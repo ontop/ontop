@@ -20,9 +20,6 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
  * #L%
  */
 
-
-import info.aduna.iteration.OffsetIteration;
-
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -41,7 +38,6 @@ import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.VariableImpl;
-import org.semanticweb.ontop.ontology.DataType;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.QueryAnonymizer;
@@ -71,41 +67,15 @@ import com.google.common.collect.Multimap;
 public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private static final long serialVersionUID = 6088558456135748487L;
-
-	private DatalogProgram unfoldingProgram;
-
-	private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
-
 	private static final Logger log = LoggerFactory.getLogger(DatalogUnfolder.class);
-	
-	//private final List<CQIE> emptyList = Collections.unmodifiableList(new LinkedList<CQIE>());
-	private final List<CQIE> emptyList = ImmutableList.of();
-	
-	
-	private enum UnfoldingMode {
-		UCQ, DATALOG
-	};
+    private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 
-	private UnfoldingMode unfoldingMode = UnfoldingMode.UCQ;
+    private static Multimap<Predicate, Integer> emptyMulti= ArrayListMultimap.create();
+    private static final List<CQIE> emptyList = ImmutableList.of();
 
-	private Map<Predicate, List<Integer>> primaryKeys = new HashMap<Predicate, List<Integer>>();
 
-	//private Multimap<Predicate, CQIE> ruleIndex;
-	private Multimap<Predicate, CQIE> ruleIndexByBody;
-	private static Multimap<Predicate, Integer> emptyMulti= ArrayListMultimap.create();
-	private Multimap<Predicate, Integer> multPredList;
-
-	
-	private DatalogDependencyGraphGenerator depGraph;
-
-	private Map<Predicate, List<CQIE>> mappings = new LinkedHashMap<Predicate, List<CQIE>>();
-	
-	/**
-	 * This field will contain the number of mappings that an ans predicate is related to.
-	 * If it is more than 1, we will not unfold it in the left join case.
-	 */
-	private Map<Predicate, Integer> mapCount = new HashMap<Predicate,Integer>();
-	
+    private final Map<Predicate, List<Integer>> primaryKeys;
+	private final Map<Predicate, List<CQIE>> mappings;
 	
 	/***
 	 * Leaf predicates are those that do not appear in the head of any rule. If
@@ -116,20 +86,21 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * (either cause of lack of MGU, or because of a rule for the predicate of
 	 * the atom) is logically empty w.r.t. to the program.
 	 */
-	private List<Predicate> extensionalPredicates = new LinkedList<Predicate>();
-	private HashSet<Predicate> allPredicates = new HashSet<Predicate>();
+	private final List<Predicate> extensionalPredicates;
+
+    //TODO: remove it (make it become a parameter)??
+    private Multimap<Predicate, Integer> multPredList;
 
 	public DatalogUnfolder(DatalogProgram unfoldingProgram) {
-		this(unfoldingProgram, new HashMap<Predicate, List<Integer>>(), emptyMulti);
+        this(unfoldingProgram, new HashMap<Predicate, List<Integer>>(), emptyMulti);
 	}
 
 	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys) {
 		this(unfoldingProgram, primaryKeys, emptyMulti);
 	}
-		
-	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys, Multimap<Predicate, Integer> multPredList) {
-		this.primaryKeys = primaryKeys;
-		this.unfoldingProgram = unfoldingProgram;
+
+	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys,
+                           Multimap<Predicate, Integer> multPredList) {
 		
 		//TODO:remove this hack!!
 		if (multPredList.isEmpty()){
@@ -138,36 +109,45 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		}else{
 			this.multPredList = multPredList;
 		}
-		/*
+
+		/**
 		 * Creating a local index for the rules according to their predicate
 		 */
+        //TODO: Do we really need to use a LinkedHashMap here?
+        Map<Predicate, List<CQIE>> ruleIndex = new LinkedHashMap<>();
+        Set<Predicate> leafPredicates = new HashSet<>();
 
 		//TODO: this should not be mappings when working with the query!!
-		for (CQIE mappingrule : unfoldingProgram.getRules()) {
-			Function head = mappingrule.getHead();
+		for (CQIE mappingRule : unfoldingProgram.getRules()) {
+			Function head = mappingRule.getHead();
 
-			List<CQIE> rules = mappings.get(head.getFunctionSymbol());
+			List<CQIE> rules = ruleIndex.get(head.getFunctionSymbol());
 			if (rules == null) {
 				rules = new LinkedList<CQIE>();
-				mappings.put(head.getFunctionSymbol(), rules);
+				ruleIndex.put(head.getFunctionSymbol(), rules);
 			}
-			rules.add(mappingrule);
+			rules.add(mappingRule);
 
 			/*
-			 * Collecting the predicates that appear in the body of rules.
+			 * Collecting the leafPredicates that appear in the body of rules.
 			 */
-			for (Function atom : mappingrule.getBody()) {
-				allPredicates.addAll(getPredicates(atom));
+			for (Function atom : mappingRule.getBody()) {
+				leafPredicates.addAll(getPredicates(atom));
 			}
-
 		}
 
-		/*
-		 * the predicates that do not appear in the head of rules are leaf
-		 * predicates
+		/**
+		 * the leafPredicates that do not appear in the head of rules are leaf
+		 * leafPredicates
 		 */
-		allPredicates.removeAll(mappings.keySet());
-		extensionalPredicates.addAll(allPredicates);
+		leafPredicates.removeAll(ruleIndex.keySet());
+
+        /**
+         * These collections are saved as final and unmodifiable attributes.
+         */
+        this.primaryKeys = Collections.unmodifiableMap(primaryKeys);
+        this.mappings = Collections.unmodifiableMap(ruleIndex);
+        this.extensionalPredicates = Collections.unmodifiableList(new ArrayList<>(leafPredicates));
 	}
 	
 	/**
@@ -180,8 +160,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		
 		this(unfoldingProgram, new HashMap<Predicate, List<Integer>>());
 		
-		
-		
 	}*/
 
 	@Override
@@ -190,7 +168,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * with respect to the program given when this unfolder was initialized. 
 	 * 
 	 */
-	public DatalogProgram unfold(DatalogProgram inputquery, String targetPredicate, String strategy, boolean includeMappings, Multimap<Predicate,Integer> multiplePredIdx) {
+	public DatalogProgram unfold(DatalogProgram inputquery, String targetPredicate, String strategy, boolean includeMappings,
+                                 Multimap<Predicate,Integer> multiplePredIdx) {
 		/*
 		 * Needed because the rewriter might generate query bodies like this
 		 * B(x,_), R(x,_), underscores reperesnt uniquie anonymous varaibles.
@@ -213,7 +192,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	}
 	
 	/***
-	 * Given a query q and the {@link #unfoldingProgram}, this method will try
+	 * Given a query q, this method will try
 	 * to flatten the query as much as possible by applying resolution steps
 	 * exaustively to every atom in the query against the rules in
 	 * 'unfoldingProgram'. This will is exactly to computing a partial
@@ -251,8 +230,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * 
 	 * <p>
 	 * The strategy of this unfolding is simple, we cycle through all the
-	 * queries and attempt to resolve atom 0 in the body againts the rules in
-	 * unfoldng program. The resolution engine will generate 1 or more CQs as
+	 * queries and attempt to resolve atom 0 in the body against the rules in
+	 * unfolding program. The resolution engine will generate 1 or more CQs as
 	 * result. The original atom is removed, and the results are appended to the
 	 * end of each query (hence its always safe to unfold atom 0). The new
 	 * queries are kept for a next cycle. We stop when no new queries are
@@ -261,7 +240,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * The right side of left joins will never be touched.
 	 * <p>
 	 * Currently the method also is aware of functional dependencies (Primary
-	 * keys) and will produce queres in which redundant joins w.r.t. to these
+	 * keys) and will produce queries in which redundant joins w.r.t. to these
 	 * are avoided.
 	 * 
 	 * @param inputquery
@@ -306,7 +285,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	
 	/***
-	 * This method asumes that the inner term (termidx) of term is a data atom,
+	 * This method assumes that the inner term (termidx) of term is a data atom,
 	 * or a nested atom.
 	 * <p>
 	 * If the term is a data atom, it returns all the new rule resulting from
@@ -332,7 +311,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
         /**
          * Rule indexing: copied from computePartialEvaluationBUP()
          */
-        depGraph = new DatalogDependencyGraphGenerator(workingList);
+        DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
         Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
 
 
@@ -405,10 +384,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		private int computePartialEvaluationBUP(List<CQIE> workingList, boolean includingMappings) {
 
 			int[] rcount = { 0, 0 }; //int queryIdx = 0;
-			
-		
-			
-			depGraph = new DatalogDependencyGraphGenerator(workingList);
+
+			DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
 			
 			List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
 			List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
@@ -618,7 +595,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			log.debug("Unfolding w.r.t. Mappings:");
 
 			log.debug("Generating Dependency Graph!");
-			 depGraph = new DatalogDependencyGraphGenerator(workingList);
+			DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
 		//	List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();		
 			List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 			List<Predicate> predicatesMightGotEmpty = new LinkedList<Predicate>();
@@ -627,7 +604,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			boolean keepLooping=true;
 			extensionalPredicates =  depGraph.getExtensionalPredicates();
             Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
-			ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
+            Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 
 			for (int predIdx = 0; predIdx < extensionalPredicates.size() ; predIdx++) {
 
@@ -675,7 +652,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 							//updating indexes with intermediate results
 							
 				
-							keepLooping = updateIndexes(pred, preFather, result, fatherRule,  workingList);
+							keepLooping = updateIndexes(pred, preFather, result, fatherRule,  workingList, depGraph);
 							
 							log.debug(pred + " : " + ruleIndex.get(preFather).toString() );
 							
@@ -686,7 +663,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 								predicatesMightGotEmpty.add(preFather);
 								
 							}
-							keepLooping = updateNullIndexes(pred, preFather,  fatherRule,  workingList);
+							keepLooping = updateNullIndexes(pred, preFather,  fatherRule,  workingList, depGraph);
 							
 							//System.out.println(ruleIndex.get(preFather).size());
 //							System.out.println(ruleIndexByBody.get(pred).size());
@@ -713,7 +690,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 			while (!predicatesMightGotEmpty.isEmpty()){
 				predicatesMightGotEmpty=updateRulesWithEmptyAnsPredicates(workingList, predicatesMightGotEmpty, touchedPredicates,
-                        ruleIndex);
+                        depGraph);
 				
 				//if I deleted ans1 I dont return anything later
 				if (predicatesMightGotEmpty.contains(ans1)){
@@ -724,7 +701,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 			if (!noRewriting){
 				// I add to the working list all the rules touched by the unfolder!
-				addNewRules2WorkingListFromBodyAtoms(workingList, extensionalPredicates, ruleIndex);
+				addNewRules2WorkingListFromBodyAtoms(workingList, extensionalPredicates, ruleIndex, depGraph);
 				addNewRules2WorkingListFromHeadAtoms(workingList, touchedPredicates, ruleIndex);
 			}
 			
@@ -739,7 +716,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		 */
 		private List<Predicate> updateRulesWithEmptyAnsPredicates(List<CQIE> workingList,
 				 		List<Predicate> predicatesMightGotEmpty, List<Predicate> touchedPredicates,
-                        Multimap<Predicate, CQIE> ruleIndex) {
+                        DatalogDependencyGraphGenerator dependencyGraph) {
 			//TODO: this is not optimal. The best would be that the generateNullBinding takes care of this
 			
 			//This loop is to update the ans rules that could be affected by the elimination of
@@ -747,6 +724,9 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			
 			//in the next variable we keep the head of the rules that we delete
 			List<Predicate> deletedPredicates = new LinkedList<Predicate>();
+
+            Multimap<Predicate, CQIE> ruleIndex = dependencyGraph.getRuleIndex();
+            Multimap<Predicate, CQIE> ruleIndexByBody = dependencyGraph.getRuleIndexByBodyPredicate();
 			
 			for (Predicate predEmpty : predicatesMightGotEmpty ) {
 
@@ -780,13 +760,13 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 							List<CQIE> result = new LinkedList<CQIE>();
 							//System.out.println(newrule);
 							result.add(newrule);
-							updateIndexes(predEmpty, fatherpred, result, fatherRule,  workingList);
+							updateIndexes(predEmpty, fatherpred, result, fatherRule,  workingList, dependencyGraph);
 							touchedPredicates.add(fatherpred);
 						} else{
 							//here I remove fatherRule, since it is either a join, or it is the first argument of the LJ
 							//System.out.println("deleting"+fatherpred);
 							
-							updateNullIndexes( predEmpty, fatherpred,  fatherRule,  workingList);
+							updateNullIndexes( predEmpty, fatherpred,  fatherRule,  workingList, dependencyGraph);
 							deletedPredicates.add(fatherpred);
 							
 						}
@@ -863,7 +843,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		 * I add to the working list all the rules touched by the unfolder w.r.t. mappings
 		 */
 		private void addNewRules2WorkingListFromBodyAtoms(List<CQIE> workingList,
-								List<Predicate> predicatesToAdd, Multimap<Predicate, CQIE> ruleIndex) {
+								List<Predicate> predicatesToAdd, Multimap<Predicate, CQIE> ruleIndex,
+                                DatalogDependencyGraphGenerator depGraph) {
 			for (int predIdx = 0; predIdx < predicatesToAdd.size() ; predIdx++) {
 				Predicate pred = predicatesToAdd.get(predIdx);
 				
@@ -927,7 +908,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		/**
 		 * This method will update the indexes when the result of unfolding fatherRule is null.
 		 */
-		private boolean updateNullIndexes(Predicate pred, Predicate preFather, CQIE fatherRule, List<CQIE> workingList) {
+		private boolean updateNullIndexes(Predicate pred, Predicate preFather, CQIE fatherRule, List<CQIE> workingList,
+                                          DatalogDependencyGraphGenerator depGraph) {
 			
 			
 			depGraph.removeRuleFromRuleIndex(preFather,fatherRule);
@@ -974,8 +956,11 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		 * </ul>
 		 */
 		private boolean updateIndexes(Predicate pred,
-				Predicate preFather, List<CQIE> result, CQIE fatherRule, List<CQIE> workingList) {
+				Predicate preFather, List<CQIE> result, CQIE fatherRule, List<CQIE> workingList,
+                DatalogDependencyGraphGenerator depGraph) {
 			//boolean hasPred = false;
+
+            Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 			
 			//Update MultipleTemplateList
 			if (multPredList.containsKey(pred))
@@ -1045,10 +1030,6 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			}
 
 		}
-
-
-
-		
 	
 
 		/**
@@ -1082,20 +1063,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				}
 			}
 			return tempList;
-		}			
-					
-					
-				
-					
-		
-		
-		
-		
-		
-		
-		
-		
-		
+		}
 		
 
 		/***
@@ -1145,9 +1113,9 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		 * 
 		 * @see Unifier
 		 */	
-	private List<CQIE> resolveDataAtom(Predicate resolvPred, Function focusedAtom, CQIE rule, Stack<Integer> termidx, int[] resolutionCount, boolean isLeftJoin,
-				boolean isSecondAtomInLeftJoin, boolean includingMappings, boolean parentIsAggr,
-                Multimap<Predicate, CQIE> ruleIndex) {
+	private List<CQIE> resolveDataAtom(Predicate resolvPred, Function focusedAtom, CQIE rule, Stack<Integer> termidx,
+                                       int[] resolutionCount, boolean isLeftJoin, boolean isSecondAtomInLeftJoin,
+                                       boolean includingMappings, boolean parentIsAggr, Multimap<Predicate, CQIE> ruleIndex) {
 
 			if (!focusedAtom.isDataFunction())
 				throw new IllegalArgumentException("Cannot unfold a non-data atom: " + focusedAtom);
@@ -2172,7 +2140,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		
 		//TODO: We are generating this too many times!!! simplify!!!
 		log.debug("Generating Dependency Graph!");
-		depGraph = new DatalogDependencyGraphGenerator(workingList);
+		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(workingList);
 
 		
 		List<CQIE> fatherCollection = new LinkedList<CQIE>();
@@ -2199,7 +2167,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				
 				//get all the indexes we need
                 Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
-				ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
+                Multimap<Predicate, CQIE> ruleIndexByBody = depGraph.getRuleIndexByBodyPredicate();
 
 
 				//The rules USING pred
@@ -2278,11 +2246,11 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
                             newSourceRuleList.add(newsourceRule);
                             int srcIdx = workingList.indexOf(sourceRule);
                             Predicate srchead = sourceRule.getHead().getFunctionSymbol();
-                            updateIndexesinTypes(workingList, srcIdx, newSourceRuleList, srchead, sourceRule);
+                            updateIndexesinTypes(workingList, srcIdx, newSourceRuleList, srchead, sourceRule, depGraph);
 							
 							//Update the indexes for the  query
 							Predicate fathead = fatherRule.getHead().getFunctionSymbol();
-							updateIndexesinTypes(workingList,fatherIdx,result, fathead,fatherRule);
+							updateIndexesinTypes(workingList,fatherIdx,result, fathead,fatherRule, depGraph);
 							
 							continue;
 						}
@@ -2697,7 +2665,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 * @param fatherRule
 	 */
 	private  void updateIndexesinTypes(List<CQIE> workingList, int fatherIdx, List<CQIE> result, 
-			Predicate preFather, CQIE fatherRule)
+			Predicate preFather, CQIE fatherRule, DatalogDependencyGraphGenerator depGraph)
 	{
 		workingList.remove(fatherIdx);
 
