@@ -66,8 +66,11 @@
     <Declaration>
         <DataProperty IRI="#hasDateTime"/>
     </Declaration>
+     <Declaration>
+            <DataProperty IRI="#hasDateTime2"/>
+        </Declaration>
     <Declaration>
-        <DataProperty IRI="#hasDateTime2"/>
+        <DataProperty IRI="#hasDateTimeString"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasDateTimeType"/>
@@ -148,9 +151,6 @@
         <DataProperty IRI="#hasText"/>
     </Declaration>
     <Declaration>
-        <DataProperty IRI="#hasNText"/>
-    </Declaration>
-    <Declaration>
         <DataProperty IRI="#hasTime"/>
     </Declaration>
     <Declaration>
@@ -160,7 +160,13 @@
         <DataProperty IRI="#hasTimestamp"/>
     </Declaration>
     <Declaration>
+        <DataProperty IRI="#hasTimestampString"/>
+    </Declaration>
+    <Declaration>
         <DataProperty IRI="#hasTimestampTZ"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasTimestampTZString"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasTinyBlob"/>
@@ -227,9 +233,13 @@
         <DataProperty IRI="#hasDateTime"/>
         <DataProperty IRI="#hasDateTimeType"/>
     </SubDataPropertyOf>
+    <SubDataPropertyOf>
+         <DataProperty IRI="#hasDateTime2"/>
+       <DataProperty IRI="#hasDateTimeType"/>
+    </SubDataPropertyOf>
      <SubDataPropertyOf>
-        <DataProperty IRI="#hasDateTime2"/>
-        <DataProperty IRI="#hasDateTimeType"/>
+        <DataProperty IRI="#hasDateTimeString"/>
+        <DataProperty abbreviatedIRI="owl:topDataProperty"/>
      </SubDataPropertyOf>
     <SubDataPropertyOf>
         <DataProperty IRI="#hasDec"/>
@@ -327,10 +337,6 @@
         <DataProperty IRI="#hasText"/>
         <DataProperty IRI="#hasCharacterType"/>
     </SubDataPropertyOf>
-    <SubDataPropertyOf>
-            <DataProperty IRI="#hasNText"/>
-            <DataProperty IRI="#hasCharacterType"/>
-        </SubDataPropertyOf>
     <SubDataPropertyOf>
         <DataProperty IRI="#hasTime"/>
         <DataProperty IRI="#hasDateTimeType"/>
