@@ -56,81 +56,6 @@ public class TMappingProcessor {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	/***
-	 * Splits a given {@link mapping} into builtin predicates ({@link conditions})
-	 * and all other atoms ({@link stripped}), which are checked for containment 
-	 * by the main algorithm.
-	 */
-
-	private static class TMappingRule {
-		public final CQIE stripped;
-		private final List<Function> conditions;
-		private final CQCUtilities cqc;
-
-		public TMappingRule(CQIE mapping) {
-			conditions = new LinkedList<Function>();
-			List<Function> newbody = new LinkedList<Function>();
-			for (Function atom : mapping.getBody()) {
-				Function clone = (Function)atom.clone();
-				if (clone.getPredicate() instanceof BuiltinPredicate) 
-					conditions.add(clone);
-				else 
-					newbody.add(clone);
-				
-			}
-			Function head = (Function)mapping.getHead().clone();
-			stripped = fac.getCQIE(head, newbody);
-			cqc = new CQCUtilities(stripped, (Ontology)null /*sigma*/);
-		}
-		
-		public boolean isConditionsEmpty() {
-			return conditions.isEmpty();
-		}
-		
-		public boolean isContainedIn(TMappingRule other) {
-			return cqc.isContainedIn(other.stripped);
-		}
-		
-		/***
-		 * Takes a conjunctive boolean atoms and returns one single atom
-		 * representing the conjunction (it might be a single atom if
-		 * conditions.size() == 1.
-		 * 
-		 * @return
-		 */
-		public Function getMergedConditions() {
-			if (conditions.size() == 1)
-				return conditions.get(0);
-			Function atom0 = conditions.remove(0);
-			Function atom1 = conditions.remove(0);
-			Term f0 = fac.getFunction(atom0.getPredicate(), atom0.getTerms());
-			Term f1 = fac.getFunction(atom1.getPredicate(), atom1.getTerms());
-			Function nestedAnd = fac.getFunctionAND(f0, f1);
-			while (conditions.size() != 0) {
-				Function condition = conditions.remove(0);
-				Term term0 = nestedAnd.getTerm(1);
-				Term term1 = fac.getFunction(condition.getPredicate(), condition.getTerms());
-				Term newAND = fac.getFunctionAND(term0, term1);
-				nestedAnd.setTerm(1, newAND);
-			}
-			return nestedAnd;
-		}
-		
-		@Override
-		public int hashCode() {
-			return stripped.hashCode() ^ conditions.hashCode();
-		}
-		
-		@Override
-		public boolean equals(Object other) {
-			if (other instanceof TMappingRule) {
-				TMappingRule otherRule = (TMappingRule)other;
-				return (stripped.equals(otherRule.stripped) && conditions.equals(otherRule.conditions));
-			}
-			return false;
-		}
-	}
-	
 
 	/***
 	 * Creates an index of all mappings based on the predicate of the head of
@@ -151,7 +76,7 @@ public class TMappingProcessor {
 				set = new HashSet<TMappingRule>();
 				mappingIndex.put(mapping.getHead().getPredicate(), set);
 			}
-			set.add(new TMappingRule(mapping));
+			set.add(new TMappingRule(mapping.getHead(), mapping.getBody()));
 		}
 
 		return mappingIndex;
@@ -213,7 +138,7 @@ public class TMappingProcessor {
 		/***
 		 * Facts are just added
 		 */
-		if (newRule.stripped.getBody().size() == 0) {
+		if (newRule.isFact()) {
 			currentMappings.add(newRule);
 			return;
 		}
@@ -268,19 +193,21 @@ public class TMappingProcessor {
                 }
 				mappingIterator.remove();
 
+				// ROMAN: i do not quite understand the code (in particular, the 1 atom in the body)
+				//        (but leave this fragment with minimal changes)
+				CQIE newmapping = currentRule.getStripped();
 				Map<Variable,Term> mgu = null;
-				if (currentRule.stripped.getBody().size() == 1) {
-					mgu = Unifier.getMGU(currentRule.stripped.getBody().get(0), newRule.stripped.getBody().get(0));
+				if (newmapping.getBody().size() == 1) {
+					mgu = Unifier.getMGU(newmapping.getBody().get(0), newRule.getStripped().getBody().get(0));
 				}			
 				
 				Function orAtom = fac.getFunctionOR(existingconditions, newconditions);
-				CQIE newmapping = currentRule.stripped;
 				newmapping.getBody().add(orAtom);
 				
 				if (mgu != null) {
 					newmapping = Unifier.applyUnifier(newmapping, mgu);
 				}
-				newRule = new TMappingRule(newmapping);
+				newRule = new TMappingRule(newmapping.getHead(), newmapping.getBody());
 				break;
 			}
 		}
@@ -397,11 +324,9 @@ public class TMappingProcessor {
 					 * predicate and, if the child is inverse and the current is
 					 * positive, it will also invert the terms in the head
 					 */
-					List<CQIE> childMappings = originalMappings.getRules(childproperty.getPredicate());
-
 					boolean requiresInverse = (current.isInverse() != childproperty.isInverse());
 
-					for (CQIE childmapping : childMappings) {
+					for (CQIE childmapping : originalMappings.getRules(childproperty.getPredicate())) {
 						List<Term> terms = childmapping.getHead().getTerms();
 
 						Function newMappingHead;
@@ -413,8 +338,7 @@ public class TMappingProcessor {
 						else {
 							newMappingHead = fac.getFunction(currentPredicate, terms.get(1), terms.get(0));
 						}
-						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody(), 
-								Collections.<Function> emptyList(), optimize);
+						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody(), optimize);
 					}
 				}
 			}
@@ -427,18 +351,15 @@ public class TMappingProcessor {
 				Predicate p = equivProperty.getPredicate();
 				Set<TMappingRule> equivalentPropertyMappings = getMappings(mappingIndex, p);
 
-				ArrayList<TMappingRule> mappingList = new ArrayList<TMappingRule>(currentNodeMappings);
-				
-				for(TMappingRule currentNodeMapping : mappingList){
-					List<Term> terms = currentNodeMapping.stripped.getHead().getTerms();
+				for (TMappingRule currentNodeMapping : currentNodeMappings) {
+					List<Term> terms = currentNodeMapping.getHeadTerms();
 					
 					Function newhead;
 					if (equivProperty.isInverse() == current.isInverse()) 
 						newhead = fac.getFunction(p, terms);
 					else 
 						newhead = fac.getFunction(p, terms.get(1), terms.get(0));
-					addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping.stripped.getBody(), 
-							currentNodeMapping.conditions, optimize);
+					addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping, optimize);
 				}
 			}
 		} // Properties loop ended
@@ -484,9 +405,7 @@ public class TMappingProcessor {
 					else 
 						throw new RuntimeException("Unknown type of node in DAG: " + childDescription);
 					
-					List<CQIE> desendantMappings = originalMappings.getRules(childPredicate);
-
-					for (CQIE childmapping : desendantMappings) {
+					for (CQIE childmapping : originalMappings.getRules(childPredicate)) {
 						List<Term> terms = childmapping.getHead().getTerms();
 
 						Function newMappingHead;
@@ -499,8 +418,7 @@ public class TMappingProcessor {
 							else 
 								newMappingHead = fac.getFunction(currentPredicate, terms.get(1));
 						}
-						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody(), 
-								Collections.<Function> emptyList(), optimize);
+						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody(), optimize);
 					}
 				}
 			}
@@ -513,14 +431,11 @@ public class TMappingProcessor {
 					continue;
 				
 				Predicate p = ((OClass) equiv).getPredicate();
-				Set<TMappingRule> equivalentClassMappings = getMappings(mappingIndex, p);
-				ArrayList<TMappingRule> mappingList = new ArrayList<TMappingRule>(currentNodeMappings);
-				
+				Set<TMappingRule> equivalentClassMappings = getMappings(mappingIndex, p);				
 
-				for (TMappingRule currentNodeMapping : mappingList) {
-					Function newhead = fac.getFunction(p, currentNodeMapping.stripped.getHead().getTerms());
-					addMappingToSet(equivalentClassMappings, newhead, currentNodeMapping.stripped.getBody(), 
-							currentNodeMapping.conditions, optimize);
+				for (TMappingRule currentNodeMapping : currentNodeMappings) {
+					Function newhead = fac.getFunction(p, currentNodeMapping.getHeadTerms());
+					addMappingToSet(equivalentClassMappings, newhead, currentNodeMapping, optimize);
 				}
 			}
 		}
@@ -530,15 +445,8 @@ public class TMappingProcessor {
 		
 		DatalogProgram tmappingsProgram = fac.getDatalogProgram();
 		for (Predicate key : mappingIndex.keySet()) {
-			for (TMappingRule mapping : mappingIndex.get(key)) {
-
-				List<Function> combinedBody = new LinkedList<Function>(); 
-				combinedBody.addAll(mapping.stripped.getBody());
-				combinedBody.addAll(mapping.conditions);
-				CQIE rule = fac.getCQIE(mapping.stripped.getHead(), combinedBody);				
-				
-				tmappingsProgram.appendRule(rule);
-			}
+			for (TMappingRule mapping : mappingIndex.get(key)) 
+				tmappingsProgram.appendRule(mapping.asCQIE());
 		}
 		long tm3 = System.currentTimeMillis();
 		if (tm3 - tm2 > 2)
@@ -565,17 +473,23 @@ public class TMappingProcessor {
 	}
 
 
-	private static void addMappingToSet(Set<TMappingRule> mappings, Function head, List<Function> body, List<Function> conditions, boolean optimize) {
-
-		List<Function> combinedBody = new LinkedList<Function>(); 
-		combinedBody.addAll(body);
-		combinedBody.addAll(conditions);
-		TMappingRule newmapping = new TMappingRule(fac.getCQIE(head, combinedBody));				
+	private static void addMappingToSet(Set<TMappingRule> mappings, Function head, List<Function> body, boolean optimize) {
+		TMappingRule newmapping = new TMappingRule(head, body);				
 		if (optimize)
 			mergeMappingsWithCQC(mappings, newmapping);
 		else
 			mappings.add(newmapping);					
 	}
+
+	private static void addMappingToSet(Set<TMappingRule> mappings, Function head, TMappingRule baseRule, boolean optimize) {
+
+		TMappingRule newmapping = new TMappingRule(head, baseRule);				
+		if (optimize)
+			mergeMappingsWithCQC(mappings, newmapping);
+		else
+			mappings.add(newmapping);					
+	}
+	
 	
 	private static void optimizeMappingProgram(Map<Predicate, Set<TMappingRule>> mappingIndex) {
 		for (Predicate p : mappingIndex.keySet()) {
@@ -586,7 +500,7 @@ public class TMappingProcessor {
 				TMappingRule candidate = iterSimilarMappings.next();
 				iterSimilarMappings.remove();
 				
-				if (candidate.stripped.getBody().size() + candidate.conditions.size() > 0) {
+				if (!candidate.isFact()) {
 					mergeMappingsWithCQC(result, candidate);
 				} else {
 					result.add(candidate);
