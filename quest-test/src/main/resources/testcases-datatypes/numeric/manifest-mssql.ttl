@@ -78,7 +78,7 @@
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mssql.obda> .
     
- :double rdf:type mf:DatatypeEvaluationTest ;
+ :real rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: REAL" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;

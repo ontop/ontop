@@ -63,7 +63,7 @@ public class QuestResultset implements TupleResultSet {
 	private Map<Integer, String> uriMap;
 	private String vendor;
 	private boolean isOracle;
-    private boolean isDB2;
+    private boolean isMsSQL;
 
 	/***
 	 * Constructs an OBDA statement from an SQL statement, a signature described
@@ -97,7 +97,7 @@ public class QuestResultset implements TupleResultSet {
 		try {
 			 vendor = st.questInstance.getConnection().getDriverName();
 			 isOracle = vendor.contains("Oracle");
-             isDB2 = vendor.contains("SQL Server");
+             isMsSQL = vendor.contains("SQL Server");
 		} catch (SQLException e) {
 			throw new OBDAException(e);
 		}					
@@ -214,20 +214,23 @@ public class QuestResultset implements TupleResultSet {
 						result = fac.getConstantLiteral(s, type);
 
 					} else if (type == COL_TYPE.DATETIME) {
-						if(isDB2){
+						if(isMsSQL){
 
-                            String value = set.getString(column);
-
-                            DateFormat df = new SimpleDateFormat("MMM DD YYYY HH:mmaa");
-                            java.util.Date date;
-                            try {
-                                date = df.parse(value);
-
-                        } catch (ParseException e) {
-                            throw new RuntimeException(e);
-                        }
-                            Timestamp ts = new Timestamp(date.getTime());
+//                            String value = set.getString(column);
+//
+//                            DateFormat df = new SimpleDateFormat("MMM DD YYYY HH:mmaa");
+//                            java.util.Date date;
+//                            try {
+//                                date = df.parse(value);
+//                                Timestamp ts = new Timestamp(date.getTime());
+//                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
+//
+//                        } catch (ParseException e) {
+                            Timestamp ts = new Timestamp(column);
                             result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
+
+//                        }
+
                         }
 						else {
                             if (isOracle) {

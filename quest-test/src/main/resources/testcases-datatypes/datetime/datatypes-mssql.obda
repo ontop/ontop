@@ -11,18 +11,18 @@ driverClass	com.microsoft.sqlserver.jdbc.SQLServerDriver
 [MappingDeclaration] @collection [[
 mappingId	Numeric Types
 target		:numeric-{id} a :Row ; :hasDecimal {decimal} ; :hasBigInt {bigint} ; :hasInt {int} ;  :hasSmallInt {smallint} ; :hasTinyInt {tinyint} ;  :hasReal {real} ; :hasFloat {float} .
-source		select "id", "decimal", "numeric", "bigint", "int", "smallint", "tinyint", "real", "float" from "Numeric"
+source		select id, decimal, numeric, bigint, int, smallint, tinyint, real, float from Numeric
 
 mappingId	Character Types
 target		:character-{id} a :Row ; :hasChar {char} ; :hasVarChar {varchar} ; :hasNChar {nchar} ; :hasNCharVarying {nvarchar} ; :hasText {text} .
-source		select "id", "char", "varchar", "nchar", "nvarchar", "text", "ntext" from "Character"
+source		select id, char, varchar, nchar, nvarchar, text, ntext from Character
 
 mappingId	Date-Time Types
-target		:datetime-{id} a :Row ; :hasDate {date} ; :hasTime {time} ; :hasDateTime {datetime} ; :hasTimestamp {timestamp} .
-source		select "id", "date", "time", "datetime", "datetime2", "datetimeoffset", "smalldatetime", "timestamp" from "DateTime"
+target		:datetime-{id} a :Row ; :hasDate {date} ; :hasTime {time} ; :hasDateTime {datetime} ; :hasDateTime2 {datetime2} .
+source		select id, date, time, datetime, datetime2, datetimeoffset, smalldatetime, timestamp from DateTime
 
 mappingId	Boolean Types
 target		:boolean-{id} a :Row ; :hasBit {bit} .
-source		select "id", "bit" from "Boolean"
+source		select id, bit from Boolean
 ]]
 

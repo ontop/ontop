@@ -16,11 +16,11 @@
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
      ontologyIRI="http://ontop.inf.unibz.it/test/datatypes">
-    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
-    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
     <Prefix name="" IRI="http://ontop.inf.unibz.it/test/datatypes#"/>
     <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
     <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
     <Declaration>
         <Class IRI="#Row"/>
     </Declaration>
@@ -67,7 +67,7 @@
         <DataProperty IRI="#hasDateTime"/>
     </Declaration>
     <Declaration>
-        <DataProperty IRI="#hasDateTimeString"/>
+        <DataProperty IRI="#hasDateTime2"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasDateTimeType"/>
@@ -148,6 +148,9 @@
         <DataProperty IRI="#hasText"/>
     </Declaration>
     <Declaration>
+        <DataProperty IRI="#hasNText"/>
+    </Declaration>
+    <Declaration>
         <DataProperty IRI="#hasTime"/>
     </Declaration>
     <Declaration>
@@ -157,13 +160,7 @@
         <DataProperty IRI="#hasTimestamp"/>
     </Declaration>
     <Declaration>
-        <DataProperty IRI="#hasTimestampString"/>
-    </Declaration>
-    <Declaration>
         <DataProperty IRI="#hasTimestampTZ"/>
-    </Declaration>
-    <Declaration>
-        <DataProperty IRI="#hasTimestampTZString"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasTinyBlob"/>
@@ -230,10 +227,10 @@
         <DataProperty IRI="#hasDateTime"/>
         <DataProperty IRI="#hasDateTimeType"/>
     </SubDataPropertyOf>
-    <SubDataPropertyOf>
-        <DataProperty IRI="#hasDateTimeString"/>
-        <DataProperty abbreviatedIRI="owl:topDataProperty"/>
-    </SubDataPropertyOf>
+     <SubDataPropertyOf>
+        <DataProperty IRI="#hasDateTime2"/>
+        <DataProperty IRI="#hasDateTimeType"/>
+     </SubDataPropertyOf>
     <SubDataPropertyOf>
         <DataProperty IRI="#hasDec"/>
         <DataProperty IRI="#hasNumericType"/>
@@ -330,6 +327,10 @@
         <DataProperty IRI="#hasText"/>
         <DataProperty IRI="#hasCharacterType"/>
     </SubDataPropertyOf>
+    <SubDataPropertyOf>
+            <DataProperty IRI="#hasNText"/>
+            <DataProperty IRI="#hasCharacterType"/>
+        </SubDataPropertyOf>
     <SubDataPropertyOf>
         <DataProperty IRI="#hasTime"/>
         <DataProperty IRI="#hasDateTimeType"/>

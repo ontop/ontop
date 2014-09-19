@@ -20,7 +20,7 @@
     obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <select-all.rq> ] ;
-    mf:result <select-all.ttl> ;
+    mf:result <select-all-mssql.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mssql.obda> .
 

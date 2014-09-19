@@ -105,13 +105,14 @@
 #ntext , text, and image data types will be removed in a future version of Microsoft SQL Server.
 #Avoid using these data types in new development work, and plan to modify applications that currently use them. Use nvarchar(max), varchar(max), and varbinary(max) instead.
 
+#should fail
 :text rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TEXT" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <text.rq> ] ;
-    mf:result <text.ttl> ;
+            [ qt:query <text_mssql.rq> ] ;
+    mf:result <text_mssql.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mssql.obda> .
  
@@ -120,8 +121,8 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <text-graph.rq> ] ;
-    mf:result <text.ttl> ;
+            [ qt:query <text_mssql-graph.rq> ] ;
+    mf:result <text_mssql.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mssql.obda> .
     

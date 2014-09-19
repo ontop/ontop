@@ -67,6 +67,9 @@
         <DataProperty IRI="#hasDateTime"/>
     </Declaration>
     <Declaration>
+        <DataProperty IRI="#hasDateTime2"/>
+    </Declaration>
+    <Declaration>
         <DataProperty IRI="#hasDateTimeType"/>
     </Declaration>
     <Declaration>
@@ -143,6 +146,9 @@
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasText"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasNText"/>
     </Declaration>
     <Declaration>
         <DataProperty IRI="#hasTime"/>
@@ -221,6 +227,10 @@
         <DataProperty IRI="#hasDateTime"/>
         <DataProperty IRI="#hasDateTimeType"/>
     </SubDataPropertyOf>
+     <SubDataPropertyOf>
+        <DataProperty IRI="#hasDateTime2"/>
+        <DataProperty IRI="#hasDateTimeType"/>
+     </SubDataPropertyOf>
     <SubDataPropertyOf>
         <DataProperty IRI="#hasDec"/>
         <DataProperty IRI="#hasNumericType"/>
@@ -317,6 +327,10 @@
         <DataProperty IRI="#hasText"/>
         <DataProperty IRI="#hasCharacterType"/>
     </SubDataPropertyOf>
+    <SubDataPropertyOf>
+            <DataProperty IRI="#hasNText"/>
+            <DataProperty IRI="#hasCharacterType"/>
+        </SubDataPropertyOf>
     <SubDataPropertyOf>
         <DataProperty IRI="#hasTime"/>
         <DataProperty IRI="#hasDateTimeType"/>

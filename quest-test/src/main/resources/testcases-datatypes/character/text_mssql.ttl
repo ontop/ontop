@@ -3,4 +3,5 @@
 @prefix :        <http://example.org/#> .
 
 []    rdf:type      rsi:ResultSetInfo ;
-      rsi:size      "41" .
+      rsi:size      "-1" ;
+      rsi:thrownException        "org.openrdf.query.QueryEvaluationException" .
