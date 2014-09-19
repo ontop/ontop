@@ -42,6 +42,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -115,6 +116,19 @@ public class TMappingProcessor {
 			return nestedAnd;
 		}
 		
+		@Override
+		public int hashCode() {
+			return stripped.hashCode() ^ conditions.hashCode();
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			if (other instanceof TMappingRule) {
+				TMappingRule otherRule = (TMappingRule)other;
+				return (stripped.equals(otherRule.stripped) && conditions.equals(otherRule.conditions));
+			}
+			return false;
+		}
 	}
 	
 
@@ -128,16 +142,16 @@ public class TMappingProcessor {
 	 * @return A map from a predicate to the list of mappings that have that
 	 *         predicate in the head atom.
 	 */
-	private static Map<Predicate, Set<CQIE>> getMappingIndex(DatalogProgram mappings) {
-		Map<Predicate, Set<CQIE>> mappingIndex = new HashMap<Predicate, Set<CQIE>>();
+	private static Map<Predicate, Set<TMappingRule>> getMappingIndex(DatalogProgram mappings) {
+		Map<Predicate, Set<TMappingRule>> mappingIndex = new HashMap<Predicate, Set<TMappingRule>>();
 
 		for (CQIE mapping : mappings.getRules()) {
-			Set<CQIE> set = mappingIndex.get(mapping.getHead().getPredicate());
+			Set<TMappingRule> set = mappingIndex.get(mapping.getHead().getPredicate());
 			if (set == null) {
-				set = new HashSet<CQIE>();
+				set = new HashSet<TMappingRule>();
 				mappingIndex.put(mapping.getHead().getPredicate(), set);
 			}
-			set.add(mapping);
+			set.add(new TMappingRule(mapping));
 		}
 
 		return mappingIndex;
@@ -194,22 +208,22 @@ public class TMappingProcessor {
 	 * @param newmapping
 	 *            The new mapping for A/P
 	 */
-	private static void mergeMappingsWithCQC(Set<CQIE> currentMappings, CQIE newmapping) {
+	private static void mergeMappingsWithCQC(Set<TMappingRule> currentMappings, TMappingRule newRule) {
 		
 		/***
 		 * Facts are just added
 		 */
-		if (newmapping.getBody().size() == 0) {
-			currentMappings.add(newmapping);
+		if (newRule.stripped.getBody().size() == 0) {
+			currentMappings.add(newRule);
 			return;
 		}
 
-		TMappingRule newRule = new TMappingRule(newmapping);
+		//TMappingRule newRule = new TMappingRule(newmapping);
 				
-		Iterator<CQIE> mappingIterator = currentMappings.iterator();
+		Iterator<TMappingRule> mappingIterator = currentMappings.iterator();
 		while (mappingIterator.hasNext()) {
-			CQIE currentMapping = mappingIterator.next();		
-			TMappingRule currentRule = new TMappingRule(currentMapping);
+			//CQIE currentMapping = mappingIterator.next();		
+			TMappingRule currentRule = mappingIterator.next(); // new TMappingRule(currentMapping);
 			
 			if (!newRule.isContainedIn(currentRule))
 				continue;
@@ -260,16 +274,17 @@ public class TMappingProcessor {
 				}			
 				
 				Function orAtom = fac.getFunctionOR(existingconditions, newconditions);
-				newmapping = currentRule.stripped;
+				CQIE newmapping = currentRule.stripped;
 				newmapping.getBody().add(orAtom);
 				
 				if (mgu != null) {
 					newmapping = Unifier.applyUnifier(newmapping, mgu);
 				}
+				newRule = new TMappingRule(newmapping);
 				break;
 			}
 		}
-		currentMappings.add(newmapping);
+		currentMappings.add(newRule);
 	}
 
 
@@ -338,7 +353,7 @@ public class TMappingProcessor {
 		 * Normalizing constants
 		 */
 		originalMappings = normalizeConstants(originalMappings);
-		Map<Predicate, Set<CQIE>> mappingIndex = getMappingIndex(originalMappings);
+		Map<Predicate, Set<TMappingRule>> mappingIndex = getMappingIndex(originalMappings);
 		
 		/*
 		 * Merge original mappings that have similar source query.
@@ -371,7 +386,7 @@ public class TMappingProcessor {
 
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();
-			Set<CQIE> currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
+			Set<TMappingRule> currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
 
 			for (Equivalences<Property> descendants : reasoner.getProperties().getSub(propertySet)) {
 				for(Property childproperty : descendants) {
@@ -398,7 +413,8 @@ public class TMappingProcessor {
 						else {
 							newMappingHead = fac.getFunction(currentPredicate, terms.get(1), terms.get(0));
 						}
-						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody(), optimize);
+						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody(), 
+								Collections.<Function> emptyList(), optimize);
 					}
 				}
 			}
@@ -409,19 +425,20 @@ public class TMappingProcessor {
 					continue;
 				 
 				Predicate p = equivProperty.getPredicate();
-				Set<CQIE> equivalentPropertyMappings = getMappings(mappingIndex, p);
+				Set<TMappingRule> equivalentPropertyMappings = getMappings(mappingIndex, p);
 
-				ArrayList<CQIE> mappingList = new ArrayList<CQIE>(currentNodeMappings);
+				ArrayList<TMappingRule> mappingList = new ArrayList<TMappingRule>(currentNodeMappings);
 				
-				for(CQIE currentNodeMapping : mappingList){
-					List<Term> terms = currentNodeMapping.getHead().getTerms();
+				for(TMappingRule currentNodeMapping : mappingList){
+					List<Term> terms = currentNodeMapping.stripped.getHead().getTerms();
 					
 					Function newhead;
 					if (equivProperty.isInverse() == current.isInverse()) 
 						newhead = fac.getFunction(p, terms);
 					else 
 						newhead = fac.getFunction(p, terms.get(1), terms.get(0));
-					addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping.getBody(), optimize);
+					addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping.stripped.getBody(), 
+							currentNodeMapping.conditions, optimize);
 				}
 			}
 		} // Properties loop ended
@@ -440,7 +457,7 @@ public class TMappingProcessor {
 
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();
-			Set<CQIE> currentNodeMappings = getMappings(mappingIndex, currentPredicate);
+			Set<TMappingRule> currentNodeMappings = getMappings(mappingIndex, currentPredicate);
 
 			for (Equivalences<BasicClassDescription> descendants : reasoner.getClasses().getSub(classSet)) {
 				for (BasicClassDescription childDescription : descendants) {
@@ -482,7 +499,8 @@ public class TMappingProcessor {
 							else 
 								newMappingHead = fac.getFunction(currentPredicate, terms.get(1));
 						}
-						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody(), optimize);
+						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody(), 
+								Collections.<Function> emptyList(), optimize);
 					}
 				}
 			}
@@ -495,13 +513,14 @@ public class TMappingProcessor {
 					continue;
 				
 				Predicate p = ((OClass) equiv).getPredicate();
-				Set<CQIE> equivalentClassMappings = getMappings(mappingIndex, p);
-				ArrayList<CQIE> mappingList = new ArrayList<CQIE>(currentNodeMappings);
+				Set<TMappingRule> equivalentClassMappings = getMappings(mappingIndex, p);
+				ArrayList<TMappingRule> mappingList = new ArrayList<TMappingRule>(currentNodeMappings);
 				
 
-				for (CQIE currentNodeMapping : mappingList) {
-					Function newhead = fac.getFunction(p, currentNodeMapping.getHead().getTerms());
-					addMappingToSet(equivalentClassMappings, newhead, currentNodeMapping.getBody(), optimize);
+				for (TMappingRule currentNodeMapping : mappingList) {
+					Function newhead = fac.getFunction(p, currentNodeMapping.stripped.getHead().getTerms());
+					addMappingToSet(equivalentClassMappings, newhead, currentNodeMapping.stripped.getBody(), 
+							currentNodeMapping.conditions, optimize);
 				}
 			}
 		}
@@ -511,8 +530,14 @@ public class TMappingProcessor {
 		
 		DatalogProgram tmappingsProgram = fac.getDatalogProgram();
 		for (Predicate key : mappingIndex.keySet()) {
-			for (CQIE mapping : mappingIndex.get(key)) {
-				tmappingsProgram.appendRule(mapping);
+			for (TMappingRule mapping : mappingIndex.get(key)) {
+
+				List<Function> combinedBody = new LinkedList<Function>(); 
+				combinedBody.addAll(mapping.stripped.getBody());
+				combinedBody.addAll(mapping.conditions);
+				CQIE rule = fac.getCQIE(mapping.stripped.getHead(), combinedBody);				
+				
+				tmappingsProgram.appendRule(rule);
 			}
 		}
 		long tm3 = System.currentTimeMillis();
@@ -529,36 +554,39 @@ public class TMappingProcessor {
 	}
 
 	
-	private static Set<CQIE> getMappings(Map<Predicate, Set<CQIE>> mappingIndex, Predicate current) {
+	private static Set<TMappingRule> getMappings(Map<Predicate, Set<TMappingRule>> mappingIndex, Predicate current) {
 		
-		Set<CQIE> currentMappings = mappingIndex.get(current);	
+		Set<TMappingRule> currentMappings = mappingIndex.get(current);	
 		if (currentMappings == null) {
-			currentMappings = new LinkedHashSet<CQIE>();
+			currentMappings = new LinkedHashSet<TMappingRule>();
 			mappingIndex.put(current, currentMappings);
 		}
 		return currentMappings;
 	}
 
 
-	private static void addMappingToSet(Set<CQIE> mappings, Function head, List<Function> body, boolean optimize) {
+	private static void addMappingToSet(Set<TMappingRule> mappings, Function head, List<Function> body, List<Function> conditions, boolean optimize) {
 
-		CQIE newmapping = fac.getCQIE(head, body);				
+		List<Function> combinedBody = new LinkedList<Function>(); 
+		combinedBody.addAll(body);
+		combinedBody.addAll(conditions);
+		TMappingRule newmapping = new TMappingRule(fac.getCQIE(head, combinedBody));				
 		if (optimize)
 			mergeMappingsWithCQC(mappings, newmapping);
 		else
 			mappings.add(newmapping);					
 	}
 	
-	private static void optimizeMappingProgram(Map<Predicate, Set<CQIE>> mappingIndex) {
+	private static void optimizeMappingProgram(Map<Predicate, Set<TMappingRule>> mappingIndex) {
 		for (Predicate p : mappingIndex.keySet()) {
-			Set<CQIE> similarMappings = mappingIndex.get(p);
-			Set<CQIE> result = new HashSet<CQIE>();
-			Iterator<CQIE> iterSimilarMappings = similarMappings.iterator();
+			Set<TMappingRule> similarMappings = mappingIndex.get(p);
+			Set<TMappingRule> result = new HashSet<TMappingRule>();
+			Iterator<TMappingRule> iterSimilarMappings = similarMappings.iterator();
 			while (iterSimilarMappings.hasNext()) {
-				CQIE candidate = iterSimilarMappings.next();
+				TMappingRule candidate = iterSimilarMappings.next();
 				iterSimilarMappings.remove();
 				
-				if (candidate.getBody().size() > 0) {
+				if (candidate.stripped.getBody().size() + candidate.conditions.size() > 0) {
 					mergeMappingsWithCQC(result, candidate);
 				} else {
 					result.add(candidate);
