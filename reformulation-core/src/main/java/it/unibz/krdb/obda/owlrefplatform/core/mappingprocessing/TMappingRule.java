@@ -9,13 +9,15 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 /***
  * Splits a given {@link mapping} into builtin predicates ({@link conditions})
  * and all other atoms ({@link stripped}), which are checked for containment 
- * by the main algorithm.
+ * by the TMapping construction algorithm.
  */
 
 public class TMappingRule {
@@ -42,20 +44,20 @@ public class TMappingRule {
 	}
 
 	public TMappingRule(Function head, TMappingRule baseRule) {
-		conditions = new LinkedList<Function>();
+		conditions = new ArrayList<Function>(baseRule.conditions.size());
 		for (Function atom : baseRule.conditions) {
 			Function clone = (Function)atom.clone();
 			conditions.add(clone);	
 		}
-		
-		List<Function> newbody = new LinkedList<Function>();
+				
+		List<Function> newbody = new ArrayList<Function>(baseRule.stripped.getBody().size());
 		for (Function atom : baseRule.stripped.getBody()) {
 			Function clone = (Function)atom.clone();
 			newbody.add(clone);	
 		}
 		Function newhead = (Function)head.clone();
 		stripped = fac.getCQIE(newhead, newbody);
-		cqc = new CQCUtilities(stripped, (Ontology)null /*sigma*/);
+		cqc = new CQCUtilities(stripped, (Ontology)null /*sigma*/); // could be null -- no optimization is used
 	}
 	
 	
@@ -68,9 +70,14 @@ public class TMappingRule {
 	}
 	
 	public CQIE asCQIE() {
-		List<Function> combinedBody = new LinkedList<Function>(); 
-		combinedBody.addAll(stripped.getBody());
-		combinedBody.addAll(conditions);
+		List<Function> combinedBody;
+		if (!conditions.isEmpty()) {
+			combinedBody = new LinkedList<Function>(); 
+			combinedBody.addAll(stripped.getBody());
+			combinedBody.addAll(conditions);
+		}
+		else
+			combinedBody = stripped.getBody();
 		return fac.getCQIE(stripped.getHead(), combinedBody);				
 	}
 	
@@ -82,7 +89,7 @@ public class TMappingRule {
 		return stripped.getHead().getTerms();
 	}
 	
-	// Roman: avoid using it because it gives access to the internal presentation
+	// ROMAN: avoid using it because it gives access to the internal presentation
 	@Deprecated
 	public CQIE getStripped() {
 		return stripped;
@@ -90,12 +97,26 @@ public class TMappingRule {
 	
 	/***
 	 * Takes a conjunctive boolean atoms and returns one single atom
-	 * representing the conjunction (it might be a single atom if
-	 * conditions.size() == 1.
+	 * representing the conjunction 
+	 * 
+	 * ASSUMPTION: conditions is NOT empty
+	 * 
+	 * Example: A -> A
+	 *          A, B -> AND(B,A)
+	 *          A, B, C -> AND(C,AND(B,A))
 	 * 
 	 * @return
 	 */
 	public Function getMergedConditions() {
+		// one might prefer to cache merged conditions
+		Iterator<Function> iter = conditions.iterator();
+		Function mergedConditions = iter.next(); // IMPORTANT: assume that conditions is non-empty
+		while (iter.hasNext()) {
+			Function e = iter.next();
+			mergedConditions = fac.getFunctionAND(e, mergedConditions);
+		}
+		return mergedConditions;
+/*		
 		if (conditions.size() == 1)
 			return conditions.get(0);
 		Function atom0 = conditions.remove(0);
@@ -111,6 +132,7 @@ public class TMappingRule {
 			nestedAnd.setTerm(1, newAND);
 		}
 		return nestedAnd;
+*/
 	}
 	
 	@Override

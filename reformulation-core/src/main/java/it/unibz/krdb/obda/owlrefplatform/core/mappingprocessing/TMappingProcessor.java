@@ -41,8 +41,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -143,12 +141,10 @@ public class TMappingProcessor {
 			return;
 		}
 
-		//TMappingRule newRule = new TMappingRule(newmapping);
-				
 		Iterator<TMappingRule> mappingIterator = currentMappings.iterator();
 		while (mappingIterator.hasNext()) {
-			//CQIE currentMapping = mappingIterator.next();		
-			TMappingRule currentRule = mappingIterator.next(); // new TMappingRule(currentMapping);
+			
+			TMappingRule currentRule = mappingIterator.next(); 
 			
 			if (!newRule.isContainedIn(currentRule))
 				continue;
@@ -345,10 +341,12 @@ public class TMappingProcessor {
 
 			/* Setting up mappings for the equivalent classes */
 			for (Property equivProperty : propertySet) {
-				if (equivProperty.equals(current))
+				Predicate p = equivProperty.getPredicate();
+
+				// skip the property or its inverse (if it is symmetric)
+				if (p.equals(current.getPredicate()))
 					continue;
 				 
-				Predicate p = equivProperty.getPredicate();
 				Set<TMappingRule> equivalentPropertyMappings = getMappings(mappingIndex, p);
 
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
@@ -359,7 +357,7 @@ public class TMappingProcessor {
 						newhead = fac.getFunction(p, terms);
 					else 
 						newhead = fac.getFunction(p, terms.get(1), terms.get(0));
-					addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping, optimize);
+					addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping);
 				}
 			}
 		} // Properties loop ended
@@ -388,19 +386,21 @@ public class TMappingProcessor {
 					 * class, or when it is an \exists P or \exists \inv P. 
 					 */
 					
-					boolean isClass = true;
-					boolean isInverse = false;
+					boolean isClass, isInverse;
 
 					Predicate childPredicate;					
 					if (childDescription instanceof OClass) {
 						if (!full)
 							continue;
 						childPredicate = ((OClass) childDescription).getPredicate();
+						isClass = true;
+						isInverse = false;
 					} 
 					else if (childDescription instanceof PropertySomeRestriction) {
-						childPredicate = ((PropertySomeRestriction) childDescription).getPredicate();
-						isInverse = ((PropertySomeRestriction) childDescription).isInverse();
+						PropertySomeRestriction some = (PropertySomeRestriction) childDescription;
+						childPredicate = some.getPredicate();
 						isClass = false;
+						isInverse = some.isInverse();
 					} 
 					else 
 						throw new RuntimeException("Unknown type of node in DAG: " + childDescription);
@@ -426,7 +426,6 @@ public class TMappingProcessor {
 			
 			/* Setting up mappings for the equivalent classes */
 			for (BasicClassDescription equiv : classSet) {
-
 				if (!(equiv instanceof OClass) || equiv.equals(current))
 					continue;
 				
@@ -435,7 +434,7 @@ public class TMappingProcessor {
 
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
 					Function newhead = fac.getFunction(p, currentNodeMapping.getHeadTerms());
-					addMappingToSet(equivalentClassMappings, newhead, currentNodeMapping, optimize);
+					addMappingToSet(equivalentClassMappings, newhead, currentNodeMapping);
 				}
 			}
 		}
@@ -481,13 +480,11 @@ public class TMappingProcessor {
 			mappings.add(newmapping);					
 	}
 
-	private static void addMappingToSet(Set<TMappingRule> mappings, Function head, TMappingRule baseRule, boolean optimize) {
-
+	
+	private static void addMappingToSet(Set<TMappingRule> mappings, Function head, TMappingRule baseRule) {
+		// this is for equivalence classes, no optimization is needed
 		TMappingRule newmapping = new TMappingRule(head, baseRule);				
-		if (optimize)
-			mergeMappingsWithCQC(mappings, newmapping);
-		else
-			mappings.add(newmapping);					
+		mappings.add(newmapping);					
 	}
 	
 	
