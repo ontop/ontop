@@ -99,7 +99,7 @@ public class QuestResultset implements TupleResultSet {
 			 QuestConnection connection = st.questInstance.getConnection();
 			 vendor = connection.getDriverName();
 			 isOracle = vendor.startsWith("Oracle");
-             isMsSQL = vendor.contains("SQL Server");
+//             isMsSQL = vendor.contains("SQL Server");
 			 connection.close();
 		} catch (SQLException e) {
 			throw new OBDAException(e);
@@ -217,7 +217,7 @@ public class QuestResultset implements TupleResultSet {
 						result = fac.getConstantLiteral(s, type);
 
 					} else if (type == COL_TYPE.DATETIME) {
-						if(isMsSQL){
+//						if(isMsSQL){
 
 //                            String value = set.getString(column);
 //
@@ -234,30 +234,30 @@ public class QuestResultset implements TupleResultSet {
 
 //                        }
 
-                        }
-						else {
-                            if (isOracle) {
+//                        }
+//						else {
+//                            if (isOracle) {
+//
+//                                String value = set.getString(column);
+//                                //TODO Oracle driver - this date format depends on the version of the driver
+//                                DateFormat df = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa"); // For oracle driver v.11 and less
+////							DateFormat df = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS"); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
+//                                java.util.Date date;
+//                                try {
+//                                    date = df.parse(value);
+//                                } catch (ParseException e) {
+//                                    throw new RuntimeException(e);
+//                                }
+//                                Timestamp ts = new Timestamp(date.getTime());
+//                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
 
-                                String value = set.getString(column);
-                                //TODO Oracle driver - this date format depends on the version of the driver
-                                DateFormat df = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa"); // For oracle driver v.11 and less
-//							DateFormat df = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS"); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
-                                java.util.Date date;
-                                try {
-                                    date = df.parse(value);
-                                } catch (ParseException e) {
-                                    throw new RuntimeException(e);
-                                }
-                                Timestamp ts = new Timestamp(date.getTime());
-                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
-
-                            } else {
-
-                                Timestamp value = set.getTimestamp(column);
-                                result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
-
-                            }
-                        }
+//                            } else {
+//
+//                                Timestamp value = set.getTimestamp(column);
+//                                result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
+//
+//                            }
+//                        }
 					} else if (type == COL_TYPE.DATE) {
 						if (!isOracle) {
 							Date value = set.getDate(column);
