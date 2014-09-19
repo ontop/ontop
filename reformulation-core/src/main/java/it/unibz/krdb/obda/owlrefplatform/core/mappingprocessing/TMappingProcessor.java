@@ -254,15 +254,14 @@ public class TMappingProcessor {
                 }
 				mappingIterator.remove();
 
-				CQIE strippedCurrentMapping =  currentRule.stripped;			
 				Map<Variable,Term> mgu = null;
-				if (strippedCurrentMapping.getBody().size() == 1) {
-					mgu = Unifier.getMGU(strippedCurrentMapping.getBody().get(0), newRule.stripped.getBody().get(0));
+				if (currentRule.stripped.getBody().size() == 1) {
+					mgu = Unifier.getMGU(currentRule.stripped.getBody().get(0), newRule.stripped.getBody().get(0));
 				}			
 				
 				Function orAtom = fac.getFunctionOR(existingconditions, newconditions);
-				strippedCurrentMapping.getBody().add(orAtom);
-				newmapping = strippedCurrentMapping;
+				newmapping = currentRule.stripped;
+				newmapping.getBody().add(orAtom);
 				
 				if (mgu != null) {
 					newmapping = Unifier.applyUnifier(newmapping, mgu);
