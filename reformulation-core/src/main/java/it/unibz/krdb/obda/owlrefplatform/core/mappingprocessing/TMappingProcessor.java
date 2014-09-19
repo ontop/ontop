@@ -108,10 +108,10 @@ public class TMappingProcessor {
 		 * @param newmapping
 		 *            The new mapping for A/P
 		 */
-		public void mergeMappingsWithCQC(TMappingRule newRule, boolean optimize) {
+		public void mergeMappingsWithCQC(TMappingRule newRule/*, boolean optimize*/) {
 			
 			// Facts are just added
-			if (!optimize || newRule.isFact()) {
+			if (/*!optimize || */newRule.isFact()) {
 				rules.add(newRule);
 				return;
 			}
@@ -246,18 +246,24 @@ public class TMappingProcessor {
 		}
 		return newProgram;
 	}
+	
+	/**
+	 * 
+	 * @param originalMappings
+	 * @param reasoner
+	 * @param optimize (always true)
+	 * @param full (false for the Semantic Index)
+	 * @return
+	 */
 
-	public static DatalogProgram getTMappings(DatalogProgram originalMappings, TBoxReasoner reasoner, boolean optimize, boolean full) {
+	public static DatalogProgram getTMappings(DatalogProgram originalMappings, TBoxReasoner reasoner, boolean full) {
 
-		long tm0 = System.currentTimeMillis();
-		
 		/*
 		 * Normalizing constants
 		 */
 		originalMappings = normalizeConstants(originalMappings);
 		
-		
-		
+			
 		Map<Predicate, TMappingIndexEntry> mappingIndex = new HashMap<Predicate, TMappingIndexEntry>();
 
 		/***
@@ -269,14 +275,9 @@ public class TMappingProcessor {
 		for (CQIE mapping : originalMappings.getRules()) {
 			TMappingIndexEntry set = getMappings(mappingIndex, (mapping.getHead().getPredicate()));
 			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody());
-			set.mergeMappingsWithCQC(rule, optimize);
+			set.mergeMappingsWithCQC(rule);
 		}
 		
-		
-
-		long tm1 = System.currentTimeMillis();
-		if (tm1 - tm0 > 2)
-			System.out.println("TIME1 " + (tm1 - tm0));
 		
 		/*
 		 * We start with the property mappings, since class t-mappings require
@@ -323,7 +324,7 @@ public class TMappingProcessor {
 							newMappingHead = fac.getFunction(currentPredicate, terms.get(1), terms.get(0));
 						}
 						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody());				
-						currentNodeMappings.mergeMappingsWithCQC(newmapping, optimize);
+						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
 			}
@@ -349,7 +350,7 @@ public class TMappingProcessor {
 						newhead = fac.getFunction(p, terms.get(1), terms.get(0));
 					
 					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
-					equivalentPropertyMappings.mergeMappingsWithCQC(newrule, optimize);
+					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
 				}
 			}
 		} // Properties loop ended
@@ -411,7 +412,7 @@ public class TMappingProcessor {
 								newMappingHead = fac.getFunction(currentPredicate, terms.get(1));
 						}
 						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody());				
-						currentNodeMappings.mergeMappingsWithCQC(newmapping, optimize);
+						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
 			}
@@ -429,28 +430,18 @@ public class TMappingProcessor {
 					Function newhead = fac.getFunction(p, currentNodeMapping.getHeadTerms());
 					
 					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
-					equivalentClassMappings.mergeMappingsWithCQC(newrule, optimize);
+					equivalentClassMappings.mergeMappingsWithCQC(newrule);
 				}
 			}
 		}
-		long tm2 = System.currentTimeMillis();
-		if (tm2 - tm1 > 2)
-			System.out.println("TIME2 " + (tm2 - tm1));
 		
 		DatalogProgram tmappingsProgram = fac.getDatalogProgram();
 		for (Predicate key : mappingIndex.keySet()) {
 			for (TMappingRule mapping : mappingIndex.get(key)) 
 				tmappingsProgram.appendRule(mapping.asCQIE());
 		}
-		long tm3 = System.currentTimeMillis();
-		if (tm3 - tm2 > 2)
-			System.out.println("TIME3 " + (tm3 - tm2));
 		
 		tmappingsProgram = DatalogNormalizer.enforceEqualities(tmappingsProgram);
-
-		long tm4 = System.currentTimeMillis();
-		if (tm4 - tm3 > 2)
-			System.out.println("TIME4 " + (tm4 - tm3));
 
 		return tmappingsProgram;	
 	}
