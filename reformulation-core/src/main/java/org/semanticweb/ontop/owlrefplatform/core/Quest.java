@@ -115,7 +115,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private SQLQueryGenerator dataSourceQueryGenerator;
 
 	/* The active query evaluation engine */
-	private EvaluationEngine evaluationEngine;
+	//private EvaluationEngine evaluationEngine;
 
 	/* The active ABox dependencies */
 	private Ontology sigma;
@@ -147,7 +147,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * These are pattern matchers that will help transforming the URI's in
 	 * queries into Functions, used by the SPARQL translator.
 	 */
-	private UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
+	// private UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
 
 	/*
 	 * Index of the function symbols that have multiple types.
@@ -156,7 +156,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 */
 	private ImmutableMultimap<Predicate,Integer> multiTypedFunctionSymbolIndex;
 
-	private final HashSet<String> templateStrings = new HashSet<String>();
+	// private final HashSet<String> templateStrings = new HashSet<>();
 	
 	/**
 	 * This represents user-supplied constraints, i.e. primary
@@ -219,17 +219,17 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * are used by the statements
 	 */
 
-	private Map<String, String> querycache = new ConcurrentHashMap<String, String>();
+	private Map<String, String> queryCache = new ConcurrentHashMap<>();
 
-	private Map<String, List<String>> signaturecache = new ConcurrentHashMap<String, List<String>>();
+	private Map<String, List<String>> signatureCache = new ConcurrentHashMap<>();
 
-	private Map<String, ParsedQuery> sesameQueryCache = new ConcurrentHashMap<String, ParsedQuery>();
+	private Map<String, ParsedQuery> sesameQueryCache = new ConcurrentHashMap<>();
 
-	private Map<String, Boolean> isbooleancache = new ConcurrentHashMap<String, Boolean>();
+	private Map<String, Boolean> isBooleanCache = new ConcurrentHashMap<>();
 
-	private Map<String, Boolean> isconstructcache = new ConcurrentHashMap<String, Boolean>();
+	private Map<String, Boolean> isConstructCache = new ConcurrentHashMap<>();
 
-	private Map<String, Boolean> isdescribecache = new ConcurrentHashMap<String, Boolean>();
+	private Map<String, Boolean> isDescribeCache = new ConcurrentHashMap<>();
 
 	private DBMetadata metadata;
 
@@ -329,11 +329,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
     }
 	
 	protected Map<String, String> getSQLCache() {
-		return querycache;
+		return queryCache;
 	}
 
 	protected Map<String, List<String>> getSignatureCache() {
-		return signaturecache;
+		return signatureCache;
 	}
 
 //	protected Map<String, Query> getJenaQueryCache() {
@@ -345,15 +345,15 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	}
 	
 	protected Map<String, Boolean> getIsBooleanCache() {
-		return isbooleancache;
+		return isBooleanCache;
 	}
 
 	protected Map<String, Boolean> getIsConstructCache() {
-		return isconstructcache;
+		return isConstructCache;
 	}
 
 	public Map<String, Boolean> getIsDescribeCache() {
-		return isdescribecache;
+		return isDescribeCache;
 	}
 
     public QuestUnfolder getQuestUnfolder() {
@@ -384,13 +384,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	}
 
 	public void dispose() {
-		try {
+/*		try {
 			if (evaluationEngine != null)
 				this.evaluationEngine.dispose();
 		} catch (Exception e) {
 			log.debug("Error during disconnect: " + e.getMessage());
 		}
-
+*/
 		try {
 			if (localConnection != null && !localConnection.isClosed())
 				disconnect();
@@ -1256,7 +1256,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	public void repositoryChanged() {
 		// clear cache
-		this.querycache.clear();
+		this.queryCache.clear();
 	}
 
 	public RDBMSSIRepositoryManager getSIRepo() {
