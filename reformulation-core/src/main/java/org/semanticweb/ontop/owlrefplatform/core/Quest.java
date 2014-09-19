@@ -75,19 +75,20 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private static final long serialVersionUID = -6074403119825754295L;
 
-	private PoolProperties poolProperties = null;
-	private DataSource tomcatPool = null;
+	private PoolProperties poolProperties;
+	private DataSource tomcatPool;
+
 	private boolean isSemanticIdx = false;
-	private Map<String, Integer> uriRefIds = null;
-	private Map<Integer, String> uriMap = null;;
+	private Map<String, Integer> uriRefIds;
+	private Map<Integer, String> uriMap;
 	// Tomcat pool default properties
 	// These can be changed in the properties file
-	protected int maxPoolSize = 20;
-	protected int startPoolSize = 2;
-	protected boolean removeAbandoned = true;
-	protected boolean logAbandoned = false;
-	protected int abandonedTimeout = 60; // 60 seconds
-	protected boolean keepAlive = true;
+	private int maxPoolSize = 20;
+	private int startPoolSize = 2;
+	private boolean removeAbandoned = true;
+	private boolean logAbandoned = false;
+	private int abandonedTimeout = 60; // 60 seconds
+	private boolean keepAlive = true;
 	
 	// Whether to print primary and foreign keys to stdout.
 	private boolean printKeys;
@@ -97,44 +98,47 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 */
 
 	/* The active ABox repository, might be null */
-	public RDBMSSIRepositoryManager dataRepository = null;
+	private RDBMSSIRepositoryManager dataRepository;
 
 	// /* The query answering engine */
 	// private TechniqueWrapper techwrapper = null;
 
-	protected QueryVocabularyValidator vocabularyValidator;
+	private QueryVocabularyValidator vocabularyValidator;
 
 	/* The active connection used to get metadata from the DBMS */
-	private transient Connection localConnection = null;
+	private transient Connection localConnection;
 
 	/* The active query rewriter */
-	protected QueryRewriter rewriter = null;
+	private QueryRewriter rewriter;
 
 	/* The active SQL generator */
-	protected SQLQueryGenerator datasourceQueryGenerator = null;
+	private SQLQueryGenerator dataSourceQueryGenerator;
 
 	/* The active query evaluation engine */
-	protected EvaluationEngine evaluationEngine = null;
+	private EvaluationEngine evaluationEngine;
 
 	/* The active ABox dependencies */
-	protected Ontology sigma = null;
+	private Ontology sigma;
 
-	/* TBox axioms translated into rules */
-	protected Map<Predicate, List<CQIE>> sigmaRulesIndex = null;
+	/* TBox axioms translated into rules.
+	 *
+	 * Unmodifiable map.
+	 */
+	private Map<Predicate, List<CQIE>> sigmaRulesIndex;
 
 	/* The TBox used for query reformulation (ROMAN: not really, it can be reduced by Sigma) */
 	private TBoxReasoner reformulationReasoner;
 
 	/* The merge and translation of all loaded ontologies */
-	protected Ontology inputTBox = null;
+	private Ontology inputTBox;
 
 	/* The input OBDA model */
-	protected OBDAModel inputOBDAModel = null;
+	private OBDAModel inputOBDAModel;
 
 	/* The input OBDA model */
 	private OBDAModel unfoldingOBDAModel;
 	
-	protected QuestUnfolder unfolder;
+	private QuestUnfolder unfolder;
 	
 	/* The equivalence map for the classes/properties that have been simplified */
 	private EquivalenceMap equivalenceMaps;
@@ -152,13 +156,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 */
 	private ImmutableMultimap<Predicate,Integer> multiTypedFunctionSymbolIndex;
 
-	final HashSet<String> templateStrings = new HashSet<String>();
+	private final HashSet<String> templateStrings = new HashSet<String>();
 	
 	/**
 	 * This represents user-supplied constraints, i.e. primary
 	 * and foreign keys not present in the database metadata
 	 */
-	private ImplicitDBConstraints userConstraints = null;
+	private ImplicitDBConstraints userConstraints;
 	
 	/*
 	 * Whether to apply the user-supplied database constraints given above
@@ -176,7 +180,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * Configuration
 	 */
 
-	public boolean reformulate = false;
+	private boolean reformulate = false;
 
 	private String reformulationTechnique = QuestConstants.UCQBASED;
 
@@ -215,17 +219,17 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * are used by the statements
 	 */
 
-	Map<String, String> querycache = new ConcurrentHashMap<String, String>();
+	private Map<String, String> querycache = new ConcurrentHashMap<String, String>();
 
-	Map<String, List<String>> signaturecache = new ConcurrentHashMap<String, List<String>>();
+	private Map<String, List<String>> signaturecache = new ConcurrentHashMap<String, List<String>>();
 
-	Map<String, ParsedQuery> sesameQueryCache = new ConcurrentHashMap<String, ParsedQuery>();
+	private Map<String, ParsedQuery> sesameQueryCache = new ConcurrentHashMap<String, ParsedQuery>();
 
-	Map<String, Boolean> isbooleancache = new ConcurrentHashMap<String, Boolean>();
+	private Map<String, Boolean> isbooleancache = new ConcurrentHashMap<String, Boolean>();
 
-	Map<String, Boolean> isconstructcache = new ConcurrentHashMap<String, Boolean>();
+	private Map<String, Boolean> isconstructcache = new ConcurrentHashMap<String, Boolean>();
 
-	Map<String, Boolean> isdescribecache = new ConcurrentHashMap<String, Boolean>();
+	private Map<String, Boolean> isdescribecache = new ConcurrentHashMap<String, Boolean>();
 
 	private DBMetadata metadata;
 
@@ -307,6 +311,22 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		this.userConstraints = userConstraints;
 		this.applyUserConstraints = true;
 	}
+
+    public RDBMSSIRepositoryManager getDataRepository() {
+        return dataRepository;
+    }
+
+    public QueryVocabularyValidator getVocabularyValidator() {
+        return vocabularyValidator;
+    }
+
+    public QueryRewriter getRewriter(){
+        return rewriter;
+    }
+
+    public SQLQueryGenerator getDataSourceQueryGenerator() {
+        return dataSourceQueryGenerator;
+    }
 	
 	protected Map<String, String> getSQLCache() {
 		return querycache;
@@ -335,6 +355,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public Map<String, Boolean> getIsDescribeCache() {
 		return isdescribecache;
 	}
+
+    public QuestUnfolder getQuestUnfolder() {
+        return unfolder;
+    }
 
 	private void loadOBDAModel(OBDAModel model) {
 
@@ -378,6 +402,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public Properties getPreferences() {
 		return preferences;
 	}
+
+    /**
+     *
+     */
+    public Map<Predicate, List<CQIE>> getSigmaRulesIndex() {
+        return sigmaRulesIndex;
+    }
 
 	private void setPreferences(Properties preferences) {
 		this.preferences = preferences;
@@ -739,12 +770,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			String parameter = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 			SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(parameter);
 			JDBCUtility jdbcutil = new JDBCUtility(parameter);
-			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,	sqladapter, sqlGenerateReplace);
+			dataSourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,	sqladapter, sqlGenerateReplace);
 
 
 
 			if (isSemanticIdx) {
-				datasourceQueryGenerator.setUriIds(uriRefIds);
+				dataSourceQueryGenerator.setUriIds(uriRefIds);
 			}
 
 			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
@@ -840,10 +871,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				saturatedSigma.saturate();
 				
 				List<CQIE> sigmaRules = createSigmaRules(saturatedSigma);
-				sigmaRulesIndex = createSigmaRulesIndex(sigmaRules);				
+				sigmaRulesIndex = Collections.unmodifiableMap(createSigmaRulesIndex(sigmaRules));
 			}
 			else {
-				sigmaRulesIndex = new HashMap<Predicate, List<CQIE>>();
+				sigmaRulesIndex = Collections.unmodifiableMap(new HashMap<Predicate, List<CQIE>>());
 			}
 			
 			/*

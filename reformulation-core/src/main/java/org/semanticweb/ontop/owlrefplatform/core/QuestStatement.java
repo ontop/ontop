@@ -153,14 +153,13 @@ public class QuestStatement implements OBDAStatement {
 		this.isconstructcache = questinstance.getIsConstructCache();
 		this.isdescribecache = questinstance.getIsDescribeCache();
 
-		this.repository = questinstance.dataRepository;
+		this.repository = questinstance.getDataRepository();
 		this.conn = conn;
-		this.rewriter = questinstance.rewriter;
-		// this.unfoldingmechanism = questinstance.unfolder;
-		this.querygenerator = questinstance.datasourceQueryGenerator;
+		this.rewriter = questinstance.getRewriter();
+		this.querygenerator = questinstance.getDataSourceQueryGenerator();
 
 		this.sqlstatement = st;
-		this.validator = questinstance.vocabularyValidator;
+		this.validator = questinstance.getVocabularyValidator();
 	}
 
     public Quest getQuestInstance() {
@@ -499,7 +498,7 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Start the partial evaluation process...");
 
-		DatalogUnfolder unfolder = (DatalogUnfolder) questInstance.unfolder.getDatalogUnfolder();
+		DatalogUnfolder unfolder = (DatalogUnfolder) questInstance.getQuestUnfolder().getDatalogUnfolder();
 		
 		//This instnce of the unfolder is carried from Quest, and contains the mappings.
 		DatalogProgram unfolding = unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true,
@@ -736,7 +735,7 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	public String getUnfolding(String strquery) throws Exception {
 		String sql = "";
-		Map<Predicate, List<CQIE>> rulesIndex = questInstance.sigmaRulesIndex;
+		Map<Predicate, List<CQIE>> rulesIndex = questInstance.getSigmaRulesIndex();
 
 		List<String> signatureContainer = new LinkedList<String>();
 		//Query query;
