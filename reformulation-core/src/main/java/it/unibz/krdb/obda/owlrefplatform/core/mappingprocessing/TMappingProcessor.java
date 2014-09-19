@@ -112,10 +112,10 @@ public class TMappingProcessor {
 		 * @param newmapping
 		 *            The new mapping for A/P
 		 */
-		public void mergeMappingsWithCQC(TMappingRule newRule) {
+		public void mergeMappingsWithCQC(TMappingRule newRule, boolean optimize) {
 			
 			// Facts are just added
-			if (newRule.isFact()) {
+			if (!optimize || newRule.isFact()) {
 				add(newRule);
 				return;
 			}
@@ -271,49 +271,25 @@ public class TMappingProcessor {
 		 */
 		
 		for (CQIE mapping : originalMappings.getRules()) {
-			TMappingIndexEntry set = mappingIndex.get(mapping.getHead().getPredicate());
-			if (set == null) {
-				set = new TMappingIndexEntry();
-				mappingIndex.put(mapping.getHead().getPredicate(), set);
-			}
-			set.add(new TMappingRule(mapping.getHead(), mapping.getBody()));
+			TMappingIndexEntry set = getMappings(mappingIndex, (mapping.getHead().getPredicate()));
+			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody());
+			set.mergeMappingsWithCQC(rule, optimize);
 		}
 		
 		
-		/*
-		 * Merge original mappings that have similar source query.
-		 */
-		if (optimize) {
-			for (Predicate p : mappingIndex.keySet()) {
-				TMappingIndexEntry similarMappings = mappingIndex.get(p);
-				TMappingIndexEntry result = new TMappingIndexEntry();
-				Iterator<TMappingRule> iterSimilarMappings = similarMappings.iterator();
-				while (iterSimilarMappings.hasNext()) {
-					TMappingRule candidate = iterSimilarMappings.next();
-					
-					result.mergeMappingsWithCQC(candidate);
-				}
-				mappingIndex.put(p, result);
-			}			
-		}
 
 		long tm1 = System.currentTimeMillis();
 		if (tm1 - tm0 > 2)
 			System.out.println("TIME1 " + (tm1 - tm0));
 		
 		/*
+		 * We start with the property mappings, since class t-mappings require
+		 * that these are already processed. 
 		 * Processing mappings for all Properties
-		 */
-
-		/*
+		 *
 		 * We process the mappings for the descendants of the current node,
 		 * adding them to the list of mappings of the current node as defined in
 		 * the TMappings specification.
-		 */
-
-		/*
-		 * We start with the property mappings, since class t-mappings require
-		 * that these are already processed. 
 		 */
 
 		for (Equivalences<Property> propertySet : reasoner.getProperties()) {
@@ -348,10 +324,7 @@ public class TMappingProcessor {
 							newMappingHead = fac.getFunction(currentPredicate, terms.get(1), terms.get(0));
 						}
 						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody());				
-						if (optimize)
-							currentNodeMappings.mergeMappingsWithCQC(newmapping);
-						else
-							currentNodeMappings.add(newmapping);					
+						currentNodeMappings.mergeMappingsWithCQC(newmapping, optimize);
 					}
 				}
 			}
@@ -438,10 +411,7 @@ public class TMappingProcessor {
 								newMappingHead = fac.getFunction(currentPredicate, terms.get(1));
 						}
 						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody());				
-						if (optimize)
-							currentNodeMappings.mergeMappingsWithCQC(newmapping);
-						else
-							currentNodeMappings.add(newmapping);					
+						currentNodeMappings.mergeMappingsWithCQC(newmapping, optimize);
 					}
 				}
 			}
