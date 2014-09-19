@@ -96,8 +96,8 @@ public class QuestResultset implements TupleResultSet {
 		formatter.setDecimalFormatSymbols(symbol);
 		try {
 			 vendor = st.questInstance.getConnection().getDriverName();
-			 isOracle = vendor.startsWith("Oracle");
-             isDB2 = vendor.startsWith("11.00.3000");
+			 isOracle = vendor.contains("Oracle");
+             isDB2 = vendor.contains("SQL Server");
 		} catch (SQLException e) {
 			throw new OBDAException(e);
 		}					
@@ -229,24 +229,29 @@ public class QuestResultset implements TupleResultSet {
                             Timestamp ts = new Timestamp(date.getTime());
                             result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
                         }
-						else
-						if (!isOracle) {
-							Timestamp value = set.getTimestamp(column);
-							result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
-						} else {
-							String value = set.getString(column);
-							//TODO Oracle driver - this date format depends on the version of the driver
-							DateFormat df = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa"); // For oracle driver v.11 and less
+						else {
+                            if (isOracle) {
+
+                                String value = set.getString(column);
+                                //TODO Oracle driver - this date format depends on the version of the driver
+                                DateFormat df = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa"); // For oracle driver v.11 and less
 //							DateFormat df = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS"); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
-							java.util.Date date;
-							try {
-								date = df.parse(value);
-							} catch (ParseException e) {
-								throw new RuntimeException(e);
-							}
-							Timestamp ts = new Timestamp(date.getTime());
-							result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
-						}
+                                java.util.Date date;
+                                try {
+                                    date = df.parse(value);
+                                } catch (ParseException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                Timestamp ts = new Timestamp(date.getTime());
+                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
+
+                            } else {
+
+                                Timestamp value = set.getTimestamp(column);
+                                result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
+
+                            }
+                        }
 					} else if (type == COL_TYPE.DATE) {
 						if (!isOracle) {
 							Date value = set.getDate(column);

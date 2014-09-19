@@ -1,0 +1,127 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : 		<http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:  <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "Character Type Tests" ;
+    mf:entries
+    ( 
+      :char
+      :varchar
+      :nchar
+      :nvarchar
+      :text
+      :char-graph
+      :varchar-graph
+      :nchar-graph
+      :nvarchar-graph
+      :text-graph
+
+    ) .
+
+:char rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: CHAR" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <char.rq> ] ;
+    mf:result <char.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mssql.obda> .
+
+:char-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: CHAR-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <char-graph.rq> ] ;
+    mf:result <char.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mssql.obda> .
+    
+:varchar rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: VARCHAR" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <varchar.rq> ] ;
+    mf:result <varchar.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mssql.obda> .
+
+:varchar-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: VARCHAR-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <varchar-graph.rq> ] ;
+    mf:result <varchar.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mssql.obda> .
+
+:nchar rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: NCHAR" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <nchar.rq> ] ;
+    mf:result <nchar.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mssql.obda> .
+
+:nchar-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: NCHAR-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <nchar-graph.rq> ] ;
+    mf:result <nchar.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mssql.obda> .
+
+:nvarchar rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: NVARCHAR" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <ncharvarying.rq> ] ;
+    mf:result <ncharvarying.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mssql.obda> .
+
+:nvarchar-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: NVARCHAR-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <ncharvarying.rq> ] ;
+    mf:result <ncharvarying.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mssql.obda> .
+
+#ntext , text, and image data types will be removed in a future version of Microsoft SQL Server.
+#Avoid using these data types in new development work, and plan to modify applications that currently use them. Use nvarchar(max), varchar(max), and varbinary(max) instead.
+
+:text rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TEXT" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <text.rq> ] ;
+    mf:result <text.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mssql.obda> .
+ 
+:text-graph rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TEXT-GRAPH" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <text-graph.rq> ] ;
+    mf:result <text.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mssql.obda> .
+    
