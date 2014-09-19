@@ -32,10 +32,8 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
@@ -44,7 +42,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -54,161 +51,147 @@ public class TMappingProcessor {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-
-	/***
-	 * Creates an index of all mappings based on the predicate of the head of
-	 * the mapping. The returned map can be used for fast access to the mapping
-	 * list.
-	 * 
-	 * @param mappings
-	 *            A set of mapping given as CQIEs
-	 * @return A map from a predicate to the list of mappings that have that
-	 *         predicate in the head atom.
-	 */
-	private static Map<Predicate, Set<TMappingRule>> getMappingIndex(DatalogProgram mappings) {
-		Map<Predicate, Set<TMappingRule>> mappingIndex = new HashMap<Predicate, Set<TMappingRule>>();
-
-		for (CQIE mapping : mappings.getRules()) {
-			Set<TMappingRule> set = mappingIndex.get(mapping.getHead().getPredicate());
-			if (set == null) {
-				set = new HashSet<TMappingRule>();
-				mappingIndex.put(mapping.getHead().getPredicate(), set);
-			}
-			set.add(new TMappingRule(mapping.getHead(), mapping.getBody()));
-		}
-
-		return mappingIndex;
-	}
-
-	/***
-	 * 
-	 * This is an optimization mechanism that allows T-mappings to produce a
-	 * smaller number of mappings, and hence, the unfolding will be able to
-	 * produce fewer queries.
-	 * 
-	 * Given a set of mappings for a class/property A in {@link currentMappings}
-	 * , this method tries to add a the data coming from a new mapping for A in
-	 * an optimal way, that is, this method will attempt to include the content
-	 * of coming from {@link newmapping} by modifying an existing mapping
-	 * instead of adding a new mapping.
-	 * 
-	 * <p/>
-	 * 
-	 * To do this, this method will strip {@link newmapping} from any
-	 * (in)equality conditions that hold over the variables of the query,
-	 * leaving only the raw body. Then it will look for another "stripped"
-	 * mapping <bold>m</bold> in {@link currentMappings} such that m is
-	 * equivalent to stripped(newmapping). If such a m is found, this method
-	 * will add the extra semantics of newmapping to "m" by appending
-	 * newmapping's conditions into an OR atom, together with the existing
-	 * conditions of m.
-	 * 
-	 * </p>
-	 * If no such m is found, then this method simply adds newmapping to
-	 * currentMappings.
-	 * 
-	 * 
-	 * <p/>
-	 * For example. If new mapping is equal to
-	 * <p/>
-	 * 
-	 * S(x,z) :- R(x,y,z), y = 2
-	 * 
-	 * <p/>
-	 * and there exists a mapping m
-	 * <p/>
-	 * S(x,z) :- R(x,y,z), y > 7
-	 * 
-	 * This method would modify 'm' as follows:
-	 * 
-	 * <p/>
-	 * S(x,z) :- R(x,y,z), OR(y > 7, y = 2)
-	 * 
-	 * <p/>
-	 * 
-	 * @param currentMappings
-	 *            The set of existing mappings for A/P
-	 * @param newmapping
-	 *            The new mapping for A/P
-	 */
-	private static void mergeMappingsWithCQC(Set<TMappingRule> currentMappings, TMappingRule newRule) {
+	private static class TMappingIndexEntry implements Iterable<TMappingRule> {
+		private final Set<TMappingRule> rules = new HashSet<TMappingRule>();
 		
+		public void add(TMappingRule rule) {
+			rules.add(rule);
+		}
+		
+		@Override
+		public Iterator<TMappingRule> iterator() {
+			return rules.iterator();
+		}
+
 		/***
-		 * Facts are just added
+		 * 
+		 * This is an optimization mechanism that allows T-mappings to produce a
+		 * smaller number of mappings, and hence, the unfolding will be able to
+		 * produce fewer queries.
+		 * 
+		 * Given a set of mappings for a class/property A in {@link currentMappings}
+		 * , this method tries to add a the data coming from a new mapping for A in
+		 * an optimal way, that is, this method will attempt to include the content
+		 * of coming from {@link newmapping} by modifying an existing mapping
+		 * instead of adding a new mapping.
+		 * 
+		 * <p/>
+		 * 
+		 * To do this, this method will strip {@link newmapping} from any
+		 * (in)equality conditions that hold over the variables of the query,
+		 * leaving only the raw body. Then it will look for another "stripped"
+		 * mapping <bold>m</bold> in {@link currentMappings} such that m is
+		 * equivalent to stripped(newmapping). If such a m is found, this method
+		 * will add the extra semantics of newmapping to "m" by appending
+		 * newmapping's conditions into an OR atom, together with the existing
+		 * conditions of m.
+		 * 
+		 * </p>
+		 * If no such m is found, then this method simply adds newmapping to
+		 * currentMappings.
+		 * 
+		 * 
+		 * <p/>
+		 * For example. If new mapping is equal to
+		 * <p/>
+		 * 
+		 * S(x,z) :- R(x,y,z), y = 2
+		 * 
+		 * <p/>
+		 * and there exists a mapping m
+		 * <p/>
+		 * S(x,z) :- R(x,y,z), y > 7
+		 * 
+		 * This method would modify 'm' as follows:
+		 * 
+		 * <p/>
+		 * S(x,z) :- R(x,y,z), OR(y > 7, y = 2)
+		 * 
+		 * <p/>
+		 * 
+		 * @param newmapping
+		 *            The new mapping for A/P
 		 */
-		if (newRule.isFact()) {
-			currentMappings.add(newRule);
-			return;
-		}
-
-		Iterator<TMappingRule> mappingIterator = currentMappings.iterator();
-		while (mappingIterator.hasNext()) {
+		public void mergeMappingsWithCQC(TMappingRule newRule) {
 			
-			TMappingRule currentRule = mappingIterator.next(); 
-			
-			if (!newRule.isContainedIn(currentRule))
-				continue;
-
-			if (!currentRule.isContainedIn(newRule))
-				continue;
-
-			/*
-			 * We found an equivalence, we will try to merge the conditions of
-			 * newmapping into the currentMapping.
-			 */
-			if (!newRule.isConditionsEmpty() && currentRule.isConditionsEmpty()) {
-				/*
-				 * There is a containment and there is no need to add the new
-				 * mapping since there there is no extra conditions in the new
-				 * mapping
-				 */
+			// Facts are just added
+			if (newRule.isFact()) {
+				add(newRule);
 				return;
-			} else if (newRule.isConditionsEmpty() && !currentRule.isConditionsEmpty()) {
-				/*
-				 * The existing query is more specific than the new query, so we
-				 * need to add the new query and remove the old
-				 */
-				mappingIterator.remove();
-				break;
-			} else if (newRule.isConditionsEmpty() && currentRule.isConditionsEmpty()) {
-				/*
-				 * There are no conditions, and the new mapping is redundant, do not add anything
-				 */
-				return;
-			} else {
-				/*
-				 * Here we can merge conditions of the new query with the one we
-				 * just found.
-				 */
-				Function newconditions = newRule.getMergedConditions();
-				Function existingconditions = currentRule.getMergedConditions();
-				
-                // we do not add a new mapping if the conditions are exactly the same
-                if (existingconditions.equals(newconditions)) {
-                    continue;
-                }
-				mappingIterator.remove();
-
-				// ROMAN: i do not quite understand the code (in particular, the 1 atom in the body)
-				//        (but leave this fragment with minimal changes)
-				CQIE newmapping = currentRule.getStripped();
-				Map<Variable,Term> mgu = null;
-				if (newmapping.getBody().size() == 1) {
-					mgu = Unifier.getMGU(newmapping.getBody().get(0), newRule.getStripped().getBody().get(0));
-				}			
-				
-				Function orAtom = fac.getFunctionOR(existingconditions, newconditions);
-				newmapping.getBody().add(orAtom);
-				
-				if (mgu != null) {
-					newmapping = Unifier.applyUnifier(newmapping, mgu);
-				}
-				newRule = new TMappingRule(newmapping.getHead(), newmapping.getBody());
-				break;
 			}
+
+			Iterator<TMappingRule> mappingIterator = iterator();
+			while (mappingIterator.hasNext()) {
+				
+				TMappingRule currentRule = mappingIterator.next(); 
+				
+				if (!newRule.isContainedIn(currentRule))
+					continue;
+
+				if (!currentRule.isContainedIn(newRule))
+					continue;
+
+				/*
+				 * We found an equivalence, we will try to merge the conditions of
+				 * newmapping into the currentMapping.
+				 */
+				if (!newRule.isConditionsEmpty() && currentRule.isConditionsEmpty()) {
+					/*
+					 * There is a containment and there is no need to add the new
+					 * mapping since there there is no extra conditions in the new
+					 * mapping
+					 */
+					return;
+				} else if (newRule.isConditionsEmpty() && !currentRule.isConditionsEmpty()) {
+					/*
+					 * The existing query is more specific than the new query, so we
+					 * need to add the new query and remove the old
+					 */
+					mappingIterator.remove();
+					break;
+				} else if (newRule.isConditionsEmpty() && currentRule.isConditionsEmpty()) {
+					/*
+					 * There are no conditions, and the new mapping is redundant, do not add anything
+					 */
+					return;
+				} else {
+					/*
+					 * Here we can merge conditions of the new query with the one we
+					 * just found.
+					 */
+					Function newconditions = newRule.getMergedConditions();
+					Function existingconditions = currentRule.getMergedConditions();
+					
+	                // we do not add a new mapping if the conditions are exactly the same
+	                if (existingconditions.equals(newconditions)) {
+	                    continue;
+	                }
+					mappingIterator.remove();
+
+					// ROMAN: i do not quite understand the code (in particular, the 1 atom in the body)
+					//        (but leave this fragment with minimal changes)
+					CQIE newmapping = currentRule.getStripped();
+					Map<Variable,Term> mgu = null;
+					if (newmapping.getBody().size() == 1) {
+						mgu = Unifier.getMGU(newmapping.getBody().get(0), newRule.getStripped().getBody().get(0));
+					}			
+					
+					Function orAtom = fac.getFunctionOR(existingconditions, newconditions);
+					newmapping.getBody().add(orAtom);
+					
+					if (mgu != null) {
+						newmapping = Unifier.applyUnifier(newmapping, mgu);
+					}
+					newRule = new TMappingRule(newmapping.getHead(), newmapping.getBody());
+					break;
+				}
+			}
+			add(newRule);
 		}
-		currentMappings.add(newRule);
 	}
+	
+	
+
 
 
 
@@ -276,13 +259,43 @@ public class TMappingProcessor {
 		 * Normalizing constants
 		 */
 		originalMappings = normalizeConstants(originalMappings);
-		Map<Predicate, Set<TMappingRule>> mappingIndex = getMappingIndex(originalMappings);
+		
+		
+		
+		Map<Predicate, TMappingIndexEntry> mappingIndex = new HashMap<Predicate, TMappingIndexEntry>();
+
+		/***
+		 * Creates an index of all mappings based on the predicate of the head of
+		 * the mapping. The returned map can be used for fast access to the mapping
+		 * list.
+		 */
+		
+		for (CQIE mapping : originalMappings.getRules()) {
+			TMappingIndexEntry set = mappingIndex.get(mapping.getHead().getPredicate());
+			if (set == null) {
+				set = new TMappingIndexEntry();
+				mappingIndex.put(mapping.getHead().getPredicate(), set);
+			}
+			set.add(new TMappingRule(mapping.getHead(), mapping.getBody()));
+		}
+		
 		
 		/*
 		 * Merge original mappings that have similar source query.
 		 */
-		if (optimize)
-			optimizeMappingProgram(mappingIndex);
+		if (optimize) {
+			for (Predicate p : mappingIndex.keySet()) {
+				TMappingIndexEntry similarMappings = mappingIndex.get(p);
+				TMappingIndexEntry result = new TMappingIndexEntry();
+				Iterator<TMappingRule> iterSimilarMappings = similarMappings.iterator();
+				while (iterSimilarMappings.hasNext()) {
+					TMappingRule candidate = iterSimilarMappings.next();
+					
+					result.mergeMappingsWithCQC(candidate);
+				}
+				mappingIndex.put(p, result);
+			}			
+		}
 
 		long tm1 = System.currentTimeMillis();
 		if (tm1 - tm0 > 2)
@@ -309,7 +322,7 @@ public class TMappingProcessor {
 
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();
-			Set<TMappingRule> currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
+			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
 
 			for (Equivalences<Property> descendants : reasoner.getProperties().getSub(propertySet)) {
 				for(Property childproperty : descendants) {
@@ -334,7 +347,11 @@ public class TMappingProcessor {
 						else {
 							newMappingHead = fac.getFunction(currentPredicate, terms.get(1), terms.get(0));
 						}
-						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody(), optimize);
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody());				
+						if (optimize)
+							currentNodeMappings.mergeMappingsWithCQC(newmapping);
+						else
+							currentNodeMappings.add(newmapping);					
 					}
 				}
 			}
@@ -347,7 +364,7 @@ public class TMappingProcessor {
 				if (p.equals(current.getPredicate()))
 					continue;
 				 
-				Set<TMappingRule> equivalentPropertyMappings = getMappings(mappingIndex, p);
+				TMappingIndexEntry equivalentPropertyMappings = getMappings(mappingIndex, p);
 
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
 					List<Term> terms = currentNodeMapping.getHeadTerms();
@@ -357,7 +374,9 @@ public class TMappingProcessor {
 						newhead = fac.getFunction(p, terms);
 					else 
 						newhead = fac.getFunction(p, terms.get(1), terms.get(0));
-					addMappingToSet(equivalentPropertyMappings, newhead, currentNodeMapping);
+					// this is for equivalence classes, no optimization is needed
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
+					equivalentPropertyMappings.add(newrule);
 				}
 			}
 		} // Properties loop ended
@@ -376,7 +395,7 @@ public class TMappingProcessor {
 
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();
-			Set<TMappingRule> currentNodeMappings = getMappings(mappingIndex, currentPredicate);
+			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);
 
 			for (Equivalences<BasicClassDescription> descendants : reasoner.getClasses().getSub(classSet)) {
 				for (BasicClassDescription childDescription : descendants) {
@@ -418,7 +437,11 @@ public class TMappingProcessor {
 							else 
 								newMappingHead = fac.getFunction(currentPredicate, terms.get(1));
 						}
-						addMappingToSet(currentNodeMappings, newMappingHead, childmapping.getBody(), optimize);
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody());				
+						if (optimize)
+							currentNodeMappings.mergeMappingsWithCQC(newmapping);
+						else
+							currentNodeMappings.add(newmapping);					
 					}
 				}
 			}
@@ -430,11 +453,13 @@ public class TMappingProcessor {
 					continue;
 				
 				Predicate p = ((OClass) equiv).getPredicate();
-				Set<TMappingRule> equivalentClassMappings = getMappings(mappingIndex, p);				
+				TMappingIndexEntry equivalentClassMappings = getMappings(mappingIndex, p);				
 
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
 					Function newhead = fac.getFunction(p, currentNodeMapping.getHeadTerms());
-					addMappingToSet(equivalentClassMappings, newhead, currentNodeMapping);
+					// this is for equivalence classes, no optimization is needed
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
+					equivalentClassMappings.add(newrule);
 				}
 			}
 		}
@@ -461,49 +486,17 @@ public class TMappingProcessor {
 	}
 
 	
-	private static Set<TMappingRule> getMappings(Map<Predicate, Set<TMappingRule>> mappingIndex, Predicate current) {
+	private static TMappingIndexEntry getMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, Predicate current) {
 		
-		Set<TMappingRule> currentMappings = mappingIndex.get(current);	
+		TMappingIndexEntry currentMappings = mappingIndex.get(current);	
 		if (currentMappings == null) {
-			currentMappings = new LinkedHashSet<TMappingRule>();
+			currentMappings = new TMappingIndexEntry();
 			mappingIndex.put(current, currentMappings);
 		}
 		return currentMappings;
 	}
 
 
-	private static void addMappingToSet(Set<TMappingRule> mappings, Function head, List<Function> body, boolean optimize) {
-		TMappingRule newmapping = new TMappingRule(head, body);				
-		if (optimize)
-			mergeMappingsWithCQC(mappings, newmapping);
-		else
-			mappings.add(newmapping);					
-	}
-
-	
-	private static void addMappingToSet(Set<TMappingRule> mappings, Function head, TMappingRule baseRule) {
-		// this is for equivalence classes, no optimization is needed
-		TMappingRule newmapping = new TMappingRule(head, baseRule);				
-		mappings.add(newmapping);					
-	}
 	
 	
-	private static void optimizeMappingProgram(Map<Predicate, Set<TMappingRule>> mappingIndex) {
-		for (Predicate p : mappingIndex.keySet()) {
-			Set<TMappingRule> similarMappings = mappingIndex.get(p);
-			Set<TMappingRule> result = new HashSet<TMappingRule>();
-			Iterator<TMappingRule> iterSimilarMappings = similarMappings.iterator();
-			while (iterSimilarMappings.hasNext()) {
-				TMappingRule candidate = iterSimilarMappings.next();
-				iterSimilarMappings.remove();
-				
-				if (!candidate.isFact()) {
-					mergeMappingsWithCQC(result, candidate);
-				} else {
-					result.add(candidate);
-				}
-			}
-			mappingIndex.put(p, result);
-		}
-	}
 }
