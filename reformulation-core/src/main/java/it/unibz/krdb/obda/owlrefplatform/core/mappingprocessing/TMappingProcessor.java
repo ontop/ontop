@@ -54,10 +54,6 @@ public class TMappingProcessor {
 	private static class TMappingIndexEntry implements Iterable<TMappingRule> {
 		private final Set<TMappingRule> rules = new HashSet<TMappingRule>();
 		
-		public void add(TMappingRule rule) {
-			rules.add(rule);
-		}
-		
 		@Override
 		public Iterator<TMappingRule> iterator() {
 			return rules.iterator();
@@ -116,11 +112,11 @@ public class TMappingProcessor {
 			
 			// Facts are just added
 			if (!optimize || newRule.isFact()) {
-				add(newRule);
+				rules.add(newRule);
 				return;
 			}
 
-			Iterator<TMappingRule> mappingIterator = iterator();
+			Iterator<TMappingRule> mappingIterator = rules.iterator();
 			while (mappingIterator.hasNext()) {
 				
 				TMappingRule currentRule = mappingIterator.next(); 
@@ -186,7 +182,7 @@ public class TMappingProcessor {
 					break;
 				}
 			}
-			add(newRule);
+			rules.add(newRule);
 		}
 	}
 	
@@ -295,6 +291,8 @@ public class TMappingProcessor {
 		for (Equivalences<Property> propertySet : reasoner.getProperties()) {
 
 			Property current = propertySet.getRepresentative();
+			if (current.isInverse())
+				continue;
 
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();
@@ -312,6 +310,7 @@ public class TMappingProcessor {
 					boolean requiresInverse = (current.isInverse() != childproperty.isInverse());
 
 					for (CQIE childmapping : originalMappings.getRules(childproperty.getPredicate())) {
+
 						List<Term> terms = childmapping.getHead().getTerms();
 
 						Function newMappingHead;
@@ -331,9 +330,10 @@ public class TMappingProcessor {
 
 			/* Setting up mappings for the equivalent classes */
 			for (Property equivProperty : propertySet) {
+				
 				Predicate p = equivProperty.getPredicate();
 
-				// skip the property or its inverse (if it is symmetric)
+				// skip the property and its inverse (if it is symmetric)
 				if (p.equals(current.getPredicate()))
 					continue;
 				 
@@ -347,9 +347,9 @@ public class TMappingProcessor {
 						newhead = fac.getFunction(p, terms);
 					else 
 						newhead = fac.getFunction(p, terms.get(1), terms.get(0));
-					// this is for equivalence classes, no optimization is needed
+					
 					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
-					equivalentPropertyMappings.add(newrule);
+					equivalentPropertyMappings.mergeMappingsWithCQC(newrule, optimize);
 				}
 			}
 		} // Properties loop ended
@@ -423,13 +423,13 @@ public class TMappingProcessor {
 					continue;
 				
 				Predicate p = ((OClass) equiv).getPredicate();
-				TMappingIndexEntry equivalentClassMappings = getMappings(mappingIndex, p);				
+				TMappingIndexEntry equivalentClassMappings = getMappings(mappingIndex, p);	
 
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
 					Function newhead = fac.getFunction(p, currentNodeMapping.getHeadTerms());
-					// this is for equivalence classes, no optimization is needed
+					
 					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
-					equivalentClassMappings.add(newrule);
+					equivalentClassMappings.mergeMappingsWithCQC(newrule, optimize);
 				}
 			}
 		}

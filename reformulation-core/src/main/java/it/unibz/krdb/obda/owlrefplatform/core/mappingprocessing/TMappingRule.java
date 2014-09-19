@@ -149,4 +149,8 @@ public class TMappingRule {
 		return false;
 	}
 
+	@Override 
+	public String toString() {
+		return stripped + " AND " + conditions;
+	}
 }
