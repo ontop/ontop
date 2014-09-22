@@ -1,0 +1,26 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : 		<http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:  <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "general tests for datatypes" ;
+    mf:entries
+    ( 
+      :selectall
+    ) .
+
+## >>> This test should fail!
+:selectall rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: all" ;
+    mf:comment	"Quest will try to retrieve mixed results that involve all know datatypes" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <select-all.rq> ] ;
+    mf:result <select-all-pgsql.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+

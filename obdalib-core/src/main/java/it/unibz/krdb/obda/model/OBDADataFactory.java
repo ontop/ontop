@@ -296,5 +296,13 @@ public interface OBDADataFactory extends Serializable {
 
 	Predicate getLeftJoinPredicate();
 
+	/**
+	 * @return
+	 */
+	public Predicate getDataTypePredicateDate();
+	
+	public Predicate getDataTypePredicateTime();
+
+	public Predicate getDataTypePredicateYear();
 	
 }

@@ -557,7 +557,7 @@ public class ExpressionEvaluator {
 
 		if (function.getTerms().size() != 2) {
 			return emptyconstant;
-		} else {
+		} else { // rdfs:Literal(text, lang)
 			Term parameter = function.getTerm(1);
 			if (parameter instanceof Variable) {
 				return fac.getFunction(fac.getDataTypePredicateString(),

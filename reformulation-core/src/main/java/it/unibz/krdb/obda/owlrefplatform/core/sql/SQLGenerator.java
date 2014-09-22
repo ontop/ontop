@@ -893,11 +893,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 			/*
 			 * Adding the ColType column to the projection (used in the result
 			 * set to know the type of constant)
+			 * 
+			 * NOTE NULL is IDENTIFIER 0 in QuestResultSet do not USE for any 
+			 * type
 			 */
-			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN.getName().toString())) {
+			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
 				return (String.format(typeStr, 9, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
 				return (String.format(typeStr, 8, signature.get(hpos)));
+			} else if (functionString.equals(OBDAVocabulary.XSD_DATE_URI)) {
+				return (String.format(typeStr, 10, signature.get(hpos)));
+			} else if (functionString.equals(OBDAVocabulary.XSD_TIME_URI)) {
+				return (String.format(typeStr, 11, signature.get(hpos)));
+			} else if (functionString.equals(OBDAVocabulary.XSD_YEAR_URI)) {
+				return (String.format(typeStr, 12, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
 				return (String.format(typeStr, 5, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
