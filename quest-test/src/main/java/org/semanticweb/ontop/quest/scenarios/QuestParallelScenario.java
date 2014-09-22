@@ -45,10 +45,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Parallel version of QuestScenarioParent
@@ -57,6 +54,7 @@ public abstract class QuestParallelScenario implements Runnable {
 
 	static final Logger logger = LoggerFactory.getLogger(QuestParallelScenario.class);
 
+    private final String suiteName;
     private final List<String> names;
 	protected final List<String> testURIs;
 	protected final List<String> queryFileURLs;
@@ -69,15 +67,31 @@ public abstract class QuestParallelScenario implements Runnable {
 
 	public interface ParallelFactory {
 
-		QuestParallelScenario createQuestParallelScenarioTest(List<String> testURIs, List<String> names,  List<String> queryFileURLs,
+		QuestParallelScenario createQuestParallelScenarioTest(String suiteName,
+                                                              List<String> testURIs, List<String> names,  List<String> queryFileURLs,
                                                                     List<String> resultFileURLs, String owlFileURL, String obdaFileURL,
                                                                     String parameterFileURL);
 
 		String getMainManifestFile();
 	}
 
-	public QuestParallelScenario(List<String> testURIs, List<String> names, List<String> queryFileURLs, List<String> resultFileURLs,
+    public class ThreadExceptionHandler implements Thread.UncaughtExceptionHandler {
+
+        private Map<Thread, Throwable> exceptions = new HashMap<>();
+
+        public void uncaughtException(Thread th, Throwable ex) {
+            exceptions.put(th, ex);
+        }
+
+        public Map<Thread, Throwable> getThrownExceptions() {
+            return exceptions;
+        }
+    };
+
+	public QuestParallelScenario(String suiteName,
+                                 List<String> testURIs, List<String> names, List<String> queryFileURLs, List<String> resultFileURLs,
                                  String owlFileURL, String obdaFileURL, String parameterFileURL) {
+        this.suiteName = suiteName;
         this.names = names;
 		this.testURIs = testURIs;
 		this.queryFileURLs = queryFileURLs;
@@ -113,10 +127,13 @@ public abstract class QuestParallelScenario implements Runnable {
 	}
 
 	public void runTest() throws Exception {
+        ThreadExceptionHandler exceptionHandler = new ThreadExceptionHandler();
+
         setUp();
         List<Thread> threads = new ArrayList<>();
         for (String name : names) {
             Thread t = new Thread(this);
+            t.setUncaughtExceptionHandler(exceptionHandler);
             t.start();
             threads.add(t);
         }
@@ -125,7 +142,36 @@ public abstract class QuestParallelScenario implements Runnable {
             thread.join();
         }
         tearDown();
+
+        summarizeThreadResults(threads, exceptionHandler.getThrownExceptions());
+
 	}
+
+    private void summarizeThreadResults(List<Thread> threads, Map<Thread, Throwable> exceptions) throws Exception {
+        int testNb = threads.size();
+        int failureNb = exceptions.size();
+        String separationLine = "--------------------------";
+        System.out.println(separationLine);
+        String msg = suiteName + "\n";
+        msg += String.format("Tests passed: %d over %d\n", testNb - failureNb, testNb);
+
+        if (failureNb > 0) {
+            msg += "Failures: \n";
+            for (Thread th : exceptions.keySet()) {
+                int index = threads.indexOf(th);
+                String name = names.get(index);
+                msg += ("  " + name + "\n");
+            }
+            /**
+             * Declares the test as failed
+             */
+            throw new Exception(msg);
+        }
+        else {
+            System.out.println(msg);
+            System.out.println(separationLine);
+        }
+    }
 
     private synchronized int getIndex() {
         int index = counter++;
@@ -134,7 +180,8 @@ public abstract class QuestParallelScenario implements Runnable {
 
     public void run() {
         int index = getIndex();
-        logger.debug(String.format("Thread %d: %s", index, names.get(index)));
+        String testName = names.get(index);
+        logger.debug(String.format("Thread %d: %s", index, testName));
 
         try {
             ResultSetInfo expectedResult = readResultSetInfo(index);
@@ -146,13 +193,13 @@ public abstract class QuestParallelScenario implements Runnable {
                 if (query instanceof TupleQuery) {
                     TupleQueryResult queryResult = ((TupleQuery) query).evaluate();
                     //TODO:  Should we do a more sophisticated verification?
-                    compareResultSize(queryResult, expectedResult);
+                    compareResultSize(testName, queryResult, expectedResult);
                 } else {
                     throw new RuntimeException("Unexpected query type: " + query.getClass());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                compareThrownException(e, expectedResult); // compare the thrown exception class
+                compareThrownException(testName, e, expectedResult); // compare the thrown exception class
             } finally {
                 con.close();
             }
@@ -161,17 +208,13 @@ public abstract class QuestParallelScenario implements Runnable {
         }
     }
 
-    public String getName() {
-        return names.toString();
-    }
-
-	private void compareResultSize(TupleQueryResult queryResult, ResultSetInfo expectedResult) throws Exception {
+	private void compareResultSize(String testName, TupleQueryResult queryResult, ResultSetInfo expectedResult) throws Exception {
 		int queryResultSize = countTuple(queryResult);
 		int expectedResultSize = (Integer) attributeValue(expectedResult, "counter");
 		if (queryResultSize != expectedResultSize) {
 			StringBuilder message = new StringBuilder(128);
 			message.append("\n============ ");
-			message.append(getName());
+			message.append(testName);
 			message.append(" =======================\n");
 			message.append("Expected result: ");
 			message.append(expectedResultSize);
@@ -187,13 +230,13 @@ public abstract class QuestParallelScenario implements Runnable {
 		}
 	}
 
-	private void compareThrownException(Exception ex, ResultSetInfo expectedResult) throws Exception {
+	private void compareThrownException(String testName, Exception ex, ResultSetInfo expectedResult) throws Exception {
 		String thrownException = ex.getClass().getName();
 		String expectedThrownException = (String) attributeValue(expectedResult, "thrownException");
 		if (!thrownException.equals(expectedThrownException)) {
 			StringBuilder message = new StringBuilder(128);
 			message.append("\n============ ");
-			message.append(getName());
+			message.append(testName);
 			message.append(" =======================\n");
 			message.append("Expected thrown exception: ");
 			message.append(expectedThrownException);
@@ -219,7 +262,7 @@ public abstract class QuestParallelScenario implements Runnable {
 			counter++;
 			BindingSet bs = tuples.next();
 			String msg = String.format("x: %s, y: %s\n", bs.getValue("x"), bs.getValue("y"));
-			logger.info(msg);
+			logger.debug(msg);
 		}
 		return counter;
 	}
@@ -288,7 +331,8 @@ public abstract class QuestParallelScenario implements Runnable {
 
 		ScenarioManifestTestUtils.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
 
-		suite.setName(getManifestName(manifestRep, con, manifestFileURL));
+        String suiteName = getManifestName(manifestRep, con, manifestFileURL);
+		suite.setName(suiteName);
 
 		// Extract test case information from the manifest file. Note that we only
 		// select those test cases that are mentioned in the list.
@@ -370,7 +414,7 @@ public abstract class QuestParallelScenario implements Runnable {
             resultFiles.add(resultFile);
 		}
 
-        QuestParallelScenario scenario = factory.createQuestParallelScenarioTest(testURIs, testNames,
+        QuestParallelScenario scenario = factory.createQuestParallelScenarioTest(suiteName, testURIs, testNames,
                 queryFiles, resultFiles, mainOwlFile, mainObdaFile, mainParameterFile);
         if (scenario != null) {
             suite.addTest(new ParallelTestCase(scenario));

@@ -25,19 +25,19 @@ import java.util.List;
 
 public class MysqlVirtualParallelScenarioTest extends QuestVirtualParallelScenario {
 
-	public MysqlVirtualParallelScenarioTest(List<String> testURIs, List<String> names, List<String> queryFileURLs,
+	public MysqlVirtualParallelScenarioTest(String suiteName, List<String> testURIs, List<String> names, List<String> queryFileURLs,
                                             List<String> resultFileURLs, String owlFileURL, String obdaFileURL,
                                             String parameterFileURL){
-        super(testURIs, names,  queryFileURLs, resultFileURLs, owlFileURL, obdaFileURL, parameterFileURL);
+        super(suiteName, testURIs, names,  queryFileURLs, resultFileURLs, owlFileURL, obdaFileURL, parameterFileURL);
 	}
 
 	public static Test suite() throws Exception {
 		return ParallelScenarioManifestTestUtils.suite(new ParallelFactory() {
 			@Override
-            public QuestParallelScenario createQuestParallelScenarioTest(List<String> testURIs, List<String> names,  List<String> queryFileURLs,
+            public QuestParallelScenario createQuestParallelScenarioTest(String suiteName, List<String> testURIs, List<String> names,  List<String> queryFileURLs,
                                                                         List<String> resultFileURLs, String owlFileURL, String obdaFileURL,
                                                                         String parameterFileURL) {
-				return new MysqlVirtualParallelScenarioTest(testURIs, names, queryFileURLs, resultFileURLs, owlFileURL,
+				return new MysqlVirtualParallelScenarioTest(suiteName, testURIs, names, queryFileURLs, resultFileURLs, owlFileURL,
 						obdaFileURL, parameterFileURL);
 			}
 			@Override

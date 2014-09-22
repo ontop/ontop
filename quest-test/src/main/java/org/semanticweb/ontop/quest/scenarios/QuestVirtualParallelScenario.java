@@ -27,15 +27,15 @@ import java.util.List;
 
 public abstract class QuestVirtualParallelScenario extends QuestParallelScenario {
 
-	public QuestVirtualParallelScenario(List<String> testURIs, List<String> names, List<String> queryFileURLs,
+	public QuestVirtualParallelScenario(String suiteName, List<String> testURIs, List<String> names, List<String> queryFileURLs,
                                         List<String> resultFileURLs, String owlFileURL, String obdaFileURL,
                                         String parameterFileURL){
-        super(testURIs, names,  queryFileURLs, resultFileURLs, owlFileURL, obdaFileURL, parameterFileURL);
+        super(suiteName, testURIs, names,  queryFileURLs, resultFileURLs, owlFileURL, obdaFileURL, parameterFileURL);
 	}
 	
 	@Override
 	protected Repository createRepository() throws Exception {
-        SesameVirtualRepo repo = new SesameVirtualRepo(getName(), owlFileURL, obdaFileURL, parameterFileURL);
+        SesameVirtualRepo repo = new SesameVirtualRepo(getClass().getName(), owlFileURL, obdaFileURL, parameterFileURL);
         repo.initialize();
         return repo;
 	}
