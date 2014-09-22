@@ -6,12 +6,12 @@ public class MappingConverterCMDTest {
 
 	@Test
 	public void testWithOntology() {
-		MappingConverterCMD.main(new String[]{"src/test/resources/dataPropertiesOntologyType.obda", "src/test/resources/dataPropertiesOntologyType.owl"});
+		MappingConverterCMD.main(new String[]{"src/test/resources/npd-v2-ql_a.obda", "src/test/resources/npd-v2-ql_a.owl"});
 	}
 	
 	@Test
 	public void testWithoutOntology() {
-		MappingConverterCMD.main(new String[]{"src/test/resources/dataPropertiesOntologyType.obda"});
+		MappingConverterCMD.main(new String[]{"src/test/resources/npd-v2-ql_a.obda"});
 	}
 	
 	@Test
