@@ -324,8 +324,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
         return rewriter;
     }
 
-    public SQLQueryGenerator getDataSourceQueryGenerator() {
-        return dataSourceQueryGenerator;
+    /**
+     * Clones the SQL generator.
+     */
+    public SQLQueryGenerator cloneDataSourceQueryGenerator() {
+        return dataSourceQueryGenerator.clone();
     }
 	
 	protected Map<String, String> getSQLCache() {
@@ -770,13 +773,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			String parameter = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 			SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(parameter);
 			JDBCUtility jdbcutil = new JDBCUtility(parameter);
-			dataSourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,	sqladapter, sqlGenerateReplace);
-
-
 
 			if (isSemanticIdx) {
-				dataSourceQueryGenerator.setUriIds(uriRefIds);
+                dataSourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,	sqladapter, sqlGenerateReplace,
+                        true, uriRefIds);
 			}
+            else {
+                dataSourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,	sqladapter, sqlGenerateReplace);
+            }
 
 			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
 

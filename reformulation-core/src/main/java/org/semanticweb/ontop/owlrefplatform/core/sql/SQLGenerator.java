@@ -80,6 +80,10 @@ import com.google.common.collect.Multimap;
 /**
  * This class generates a SQL string from the datalog program coming from the
  * unfolder.
+ *
+ * This class is NOT thread-safe (attributes values are query-dependent).
+ * Thus, an instance of this class should NOT BE SHARED between QuestStatements but be DUPLICATED.
+ *
  * 
  * @author mrezk, mariano, guohui
  * 
@@ -178,11 +182,23 @@ public class SQLGenerator implements SQLQueryGenerator {
         this.generatingREPLACE = sqlGenerateReplace;
     }
 
-    @Override
-	public void setUriIds (Map<String,Integer> uriid){
-		this.isSI = true;
-		this.uriRefIds = uriid;
-	}
+    public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace,
+                        boolean isSI,  Map<String, Integer> uriRefIds) {
+        this(metadata, jdbcutil, sqladapter, sqlGenerateReplace);
+        this.isSI = isSI;
+        this.uriRefIds = uriRefIds;
+    }
+
+    /**
+     * SQLGenerator must not be shared between threads
+     * but CLONED.
+     *
+     * @return A cloned object without any query-dependent value
+     */
+    public SQLQueryGenerator clone() {
+        return new SQLGenerator(metadata, jdbcutil, sqladapter, generatingREPLACE,
+                isSI, uriRefIds);
+    }
 
     private ImmutableTable<Predicate, Predicate, Predicate> buildPredicateUnifyTable() {
     	return new ImmutableTable.Builder<Predicate, Predicate, Predicate>()

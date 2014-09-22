@@ -156,7 +156,7 @@ public class QuestStatement implements OBDAStatement {
 		this.repository = questinstance.getDataRepository();
 		this.conn = conn;
 		this.rewriter = questinstance.getRewriter();
-		this.querygenerator = questinstance.getDataSourceQueryGenerator();
+		this.querygenerator = questinstance.cloneDataSourceQueryGenerator();
 
 		this.sqlstatement = st;
 		this.validator = questinstance.getVocabularyValidator();
