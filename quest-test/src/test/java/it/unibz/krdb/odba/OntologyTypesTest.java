@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -36,9 +37,11 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
+import java.net.URI;
 import java.sql.Connection;
 import java.util.Properties;
 
+import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -67,6 +70,7 @@ public class OntologyTypesTest{
 
 	final String owlFile = "src/test/resources/ontologyType/dataPropertiesOntologyType.owl";
 	final String obdaFile = "src/test/resources/ontologyType/dataPropertiesOntologyType.obda";
+    final String r2rmlFile = "src/test/resources/ontologyType/dataPropertiesPrettyType.ttl";
 	final String obdaErroredFile = "src/test/resources/ontologyType/erroredOntologyType.obda";
 
 	@Before
@@ -173,7 +177,66 @@ public class OntologyTypesTest{
 		runTests(p, query4, 3);		
 		
 	}
-	
+
+    @Test
+    public void testOntologyTypeR2rml() throws Exception {
+        String jdbcurl = "jdbc:oracle:thin:@//10.7.20.91:1521/xe";
+        String username = "system";
+        String password = "obdaps83";
+        String driverclass = "oracle.jdbc.driver.OracleDriver";
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        OBDADataFactory f = OBDADataFactoryImpl.getInstance();
+        // String sourceUrl = "http://example.org/customOBDA";
+        URI obdaURI = new File(r2rmlFile).toURI();
+        String sourceUrl = obdaURI.toString();
+        OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
+                username, password, driverclass);
+
+        log.info("Loading r2rml file");
+        // Creating a new instance of the reasoner
+        QuestOWLFactory factory = new QuestOWLFactory();
+
+        factory.setPreferenceHolder(p);
+
+        R2RMLReader reader = new R2RMLReader(r2rmlFile);
+
+        obdaModel = reader.readModel(dataSource);
+
+        //no value in the mapping
+        //xsd:long is not supported for ontology, it is translated into integer
+        String query1 = "PREFIX : <http://www.company.com/ARES#>" +
+                "select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
+
+        runTests(p, query1, 3);
+
+        //no value in the mapping
+        //xsd:string in the ontology
+        String query2 = "PREFIX : <http://www.company.com/ARES#>" +
+                "select * {?x :assayName ?y. FILTER(datatype(?y) = xsd:string)}";
+
+        runTests(p, query2, 3);
+
+        //no value in the ontology
+        //rdfs:Literal in the mapping
+        String query3 = "PREFIX : <http://www.company.com/ARES#>" +
+                "select * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
+
+        runTests(p, query3, 3);
+
+        //no value in the ontology
+        //no value in the mapping
+        //value in the oracle database is decimal
+        String query4 = "PREFIX : <http://www.company.com/ARES#>" +
+                "select * {?x :AssayID ?y. FILTER(datatype(?y) = xsd:decimal)}";
+
+        runTests(p, query4, 3);
+    }
+
 	@Test	
 	// Ontology datatype http://www.w3.org/2001/XMLSchema#integer for http://www.company.com/ARES#hasARESID
 	// does not correspond to datatype http://www.w3.org/2001/XMLSchema#string in mappings
