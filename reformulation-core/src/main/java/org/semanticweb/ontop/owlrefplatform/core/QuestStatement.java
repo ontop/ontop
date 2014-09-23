@@ -77,6 +77,8 @@ import com.google.common.collect.Multimap;
  */
 public class QuestStatement implements OBDAStatement {
 
+    private static final boolean ALLOW_QUERY_CACHING = true;
+
 	private QueryRewriter rewriter = null;
 
 	private SQLQueryGenerator querygenerator = null;
@@ -743,7 +745,7 @@ public class QuestStatement implements OBDAStatement {
 		
 		// Check the cache first if the system has processed the query string
 		// before
-		if (querycache.containsKey(strquery)) {
+		if (ALLOW_QUERY_CACHING && querycache.containsKey(strquery)) {
 			// Obtain immediately the SQL string from cache
 			sql = querycache.get(strquery);
 
