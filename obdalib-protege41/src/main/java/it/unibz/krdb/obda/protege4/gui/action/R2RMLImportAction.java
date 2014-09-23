@@ -66,28 +66,29 @@ public class R2RMLImportAction extends ProtegeAction {
 
 		final OWLWorkspace workspace = editorKit.getWorkspace();
 
-		String message = "The imported mappings will be appended to the existing data source. Continue?";
-		int response = JOptionPane.showConfirmDialog(workspace, message,
-				"Confirmation", JOptionPane.YES_NO_OPTION);
+		if (obdaModel.getSources().isEmpty()) 
+		{
+			JOptionPane.showMessageDialog(workspace, "The data source is missing. Create one in ontop Mappings. ");
+		}
+		else {
+			String message = "The imported mappings will be appended to the existing data source. Continue?";
+			int response = JOptionPane.showConfirmDialog(workspace, message,
+					"Confirmation", JOptionPane.YES_NO_OPTION);
 
-		if (response == JOptionPane.YES_OPTION) {
+			if (response == JOptionPane.YES_OPTION) {
 
-			final JFileChooser fc = new JFileChooser();
-			fc.showOpenDialog(workspace);
-			File file = null;
-			try {
+				final JFileChooser fc = new JFileChooser();
+				fc.showOpenDialog(workspace);
+				File file = null;
+				try {
 
-				file = (fc.getSelectedFile());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			if (file != null) {
-				R2RMLReader reader = new R2RMLReader(file);
-
-				if (obdaModel.getSources().isEmpty()) {
-					JOptionPane.showMessageDialog(workspace, "The data source has not been set.");
+					file = (fc.getSelectedFile());
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				else {
+				if (file != null) {
+					R2RMLReader reader = new R2RMLReader(file);
+
 					URI sourceID = obdaModel.getSources().get(0).getSourceID();
 
 					try {
@@ -102,9 +103,10 @@ public class R2RMLImportAction extends ProtegeAction {
 						JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
 						throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
 					}
+
 				}
 			}
 
-	}
+		}
 	}
 }
