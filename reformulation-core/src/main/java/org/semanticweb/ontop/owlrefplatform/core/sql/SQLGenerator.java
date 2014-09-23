@@ -196,7 +196,8 @@ public class SQLGenerator implements SQLQueryGenerator {
      * @return A cloned object without any query-dependent value
      */
     public SQLQueryGenerator clone() {
-        return new SQLGenerator(metadata, jdbcutil, sqladapter, generatingREPLACE,
+        //TODO: clone metadata
+        return new SQLGenerator(metadata.clone(), jdbcutil, sqladapter, generatingREPLACE,
                 isSI, uriRefIds);
     }
 
@@ -2430,10 +2431,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 
     public boolean isGeneratingREPLACE() {
         return generatingREPLACE;
-    }
-
-    public void setGeneratingREPLACE(boolean generatingREPLACE) {
-        this.generatingREPLACE = generatingREPLACE;
     }
 
     /**

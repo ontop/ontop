@@ -84,7 +84,23 @@ public class DBMetadata implements Serializable {
 		load(md);
 	}
 
-	/**
+    protected DBMetadata(HashMap<String, DataDefinition> schema,
+                      String driverName, String databaseProductName, boolean storesLowerCaseIdentifiers,
+                      boolean storesLowerCaseQuotedIdentifiers, boolean storesMixedCaseQuotedIdentifiers,
+                      boolean storesMixedCaseIdentifiers, boolean storesUpperCaseQuotedIdentifiers,
+                      boolean storesUpperCaseIdentifiers) {
+        this.schema = new HashMap<>(schema);
+        this.driverName = driverName;
+        this.databaseProductName = databaseProductName;
+        this.storesLowerCaseIdentifiers = storesLowerCaseIdentifiers;
+        this.storesLowerCaseQuotedIdentifiers = storesLowerCaseQuotedIdentifiers;
+        this.storesMixedCaseQuotedIdentifiers = storesMixedCaseQuotedIdentifiers;
+        this.storesMixedCaseIdentifiers = storesMixedCaseIdentifiers;
+        this.storesUpperCaseQuotedIdentifiers = storesUpperCaseQuotedIdentifiers;
+        this.storesUpperCaseIdentifiers = storesUpperCaseIdentifiers;
+    }
+
+    /**
 	 * Load some general information about the database metadata.
 	 * 
 	 * @param md
@@ -108,6 +124,16 @@ public class DBMetadata implements Serializable {
 					"Failed on importing database metadata!\n" + e.getMessage());
 		}
 	}
+
+    /**
+     * DBMetadata is not immutable so it should not be shared between multiple threads
+     *
+     * @return
+     */
+    public DBMetadata clone() {
+        return new DBMetadata(this.schema, driverName, databaseProductName, storesLowerCaseIdentifiers, storesLowerCaseQuotedIdentifiers,
+                storesMixedCaseQuotedIdentifiers, storesMixedCaseIdentifiers, storesUpperCaseQuotedIdentifiers, storesUpperCaseIdentifiers);
+    }
 
 	/**
 	 * Inserts a new data definition to this meta data object. The name is
