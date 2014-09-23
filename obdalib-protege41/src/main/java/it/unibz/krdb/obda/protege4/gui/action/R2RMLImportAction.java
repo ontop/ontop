@@ -84,21 +84,26 @@ public class R2RMLImportAction extends ProtegeAction {
 			if (file != null) {
 				R2RMLReader reader = new R2RMLReader(file);
 
-				URI sourceID = obdaModel.getSources().get(0).getSourceID();
-
-				try {
-					for (OBDAMappingAxiom mapping : reader.readMappings()) {
-						if (mapping.getTargetQuery().toString().contains("BNODE")){
-							JOptionPane.showMessageDialog(workspace, "The mapping "+mapping.getId()+" contains BNode. -ontoPro- does not support it yet.");
-						} else{
-							obdaModel.addMapping(sourceID, mapping);
-						}
-					}
-				} catch (DuplicateMappingException dm) {
-					JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: "+dm.getLocalizedMessage());
-					throw new RuntimeException("Duplicate mapping found: "+dm.getMessage());
+				if (obdaModel.getSources().isEmpty()) {
+					JOptionPane.showMessageDialog(workspace, "The data source has not been set.");
 				}
-		}
+				else {
+					URI sourceID = obdaModel.getSources().get(0).getSourceID();
+
+					try {
+						for (OBDAMappingAxiom mapping : reader.readMappings()) {
+							if (mapping.getTargetQuery().toString().contains("BNODE")) {
+								JOptionPane.showMessageDialog(workspace, "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
+							} else {
+								obdaModel.addMapping(sourceID, mapping);
+							}
+						}
+					} catch (DuplicateMappingException dm) {
+						JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
+						throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
+					}
+				}
+			}
 
 	}
 	}
