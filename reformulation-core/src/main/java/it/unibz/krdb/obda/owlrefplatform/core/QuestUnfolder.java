@@ -105,7 +105,7 @@ public class QuestUnfolder {
 		 */
 		/*if (optimizeMap)*/ {
 			// ROMAN: THIS HAS NO EFFECT 
-			CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
+            unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
 			
 			List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
 			unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true, foreignKeyRules);
