@@ -781,7 +781,7 @@ public abstract class SPARQLQueryParent extends TestCase {
 	public static TestSuite suite(String manifestFileURL, Factory factory, boolean approvedOnly)
 		throws Exception
 	{
-		logger.info("Building test suite for {}", manifestFileURL);
+		logger.info("Building test extractTest for {}", manifestFileURL);
 
 		TestSuite suite = new TestSuite(factory.getClass().getName());
 
@@ -916,7 +916,7 @@ public abstract class SPARQLQueryParent extends TestCase {
 		con.close();
 
 		manifestRep.shutDown();
-		logger.info("Created test suite with " + suite.countTestCases() + " test cases.");
+		logger.info("Created test extractTest with " + suite.countTestCases() + " test cases.");
 		return suite;
 	}
 
@@ -924,7 +924,7 @@ public abstract class SPARQLQueryParent extends TestCase {
 			String manifestFileURL)
 		throws QueryEvaluationException, RepositoryException, MalformedQueryException
 	{
-		// Try to extract suite name from manifest file
+		// Try to extract extractTest name from manifest file
 		TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SERQL,
 				"SELECT ManifestName FROM {ManifestURL} rdfs:label {ManifestName}");
 		manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createURI(manifestFileURL));

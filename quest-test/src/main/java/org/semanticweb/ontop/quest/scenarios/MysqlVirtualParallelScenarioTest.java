@@ -21,14 +21,13 @@ package org.semanticweb.ontop.quest.scenarios;
  */
 
 import junit.framework.Test;
+
+
 import java.util.List;
 
-public class MysqlVirtualParallelScenarioTest extends QuestVirtualParallelScenario {
+public class MysqlVirtualParallelScenarioTest extends ParallelScenarioTest {
 
-	public MysqlVirtualParallelScenarioTest(String suiteName, List<String> testURIs, List<String> names, List<String> queryFileURLs,
-                                            List<String> resultFileURLs, String owlFileURL, String obdaFileURL,
-                                            String parameterFileURL){
-        super(suiteName, testURIs, names,  queryFileURLs, resultFileURLs, owlFileURL, obdaFileURL, parameterFileURL);
+	public MysqlVirtualParallelScenarioTest(){
 	}
 
 	public static Test suite() throws Exception {
@@ -37,8 +36,9 @@ public class MysqlVirtualParallelScenarioTest extends QuestVirtualParallelScenar
             public QuestParallelScenario createQuestParallelScenarioTest(String suiteName, List<String> testURIs, List<String> names,  List<String> queryFileURLs,
                                                                         List<String> resultFileURLs, String owlFileURL, String obdaFileURL,
                                                                         String parameterFileURL) {
-				return new MysqlVirtualParallelScenarioTest(suiteName, testURIs, names, queryFileURLs, resultFileURLs, owlFileURL,
-						obdaFileURL, parameterFileURL);
+				return new QuestVirtualParallelScenario(suiteName, testURIs, names, queryFileURLs, resultFileURLs, owlFileURL,
+                        obdaFileURL, parameterFileURL) {
+                };
 			}
 			@Override
 			public String getMainManifestFile() {

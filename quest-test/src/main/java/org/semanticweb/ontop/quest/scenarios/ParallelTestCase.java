@@ -15,8 +15,8 @@ public class ParallelTestCase extends TestCase {
 
     private final QuestParallelScenario scenario;
 
-    public ParallelTestCase(QuestParallelScenario scenario) {
-        super("Tests running in parallel");
+    public ParallelTestCase(String name, QuestParallelScenario scenario) {
+        super(name);
         this.scenario = scenario;
     }
 

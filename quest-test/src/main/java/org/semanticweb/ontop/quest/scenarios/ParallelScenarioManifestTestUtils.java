@@ -52,7 +52,7 @@ public class ParallelScenarioManifestTestUtils {
 
 	static final Logger logger = LoggerFactory.getLogger(ParallelScenarioManifestTestUtils.class);
 
-	public static TestSuite suite(QuestParallelScenario.ParallelFactory factory) throws Exception {
+	public static TestSuite suite(ParallelScenarioTest.ParallelFactory factory) throws Exception {
 		final String manifestFile;
 		final File tmpDir;
 
@@ -111,14 +111,14 @@ public class ParallelScenarioManifestTestUtils {
 		while (manifestResults.hasNext()) {
 			BindingSet bindingSet = manifestResults.next();
 			String subManifestFile = bindingSet.getValue("manifestFile").toString();
-			suite.addTest(QuestParallelScenario.suite(subManifestFile, factory));
+			suite.addTest(ParallelScenarioTest.extractTest(subManifestFile, factory));
 		}
 
 		manifestResults.close();
 		con.close();
 		manifestRep.shutDown();
 
-		logger.info("Created aggregated test suite with " + suite.countTestCases() + " test cases.");
+		logger.info("Created aggregated test extractTest with " + suite.countTestCases() + " test cases.");
 		return suite;
 	}
 
@@ -139,11 +139,6 @@ public class ParallelScenarioManifestTestUtils {
 			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
 			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
 			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
-			//config.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
-
-//			rdfParser.setVerifyData(false);
-//			rdfParser.setStopAtFirstError(true);
-//			rdfParser.setDatatypeHandling(RDFParser.DatatypeHandling.IGNORE);
 
 			RDFInserter rdfInserter = new RDFInserter(con);
 			rdfInserter.enforceContext(contexts);
