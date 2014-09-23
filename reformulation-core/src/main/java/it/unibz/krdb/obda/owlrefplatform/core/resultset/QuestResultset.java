@@ -41,9 +41,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class QuestResultset implements TupleResultSet {
 
@@ -99,7 +97,7 @@ public class QuestResultset implements TupleResultSet {
 			 QuestConnection connection = st.questInstance.getConnection();
 			 vendor = connection.getDriverName();
 			 isOracle = vendor.startsWith("Oracle");
-//             isMsSQL = vendor.contains("SQL Server");
+             isMsSQL = vendor.contains("SQL Server");
 			 connection.close();
 		} catch (SQLException e) {
 			throw new OBDAException(e);
@@ -218,17 +216,61 @@ public class QuestResultset implements TupleResultSet {
 
 					} else if (type == COL_TYPE.DATETIME) {
 
-                            /** set.getTimestamp() gives problem with MySQL and Oracle drivers we need to specify the dateformat
-                            MySQL DateFormat ("MMM DD YYYY HH:mmaa");
-                            Oracle DateFormat "dd-MMM-yy HH.mm.ss.SSSSSS aa" For oracle driver v.11 and less
-    						Oracle "dd-MMM-yy HH:mm:ss,SSSSSS" FOR ORACLE DRIVER 12.1.0.2
-                            To overcome the problem we create a new Timestamp */
+                        /** set.getTimestamp() gives problem with MySQL and Oracle drivers we need to specify the dateformat
+                         MySQL DateFormat ("MMM DD YYYY HH:mmaa");
+                         Oracle DateFormat "dd-MMM-yy HH.mm.ss.SSSSSS aa" For oracle driver v.11 and less
+                         Oracle "dd-MMM-yy HH:mm:ss,SSSSSS" FOR ORACLE DRIVER 12.1.0.2
+                         To overcome the problem we create a new Timestamp */
 
-                            Timestamp ts = new Timestamp(column);
-                            result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
+                    try {
 
 
-					} else if (type == COL_TYPE.DATE) {
+                        Timestamp value = set.getTimestamp(column);
+                        result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
+
+                    }
+                    catch (Exception e){
+
+                        if (isMsSQL) {
+                            String value = set.getString(column);
+
+                            DateFormat df = new SimpleDateFormat("MMM DD YYYY HH:mmaa");
+                            java.util.Date date;
+                            try {
+                                date = df.parse(value);
+                                Timestamp ts = new Timestamp(date.getTime());
+                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
+
+                            } catch (ParseException pe) {
+
+                                throw new RuntimeException(pe);
+                            }
+                        } else {
+                            if (isOracle) {
+
+                                String value = set.getString(column);
+                                //TODO Oracle driver - this date format depends on the version of the driver
+                                DateFormat df = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa"); // For oracle driver v.11 and less
+//							DateFormat df = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS"); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
+                                java.util.Date date;
+                                try {
+                                    date = df.parse(value);
+                                } catch (ParseException pe) {
+                                    throw new RuntimeException(pe);
+                                }
+
+                                Timestamp ts = new Timestamp(date.getTime());
+                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
+                            }
+                            else{
+                                throw new RuntimeException(e);
+                            }
+                        }
+
+                        }
+
+
+                    } else if (type == COL_TYPE.DATE) {
 						if (!isOracle) {
 							Date value = set.getDate(column);
 							result = fac.getConstantLiteral(value.toString(), type);
