@@ -63,5 +63,5 @@ public interface SQLQueryGenerator extends Serializable {
 
 	// public ViewManager getViewManager();
 
-    public SQLQueryGenerator clone();
+    public SQLQueryGenerator cloneGenerator();
 }

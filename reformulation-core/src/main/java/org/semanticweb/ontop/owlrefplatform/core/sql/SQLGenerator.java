@@ -195,8 +195,7 @@ public class SQLGenerator implements SQLQueryGenerator {
      *
      * @return A cloned object without any query-dependent value
      */
-    public SQLQueryGenerator clone() {
-        //TODO: clone metadata
+    public SQLQueryGenerator cloneGenerator() {
         return new SQLGenerator(metadata.clone(), jdbcutil, sqladapter, generatingREPLACE,
                 isSI, uriRefIds);
     }

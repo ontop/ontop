@@ -328,7 +328,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
      * Clones the SQL generator.
      */
     public SQLQueryGenerator cloneDataSourceQueryGenerator() {
-        return dataSourceQueryGenerator.clone();
+        return dataSourceQueryGenerator.cloneGenerator();
     }
 	
 	protected Map<String, String> getSQLCache() {
