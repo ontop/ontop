@@ -839,8 +839,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfolder.addNOTNULLToMappings();
 			}
 
-			
-			unfolder.setupUnfolder();
+			// Initializes the unfolder
+			unfolder.setup();
 
             //if ((aboxMode.equals(QuestConstants.VIRTUAL))) {
             multiTypedFunctionSymbolIndex = ImmutableMultimap.copyOf(unfolder.processMultipleTemplatePredicates());
@@ -928,6 +928,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		rewriter.setTBox(reformulationR, sigma);
 	}
 
+
+    /**
+     * Has side-effects! Dangerous for concurrency when is called by a Quest statement!
+     *
+     * TODO: isolate it if this feature is really needed
+     */
 	public void updateSemanticIndexMappings() throws DuplicateMappingException, OBDAException {
 		/* Setting up the OBDA model */
 
@@ -941,7 +947,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		sigma.addEntities(aboxDependencies.getVocabulary());
 		sigma.addAssertions(aboxDependencies.getAssertions());	
 	}
-	
 	
 
 	/***

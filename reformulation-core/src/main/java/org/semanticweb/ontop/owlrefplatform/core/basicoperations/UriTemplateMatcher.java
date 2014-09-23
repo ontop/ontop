@@ -36,28 +36,26 @@ import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 
+/**
+ * Immutable class
+ */
 public class UriTemplateMatcher {
 
 	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
-	private Map<Pattern, Function> uriTemplateMatcher = new HashMap<Pattern, Function>();
+	private final Map<Pattern, Function> matchers;
+
+    public UriTemplateMatcher(Map<Pattern, Function> matchers) {
+        this.matchers = Collections.unmodifiableMap(matchers);
+    }
 	
 	public UriTemplateMatcher() {
-		// NO-OP
+        this.matchers = Collections.unmodifiableMap(new HashMap<Pattern, Function>());
 	}
-	
-	
-	public void clear() {
-		uriTemplateMatcher.clear();
-	}
-	
-	public UriTemplateMatcher(Map<Pattern, Function> existing) {
-		uriTemplateMatcher.putAll(existing);
-	}
-	
-	public void put(Pattern uriTemplatePattern, Function uriFunction) {
-		uriTemplateMatcher.put(uriTemplatePattern, uriFunction);
-	}
+
+    public UriTemplateMatcher(UriTemplateMatcher that) {
+        this.matchers = that.matchers;
+    }
 	
 	/***
 	 * We will try to match the URI to one of our patterns, if this happens, we
@@ -68,7 +66,7 @@ public class UriTemplateMatcher {
 		Function functionURI = null;
 
 		List<Pattern> patternsMatched = new LinkedList<Pattern>();
-		for (Pattern pattern : uriTemplateMatcher.keySet()) {
+		for (Pattern pattern : matchers.keySet()) {
 
 			Matcher matcher = pattern.matcher(uriString);
 			boolean match = matcher.matches();
@@ -85,7 +83,7 @@ public class UriTemplateMatcher {
 
 		Collections.sort(patternsMatched, comparator); 
 		for (Pattern pattern : patternsMatched) {
-			Function matchingFunction = uriTemplateMatcher.get(pattern);
+			Function matchingFunction = matchers.get(pattern);
 			Term baseParameter = matchingFunction.getTerms().get(0);
 			if (baseParameter instanceof Constant) {
 				/*
