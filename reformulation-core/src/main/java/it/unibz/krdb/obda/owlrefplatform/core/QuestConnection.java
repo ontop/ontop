@@ -49,7 +49,7 @@ public class QuestConnection implements OBDAConnection {
 	}
 
 	public String getDriverName() throws SQLException {
-		return conn.getMetaData().getDatabaseProductVersion();
+		return conn.getMetaData().getDatabaseProductName();
 	}
 	
 	@Override

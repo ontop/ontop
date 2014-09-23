@@ -30,6 +30,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
@@ -323,7 +324,7 @@ public class JDBCConnectionManager {
 	 * 
 	 * Only retrieves metadata for the tables listed
 	 * 
-	 * Future plan to retrive all tables when this list is empty?
+	 * Future plan to retrieve all tables when this list is empty?
 	 * 
 	 * @param tables 
 	 * @param lowerCaseId: Decides whether casing of unquoted object identifiers should be changed
@@ -382,7 +383,6 @@ public class JDBCConnectionManager {
 			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
 
 			TableDefinition td = new TableDefinition(tableGivenName);
-//			TableDefinition td = new TableDefinition(tblName);
 
 			try {
 				rsColumns = md.getColumns(null, tableSchema, tblName, null);
@@ -390,13 +390,11 @@ public class JDBCConnectionManager {
 					continue;
 				}
 				for (int pos = 1; rsColumns.next(); pos++) {
-					
-					// Print JDBC metadata returned by the driver, enable for debugging
-					int metadataCount = rsColumns.getMetaData().getColumnCount();
-					for (int j = 1; j < metadataCount+1; j++) {
-						String columnName = rsColumns.getMetaData().getColumnName(j);
-						log.debug("Column={} Value={}", columnName, rsColumns.getString(columnName));
-					}
+		
+					/**
+					 * Print JDBC metadata returned by the driver, enabled in debug mode
+					 */
+					displayColumnNames(md, conn, rsColumns, tableSchema, tblName);
 					
 					
 					final String columnName = rsColumns.getString("COLUMN_NAME");
@@ -434,6 +432,60 @@ public class JDBCConnectionManager {
 		return metadata;
 	}
 
+	/**
+	 * Prints column names of a given table.
+     *
+	 * By default, uses the metadata provided by the JDBC.
+	 * 
+	 */
+	private static void displayColumnNames(DatabaseMetaData dbMetadata, 
+			Connection connection, ResultSet rsColumns, 
+			String tableSchema, String tableName) throws SQLException {
+		
+		/**
+		 * Special case: DB2
+		 */
+		if (dbMetadata.getDatabaseProductName().contains("DB2")) {
+			displayDB2ColumnNames(connection, tableSchema, tableName);
+			return;
+		}
+		
+		/**
+		 * Generic procedure based on JDBC
+		 */
+		ResultSetMetaData columnMetadata = rsColumns.getMetaData();
+		int metadataCount = columnMetadata.getColumnCount();
+		
+			for (int j = 1; j < metadataCount+1; j++) {
+			    String columnName = columnMetadata.getColumnName(j);
+			    String value = rsColumns.getString(columnName);
+			    log.debug("Column={} Value={}", columnName, value);
+			}
+	}
+	
+	/**
+	 * Alternative solution for DB2 to print column names
+	 * about a given table.
+     *
+     * Queries directly the system table SysCat.Columns.
+	 */
+	private static void displayDB2ColumnNames(Connection connection, 
+			String tableSchema, String tableName) throws SQLException {
+		Statement st = connection.createStatement();
+        String sqlQuery = "SELECT colname, typename \n FROM SysCat.Columns \n" +
+                String.format("WHERE tabname = '%s' AND tabschema = '%s'", tableName, tableSchema);
+        st.execute(sqlQuery);
+        ResultSet results = st.getResultSet();
+
+        while(results.next()) {
+            log.debug("Column={} Value={}", results.getString("colname"), results.getString("typename"));
+        }
+        st.close();
+	}
+	
+	
+	
+	
 	/**
 	 * Retrieve metadata for SQL Server database engine
 	 */
