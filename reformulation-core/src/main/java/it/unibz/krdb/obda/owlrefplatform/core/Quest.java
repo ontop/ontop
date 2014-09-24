@@ -776,7 +776,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/***
 			 * T-Mappings and Fact mappings
 			 */
-			boolean optimizeMap = true;
+
 
 			if ((aboxMode.equals(QuestConstants.VIRTUAL))) {
 				log.debug("Original mapping size: {}", unfolder.getRules().size());
@@ -790,7 +790,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 // Adding ontology assertions (ABox) as rules (facts, head with no body).
 				unfolder.addABoxAssertionsAsFacts(inputTBox.getABox());
 				
-				unfolder.applyTMappings(optimizeMap, reformulationReasoner, true);
+				unfolder.applyTMappings(reformulationReasoner, true);
 				
 				Ontology aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reformulationReasoner);	
 				sigma.addEntities(aboxDependencies.getVocabulary());
@@ -831,16 +831,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			setupRewriter(reasoner, sigma);
 
 
-			if (optimizeMap) {
+			/*if (optimizeMap)*/ {
 				Ontology saturatedSigma = sigma.clone();
 				saturatedSigma.saturate();
 				
 				List<CQIE> sigmaRules = createSigmaRules(saturatedSigma);
 				sigmaRulesIndex = createSigmaRulesIndex(sigmaRules);				
 			}
-			else {
-				sigmaRulesIndex = new HashMap<Predicate, List<CQIE>>();
-			}
+			//else {
+			//	sigmaRulesIndex = new HashMap<Predicate, List<CQIE>>();
+			//}
 			
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
