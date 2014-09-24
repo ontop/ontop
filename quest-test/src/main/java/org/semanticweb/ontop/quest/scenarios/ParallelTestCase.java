@@ -2,6 +2,7 @@ package org.semanticweb.ontop.quest.scenarios;
 
 
 import junit.framework.TestCase;
+import org.junit.Ignore;
 
 /**
  * This class allows to separate the scenario
@@ -11,6 +12,7 @@ import junit.framework.TestCase;
  * (used for thread and used for launching a testCase).
  *
  */
+@Ignore
 public class ParallelTestCase extends TestCase {
 
     private final QuestParallelScenario scenario;

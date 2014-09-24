@@ -3,6 +3,7 @@ package org.semanticweb.ontop.quest.scenarios;
 
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.junit.Ignore;
 import org.openrdf.model.URI;
 import org.openrdf.query.*;
 import org.openrdf.repository.Repository;
@@ -17,6 +18,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+@Ignore
 public class ParallelScenarioTest extends TestCase {
     private static final Logger LOGGER = LoggerFactory.getLogger(QuestParallelScenario.class);
 
