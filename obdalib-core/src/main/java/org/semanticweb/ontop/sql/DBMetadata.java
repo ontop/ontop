@@ -92,7 +92,15 @@ public class DBMetadata implements Serializable {
                       boolean storesLowerCaseQuotedIdentifiers, boolean storesMixedCaseQuotedIdentifiers,
                       boolean storesMixedCaseIdentifiers, boolean storesUpperCaseQuotedIdentifiers,
                       boolean storesUpperCaseIdentifiers) {
-        this.schema = new HashMap<>(schema);
+        this.schema = new HashMap<>();
+
+        /*
+         * DataDefinition is mutable so should be cloned.
+         */
+        for (Map.Entry<String, DataDefinition> entry: schema.entrySet()) {
+            this.schema.put(entry.getKey(), entry.getValue().cloneDefinition());
+        }
+
         this.driverName = driverName;
         this.databaseProductName = databaseProductName;
         this.storesLowerCaseIdentifiers = storesLowerCaseIdentifiers;
