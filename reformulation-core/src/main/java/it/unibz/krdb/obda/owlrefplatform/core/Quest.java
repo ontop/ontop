@@ -454,6 +454,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			Class.forName(driver);
 		} catch (ClassNotFoundException e1) {
 			// Does nothing because the SQLException handles this problem also.
+			log.error("connect():Error loading the driver");
 		}
 		localConnection = DriverManager.getConnection(url, username, password);
 
@@ -1152,9 +1153,20 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		// url = url + "?relaxAutoCommit=true";
 		// }
 		try {
+//			/*
+//			 * Checking if the driver has already been loaded
+//			 */
+//			java.lang.reflect.Method m = ClassLoader.class.getDeclaredMethod("findLoadedClass", new Class[] { String.class });
+//	        m.setAccessible(true);
+//	        ClassLoader cl = ClassLoader.getSystemClassLoader();
+//	        Object test1 = m.invoke(cl, "it.unibz.krdb.obda.owlrefplatform.core.Quest$"+driver);
+//	        System.out.println(test1 != null);
+////	        
+	        
 			Class.forName(driver);
 		} catch (ClassNotFoundException e1) {
-			log.debug(e1.getMessage());
+			log.error("getSQLConnection():Error loading the driver");
+			log.error(e1.getMessage());
 		}
 		try {
 			conn = DriverManager.getConnection(url, username, password);
@@ -1191,6 +1203,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public QuestConnection getConnection() throws OBDAException {
 
 		return new QuestConnection(this, getSQLPoolConnection());
+	}
+	
+	public DBMetadata getMetaData() {
+		return metadata;
 	}
 
 	public UriTemplateMatcher getUriTemplateMatcher() {

@@ -93,15 +93,13 @@ public class QuestResultset implements TupleResultSet {
 		DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
 		symbol.setDecimalSeparator('.');
 		formatter.setDecimalFormatSymbols(symbol);
-		try {
-			 QuestConnection connection = st.questInstance.getConnection();
-			 vendor = connection.getDriverName();
-			 isOracle = vendor.startsWith("Oracle");
+		
+//			 QuestConnection connection = st.questInstance.getConnection();
+			 vendor =  st.questInstance.getMetaData().getDriverName();
+			 isOracle = vendor.contains("Oracle");
              isMsSQL = vendor.contains("SQL Server");
-			 connection.close();
-		} catch (SQLException e) {
-			throw new OBDAException(e);
-		}					
+//			 connection.close();
+						
 
 
 	}

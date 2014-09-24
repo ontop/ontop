@@ -47,10 +47,6 @@ public class QuestConnection implements OBDAConnection {
 		this.conn = connection;
 		isClosed = false;
 	}
-
-	public String getDriverName() throws SQLException {
-		return conn.getMetaData().getDatabaseProductName();
-	}
 	
 	@Override
 	public void close() throws OBDAException {
