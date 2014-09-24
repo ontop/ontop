@@ -52,7 +52,7 @@ public class DBMetadata implements Serializable {
 
 	private static final long serialVersionUID = -806363154890865756L;
 
-	private HashMap<String, DataDefinition> schema = new HashMap<String, DataDefinition>();
+	private Map<String, DataDefinition> schema;
 
 	private String driverName;
 	private String databaseProductName;
@@ -81,10 +81,11 @@ public class DBMetadata implements Serializable {
 	 *            The database metadata.
 	 */
 	public DBMetadata(DatabaseMetaData md) {
-		load(md);
+		this.schema = new HashMap<>();
+        load(md);
 	}
 
-    protected DBMetadata(HashMap<String, DataDefinition> schema,
+    protected DBMetadata(Map<String, DataDefinition> schema,
                       String driverName, String databaseProductName, boolean storesLowerCaseIdentifiers,
                       boolean storesLowerCaseQuotedIdentifiers, boolean storesMixedCaseQuotedIdentifiers,
                       boolean storesMixedCaseIdentifiers, boolean storesUpperCaseQuotedIdentifiers,
@@ -131,7 +132,7 @@ public class DBMetadata implements Serializable {
      * @return
      */
     public DBMetadata clone() {
-        return new DBMetadata(this.schema, driverName, databaseProductName, storesLowerCaseIdentifiers, storesLowerCaseQuotedIdentifiers,
+        return new DBMetadata(schema, driverName, databaseProductName, storesLowerCaseIdentifiers, storesLowerCaseQuotedIdentifiers,
                 storesMixedCaseQuotedIdentifiers, storesMixedCaseIdentifiers, storesUpperCaseQuotedIdentifiers, storesUpperCaseIdentifiers);
     }
 

@@ -775,11 +775,19 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			JDBCUtility jdbcutil = new JDBCUtility(parameter);
 
 			if (isSemanticIdx) {
-                dataSourceQueryGenerator = new SQLGenerator(metadata.clone(), jdbcutil,	sqladapter, sqlGenerateReplace,
+                /*
+                 * We do not clone metadata here but because it will be updated during
+                 * the repository setup.
+                 *
+                 * However, please note that SQL Generator will never be used directly
+                 * but cloned for each QuestStatement.
+                 * When cloned, metadata is also cloned, so it should be "safe".
+                 */
+                dataSourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,	sqladapter, sqlGenerateReplace,
                         true, uriRefIds);
 			}
             else {
-                dataSourceQueryGenerator = new SQLGenerator(metadata.clone(), jdbcutil,	sqladapter, sqlGenerateReplace);
+                dataSourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,	sqladapter, sqlGenerateReplace);
             }
 
 			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
