@@ -50,7 +50,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 public class SesameVirtualRepo extends SesameAbstractRepo {
 
 	private QuestDBVirtualStore virtualStore;
-	private QuestDBConnection questDBConn;
 
 	public SesameVirtualRepo(String name, String obdaFile, boolean existential, String rewriting)
 			throws Exception {
@@ -201,9 +200,8 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	public QuestDBConnection getQuestConnection() throws OBDAException {
 		if(!super.isinitialized)
 			throw new Error("The SesameVirtualRepo must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
-		
-		questDBConn = this.virtualStore.getConnection();
-		return questDBConn;
+
+        return virtualStore.getConnection();
 	}
 
 	@Override
@@ -218,12 +216,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	@Override
 	public void shutDown() throws RepositoryException {
 		super.shutDown();
-		try {
-			questDBConn.close();
-			virtualStore.close();
-		} catch (OBDAException e) {
-			e.printStackTrace();
-		}
+		virtualStore.close();
 	}
 
 	public String getType() {

@@ -20,6 +20,10 @@ package org.semanticweb.ontop.sql;
  * #L%
  */
 
+import org.semanticweb.ontop.sql.api.Attribute;
+
+import java.util.Map;
+
 public class ViewDefinition extends DataDefinition {
 
 
@@ -37,9 +41,19 @@ public class ViewDefinition extends DataDefinition {
 	public ViewDefinition(String name) {
 		super(name);
 	}
-	
 
-	@Deprecated
+    public ViewDefinition(String name, Map<Integer, Attribute> attributes, String statement) {
+        super(name, attributes);
+        this.statement = statement;
+    }
+
+    @Override
+    public DataDefinition cloneDefinition() {
+        return new ViewDefinition(name, attributes, statement);
+    }
+
+
+    @Deprecated
 	public void copy(String statement) {
 		this.statement = statement;
 	}

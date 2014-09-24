@@ -23,16 +23,20 @@ package org.semanticweb.ontop.sql;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.semanticweb.ontop.sql.api.Attribute;
 
+/**
+ * TODO: see if we can make it immutable so that it can be shared between threads.
+ */
 public abstract class DataDefinition implements Serializable {
 
 	private static final long serialVersionUID = 212770563440334334L;
 
 	protected String name;
 
-	protected HashMap<Integer, Attribute> attributes = new HashMap<Integer, Attribute>();
+	protected Map<Integer, Attribute> attributes = new HashMap<Integer, Attribute>();
 
 	public DataDefinition() { // TODO Remove later! The attribute name should be mandatory and cannot be changed!
 		// NO-OP
@@ -41,6 +45,16 @@ public abstract class DataDefinition implements Serializable {
 	public DataDefinition(String name) {
 		this.name = name;
 	}
+
+    protected DataDefinition(String name, Map<Integer, Attribute> attributes) {
+        this.name = name;
+        this.attributes = new HashMap<>(attributes);
+    }
+
+    /**
+     * This method should be overwritten by subclasses
+     */
+    abstract public DataDefinition cloneDefinition();
 
 	public void setName(String name) { // TODO Remove later! The attribute name should be mandatory and cannot be changed!
 		this.name = name;

@@ -34,8 +34,17 @@ public class TableDefinition extends DataDefinition {
 	public TableDefinition(String name) {
 		super(name);
 	}
-	
-	public List<Attribute> getPrimaryKeys() {
+
+    public TableDefinition(String name, Map<Integer, Attribute> attributes) {
+        super(name, attributes);
+    }
+
+    @Override
+    public DataDefinition cloneDefinition() {
+        return new TableDefinition(name, attributes);
+    }
+
+    public List<Attribute> getPrimaryKeys() {
 		List<Attribute> primaryKeys = new ArrayList<Attribute>();
 		for (Attribute attr : attributes.values()) {
 			if (attr.isPrimaryKey()) {

@@ -110,7 +110,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
     private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
-	private TermComparator comparator = new TermComparator();
+	private final TermComparator comparator = new TermComparator();
 
 	private UriTemplateMatcher uriTemplateMatcher;
 
@@ -124,8 +124,6 @@ public class SparqlAlgebraToDatalogTranslator {
 	public void setTemplateMatcher(UriTemplateMatcher templateMatcher) {
 		uriTemplateMatcher = templateMatcher;
 	}
-	
-	
 
 	protected static org.slf4j.Logger log = LoggerFactory
 			.getLogger(SparqlAlgebraToDatalogTranslator.class);
