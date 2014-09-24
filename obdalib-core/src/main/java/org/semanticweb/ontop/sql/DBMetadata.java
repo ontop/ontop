@@ -47,6 +47,8 @@ import org.semanticweb.ontop.sql.api.ParsedSQLQuery;
  * view definitions, table definitions, attributes of DB tables, etc.
  * @author KRDB
  *
+ * TODO: see if we can make it immutable so that it can be shared between threads.
+ *
  */
 public class DBMetadata implements Serializable {
 
@@ -69,7 +71,7 @@ public class DBMetadata implements Serializable {
 	 * Constructs a blank metadata. Use only for testing purpose.
 	 */
 	public DBMetadata() {
-		// NO-OP
+        this.schema = new HashMap<>();
 	}
 
 	/**
