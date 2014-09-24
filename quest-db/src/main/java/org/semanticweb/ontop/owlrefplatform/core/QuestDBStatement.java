@@ -108,17 +108,20 @@ public class QuestDBStatement implements OBDAStatement {
 		String pathstr = rdffile.toString();
 		int dotidx = pathstr.lastIndexOf('.');
 		String ext = pathstr.substring(dotidx);
+
+        Quest questInstance = st.getQuestInstance();
+
 		int result = -1;
 		try {
 			if (ext.toLowerCase().equals(".owl")) {
 				OWLOntology owlontology = man.loadOntologyFromOntologyDocument(IRI.create(rdffile));
 				Set<OWLOntology> ontos = man.getImportsClosure(owlontology);
 				OWLAPI3ABoxIterator aBoxIter = 
-					new OWLAPI3ABoxIterator(ontos, st.questInstance.getEquivalenceMap().getInternalMap());
+					new OWLAPI3ABoxIterator(ontos, questInstance.getEquivalenceMap().getInternalMap());
 				result = st.insertData(aBoxIter, useFile, commit, batch);
 			} else if (ext.toLowerCase().equals(".nt")) {
 				NTripleAssertionIterator it = 
-					new NTripleAssertionIterator(rdffile, st.questInstance.getEquivalenceMap());
+					new NTripleAssertionIterator(rdffile, questInstance.getEquivalenceMap());
 				result = st.insertData(it, useFile, commit, batch);
 			}
 			return result;
@@ -269,11 +272,13 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	public String getRewriting(String query) throws Exception {
+
+        Quest questInstance = st.getQuestInstance();
 		
 		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 		ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
 		
-		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.questInstance.getUriTemplateMatcher());
+		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(questInstance.getUriTemplateMatcher());
 		
 		LinkedList<String> signatureContainer = new LinkedList<String>();
 		tr.getSignature(pq, signatureContainer);

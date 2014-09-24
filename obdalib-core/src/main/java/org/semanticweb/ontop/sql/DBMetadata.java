@@ -47,12 +47,14 @@ import org.semanticweb.ontop.sql.api.ParsedSQLQuery;
  * view definitions, table definitions, attributes of DB tables, etc.
  * @author KRDB
  *
+ * TODO: see if we can make it immutable so that it can be shared between threads.
+ *
  */
 public class DBMetadata implements Serializable {
 
 	private static final long serialVersionUID = -806363154890865756L;
 
-	private HashMap<String, DataDefinition> schema = new HashMap<String, DataDefinition>();
+	private Map<String, DataDefinition> schema;
 
 	private String driverName;
 	private String databaseProductName;
@@ -69,7 +71,7 @@ public class DBMetadata implements Serializable {
 	 * Constructs a blank metadata. Use only for testing purpose.
 	 */
 	public DBMetadata() {
-		// NO-OP
+        this.schema = new HashMap<>();
 	}
 
 	/**
@@ -81,10 +83,35 @@ public class DBMetadata implements Serializable {
 	 *            The database metadata.
 	 */
 	public DBMetadata(DatabaseMetaData md) {
-		load(md);
+		this.schema = new HashMap<>();
+        load(md);
 	}
 
-	/**
+    protected DBMetadata(Map<String, DataDefinition> schema,
+                      String driverName, String databaseProductName, boolean storesLowerCaseIdentifiers,
+                      boolean storesLowerCaseQuotedIdentifiers, boolean storesMixedCaseQuotedIdentifiers,
+                      boolean storesMixedCaseIdentifiers, boolean storesUpperCaseQuotedIdentifiers,
+                      boolean storesUpperCaseIdentifiers) {
+        this.schema = new HashMap<>();
+
+        /*
+         * DataDefinition is mutable so should be cloned.
+         */
+        for (Map.Entry<String, DataDefinition> entry: schema.entrySet()) {
+            this.schema.put(entry.getKey(), entry.getValue().cloneDefinition());
+        }
+
+        this.driverName = driverName;
+        this.databaseProductName = databaseProductName;
+        this.storesLowerCaseIdentifiers = storesLowerCaseIdentifiers;
+        this.storesLowerCaseQuotedIdentifiers = storesLowerCaseQuotedIdentifiers;
+        this.storesMixedCaseQuotedIdentifiers = storesMixedCaseQuotedIdentifiers;
+        this.storesMixedCaseIdentifiers = storesMixedCaseIdentifiers;
+        this.storesUpperCaseQuotedIdentifiers = storesUpperCaseQuotedIdentifiers;
+        this.storesUpperCaseIdentifiers = storesUpperCaseIdentifiers;
+    }
+
+    /**
 	 * Load some general information about the database metadata.
 	 * 
 	 * @param md
@@ -108,6 +135,16 @@ public class DBMetadata implements Serializable {
 					"Failed on importing database metadata!\n" + e.getMessage());
 		}
 	}
+
+    /**
+     * DBMetadata is not immutable so it should not be shared between multiple threads
+     *
+     * @return
+     */
+    public DBMetadata clone() {
+        return new DBMetadata(schema, driverName, databaseProductName, storesLowerCaseIdentifiers, storesLowerCaseQuotedIdentifiers,
+                storesMixedCaseQuotedIdentifiers, storesMixedCaseIdentifiers, storesUpperCaseQuotedIdentifiers, storesUpperCaseIdentifiers);
+    }
 
 	/**
 	 * Inserts a new data definition to this meta data object. The name is

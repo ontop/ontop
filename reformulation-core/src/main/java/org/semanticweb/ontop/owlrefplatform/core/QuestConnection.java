@@ -125,7 +125,7 @@ public class QuestConnection implements OBDAConnection {
 
 	@Override
 	public boolean isReadOnly() throws OBDAException {
-		if (this.questinstance.dataRepository == null)
+		if (this.questinstance.getDataRepository() == null)
 			return true;
 		try {
 			return conn.isReadOnly();

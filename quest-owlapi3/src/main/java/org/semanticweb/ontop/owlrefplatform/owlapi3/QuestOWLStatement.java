@@ -52,6 +52,7 @@ import org.semanticweb.ontop.ontology.Description;
 import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlapi3.OntopOWLException;
+import org.semanticweb.ontop.owlrefplatform.core.Quest;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
@@ -395,7 +396,8 @@ public class QuestOWLStatement {
 			//Query jenaquery = QueryFactory.create(query);
 			QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 			ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
-			SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.questInstance.getUriTemplateMatcher());
+            Quest questInstance = st.getQuestInstance();
+			SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(questInstance.getUriTemplateMatcher());
 
 			LinkedList<String> signatureContainer = new LinkedList<String>();
 			tr.getSignature(pq, signatureContainer);

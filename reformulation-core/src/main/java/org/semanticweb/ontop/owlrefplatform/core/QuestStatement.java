@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
+import com.google.common.collect.ArrayListMultimap;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
@@ -64,7 +65,6 @@ import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 //import com.hp.hpl.jena.query.Query;
@@ -77,13 +77,13 @@ import com.google.common.collect.Multimap;
  */
 public class QuestStatement implements OBDAStatement {
 
+    private static final boolean ALLOW_QUERY_CACHING = true;
+
 	private QueryRewriter rewriter = null;
 
 	private SQLQueryGenerator querygenerator = null;
 
 	private QueryVocabularyValidator validator = null;
-
-	private OBDAModel unfoldingOBDAModel = null;
 
 	private boolean canceled = false;
 	
@@ -97,13 +97,11 @@ public class QuestStatement implements OBDAStatement {
 
 	private QuestConnection conn;
 
-	public Quest questInstance;
+	private final Quest questInstance;
 
 	private static Logger log = LoggerFactory.getLogger(QuestStatement.class);
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-
-	Thread runningThread = null;
 
 	private QueryExecutionThread executionthread;
 
@@ -114,8 +112,6 @@ public class QuestStatement implements OBDAStatement {
 	final Map<String, String> querycache;
 
 	final Map<String, List<String>> signaturecache;
-
-	//private Map<String, Query> jenaQueryCache;
 	
 	private Map<String, ParsedQuery> sesameQueryCache;
 
@@ -126,6 +122,14 @@ public class QuestStatement implements OBDAStatement {
 	final Map<String, Boolean> isdescribecache;
 
 	final SparqlAlgebraToDatalogTranslator translator;
+
+    /**
+     * Index function symbols (predicate) that have multiple types.
+     * Such predicates should be managed carefully. See DatalogUnfolder.pushTypes() for more details.
+     *
+     * Not that this index may be modified by the DatalogUnfolder.
+     */
+    private Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex = ArrayListMultimap.create();
 	
 	SesameConstructTemplate templ = null;
 
@@ -151,15 +155,18 @@ public class QuestStatement implements OBDAStatement {
 		this.isconstructcache = questinstance.getIsConstructCache();
 		this.isdescribecache = questinstance.getIsDescribeCache();
 
-		this.repository = questinstance.dataRepository;
+		this.repository = questinstance.getDataRepository();
 		this.conn = conn;
-		this.rewriter = questinstance.rewriter;
-		// this.unfoldingmechanism = questinstance.unfolder;
-		this.querygenerator = questinstance.datasourceQueryGenerator;
+		this.rewriter = questinstance.getRewriter();
+		this.querygenerator = questinstance.cloneDataSourceQueryGenerator();
 
 		this.sqlstatement = st;
-		this.validator = questinstance.vocabularyValidator;
+		this.validator = questinstance.getVocabularyValidator();
 	}
+
+    public Quest getQuestInstance() {
+        return questInstance;
+    }
 
 	private class QueryExecutionThread extends Thread {
 
@@ -452,14 +459,14 @@ public class QuestStatement implements OBDAStatement {
 			//TODO: cant we use here QuestInstance???
 
 			
-			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiplePredIdx);
+			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
 
 			if (questInstance.isSemIdx()==true){
-				questInstance.multiplePredIdx = questInstance.unfolder.processMultipleTemplatePredicates();
+				multiTypedFunctionSymbolIndex = questInstance.copyMultiTypedFunctionSymbolIndex();
 			}
 
 			//Flattening !!
-			program = unfolder.unfold(program, "ans1",QuestConstants.BUP,false, questInstance.multiplePredIdx);
+			program = unfolder.unfold(program, "ans1",QuestConstants.BUP,false, multiTypedFunctionSymbolIndex);
 
 			log.debug("Enforcing equalities...");
 			for (CQIE rule: program.getRules()){
@@ -493,10 +500,11 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Start the partial evaluation process...");
 
-		DatalogUnfolder unfolder = (DatalogUnfolder) questInstance.unfolder.getDatalogUnfolder();
+		DatalogUnfolder unfolder = (DatalogUnfolder) questInstance.getQuestUnfolder().getDatalogUnfolder();
 		
 		//This instnce of the unfolder is carried from Quest, and contains the mappings.
-		DatalogProgram unfolding = unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true,questInstance.multiplePredIdx);
+		DatalogProgram unfolding = unfolder.unfold((DatalogProgram) query, "ans1",QuestConstants.BUP, true,
+                multiTypedFunctionSymbolIndex);
 		
 		log.debug("Partial evaluation: \n{}", unfolding);
 
@@ -512,7 +520,7 @@ public class QuestStatement implements OBDAStatement {
 		
 		// PUSH TYPE HERE
 		log.debug("Pushing types...");
-        unfolding = pushTypes(unfolding, unfolder);
+        unfolding = pushTypes(unfolding, unfolder, multiTypedFunctionSymbolIndex);
 		
 		
 		log.debug("Pulling out equalities...");
@@ -534,7 +542,8 @@ public class QuestStatement implements OBDAStatement {
      * @param unfolder
      * @return the updated Datalog program
      */
-    private DatalogProgram pushTypes(DatalogProgram datalogProgram, DatalogUnfolder unfolder) {
+    private DatalogProgram pushTypes(DatalogProgram datalogProgram, DatalogUnfolder unfolder,
+                                     Multimap<Predicate,Integer> multiTypedFunctionSymbolMap) {
         boolean canPush = true;
 
         /**
@@ -546,7 +555,6 @@ public class QuestStatement implements OBDAStatement {
          *
          * (former explanation :  "See LeftJoin3Virtual. Problems with the Join.")
          */
-        Multimap<Predicate,Integer> multiTypedFunctionSymbolMap = unfolder.getMultiplePredList();
         if (!multiTypedFunctionSymbolMap.isEmpty()) {
             DatalogDependencyGraphGenerator dependencyGraph = new DatalogDependencyGraphGenerator(datalogProgram.getRules());
 
@@ -561,7 +569,7 @@ public class QuestStatement implements OBDAStatement {
         }
 
         if (canPush) {
-            List<CQIE> newTypedRules = unfolder.pushTypes(datalogProgram, unfolder.getMultiplePredList());
+            List<CQIE> newTypedRules = unfolder.pushTypes(datalogProgram, multiTypedFunctionSymbolMap);
 
             //TODO: can we avoid using this intermediate variable???
             datalogProgram.removeAllRules();
@@ -729,7 +737,7 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	public String getUnfolding(String strquery) throws Exception {
 		String sql = "";
-		Map<Predicate, List<CQIE>> rulesIndex = questInstance.sigmaRulesIndex;
+		Map<Predicate, List<CQIE>> rulesIndex = questInstance.getSigmaRulesIndex();
 
 		List<String> signatureContainer = new LinkedList<String>();
 		//Query query;
@@ -737,7 +745,7 @@ public class QuestStatement implements OBDAStatement {
 		
 		// Check the cache first if the system has processed the query string
 		// before
-		if (querycache.containsKey(strquery)) {
+		if (ALLOW_QUERY_CACHING && querycache.containsKey(strquery)) {
 			// Obtain immediately the SQL string from cache
 			sql = querycache.get(strquery);
 
@@ -818,9 +826,9 @@ public class QuestStatement implements OBDAStatement {
 /*
 				DatalogProgram progClone = programAfterUnfolding.clone();
 			
-				DatalogUnfolder unfolder = new DatalogUnfolder(programAfterUnfolding.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiplePredIdx);
+				DatalogUnfolder unfolder = new DatalogUnfolder(programAfterUnfolding.clone(), new HashMap<Predicate, List<Integer>>(), questInstance.multiTypedFunctionSymbolIndex);
 			
-				programAfterUnfolding = unfolder.unfold(progClone, "ans1",QuestConstants.BUP,false, questInstance.multiplePredIdx);
+				programAfterUnfolding = unfolder.unfold(progClone, "ans1",QuestConstants.BUP,false, questInstance.multiTypedFunctionSymbolIndex);
 				
 	*/			
 				

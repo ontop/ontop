@@ -61,7 +61,7 @@ public interface SQLQueryGenerator extends Serializable {
 	// public void update(PrefixManager man, DLLiterOntology onto, Set<URI>
 	// uris);
 
-	void setUriIds(Map<String, Integer> uriRefIds);
-
 	// public ViewManager getViewManager();
+
+    public SQLQueryGenerator cloneGenerator();
 }
