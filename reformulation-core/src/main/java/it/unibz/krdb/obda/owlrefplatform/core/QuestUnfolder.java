@@ -94,22 +94,22 @@ public class QuestUnfolder {
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
 
-	public void applyTMappings(/*boolean optimizeMap, */TBoxReasoner reformulationReasoner, boolean full) throws OBDAException  {
+	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
 
-		unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, /*optimizeMap,*/ full);
+		unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full);
 		
 		/*
 		 * Eliminating redundancy from the unfolding program
 		 */
-		/*if (optimizeMap)*/ {
+
 			// ROMAN: THIS HAS NO EFFECT 
-            unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
+//            unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
 			
 			List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
 			unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true, foreignKeyRules);
-		}
+
 
 		final long endTime = System.currentTimeMillis();
 

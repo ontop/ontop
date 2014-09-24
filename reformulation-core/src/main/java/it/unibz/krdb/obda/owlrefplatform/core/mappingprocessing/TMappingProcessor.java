@@ -108,10 +108,10 @@ public class TMappingProcessor {
 		 * @param newmapping
 		 *            The new mapping for A/P
 		 */
-		public void mergeMappingsWithCQC(TMappingRule newRule/*, boolean optimize*/) {
+		public void mergeMappingsWithCQC(TMappingRule newRule) {
 			
 			// Facts are just added
-			if (/*!optimize || */newRule.isFact()) {
+			if (newRule.isFact()) {
 				rules.add(newRule);
 				return;
 			}
@@ -251,7 +251,6 @@ public class TMappingProcessor {
 	 * 
 	 * @param originalMappings
 	 * @param reasoner
-	 * @param optimize (always true)
 	 * @param full (false for the Semantic Index)
 	 * @return
 	 */
