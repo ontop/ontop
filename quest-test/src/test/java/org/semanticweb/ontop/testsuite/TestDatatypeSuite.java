@@ -33,9 +33,9 @@ public class TestDatatypeSuite extends TestSuite {
 		TestSuite suite = new TestSuite("Database Data-type Test Suite");
 		suite.addTest(MysqlDatatypeTest.suite());
 		suite.addTest(PgsqlDatatypeTest.suite());
-//		extractTest.addTest(MssqlDatatypeTest.extractTest());
+//		suite.addTest(MssqlDatatypeTest.suite());
 		suite.addTest(OracleDatatypeTest.suite());
-//		extractTest.addTest(Db2DatatypeTest.extractTest());
+//		suite.addTest(Db2DatatypeTest.suite());
 		return suite;
 	}
 }
