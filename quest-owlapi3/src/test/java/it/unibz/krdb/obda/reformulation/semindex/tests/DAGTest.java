@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.HashSet;
@@ -39,7 +40,7 @@ public class DAGTest extends TestCase {
 	SemanticIndexHelper	helper	= new SemanticIndexHelper();
 
 	private void test_dag_index_nodes(String testname) throws Exception {
-		TBoxReasonerImpl reasoner = helper.load_dag(testname);
+		TBoxReasoner reasoner = helper.load_dag(testname);
 		List<List<Description>> exp_idx = helper.get_results(testname);
 
 		Set<BasicClassDescription> classes= new HashSet<BasicClassDescription>();

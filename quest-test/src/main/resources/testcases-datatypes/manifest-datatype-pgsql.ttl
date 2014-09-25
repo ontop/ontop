@@ -12,4 +12,5 @@
         <boolean/manifest-pgsql.ttl>
         #<binary/manifest-mysql.ttl>
         #<others/manifest-mysql.ttl>
+		<general/manifest-pgsql.ttl>
     ).

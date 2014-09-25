@@ -1,0 +1,34 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#
+
+[SourceDeclaration]
+sourceUri	oracleBolzano
+connectionUrl	jdbc:oracle:thin:@//10.7.20.91:1521/xe
+username	system
+password	obdaps83
+driverClass	oracle.jdbc.driver.OracleDriver
+
+[MappingDeclaration] @collection [[
+mappingId	Countries
+target		:Country-{country_name} a :Country . 
+source		select country_name FROM hr.countries
+
+mappingId	Countries2
+target		:Country2-{COL} a :Country2 . 
+source		select country_name COL FROM HR.countries
+
+mappingId	Countries3
+target		:Country3-{COL} a :Country3 . 
+source		select 'Country Name' COL FROM dual
+
+mappingId	Countries4
+target		:Country4-{col} a :Country4 . 
+source		select To_Char(country_name) "col" FROM HR.countries
+
+mappingId	Countries5
+target		:Country5-{COL} a :Country5 . 
+source		select To_Char(country_name) col FROM HR.countries
+
+
+]]
+

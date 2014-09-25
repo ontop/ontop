@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class NTripleAssertionIteratorTest extends TestCase {
 	public void testIteratorTest() throws IOException {
 		File testFile = new File("src/test/resources/test/lubm-data.n3");
 		URI fileURI = testFile.toURI();
-		NTripleAssertionIterator iterator = new NTripleAssertionIterator(fileURI, new HashMap<Predicate, Description>());
+		NTripleAssertionIterator iterator = new NTripleAssertionIterator(fileURI, EquivalenceMap.getEmptyEquivalenceMap());
 		
 		int typeCount = 0;
 		int objPropCount = 0;

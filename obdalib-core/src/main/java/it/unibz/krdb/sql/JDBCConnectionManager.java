@@ -30,12 +30,15 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -227,12 +230,12 @@ public class JDBCConnectionManager {
 	 *            The database id.
 	 * @return The database meta data object.
 	 */
-	public DBMetadata getMetaData(OBDADataSource sourceId, ArrayList<RelationJSQL> tables) throws SQLException {
+	public DBMetadata getMetaData(OBDADataSource sourceId, List<RelationJSQL> tables) throws SQLException {
 		Connection conn = getConnection(sourceId);
 		return getMetaData(conn, tables);
 	}
 	
-	public static DBMetadata getMetaData(Connection conn, ArrayList<RelationJSQL> tables) throws SQLException {
+	public static DBMetadata getMetaData(Connection conn, List<RelationJSQL> tables) throws SQLException {
 		if (tables == null || tables.isEmpty())
 			return getMetaData(conn);
 		DBMetadata metadata = null;
@@ -281,10 +284,17 @@ public class JDBCConnectionManager {
 					}
 					for (int pos = 1; rsColumns.next(); pos++) {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
-						final int dataType = rsColumns.getInt("DATA_TYPE");
+						int dataType = rsColumns.getInt("DATA_TYPE");
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
 						final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
+						
+						final String typeName = rsColumns.getString("TYPE_NAME");
+						
+						if (dataType == 91 && typeName.equals("YEAR")) {
+							dataType = -10000;
+						}
+						
 						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
 
 						// Check if the columns are unique regardless their letter cases
@@ -314,12 +324,12 @@ public class JDBCConnectionManager {
 	 * 
 	 * Only retrieves metadata for the tables listed
 	 * 
-	 * Future plan to retrive all tables when this list is empty?
+	 * Future plan to retrieve all tables when this list is empty?
 	 * 
 	 * @param tables 
 	 * @param lowerCaseId: Decides whether casing of unquoted object identifiers should be changed
 	 */
-	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, ArrayList<RelationJSQL> tables, int caseIds) throws SQLException {
+	private static DBMetadata getOtherMetaData(DatabaseMetaData md, Connection conn, List<RelationJSQL> tables, int caseIds) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
 		Statement stmt = null;
 		
@@ -373,7 +383,6 @@ public class JDBCConnectionManager {
 			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
 
 			TableDefinition td = new TableDefinition(tableGivenName);
-//			TableDefinition td = new TableDefinition(tblName);
 
 			try {
 				rsColumns = md.getColumns(null, tableSchema, tblName, null);
@@ -381,12 +390,30 @@ public class JDBCConnectionManager {
 					continue;
 				}
 				for (int pos = 1; rsColumns.next(); pos++) {
+		
+					/**
+					 * Print JDBC metadata returned by the driver, enabled in debug mode
+					 */
+					displayColumnNames(md, conn, rsColumns, tableSchema, tblName);
+					
+					
 					final String columnName = rsColumns.getString("COLUMN_NAME");
-					final int dataType = rsColumns.getInt("DATA_TYPE");
+					int dataType = rsColumns.getInt("DATA_TYPE");
 					final boolean isPrimaryKey = primaryKeys.contains(columnName);
 					final Reference reference = foreignKeys.get(columnName);
 					final int isNullable = rsColumns.getInt("NULLABLE");
-					td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+					
+					/***
+					 * Fix for MySQL YEAR
+					 */
+					final String typeName = rsColumns.getString("TYPE_NAME");
+					
+					if (dataType == 91 && typeName.equals("YEAR")) {
+						dataType = -10000;
+					}
+					
+					
+					td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, typeName));
 				
 					// Check if the columns are unique regardless their letter cases
 					if (!tableColumns.add(columnName.toLowerCase())) {
@@ -405,6 +432,60 @@ public class JDBCConnectionManager {
 		return metadata;
 	}
 
+	/**
+	 * Prints column names of a given table.
+     *
+	 * By default, uses the metadata provided by the JDBC.
+	 * 
+	 */
+	private static void displayColumnNames(DatabaseMetaData dbMetadata, 
+			Connection connection, ResultSet rsColumns, 
+			String tableSchema, String tableName) throws SQLException {
+		
+		/**
+		 * Special case: DB2
+		 */
+		if (dbMetadata.getDatabaseProductName().contains("DB2")) {
+			displayDB2ColumnNames(connection, tableSchema, tableName);
+			return;
+		}
+		
+		/**
+		 * Generic procedure based on JDBC
+		 */
+		ResultSetMetaData columnMetadata = rsColumns.getMetaData();
+		int metadataCount = columnMetadata.getColumnCount();
+		
+			for (int j = 1; j < metadataCount+1; j++) {
+			    String columnName = columnMetadata.getColumnName(j);
+			    String value = rsColumns.getString(columnName);
+			    log.debug("Column={} Value={}", columnName, value);
+			}
+	}
+	
+	/**
+	 * Alternative solution for DB2 to print column names
+	 * about a given table.
+     *
+     * Queries directly the system table SysCat.Columns.
+	 */
+	private static void displayDB2ColumnNames(Connection connection, 
+			String tableSchema, String tableName) throws SQLException {
+		Statement st = connection.createStatement();
+        String sqlQuery = "SELECT colname, typename \n FROM SysCat.Columns \n" +
+                String.format("WHERE tabname = '%s' AND tabschema = '%s'", tableName, tableSchema);
+        st.execute(sqlQuery);
+        ResultSet results = st.getResultSet();
+
+        while(results.next()) {
+            log.debug("Column={} Value={}", results.getString("colname"), results.getString("typename"));
+        }
+        st.close();
+	}
+	
+	
+	
+	
 	/**
 	 * Retrieve metadata for SQL Server database engine
 	 */
@@ -567,12 +648,33 @@ public class JDBCConnectionManager {
 					TableDefinition td = new TableDefinition(tblName);
 					rsColumns = md.getColumns(null, tableOwner, tblName, null);
 					
+					
+					
 					for (int pos = 1; rsColumns.next(); pos++) {
+						log.debug("=============== COLUMN METADATA ========================");
+						// Print JDBC metadata returned by the driver, enable for debugging
+						int metadataCount = rsColumns.getMetaData().getColumnCount();
+						for (int j = 1; j < metadataCount+1; j++) {
+							String columnName = rsColumns.getMetaData().getColumnName(j);
+							log.debug("Column={} Value={}", columnName, rsColumns.getString(columnName));
+						}
+						
 						final String columnName = rsColumns.getString("COLUMN_NAME");
-						final int dataType = rsColumns.getInt("DATA_TYPE");
+						int dataType = rsColumns.getInt("DATA_TYPE");
+						
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
 						final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
+						
+						/***
+						 * To fix bug in Oracle 11 and up driver retruning wrong datatype
+						 */
+						final String typeName = rsColumns.getString("TYPE_NAME");
+						
+						if (dataType == 93 && typeName.equals("DATE")) {
+							dataType = 91;
+						}
+						
 						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
 					}
 					// Add this information to the DBMetadata
@@ -605,7 +707,7 @@ public class JDBCConnectionManager {
 	 * 
 	 * @param tables 
 	 */
-	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn, ArrayList<RelationJSQL> tables) throws SQLException {
+	private static DBMetadata getOracleMetaData(DatabaseMetaData md, Connection conn, List<RelationJSQL> tables) throws SQLException {
 		DBMetadata metadata = new DBMetadata(md);
 		Statement stmt = null;
 		ResultSet resultSet = null;
@@ -667,12 +769,41 @@ public class JDBCConnectionManager {
 					rsColumns = md.getColumns(null, tableOwner, tblName, null);
 			
 					for (int pos = 1; rsColumns.next(); pos++) {
+						
+						log.debug("=============== COLUMN METADATA ========================");
+
+						// Print JDBC metadata returned by the driver, enable for debugging
+						int metadataCount = rsColumns.getMetaData().getColumnCount();
+						for (int j = 1; j < metadataCount+1; j++) {
+							String columnName = rsColumns.getMetaData().getColumnName(j);
+							log.debug("Column={} Value={}", columnName, rsColumns.getString(columnName));
+						}
+						
 						final String columnName = rsColumns.getString("COLUMN_NAME");
-						final int dataType = rsColumns.getInt("DATA_TYPE");
+						
+						//TODO Oracle bug here - wrong automatic typing - Date vs DATETIME - driver ojdbc16-11.2.0.3
+						/* Oracle returns 93 for DATE SQL types, but this corresponds to 
+						 * TIMESTAMP. This causes a wrong typing to xsd:dateTime and later
+						 * parsing errors. To avoid this bug manually type the column in the
+						 * mapping. This may be a problem of the driver, try with other version
+						 * I tried oracle thin driver ojdbc16-11.2.0.3
+						 */
+						int dataType = rsColumns.getInt("DATA_TYPE");
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
 						final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
-						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+						
+						/***
+						 * To fix bug in Oracle 11 and up driver retruning wrong datatype
+						 */
+						final String typeName = rsColumns.getString("TYPE_NAME");
+						
+						if (dataType == 93 && typeName.equals("DATE")) {
+							dataType = 91;
+						}
+						
+						
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, typeName));
 					}
 					// Add this information to the DBMetadata
 					metadata.add(td);

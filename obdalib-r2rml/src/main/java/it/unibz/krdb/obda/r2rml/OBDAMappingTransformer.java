@@ -42,15 +42,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.xml.datatype.DatatypeFactory;
+
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 
 import eu.optique.api.mapping.LogicalTable;
@@ -74,6 +73,8 @@ public class OBDAMappingTransformer {
 	private ValueFactory vf;
 	private OWLOntology ontology;
 	private Set<OWLObjectProperty> objectProperties;
+    private Set<OWLDataProperty> dataProperties;
+
 	
 	public OBDAMappingTransformer() {
 		this.vf = new ValueFactoryImpl();
@@ -334,7 +335,8 @@ public class OBDAMappingTransformer {
 			
 			IRI propname = IRI.create(predURIString);
 			OWLDataFactory factory =  OWLManager.getOWLDataFactory();
-			OWLObjectProperty prop = factory.getOWLObjectProperty(propname);
+			OWLObjectProperty objectProperty = factory.getOWLObjectProperty(propname);
+            OWLDataProperty dataProperty = factory.getOWLDataProperty(propname);
 			
 			if (pred.isClass() && !predURIString.equals(OBDAVocabulary.RDF_TYPE)) {
 				// The term is actually a SubjectMap (class)
@@ -359,34 +361,43 @@ public class OBDAMappingTransformer {
 				//add object declaration to predObj node
 				//term 0 is always the subject, we are interested in term 1
 				Term object = func.getTerm(1);
-				
-				if(func.toString().contains("dateBaaLicenseeValidTo"))
-					System.out.print("found you");
-				
-
-				if (object instanceof Variable){
-					if(ontology!= null && objectProperties.contains(prop)){
+								
+ 				if (object instanceof Variable){ //we create an rr:column
+					if(ontology!= null && objectProperties.contains(objectProperty)){
 						obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
 						obm.setTermType(R2RMLVocabulary.iri);
-					}
-					else{
-					obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
-					}
-					//we add the predicate object map in case of literal
+					} else {
+                        if (ontology != null && dataProperties.contains(dataProperty)) {
+
+                            obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
+                            //set the datatype for the typed literal
+
+                            Set<OWLDataRange> ranges = dataProperty.getRanges(ontology);
+                            //assign the datatype if present
+                            if (ranges.size() == 1) {
+                                IRI dataRange = ranges.iterator().next().asOWLDatatype().getIRI();
+                                obm.setDatatype(vf.createURI(dataRange.toString()));
+                            }
+
+                        } else {
+                            obm = mfact.createObjectMap(TermMapType.COLUMN_VALUED, vf.createLiteral(((Variable) object).getName()).stringValue());
+                        }
+                    }
+                    //we add the predicate object map in case of literal
 					pom = mfact.createPredicateObjectMap(predM, obm);
 					tm.addPredicateObjectMap(pom);
-				} else if (object instanceof Function) {
+				} else if (object instanceof Function) { //we create a template
 					//check if uritemplate
-					Predicate objectPred = ((Function) object).getFunctionSymbol();
+ 					Predicate objectPred = ((Function) object).getFunctionSymbol();
 					if (objectPred instanceof URITemplatePredicate) {
 						String objectURI =  URITemplates.getUriTemplateString((Function)object, prefixmng);
 						//add template object
 						//statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectURI)));
 						//obm.setTemplate(mfact.createTemplate(objectURI));
 						obm = mfact.createObjectMap(mfact.createTemplate(objectURI));
-					}else if (objectPred instanceof DataTypePredicate) {
+					}else if (objectPred.isDataTypePredicate()) {
 						Term objectTerm = ((Function) object).getTerm(0);
-
+						
 						if (objectTerm instanceof Variable) {
 							//Now we add the template!!
 							String objectTemplate =  "{"+ ((Variable) objectTerm).getName() +"}" ;
@@ -395,9 +406,24 @@ public class OBDAMappingTransformer {
 							//obm.setTemplate(mfact.createTemplate(objectTemplate));
 							obm = mfact.createObjectMap(mfact.createTemplate(objectTemplate));
 							obm.setTermType(R2RMLVocabulary.literal);
-						
 							
 							
+							//check if it is not a plain literal
+							if(!objectPred.equals(OBDAVocabulary.RDFS_LITERAL)){
+								
+								//set the datatype for the typed literal								
+								obm.setDatatype(vf.createURI(objectPred.getName()));
+							}
+							else{
+								//check if the plain literal has a lang value
+								if(objectPred.getArity()==2){
+									
+									Term langTerm = ((Function) object).getTerm(1);
+									obm.setLanguageTag(langTerm.toString());
+								}
+							}
+							
+	
 							
 						} else if (objectTerm instanceof Constant) {
 							//statements.add(vf.createStatement(objNode, R2RMLVocabulary.constant, vf.createLiteral(((Constant) objectTerm).getValue())));
@@ -425,7 +451,11 @@ public class OBDAMappingTransformer {
 	public void setOntology(OWLOntology ontology) {
 		this.ontology = ontology;
 		if(ontology != null){
+            //gets all object properties from the ontology
 			objectProperties = ontology.getObjectPropertiesInSignature();
+
+            //gets all data properties from the ontology
+            dataProperties = ontology.getDataPropertiesInSignature();
 		}
 	}
 	

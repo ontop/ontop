@@ -3,7 +3,7 @@
 	<groupId>it.unibz.inf.ontop</groupId>
 	<artifactId>ontop</artifactId>
 	<packaging>pom</packaging>
-	<version>1.12.0</version>
+	<version>1.13.0</version>
 	<name>ontop</name>
 	<url>http://ontop.inf.unibz.it/</url>
 
@@ -36,7 +36,7 @@
 	<developers>
 		<developer>
 			<id>marianormuro</id>
-			<name>Mariano Rodriguez Muro</name>
+			<name>Mariano Rodriguez-Muro</name>
 		</developer>
 		<developer>
 			<id>ghxiao</id>
@@ -82,8 +82,9 @@
 		<module>quest-rdb2rdf-compliance</module>
 
 		<module>quest-test</module>
-		
-	</modules>
+        <module>ontop-cli</module>
+
+    </modules>
 
 	<profiles>
 		<profile>
@@ -314,7 +315,7 @@
 			<dependency>
     			<groupId>com.github.jsqlparser</groupId>
     			<artifactId>jsqlparser</artifactId>
-    			<version>0.9</version>
+    			<version>0.9.1</version>
 			</dependency>
 			<dependency>
     			<groupId>com.google.guava</groupId>
@@ -483,7 +484,7 @@
 			<dependency>
 				<groupId>com.ibm</groupId>
 				<artifactId>db2jcc4.jar</artifactId>
-				<version>10.1</version>
+				<version>10.1.4</version>
 			</dependency>
 			<dependency>
 				<groupId>com.h2database</groupId>

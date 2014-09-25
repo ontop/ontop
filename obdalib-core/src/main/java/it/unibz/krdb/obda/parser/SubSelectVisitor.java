@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.sql.api.SelectJSQL;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
@@ -39,6 +40,7 @@ import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.IntervalExpression;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.JdbcParameter;
+import net.sf.jsqlparser.expression.JsonExpression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
@@ -75,6 +77,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
+import net.sf.jsqlparser.expression.operators.relational.RegExpMySQLOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
@@ -98,7 +101,7 @@ public class SubSelectVisitor implements SelectVisitor, FromItemVisitor, Express
 	 * Store the table selected by the SQL query in RelationJSQL
 	 */
 	
-	private ArrayList<SelectJSQL> subSelects;
+	private List<SelectJSQL> subSelects;
 
 
 	/**
@@ -108,7 +111,7 @@ public class SubSelectVisitor implements SelectVisitor, FromItemVisitor, Express
 	 * @param unquote 
 	 * @return
 	 */
-	public ArrayList<SelectJSQL> getSubSelectList(Select select, boolean unquote) {
+	public List<SelectJSQL> getSubSelects(Select select, boolean unquote) {
 		init();
  		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -440,6 +443,22 @@ public class SubSelectVisitor implements SelectVisitor, FromItemVisitor, Express
 
 	@Override
 	public void visit(SignedExpression arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+	@Override
+	public void visit(JsonExpression arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+	@Override
+	public void visit(RegExpMySQLOperator arg0) {
 		// TODO Auto-generated method stub
 		
 	}

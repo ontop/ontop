@@ -10,7 +10,7 @@ driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Numeric Types
-target		:numeric-{id} a :Row ; :hasTinyInt {type_tinyint} ; :hasSmallInt {type_smallint} ; :hasMediumInt {type_mediumint} ; :hasInt {type_int} ; :hasBigInt {type_bigint} ; :hasDecimal {type_decimal} ; :hasFloat {type_float} ; :hasDouble {type_double} . 
+target		:numeric-{id} a :Row ; :hasTinyInt {type_tinyint} ; :hasSmallInt {type_smallint} ; :hasMediumInt {type_mediumint} ; :hasInt {type_int} ; :hasBigInt {type_bigint} ; :hasDecimal {type_decimal} ; :hasFloat {type_float} ; :hasDouble {type_double} .
 source		select id, type_tinyint, type_smallint, type_mediumint, type_int, type_bigint, type_decimal, type_float, type_double from Numerics
 
 mappingId	Character Types

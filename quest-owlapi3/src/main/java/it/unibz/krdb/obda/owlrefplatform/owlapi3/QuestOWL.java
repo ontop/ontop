@@ -41,6 +41,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.obda.utils.VersionInfo;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -175,15 +176,27 @@ public class QuestOWL extends OWLReasonerBase {
 	private QuestOWLConnection owlconn = null;
 
 	private OWLOntologyManager man;
+	
+	
+	// //////////////////////////////////////////////////////////////////////////////////////
+	//
+	//  User Constraints are primary and foreign keys not in the database 
+	//  
+	//
+	// //////////////////////////////////////////////////////////////////////////////////////
+	
+	private ImplicitDBConstraints userConstraints = null;
+	
+	/* Used to signal whether to apply the user constraints above */
+	private boolean applyUserConstraints = false;
 
-	/***
-	 * Default constructor.
+	
+	/**
+	 * Initialization code which is called from both of the two constructors. 
+	 * @param obdaModel 
+	 * 
 	 */
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences) {
-
-		super(rootOntology, configuration, bufferingMode);
-
+	private void init(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, Properties preferences){
 		pm = configuration.getProgressMonitor();
 		if (pm == null) {
 			pm = new NullReasonerProgressMonitor();
@@ -199,9 +212,33 @@ public class QuestOWL extends OWLReasonerBase {
 		extractVersion();
 		
 		prepareReasoner();
+	}
+	
+	/***
+	 * Default constructor.
+	 */
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
+			Properties preferences) {
+		super(rootOntology, configuration, bufferingMode);
+		this.init(rootOntology, obdaModel, configuration, preferences);
 
 	}
 
+	/**
+	 * This constructor is the same as the default constructor, except that extra constraints (i.e. primary and foreign keys) may be
+	 * supplied 
+	 * @param userConstraints User-supplied primary and foreign keys
+	 */
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
+			Properties preferences, ImplicitDBConstraints userConstraints) {
+		super(rootOntology, configuration, bufferingMode);
+		
+		this.userConstraints = userConstraints;
+		assert(userConstraints != null);
+		this.applyUserConstraints = true;
+		
+		this.init(rootOntology, obdaModel, configuration, preferences);
+	}
 	/**
 	 * extract version from {@link it.unibz.krdb.obda.utils.VersionInfo}, which is from the file {@code version.properties}
 	 */
@@ -267,6 +304,8 @@ public class QuestOWL extends OWLReasonerBase {
 
 		questInstance = new Quest(translatedOntologyMerge, obdaModel, preferences);
 
+		if(this.applyUserConstraints)
+			questInstance.setImplicitDBConstraints(userConstraints);
 		
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		
@@ -291,7 +330,7 @@ public class QuestOWL extends OWLReasonerBase {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
 					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure,
-							questInstance.getEquivalenceMap());
+							questInstance.getEquivalenceMap().getInternalMap());
 					int count = st.insertData(aBoxIter, 5000, 500);
 					log.debug("Inserted {} triples from the ontology.", count);
 				}
@@ -385,6 +424,19 @@ public class QuestOWL extends OWLReasonerBase {
 		return owlconn;
 	}
 
+	/**
+	 * Replaces the owl connection with a new one
+	 * Called when the user cancels a query. Easier to get a new connection, than waiting for the cancel
+	 * @return The old connection: The caller must close this connection
+	 * @throws OBDAException
+	 */
+	public QuestOWLConnection replaceConnection() throws OBDAException {
+		QuestOWLConnection oldconn = this.owlconn;
+		conn = questInstance.getNonPoolConnection();
+		owlconn = new QuestOWLConnection(conn);
+		return oldconn;
+	}
+	
 	@Override
 	public String getReasonerName() {
 		return "Quest";
@@ -461,6 +513,7 @@ public class QuestOWL extends OWLReasonerBase {
 				errorMessage = e.getMessage();
 				log.error("Could not initialize the Quest query answering engine. Answering queries will not be available.");
 				log.error(e.getMessage(), e);
+				throw e;
 			}
 
 		} catch (Exception e) {

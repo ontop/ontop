@@ -143,6 +143,8 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getFunctionLike(Term term1, Term term2);
 	
+	public Function getFunctionRegex(Term term1, Term term2, Term term3);
+	
 
 	/*
 	 * Numerical arithmethic functions
@@ -293,4 +295,14 @@ public interface OBDADataFactory extends Serializable {
 	Predicate getJoinPredicate();
 
 	Predicate getLeftJoinPredicate();
+
+	/**
+	 * @return
+	 */
+	public Predicate getDataTypePredicateDate();
+	
+	public Predicate getDataTypePredicateTime();
+
+	public Predicate getDataTypePredicateYear();
+	
 }

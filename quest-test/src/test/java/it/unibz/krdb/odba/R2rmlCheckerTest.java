@@ -71,11 +71,8 @@ public class R2rmlCheckerTest {
 	private Ontology onto;
 
 	final String owlfile = "src/test/resources/r2rml/npd-v2-ql_a.owl";
-	final String obdafile = "src/test/resources/r2rml/npd-v2-ql_a.obda";
-
-//	final String r2rmlfile = "src/test/resources/r2rml/npd-v2_uglyVersion.ttl";
-	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a_IRI.ttl";
-//	final String r2rmlfile = "src/test/resources/r2rml/npd-v2_pretty.ttl";
+    final String obdafile = "src/test/resources/r2rml/npd-v2-ql_a.obda";
+	final String r2rmlfile = "src/test/resources/r2rml/npd-v2-ql_a.ttl";
 
 	private List<Predicate> emptyConceptsObda = new ArrayList<Predicate>();
 	private List<Predicate> emptyRolesObda = new ArrayList<Predicate>();
@@ -87,7 +84,36 @@ public class R2rmlCheckerTest {
 
 	@Before
 	public void setUp() throws Exception {
+		// Loading the OWL file
+		
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		ontology = manager
+				.loadOntologyFromOntologyDocument((new File(owlfile)));
 
+		OWLAPI3Translator translator = new OWLAPI3Translator();
+
+		onto = translator.translate(ontology);
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
+				QuestConstants.FALSE);
+
+		loadOBDA(p);
+
+		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
+		String username = "fish";
+		String password = "fish";
+		String driverclass = "com.mysql.jdbc.Driver";
+
+		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
+		// String sourceUrl = "http://example.org/customOBDA";
+		URI obdaURI = new File(r2rmlfile).toURI();
+		String sourceUrl = obdaURI.toString();
+		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
+				username, password, driverclass);
+
+		loadR2rml(p, dataSource);
 	}
 
 	@After
@@ -117,35 +143,7 @@ public class R2rmlCheckerTest {
 
 	@Test
 	public void testDescriptionsCheck() throws Exception {
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager
-				.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		OWLAPI3Translator translator = new OWLAPI3Translator();
-
-		onto = translator.translate(ontology);
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
-				QuestConstants.FALSE);
-
-		loadOBDA(p);
-
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
-		String driverclass = "com.mysql.jdbc.Driver";
-
-		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-//		String sourceUrl = "http://example.org/customOBDA";
-		URI obdaURI =  new File(r2rmlfile).toURI();
-		String sourceUrl =obdaURI.toString();
-		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-				username, password, driverclass);
-
-		loadR2rml(p, dataSource);
+		
 
 		// Now we are ready for querying
 		log.debug("Comparing concepts");
@@ -179,20 +177,9 @@ public class R2rmlCheckerTest {
 	 * 
 	 * @throws Exception
 	 */
-	@Test
-	public void testOBDA() throws Exception {
+//	@Test
+	public void testOBDAEmpties() throws Exception {
 
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager
-				.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
-				QuestConstants.FALSE);
-
-		loadOBDA(p);
 
 		// Now we are ready for querying
 		conn = reasonerOBDA.getConnection();
@@ -215,32 +202,8 @@ public class R2rmlCheckerTest {
 	 * 
 	 * @throws Exception
 	 */
-	@Test
-	public void testR2rml() throws Exception {
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager
-				.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
-				QuestConstants.FALSE);
-
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
-		String driverclass = "com.mysql.jdbc.Driver";
-
-		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-
-//		String sourceUrl = "http://example.org/customOBDA";
-		URI obdaURI =  new File(r2rmlfile).toURI();
-		String sourceUrl =obdaURI.toString();
-		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-				username, password, driverclass);
-
-		loadR2rml(p, dataSource);
+//	@Test
+	public void testR2rmlEmpties() throws Exception {
 
 		// Now we are ready for querying
 		conn = reasonerR2rml.getConnection();
@@ -262,41 +225,16 @@ public class R2rmlCheckerTest {
 	 * 
 	 * @throws Exception
 	 */
-	@Test
+//	@Test
 	public void testComparesNpdQuery() throws Exception {
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager
-				.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
-				QuestConstants.FALSE);
-
-		loadOBDA(p);
-		// Now we are ready for querying
+		
+		// Now we are ready for querying obda
 		// npd query 1
 		int obdaResult = npdQuery(reasonerOBDA.getConnection());
 		// reasoner.dispose();
 
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
-		String driverclass = "com.mysql.jdbc.Driver";
 
-		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-//		String sourceUrl = "http://example.org/customOBDA";
-		URI obdaURI =  new File(r2rmlfile).toURI();
-		String sourceUrl =obdaURI.toString();
-
-		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-				username, password, driverclass);
-
-		loadR2rml(p, dataSource);
-
-		// Now we are ready for querying
+		// Now we are ready for querying r2rml
 		// npd query 1
 		int r2rmlResult = npdQuery(reasonerR2rml.getConnection());
 		
@@ -305,55 +243,50 @@ public class R2rmlCheckerTest {
 	}
 
 	/**
-	 * Compare the results of r2rml and obda files over the role <http://sws.ifi.uio.no/vocab/npd-v2#factMapURL>
+	 * Compare the results of r2rml and obda files over one role
+	 * Try <http://sws.ifi.uio.no/vocab/npd-v2#factMapURL> for the case of termtype set to IRI
+	 * Try <http://sws.ifi.uio.no/vocab/npd-v2#dateSyncNPD> or <http://sws.ifi.uio.no/vocab/npd-v2#dateBaaLicenseeValidTo>  to test typed literal
+	 * Try <http://sws.ifi.uio.no/vocab/npd-v2#sensorLength>, <http://sws.ifi.uio.no/vocab/npd-v2#wellboreHoleDiameter> or <http://sws.ifi.uio.no/vocab/npd-v2#isMultilateral> for a plain Literal
+	 *
 	 * @throws Exception
 	 */
-	@Test
+//	@Test
 	public void testOneRole() throws Exception {
-
-		// Loading the OWL file
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		ontology = manager
-				.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		OWLAPI3Translator translator = new OWLAPI3Translator();
-
-		onto = translator.translate(ontology);
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
-				QuestConstants.FALSE);
-
-		loadOBDA(p);
-
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
-		String driverclass = "com.mysql.jdbc.Driver";
-
-		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-//		String sourceUrl = "http://example.org/customOBDA";
-		URI obdaURI =  new File(r2rmlfile).toURI();
-		String sourceUrl =obdaURI.toString();
-
-		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-				username, password, driverclass);
-
-		loadR2rml(p, dataSource);
 
 		// Now we are ready for querying
 		log.debug("Comparing roles");
 
-			int roleOBDA = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#factMapURL>",
+			int roleOBDA = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>",
 					reasonerOBDA.getConnection());
-			int roleR2rml = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#factMapURL>",
+			int roleR2rml = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>",
 					reasonerR2rml.getConnection());
 
 			assertEquals(roleOBDA, roleR2rml);
 
 		
 	}
+	
+	/**
+	 * Compare the results of r2rml and obda files over one role
+	 * Added the filter to give as results only Literals
+	 * 
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void testOneRoleFilterLiterals() throws Exception {
+
+		// Now we are ready for querying
+		log.debug("Comparing roles");
+
+		int roleOBDA = runSPARQLRoleFilterQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>",reasonerOBDA.getConnection());
+		int roleR2rml = runSPARQLRoleFilterQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>", reasonerR2rml.getConnection());
+
+		assertEquals(roleOBDA, roleR2rml);
+
+	}
+	
+
 	/**
 	 * Execute Npd query 1 and give the number of results
 	 * @return 
@@ -381,6 +314,7 @@ public class R2rmlCheckerTest {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			// conn.close();
 			st.close();
@@ -397,6 +331,7 @@ public class R2rmlCheckerTest {
 	 *            quest preferences for QuestOWL, dataSource for the model
 	 */
 	private void loadR2rml(QuestPreferences p, OBDADataSource dataSource) {
+		log.info("Loading r2rml file");
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
 
@@ -422,6 +357,7 @@ public class R2rmlCheckerTest {
 
 	private void loadOBDA(QuestPreferences p) throws Exception {
 		// Loading the OBDA data
+		log.info("Loading obda file");
 		fac = OBDADataFactoryImpl.getInstance();
 		obdaModel = fac.getOBDAModel();
 
@@ -456,6 +392,7 @@ public class R2rmlCheckerTest {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			st.close();
 			// conn.close();
@@ -465,21 +402,28 @@ public class R2rmlCheckerTest {
 	}
 
 	private int runSPARQLRolesQuery(String description, QuestOWLConnection conn) throws Exception {
-		String query = "SELECT * WHERE {?x " + description + " ?y.  FILTER isLiteral(?y)}";
+		String query = "SELECT * WHERE {?x " + description + " ?y.}";
 		QuestOWLStatement st = conn.createStatement();
 		int n = 0;
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 			while (rs.nextRow()) {
-				log.debug("result : "  + rs.getOWLObject("x"));
-				log.debug("result : "  + rs.getOWLObject("y"));
+//				log.debug("result : "  + rs.getOWLObject("x"));
+//				log.debug("result : "  + rs.getOWLObject("y"));
+//				log.debug("result : "  + rs.getOWLLiteral("y"));
+				
+				if(n==0){
+					log.debug("result : "  + rs.getOWLObject("x"));
+					log.debug("result : "  + rs.getOWLObject("y"));
+				
+				}
 				n++;
 			}
-			// log.info("description: " + n);
+			
 			return n;
 
 		} catch (Exception e) {
-			assertTrue(false);
+			log.debug(e.toString());
 			throw e;
 
 		} finally {
@@ -487,12 +431,47 @@ public class R2rmlCheckerTest {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			// conn.close();
 			st.close();
 
 		}
 
+	}
+	
+	private int runSPARQLRoleFilterQuery(String description, QuestOWLConnection connection) throws OWLException {
+		String query = "SELECT * WHERE {?x " + description + " ?y. FILTER(isLiteral(?y))}";
+		QuestOWLStatement st = connection.createStatement();
+		int n = 0;
+		try {
+			QuestOWLResultSet rs = st.executeTuple(query);
+			while (rs.nextRow()) {
+				if(n==0){
+					log.debug("result : "  + rs.getOWLObject("x"));
+					log.debug("result : "  + rs.getOWLLiteral("y"));
+				
+				}
+				n++;
+			}
+			
+			return n;
+
+		} catch (Exception e) {
+			log.debug(e.toString());
+			throw e;
+
+		} finally {
+			try {
+
+			} catch (Exception e) {
+				st.close();
+				assertTrue(false);
+			}
+			// conn.close();
+			st.close();
+
+		}
 	}
 
 }

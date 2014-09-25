@@ -633,6 +633,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			Variable var = ofac.getVariable(v.getName());
 			int direction = 0;
 			if (c.isAscending()) direction = 1;
+            else direction = 2;
 			pr.getQueryModifiers().addOrderCondition(var, direction);
 		}
 		te = order.getArg(); // narrow down the query
@@ -805,6 +806,15 @@ public class SparqlAlgebraToDatalogTranslator {
 			} else if (predicateUri.equals(
 					OBDAVocabulary.XSD_STRING_URI)) {
 				predicate = OBDAVocabulary.XSD_STRING;
+			} else if (predicateUri.equals(
+					OBDAVocabulary.XSD_DATE_URI)) {
+				predicate = OBDAVocabulary.XSD_DATE;
+			}  else if (predicateUri.equals(
+					OBDAVocabulary.XSD_TIME_URI)) {
+				predicate = OBDAVocabulary.XSD_TIME;
+			} else if (predicateUri.equals(
+					OBDAVocabulary.XSD_YEAR_URI)) {
+				predicate = OBDAVocabulary.XSD_YEAR;
 			} else {
 
 				predicate = ofac.getPredicate(predicateUri, 1,
@@ -1095,6 +1105,12 @@ public class SparqlAlgebraToDatalogTranslator {
 			return ofac.getDataTypePredicateDateTime();
 		case BOOLEAN:
 			return ofac.getDataTypePredicateBoolean();
+		case DATE:
+			return ofac.getDataTypePredicateDate();
+		case TIME:
+			return ofac.getDataTypePredicateTime();
+		case YEAR:
+			return ofac.getDataTypePredicateYear();
 		default:
 			throw new RuntimeException("Unknown data type!");
 		}
@@ -1142,6 +1158,15 @@ public class SparqlAlgebraToDatalogTranslator {
 			} else if (dataTypeURI
 					.equalsIgnoreCase(OBDAVocabulary.XSD_BOOLEAN_URI)) {
 				dataType = COL_TYPE.BOOLEAN;
+			} else if (dataTypeURI
+					.equalsIgnoreCase(OBDAVocabulary.XSD_DATE_URI)) {
+				dataType = COL_TYPE.DATE;
+			} else if (dataTypeURI
+					.equalsIgnoreCase(OBDAVocabulary.XSD_TIME_URI)) {
+				dataType = COL_TYPE.TIME;
+			} else if (dataTypeURI
+					.equalsIgnoreCase(OBDAVocabulary.XSD_YEAR_URI)) {
+				dataType = COL_TYPE.YEAR;
 			} else {
 				throw new RuntimeException("Unsupported datatype: "
 						+ dataTypeURI.toString());

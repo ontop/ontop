@@ -250,6 +250,21 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public Predicate getDataTypePredicateDate() {
+		return OBDAVocabulary.XSD_DATE;
+	}
+	
+	@Override
+	public Predicate getDataTypePredicateYear() {
+		return OBDAVocabulary.XSD_YEAR;
+	}
+
+	@Override
+	public Predicate getDataTypePredicateTime() {
+		return OBDAVocabulary.XSD_TIME;
+	}
+
+	@Override
 	public Predicate getUriTemplatePredicate(int arity) {
 		return new URITemplatePredicateImpl(arity);
 	}
@@ -384,6 +399,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 	
 	@Override
+	public Function getFunctionRegex(Term term1, Term term2, Term term3) {
+		return getFunction(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3 );
+	}
+	
+	@Override
 	public Function getFunctionMinus(Term term1) {
 		return getFunction(OBDAVocabulary.MINUS, term1);
 	}
@@ -481,6 +501,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 			return getUriTemplatePredicate(1);
 		case BNODE:
 			return getBNodeTemplatePredicate(1);
+		case DATE:
+			return getDataTypePredicateDate();
+		case TIME:
+			return getDataTypePredicateTime();
+		case YEAR:
+			return getDataTypePredicateYear();
 		default:
 			throw new RuntimeException("Cannot get URI for unsupported type: " + type);
 		}
