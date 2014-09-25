@@ -12,10 +12,7 @@ import java.sql.Statement;
 public class ADPDemo {
 
   public static void main(String[] args) throws Exception {
-	  
-	  
-	  
-	  Class.forName("madgik.adp.federatedjdbc.AdpDriver");
+
 	  
 	  String conString="jdbc:adp:http://whale.di.uoa.gr:9090/datasets/npd-dataset";
 
