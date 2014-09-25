@@ -49,7 +49,7 @@ export QUEST_SESAME_DIST=QuestSesame
 export QUEST_JETTY_DIST=QuestJetty
 export OWL_API_DIST=QuestOWL
 
-export VERSION=1.12
+export VERSION=1.13
 export REVISION=0
 
 
