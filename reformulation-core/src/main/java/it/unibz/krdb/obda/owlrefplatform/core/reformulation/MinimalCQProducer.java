@@ -27,7 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class MinimalCQProducer {
-	private final TreeWitnessReasonerCache reasoner;
+	private final TreeWitnessReasonerCache reasoner;  // needs only isMoreSpecific
 	private List<Function> atoms = new LinkedList<Function>();
 	private List<Function> noCheckAtoms = new LinkedList<Function>();
 	

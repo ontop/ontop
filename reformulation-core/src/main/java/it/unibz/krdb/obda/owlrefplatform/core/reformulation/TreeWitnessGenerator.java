@@ -22,8 +22,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -44,6 +46,7 @@ public class TreeWitnessGenerator {
 	private final TreeWitnessReasonerCache reasoner;
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessGenerator.class);	
+	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
 	
 	public TreeWitnessGenerator(TreeWitnessReasonerCache reasoner, Property property, OClass filler) {
 		this.reasoner = reasoner;
@@ -110,7 +113,9 @@ public class TreeWitnessGenerator {
 							BasicClassDescription bp = i.next();
 							if ((b != bp) && (bp instanceof PropertySomeRestriction)) {
 								PropertySomeRestriction somep = (PropertySomeRestriction)bp;
-								if (bsubproperties.contains(reasoner.getProperty(somep))) {
+								Property propp = ontFactory.createProperty(somep.getPredicate(), somep.isInverse());
+								
+								if (bsubproperties.contains(propp)) {
 									i.remove();
 									modified = true;
 								}
@@ -142,8 +147,7 @@ public class TreeWitnessGenerator {
 	
 	public boolean endPointEntailsAnyOf(Set<BasicClassDescription> subc) {
 		if (existsRinv == null)
-			existsRinv = TreeWitnessReasonerCache.getOntologyFactory().
-						createPropertySomeRestriction(property.getPredicate(), !property.isInverse());	
+			existsRinv = ontFactory.createPropertySomeRestriction(property.getPredicate(), !property.isInverse());	
 		
 		return subc.contains(existsRinv) || subc.contains(filler);
 	}

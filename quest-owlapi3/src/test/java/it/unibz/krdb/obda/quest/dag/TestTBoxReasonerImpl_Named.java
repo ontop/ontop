@@ -139,6 +139,19 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 		}
 
 		@Override
+		public Set<T> getSubRepresentatives(T v) {
+			Equivalences<T> eq = reasonerDAG.getVertex(v);
+			LinkedHashSet<T> result = new LinkedHashSet<T>();
+			
+			for (Equivalences<T> e : reasonerDAG.getSub(eq)) {
+				Equivalences<T> nodes = getVertex(e.getRepresentative());
+				if (nodes != null)
+					result.add(nodes.getRepresentative());			
+			}
+			return result;
+		}		
+
+		@Override
 		public Set<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
 			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
 			
@@ -166,6 +179,6 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 			}
 			
 			return result;
-		}		
+		}
 	}
 }

@@ -58,10 +58,6 @@ import org.slf4j.LoggerFactory;
 public class TreeWitnessReasonerCache {
 	private final TBoxReasoner reasoner;
 	
-	// caching 
-	private final Map<BasicClassDescription, Set<BasicClassDescription>> subconcepts; 
-	private final Map<Property, Set<Property>> subproperties; 
-
 	// caching for predicate symbols 
 	private final Map<Predicate, Set<BasicClassDescription>> predicateSubconcepts;
 	private final Map<Predicate, Set<Property>> predicateSubproperties;
@@ -75,17 +71,12 @@ public class TreeWitnessReasonerCache {
 
 	public static final OClass owlThing = ontFactory.createClass("http://www.w3.org/TR/2004/REC-owl-semantics-20040210/#owl_Thing");	
 	
-	public static OntologyFactory getOntologyFactory() {
-		return ontFactory;
-	}
 	
 	public TreeWitnessReasonerCache(TBoxReasoner reasoner) {
 		
 		this.reasoner = reasoner;
 
 		Map<ClassDescription, TreeWitnessGenerator> gens = new HashMap<ClassDescription, TreeWitnessGenerator>();
-		subconcepts = new HashMap<BasicClassDescription, Set<BasicClassDescription>>();
-		subproperties = new HashMap<Property, Set<Property>>();
 		
 		predicateSubconcepts = new HashMap<Predicate, Set<BasicClassDescription>>();
 		predicateSubproperties = new HashMap<Predicate, Set<Property>>();
@@ -128,16 +119,7 @@ public class TreeWitnessReasonerCache {
 	 */
 	
 	public Set<BasicClassDescription> getSubConcepts(BasicClassDescription con) {
-		Set<BasicClassDescription> s = subconcepts.get(con);
-		if (s == null) {
-			Set<Equivalences<BasicClassDescription>> sub = reasoner.getClasses().getSub(reasoner.getClasses().getVertex(con));
-			s = new HashSet<BasicClassDescription>();
-			for (Equivalences<BasicClassDescription> set : sub)
-				s.add(set.getRepresentative());
-			//s = Collections.singleton(con);
-			subconcepts.put(con, s);
-		}
-		return s;
+		return reasoner.getClasses().getSubRepresentatives(con);
 	}
 
 	public Set<BasicClassDescription> getSubConcepts(Predicate pred) {
@@ -169,28 +151,11 @@ public class TreeWitnessReasonerCache {
 	 * @return the set of subproperties
 	 */
 	
-	private Set<Property> getSubProperties(Property prop) {
-		Set<Property> s = subproperties.get(prop);
-		if (s == null) {
-			Set<Equivalences<Property>> sub = reasoner.getProperties().getSub(reasoner.getProperties().getVertex(prop));
-			s = new HashSet<Property>();
-			for (Equivalences<Property> set : sub)
-				s.add(set.getRepresentative());			
-			//s = Collections.singleton(prop);
-			subproperties.put(prop, s);
-		}
-		return s;
-	}
-	
-	public Property getProperty(PropertySomeRestriction some) {
-		return ontFactory.createProperty(some.getPredicate(), some.isInverse());
-	}
-	
 	public Set<Property> getSubProperties(Predicate pred, boolean inverse) {
 		Map<Predicate, Set<Property>> cache = (inverse ? predicateSubpropertiesInv : predicateSubproperties);
 		Set<Property> s = cache.get(pred);
 		if (s == null) {
-			s = getSubProperties(ontFactory.createProperty(pred, inverse));
+			s = reasoner.getProperties().getSubRepresentatives(ontFactory.createProperty(pred, inverse));
 			cache.put(pred, s);
 		}
 		return s;

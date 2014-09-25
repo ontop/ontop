@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
 
 public class TreeWitnessRewriter implements QueryRewriter {
 
-	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private TreeWitnessReasonerCache reasonerCache;
