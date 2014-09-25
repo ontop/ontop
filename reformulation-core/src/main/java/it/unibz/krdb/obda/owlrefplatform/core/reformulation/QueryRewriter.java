@@ -25,9 +25,7 @@ import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
-import java.io.Serializable;
-
-public interface QueryRewriter extends Serializable {
+public interface QueryRewriter {
 
 	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException;
 

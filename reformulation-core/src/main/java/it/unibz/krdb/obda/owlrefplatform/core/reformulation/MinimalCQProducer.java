@@ -27,11 +27,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class MinimalCQProducer {
-	private final TreeWitnessReasonerLite reasoner;
+	private final TreeWitnessReasonerCache reasoner;
 	private List<Function> atoms = new LinkedList<Function>();
 	private List<Function> noCheckAtoms = new LinkedList<Function>();
 	
-	public MinimalCQProducer(TreeWitnessReasonerLite reasoner) {
+	public MinimalCQProducer(TreeWitnessReasonerCache reasoner) {
 		this.reasoner = reasoner;
 	}
 

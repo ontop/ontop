@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 
 import java.util.ArrayList;
@@ -164,42 +165,8 @@ public class DatalogQueryServices {
 	}
 	
 	
-	private static CQIE removeEQ(CQIE q) {
-		boolean replacedEQ = false;
-		
-		do {
-			replacedEQ = false;
-		
-			Iterator<Function> i = q.getBody().iterator(); 
-			while (i.hasNext()) { 
-				Function a = i.next();
-				if (a.getPredicate().equals(OBDAVocabulary.EQ)) {
-					Map<Variable, Term> substituition = new HashMap<Variable, Term>(1);
-					Term t0 = a.getTerm(0); 
-					Term t1 = a.getTerm(1); 					
-					if (t1 instanceof Variable)
-						substituition.put((Variable)t1, t0);
-					else if (t0 instanceof Variable)
-						substituition.put((Variable)t0, t1);
-					else
-						substituition = null;
-					if (substituition != null) {
-						//log.debug("REMOVE " + a + " IN " + q);
-						i.remove();
-						Unifier.applyUnifier(q, substituition, false);
-						//log.debug(" RESULT: " + q);
-						replacedEQ = true;
-						break;
-					}
-				}
-			}
-		} while (replacedEQ);
-		
-		return q;
-	}
-	
 	private static CQIE reduce(CQIE q) {
-		q = removeEQ(q);	
+		DatalogNormalizer.enforceEqualities(q, false);
 		makeSingleOccurrencesAnonymous(q.getBody(), q.getHead().getTerms());
 		return CQCUtilities.removeRundantAtoms(q);
 	}

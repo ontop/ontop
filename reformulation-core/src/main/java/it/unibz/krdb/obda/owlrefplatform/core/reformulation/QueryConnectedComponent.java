@@ -28,7 +28,6 @@ import it.unibz.krdb.obda.model.Variable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -66,8 +65,6 @@ public class QueryConnectedComponent {
 	private boolean noFreeTerms; // no free variables and no constants 
 	                             // if true the component can be mapped onto the anonymous part of the canonical model
 
-	private static final Logger log = LoggerFactory.getLogger(QueryConnectedComponent.class);
-	
 	/**
 	 * constructor is private as instances created only by the static method getConnectedComponents
 	 * 

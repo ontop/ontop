@@ -38,7 +38,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Loop;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessSet.CompatibleTreeWitnessSetIterator;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
@@ -55,27 +54,25 @@ import org.slf4j.LoggerFactory;
  */
 
 public class TreeWitnessRewriter implements QueryRewriter {
-	private static final long serialVersionUID = 1L;
 
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
-	private TreeWitnessReasonerLite reasoner;
+	private TreeWitnessReasonerCache reasoner;
 	private ExtDatalogProgram extDP;
 	
-	private Ontology sigma = null;
+	private Ontology sigma;
 
 	public TreeWitnessRewriter() {
-		reasoner = new TreeWitnessReasonerLite();
-		extDP = new ExtDatalogProgram(reasoner);
 	}
 	
 	@Override
 	public void setTBox(TBoxReasoner reasoner, Ontology sigma) {
 		double startime = System.currentTimeMillis();
 
-		Ontology ontology = TBoxReasonerToOntology.getOntology(reasoner);
-		this.reasoner.setTBox(ontology);
+		//Ontology ontology = TBoxReasonerToOntology.getOntology(reasoner);
+		this.reasoner = new TreeWitnessReasonerCache(reasoner);
+		this.extDP = new ExtDatalogProgram(this.reasoner);
 		
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;

@@ -23,26 +23,21 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeClassRestriction;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
-import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -60,34 +55,33 @@ import org.slf4j.LoggerFactory;
  */
 
 
-public class TreeWitnessReasonerLite {
-	private Ontology tbox;
-
-	// reflexive and transitive closure of the relations
-	private Map<BasicClassDescription, Set<BasicClassDescription>> subconcepts; 
-	private Map<Property, Set<Property>> subproperties; 
+public class TreeWitnessReasonerCache {
+	private final TBoxReasoner reasoner;
+	
+	// caching 
+	private final Map<BasicClassDescription, Set<BasicClassDescription>> subconcepts; 
+	private final Map<Property, Set<Property>> subproperties; 
 
 	// caching for predicate symbols 
-	private Map<Predicate, Set<BasicClassDescription>> predicateSubconcepts;
-	private Map<Predicate, Set<Property>> predicateSubproperties;
-	private Map<Predicate, Set<Property>> predicateSubpropertiesInv;
+	private final Map<Predicate, Set<BasicClassDescription>> predicateSubconcepts;
+	private final Map<Predicate, Set<Property>> predicateSubproperties;
+	private final Map<Predicate, Set<Property>> predicateSubpropertiesInv;
 
 	// tree witness generators of the ontology (i.e., positive occurrences of \exists R.B)
-	private Collection<TreeWitnessGenerator> generators;
+	private final Collection<TreeWitnessGenerator> generators;
 
 	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
-	private static final Logger log = LoggerFactory.getLogger(TreeWitnessReasonerLite.class);	
+	private static final Logger log = LoggerFactory.getLogger(TreeWitnessReasonerCache.class);	
 
 	public static final OClass owlThing = ontFactory.createClass("http://www.w3.org/TR/2004/REC-owl-semantics-20040210/#owl_Thing");	
 	
-	public OntologyFactory getOntologyFactory() {
+	public static OntologyFactory getOntologyFactory() {
 		return ontFactory;
 	}
 	
-	public void setTBox(Ontology ontology) {
-
-		this.tbox = ontology;
-		log.debug("SET ONTOLOGY {}", ontology);
+	public TreeWitnessReasonerCache(TBoxReasoner reasoner) {
+		
+		this.reasoner = reasoner;
 
 		Map<ClassDescription, TreeWitnessGenerator> gens = new HashMap<ClassDescription, TreeWitnessGenerator>();
 		subconcepts = new HashMap<BasicClassDescription, Set<BasicClassDescription>>();
@@ -98,136 +92,32 @@ public class TreeWitnessReasonerLite {
 		predicateSubpropertiesInv = new HashMap<Predicate, Set<Property>>();
 		
 		// COLLECT GENERATING CONCEPTS (together with their declared subclasses)
-		// COLLECT SUB-CONCEPT AND SUB-PROPERTY RELATIONS
-		log.debug("AXIOMS");
-		for (Axiom ax : tbox.getAssertions()) {
-			if (ax instanceof SubClassAxiomImpl) {
-				SubClassAxiomImpl sax = (SubClassAxiomImpl) ax;
-				log.debug("CI AXIOM: {}", sax);
-				BasicClassDescription subConcept = (BasicClassDescription)sax.getSub();
-				ClassDescription superConcept = sax.getSuper();
-				if (superConcept instanceof PropertySomeClassRestriction) {
-					PropertySomeClassRestriction some = (PropertySomeClassRestriction)superConcept;
-					// make \exists R.\top equivalent to \exists R
-					if (some.getFiller().equals(owlThing)) 
-						superConcept = ontFactory.createPropertySomeRestriction(some.getPredicate(), some.isInverse());
-					
-					TreeWitnessGenerator twg = gens.get(superConcept);
+		// TODO: improve the algorithm
+		for (Equivalences<BasicClassDescription> set : reasoner.getClasses()) {
+			Set<Equivalences<BasicClassDescription>> subClasses = reasoner.getClasses().getSub(set);
+			boolean couldBeGenerating = set.size() > 1 || subClasses.size() > 1; 
+			for (BasicClassDescription concept : set) {
+				if (concept instanceof PropertySomeRestriction && couldBeGenerating) {
+					PropertySomeRestriction some = (PropertySomeRestriction)concept;
+					TreeWitnessGenerator twg = gens.get(some);
 					if (twg == null) {
-						twg = new TreeWitnessGenerator(this, ontFactory.createObjectProperty(some.getPredicate().getName(), some.isInverse()), some.getFiller());			
-						gens.put(superConcept, twg);
+						twg = new TreeWitnessGenerator(this, ontFactory.createObjectProperty(some.getPredicate().getName(), some.isInverse()), owlThing);			
+						gens.put(concept, twg);
 					}
-					twg.addConcept(subConcept);
-					log.debug("GENERATING CI: {} <= {}", subConcept, superConcept);
-				}
-				else {
-					BasicClassDescription basicSuperConcept = (BasicClassDescription)superConcept;
-					Set<BasicClassDescription> set = subconcepts.get(basicSuperConcept);
-					if (set == null) {
-						set = new HashSet<BasicClassDescription>();
-						set.add(basicSuperConcept);  // keep it reflexive
-						subconcepts.put(basicSuperConcept, set);
-					}
-					set.add(subConcept);	
-					
-					if (basicSuperConcept instanceof PropertySomeRestriction) {
-						PropertySomeRestriction some = (PropertySomeRestriction)basicSuperConcept;
-						TreeWitnessGenerator twg = gens.get(some);
-						if (twg == null) {
-							twg = new TreeWitnessGenerator(this, ontFactory.createObjectProperty(some.getPredicate().getName(), some.isInverse()), owlThing);			
-							gens.put(superConcept, twg);
+					for (Equivalences<BasicClassDescription> subClassSet : subClasses) {
+						for (BasicClassDescription subConcept : subClassSet) {
+							if (!subConcept.equals(concept)) {
+								twg.addConcept(subConcept);
+								log.debug("GENERATING CI: {} <= {}", subConcept, some);
+							}
 						}
-						twg.addConcept(subConcept);
-						log.debug("GENERATING CI: {} <= {}", subConcept, some);
 					}
-				}
-			} 
-			else if (ax instanceof SubPropertyAxiomImpl) {
-				SubPropertyAxiomImpl sax = (SubPropertyAxiomImpl) ax;
-				log.debug("RI AXIOM: {}", sax);
-				Property superProperty = sax.getSuper();
-				Property subProperty = sax.getSub();
-				Property superPropertyInv = ontFactory.createProperty(superProperty.getPredicate(), !superProperty.isInverse());
-				Property subPropertyInv = ontFactory.createProperty(subProperty.getPredicate(), !subProperty.isInverse());
-				Set<Property> set = subproperties.get(superProperty);
-				Set<Property> setInv = null;
-				if (set == null) {
-					set = new HashSet<Property>(4);
-					set.add(superProperty);  // keep it reflexive
-					set.add(subProperty);
-					subproperties.put(superProperty, set);
-					setInv = new HashSet<Property>(4);
-					setInv.add(superPropertyInv); // keep it reflexive
-					setInv.add(subPropertyInv);
-					subproperties.put(superPropertyInv, setInv);
-				}
-				else 
-					setInv = subproperties.get(superPropertyInv);
-				
-				set.add(subProperty);
-				setInv.add(subPropertyInv);
+				}				
 			}
-			else
-				log.debug("UNKNOWN AXIOM TYPE: {}", ax);
 		}
 
 		generators = gens.values();
 	
-		// SATURATE PROPERTY HIERARCHY
-		{
-			for (Map.Entry<Property, Set<Property>> p : subproperties.entrySet())
-				log.debug("DECLARED SUBPROPERTIES OF {} ARE {}", p.getKey(), p.getValue());
-
-			graphTransitiveClosure(subproperties);
-			
-			for (Map.Entry<Property, Set<Property>> p : subproperties.entrySet())
-				log.debug("SATURATED SUBPROPERTY OF {} ARE {}", p.getKey(), p.getValue());
-		}
-	
-		// SATURATE CONCEPT HIERARCHY
-		{
-			for (Map.Entry<BasicClassDescription, Set<BasicClassDescription>> k : subconcepts.entrySet())
-				log.debug("DECLARED SUBCONCEPTS OF {} ARE {}", k.getKey(), k.getValue());
-	
-			// ADD INCLUSIONS BETWEEN EXISTENTIALS OF SUB-PROPERTIES
-			for (Map.Entry<Property, Set<Property>> prop : subproperties.entrySet()) {
-				PropertySomeRestriction existsSuper =  ontFactory.createPropertySomeRestriction(prop.getKey().getPredicate(), prop.getKey().isInverse());
-				Set<BasicClassDescription> setExistsSuper = subconcepts.get(existsSuper);
-				if (setExistsSuper == null) {
-					setExistsSuper = new HashSet<BasicClassDescription>();
-					// no need to insert reflexive pair as the role hierarchy is already reflexive
-					subconcepts.put(existsSuper, setExistsSuper); 
-				}
-				for (Property subproperty : prop.getValue()) 
-					setExistsSuper.add(ontFactory.createPropertySomeRestriction(subproperty.getPredicate(), subproperty.isInverse())); 	
-			}
-			graphTransitiveClosure(subconcepts);
-			
-			for (Map.Entry<BasicClassDescription, Set<BasicClassDescription>> k : subconcepts.entrySet())
-				log.debug("SATURATED SUBCONCEPTS OF {} ARE {}", k.getKey(), k.getValue());
-		}
-	}
-	
-	private static <T> void graphTransitiveClosure(Map<T, Set<T>> graph) {
-		log.debug("COMPUTING TRANSITIVE CLOSURE");
-		Queue<T> useForExtension = new LinkedList<T>(graph.keySet());
-		while (!useForExtension.isEmpty()) {
-			T o1key = useForExtension.poll();
-			//log.debug("   USE FOR EXTENSION: " + o1key);
-			Set<T> o1value = null;
-			for (Map.Entry<T, Set<T>> o2 : graph.entrySet()) {
-				if (o2.getKey() == o1key)
-					continue;
-				if (o2.getValue().contains(o1key)) {
-					if (o1value == null)
-						o1value = graph.get(o1key);
-					if (o2.getValue().addAll(o1value)) {
-						useForExtension.add(o2.getKey());
-						//log.debug("ALL " + o2.getKey() + " ARE EXTENDED WITH ALL " + o1key);
-					}
-				}
-			}
-		}		
 	}
 	
 	/**
@@ -240,7 +130,11 @@ public class TreeWitnessReasonerLite {
 	public Set<BasicClassDescription> getSubConcepts(BasicClassDescription con) {
 		Set<BasicClassDescription> s = subconcepts.get(con);
 		if (s == null) {
-			s = Collections.singleton(con);
+			Set<Equivalences<BasicClassDescription>> sub = reasoner.getClasses().getSub(reasoner.getClasses().getVertex(con));
+			s = new HashSet<BasicClassDescription>();
+			for (Equivalences<BasicClassDescription> set : sub)
+				s.add(set.getRepresentative());
+			//s = Collections.singleton(con);
 			subconcepts.put(con, s);
 		}
 		return s;
@@ -278,7 +172,11 @@ public class TreeWitnessReasonerLite {
 	private Set<Property> getSubProperties(Property prop) {
 		Set<Property> s = subproperties.get(prop);
 		if (s == null) {
-			s = Collections.singleton(prop);
+			Set<Equivalences<Property>> sub = reasoner.getProperties().getSub(reasoner.getProperties().getVertex(prop));
+			s = new HashSet<Property>();
+			for (Equivalences<Property> set : sub)
+				s.add(set.getRepresentative());			
+			//s = Collections.singleton(prop);
 			subproperties.put(prop, s);
 		}
 		return s;

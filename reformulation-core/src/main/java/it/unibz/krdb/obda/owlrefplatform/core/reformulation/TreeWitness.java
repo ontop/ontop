@@ -28,7 +28,7 @@ import java.util.Set;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReasonerLite.IntersectionOfConceptSets;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReasonerCache.IntersectionOfConceptSets;
 
 /**
  * TreeWitness: universal tree witnesses as in the KR 2012 paper

@@ -50,7 +50,6 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -6641916058733198535L;
 	private final static QueryAnonymizer anonymizer = new QueryAnonymizer();
 	private final static Unifier unifier = new Unifier();
 

@@ -53,12 +53,7 @@ import org.slf4j.LoggerFactory;
 
 public class TreeRedReformulator implements QueryRewriter {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -5839664343260233946L;
 	private static final QueryAnonymizer anonymizer = new QueryAnonymizer();
-	// private static final AtomUnifier unifier = new AtomUnifier();
 
 	private static final Logger log = LoggerFactory.getLogger(TreeRedReformulator.class);
 
@@ -66,7 +61,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	private static final SemanticQueryOptimizer sqoOptimizer = null;
 
-	private static final PositiveInclusionApplicator piApplicator = new PositiveInclusionApplicator(sqoOptimizer);;
+	private static final PositiveInclusionApplicator piApplicator = new PositiveInclusionApplicator(sqoOptimizer);
 
 	/***
 	 * The TBox used for reformulating.

@@ -47,12 +47,12 @@ public class ExtDatalogProgram {
 
 	private Ontology sigma;
 
-	private final TreeWitnessReasonerLite reasoner;
+	private final TreeWitnessReasonerCache reasoner;
 
 	private final Map<Predicate, ExtDatalogProgramDef> extPredicateMap = new HashMap<Predicate, ExtDatalogProgramDef>();
 	private final DatalogProgram fullDP;
 
-	public ExtDatalogProgram(TreeWitnessReasonerLite reasoner) {
+	public ExtDatalogProgram(TreeWitnessReasonerCache reasoner) {
 		this.reasoner = reasoner;
 		fullDP = fac.getDatalogProgram();
 	}

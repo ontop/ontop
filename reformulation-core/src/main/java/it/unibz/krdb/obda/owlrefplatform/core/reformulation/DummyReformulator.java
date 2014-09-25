@@ -34,11 +34,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 public class DummyReformulator implements QueryRewriter {
 
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 8989177354924893482L;
-
 	@Override
 	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException {
 		return input;

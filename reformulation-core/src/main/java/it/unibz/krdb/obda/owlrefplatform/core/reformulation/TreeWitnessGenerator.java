@@ -42,12 +42,12 @@ public class TreeWitnessGenerator {
 	private Set<BasicClassDescription> subconcepts;
 	private PropertySomeRestriction existsRinv;
 
-	private final TreeWitnessReasonerLite reasoner;
+	private final TreeWitnessReasonerCache reasoner;
 	private final OntologyFactory ontFactory; 
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessGenerator.class);	
 	
-	public TreeWitnessGenerator(TreeWitnessReasonerLite reasoner, Property property, OClass filler) {
+	public TreeWitnessGenerator(TreeWitnessReasonerCache reasoner, Property property, OClass filler) {
 		this.reasoner = reasoner;
 		this.property = property;
 		this.filler = filler;
@@ -58,7 +58,7 @@ public class TreeWitnessGenerator {
 		concepts.add(con);
 	}
 	
-	public static Set<BasicClassDescription> getMaximalBasicConcepts(Collection<TreeWitnessGenerator> gens, TreeWitnessReasonerLite reasoner) {
+	public static Set<BasicClassDescription> getMaximalBasicConcepts(Collection<TreeWitnessGenerator> gens, TreeWitnessReasonerCache reasoner) {
 		Set<BasicClassDescription> concepts = new HashSet<BasicClassDescription>();
 		for (TreeWitnessGenerator twg : gens) 
 			concepts.addAll(twg.concepts);
