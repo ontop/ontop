@@ -109,11 +109,6 @@ public class JDBCConnectionManager {
 
 		if (driver == null || driver.trim().equals(""))
 			throw new SQLException("Invalid driver");
-		try {
-			Class.forName(driver);
-		} catch (ClassNotFoundException e1) {
-			// NO-OP
-		}
 
 		Connection conn = DriverManager.getConnection(url, username, password);
 		connectionPool.put(dataSource, conn);

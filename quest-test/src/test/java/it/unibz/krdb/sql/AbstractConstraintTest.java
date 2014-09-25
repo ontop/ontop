@@ -50,11 +50,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 	
 	@Override
 	public void setUp() {
-		try {
-			Class.forName(getDriverName());
-		} 
-		catch (ClassNotFoundException e) { /* NO-OP */ }
-		
+
 		try {
 			log.info(getConnectionString() + "\n");
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
