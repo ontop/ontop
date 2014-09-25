@@ -45,26 +45,16 @@ public class ExtDatalogProgram {
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private static final Logger log = LoggerFactory.getLogger(ExtDatalogProgram.class);
 
-	private Ontology sigma;
-
 	private final TreeWitnessReasonerCache reasoner;
+	private final Ontology sigma;
 
 	private final Map<Predicate, ExtDatalogProgramDef> extPredicateMap = new HashMap<Predicate, ExtDatalogProgramDef>();
 	private final DatalogProgram fullDP;
 
-	public ExtDatalogProgram(TreeWitnessReasonerCache reasoner) {
+	public ExtDatalogProgram(TreeWitnessReasonerCache reasoner, Ontology sigma) {
 		this.reasoner = reasoner;
-		fullDP = fac.getDatalogProgram();
-	}
-	
-	/**
-	 * clears the cache (called when a new CBox is set)
-	 */
-	
-	public void setSigma(Ontology sigma) {
 		this.sigma = sigma;
-		extPredicateMap.clear();
-		fullDP.removeAllRules();
+		fullDP = fac.getDatalogProgram();
 	}
 
 	public DatalogProgram getFullDP() {

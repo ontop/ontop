@@ -58,34 +58,27 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
-	private TreeWitnessReasonerCache reasoner;
+	private TreeWitnessReasonerCache reasonerCache;
 	private ExtDatalogProgram extDP;
 	
 	private Ontology sigma;
-
-	public TreeWitnessRewriter() {
-	}
 	
 	@Override
 	public void setTBox(TBoxReasoner reasoner, Ontology sigma) {
 		double startime = System.currentTimeMillis();
 
-		//Ontology ontology = TBoxReasonerToOntology.getOntology(reasoner);
-		this.reasoner = new TreeWitnessReasonerCache(reasoner);
-		this.extDP = new ExtDatalogProgram(this.reasoner);
-		
-		double endtime = System.currentTimeMillis();
-		double tm = (endtime - startime) / 1000;
-		time += tm;
-		log.debug(String.format("setTBox time: %.3f s (total %.3f s)", tm, time));
-		
+		reasonerCache = new TreeWitnessReasonerCache(reasoner);
 		log.debug("SET SIGMA");
 		for (Axiom ax : sigma.getAssertions()) {
 			log.debug("SIGMA: " + ax);
 		}
 		this.sigma = sigma;
-		extDP.setSigma(sigma);
+		this.extDP = new ExtDatalogProgram(reasonerCache, sigma);
 		
+		double endtime = System.currentTimeMillis();
+		double tm = (endtime - startime) / 1000;
+		time += tm;
+		log.debug(String.format("setTBox time: %.3f s (total %.3f s)", tm, time));		
 	}
 	
 	
@@ -109,7 +102,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 */
 
 	private List<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0)  {
-		Collection<BasicClassDescription> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner);		
+		Collection<BasicClassDescription> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasonerCache);		
 		List<Function> genAtoms = new ArrayList<Function>(concepts.size());
 		Term x = fac.getVariableNondistinguished(); 
 		
@@ -137,7 +130,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	private void rewriteCC(QueryConnectedComponent cc, Function headAtom, DatalogProgram output, ExtPredicateCache cache, DatalogProgram edgeDP) {
 		String headURI = headAtom.getFunctionSymbol().getName();
 		
-		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner);
+		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasonerCache);
 
 		if (cc.hasNoFreeTerms()) {  
 			for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), fac.getVariableNondistinguished())) {
@@ -148,7 +141,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		// COMPUTE AND STORE TREE WITNESS FORMULAS
 		for (TreeWitness tw : tws.getTWs()) {
 			log.debug("TREE WITNESS: {}", tw);		
-			MinimalCQProducer twf = new MinimalCQProducer(reasoner); 
+			MinimalCQProducer twf = new MinimalCQProducer(reasonerCache); 
 			
 			// equality atoms
 			Iterator<Term> i = tw.getRoots().iterator();
@@ -193,7 +186,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				while (iterator.hasNext()) {
 					Collection<TreeWitness> compatibleTWs = iterator.next();
 					log.debug("COMPATIBLE: {}", compatibleTWs);
-					MinimalCQProducer mainbody = new MinimalCQProducer(reasoner); 
+					MinimalCQProducer mainbody = new MinimalCQProducer(reasonerCache); 
 					
 					for (Edge edge : cc.getEdges()) {
 						boolean contained = false;
@@ -221,7 +214,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			else {
 				// no conflicting tree witnesses
 				// use polynomial tree witness rewriting by treating each edge independently 
-				MinimalCQProducer mainbody = new MinimalCQProducer(reasoner); 		
+				MinimalCQProducer mainbody = new MinimalCQProducer(reasonerCache); 		
 				for (Edge edge : cc.getEdges()) {
 					log.debug("EDGE {}", edge);
 					
@@ -234,7 +227,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 										"_EDGE_" + (edgeDP.getRules().size() + 1) /*+ "_" + atomURI.getRawFragment()*/, cc.getVariables());
 								mainbody.addNoCheck(edgeAtom);				
 								
-								MinimalCQProducer edgeAtoms = new MinimalCQProducer(reasoner); 
+								MinimalCQProducer edgeAtoms = new MinimalCQProducer(reasonerCache); 
 								edgeAtoms.addAll(edge.getAtoms());
 								edgeDP.appendRule(fac.getCQIE(edgeAtom, cache.getExtAtoms(edgeAtoms)));													
 							}
@@ -252,7 +245,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		}
 		else {
 			// degenerate connected component
-			MinimalCQProducer loopbody = new MinimalCQProducer(reasoner);
+			MinimalCQProducer loopbody = new MinimalCQProducer(reasonerCache);
 			Loop loop = cc.getLoop();
 			log.debug("LOOP {}", loop);
 			if (loop != null)
