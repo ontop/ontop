@@ -134,7 +134,7 @@ public class ImdbTestPostgres {
                 "   $m a mo:Movie; mo:title ?title; mo:hasActor ?x; mo:hasDirector ?x; mo:isProducedBy $y; mo:belongsToGenre $z .\n" +
                 "   $x dbpedia:birthName $actor_name .\n" +
                 "   $y :companyName $company_name; :hasCompanyLocation [ a mo:Eastern_Asia ] .\n" +
-                "   $z a mo:Love .\n" +
+//                "   $z a mo:Love .\n" +
                 "}\n";
 
         String query3 = "PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>\n" +
@@ -156,7 +156,7 @@ public class ImdbTestPostgres {
                 "   $y :hasCompanyLocation [ a mo:Eastern_Asia ] .\n" +
                 "}\n";
 
-        runTestQuery(p, query3);
+        runTestQuery(p, query2);
     }
 
     private void runTestQuery(Properties p, String query) throws Exception {

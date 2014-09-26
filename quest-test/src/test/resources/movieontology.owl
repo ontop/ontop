@@ -3074,9 +3074,9 @@
     
 
 
-    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Romance1 -->
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Romance -->
 
-    <owl:Thing rdf:about="&mo;Romance1">
+    <owl:Thing rdf:about="&mo;Romance">
         <rdf:type rdf:resource="&mo;Love"/>
         <rdf:type rdf:resource="&owl;NamedIndividual"/>
     </owl:Thing>
