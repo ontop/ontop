@@ -1036,7 +1036,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		for (Axiom assertion : assertions) {
 			try {
 				CQIE rule = AxiomToRuleTranslator.translate(assertion);
-				rules.add(rule);
+                if(rule != null) {
+                    rules.add(rule);
+                }
 			} catch (UnsupportedOperationException e) {
 				log.warn(e.getMessage());
 			}
