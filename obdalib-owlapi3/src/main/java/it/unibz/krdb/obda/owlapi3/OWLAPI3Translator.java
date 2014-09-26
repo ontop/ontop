@@ -112,7 +112,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * Translates an OWLOntology into ontops internal ontlogy representation. It
+ * Translates an OWLOntology into ontops internal ontology representation. It
  * will ignore all ABox assertions and does a syntactic approximation of the
  * ontology, dropping anything not support by Quest during inference.
  * 

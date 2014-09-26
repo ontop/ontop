@@ -455,7 +455,11 @@ public class CQCUtilities {
 		if (!query.getHead().getFunctionSymbol().equals(canonicalhead.getFunctionSymbol()))
 			return false;
 
-		for (Function queryatom : query.getBody()) {
+        List<Function> body = query.getBody();
+        if(body.isEmpty()){
+            return false;
+        }
+        for (Function queryatom : query.getBody()) {
 			if (!canonicalpredicates.contains(((Function) queryatom).getFunctionSymbol())) {
 				return false;
 			}
@@ -553,6 +557,12 @@ public class CQCUtilities {
 		return false;
 	}
 
+    /**
+     * TODO!!!
+     *
+     * @param query
+     * @return
+     */
 	public boolean hasAnswer(CQIE query) {
 		query = query.clone();
 		QueryAnonymizer.deAnonymize(query);
@@ -885,7 +895,7 @@ public class CQCUtilities {
 	 * Removal of queries is done in two main double scans. The first scan goes
 	 * top-down/down-top, the second scan goes down-top/top-down
 	 * 
-	 * @param querieslist
+	 * @param queriesInput
 	 */
 	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, Ontology sigma, List<CQIE> rules, boolean sort) {
 
