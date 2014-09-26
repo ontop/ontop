@@ -1,0 +1,40 @@
+Find actress 100
+Find actor 100
+Find movie 1
+Find TV series 1
+Find writer 39
+Find producer 100
+Find director 36
+Find editor 46
+Find movie genre 4
+Find TV series genre 5
+Find movie budget 1
+Find TV series budget 1
+Find movie gross 89
+Find TV series gross 0
+Find movie production year 1
+Find TV series production year 1
+Find movie actors (male and female) 25
+Find movie male actor 18
+Find movie female actor 7
+Find movie director 2
+Find movie producer 3
+Find movie editor 1
+Find movie producing company 3
+Find movie producing company country origin 100
+
+Find the Top 25 movie titles based on a specific genre 25
+Find the Bottom 10 movie titles based on rating 10
+Find all movie information given a particular movie title 100
+Find production companies in a specific region 100
+Find movie titles produced by production companies in Eastern Asia and has gross revenue over 1 million USD 100
+Find action movies produced in eastern asia 100
+Find names that act as both the director and the actor at the same time produced in eastern asia 36
+
+Q1 18
+Q2 100
+Q3 45
+Q4 100
+Q5 100
+
+IQ1 3969409
