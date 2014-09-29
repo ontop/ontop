@@ -38,7 +38,7 @@ import org.semanticweb.ontop.ontology.SubDescriptionAxiom;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
-import org.semanticweb.ontop.utils.QueryUtils;
+import org.semanticweb.ontop.mapping.QueryUtils;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import org.slf4j.Logger;

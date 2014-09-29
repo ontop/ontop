@@ -20,6 +20,7 @@ package org.semanticweb.ontop.utils;
  * #L%
  */
 
+import org.semanticweb.ontop.mapping.LookupTable;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.DatalogProgram;

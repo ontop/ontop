@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.utils;
+package org.semanticweb.ontop.mapping;
 
 /*
  * #%L
@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Queue;
 
 import com.google.common.collect.Lists;
+import org.semanticweb.ontop.utils.ListListener;
 
 public class QueryUtils {
 

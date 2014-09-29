@@ -60,7 +60,7 @@ import org.semanticweb.ontop.protege4.utils.MappingFilterLexer;
 import org.semanticweb.ontop.protege4.utils.MappingFilterParser;
 import org.semanticweb.ontop.protege4.utils.OBDAMappingListRenderer;
 import org.semanticweb.ontop.utils.IDGenerator;
-import org.semanticweb.ontop.utils.SourceQueryValidator;
+import org.semanticweb.ontop.mapping.SQLSourceQueryValidator;
 import org.slf4j.LoggerFactory;
 
 public class MappingManagerPanel extends JPanel implements DatasourceSelectorListener {
@@ -69,7 +69,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 	private Thread validatorThread;
 
-	private SourceQueryValidator validator;
+	private SQLSourceQueryValidator validator;
 
 	private TargetQueryVocabularyValidator validatortrg;
 
@@ -572,7 +572,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 					OBDAMappingAxiom o = (OBDAMappingAxiom) path[index];
 					String id = o.getId();
 					outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
-					validator = new SourceQueryValidator(selectedSource, o.getSourceQuery());
+					validator = new SQLSourceQueryValidator(selectedSource, o.getSourceQuery());
 					long timestart = System.nanoTime();
 
 					if (canceled) {

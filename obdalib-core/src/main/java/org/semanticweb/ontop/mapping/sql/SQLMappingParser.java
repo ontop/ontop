@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.utils;
+package org.semanticweb.ontop.mapping.sql;
 
 /*
  * #%L
@@ -24,7 +24,6 @@ package org.semanticweb.ontop.utils;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
@@ -38,22 +37,21 @@ import org.semanticweb.ontop.sql.api.RelationJSQL;
 import net.sf.jsqlparser.JSQLParserException;
 
 
-
 /**
  * This class is in charge of parsing the mappings and obtaining the list of schema names 
  * and tables.Afterwards from this list we obtain the metadata (not in this class).
  * @author Dag
  *
  */
-public class MappingParser {
+public class SQLMappingParser implements org.semanticweb.ontop.mapping.MappingParser {
 	
-	private List<OBDAMappingAxiom> mappingList;
+	private List<OBDAMappingAxiom> mappings;
 	private SQLQueryParser sqlQueryParser;
-	private List<ParsedMapping> parsedMappings;
+	private List<ParsedSQLMapping> parsedMappings;
 	private List<RelationJSQL> realTables; // Tables that are not view definitions
 	
-	public MappingParser(Connection conn, ArrayList<OBDAMappingAxiom> mappingAxioms) throws SQLException{
-		this.mappingList = mappingAxioms;
+	public SQLMappingParser(Connection conn, List<OBDAMappingAxiom> mappingAxioms) throws SQLException{
+		this.mappings = mappingAxioms;
 		this.sqlQueryParser = new SQLQueryParser(conn);
 		this.parsedMappings = this.parseMappings();
 	}
@@ -91,13 +89,13 @@ public class MappingParser {
 	 * 
 	 * @return
 	 */
-	public List<ParsedMapping> getParsedMappings(){
+    public List<ParsedSQLMapping> getParsedMappings(){
 		return parsedMappings;
 	}
 	
 	public List<RelationJSQL> getTables() throws JSQLParserException{
 		List<RelationJSQL> tables = new ArrayList<>();
-		for(ParsedMapping pm : parsedMappings){
+		for(ParsedSQLMapping pm : parsedMappings){
 			ParsedSQLQuery query = pm.getSourceQueryParsed();
 			List<RelationJSQL> queryTables = query.getTables();
 			for(RelationJSQL table : queryTables){
@@ -124,18 +122,18 @@ public class MappingParser {
 	}
 	
 	/**
-	 * 	Parses the mappingList (Actually, only the source sql is parsed.)
+	 * 	Parses the mappings (Actually, only the source sql is parsed.)
 	 * This is necessary to separate the parsing, such that this can be done before the
 	 * table schema extraction
 	 * 
 	 * @return List of parsed mappings
 	 */
-	private ArrayList<ParsedMapping> parseMappings() {
-		LinkedList<String> errorMessage = new LinkedList<String>();
-		ArrayList<ParsedMapping> parsedMappings = new ArrayList<ParsedMapping>();
-		for (OBDAMappingAxiom axiom : this.mappingList) {
+	private List<ParsedSQLMapping> parseMappings() {
+		List<String> errorMessage = new ArrayList<>();
+		List<ParsedSQLMapping> parsedMappings = new ArrayList<>();
+		for (OBDAMappingAxiom axiom : this.mappings) {
 			try {
-				ParsedMapping parsed = new ParsedMapping(axiom, sqlQueryParser);
+				ParsedSQLMapping parsed = new ParsedSQLMapping(axiom, sqlQueryParser);
 				parsedMappings.add(parsed);
 			} catch (Exception e) {
 				errorMessage.add("Error in mapping with id: " + axiom.getId() + " \n Description: "
@@ -155,6 +153,10 @@ public class MappingParser {
 		return parsedMappings;
 				
 	}
-	
 
+    // FIXME: use this method instead of  #getParsedMappings
+    @Override
+    public List<OBDAMappingAxiom> parse() {
+        return mappings;
+    }
 }

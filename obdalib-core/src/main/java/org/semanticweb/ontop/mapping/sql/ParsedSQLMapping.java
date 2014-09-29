@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.utils;
+package org.semanticweb.ontop.mapping.sql;
 
 /*
  * #%L
@@ -37,17 +37,17 @@ import org.semanticweb.ontop.sql.api.ParsedSQLQuery;
  * @author Dag Hovland
  *
  */
-public class ParsedMapping {
+public class ParsedSQLMapping {
 
-	ParsedSQLQuery sourceQueryParsed;
-	OBDAMappingAxiom axiom;
+	private final ParsedSQLQuery sourceQueryParsed;
+    private final OBDAMappingAxiom axiom;
 	
-	public ParsedMapping(OBDAMappingAxiom axiom, SQLQueryParser translator){
+	public ParsedSQLMapping(OBDAMappingAxiom axiom, SQLQueryParser sqlParser){
 		this.axiom = axiom;
 		OBDASQLQuery sourceQuery = (OBDASQLQuery) axiom.getSourceQuery();
 
 		// Construct the SQL parsed query from the source query
-		ParsedSQLQuery queryParsed = translator.parseShallowly(sourceQuery.toString());
+		ParsedSQLQuery queryParsed = sqlParser.parseShallowly(sourceQuery.toString());
 		this.sourceQueryParsed = queryParsed;
 	}
 	

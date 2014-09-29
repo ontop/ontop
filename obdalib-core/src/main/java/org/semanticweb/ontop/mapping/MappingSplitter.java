@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.utils;
+package org.semanticweb.ontop.mapping;
 
 /*
  * #%L
@@ -33,6 +33,7 @@ import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.OBDARDBMappingAxiom;
 import org.semanticweb.ontop.model.OBDASQLQuery;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.utils.IDGenerator;
 
 /**
  * This class split the mappings

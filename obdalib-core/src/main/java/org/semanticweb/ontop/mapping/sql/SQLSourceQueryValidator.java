@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.utils;
+package org.semanticweb.ontop.mapping.sql;
 
 /*
  * #%L
@@ -29,7 +29,7 @@ import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.sql.JDBCConnectionManager;
 
-public class SourceQueryValidator {
+public class SQLSourceQueryValidator {
 
 	private OBDAQuery sourceQuery = null;
 
@@ -43,7 +43,7 @@ public class SourceQueryValidator {
 
 	private Connection c;
 
-	public SourceQueryValidator(OBDADataSource source, OBDAQuery q) {
+	public SQLSourceQueryValidator(OBDADataSource source, OBDAQuery q) {
 		this.source = source;
 		sourceQuery = q;
 	}

@@ -55,8 +55,8 @@ import org.semanticweb.ontop.sql.JDBCConnectionManager;
 import org.semanticweb.ontop.sql.TableDefinition;
 import org.semanticweb.ontop.sql.api.Attribute;
 import org.semanticweb.ontop.sql.api.RelationJSQL;
-import org.semanticweb.ontop.utils.MappingParser;
-import org.semanticweb.ontop.utils.MappingSplitter;
+import org.semanticweb.ontop.mapping.SQLMappingParser;
+import org.semanticweb.ontop.mapping.MappingSplitter;
 import org.semanticweb.ontop.utils.MetaMappingExpander;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -716,7 +716,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					// (the schema.table names) by parsing the mappings
 					
 					// Parse mappings. Just to get the table names in use
-					MappingParser mParser = new MappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
+					SQLMappingParser mParser = new SQLMappingParser(localConnection, unfoldingOBDAModel.getMappings(sourceId));
 							
 					try{
 						List<RelationJSQL> realTables = mParser.getRealTables();

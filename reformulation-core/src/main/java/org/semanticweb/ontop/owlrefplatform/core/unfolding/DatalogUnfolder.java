@@ -44,7 +44,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.QueryAnonymizer
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
-import org.semanticweb.ontop.utils.QueryUtils;
+import org.semanticweb.ontop.mapping.QueryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

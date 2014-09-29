@@ -20,7 +20,7 @@ package org.semanticweb.ontop.utils;
  * #L%
  */
 
-import org.semanticweb.ontop.utils.LookupTable;
+import org.semanticweb.ontop.mapping.LookupTable;
 
 import junit.framework.TestCase;
 

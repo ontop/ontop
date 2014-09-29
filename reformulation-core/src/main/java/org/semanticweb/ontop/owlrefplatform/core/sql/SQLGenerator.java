@@ -68,7 +68,7 @@ import java.util.Set;
 import org.openrdf.model.Literal;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.HSQLSQLDialectAdapter;
 import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
-import org.semanticweb.ontop.utils.QueryUtils;
+import org.semanticweb.ontop.mapping.QueryUtils;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
