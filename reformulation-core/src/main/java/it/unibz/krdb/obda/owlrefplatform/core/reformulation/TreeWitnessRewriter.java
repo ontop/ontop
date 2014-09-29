@@ -71,7 +71,6 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			log.debug("SIGMA: " + ax);
 		}
 		this.sigma = sigma;
-		new ExtDatalogProgram(reasonerCache, sigma);
 		
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
