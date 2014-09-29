@@ -3,7 +3,7 @@
 	<groupId>it.unibz.inf.ontop</groupId>
 	<artifactId>ontop</artifactId>
 	<packaging>pom</packaging>
-	<version>1.12.1-SNAPSHOT</version>
+	<version>1.13.1-SNAPSHOT</version>
 	<name>ontop</name>
 	<url>http://ontop.inf.unibz.it/</url>
 
@@ -315,7 +315,7 @@
 			<dependency>
     			<groupId>com.github.jsqlparser</groupId>
     			<artifactId>jsqlparser</artifactId>
-    			<version>0.9.1-SNAPSHOT</version>
+    			<version>0.9.1</version>
 			</dependency>
 			<dependency>
     			<groupId>com.google.guava</groupId>

@@ -162,7 +162,7 @@
 	<!-- Reasoner plugins -->
 	<extension id="quest.reasoner.factory"
              point="org.protege.editor.owl.inference_reasonerfactory">
-    <name value="Quest 1.12.0 (ontop)"/>
+    <name value="Quest 1.13.0 (ontop)"/>
     <class value="it.unibz.krdb.obda.protege4.core.ProtegeOBDAOWLReformulationPlatformFactory"/>
   </extension>
 </plugin>
