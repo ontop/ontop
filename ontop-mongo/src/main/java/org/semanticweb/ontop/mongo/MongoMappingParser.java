@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.mongo;
 
+import com.google.common.collect.Lists;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 
@@ -30,6 +31,6 @@ public class MongoMappingParser implements MappingParser {
 
     @Override
     public List<OBDAMappingAxiom> parse() {
-        return null;
+        return Lists.newArrayList();
     }
 }
