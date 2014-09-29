@@ -59,8 +59,6 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private TreeWitnessReasonerCache reasonerCache;
-	private ExtDatalogProgram extDP;
-	
 	private Ontology sigma;
 	
 	@Override
@@ -73,7 +71,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			log.debug("SIGMA: " + ax);
 		}
 		this.sigma = sigma;
-		this.extDP = new ExtDatalogProgram(reasonerCache, sigma);
+		new ExtDatalogProgram(reasonerCache, sigma);
 		
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
@@ -127,14 +125,14 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 * rewrites a given connected CQ with the rules put into output
 	 */
 	
-	private void rewriteCC(QueryConnectedComponent cc, Function headAtom, DatalogProgram output, ExtPredicateCache cache, DatalogProgram edgeDP) {
+	private void rewriteCC(QueryConnectedComponent cc, Function headAtom, DatalogProgram output, DatalogProgram edgeDP) {
 		String headURI = headAtom.getFunctionSymbol().getName();
 		
 		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasonerCache);
 
 		if (cc.hasNoFreeTerms()) {  
 			for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), fac.getVariableNondistinguished())) {
-				output.appendRule(fac.getCQIE(headAtom, cache.getExtAtom(a))); 
+				output.appendRule(fac.getCQIE(headAtom, a)); 
 			}
 		}
 
@@ -160,7 +158,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			for (Function a : genAtoms) 				
 				if (twf.subsumes(a)) {
 					subsumes = true;
-					log.debug("TWF {} SUBSUMES {}", twf.getAtoms(), a);
+					log.debug("TWF {} SUBSUMES {}", twf.getAllAtoms(), a);
 					break;
 				}
 
@@ -169,11 +167,11 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				for (Function a : genAtoms) {				
 					MinimalCQProducer twfa = new MinimalCQProducer(twf);
 					twfa.add(a); // 
-					twfs.add(cache.getExtAtoms(twfa));
+					twfs.add(twfa.getAllAtoms());
 				}
 			}
 			else
-				twfs.add(cache.getExtAtoms(twf));
+				twfs.add(twf.getAllAtoms());
 			
 			tw.setFormula(twfs);
 		}
@@ -208,7 +206,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 							edgeDP.appendRule(fac.getCQIE(twAtom, twfa));
 					}	
 					mainbody.addAllNoCheck(cc.getNonDLAtoms());					
-					output.appendRule(fac.getCQIE(headAtom, cache.getExtAtoms(mainbody))); 
+					output.appendRule(fac.getCQIE(headAtom, mainbody.getAllAtoms())); 
 				}
 			}
 			else {
@@ -229,7 +227,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 								
 								MinimalCQProducer edgeAtoms = new MinimalCQProducer(reasonerCache); 
 								edgeAtoms.addAll(edge.getAtoms());
-								edgeDP.appendRule(fac.getCQIE(edgeAtom, cache.getExtAtoms(edgeAtoms)));													
+								edgeDP.appendRule(fac.getCQIE(edgeAtom, edgeAtoms.getAllAtoms()));													
 							}
 							
 							for (List<Function> twfa : tw.getFormula())
@@ -240,7 +238,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 						mainbody.addAll(edge.getAtoms());
 				}
 				mainbody.addAllNoCheck(cc.getNonDLAtoms());
-				output.appendRule(fac.getCQIE(headAtom, cache.getExtAtoms(mainbody))); 
+				output.appendRule(fac.getCQIE(headAtom, mainbody.getAllAtoms())); 
 			}
 		}
 		else {
@@ -251,7 +249,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			if (loop != null)
 				loopbody.addAll(loop.getAtoms());
 			loopbody.addAllNoCheck(cc.getNonDLAtoms());
-			output.appendRule(fac.getCQIE(headAtom, cache.getExtAtoms(loopbody))); 
+			output.appendRule(fac.getCQIE(headAtom, loopbody.getAllAtoms())); 
 		}
 	}
 	
@@ -267,8 +265,6 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		DatalogProgram ccDP = null;
 		DatalogProgram edgeDP = fac.getDatalogProgram();
 
-		ExtPredicateCache cache = new ExtPredicateCache(extDP);
-		
 		for (CQIE cqie : dp.getRules()) {
 			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(cqie);	
 			Function cqieAtom = cqie.getHead();
@@ -278,7 +274,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				log.debug("CONNECTED COMPONENT ({})" + " EXISTS {}", cc.getFreeVariables(), cc.getQuantifiedVariables());
 				log.debug("     WITH EDGES {} AND LOOP {}", cc.getEdges(), cc.getLoop());
 				log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
-				rewriteCC(cc, cqieAtom, output, cache, edgeDP); 				
+				rewriteCC(cc, cqieAtom, output, edgeDP); 				
 			}
 			else {
 				if (ccDP == null)
@@ -290,7 +286,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 					log.debug("     WITH EDGES {} AND LOOP {}", cc.getEdges(), cc.getLoop());
 					log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
 					Function ccAtom = getHeadAtom(cqieURI, "_CC_" + (ccDP.getRules().size() + 1), cc.getFreeVariables());
-					rewriteCC(cc, ccAtom, ccDP, cache, edgeDP); 
+					rewriteCC(cc, ccAtom, ccDP, edgeDP); 
 					ccBody.add(ccAtom);
 				}
 				output.appendRule(fac.getCQIE(cqieAtom, ccBody));
@@ -309,11 +305,6 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			output = DatalogQueryServices.plugInDefinitions(output, ccDP);
 			log.debug("INLINE CONNECTED COMPONENTS PROGRAM\n{}", output);
 		}
-		DatalogProgram extDP = cache.getExtDP();
-		if (extDP != null) {
-			output = DatalogQueryServices.plugInDefinitions(output, extDP);
-			log.debug("INLINE EXT PROGRAM\n{}", output);
-		}
 	
 		// extra CQC 
 		if (output.getRules().size() > 1)
@@ -328,64 +319,4 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		log.debug("Final rewriting:\n{}", output);
 		return output;
 	}
-	
-
-	/**
-	 * cache for the Ext_E predicates and Datalog programs they are defined by
-	 * 
-	 * @author Roman Kontchakov
-	 *
-	 */
-	private static class ExtPredicateCache {
-		//private Set<Predicate> usedExts = new HashSet<Predicate>();
-		private boolean usedExts = false;
-		final private ExtDatalogProgram extDP;
-		
-		public ExtPredicateCache(ExtDatalogProgram extDP) {
-			this.extDP = extDP;
-		}
-
-		public List<Function> getExtAtoms(MinimalCQProducer atoms) {
-			List<Function> extAtoms = new ArrayList<Function>(atoms.getAtoms().size() + atoms.getNoCheckAtoms().size());
-			extAtoms.addAll(atoms.getNoCheckAtoms());
-
-			for (Function a : atoms.getAtoms()) 
-				extAtoms.add(getExtAtom(a));
-
-			return extAtoms;
-		}
-
-				
-		public Function getExtAtom(Function a) {
-			Predicate ext = extDP.getEntryForPredicate(a.getFunctionSymbol());
-			
-			if (ext != null) {
-				usedExts = true;        // usedExts.add(ext);
-				if (a.getArity() == 1) 
-					return fac.getFunction(ext, a.getTerm(0));
-				else {
-					assert (a.getArity() == 2);
-					return fac.getFunction(ext, a.getTerm(0), a.getTerm(1));
-				}
-			}
-			return a;
-		}
-		
-		/**
-		 * @return Datalog program containing definitions for all Ext_E in usedExts
-		 */
-
-		public DatalogProgram getExtDP() {
-			if (!usedExts) 
-				return null;
-			
-			//DatalogProgram dp = fac.getDatalogProgram();		
-			//for (Predicate pred : usedExts) { 
-			//	List<CQIE> extDef = extDP.getDP(pred);			 
-			//	dp.appendRule(extDef);		 
-			//}
-			return extDP.getFullDP(); 
-		}
-	}
-	
 }

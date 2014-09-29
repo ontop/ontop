@@ -21,6 +21,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
  */
 
 import it.unibz.krdb.obda.model.Function;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -68,10 +70,6 @@ public class MinimalCQProducer {
 			add(a);
 	}
 
-	public List<Function> getAtoms() {
-		return atoms;
-	}
-	
 	public void addNoCheck(Function atom) {
 		noCheckAtoms.add(atom);
 	}
@@ -80,7 +78,10 @@ public class MinimalCQProducer {
 		noCheckAtoms.addAll(aa);
 	}
 
-	public List<Function> getNoCheckAtoms() {
-		return noCheckAtoms;
-	}
+	public List<Function> getAllAtoms() {
+		List<Function> extAtoms = new ArrayList<Function>(atoms.size() + noCheckAtoms.size());
+		extAtoms.addAll(noCheckAtoms);
+		extAtoms.addAll(atoms);
+		return extAtoms;
+	}	
 }
