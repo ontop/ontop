@@ -60,7 +60,7 @@ import org.semanticweb.ontop.protege4.utils.MappingFilterLexer;
 import org.semanticweb.ontop.protege4.utils.MappingFilterParser;
 import org.semanticweb.ontop.protege4.utils.OBDAMappingListRenderer;
 import org.semanticweb.ontop.utils.IDGenerator;
-import org.semanticweb.ontop.mapping.SQLSourceQueryValidator;
+import org.semanticweb.ontop.mapping.sql.SQLSourceQueryValidator;
 import org.slf4j.LoggerFactory;
 
 public class MappingManagerPanel extends JPanel implements DatasourceSelectorListener {

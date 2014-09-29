@@ -55,7 +55,7 @@ import org.semanticweb.ontop.sql.JDBCConnectionManager;
 import org.semanticweb.ontop.sql.TableDefinition;
 import org.semanticweb.ontop.sql.api.Attribute;
 import org.semanticweb.ontop.sql.api.RelationJSQL;
-import org.semanticweb.ontop.mapping.SQLMappingParser;
+import org.semanticweb.ontop.mapping.sql.SQLMappingParser;
 import org.semanticweb.ontop.mapping.MappingSplitter;
 import org.semanticweb.ontop.utils.MetaMappingExpander;
 import org.slf4j.Logger;

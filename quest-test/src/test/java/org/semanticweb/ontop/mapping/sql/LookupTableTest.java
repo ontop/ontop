@@ -1,8 +1,8 @@
-package org.semanticweb.ontop.utils;
+package org.semanticweb.ontop.mapping.sql;
 
 /*
  * #%L
- * ontop-obdalib-core
+ * ontop-test
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -20,7 +20,7 @@ package org.semanticweb.ontop.utils;
  * #L%
  */
 
-import org.semanticweb.ontop.mapping.LookupTable;
+
 
 import junit.framework.TestCase;
 
