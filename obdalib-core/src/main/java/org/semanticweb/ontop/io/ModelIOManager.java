@@ -37,7 +37,7 @@ import java.util.Map;
 
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.Indicator;
-import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.exception.InvalidPredicateDeclarationException;
 import org.semanticweb.ontop.exception.UnsupportedTagException;
 import org.semanticweb.ontop.model.CQIE;
@@ -153,9 +153,9 @@ public class ModelIOManager {
      *          The target file location from which the model is loaded.
      * @throws IOException
      * @throws InvalidPredicateDeclarationException
-     * @throws InvalidMappingException 
+     * @throws InvalidMappingExceptionWithIndicator 
      */
-    public void load(String fileLocation) throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+    public void load(String fileLocation) throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
         load(new File(fileLocation));
     }
     
@@ -166,9 +166,9 @@ public class ModelIOManager {
      *          The target file object from which the model is loaded.
      * @throws IOException
      * @throws InvalidPredicateDeclarationException
-     * @throws InvalidMappingException 
+     * @throws InvalidMappingExceptionWithIndicator 
      */
-    public void load(File file) throws IOException, InvalidMappingException {
+    public void load(File file) throws IOException, InvalidMappingExceptionWithIndicator {
         if (!file.exists()) {
             log.warn("WARNING: Cannot locate OBDA file at: " + file.getPath());
             return;
@@ -188,15 +188,15 @@ public class ModelIOManager {
      * 
      * @param stream
      * @throws IOException
-     * @throws InvalidMappingException
+     * @throws InvalidMappingExceptionWithIndicator
      */
-	public void load(InputStream stream) throws IOException, InvalidMappingException {
+	public void load(InputStream stream) throws IOException, InvalidMappingExceptionWithIndicator {
 		LineNumberReader reader = new LineNumberReader(new InputStreamReader(stream));
 		load(reader);
 	}
 
 	private void load(LineNumberReader reader) throws IOException,
-			InvalidMappingException {
+			InvalidMappingExceptionWithIndicator {
 	    // Clean the model first before loading
         model.reset();
     
@@ -233,7 +233,7 @@ public class ModelIOManager {
         
         // Throw some validation exceptions
         if (!invalidMappingIndicators.isEmpty()) {
-            throw new InvalidMappingException(invalidMappingIndicators);
+            throw new InvalidMappingExceptionWithIndicator(invalidMappingIndicators);
         }
 	}
 
@@ -397,13 +397,13 @@ public class ModelIOManager {
             if (currentLabel.equals(Label.mappingId.name())) {
                 mappingId = value;
                 if (mappingId.isEmpty()) { // empty or not
-                    register(invalidMappingIndicators, new Indicator(lineNumber, Label.mappingId, InvalidMappingException.MAPPING_ID_IS_BLANK));
+                    register(invalidMappingIndicators, new Indicator(lineNumber, Label.mappingId, InvalidMappingExceptionWithIndicator.MAPPING_ID_IS_BLANK));
                     isMappingValid = false;
                 }
             } else if (currentLabel.equals(Label.target.name())) {
                 String targetString = value;
                 if (targetString.isEmpty()) { // empty or not
-                    register(invalidMappingIndicators, new Indicator(lineNumber, mappingId, InvalidMappingException.TARGET_QUERY_IS_BLANK));
+                    register(invalidMappingIndicators, new Indicator(lineNumber, mappingId, InvalidMappingExceptionWithIndicator.TARGET_QUERY_IS_BLANK));
                     isMappingValid = false;
                 } else {
 	                // Load the target query
@@ -412,7 +412,7 @@ public class ModelIOManager {
             } else if (currentLabel.equals(Label.source.name())) {
                 String sourceString = value;
                 if (sourceString.isEmpty()) { // empty or not
-                    register(invalidMappingIndicators, new Indicator(lineNumber, mappingId, InvalidMappingException.SOURCE_QUERY_IS_BLANK));
+                    register(invalidMappingIndicators, new Indicator(lineNumber, mappingId, InvalidMappingExceptionWithIndicator.SOURCE_QUERY_IS_BLANK));
                     isMappingValid = false;
                 } else {
 	                // Build the source query string.

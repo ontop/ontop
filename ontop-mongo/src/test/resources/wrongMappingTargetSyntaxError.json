@@ -14,7 +14,7 @@
                     "type": 1
                 }
             },
-            "target": "<http://ex.org/Student/{code}> a <http://ex.org/UndergraduateStudent> ."
+            "target": "<http://ex.org/Student/{code}> a <http://ex.org/UndergraduateStudent> ;"
         }
         ,
 

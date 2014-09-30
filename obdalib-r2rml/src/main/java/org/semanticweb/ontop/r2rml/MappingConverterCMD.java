@@ -20,7 +20,7 @@ package org.semanticweb.ontop.r2rml;
  * #L%
  */
 
-import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -71,7 +71,7 @@ class MappingConverterCMD {
 
 				try {
 					modelIO.load(new File(obdaURI));
-				} catch (IOException | InvalidMappingException e) {
+				} catch (IOException | InvalidMappingExceptionWithIndicator e) {
 					e.printStackTrace();
 				}
 				URI srcURI = model.getSources().get(0).getSourceID();

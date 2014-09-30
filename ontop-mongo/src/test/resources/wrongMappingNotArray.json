@@ -1,0 +1,19 @@
+{
+    "prefixes": {
+        "xsd:" : "http://www.w3.org/2001/XMLSchema#",
+        "rdfs:" : "http://www.w3.org/2000/01/rdf-schema#",
+        "ex:" : "http://ex.org/",
+        ":" : "http://ex.org/"
+    },
+    "mappings": 
+        {
+            "mappingId": "UndergraduateStudent",
+            "source": {
+                "collection": "students",
+                "criteria": {
+                    "type": 1
+                }
+            },
+            "target": "<http://ex.org/Student/{code}> a <http://ex.org/UndergraduateStudent> ."
+        }
+}

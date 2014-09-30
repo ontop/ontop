@@ -26,7 +26,7 @@ import java.net.URI;
 import java.util.Set;
 
 import org.openrdf.model.Model;
-import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
@@ -97,9 +97,9 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * @param obdaURI - the file URI
 	 * @return the generated OBDAModel
 	 * @throws IOException
-	 * @throws InvalidMappingException
+	 * @throws InvalidMappingExceptionWithIndicator
 	 */
-	public OBDAModel getObdaModel(URI obdaURI) throws IOException, InvalidMappingException {
+	public OBDAModel getObdaModel(URI obdaURI) throws IOException, InvalidMappingExceptionWithIndicator {
 		//create empty model
 		OBDAModel obdaModel = fac.getOBDAModel();
 		// System.out.println(obdaURI.toString());

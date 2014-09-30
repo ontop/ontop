@@ -4,13 +4,13 @@
         "rdfs:" : "http://www.w3.org/2000/01/rdf-schema#",
         "ex:" : "http://ex.org/",
         ":" : "http://ex.org/"
-    },
+    ,
     "mappings": [
         {
             "mappingId": "UndergraduateStudent",
             "source": {
                 "collection": "students",
-                "criteria": {
+                "criteria": [{
                     "type": 1
                 }
             },

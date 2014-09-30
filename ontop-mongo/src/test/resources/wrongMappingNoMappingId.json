@@ -7,7 +7,7 @@
     },
     "mappings": [
         {
-            "mappingId": "UndergraduateStudent",
+            "mappingIdd": "UndergraduateStudent",
             "source": {
                 "collection": "students",
                 "criteria": {

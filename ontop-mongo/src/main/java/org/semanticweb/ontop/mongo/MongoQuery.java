@@ -32,4 +32,12 @@ public class MongoQuery implements OBDAQuery {
     public boolean hasModifiers() {
         return false;
     }
+    
+    public String getCollectionName () {
+    	return collectionName;
+    }
+
+    public JsonObject getFilterCriteria () {
+    	return filterCriteria;
+    }
 }

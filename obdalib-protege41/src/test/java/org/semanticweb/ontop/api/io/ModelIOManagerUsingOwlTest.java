@@ -29,7 +29,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.exception.InvalidPredicateDeclarationException;
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.io.PrefixManager;
@@ -114,12 +114,12 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         }
     }
 
-    public void testRegularFile() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+    public void testRegularFile() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
         saveRegularFile();
         loadRegularFile();
     }
 
-    public void testFileWithMultipleDataSources() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+    public void testFileWithMultipleDataSources() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
         saveFileWithMultipleDataSources();
         loadFileWithMultipleDataSources();
     }
@@ -132,7 +132,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
             assertFalse(true);
         } catch (InvalidPredicateDeclarationException e) {
             assertFalse(true);
-        } catch (InvalidMappingException e) {
+        } catch (InvalidMappingExceptionWithIndicator e) {
             // The wrong mapping doesn't get loaded.
             assertTrue(e.getMessage(), (countElement(model.getMappings()) == 2));
         }
@@ -146,7 +146,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
             assertFalse(true);
         } catch (InvalidPredicateDeclarationException e) {
             assertFalse(true);
-        } catch (InvalidMappingException e) {
+        } catch (InvalidMappingExceptionWithIndicator e) {
             // The wrong mapping doesn't get loaded.
             assertTrue(e.getMessage(), (countElement(model.getMappings()) == 2));
         }
@@ -160,7 +160,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
             assertFalse(true);
         } catch (InvalidPredicateDeclarationException e) {
             assertFalse(true);
-        } catch (InvalidMappingException e) {
+        } catch (InvalidMappingExceptionWithIndicator e) {
             // The wrong mapping doesn't get loaded.
             assertTrue(e.getMessage(), (countElement(model.getMappings()) == 2));
         }
@@ -174,7 +174,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         	assertTrue(true);
         } catch (InvalidPredicateDeclarationException e) {
             assertFalse(true);
-        } catch (InvalidMappingException e) {
+        } catch (InvalidMappingExceptionWithIndicator e) {
             assertFalse(true);
         }
     }
@@ -187,7 +187,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         	assertTrue(true);
         } catch (InvalidPredicateDeclarationException e) {
             assertFalse(true);
-        } catch (InvalidMappingException e) {
+        } catch (InvalidMappingExceptionWithIndicator e) {
             assertFalse(true);
         }
     }
@@ -200,7 +200,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
             assertFalse(true);
         } catch (InvalidPredicateDeclarationException e) {
             assertFalse(true);
-        } catch (InvalidMappingException e) {
+        } catch (InvalidMappingExceptionWithIndicator e) {
             // The wrong mapping doesn't get loaded, i.e., all of them
             assertTrue(e.getMessage(), (countElement(model.getMappings()) == 0));
         }
@@ -234,7 +234,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
      * Test loading the file
      */
 
-    private void loadRegularFile() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+    private void loadRegularFile() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
         ioManager = new ModelIOManager(model);
         ioManager.load("src/test/java/org/semanticweb/ontop/api/io/SchoolRegularFile.obda");
 
@@ -244,7 +244,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         assertTrue(countElement(model.getMappings()) == 3);
     }
 
-    private void loadFileWithMultipleDataSources() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+    private void loadFileWithMultipleDataSources() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
         ioManager = new ModelIOManager(model);
         ioManager.load("src/test/java/org/semanticweb/ontop/api/io/SchoolMultipleDataSources.obda");
 
@@ -254,7 +254,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         assertTrue(countElement(model.getMappings()) == 6);
     }
 
-    private void loadObdaFile(String fileLocation) throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+    private void loadObdaFile(String fileLocation) throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
         // Load the OBDA model
         ModelIOManager modelIO = new ModelIOManager(model);
         modelIO.load(fileLocation);

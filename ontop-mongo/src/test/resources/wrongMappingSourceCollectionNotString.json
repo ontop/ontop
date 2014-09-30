@@ -21,8 +21,8 @@
         {
             "mappingId": "GraduateStudent",
             "source": {
-                "collection": "students",
-                "criteria": {
+            	"collection": 3.14,
+            	"criteria": {
                     "type": 2
                 }
             },

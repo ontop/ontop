@@ -22,9 +22,7 @@
             "mappingId": "GraduateStudent",
             "source": {
                 "collection": "students",
-                "criteria": {
-                    "type": 2
-                }
+                "criteria": "type: 2"
             },
             "target": "<http://ex.org/Student/{code}> a <http://ex.org/GraduateStudent> ."
         }

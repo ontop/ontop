@@ -34,7 +34,7 @@ import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.n3.N3Writer;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
-import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
@@ -60,7 +60,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 	private OWLOntology ontology = null;
 	
 	@Override
-	public void setUp() throws IOException, InvalidMappingException {
+	public void setUp() throws IOException, InvalidMappingExceptionWithIndicator {
 		// obda file
 		File f = new File("src/test/resources/materializer/MaterializeTest.obda");
 		//create model

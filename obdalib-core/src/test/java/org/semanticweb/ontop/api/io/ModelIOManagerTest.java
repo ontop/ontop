@@ -2,7 +2,7 @@ package org.semanticweb.ontop.api.io;
 
 import java.io.IOException;
 
-import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.exception.InvalidPredicateDeclarationException;
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -15,7 +15,7 @@ public class ModelIOManagerTest {
 
 	@Test
 	public void testSpaceBeforeEndCollectionSymbol() throws IOException,
-			InvalidPredicateDeclarationException, InvalidMappingException {
+			InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		OBDAModel obdaModel = fac.getOBDAModel();
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
@@ -25,7 +25,7 @@ public class ModelIOManagerTest {
 
 	@Test(expected = IOException.class)
 	public void testEndCollectionSymbolRequirement() throws IOException,
-			InvalidPredicateDeclarationException, InvalidMappingException {
+			InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		OBDAModel obdaModel = fac.getOBDAModel();
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
