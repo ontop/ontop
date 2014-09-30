@@ -37,6 +37,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleDirectedGraph;
+
 /**
  * QueryConnectedComponent represents a connected component of a CQ
  * 
@@ -86,7 +89,7 @@ public class QueryConnectedComponent {
 			Term t = l.getTerm(); 
 			if (t instanceof Variable) {
 				variables.add(t);
-				//if (headNewLiterals.contains(t))
+				//if (headterms.contains(t))
 				if (l.isExistentialVariable())
 					quantifiedVariables.add(l);
 				else 
@@ -124,7 +127,7 @@ public class QueryConnectedComponent {
 			allLoops.remove(seed);
 		}
 		
-		// expand the current CC by adding all edges that are have at least one of the NewLiterals in them
+		// expand the current CC by adding all edges that are have at least one of the terms in them
 		boolean expanded = true;
 		while (expanded) {
 			expanded = false;
@@ -188,8 +191,9 @@ public class QueryConnectedComponent {
 	 */
 	
 	public static List<QueryConnectedComponent> getConnectedComponents(CQIE cqie) {
-		List<QueryConnectedComponent> ccs = new LinkedList<QueryConnectedComponent>();
 
+//		SimpleDirectedGraph<Loop, DefaultEdge> query = new SimpleDirectedGraph(DefaultEdge.class);
+		
 		Set<Term> headTerms = new HashSet<Term>(cqie.getHead().getTerms());
 
 
@@ -229,6 +233,9 @@ public class QueryConnectedComponent {
 				nonDLAtoms.add(a);
 			}
 		}	
+
+		
+		List<QueryConnectedComponent> ccs = new LinkedList<QueryConnectedComponent>();
 		
 		// form the list of connected components from the list of edges
 		while (!pairs.isEmpty()) {
@@ -245,7 +252,7 @@ public class QueryConnectedComponent {
 		}
 
 		// create degenerate connected components for all remaining loops (which are disconnected from anything else)
-		//for (Entry<NewLiteral, Loop> loop : allLoops.entrySet()) {
+		//for (Entry<term, Loop> loop : allLoops.entrySet()) {
 		while (!allLoops.isEmpty()) {
 			Term seed = allLoops.keySet().iterator().next();
 			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed));			
@@ -326,7 +333,7 @@ public class QueryConnectedComponent {
 	/**
 	 * Loop: class representing loops of connected components
 	 * 
-	 * a loop is characterized by a Term and a set of atoms involving only that Term
+	 * a loop is characterized by a term and a set of atoms involving only that term
 	 * 
 	 * @author Roman Kontchakov
 	 *
@@ -334,7 +341,7 @@ public class QueryConnectedComponent {
 	
 	static class Loop {
 		private final Term term;
-		private Collection<Function> atoms;
+		private final List<Function> atoms;
 		private final boolean isExistentialVariable;
 		
 		public Loop(Term term, boolean isExistentialVariable) {
@@ -377,7 +384,7 @@ public class QueryConnectedComponent {
 	/**
 	 * Edge: class representing edges of connected components
 	 * 
-	 * an edge is characterized by a pair of Terms and a set of atoms involving only those Terms
+	 * an edge is characterized by a pair of terms and a set of atoms involving only those terms
 	 * 
 	 * @author Roman Kontchakov
 	 *
@@ -385,7 +392,7 @@ public class QueryConnectedComponent {
 	
 	static class Edge {
 		private final Loop l0, l1;
-		private Collection<Function> bAtoms;
+		private final List<Function> bAtoms;
 		
 		public Edge(Loop l0, Loop l1) {
 			this.bAtoms = new ArrayList<Function>(10);
@@ -436,12 +443,10 @@ public class QueryConnectedComponent {
 	
 	private static class TermPair {
 		private final Term t0, t1;
-		private final int hashCode;
 
 		public TermPair(Term t0, Term t1) {
 			this.t0 = t0;
 			this.t1 = t1;
-			this.hashCode = t0.hashCode() ^ t1.hashCode();
 		}
 
 		@Override
@@ -463,7 +468,7 @@ public class QueryConnectedComponent {
 		
 		@Override
 		public int hashCode() {
-			return hashCode;
+			return t0.hashCode() ^ t1.hashCode();
 		}
 	}	
 }
