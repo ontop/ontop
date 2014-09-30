@@ -450,12 +450,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
 		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-		try {
-			Class.forName(driver);
-		} catch (ClassNotFoundException e1) {
-			// Does nothing because the SQLException handles this problem also.
-			log.error("connect():Error loading the driver");
-		}
 		localConnection = DriverManager.getConnection(url, username, password);
 
 		if (localConnection != null) {
@@ -787,10 +781,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 // Normalizing equalities
 				unfolder.normalizeEqualities();
 				
-				 // Adding ontology assertions (ABox) as rules (facts, head with no body).
-				unfolder.addABoxAssertionsAsFacts(inputTBox.getABox());
-				
 				unfolder.applyTMappings(reformulationReasoner, true);
+
+                // Adding ontology assertions (ABox) as rules (facts, head with no body).
+                unfolder.addABoxAssertionsAsFacts(inputTBox.getABox());
 				
 				Ontology aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reformulationReasoner);	
 				sigma.addEntities(aboxDependencies.getVocabulary());
@@ -1042,7 +1036,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		for (Axiom assertion : assertions) {
 			try {
 				CQIE rule = AxiomToRuleTranslator.translate(assertion);
-				rules.add(rule);
+                if(rule != null) {
+                    rules.add(rule);
+                }
 			} catch (UnsupportedOperationException e) {
 				log.warn(e.getMessage());
 			}
@@ -1149,25 +1145,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
 		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-		// if (driver.contains("mysql")) {
-		// url = url + "?relaxAutoCommit=true";
-		// }
-		try {
-//			/*
-//			 * Checking if the driver has already been loaded
-//			 */
-//			java.lang.reflect.Method m = ClassLoader.class.getDeclaredMethod("findLoadedClass", new Class[] { String.class });
-//	        m.setAccessible(true);
-//	        ClassLoader cl = ClassLoader.getSystemClassLoader();
-//	        Object test1 = m.invoke(cl, "it.unibz.krdb.obda.owlrefplatform.core.Quest$"+driver);
-//	        System.out.println(test1 != null);
-////	        
-	        
-			Class.forName(driver);
-		} catch (ClassNotFoundException e1) {
-			log.error("getSQLConnection():Error loading the driver");
-			log.error(e1.getMessage());
-		}
 		try {
 			conn = DriverManager.getConnection(url, username, password);
 		} catch (SQLException e) {
