@@ -37,9 +37,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.SimpleDirectedGraph;
-
 /**
  * QueryConnectedComponent represents a connected component of a CQ
  * 
@@ -92,8 +89,7 @@ public class QueryConnectedComponent {
 				//if (headterms.contains(t))
 				if (l.isExistentialVariable())
 					quantifiedVariables.add(l);
-				else 
-					{
+				else {
 					freeVariables.add(t);
 					noFreeTerms = false;
 				}
@@ -192,10 +188,7 @@ public class QueryConnectedComponent {
 	
 	public static List<QueryConnectedComponent> getConnectedComponents(CQIE cqie) {
 
-//		SimpleDirectedGraph<Loop, DefaultEdge> query = new SimpleDirectedGraph(DefaultEdge.class);
-		
 		Set<Term> headTerms = new HashSet<Term>(cqie.getHead().getTerms());
-
 
 		// collect all edges and loops 
 		//      an edge is a binary predicate P(t, t') with t \ne t'
