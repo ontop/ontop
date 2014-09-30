@@ -6,16 +6,21 @@ import org.semanticweb.ontop.model.impl.AbstractOBDAMappingAxiom;
 
 public class MongoMappingAxiom extends AbstractOBDAMappingAxiom {
 
-	private MongoQuery sourceQuery;
-	private CQIE targetQuery;
+	private final MongoQuery sourceQuery;
+	private final CQIE targetQuery;
 	
-    public MongoMappingAxiom(String id) {
+    
+
+    public MongoMappingAxiom(String id, MongoQuery sourceQuery, CQIE targetQuery) {
         super(id);
+        this.sourceQuery = sourceQuery;
+        this.targetQuery = targetQuery;
     }
 
+    
     @Override
     public void setSourceQuery(OBDAQuery query) {
-    	this.sourceQuery = (MongoQuery)query;
+    	throw new IllegalAccessError("use constructor instead");
     }
 
     @Override
@@ -25,7 +30,7 @@ public class MongoMappingAxiom extends AbstractOBDAMappingAxiom {
 
     @Override
     public void setTargetQuery(OBDAQuery query) {
-    	this.targetQuery = (CQIE)query;
+    	throw new IllegalAccessError("use constructor instead");
     }
 
     @Override
@@ -35,10 +40,7 @@ public class MongoMappingAxiom extends AbstractOBDAMappingAxiom {
 
     @Override
     public Object clone() {
-    	// TODO what is the correct wat to clone sourceQuery and should it be cloned or not?
-    	MongoMappingAxiom cloneAxiom = new MongoMappingAxiom( getId() );
-    	cloneAxiom.setSourceQuery( (OBDAQuery)sourceQuery );
-    	cloneAxiom.setTargetQuery( targetQuery.clone() );
-        return cloneAxiom;
+    	MongoMappingAxiom cloneAxiom = new MongoMappingAxiom( getId(), sourceQuery.clone() , targetQuery.clone() );
+    	return cloneAxiom;
     }
 }

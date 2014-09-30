@@ -8,6 +8,7 @@ import com.google.gson.JsonParser;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.SimplePrefixManager;
 import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.parser.TargetQueryParserException;
@@ -34,7 +35,29 @@ public class MongoMappingParser implements MappingParser {
     private final String mappingDocument;
     
     private final PrefixManager prefixManager;
-
+    
+    
+    // Error messages
+    final static String INVALID_MAPPING_DOCUMENT = "The root of the mapping document is not a Json Object";
+    
+    final static String INVALID_PREFIXES_TYPE = "The " + prefixesKey + " element is not a Json Object";
+    final static String INVALID_PREFIX_VALUE_TYPE = "The value of the key (%s) is not a String";
+    
+    final static String MISSING_MAPPINGS_KEY = "A mapping document must contain a " + mappingsKey + " key";
+    final static String INVALID_MAPPINGS_TYPE = "The " + mappingsKey + " element is not a Json Array";
+    
+	static final String INVALID_MAPPING_TYPE = "The mapping element is not a Json Object";
+	static final String MISSING_ONE_OF_MAPPING_KEYS = "A mapping object should contain " + mappingIdKey + ", " + sourceKey + " and " + targetKey + " keys";
+	static final String INVALID_MAPPING_ID_TYPE = "The value of " + mappingIdKey + " is not a String";
+	static final String INVALID_MAPPING_SOURCE_TYPE = "The value of " + sourceKey + " is not a Json Object";
+	static final String INVALID_MAPPING_TARGET_TYPE = "The value of " + targetKey + " is not a String";
+	
+	static final String MISSING_ONE_OF_SOURCE_QUERY_KEYS = "A source query object should contain " + collectionKey + " and " + criteriaKey + " keys";
+	static final String INVALID_SOURCE_COLLECTION_TYPE = "The value of " + collectionKey + " is not a String";
+	static final String INVALID_SOURCE_CRITERIA_TYPE = "The value of " + criteriaKey + " is not a Json Object";
+    
+	
+	
     public MongoMappingParser(String mappingDocument){
         this.mappingDocument = mappingDocument;
         this.prefixManager = new SimplePrefixManager(); 
@@ -67,7 +90,7 @@ public class MongoMappingParser implements MappingParser {
     	JsonElement root = parser.parse(mappingDocument);
   	
     	if (!root.isJsonObject()) {
-    		throw new InvalidMongoMappingException(root, "root of the mapping document is not a Json Object");
+    		throw new InvalidMongoMappingException(root, INVALID_MAPPING_DOCUMENT );
     	}
     	
     	return parse(root.getAsJsonObject());
@@ -81,7 +104,7 @@ public class MongoMappingParser implements MappingParser {
     	
     	// check whether there is a mappings entry, if yes, parse them
     	if (!rootObject.has(mappingsKey)) {
-			throw new InvalidMongoMappingException(rootObject, "A mapping document must contain a " + mappingsKey + " key");
+			throw new InvalidMongoMappingException(rootObject, MISSING_MAPPINGS_KEY);
     	}    		
     	return readMappingsDeclaration(rootObject.get(mappingsKey));
     }
@@ -92,7 +115,7 @@ public class MongoMappingParser implements MappingParser {
 	private List<OBDAMappingAxiom> readMappingsDeclaration(JsonElement mappingsElement) throws InvalidMongoMappingException {
 		
 		if (!mappingsElement.isJsonArray()) {
-			throw new InvalidMongoMappingException(mappingsElement, "The " + mappingsKey + " element is not a Json Array");
+			throw new InvalidMongoMappingException(mappingsElement, INVALID_MAPPINGS_TYPE);
 		}
 
 		List<OBDAMappingAxiom> mappingsList = new ArrayList<>();
@@ -111,52 +134,52 @@ public class MongoMappingParser implements MappingParser {
 	private OBDAMappingAxiom readMappingDeclaration(JsonElement mappingElement) throws InvalidMongoMappingException {
 		// check that mappingElement is a Json Object (not a primitive)
 		if (!mappingElement.isJsonObject()) {
-			throw new InvalidMongoMappingException(mappingElement, "The mapping element is not a Json Object");
+			throw new InvalidMongoMappingException(mappingElement, INVALID_MAPPING_TYPE);
 		}
 		
 		JsonObject mappingObject = mappingElement.getAsJsonObject();
 		
 		// check that all keys (mappingId, source and target) are present
 		if (! (mappingObject.has(mappingIdKey) && mappingObject.has(sourceKey)) && mappingObject.has(targetKey)) {
-			throw new InvalidMongoMappingException(mappingObject, "A mapping object should contain " + mappingIdKey + ", " + sourceKey + " and " + targetKey + " keys");
+			throw new InvalidMongoMappingException(mappingObject, MISSING_ONE_OF_MAPPING_KEYS);
 		}
 
 		// the value of mappingId should be a String
 		if (! (mappingObject.get(mappingIdKey).isJsonPrimitive() && mappingObject.get(mappingIdKey).getAsJsonPrimitive().isString()) ) {			
-			throw new InvalidMongoMappingException(mappingObject, "The value of " + mappingIdKey + " is not a String");
+			throw new InvalidMongoMappingException(mappingObject, INVALID_MAPPING_ID_TYPE);
 		}
 	
 		// the value of source should be a JsonObject
 		if (! mappingObject.get(sourceKey).isJsonObject() ) {
-			throw new InvalidMongoMappingException(mappingObject, "The value of " + sourceKey + " is not a Json Object");
+			throw new InvalidMongoMappingException(mappingObject, INVALID_MAPPING_SOURCE_TYPE);
 		}
 
 		// the value of target should be a String
 		if (! (mappingObject.get(targetKey).isJsonPrimitive() && mappingObject.get(targetKey).getAsJsonPrimitive().isString()) ) {
-			throw new InvalidMongoMappingException(mappingObject, "The value of " + targetKey + " is not a String");
+			throw new InvalidMongoMappingException(mappingObject, INVALID_MAPPING_TARGET_TYPE);
 		}
 		
 		String mappingId = mappingObject.get(mappingIdKey).getAsString();
-		OBDAMappingAxiom axiom = new MongoMappingAxiom(mappingId);
-		axiom.setSourceQuery(readSourceQuery(mappingObject.get(sourceKey).getAsJsonObject()));
-		axiom.setTargetQuery(readTargetQuery(mappingObject.get(targetKey)));
+		MongoQuery sourceQuery = readSourceQuery(mappingObject.get(sourceKey).getAsJsonObject());
+		CQIE targetQuery = readTargetQuery(mappingObject.get(targetKey));
+		OBDAMappingAxiom axiom = new MongoMappingAxiom(mappingId, sourceQuery, targetQuery);
 		return axiom;
 	}
 
-	private static OBDAQuery readSourceQuery(JsonObject sourceQuery) throws InvalidMongoMappingException {
+	private static MongoQuery readSourceQuery(JsonObject sourceQuery) throws InvalidMongoMappingException {
 
 		if (! (sourceQuery.has(collectionKey) && sourceQuery.has(criteriaKey)) ) {
-			throw new InvalidMongoMappingException(sourceQuery, "A source query object should contain " + collectionKey + " and " + criteriaKey + " keys");
+			throw new InvalidMongoMappingException(sourceQuery, MISSING_ONE_OF_SOURCE_QUERY_KEYS);
 		}
 		
 		// the value of collection should be a String
 		if (! (sourceQuery.get(collectionKey).isJsonPrimitive() && sourceQuery.get(collectionKey).getAsJsonPrimitive().isString()) ) {			
-			throw new InvalidMongoMappingException(sourceQuery, "The value of " + collectionKey + " is not a String");
+			throw new InvalidMongoMappingException(sourceQuery, INVALID_SOURCE_COLLECTION_TYPE);
 		}
 			
 		// the value of criteria should be a JsonObject
 		if (! sourceQuery.get(criteriaKey).isJsonObject() ) {
-			throw new InvalidMongoMappingException(sourceQuery, "The value of " + criteriaKey + " is not a Json Object");
+			throw new InvalidMongoMappingException(sourceQuery, INVALID_SOURCE_CRITERIA_TYPE);
 		}
 
 		return new MongoQuery( sourceQuery.get(collectionKey).getAsString(), sourceQuery.get(criteriaKey).getAsJsonObject() );
@@ -167,7 +190,7 @@ public class MongoMappingParser implements MappingParser {
 	 * 
 	 * Here it is assumed that targetElement has been already checked to be a Primitive, which is a String
 	 */
-	private OBDAQuery readTargetQuery(JsonElement targetElement) throws InvalidMongoMappingException {
+	private CQIE readTargetQuery(JsonElement targetElement) throws InvalidMongoMappingException {
 
 		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(prefixManager);
 		try {
@@ -182,14 +205,15 @@ public class MongoMappingParser implements MappingParser {
 	private void readPrefixDeclaration(JsonElement prefixesElement) throws InvalidMongoMappingException {
 		
 		if (!prefixesElement.isJsonObject()) {
-			throw new InvalidMongoMappingException(prefixesElement, "The " + prefixesKey + " element is not a Json Object");
+			throw new InvalidMongoMappingException(prefixesElement, INVALID_PREFIXES_TYPE);
 		}
 		
 		Set<Entry<String, JsonElement>> prefixes = prefixesElement.getAsJsonObject().entrySet();
 		for ( Entry<String, JsonElement> pair : prefixes) {
 			if (! (pair.getValue().isJsonPrimitive() && pair.getValue().getAsJsonPrimitive().isString()) )
 			{
-				throw new InvalidMongoMappingException(pair.getValue(), "The value of " + pair.getKey() + " key is not a String");
+				String message = String.format(INVALID_PREFIX_VALUE_TYPE, pair.getKey());
+				throw new InvalidMongoMappingException(pair.getValue(), message);
 			}
 			prefixManager.addPrefix(pair.getKey(), pair.getValue().getAsString());
 		}

@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.mongo;
 
 import com.google.gson.JsonObject;
+
 import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.model.OBDAQueryModifiers;
 
@@ -9,7 +10,7 @@ import org.semanticweb.ontop.model.OBDAQueryModifiers;
  */
 public class MongoQuery implements OBDAQuery {
 
-    private final String collectionName;
+	private final String collectionName;
 
     private final JsonObject filterCriteria;
 
@@ -39,5 +40,11 @@ public class MongoQuery implements OBDAQuery {
 
     public JsonObject getFilterCriteria () {
     	return filterCriteria;
+    }
+    
+    public MongoQuery clone(){
+    	// TODO: check if we need to deep clone the json object
+		return new MongoQuery(collectionName, filterCriteria);
+    	
     }
 }

@@ -1,6 +1,8 @@
 package org.semanticweb.ontop.mongo;
 
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -70,8 +72,9 @@ public class MongoMappingParserTest {
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
         	parser.parse();
+        	fail();
         } catch (InvalidMongoMappingException e) {
-        	Assert.assertEquals("The prefixes element is not a Json Object", e.getMessage());
+        	Assert.assertEquals(MongoMappingParser.INVALID_PREFIXES_TYPE, e.getMessage());
         }
     }
     
@@ -81,72 +84,140 @@ public class MongoMappingParserTest {
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
         	parser.parse();
+        	fail();
         } catch (InvalidMongoMappingException e) {
-        	Assert.assertEquals("The value of xsd: key is not a String", e.getMessage());
+        	String expectedMessage = String.format(MongoMappingParser.INVALID_PREFIX_VALUE_TYPE, "xsd:");
+        	Assert.assertEquals(expectedMessage, e.getMessage());
         }
     }
     
     @Test
-    public void testParse4() throws IOException, InvalidMongoMappingException {
+    public void testParseMappings1() throws IOException, InvalidMongoMappingException {
+    	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingNoMappings.json");
+        MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
+        try {
+        	parser.parse();
+        	fail();
+        } catch (InvalidMongoMappingException e) {
+        	Assert.assertEquals(MongoMappingParser.MISSING_MAPPINGS_KEY, e.getMessage());
+        }
+    }
+
+    @Test
+    public void testParseMappings2() throws IOException, InvalidMongoMappingException {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingNotArray.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
         	parser.parse();
+        	fail();
         } catch (InvalidMongoMappingException e) {
-        	Assert.assertEquals("The mappings element is not a Json Array", e.getMessage());
+        	Assert.assertEquals(MongoMappingParser.INVALID_MAPPINGS_TYPE, e.getMessage());
         }
     }
 
     @Test
-    public void testParse5() throws IOException, InvalidMongoMappingException {
+    public void testParseMapping1() throws IOException, InvalidMongoMappingException {
+    	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingNotObject.json");
+        MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
+        try {
+        	parser.parse();
+        	fail();
+        } catch (InvalidMongoMappingException e) {
+        	Assert.assertEquals(MongoMappingParser.INVALID_MAPPING_TYPE, e.getMessage());
+        }
+    }
+
+    @Test
+    public void testParseMapping2() throws IOException, InvalidMongoMappingException {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingNoMappingId.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
         	parser.parse();
+         	fail();
         } catch (InvalidMongoMappingException e) {
-        	Assert.assertEquals("A mapping object should contain mappingId, source and target keys", e.getMessage());
+        	Assert.assertEquals(MongoMappingParser.MISSING_ONE_OF_MAPPING_KEYS, e.getMessage());
         }
     }
 
     @Test
-    public void testParse6() throws IOException, InvalidMongoMappingException {
+    public void testParseMapping3() throws IOException, InvalidMongoMappingException {
+    	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingMappingIdNotString.json");
+        MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
+        try {
+        	parser.parse();
+         	fail();
+        } catch (InvalidMongoMappingException e) {
+        	Assert.assertEquals(MongoMappingParser.INVALID_MAPPING_ID_TYPE, e.getMessage());
+        }
+    }
+
+    @Test
+    public void testParseMapping4() throws IOException, InvalidMongoMappingException {
+    	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingSourceNotObject.json");
+        MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
+        try {
+        	parser.parse();
+         	fail();
+        } catch (InvalidMongoMappingException e) {
+        	Assert.assertEquals(MongoMappingParser.INVALID_MAPPING_SOURCE_TYPE, e.getMessage());
+        }
+    }
+
+    @Test
+    public void testParseMapping5() throws IOException, InvalidMongoMappingException {
+    	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingTargetNotString.json");
+        MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
+        try {
+        	parser.parse();
+         	fail();
+        } catch (InvalidMongoMappingException e) {
+        	Assert.assertEquals(MongoMappingParser.INVALID_MAPPING_TARGET_TYPE, e.getMessage());
+        }
+    }
+
+    @Test
+    public void testParseSource1() throws IOException, InvalidMongoMappingException {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingSourceNoCollection.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
         	parser.parse();
+         	fail();
         } catch (InvalidMongoMappingException e) {
-        	Assert.assertEquals("A source query object should contain collection and criteria keys", e.getMessage());
+        	Assert.assertEquals(MongoMappingParser.MISSING_ONE_OF_SOURCE_QUERY_KEYS, e.getMessage());
         }
     }
 
     @Test
-    public void testParse7() throws IOException, InvalidMongoMappingException {
+    public void testParseSource2() throws IOException, InvalidMongoMappingException {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingSourceCollectionNotString.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
         	parser.parse();
+         	fail();
         } catch (InvalidMongoMappingException e) {
-        	Assert.assertEquals("The value of collection is not a String", e.getMessage());
+        	Assert.assertEquals(MongoMappingParser.INVALID_SOURCE_COLLECTION_TYPE, e.getMessage());
         }
     }
 
     @Test
-    public void testParse8() throws IOException, InvalidMongoMappingException {
+    public void testParseSource3() throws IOException, InvalidMongoMappingException {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingSourceCriteriaNotObject.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
         	parser.parse();
+         	fail();
         } catch (InvalidMongoMappingException e) {
-        	Assert.assertEquals("The value of criteria is not a Json Object", e.getMessage());
+        	Assert.assertEquals(MongoMappingParser.INVALID_SOURCE_CRITERIA_TYPE, e.getMessage());
         }
     }
 
     @Test(expected=TargetQueryParserException.class)
-    public void testParse9() throws Throwable {
+    public void testParseTarget1() throws Throwable {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingTargetSyntaxError.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
         	parser.parse();
+         	fail();
         } catch (InvalidMongoMappingException e) {
         	throw e.getCause();
         }
