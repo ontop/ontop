@@ -99,7 +99,7 @@ public class ImdbTestPostgres {
                     count += 1;
                 }
                 log.debug("Total result: {}", count);
-//                assertFalse(count == 0);
+                assertFalse(count == 0);
                 log.debug("Elapsed time: {} ms", time);
             }
         }
@@ -134,17 +134,9 @@ public class ImdbTestPostgres {
                 "   $m a mo:Movie; mo:title ?title; mo:hasActor ?x; mo:hasDirector ?x; mo:isProducedBy $y; mo:belongsToGenre $z .\n" +
                 "   $x dbpedia:birthName $actor_name .\n" +
                 "   $y :companyName $company_name; :hasCompanyLocation [ a mo:Eastern_Asia ] .\n" +
-//                "   $z a mo:Love .\n" +
+                "   $z a mo:Love .\n" +
                 "}\n";
 
-        String query3 = "PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>\n" +
-                "PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>\n" +
-                "PREFIX dbpedia: <http://dbpedia.org/ontology/>\n" +
-                "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
-                "SELECT $x " +
-        " WHERE { \n" +
-                "   $x a mo:Love .\n" +
-                "}\n";
 
         String query2 = "PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>\n" +
                 "PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>\n" +
@@ -156,7 +148,7 @@ public class ImdbTestPostgres {
                 "   $y :hasCompanyLocation [ a mo:Eastern_Asia ] .\n" +
                 "}\n";
 
-        runTestQuery(p, query2);
+        runTestQuery(p, query);
     }
 
     private void runTestQuery(Properties p, String query) throws Exception {
