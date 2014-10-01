@@ -358,6 +358,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public void setExcludeFromTMappings(List<SimplePredicate> excludeFromTMappings){
 		assert(excludeFromTMappings != null);
 		this.excludeFromTMappings = excludeFromTMappings;
+
+        this.applyExcludeFromTMappings = true;
 	}
 
 	/**

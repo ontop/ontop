@@ -20,7 +20,7 @@ public class SimplePredicate {
 		String toName = to.getName();
 		int toArity = to.getArity();
 		
-		return toName == this.name && toArity == this.arity;
+		return toName.equals(this.name) && toArity == this.arity;
 	}
 	
 	@Override 
@@ -28,7 +28,7 @@ public class SimplePredicate {
 		boolean result = false;
 		if (other instanceof SimplePredicate) {
 			SimplePredicate that = (SimplePredicate) other;
-			result = (this.arity == that.arity && this.name == that.name);
+			result = (this.arity == that.arity && this.name.equals(that.name));
 		}
 		return result;
 	}
