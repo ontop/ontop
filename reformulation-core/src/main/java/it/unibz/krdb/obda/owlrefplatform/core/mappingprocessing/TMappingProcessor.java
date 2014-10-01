@@ -88,8 +88,8 @@ public class TMappingProcessor implements Serializable {
 		excludeFromTMappings = new ArrayList<SimplePredicate>();
 	}
 	
-	public TMappingProcessor(Ontology tbox, boolean optmize, List<SimplePredicate> excludeFromTMappings) {
-		this.optimize = optmize;
+	public TMappingProcessor(Ontology tbox, boolean optimize, List<SimplePredicate> excludeFromTMappings) {
+		this.optimize = optimize;
 		
 		reasoner = new TBoxReasonerImpl(tbox);
 
