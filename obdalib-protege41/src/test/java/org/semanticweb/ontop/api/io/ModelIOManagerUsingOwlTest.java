@@ -26,6 +26,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -313,7 +314,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         }
     }
     
-    private int countElement(Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings) {
+    private int countElement(Map<URI, List<OBDAMappingAxiom>> mappings) {
         int total = 0;
         for (List<OBDAMappingAxiom> list : mappings.values()) {
             total += list.size();

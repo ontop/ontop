@@ -36,9 +36,9 @@ import org.semanticweb.ontop.querymanager.QueryController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OBDAModelImpl implements SQLOBDAModel {
+public class SQLOBDAModelImpl implements SQLOBDAModel {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
 	private QueryController queryController;
 
@@ -54,7 +54,7 @@ public class OBDAModelImpl implements SQLOBDAModel {
 
 	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
-	private static final Logger log = LoggerFactory.getLogger(OBDAModelImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(SQLOBDAModelImpl.class);
 
 	private final LinkedHashSet<Predicate> declaredClasses = new LinkedHashSet<Predicate>();
 
@@ -68,7 +68,7 @@ public class OBDAModelImpl implements SQLOBDAModel {
 	/**
 	 * The default constructor
 	 */
-	public OBDAModelImpl() {
+	public SQLOBDAModelImpl() {
 		log.debug("OBDA model is initialized!");
 
 		queryController = new QueryController();
@@ -81,10 +81,18 @@ public class OBDAModelImpl implements SQLOBDAModel {
 		mappinglisteners = new ArrayList<>();
 	}
 
+    @Override
+    public OBDAModel newModel(Map<URI, List<OBDAMappingAxiom>> newMappings) {
+        SQLOBDAModelImpl model = (SQLOBDAModelImpl) clone();
+        model.mappings = new HashMap<>(newMappings);
+        return model;
+    }
+
 	@Override
 	public QueryController getQueryController() {
 		return queryController;
 	}
+
 
 	@Override
 	public String getVersion() {

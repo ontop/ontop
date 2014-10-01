@@ -29,8 +29,7 @@ import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.ui.renderer.OWLEntityRendererImpl;
-import org.semanticweb.ontop.model.impl.OBDAModelImpl;
+import org.semanticweb.ontop.model.impl.SQLOBDAModelImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.utils.OBDAPreferences;
@@ -72,7 +71,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 		kit = (OWLEditorKit)getEditorKit();
 //		mmgr = (OWLModelManager)kit.getModelManager();
 //		mmgr.addListener(instance.getModelManagerListener());
-		getEditorKit().put(OBDAModelImpl.class.getName(), instance);
+		getEditorKit().put(SQLOBDAModelImpl.class.getName(), instance);
 
 		// getEditorKit().getModelManager().put(APIController.class.getName(),
 		// instance);

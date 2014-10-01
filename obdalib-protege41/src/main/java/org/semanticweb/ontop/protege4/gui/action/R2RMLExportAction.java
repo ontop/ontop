@@ -31,7 +31,7 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.OBDAModelImpl;
+import org.semanticweb.ontop.model.impl.SQLOBDAModelImpl;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.r2rml.R2RMLWriter;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class R2RMLExportAction extends ProtegeAction {
 	@Override
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit)getEditorKit();		
-		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModel();
+		obdaModel = ((OBDAModelManager)editorKit.get(SQLOBDAModelImpl.class.getName())).getActiveOBDAModel();
 		modelManager = editorKit.getOWLModelManager();
 	}
 

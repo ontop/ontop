@@ -32,7 +32,7 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.OBDAModelImpl;
+import org.semanticweb.ontop.model.impl.SQLOBDAModelImpl;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.DataDefinition;
 import org.semanticweb.ontop.sql.JDBCConnectionManager;
@@ -181,7 +181,7 @@ public class DirectMappingEngine {
 	 * @throws Exception 
 	 */
 	public SQLOBDAModel extractMappings(OBDADataSource source) throws Exception{
-		OBDAModelImpl model = new OBDAModelImpl();
+		SQLOBDAModelImpl model = new SQLOBDAModelImpl();
 		return extractMappings(model, source);
 	}
 	

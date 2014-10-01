@@ -21,7 +21,7 @@ public interface OBDAModel {
     public OBDAMappingAxiom getMapping(URI sourceUri, String mappingId);
 
     /**
-     * Returns all the mappings the given data source id.
+     * Returns the mappings of a given data source.
      */
     public List<OBDAMappingAxiom> getMappings(URI sourceUri);
 
@@ -29,4 +29,12 @@ public interface OBDAModel {
      * Returns all the mappings in this model.
      */
     public Map<URI, List<OBDAMappingAxiom>> getMappings();
+
+    /**
+     * Constructs a new OBDA model with new mappings.
+     *
+     * Note that some ODBA models are immutable so you
+     * should use this method to "update" them.
+     */
+    public OBDAModel newModel(Map<URI, List<OBDAMappingAxiom>> newMappings);
 }

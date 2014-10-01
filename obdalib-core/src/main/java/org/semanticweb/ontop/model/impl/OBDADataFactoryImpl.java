@@ -67,7 +67,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 				}
 	
 	public SQLOBDAModel getOBDAModel() {
-		return new OBDAModelImpl();
+		return new SQLOBDAModelImpl();
 	}
 
 	@Deprecated

@@ -40,7 +40,7 @@ import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.OBDAModelImpl;
+import org.semanticweb.ontop.model.impl.SQLOBDAModelImpl;
 import org.semanticweb.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.utils.OBDAProgessMonitor;
@@ -68,7 +68,7 @@ public class BootstrapAction extends ProtegeAction {
 		editorKit = (OWLEditorKit) getEditorKit();
 		workspace = editorKit.getWorkspace();
 		owlManager = editorKit.getOWLModelManager();
-		modelManager = ((OBDAModelManager) editorKit.get(OBDAModelImpl.class
+		modelManager = ((OBDAModelManager) editorKit.get(SQLOBDAModelImpl.class
 				.getName()));
 	}
 
