@@ -86,12 +86,6 @@ public interface SQLOBDAModel extends OBDAModel {
 	public void fireSourceNameUpdated(URI old, OBDADataSource neu); // TODO
 																	// remove
 
-	/**
-	 * Returns the list of all sources defined in this OBDA model. This list is
-	 * a non-modifiable copy of the internal list.
-	 */
-	public List<OBDADataSource> getSources();
-
 	public OBDADataSource getSource(URI name);
 
 	public void addSource(OBDADataSource source);

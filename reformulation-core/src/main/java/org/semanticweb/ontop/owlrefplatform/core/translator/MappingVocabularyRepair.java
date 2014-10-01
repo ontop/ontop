@@ -20,11 +20,8 @@ package org.semanticweb.ontop.owlrefplatform.core.translator;
  * #L%
  */
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.net.URI;
+import java.util.*;
 
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.SQLOBDAModel;
@@ -43,38 +40,43 @@ import org.slf4j.LoggerFactory;
 public class MappingVocabularyRepair {
 
 	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private static Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
 
-	Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
 
-	public void fixOBDAModel(SQLOBDAModel model, Set<Predicate> vocabulary) {
-		log.debug("Fixing OBDA Model");
-		for (OBDADataSource source : model.getSources()) {
-			Collection<OBDAMappingAxiom> mappings = new LinkedList<OBDAMappingAxiom>(model.getMappings(source.getSourceID()));
-			model.removeAllMappings(source.getSourceID());
-			try {
-				model.addMappings(source.getSourceID(), fixMappingPredicates(mappings, vocabulary));
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
+    public OBDAModel fixOBDAModel(OBDAModel model, Set<Predicate> vocabulary) {
+        log.debug("Fixing OBDA Model");
+
+        Map<URI, List<OBDAMappingAxiom>> mappings = new HashMap<>();
+
+        for (OBDADataSource source : model.getSources()) {
+            List<OBDAMappingAxiom> sourceMapping = new ArrayList<>(model.getMappings(source.getSourceID()));
+
+            try {
+                mappings.put(source.getSourceID(), fixMappingPredicates(sourceMapping, vocabulary));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return model.newModel(mappings);
+    }
 
 	/***
 	 * Makes sure that the mappings given are correctly typed w.r.t. the given
-	 * vocabualry.
+	 * vocabulary.
 	 * 
 	 * @param originalMappings
-	 * @param equivalencesMap
+	 * @param vocabulary
 	 * @return
 	 */
-	public Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, Set<Predicate> vocabulary) {
+	public List<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings,
+                                                       Set<Predicate> vocabulary) {
 		//		log.debug("Reparing/validating {} mappings", originalMappings.size());
 		HashMap<String, Predicate> urimap = new HashMap<String, Predicate>();
 		for (Predicate p : vocabulary) {
 			urimap.put(p.getName(), p);
 		}
 
-		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
+		List<OBDAMappingAxiom> result = new ArrayList<>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
 			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
 			List<Function> body = targetQuery.getBody();

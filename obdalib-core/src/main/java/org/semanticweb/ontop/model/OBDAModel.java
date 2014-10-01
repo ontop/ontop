@@ -37,4 +37,12 @@ public interface OBDAModel {
      * should use this method to "update" them.
      */
     public OBDAModel newModel(Map<URI, List<OBDAMappingAxiom>> newMappings);
+
+    /**
+     * Returns the list of all sources defined in this OBDA model. This list is
+     * a non-modifiable copy of the internal list.
+     */
+    public List<OBDADataSource> getSources();
+
+
 }

@@ -523,7 +523,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		 */
 		if (inputOBDAModel != null && !inputTBox.getVocabulary().isEmpty()) {
 			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
-			repairmodel.fixOBDAModel(inputOBDAModel, inputTBox.getVocabulary());
+            //TODO: remove this cast (when a non-SQL OBDA model will be used) !
+			inputOBDAModel = (SQLOBDAModel) repairmodel.fixOBDAModel(inputOBDAModel,
+                    inputTBox.getVocabulary());
 		}
 
 		unfoldingOBDAModel = fac.getOBDAModel();
