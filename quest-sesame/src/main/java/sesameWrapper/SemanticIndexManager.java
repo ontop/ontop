@@ -109,9 +109,7 @@ public class SemanticIndexManager {
 
 	public int insertData(OWLOntology ontology, int commitInterval, int batchSize) throws SQLException {
 
-		OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(ontology.getOWLOntologyManager().getImportsClosure(ontology),
-				equivalenceMaps.getInternalMap());
-
+		OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(ontology.getOWLOntologyManager().getImportsClosure(ontology));
 		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
 		int result = dataRepository.insertData(conn, newData, commitInterval, batchSize);
 

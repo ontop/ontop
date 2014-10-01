@@ -49,10 +49,10 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 	private Assertion next = null;
 
 	private final OWLAPI3Translator translator = new OWLAPI3Translator();
-	private final Map<Predicate, Description> equivalenceMap;
+	//private final Map<Predicate, Description> equivalenceMap;
 
-	public OWLAPI3ABoxIterator(Collection<OWLOntology> ontologies, Map<Predicate, Description> equivalenceMap) {
-		this.equivalenceMap = equivalenceMap;
+	public OWLAPI3ABoxIterator(Collection<OWLOntology> ontologies) {
+		//this.equivalenceMap = equivalenceMap;
 		if (ontologies.size() > 0) {
 			this.ontologies = ontologies.iterator();
 			this.owlaxiomiterator = this.ontologies.next().getAxioms().iterator();
@@ -137,7 +137,7 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 			OWLAxiom currentABoxAssertion = owlaxiomiterator.next();
 			
 			if (currentABoxAssertion instanceof OWLIndividualAxiom) {						
-				Assertion ax = translator.translate((OWLIndividualAxiom) currentABoxAssertion, equivalenceMap);
+				Assertion ax = translator.translate((OWLIndividualAxiom) currentABoxAssertion);
 				if (ax != null)
 					return ax;
 			}
@@ -161,7 +161,7 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 			OWLAxiom currentABoxAssertion = owlaxiomiterator.next();
 			
 			if (currentABoxAssertion instanceof OWLIndividualAxiom) {						
-				Assertion ax = translator.translate((OWLIndividualAxiom) currentABoxAssertion, equivalenceMap);
+				Assertion ax = translator.translate((OWLIndividualAxiom) currentABoxAssertion);
 				if (ax != null) {
 					next = ax;
 					return true;

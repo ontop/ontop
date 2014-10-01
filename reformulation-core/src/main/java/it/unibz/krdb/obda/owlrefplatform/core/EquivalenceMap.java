@@ -34,103 +34,92 @@ public class EquivalenceMap {
 	private EquivalenceMap(Map<Predicate, Description> equivalenceMap) {
 		this.equivalenceMap = equivalenceMap;
 	}
+		
+	public OClass getClassRepresentative(Predicate p) {
+		return (OClass)equivalenceMap.get(p);
+	}
+	
+	public Property getPropertyRepresentative(Predicate p) {
+		return (Property)equivalenceMap.get(p);
+	}
+	
+	// TO BE REMOVED: USED ONLY ONCE in EquivalenceTBoxOptimizer
+	@Deprecated
+	public Set<Predicate> keySet() {
+		return equivalenceMap.keySet();
+	}	
+
+	// TO BE REMOVED: two uses EquivalenceTBoxOptimizer and QueryVocabularyValidator
+	@Deprecated 
+	public boolean containsKey(Predicate p) {
+		return equivalenceMap.containsKey(p);
+	}
+	
+	
+	public Function getNormal(Function atom) {
+		Predicate p = atom.getPredicate();
+		
+		if (p.getArity() == 1) {
+			OClass equivalent = getClassRepresentative(p);
+			if (equivalent != null)
+				return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
+		} 
+		else {
+			Property equivalent = getPropertyRepresentative(p);
+			if (equivalent != null) {
+				if (!equivalent.isInverse()) 
+					return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
+				else 
+					return dfac.getFunction(equivalent.getPredicate(), atom.getTerm(1), atom.getTerm(0));
+			}
+		}
+		return atom;
+	}
+
+	// used in EquivalentTriplePredicateIterator
 	
 	public Assertion getNormal(Assertion assertion) {
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
 			Predicate concept = ca.getConcept();
-			ObjectConstant object = ca.getObject();
+			OClass description = getClassRepresentative(concept);
 			
-			Description description = equivalenceMap.get(concept);
 			if (description != null) {
-				return ofac.createClassAssertion(((OClass) description).getPredicate(), object);
+				ObjectConstant object = ca.getObject();
+				return ofac.createClassAssertion(description.getPredicate(), object);
 			}			
-		} else if (assertion instanceof ObjectPropertyAssertion) {
+		} 
+		else if (assertion instanceof ObjectPropertyAssertion) {
 			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
 			Predicate role = opa.getRole();
-			ObjectConstant object1 = opa.getFirstObject();
-			ObjectConstant object2 = opa.getSecondObject();
+			Property property = getPropertyRepresentative(role);
 			
-			Description description = equivalenceMap.get(role);
-			if (description != null) {
-				Property property = (Property) description;
+			if (property != null) {
+				ObjectConstant object1 = opa.getFirstObject();
+				ObjectConstant object2 = opa.getSecondObject();
 				if (property.isInverse()) {
 					return ofac.createObjectPropertyAssertion(property.getPredicate(), object2, object1);
 				} else {
 					return ofac.createObjectPropertyAssertion(property.getPredicate(), object1, object2);
 				}
 			}
-		} else if (assertion instanceof DataPropertyAssertion) {
+		} 
+		else if (assertion instanceof DataPropertyAssertion) {
 			DataPropertyAssertion dpa = (DataPropertyAssertion) assertion;
 			Predicate attribute = dpa.getAttribute();
-			ObjectConstant object = dpa.getObject();
-			ValueConstant constant = dpa.getValue();
+			Property property = getPropertyRepresentative(attribute);
 			
-			Description description = equivalenceMap.get(attribute);
-			if (description != null) {
-				return ofac.createDataPropertyAssertion(((Property) description).getPredicate(), object, constant);
+			if (property != null) {
+				ObjectConstant object = dpa.getObject();
+				ValueConstant constant = dpa.getValue();
+				return ofac.createDataPropertyAssertion(property.getPredicate(), object, constant);
 			}
 		}
 		return assertion;
 	}
 	
-	// TESTS ONLY
-	public boolean containsKey(Predicate p) {
-		return equivalenceMap.containsKey(p);
-	}
 	
-	// TESTS ONLY
-	public int keySetSize() {
-		return equivalenceMap.keySet().size();
-	}
-
-	// TO BE REMOVED
-	@Deprecated
-	public Description getValue(Predicate p) {
-		return equivalenceMap.get(p);
-	}
 	
-	// TO BE REMOVED: USED ONLY ONCE
-	@Deprecated
-	public Set<Predicate> keySet() {
-		return equivalenceMap.keySet();
-	}	
-	
-	// TO BE REMOVED (used by OWLAPI3ABoxIterator)
-	@Deprecated
-	public Map<Predicate, Description> getInternalMap() {
-		return equivalenceMap;
-	}
-	
-	public Function getNormal(Function atom) {
-		Predicate p = atom.getPredicate();
-		Function newatom = null;
-		if (p.getArity() == 1) {
-//			Description description = fac.createClass(p);
-			Description equivalent = equivalenceMap.get(p);
-			if (equivalent == null)
-				newatom = atom;
-			else {
-				newatom = dfac.getFunction(((OClass) equivalent).getPredicate(), atom.getTerms());
-
-			}
-		} else {
-//			Description description = fac.createProperty(p);
-			Description equivalent = equivalenceMap.get(p);
-			if (equivalent == null)
-				newatom = atom;
-			else {
-				Property equiprop = (Property) equivalent;
-				if (!equiprop.isInverse()) {
-					newatom = dfac.getFunction(equiprop.getPredicate(), atom.getTerms());
-				} else {
-					newatom = dfac.getFunction(equiprop.getPredicate(), atom.getTerms().get(1), atom.getTerm(0));
-				}
-			}
-		}
-		return newatom;
-	}
-
 	/* ALTERNATIVE FROM QueryVocabularyValidator
 	Description equivalent = equivalences.get(atom.getFunctionSymbol());
 	if (equivalent == null) {

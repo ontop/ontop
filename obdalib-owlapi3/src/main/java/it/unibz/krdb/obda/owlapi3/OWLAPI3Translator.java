@@ -528,7 +528,7 @@ public class OWLAPI3Translator {
 				
 				
 				} else if (axiom instanceof OWLIndividualAxiom) {
-					Assertion translatedAxiom = translate((OWLIndividualAxiom)axiom, null);
+					Assertion translatedAxiom = translate((OWLIndividualAxiom)axiom);
 					if (translatedAxiom != null)
 						dl_onto.addAssertion(translatedAxiom);
 					
@@ -940,7 +940,7 @@ public class OWLAPI3Translator {
 	 * @param equivalenceMap
 	 * @return
 	 */
-	public Assertion translate(OWLIndividualAxiom axiom, Map<Predicate, Description> equivalenceMap) {
+	public Assertion translate(OWLIndividualAxiom axiom) {
 
 		if (axiom instanceof OWLClassAssertionAxiom) {
 
@@ -963,15 +963,15 @@ public class OWLAPI3Translator {
 			Predicate classproperty = dfac.getClassPredicate((namedclass.getIRI().toString()));
 			URIConstant c = dfac.getConstantURI(indv.asOWLNamedIndividual().getIRI().toString());
 
-			Description equivalent = null;
-			if (equivalenceMap != null)
-				equivalent = equivalenceMap.get(classproperty);
-
-			if (equivalent == null)
+//			Description equivalent = null;
+//			if (equivalenceMap != null)
+//				equivalent = equivalenceMap.get(classproperty);
+//
+//			if (equivalent == null)
 				return ofac.createClassAssertion(classproperty, c);
-			else {
-				return ofac.createClassAssertion(((OClass) equivalent).getPredicate(), c);
-			}
+//			else {
+//				return ofac.createClassAssertion(((OClass) equivalent).getPredicate(), c);
+//			}
 
 		} else if (axiom instanceof OWLObjectPropertyAssertionAxiom) {
 
@@ -1011,20 +1011,20 @@ public class OWLAPI3Translator {
 			URIConstant c1 = dfac.getConstantURI(subject.asOWLNamedIndividual().getIRI().toString());
 			URIConstant c2 = dfac.getConstantURI(object.asOWLNamedIndividual().getIRI().toString());
 
-			Description equivalent = null;
-			if (equivalenceMap != null)
-				equivalent = equivalenceMap.get(p);
+//			Description equivalent = null;
+//			if (equivalenceMap != null)
+//				equivalent = equivalenceMap.get(p);
 
-			if (equivalent == null)
+//			if (equivalent == null)
 				return ofac.createObjectPropertyAssertion(p, c1, c2);
-			else {
-				Property equiProp = (Property) equivalent;
-				if (!equiProp.isInverse()) {
-					return ofac.createObjectPropertyAssertion(equiProp.getPredicate(), c1, c2);
-				} else {
-					return ofac.createObjectPropertyAssertion(equiProp.getPredicate(), c2, c1);
-				}
-			}
+//			else {
+//				Property equiProp = (Property) equivalent;
+//				if (!equiProp.isInverse()) {
+//					return ofac.createObjectPropertyAssertion(equiProp.getPredicate(), c1, c2);
+//				} else {
+//					return ofac.createObjectPropertyAssertion(equiProp.getPredicate(), c2, c1);
+//				}
+//			}
 
 		} else if (axiom instanceof OWLDataPropertyAssertionAxiom) {
 
@@ -1054,17 +1054,17 @@ public class OWLAPI3Translator {
 			URIConstant c1 = dfac.getConstantURI(subject.asOWLNamedIndividual().getIRI().toString());
 			ValueConstant c2 = dfac.getConstantLiteral(object.getLiteral(), type);
 
-			Description equivalent = null;
-			if (equivalenceMap != null) {
-				equivalent = equivalenceMap.get(p);
-			}
+//			Description equivalent = null;
+//			if (equivalenceMap != null) {
+//				equivalent = equivalenceMap.get(p);
+//			}
 
-			if (equivalent == null) {
+//			if (equivalent == null) {
 				return ofac.createDataPropertyAssertion(p, c1, c2);
-			} else {
-				Property equiProp = (Property) equivalent;
-				return ofac.createDataPropertyAssertion(equiProp.getPredicate(), c1, c2);
-			}
+//			} else {
+//				Property equiProp = (Property) equivalent;
+//				return ofac.createDataPropertyAssertion(equiProp.getPredicate(), c1, c2);
+//			}
 
 		} else {
 			return null;
