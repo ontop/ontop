@@ -37,6 +37,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RepositoryChangedListener;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AxiomToRuleTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
@@ -79,7 +80,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -104,9 +104,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private PoolProperties poolProperties = null;
 	private DataSource tomcatPool = null;
-	private boolean isSemanticIdx = false;
-	private Map<String, Integer> uriRefIds = null;
-	private Map<Integer, String> uriMap = null;;
 	// Tomcat pool default properties
 	// These can be changed in the properties file
 	protected int maxPoolSize = 20;
@@ -124,7 +121,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 */
 
 	/* The active ABox repository, might be null */
-	public RDBMSSIRepositoryManager dataRepository = null;
+	private RDBMSSIRepositoryManager dataRepository = null;
 
 	// /* The query answering engine */
 	// private TechniqueWrapper techwrapper = null;
@@ -524,7 +521,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 */
 
 			if (aboxMode.equals(QuestConstants.CLASSIC)) {
-				isSemanticIdx = true;
+				//isSemanticIdx = true;
+				
 				if (inmemory) {
 					String driver = "org.h2.Driver";
 					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis()
@@ -609,12 +607,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				/* Setting up the OBDA model */
 
 				unfoldingOBDAModel.addSource(obdaSource);
-				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
-
-				uriRefIds = dataRepository.getUriIds();
-				uriMap = dataRepository.getUriMap();
-
-			} else if (aboxMode.equals(QuestConstants.VIRTUAL)) {
+				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());				
+			} 
+			else if (aboxMode.equals(QuestConstants.VIRTUAL)) {
 
 				// ROMAN: WHY EMPTY SIGMA?
 				sigma = OntologyFactoryImpl.getInstance().createOntology();
@@ -738,8 +733,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 
 
-			if (isSemanticIdx) {
-				datasourceQueryGenerator.setUriIds(uriRefIds);
+			if (isSemIdx()) {
+				datasourceQueryGenerator.setUriMap(dataRepository.getUriMap());
 			}
 
 			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
@@ -1194,32 +1189,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return unfolder.unfold(query, targetPredicate);
 	}
 	
-	public void setUriRefIds(Map<String, Integer> uriIds) {
-		this.uriRefIds = uriIds;
-	}
-
-	public Map<String, Integer> getUriRefIds() {
-		return uriRefIds;
-	}
-
-	public void setUriMap(LinkedHashMap<Integer, String> uriMap) {
-		this.uriMap = uriMap;
-	}
-
-	public Map<Integer, String> getUriMap() {
-		return uriMap;
-	}
-
 	public void repositoryChanged() {
 		// clear cache
 		this.querycache.clear();
 	}
 
-	public RDBMSSIRepositoryManager getSIRepo() {
-		return dataRepository;
-	}
-
 	public boolean isSemIdx() {
-		return isSemanticIdx;
+		return (dataRepository != null);
+	}
+	
+	public RDBMSSIRepositoryManager getSamanticIndexRepository() {
+		return dataRepository;
 	}
 }

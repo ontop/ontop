@@ -41,6 +41,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
@@ -112,7 +113,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
 	private boolean isSI = false;
-	private Map<String, Integer> uriRefIds;
+	private SemanticIndexURIMap uriRefIds;
 	
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
 
@@ -128,7 +129,7 @@ public class SQLGenerator implements SQLQueryGenerator {
     }
 
     @Override
-	public void setUriIds (Map<String,Integer> uriid){
+	public void setUriMap (SemanticIndexURIMap uriid){
 		this.isSI = true;
 		this.uriRefIds = uriid;
 	}
@@ -1176,7 +1177,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			ValueConstant ct = (ValueConstant) term;
 			if (isSI) {
 				if (ct.getType() == COL_TYPE.OBJECT || ct.getType() == COL_TYPE.LITERAL) {
-					int id = getUriid(ct.getValue());
+					int id = uriRefIds.getId(ct.getValue());
 					if (id >= 0)
 						return jdbcutil.getSQLLexicalForm(String.valueOf(id));
 				}
@@ -1185,7 +1186,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (term instanceof URIConstant) {
 			if (isSI) {
 				String uri = term.toString();
-				int id = getUriid(uri);
+				int id = uriRefIds.getId(uri);
 				return jdbcutil.getSQLLexicalForm(String.valueOf(id));
 			}
 			URIConstant uc = (URIConstant) term;
@@ -1321,21 +1322,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 
-	/***
-	 * We look for the ID in the list of IDs, if its not there, we return -2, which we know will never appear
-	 * on the DB. This is correct because if a constant appears in a query, and that constant was never inserted
-	 * in the DB, the query must be empty (that atom), by putting -2 as id, we will enforce that.
-	 * @param uri
-	 * @return
-	 */
-	private int getUriid(String uri) {
-		
-		Integer id = uriRefIds.get(uri);
-		if (id != null)
-			return id;
-		return -2;
-					
-	}
 
 	/**
 	 * Returns the SQL string for the boolean operator, including placeholders
