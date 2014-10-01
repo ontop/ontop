@@ -157,7 +157,7 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 		}
 */
 		
-		while (owlaxiomiterator.hasNext()) {
+		while (true) {
 			OWLAxiom currentABoxAssertion = owlaxiomiterator.next();
 			
 			if (currentABoxAssertion instanceof OWLIndividualAxiom) {						
@@ -168,7 +168,6 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 				}
 			}
 		}
-		return false;
 	}
 
 }
