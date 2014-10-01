@@ -528,7 +528,7 @@ public class OWLAPI3Translator {
 				
 				
 				} else if (axiom instanceof OWLIndividualAxiom) {
-					Assertion translatedAxiom = translate((OWLIndividualAxiom)axiom);
+					Assertion translatedAxiom = translate((OWLIndividualAxiom)axiom, null);
 					if (translatedAxiom != null)
 						dl_onto.addAssertion(translatedAxiom);
 					
@@ -645,7 +645,7 @@ public class OWLAPI3Translator {
 																							// place
 																							// of
 																							// false
-				/* Creatin the range assertion */
+				/* Creating the range assertion */
 				PropertySomeRestriction propertySomeRestrictionInv = ofac.getPropertySomeRestriction(auxRole.getPredicate(), !isInverse);
 
 				SubClassAxiomImpl subclass = (SubClassAxiomImpl) ofac.createSubClassAxiom(propertySomeRestrictionInv, filler);
@@ -917,9 +917,6 @@ public class OWLAPI3Translator {
 
 	}
 
-	public Assertion translate(OWLIndividualAxiom axiom) {
-		return translate(axiom, null);
-	}
 
 	/***
 	 * This will translate an OWLABox assertion into our own abox assertions.

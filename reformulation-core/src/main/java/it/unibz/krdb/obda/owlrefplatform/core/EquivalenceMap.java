@@ -96,7 +96,7 @@ public class EquivalenceMap {
 		return equivalenceMap.keySet();
 	}	
 	
-	// TO BE REMOVED
+	// TO BE REMOVED (used by OWLAPI3ABoxIterator)
 	@Deprecated
 	public Map<Predicate, Description> getInternalMap() {
 		return equivalenceMap;
