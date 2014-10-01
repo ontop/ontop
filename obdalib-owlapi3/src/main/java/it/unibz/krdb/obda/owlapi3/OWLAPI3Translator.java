@@ -558,7 +558,7 @@ public class OWLAPI3Translator {
 						 * during TBox translation
 						 */
 					} else {
-						log.warn("Ignoring declartion axiom: {}", axiom);
+						log.info("Ignoring declaration axiom: {}", axiom);
 					}
 
 					/*
