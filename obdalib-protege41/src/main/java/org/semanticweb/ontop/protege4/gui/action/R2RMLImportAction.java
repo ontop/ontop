@@ -32,7 +32,7 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.r2rml.R2RMLReader;
@@ -44,7 +44,7 @@ public class R2RMLImportAction extends ProtegeAction {
 	private static final long serialVersionUID = -1211395039869926309L;
 
 	private OWLEditorKit editorKit = null;
-	private OBDAModel obdaModel = null;
+	private SQLOBDAModel obdaModel = null;
 
 	private Logger log = LoggerFactory.getLogger(R2RMLImportAction.class);
 

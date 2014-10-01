@@ -6,7 +6,7 @@ import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.exception.InvalidPredicateDeclarationException;
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 
 import org.junit.Test;
@@ -17,7 +17,7 @@ public class ModelIOManagerTest {
 	public void testSpaceBeforeEndCollectionSymbol() throws IOException,
 			InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		OBDAModel obdaModel = fac.getOBDAModel();
+		SQLOBDAModel obdaModel = fac.getOBDAModel();
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 		ioManager
 				.load("src/test/resources/format/obda/unusualCollectionEnding.obda");
@@ -27,7 +27,7 @@ public class ModelIOManagerTest {
 	public void testEndCollectionSymbolRequirement() throws IOException,
 			InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		OBDAModel obdaModel = fac.getOBDAModel();
+		SQLOBDAModel obdaModel = fac.getOBDAModel();
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 		ioManager
 				.load("src/test/resources/format/obda/missingCollectionEnding.obda");

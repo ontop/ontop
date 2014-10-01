@@ -16,7 +16,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.Quest;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
@@ -25,7 +25,6 @@ import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -56,7 +55,7 @@ public class TestQuestImplicitDBConstraints {
 	private QuestOWLFactory factory;
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
+	private SQLOBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	private QuestOWL reasoner;

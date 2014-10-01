@@ -24,13 +24,13 @@ import javax.swing.JTextPane;
 import javax.swing.text.DefaultStyledDocument;
 
 import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 
 public class MappingStyledDocument extends DefaultStyledDocument {
 
 	private static final long serialVersionUID = -1541062682306964359L;
 
-	public MappingStyledDocument(JTextPane parent, OBDAModel apic, TargetQueryVocabularyValidator validator) {
+	public MappingStyledDocument(JTextPane parent, SQLOBDAModel apic, TargetQueryVocabularyValidator validator) {
 		super();
 	}
 }

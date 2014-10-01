@@ -24,14 +24,7 @@ package org.semanticweb.ontop.protege4.core;
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.QueryIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAMappingListener;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.OBDAModelListener;
-import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OBDAModelValidator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
@@ -65,28 +58,13 @@ import org.protege.editor.owl.model.event.OWLModelManagerChangeEvent;
 import org.protege.editor.owl.model.event.OWLModelManagerListener;
 import org.protege.editor.owl.model.inference.ProtegeOWLReasonerInfo;
 import org.protege.editor.owl.ui.prefix.PrefixUtilities;
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.io.PrefixManager;
-import org.semanticweb.ontop.io.QueryIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAMappingListener;
-import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.OBDAModelListener;
 import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.owlapi3.OBDAModelValidator;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.protege4.utils.DialogUtils;
-import org.semanticweb.ontop.querymanager.QueryController;
-import org.semanticweb.ontop.querymanager.QueryControllerEntity;
-import org.semanticweb.ontop.querymanager.QueryControllerGroup;
-import org.semanticweb.ontop.querymanager.QueryControllerListener;
-import org.semanticweb.ontop.querymanager.QueryControllerQuery;
-import org.semanticweb.ontop.sql.JDBCConnectionManager;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -119,7 +97,7 @@ public class OBDAModelManager implements Disposable {
 
 	private QueryController queryController;
 
-	private Map<URI, OBDAModel> obdamodels;
+	private Map<URI, SQLOBDAModel> obdamodels;
 
 	private List<OBDAModelManagerListener> obdaManagerListeners;
 
@@ -160,7 +138,7 @@ public class OBDAModelManager implements Disposable {
 		OWLModelManager owlmmgr = (OWLModelManager) editorKit.getModelManager();
 		owlmmgr.addListener(modelManagerListener);
 		obdaManagerListeners = new LinkedList<OBDAModelManagerListener>();
-		obdamodels = new HashMap<URI, OBDAModel>();
+		obdamodels = new HashMap<URI, SQLOBDAModel>();
 
 		// Adding ontology change listeners to synchronize with the mappings
 		mmgr.addOntologyChangeListener(new OntologyRefactoringListener());
@@ -203,7 +181,7 @@ public class OBDAModelManager implements Disposable {
 					log.debug("Old ID: {}", oldiri);
 					log.debug("New ID: {}", newiri);
 
-					OBDAModel model = obdamodels.get(oldiri.toURI());
+					SQLOBDAModel model = obdamodels.get(oldiri.toURI());
 
 					if (model == null) {
 						setupNewOBDAModel();
@@ -221,7 +199,7 @@ public class OBDAModelManager implements Disposable {
 					OWLAxiom axiom = change.getAxiom();
 					if (axiom instanceof OWLDeclarationAxiom) {
 						OWLEntity entity = ((OWLDeclarationAxiom) axiom).getEntity();
-						OBDAModel activeOBDAModel = getActiveOBDAModel();
+						SQLOBDAModel activeOBDAModel = getActiveOBDAModel();
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
 							Predicate c = dfac.getClassPredicate(oc.getIRI().toString());
@@ -241,7 +219,7 @@ public class OBDAModelManager implements Disposable {
 					OWLAxiom axiom = change.getAxiom();
 					if (axiom instanceof OWLDeclarationAxiom) {
 						OWLEntity entity = ((OWLDeclarationAxiom) axiom).getEntity();
-						OBDAModel activeOBDAModel = getActiveOBDAModel();
+						SQLOBDAModel activeOBDAModel = getActiveOBDAModel();
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
 							Predicate c = dfac.getClassPredicate(oc.getIRI().toString());
@@ -285,7 +263,7 @@ public class OBDAModelManager implements Disposable {
 			}
 
 			// Applying the renaming to the OBDA model
-			OBDAModel obdamodel = getActiveOBDAModel();
+			SQLOBDAModel obdamodel = getActiveOBDAModel();
 			for (OWLEntity olde : renamings.keySet()) {
 				OWLEntity removedEntity = olde;
 				OWLEntity newEntity = renamings.get(removedEntity);
@@ -314,7 +292,7 @@ public class OBDAModelManager implements Disposable {
 		obdaManagerListeners.remove(listener);
 	}
 
-	public OBDAModel getActiveOBDAModel() {
+	public SQLOBDAModel getActiveOBDAModel() {
 		OWLOntology ontology = owlEditorKit.getOWLModelManager().getActiveOntology();
 		if (ontology != null) {
 			OWLOntologyID ontologyID = ontology.getOntologyID();
@@ -343,7 +321,7 @@ public class OBDAModelManager implements Disposable {
 	 * created.
 	 */
 	private void setupNewOBDAModel() {
-		OBDAModel activeOBDAModel = getActiveOBDAModel();
+		SQLOBDAModel activeOBDAModel = getActiveOBDAModel();
 
 		if (activeOBDAModel != null) {
 			return;
@@ -431,7 +409,7 @@ public class OBDAModelManager implements Disposable {
 			OWLOntology activeOntology = source.getActiveOntology();
 
 			// Initialize the active OBDA model
-			OBDAModel activeOBDAModel = null;
+			SQLOBDAModel activeOBDAModel = null;
 
 			// Perform a proper handling for each type of event
 			final EventType eventType = event.getType();

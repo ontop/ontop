@@ -133,10 +133,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private Ontology inputTBox;
 
 	/* The input OBDA model */
-	private OBDAModel inputOBDAModel;
+	private SQLOBDAModel inputOBDAModel;
 
 	/* The input OBDA model */
-	private OBDAModel unfoldingOBDAModel;
+	private SQLOBDAModel unfoldingOBDAModel;
 	
 	private QuestUnfolder unfolder;
 	
@@ -270,7 +270,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 *            QuestDefaults.properties for a description (in
 	 *            src/main/resources)
 	 */
-	public Quest(Ontology tbox, OBDAModel mappings, Properties config) {
+	public Quest(Ontology tbox, SQLOBDAModel mappings, Properties config) {
 		if (tbox == null)
 			throw new InvalidParameterException("TBox cannot be null");
 		
@@ -294,7 +294,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		loadOBDAModel(mappings);
 	}
 	
-	public Quest(Ontology tbox, OBDAModel mappings, DBMetadata metadata, Properties config) {
+	public Quest(Ontology tbox, SQLOBDAModel mappings, DBMetadata metadata, Properties config) {
 		this(tbox, mappings, config);
 		this.metadata = metadata;
 	}
@@ -363,15 +363,15 @@ public class Quest implements Serializable, RepositoryChangedListener {
         return unfolder;
     }
 
-	private void loadOBDAModel(OBDAModel model) {
+	private void loadOBDAModel(SQLOBDAModel model) {
 
 		if (model == null) {
 			model = OBDADataFactoryImpl.getInstance().getOBDAModel();
 		}
-		inputOBDAModel = (OBDAModel) model.clone();
+		inputOBDAModel = (SQLOBDAModel) model.clone();
 	}
 
-	public OBDAModel getOBDAModel() {
+	public SQLOBDAModel getOBDAModel() {
 		return inputOBDAModel;
 	}
 
@@ -692,7 +692,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 				MappingVocabularyTranslator mtrans = new MappingVocabularyTranslator();
 				sourceID= obdaSource.getSourceID();
-				ArrayList<OBDAMappingAxiom> mappingsOB = this.inputOBDAModel.getMappings(sourceID);
+				List<OBDAMappingAxiom> mappingsOB = this.inputOBDAModel.getMappings(sourceID);
 				Collection<OBDAMappingAxiom> newMappings = mtrans.translateMappings(mappingsOB, equivalenceMaps);
 
 				unfoldingOBDAModel.addMappings(sourceID, newMappings);
@@ -965,8 +965,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * @param adapter
 	 * @throws SQLException
 	 */
-	private static void preprocessProjection(Connection localConnection, ArrayList<OBDAMappingAxiom> mappings, OBDADataFactory factory,
-			SQLDialectAdapter adapter) throws SQLException {
+	private static void preprocessProjection(Connection localConnection, List<OBDAMappingAxiom> mappings,
+                                             OBDADataFactory factory, SQLDialectAdapter adapter)
+            throws SQLException {
 
 		// TODO this code seems buggy, it will probably break easily (check the
 		// part with

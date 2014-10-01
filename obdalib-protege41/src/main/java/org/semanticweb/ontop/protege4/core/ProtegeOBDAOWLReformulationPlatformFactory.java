@@ -20,16 +20,13 @@ package org.semanticweb.ontop.protege4.core;
  * #L%
  */
 
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 
 import java.util.Properties;
 
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
@@ -51,7 +48,7 @@ public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeO
 		factory.setPreferenceHolder(preferences);
 	}
 
-	public void setOBDAModel(OBDAModel model) {
+	public void setOBDAModel(SQLOBDAModel model) {
 		factory.setOBDAController(model);
 	}
 

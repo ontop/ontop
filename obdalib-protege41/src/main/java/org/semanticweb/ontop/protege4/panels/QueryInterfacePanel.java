@@ -32,7 +32,7 @@ import javax.swing.table.TableModel;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyleContext;
 
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
 import org.semanticweb.ontop.protege4.gui.IconLoader;
@@ -63,7 +63,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	private OBDADataQueryAction<String> retrieveUCQUnfoldingAction;
 	private OBDADataQueryAction<?> retrieveEQLUnfoldingAction;
 	
-	private OBDAModel apic;
+	private SQLOBDAModel apic;
 
 	private QueryController qc;
 	
@@ -76,7 +76,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	/** 
 	 * Creates new form QueryInterfacePanel
 	 */
-	public QueryInterfacePanel(OBDAModel apic, QueryController qc) {
+	public QueryInterfacePanel(SQLOBDAModel apic, QueryController qc) {
 		this.qc = qc;
 		this.apic = apic;
 		
@@ -106,7 +106,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		}
 	}
 
-	public void setOBDAModel(OBDAModel api) {
+	public void setOBDAModel(SQLOBDAModel api) {
 		this.apic = api;
 	}
 

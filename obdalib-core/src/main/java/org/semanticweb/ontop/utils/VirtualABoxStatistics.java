@@ -32,7 +32,7 @@ import java.util.List;
 import org.semanticweb.ontop.exception.NoDatasourceSelectedException;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.OBDASQLQuery;
 import org.semanticweb.ontop.model.impl.CQIEImpl;
 import org.semanticweb.ontop.sql.JDBCConnectionManager;
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 public class VirtualABoxStatistics {
 
-	private OBDAModel model;
+	private SQLOBDAModel model;
 
 	private HashMap<String, HashMap<String, Integer>> statistics = new HashMap<String, HashMap<String, Integer>>();
 
@@ -58,7 +58,7 @@ public class VirtualABoxStatistics {
 	 * @param model
 	 *            The mandatory OBDA model.
 	 */
-	public VirtualABoxStatistics(OBDAModel model) {
+	public VirtualABoxStatistics(SQLOBDAModel model) {
 		this.model = model;
 	}
 
@@ -140,7 +140,7 @@ public class VirtualABoxStatistics {
 
 		for (OBDADataSource database : sourceList) {
 			URI sourceUri = database.getSourceID();
-			ArrayList<OBDAMappingAxiom> mappingList = model.getMappings(sourceUri);
+			List<OBDAMappingAxiom> mappingList = model.getMappings(sourceUri);
 
 			HashMap<String, Integer> mappingStat = new HashMap<String, Integer>();
 			for (OBDAMappingAxiom mapping : mappingList) {

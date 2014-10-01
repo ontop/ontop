@@ -22,22 +22,21 @@ package org.semanticweb.ontop.sesame;
 
 import java.util.Iterator;
 
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
-import org.semanticweb.ontop.sesame.SesameStatementIterator;
 
 public class SesameMaterializer {
 	
 		private Iterator<Assertion> assertions = null;
 		private QuestMaterializer materializer;
 		
-		public SesameMaterializer(OBDAModel model) throws Exception {
+		public SesameMaterializer(SQLOBDAModel model) throws Exception {
 			this(model, null);
 		}
 		
-		public SesameMaterializer(OBDAModel model, Ontology onto) throws Exception {
+		public SesameMaterializer(SQLOBDAModel model, Ontology onto) throws Exception {
 			 materializer = new QuestMaterializer(model, onto);
 			 assertions = materializer.getAssertionIterator();
 		}

@@ -29,7 +29,7 @@ import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -55,7 +55,7 @@ public class OWLConstructDescribeTest extends TestCase{
 
 	Connection con = null;
 	OWLOntology ontology = null;
-	OBDAModel obdaModel = null;
+	SQLOBDAModel obdaModel = null;
 	QuestOWL reasoner = null;
 	QuestOWLConnection conn = null;
 	QuestOWLStatement st = null;

@@ -50,7 +50,7 @@ import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlapi3.OBDAModelSynchronizer;
@@ -84,7 +84,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 	private static final long serialVersionUID = -1211395039869926309L;
 
 	private OWLEditorKit editorKit = null;
-	private OBDAModel obdaModel = null;
+	private SQLOBDAModel obdaModel = null;
 	private OWLWorkspace workspace;	
 	private OWLModelManager modelManager;
 	

@@ -34,11 +34,8 @@ import org.semanticweb.ontop.exception.InvalidPredicateDeclarationException;
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.SimplePrefixManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.parser.TurtleOBDASyntaxParser;
@@ -54,7 +51,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
 
     private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
-    private OBDAModel model;
+    private SQLOBDAModel model;
 
     private ModelIOManager ioManager;
 
@@ -94,7 +91,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         addSampleMappings(model, datasource.getSourceID());
     }
     
-    private void loadOntologyToModel(OBDAModel model) throws OWLOntologyCreationException {
+    private void loadOntologyToModel(SQLOBDAModel model) throws OWLOntologyCreationException {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         File file = new File("src/test/java/org/semanticweb/ontop/api/io/School.owl");
         OWLOntology schoolOntology = manager.loadOntologyFromOntologyDocument(file);
@@ -294,7 +291,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         return datasource2;
     }
     
-    private void addSampleMappings(OBDAModel model, URI sourceId) {
+    private void addSampleMappings(SQLOBDAModel model, URI sourceId) {
         // Add some mappings
         try {
             model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[0][0], mappings[0][1], parser.parse(mappings[0][2])));
@@ -305,7 +302,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         }
     }
     
-    private void addMoreSampleMappings(OBDAModel model, URI sourceId) {
+    private void addMoreSampleMappings(SQLOBDAModel model, URI sourceId) {
         // Add some mappings
         try {
             model.addMapping(sourceId, dfac.getRDBMSMappingAxiom(mappings[3][0], mappings[3][1], parser.parse(mappings[3][2])));

@@ -22,27 +22,13 @@ package org.semanticweb.ontop.model.impl;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.semanticweb.ontop.model.BNode;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.OBDAQuery;
-import org.semanticweb.ontop.model.OBDARDBMappingAxiom;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.URIConstant;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.utils.IDGenerator;
 
@@ -80,7 +66,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return getIRIFactory().createURI(s);
 				}
 	
-	public OBDAModel getOBDAModel() {
+	public SQLOBDAModel getOBDAModel() {
 		return new OBDAModelImpl();
 	}
 

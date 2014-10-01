@@ -28,15 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.ontop.exception.DuplicateMappingException;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.OBDAQuery;
-import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
@@ -115,7 +108,7 @@ public class DirectMappingEngine {
 	 * @throws Exceptions
 	 */
 			
-	public void enrichOntology(OWLOntology ontology, OBDAModel model) throws OWLOntologyStorageException, SQLException{
+	public void enrichOntology(OWLOntology ontology, SQLOBDAModel model) throws OWLOntologyStorageException, SQLException{
 		List<OBDADataSource> sourcelist = new ArrayList<OBDADataSource>();
 		sourcelist = model.getSources();
 		OntoExpansion oe = new OntoExpansion();
@@ -147,7 +140,7 @@ public class DirectMappingEngine {
 	 * 
 	 * @throws Exceptions
 	 */
-	public OWLOntology getOntology(OWLOntology ontology, OWLOntologyManager manager, OBDAModel model) throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException{
+	public OWLOntology getOntology(OWLOntology ontology, OWLOntologyManager manager, SQLOBDAModel model) throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException{
 		OWLDataFactory dataFactory = manager.getOWLDataFactory();
 		
 		Set<Predicate> classset = model.getDeclaredClasses();
@@ -187,12 +180,12 @@ public class DirectMappingEngine {
 	 * @return a new OBDA Model containing all the extracted mappings
 	 * @throws Exception 
 	 */
-	public OBDAModel extractMappings(OBDADataSource source) throws Exception{
+	public SQLOBDAModel extractMappings(OBDADataSource source) throws Exception{
 		OBDAModelImpl model = new OBDAModelImpl();
 		return extractMappings(model, source);
 	}
 	
-	public OBDAModel extractMappings(OBDAModel model, OBDADataSource source) throws Exception{
+	public SQLOBDAModel extractMappings(SQLOBDAModel model, OBDADataSource source) throws Exception{
 		insertMapping(source, model);
 		return model;
 	}
@@ -210,13 +203,13 @@ public class DirectMappingEngine {
 	 * since mapping id is generated randomly and same id may occur
 	 * @throws Exception 
 	 */
-	public void insertMapping(OBDADataSource source, OBDAModel model) throws Exception{		
+	public void insertMapping(OBDADataSource source, SQLOBDAModel model) throws Exception{
 		model.addSource(source);
 		insertMapping(conMan.getMetaData(source),model,source.getSourceID());
 	}
 	
 	
-	public void insertMapping(DBMetadata metadata, OBDAModel model, URI sourceUri) throws Exception{			
+	public void insertMapping(DBMetadata metadata, SQLOBDAModel model, URI sourceUri) throws Exception{
 		if (baseuri == null || baseuri.isEmpty())
 			this.baseuri = model.getPrefixManager().getDefaultPrefix();
 		List<TableDefinition> tables = metadata.getTableList();

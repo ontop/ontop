@@ -35,7 +35,7 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.ClassAssertion;
@@ -116,7 +116,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 	public void testDataWithModel() throws Exception {
 	
 			File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
-			OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
+			SQLOBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
 			ModelIOManager man = new ModelIOManager(model);
 			man.load(f);
 			QuestMaterializer mat = new QuestMaterializer(model, prefs);
@@ -144,7 +144,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 			// read model
 			File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
-			OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
+			SQLOBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
 			ModelIOManager man = new ModelIOManager(model);
 			man.load(f);
 			

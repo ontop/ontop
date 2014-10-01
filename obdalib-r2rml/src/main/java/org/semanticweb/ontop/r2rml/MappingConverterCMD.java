@@ -22,10 +22,9 @@ package org.semanticweb.ontop.r2rml;
 
 import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.io.File;
@@ -63,7 +62,7 @@ class MappingConverterCMD {
 				File out = new File(outfile);
 				URI obdaURI = new File(mapFile).toURI();
 				// create model
-				OBDAModel model = OBDADataFactoryImpl.getInstance()
+				SQLOBDAModel model = OBDADataFactoryImpl.getInstance()
 						.getOBDAModel();
 
 				// obda mapping
@@ -108,7 +107,7 @@ class MappingConverterCMD {
 				String sourceUrl =obdaURI.toString();
 				OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
 						username, password, driverclass);
-				OBDAModel model = reader.readModel(dataSource);
+				SQLOBDAModel model = reader.readModel(dataSource);
 
 				ModelIOManager modelIO = new ModelIOManager(model);
 				modelIO.save(out);

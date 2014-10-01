@@ -23,19 +23,14 @@ package org.semanticweb.ontop.protege4.gui.action;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
 
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.r2rml.R2RMLWriter;
@@ -47,7 +42,7 @@ public class R2RMLExportAction extends ProtegeAction {
 	private static final long serialVersionUID = -1211395039869926309L;
 
 	private OWLEditorKit editorKit = null;
-	private OBDAModel obdaModel = null;
+	private SQLOBDAModel obdaModel = null;
 	private OWLModelManager modelManager= null;
 	
 	private Logger log = LoggerFactory.getLogger(R2RMLExportAction.class);

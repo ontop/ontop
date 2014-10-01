@@ -22,10 +22,9 @@ package org.semanticweb.ontop.owlapi3.bootstrapping;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 
 import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.owlapi3.directmapping.DirectMappingEngine;
 import org.semanticweb.ontop.sql.DBMetadata;
@@ -36,7 +35,7 @@ public abstract class AbstractDBMetadata
 {
 	
 	private OWLOntology onto;
-	private OBDAModel model;
+	private SQLOBDAModel model;
 	private OBDADataSource source;
 	
 	protected DBMetadata getMetadata() throws Exception 
@@ -55,21 +54,21 @@ public abstract class AbstractDBMetadata
 		return metadata;
 	}
 	
-	protected void getOntologyAndDirectMappings(String baseuri, OWLOntology onto, OBDAModel model, OBDADataSource source) throws Exception {
+	protected void getOntologyAndDirectMappings(String baseuri, OWLOntology onto, SQLOBDAModel model, OBDADataSource source) throws Exception {
 		this.source = source;	
 		DirectMappingEngine engine = new DirectMappingEngine(baseuri, model.getMappings(source.getSourceID()).size());
 		this.model =  engine.extractMappings(model, source);
 		this.onto =  engine.getOntology(onto, onto.getOWLOntologyManager(), model);
 	}
 	
-	protected void getOntologyAndDirectMappings(DBMetadata metadata, String baseuri, OWLOntology onto, OBDAModel model, OBDADataSource source) throws Exception {
+	protected void getOntologyAndDirectMappings(DBMetadata metadata, String baseuri, OWLOntology onto, SQLOBDAModel model, OBDADataSource source) throws Exception {
 		this.source = source;	
 		DirectMappingEngine engine = new DirectMappingEngine(metadata, baseuri, model.getMappings(source.getSourceID()).size());
 		this.model =  engine.extractMappings(model, source);
 		this.onto =  engine.getOntology(onto, onto.getOWLOntologyManager(), model);
 	}
 	
-	protected OBDAModel getOBDAModel()
+	protected SQLOBDAModel getOBDAModel()
 	{
 		return this.model;
 	}

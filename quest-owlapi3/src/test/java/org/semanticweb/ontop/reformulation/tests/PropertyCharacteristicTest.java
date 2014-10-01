@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -151,7 +151,7 @@ public class PropertyCharacteristicTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(owlFile);
 	
-		OBDAModel obdaModel = ofac.getOBDAModel();
+		SQLOBDAModel obdaModel = ofac.getOBDAModel();
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 		ioManager.load(obdaFile);
 		

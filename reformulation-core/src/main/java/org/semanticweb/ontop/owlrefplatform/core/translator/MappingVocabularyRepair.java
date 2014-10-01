@@ -26,17 +26,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.DataTypePredicate;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.OBDASQLQuery;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Predicate.COL_TYPE;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.slf4j.Logger;
@@ -55,7 +46,7 @@ public class MappingVocabularyRepair {
 
 	Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
 
-	public void fixOBDAModel(OBDAModel model, Set<Predicate> vocabulary) {
+	public void fixOBDAModel(SQLOBDAModel model, Set<Predicate> vocabulary) {
 		log.debug("Fixing OBDA Model");
 		for (OBDADataSource source : model.getSources()) {
 			Collection<OBDAMappingAxiom> mappings = new LinkedList<OBDAMappingAxiom>(model.getMappings(source.getSourceID()));

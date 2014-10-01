@@ -22,7 +22,7 @@ package org.semanticweb.ontop.owlapi3.bootstrapping;
 
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -39,23 +39,23 @@ public class DirectMappingBootstrapper extends AbstractDBMetadata{
 		//create empty ontology and model, add source to model
 		OWLOntologyManager mng = OWLManager.createOWLOntologyManager();
 		OWLOntology onto = mng.createOntology(IRI.create(baseuri));
-		OBDAModel model = fact.getOBDAModel();
+		SQLOBDAModel model = fact.getOBDAModel();
 		model.addSource(source);
 		getOntologyAndDirectMappings(baseuri, onto, model, source);
 	}
 
-	public DirectMappingBootstrapper(String baseUri, OWLOntology ontology, OBDAModel model, OBDADataSource source) throws Exception{
+	public DirectMappingBootstrapper(String baseUri, OWLOntology ontology, SQLOBDAModel model, OBDADataSource source) throws Exception{
 		getOntologyAndDirectMappings(baseUri, ontology, model, source);
 	}
 	
-	public DirectMappingBootstrapper(DBMetadata metadata, String baseUri, OWLOntology ontology, OBDAModel model, OBDADataSource source) throws Exception{
+	public DirectMappingBootstrapper(DBMetadata metadata, String baseUri, OWLOntology ontology, SQLOBDAModel model, OBDADataSource source) throws Exception{
 		getOntologyAndDirectMappings(metadata, baseUri, ontology, model, source);
 	}
 
 	/***
 	 * Creates an OBDA model using direct mappings
 	 */
-	public OBDAModel getModel() {
+	public SQLOBDAModel getModel() {
 		return getOBDAModel();
 	}
 

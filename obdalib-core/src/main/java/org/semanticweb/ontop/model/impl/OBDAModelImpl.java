@@ -23,36 +23,20 @@ package org.semanticweb.ontop.model.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.SimplePrefixManager;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAMappingListener;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.OBDAModelListener;
-import org.semanticweb.ontop.model.OBDAQuery;
-import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.querymanager.QueryController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OBDAModelImpl implements OBDAModel {
+public class OBDAModelImpl implements SQLOBDAModel {
 
 	private static final long serialVersionUID = 1L;
 
@@ -64,7 +48,7 @@ public class OBDAModelImpl implements OBDAModel {
 
 	private ArrayList<OBDAModelListener> sourceslisteners;
 
-	private Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings;
+	private Map<URI, List<OBDAMappingAxiom>> mappings;
 
 	private ArrayList<OBDAMappingListener> mappinglisteners;
 
@@ -90,11 +74,11 @@ public class OBDAModelImpl implements OBDAModel {
 		queryController = new QueryController();
 		prefixManager = new SimplePrefixManager();
 
-		datasources = new HashMap<URI, OBDADataSource>();
-		sourceslisteners = new ArrayList<OBDAModelListener>();
+		datasources = new HashMap<>();
+		sourceslisteners = new ArrayList<>();
 
-		mappings = new Hashtable<URI, ArrayList<OBDAMappingAxiom>>();
-		mappinglisteners = new ArrayList<OBDAMappingListener>();
+		mappings = new Hashtable<>();
+		mappinglisteners = new ArrayList<>();
 	}
 
 	@Override
@@ -245,7 +229,7 @@ public class OBDAModelImpl implements OBDAModel {
 	public void removeMapping(URI datasource_uri, String mapping_id) {
 		int index = indexOf(datasource_uri, mapping_id);
 		if (index != -1) {
-			ArrayList<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
+			List<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
 			current_mappings.remove(index);
 			fireMappingDeleted(datasource_uri, mapping_id);
 		}
@@ -253,7 +237,7 @@ public class OBDAModelImpl implements OBDAModel {
 
 	@Override
 	public void removeAllMappings(URI datasource_uri) {
-		ArrayList<OBDAMappingAxiom> mappings = getMappings(datasource_uri);
+		List<OBDAMappingAxiom> mappings = getMappings(datasource_uri);
 		while (!mappings.isEmpty()) {
 			mappings.remove(0);
 		}
@@ -299,20 +283,20 @@ public class OBDAModelImpl implements OBDAModel {
 		if (pos == -1) {
 			return null;
 		}
-		ArrayList<OBDAMappingAxiom> mappings = getMappings(source_uri);
+		List<OBDAMappingAxiom> mappings = getMappings(source_uri);
 		return mappings.get(pos);
 	}
 
 	@Override
-	public Hashtable<URI, ArrayList<OBDAMappingAxiom>> getMappings() {
+	public Map<URI, List<OBDAMappingAxiom>> getMappings() {
 		return mappings;
 	}
 
 	@Override
-	public ArrayList<OBDAMappingAxiom> getMappings(URI datasource_uri) {
+	public List<OBDAMappingAxiom> getMappings(URI datasource_uri) {
 		if (datasource_uri == null)
 			return null;
-		ArrayList<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
+		List<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
 		if (current_mappings == null) {
 			initMappingsArray(datasource_uri);
 		}
@@ -321,7 +305,7 @@ public class OBDAModelImpl implements OBDAModel {
 
 	@Override
 	public int indexOf(URI datasource_uri, String mapping_id) {
-		ArrayList<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
+		List<OBDAMappingAxiom> current_mappings = mappings.get(datasource_uri);
 		if (current_mappings == null) {
 			initMappingsArray(datasource_uri);
 			current_mappings = mappings.get(datasource_uri);
@@ -353,7 +337,7 @@ public class OBDAModelImpl implements OBDAModel {
 	@Override
 	public void removeAllMappings() {
 		mappings.clear();
-		mappings = new Hashtable<URI, ArrayList<OBDAMappingAxiom>>();
+		mappings = new Hashtable<>();
 		fireAllMappingsRemoved();
 	}
 
@@ -417,10 +401,10 @@ public class OBDAModelImpl implements OBDAModel {
 
 	@Override
 	public Object clone() {
-		OBDAModel clone = dfac.getOBDAModel();
+		SQLOBDAModel clone = dfac.getOBDAModel();
 		for (OBDADataSource source : datasources.values()) {
 			clone.addSource((OBDADataSource) source.clone());
-			for (ArrayList<OBDAMappingAxiom> mappingList : mappings.values()) {
+			for (List<OBDAMappingAxiom> mappingList : mappings.values()) {
 				for (OBDAMappingAxiom mapping : mappingList) {
 					try {
 						clone.addMapping(source.getSourceID(), (OBDAMappingAxiom) mapping.clone());
@@ -437,7 +421,7 @@ public class OBDAModelImpl implements OBDAModel {
 	public int renamePredicate(Predicate oldname, Predicate newName) {
 		int modifiedCount = 0;
 		for (OBDADataSource source : datasources.values()) {
-			ArrayList<OBDAMappingAxiom> mp = mappings.get(source.getSourceID());
+			List<OBDAMappingAxiom> mp = mappings.get(source.getSourceID());
 			for (OBDAMappingAxiom mapping : mp) {
 				CQIE cq = (CQIE) mapping.getTargetQuery();
 				List<Function> body = cq.getBody();

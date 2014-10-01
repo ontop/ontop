@@ -31,7 +31,7 @@ import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.ontology.Ontology;
@@ -99,9 +99,9 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * @throws IOException
 	 * @throws InvalidMappingExceptionWithIndicator
 	 */
-	public OBDAModel getObdaModel(URI obdaURI) throws IOException, InvalidMappingExceptionWithIndicator {
+	public SQLOBDAModel getObdaModel(URI obdaURI) throws IOException, InvalidMappingExceptionWithIndicator {
 		//create empty model
-		OBDAModel obdaModel = fac.getOBDAModel();
+		SQLOBDAModel obdaModel = fac.getOBDAModel();
 		// System.out.println(obdaURI.toString());
 		if (obdaURI.toString().endsWith(".obda")) {
 			//read obda file
@@ -130,7 +130,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		super(name);
 
 		//obtain the model
-		OBDAModel obdaModel = null;
+		SQLOBDAModel obdaModel = null;
 		if (obdaUri == null) {
 			log.debug("No mappings where given, mappings will be automatically generated.");
 			//obtain model from direct mapping RDB2RDF method
@@ -189,7 +189,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		OBDADataSource source = getDataSourceFromConfig(config);
 		//obtain obdaModel
 		R2RMLReader reader = new R2RMLReader(mappings);
-		OBDAModel obdaModel = reader.readModel(source.getSourceID());
+		SQLOBDAModel obdaModel = reader.readModel(source.getSourceID());
 		//add data source to model
 		obdaModel.addSource(source);
 		OBDAModelSynchronizer.declarePredicates(tbox, obdaModel);
@@ -243,7 +243,7 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 		return translator.mergeTranslateOntologies(clousure);
 	}
 	
-	private void setupQuest(Ontology tbox, OBDAModel obdaModel, DBMetadata metadata, QuestPreferences pref) throws Exception {
+	private void setupQuest(Ontology tbox, SQLOBDAModel obdaModel, DBMetadata metadata, QuestPreferences pref) throws Exception {
 		//start Quest with the given ontology and model and preferences
 		if (metadata == null) {
 			//start up quest by obtaining metadata from given data source 
@@ -298,11 +298,11 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 	 * Generate an OBDAModel from Direct Mapping (Bootstrapping)
 	 * @return the OBDAModel
 	 */
-	private OBDAModel getOBDAModelDM() {
+	private SQLOBDAModel getOBDAModelDM() {
 
 		DirectMappingEngine dm = new DirectMappingEngine("http://example.org/base", 0);
 		try {
-			OBDAModel model = dm.extractMappings(getMemOBDADataSource("H2m"));
+			SQLOBDAModel model = dm.extractMappings(getMemOBDADataSource("H2m"));
 			return model;
 		} catch (Exception e) {
 			e.printStackTrace();

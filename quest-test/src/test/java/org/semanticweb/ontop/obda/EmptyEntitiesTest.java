@@ -22,7 +22,7 @@ package org.semanticweb.ontop.obda;
 
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.BasicClassDescription;
@@ -40,14 +40,8 @@ import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -77,7 +71,7 @@ public class EmptyEntitiesTest {
 	private Connection connection;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
+	private SQLOBDAModel obdaModel;
 	private OWLOntology ontology;
 
 //	final String owlfile = "src/test/resources/emptiesDatabase.owl";

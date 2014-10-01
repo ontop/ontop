@@ -44,14 +44,8 @@ import javax.swing.text.StyledDocument;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.OBDAQuery;
-import org.semanticweb.ontop.model.OBDARDBMappingAxiom;
-import org.semanticweb.ontop.model.OBDASQLQuery;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.parser.TargetQueryParserException;
 import org.semanticweb.ontop.parser.TurtleOBDASyntaxParser;
@@ -75,7 +69,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private static final long serialVersionUID = 4351696247473906680L;
 
 	/** Fields */
-	private OBDAModel obdaModel;
+	private SQLOBDAModel obdaModel;
 	private OBDADataSource dataSource;
 	private JDialog parent;
 	private TargetQueryVocabularyValidator validator;
@@ -89,7 +83,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	/**
 	 * Create the dialog for inserting a new mapping.
 	 */
-	public NewMappingDialogPanel(OBDAModel obdaModel, JDialog parent, OBDADataSource dataSource, TargetQueryVocabularyValidator validator) {
+	public NewMappingDialogPanel(SQLOBDAModel obdaModel, JDialog parent, OBDADataSource dataSource, TargetQueryVocabularyValidator validator) {
 
 		DialogUtils.installEscapeCloseOperation(parent);
 		this.obdaModel = obdaModel;
@@ -208,7 +202,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 			final boolean isValid = validator.validate(targetQuery);
 			if (isValid) {
 				try {
-					OBDAModel mapcon = obdaModel;
+					SQLOBDAModel mapcon = obdaModel;
 					URI sourceID = dataSource.getSourceID();
 					System.out.println(sourceID.toString()+" \n");
 					

@@ -38,18 +38,9 @@ import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
 import org.semanticweb.ontop.exception.DuplicateMappingException;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.OBDARDBMappingAxiom;
-import org.semanticweb.ontop.model.OBDASQLQuery;
-import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.parser.SQLQueryParser;
@@ -78,12 +69,11 @@ public class MetaMappingExpander {
 	 * TODO
 	 * 
 	 * @param connection
-	 * @param metadata
 	 */
 	public MetaMappingExpander(Connection connection) {
 		this.connection = connection;
 		translator = new SQLQueryParser();
-		expandedMappings = new ArrayList<OBDAMappingAxiom>();
+		expandedMappings = new ArrayList<>();
 		dfac = OBDADataFactoryImpl.getInstance();
 	}
 
@@ -97,7 +87,7 @@ public class MetaMappingExpander {
 	 * @throws SQLException 
 	 * @throws JSQLParserException 
 	 */
-	private List<OBDAMappingAxiom> expand(ArrayList<OBDAMappingAxiom> mappings) throws SQLException, JSQLParserException {
+	private List<OBDAMappingAxiom> expand(List<OBDAMappingAxiom> mappings) throws SQLException, JSQLParserException {
 		
 		for (OBDAMappingAxiom mapping : mappings) {
 
@@ -472,7 +462,7 @@ public class MetaMappingExpander {
 	 * 		expanded normal mappings
 	 * @throws Exception 
 	 */
-	public void expand(OBDAModel obdaModel, URI sourceURI) throws Exception {
+	public void expand(SQLOBDAModel obdaModel, URI sourceURI) throws Exception {
 		List<OBDAMappingAxiom> expandedMappings = expand(obdaModel.getMappings(sourceURI));
 		
 		obdaModel.removeAllMappings();

@@ -24,21 +24,8 @@ package org.semanticweb.ontop.r2rml;
  * Class responsible to write an r2rml turtle file given an obda model
  */
 import org.semanticweb.ontop.io.PrefixManager;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.DataTypePredicate;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.OBDAQuery;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.URIConstant;
-import org.semanticweb.ontop.model.URITemplatePredicate;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
-import org.semanticweb.ontop.model.impl.BNodePredicateImpl;
-import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
-import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -49,10 +36,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
@@ -60,7 +45,6 @@ import org.openrdf.model.Statement;
 import org.openrdf.model.impl.GraphImpl;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.Rio;
-import org.openrdf.rio.turtle.TurtleWriter;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import eu.optique.api.mapping.R2RMLMappingManager;
@@ -76,7 +60,7 @@ public class R2RMLWriter {
 	private PrefixManager prefixmng;
 	private OWLOntology ontology;
 	
-	public R2RMLWriter(File file, OBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
+	public R2RMLWriter(File file, SQLOBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
 	{
 		this(obdamodel, sourceURI, ontology);
 		try {
@@ -88,7 +72,7 @@ public class R2RMLWriter {
 		}
 	}
 	
-	public R2RMLWriter(OBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
+	public R2RMLWriter(SQLOBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
 	{
 		this.sourceUri = sourceURI;	
 		this.mappings = obdamodel.getMappings(sourceUri);
@@ -96,11 +80,11 @@ public class R2RMLWriter {
 		this.ontology = ontology;
 	}
 	
-	public R2RMLWriter(OBDAModel obdamodel, URI sourceURI){
+	public R2RMLWriter(SQLOBDAModel obdamodel, URI sourceURI){
 		this(obdamodel, sourceURI, null);
 	}
 	
-	public R2RMLWriter(File file, OBDAModel obdamodel, URI sourceURI){
+	public R2RMLWriter(File file, SQLOBDAModel obdamodel, URI sourceURI){
 		this(file, obdamodel, sourceURI, null);
 	}
 

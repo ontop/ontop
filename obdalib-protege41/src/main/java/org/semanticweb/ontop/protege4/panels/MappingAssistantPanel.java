@@ -50,18 +50,8 @@ import javax.swing.table.TableModel;
 
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.io.PrefixManager;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDALibConstants;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.OBDAQuery;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
@@ -90,7 +80,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private static final long serialVersionUID = 1L;
 
-	private OBDAModel obdaModel;
+	private SQLOBDAModel obdaModel;
 	
 	private PrefixManager prefixManager;
 	
@@ -109,7 +99,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private static Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
 	private static Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
 	
-	public MappingAssistantPanel(OBDAModel model) {
+	public MappingAssistantPanel(SQLOBDAModel model) {
 		obdaModel = model;
 		prefixManager = obdaModel.getPrefixManager();
 		initComponents();

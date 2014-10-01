@@ -40,12 +40,8 @@ import org.semanticweb.ontop.exception.Indicator;
 import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.exception.InvalidPredicateDeclarationException;
 import org.semanticweb.ontop.exception.UnsupportedTagException;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.OBDAQuery;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.parser.TargetQueryParser;
 import org.semanticweb.ontop.parser.TargetQueryParserException;
@@ -78,7 +74,7 @@ public class ModelIOManager {
     private static final String END_COLLECTION_SYMBOL = "]]";
     private static final String COMMENT_SYMBOL = ";";
     
-    private OBDAModel model;
+    private SQLOBDAModel model;
     private PrefixManager prefixManager;
     private OBDADataFactory dataFactory;
     
@@ -94,7 +90,7 @@ public class ModelIOManager {
      * @param model
      *          The target OBDA model.
      */
-    public ModelIOManager(OBDAModel model) {
+    public ModelIOManager(SQLOBDAModel model) {
         this.model = model;
         prefixManager = model.getPrefixManager();
         dataFactory = model.getDataFactory();

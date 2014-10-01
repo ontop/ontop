@@ -25,13 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.semanticweb.ontop.exception.DuplicateMappingException;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.OBDARDBMappingAxiom;
-import org.semanticweb.ontop.model.OBDASQLQuery;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.utils.IDGenerator;
 
@@ -109,7 +104,7 @@ public class MappingSplitter {
 	 * @param obdaModel
 	 * @param sourceURI
 	 */
-	public void splitMappings(OBDAModel obdaModel, URI sourceURI) {
+	public void splitMappings(SQLOBDAModel obdaModel, URI sourceURI) {
 		List<OBDAMappingAxiom> splittedMappings = splitMappings(obdaModel.getMappings(sourceURI));
 		
 		obdaModel.removeAllMappings();

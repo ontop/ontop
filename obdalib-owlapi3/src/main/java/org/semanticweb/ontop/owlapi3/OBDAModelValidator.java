@@ -21,13 +21,13 @@ package org.semanticweb.ontop.owlapi3;
  */
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
 import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 /***
@@ -42,17 +42,17 @@ import org.semanticweb.owlapi.model.OWLOntology;
  */
 public class OBDAModelValidator {
 
-	private OBDAModel obdaModel;
+	private SQLOBDAModel obdaModel;
 	private TargetQueryVocabularyValidator validator;
 
 	// TODO We should reduce the dependency to OWL-API to define the ontology.
-	public OBDAModelValidator(OBDAModel obdaModel, OWLOntology ontology) {
+	public OBDAModelValidator(SQLOBDAModel obdaModel, OWLOntology ontology) {
 		this.obdaModel = obdaModel;
 		validator = new TargetQueryValidator(obdaModel);
 	}
 
 	public void run() throws Exception {
-		Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappingTable = obdaModel.getMappings();
+		Map<URI, List<OBDAMappingAxiom>> mappingTable = obdaModel.getMappings();
 		for (URI datasourceUri : mappingTable.keySet()) {
 			for (OBDAMappingAxiom mapping : mappingTable.get(datasourceUri)) {
 				CQIE tq = (CQIE) mapping.getTargetQuery();

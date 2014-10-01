@@ -39,7 +39,7 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
@@ -58,7 +58,7 @@ public class BootstrapAction extends ProtegeAction {
 	private DirectMappingBootstrapper dm = null;
 	private String baseUri = "";
 	private OWLOntology currentOnto;
-	private OBDAModel currentModel;
+	private SQLOBDAModel currentModel;
 	private OBDADataSource currentSource;
 
 	private Logger log = LoggerFactory.getLogger(BootstrapAction.class);
@@ -157,7 +157,7 @@ public class BootstrapAction extends ProtegeAction {
 		}
 
 		public void run(String baseUri, OWLOntology currentOnto,
-				OBDAModel currentModel, OBDADataSource currentSource)
+				SQLOBDAModel currentModel, OBDADataSource currentSource)
 				throws Exception {
 			dm = new DirectMappingBootstrapper(baseUri, currentOnto,
 					currentModel, currentSource);

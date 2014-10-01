@@ -34,7 +34,7 @@ import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
 import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlapi3.OBDAModelSynchronizer;
@@ -86,7 +86,7 @@ class QuestSesameMaterializerCMD {
 			
 			URI obdaURI =  new File(obdafile).toURI();
 			//create model
-			OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
+			SQLOBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
 			//obda mapping
 			if (obdaURI.toString().endsWith(".obda"))
 			{

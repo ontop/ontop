@@ -27,7 +27,7 @@ import java.io.PrintWriter;
 
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlapi3.QuestOWLIndividualIterator;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
@@ -55,7 +55,7 @@ public class ABoxMaterializerExample {
 		 * Load the OBDA model from an external .obda file
 		 */
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		OBDAModel obdaModel = fac.getOBDAModel();
+		SQLOBDAModel obdaModel = fac.getOBDAModel();
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 		ioManager.load(inputFile);
 

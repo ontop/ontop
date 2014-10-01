@@ -9,7 +9,7 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3.example;
 
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
@@ -22,7 +22,7 @@ import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.TableDefinition;
 import org.semanticweb.ontop.sql.api.Attribute;
-import java.sql.Connection;
+
 import java.io.File;
 import java.util.Set;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -54,7 +54,7 @@ private void setup()  throws Exception {
 	 * Load the OBDA model from an external .obda file
 	 */
 	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	OBDAModel obdaModel = fac.getOBDAModel();
+	SQLOBDAModel obdaModel = fac.getOBDAModel();
 	ModelIOManager ioManager = new ModelIOManager(obdaModel);
 	ioManager.load(obdafile);
 	

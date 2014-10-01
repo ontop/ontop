@@ -16,16 +16,11 @@ import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Objec
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ObjectPropertyAssertion;
 
 import java.io.File;
-import java.io.IOException;
-
-import junit.framework.TestCase;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -48,7 +43,7 @@ public class InconsistencyCheckingVirtualTest {
 	private QuestOWL reasoner;
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
-	private OBDAModel obdaModel;
+	private SQLOBDAModel obdaModel;
 	
 	QuestPreferences p;
 	

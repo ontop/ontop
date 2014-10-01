@@ -42,17 +42,13 @@ import javax.swing.text.StyledDocument;
 
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.URIConstant;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.parser.TargetQueryParserException;
 import org.semanticweb.ontop.parser.TurtleOBDASyntaxParser;
 
 public class QueryPainter {
-	private final OBDAModel apic;
+	private final SQLOBDAModel apic;
 
 	private SimpleAttributeSet black;
 	private SimpleAttributeSet brackets;
@@ -92,7 +88,7 @@ public class QueryPainter {
 	private List<ValidatorListener> validatorListeners = new LinkedList<QueryPainter.ValidatorListener>();
 	private TurtleOBDASyntaxParser textParser;
 
-	public QueryPainter(OBDAModel apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
+	public QueryPainter(SQLOBDAModel apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
 		this.apic = apic;
 		this.parent = parent;
 		this.validator = validator;

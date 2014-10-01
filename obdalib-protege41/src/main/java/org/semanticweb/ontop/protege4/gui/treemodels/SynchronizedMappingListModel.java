@@ -28,19 +28,17 @@ import javax.swing.AbstractListModel;
 
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAMappingListener;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.protege4.gui.treemodels.FilteredModel;
-import org.semanticweb.ontop.protege4.gui.treemodels.TreeModelFilter;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 
 public class SynchronizedMappingListModel extends AbstractListModel implements FilteredModel, OBDAMappingListener {
 
 	private static final long serialVersionUID = 2317408823037931358L;
 	
-	private OBDAModel obdaModel;
+	private SQLOBDAModel obdaModel;
 	private URI focusedSource;
 	private List<TreeModelFilter<OBDAMappingAxiom>> filters;
 
-	public SynchronizedMappingListModel(OBDAModel obdaModel) {
+	public SynchronizedMappingListModel(SQLOBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
 		obdaModel.addMappingsListener(this);
 		filters = new LinkedList<TreeModelFilter<OBDAMappingAxiom>>();

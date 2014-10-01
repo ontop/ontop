@@ -28,19 +28,12 @@ import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDALibConstants;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.ontology.Assertion;
-import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.semanticweb.ontop.sql.JDBCConnectionManager;
 
 import junit.framework.TestCase;
@@ -55,7 +48,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 	public void testNoSource() throws Exception {
 try{
-		OBDAModel model = fac.getOBDAModel();
+		SQLOBDAModel model = fac.getOBDAModel();
 
 		/*
 		 * Setting the database;
@@ -138,7 +131,7 @@ try{
 
 		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
 
-		OBDAModel model = fac.getOBDAModel();
+		SQLOBDAModel model = fac.getOBDAModel();
 		model.addSource(source);
 		model.addMapping(source.getSourceID(), map1);
 
@@ -156,7 +149,7 @@ try{
 
 	public void testTwoSources() throws Exception {
 try{
-		OBDAModel model = fac.getOBDAModel();
+		SQLOBDAModel model = fac.getOBDAModel();
 
 		/*
 		 * Setting the database;
@@ -252,7 +245,7 @@ try{
 
 	public void testThreeSources() throws Exception {
 try{
-		OBDAModel model = fac.getOBDAModel();
+		SQLOBDAModel model = fac.getOBDAModel();
 
 		/*
 		 * Setting the database;
@@ -357,7 +350,7 @@ try{
 
 	public void testThreeSourcesNoMappings() throws Exception {
 try{
-		OBDAModel model = fac.getOBDAModel();
+		SQLOBDAModel model = fac.getOBDAModel();
 
 		/*
 		 * Setting the database;
@@ -424,7 +417,7 @@ try{
 
 	public void testThreeSourcesNoMappingsFor1And3() throws Exception {
 try{
-		OBDAModel model = fac.getOBDAModel();
+		SQLOBDAModel model = fac.getOBDAModel();
 
 		/*
 		 * Setting the database;
@@ -612,7 +605,7 @@ try{
 		OBDAMappingAxiom map5 = fac.getRDBMSMappingAxiom(sql5, fac.getCQIE(head, fac.getFunction(hasschool, objectTerm, schoolUriVariable)));
 		OBDAMappingAxiom map6 = fac.getRDBMSMappingAxiom(sql6, fac.getCQIE(head, fac.getFunction(school, schoolUriVariable)));
 
-		OBDAModel model = fac.getOBDAModel();
+		SQLOBDAModel model = fac.getOBDAModel();
 		model.addSource(source);
 		model.addMapping(source.getSourceID(), map1);
 		model.addMapping(source.getSourceID(), map2);

@@ -28,14 +28,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.GraphResultSet;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.ResultSet;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.OntologyFactory;
@@ -45,7 +39,6 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
-import org.semanticweb.ontop.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +62,7 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestMaterializer {
 
-	private OBDAModel model;
+	private SQLOBDAModel model;
 	private Quest questInstance;
 	private Ontology ontology;
 	
@@ -86,16 +79,16 @@ public class QuestMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public QuestMaterializer(OBDAModel model) throws Exception {
+	public QuestMaterializer(SQLOBDAModel model) throws Exception {
 		this(model, null, getDefaultPreferences());
 	}
 	
-	public QuestMaterializer(OBDAModel model, QuestPreferences pref) throws Exception {
+	public QuestMaterializer(SQLOBDAModel model, QuestPreferences pref) throws Exception {
 		this(model, null, pref);
 		
 	}
 	
-	public QuestMaterializer(OBDAModel model, Ontology onto) throws Exception {
+	public QuestMaterializer(SQLOBDAModel model, Ontology onto) throws Exception {
 		this(model, onto, getDefaultPreferences());
 	}
 	
@@ -105,7 +98,7 @@ public class QuestMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences preferences) throws Exception {
+	public QuestMaterializer(SQLOBDAModel model, Ontology onto, QuestPreferences preferences) throws Exception {
 		this.model = model;
 		this.ontology = onto;
 		this.vocabulary = new HashSet<Predicate>();

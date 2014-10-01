@@ -21,7 +21,7 @@ package org.semanticweb.ontop.reformulation.semindex.tests;
  */
 
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -56,7 +56,7 @@ public class SNOMEDTest {
 		// Loading the OBDA data
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-		OBDAModel obdaModel = fac.getOBDAModel();
+		SQLOBDAModel obdaModel = fac.getOBDAModel();
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);

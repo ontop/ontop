@@ -31,7 +31,7 @@ import javax.swing.JPanel;
 
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.panels.OBDAModelStatisticsPanel;
@@ -43,7 +43,7 @@ public class ABoxStatisticsAction extends ProtegeAction {
 	private static final long serialVersionUID = 3322509244957306932L;
 
 	private OWLEditorKit editorKit = null;
-	private OBDAModel obdaModel = null;
+	private SQLOBDAModel obdaModel = null;
 	private VirtualABoxStatistics statistics = null;
 		
 	@Override

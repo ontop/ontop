@@ -32,16 +32,11 @@ import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.QueryParser;
 import org.openrdf.query.parser.QueryParserUtil;
 import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDAConnection;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.OBDAStatement;
-import org.semanticweb.ontop.model.ResultSet;
-import org.semanticweb.ontop.model.TupleResultSet;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
-import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
@@ -138,7 +133,7 @@ public class QuestDBStatement implements OBDAStatement {
 		Iterator<Assertion> assertionIter = null;
 		QuestMaterializer materializer = null;
 		try {
-			OBDAModel obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();
+			SQLOBDAModel obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();
 			ModelIOManager io = new ModelIOManager(obdaModel);
 			io.load(uri.toString());
 			materializer = new QuestMaterializer(obdaModel);

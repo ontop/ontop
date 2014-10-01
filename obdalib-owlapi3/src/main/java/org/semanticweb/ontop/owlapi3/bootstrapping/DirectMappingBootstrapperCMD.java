@@ -21,10 +21,9 @@ package org.semanticweb.ontop.owlapi3.bootstrapping;
  */
 
 import java.io.File;
-import java.net.URI;
 
 import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -75,7 +74,7 @@ public class DirectMappingBootstrapperCMD {
 					File obda = new File(obdafile);
 					DirectMappingBootstrapper dm = new DirectMappingBootstrapper(
 							uri, url, user, passw, driver);
-					OBDAModel model = dm.getModel();
+					SQLOBDAModel model = dm.getModel();
 					OWLOntology onto = dm.getOntology();
 					ModelIOManager mng = new ModelIOManager(model);
 					mng.save(obda);

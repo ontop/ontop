@@ -29,7 +29,7 @@ import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 
 public interface OBDADataFactory extends Serializable {
 
-	public OBDAModel getOBDAModel();
+	public SQLOBDAModel getOBDAModel();
 
 	public CQIE getCQIE(Function head, Function... body );
 	

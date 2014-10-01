@@ -44,7 +44,7 @@ import org.openrdf.rio.helpers.BasicParserSettings;
 import org.openrdf.rio.helpers.RDFHandlerBase;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
@@ -162,7 +162,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		if (bObtainFromMappings) {
 			// Retrieves the ABox from the target database via mapping.
 			log.debug("Loading data from Mappings into the database");
-			OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
+			SQLOBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
 			for (Predicate p : tbox.getVocabulary()) {
 				obdaModelForMaterialization.declarePredicate(p);
 			}

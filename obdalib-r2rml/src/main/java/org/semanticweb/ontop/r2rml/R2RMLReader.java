@@ -27,7 +27,7 @@ import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.io.File;
@@ -41,7 +41,7 @@ public class R2RMLReader {
 	private R2RMLManager manager;
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	private OBDAModel obdaModel = fac.getOBDAModel();
+	private SQLOBDAModel obdaModel = fac.getOBDAModel();
 	
 	private Model m ;
 	
@@ -55,7 +55,7 @@ public class R2RMLReader {
 		this(new File(file));
 	}
 	
-	public R2RMLReader(File file, OBDAModel model)
+	public R2RMLReader(File file, SQLOBDAModel model)
 	{
 		this(file);
 		obdaModel = model;
@@ -67,7 +67,7 @@ public class R2RMLReader {
 		m = manager.getModel();
 	}
 	
-	public void setOBDAModel(OBDAModel model)
+	public void setOBDAModel(SQLOBDAModel model)
 	{
 		this.obdaModel = model;
 	}
@@ -77,7 +77,7 @@ public class R2RMLReader {
 	 * @param sourceUri - the uri of the datasource of the model
 	 * @return the read obda model
 	 */
-	public OBDAModel readModel(URI sourceUri){
+	public SQLOBDAModel readModel(URI sourceUri){
 		try {
 			//add to the model the mappings retrieved from the manager
 			obdaModel.addMappings(sourceUri, manager.getMappings(m));
@@ -92,7 +92,7 @@ public class R2RMLReader {
 	 * @param datasource - the datasource of the model
 	 * @return the read obda model
 	 */
-	public OBDAModel readModel(OBDADataSource dataSource){
+	public SQLOBDAModel readModel(OBDADataSource dataSource){
 		try {
 			obdaModel.addSource(dataSource);
 			URI sourceUri = dataSource.getSourceID();

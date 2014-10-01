@@ -36,7 +36,7 @@ import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
 import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.impl.PunningException;
@@ -55,7 +55,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class SesameMaterializerCmdTest extends TestCase {
 	
-	private OBDAModel model;
+	private SQLOBDAModel model;
 	private Ontology onto;
 	private OWLOntology ontology = null;
 	
