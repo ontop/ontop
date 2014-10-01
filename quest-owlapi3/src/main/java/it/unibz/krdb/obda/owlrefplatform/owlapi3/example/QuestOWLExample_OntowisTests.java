@@ -52,9 +52,9 @@ interface ParamConst{
 	public static final String DB2_VIEW = "src/main/resources/example/ontowis-5joins-int-view-db2.obda";
 }
 
-public class QuestOWLExample {
+public class QuestOWLExample_OntowisTests {
 	
-	public QuestOWLExample(String obdaFile){
+	public QuestOWLExample_OntowisTests(String obdaFile){
 		this.obdafile = obdaFile;
 	}
 	
@@ -301,7 +301,7 @@ public class QuestOWLExample {
 		}
 		}	
 		try {
-			QuestOWLExample example = new QuestOWLExample(obdaFile);
+			QuestOWLExample_OntowisTests example = new QuestOWLExample_OntowisTests(obdaFile);
 			example.runQuery();
 		} catch (Exception e) {
 			e.printStackTrace();
