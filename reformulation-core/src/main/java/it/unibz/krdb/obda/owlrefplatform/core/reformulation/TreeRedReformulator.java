@@ -25,7 +25,6 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -80,8 +79,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	}
 
-	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException {
-		//
+	public DatalogProgram rewrite(DatalogProgram prog) throws OBDAException {
 
 		log.debug("Query reformulation started...");
 
@@ -90,12 +88,6 @@ public class TreeRedReformulator implements QueryRewriter {
 		// Thread.currentThread ().yield ();
 
 		double starttime = System.currentTimeMillis();
-
-		if (!(input instanceof DatalogProgram)) {
-			throw new OBDAException("Rewriting exception: The input must be a DatalogProgram instance");
-		}
-
-		DatalogProgram prog = (DatalogProgram) input;
 
 		// log.debug("Starting query rewrting. Received query: \n{}", prog);
 
@@ -304,7 +296,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		double endtime = System.currentTimeMillis();
 		double milliseconds = (endtime - starttime) / 1000;
 
-		QueryUtils.copyQueryModifiers(input, resultprogram);
+		QueryUtils.copyQueryModifiers(prog, resultprogram);
 
 		// if (showreformulation)
 		// log.debug("Computed reformulation: \n{}", resultprogram);

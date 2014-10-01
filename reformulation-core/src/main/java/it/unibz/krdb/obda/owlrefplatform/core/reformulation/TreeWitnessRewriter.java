@@ -25,7 +25,6 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Axiom;
@@ -255,11 +254,10 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	private double time = 0;
 	
 	@Override
-	public OBDAQuery rewrite(OBDAQuery input) {
+	public DatalogProgram rewrite(DatalogProgram dp) {
 		
 		double startime = System.currentTimeMillis();
 		
-		DatalogProgram dp = (DatalogProgram) input;
 		DatalogProgram output = fac.getDatalogProgram();
 		DatalogProgram ccDP = null;
 		DatalogProgram edgeDP = fac.getDatalogProgram();
@@ -309,7 +307,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		if (output.getRules().size() > 1)
 			output = fac.getDatalogProgram(CQCUtilities.removeContainedQueries(output.getRules(), true, sigma));
 		
-		QueryUtils.copyQueryModifiers(input, output);
+		QueryUtils.copyQueryModifiers(dp, output);
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;

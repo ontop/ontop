@@ -20,11 +20,20 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.AlgebraOperatorPredicateImpl;
+import it.unibz.krdb.obda.model.impl.BooleanOperationPredicateImpl;
+import it.unibz.krdb.obda.model.impl.DataTypePredicateImpl;
+import it.unibz.krdb.obda.model.impl.NonBooleanOperationPredicateImpl;
+import it.unibz.krdb.obda.model.impl.NumericalOperationPredicateImpl;
+import it.unibz.krdb.obda.model.impl.PredicateImpl;
+import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,6 +54,21 @@ import java.util.Set;
  * a connected component can either be degenerate (if it has no proper edges, i.e., just a loop)
  * 
  * @author Roman Kontchakov
+ * 
+ * 
+ * types of predicates (as of 1 October 2014)
+ * 
+ * Constant: NULL (string), TRUE, FALSE (boolean)
+ * 
+ * NumericalOperationPredicate: MINUS, ADD, SUBSTRACT, MULTIPLY
+ * BooleanOperationPredicate: AND, NOT, OR, EQ, NEQ, GTE, GT, LTE, LT, IS_NULL, IS_NOT_NULL, IS_TRUE, 
+ *                            SPARQL_IS_LITERAL_URI, SPARQL_IS_URI, SPARQL_IS_IRI, SPARQL_IS_BLANK, SPARQL_LANGMATCHES, 
+ *                            SPARQL_REGEX, SPARQL_LIKE
+ * NonBooleanOperationPredicate: SPARQL_STR, SPARQL_DATATYPE, SPARQL_LANG                        
+ * DataTypePredicate: RDFS_LITERAL, RDFS_LITERAL_LANG, XSD_STRING, XSD_INTEGER, XSD_DECIMAL, XSD_DOUBLE, XSD_DATETIME,
+ *                    XSD_BOOLEAN, XSD_DATE, XSD_TIME, XSD_YEAR
+ * Predicate: QUEST_TRIPLE_PRED, QUEST_CAST                    
+ * AlgebraOperatorPredicate: SPARQL_JOIN, SPARQL_LEFTJOIN 
  *
  */
 

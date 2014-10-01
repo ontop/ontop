@@ -146,13 +146,13 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	// reformulates according to PerfectRef
 	// #############################
 
-	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException {
+	public DatalogProgram rewrite(DatalogProgram prog) throws OBDAException {
 
-		if (!(input instanceof DatalogProgram)) {
-			throw new OBDAException("Rewriting exception: The input must be a DatalogProgram instance");
-		}
+//		if (!(input instanceof DatalogProgram)) {
+//			throw new OBDAException("Rewriting exception: The input must be a DatalogProgram instance");
+//		}
 
-		DatalogProgram prog = (DatalogProgram) input;
+//		DatalogProgram prog = (DatalogProgram) input;
 
 		log.debug("Starting query rewrting. Received query: \n{}", prog);
 

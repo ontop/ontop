@@ -649,7 +649,7 @@ public class QuestStatement implements OBDAStatement {
 		DatalogProgram initialProgram = translateAndPreProcess(query, signatureContainer);
 		
 		// Perform the query rewriting
-		DatalogProgram programAfterRewriting = getRewriting(initialProgram);
+		DatalogProgram programAfterRewriting = rewriter.rewrite(initialProgram);
 		
 		// Translate the output datalog program back to SPARQL string
 		// TODO Re-enable the prefix manager using Sesame prefix manager
@@ -666,19 +666,11 @@ public class QuestStatement implements OBDAStatement {
 
 		DatalogProgram program = translateAndPreProcess(query, signature);
 
-		OBDAQuery rewriting = rewriter.rewrite(program);
-		return DatalogProgramRenderer.encode((DatalogProgram) rewriting);
+		DatalogProgram rewriting = rewriter.rewrite(program);
+		return DatalogProgramRenderer.encode(rewriting);
 	}
 	
 	
-
-	/**
-	 * Returns the final rewriting of the given query
-	 */
-	public DatalogProgram getRewriting(DatalogProgram program) throws OBDAException {
-		OBDAQuery rewriting = rewriter.rewrite(program);
-		return (DatalogProgram) rewriting;
-	}
 
 	/***
 	 * Returns the SQL query for a given SPARQL query. In the process, the
@@ -727,12 +719,12 @@ public class QuestStatement implements OBDAStatement {
 			sesameQueryCache.put(strquery, query);
 			signaturecache.put(strquery, signatureContainer);
 
-			//DatalogProgram program_test = translateAndPreProcess(query, signatureContainer);
 			DatalogProgram program = translateAndPreProcess(query, signatureContainer);
 			try {
 				// log.debug("Input query:\n{}", strquery);
 
 				for (CQIE q : program.getRules()) {
+					// ROMAN: unfoldJoinTrees clones the query, so the statement below does not change anything
 					DatalogNormalizer.unfoldJoinTrees(q, false);
 				}
 
@@ -760,7 +752,7 @@ public class QuestStatement implements OBDAStatement {
 			log.debug("Start the rewriting process...");
 			try {
 				final long startTime = System.currentTimeMillis();
-				programAfterRewriting = getRewriting(program);
+				programAfterRewriting = rewriter.rewrite(program);
 				final long endTime = System.currentTimeMillis();
 				rewritingTime = endTime - startTime;
 
