@@ -33,6 +33,10 @@ import java.util.*;
  * A class that allows you to perform different operations related to query
  * containment on conjunctive queries.
  * 
+ * Two usages: 
+ *    - simplifying queries with DL atoms
+ *    - simplifying mapping queries with SQL atoms
+ * 
  * @author Mariano Rodriguez Muro
  * 
  */
@@ -678,6 +682,15 @@ public class CQCUtilities {
 		}
 	}
 
+	private static final Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
+		@Override
+		public int compare(CQIE o1, CQIE o2) {
+			return o2.getBody().size() - o1.getBody().size();
+		}
+	};
+
+	
+	
 	/***
 	 * Removes queries that are contained syntactically, using the method
 	 * isContainedInSyntactic(CQIE q1, CQIE 2). To make the process more
@@ -691,34 +704,7 @@ public class CQCUtilities {
 	 */
 	public static void removeContainedQueriesSyntacticSorter(List<CQIE> queries, boolean twopasses) {
 
-//		int initialsize = queries.size();
-//		log.debug("Removing trivially redundant queries. Initial set size: {}:", initialsize);
-//		long startime = System.currentTimeMillis();
-
-		Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
-
-			@Override
-			public int compare(CQIE o1, CQIE o2) {
-				return o2.getBody().size() - o1.getBody().size();
-			}
-		};
-
 		Collections.sort(queries, lenghtComparator);
-		// queries = new LinkedList<CQIE>(queries);
-		//
-		//
-		// Iterator<CQIE> forwardIt = queries.iterator();
-		// while (forwardIt.hasNext()) {
-		// CQIE cq = forwardIt.next();
-		// Iterator<CQIE> backwardIt =
-		// ((LinkedList)queries).descendingIterator();
-		// while (backwardIt.hasNext()) {
-		// if (isContainedInSyntactic(cq, backwardIt.next())) {
-		// forwardIt.remove();
-		// break;
-		// }
-		// }
-		// }
 
 		for (int i = 0; i < queries.size(); i++) {
 			for (int j = queries.size() - 1; j > i; j--) {
@@ -743,18 +729,10 @@ public class CQCUtilities {
 				}
 			}
 		}
-
-//		int newsize = queries.size();
-//		int queriesremoved = initialsize - newsize;
-//		long endtime = System.currentTimeMillis();
-//		long time = (endtime - startime) / 1000;
-//		log.debug("Done. Time elapse: {}s", time);
-//		log.debug("Resulting size: {}   Queries removed: {}", newsize, queriesremoved);
-
 	}
 
 	/***
-	 * Check if query cq1 is contained in cq2, sintactically. That is, if the
+	 * Check if query cq1 is contained in cq2, syntactically. That is, if the
 	 * head of cq1 and cq2 are equal according to toString().equals and each
 	 * atom in cq2 is also in the body of cq1 (also by means of
 	 * toString().equals().
@@ -781,48 +759,15 @@ public class CQCUtilities {
 		}
 		return true;
 	}
-
-	public static DatalogProgram removeContainedQueriesSorted(DatalogProgram program, boolean twopasses) {
-		DatalogProgram result = OBDADataFactoryImpl.getInstance().getDatalogProgram();
-		result.setQueryModifiers(program.getQueryModifiers());
-		List<CQIE> rules = new LinkedList<CQIE>();
-		rules.addAll(program.getRules());
-		rules = removeContainedQueries(rules, twopasses, null, null, true);
-		result.appendRule(rules);
-		return result;
-	}
-
-	public static DatalogProgram removeContainedQueriesSorted(DatalogProgram program, boolean twopasses, DataDependencies sigma) {
-		DatalogProgram result = OBDADataFactoryImpl.getInstance().getDatalogProgram();
-		result.setQueryModifiers(program.getQueryModifiers());
-		List<CQIE> rules = removeContainedQueriesSorted(program.getRules(), twopasses, sigma);
-		result.appendRule(rules);
-		return result; 
-	}
 	
 	public static DatalogProgram removeContainedQueriesSorted(DatalogProgram program, boolean twopasses, List<CQIE> foreignKeyRules) {
 		DatalogProgram result = OBDADataFactoryImpl.getInstance().getDatalogProgram();
 		result.setQueryModifiers(program.getQueryModifiers());
 		List<CQIE> rules = new LinkedList<CQIE>();
 		rules.addAll(program.getRules());
-		rules = removeContainedQueriesSorted(rules, twopasses, foreignKeyRules);
+		rules = removeContainedQueries(rules, twopasses, foreignKeyRules, true);
 		result.appendRule(rules);
 		return result;
-	}
-
-	/***
-	 * Removes queries that are contained syntactically, using the method
-	 * isContainedInSyntactic(CQIE q1, CQIE 2). To make the process more
-	 * efficient, we first sort the list of queries as to have longer queries
-	 * first and shorter queries last.
-	 * 
-	 * Removal of queries is done in two main double scans. The first scan goes
-	 * top-down/down-top, the second scan goes down-top/top-down
-	 * 
-	 * @param queries
-	 */
-	public static List<CQIE> removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses, List<CQIE> rules) {
-		return removeContainedQueries(queries, twopasses, null, rules, true);
 	}
 	
 	/***
@@ -837,16 +782,13 @@ public class CQCUtilities {
 	 * @param queries
 	 */
 	public static List<CQIE> removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses, DataDependencies sigma) {
-		return removeContainedQueries(queries, twopasses, sigma, null, true);
+		return removeContainedQueries(queries, twopasses, sigma, true);
 	}
 
-	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, List<CQIE> rules) {
-		return removeContainedQueries(queriesInput, twopasses, null, rules, false);
-	}
-	
 	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, DataDependencies sigma) {
-		return removeContainedQueries(queriesInput, twopasses, sigma, null, false);
+		return removeContainedQueries(queriesInput, twopasses, sigma, false);
 	}
+
 	
 	/***
 	 * Removes queries that are contained syntactically, using the method
@@ -859,7 +801,7 @@ public class CQCUtilities {
 	 * 
 	 * @param queriesInput
 	 */
-	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, DataDependencies sigma, List<CQIE> rules, boolean sort) {
+	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, List<CQIE> rules, boolean sort) {
 
 		List<CQIE> queries = new LinkedList<CQIE>();
 		queries.addAll(queriesInput);
@@ -868,13 +810,59 @@ public class CQCUtilities {
 //		log.debug("Optimzing w.r.t. CQC. Initial size: {}:", initialsize);
 //		double startime = System.currentTimeMillis();
 
-		Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
+		if (sort) {
+			// log.debug("Sorting...");
+			Collections.sort(queries, lenghtComparator);
+		}
 
-			@Override
-			public int compare(CQIE o1, CQIE o2) {
-				return o2.getBody().size() - o1.getBody().size();
+		
+		if (rules != null && !rules.isEmpty()) {
+			for (int i = 0; i < queries.size(); i++) {
+				CQIE query = queries.get(i);
+				CQCUtilities cqc = new CQCUtilities(query, rules);
+				if (cqc.rules != null)
+				for (int j = queries.size() - 1; j > i; j--) {
+					CQIE query2 = queries.get(j);
+					if (cqc.isContainedIn(query2)) {
+//						log.debug("REMOVE (FK): " + queries.get(i));
+						queries.remove(i);
+						i -= 1;
+						break;
+					}
+				}
 			}
-		};
+
+			if (twopasses) {
+				for (int i = (queries.size() - 1); i >= 0; i--) {
+					CQCUtilities cqc = new CQCUtilities(queries.get(i), rules);
+					if (cqc.rules != null)
+					for (int j = 0; j < i; j++) {
+						if (cqc.isContainedIn(queries.get(j))) {
+//							log.debug("REMOVE (FK): " + queries.get(i));
+							queries.remove(i);
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+//		int newsize = queries.size();
+//		double endtime = System.currentTimeMillis();
+//		double time = (endtime - startime) / 1000;
+//		log.debug("Resulting size: {}  Time elapsed: {}", newsize, time);
+		
+		return queries;
+	}
+	
+	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, DataDependencies sigma, boolean sort) {
+
+		List<CQIE> queries = new LinkedList<CQIE>();
+		queries.addAll(queriesInput);
+		
+//		int initialsize = queries.size();
+//		log.debug("Optimzing w.r.t. CQC. Initial size: {}:", initialsize);
+//		double startime = System.currentTimeMillis();
 
 		if (sort) {
 			// log.debug("Sorting...");
@@ -902,37 +890,6 @@ public class CQCUtilities {
 					for (int j = 0; j < i; j++) {
 						if (cqc.isContainedIn(queries.get(j))) {
 //							log.debug("REMOVE (SIGMA): " + queries.get(i));
-							queries.remove(i);
-							break;
-						}
-					}
-				}
-			}
-		}
-		
-		if (rules != null && !rules.isEmpty()) {
-			for (int i = 0; i < queries.size(); i++) {
-				CQIE query = queries.get(i);
-				CQCUtilities cqc = new CQCUtilities(query, rules);
-				if (cqc.rules != null)
-				for (int j = queries.size() - 1; j > i; j--) {
-					CQIE query2 = queries.get(j);
-					if (cqc.isContainedIn(query2)) {
-//						log.debug("REMOVE (FK): " + queries.get(i));
-						queries.remove(i);
-						i -= 1;
-						break;
-					}
-				}
-			}
-
-			if (twopasses) {
-				for (int i = (queries.size() - 1); i >= 0; i--) {
-					CQCUtilities cqc = new CQCUtilities(queries.get(i), rules);
-					if (cqc.rules != null)
-					for (int j = 0; j < i; j++) {
-						if (cqc.isContainedIn(queries.get(j))) {
-//							log.debug("REMOVE (FK): " + queries.get(i));
 							queries.remove(i);
 							break;
 						}

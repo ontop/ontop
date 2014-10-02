@@ -47,17 +47,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * This class is used only in TreeRedReformulator
+ *
+ */
+
+@Deprecated
 public class PositiveInclusionApplicator {
 
-	Unifier						unifier		= new Unifier();
-	QueryAnonymizer					anonymizer	= new QueryAnonymizer();
-	OBDADataFactory					termFactory	= OBDADataFactoryImpl.getInstance();
-	private SemanticQueryOptimizer	sqoOptimizer;
-
-	public PositiveInclusionApplicator(SemanticQueryOptimizer sqoOptimizer) {
-		this.sqoOptimizer = sqoOptimizer;
-	}
-
+	private final OBDADataFactory termFactory	= OBDADataFactoryImpl.getInstance();
+	private final SemanticQueryOptimizer sqoOptimizer = null;
+	
 	public PositiveInclusionApplicator() {
 	}
 
@@ -227,9 +227,9 @@ public class PositiveInclusionApplicator {
 				for (int i = 0; i < body.size(); i++) {
 					if (isPIApplicable(pi, (Function) body.get(i))) {
 						if (sqoOptimizer != null) {
-							results.add(anonymizer.anonymize(sqoOptimizer.optimizeBySQO(applyPI(query, pi, i))));
+							results.add(QueryAnonymizer.anonymize(sqoOptimizer.optimizeBySQO(applyPI(query, pi, i))));
 						} else {
-							results.add(anonymizer.anonymize(applyPI(query, pi, i)));
+							results.add(QueryAnonymizer.anonymize(applyPI(query, pi, i)));
 						}
 					}
 				}
@@ -343,9 +343,9 @@ public class PositiveInclusionApplicator {
 						}
 
 						if (unify) {
-							CQIE unifiedQuery = unifier.unify(currentcq, i, j);
+							CQIE unifiedQuery = Unifier.unify(currentcq, i, j);
 							if (unifiedQuery != null) {
-								newset.add(anonymizer.anonymize(unifiedQuery));
+								newset.add(QueryAnonymizer.anonymize(unifiedQuery));
 							}
 						}
 					}

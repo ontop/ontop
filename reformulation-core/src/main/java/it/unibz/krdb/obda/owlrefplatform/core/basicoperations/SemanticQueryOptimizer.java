@@ -42,12 +42,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This class is never used
+ */
+
+@Deprecated
 public class SemanticQueryOptimizer {
 	
-	 Map<Predicate,Set<SubDescriptionAxiom>> axiomIndex;
-	 OBDADataFactory fac;
+	 private final Map<Predicate,Set<SubDescriptionAxiom>> axiomIndex;
+	 private final OBDADataFactory fac;
 	
-	public SemanticQueryOptimizer(OBDADataFactory fac, Map<Predicate,Set<SubDescriptionAxiom>> includedPredicateIndex) {
+	private SemanticQueryOptimizer(OBDADataFactory fac, Map<Predicate,Set<SubDescriptionAxiom>> includedPredicateIndex) {
 		this.fac = fac;
 		this.axiomIndex = includedPredicateIndex;
 	}
@@ -82,8 +87,7 @@ public class SemanticQueryOptimizer {
 	 * @return
 	 */
 	public CQIE optimizeBySQO(CQIE query) {
-		QueryAnonymizer anonymizer = new QueryAnonymizer();
-		CQIE copy = anonymizer.anonymize(query.clone());
+		CQIE copy = QueryAnonymizer.anonymize(query.clone());
 		List<Function> body = copy.getBody();
 		for (int i = 0; i < body.size(); i++) {
 			int previoussize = body.size();
@@ -150,7 +154,7 @@ public class SemanticQueryOptimizer {
 				}
 			}
 			if (previoussize != body.size()) {
-				copy = anonymizer.anonymize(copy);
+				copy = QueryAnonymizer.anonymize(copy);
 				body = copy.getBody();
 				i = 0;
 				continue;
@@ -305,7 +309,7 @@ public class SemanticQueryOptimizer {
 
 				}
 				if (previoussize != body.size()) {
-					copy = anonymizer.anonymize(copy);
+					copy = QueryAnonymizer.anonymize(copy);
 					body = copy.getBody();
 					i = 0;
 					continue;

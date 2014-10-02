@@ -59,7 +59,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	private static final SemanticQueryOptimizer sqoOptimizer = null;
 
-	private static final PositiveInclusionApplicator piApplicator = new PositiveInclusionApplicator(sqoOptimizer);
+	private static final PositiveInclusionApplicator piApplicator = new PositiveInclusionApplicator(/*sqoOptimizer*/);
 
 	/***
 	 * The TBox used for reformulating.

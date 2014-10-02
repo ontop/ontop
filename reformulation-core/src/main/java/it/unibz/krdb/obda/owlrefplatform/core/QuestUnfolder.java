@@ -107,8 +107,8 @@ public class QuestUnfolder {
 			// ROMAN: THIS HAS NO EFFECT 
 //            unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
 			
-			List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
-			unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true, foreignKeyRules);
+		List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
+		unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true, foreignKeyRules);
 
 
 		final long endTime = System.currentTimeMillis();
