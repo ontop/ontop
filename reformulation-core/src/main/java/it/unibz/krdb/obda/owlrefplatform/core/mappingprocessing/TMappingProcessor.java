@@ -40,6 +40,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -52,11 +53,14 @@ public class TMappingProcessor {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
+	/** List of predicates that need to be excluded from T-Mappings **/
+	// Davide> I moved the initialization out of the constructor, as
+	//         the field became static due to some changes
+	private static List<SimplePredicate> excludeFromTMappings = new ArrayList<SimplePredicate>();
+
 	private static class TMappingIndexEntry implements Iterable<TMappingRule> {
 		private final Set<TMappingRule> rules = new HashSet<TMappingRule>();
 	
-	/** List of predicates that need to be excluded from T-Mappings **/
-	List<SimplePredicate> excludeFromTMappings;
 
 	@Override
 		public Iterator<TMappingRule> iterator() {

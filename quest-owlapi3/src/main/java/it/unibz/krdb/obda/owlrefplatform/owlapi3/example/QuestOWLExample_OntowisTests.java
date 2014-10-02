@@ -276,6 +276,18 @@ public class QuestOWLExample_OntowisTests {
 		String obdaFile = null;
 		
 		switch(args[0]){
+		case "--help":{
+			System.out.println(
+					"Options:\n\n"
+					+ "--MYSQL; --POSTGRES; --DB2; "
+					+ "--MYSQL-VIEW; --POSTGRES-VIEW; --DB2-VIEW"
+					+ "\n\n"
+					+ "The concepts for which T-mappings should"
+					+ "be disabled are defined the file tMappingsConf.conf");
+			System.exit(0);
+			break;
+		}
+		
 		case "--MYSQL":{
 			obdaFile = ParamConst.MYSQL;
 			break;
