@@ -25,9 +25,6 @@ import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.ontology.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.*;
 
 /***
@@ -39,32 +36,20 @@ import java.util.*;
  */
 public class CQCUtilities {
 
-	private CQIE canonicalQuery = null;
+	private List<Function> canonicalbody = null;
 
-	private static Unifier unifier = new Unifier();
+	private Function canonicalhead = null;
 
-	private static QueryAnonymizer anonymizer = new QueryAnonymizer();
-
-	private static OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
-
-	List<Function> canonicalbody = null;
-
-	Function canonicalhead = null;
-
-	Set<Predicate> canonicalpredicates = new HashSet<Predicate>(50);
+	private final Set<Predicate> canonicalpredicates = new HashSet<Predicate>(50);
 
 	/***
 	 * An index of all the facts obtained by freezing this query.
 	 */
-	private Map<Predicate, List<Function>> factMap = new HashMap<Predicate, List<Function>>();
+	private final Map<Predicate, List<Function>> factMap;
 
-	static Logger log = LoggerFactory.getLogger(CQCUtilities.class);
+	private List<CQIE> rules = null; // a somewhat non-trivial interaction with the first if in the constructor 
 
-	private Ontology sigma = null;
-	
-	private List<CQIE> rules = null;
-
-	final private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	/***
 	 * Constructs a CQC utility using the given query. If Sigma is not null and
@@ -76,12 +61,12 @@ public class CQCUtilities {
 	 *            A set of ABox dependencies
 	 */
 	public CQCUtilities(CQIE query, Ontology sigma) {
-		this.sigma = sigma;
+		//this.sigma = sigma;
 		if (sigma != null) {
 			// log.debug("Using dependencies to chase the query");
 			query = chaseQuery(query, sigma);
 		}
-		this.canonicalQuery = getCanonicalQuery(query);
+		CQIE canonicalQuery = getCanonicalQuery(query);
 		canonicalbody = canonicalQuery.getBody();
 		canonicalhead = canonicalQuery.getHead();
 		factMap = new HashMap<Predicate, List<Function>>(canonicalbody.size() * 2);
@@ -102,13 +87,15 @@ public class CQCUtilities {
 	}
 
 	public CQCUtilities(CQIE query, List<CQIE> rules) {
+
+		factMap = new HashMap<Predicate, List<Function>>();
+		
 		for (Function b : query.getBody())
-			if (b.isBooleanFunction())
-				return;
+			if (b.isBooleanFunction())   
+				return;   // here rules may remain null even if the parameter was non-null
 		
 		this.rules = rules;
 		if (rules != null && !rules.isEmpty()) {
-			factMap = new HashMap<Predicate, List<Function>>();
 			List<Function> generatedFacts = chaseQuery(query, rules);
 			
 			// Map the facts
@@ -139,7 +126,7 @@ public class CQCUtilities {
 	 * @param sigma
 	 * @return
 	 */
-	public CQIE chaseQuery(CQIE query, Ontology sigma) {
+	public static CQIE chaseQuery(CQIE query, Ontology sigma) {
 		sigma.saturate();
 		Function head = (Function) query.getHead();
 
@@ -333,7 +320,7 @@ public class CQCUtilities {
 	 * 
 	 * @param q
 	 */
-	public CQIE getCanonicalQuery(CQIE q) {
+	public static CQIE getCanonicalQuery(CQIE q) {
 		CQIE canonicalquery = q.clone();
 
 		int constantcounter = 1;
@@ -368,17 +355,17 @@ public class CQCUtilities {
 				if (term instanceof Variable) {
 					substitution = currentMap.get(term);
 					if (substitution == null) {
-						ValueConstant newconstant = termFactory.getConstantLiteral("CAN" + ((Variable) term).getName() + constantcounter);
+						ValueConstant newconstant = fac.getConstantLiteral("CAN" + ((Variable) term).getName() + constantcounter);
 						constantcounter += 1;
 						currentMap.put((Variable) term, newconstant);
 						substitution = newconstant;
 					}
 				} else if (term instanceof ValueConstant) {
-					ValueConstant newconstant = termFactory.getConstantLiteral("CAN" + ((ValueConstant) term).getValue() + constantcounter);
+					ValueConstant newconstant = fac.getConstantLiteral("CAN" + ((ValueConstant) term).getValue() + constantcounter);
 					constantcounter += 1;
 					substitution = newconstant;
 				} else if (term instanceof URIConstant) {
-					ValueConstant newconstant = termFactory.getConstantLiteral("CAN" + ((URIConstant) term).getURI() + constantcounter);
+					ValueConstant newconstant = fac.getConstantLiteral("CAN" + ((URIConstant) term).getURI() + constantcounter);
 					constantcounter += 1;
 					substitution = newconstant;
 				}
@@ -393,7 +380,7 @@ public class CQCUtilities {
 						if (fterm instanceof VariableImpl) {
 							substitution = currentMap.get(fterm);
 							if (substitution == null) {
-								ValueConstant newconstant = termFactory.getConstantLiteral("CAN" + ((VariableImpl) fterm).getName()
+								ValueConstant newconstant = fac.getConstantLiteral("CAN" + ((VariableImpl) fterm).getName()
 										+ constantcounter);
 								constantcounter += 1;
 								currentMap.put((Variable) fterm, newconstant);
@@ -401,7 +388,7 @@ public class CQCUtilities {
 
 							}
 						} else {
-							ValueConstant newconstant = termFactory.getConstantLiteral("CAN" + ((ValueConstant) fterm).getValue()
+							ValueConstant newconstant = fac.getConstantLiteral("CAN" + ((ValueConstant) fterm).getValue()
 									+ constantcounter);
 							constantcounter += 1;
 							substitution = newconstant;
@@ -447,6 +434,7 @@ public class CQCUtilities {
 	 * @param query
 	 * @return
 	 */
+	/*
 	private boolean hasAnswerRecursive(CQIE query) {
 
 		List<Function> body = query.getBody();
@@ -460,21 +448,21 @@ public class CQCUtilities {
 
 			for (Function currentGroundAtom : relevantFacts) {
 
-				Map<Variable, Term> mgu = unifier.getMGU(currentAtomTry, currentGroundAtom);
+				Map<Variable, Term> mgu = Unifier.getMGU(currentAtomTry, currentGroundAtom);
 				if (mgu == null)
 					continue;
 
-				CQIE satisfiedquery = unifier.applyUnifier(query, mgu);
+				CQIE satisfiedquery = Unifier.applyUnifier(query, mgu);
 				satisfiedquery.getBody().remove(atomidx);
 
 				if (satisfiedquery.getBody().size() == 0)
 					if (canonicalhead.equals(satisfiedquery.getHead()))
 						return true;
-				/*
-				 * Stopping early if we have chosen an MGU that has no
-				 * possibility of being successful because of the head.
-				 */
-				if (unifier.getMGU(canonicalhead, satisfiedquery.getHead()) == null) {
+				
+				// Stopping early if we have chosen an MGU that has no
+				// possibility of being successful because of the head.
+				 
+				if (Unifier.getMGU(canonicalhead, satisfiedquery.getHead()) == null) {
 					continue;
 				}
 				if (hasAnswerRecursive(satisfiedquery))
@@ -484,13 +472,14 @@ public class CQCUtilities {
 		}
 		return false;
 	}
-
+*/
 	/***
 	 * Implements a stack based, non-recursive query answering mechanism.
 	 * 
 	 * @param query2
 	 * @return
 	 */
+/*	
 	private boolean hasAnswerNonRecursive1(CQIE query2) {
 
 		query2 = QueryAnonymizer.deAnonymize(query2);
@@ -510,9 +499,9 @@ public class CQCUtilities {
 			for (int groundatomidx = 0; groundatomidx < canonicalbody.size(); groundatomidx++) {
 				Function currentGroundAtom = (Function) canonicalbody.get(groundatomidx);
 
-				Map<Variable, Term> mgu = unifier.getMGU(currentAtomTry, currentGroundAtom);
+				Map<Variable, Term> mgu = Unifier.getMGU(currentAtomTry, currentGroundAtom);
 				if (mgu != null) {
-					CQIE satisfiedquery = unifier.applyUnifier(currentquery.clone(), mgu);
+					CQIE satisfiedquery = Unifier.applyUnifier(currentquery.clone(), mgu);
 					satisfiedquery.getBody().remove(atomidx);
 
 					if (satisfiedquery.getBody().size() == 0) {
@@ -528,13 +517,14 @@ public class CQCUtilities {
 
 		return false;
 	}
-
+*/
     /**
      * TODO!!!
      *
      * @param query
      * @return
      */
+	
 	public boolean hasAnswer(CQIE query) {
 		query = query.clone();
 		QueryAnonymizer.deAnonymize(query);
@@ -564,13 +554,13 @@ public class CQCUtilities {
 				
 			Predicate currentPredicate = currentAtom.getPredicate();
 
-			/* Looking for options for this atom */
+			// Looking for options for this atom 
 			Stack<Function> factChoices = choicesMap.get(currentAtomIdx);
 			if (factChoices == null) {
-				/*
-				 * we have never reached this atom, setting up the initial list
-				 * of choices from the original fact list.
-				 */
+				
+				// we have never reached this atom, setting up the initial list
+				// of choices from the original fact list.
+				 
 				factChoices = new Stack<Function>();
 				factChoices.addAll(factMap.get(currentPredicate));
 				choicesMap.put(currentAtomIdx, factChoices);
@@ -581,35 +571,32 @@ public class CQCUtilities {
 			while (!factChoices.isEmpty()) {
 				Map<Variable, Term> mgu = Unifier.getMGU(currentAtom, factChoices.pop());
 				if (mgu == null) {
-					/* No way to use the current fact */
+					// No way to use the current fact 
 					continue;
 				}
 				newquery = Unifier.applyUnifier(currentQuery, mgu);
-				/*
-				 * Stopping early if we have chosen an MGU that has no
-				 * possibility of being successful because of the head.
-				 */
+				
+				// Stopping early if we have chosen an MGU that has no
+				// possibility of being successful because of the head.
+				
 				if (Unifier.getMGU(canonicalhead, newquery.getHead()) == null) {
-					/*
-					 * There is no chance to unifiy the two heads, hence this
-					 * fact is not good.
-					 */
+					
+					// There is no chance to unifiy the two heads, hence this
+					// fact is not good.
 					continue;
 				}
 
-				/*
-				 * The current fact was applicable, no conflicts so far, we can
-				 * advance to the next atom
-				 */
+				
+				// The current fact was applicable, no conflicts so far, we can
+				// advance to the next atom
 				choiceMade = true;
 				break;
 
 			}
 			if (!choiceMade) {
-				/*
-				 * Reseting choices state and backtracking and resetting the set
-				 * of choices for the current position
-				 */
+				
+				// Reseting choices state and backtracking and resetting the set
+				// of choices for the current position
 				factChoices.addAll(factMap.get(currentPredicate));
 				currentAtomIdx -= 1;
 				if (currentAtomIdx == -1)
@@ -620,11 +607,11 @@ public class CQCUtilities {
 			} else {
 
 				if (currentAtomIdx == bodysize - 1) {
-					/* we found a succesful set of facts */
+					// we found a successful set of facts 
 					return true;
 				}
 
-				/* Advancing to the next index */
+				// Advancing to the next index 
 				queryStack.push(currentQuery);
 				currentAtomIdx += 1;
 				currentQuery = newquery;
@@ -639,7 +626,7 @@ public class CQCUtilities {
 	}
 
 	/**
-	 * Removes all atoms that are equalt (syntactically) and then all the atoms
+	 * Removes all atoms that are equal (syntactically) and then all the atoms
 	 * that are redundant due to CQC.
 	 * 
 	 * @param queries
@@ -660,14 +647,14 @@ public class CQCUtilities {
 					}
 				}
 			}
-			newqueries.add(anonymizer.anonymize(removeRundantAtoms(cq)));
+			newqueries.add(QueryAnonymizer.anonymize(removeRundantAtoms(cq)));
 		}
 		return newqueries;
 	}
 
 	/***
 	 * Removes all atoms that are redundant w.r.t to query containment.This is
-	 * done by going through all unifyiable atoms, attempting to unify them. If
+	 * done by going through all unifiable atoms, attempting to unify them. If
 	 * they unify with a MGU that is empty, then one of the atoms is redundant.
 	 * 
 	 * 
@@ -756,10 +743,10 @@ public class CQCUtilities {
 			}
 		}
 
-		int newsize = queries.size();
-		int queriesremoved = initialsize - newsize;
-		long endtime = System.currentTimeMillis();
-		long time = (endtime - startime) / 1000;
+//		int newsize = queries.size();
+//		int queriesremoved = initialsize - newsize;
+//		long endtime = System.currentTimeMillis();
+//		long time = (endtime - startime) / 1000;
 //		log.debug("Done. Time elapse: {}s", time);
 //		log.debug("Resulting size: {}   Queries removed: {}", newsize, queriesremoved);
 
@@ -877,7 +864,7 @@ public class CQCUtilities {
 		LinkedList<CQIE> queries = new LinkedList<CQIE>();
 		queries.addAll(queriesInput);
 		
-		int initialsize = queries.size();
+//		int initialsize = queries.size();
 //		log.debug("Optimzing w.r.t. CQC. Initial size: {}:", initialsize);
 
 		double startime = System.currentTimeMillis();
@@ -954,11 +941,9 @@ public class CQCUtilities {
 				}
 			}
 		}
-		int newsize = queries.size();
-
-		double endtime = System.currentTimeMillis();
-		double time = (endtime - startime) / 1000;
-
+//		int newsize = queries.size();
+//		double endtime = System.currentTimeMillis();
+//		double time = (endtime - startime) / 1000;
 //		log.debug("Resulting size: {}  Time elapsed: {}", newsize, time);
 		
 		return queries;

@@ -43,10 +43,9 @@ import java.util.List;
 
 public class QueryAnonymizer {
 
-	private static final OBDADataFactory termFactory = OBDADataFactoryImpl
-			.getInstance();
+	private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 
-	public DatalogProgram anonymize(DatalogProgram prog) {
+	public static DatalogProgram anonymize(DatalogProgram prog) {
 
 		DatalogProgram newProg = termFactory.getDatalogProgram();
 		List<CQIE> rules = prog.getRules();
@@ -68,7 +67,7 @@ public class QueryAnonymizer {
 	 * @param q
 	 * @param focusatomIndex
 	 */
-	public void anonymize(CQIE q, int focusatomIndex) {
+	public static void anonymize(CQIE q, int focusatomIndex) {
 
 		List<Function> body = q.getBody();
 		Function atom = (Function) body.get(focusatomIndex);
@@ -124,7 +123,7 @@ public class QueryAnonymizer {
 		}
 	}
 
-	public Collection<CQIE> anonymize(Collection<CQIE> cqs) {
+	public static Collection<CQIE> anonymize(Collection<CQIE> cqs) {
 		HashSet<CQIE> anonymous = new HashSet<CQIE>(1000);
 		for (CQIE cq : cqs) {
 			anonymous.add(anonymize(cq));
@@ -132,7 +131,7 @@ public class QueryAnonymizer {
 		return anonymous;
 	}
 
-	public CQIE anonymize(CQIE q) {
+	public static CQIE anonymize(CQIE q) {
 
 		HashMap<String, List<Object[]>> auxmap = new HashMap<String, List<Object[]>>();
 
@@ -179,7 +178,7 @@ public class QueryAnonymizer {
 		return query;
 	}
 
-	private void collectAuxiliaries(Term term, Function atom, int pos,
+	private static void collectAuxiliaries(Term term, Function atom, int pos,
 			HashMap<String, List<Object[]>> auxmap) {
 		if (term instanceof Variable) {
 			Variable var = (Variable) term;
@@ -203,7 +202,7 @@ public class QueryAnonymizer {
 		}
 	}
 
-	private boolean isVariableInHead(CQIE q, Term t) {
+	private static boolean isVariableInHead(CQIE q, Term t) {
 		if (t instanceof AnonymousVariable)
 			return false;
 
