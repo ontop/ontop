@@ -37,9 +37,9 @@ import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
 
 import junit.framework.TestCase;
+import org.semanticweb.ontop.quest.dag.TestTBoxReasonerImpl_OnGraph;
 
 
 public class DAGChainTest extends TestCase {
@@ -127,7 +127,7 @@ public class DAGChainTest extends TestCase {
 //			System.out.println("---- " + nodes);
 //		}
 		
-		Test_TBoxReasonerImplOnGraph reasoner = new Test_TBoxReasonerImplOnGraph(res0);
+		TestTBoxReasonerImpl_OnGraph reasoner = new TestTBoxReasonerImpl_OnGraph(res0);
 		reasoner.convertIntoChainDAG();
 
 		EquivalencesDAG<BasicClassDescription> classes = reasoner.getClasses();

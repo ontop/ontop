@@ -21,15 +21,17 @@ package org.semanticweb.ontop.owlrefplatform.core.resultset;
  */
 
 import java.net.URISyntaxException;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -57,7 +59,10 @@ public class QuestResultset implements TupleResultSet {
 	private int bnodeCounter = 0;
 
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	private Map<Integer, String> uriMap; 
+	private Map<Integer, String> uriMap;
+	private String vendor;
+	private boolean isOracle;
+    private boolean isMsSQL;
 
 	/***
 	 * Constructs an OBDA statement from an SQL statement, a signature described
@@ -89,6 +94,12 @@ public class QuestResultset implements TupleResultSet {
 		DecimalFormatSymbols symbol = DecimalFormatSymbols.getInstance();
 		symbol.setDecimalSeparator('.');
 		formatter.setDecimalFormatSymbols(symbol);
+
+			 vendor =  st.getQuestInstance().getMetaData().getDriverName();
+			 isOracle = vendor.contains("Oracle");
+             isMsSQL = vendor.contains("SQL Server");
+						
+
 
 	}
 
@@ -217,7 +228,80 @@ public class QuestResultset implements TupleResultSet {
 						result = fac.getConstantLiteral(s, type);
 
 					} else if (type == COL_TYPE.DATETIME) {
-						Timestamp value = set.getTimestamp(column);
+
+                        /** set.getTimestamp() gives problem with MySQL and Oracle drivers we need to specify the dateformat
+                         MySQL DateFormat ("MMM DD YYYY HH:mmaa");
+                         Oracle DateFormat "dd-MMM-yy HH.mm.ss.SSSSSS aa" For oracle driver v.11 and less
+                         Oracle "dd-MMM-yy HH:mm:ss,SSSSSS" FOR ORACLE DRIVER 12.1.0.2
+                         To overcome the problem we create a new Timestamp */
+
+                    try {
+
+
+                        Timestamp value = set.getTimestamp(column);
+                        result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
+
+                    }
+                    catch (Exception e){
+
+                        if (isMsSQL) {
+                            String value = set.getString(column);
+
+                            DateFormat df = new SimpleDateFormat("MMM DD YYYY HH:mmaa");
+                            java.util.Date date;
+                            try {
+                                date = df.parse(value);
+                                Timestamp ts = new Timestamp(date.getTime());
+                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
+
+                            } catch (ParseException pe) {
+
+                                throw new RuntimeException(pe);
+                            }
+                        } else {
+                            if (isOracle) {
+
+                                String value = set.getString(column);
+                                //TODO Oracle driver - this date format depends on the version of the driver
+                                DateFormat df = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa"); // For oracle driver v.11 and less
+//							DateFormat df = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS"); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
+                                java.util.Date date;
+                                try {
+                                    date = df.parse(value);
+                                } catch (ParseException pe) {
+                                    throw new RuntimeException(pe);
+                                }
+
+                                Timestamp ts = new Timestamp(date.getTime());
+                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
+                            }
+                            else{
+                                throw new RuntimeException(e);
+                            }
+                        }
+
+                        }
+
+
+                    } else if (type == COL_TYPE.DATE) {
+						if (!isOracle) {
+							Date value = set.getDate(column);
+							result = fac.getConstantLiteral(value.toString(), type);
+						} else {
+							String value = set.getString(column);
+							DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+							java.util.Date date;
+							try {
+								date = df.parse(value);
+							} catch (ParseException e) {
+								throw new RuntimeException(e);
+							}
+							result = fac.getConstantLiteral(value.toString(), type);
+						}
+						
+						
+					} else if (type == COL_TYPE.TIME) {
+						Time value = set.getTime(column);						
 						result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
 					} else if (type == COL_TYPE.INTEGER) {
 						realValue = String.valueOf(set.getInt(column));
@@ -271,7 +355,7 @@ public class QuestResultset implements TupleResultSet {
 		return constant;
 	}
 
-	private COL_TYPE getQuestType(byte sqltype) {
+	private COL_TYPE getQuestType(int sqltype) {
 		if (sqltype == 1) {
 			return COL_TYPE.OBJECT;
 		} else if (sqltype == 2) {
@@ -290,6 +374,12 @@ public class QuestResultset implements TupleResultSet {
 			return COL_TYPE.DATETIME;
 		} else if (sqltype == 9) {
 			return COL_TYPE.BOOLEAN;
+		} else if (sqltype == 10) {
+			return COL_TYPE.DATE;
+		} else if (sqltype == 11) {
+			return COL_TYPE.TIME;
+		} else if (sqltype == 12) {
+			return COL_TYPE.YEAR;
 		} else if (sqltype == 0) {
 			return null;
 		} else {

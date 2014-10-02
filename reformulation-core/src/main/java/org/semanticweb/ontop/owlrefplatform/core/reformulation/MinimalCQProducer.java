@@ -20,19 +20,16 @@ package org.semanticweb.ontop.owlrefplatform.core.reformulation;
  * #L%
  */
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import org.semanticweb.ontop.model.Function;
 
 public class MinimalCQProducer {
-	private final TreeWitnessReasonerLite reasoner;
+	private final TreeWitnessReasonerCache reasoner;  // needs only isMoreSpecific
 	private List<Function> atoms = new LinkedList<Function>();
 	private List<Function> noCheckAtoms = new LinkedList<Function>();
 	
-	public MinimalCQProducer(TreeWitnessReasonerLite reasoner) {
+	public MinimalCQProducer(TreeWitnessReasonerCache reasoner) {
 		this.reasoner = reasoner;
 	}
 
@@ -69,10 +66,6 @@ public class MinimalCQProducer {
 			add(a);
 	}
 
-	public List<Function> getAtoms() {
-		return atoms;
-	}
-	
 	public void addNoCheck(Function atom) {
 		noCheckAtoms.add(atom);
 	}
@@ -81,7 +74,10 @@ public class MinimalCQProducer {
 		noCheckAtoms.addAll(aa);
 	}
 
-	public List<Function> getNoCheckAtoms() {
-		return noCheckAtoms;
-	}
+	public List<Function> getAllAtoms() {
+		List<Function> extAtoms = new ArrayList<Function>(atoms.size() + noCheckAtoms.size());
+		extAtoms.addAll(noCheckAtoms);
+		extAtoms.addAll(atoms);
+		return extAtoms;
+	}	
 }

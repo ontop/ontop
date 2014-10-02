@@ -23,7 +23,6 @@ package org.semanticweb.ontop.quest.dag;
 
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -31,11 +30,9 @@ import junit.framework.TestCase;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.Description;
 import org.semanticweb.ontop.ontology.Property;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,7 +103,7 @@ public class S_TestTransitiveReduction extends TestCase {
 			String fileInput=input.get(i);
 
 			TBoxReasonerImpl dag2 = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
-			Test_TBoxReasonerImplOnGraph reasonerd1 = new Test_TBoxReasonerImplOnGraph(dag2);
+            TestTBoxReasonerImpl_OnGraph reasonerd1 = new TestTBoxReasonerImpl_OnGraph(dag2);
 
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", dag2.getPropertyGraph());
@@ -120,7 +117,7 @@ public class S_TestTransitiveReduction extends TestCase {
 	}
 
 
-	private boolean testRedundantEdges(Test_TBoxReasonerImplOnGraph reasonerd1, TBoxReasonerImpl d2){
+	private boolean testRedundantEdges(TestTBoxReasonerImpl_OnGraph reasonerd1, TBoxReasonerImpl d2){
 		//number of edges in the graph
 		int  numberEdgesD1= reasonerd1.edgeSetSize();
 		//number of edges in the dag

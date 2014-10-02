@@ -25,33 +25,75 @@ import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.ontology.Axiom;
-import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.ontology.PropertySomeRestriction;
-import org.semanticweb.ontop.ontology.SubDescriptionAxiom;
+import org.semanticweb.ontop.ontology.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class AxiomToRuleTranslator {
-	
-	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+
+    private static Logger log = LoggerFactory.getLogger(AxiomToRuleTranslator.class);
+
+    private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 		
 	public static CQIE translate(Axiom axiom) throws UnsupportedOperationException {
 		if (axiom instanceof SubDescriptionAxiom) {
 			SubDescriptionAxiom subsumption = (SubDescriptionAxiom) axiom;
 			Description descLeft = subsumption.getSub();
 			Description descRight = subsumption.getSuper();
+
+            /*
+             * We don't need the translate the axioms of the range of the datatype property,
+             * as they do not contribute to the reasoning.
+             *
+             * On the other hand, these axioms are used somewhere else for handing datatypes
+             */
+            if(isDataTypeRangeAxiom(subsumption)){
+                // log.info(subsumption + " is a DataType range axiom");
+                return null;
+            }
+
+            try {
+                Function head = translate(descRight);
+                Function body = translate(descLeft);
+                return ofac.getCQIE(head, body);
+            } catch (UnsupportedOperationException ex){
+                throw new UnsupportedOperationException("Unsupported type of axiom: " + axiom.toString(),  ex);
+            }
 			
-			Function head = translate(descRight);
-			Function body = translate(descLeft);
-			
-			return ofac.getCQIE(head, body);
+
 		} else {
 			throw new UnsupportedOperationException("Unsupported type of axiom: " + axiom.toString());
 		}
 	}
-		
-	public static Function translate(Description description) throws UnsupportedOperationException {
+
+    /**
+     * Tests if the axiom is a datatype range axiom like range(age, xsd:int).
+     * which in DL syntax is \exists age^- \subseteq xsd:int
+     */
+    private static boolean isDataTypeRangeAxiom(SubDescriptionAxiom axiom) {
+
+        if (!(axiom.getSuper() instanceof DataType)) {
+            return false;
+        }
+
+        Description sub = axiom.getSub();
+
+        if (!(sub instanceof PropertySomeRestriction)) {
+            return false;
+        }
+
+        PropertySomeRestriction some = (PropertySomeRestriction) sub;
+
+        if (!some.isInverse()) {
+            return false;
+        }
+
+        return true;
+
+    }
+
+    public static Function translate(Description description) throws UnsupportedOperationException {
 		final Variable varX = ofac.getVariable("x");
 		final Variable varY = ofac.getVariable("y");
 		if (description instanceof OClass) {

@@ -22,14 +22,14 @@ package org.semanticweb.ontop.owlrefplatform.core.reformulation;
 
 import java.io.Serializable;
 
+import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
-public interface QueryRewriter extends Serializable {
+public interface QueryRewriter {
 
-	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException;
+	public DatalogProgram rewrite(DatalogProgram input) throws OBDAException;
 
 	/***
 	 * Sets the ontology and the ABox dependencies that this rewriter should 

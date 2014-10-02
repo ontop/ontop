@@ -33,6 +33,9 @@ package org.semanticweb.ontop.obda;
         import org.slf4j.Logger;
         import org.slf4j.LoggerFactory;
 
+        import static org.junit.Assert.assertEquals;
+        import static org.junit.Assert.assertFalse;
+
 public class ImdbTestPostgres {
     private OBDADataFactory fac;
 
@@ -96,6 +99,7 @@ public class ImdbTestPostgres {
                     count += 1;
                 }
                 log.debug("Total result: {}", count);
+                assertFalse(count == 0);
                 log.debug("Elapsed time: {} ms", time);
             }
         }
@@ -115,5 +119,74 @@ public class ImdbTestPostgres {
         runTests(p);
     }
 
+
+    @Test
+    public void testOneQuery() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+
+        String query = "PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>\n" +
+                "PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>\n" +
+                "PREFIX dbpedia: <http://dbpedia.org/ontology/>\n" +
+                "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+                "SELECT $x $title $company_name\n" +
+                "WHERE { \n" +
+                "   $m a mo:Movie; mo:title ?title; mo:hasActor ?x; mo:hasDirector ?x; mo:isProducedBy $y; mo:belongsToGenre $z .\n" +
+                "   $x dbpedia:birthName $actor_name .\n" +
+                "   $y :companyName $company_name; :hasCompanyLocation [ a mo:Eastern_Asia ] .\n" +
+                "   $z a mo:Love .\n" +
+                "}\n";
+
+
+        String query2 = "PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>\n" +
+                "PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>\n" +
+                "PREFIX dbpedia: <http://dbpedia.org/ontology/>\n" +
+                "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+                "SELECT *\n" +
+                "WHERE { \n" +
+                "   $m a mo:Movie; mo:isProducedBy $y .\n" +
+                "   $y :hasCompanyLocation [ a mo:Eastern_Asia ] .\n" +
+                "}\n";
+
+        runTestQuery(p, query);
+    }
+
+    private void runTestQuery(Properties p, String query) throws Exception {
+
+        // Creating a new instance of the reasoner
+        QuestOWLFactory factory = new QuestOWLFactory();
+        factory.setOBDAController(obdaModel);
+
+        factory.setPreferenceHolder(p);
+
+        QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+
+        // Now we are ready for querying
+        QuestOWLConnection conn = reasoner.getConnection();
+        QuestOWLStatement st = conn.createStatement();
+
+
+                log.debug("Executing query: ");
+                log.debug("Query: \n{}", query);
+
+                long start = System.nanoTime();
+                QuestOWLResultSet res = st.executeTuple(query);
+                long end = System.nanoTime();
+
+                double time = (end - start) / 1000;
+
+                int count = 0;
+                while (res.nextRow()) {
+                    count += 1;
+                }
+                log.debug("Total result: {}", count);
+
+                assertFalse(count == 0);
+
+                log.debug("Elapsed time: {} ms", time);
+
+
+
+    }
 }
 

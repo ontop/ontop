@@ -28,19 +28,18 @@ import java.util.Set;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessReasonerLite.IntersectionOfConceptSets;
 
 /**
  * TreeWitness: universal tree witnesses as in the KR 2012 paper
- *     each tree witness is deNewLiteralined by its domain, root NewLiterals and a set of \exists R.B concept 
+ *     each tree witness is determined by its domain, root terms and a set of \exists R.B concept 
  *           that generate a tree in the TBox canonical model to embed the tree witness part of the query
  *           
- *           roots are the NewLiterals that are mapped to the root of that tree
+ *           roots are the terms that are mapped to the root of that tree
  *           
  *           the "tree witness part of the query" consists of all atoms in the query 
- *                       with NewLiterals in the tw domain and at least one of the NewLiterals not being a tw root
+ *                       with terms in the tw domain and at least one of the terms not being a tw root
  *                       
- *     each instance also stores those atoms of the query with all NewLiterals among the tw roots
+ *     each instance also stores those atoms of the query with all terms among the tw roots
  *      
  *     this information is enough to produce the tree witness formula tw_f 
  *     
@@ -56,16 +55,16 @@ public class TreeWitness {
 	private final Collection<TreeWitnessGenerator> gens; // the \exists R.B concepts that realise the tree witness 
 	                                          // in the canonical model of the TBox
 	
-	private final IntersectionOfConceptSets rootConcepts; // store concept for merging tree witnesses
+	private final TreeWitnessReasonerCache.IntersectionOfConceptSets rootConcepts; // store concept for merging tree witnesses
 	
 	private List<List<Function>> twfs;  // tw-formula: disjunction of conjunctions of atoms
 
-	public TreeWitness(Collection<TreeWitnessGenerator> gens, TermCover terms, Set<Function> rootAtoms, IntersectionOfConceptSets rootConcepts) {
+	public TreeWitness(Collection<TreeWitnessGenerator> gens, TermCover terms, Set<Function> rootAtoms, TreeWitnessReasonerCache.IntersectionOfConceptSets rootConcepts) {
 		this.gens = gens;
 		this.terms = terms;
 		this.rootAtoms = rootAtoms;
 		this.rootConcepts = rootConcepts;
-		//this.domain = domain; // new HashSet<NewLiteral>(roots); domain.addAll(nonroots);
+		//this.domain = domain; // new HashSet<term>(roots); domain.addAll(nonroots);
 	}
 	
 	void setFormula(List<List<Function>> twfs) {
@@ -76,12 +75,12 @@ public class TreeWitness {
 		return twfs;
 	}
 	
-	public IntersectionOfConceptSets getRootConcepts() {
+	public TreeWitnessReasonerCache.IntersectionOfConceptSets getRootConcepts() {
 		return rootConcepts;
 	}
 	
 	/**
-	 * Set<NewLiteral> getRoots()
+	 * Set<Term> getRoots()
 	 * 
 	 * @return set of roots of the tree witness
 	 */
@@ -92,16 +91,16 @@ public class TreeWitness {
 	/**
 	 * boolean isMergeable()
 	 * 
-	 * @return true if all root NewLiterals are quantified variables and there is the intersection of root concepts is non-empty
+	 * @return true if all root terms are quantified variables and there is the intersection of root concepts is non-empty
 	 */
 	public boolean isMergeable() {
 		return !rootConcepts.isEmpty();
 	}
 	
 	/**
-	 * Set<NewLiteral> getDomain()
+	 * Set<Term> getDomain()
 	 * 
-	 * @return the domain (set of NewLiterals) of the tree witness
+	 * @return the domain (set of terms) of the tree witness
 	 */
 	
 	public Set<Term> getDomain() {
@@ -123,9 +122,8 @@ public class TreeWitness {
 	}
 
 	/**
-	 * getSubConcepts
+	 * getGeneratorSubConcepts
 	 * 
-	 * @param twgs a set of tree witness generators
 	 * @return the set of all sub-concepts for all of the tree witness generators
 	 */
 	
@@ -144,7 +142,7 @@ public class TreeWitness {
 	/**
 	 * Set<Function> getRootAtoms()
 	 * 
-	 * @return query atoms with all NewLiterals among the roots of tree witness
+	 * @return query atoms with all terms among the roots of tree witness
 	 */
 	
 	public Set<Function> getRootAtoms() {

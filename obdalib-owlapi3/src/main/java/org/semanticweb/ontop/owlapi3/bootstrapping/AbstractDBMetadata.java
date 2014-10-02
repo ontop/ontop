@@ -43,10 +43,6 @@ public abstract class AbstractDBMetadata
 	{
 		DBMetadata metadata = null;
 
-			Class.forName(source.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-
-
-		
 			Connection conn = DriverManager.getConnection(source.getParameter(RDBMSourceParameterConstants.DATABASE_URL),
 					source.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME), source.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD));
 			metadata = JDBCConnectionManager.getMetaData(conn);

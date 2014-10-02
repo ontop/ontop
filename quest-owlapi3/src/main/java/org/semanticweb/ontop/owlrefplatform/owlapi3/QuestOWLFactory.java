@@ -28,9 +28,6 @@ import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 import java.util.Properties;
 
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;

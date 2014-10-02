@@ -33,8 +33,6 @@ import org.semanticweb.ontop.ontology.BasicClassDescription;
 import org.semanticweb.ontop.ontology.Property;
 import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
 import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Loop;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessReasonerLite.IntersectionOfConceptSets;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessReasonerLite.IntersectionOfProperties;
 import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessSet.PropertiesCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,9 +40,9 @@ import org.slf4j.LoggerFactory;
 public class QueryFolding {
 	private final PropertiesCache propertiesCache;
 	
-	private IntersectionOfProperties properties; 
+	private TreeWitnessReasonerCache.IntersectionOfProperties properties;
 	private Set<Loop> roots; 
-	private IntersectionOfConceptSets internalRootConcepts;
+	private TreeWitnessReasonerCache.IntersectionOfConceptSets internalRootConcepts;
 	private Set<Term> internalRoots;
 	private Set<Term> internalDomain;
 	private List<TreeWitness> interior;
@@ -60,9 +58,9 @@ public class QueryFolding {
 	
 	public QueryFolding(PropertiesCache propertiesCache) {
 		this.propertiesCache = propertiesCache;
-		properties = new IntersectionOfProperties(); 
+		properties = new TreeWitnessReasonerCache.IntersectionOfProperties();
 		roots = new HashSet<Loop>(); 
-		internalRootConcepts = new IntersectionOfConceptSets(); 
+		internalRootConcepts = new TreeWitnessReasonerCache.IntersectionOfConceptSets();
 		internalRoots = new HashSet<Term>();
 		internalDomain = new HashSet<Term>();
 		interior = Collections.EMPTY_LIST; // in-place QueryFolding for one-step TreeWitnesses, 
@@ -73,9 +71,9 @@ public class QueryFolding {
 	public QueryFolding(QueryFolding qf) {
 		this.propertiesCache = qf.propertiesCache;
 
-		properties = new IntersectionOfProperties(qf.properties.get()); 
+		properties = new TreeWitnessReasonerCache.IntersectionOfProperties(qf.properties.get());
 		roots = new HashSet<Loop>(qf.roots); 
-		internalRootConcepts = new IntersectionOfConceptSets(qf.internalRootConcepts.get()); 
+		internalRootConcepts = new TreeWitnessReasonerCache.IntersectionOfConceptSets(qf.internalRootConcepts.get());
 		internalRoots = new HashSet<Term>(qf.internalRoots);
 		internalDomain = new HashSet<Term>(qf.internalDomain);
 		interior = new LinkedList<TreeWitness>(qf.interior);
@@ -119,7 +117,7 @@ public class QueryFolding {
 	public void newQueryFolding(TreeWitness tw) {
 		properties.clear(); 
 		roots.clear(); 
-		internalRootConcepts = new IntersectionOfConceptSets(tw.getRootConcepts()); 
+		internalRootConcepts = new TreeWitnessReasonerCache.IntersectionOfConceptSets(tw.getRootConcepts());
 		internalRoots = new HashSet<Term>(tw.getRoots());
 		internalDomain = new HashSet<Term>(tw.getDomain());
 		interior = new LinkedList<TreeWitness>();
@@ -175,13 +173,13 @@ public class QueryFolding {
 		log.debug("  PROPERTIES {}", properties);
 		log.debug("  ENDTYPE {}", internalRootConcepts);
 
-		IntersectionOfConceptSets rootType = new IntersectionOfConceptSets();
+		TreeWitnessReasonerCache.IntersectionOfConceptSets rootType = new TreeWitnessReasonerCache.IntersectionOfConceptSets();
 
 		Set<Function> rootAtoms = new HashSet<Function>();
 		for (Loop root : roots) {
 			rootAtoms.addAll(root.getAtoms());
 			if (!root.isExistentialVariable()) { // if the variable is not quantified -- not mergeable
-				rootType = IntersectionOfConceptSets.EMPTY;
+				rootType = TreeWitnessReasonerCache.IntersectionOfConceptSets.EMPTY;
 				log.debug("  NOT MERGEABLE: {} IS NOT QUANTIFIED", root);				
 			}
 		}
@@ -190,7 +188,7 @@ public class QueryFolding {
 		for (Edge edge : edges) {
 			if (roots.contains(edge.getLoop0()) && roots.contains(edge.getLoop1())) {
 				rootAtoms.addAll(edge.getBAtoms());
-				rootType = IntersectionOfConceptSets.EMPTY;
+				rootType = TreeWitnessReasonerCache.IntersectionOfConceptSets.EMPTY;
 				log.debug("  NOT MERGEABLE: {} IS WITHIN THE ROOTS", edge);				
 			}
 		}

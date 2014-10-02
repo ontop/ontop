@@ -20,11 +20,7 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 	
 	@Override
 	public void setUp() {
-		try {
-			Class.forName(getDriverName());
-		} 
-		catch (ClassNotFoundException e) { /* NO-OP */ }
-		
+
 		try {
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
 			metadata = JDBCConnectionManager.getMetaData(conn);

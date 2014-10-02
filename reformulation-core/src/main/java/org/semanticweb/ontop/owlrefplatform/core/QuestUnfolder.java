@@ -102,23 +102,22 @@ public class QuestUnfolder {
 
     }
 
-	public void applyTMappings(boolean optimizeMap, TBoxReasoner reformulationReasoner, boolean full) throws OBDAException  {
+	public void applyTMappings(/*boolean optimizeMap, */ TBoxReasoner reformulationReasoner, boolean full) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
 
-		TMappingProcessor tmappingProc = new TMappingProcessor(reformulationReasoner, optimizeMap);
-		unfoldingProgram = tmappingProc.getTMappings(unfoldingProgram, full);
-
+		unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full);
+		
 		/*
 		 * Eliminating redundancy from the unfolding program
 		 */
-		unfoldingProgram = DatalogNormalizer.enforceEqualities(unfoldingProgram);
-		List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
 
-		if (optimizeMap) {
-			CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
+			// ROMAN: THIS HAS NO EFFECT 
+//            unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
+			
+			List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
 			unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true, foreignKeyRules);
-		}
+
 
 		final long endTime = System.currentTimeMillis();
 
@@ -287,7 +286,7 @@ public class QuestUnfolder {
 
 		unfoldingProgram = analyzer.constructDatalogProgram();
 
-		applyTMappings(true, reformulationReasoner, false);
+		applyTMappings(/*true, */reformulationReasoner, false);
 		
 		setupUnfolder();
 

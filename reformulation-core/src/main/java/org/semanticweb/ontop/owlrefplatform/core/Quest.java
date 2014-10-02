@@ -476,11 +476,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
 		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-		try {
-			Class.forName(driver);
-		} catch (ClassNotFoundException e1) {
-			// Does nothing because the SQLException handles this problem also.
-		}
 		localConnection = DriverManager.getConnection(url, username, password);
 
 		if (localConnection != null) {
@@ -818,7 +813,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/***
 			 * T-Mappings and Fact mappings
 			 */
-			boolean optimizeMap = true;
+
 
 			if ((aboxMode.equals(QuestConstants.VIRTUAL))) {
 				log.debug("Original mapping size: {}", unfolder.getRules().size());
@@ -829,10 +824,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 // Normalizing equalities
 				unfolder.normalizeEqualities();
 				
-				 // Adding ontology assertions (ABox) as rules (facts, head with no body).
-				unfolder.addABoxAssertionsAsFacts(inputTBox.getABox());
-				
-				unfolder.applyTMappings(optimizeMap, reformulationReasoner, true);
+				unfolder.applyTMappings(reformulationReasoner, true);
+
+                // Adding ontology assertions (ABox) as rules (facts, head with no body).
+                unfolder.addABoxAssertionsAsFacts(inputTBox.getABox());
 				
 				Ontology aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reformulationReasoner);	
 				sigma.addEntities(aboxDependencies.getVocabulary());
@@ -878,16 +873,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			setupRewriter(reasoner, sigma);
 
 
-			if (optimizeMap) {
+			/*if (optimizeMap)*/ {
 				Ontology saturatedSigma = sigma.clone();
 				saturatedSigma.saturate();
 				
 				List<CQIE> sigmaRules = createSigmaRules(saturatedSigma);
 				sigmaRulesIndex = Collections.unmodifiableMap(createSigmaRulesIndex(sigmaRules));
 			}
-			else {
-				sigmaRulesIndex = Collections.unmodifiableMap(new HashMap<Predicate, List<CQIE>>());
-			}
+			//else {
+			//	sigmaRulesIndex = Collections.unmodifiableMap(new HashMap<Predicate, List<CQIE>>());
+			//}
 			
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
@@ -1095,7 +1090,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		for (Axiom assertion : assertions) {
 			try {
 				CQIE rule = AxiomToRuleTranslator.translate(assertion);
-				rules.add(rule);
+                if(rule != null) {
+                    rules.add(rule);
+                }
 			} catch (UnsupportedOperationException e) {
 				log.warn(e.getMessage());
 			}
@@ -1202,14 +1199,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
 		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-		// if (driver.contains("mysql")) {
-		// url = url + "?relaxAutoCommit=true";
-		// }
-		try {
-			Class.forName(driver);
-		} catch (ClassNotFoundException e1) {
-			log.debug(e1.getMessage());
-		}
 		try {
 			conn = DriverManager.getConnection(url, username, password);
 		} catch (SQLException e) {
@@ -1245,6 +1234,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public QuestConnection getConnection() throws OBDAException {
 
 		return new QuestConnection(this, getSQLPoolConnection());
+	}
+	
+	public DBMetadata getMetaData() {
+		return metadata;
 	}
 
 	public UriTemplateMatcher getUriTemplateMatcher() {
