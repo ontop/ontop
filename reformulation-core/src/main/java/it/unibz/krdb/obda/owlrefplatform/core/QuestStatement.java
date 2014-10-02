@@ -677,7 +677,7 @@ public class QuestStatement implements OBDAStatement {
 	 * Query object created (or cached) will be set as jenaQueryContainer[0] so
 	 * that it can be used in other process after getUnfolding.
 	 * 
-	 * If the queyr is not already cached, it will be cached in this process.
+	 * If the query is not already cached, it will be cached in this process.
 	 * 
 	 * @param strquery
 	 * @param signatureContainer
@@ -687,7 +687,6 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	public String getUnfolding(String strquery) throws Exception {
 		String sql = "";
-		Map<Predicate, List<CQIE>> rulesIndex = questInstance.sigmaRulesIndex;
 
 		List<String> signatureContainer = new LinkedList<String>();
 		//Query query;
@@ -739,7 +738,7 @@ public class QuestStatement implements OBDAStatement {
 				/*
 				 * Query optimization w.r.t Sigma rules
 				 */
-				optimizeQueryWithSigmaRules(program, rulesIndex);
+				optimizeQueryWithSigmaRules(program, questInstance.sigmaRulesIndex);
 
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
@@ -755,7 +754,7 @@ public class QuestStatement implements OBDAStatement {
 				final long endTime = System.currentTimeMillis();
 				rewritingTime = endTime - startTime;
 
-				optimizeQueryWithSigmaRules(programAfterRewriting, rulesIndex);
+				optimizeQueryWithSigmaRules(programAfterRewriting, questInstance.sigmaRulesIndex);
 
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
@@ -796,7 +795,7 @@ public class QuestStatement implements OBDAStatement {
 	 * @param program
 	 * @param rules
 	 */
-	private void optimizeQueryWithSigmaRules(DatalogProgram program, Map<Predicate, List<CQIE>> rulesIndex) {
+	private static void optimizeQueryWithSigmaRules(DatalogProgram program, Map<Predicate, List<CQIE>> rulesIndex) {
 		List<CQIE> unionOfQueries = new LinkedList<CQIE>(program.getRules());
 		// for each rule in the query
 		for (int qi = 0; qi < unionOfQueries.size(); qi++) {

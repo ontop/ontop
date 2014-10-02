@@ -37,7 +37,6 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RepositoryChangedListener;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AxiomToRuleTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
@@ -84,7 +83,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -139,9 +137,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	/* The active query evaluation engine */
 	protected EvaluationEngine evaluationEngine = null;
-
-	/* The active ABox dependencies */
-	private Ontology sigma = null;
 
 	/* TBox axioms translated into rules (used by QuestStatement) */ 
 	protected Map<Predicate, List<CQIE>> sigmaRulesIndex = null;
@@ -570,8 +565,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 				dataRepository.setTBox(reformulationReasoner);
 				
-				sigma = SigmaTBoxOptimizer.getSigmaOntology(reformulationReasoner);
-
 				if (inmemory) {
 
 					/*
@@ -610,10 +603,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());				
 			} 
 			else if (aboxMode.equals(QuestConstants.VIRTUAL)) {
-
-				// ROMAN: WHY EMPTY SIGMA?
-				sigma = OntologyFactoryImpl.getInstance().createOntology();
-				
 				// log.debug("Working in virtual mode");
 
 				Collection<OBDADataSource> sources = this.inputOBDAModel.getSources();
@@ -655,7 +644,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
 			URI sourceId = datasource.getSourceID();
 
-			
 			
 			//if the metadata was not already set
 			if (metadata == null) {
@@ -780,10 +768,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
                 unfolder.addABoxAssertionsAsFacts(inputTBox.getABox());
-				
-				Ontology aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reformulationReasoner);	
-				sigma.addEntities(aboxDependencies.getVocabulary());
-				sigma.addAssertions(aboxDependencies.getAssertions());
 
 				// Adding data typing on the mapping axioms.
 				unfolder.extendTypesWithMetadata(reformulationReasoner, equivalenceMaps);
@@ -799,8 +783,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			log.debug("DB Metadata: \n{}", metadata);
 
+			/* The active ABox dependencies */
+			Ontology sigma = SigmaTBoxOptimizer.getSigmaOntology(reformulationReasoner);
 			
-			/***
+			/*
 			 * Setting up the TBox we will use for the reformulation
 			 */
 			TBoxReasoner reasoner;
@@ -850,8 +836,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 	}
 
-
-
 	private void setupRewriter(TBoxReasoner reformulationR, Ontology sigma) {
 		if (reformulate == false) {
 			rewriter = new DummyReformulator();
@@ -867,6 +851,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		rewriter.setTBox(reformulationR, sigma);
 	}
+	
+
 
 	public void updateSemanticIndexMappings() throws DuplicateMappingException, OBDAException {
 		/* Setting up the OBDA model */
@@ -877,9 +863,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		unfolder.updateSemanticIndexMappings(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), 
 										reformulationReasoner);
 		
-		Ontology aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reformulationReasoner);	
-		sigma.addEntities(aboxDependencies.getVocabulary());
-		sigma.addAssertions(aboxDependencies.getAssertions());	
+		//updateSigmaFromReasoner is not needed -- the reasoner does not change
+		// Ontology aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reformulationReasoner);	
+		// sigma.addEntities(aboxDependencies.getVocabulary());
+		// sigma.addAssertions(aboxDependencies.getAssertions());	
 	}
 	
 	
