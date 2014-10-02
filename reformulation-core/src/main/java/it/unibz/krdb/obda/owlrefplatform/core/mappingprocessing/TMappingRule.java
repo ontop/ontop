@@ -8,6 +8,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -27,7 +28,7 @@ public class TMappingRule {
 	private final CQIE stripped;	
 	private final List<Function> conditions;	
 	private final CQCUtilities cqc;
-
+	
 	public TMappingRule(Function head, List<Function> body) {
 		conditions = new LinkedList<Function>();
 		List<Function> newbody = new LinkedList<Function>();
@@ -40,7 +41,7 @@ public class TMappingRule {
 		}
 		Function newhead = (Function)head.clone();
 		stripped = fac.getCQIE(newhead, newbody);
-		cqc = new CQCUtilities(stripped, (Ontology)null /*sigma*/);
+		cqc = new CQCUtilities(stripped, (DataDependencies)null /*sigma*/);
 	}
 
 	public TMappingRule(Function head, TMappingRule baseRule) {
@@ -57,7 +58,7 @@ public class TMappingRule {
 		}
 		Function newhead = (Function)head.clone();
 		stripped = fac.getCQIE(newhead, newbody);
-		cqc = new CQCUtilities(stripped, (Ontology)null /*sigma*/); // could be null -- no optimization is used
+		cqc = new CQCUtilities(stripped, (DataDependencies)null /*sigma*/); // could be null -- no optimization is used
 	}
 	
 	

@@ -40,6 +40,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RepositoryChangedListener;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AxiomToRuleTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
@@ -138,12 +139,11 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	/* The active query evaluation engine */
 	protected EvaluationEngine evaluationEngine = null;
 
-	/* TBox axioms translated into rules (used by QuestStatement) */ 
-	protected Map<Predicate, List<CQIE>> sigmaRulesIndex = null;
-
 	/* The TBox used for query reformulation (ROMAN: not really, it can be reduced by Sigma) */
 	private TBoxReasoner reformulationReasoner;
 
+	private DataDependencies sigma;
+	
 	/* The merge and translation of all loaded ontologies */
 	private Ontology inputTBox = null;
 
@@ -319,6 +319,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	protected Map<String, List<String>> getSignatureCache() {
 		return signaturecache;
+	}
+	
+	public DataDependencies getDataDependencies() {
+		return sigma;
 	}
 
 //	protected Map<String, Query> getJenaQueryCache() {
@@ -784,14 +788,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			log.debug("DB Metadata: \n{}", metadata);
 
 			/* The active ABox dependencies */
-			Ontology sigma = SigmaTBoxOptimizer.getSigmaOntology(reformulationReasoner);
+			sigma = new DataDependencies(reformulationReasoner);
 			
 			/*
 			 * Setting up the TBox we will use for the reformulation
 			 */
 			TBoxReasoner reasoner;
 			if (bOptimizeTBoxSigma) {
-				TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(sigma);
+				TBoxReasoner sigmaReasoner = sigma.getReasoner();
 				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner, 
 						reformulationOntology.getVocabulary(), sigmaReasoner);
 				reasoner = new TBoxReasonerImpl(reducer.getReducedOntology());
@@ -803,10 +807,24 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 * Setting up the reformulation engine
 			 */
 
-			setupRewriter(reasoner, sigma);
+			if (reformulate == false) {
+				rewriter = new DummyReformulator();
+			} 
+			else if (QuestConstants.PERFECTREFORMULATION.equals(reformulationTechnique)) {
+				rewriter = new DLRPerfectReformulator();
+			} 
+			else if (QuestConstants.UCQBASED.equals(reformulationTechnique)) {
+				rewriter = new TreeRedReformulator();
+			} 
+			else if (QuestConstants.TW.equals(reformulationTechnique)) {
+				rewriter = new TreeWitnessRewriter();
+			} 
+			else {
+				throw new IllegalArgumentException("Invalid value for argument: " + QuestPreferences.REFORMULATION_TECHNIQUE);
+			}
 
-			sigmaRulesIndex = createSigmaRulesIndex(sigma);				
-			
+			rewriter.setTBox(reasoner, sigma);
+
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
@@ -836,21 +854,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 	}
 
-	private void setupRewriter(TBoxReasoner reformulationR, Ontology sigma) {
-		if (reformulate == false) {
-			rewriter = new DummyReformulator();
-		} else if (QuestConstants.PERFECTREFORMULATION.equals(reformulationTechnique)) {
-			rewriter = new DLRPerfectReformulator();
-		} else if (QuestConstants.UCQBASED.equals(reformulationTechnique)) {
-			rewriter = new TreeRedReformulator();
-		} else if (QuestConstants.TW.equals(reformulationTechnique)) {
-			rewriter = new TreeWitnessRewriter();
-		} else {
-			throw new IllegalArgumentException("Invalid value for argument: " + QuestPreferences.REFORMULATION_TECHNIQUE);
-		}
-
-		rewriter.setTBox(reformulationR, sigma);
-	}
 	
 
 
@@ -1002,34 +1005,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return toReturn;
 	}
 
-
-	private  Map<Predicate, List<CQIE>> createSigmaRulesIndex(Ontology sigma) {
-		Ontology saturatedSigma = sigma.clone();
-		saturatedSigma.saturate();
-		
-		Map<Predicate, List<CQIE>> sigmaRulesMap = new HashMap<Predicate, List<CQIE>>();
-		
-		for (Axiom assertion : saturatedSigma.getAssertions()) {
-			try {
-				CQIE rule = AxiomToRuleTranslator.translate(assertion);
-                if(rule != null) {
-        			Function atom = rule.getBody().get(0); // The rule always has one
-					// body atom
-        			Predicate predicate = atom.getFunctionSymbol();
-        			List<CQIE> rules = sigmaRulesMap.get(predicate);
-        			if (rules == null) {
-        				rules = new LinkedList<CQIE>();
-        				sigmaRulesMap.put(predicate, rules);
-        			}
-        			rules.add(rule);
-                }
-			} 
-			catch (UnsupportedOperationException e) {
-				log.warn(e.getMessage());
-			}
-		}
-		return sigmaRulesMap;
-	}
 
 
 	private void setupConnectionPool() {

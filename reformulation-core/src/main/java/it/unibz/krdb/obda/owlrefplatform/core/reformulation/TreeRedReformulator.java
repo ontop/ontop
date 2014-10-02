@@ -37,6 +37,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SemanticQueryOptimizer;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import it.unibz.krdb.obda.utils.QueryUtils;
@@ -69,7 +70,7 @@ public class TreeRedReformulator implements QueryRewriter {
 	 * The set of ABox dependencies that will be used to optimize the
 	 * reformulation.
 	 */
-	private Ontology sigma = null;
+	private DataDependencies sigma = null;
 
 	public TreeRedReformulator() {
 
@@ -378,7 +379,7 @@ public class TreeRedReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(TBoxReasoner reasoner, Ontology sigma) {
+	public void setTBox(TBoxReasoner reasoner, DataDependencies sigmap) {
 		this.ontology = TBoxReasonerToOntology.getOntology(reasoner);
 
 		/*
@@ -388,10 +389,10 @@ public class TreeRedReformulator implements QueryRewriter {
 		this.ontology.saturate();
 		
 		
-		this.sigma = sigma;
+		this.sigma = sigmap;
 		if (this.sigma != null) {
 			log.debug("Using {} dependencies.", sigma.getAssertions().size());
-			this.sigma.saturate();
+			//this.sigma.saturate();
 		}
 
 	}

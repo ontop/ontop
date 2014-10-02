@@ -44,6 +44,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
@@ -111,8 +112,6 @@ public class QuestStatement implements OBDAStatement {
 	public Quest questInstance;
 
 	private static Logger log = LoggerFactory.getLogger(QuestStatement.class);
-
-	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
 	Thread runningThread = null;
 
@@ -735,10 +734,8 @@ public class QuestStatement implements OBDAStatement {
 					throw new OBDAException("Error, the translation of the query generated 0 rules. This is not possible for any SELECT query (other queries are not supported by the translator).");
 				}
 
-				/*
-				 * Query optimization w.r.t Sigma rules
-				 */
-				optimizeQueryWithSigmaRules(program, questInstance.sigmaRulesIndex);
+				// Query optimization w.r.t Sigma rules
+				DataDependencies.optimizeQueryWithSigmaRules(program, questInstance.getDataDependencies());
 
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
@@ -754,7 +751,7 @@ public class QuestStatement implements OBDAStatement {
 				final long endTime = System.currentTimeMillis();
 				rewritingTime = endTime - startTime;
 
-				optimizeQueryWithSigmaRules(programAfterRewriting, questInstance.sigmaRulesIndex);
+				DataDependencies.optimizeQueryWithSigmaRules(programAfterRewriting, questInstance.getDataDependencies());
 
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
@@ -790,70 +787,6 @@ public class QuestStatement implements OBDAStatement {
 		return sql;
 	}
 
-	/**
-	 * 
-	 * @param program
-	 * @param rules
-	 */
-	private static void optimizeQueryWithSigmaRules(DatalogProgram program, Map<Predicate, List<CQIE>> rulesIndex) {
-		List<CQIE> unionOfQueries = new LinkedList<CQIE>(program.getRules());
-		// for each rule in the query
-		for (int qi = 0; qi < unionOfQueries.size(); qi++) {
-			CQIE query = unionOfQueries.get(qi);
-			// get query head, body
-			Function queryHead = query.getHead();
-			List<Function> queryBody = query.getBody();
-			// for each atom in query body
-			for (int i = 0; i < queryBody.size(); i++) {
-				Set<Function> removedAtom = new HashSet<Function>();
-				Function atomQuery = queryBody.get(i);
-				Predicate predicate = atomQuery.getPredicate();
-
-				// for each tbox rule
-				List<CQIE> rules = rulesIndex.get(predicate);
-				if (rules == null || rules.isEmpty()) {
-					continue;
-				}
-				for (CQIE rule : rules) {
-					// try to unify current query body atom with tbox rule body
-					// atom
-					rule = DatalogUnfolder.getFreshRule(rule, 4022013); // Random
-																		// suffix
-																		// number
-					Function ruleBody = rule.getBody().get(0);
-					Map<Variable, Term> theta = Unifier.getMGU(ruleBody, atomQuery);
-					if (theta == null || theta.isEmpty()) {
-						continue;
-					}
-					// if unifiable, apply to head of tbox rule
-					Function ruleHead = rule.getHead();
-					Function copyRuleHead = (Function) ruleHead.clone();
-					Unifier.applyUnifier(copyRuleHead, theta);
-
-					removedAtom.add(copyRuleHead);
-				}
-
-				for (int j = 0; j < queryBody.size(); j++) {
-					if (j == i) {
-						continue;
-					}
-					Function toRemove = queryBody.get(j);
-					if (removedAtom.contains(toRemove)) {
-						queryBody.remove(j);
-						j -= 1;
-						if (j < i) {
-							i -= 1;
-						}
-					}
-				}
-			}
-			// update query datalog program
-			unionOfQueries.remove(qi);
-			unionOfQueries.add(qi, ofac.getCQIE(queryHead, queryBody));
-		}
-		program.removeAllRules();
-		program.appendRule(unionOfQueries);
-	}
 
 	/**
 	 * Returns the number of tuples returned by the query

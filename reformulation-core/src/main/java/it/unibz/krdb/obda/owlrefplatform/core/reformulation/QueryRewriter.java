@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 public interface QueryRewriter {
@@ -36,5 +36,5 @@ public interface QueryRewriter {
 	 * @param ontology
 	 * @param sigma
 	 */
-	public void setTBox(TBoxReasoner ontology, Ontology sigma);
+	public void setTBox(TBoxReasoner ontology, DataDependencies sigma);
 }

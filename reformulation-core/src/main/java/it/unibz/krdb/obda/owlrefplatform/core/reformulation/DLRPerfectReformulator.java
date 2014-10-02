@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import it.unibz.krdb.obda.utils.QueryUtils;
@@ -174,7 +175,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(TBoxReasoner reasoner, Ontology sigma) {
+	public void setTBox(TBoxReasoner reasoner, DataDependencies sigma) {
 		assertions.clear();
 		Ontology ontology = TBoxReasonerToOntology.getOntology(reasoner);
 		this.assertions.addAll(ontology.getAssertions());

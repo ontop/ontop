@@ -25,6 +25,8 @@ import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.ontology.*;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
+
 import java.util.*;
 
 /***
@@ -60,7 +62,7 @@ public class CQCUtilities {
 	 * @param sigma
 	 *            A set of ABox dependencies
 	 */
-	public CQCUtilities(CQIE query, Ontology sigma) {
+	public CQCUtilities(CQIE query, DataDependencies sigma) {
 		//this.sigma = sigma;
 		if (sigma != null) {
 			// log.debug("Using dependencies to chase the query");
@@ -126,8 +128,8 @@ public class CQCUtilities {
 	 * @param sigma
 	 * @return
 	 */
-	public static CQIE chaseQuery(CQIE query, Ontology sigma) {
-		sigma.saturate();
+	public static CQIE chaseQuery(CQIE query, DataDependencies sigma) {
+		//sigma.saturate();
 		Function head = (Function) query.getHead();
 
 		LinkedHashSet<Function> body = new LinkedHashSet<Function>();
@@ -790,7 +792,7 @@ public class CQCUtilities {
 		return result;
 	}
 
-	public static DatalogProgram removeContainedQueriesSorted(DatalogProgram program, boolean twopasses, Ontology sigma) {
+	public static DatalogProgram removeContainedQueriesSorted(DatalogProgram program, boolean twopasses, DataDependencies sigma) {
 		DatalogProgram result = OBDADataFactoryImpl.getInstance().getDatalogProgram();
 		result.setQueryModifiers(program.getQueryModifiers());
 		List<CQIE> rules = removeContainedQueriesSorted(program.getRules(), twopasses, sigma);
@@ -834,7 +836,7 @@ public class CQCUtilities {
 	 * 
 	 * @param queries
 	 */
-	public static List<CQIE> removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses, Ontology sigma) {
+	public static List<CQIE> removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses, DataDependencies sigma) {
 		return removeContainedQueries(queries, twopasses, sigma, null, true);
 	}
 
@@ -842,7 +844,7 @@ public class CQCUtilities {
 		return removeContainedQueries(queriesInput, twopasses, null, rules, false);
 	}
 	
-	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, Ontology sigma) {
+	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, DataDependencies sigma) {
 		return removeContainedQueries(queriesInput, twopasses, sigma, null, false);
 	}
 	
@@ -857,7 +859,7 @@ public class CQCUtilities {
 	 * 
 	 * @param queriesInput
 	 */
-	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, Ontology sigma, List<CQIE> rules, boolean sort) {
+	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, DataDependencies sigma, List<CQIE> rules, boolean sort) {
 
 		List<CQIE> queries = new LinkedList<CQIE>();
 		queries.addAll(queriesInput);

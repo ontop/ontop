@@ -215,8 +215,4 @@ public class SigmaTBoxOptimizer {
 
 		return scChildren.containsAll(tcChildren);
 	}
-	
-	public static Ontology getSigmaOntology(TBoxReasoner reasoner) {
-		return TBoxReasonerToOntology.getOntology(reasoner, true);
-	}
 }

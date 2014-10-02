@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Loop;
@@ -58,18 +59,19 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private TreeWitnessReasonerCache reasonerCache;
-	private Ontology sigma;
+	private DataDependencies sigma;
 	
 	@Override
-	public void setTBox(TBoxReasoner reasoner, Ontology sigma) {
+	public void setTBox(TBoxReasoner reasoner, DataDependencies sigmap) {
 		double startime = System.currentTimeMillis();
 
 		reasonerCache = new TreeWitnessReasonerCache(reasoner);
-		log.debug("SET SIGMA");
-		for (Axiom ax : sigma.getAssertions()) {
-			log.debug("SIGMA: " + ax);
-		}
-		this.sigma = sigma;
+		sigma = sigmap;
+		
+//		log.debug("SET SIGMA");
+//		for (Axiom ax : sigma.getAssertions()) {
+//			log.debug("SIGMA: " + ax);
+//		}
 		
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
