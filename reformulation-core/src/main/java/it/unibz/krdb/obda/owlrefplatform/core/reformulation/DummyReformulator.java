@@ -20,8 +20,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
@@ -34,13 +34,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 public class DummyReformulator implements QueryRewriter {
 
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 8989177354924893482L;
-
 	@Override
-	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException {
+	public DatalogProgram rewrite(DatalogProgram input) throws OBDAException {
 		return input;
 	}
 

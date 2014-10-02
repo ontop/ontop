@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -38,27 +39,26 @@ public class TreeWitnessGenerator {
 	private final Property property;
 	private final OClass filler;
 
-	private Set<BasicClassDescription> concepts = new HashSet<BasicClassDescription>();
+	private final Set<BasicClassDescription> concepts = new HashSet<BasicClassDescription>();
 	private Set<BasicClassDescription> subconcepts;
 	private PropertySomeRestriction existsRinv;
 
-	private final TreeWitnessReasonerLite reasoner;
-	private final OntologyFactory ontFactory; 
+	private final TreeWitnessReasonerCache reasoner;
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessGenerator.class);	
+	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
 	
-	public TreeWitnessGenerator(TreeWitnessReasonerLite reasoner, Property property, OClass filler) {
+	public TreeWitnessGenerator(TreeWitnessReasonerCache reasoner, Property property, OClass filler) {
 		this.reasoner = reasoner;
 		this.property = property;
 		this.filler = filler;
-		this.ontFactory = reasoner.getOntologyFactory();
 	}
 
 	void addConcept(BasicClassDescription con) {
 		concepts.add(con);
 	}
 	
-	public static Set<BasicClassDescription> getMaximalBasicConcepts(Collection<TreeWitnessGenerator> gens, TreeWitnessReasonerLite reasoner) {
+	public static Set<BasicClassDescription> getMaximalBasicConcepts(Collection<TreeWitnessGenerator> gens, TreeWitnessReasonerCache reasoner) {
 		Set<BasicClassDescription> concepts = new HashSet<BasicClassDescription>();
 		for (TreeWitnessGenerator twg : gens) 
 			concepts.addAll(twg.concepts);
@@ -113,7 +113,9 @@ public class TreeWitnessGenerator {
 							BasicClassDescription bp = i.next();
 							if ((b != bp) && (bp instanceof PropertySomeRestriction)) {
 								PropertySomeRestriction somep = (PropertySomeRestriction)bp;
-								if (bsubproperties.contains(reasoner.getProperty(somep))) {
+								Property propp = ontFactory.createProperty(somep.getPredicate(), somep.isInverse());
+								
+								if (bsubproperties.contains(propp)) {
 									i.remove();
 									modified = true;
 								}

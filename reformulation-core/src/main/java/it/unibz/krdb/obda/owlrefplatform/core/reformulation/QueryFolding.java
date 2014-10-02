@@ -26,8 +26,8 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Loop;
-import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReasonerLite.IntersectionOfConceptSets;
-import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReasonerLite.IntersectionOfProperties;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReasonerCache.IntersectionOfConceptSets;
+import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessReasonerCache.IntersectionOfProperties;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessSet.PropertiesCache;
 
 import java.util.Collection;

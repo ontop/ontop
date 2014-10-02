@@ -290,6 +290,12 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 			// add each of them to the result
 			return Collections.unmodifiableSet(result);
 		}
+
+		@Override
+		public Set<T> getSubRepresentatives(T v) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 	
 	

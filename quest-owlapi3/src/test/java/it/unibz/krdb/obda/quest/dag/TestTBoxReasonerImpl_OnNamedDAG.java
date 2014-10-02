@@ -202,5 +202,11 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 
 			return result;
 		}
+
+		@Override
+		public Set<T> getSubRepresentatives(T v) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 }
