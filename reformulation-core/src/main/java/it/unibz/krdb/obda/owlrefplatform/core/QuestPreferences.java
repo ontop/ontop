@@ -80,6 +80,8 @@ public class QuestPreferences extends Properties {
 	public static final String KEEP_ALIVE = "keep_alive";
 	
 	/** Davide> Handling of T-Mappings **/
+	// TODO Davide> Set an option "level of reasoning, i.e., RDF -> RDFS -> OWL2QL"
+	//              It would amount to no t-mappings && no rewriting -> no rewriting -> everything
 	public static final String T_MAPPINGS = "t_mappings";
 		
 	
