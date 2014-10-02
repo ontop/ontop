@@ -637,9 +637,9 @@ public class CQCUtilities {
 		for (CQIE cq : queries) {
 			List<Function> body = cq.getBody();
 			for (int i = 0; i < body.size(); i++) {
-				Function currentAtom = (Function) body.get(i);
+				Function currentAtom = body.get(i);
 				for (int j = i + 1; j < body.size(); j++) {
-					Function comparisonAtom = (Function) body.get(j);
+					Function comparisonAtom = body.get(j);
 					if (currentAtom.getPredicate().equals(comparisonAtom.getPredicate())) {
 						if (currentAtom.equals(comparisonAtom)) {
 							body.remove(j);
@@ -647,7 +647,8 @@ public class CQCUtilities {
 					}
 				}
 			}
-			newqueries.add(QueryAnonymizer.anonymize(removeRundantAtoms(cq)));
+			removeRundantAtoms(cq);
+			newqueries.add(QueryAnonymizer.anonymize(cq));
 		}
 		return newqueries;
 	}
@@ -661,7 +662,7 @@ public class CQCUtilities {
 	 * @param q
 	 * @throws Exception
 	 */
-	public static CQIE removeRundantAtoms(CQIE q) {
+	public static void removeRundantAtoms(CQIE q) {
 		CQIE result = q;
 		for (int i = 0; i < result.getBody().size(); i++) {
 			Function currentAtom = result.getBody().get(i);
@@ -672,9 +673,7 @@ public class CQCUtilities {
 					result = Unifier.unify(result, i, j);
 				}
 			}
-
 		}
-		return result;
 	}
 
 	/***
@@ -690,9 +689,9 @@ public class CQCUtilities {
 	 */
 	public static void removeContainedQueriesSyntacticSorter(List<CQIE> queries, boolean twopasses) {
 
-		int initialsize = queries.size();
+//		int initialsize = queries.size();
 //		log.debug("Removing trivially redundant queries. Initial set size: {}:", initialsize);
-		long startime = System.currentTimeMillis();
+//		long startime = System.currentTimeMillis();
 
 		Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
 
@@ -860,14 +859,12 @@ public class CQCUtilities {
 	 */
 	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, Ontology sigma, List<CQIE> rules, boolean sort) {
 
-		// queries = new LinkedList<CQIE>(queries);
-		LinkedList<CQIE> queries = new LinkedList<CQIE>();
+		List<CQIE> queries = new LinkedList<CQIE>();
 		queries.addAll(queriesInput);
 		
 //		int initialsize = queries.size();
 //		log.debug("Optimzing w.r.t. CQC. Initial size: {}:", initialsize);
-
-		double startime = System.currentTimeMillis();
+//		double startime = System.currentTimeMillis();
 
 		Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
 

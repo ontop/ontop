@@ -52,8 +52,6 @@ import org.slf4j.LoggerFactory;
 
 public class TreeRedReformulator implements QueryRewriter {
 
-	private static final QueryAnonymizer anonymizer = new QueryAnonymizer();
-
 	private static final Logger log = LoggerFactory.getLogger(TreeRedReformulator.class);
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
@@ -97,14 +95,15 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		/* Query preprocessing */
 
-		DatalogProgram anonymizedProgram = anonymizer.anonymize(prog);
+		DatalogProgram anonymizedProgram = QueryAnonymizer.anonymize(prog);
 		
 
 		// log.debug("Removing redundant atoms by query containment");
-		/* Simpliying the query by removing redundant atoms w.r.t. to CQC */
+		/* Simplifying the query by removing redundant atoms w.r.t. to CQC */
 		HashSet<CQIE> oldqueries = new HashSet<CQIE>(5000);
 		for (CQIE q : anonymizedProgram.getRules()) {
-			oldqueries.add(CQCUtilities.removeRundantAtoms(q));
+			CQCUtilities.removeRundantAtoms(q);
+			oldqueries.add(q);
 		}
 		oldqueries.addAll(anonymizedProgram.getRules());
 
@@ -147,7 +146,7 @@ public class TreeRedReformulator implements QueryRewriter {
 				}
 
 				for (CQIE newcq : piApplicator.apply(oldquery, relevantInclusions)) {
-					newqueriesbyPI.add(anonymizer.anonymize(newcq));
+					newqueriesbyPI.add(QueryAnonymizer.anonymize(newcq));
 					
 				}
 
@@ -160,11 +159,11 @@ public class TreeRedReformulator implements QueryRewriter {
 
 			/*
 			 * Handling existential inclusions, and unification We will collect
-			 * all predicates mantioned in the old queries, we will collect all
+			 * all predicates mentioned in the old queries, we will collect all
 			 * the existential inclusions relevant for those predicates and sort
 			 * them by inverse and not inverse. Last we apply these groups of
 			 * inclusions at the same time. All of them will share one single
-			 * unification atempt.
+			 * unification attempt.
 			 */
 
 			HashSet<CQIE> newqueriesbyunificationandPI = new HashSet<CQIE>(1000);

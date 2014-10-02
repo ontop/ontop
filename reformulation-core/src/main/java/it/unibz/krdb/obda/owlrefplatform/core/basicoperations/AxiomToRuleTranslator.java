@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  */
 
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Variable;
@@ -33,12 +32,8 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AxiomToRuleTranslator {
-
-    private static Logger log = LoggerFactory.getLogger(AxiomToRuleTranslator.class);
 
     private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 		

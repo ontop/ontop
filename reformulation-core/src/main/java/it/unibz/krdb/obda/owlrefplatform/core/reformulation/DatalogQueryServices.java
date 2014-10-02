@@ -125,7 +125,8 @@ public class DatalogQueryServices {
 												
 						// newquery contains only cloned atoms, so it is safe to unify "in-place"
 						Unifier.applyUnifier(newquery, mgu, false);
-						queue.add(reduce(newquery));
+						reduce(newquery);
+						queue.add(newquery);
 						replaced = true;
 					}
 
@@ -164,10 +165,10 @@ public class DatalogQueryServices {
 	}
 	
 	
-	private static CQIE reduce(CQIE q) {
+	private static void reduce(CQIE q) {
 		DatalogNormalizer.enforceEqualities(q, false);
 		makeSingleOccurrencesAnonymous(q.getBody(), q.getHead().getTerms());
-		return CQCUtilities.removeRundantAtoms(q);
+		CQCUtilities.removeRundantAtoms(q);
 	}
 
 	//
