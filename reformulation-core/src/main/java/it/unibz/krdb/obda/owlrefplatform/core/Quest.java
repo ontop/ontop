@@ -141,19 +141,19 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	protected EvaluationEngine evaluationEngine = null;
 
 	/* The active ABox dependencies */
-	protected Ontology sigma = null;
+	private Ontology sigma = null;
 
-	/* TBox axioms translated into rules */
+	/* TBox axioms translated into rules (used by QuestStatement) */ 
 	protected Map<Predicate, List<CQIE>> sigmaRulesIndex = null;
 
 	/* The TBox used for query reformulation (ROMAN: not really, it can be reduced by Sigma) */
 	private TBoxReasoner reformulationReasoner;
 
 	/* The merge and translation of all loaded ontologies */
-	protected Ontology inputTBox = null;
+	private Ontology inputTBox = null;
 
 	/* The input OBDA model */
-	protected OBDAModel inputOBDAModel = null;
+	private OBDAModel inputOBDAModel = null;
 
 	/* The input OBDA model */
 	private OBDAModel unfoldingOBDAModel;
@@ -819,17 +819,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			setupRewriter(reasoner, sigma);
 
-
-			/*if (optimizeMap)*/ {
-				Ontology saturatedSigma = sigma.clone();
-				saturatedSigma.saturate();
-				
-				List<CQIE> sigmaRules = createSigmaRules(saturatedSigma);
-				sigmaRulesIndex = createSigmaRulesIndex(sigmaRules);				
-			}
-			//else {
-			//	sigmaRulesIndex = new HashMap<Predicate, List<CQIE>>();
-			//}
+			sigmaRulesIndex = createSigmaRulesIndex(sigma);				
 			
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
@@ -1025,34 +1015,31 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return toReturn;
 	}
 
-	private List<CQIE> createSigmaRules(Ontology ontology) {
-		List<CQIE> rules = new ArrayList<CQIE>();
-		Set<Axiom> assertions = ontology.getAssertions();
-		for (Axiom assertion : assertions) {
+
+	private  Map<Predicate, List<CQIE>> createSigmaRulesIndex(Ontology sigma) {
+		Ontology saturatedSigma = sigma.clone();
+		saturatedSigma.saturate();
+		
+		Map<Predicate, List<CQIE>> sigmaRulesMap = new HashMap<Predicate, List<CQIE>>();
+		
+		for (Axiom assertion : saturatedSigma.getAssertions()) {
 			try {
 				CQIE rule = AxiomToRuleTranslator.translate(assertion);
                 if(rule != null) {
-                    rules.add(rule);
+        			Function atom = rule.getBody().get(0); // The rule always has one
+					// body atom
+        			Predicate predicate = atom.getFunctionSymbol();
+        			List<CQIE> rules = sigmaRulesMap.get(predicate);
+        			if (rules == null) {
+        				rules = new LinkedList<CQIE>();
+        				sigmaRulesMap.put(predicate, rules);
+        			}
+        			rules.add(rule);
                 }
-			} catch (UnsupportedOperationException e) {
+			} 
+			catch (UnsupportedOperationException e) {
 				log.warn(e.getMessage());
 			}
-		}
-		return rules;
-	}
-
-	private static Map<Predicate, List<CQIE>> createSigmaRulesIndex(List<CQIE> sigmaRules) {
-		Map<Predicate, List<CQIE>> sigmaRulesMap = new HashMap<Predicate, List<CQIE>>();
-		for (CQIE rule : sigmaRules) {
-			Function atom = rule.getBody().get(0); // The rule always has one
-													// body atom
-			Predicate predicate = atom.getFunctionSymbol();
-			List<CQIE> rules = sigmaRulesMap.get(predicate);
-			if (rules == null) {
-				rules = new LinkedList<CQIE>();
-				sigmaRulesMap.put(predicate, rules);
-			}
-			rules.add(rule);
 		}
 		return sigmaRulesMap;
 	}
