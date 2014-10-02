@@ -374,11 +374,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-	// Semantic Index URI reference structures
-	private HashMap<String, Integer> uriIds = new HashMap<String, Integer> (100000);
-	private HashMap <Integer, String> uriMap2 = new HashMap<Integer, String> (100000);
-	
-	private int maxURIId = -1;
+	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
 	
 	private TBoxReasoner reasonerDag;
 
@@ -388,15 +384,15 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private static final boolean mergeUniions = false;
 
-	private HashSet<SemanticIndexRecord> nonEmptyEntityRecord = new HashSet<SemanticIndexRecord>();
+	private final HashSet<SemanticIndexRecord> nonEmptyEntityRecord = new HashSet<SemanticIndexRecord>();
 
 	private List<RepositoryChangedListener> changeList;
 
-	public RDBMSSIRepositoryManager(Set<Predicate> vocabulary) {
+	public RDBMSSIRepositoryManager(/*Set<Predicate> vocabulary*/) {
 
-		if (vocabulary != null) {
-			setVocabulary(vocabulary);
-		}
+		//if (vocabulary != null) {
+		//	setVocabulary(vocabulary);
+		//}
 
 		changeList = new LinkedList<RepositoryChangedListener>();
 	}
@@ -959,7 +955,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			ObjectConstant subject = (ObjectConstant) attributeAssertion.getValue1();
 
 			String uri = subject.getValue();
-			 uri_id = idOfURI(uri);
+			 uri_id = uriMap.idOfURI(uri);
 				uriidStm.setInt(1, uri_id);
 				uriidStm.setString(2, uri);
 				uriidStm.addBatch();
@@ -995,12 +991,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				// Construct the database INSERT statement
 				// replace URIs with their ids
 				
-				uri_id = idOfURI(uri);
+				uri_id = uriMap.idOfURI(uri);
 				uriidStm.setInt(1, uri_id);
 				uriidStm.setString(2, uri);
 				uriidStm.addBatch();
 
-				uri2_id = idOfURI(uri2);
+				uri2_id = uriMap.idOfURI(uri2);
 				uriidStm.setInt(1, uri2_id);
 				uriidStm.setString(2, uri2);
 				uriidStm.addBatch();
@@ -1081,7 +1077,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				uri = ((URIConstant) c1).getURI().toString();
 
 			// Construct the database INSERT statement
-			uri_id = idOfURI(uri);
+			uri_id = uriMap.idOfURI(uri);
 			uriidStm.setInt(1, uri_id);
 			uriidStm.setString(2, uri);
 			uriidStm.addBatch();			
@@ -1098,21 +1094,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			// log.debug("Class");
 		}
-	}
-
-	private int idOfURI(String uri) {
-		Integer existingID = uriIds.get(uri);
-		if (existingID == null)
-		{
-			existingID = maxURIId + 1;
-			
-			uriIds.put(uri, existingID);
-			uriMap2.put(existingID, uri);
-			
-			maxURIId += 1;
-			
-		}
-		return existingID;
 	}
 
 	private void closeStatement(PreparedStatement statement) throws SQLException {
@@ -3047,14 +3028,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	}
 
-	@Override
-	public void setVocabulary(Set<Predicate> vocabulary) {
-		// TODO
-
-		/* This method should initialize the vocabulary of the DAG */
-
-	}
-
 	/*
 	 * Utilities
 	 */
@@ -3566,22 +3539,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 	}
 
-	// @Override
-	// public boolean isEmpty(Function atom) {
-	// int index = getIndexHash(atom);
-	//
-	// Boolean empty = emptynessIndexes.get(index);
-	// if (empty == null)
-	// return true;
-	// return empty;
-	// }
-
-	public Map<String,Integer> getUriIds(){
-		return uriIds;
-	}
-	
-	public Map<Integer, String> getUriMap() {
-		return uriMap2;
+	public SemanticIndexURIMap getUriMap() {
+		return uriMap;
 	}
 	
 	/***

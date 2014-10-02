@@ -37,6 +37,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RepositoryChangedListener;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AxiomToRuleTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
@@ -79,7 +80,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -104,9 +104,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private PoolProperties poolProperties = null;
 	private DataSource tomcatPool = null;
-	private boolean isSemanticIdx = false;
-	private Map<String, Integer> uriRefIds = null;
-	private Map<Integer, String> uriMap = null;;
 	// Tomcat pool default properties
 	// These can be changed in the properties file
 	protected int maxPoolSize = 20;
@@ -124,7 +121,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 */
 
 	/* The active ABox repository, might be null */
-	public RDBMSSIRepositoryManager dataRepository = null;
+	private RDBMSSIRepositoryManager dataRepository = null;
 
 	// /* The query answering engine */
 	// private TechniqueWrapper techwrapper = null;
@@ -144,19 +141,19 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	protected EvaluationEngine evaluationEngine = null;
 
 	/* The active ABox dependencies */
-	protected Ontology sigma = null;
+	private Ontology sigma = null;
 
-	/* TBox axioms translated into rules */
+	/* TBox axioms translated into rules (used by QuestStatement) */ 
 	protected Map<Predicate, List<CQIE>> sigmaRulesIndex = null;
 
 	/* The TBox used for query reformulation (ROMAN: not really, it can be reduced by Sigma) */
 	private TBoxReasoner reformulationReasoner;
 
 	/* The merge and translation of all loaded ontologies */
-	protected Ontology inputTBox = null;
+	private Ontology inputTBox = null;
 
 	/* The input OBDA model */
-	protected OBDAModel inputOBDAModel = null;
+	private OBDAModel inputOBDAModel = null;
 
 	/* The input OBDA model */
 	private OBDAModel unfoldingOBDAModel;
@@ -515,7 +512,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			equivalenceMaps = EquivalenceMap.getEmptyEquivalenceMap();
 			reformulationOntology = inputTBox;
 		}
-		Set<Predicate> reformulationVocabulary = reformulationOntology.getVocabulary();
+		// Set<Predicate> reformulationVocabulary = reformulationOntology.getVocabulary();
 
 		try {
 
@@ -524,7 +521,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 */
 
 			if (aboxMode.equals(QuestConstants.CLASSIC)) {
-				isSemanticIdx = true;
+				//isSemanticIdx = true;
+				
 				if (inmemory) {
 					String driver = "org.h2.Driver";
 					String url = "jdbc:h2:mem:questrepository:" + System.currentTimeMillis()
@@ -567,7 +565,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				// setup connection pool
 				setupConnectionPool();
 
-				dataRepository = new RDBMSSIRepositoryManager(reformulationVocabulary);
+				dataRepository = new RDBMSSIRepositoryManager(/*reformulationVocabulary*/);
 				dataRepository.addRepositoryChangedListener(this);
 
 				dataRepository.setTBox(reformulationReasoner);
@@ -609,12 +607,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				/* Setting up the OBDA model */
 
 				unfoldingOBDAModel.addSource(obdaSource);
-				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
-
-				uriRefIds = dataRepository.getUriIds();
-				uriMap = dataRepository.getUriMap();
-
-			} else if (aboxMode.equals(QuestConstants.VIRTUAL)) {
+				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());				
+			} 
+			else if (aboxMode.equals(QuestConstants.VIRTUAL)) {
 
 				// ROMAN: WHY EMPTY SIGMA?
 				sigma = OntologyFactoryImpl.getInstance().createOntology();
@@ -738,8 +733,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 
 
-			if (isSemanticIdx) {
-				datasourceQueryGenerator.setUriIds(uriRefIds);
+			if (isSemIdx()) {
+				datasourceQueryGenerator.setUriMap(dataRepository.getUriMap());
 			}
 
 			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
@@ -812,7 +807,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (bOptimizeTBoxSigma) {
 				TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(sigma);
 				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner, 
-						reformulationVocabulary, sigmaReasoner);
+						reformulationOntology.getVocabulary(), sigmaReasoner);
 				reasoner = new TBoxReasonerImpl(reducer.getReducedOntology());
 			} else {
 				reasoner = reformulationReasoner;
@@ -824,22 +819,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			setupRewriter(reasoner, sigma);
 
-
-			/*if (optimizeMap)*/ {
-				Ontology saturatedSigma = sigma.clone();
-				saturatedSigma.saturate();
-				
-				List<CQIE> sigmaRules = createSigmaRules(saturatedSigma);
-				sigmaRulesIndex = createSigmaRulesIndex(sigmaRules);				
-			}
-			//else {
-			//	sigmaRulesIndex = new HashMap<Predicate, List<CQIE>>();
-			//}
+			sigmaRulesIndex = createSigmaRulesIndex(sigma);				
 			
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
-			vocabularyValidator = new QueryVocabularyValidator(reformulationVocabulary, equivalenceMaps);
+			vocabularyValidator = new QueryVocabularyValidator(/*reformulationVocabulary,*/ equivalenceMaps);
 
 			log.debug("... Quest has been initialized.");
 		} catch (Exception e) {
@@ -1030,34 +1015,31 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return toReturn;
 	}
 
-	private List<CQIE> createSigmaRules(Ontology ontology) {
-		List<CQIE> rules = new ArrayList<CQIE>();
-		Set<Axiom> assertions = ontology.getAssertions();
-		for (Axiom assertion : assertions) {
+
+	private  Map<Predicate, List<CQIE>> createSigmaRulesIndex(Ontology sigma) {
+		Ontology saturatedSigma = sigma.clone();
+		saturatedSigma.saturate();
+		
+		Map<Predicate, List<CQIE>> sigmaRulesMap = new HashMap<Predicate, List<CQIE>>();
+		
+		for (Axiom assertion : saturatedSigma.getAssertions()) {
 			try {
 				CQIE rule = AxiomToRuleTranslator.translate(assertion);
                 if(rule != null) {
-                    rules.add(rule);
+        			Function atom = rule.getBody().get(0); // The rule always has one
+					// body atom
+        			Predicate predicate = atom.getFunctionSymbol();
+        			List<CQIE> rules = sigmaRulesMap.get(predicate);
+        			if (rules == null) {
+        				rules = new LinkedList<CQIE>();
+        				sigmaRulesMap.put(predicate, rules);
+        			}
+        			rules.add(rule);
                 }
-			} catch (UnsupportedOperationException e) {
+			} 
+			catch (UnsupportedOperationException e) {
 				log.warn(e.getMessage());
 			}
-		}
-		return rules;
-	}
-
-	private static Map<Predicate, List<CQIE>> createSigmaRulesIndex(List<CQIE> sigmaRules) {
-		Map<Predicate, List<CQIE>> sigmaRulesMap = new HashMap<Predicate, List<CQIE>>();
-		for (CQIE rule : sigmaRules) {
-			Function atom = rule.getBody().get(0); // The rule always has one
-													// body atom
-			Predicate predicate = atom.getFunctionSymbol();
-			List<CQIE> rules = sigmaRulesMap.get(predicate);
-			if (rules == null) {
-				rules = new LinkedList<CQIE>();
-				sigmaRulesMap.put(predicate, rules);
-			}
-			rules.add(rule);
 		}
 		return sigmaRulesMap;
 	}
@@ -1194,32 +1176,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return unfolder.unfold(query, targetPredicate);
 	}
 	
-	public void setUriRefIds(Map<String, Integer> uriIds) {
-		this.uriRefIds = uriIds;
-	}
-
-	public Map<String, Integer> getUriRefIds() {
-		return uriRefIds;
-	}
-
-	public void setUriMap(LinkedHashMap<Integer, String> uriMap) {
-		this.uriMap = uriMap;
-	}
-
-	public Map<Integer, String> getUriMap() {
-		return uriMap;
-	}
-
 	public void repositoryChanged() {
 		// clear cache
 		this.querycache.clear();
 	}
 
-	public RDBMSSIRepositoryManager getSIRepo() {
-		return dataRepository;
-	}
-
 	public boolean isSemIdx() {
-		return isSemanticIdx;
+		return (dataRepository != null);
+	}
+	
+	public RDBMSSIRepositoryManager getSamanticIndexRepository() {
+		return dataRepository;
 	}
 }

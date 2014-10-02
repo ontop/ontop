@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 
 import java.net.URISyntaxException;
 import java.sql.Date;
@@ -49,7 +50,7 @@ public class QuestResultset implements TupleResultSet {
 	private ResultSet set = null;
 	QuestStatement st;
 	private List<String> signature;
-	DecimalFormat formatter = new DecimalFormat("0.0###E0");
+	private DecimalFormat formatter = new DecimalFormat("0.0###E0");
 
 	private HashMap<String, Integer> columnMap;
 
@@ -59,7 +60,8 @@ public class QuestResultset implements TupleResultSet {
 	private int bnodeCounter = 0;
 
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	private Map<Integer, String> uriMap;
+	private SemanticIndexURIMap uriMap;
+	
 	private String vendor;
 	private boolean isOracle;
     private boolean isMsSQL;
@@ -80,7 +82,10 @@ public class QuestResultset implements TupleResultSet {
 		this.set = set;
 		this.st = st;
 		this.isSemIndex = st.questInstance.isSemIdx();
-		this.uriMap = st.questInstance.getUriMap();
+		if (isSemIndex) 
+			uriMap = st.questInstance.getSamanticIndexRepository().getUriMap();
+		else
+			uriMap = null;
 		this.signature = signature;
 		
 		columnMap = new HashMap<String, Integer>(signature.size() * 2);
@@ -162,7 +167,7 @@ public class QuestResultset implements TupleResultSet {
 					if (isSemIndex) {
 						try {
 							Integer id = Integer.parseInt(realValue);
-							realValue = this.uriMap.get(id);
+							realValue = uriMap.getURI(id);
 						} catch (NumberFormatException e) {
 							/*
 							 * If its not a number, then it has to be a URI, so
