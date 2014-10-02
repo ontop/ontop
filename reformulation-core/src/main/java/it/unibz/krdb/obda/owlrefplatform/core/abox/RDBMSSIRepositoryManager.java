@@ -388,11 +388,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private List<RepositoryChangedListener> changeList;
 
-	public RDBMSSIRepositoryManager(Set<Predicate> vocabulary) {
+	public RDBMSSIRepositoryManager(/*Set<Predicate> vocabulary*/) {
 
-		if (vocabulary != null) {
-			setVocabulary(vocabulary);
-		}
+		//if (vocabulary != null) {
+		//	setVocabulary(vocabulary);
+		//}
 
 		changeList = new LinkedList<RepositoryChangedListener>();
 	}
@@ -3025,14 +3025,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			conn.setAutoCommit(commitval);
 			throw e;
 		}
-
-	}
-
-	@Override
-	public void setVocabulary(Set<Predicate> vocabulary) {
-		// TODO
-
-		/* This method should initialize the vocabulary of the DAG */
 
 	}
 

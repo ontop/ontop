@@ -512,7 +512,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			equivalenceMaps = EquivalenceMap.getEmptyEquivalenceMap();
 			reformulationOntology = inputTBox;
 		}
-		Set<Predicate> reformulationVocabulary = reformulationOntology.getVocabulary();
+		// Set<Predicate> reformulationVocabulary = reformulationOntology.getVocabulary();
 
 		try {
 
@@ -565,7 +565,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				// setup connection pool
 				setupConnectionPool();
 
-				dataRepository = new RDBMSSIRepositoryManager(reformulationVocabulary);
+				dataRepository = new RDBMSSIRepositoryManager(/*reformulationVocabulary*/);
 				dataRepository.addRepositoryChangedListener(this);
 
 				dataRepository.setTBox(reformulationReasoner);
@@ -807,7 +807,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (bOptimizeTBoxSigma) {
 				TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(sigma);
 				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner, 
-						reformulationVocabulary, sigmaReasoner);
+						reformulationOntology.getVocabulary(), sigmaReasoner);
 				reasoner = new TBoxReasonerImpl(reducer.getReducedOntology());
 			} else {
 				reasoner = reformulationReasoner;
@@ -834,7 +834,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
-			vocabularyValidator = new QueryVocabularyValidator(reformulationVocabulary, equivalenceMaps);
+			vocabularyValidator = new QueryVocabularyValidator(/*reformulationVocabulary,*/ equivalenceMaps);
 
 			log.debug("... Quest has been initialized.");
 		} catch (Exception e) {

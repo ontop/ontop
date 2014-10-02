@@ -76,7 +76,7 @@ public class SemanticIndexManager {
 		// generate a new TBox with a simpler vocabulary
 		optimizedOntology = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, equivalenceMaps, ontologyClosure.getVocabulary());
 			
-		dataRepository = new RDBMSSIRepositoryManager(optimizedOntology.getVocabulary());
+		dataRepository = new RDBMSSIRepositoryManager(/*optimizedOntology.getVocabulary()*/);
 		TBoxReasoner optimizedDag = new TBoxReasonerImpl(optimizedOntology);
 		dataRepository.setTBox(optimizedDag);
 
