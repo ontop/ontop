@@ -20,11 +20,7 @@ package it.unibz.krdb.obda.reformulation.tests;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -34,13 +30,16 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-public class CQCUtilitiesTest extends TestCase {
+public class CQCUtilitiesTest {
 
 	CQIE initialquery1 = null;
 
@@ -62,6 +61,7 @@ public class CQCUtilitiesTest extends TestCase {
 	Term u1 = tfac.getVariableNondistinguished();
 	Term u2 = tfac.getVariableNondistinguished();
 
+    @Before
 	public void setUp() throws Exception {
 		/*
 		 * Creating the query:
@@ -104,6 +104,7 @@ public class CQCUtilitiesTest extends TestCase {
 		initialquery1 = tfac.getCQIE(head, body);
 	}
 
+    @Test
 	public void testGrounding() {
 		Ontology sigma = null;
 		CQCUtilities cqcutil = new CQCUtilities(initialquery1, sigma);
@@ -129,6 +130,7 @@ public class CQCUtilitiesTest extends TestCase {
 		assertTrue(head.get(2).equals(tfac.getConstantLiteral("CANy2")));
 	}
 
+    @Test
 	public void testContainment1() {
 
 		// Query 1 - q(x,y) :- R(x,y), R(y,z)
@@ -331,6 +333,7 @@ public class CQCUtilitiesTest extends TestCase {
 		assertTrue(cqcu.isContainedIn(q9));
 	}
 
+    @Test
 	public void testSyntacticContainmentCheck() {
 		// Query 1 - q(x) :- R(x,y), R(y,z), A(x)
 		// Query 2 - q(x) :- R(x,y)
@@ -400,6 +403,7 @@ public class CQCUtilitiesTest extends TestCase {
 
 	}
 
+    @Test
 	public void testRemovalOfSyntacticContainmentCheck() {
 		/*
 		 * Putting all queries in a list, in the end, query 1 must be removed
@@ -499,10 +503,11 @@ public class CQCUtilitiesTest extends TestCase {
 		assertTrue(queries.contains(q3));
 	}
 
+    @Test
 	public void testSemanticContainment() {
 		OntologyFactoryImpl dfac = new OntologyFactoryImpl();
 
-		/* we allways assert true = isContainedIn(q1, q2) */
+		/* we always assert true = isContainedIn(q1, q2) */
 
 		{
 			// q(x) :- A(x), q(y) :- C(y), with A ISA C
@@ -664,4 +669,64 @@ public class CQCUtilitiesTest extends TestCase {
 		// q(x,y) :- R(x,y), q(s,t) :- S(s,t), with inv(R) ISA M, M ISA inv(S)
 
 	}
+
+    //Facts should not be removed by the CQCUtilities
+    @Test
+    public void testFacts() {
+
+        OntologyFactoryImpl dfac = new OntologyFactoryImpl();
+
+        // q(x) :- , q(x) :- R(x,y), A(x)
+
+        Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
+        ClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+        ClassDescription right = dfac.getPropertySomeRestriction(
+                tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), false);
+        SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+
+        sigma.addConcept(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+        sigma.addRole(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }));
+
+        sigma.addAssertion(inclusion);
+
+
+        // Query 1 q(x) :- R(x,y), A(x)
+        List<Term> headTerms = new LinkedList<Term>();
+        headTerms.add(x);
+
+        Function head = tfac.getFunction(pfac.getPredicate("q", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), headTerms);
+
+        List<Function> body = new LinkedList<Function>();
+
+        List<Term> terms = new LinkedList<Term>();
+        terms.add(tfac.getVariable("x"));
+        terms.add(tfac.getVariable("y"));
+        body.add(tfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
+
+        terms = new LinkedList<Term>();
+        terms.add(tfac.getVariable("x"));
+        body.add(tfac.getFunction(pfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), terms));
+
+        CQIE query1 = tfac.getCQIE(head, body);
+
+        // Query 2 q(x)
+
+        headTerms = new LinkedList<Term>();
+        headTerms.add(tfac.getVariable("x"));
+
+        head = tfac.getFunction(pfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
+
+        body = new LinkedList<Function>();
+
+        CQIE query2 = tfac.getCQIE(head, body);
+
+        CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);
+        assertFalse(cqcutil1.isContainedIn(query2));
+
+        CQCUtilities cqcutil2 = new CQCUtilities(query2, sigma);
+        assertFalse(cqcutil2.isContainedIn(query1));
+
+        assertFalse(CQCUtilities.isContainedInSyntactic(query2, query1));
+        assertFalse(CQCUtilities.isContainedInSyntactic(query1, query2));
+    }
 }
