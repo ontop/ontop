@@ -32,7 +32,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-public class OWLAPI2VocabularyExtractorTest extends TestCase {
+public class OWLAPI3VocabularyExtractorTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();

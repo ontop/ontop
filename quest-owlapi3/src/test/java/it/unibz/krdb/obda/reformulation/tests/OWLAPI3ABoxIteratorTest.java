@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.reformulation.tests;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 
@@ -34,7 +35,7 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-public class OWLAPI2ABoxIteratorTest extends TestCase {
+public class OWLAPI3ABoxIteratorTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -47,8 +48,8 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		Iterator<OWLAxiom> owliterator = ontology.getAxioms().iterator();
-		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(owliterator);
+		//Iterator<OWLAxiom> owliterator = ontology.getAxioms().iterator();
+		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(Lists.newArrayList(ontology));
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -64,7 +65,7 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(ontology.getAxioms());
+		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(Lists.newArrayList(ontology));
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -75,7 +76,7 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 	
 	public void testAssertionEmptyIterable() throws Exception {
 
-		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(new HashSet<OWLAxiom>());
+		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(Lists.<OWLOntology>newArrayList());
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -95,7 +96,7 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(ontology);
+		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(Lists.newArrayList(ontology));
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -109,7 +110,7 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.createOntology();
 
-		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(ontology);
+		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(Lists.newArrayList(ontology));
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
