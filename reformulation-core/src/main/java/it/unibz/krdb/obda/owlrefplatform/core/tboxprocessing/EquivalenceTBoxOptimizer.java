@@ -24,9 +24,11 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -68,7 +70,10 @@ public class EquivalenceTBoxOptimizer {
 	public static Ontology getOptimalTBox(TBoxReasoner reasoner, final EquivalenceMap equivalenceMap, Set<Predicate> originalVocabulary) {
 		
 		final Ontology optimizedTBox = ofac.createOntology();
-			
+		final Set<Predicate> extraVocabulary = new HashSet<Predicate>();
+		extraVocabulary.addAll(originalVocabulary);
+		//extraVocabulary.removeAll(equivalenceMap.keySet());
+		
 		TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
 
 			@Override
@@ -91,17 +96,39 @@ public class EquivalenceTBoxOptimizer {
 				}
 			}
 			
-			public boolean isInMap(Description desc) {
-				Predicate pred = VocabularyExtractor.getPredicate(desc);				
-				return ((pred != null) && equivalenceMap.containsKey(pred));			
+			public boolean isInMap(BasicClassDescription desc) {
+				if (desc instanceof OClass) {
+					Predicate pred = ((OClass)desc).getPredicate();
+					OClass rep = equivalenceMap.getClassRepresentative(pred);
+					if (rep != null) {
+						extraVocabulary.remove(pred);
+						return true;
+					}
+				}
+				else if (desc instanceof PropertySomeRestriction) {
+					Predicate pred = ((PropertySomeRestriction)desc).getPredicate();
+					Property rep = equivalenceMap.getPropertyRepresentative(pred);
+					if (rep != null) {
+						extraVocabulary.remove(pred);
+						return true;
+					}
+				}
+				return false;
+			}
+			public boolean isInMap(Property desc) {
+				//Predicate pred = VocabularyExtractor.getPredicate(desc);				
+				//return ((pred != null) && equivalenceMap.containsKey(pred));			
+				Property rep = equivalenceMap.getPropertyRepresentative(desc.getPredicate());
+				if (rep != null) {
+					extraVocabulary.remove(desc.getPredicate());
+					return true;
+				}
+				return false;
 			}
 		});
 
 		// Last, add references to all the vocabulary of the original TBox
 		
-		Set<Predicate> extraVocabulary = new HashSet<Predicate>();
-		extraVocabulary.addAll(originalVocabulary);
-		extraVocabulary.removeAll(equivalenceMap.keySet());
 		optimizedTBox.addEntities(extraVocabulary);
 		
 		return optimizedTBox;
