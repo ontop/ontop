@@ -52,8 +52,8 @@ public class QueryVocabularyValidator /*implements Serializable*/ {
 		this.vocabulary = vocabulary;
 		this.equivalences = equivalences;
 	}
-
-	public boolean validatePredicates(DatalogProgram input) {
+/*
+	public boolean validatePredicates0(DatalogProgram input) {
 
 		boolean isValid = true;
 		
@@ -66,7 +66,8 @@ public class QueryVocabularyValidator /*implements Serializable*/ {
 
 		return isValid;
 	}
-
+*/
+/*	
 	private boolean validate(Function atom) {
 
 		Predicate predicate = atom.getPredicate();
@@ -93,7 +94,7 @@ public class QueryVocabularyValidator /*implements Serializable*/ {
 		}
 		return true;
 	}
-
+*/
 	/*
 	 * Substitute atoms based on the equivalence map.
 	 */

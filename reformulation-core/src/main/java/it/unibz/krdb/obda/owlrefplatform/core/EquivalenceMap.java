@@ -43,18 +43,6 @@ public class EquivalenceMap {
 		return (Property)equivalenceMap.get(p);
 	}
 	
-	// TO BE REMOVED: USED ONLY ONCE in EquivalenceTBoxOptimizer
-	@Deprecated
-	public Set<Predicate> keySet() {
-		return equivalenceMap.keySet();
-	}	
-
-	// TO BE REMOVED: two uses EquivalenceTBoxOptimizer and QueryVocabularyValidator
-	@Deprecated 
-	public boolean containsKey(Predicate p) {
-		return equivalenceMap.containsKey(p);
-	}
-	
 	
 	public Function getNormal(Function atom) {
 		Predicate p = atom.getPredicate();
