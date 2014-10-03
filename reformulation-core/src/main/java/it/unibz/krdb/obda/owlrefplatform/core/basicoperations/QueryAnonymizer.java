@@ -238,13 +238,14 @@ public class QueryAnonymizer {
 		Iterator<CQIE> it = dp.getRules().iterator();
 		while (it.hasNext()) {
 			CQIE query = it.next();
-			result.appendRule(deAnonymize(query));
+			deAnonymize(query);
+			result.appendRule(query);
 		}
 		result.setQueryModifiers(dp.getQueryModifiers());
 		return result;
 	}
 
-	public static CQIE deAnonymize(CQIE query) {
+	public static void deAnonymize(CQIE query) {
 		// query = query.clone();
 		Function head = query.getHead();
 		Iterator<Term> hit = head.getTerms().iterator();
@@ -286,6 +287,5 @@ public class QueryAnonymizer {
 			}
 			a.updateTerms(vec);
 		}
-		return query;
 	}
 }

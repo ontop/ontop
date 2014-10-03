@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  */
 
 import it.unibz.krdb.obda.model.*;
-import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.ontology.*;
@@ -42,9 +41,7 @@ import java.util.*;
  */
 public class CQCUtilities {
 
-	private List<Function> canonicalbody = null;
-
-	private Function canonicalhead = null;
+	private CQIE canonicalQuery = null;
 
 	private final Set<Predicate> canonicalpredicates = new HashSet<Predicate>(50);
 
@@ -72,12 +69,10 @@ public class CQCUtilities {
 			// log.debug("Using dependencies to chase the query");
 			query = chaseQuery(query, sigma);
 		}
-		CQIE canonicalQuery = getCanonicalQuery(query);
-		canonicalbody = canonicalQuery.getBody();
-		canonicalhead = canonicalQuery.getHead();
+		canonicalQuery = getCanonicalQuery(query);
 		
-		factMap = new HashMap<Predicate, List<Function>>(canonicalbody.size() * 2);
-		for (Function atom : canonicalbody) {
+		factMap = new HashMap<Predicate, List<Function>>(canonicalQuery.getBody().size() * 2);
+		for (Function atom : canonicalQuery.getBody()) {
 			Function fact = (Function) atom;
 			if (!fact.isDataFunction())
 				continue;
@@ -96,12 +91,10 @@ public class CQCUtilities {
 		
 		this.rules = rules;
 		if (rules != null && !rules.isEmpty()) {			
-			CQIE canonicalQuery = getCanonicalQuery(query);
-			canonicalhead = canonicalQuery.getHead();
-			canonicalbody = canonicalQuery.getBody();
+			canonicalQuery = getCanonicalQuery(query);
 						
 			// Map the facts
-			for (Function fact : chaseQuery(rules)) 
+			for (Function fact : chaseQuery(canonicalQuery.getBody(), rules)) 
 				addFact(fact);
 		}
 	}
@@ -266,10 +259,10 @@ public class CQCUtilities {
 	 * @param rules
 	 * @return
 	 */
-	private List<Function> chaseQuery(List<CQIE> rules) {
+	private static List<Function> chaseQuery(List<Function> body, List<CQIE> rules) {
 
 		List<Function> facts = new ArrayList<Function>();
-		for (Function fact : canonicalbody) {
+		for (Function fact : body) {
 			facts.add(fact);
 			for (CQIE rule : rules) {
 				Function ruleBody = rule.getBody().get(0);
@@ -384,7 +377,7 @@ public class CQCUtilities {
 	 */
 	public boolean isContainedIn(CQIE query) {
 
-		if (!query.getHead().getFunctionSymbol().equals(canonicalhead.getFunctionSymbol()))
+		if (!query.getHead().getFunctionSymbol().equals(canonicalQuery.getHead().getFunctionSymbol()))
 			return false;
 
         List<Function> body = query.getBody();
@@ -502,7 +495,6 @@ public class CQCUtilities {
 		query = query.clone();
 		QueryAnonymizer.deAnonymize(query);
 
-
 		int bodysize = query.getBody().size();
 		int maxIdxReached = -1;
 		Stack<CQIE> queryStack = new Stack<CQIE>();
@@ -518,12 +510,10 @@ public class CQCUtilities {
 
 		int currentAtomIdx = 0;
 		while (currentAtomIdx >= 0) {
-
 			if (currentAtomIdx > maxIdxReached)
 				maxIdxReached = currentAtomIdx;
 
-			currentAtom = currentBody.get(currentAtomIdx);
-			
+			currentAtom = currentBody.get(currentAtomIdx);			
 				
 			Predicate currentPredicate = currentAtom.getPredicate();
 
@@ -552,13 +542,12 @@ public class CQCUtilities {
 				// Stopping early if we have chosen an MGU that has no
 				// possibility of being successful because of the head.
 				
-				if (Unifier.getMGU(canonicalhead, newquery.getHead()) == null) {
+				if (Unifier.getMGU(canonicalQuery.getHead(), newquery.getHead()) == null) {
 					
-					// There is no chance to unifiy the two heads, hence this
+					// There is no chance to unify the two heads, hence this
 					// fact is not good.
 					continue;
 				}
-
 				
 				// The current fact was applicable, no conflicts so far, we can
 				// advance to the next atom
@@ -589,13 +578,10 @@ public class CQCUtilities {
 				currentAtomIdx += 1;
 				currentQuery = newquery;
 				currentBody = currentQuery.getBody();
-
 			}
-
 		}
 
 		return false;
-
 	}
 
 

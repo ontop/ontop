@@ -109,8 +109,7 @@ public class CQCUtilitiesTest {
 
     @Test
 	public void testGrounding() {
-		DataDependencies sigma = null;
-		CQCUtilities cqcutil = new CQCUtilities(initialquery1, sigma);
+		CQCUtilities cqcutil = new CQCUtilities(initialquery1, (DataDependencies)null);
 		CQIE groundedcq = cqcutil.getCanonicalQuery(initialquery1);
 
 		List<Term> head = groundedcq.getHead().getTerms();
@@ -278,61 +277,54 @@ public class CQCUtilitiesTest {
 		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("T"), pfac.getVariable("k"), pfac.getVariable("i")));
 
 		CQIE q10 = pfac.getCQIE(head, body);
-		DataDependencies sigma = null;
 
 		// Checking containment 5 in 6 and viceversa
 
-		CQCUtilities cqcu = new CQCUtilities(q6, sigma);
+		CQCUtilities cqcu = new CQCUtilities(q6, (DataDependencies)null);
 		assertTrue(cqcu.isContainedIn(q5));
 
-		cqcu = new CQCUtilities(q5, sigma);
+		cqcu = new CQCUtilities(q5, (DataDependencies)null);
 		assertTrue(cqcu.isContainedIn(q6));
 
 		// checking containment of 7 in 8
-		cqcu = new CQCUtilities(q7, sigma);
+		cqcu = new CQCUtilities(q7, (DataDependencies)null);
 		assertTrue(cqcu.isContainedIn(q8));
 
 		// checking non-containment of 8 in 7
-		cqcu = new CQCUtilities(q8, sigma);
+		cqcu = new CQCUtilities(q8, (DataDependencies)null);
 		assertFalse(cqcu.isContainedIn(q7));
 
 		// Checking contaiment q2 <= q1
-
-		cqcu = new CQCUtilities(q2, sigma);
+		cqcu = new CQCUtilities(q2, (DataDependencies)null);
 		assertTrue(cqcu.isContainedIn(q1));
 
 		// Checking contaiment q1 <= q2
-
-		cqcu = new CQCUtilities(q1, sigma);
+		cqcu = new CQCUtilities(q1, (DataDependencies)null);
 		assertFalse(cqcu.isContainedIn(q2));
 
 		// Checking contaiment q1 <= q3
-
-		cqcu = new CQCUtilities(q1, sigma);
+		cqcu = new CQCUtilities(q1, (DataDependencies)null);
 		assertTrue(cqcu.isContainedIn(q3));
 
 		// Checking contaiment q3 <= q1
-
-		cqcu = new CQCUtilities(q3, sigma);
+		cqcu = new CQCUtilities(q3, (DataDependencies)null);
 		assertFalse(cqcu.isContainedIn(q1));
 
 		// Checking contaiment q1 <= q4
-
-		cqcu = new CQCUtilities(q1, sigma);
+		cqcu = new CQCUtilities(q1, (DataDependencies)null);
 		assertFalse(cqcu.isContainedIn(q4));
 
 		// Checking contaiment q4 <= q1
-
-		cqcu = new CQCUtilities(q4, sigma);
+		cqcu = new CQCUtilities(q4, (DataDependencies)null);
 		assertFalse(cqcu.isContainedIn(q1));
 		
 		
 		// Checking containment q9 <= q10 true
-		cqcu = new CQCUtilities(q9, sigma);
+		cqcu = new CQCUtilities(q9, (DataDependencies)null);
 		assertTrue(cqcu.isContainedIn(q10));
 		
 		// Checking containment q10 <= q9 true
-		cqcu = new CQCUtilities(q10, sigma);
+		cqcu = new CQCUtilities(q10, (DataDependencies)null);
 		assertTrue(cqcu.isContainedIn(q9));
 	}
 
