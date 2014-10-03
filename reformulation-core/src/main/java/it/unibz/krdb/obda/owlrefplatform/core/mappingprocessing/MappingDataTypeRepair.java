@@ -35,6 +35,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.*;
 import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxTraversal;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxTraverseListener;
@@ -42,6 +43,7 @@ import it.unibz.krdb.obda.utils.TypeMapper;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.Attribute;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,6 +144,7 @@ public class MappingDataTypeRepair {
         //get all the datatypes in the ontology
         getDataTypeFromOntology();
 
+		QueryVocabularyValidator qvv = new QueryVocabularyValidator(equivalenceMap);
 
 		List<CQIE> mappingRules = mappingDatalog.getRules();
 		for (CQIE rule : mappingRules) {
@@ -166,7 +169,7 @@ public class MappingDataTypeRepair {
 				Predicate functionSymbol = function.getFunctionSymbol();
 				if (functionSymbol.isDataTypePredicate()) {
 
-                    Function normal = equivalenceMap.getNormal(atom);
+                    Function normal = qvv.getNormal(atom);
                     Predicate dataType = dataTypesMap.get(normal.getFunctionSymbol());
 
                     //if a datatype was already assigned in the ontology
@@ -203,7 +206,7 @@ public class MappingDataTypeRepair {
 
                 //check in the ontology if we have already information about the datatype
 
-                Function normal = equivalenceMap.getNormal(atom);
+                Function normal = qvv.getNormal(atom);
                     //Check if a datatype was already assigned in the ontology
                 dataTypeFunctor= dataTypesMap.get(normal.getFunctionSymbol());
 

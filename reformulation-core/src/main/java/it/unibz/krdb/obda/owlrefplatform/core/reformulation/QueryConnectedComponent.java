@@ -20,20 +20,11 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.impl.AlgebraOperatorPredicateImpl;
-import it.unibz.krdb.obda.model.impl.BooleanOperationPredicateImpl;
-import it.unibz.krdb.obda.model.impl.DataTypePredicateImpl;
-import it.unibz.krdb.obda.model.impl.NonBooleanOperationPredicateImpl;
-import it.unibz.krdb.obda.model.impl.NumericalOperationPredicateImpl;
-import it.unibz.krdb.obda.model.impl.PredicateImpl;
-import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -162,7 +162,7 @@ public class QuestStatement implements OBDAStatement {
 		this.isconstructcache = questinstance.getIsConstructCache();
 		this.isdescribecache = questinstance.getIsDescribeCache();
 
-		this.repository = questinstance.dataRepository;
+		this.repository = questinstance.getSamanticIndexRepository();
 		this.conn = conn;
 		this.rewriter = questinstance.rewriter;
 		// this.unfoldingmechanism = questinstance.unfolder;
@@ -477,8 +477,7 @@ public class QuestStatement implements OBDAStatement {
 		DatalogProgram program = null;
 		try {
 			if (questInstance.isSemIdx()) {
-				translator.setSI();
-				translator.setUriRef(questInstance.getUriRefIds());
+				translator.setSemanticIndexUriRef(questInstance.getSamanticIndexRepository().getUriMap());
 			}
 			program = translator.translate(pq, signature);
 

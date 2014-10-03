@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
@@ -186,7 +187,10 @@ public class QuestOWLStatement {
 
 			// Retrieves the ABox from the ontology file.
 
-			aBoxIter = new OWLAPI3ABoxIterator(set, new HashMap<Predicate, Description>());
+			aBoxIter = new OWLAPI3ABoxIterator(set);
+			// TODO: (ROMAN) -- check whether we need to use 
+			// EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
+
 			return st.insertData(aBoxIter, commitSize, batchsize);
 		} else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
 

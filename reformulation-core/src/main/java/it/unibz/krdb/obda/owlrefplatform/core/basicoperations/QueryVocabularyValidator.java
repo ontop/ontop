@@ -21,39 +21,31 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  */
 
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 
 import java.util.List;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class QueryVocabularyValidator /*implements Serializable*/ {
-
-	//private static final long serialVersionUID = -2901421485090507301L;
-
-	private final Logger log = LoggerFactory.getLogger(QueryVocabularyValidator.class);
-
-	/** The source ontology vocabulary for validating the target query */
-	private final Set<Predicate> vocabulary;
+public class QueryVocabularyValidator {
 
 	private final EquivalenceMap equivalences;
+	
+	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
 
-	public QueryVocabularyValidator(Set<Predicate> vocabulary, EquivalenceMap equivalences) {
-		this.vocabulary = vocabulary;
+	public QueryVocabularyValidator(/*Set<Predicate> vocabulary, */ EquivalenceMap equivalences) {
+		//this.vocabulary = vocabulary;
 		this.equivalences = equivalences;
 	}
-
-	public boolean validatePredicates(DatalogProgram input) {
+/*
+	public boolean validatePredicates0(DatalogProgram input) {
 
 		boolean isValid = true;
 		
@@ -66,7 +58,8 @@ public class QueryVocabularyValidator /*implements Serializable*/ {
 
 		return isValid;
 	}
-
+*/
+/*	
 	private boolean validate(Function atom) {
 
 		Predicate predicate = atom.getPredicate();
@@ -93,7 +86,7 @@ public class QueryVocabularyValidator /*implements Serializable*/ {
 		}
 		return true;
 	}
-
+*/
 	/*
 	 * Substitute atoms based on the equivalence map.
 	 */
@@ -131,9 +124,31 @@ public class QueryVocabularyValidator /*implements Serializable*/ {
 			if (atom.isBooleanFunction())
 				continue;
 
-			Function newatom = equivalences.getNormal(atom);
+			Function newatom = getNormal(atom);
 
 			body.set(i, newatom);
 		}
 	}
+	
+	public Function getNormal(Function atom) {
+		Predicate p = atom.getPredicate();
+		
+		if (p.getArity() == 1) {
+			OClass equivalent = equivalences.getClassRepresentative(p);
+			if (equivalent != null)
+				return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
+		} 
+		else {
+			Property equivalent = equivalences.getPropertyRepresentative(p);
+			if (equivalent != null) {
+				if (!equivalent.isInverse()) 
+					return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
+				else 
+					return dfac.getFunction(equivalent.getPredicate(), atom.getTerm(1), atom.getTerm(0));
+			}
+		}
+		return atom;
+	}
+
+	
 }

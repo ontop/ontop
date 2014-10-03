@@ -69,6 +69,11 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryparser-sparql</artifactId>
 		</dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
 	</dependencies>
 	
 	<build>
@@ -84,7 +89,6 @@
 						<exclude>**/SNOMEDTestJGraphT.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
 						<exclude>**/DAGCreationFromOntologyTest.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
 						<exclude>**/RDBMSDirect*.java</exclude>
-						<exclude>**/OWLAPI2ABox*.java</exclude>
 						<exclude>**/SemanticIndexTestSuite.java</exclude>
 						<exclude>**/SNOMEDTest.java</exclude>
 					</testExcludes>
