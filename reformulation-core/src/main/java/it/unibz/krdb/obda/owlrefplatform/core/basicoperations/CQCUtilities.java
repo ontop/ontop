@@ -95,16 +95,13 @@ public class CQCUtilities {
 				return;   // here rules may remain null even if the parameter was non-null
 		
 		this.rules = rules;
-		if (rules != null && !rules.isEmpty()) {
-			
+		if (rules != null && !rules.isEmpty()) {			
 			CQIE canonicalQuery = getCanonicalQuery(query);
 			canonicalhead = canonicalQuery.getHead();
 			canonicalbody = canonicalQuery.getBody();
 						
-			List<Function> generatedFacts = chaseQuery(rules);
-			
 			// Map the facts
-			for (Function fact : generatedFacts) 
+			for (Function fact : chaseQuery(rules)) 
 				addFact(fact);
 		}
 	}
@@ -147,69 +144,53 @@ public class CQCUtilities {
 		while (loop) {
 			loop = false;
 			for (Function atom : body) {
-				if (atom == null) {
+				if (atom == null) 
 					continue;
-				}
-
-				Function patom = (Function) atom;
-				Predicate predicate = atom.getPredicate();
 
 				Term oldTerm1 = null;
 				Term oldTerm2 = null;
 
-				Set<SubDescriptionAxiom> pis = sigma.getByIncluded(predicate);
-				if (pis == null) {
+				Set<SubDescriptionAxiom> pis = sigma.getByIncluded(atom.getPredicate());
+				if (pis == null) 
 					continue;
-				}
+				
 				for (SubDescriptionAxiom pi : pis) {
 
 					Description left = pi.getSub();
 					if (left instanceof Property) {
-
-						if (patom.getArity() != 2)
-							continue;
-
 						Property lefttRoleDescription = (Property) left;
 
 						if (lefttRoleDescription.isInverse()) {
-							oldTerm1 = patom.getTerm(1);
-							oldTerm2 = patom.getTerm(0);
+							oldTerm1 = atom.getTerm(1);
+							oldTerm2 = atom.getTerm(0);
 						} else {
-							oldTerm1 = patom.getTerm(0);
-							oldTerm2 = patom.getTerm(1);
+							oldTerm1 = atom.getTerm(0);
+							oldTerm2 = atom.getTerm(1);
 						}
-					} else if (left instanceof OClass) {
-
-						if (patom.getArity() != 1)
-							continue;
-
-						oldTerm1 = patom.getTerm(0);
-
-					} else if (left instanceof PropertySomeRestriction) {
-						if (patom.getArity() != 2)
-							continue;
-
+					} 
+					else if (left instanceof OClass) {
+						oldTerm1 = atom.getTerm(0);
+					} 
+					else if (left instanceof PropertySomeRestriction) {
 						PropertySomeRestriction lefttAtomicRole = (PropertySomeRestriction) left;
 						if (lefttAtomicRole.isInverse()) {
-							oldTerm1 = patom.getTerm(1);
+							oldTerm1 = atom.getTerm(1);
 						} else {
-							oldTerm1 = patom.getTerm(0);
+							oldTerm1 = atom.getTerm(0);
 						}
-
-					} else {
+					} 
+					else {
 						throw new RuntimeException("ERROR: Unsupported dependnecy: " + pi.toString());
 					}
 
 					Description right = pi.getSuper();
-
-					Term newTerm1 = null;
-					Term newTerm2 = null;
-					Predicate newPredicate = null;
 					Function newAtom = null;
 
 					if (right instanceof Property) {
 						Property rightRoleDescription = (Property) right;
-						newPredicate = rightRoleDescription.getPredicate();
+						Predicate newPredicate = rightRoleDescription.getPredicate();
+						Term newTerm1 = null;
+						Term newTerm2 = null;
 						if (rightRoleDescription.isInverse()) {
 							newTerm1 = oldTerm2;
 							newTerm2 = oldTerm1;
@@ -220,8 +201,8 @@ public class CQCUtilities {
 						newAtom = fac.getFunction(newPredicate, newTerm1, newTerm2);
 					} else if (right instanceof OClass) {
 						OClass rightAtomicConcept = (OClass) right;
-						newTerm1 = oldTerm1;
-						newPredicate = rightAtomicConcept.getPredicate();
+						Term newTerm1 = oldTerm1;
+						Predicate newPredicate = rightAtomicConcept.getPredicate();
 						newAtom = fac.getFunction(newPredicate, newTerm1);
 
 					} else if (right instanceof PropertySomeRestriction) {
@@ -231,43 +212,33 @@ public class CQCUtilities {
 						// hence we are incomplete in containment detection.
 
 						PropertySomeRestriction rightExistential = (PropertySomeRestriction) right;
-						newPredicate = rightExistential.getPredicate();
+						Predicate newPredicate = rightExistential.getPredicate();
 						if (rightExistential.isInverse()) {
-							if (newTerm2 instanceof AnonymousVariable)
-								continue;
-							newTerm1 = fac.getVariableNondistinguished();
-							newTerm2 = oldTerm1;
+							Term newTerm1 = fac.getVariableNondistinguished();
+							Term newTerm2 = oldTerm1;
 							newAtom = fac.getFunction(newPredicate, newTerm1, newTerm2);
 						} else {
-							if (newTerm1 instanceof AnonymousVariable)
-								continue;
-							newTerm1 = oldTerm1;
-							newTerm2 = fac.getVariableNondistinguished();
+							Term newTerm1 = oldTerm1;
+							Term newTerm2 = fac.getVariableNondistinguished();
 							newAtom = fac.getFunction(newPredicate, newTerm1, newTerm2);
 						}
 					} else if (right instanceof DataType) {
 						// Does nothing
 					} else if (right instanceof PropertySomeDataTypeRestriction) {
 						PropertySomeDataTypeRestriction rightExistential = (PropertySomeDataTypeRestriction) right;
-						newPredicate = rightExistential.getPredicate();
+						Predicate newPredicate = rightExistential.getPredicate();
 						if (rightExistential.isInverse()) {
 							throw new RuntimeException("ERROR: The data property of some restriction should not have an inverse!");
 						} else {
-							if (newTerm1 instanceof AnonymousVariable)
-								continue;
-							newTerm1 = oldTerm1;
-							newTerm2 = fac.getVariableNondistinguished();
+							Term newTerm1 = oldTerm1;
+							Term newTerm2 = fac.getVariableNondistinguished();
 							newAtom = fac.getFunction(newPredicate, newTerm1, newTerm2);
 						}
 					}
-
-					else {
+					else 
 						throw new RuntimeException("ERROR: Unsupported dependency: " + pi.toString());
-					}
 
-					if (!newbody.contains(newAtom)) {
-						newbody.add(newAtom);
-					}
+					newbody.add(newAtom);
 
 				}
 			}
@@ -292,7 +263,6 @@ public class CQCUtilities {
 	 * This method is used to chase foreign key constraint rule in which the rule
 	 * has only one atom in the body.
 	 * 
-	 * @param query
 	 * @param rules
 	 * @return
 	 */
