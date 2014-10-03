@@ -9,11 +9,6 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -111,8 +106,8 @@ public class QuestOWLExample_ReasoningDisabled {
 		 * Get the book information that is stored in the database
 		 */
 
-        String[] queries = new String[20];
-        String[] results = new String[20];
+        String[] queries = new String[10];
+        String[] results = new String[10];
 
 
 
@@ -128,7 +123,7 @@ public class QuestOWLExample_ReasoningDisabled {
         queries[7]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A3. ?x a  :B3}  ";
         queries[8]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A2. ?x a  :B2}  ";
         queries[9]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A1. ?x a  :B1}  ";
-
+/*
         queries[10]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A5. FILTER (?x < 1000). }  ";
         queries[11]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A4. FILTER (?x < 1000). }  ";
         queries[12]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A3. FILTER (?x < 1000). }  ";
@@ -141,7 +136,7 @@ public class QuestOWLExample_ReasoningDisabled {
         queries[18]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A2. ?x a  :B2. FILTER (?x < 1000). }  ";
         queries[19]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A1. ?x a  :B1. FILTER (?x < 1000). }  ";
 
-
+*/
         /*
         queries[1]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 1000)  } ";
         queries[2]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 2000)  } ";

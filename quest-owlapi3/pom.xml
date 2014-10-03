@@ -56,13 +56,12 @@
 		<dependency>
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<type>jar</type>
-			<!--   <scope>test</scope> Davide> I commented this out -->
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<!--   <scope>test</scope> Davide> I commented this out -->
+			<scope>test</scope>
 		</dependency>
 		
 		<dependency>
