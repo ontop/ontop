@@ -35,8 +35,9 @@ public interface OBDAModel {
      *
      * Note that some ODBA models are immutable so you
      * should use this method to "update" them.
+     * 
      */
-    public OBDAModel newModel(Map<URI, List<OBDAMappingAxiom>> newMappings);
+    public OBDAModel newModel(List<OBDADataSource> dataSources, Map<URI, List<OBDAMappingAxiom>> newMappings);
 
     /**
      * Returns the list of all sources defined in this OBDA model. This list is

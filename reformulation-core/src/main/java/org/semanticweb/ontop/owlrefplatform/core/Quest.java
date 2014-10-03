@@ -23,7 +23,9 @@ package org.semanticweb.ontop.owlrefplatform.core;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+
 import net.sf.jsqlparser.JSQLParserException;
+
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.openrdf.query.parser.ParsedQuery;
@@ -651,11 +653,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 				/* Setting up the OBDA model */
 
-				unfoldingOBDAModel.addSource(obdaSource);
-				sourceID= obdaSource.getSourceID();
-				Collection<OBDAMappingAxiom> mappings = dataRepository.getMappings();
-				unfoldingOBDAModel.addMappings(sourceID, mappings);
-
+				sourceID = obdaSource.getSourceID();
+					
+				Map<URI, List<OBDAMappingAxiom>> mappings = new HashMap<>();
+								
+				List<OBDAMappingAxiom> joinedMappings = new ArrayList<>(dataRepository.getMappings());
+				mappings.put(sourceID, joinedMappings);
+				List<OBDADataSource> dataSources = new ArrayList<>();
+				dataSources.add(obdaSource);
+				unfoldingOBDAModel = (SQLOBDAModel)unfoldingOBDAModel.newModel(dataSources, mappings);
+			
 				uriRefIds = dataRepository.getUriIds();
 				uriMap = dataRepository.getUriMap();
 
@@ -666,7 +673,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				
 				// log.debug("Working in virtual mode");
 
-				Collection<OBDADataSource> sources = this.inputOBDAModel.getSources();
+				List<OBDADataSource> sources = this.inputOBDAModel.getSources();
 				if (sources == null || sources.size() == 0)
 					throw new Exception(
 							"No datasource has been defined. Virtual ABox mode requires exactly 1 data source in your OBDA model.");
@@ -685,20 +692,21 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				// setup connection pool
 				setupConnectionPool();
 
-				unfoldingOBDAModel.addSource(obdaSource);
-
 				/*
 				 * Processing mappings with respect to the vocabulary
 				 * simplification
 				 */
 
-				MappingVocabularyTranslator mtrans = new MappingVocabularyTranslator();
-				sourceID= obdaSource.getSourceID();
-				List<OBDAMappingAxiom> mappingsOB = this.inputOBDAModel.getMappings(sourceID);
-				Collection<OBDAMappingAxiom> newMappings = mtrans.translateMappings(mappingsOB, equivalenceMaps);
 
-				unfoldingOBDAModel.addMappings(sourceID, newMappings);
-
+				URI sourceUri = obdaSource.getSourceID();
+				List<OBDAMappingAxiom> originalMappings = inputOBDAModel.getMappings(sourceUri);
+				List<OBDAMappingAxiom> translatedMappings = MappingVocabularyTranslator.translateMappings(originalMappings, equivalenceMaps);
+				
+				Map<URI, List<OBDAMappingAxiom>> mappings = new HashMap<>();
+				mappings.put(sourceUri, translatedMappings);
+				
+				// TODO: create the OBDA model here normally
+				unfoldingOBDAModel = (SQLOBDAModel)unfoldingOBDAModel.newModel(sources, mappings);
 			}
 
 			// NOTE: Currently the system only supports one data source.
@@ -824,8 +832,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 			if ((aboxMode.equals(QuestConstants.VIRTUAL))) {
 				log.debug("Original mapping size: {}", unfolder.getRules().size());
+				// Normalizing language tags: make all LOWER CASE
 
-				 // Normalizing language tags: make all LOWER CASE
 				unfolder.normalizeLanguageTagsinMappings();
 
 				 // Normalizing equalities
@@ -947,8 +955,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public void updateSemanticIndexMappings() throws DuplicateMappingException, OBDAException {
 		/* Setting up the OBDA model */
 
-		unfoldingOBDAModel.removeAllMappings(obdaSource.getSourceID());
-		unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
+		// TODO: is it necessary to copy mappings of other datasources??
+		Map<URI, List<OBDAMappingAxiom>> mappings = new HashMap<>(unfoldingOBDAModel.getMappings());
+		mappings.put(obdaSource.getSourceID(), dataRepository.getMappings());
+		unfoldingOBDAModel = (SQLOBDAModel)unfoldingOBDAModel.newModel(unfoldingOBDAModel.getSources(), mappings);
 
 		unfolder.updateSemanticIndexMappings(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), 
 										reformulationReasoner);

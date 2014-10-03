@@ -1758,7 +1758,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException {
+	public List<OBDAMappingAxiom> getMappings() throws OBDAException {
 
 		Set<Property> roleNodes = new HashSet<Property>();
 
@@ -2206,7 +2206,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		/*
 		 * Collecting the result
 		 */
-		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
+		List<OBDAMappingAxiom> result = new ArrayList<>();
 		for (Predicate predicate : mappings.keySet()) {
 			log.debug("Predicate: {} Mappings: {}", predicate, mappings.get(predicate).size());
 			result.addAll(mappings.get(predicate));

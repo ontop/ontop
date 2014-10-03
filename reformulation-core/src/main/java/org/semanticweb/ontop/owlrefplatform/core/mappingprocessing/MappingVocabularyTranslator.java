@@ -26,6 +26,7 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,9 +58,8 @@ public class MappingVocabularyTranslator {
 	 * @param equivalencesMap
 	 * @return
 	 */
-	public static Collection<OBDAMappingAxiom> translateMappings(Collection<OBDAMappingAxiom> originalMappings,
-			EquivalenceMap equivalencesMap) {
-		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
+	public static List<OBDAMappingAxiom> translateMappings(List<OBDAMappingAxiom> originalMappings, EquivalenceMap equivalencesMap) {
+		List<OBDAMappingAxiom> result = new ArrayList<OBDAMappingAxiom>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
 			
 			CQIE targetQuery = (CQIE) mapping.getTargetQuery();

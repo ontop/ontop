@@ -57,7 +57,7 @@ public class MappingVocabularyRepair {
                 throw new RuntimeException(e);
             }
         }
-        return model.newModel(mappings);
+        return model.newModel(model.getSources(), mappings);
     }
 
 	/***

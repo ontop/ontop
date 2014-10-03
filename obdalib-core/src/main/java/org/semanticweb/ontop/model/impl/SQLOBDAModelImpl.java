@@ -31,7 +31,6 @@ import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.SimplePrefixManager;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.querymanager.QueryController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +43,7 @@ public class SQLOBDAModelImpl implements SQLOBDAModel {
 
 	private PrefixManager prefixManager;
 
-	private HashMap<URI, OBDADataSource> datasources;
+	private Map<URI, OBDADataSource> datasources;
 
 	private ArrayList<OBDAModelListener> sourceslisteners;
 
@@ -82,9 +81,14 @@ public class SQLOBDAModelImpl implements SQLOBDAModel {
 	}
 
     @Override
-    public OBDAModel newModel(Map<URI, List<OBDAMappingAxiom>> newMappings) {
+    public OBDAModel newModel(List<OBDADataSource> dataSources, Map<URI, List<OBDAMappingAxiom>> newMappings) {
         SQLOBDAModelImpl model = (SQLOBDAModelImpl) clone();
         model.mappings = new HashMap<>(newMappings);
+        Map<URI, OBDADataSource> dataSourceIndex = new HashMap<>();
+        for (OBDADataSource source: dataSources) {
+        	dataSourceIndex.put(source.getSourceID(), source);
+        }
+        model.datasources = dataSourceIndex;
         return model;
     }
 
