@@ -39,8 +39,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import com.hp.hpl.jena.iri.IRIFactory;
-
 public class DBMetadataUtil {
 
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
@@ -48,7 +46,7 @@ public class DBMetadataUtil {
 	private static Logger log = LoggerFactory.getLogger(DBMetadataUtil.class);
 	
 	/*
-	 * genereate CQIE rules from foreign key info of db metadata
+	 * generate CQIE rules from foreign key info of db metadata
 	 * TABLE1.COL1 references TABLE2.COL2 as foreign key then 
 	 * construct CQIE rule TABLE2(P1, P3, COL2, P4) :- TABLE1(COL2, T2, T3).
 	 */
@@ -76,6 +74,8 @@ public class DBMetadataUtil {
 						// Get table definition for referenced table
 						def2 = (TableDefinition) metadata.getDefinition(table2);
 						if (def2 == null) { // in case of broken FK
+							// ROMAN: this is not necessarily broken -- the table may not be mentioned in the mappings 
+							//        (which can happen in the NEW abridged metadata)
 							throw new BrokenForeignKeyException(reference, "Missing table: " + table2);
 						}
 						// Get positions of referenced attribute

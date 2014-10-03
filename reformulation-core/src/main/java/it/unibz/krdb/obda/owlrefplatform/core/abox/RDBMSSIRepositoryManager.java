@@ -43,7 +43,6 @@ import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
-import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
@@ -55,8 +54,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexCache;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -81,7 +79,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Queue;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -377,42 +374,25 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-	// Semantic Index URI reference structures
-	private HashMap<String, Integer> uriIds = new HashMap<String, Integer> (100000);
-	private HashMap <Integer, String> uriMap2 = new HashMap<Integer, String> (100000);
+	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
 	
-	private int maxURIId = -1;
-	
-	private Properties config;
-
-	private TBoxReasonerImpl reasonerDag;
+	private TBoxReasoner reasonerDag;
 
 	private SemanticIndexCache cacheSI;
 	
-	private Ontology aboxDependencies;
-
-	private Ontology ontology;
-
 	private boolean isIndexed;
 
 	private static final boolean mergeUniions = false;
 
-	// private HashMap<Integer, Boolean> emptynessIndexes = new HashMap<Integer,
-	// Boolean>();
-
-	private HashSet<SemanticIndexRecord> nonEmptyEntityRecord = new HashSet<SemanticIndexRecord>();
+	private final HashSet<SemanticIndexRecord> nonEmptyEntityRecord = new HashSet<SemanticIndexRecord>();
 
 	private List<RepositoryChangedListener> changeList;
 
-	public RDBMSSIRepositoryManager() {
-		this(null);
-	}
+	public RDBMSSIRepositoryManager(/*Set<Predicate> vocabulary*/) {
 
-	public RDBMSSIRepositoryManager(Set<Predicate> vocabulary) {
-
-		if (vocabulary != null) {
-			setVocabulary(vocabulary);
-		}
+		//if (vocabulary != null) {
+		//	setVocabulary(vocabulary);
+		//}
 
 		changeList = new LinkedList<RepositoryChangedListener>();
 	}
@@ -420,14 +400,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public void addRepositoryChangedListener(RepositoryChangedListener list) {
 		this.changeList.add(list);
 	}
-
-	// public HashMap<Predicate, Integer> getIndexes() {
-	// return indexes;
-	// }
-
-	// public HashMap<Integer, Boolean> getEmptynessIndexes() {
-	// return emptynessIndexes;
-	// }
 
 	public boolean getIsIndexed() {
 		return this.isIndexed;
@@ -439,45 +411,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	@Override
 	public void setConfig(Properties config) {
-		this.config = config;
 	}
 
-//	public DAGImpl getDAG() {
-//		return dag;
-//	}
-
 	@Override
-	public void setTBox(Ontology ontology) {
-
-		this.ontology = ontology;
-
-		log.debug("Ontology: {}", ontology.toString());
-
-		/*
-		 * 
-		 * PART 1: Collecting relevant nodes for mappings
-		 */
-
-		/*
-		 * Collecting relevant nodes for each role. For a Role P, the relevant
-		 * nodes are, the DAGNode for P, and the top most inverse children of P
-		 */
-		
-		reasonerDag = new TBoxReasonerImpl(ontology);
-		
-		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasonerDag);
-				
+	public void setTBox(TBoxReasoner reasonerDag) {
+		this.reasonerDag = reasonerDag;		
 		cacheSI = new SemanticIndexCache(reasonerDag);
-		
-
-		// try {
-		// GraphGenerator.dumpISA(dag, "no-cycles");
-		// GraphGenerator.dumpISA(pureIsa, "isa-indexed");
-		//
-		// } catch (IOException e) {
-		//
-		// }
-
 	}
 
 	@Override
@@ -1016,7 +955,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			ObjectConstant subject = (ObjectConstant) attributeAssertion.getValue1();
 
 			String uri = subject.getValue();
-			 uri_id = idOfURI(uri);
+			 uri_id = uriMap.idOfURI(uri);
 				uriidStm.setInt(1, uri_id);
 				uriidStm.setString(2, uri);
 				uriidStm.addBatch();
@@ -1052,12 +991,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				// Construct the database INSERT statement
 				// replace URIs with their ids
 				
-				uri_id = idOfURI(uri);
+				uri_id = uriMap.idOfURI(uri);
 				uriidStm.setInt(1, uri_id);
 				uriidStm.setString(2, uri);
 				uriidStm.addBatch();
 
-				uri2_id = idOfURI(uri2);
+				uri2_id = uriMap.idOfURI(uri2);
 				uriidStm.setInt(1, uri2_id);
 				uriidStm.setString(2, uri2);
 				uriidStm.addBatch();
@@ -1138,7 +1077,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				uri = ((URIConstant) c1).getURI().toString();
 
 			// Construct the database INSERT statement
-			uri_id = idOfURI(uri);
+			uri_id = uriMap.idOfURI(uri);
 			uriidStm.setInt(1, uri_id);
 			uriidStm.setString(2, uri);
 			uriidStm.addBatch();			
@@ -1155,21 +1094,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			// log.debug("Class");
 		}
-	}
-
-	private int idOfURI(String uri) {
-		Integer existingID = uriIds.get(uri);
-		if (existingID == null)
-		{
-			existingID = maxURIId + 1;
-			
-			uriIds.put(uri, existingID);
-			uriMap2.put(existingID, uri);
-			
-			maxURIId += 1;
-			
-		}
-		return existingID;
 	}
 
 	private void closeStatement(PreparedStatement statement) throws SQLException {
@@ -1619,11 +1543,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public Ontology getABoxDependencies() {
-		return aboxDependencies;
-	}
-	
-	@Override
 	public void loadMetadata(Connection conn) throws SQLException {
 		log.debug("Loading semantic index metadata from the database *");
 
@@ -1725,14 +1644,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	@Override
 	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException {
 
-
 		Set<Property> roleNodes = new HashSet<Property>();
-//		Map<Property, List<Property>> roleInverseMaps = new HashMap<Property, List<Property>>();
 
-		for (Predicate rolepred : ontology.getRoles()) {
+		for (Equivalences<Property> set: reasonerDag.getProperties()) {
 
-			Property node = reasonerDag.getProperties().getVertex(ofac.createProperty(rolepred)).getRepresentative();
-			// We only map named roles
+			Property node = set.getRepresentative();
+			// only named roles are mapped
 			if (node.isInverse()) 
 				continue;
 			
@@ -3111,14 +3028,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	}
 
-	@Override
-	public void setVocabulary(Set<Predicate> vocabulary) {
-		// TODO
-
-		/* This method should initialize the vocabulary of the DAG */
-
-	}
-
 	/*
 	 * Utilities
 	 */
@@ -3630,22 +3539,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 	}
 
-	// @Override
-	// public boolean isEmpty(Function atom) {
-	// int index = getIndexHash(atom);
-	//
-	// Boolean empty = emptynessIndexes.get(index);
-	// if (empty == null)
-	// return true;
-	// return empty;
-	// }
-
-	public Map<String,Integer> getUriIds(){
-		return uriIds;
-	}
-	
-	public Map<Integer, String> getUriMap() {
-		return uriMap2;
+	public SemanticIndexURIMap getUriMap() {
+		return uriMap;
 	}
 	
 	/***

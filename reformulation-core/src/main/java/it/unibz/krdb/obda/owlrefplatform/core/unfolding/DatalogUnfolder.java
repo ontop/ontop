@@ -1350,7 +1350,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		}
 
 		if (result == null) {
-			// this is the case for second atom in leaft join generating more
+			// this is the case for second atom in left join generating more
 			// than one rull, we
 			// must reutrn an empty result i ndicating its already a partial
 			// evaluation.
@@ -1371,7 +1371,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * * Normalizes a rule that has multiple data atoms to a rule in which there
 	 * is one single Join atom by creating a nested Join structure. Required to
 	 * resolve atoms in LeftJoins (any, left or right) to avoid ending up with
-	 * left joins with more than 2 table defintions. If the body contains only
+	 * left joins with more than 2 table definitions. If the body contains only
 	 * one data atom (or none) it will return <strong>null</strong>. For
 	 * example:
 	 * 

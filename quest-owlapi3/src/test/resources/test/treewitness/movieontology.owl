@@ -1,0 +1,3972 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY imdb "http://www.imdb.com/" >
+    <!ENTITY quest "http://obda.org/quest#" >
+    <!ENTITY page "http://dbpedia.org/page/" >
+    <!ENTITY dbpedia "http://dbpedia.org/ontology/" >
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY dc "http://purl.org/dc/elements/1.1/" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY www "http://www.movieontology.org/2009/11/09/" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY mo "http://www.movieontology.org/2009/10/01/movieontology.owl#" >
+    <!ENTITY mo2 "http://www.movieontology.org/2009/11/09/movieontology.owl#" >
+]>
+
+
+<rdf:RDF xmlns="&www;movieontology.owl#"
+     xml:base="&www;movieontology.owl"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:mo="http://www.movieontology.org/2009/10/01/movieontology.owl#"
+     xmlns:www="http://www.movieontology.org/2009/11/09/"
+     xmlns:mo2="&www;movieontology.owl#"
+     xmlns:imdb="http://www.imdb.com/"
+     xmlns:quest="http://obda.org/quest#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:page="http://dbpedia.org/page/"
+     xmlns:dbpedia="http://dbpedia.org/ontology/"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="&www;movieontology.owl">
+        <dc:date rdf:datatype="&xsd;string">20.01.2010</dc:date>
+        <dc:publisher rdf:datatype="&xsd;string">Amancio Bouza</dc:publisher>
+        <dc:creator rdf:datatype="&xsd;string">Amancio Bouza</dc:creator>
+        <dc:contributor rdf:datatype="&xsd;string">Amancio Bouza</dc:contributor>
+        <dc:description rdf:datatype="&xsd;string">MO - Movie ontology</dc:description>
+        <!--<owl:imports rdf:resource="file://src/test/resources/test/treewitness/dbpedia_3.7.owl"/>-->
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://dbpedia.org/ontology/gross -->
+
+    <owl:AnnotationProperty rdf:about="&dbpedia;gross">
+        <rdfs:label xml:lang="el">ακαθάριστα ($)</rdfs:label>
+        <rdfs:label xml:lang="en">gross ($)</rdfs:label>
+        <rdfs:domain rdf:resource="&dbpedia;Film"/>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://purl.org/dc/elements/1.1/contributor -->
+
+    <owl:AnnotationProperty rdf:about="&dc;contributor"/>
+    
+
+
+    <!-- http://purl.org/dc/elements/1.1/creator -->
+
+    <owl:AnnotationProperty rdf:about="&dc;creator"/>
+    
+
+
+    <!-- http://purl.org/dc/elements/1.1/date -->
+
+    <owl:AnnotationProperty rdf:about="&dc;date"/>
+    
+
+
+    <!-- http://purl.org/dc/elements/1.1/description -->
+
+    <owl:AnnotationProperty rdf:about="&dc;description"/>
+    
+
+
+    <!-- http://purl.org/dc/elements/1.1/publisher -->
+
+    <owl:AnnotationProperty rdf:about="&dc;publisher"/>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#belongsToGenre -->
+
+    <owl:AnnotationProperty rdf:about="&mo;belongsToGenre"/>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasColor -->
+
+    <owl:AnnotationProperty rdf:about="&mo;hasColor"/>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasComposer -->
+
+    <owl:AnnotationProperty rdf:about="&mo;hasComposer"/>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#nominatedFor -->
+
+    <owl:AnnotationProperty rdf:about="&mo;nominatedFor"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.w3.org/2001/XMLSchema#date -->
+
+    <rdfs:Datatype rdf:about="&xsd;date"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#belongsToGenre -->
+
+    <owl:ObjectProperty rdf:about="&mo;belongsToGenre">
+        <rdfs:range rdf:resource="&mo;Genre"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#containsCountry -->
+
+    <owl:ObjectProperty rdf:about="&mo;containsCountry">
+        <rdfs:range rdf:resource="&dbpedia;Country"/>
+        <rdfs:domain rdf:resource="&mo;Territory"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#enablesConsumptionOf -->
+
+    <owl:ObjectProperty rdf:about="&mo;enablesConsumptionOf">
+        <owl:inverseOf rdf:resource="&mo;isConsumableAs"/>
+        <rdfs:domain rdf:resource="&www;movieontology.owl#Consumable_Product"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasActor -->
+
+    <owl:ObjectProperty rdf:about="&mo;hasActor">
+        <owl:inverseOf rdf:resource="&mo;isActorIn"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasActress -->
+
+    <owl:ObjectProperty rdf:about="&mo;hasActress">
+        <rdfs:subPropertyOf rdf:resource="&mo;hasActor"/>
+        <owl:propertyDisjointWith rdf:resource="&mo;hasMaleActor"/>
+        <owl:inverseOf rdf:resource="&mo;isActressIn"/>
+        <rdfs:range rdf:resource="&www;movieontology.owl#Actress"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasColor -->
+
+    <owl:ObjectProperty rdf:about="&mo;hasColor">
+        <rdfs:range rdf:resource="&mo;Colorinfo"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasComposer -->
+
+    <owl:ObjectProperty rdf:about="&mo;hasComposer">
+        <rdfs:range rdf:resource="&dbpedia;Musical_Artist"/>
+        <owl:inverseOf rdf:resource="&mo;isComposerIn"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasCostumeDesigner -->
+
+    <owl:ObjectProperty rdf:about="&mo;hasCostumeDesigner">
+        <rdfs:range rdf:resource="&mo;Costume_Designer"/>
+        <owl:inverseOf rdf:resource="&mo;isCostumeDesignerIn"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasDirector -->
+
+    <owl:ObjectProperty rdf:about="&mo;hasDirector">
+        <rdfs:range rdf:resource="&page;Film_Director"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasEditor -->
+
+    <owl:ObjectProperty rdf:about="&mo;hasEditor">
+        <rdfs:range rdf:resource="&mo;Editor"/>
+        <owl:inverseOf rdf:resource="&mo;isEditorIn"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasFilmLocation -->
+
+    <owl:ObjectProperty rdf:about="&mo;hasFilmLocation">
+        <rdfs:range rdf:resource="&page;Place"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasMaleActor -->
+
+    <owl:ObjectProperty rdf:about="&mo;hasMaleActor">
+        <rdfs:range rdf:resource="&dbpedia;Actor"/>
+        <rdfs:subPropertyOf rdf:resource="&mo;hasActor"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasProducer -->
+
+    <owl:ObjectProperty rdf:about="&mo;hasProducer">
+        <rdfs:range rdf:resource="&mo;Producer"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasReleasingCountry -->
+
+    <owl:ObjectProperty rdf:about="&mo;hasReleasingCountry">
+        <rdfs:range rdf:resource="&dbpedia;Country"/>
+        <owl:inverseOf rdf:resource="&mo;isReleasingCountryOf"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasSoundmix -->
+
+    <owl:ObjectProperty rdf:about="&mo;hasSoundmix">
+        <rdfs:range rdf:resource="&mo;Sound_Mix"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasTranslatedMovie -->
+
+    <owl:ObjectProperty rdf:about="&mo;hasTranslatedMovie">
+        <rdfs:domain rdf:resource="&dbpedia;Language"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isActorIn -->
+
+    <owl:ObjectProperty rdf:about="&mo;isActorIn">
+        <rdfs:domain rdf:resource="&dbpedia;Actor"/>
+        <rdfs:subPropertyOf rdf:resource="&mo;isActorIn"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isActressIn -->
+
+    <owl:ObjectProperty rdf:about="&mo;isActressIn">
+        <rdfs:subPropertyOf rdf:resource="&mo;isActorIn"/>
+        <owl:propertyDisjointWith rdf:resource="&www;movieontology.owl#isMaleActorIn"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isAwardedWith -->
+
+    <owl:ObjectProperty rdf:about="&mo;isAwardedWith">
+        <rdfs:range rdf:resource="&mo;Award"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isCertificationOf -->
+
+    <owl:ObjectProperty rdf:about="&mo;isCertificationOf">
+        <rdfs:domain rdf:resource="&mo;Certification"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isCertifiedWith -->
+
+    <owl:ObjectProperty rdf:about="&mo;isCertifiedWith">
+        <rdfs:range rdf:resource="&mo;Certification"/>
+        <owl:inverseOf rdf:resource="&mo;isCertificationOf"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isColorOf -->
+
+    <owl:ObjectProperty rdf:about="&mo;isColorOf">
+        <rdfs:domain rdf:resource="&mo;Colorinfo"/>
+        <owl:inverseOf rdf:resource="&mo;hasColor"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isComposerIn -->
+
+    <owl:ObjectProperty rdf:about="&mo;isComposerIn">
+        <rdfs:domain rdf:resource="&dbpedia;Musical_Artist"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isConsumableAs -->
+
+    <owl:ObjectProperty rdf:about="&mo;isConsumableAs">
+        <rdfs:range rdf:resource="&www;movieontology.owl#Consumable_Product"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isCostumeDesignerIn -->
+
+    <owl:ObjectProperty rdf:about="&mo;isCostumeDesignerIn">
+        <rdfs:domain rdf:resource="&mo;Costume_Designer"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isDirectorOf -->
+
+    <owl:ObjectProperty rdf:about="&mo;isDirectorOf">
+        <rdfs:domain rdf:resource="&page;Film_Director"/>
+        <owl:inverseOf rdf:resource="&mo;hasDirector"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isEditorIn -->
+
+    <owl:ObjectProperty rdf:about="&mo;isEditorIn">
+        <rdfs:domain rdf:resource="&mo;Editor"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isFilmLocationOf -->
+
+    <owl:ObjectProperty rdf:about="&mo;isFilmLocationOf">
+        <rdfs:domain rdf:resource="&page;Place"/>
+        <owl:inverseOf rdf:resource="&mo;hasFilmLocation"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isGenreOf -->
+
+    <owl:ObjectProperty rdf:about="&mo;isGenreOf">
+        <owl:inverseOf rdf:resource="&mo;belongsToGenre"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isProducedBy -->
+
+    <owl:ObjectProperty rdf:about="&mo;isProducedBy">
+        <rdfs:range rdf:resource="&mo;Production_Company"/>
+        <owl:inverseOf rdf:resource="&mo;produced"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isReleasingCountryOf -->
+
+    <owl:ObjectProperty rdf:about="&mo;isReleasingCountryOf">
+        <rdfs:domain rdf:resource="&dbpedia;Country"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isSoundmixOf -->
+
+    <owl:ObjectProperty rdf:about="&mo;isSoundmixOf">
+        <rdfs:domain rdf:resource="&mo;Sound_Mix"/>
+        <owl:inverseOf rdf:resource="&mo;hasSoundmix"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isTranslatedTo -->
+
+    <owl:ObjectProperty rdf:about="&mo;isTranslatedTo">
+        <rdfs:range rdf:resource="&dbpedia;Language"/>
+        <owl:inverseOf rdf:resource="&mo;hasTranslatedMovie"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#nominatedFor -->
+
+    <owl:ObjectProperty rdf:about="&mo;nominatedFor">
+        <rdfs:range rdf:resource="&mo;Award"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#partOfTerritory -->
+
+    <owl:ObjectProperty rdf:about="&mo;partOfTerritory">
+        <rdfs:domain rdf:resource="&dbpedia;Country"/>
+        <rdfs:range rdf:resource="&mo;Territory"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#produced -->
+
+    <owl:ObjectProperty rdf:about="&mo;produced">
+        <rdfs:domain rdf:resource="&mo;Production_Company"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#hasCompanyLocation -->
+
+    <owl:ObjectProperty rdf:about="&www;movieontology.owl#hasCompanyLocation">
+        <rdfs:domain rdf:resource="&mo;Production_Company"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#isAwardOf -->
+
+    <owl:ObjectProperty rdf:about="&www;movieontology.owl#isAwardOf">
+        <rdfs:domain rdf:resource="&mo;Award"/>
+        <owl:inverseOf rdf:resource="&mo;isAwardedWith"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#isMaleActorIn -->
+
+    <owl:ObjectProperty rdf:about="&www;movieontology.owl#isMaleActorIn">
+        <owl:inverseOf rdf:resource="&mo;hasMaleActor"/>
+        <rdfs:subPropertyOf rdf:resource="&mo;isActorIn"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://dbpedia.org/ontology/birthDate -->
+
+    <owl:DatatypeProperty rdf:about="&dbpedia;birthDate">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:label xml:lang="de">Geburtsdatum</rdfs:label>
+        <rdfs:label xml:lang="el">ημερομηνία_γέννησης</rdfs:label>
+        <rdfs:label xml:lang="en">birth date</rdfs:label>
+        <rdfs:label xml:lang="fr">date de naissance</rdfs:label>
+        <rdfs:domain rdf:resource="&dbpedia;Person"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://dbpedia.org/ontology/birthName -->
+
+    <owl:DatatypeProperty rdf:about="&dbpedia;birthName">
+        <rdfs:label xml:lang="el">όνομα_γέννησης</rdfs:label>
+        <rdfs:label xml:lang="en">birth name</rdfs:label>
+        <rdfs:domain rdf:resource="&dbpedia;Person"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://dbpedia.org/ontology/budget -->
+
+    <owl:DatatypeProperty rdf:about="&dbpedia;budget">
+        <rdfs:label xml:lang="el">προϋπολογισμός ($)</rdfs:label>
+        <rdfs:label xml:lang="en">budget ($)</rdfs:label>
+        <rdfs:range rdf:resource="&xsd;double"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://dbpedia.org/ontology/gross -->
+
+    <owl:DatatypeProperty rdf:about="&dbpedia;gross">
+        <rdfs:label xml:lang="el">ακαθάριστα ($)</rdfs:label>
+        <rdfs:label xml:lang="en">gross ($)</rdfs:label>
+        <rdfs:range rdf:resource="&xsd;double"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://dbpedia.org/ontology/productionStartYear -->
+
+    <owl:DatatypeProperty rdf:about="&dbpedia;productionStartYear">
+        <rdfs:label xml:lang="en">production start year</rdfs:label>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#imdbrating -->
+
+    <owl:DatatypeProperty rdf:about="&mo;imdbrating">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="&xsd;double"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#releasedate -->
+
+    <owl:DatatypeProperty rdf:about="&mo;releasedate">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#runtime -->
+
+    <owl:DatatypeProperty rdf:about="&mo;runtime">
+        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#title -->
+
+    <owl:DatatypeProperty rdf:about="&mo;title">
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#companyName -->
+
+    <owl:DatatypeProperty rdf:about="&www;movieontology.owl#companyName">
+        <rdfs:label xml:lang="en">company name</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#countryCode -->
+
+    <owl:DatatypeProperty rdf:about="&www;movieontology.owl#countryCode">
+        <rdfs:label>country code</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://dbpedia.org/ontology/Actor -->
+
+    <owl:Class rdf:about="&dbpedia;Actor">
+        <rdfs:subClassOf rdf:resource="&dbpedia;Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dbpedia.org/ontology/Country -->
+
+    <owl:Class rdf:about="&dbpedia;Country"/>
+    
+
+
+    <!-- http://dbpedia.org/ontology/Language -->
+
+    <owl:Class rdf:about="&dbpedia;Language">
+        <rdfs:subClassOf rdf:resource="&mo;Presentation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dbpedia.org/ontology/Musical_Artist -->
+
+    <owl:Class rdf:about="&dbpedia;Musical_Artist">
+        <rdfs:subClassOf rdf:resource="&dbpedia;Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dbpedia.org/ontology/Person -->
+
+    <owl:Class rdf:about="&dbpedia;Person"/>
+    
+
+
+    <!-- http://dbpedia.org/ontology/Writer -->
+
+    <owl:Class rdf:about="&dbpedia;Writer">
+        <rdfs:subClassOf rdf:resource="&dbpedia;Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dbpedia.org/page/Film_Director -->
+
+    <owl:Class rdf:about="&page;Film_Director">
+        <rdfs:subClassOf rdf:resource="&dbpedia;Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dbpedia.org/page/Place -->
+
+    <owl:Class rdf:about="&page;Place"/>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Actionreach -->
+
+    <owl:Class rdf:about="&mo;Actionreach">
+        <rdfs:subClassOf rdf:resource="&mo;Entertainment"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Africa -->
+
+    <owl:Class rdf:about="&mo;Africa">
+        <rdfs:subClassOf rdf:resource="&mo;Territory"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#America -->
+
+    <owl:Class rdf:about="&mo;America">
+        <rdfs:subClassOf rdf:resource="&mo;Territory"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Asia -->
+
+    <owl:Class rdf:about="&mo;Asia">
+        <rdfs:subClassOf rdf:resource="&mo;Territory"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Australia_and_New_Zealand -->
+
+    <owl:Class rdf:about="&mo;Australia_and_New_Zealand">
+        <rdfs:subClassOf rdf:resource="&mo;Oceania"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Award -->
+
+    <owl:Class rdf:about="&mo;Award"/>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Brute_Action -->
+
+    <owl:Class rdf:about="&mo;Brute_Action">
+        <rdfs:subClassOf rdf:resource="&mo;Actionreach"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Caribbean -->
+
+    <owl:Class rdf:about="&mo;Caribbean">
+        <rdfs:subClassOf rdf:resource="&mo;America"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Central_America -->
+
+    <owl:Class rdf:about="&mo;Central_America">
+        <rdfs:subClassOf rdf:resource="&mo;LatinAmerica"/>
+        <owl:disjointWith rdf:resource="&mo;South_America"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Central_Asia -->
+
+    <owl:Class rdf:about="&mo;Central_Asia">
+        <rdfs:subClassOf rdf:resource="&mo;Asia"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Certification -->
+
+    <owl:Class rdf:about="&mo;Certification"/>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Colorinfo -->
+
+    <owl:Class rdf:about="&mo;Colorinfo">
+        <rdfs:subClassOf rdf:resource="&mo;Presentation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Costume_Designer -->
+
+    <owl:Class rdf:about="&mo;Costume_Designer">
+        <rdfs:subClassOf rdf:resource="&dbpedia;Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Documentarial_Information -->
+
+    <owl:Class rdf:about="&mo;Documentarial_Information">
+        <rdfs:subClassOf rdf:resource="&mo;Special-Info"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Eastern_Africa -->
+
+    <owl:Class rdf:about="&mo;Eastern_Africa">
+        <rdfs:subClassOf rdf:resource="&mo;Africa"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Eastern_Asia -->
+
+    <owl:Class rdf:about="&mo;Eastern_Asia">
+        <rdfs:subClassOf rdf:resource="&mo;Asia"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Eastern_Europe -->
+
+    <owl:Class rdf:about="&mo;Eastern_Europe">
+        <rdfs:subClassOf rdf:resource="&mo;Europe"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Editor -->
+
+    <owl:Class rdf:about="&mo;Editor">
+        <rdfs:subClassOf rdf:resource="&dbpedia;Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Entertaining_Information -->
+
+    <owl:Class rdf:about="&mo;Entertaining_Information">
+        <rdfs:subClassOf rdf:resource="&mo;Entertainment"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Entertainment -->
+
+    <owl:Class rdf:about="&mo;Entertainment">
+        <rdfs:subClassOf rdf:resource="&mo;Genre"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Europe -->
+
+    <owl:Class rdf:about="&mo;Europe">
+        <rdfs:subClassOf rdf:resource="&mo;Territory"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Experience -->
+
+    <owl:Class rdf:about="&mo;Experience">
+        <rdfs:subClassOf rdf:resource="&mo;Entertainment"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Fast-Info -->
+
+    <owl:Class rdf:about="&mo;Fast-Info">
+        <rdfs:subClassOf rdf:resource="&mo;Information"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Fun -->
+
+    <owl:Class rdf:about="&mo;Fun">
+        <rdfs:subClassOf rdf:resource="&mo;SocialActive"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Genre -->
+
+    <owl:Class rdf:about="&mo;Genre"/>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Heavy_Sensible -->
+
+    <owl:Class rdf:about="&mo;Heavy_Sensible">
+        <rdfs:subClassOf rdf:resource="&mo;Sensible"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Historical_Information -->
+
+    <owl:Class rdf:about="&mo;Historical_Information">
+        <rdfs:subClassOf rdf:resource="&mo;Documentarial_Information"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Imaginational_Entertainment -->
+
+    <owl:Class rdf:about="&mo;Imaginational_Entertainment">
+        <rdfs:subClassOf rdf:resource="&mo;Entertainment"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Info-TV -->
+
+    <owl:Class rdf:about="&mo;Info-TV">
+        <rdfs:subClassOf rdf:resource="&mo;Fast-Info"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Information -->
+
+    <owl:Class rdf:about="&mo;Information">
+        <rdfs:subClassOf rdf:resource="&mo;Genre"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Intelectual_Entertainment -->
+
+    <owl:Class rdf:about="&mo;Intelectual_Entertainment">
+        <rdfs:subClassOf rdf:resource="&mo;Experience"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Kids -->
+
+    <owl:Class rdf:about="&mo;Kids">
+        <rdfs:subClassOf rdf:resource="&mo;SocialActive"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#LatinAmerica -->
+
+    <owl:Class rdf:about="&mo;LatinAmerica">
+        <rdfs:subClassOf rdf:resource="&mo;America"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Logical_Thrilling -->
+
+    <owl:Class rdf:about="&mo;Logical_Thrilling">
+        <rdfs:subClassOf rdf:resource="&mo;Thrilling"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Love -->
+
+    <owl:Class rdf:about="&mo;Love">
+        <rdfs:subClassOf rdf:resource="&mo;Sensible"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Melanesia -->
+
+    <owl:Class rdf:about="&mo;Melanesia">
+        <rdfs:subClassOf rdf:resource="&mo;Oceania"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Micronesia -->
+
+    <owl:Class rdf:about="&mo;Micronesia">
+        <rdfs:subClassOf rdf:resource="&mo;Oceania"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Middle_Africa -->
+
+    <owl:Class rdf:about="&mo;Middle_Africa">
+        <rdfs:subClassOf rdf:resource="&mo;Africa"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Movie -->
+
+    <owl:Class rdf:about="&mo;Movie"/>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Musical_Entertainment -->
+
+    <owl:Class rdf:about="&mo;Musical_Entertainment">
+        <rdfs:subClassOf rdf:resource="&mo;Intelectual_Entertainment"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Northern_Africa -->
+
+    <owl:Class rdf:about="&mo;Northern_Africa">
+        <rdfs:subClassOf rdf:resource="&mo;Africa"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Northern_America -->
+
+    <owl:Class rdf:about="&mo;Northern_America">
+        <rdfs:subClassOf rdf:resource="&mo;America"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Northern_Europe -->
+
+    <owl:Class rdf:about="&mo;Northern_Europe">
+        <rdfs:subClassOf rdf:resource="&mo;Europe"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Oceania -->
+
+    <owl:Class rdf:about="&mo;Oceania">
+        <rdfs:subClassOf rdf:resource="&mo;Territory"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Old_Action -->
+
+    <owl:Class rdf:about="&mo;Old_Action">
+        <rdfs:subClassOf rdf:resource="&mo;Actionreach"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Online_retailer -->
+
+    <owl:Class rdf:about="&mo;Online_retailer"/>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Polynesia -->
+
+    <owl:Class rdf:about="&mo;Polynesia">
+        <rdfs:subClassOf rdf:resource="&mo;Oceania"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Porn -->
+
+    <owl:Class rdf:about="&mo;Porn">
+        <rdfs:subClassOf rdf:resource="&mo;Experience"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Presentation -->
+
+    <owl:Class rdf:about="&mo;Presentation"/>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Producer -->
+
+    <owl:Class rdf:about="&mo;Producer">
+        <rdfs:subClassOf rdf:resource="&dbpedia;Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Production_Company -->
+
+    <owl:Class rdf:about="&mo;Production_Company"/>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#SciFi_and_Fantasy -->
+
+    <owl:Class rdf:about="&mo;SciFi_and_Fantasy">
+        <rdfs:subClassOf rdf:resource="&mo;Imaginational_Entertainment"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Sensible -->
+
+    <owl:Class rdf:about="&mo;Sensible">
+        <rdfs:subClassOf rdf:resource="&mo;Entertainment"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Sensible_Thrilling -->
+
+    <owl:Class rdf:about="&mo;Sensible_Thrilling">
+        <rdfs:subClassOf rdf:resource="&mo;Thrilling"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#SocialActive -->
+
+    <owl:Class rdf:about="&mo;SocialActive">
+        <rdfs:subClassOf rdf:resource="&mo;Entertainment"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Sound_Mix -->
+
+    <owl:Class rdf:about="&mo;Sound_Mix">
+        <rdfs:subClassOf rdf:resource="&mo;Presentation"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#South_America -->
+
+    <owl:Class rdf:about="&mo;South_America">
+        <rdfs:subClassOf rdf:resource="&mo;LatinAmerica"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Southeastern_Asia -->
+
+    <owl:Class rdf:about="&mo;Southeastern_Asia">
+        <rdfs:subClassOf rdf:resource="&mo;Asia"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Southern_Africa -->
+
+    <owl:Class rdf:about="&mo;Southern_Africa">
+        <rdfs:subClassOf rdf:resource="&mo;Africa"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Southern_Asia -->
+
+    <owl:Class rdf:about="&mo;Southern_Asia">
+        <rdfs:subClassOf rdf:resource="&mo;Asia"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Southern_Europe -->
+
+    <owl:Class rdf:about="&mo;Southern_Europe">
+        <rdfs:subClassOf rdf:resource="&mo;Europe"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Special-Info -->
+
+    <owl:Class rdf:about="&mo;Special-Info">
+        <rdfs:subClassOf rdf:resource="&mo;Information"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#TV-Entertainment -->
+
+    <owl:Class rdf:about="&mo;TV-Entertainment">
+        <rdfs:subClassOf rdf:resource="&mo;Experience"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#TVSeries -->
+
+    <owl:Class rdf:about="&mo;TVSeries"/>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Territory -->
+
+    <owl:Class rdf:about="&mo;Territory"/>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Thrilling -->
+
+    <owl:Class rdf:about="&mo;Thrilling">
+        <rdfs:subClassOf rdf:resource="&mo;Imaginational_Entertainment"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Western_Africa -->
+
+    <owl:Class rdf:about="&mo;Western_Africa">
+        <rdfs:subClassOf rdf:resource="&mo;Africa"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Western_Asia -->
+
+    <owl:Class rdf:about="&mo;Western_Asia">
+        <rdfs:subClassOf rdf:resource="&mo;Asia"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Western_Europe -->
+
+    <owl:Class rdf:about="&mo;Western_Europe">
+        <rdfs:subClassOf rdf:resource="&mo;Europe"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#Actress -->
+
+    <owl:Class rdf:about="&www;movieontology.owl#Actress">
+        <rdfs:subClassOf rdf:resource="&dbpedia;Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#Colorinfo -->
+
+    <owl:Class rdf:about="&www;movieontology.owl#Colorinfo"/>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#Consumable_Product -->
+
+    <owl:Class rdf:about="&www;movieontology.owl#Consumable_Product"/>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+    <owl:Class rdf:about="&owl;Thing"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Action -->
+
+    <owl:Thing rdf:about="&mo;Action">
+        <rdf:type rdf:resource="&mo;Brute_Action"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Adult -->
+
+    <owl:Thing rdf:about="&mo;Adult">
+        <rdf:type rdf:resource="&mo;Porn"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Adventure -->
+
+    <owl:Thing rdf:about="&mo;Adventure">
+        <rdf:type rdf:resource="&mo;Actionreach"/>
+        <rdf:type rdf:resource="&mo;Imaginational_Entertainment"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Afghanistan -->
+
+    <owl:Thing rdf:about="&mo;Afghanistan">
+        <rdf:type rdf:resource="&mo;Southern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Aland_Islands -->
+
+    <owl:Thing rdf:about="&mo;Aland_Islands">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Albania -->
+
+    <owl:Thing rdf:about="&mo;Albania">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Algeria -->
+
+    <owl:Thing rdf:about="&mo;Algeria">
+        <rdf:type rdf:resource="&mo;Northern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Amazon.com_retailer -->
+
+    <owl:Thing rdf:about="&mo;Amazon.com_retailer">
+        <rdf:type rdf:resource="&mo;Online_retailer"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#American_Samoa -->
+
+    <owl:Thing rdf:about="&mo;American_Samoa">
+        <rdf:type rdf:resource="&mo;Polynesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Andorra -->
+
+    <owl:Thing rdf:about="&mo;Andorra">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Angola -->
+
+    <owl:Thing rdf:about="&mo;Angola">
+        <rdf:type rdf:resource="&mo;Middle_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Anguilla -->
+
+    <owl:Thing rdf:about="&mo;Anguilla">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Animation -->
+
+    <owl:Thing rdf:about="&mo;Animation">
+        <rdf:type rdf:resource="&mo;Fun"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Antigua_and_Barbuda -->
+
+    <owl:Thing rdf:about="&mo;Antigua_and_Barbuda">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Argentina -->
+
+    <owl:Thing rdf:about="&mo;Argentina">
+        <rdf:type rdf:resource="&mo;South_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Armenia -->
+
+    <owl:Thing rdf:about="&mo;Armenia">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Aruba -->
+
+    <owl:Thing rdf:about="&mo;Aruba">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Australia -->
+
+    <owl:Thing rdf:about="&mo;Australia">
+        <rdf:type rdf:resource="&mo;Australia_and_New_Zealand"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Austria -->
+
+    <owl:Thing rdf:about="&mo;Austria">
+        <rdf:type rdf:resource="&mo;Western_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Azerbaijan -->
+
+    <owl:Thing rdf:about="&mo;Azerbaijan">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#BAFTA_Film_Award -->
+
+    <owl:Thing rdf:about="&mo;BAFTA_Film_Award">
+        <rdf:type rdf:resource="&mo;Award"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Bahamas -->
+
+    <owl:Thing rdf:about="&mo;Bahamas">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Bahrain -->
+
+    <owl:Thing rdf:about="&mo;Bahrain">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Bangladesh -->
+
+    <owl:Thing rdf:about="&mo;Bangladesh">
+        <rdf:type rdf:resource="&mo;Southern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Barbados -->
+
+    <owl:Thing rdf:about="&mo;Barbados">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Belarus -->
+
+    <owl:Thing rdf:about="&mo;Belarus">
+        <rdf:type rdf:resource="&mo;Eastern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Belgium -->
+
+    <owl:Thing rdf:about="&mo;Belgium">
+        <rdf:type rdf:resource="&mo;Western_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Belize -->
+
+    <owl:Thing rdf:about="&mo;Belize">
+        <rdf:type rdf:resource="&mo;Central_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Benin -->
+
+    <owl:Thing rdf:about="&mo;Benin">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Bermuda -->
+
+    <owl:Thing rdf:about="&mo;Bermuda">
+        <rdf:type rdf:resource="&mo;Northern_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Bhutan -->
+
+    <owl:Thing rdf:about="&mo;Bhutan">
+        <rdf:type rdf:resource="&mo;Southern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Biography -->
+
+    <owl:Thing rdf:about="&mo;Biography">
+        <rdf:type rdf:resource="&mo;Documentarial_Information"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Black_and_White -->
+
+    <owl:Thing rdf:about="&mo;Black_and_White">
+        <rdf:type rdf:resource="&mo;Colorinfo"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Blockbuster.com_retailer -->
+
+    <owl:Thing rdf:about="&mo;Blockbuster.com_retailer">
+        <rdf:type rdf:resource="&mo;Online_retailer"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Bolivia -->
+
+    <owl:Thing rdf:about="&mo;Bolivia">
+        <rdf:type rdf:resource="&mo;South_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Bosnia-Herzegovina -->
+
+    <owl:Thing rdf:about="&mo;Bosnia-Herzegovina">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Botswana -->
+
+    <owl:Thing rdf:about="&mo;Botswana">
+        <rdf:type rdf:resource="&mo;Southern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Brazil -->
+
+    <owl:Thing rdf:about="&mo;Brazil">
+        <rdf:type rdf:resource="&mo;South_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#British_Virgin_Islands -->
+
+    <owl:Thing rdf:about="&mo;British_Virgin_Islands">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Brunei_Darussalam -->
+
+    <owl:Thing rdf:about="&mo;Brunei_Darussalam">
+        <rdf:type rdf:resource="&mo;Southeastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Bulgaria -->
+
+    <owl:Thing rdf:about="&mo;Bulgaria">
+        <rdf:type rdf:resource="&mo;Eastern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Burkina_Faso -->
+
+    <owl:Thing rdf:about="&mo;Burkina_Faso">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Burma -->
+
+    <owl:Thing rdf:about="&mo;Burma">
+        <rdf:type rdf:resource="&mo;Southern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Burundi -->
+
+    <owl:Thing rdf:about="&mo;Burundi">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Cambodia -->
+
+    <owl:Thing rdf:about="&mo;Cambodia">
+        <rdf:type rdf:resource="&mo;Southeastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Cameroon -->
+
+    <owl:Thing rdf:about="&mo;Cameroon">
+        <rdf:type rdf:resource="&mo;Middle_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Canada -->
+
+    <owl:Thing rdf:about="&mo;Canada">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Cape_Verde -->
+
+    <owl:Thing rdf:about="&mo;Cape_Verde">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Cayman_Islands -->
+
+    <owl:Thing rdf:about="&mo;Cayman_Islands">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Central_African_Republic -->
+
+    <owl:Thing rdf:about="&mo;Central_African_Republic">
+        <rdf:type rdf:resource="&mo;Middle_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Chad -->
+
+    <owl:Thing rdf:about="&mo;Chad">
+        <rdf:type rdf:resource="&mo;Middle_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Channel_Islands -->
+
+    <owl:Thing rdf:about="&mo;Channel_Islands">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Chile -->
+
+    <owl:Thing rdf:about="&mo;Chile">
+        <rdf:type rdf:resource="&mo;South_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#China -->
+
+    <owl:Thing rdf:about="&mo;China">
+        <rdf:type rdf:resource="&mo;Eastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Colombia -->
+
+    <owl:Thing rdf:about="&mo;Colombia">
+        <rdf:type rdf:resource="&mo;South_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Color -->
+
+    <owl:Thing rdf:about="&mo;Color">
+        <rdf:type rdf:resource="&www;movieontology.owl#Colorinfo"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Comedy -->
+
+    <owl:Thing rdf:about="&mo;Comedy">
+        <rdf:type rdf:resource="&mo;Fun"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Comoros -->
+
+    <owl:Thing rdf:about="&mo;Comoros">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Congo -->
+
+    <owl:Thing rdf:about="&mo;Congo">
+        <rdf:type rdf:resource="&mo;Middle_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Cook_Islands -->
+
+    <owl:Thing rdf:about="&mo;Cook_Islands">
+        <rdf:type rdf:resource="&mo;Polynesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Costa_Rica -->
+
+    <owl:Thing rdf:about="&mo;Costa_Rica">
+        <rdf:type rdf:resource="&mo;Central_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Crime -->
+
+    <owl:Thing rdf:about="&mo;Crime">
+        <rdf:type rdf:resource="&mo;Logical_Thrilling"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Croatia -->
+
+    <owl:Thing rdf:about="&mo;Croatia">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Cuba -->
+
+    <owl:Thing rdf:about="&mo;Cuba">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Cyprus -->
+
+    <owl:Thing rdf:about="&mo;Cyprus">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Czech_Republic -->
+
+    <owl:Thing rdf:about="&mo;Czech_Republic">
+        <rdf:type rdf:resource="&mo;Eastern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Denmark -->
+
+    <owl:Thing rdf:about="&mo;Denmark">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Djibouti -->
+
+    <owl:Thing rdf:about="&mo;Djibouti">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Documentary -->
+
+    <owl:Thing rdf:about="&mo;Documentary">
+        <rdf:type rdf:resource="&mo;Documentarial_Information"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Dominica -->
+
+    <owl:Thing rdf:about="&mo;Dominica">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Dominican_Republic -->
+
+    <owl:Thing rdf:about="&mo;Dominican_Republic">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Drama -->
+
+    <owl:Thing rdf:about="&mo;Drama">
+        <rdf:type rdf:resource="&mo;Heavy_Sensible"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Ecuador -->
+
+    <owl:Thing rdf:about="&mo;Ecuador">
+        <rdf:type rdf:resource="&mo;South_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Egypt -->
+
+    <owl:Thing rdf:about="&mo;Egypt">
+        <rdf:type rdf:resource="&mo;Northern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#El_Salvador -->
+
+    <owl:Thing rdf:about="&mo;El_Salvador">
+        <rdf:type rdf:resource="&mo;Central_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Equatorial_Guinea -->
+
+    <owl:Thing rdf:about="&mo;Equatorial_Guinea">
+        <rdf:type rdf:resource="&mo;Middle_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Eritrea -->
+
+    <owl:Thing rdf:about="&mo;Eritrea">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Estonia -->
+
+    <owl:Thing rdf:about="&mo;Estonia">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Ethiopia -->
+
+    <owl:Thing rdf:about="&mo;Ethiopia">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Falkland_Islands -->
+
+    <owl:Thing rdf:about="&mo;Falkland_Islands">
+        <rdf:type rdf:resource="&mo;South_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Family -->
+
+    <owl:Thing rdf:about="&mo;Family">
+        <rdf:type rdf:resource="&mo;Kids"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Fantasy -->
+
+    <owl:Thing rdf:about="&mo;Fantasy">
+        <rdf:type rdf:resource="&mo;SciFi_and_Fantasy"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Faroe_Islands -->
+
+    <owl:Thing rdf:about="&mo;Faroe_Islands">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Federated_States_of_Micronesia -->
+
+    <owl:Thing rdf:about="&mo;Federated_States_of_Micronesia">
+        <rdf:type rdf:resource="&mo;Micronesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Fiji -->
+
+    <owl:Thing rdf:about="&mo;Fiji">
+        <rdf:type rdf:resource="&mo;Melanesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Film-Noir -->
+
+    <owl:Thing rdf:about="&mo;Film-Noir">
+        <rdf:type rdf:resource="&mo;Heavy_Sensible"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Finland -->
+
+    <owl:Thing rdf:about="&mo;Finland">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#France -->
+
+    <owl:Thing rdf:about="&mo;France">
+        <rdf:type rdf:resource="&mo;Western_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#French_Guiana -->
+
+    <owl:Thing rdf:about="&mo;French_Guiana">
+        <rdf:type rdf:resource="&mo;South_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#French_Polynesia -->
+
+    <owl:Thing rdf:about="&mo;French_Polynesia">
+        <rdf:type rdf:resource="&mo;Polynesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Gabon -->
+
+    <owl:Thing rdf:about="&mo;Gabon">
+        <rdf:type rdf:resource="&mo;Middle_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Gambia -->
+
+    <owl:Thing rdf:about="&mo;Gambia">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Game-Show -->
+
+    <owl:Thing rdf:about="&mo;Game-Show">
+        <rdf:type rdf:resource="&mo;TV-Entertainment"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Georgia -->
+
+    <owl:Thing rdf:about="&mo;Georgia">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Germany -->
+
+    <owl:Thing rdf:about="&mo;Germany">
+        <rdf:type rdf:resource="&mo;Western_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Ghana -->
+
+    <owl:Thing rdf:about="&mo;Ghana">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Gibraltar -->
+
+    <owl:Thing rdf:about="&mo;Gibraltar">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Golden_Globe_Award -->
+
+    <owl:Thing rdf:about="&mo;Golden_Globe_Award">
+        <rdf:type rdf:resource="&mo;Award"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Greece -->
+
+    <owl:Thing rdf:about="&mo;Greece">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Greenland -->
+
+    <owl:Thing rdf:about="&mo;Greenland">
+        <rdf:type rdf:resource="&mo;Northern_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Grenada -->
+
+    <owl:Thing rdf:about="&mo;Grenada">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Guadeloupe -->
+
+    <owl:Thing rdf:about="&mo;Guadeloupe">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Guam -->
+
+    <owl:Thing rdf:about="&mo;Guam">
+        <rdf:type rdf:resource="&mo;Micronesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Guatemala -->
+
+    <owl:Thing rdf:about="&mo;Guatemala">
+        <rdf:type rdf:resource="&mo;Central_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Guernesey -->
+
+    <owl:Thing rdf:about="&mo;Guernesey">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Guinea -->
+
+    <owl:Thing rdf:about="&mo;Guinea">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Guinea-Bassau -->
+
+    <owl:Thing rdf:about="&mo;Guinea-Bassau">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Guyana -->
+
+    <owl:Thing rdf:about="&mo;Guyana">
+        <rdf:type rdf:resource="&mo;South_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Haiti -->
+
+    <owl:Thing rdf:about="&mo;Haiti">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#History -->
+
+    <owl:Thing rdf:about="&mo;History">
+        <rdf:type rdf:resource="&mo;Historical_Information"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Holy_See -->
+
+    <owl:Thing rdf:about="&mo;Holy_See">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Honduras -->
+
+    <owl:Thing rdf:about="&mo;Honduras">
+        <rdf:type rdf:resource="&mo;Central_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Hong_Kong -->
+
+    <owl:Thing rdf:about="&mo;Hong_Kong">
+        <rdf:type rdf:resource="&mo;Eastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Horror -->
+
+    <owl:Thing rdf:about="&mo;Horror">
+        <rdf:type rdf:resource="&mo;Thrilling"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Hungary -->
+
+    <owl:Thing rdf:about="&mo;Hungary">
+        <rdf:type rdf:resource="&mo;Eastern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Iceland -->
+
+    <owl:Thing rdf:about="&mo;Iceland">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#India -->
+
+    <owl:Thing rdf:about="&mo;India">
+        <rdf:type rdf:resource="&mo;Southern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Indonesia -->
+
+    <owl:Thing rdf:about="&mo;Indonesia">
+        <rdf:type rdf:resource="&mo;Southeastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Iran -->
+
+    <owl:Thing rdf:about="&mo;Iran">
+        <rdf:type rdf:resource="&mo;Southern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Iraq -->
+
+    <owl:Thing rdf:about="&mo;Iraq">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Ireland -->
+
+    <owl:Thing rdf:about="&mo;Ireland">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Isle_of_Man -->
+
+    <owl:Thing rdf:about="&mo;Isle_of_Man">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Israel -->
+
+    <owl:Thing rdf:about="&mo;Israel">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Italy -->
+
+    <owl:Thing rdf:about="&mo;Italy">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Ivory_Coast -->
+
+    <owl:Thing rdf:about="&mo;Ivory_Coast">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Jamaica -->
+
+    <owl:Thing rdf:about="&mo;Jamaica">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Japan -->
+
+    <owl:Thing rdf:about="&mo;Japan">
+        <rdf:type rdf:resource="&mo;Eastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Jersey -->
+
+    <owl:Thing rdf:about="&mo;Jersey">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Jordan -->
+
+    <owl:Thing rdf:about="&mo;Jordan">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Kazakhstan -->
+
+    <owl:Thing rdf:about="&mo;Kazakhstan">
+        <rdf:type rdf:resource="&mo;Central_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Kenya -->
+
+    <owl:Thing rdf:about="&mo;Kenya">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Kiribati -->
+
+    <owl:Thing rdf:about="&mo;Kiribati">
+        <rdf:type rdf:resource="&mo;Micronesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Kuwait -->
+
+    <owl:Thing rdf:about="&mo;Kuwait">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Kyrgyzstan -->
+
+    <owl:Thing rdf:about="&mo;Kyrgyzstan">
+        <rdf:type rdf:resource="&mo;Central_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Laos -->
+
+    <owl:Thing rdf:about="&mo;Laos">
+        <rdf:type rdf:resource="&mo;Southeastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Latvia -->
+
+    <owl:Thing rdf:about="&mo;Latvia">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Lebanon -->
+
+    <owl:Thing rdf:about="&mo;Lebanon">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Lesotho -->
+
+    <owl:Thing rdf:about="&mo;Lesotho">
+        <rdf:type rdf:resource="&mo;Southern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Liberia -->
+
+    <owl:Thing rdf:about="&mo;Liberia">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Libya -->
+
+    <owl:Thing rdf:about="&mo;Libya">
+        <rdf:type rdf:resource="&mo;Northern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Liechtenstein -->
+
+    <owl:Thing rdf:about="&mo;Liechtenstein">
+        <rdf:type rdf:resource="&mo;Western_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Lithuania -->
+
+    <owl:Thing rdf:about="&mo;Lithuania">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Luxembourg -->
+
+    <owl:Thing rdf:about="&mo;Luxembourg">
+        <rdf:type rdf:resource="&mo;Western_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Macao -->
+
+    <owl:Thing rdf:about="&mo;Macao">
+        <rdf:type rdf:resource="&mo;Eastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Madagascar -->
+
+    <owl:Thing rdf:about="&mo;Madagascar">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Malawi -->
+
+    <owl:Thing rdf:about="&mo;Malawi">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Malaysia -->
+
+    <owl:Thing rdf:about="&mo;Malaysia">
+        <rdf:type rdf:resource="&mo;Southeastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Maldives -->
+
+    <owl:Thing rdf:about="&mo;Maldives">
+        <rdf:type rdf:resource="&mo;Southern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Mali -->
+
+    <owl:Thing rdf:about="&mo;Mali">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Malta -->
+
+    <owl:Thing rdf:about="&mo;Malta">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Marshal_lIsland -->
+
+    <owl:Thing rdf:about="&mo;Marshal_lIsland">
+        <rdf:type rdf:resource="&mo;Micronesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Martinique -->
+
+    <owl:Thing rdf:about="&mo;Martinique">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Mauritania -->
+
+    <owl:Thing rdf:about="&mo;Mauritania">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Mauritius -->
+
+    <owl:Thing rdf:about="&mo;Mauritius">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Mayotte -->
+
+    <owl:Thing rdf:about="&mo;Mayotte">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Mexico -->
+
+    <owl:Thing rdf:about="&mo;Mexico">
+        <rdf:type rdf:resource="&mo;Central_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Miscellaneous_Award -->
+
+    <owl:Thing rdf:about="&mo;Miscellaneous_Award">
+        <rdf:type rdf:resource="&mo;Award"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Moldova -->
+
+    <owl:Thing rdf:about="&mo;Moldova">
+        <rdf:type rdf:resource="&mo;Eastern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Monaco -->
+
+    <owl:Thing rdf:about="&mo;Monaco">
+        <rdf:type rdf:resource="&mo;Western_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Mongolia -->
+
+    <owl:Thing rdf:about="&mo;Mongolia">
+        <rdf:type rdf:resource="&mo;Eastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Montenegro -->
+
+    <owl:Thing rdf:about="&mo;Montenegro">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Montserrat -->
+
+    <owl:Thing rdf:about="&mo;Montserrat">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Morocco -->
+
+    <owl:Thing rdf:about="&mo;Morocco">
+        <rdf:type rdf:resource="&mo;Northern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Mozambique -->
+
+    <owl:Thing rdf:about="&mo;Mozambique">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Music -->
+
+    <owl:Thing rdf:about="&mo;Music">
+        <rdf:type rdf:resource="&mo;Musical_Entertainment"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Musical -->
+
+    <owl:Thing rdf:about="&mo;Musical">
+        <rdf:type rdf:resource="&mo;Musical_Entertainment"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Myanmar -->
+
+    <owl:Thing rdf:about="&mo;Myanmar">
+        <rdf:type rdf:resource="&mo;Southeastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Mystery -->
+
+    <owl:Thing rdf:about="&mo;Mystery">
+        <rdf:type rdf:resource="&mo;Sensible_Thrilling"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Namibia -->
+
+    <owl:Thing rdf:about="&mo;Namibia">
+        <rdf:type rdf:resource="&mo;Southern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Nauru -->
+
+    <owl:Thing rdf:about="&mo;Nauru">
+        <rdf:type rdf:resource="&mo;Micronesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Nepal -->
+
+    <owl:Thing rdf:about="&mo;Nepal">
+        <rdf:type rdf:resource="&mo;Southern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Netflix.com_retailer -->
+
+    <owl:Thing rdf:about="&mo;Netflix.com_retailer">
+        <rdf:type rdf:resource="&mo;Online_retailer"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Netherlands -->
+
+    <owl:Thing rdf:about="&mo;Netherlands">
+        <rdf:type rdf:resource="&mo;Western_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Netherlands_Antilles -->
+
+    <owl:Thing rdf:about="&mo;Netherlands_Antilles">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#New_Caledonia -->
+
+    <owl:Thing rdf:about="&mo;New_Caledonia">
+        <rdf:type rdf:resource="&mo;Melanesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#New_Zealand -->
+
+    <owl:Thing rdf:about="&mo;New_Zealand">
+        <rdf:type rdf:resource="&mo;Australia_and_New_Zealand"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#News -->
+
+    <owl:Thing rdf:about="&mo;News">
+        <rdf:type rdf:resource="&mo;Info-TV"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Nicaragua -->
+
+    <owl:Thing rdf:about="&mo;Nicaragua">
+        <rdf:type rdf:resource="&mo;Central_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Niger -->
+
+    <owl:Thing rdf:about="&mo;Niger">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Nigeria -->
+
+    <owl:Thing rdf:about="&mo;Nigeria">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Niue -->
+
+    <owl:Thing rdf:about="&mo;Niue">
+        <rdf:type rdf:resource="&mo;Polynesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Norfolk_Island -->
+
+    <owl:Thing rdf:about="&mo;Norfolk_Island">
+        <rdf:type rdf:resource="&mo;Australia_and_New_Zealand"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#North_Korea -->
+
+    <owl:Thing rdf:about="&mo;North_Korea">
+        <rdf:type rdf:resource="&mo;Eastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Northern_Mariana_Islands -->
+
+    <owl:Thing rdf:about="&mo;Northern_Mariana_Islands">
+        <rdf:type rdf:resource="&mo;Micronesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Norway -->
+
+    <owl:Thing rdf:about="&mo;Norway">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Oman -->
+
+    <owl:Thing rdf:about="&mo;Oman">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Oscar_Award -->
+
+    <owl:Thing rdf:about="&mo;Oscar_Award">
+        <rdf:type rdf:resource="&mo;Award"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Pakistan -->
+
+    <owl:Thing rdf:about="&mo;Pakistan">
+        <rdf:type rdf:resource="&mo;Southern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Palau -->
+
+    <owl:Thing rdf:about="&mo;Palau">
+        <rdf:type rdf:resource="&mo;Micronesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Palestine -->
+
+    <owl:Thing rdf:about="&mo;Palestine">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Panama -->
+
+    <owl:Thing rdf:about="&mo;Panama">
+        <rdf:type rdf:resource="&mo;Central_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Papua_New_Guinea -->
+
+    <owl:Thing rdf:about="&mo;Papua_New_Guinea">
+        <rdf:type rdf:resource="&mo;Melanesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Paraguay -->
+
+    <owl:Thing rdf:about="&mo;Paraguay">
+        <rdf:type rdf:resource="&mo;South_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Peru -->
+
+    <owl:Thing rdf:about="&mo;Peru">
+        <rdf:type rdf:resource="&mo;South_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Philippines -->
+
+    <owl:Thing rdf:about="&mo;Philippines">
+        <rdf:type rdf:resource="&mo;Southeastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Pitcairn -->
+
+    <owl:Thing rdf:about="&mo;Pitcairn">
+        <rdf:type rdf:resource="&mo;Polynesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Poland -->
+
+    <owl:Thing rdf:about="&mo;Poland">
+        <rdf:type rdf:resource="&mo;Eastern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Portugal -->
+
+    <owl:Thing rdf:about="&mo;Portugal">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Primetime_Emmy_Award -->
+
+    <owl:Thing rdf:about="&mo;Primetime_Emmy_Award">
+        <rdf:type rdf:resource="&mo;Award"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Puerto_Rico -->
+
+    <owl:Thing rdf:about="&mo;Puerto_Rico">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Qatar -->
+
+    <owl:Thing rdf:about="&mo;Qatar">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Reality-TV -->
+
+    <owl:Thing rdf:about="&mo;Reality-TV">
+        <rdf:type rdf:resource="&mo;TV-Entertainment"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Republic_of_Macedonia -->
+
+    <owl:Thing rdf:about="&mo;Republic_of_Macedonia">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Reunion -->
+
+    <owl:Thing rdf:about="&mo;Reunion">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Romance -->
+
+    <owl:Thing rdf:about="&mo;Romance">
+        <rdf:type rdf:resource="&mo;Love"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Romania -->
+
+    <owl:Thing rdf:about="&mo;Romania">
+        <rdf:type rdf:resource="&mo;Eastern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#RottenTomatoes.com_retailer -->
+
+    <owl:Thing rdf:about="&mo;RottenTomatoes.com_retailer">
+        <rdf:type rdf:resource="&mo;Online_retailer"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Russia -->
+
+    <owl:Thing rdf:about="&mo;Russia">
+        <rdf:type rdf:resource="&mo;Eastern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#RussiaAsia -->
+
+    <owl:Thing rdf:about="&mo;RussiaAsia">
+        <rdf:type rdf:resource="&mo;Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Rwanda -->
+
+    <owl:Thing rdf:about="&mo;Rwanda">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Saint-Barthelemy -->
+
+    <owl:Thing rdf:about="&mo;Saint-Barthelemy">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Saint_Helena -->
+
+    <owl:Thing rdf:about="&mo;Saint_Helena">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Saint_Kitts_and_NEvis -->
+
+    <owl:Thing rdf:about="&mo;Saint_Kitts_and_NEvis">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Saint_Lucia -->
+
+    <owl:Thing rdf:about="&mo;Saint_Lucia">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Saint_Martin -->
+
+    <owl:Thing rdf:about="&mo;Saint_Martin">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Saint_Pierre_and_Miquelon -->
+
+    <owl:Thing rdf:about="&mo;Saint_Pierre_and_Miquelon">
+        <rdf:type rdf:resource="&mo;Northern_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Saint_Vincent_and_the_Grenadines -->
+
+    <owl:Thing rdf:about="&mo;Saint_Vincent_and_the_Grenadines">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Samoa -->
+
+    <owl:Thing rdf:about="&mo;Samoa">
+        <rdf:type rdf:resource="&mo;Polynesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#San_Marino -->
+
+    <owl:Thing rdf:about="&mo;San_Marino">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Sao_Tome_and_Principe -->
+
+    <owl:Thing rdf:about="&mo;Sao_Tome_and_Principe">
+        <rdf:type rdf:resource="&mo;Middle_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Saudi_Arabia -->
+
+    <owl:Thing rdf:about="&mo;Saudi_Arabia">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Sci-Fi -->
+
+    <owl:Thing rdf:about="&mo;Sci-Fi">
+        <rdf:type rdf:resource="&mo;SciFi_and_Fantasy"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Senegal -->
+
+    <owl:Thing rdf:about="&mo;Senegal">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Serbia -->
+
+    <owl:Thing rdf:about="&mo;Serbia">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Serbia_and_Montenegro -->
+
+    <owl:Thing rdf:about="&mo;Serbia_and_Montenegro">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Seychelles -->
+
+    <owl:Thing rdf:about="&mo;Seychelles">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Short -->
+
+    <owl:Thing rdf:about="&mo;Short">
+        <rdf:type rdf:resource="&mo;Genre"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Sierra_Leone -->
+
+    <owl:Thing rdf:about="&mo;Sierra_Leone">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Singapore -->
+
+    <owl:Thing rdf:about="&mo;Singapore">
+        <rdf:type rdf:resource="&mo;Southeastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Slovakia -->
+
+    <owl:Thing rdf:about="&mo;Slovakia">
+        <rdf:type rdf:resource="&mo;Eastern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Slovenia -->
+
+    <owl:Thing rdf:about="&mo;Slovenia">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Solomon_Island -->
+
+    <owl:Thing rdf:about="&mo;Solomon_Island">
+        <rdf:type rdf:resource="&mo;Melanesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Somalia -->
+
+    <owl:Thing rdf:about="&mo;Somalia">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#South_Africa -->
+
+    <owl:Thing rdf:about="&mo;South_Africa">
+        <rdf:type rdf:resource="&mo;Southern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#South_Korea -->
+
+    <owl:Thing rdf:about="&mo;South_Korea">
+        <rdf:type rdf:resource="&mo;Eastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Spain -->
+
+    <owl:Thing rdf:about="&mo;Spain">
+        <rdf:type rdf:resource="&mo;Southern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Sport -->
+
+    <owl:Thing rdf:about="&mo;Sport">
+        <rdf:type rdf:resource="&mo;Entertaining_Information"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Sri_Lanka -->
+
+    <owl:Thing rdf:about="&mo;Sri_Lanka">
+        <rdf:type rdf:resource="&mo;Southern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Sudan -->
+
+    <owl:Thing rdf:about="&mo;Sudan">
+        <rdf:type rdf:resource="&mo;Northern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Suriname -->
+
+    <owl:Thing rdf:about="&mo;Suriname">
+        <rdf:type rdf:resource="&mo;South_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Svalbard_and_Jan_Mayen_Islands -->
+
+    <owl:Thing rdf:about="&mo;Svalbard_and_Jan_Mayen_Islands">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Swaziland -->
+
+    <owl:Thing rdf:about="&mo;Swaziland">
+        <rdf:type rdf:resource="&mo;Southern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Sweden -->
+
+    <owl:Thing rdf:about="&mo;Sweden">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Switzerland -->
+
+    <owl:Thing rdf:about="&mo;Switzerland">
+        <rdf:type rdf:resource="&mo;Western_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Syria -->
+
+    <owl:Thing rdf:about="&mo;Syria">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Taiwan -->
+
+    <owl:Thing rdf:about="&mo;Taiwan">
+        <rdf:type rdf:resource="&mo;Eastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Tajikistan -->
+
+    <owl:Thing rdf:about="&mo;Tajikistan">
+        <rdf:type rdf:resource="&mo;Central_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Talk-Show -->
+
+    <owl:Thing rdf:about="&mo;Talk-Show">
+        <rdf:type rdf:resource="&mo;Info-TV"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Tanzania -->
+
+    <owl:Thing rdf:about="&mo;Tanzania">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Thailand -->
+
+    <owl:Thing rdf:about="&mo;Thailand">
+        <rdf:type rdf:resource="&mo;Southeastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Thriller -->
+
+    <owl:Thing rdf:about="&mo;Thriller">
+        <rdf:type rdf:resource="&mo;Sensible_Thrilling"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Timor-Leste -->
+
+    <owl:Thing rdf:about="&mo;Timor-Leste">
+        <rdf:type rdf:resource="&mo;Southeastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Togo -->
+
+    <owl:Thing rdf:about="&mo;Togo">
+        <rdf:type rdf:resource="&mo;Western_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Tokelau -->
+
+    <owl:Thing rdf:about="&mo;Tokelau">
+        <rdf:type rdf:resource="&mo;Polynesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Tonga -->
+
+    <owl:Thing rdf:about="&mo;Tonga">
+        <rdf:type rdf:resource="&mo;Polynesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Trinidad_and_Tobago -->
+
+    <owl:Thing rdf:about="&mo;Trinidad_and_Tobago">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Tunisia -->
+
+    <owl:Thing rdf:about="&mo;Tunisia">
+        <rdf:type rdf:resource="&mo;Northern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Turkey -->
+
+    <owl:Thing rdf:about="&mo;Turkey">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Turkmenistan -->
+
+    <owl:Thing rdf:about="&mo;Turkmenistan">
+        <rdf:type rdf:resource="&mo;Central_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Turks_and_Caicos_Islands -->
+
+    <owl:Thing rdf:about="&mo;Turks_and_Caicos_Islands">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Tuvalu -->
+
+    <owl:Thing rdf:about="&mo;Tuvalu">
+        <rdf:type rdf:resource="&mo;Polynesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#USA -->
+
+    <owl:Thing rdf:about="&mo;USA">
+        <rdf:type rdf:resource="&mo;Northern_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#USA_Passed -->
+
+    <owl:Thing rdf:about="&mo;USA_Passed">
+        <rdf:type rdf:resource="&mo;Certification"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Uganda -->
+
+    <owl:Thing rdf:about="&mo;Uganda">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Ukraine -->
+
+    <owl:Thing rdf:about="&mo;Ukraine">
+        <rdf:type rdf:resource="&mo;Eastern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#United_Arab_Emirates -->
+
+    <owl:Thing rdf:about="&mo;United_Arab_Emirates">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#United_Kingdom -->
+
+    <owl:Thing rdf:about="&mo;United_Kingdom">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#United_States_Virgin_Islands -->
+
+    <owl:Thing rdf:about="&mo;United_States_Virgin_Islands">
+        <rdf:type rdf:resource="&mo;Caribbean"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Uruguay -->
+
+    <owl:Thing rdf:about="&mo;Uruguay">
+        <rdf:type rdf:resource="&mo;South_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Uzbekistan -->
+
+    <owl:Thing rdf:about="&mo;Uzbekistan">
+        <rdf:type rdf:resource="&mo;Central_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Vanuatu -->
+
+    <owl:Thing rdf:about="&mo;Vanuatu">
+        <rdf:type rdf:resource="&mo;Melanesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Venezuela -->
+
+    <owl:Thing rdf:about="&mo;Venezuela">
+        <rdf:type rdf:resource="&mo;South_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Vietnam -->
+
+    <owl:Thing rdf:about="&mo;Vietnam">
+        <rdf:type rdf:resource="&mo;Southeastern_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Wallis_and_Futuna_Islands -->
+
+    <owl:Thing rdf:about="&mo;Wallis_and_Futuna_Islands">
+        <rdf:type rdf:resource="&mo;Polynesia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#War -->
+
+    <owl:Thing rdf:about="&mo;War">
+        <rdf:type rdf:resource="&mo;Brute_Action"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Western -->
+
+    <owl:Thing rdf:about="&mo;Western">
+        <rdf:type rdf:resource="&mo;Old_Action"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Western_Sahara -->
+
+    <owl:Thing rdf:about="&mo;Western_Sahara">
+        <rdf:type rdf:resource="&mo;Northern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Yemen -->
+
+    <owl:Thing rdf:about="&mo;Yemen">
+        <rdf:type rdf:resource="&mo;Western_Asia"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Zaire -->
+
+    <owl:Thing rdf:about="&mo;Zaire">
+        <rdf:type rdf:resource="&mo;Middle_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Zambia -->
+
+    <owl:Thing rdf:about="&mo;Zambia">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Zimbabwe -->
+
+    <owl:Thing rdf:about="&mo;Zimbabwe">
+        <rdf:type rdf:resource="&mo;Eastern_Africa"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#Australia -->
+
+    <owl:Thing rdf:about="&www;movieontology.owl#Australia">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#Canada -->
+
+    <owl:Thing rdf:about="&www;movieontology.owl#Canada">
+        <rdf:type rdf:resource="&mo;Northern_America"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#China -->
+
+    <owl:Thing rdf:about="&www;movieontology.owl#China">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#Denmark -->
+
+    <owl:Thing rdf:about="&www;movieontology.owl#Denmark">
+        <rdf:type rdf:resource="&mo;Northern_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#France -->
+
+    <owl:Thing rdf:about="&www;movieontology.owl#France">
+        <rdf:type rdf:resource="&mo;Western_Europe"/>
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#Great_Britain -->
+
+    <owl:Thing rdf:about="&www;movieontology.owl#Great_Britain">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#India -->
+
+    <owl:Thing rdf:about="&www;movieontology.owl#India">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#Italy -->
+
+    <owl:Thing rdf:about="&www;movieontology.owl#Italy">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#Mexico -->
+
+    <owl:Thing rdf:about="&www;movieontology.owl#Mexico">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#United_States -->
+
+    <owl:Thing rdf:about="&www;movieontology.owl#United_States">
+        <rdf:type rdf:resource="&owl;NamedIndividual"/>
+    </owl:Thing>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Eastern_Europe"/>
+            <rdf:Description rdf:about="&mo;Northern_Europe"/>
+            <rdf:Description rdf:about="&mo;Southern_Europe"/>
+            <rdf:Description rdf:about="&mo;Western_Europe"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&dbpedia;Language"/>
+            <rdf:Description rdf:about="&mo;Colorinfo"/>
+            <rdf:Description rdf:about="&mo;Sound_Mix"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Eastern_Africa"/>
+            <rdf:Description rdf:about="&mo;Middle_Africa"/>
+            <rdf:Description rdf:about="&mo;Northern_Africa"/>
+            <rdf:Description rdf:about="&mo;Southern_Africa"/>
+            <rdf:Description rdf:about="&mo;Western_Africa"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Caribbean"/>
+            <rdf:Description rdf:about="&mo;LatinAmerica"/>
+            <rdf:Description rdf:about="&mo;Northern_America"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Amazon.com_retailer"/>
+            <rdf:Description rdf:about="&mo;Netflix.com_retailer"/>
+        </owl:distinctMembers>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Central_Asia"/>
+            <rdf:Description rdf:about="&mo;Eastern_Asia"/>
+            <rdf:Description rdf:about="&mo;Southeastern_Asia"/>
+            <rdf:Description rdf:about="&mo;Southern_Asia"/>
+            <rdf:Description rdf:about="&mo;Western_Asia"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Blockbuster.com_retailer"/>
+            <rdf:Description rdf:about="&mo;RottenTomatoes.com_retailer"/>
+        </owl:distinctMembers>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Blockbuster.com_retailer"/>
+            <rdf:Description rdf:about="&mo;Netflix.com_retailer"/>
+        </owl:distinctMembers>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Amazon.com_retailer"/>
+            <rdf:Description rdf:about="&mo;Blockbuster.com_retailer"/>
+        </owl:distinctMembers>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Amazon.com_retailer"/>
+            <rdf:Description rdf:about="&mo;RottenTomatoes.com_retailer"/>
+        </owl:distinctMembers>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Australia_and_New_Zealand"/>
+            <rdf:Description rdf:about="&mo;Melanesia"/>
+            <rdf:Description rdf:about="&mo;Micronesia"/>
+            <rdf:Description rdf:about="&mo;Polynesia"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Netflix.com_retailer"/>
+            <rdf:Description rdf:about="&mo;RottenTomatoes.com_retailer"/>
+        </owl:distinctMembers>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Africa"/>
+            <rdf:Description rdf:about="&mo;America"/>
+            <rdf:Description rdf:about="&mo;Asia"/>
+            <rdf:Description rdf:about="&mo;Europe"/>
+            <rdf:Description rdf:about="&mo;Oceania"/>
+        </owl:members>
+    </rdf:Description>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
+

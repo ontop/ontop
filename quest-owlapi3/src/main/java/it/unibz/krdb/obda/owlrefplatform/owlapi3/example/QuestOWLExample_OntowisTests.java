@@ -287,6 +287,7 @@ public class QuestOWLExample_OntowisTests {
 			System.exit(0);
 			break;
 		}
+		
 		case "--MYSQL":{
 			obdaFile = ParamConst.MYSQL;
 			break;

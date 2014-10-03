@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 
@@ -50,7 +51,6 @@ import java.util.Vector;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.datatypes.XMLDatatypeUtil;
-import org.openrdf.model.impl.CalendarLiteralImpl;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
@@ -113,14 +113,13 @@ import org.slf4j.LoggerFactory;
 public class SparqlAlgebraToDatalogTranslator {
 
 	
-	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
-	private TermComparator comparator = new TermComparator();
+	private final TermComparator comparator = new TermComparator();
 
 	private UriTemplateMatcher uriTemplateMatcher;
 
-	private Map<String, Integer> uriRef = null;
-	private boolean isSI = false;
+	private SemanticIndexURIMap uriRef = null;  // used only in the Semantic Index mode
 	
 	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher) {
 		uriTemplateMatcher = templateMatcher;
@@ -633,6 +632,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			Variable var = ofac.getVariable(v.getName());
 			int direction = 0;
 			if (c.isAscending()) direction = 1;
+            else direction = 2;
 			pr.getQueryModifiers().addOrderCondition(var, direction);
 		}
 		te = order.getArg(); // narrow down the query
@@ -754,7 +754,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		if (p instanceof URIImpl && p.toString().equals(RDF.TYPE.stringValue())) {
 			// Subject node
 			
-			terms.add(getOntopTerm(subj, s, isSI));
+			terms.add(getOntopTerm(subj, s));
 			
 
 			// Object node
@@ -805,6 +805,15 @@ public class SparqlAlgebraToDatalogTranslator {
 			} else if (predicateUri.equals(
 					OBDAVocabulary.XSD_STRING_URI)) {
 				predicate = OBDAVocabulary.XSD_STRING;
+			} else if (predicateUri.equals(
+					OBDAVocabulary.XSD_DATE_URI)) {
+				predicate = OBDAVocabulary.XSD_DATE;
+			}  else if (predicateUri.equals(
+					OBDAVocabulary.XSD_TIME_URI)) {
+				predicate = OBDAVocabulary.XSD_TIME;
+			} else if (predicateUri.equals(
+					OBDAVocabulary.XSD_YEAR_URI)) {
+				predicate = OBDAVocabulary.XSD_YEAR;
 			} else {
 
 				predicate = ofac.getPredicate(predicateUri, 1,
@@ -817,10 +826,9 @@ public class SparqlAlgebraToDatalogTranslator {
 			 * The predicate is NOT rdf:type
 			 */
 
-			
-			terms.add(getOntopTerm(subj, s, isSI));
+			terms.add(getOntopTerm(subj, s));
 
-			terms.add(getOntopTerm(obj,o,isSI));
+			terms.add(getOntopTerm(obj,o));
 			
 			// Construct the predicate
 
@@ -850,7 +858,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		pr.appendRule(newrule);
 	}
 	
-	private Term getOntopTerm(Var subj, Value s, boolean isSI) {
+	private Term getOntopTerm(Var subj, Value s) {
 		Term result = null;
 		if (s == null) {
 			result = ofac.getVariable(subj.getName());
@@ -897,13 +905,14 @@ public class SparqlAlgebraToDatalogTranslator {
 			subject_URI = decodeURIEscapeCodes(subject_URI);
 			
 
-			if (isSI) {
-				int id = indexOfRef(s.stringValue());
-				Function functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
-				result = functionURI;
+			if (uriRef != null) {
+				/* if in the Semantic Index mode */
+				int id = uriRef.getId(s.stringValue());
+				
+				result = ofac.getFunction(ofac.getUriTemplatePredicate(1), 
+							ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
 			} else {
-				Function functionURI = uriTemplateMatcher.generateURIFunction(subject_URI);
-				result = functionURI;
+				result = uriTemplateMatcher.generateURIFunction(subject_URI);
 			}
 		}
 		
@@ -996,15 +1005,8 @@ public class SparqlAlgebraToDatalogTranslator {
 		return strBuilder.toString();
 
 	}
-
-	private int indexOfRef(String uri) {
-		Integer index =  this.uriRef.get(uri);
-		if (index != null)
-			return index;
-		return -2;
-	}
 	
-	private class TermComparator implements Comparator<Term> {
+	private static class TermComparator implements Comparator<Term> {
 
 		@Override
 		public int compare(Term arg0, Term arg1) {
@@ -1053,10 +1055,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		return result;
 	}
 	
-	private Variable getFreshVariable(int[] count) {
-		count[0] += 1;
-		return ofac.getVariable("VAR" + count[0]);
-	}
+	//private Variable getFreshVariable(int[] count) {
+	//	count[0] += 1;
+	//	return ofac.getVariable("VAR" + count[0]);
+	//}
 
 	public ValueConstant getConstant(LiteralImpl literal) {
 		URI type = literal.getDatatype();
@@ -1095,6 +1097,12 @@ public class SparqlAlgebraToDatalogTranslator {
 			return ofac.getDataTypePredicateDateTime();
 		case BOOLEAN:
 			return ofac.getDataTypePredicateBoolean();
+		case DATE:
+			return ofac.getDataTypePredicateDate();
+		case TIME:
+			return ofac.getDataTypePredicateTime();
+		case YEAR:
+			return ofac.getDataTypePredicateYear();
 		default:
 			throw new RuntimeException("Unknown data type!");
 		}
@@ -1142,6 +1150,15 @@ public class SparqlAlgebraToDatalogTranslator {
 			} else if (dataTypeURI
 					.equalsIgnoreCase(OBDAVocabulary.XSD_BOOLEAN_URI)) {
 				dataType = COL_TYPE.BOOLEAN;
+			} else if (dataTypeURI
+					.equalsIgnoreCase(OBDAVocabulary.XSD_DATE_URI)) {
+				dataType = COL_TYPE.DATE;
+			} else if (dataTypeURI
+					.equalsIgnoreCase(OBDAVocabulary.XSD_TIME_URI)) {
+				dataType = COL_TYPE.TIME;
+			} else if (dataTypeURI
+					.equalsIgnoreCase(OBDAVocabulary.XSD_YEAR_URI)) {
+				dataType = COL_TYPE.YEAR;
 			} else {
 				throw new RuntimeException("Unsupported datatype: "
 						+ dataTypeURI.toString());
@@ -1187,12 +1204,12 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 	}
 	
-	private Function getVariableTermIntoBoolFunction(Var expr) {
-		return ofac.getFunction(OBDAVocabulary.IS_TRUE, getVariableTerm(expr));
-	}
+	//private Function getVariableTermIntoBoolFunction(Var expr) {
+	//	return ofac.getFunction(OBDAVocabulary.IS_TRUE, getVariableTerm(expr));
+	//}
 	
 	private Term getVariableTerm(Var expr) {
-		return getOntopTerm(expr, expr.getValue(), isSI);
+		return getOntopTerm(expr, expr.getValue());
 		
 	}
 
@@ -1385,15 +1402,7 @@ public class SparqlAlgebraToDatalogTranslator {
 //		}
 //	}
 
-//	public boolean isBoolean(Query q) {
-//		return q.isAskType();
-//	}
-
-	public void setUriRef(Map<String,Integer> uriR) {
-		this.uriRef = uriR;
-	}
-	
-	public void setSI() {
-		isSI = true;
+	public void setSemanticIndexUriRef(SemanticIndexURIMap uriRef) {
+		this.uriRef = uriRef;
 	}
 }

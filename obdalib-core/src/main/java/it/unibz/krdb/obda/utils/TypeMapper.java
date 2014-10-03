@@ -56,8 +56,8 @@ public class TypeMapper {
 		typeMapper.put(Types.FLOAT, dfac.getDataTypePredicateDouble());
 		typeMapper.put(Types.DOUBLE, dfac.getDataTypePredicateDouble());
 		typeMapper.put(Types.REAL, dfac.getDataTypePredicateDouble());
-//		typeMapper.put(Types.DATE, dfac.getDataTypePredicateDate());
-//		typeMapper.put(Types.TIME, dfac.getDataTypePredicateTime());
+		typeMapper.put(Types.DATE, dfac.getDataTypePredicateDate());
+		typeMapper.put(Types.TIME, dfac.getDataTypePredicateTime());
 		typeMapper.put(Types.TIMESTAMP, dfac.getDataTypePredicateDateTime());
 		typeMapper.put(Types.BOOLEAN, dfac.getDataTypePredicateBoolean());
 		typeMapper.put(Types.BIT, dfac.getDataTypePredicateBoolean());

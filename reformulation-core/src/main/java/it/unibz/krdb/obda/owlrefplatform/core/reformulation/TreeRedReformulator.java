@@ -25,7 +25,6 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -38,6 +37,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SemanticQueryOptimizer;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
@@ -51,12 +52,7 @@ import org.slf4j.LoggerFactory;
 
 public class TreeRedReformulator implements QueryRewriter {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -5839664343260233946L;
 	private static final QueryAnonymizer anonymizer = new QueryAnonymizer();
-	// private static final AtomUnifier unifier = new AtomUnifier();
 
 	private static final Logger log = LoggerFactory.getLogger(TreeRedReformulator.class);
 
@@ -64,7 +60,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	private static final SemanticQueryOptimizer sqoOptimizer = null;
 
-	private static final PositiveInclusionApplicator piApplicator = new PositiveInclusionApplicator(sqoOptimizer);;
+	private static final PositiveInclusionApplicator piApplicator = new PositiveInclusionApplicator(sqoOptimizer);
 
 	/***
 	 * The TBox used for reformulating.
@@ -83,8 +79,7 @@ public class TreeRedReformulator implements QueryRewriter {
 
 	}
 
-	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException {
-		//
+	public DatalogProgram rewrite(DatalogProgram prog) throws OBDAException {
 
 		log.debug("Query reformulation started...");
 
@@ -93,12 +88,6 @@ public class TreeRedReformulator implements QueryRewriter {
 		// Thread.currentThread ().yield ();
 
 		double starttime = System.currentTimeMillis();
-
-		if (!(input instanceof DatalogProgram)) {
-			throw new OBDAException("Rewriting exception: The input must be a DatalogProgram instance");
-		}
-
-		DatalogProgram prog = (DatalogProgram) input;
 
 		// log.debug("Starting query rewrting. Received query: \n{}", prog);
 
@@ -307,7 +296,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		double endtime = System.currentTimeMillis();
 		double milliseconds = (endtime - starttime) / 1000;
 
-		QueryUtils.copyQueryModifiers(input, resultprogram);
+		QueryUtils.copyQueryModifiers(prog, resultprogram);
 
 		// if (showreformulation)
 		// log.debug("Computed reformulation: \n{}", resultprogram);
@@ -390,31 +379,21 @@ public class TreeRedReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void initialize() {
-		// nothing to do here
-	}
-
-	@Override
-	public void setTBox(Ontology ontology) {
-		this.ontology = ontology.clone();
+	public void setTBox(TBoxReasoner reasoner, Ontology sigma) {
+		this.ontology = TBoxReasonerToOntology.getOntology(reasoner);
 
 		/*
 		 * Our strategy requires saturation to minimize the number of cycles
 		 * that will be necessary to compute reformulation.
 		 */
 		this.ontology.saturate();
-
-	}
-
-	@Override
-	public void setCBox(Ontology sigma) {
-
-		this.sigma = (Ontology) sigma;
+		
+		
+		this.sigma = sigma;
 		if (this.sigma != null) {
 			log.debug("Using {} dependencies.", sigma.getAssertions().size());
 			this.sigma.saturate();
 		}
 
 	}
-
 }

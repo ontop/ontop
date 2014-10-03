@@ -3,7 +3,7 @@
 	<groupId>it.unibz.inf.ontop</groupId>
 	<artifactId>ontop</artifactId>
 	<packaging>pom</packaging>
-	<version>1.12.1-SNAPSHOT</version>
+	<version>1.13.2-SNAPSHOT</version>
 	<name>ontop</name>
 	<url>http://ontop.inf.unibz.it/</url>
 
@@ -82,8 +82,9 @@
 		<module>quest-rdb2rdf-compliance</module>
 
 		<module>quest-test</module>
-		
-	</modules>
+        <module>ontop-cli</module>
+
+    </modules>
 
 	<profiles>
 		<profile>
@@ -166,6 +167,11 @@
 					<artifactId>maven-bundle-plugin</artifactId>
 					<version>2.4.0</version>
 				</plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>1.5</version>
+                </plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -314,7 +320,7 @@
 			<dependency>
     			<groupId>com.github.jsqlparser</groupId>
     			<artifactId>jsqlparser</artifactId>
-    			<version>0.9.1-SNAPSHOT</version>
+    			<version>0.9.1</version>
 			</dependency>
 			<dependency>
     			<groupId>com.google.guava</groupId>
@@ -483,7 +489,7 @@
 			<dependency>
 				<groupId>com.ibm</groupId>
 				<artifactId>db2jcc4.jar</artifactId>
-				<version>10.1</version>
+				<version>10.1.4</version>
 			</dependency>
 			<dependency>
 				<groupId>com.h2database</groupId>

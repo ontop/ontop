@@ -115,6 +115,7 @@ public class R2RMLParser {
 
 	/**
 	 * Get classes
+     * They can be retrieved only once, after retrieving everything is cleared.
 	 * @return
 	 */
 	public List<Predicate> getClassPredicates() {
@@ -148,6 +149,7 @@ public class R2RMLParser {
 	
 	/**
 	 * Get subject
+     *
 	 * @param tm
 	 * @param joinCond
 	 * @return
@@ -157,6 +159,7 @@ public class R2RMLParser {
 			throws Exception {
 		Term subjectAtom = null;
 		String subj = "";
+        classPredicates.clear();
 
 		// SUBJECT
 		SubjectMap sMap = tm.getSubjectMap();
@@ -329,6 +332,7 @@ public class R2RMLParser {
 		}
 
 		//we check if the object map is a column (can be only literal)
+        //if it has a datatype or language property we check it later
 		String col = om.getColumn();
 		if (col != null) {
 			col=trim(col);
@@ -336,16 +340,9 @@ public class R2RMLParser {
 			if (!joinCond.isEmpty()){
 				col = joinCond + col;
 			}
-			
-			if (lan != null || datatype != null) 
-			{
+
 				objectAtom = fac.getVariable(col);
-			}
-			else
-			{ //we check later if it has a language tag or if it is a datatype 
-				objectAtom = fac.getFunction(OBDAVocabulary.RDFS_LITERAL, fac.getVariable(col));
-				
-			}
+
 		}
 
 		

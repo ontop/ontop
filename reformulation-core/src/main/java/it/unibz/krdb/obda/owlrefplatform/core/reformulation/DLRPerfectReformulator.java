@@ -33,6 +33,8 @@ import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.Iterator;
@@ -48,7 +50,6 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -6641916058733198535L;
 	private final static QueryAnonymizer anonymizer = new QueryAnonymizer();
 	private final static Unifier unifier = new Unifier();
 
@@ -57,7 +58,7 @@ public class DLRPerfectReformulator implements QueryRewriter {
 
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	Logger log = LoggerFactory.getLogger(DLRPerfectReformulator.class);
+	private final static Logger log = LoggerFactory.getLogger(DLRPerfectReformulator.class);
 
 	public DLRPerfectReformulator() {
 
@@ -145,13 +146,13 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	// reformulates according to PerfectRef
 	// #############################
 
-	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException {
+	public DatalogProgram rewrite(DatalogProgram prog) throws OBDAException {
 
-		if (!(input instanceof DatalogProgram)) {
-			throw new OBDAException("Rewriting exception: The input must be a DatalogProgram instance");
-		}
+//		if (!(input instanceof DatalogProgram)) {
+//			throw new OBDAException("Rewriting exception: The input must be a DatalogProgram instance");
+//		}
 
-		DatalogProgram prog = (DatalogProgram) input;
+//		DatalogProgram prog = (DatalogProgram) input;
 
 		log.debug("Starting query rewrting. Received query: \n{}", prog);
 
@@ -173,20 +174,11 @@ public class DLRPerfectReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(Ontology ontology) {
+	public void setTBox(TBoxReasoner reasoner, Ontology sigma) {
 		assertions.clear();
+		Ontology ontology = TBoxReasonerToOntology.getOntology(reasoner);
 		this.assertions.addAll(ontology.getAssertions());
-
+		
+		// This reformulator is not able to handle ABox dependencies
 	}
-
-	@Override
-	public void setCBox(Ontology sigma) {
-		// This reformulator is not able to handle ABox dependecies
-
-	}
-
-	@Override
-	public void initialize() {
-	}
-
 }

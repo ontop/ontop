@@ -49,14 +49,20 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 
 public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	
-	private SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag;
-	private Map<T, Equivalences<T>> equivalencesMap;
+	private final SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag;
+	private final Map<T, Equivalences<T>> equivalencesMap;
+	
+	private final Map<Equivalences<T>, Set<Equivalences<T>>> cacheSub;
+	private final Map<T, Set<T>> cacheSubRep;
 
 	public EquivalencesDAGImpl(DefaultDirectedGraph<T,DefaultEdge> graph) {
 		
 		this.equivalencesMap = new HashMap<T, Equivalences<T>>();
 		SimpleDirectedGraph<Equivalences<T>,DefaultEdge> dag0 = factorize(graph, this.equivalencesMap);
 		this.dag = removeRedundantEdges(dag0);
+		
+		this.cacheSub = new HashMap<Equivalences<T>, Set<Equivalences<T>>>();
+		this.cacheSubRep = new HashMap<T, Set<T>>();
 	}
 	
 	public Set<Equivalences<T>> vertexSet() {
@@ -91,17 +97,50 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	@Override
 	public Set<Equivalences<T>> getSub(Equivalences<T> v) {
 
-		LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+		Set<Equivalences<T>> result = cacheSub.get(v);
+		if (result == null) {
+			result = new LinkedHashSet<Equivalences<T>>();
 
-		BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator = 
-					new BreadthFirstIterator<Equivalences<T>, DefaultEdge>(
-							new EdgeReversedGraph<Equivalences<T>, DefaultEdge>(dag), v);
+			BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator = 
+						new BreadthFirstIterator<Equivalences<T>, DefaultEdge>(
+								new EdgeReversedGraph<Equivalences<T>, DefaultEdge>(dag), v);
 
-		while (iterator.hasNext()) {
-			Equivalences<T> child = iterator.next();
-			result.add(child);
+			while (iterator.hasNext()) {
+				Equivalences<T> child = iterator.next();
+				result.add(child);
+			}
+			result = Collections.unmodifiableSet(result);
+			cacheSub.put(v, result);
 		}
-		return Collections.unmodifiableSet(result);
+		return result; 
+	}
+
+	/** 
+	 * 
+	 */
+	@Override
+	public Set<T> getSubRepresentatives(T v) {
+		Equivalences<T> eq = equivalencesMap.get(v);
+		
+		if (eq == null)
+			return Collections.singleton(v);
+		
+		Set<T> result = cacheSubRep.get(eq.getRepresentative());
+		if (result == null) {
+			result = new LinkedHashSet<T>();
+
+			BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator = 
+						new BreadthFirstIterator<Equivalences<T>, DefaultEdge>(
+								new EdgeReversedGraph<Equivalences<T>, DefaultEdge>(dag), eq);
+
+			while (iterator.hasNext()) {
+				Equivalences<T> child = iterator.next();
+				result.add(child.getRepresentative());
+			}
+			result = Collections.unmodifiableSet(result);
+			cacheSubRep.put(eq.getRepresentative(), result);
+		}
+		return result; 
 	}
 	
 	/** 

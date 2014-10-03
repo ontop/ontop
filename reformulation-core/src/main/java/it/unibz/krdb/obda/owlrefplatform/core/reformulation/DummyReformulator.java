@@ -20,9 +20,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 /***
  * A query reformulator that does nothing on the given query. 
@@ -33,32 +34,13 @@ import it.unibz.krdb.obda.ontology.Ontology;
 public class DummyReformulator implements QueryRewriter {
 
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 8989177354924893482L;
-
 	@Override
-	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException {
+	public DatalogProgram rewrite(DatalogProgram input) throws OBDAException {
 		return input;
 	}
 
 	@Override
-	public void setTBox(Ontology ontology) {
-		// NO-OP
-		
+	public void setTBox(TBoxReasoner ontology, Ontology sigma) {
+		// NO-OP		
 	}
-
-	@Override
-	public void setCBox(Ontology sigma) {
-		// NO-OP
-		
-	}
-
-	@Override
-	public void initialize() {
-		// NO-OP
-		
-	}
-
 }

@@ -22,29 +22,27 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 
 import java.util.Iterator;
-import java.util.Map;
 
 public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 
-	private Iterator<Assertion> originalIterator;
-	private Map<Predicate, Description> equivalenceMap;
+	private final Iterator<Assertion> originalIterator;
+	private final EquivalenceMap equivalenceMap;
+
+	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();	
 	
-	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-	
-	public EquivalentTriplePredicateIterator(Iterator<Assertion> iterator, Map<Predicate, Description> equivalences) {
+	public EquivalentTriplePredicateIterator(Iterator<Assertion> iterator, EquivalenceMap equivalences) {
 		originalIterator = iterator;
 		equivalenceMap = equivalences;
 	}
@@ -57,46 +55,53 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 	@Override
 	public Assertion next() {
 		Assertion assertion = originalIterator.next();
+		return getNormal(assertion);
+	}
+
+	@Override
+	public void remove() {
+		originalIterator.remove();
+	}
+	
+	// used in EquivalentTriplePredicateIterator
+	
+	private Assertion getNormal(Assertion assertion) {
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
 			Predicate concept = ca.getConcept();
-			ObjectConstant object = ca.getObject();
+			OClass description = equivalenceMap.getClassRepresentative(concept);
 			
-			Description description = equivalenceMap.get(concept);
 			if (description != null) {
-				return ofac.createClassAssertion(((OClass) description).getPredicate(), object);
+				ObjectConstant object = ca.getObject();
+				return ofac.createClassAssertion(description.getPredicate(), object);
 			}			
-		} else if (assertion instanceof ObjectPropertyAssertion) {
+		} 
+		else if (assertion instanceof ObjectPropertyAssertion) {
 			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
 			Predicate role = opa.getRole();
-			ObjectConstant object1 = opa.getFirstObject();
-			ObjectConstant object2 = opa.getSecondObject();
+			Property property = equivalenceMap.getPropertyRepresentative(role);
 			
-			Description description = equivalenceMap.get(role);
-			if (description != null) {
-				Property property = (Property) description;
+			if (property != null) {
+				ObjectConstant object1 = opa.getFirstObject();
+				ObjectConstant object2 = opa.getSecondObject();
 				if (property.isInverse()) {
 					return ofac.createObjectPropertyAssertion(property.getPredicate(), object2, object1);
 				} else {
 					return ofac.createObjectPropertyAssertion(property.getPredicate(), object1, object2);
 				}
 			}
-		} else if (assertion instanceof DataPropertyAssertion) {
+		} 
+		else if (assertion instanceof DataPropertyAssertion) {
 			DataPropertyAssertion dpa = (DataPropertyAssertion) assertion;
 			Predicate attribute = dpa.getAttribute();
-			ObjectConstant object = dpa.getObject();
-			ValueConstant constant = dpa.getValue();
+			Property property = equivalenceMap.getPropertyRepresentative(attribute);
 			
-			Description description = equivalenceMap.get(attribute);
-			if (description != null) {
-				return ofac.createDataPropertyAssertion(((Property) description).getPredicate(), object, constant);
+			if (property != null) {
+				ObjectConstant object = dpa.getObject();
+				ValueConstant constant = dpa.getValue();
+				return ofac.createDataPropertyAssertion(property.getPredicate(), object, constant);
 			}
 		}
 		return assertion;
-	}
-
-	@Override
-	public void remove() {
-		originalIterator.remove();
 	}
 }

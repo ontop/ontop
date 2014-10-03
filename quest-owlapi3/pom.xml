@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.12.1-SNAPSHOT</version>
+		<version>1.13.2-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>ontop-quest-owlapi3</artifactId>
@@ -53,29 +53,27 @@
 			<artifactId>owlapi-apibinding</artifactId>
 		</dependency>
 		
-
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<type>jar</type>
+			<!--   <scope>test</scope> Davide> I commented this out -->
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<!--   <scope>test</scope> Davide> I commented this out -->
+		</dependency>
 		
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryparser-sparql</artifactId>
 		</dependency>
 
-        <!-- Comments out all the jdbc jars not in test scope before merging to develop -->
         <dependency>
-            <groupId>postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <type>jar</type>
-            <!--   <scope>test</scope> Davide> I commented this out -->
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <!--   <scope>test</scope> Davide> I commented this out -->
-        </dependency>
-        <dependency>
-            <groupId>com.ibm</groupId>
-            <artifactId>db2jcc4.jar</artifactId>
-        </dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+		</dependency>
 	</dependencies>
 	
 	<build>
@@ -91,7 +89,6 @@
 						<exclude>**/SNOMEDTestJGraphT.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
 						<exclude>**/DAGCreationFromOntologyTest.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
 						<exclude>**/RDBMSDirect*.java</exclude>
-						<exclude>**/OWLAPI2ABox*.java</exclude>
 						<exclude>**/SemanticIndexTestSuite.java</exclude>
 						<exclude>**/SNOMEDTest.java</exclude>
 					</testExcludes>

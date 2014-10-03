@@ -20,43 +20,15 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
-import it.unibz.krdb.obda.ontology.DataType;
-import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeDataTypeRestriction;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
-import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
-
+import it.unibz.krdb.obda.ontology.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /***
  * A class that allows you to perform different operations related to query
@@ -455,7 +427,11 @@ public class CQCUtilities {
 		if (!query.getHead().getFunctionSymbol().equals(canonicalhead.getFunctionSymbol()))
 			return false;
 
-		for (Function queryatom : query.getBody()) {
+        List<Function> body = query.getBody();
+        if(body.isEmpty()){
+            return false;
+        }
+        for (Function queryatom : query.getBody()) {
 			if (!canonicalpredicates.contains(((Function) queryatom).getFunctionSymbol())) {
 				return false;
 			}
@@ -553,6 +529,12 @@ public class CQCUtilities {
 		return false;
 	}
 
+    /**
+     * TODO!!!
+     *
+     * @param query
+     * @return
+     */
 	public boolean hasAnswer(CQIE query) {
 		query = query.clone();
 		QueryAnonymizer.deAnonymize(query);
@@ -798,10 +780,12 @@ public class CQCUtilities {
 			return false;
 		}
 
-		// HashSet<Function> body1 = new HashSet<Function>(cq1.getBody().size());
-		// body1.addAll(cq1.getBody());
+        List<Function> body = cq2.getBody();
+        if(body.isEmpty()){
+            return false;
+        }
 
-		for (Function atom : cq2.getBody()) {
+		for (Function atom : body) {
 			// if (!body1.contains(atom))
 			// return false;
 			if (!cq1.getBody().contains(atom))
@@ -885,7 +869,7 @@ public class CQCUtilities {
 	 * Removal of queries is done in two main double scans. The first scan goes
 	 * top-down/down-top, the second scan goes down-top/top-down
 	 * 
-	 * @param querieslist
+	 * @param queriesInput
 	 */
 	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, Ontology sigma, List<CQIE> rules, boolean sort) {
 

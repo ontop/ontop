@@ -96,8 +96,6 @@ public class QuestStatement implements OBDAStatement {
 
 	private QueryVocabularyValidator validator = null;
 
-	private OBDAModel unfoldingOBDAModel = null;
-
 	private boolean canceled = false;
 	
 	private boolean queryIsParsed = false;
@@ -164,7 +162,7 @@ public class QuestStatement implements OBDAStatement {
 		this.isconstructcache = questinstance.getIsConstructCache();
 		this.isdescribecache = questinstance.getIsDescribeCache();
 
-		this.repository = questinstance.dataRepository;
+		this.repository = questinstance.getSamanticIndexRepository();
 		this.conn = conn;
 		this.rewriter = questinstance.rewriter;
 		// this.unfoldingmechanism = questinstance.unfolder;
@@ -172,7 +170,6 @@ public class QuestStatement implements OBDAStatement {
 
 		this.sqlstatement = st;
 		this.validator = questinstance.vocabularyValidator;
-		this.unfoldingOBDAModel = questinstance.unfoldingOBDAModel;
 	}
 
 	private class QueryExecutionThread extends Thread {
@@ -228,6 +225,7 @@ public class QuestStatement implements OBDAStatement {
 		}
 
 		public void cancel() throws SQLException {
+			canceled = true;
 			if (!executingSQL) {
 				this.stop();
 			} else {
@@ -479,8 +477,7 @@ public class QuestStatement implements OBDAStatement {
 		DatalogProgram program = null;
 		try {
 			if (questInstance.isSemIdx()) {
-				translator.setSI();
-				translator.setUriRef(questInstance.getUriRefIds());
+				translator.setSemanticIndexUriRef(questInstance.getSamanticIndexRepository().getUriMap());
 			}
 			program = translator.translate(pq, signature);
 
@@ -512,7 +509,7 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Start the partial evaluation process...");
 
-		DatalogProgram unfolding = questInstance.unfolder.unfold((DatalogProgram) query, "ans1");
+		DatalogProgram unfolding = questInstance.unfold((DatalogProgram) query, "ans1");
 		log.debug("Partial evaluation: \n{}", unfolding);
 
 		removeNonAnswerQueries(unfolding);
@@ -651,7 +648,7 @@ public class QuestStatement implements OBDAStatement {
 		DatalogProgram initialProgram = translateAndPreProcess(query, signatureContainer);
 		
 		// Perform the query rewriting
-		DatalogProgram programAfterRewriting = getRewriting(initialProgram);
+		DatalogProgram programAfterRewriting = rewriter.rewrite(initialProgram);
 		
 		// Translate the output datalog program back to SPARQL string
 		// TODO Re-enable the prefix manager using Sesame prefix manager
@@ -668,19 +665,11 @@ public class QuestStatement implements OBDAStatement {
 
 		DatalogProgram program = translateAndPreProcess(query, signature);
 
-		OBDAQuery rewriting = rewriter.rewrite(program);
-		return DatalogProgramRenderer.encode((DatalogProgram) rewriting);
+		DatalogProgram rewriting = rewriter.rewrite(program);
+		return DatalogProgramRenderer.encode(rewriting);
 	}
 	
 	
-
-	/**
-	 * Returns the final rewriting of the given query
-	 */
-	public DatalogProgram getRewriting(DatalogProgram program) throws OBDAException {
-		OBDAQuery rewriting = rewriter.rewrite(program);
-		return (DatalogProgram) rewriting;
-	}
 
 	/***
 	 * Returns the SQL query for a given SPARQL query. In the process, the
@@ -729,16 +718,16 @@ public class QuestStatement implements OBDAStatement {
 			sesameQueryCache.put(strquery, query);
 			signaturecache.put(strquery, signatureContainer);
 
-			//DatalogProgram program_test = translateAndPreProcess(query, signatureContainer);
 			DatalogProgram program = translateAndPreProcess(query, signatureContainer);
 			try {
 				// log.debug("Input query:\n{}", strquery);
 
 				for (CQIE q : program.getRules()) {
+					// ROMAN: unfoldJoinTrees clones the query, so the statement below does not change anything
 					DatalogNormalizer.unfoldJoinTrees(q, false);
 				}
 
-				log.debug("Normalized program: \n{}", program);
+ 				log.debug("Normalized program: \n{}", program);
 
 				/*
 				 * Empty unfolding, constructing an empty result set
@@ -762,7 +751,7 @@ public class QuestStatement implements OBDAStatement {
 			log.debug("Start the rewriting process...");
 			try {
 				final long startTime = System.currentTimeMillis();
-				programAfterRewriting = getRewriting(program);
+				programAfterRewriting = rewriter.rewrite(program);
 				final long endTime = System.currentTimeMillis();
 				rewritingTime = endTime - startTime;
 
@@ -906,6 +895,7 @@ public class QuestStatement implements OBDAStatement {
 	
 	@Override
 	public void cancel() throws OBDAException {
+		canceled = true;
 		try {
 			QuestStatement.this.executionthread.cancel();
 		} catch (Exception e) {
@@ -913,6 +903,14 @@ public class QuestStatement implements OBDAStatement {
 		}
 	}
 
+	/**
+	 * Called to check whether the statement was cancelled on purpose
+	 * @return
+	 */
+	public boolean isCanceled(){
+		return canceled;
+	}
+	
 	@Override
 	public int executeUpdate(String query) throws OBDAException {
 		// TODO Auto-generated method stub
@@ -1011,7 +1009,7 @@ public class QuestStatement implements OBDAStatement {
 	 * 
 	 * @param data
 	 * @param recreateIndexes
-	 *            Indicates if indexes (if any) should be droped before
+	 *            Indicates if indexes (if any) should be dropped before
 	 *            inserting the tuples and recreated afterwards. Note, if no
 	 *            index existed before the insert no drop will be done and no
 	 *            new index will be created.

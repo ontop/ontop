@@ -204,7 +204,7 @@ public class JDBCUtility implements Serializable {
 		 * standard, e.g., to_date('2012-12-18 09:58:23.2','YYYY-MM-DD HH24:MI:SS.FF')
 		 */
 		if (driver == Driver.ORACLE) {
-			bf.insert(0, "to_date(");
+			bf.insert(0, "to_timestamp(");
 			bf.append(",'YYYY-MM-DD HH24:MI:SS')");
 		}
 		return bf.toString();
@@ -218,10 +218,10 @@ public class JDBCUtility implements Serializable {
 			case MYSQL:
 			case H2:
 			case PGSQL:
-			case DB2:
-			case TEIID:
+        	case TEIID:
 				sql = "TRUE";
 				break;
+            case DB2:
 			case ORACLE:
 				sql = "1";
 				break;
@@ -234,10 +234,10 @@ public class JDBCUtility implements Serializable {
 			case MYSQL:
 			case H2:
 			case PGSQL:
-			case DB2:
 			case TEIID:
 				sql = "FALSE";
 				break;
+            case DB2:
 			case ORACLE:
 				sql = "0";
 				break;

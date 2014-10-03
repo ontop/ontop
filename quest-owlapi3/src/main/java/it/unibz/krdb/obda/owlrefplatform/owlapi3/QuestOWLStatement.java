@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
@@ -32,6 +33,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
@@ -95,7 +97,7 @@ public class QuestOWLStatement {
 
 	private QuestStatement st;
 	private QuestOWLConnection conn;
-
+	
 	public QuestOWLStatement(QuestStatement st, QuestOWLConnection conn) {
 		this.conn = conn;
 		this.st = st;
@@ -105,6 +107,10 @@ public class QuestOWLStatement {
 		return st;
 	}
 
+	public boolean isCanceled(){
+		return st.isCanceled();
+	}
+	
 	public void cancel() throws OWLException {
 		try {
 			st.cancel();
@@ -126,6 +132,8 @@ public class QuestOWLStatement {
 		try {
 			TupleResultSet executedQuery = (TupleResultSet) st.execute(query);
 			QuestOWLResultSet questOWLResultSet = new QuestOWLResultSet(executedQuery, this);
+
+	 		
 			return questOWLResultSet;
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
@@ -179,7 +187,10 @@ public class QuestOWLStatement {
 
 			// Retrieves the ABox from the ontology file.
 
-			aBoxIter = new OWLAPI3ABoxIterator(set, new HashMap<Predicate, Description>());
+			aBoxIter = new OWLAPI3ABoxIterator(set);
+			// TODO: (ROMAN) -- check whether we need to use 
+			// EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
+
 			return st.insertData(aBoxIter, commitSize, batchsize);
 		} else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
 
@@ -325,7 +336,7 @@ public class QuestOWLStatement {
 
 	public void getMoreResults() throws OWLException {
 		try {
-			st.cancel();
+			st.getMoreResults();
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}

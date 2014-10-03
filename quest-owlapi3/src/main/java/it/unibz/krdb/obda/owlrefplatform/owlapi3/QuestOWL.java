@@ -40,6 +40,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.obda.utils.VersionInfo;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
@@ -386,9 +387,11 @@ public class QuestOWL extends OWLReasonerBase {
 				if (bObtainFromOntology) {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
-					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure,
-							questInstance.getEquivalenceMap());
-					int count = st.insertData(aBoxIter, 5000, 500);
+					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure);
+					EquivalentTriplePredicateIterator aBoxNormalIter = 
+							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getEquivalenceMap());
+					
+					int count = st.insertData(aBoxNormalIter, 5000, 500);
 					log.debug("Inserted {} triples from the ontology.", count);
 				}
 				if (bObtainFromMappings) {
@@ -481,6 +484,19 @@ public class QuestOWL extends OWLReasonerBase {
 		return owlconn;
 	}
 
+	/**
+	 * Replaces the owl connection with a new one
+	 * Called when the user cancels a query. Easier to get a new connection, than waiting for the cancel
+	 * @return The old connection: The caller must close this connection
+	 * @throws OBDAException
+	 */
+	public QuestOWLConnection replaceConnection() throws OBDAException {
+		QuestOWLConnection oldconn = this.owlconn;
+		conn = questInstance.getNonPoolConnection();
+		owlconn = new QuestOWLConnection(conn);
+		return oldconn;
+	}
+	
 	@Override
 	public String getReasonerName() {
 		return "Quest";

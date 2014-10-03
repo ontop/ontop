@@ -25,8 +25,6 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Description;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -46,49 +44,19 @@ import org.semanticweb.owlapi.model.OWLOntology;
  */
 public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 
-	Iterator<OWLAxiom> owlaxiomiterator = null;
-	Iterator<OWLOntology> ontologies = null;
+	private Iterator<OWLAxiom> owlaxiomiterator = null;
+	private Iterator<OWLOntology> ontologies = null;
+	private Assertion next = null;
 
-	OWLIndividualAxiom next = null;
-
-	OWLAPI3Translator translator = new OWLAPI3Translator();
-	private Map<Predicate, Description> equivalenceMap;
+	private final OWLAPI3Translator translator = new OWLAPI3Translator();
+	//private final Map<Predicate, Description> equivalenceMap;
 
 	public OWLAPI3ABoxIterator(Collection<OWLOntology> ontologies) {
-		this(ontologies, new HashMap<Predicate, Description>());
-	}
-
-	public OWLAPI3ABoxIterator(Collection<OWLOntology> ontologies, Map<Predicate, Description> equivalenceMap) {
-		this.equivalenceMap = equivalenceMap;
+		//this.equivalenceMap = equivalenceMap;
 		if (ontologies.size() > 0) {
 			this.ontologies = ontologies.iterator();
 			this.owlaxiomiterator = this.ontologies.next().getAxioms().iterator();
 		}
-	}
-
-	public OWLAPI3ABoxIterator(OWLOntology ontology) {
-		this(ontology, new HashMap<Predicate, Description>());
-	}
-
-	public OWLAPI3ABoxIterator(OWLOntology ontology, Map<Predicate, Description> equivalenceMap) {
-		this.ontologies = Collections.singleton(ontology).iterator();
-		this.owlaxiomiterator = ontologies.next().getAxioms().iterator();
-	}
-
-	public OWLAPI3ABoxIterator(Iterable<OWLAxiom> axioms) {
-		this(axioms, new HashMap<Predicate, Description>());
-	}
-
-	public OWLAPI3ABoxIterator(Iterable<OWLAxiom> axioms, Map<Predicate, Description> equivalenceMap) {
-		this.owlaxiomiterator = axioms.iterator();
-	}
-
-	public OWLAPI3ABoxIterator(Iterator<OWLAxiom> axioms) {
-		this(axioms, new HashMap<Predicate, Description>());
-	}
-
-	public OWLAPI3ABoxIterator(Iterator<OWLAxiom> axioms, Map<Predicate, Description> equivalenceMap) {
-		this.owlaxiomiterator = axioms;
 	}
 
 	@Override
@@ -120,13 +88,7 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 	public Assertion next() {
 		while (true) {
 			try {
-				OWLIndividualAxiom next = nextInCurrentIterator();
-
-				Assertion ass = translator.translate(next, equivalenceMap);
-				if (ass == null)
-					throw new NoSuchElementException();
-				else
-					return ass;
+				return nextInCurrentIterator();
 			} catch (NoSuchElementException e) {
 				switchToNextIterator();
 			}
@@ -155,61 +117,56 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 
 	/***
 	 * Gives the next individual axiom in the current iterator. If none is found
-	 * it will throw no such element execption.
+	 * it will throw no such element exception.
 	 * 
 	 * @return
 	 * @throws NoSuchElementException
 	 */
-	private OWLIndividualAxiom nextInCurrentIterator() throws NoSuchElementException {
+	private Assertion nextInCurrentIterator() throws NoSuchElementException {
 
 		if (owlaxiomiterator == null)
 			throw new NoSuchElementException();
 
-		OWLAxiom currentABoxAssertion = null;
-
 		if (next != null) {
-			OWLIndividualAxiom out = next;
+			Assertion out = next;
 			next = null;
 			return out;
 		}
 
-		currentABoxAssertion = owlaxiomiterator.next();
-
 		while (true) {
-			// System.out.println(currentABoxAssertion);
-			if ((currentABoxAssertion instanceof OWLIndividualAxiom)
-					&& (translator.translate((OWLIndividualAxiom) currentABoxAssertion) != null)) {
-				return (OWLIndividualAxiom) currentABoxAssertion;
+			OWLAxiom currentABoxAssertion = owlaxiomiterator.next();
+			
+			if (currentABoxAssertion instanceof OWLIndividualAxiom) {						
+				Assertion ax = translator.translate((OWLIndividualAxiom) currentABoxAssertion);
+				if (ax != null)
+					return ax;
 			}
-			currentABoxAssertion = owlaxiomiterator.next();
 		}
 	}
 
 	private boolean hasNextInCurrentIterator() {
 		if (owlaxiomiterator == null)
 			return false;
-
+/*
 		OWLAxiom currentABoxAssertion = null;
 
 		try {
 			currentABoxAssertion = owlaxiomiterator.next();
-
 		} catch (NoSuchElementException e) {
 			return false;
 		}
-
+*/
+		
 		while (true) {
-			if ((currentABoxAssertion instanceof OWLIndividualAxiom)
-					&& (translator.translate((OWLIndividualAxiom) currentABoxAssertion) != null)) {
-				next = (OWLIndividualAxiom) currentABoxAssertion;
-				return true;
+			OWLAxiom currentABoxAssertion = owlaxiomiterator.next();
+			
+			if (currentABoxAssertion instanceof OWLIndividualAxiom) {						
+				Assertion ax = translator.translate((OWLIndividualAxiom) currentABoxAssertion);
+				if (ax != null) {
+					next = ax;
+					return true;
+				}
 			}
-			try {
-				currentABoxAssertion = owlaxiomiterator.next();
-			} catch (NoSuchElementException e) {
-				return false;
-			}
-
 		}
 	}
 

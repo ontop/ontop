@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.PunningException;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -70,9 +71,9 @@ public interface RDBMSDataRepositoryManager extends Serializable {
 	//
 	// public void setDatabase(Connection conn);
 
-	public void setTBox(Ontology ontology);
+	public void setTBox(TBoxReasoner reasonerDag);
 
-	public void setVocabulary(Set<Predicate> vocabulary) throws PunningException;
+	// public void setVocabulary(Set<Predicate> vocabulary) throws PunningException;
 
 	public String getType();
 
@@ -142,7 +143,7 @@ public interface RDBMSDataRepositoryManager extends Serializable {
 	 */
 	public boolean isIndexed(Connection conn);
 
-	public Ontology getABoxDependencies();
+	//public Ontology getABoxDependencies();
 
 	/***
 	 * Attempts to load the metadata from the database. This will override the

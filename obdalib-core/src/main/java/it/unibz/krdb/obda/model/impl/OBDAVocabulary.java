@@ -144,7 +144,13 @@ public class OBDAVocabulary {
 	public static final String XSD_DATETIME_URI = "http://www.w3.org/2001/XMLSchema#dateTime";
 
 	public static final String XSD_BOOLEAN_URI = "http://www.w3.org/2001/XMLSchema#boolean";
+	
+	public static final String XSD_DATE_URI = "http://www.w3.org/2001/XMLSchema#date";
+	
+	public static final String XSD_TIME_URI = "http://www.w3.org/2001/XMLSchema#time";
 
+	public static final String XSD_YEAR_URI = "http://www.w3.org/2001/XMLSchema#gYear";
+	
 	/* Data type predicates */
 
 	public static final Predicate RDFS_LITERAL = new DataTypePredicateImpl(
@@ -171,9 +177,18 @@ public class OBDAVocabulary {
 	public static final Predicate XSD_BOOLEAN = new DataTypePredicateImpl(
 			XSD_BOOLEAN_URI, COL_TYPE.BOOLEAN);
 
+	public static final Predicate XSD_DATE = new DataTypePredicateImpl(
+			XSD_DATE_URI, COL_TYPE.DATE);
+
+	public static final Predicate XSD_TIME = new DataTypePredicateImpl(
+			XSD_TIME_URI, COL_TYPE.TIME);
+	
+	public static final Predicate XSD_YEAR = new DataTypePredicateImpl(
+			XSD_YEAR_URI, COL_TYPE.YEAR);
+
 	public static final Predicate[] QUEST_DATATYPE_PREDICATES = new Predicate[] {
 			RDFS_LITERAL, XSD_STRING, XSD_INTEGER, XSD_DECIMAL, XSD_DOUBLE,
-			XSD_DATETIME, XSD_BOOLEAN };
+			XSD_DATETIME, XSD_BOOLEAN, XSD_DATE, XSD_TIME, XSD_YEAR };
 	
 	public static final Predicate[] QUEST_NUMERICAL_DATATYPES = new Predicate[] {
 			XSD_INTEGER, XSD_DECIMAL, XSD_DOUBLE };

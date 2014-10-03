@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.NTripleAssertionIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
@@ -113,13 +114,19 @@ public class QuestDBStatement implements OBDAStatement {
 			if (ext.toLowerCase().equals(".owl")) {
 				OWLOntology owlontology = man.loadOntologyFromOntologyDocument(IRI.create(rdffile));
 				Set<OWLOntology> ontos = man.getImportsClosure(owlontology);
-				OWLAPI3ABoxIterator aBoxIter = 
-					new OWLAPI3ABoxIterator(ontos, st.questInstance.getEquivalenceMap());
-				result = st.insertData(aBoxIter, useFile, commit, batch);
-			} else if (ext.toLowerCase().equals(".nt")) {
-				NTripleAssertionIterator it = 
-					new NTripleAssertionIterator(rdffile, st.questInstance.getEquivalenceMap());
-				result = st.insertData(it, useFile, commit, batch);
+				
+				EquivalentTriplePredicateIterator aBoxNormalIter = 
+						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos), 
+								st.questInstance.getEquivalenceMap());
+				
+				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
+			} 
+			else if (ext.toLowerCase().equals(".nt")) {				
+				NTripleAssertionIterator it = new NTripleAssertionIterator(rdffile);
+				EquivalentTriplePredicateIterator aBoxNormalIter = 
+						new EquivalentTriplePredicateIterator(it, st.questInstance.getEquivalenceMap());
+				
+				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
 			}
 			return result;
 		} catch (Exception e) {
@@ -223,7 +230,7 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	@Override
-	public void setQueryTimeout(int seconds) throws Exception {
+	public void setQueryTimeout(int seconds) throws OBDAException {
 		st.setQueryTimeout(seconds);
 	}
 
