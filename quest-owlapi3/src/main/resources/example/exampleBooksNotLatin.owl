@@ -54,7 +54,7 @@
     <!-- http://meraka/moss/exampleBooks.owl#writtenBy -->
 
     <owl:ObjectProperty rdf:about="http://meraka/moss/exampleBooks.owl#writtenBy">
-        <rdfs:range rdf:resource="http://meraka/moss/exampleBooks.owl#Author"/>
+        <rdfs:range rdf:resource="http://meraka/moss/exampleBooks.owl#Автор"/>
         <rdfs:domain rdf:resource="http://meraka/moss/exampleBooks.owl#Book"/>
     </owl:ObjectProperty>
     
@@ -150,9 +150,9 @@
     
 
 
-    <!-- http://meraka/moss/exampleBooks.owl#Author -->
+    <!-- http://meraka/moss/exampleBooks.owl#Автор -->
 
-    <owl:Class rdf:about="http://meraka/moss/exampleBooks.owl#Author">
+    <owl:Class rdf:about="http://meraka/moss/exampleBooks.owl#Автор">
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="http://meraka/moss/exampleBooks.owl#name"/>
@@ -252,7 +252,7 @@
     <!-- http://meraka/moss/exampleBooks.owl#EmergingWriter -->
 
     <owl:Class rdf:about="http://meraka/moss/exampleBooks.owl#EmergingWriter">
-        <rdfs:subClassOf rdf:resource="http://meraka/moss/exampleBooks.owl#Author"/>
+        <rdfs:subClassOf rdf:resource="http://meraka/moss/exampleBooks.owl#Автор"/>
     </owl:Class>
     
 
