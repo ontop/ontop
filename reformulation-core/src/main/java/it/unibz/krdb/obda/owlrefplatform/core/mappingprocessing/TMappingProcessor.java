@@ -253,6 +253,20 @@ public class TMappingProcessor {
 	}
 
 	/**
+	 * Davide> This methods allows to specify whether T-Mapping should
+	 *         be disabled for certain predicates
+	 * @param originalMappings
+	 * @param reasoner
+	 * @param full
+	 * @param excludeFromTMappings
+	 * @return
+	 */
+	public static DatalogProgram getTMappings(DatalogProgram originalMappings, TBoxReasoner reasoner, boolean full, List<SimplePredicate> excludeFromTMappings){
+		TMappingProcessor.excludeFromTMappings.addAll(excludeFromTMappings);
+		return getTMappings(originalMappings, reasoner, full);
+	}
+	
+	/**
 	 * 
 	 * @param originalMappings
 	 * @param reasoner
