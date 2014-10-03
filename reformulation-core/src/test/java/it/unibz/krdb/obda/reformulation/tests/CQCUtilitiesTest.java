@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SyntacticCQC;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
 
 import org.junit.Before;
@@ -395,13 +396,13 @@ public class CQCUtilitiesTest {
 
 		CQIE q3 = tfac.getCQIE(head, body);
 
-		assertTrue(CQCUtilities.isContainedInSyntactic(q1, q2));
+		assertTrue(SyntacticCQC.isContainedInSyntactic(q1, q2));
 
-		assertTrue(CQCUtilities.isContainedInSyntactic(q1, q3));
+		assertTrue(SyntacticCQC.isContainedInSyntactic(q1, q3));
 
-		assertFalse(CQCUtilities.isContainedInSyntactic(q2, q1));
+		assertFalse(SyntacticCQC.isContainedInSyntactic(q2, q1));
 
-		assertFalse(CQCUtilities.isContainedInSyntactic(q3, q1));
+		assertFalse(SyntacticCQC.isContainedInSyntactic(q3, q1));
 
 	}
 
@@ -472,7 +473,7 @@ public class CQCUtilitiesTest {
 		LinkedList<CQIE> queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q2);
-		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
+		SyntacticCQC.removeContainedQueriesSyntacticSorter(queries, true);
 
 		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q2));
@@ -480,7 +481,7 @@ public class CQCUtilitiesTest {
 		queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q3);
-		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
+		SyntacticCQC.removeContainedQueriesSyntacticSorter(queries, true);
 
 		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q3));
@@ -488,7 +489,7 @@ public class CQCUtilitiesTest {
 		queries = new LinkedList<CQIE>();
 		queries.add(q2);
 		queries.add(q3);
-		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
+		SyntacticCQC.removeContainedQueriesSyntacticSorter(queries, true);
 
 		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
@@ -498,7 +499,7 @@ public class CQCUtilitiesTest {
 		queries.add(q1);
 		queries.add(q2);
 		queries.add(q3);
-		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
+		SyntacticCQC.removeContainedQueriesSyntacticSorter(queries, true);
 
 		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
@@ -728,7 +729,7 @@ public class CQCUtilitiesTest {
         CQCUtilities cqcutil2 = new CQCUtilities(query2, new DataDependencies(sigma));
         assertFalse(cqcutil2.isContainedIn(query1));
 
-        assertFalse(CQCUtilities.isContainedInSyntactic(query2, query1));
-        assertFalse(CQCUtilities.isContainedInSyntactic(query1, query2));
+        assertFalse(SyntacticCQC.isContainedInSyntactic(query2, query1));
+        assertFalse(SyntacticCQC.isContainedInSyntactic(query1, query2));
     }
 }

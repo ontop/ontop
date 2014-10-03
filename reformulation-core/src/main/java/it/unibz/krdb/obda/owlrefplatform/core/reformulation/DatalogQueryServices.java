@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SyntacticCQC;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 
 import java.util.ArrayList;
@@ -137,11 +138,11 @@ public class DatalogQueryServices {
 				ListIterator<CQIE> i = output.listIterator();
 				while (i.hasNext()) {
 					CQIE q2 = i.next();
-					if (CQCUtilities.isContainedInSyntactic(query, q2)) {
+					if (SyntacticCQC.isContainedInSyntactic(query, q2)) {
 						found = true;
 						break;
 					}
-					else if (CQCUtilities.isContainedInSyntactic(q2, query)) {
+					else if (SyntacticCQC.isContainedInSyntactic(q2, query)) {
 						i.remove();				
 						log.debug("   PRUNED {} BY {}", q2, query);
 					}
@@ -168,7 +169,7 @@ public class DatalogQueryServices {
 	private static void reduce(CQIE q) {
 		DatalogNormalizer.enforceEqualities(q, false);
 		makeSingleOccurrencesAnonymous(q.getBody(), q.getHead().getTerms());
-		CQCUtilities.removeRundantAtoms(q);
+		SyntacticCQC.removeRundantAtoms(q);
 	}
 
 	//

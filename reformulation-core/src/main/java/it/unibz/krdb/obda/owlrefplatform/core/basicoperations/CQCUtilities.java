@@ -75,20 +75,14 @@ public class CQCUtilities {
 		CQIE canonicalQuery = getCanonicalQuery(query);
 		canonicalbody = canonicalQuery.getBody();
 		canonicalhead = canonicalQuery.getHead();
+		
 		factMap = new HashMap<Predicate, List<Function>>(canonicalbody.size() * 2);
 		for (Function atom : canonicalbody) {
 			Function fact = (Function) atom;
 			if (!fact.isDataFunction())
 				continue;
 			
-			Predicate predicate = fact.getPredicate();
-			canonicalpredicates.add(predicate);
-			List<Function> facts = factMap.get(predicate);
-			if (facts == null) {
-				facts = new LinkedList<Function>();
-				factMap.put(predicate, facts);
-			}
-			facts.add(fact);
+			addFact(fact);
 		}
 	}
 
@@ -102,22 +96,31 @@ public class CQCUtilities {
 		
 		this.rules = rules;
 		if (rules != null && !rules.isEmpty()) {
-			List<Function> generatedFacts = chaseQuery(query, rules);
+			
+			CQIE canonicalQuery = getCanonicalQuery(query);
+			canonicalhead = canonicalQuery.getHead();
+			canonicalbody = canonicalQuery.getBody();
+						
+			List<Function> generatedFacts = chaseQuery(rules);
 			
 			// Map the facts
-			for (Function fact : generatedFacts) {
-				Predicate p = fact.getPredicate();
-				canonicalpredicates.add(p);
-				List<Function> facts = factMap.get(p);
-				if (facts == null) {
-					facts = new LinkedList<Function>();
-					factMap.put(p, facts);
-				}
-				facts.add(fact);
-			}
+			for (Function fact : generatedFacts) 
+				addFact(fact);
 		}
 	}
 
+	private void addFact(Function fact) {
+		Predicate p = fact.getPredicate();
+		canonicalpredicates.add(p);
+		List<Function> facts = factMap.get(p);
+		if (facts == null) {
+			facts = new LinkedList<Function>();
+			factMap.put(p, facts);
+		}
+		facts.add(fact);
+	}
+
+	
 	/***
 	 * This method will "chase" a query with respect to a set of ABox
 	 * dependencies. This will introduce atoms that are implied by the presence
@@ -132,9 +135,7 @@ public class CQCUtilities {
 	 * @param sigma
 	 * @return
 	 */
-	public static CQIE chaseQuery(CQIE query, DataDependencies sigma) {
-		//sigma.saturate();
-		Function head = (Function) query.getHead();
+	private static CQIE chaseQuery(CQIE query, DataDependencies sigma) {
 
 		LinkedHashSet<Function> body = new LinkedHashSet<Function>();
 		body.addAll(query.getBody());
@@ -280,7 +281,8 @@ public class CQCUtilities {
 
 		LinkedList<Function> bodylist = new LinkedList<Function>();
 		bodylist.addAll(body);
-		CQIE newquery = fac.getCQIE(head, bodylist);
+		
+		CQIE newquery = fac.getCQIE(query.getHead(), bodylist);
 		newquery.setQueryModifiers(query.getQueryModifiers());
 
 		return newquery;
@@ -294,13 +296,9 @@ public class CQCUtilities {
 	 * @param rules
 	 * @return
 	 */
-	public List<Function> chaseQuery(CQIE query, List<CQIE> rules) {
-		List<Function> facts = new ArrayList<Function>();
+	private List<Function> chaseQuery(List<CQIE> rules) {
 
-		CQIE canonicalQuery = getCanonicalQuery(query);
-		canonicalhead = canonicalQuery.getHead();
-		canonicalbody = canonicalQuery.getBody();
-		
+		List<Function> facts = new ArrayList<Function>();
 		for (Function fact : canonicalbody) {
 			facts.add(fact);
 			for (CQIE rule : rules) {
@@ -326,7 +324,7 @@ public class CQCUtilities {
 	 * 
 	 * @param q
 	 */
-	public static CQIE getCanonicalQuery(CQIE q) {
+	public static CQIE getCanonicalQuery(CQIE q) { // public only for the test
 		CQIE canonicalquery = q.clone();
 
 		int constantcounter = 1;
@@ -352,8 +350,8 @@ public class CQCUtilities {
 	 *            is needed to provide a numbering to each of the new constants
 	 * @return
 	 */
-	public static int getCanonicalAtom(Function atom, int constantcounter, Map<Variable, Term> currentMap) {
-		List<Term> headterms = ((Function) atom).getTerms();
+	private static int getCanonicalAtom(Function atom, int constantcounter, Map<Variable, Term> currentMap) {
+		List<Term> headterms = atom.getTerms();
 		for (int i = 0; i < headterms.size(); i++) {
 			Term term = headterms.get(i);
 			if (term instanceof Variable) {
@@ -415,17 +413,16 @@ public class CQCUtilities {
 	 * @return
 	 */
 	public boolean isContainedIn(CQIE query) {
-//		CQIE duplicate1 = query.clone();
 
 		if (!query.getHead().getFunctionSymbol().equals(canonicalhead.getFunctionSymbol()))
 			return false;
 
         List<Function> body = query.getBody();
-        if(body.isEmpty()){
+        if (body.isEmpty())
             return false;
-        }
-        for (Function queryatom : query.getBody()) {
-			if (!canonicalpredicates.contains(((Function) queryatom).getFunctionSymbol())) {
+        
+        for (Function queryatom : body) {
+			if (!canonicalpredicates.contains(queryatom.getFunctionSymbol())) {
 				return false;
 			}
 		}
@@ -531,7 +528,7 @@ public class CQCUtilities {
      * @return
      */
 	
-	public boolean hasAnswer(CQIE query) {
+	private boolean hasAnswer(CQIE query) {
 		query = query.clone();
 		QueryAnonymizer.deAnonymize(query);
 
@@ -631,56 +628,6 @@ public class CQCUtilities {
 
 	}
 
-	/**
-	 * Removes all atoms that are equal (syntactically) and then all the atoms
-	 * that are redundant due to CQC.
-	 * 
-	 * @param queries
-	 * @throws Exception
-	 */
-	public static HashSet<CQIE> removeDuplicateAtoms(Collection<CQIE> queries) {
-		HashSet<CQIE> newqueries = new HashSet<CQIE>(queries.size() * 2);
-		for (CQIE cq : queries) {
-			List<Function> body = cq.getBody();
-			for (int i = 0; i < body.size(); i++) {
-				Function currentAtom = body.get(i);
-				for (int j = i + 1; j < body.size(); j++) {
-					Function comparisonAtom = body.get(j);
-					if (currentAtom.getPredicate().equals(comparisonAtom.getPredicate())) {
-						if (currentAtom.equals(comparisonAtom)) {
-							body.remove(j);
-						}
-					}
-				}
-			}
-			removeRundantAtoms(cq);
-			newqueries.add(QueryAnonymizer.anonymize(cq));
-		}
-		return newqueries;
-	}
-
-	/***
-	 * Removes all atoms that are redundant w.r.t to query containment.This is
-	 * done by going through all unifiable atoms, attempting to unify them. If
-	 * they unify with a MGU that is empty, then one of the atoms is redundant.
-	 * 
-	 * 
-	 * @param q
-	 * @throws Exception
-	 */
-	public static void removeRundantAtoms(CQIE q) {
-		CQIE result = q;
-		for (int i = 0; i < result.getBody().size(); i++) {
-			Function currentAtom = result.getBody().get(i);
-			for (int j = i + 1; j < result.getBody().size(); j++) {
-				Function nextAtom = result.getBody().get(j);
-				Map<Variable, Term> map = Unifier.getMGU(currentAtom, nextAtom);
-				if (map != null && map.isEmpty()) {
-					result = Unifier.unify(result, i, j);
-				}
-			}
-		}
-	}
 
 	private static final Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
 		@Override
@@ -691,74 +638,7 @@ public class CQCUtilities {
 
 	
 	
-	/***
-	 * Removes queries that are contained syntactically, using the method
-	 * isContainedInSyntactic(CQIE q1, CQIE 2). To make the process more
-	 * efficient, we first sort the list of queries as to have longer queries
-	 * first and shorter queries last.
-	 * 
-	 * Removal of queries is done in two main double scans. The first scan goes
-	 * top-down/down-top, the second scan goes down-top/top-down
-	 * 
-	 * @param queries
-	 */
-	public static void removeContainedQueriesSyntacticSorter(List<CQIE> queries, boolean twopasses) {
 
-		Collections.sort(queries, lenghtComparator);
-
-		for (int i = 0; i < queries.size(); i++) {
-			for (int j = queries.size() - 1; j > i; j--) {
-				if (isContainedInSyntactic(queries.get(i), queries.get(j))) {
-//					log.debug("REMOVE: " + queries.get(i));
-					queries.remove(i);
-					i = -1;
-					break;
-				}
-			}
-		}
-
-		if (twopasses) {
-			for (int i = queries.size() - 1; i > 0; i--) {
-				for (int j = 0; j < i; j++) {
-					if (isContainedInSyntactic(queries.get(i), queries.get(j))) {
-//						log.debug("REMOVE: " + queries.get(i));
-						queries.remove(i);
-						i = +1;
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	/***
-	 * Check if query cq1 is contained in cq2, syntactically. That is, if the
-	 * head of cq1 and cq2 are equal according to toString().equals and each
-	 * atom in cq2 is also in the body of cq1 (also by means of
-	 * toString().equals().
-	 * 
-	 * @param cq1
-	 * @param cq2
-	 * @return
-	 */
-	public static boolean isContainedInSyntactic(CQIE cq1, CQIE cq2) {
-		if (!cq2.getHead().equals(cq1.getHead())) {
-			return false;
-		}
-
-        List<Function> body = cq2.getBody();
-        if(body.isEmpty()){
-            return false;
-        }
-
-		for (Function atom : body) {
-			// if (!body1.contains(atom))
-			// return false;
-			if (!cq1.getBody().contains(atom))
-				return false;
-		}
-		return true;
-	}
 	
 	public static DatalogProgram removeContainedQueriesSorted(DatalogProgram program, boolean twopasses, List<CQIE> foreignKeyRules) {
 		DatalogProgram result = OBDADataFactoryImpl.getInstance().getDatalogProgram();
