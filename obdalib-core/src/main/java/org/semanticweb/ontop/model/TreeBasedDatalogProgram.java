@@ -1,19 +1,16 @@
 package org.semanticweb.ontop.model;
 
 import java.util.*;
-import java.util.HashMap;
-import java.util.HashSet;
 
 import com.google.common.collect.Multimap;
 import fj.*;
 import fj.data.*;
 import fj.data.List;
-import fj.data.TreeMap;
+import fj.data.HashMap;
 import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Immutable DatalogProgram for queries.
@@ -26,21 +23,24 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
  * Former name: indexedDatalogProgram. This name has been replaced
  * because most indexes have been replaced by a tree structure.
  *
+ * TODO: PROPOSAL: use a Tree<P2<Predicate, List<CQIE>>> instead of predicateTree and predicateDefinitions.
+ * Apparently, we may not need global indexes. Tree navigation seems to be enough.
+ *
  */
 public class TreeBasedDatalogProgram {
 
-    public static final Ord<Predicate> predicateOrder = Ord.ord(
-            new F<Predicate, F<Predicate, Ordering>>() {
-                public F<Predicate, Ordering> f(final Predicate a1) {
-                    return new F<Predicate, Ordering>() {
-                        public Ordering f(final Predicate a2) {
-                            //TODO: check arity later
-                            final int x = a1.getName().compareTo(a2.getName());
-                            return x < 0 ? Ordering.LT : x == 0 ? Ordering.EQ : Ordering.GT;
-                        }
-                    };
-                }
-            });
+//    public static final Ord<Predicate> predicateOrder = Ord.ord(
+//            new F<Predicate, F<Predicate, Ordering>>() {
+//                public F<Predicate, Ordering> f(final Predicate a1) {
+//                    return new F<Predicate, Ordering>() {
+//                        public Ordering f(final Predicate a2) {
+//                            //TODO: check arity later
+//                            final int x = a1.getName().compareTo(a2.getName());
+//                            return x < 0 ? Ordering.LT : x == 0 ? Ordering.EQ : Ordering.GT;
+//                        }
+//                    };
+//                }
+//            });
 
     /**
      * Predicate hierarchy in this query-oriented DatalogProgram.
@@ -54,8 +54,11 @@ public class TreeBasedDatalogProgram {
      * Multiple definitions for a given rule are possible.
      *
      * Final and immutable structure.
+     * Beware, it is not a java.util.HashMap !!
+     *
+     * Sorry, we do not have a nice convenient interface for it.
      */
-    private final TreeMap<Predicate, List<CQIE>> predicateDefinitions;
+    private final HashMap<Predicate, List<CQIE>> predicateDefinitions;
 
     /**
      * Index subtrees so that to efficiently retrieve them
@@ -72,6 +75,28 @@ public class TreeBasedDatalogProgram {
     //private final TreeMap<Predicate, List<CQIE>> predicateUsages;
 
 
+//    /**
+//     * TODO: worth it?
+//     *
+//     * Expensive constructor: the predicate tree has to be built
+//     * @param predicateDefinitions
+//     */
+//    public TreeBasedDatalogProgram(HashMap<Predicate, List<CQIE>> predicateDefinitions) {
+//        //TODO: implement it
+//        throw new NotImplementedException();
+//    }
+
+//    /**
+//     * Semi-expensive constructor: the predicate tree as to be checked.
+//     *
+//     * @param predicateTree
+//     * @param predicateDefinitions
+//     */
+//    public TreeBasedDatalogProgram(HashMap<Predicate, List<CQIE>> predicateDefinitions, Tree<Predicate> predicateTree) {
+//        this(predicateTree, predicateDefinitions);
+//        //TODO: quickly check the children
+//    }
+
     /**
      * Very expensive constructor:
      *   - The rule lists have to be converted and indexed.
@@ -79,72 +104,73 @@ public class TreeBasedDatalogProgram {
      *
      * @param rules
      */
-    public TreeBasedDatalogProgram(java.util.List<CQIE> rules) {
+    public static TreeBasedDatalogProgram fromRules(java.util.List<CQIE> rules) {
+        return new TreeBasedDatalogProgram(rules);
+    }
+
+    private TreeBasedDatalogProgram(java.util.List<CQIE> rules) {
         DatalogDependencyGraphGenerator dependencyGraphGenerator = new DatalogDependencyGraphGenerator(rules);
 
         predicateTree = convertDirectedGraphToTree(dependencyGraphGenerator.getPredicateDependencyGraph());
         predicateDefinitions = convertMultimapToMap(dependencyGraphGenerator.getRuleIndex());
-        //predicateSubTreeIndex = buildIndexFromTree(predicateTree);
-        //predicateUsages = convertMultimapToMap(dependencyGraphGenerator.getRuleIndexByBodyPredicate());
     }
+
+    public static TreeBasedDatalogProgram fromRuleTree(Tree<P2<Predicate, List<CQIE>>> ruleTree) {
+        return new TreeBasedDatalogProgram(ruleTree);
+    }
+
+    public static TreeBasedDatalogProgram fromP3RuleTree(Tree<P3<Predicate, List<CQIE>, Option<Function>>> p3Tree) {
+        return new TreeBasedDatalogProgram(convertP32P2RuleTree(p3Tree));
+    }
+
+    private TreeBasedDatalogProgram(Tree<P2<Predicate, List<CQIE>>> ruleTree) {
+        this.predicateTree = ruleTree.fmap(P2.<Predicate, List<CQIE>>__1());
+        this.predicateDefinitions = HashMap.from(ruleTree);
+    }
+
 
     /**
-     * TODO: worth it?
-     *
-     * Expensive constructor: the predicate tree has to be built
-     * @param predicateDefinitions
+     * Converts the P3 rule tree into a P2 tree without the type proposal element.
      */
-    public TreeBasedDatalogProgram(TreeMap<Predicate, List<CQIE>> predicateDefinitions) {
-        //TODO: implement it
-        throw new NotImplementedException();
+    private static Tree<P2<Predicate, List<CQIE>>> convertP32P2RuleTree(Tree<P3<Predicate, List<CQIE>, Option<Function>>> p3Tree) {
+        return p3Tree.fmap(new F<P3<Predicate, List<CQIE>, Option<Function>>, P2<Predicate, List<CQIE>>>() {
+            @Override
+            public P2<Predicate, List<CQIE>> f(P3<Predicate, List<CQIE>, Option<Function>> label) {
+                return P.p(label._1(), label._2());
+            }
+        });
     }
 
-    /**
-     * Semi-expensive constructor: the predicate tree as to be checked.
-     *
-     * @param predicateTree
-     * @param predicateDefinitions
-     */
-    public TreeBasedDatalogProgram(TreeMap<Predicate, List<CQIE>> predicateDefinitions, Tree<Predicate> predicateTree) {
-        this(predicateTree, predicateDefinitions);
-        //TODO: quickly check the children
-    }
+//    /**
+//     * Fast but dangerous constructor.
+//     * Inconsistency between the predicate tree and the predicate definitions are not be detected.
+//     *
+//     * @param predicateTree
+//     * @param predicateDefinitions
+//     */
+//    private TreeBasedDatalogProgram(Tree<Predicate> predicateTree, HashMap<Predicate, List<CQIE>> predicateDefinitions) {
+//        this.predicateTree = predicateTree;
+//        this.predicateDefinitions = predicateDefinitions;
+//    }
 
-    /**
-     * Fast but dangerous constructor.
-     * Inconsistency between the predicate tree and the predicate definitions are not be detected.
-     *
-     * @param predicateTree
-     * @param predicateDefinitions
-     */
-    private TreeBasedDatalogProgram(Tree<Predicate> predicateTree, TreeMap<Predicate, List<CQIE>> predicateDefinitions) {
-        this.predicateTree = predicateTree;
-        this.predicateDefinitions = predicateDefinitions;
-    }
-
-    private TreeBasedDatalogProgram(TreeBasedDatalogProgram that, CQIE newRule) {
-        predicateTree = addDependencyToTree(that.predicateTree, newRule);
-        predicateDefinitions = addPredicateDefinition(that.predicateDefinitions, newRule);
-        //predicateUsages = addPredicateUsage(that.predicateUsages, newRule);
-    }
-
-    /**
-     * TODO: implement it!
-     */
-    public TreeBasedDatalogProgram(TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> treeZipper) {
-        throw new NotImplementedException();
-    }
+//    private TreeBasedDatalogProgram(TreeBasedDatalogProgram that, CQIE newRule) {
+//        predicateTree = addDependencyToTree(that.predicateTree, newRule);
+//        predicateDefinitions = addPredicateDefinition(that.predicateDefinitions, newRule);
+//        //predicateUsages = addPredicateUsage(that.predicateUsages, newRule);
+//    }
 
     public List<CQIE> getRules() {
         return List.join(predicateDefinitions.values());
     }
 
-    /**
-     * Immutable
-     */
-    public Tree<Predicate> getPredicateTree() {
-        return predicateTree;
-    }
+//    /**
+//     * Immutable
+//     *
+//     * TODO: do we need it?
+//     */
+//    public Tree<Predicate> getPredicateTree() {
+//        return predicateTree;
+//    }
 
     /**
      * Computes a rule tree.
@@ -168,12 +194,14 @@ public class TreeBasedDatalogProgram {
         return ruleTree;
     }
 
-    /**
-     * Immutable
-     */
-    public TreeMap<Predicate, List<CQIE>> getPredicateDefinitions() {
-        return predicateDefinitions;
-    }
+//    /**
+//     * Immutable
+//     *
+//     * TODO: do we need it?
+//     */
+//    public HashMap<Predicate, List<CQIE>> getPredicateDefinitions() {
+//        return predicateDefinitions;
+//    }
 
     /**
      * Returns an immutable list
@@ -187,68 +215,67 @@ public class TreeBasedDatalogProgram {
     }
 
 
-    /**
-     * TODO: do we really need this method?
-     * Is trying to update the predicate tree really necessary?
-     */
-    public TreeBasedDatalogProgram addRule(CQIE newRule) {
-        return new TreeBasedDatalogProgram(this, newRule);
-    }
+//    /**
+//     * TODO: do we really need this method?
+//     * Is trying to update the predicate tree really necessary?
+//     */
+//    public TreeBasedDatalogProgram addRule(CQIE newRule) {
+//        return new TreeBasedDatalogProgram(this, newRule);
+//    }
+//
+//    /**
+//     * TODO: do we need this method?
+//     */
+//    public TreeBasedDatalogProgram replaceRule(CQIE formerRule, CQIE newRule) {
+//        //TODO: implement it
+//        throw new NotImplementedException();
+//    }
+//
+//    /**
+//     * TODO: do we need this structure?
+//     */
+//    public TreeBasedDatalogProgram replaceRule(CQIE formerRule, List<CQIE> newRule) {
+//        //TODO: implement it
+//        throw new NotImplementedException();
+//    }
+//
+//    /**
+//     *
+//     * TODO: do we need this structure?
+//     */
+//    public TreeBasedDatalogProgram replaceRules(Predicate headPredicate, CQIE newRule) {
+//        //TODO: implement it
+//        throw new NotImplementedException();
+//    }
+//
+//    /**
+//     * TODO: do we really need this structure?
+//     */
+//    public TreeBasedDatalogProgram replaceRules(Predicate headPredicate, List<CQIE> newRules) {
+//        //TODO: implement it
+//        throw new NotImplementedException();
+//    }
+//
+//    /**
+//     * TODO: do we really need this structure?
+//     *
+//     * It may become necessary to update the predicate tree
+//     *
+//     */
+//    public TreeBasedDatalogProgram removeRule(CQIE rule) {
+//        //TODO: implement it
+//        throw new NotImplementedException();
+//    }
 
-    /**
-     * TODO: do we need this method?
-     */
-    public TreeBasedDatalogProgram replaceRule(CQIE formerRule, CQIE newRule) {
-        //TODO: implement it
-        throw new NotImplementedException();
-    }
 
-    /**
-     * TODO: do we need this structure?
-     */
-    public TreeBasedDatalogProgram replaceRule(CQIE formerRule, List<CQIE> newRule) {
-        //TODO: implement it
-        throw new NotImplementedException();
-    }
-
-    /**
-     *
-     * TODO: do we need this structure?
-     */
-    public TreeBasedDatalogProgram replaceRules(Predicate headPredicate, CQIE newRule) {
-        //TODO: implement it
-        throw new NotImplementedException();
-    }
-
-    /**
-     * TODO: do we really need this structure?
-     */
-    public TreeBasedDatalogProgram replaceRules(Predicate headPredicate, List<CQIE> newRules) {
-        //TODO: implement it
-        throw new NotImplementedException();
-    }
-
-    /**
-     * TODO: do we really need this structure?
-     *
-     * It may become necessary to update the predicate tree
-     *
-     */
-    public TreeBasedDatalogProgram removeRule(CQIE rule) {
-        //TODO: implement it
-        throw new NotImplementedException();
-    }
-
-
-    private static TreeMap<Predicate,List<CQIE>> convertMultimapToMap(Multimap<Predicate, CQIE> ruleIndex) {
+    private static HashMap<Predicate,List<CQIE>> convertMultimapToMap(Multimap<Predicate, CQIE> ruleIndex) {
         Map<Predicate, Collection<CQIE>> map1 = ruleIndex.asMap();
-        Map<Predicate, List<CQIE>> map2 = new HashMap<>();
+        java.util.List<P2<Predicate, List<CQIE>>> pairList = new ArrayList<>();
 
         for (Map.Entry<Predicate, Collection<CQIE>> entry: map1.entrySet()) {
-            map2.put(entry.getKey(), List.iterableList(entry.getValue()));
+            pairList.add(P.p(entry.getKey(), List.iterableList(entry.getValue())));
         }
-
-        return TreeMap.fromMutableMap(predicateOrder, map2);
+        return HashMap.from(pairList);
     }
 
     private static Tree<Predicate> convertDirectedGraphToTree(DirectedGraph<Predicate, DefaultEdge> originalGraph) {
@@ -258,99 +285,6 @@ public class TreeBasedDatalogProgram {
         }
         Predicate rootPredicate = iter.next();
         return createSubTree(rootPredicate, originalGraph);
-    }
-
-    /**
-     * Iterates over all the nodes (with a zipper structure) and adds
-     *
-     * TODO: replace the mutable map to immutable maps
-     */
-    private static TreeMap<Predicate,Tree<Predicate>> buildIndexFromTree(Tree<Predicate> predicateTree) {
-        TreeZipper<Predicate> rootZipper =  TreeZipper.fromTree(predicateTree);
-
-        Map<Predicate, Tree<Predicate>> mutableMap = new HashMap<>();
-        Iterator<TreeZipper<Predicate>> iterator = rootZipper.iterator();
-        while (iterator.hasNext()) {
-            TreeZipper<Predicate> currentZipper =  iterator.next();
-            mutableMap.put(currentZipper.getLabel(), currentZipper.focus());
-        }
-
-        return TreeMap.fromMutableMap(predicateOrder, mutableMap);
-    }
-
-    private static Tree<Predicate> addDependencyToTree(Tree<Predicate> predicateTree, final CQIE newRule) {
-        TreeZipper<Predicate> rootZipper = TreeZipper.fromTree(predicateTree);
-
-        final Predicate headPredicate = newRule.getHead().getFunctionSymbol();
-
-        Option<TreeZipper<Predicate>> optionalHeadPredicateZipper = rootZipper.findChild(new F<Tree<Predicate>, Boolean>() {
-            @Override
-            public Boolean f(Tree<Predicate> tree) {
-                return tree.root().equals(headPredicate);
-            }
-        });
-
-        java.util.Set<Predicate> bodyPredicates = new HashSet<>();
-        for (Function bodyAtom: newRule.getBody()) {
-            // TODO: make it robust to left join (implement this in the CQIE class)
-            // TODO: see QueryUtils for reuse
-            bodyPredicates.add(bodyAtom.getFunctionSymbol());
-        }
-
-        /**
-         * If the head predicate is not in the tree, this tree should be empty but this is not possible.
-         *
-         * --> Throws an Exception
-         */
-        if (optionalHeadPredicateZipper.isNone()) {
-//            List<Tree<Predicate>> bodyPredicateForest = Stream.iterableStream(bodyPredicates).map(
-//                    new F<Predicate, Tree<Predicate>>() {
-//                        @Override
-//                        public Tree<Predicate> f(Predicate predicate) {
-//                            return Tree.node(predicate, List.<Tree<Predicate>>nil());
-//                        }
-//                    }).toList();
-            throw new IllegalArgumentException("The head predicate of the rule is not already present " +
-                    "in the predicate tree of the DatalogProgram");
-        }
-        /**
-         * If the head predicate of the rule is already within the tree
-         */
-        else  {
-            TreeZipper<Predicate> predicateZipper = optionalHeadPredicateZipper.some();
-            // TODO: check if predicateZipper.toForest() also does the job
-            Stream<Tree<Predicate>> children = predicateZipper.toTree().subForest()._1();
-
-            // Adds new body function symbols (if not already present)
-            for (final Predicate predicate : bodyPredicates) {
-
-                /*
-                 * Boolean function that returns True when the root of a sub-tree
-                 * is the expected predicate.
-                 */
-                F<Tree<Predicate>, Boolean> equalsFunction = new F<Tree<Predicate>, Boolean>() {
-                    @Override
-                    public Boolean f(Tree<Predicate> tree) {
-                        return tree.root().equals(predicate);
-                    }
-                };
-
-                /**
-                 * If this body predicate is not yet a child of the head predicate,
-                 * adds it.
-                 */
-                if (children.indexOf(equalsFunction).isNone())
-                    //TODO: avoid such re-affecting
-                    predicateZipper = predicateZipper.insertDownLast(Tree.node(predicate, List.<Tree<Predicate>>nil())).parent().some();
-            }
-            return predicateZipper.root().toTree();
-        }
-    }
-
-
-    private static TreeMap<Predicate,List<CQIE>> addPredicateDefinition(TreeMap<Predicate, List<CQIE>> predicateDefinitions, CQIE newRule) {
-        // TODO: implement it
-        return null;
     }
 
     /**
@@ -368,5 +302,73 @@ public class TreeBasedDatalogProgram {
 
         return Tree.node(predicate, List.iterableList(subTrees));
     }
+
+//    private static Tree<Predicate> addDependencyToTree(Tree<Predicate> predicateTree, final CQIE newRule) {
+//        TreeZipper<Predicate> rootZipper = TreeZipper.fromTree(predicateTree);
+//
+//        final Predicate headPredicate = newRule.getHead().getFunctionSymbol();
+//
+//        Option<TreeZipper<Predicate>> optionalHeadPredicateZipper = rootZipper.findChild(new F<Tree<Predicate>, Boolean>() {
+//            @Override
+//            public Boolean f(Tree<Predicate> tree) {
+//                return tree.root().equals(headPredicate);
+//            }
+//        });
+//
+//        java.util.Set<Predicate> bodyPredicates = new HashSet<>();
+//        for (Function bodyAtom: newRule.getBody()) {
+//            // TODO: make it robust to left join (implement this in the CQIE class)
+//            // TODO: see QueryUtils for reuse
+//            bodyPredicates.add(bodyAtom.getFunctionSymbol());
+//        }
+//
+//        /**
+//         * If the head predicate is not in the tree, this tree should be empty but this is not possible.
+//         *
+//         * --> Throws an Exception
+//         */
+//        if (optionalHeadPredicateZipper.isNone()) {
+//            throw new IllegalArgumentException("The head predicate of the rule is not already present " +
+//                    "in the predicate tree of the DatalogProgram");
+//        }
+//        /**
+//         * If the head predicate of the rule is already within the tree
+//         */
+//        else  {
+//            TreeZipper<Predicate> predicateZipper = optionalHeadPredicateZipper.some();
+//            // TODO: check if predicateZipper.toForest() also does the job
+//            Stream<Tree<Predicate>> children = predicateZipper.toTree().subForest()._1();
+//
+//            // Adds new body function symbols (if not already present)
+//            for (final Predicate predicate : bodyPredicates) {
+//
+//                /*
+//                 * Boolean function that returns True when the root of a sub-tree
+//                 * is the expected predicate.
+//                 */
+//                F<Tree<Predicate>, Boolean> equalsFunction = new F<Tree<Predicate>, Boolean>() {
+//                    @Override
+//                    public Boolean f(Tree<Predicate> tree) {
+//                        return tree.root().equals(predicate);
+//                    }
+//                };
+//
+//                /**
+//                 * If this body predicate is not yet a child of the head predicate,
+//                 * adds it.
+//                 */
+//                if (children.indexOf(equalsFunction).isNone())
+//                    //TODO: avoid such re-affecting
+//                    predicateZipper = predicateZipper.insertDownLast(Tree.node(predicate, List.<Tree<Predicate>>nil())).parent().some();
+//            }
+//            return predicateZipper.root().toTree();
+//        }
+//    }
+
+
+//    private static HashMap<Predicate,List<CQIE>> addPredicateDefinition(HashMap<Predicate, List<CQIE>> predicateDefinitions, CQIE newRule) {
+//        // TODO: implement it
+//        return null;
+//    }
 
 }
