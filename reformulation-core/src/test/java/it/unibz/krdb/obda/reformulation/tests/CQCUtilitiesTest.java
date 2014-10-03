@@ -109,10 +109,9 @@ public class CQCUtilitiesTest {
 
     @Test
 	public void testGrounding() {
-		CQCUtilities cqcutil = new CQCUtilities(initialquery1, (DataDependencies)null);
-		CQIE groundedcq = cqcutil.getCanonicalQuery(initialquery1);
+		CQCUtilities.CanonicalQueryForCQ c2cq = new CQCUtilities.CanonicalQueryForCQ(initialquery1);
 
-		List<Term> head = groundedcq.getHead().getTerms();
+		List<Term> head = c2cq.getHead().getTerms();
 		assertTrue(head.get(0).equals(tfac.getConstantLiteral("CANx1")));
 		assertTrue(head.get(1).equals(tfac.getConstantURI("URI1")));
 		assertTrue(head.get(2).equals(tfac.getConstantLiteral("m")));
@@ -121,11 +120,11 @@ public class CQCUtilitiesTest {
 		assertTrue(f1.getTerms().get(0).equals(tfac.getConstantLiteral("CANx1")));
 		assertTrue(f1.getTerms().get(1).equals(tfac.getConstantLiteral("CANy2")));
 
-		head = ((Function) groundedcq.getBody().get(0)).getTerms();
+		head = c2cq.getBodyAtoms().get(r).get(0).getTerms();
 		assertTrue(head.get(0).equals(tfac.getConstantLiteral("CANx1")));
 		assertTrue(head.get(1).equals(tfac.getConstantLiteral("CANy2")));
 
-		head = ((Function) groundedcq.getBody().get(1)).getTerms();
+		head = c2cq.getBodyAtoms().get(s).get(0).getTerms();
 		assertTrue(head.get(0).equals(tfac.getConstantLiteral("m")));
 		f1 = (FunctionalTermImpl) head.get(1);
 		assertTrue(f1.getTerms().get(0).equals(tfac.getConstantLiteral("CANx1")));

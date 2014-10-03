@@ -41,16 +41,12 @@ import java.util.*;
  */
 public class CQCUtilities {
 
-	private CQIE canonicalQuery = null;
-
-	private final Set<Predicate> canonicalpredicates = new HashSet<Predicate>(50);
-
+	private Function canonicalHead = null;
+	
 	/***
 	 * An index of all the facts obtained by freezing this query.
 	 */
-	private final Map<Predicate, List<Function>> factMap;
-
-	private List<CQIE> rules = null; // a somewhat non-trivial interaction with the first if in the constructor 
+	private Map<Predicate, List<Function>> factMap;
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
@@ -64,51 +60,32 @@ public class CQCUtilities {
 	 *            A set of ABox dependencies
 	 */
 	public CQCUtilities(CQIE query, DataDependencies sigma) {
-		//this.sigma = sigma;
+
 		if (sigma != null) {
 			// log.debug("Using dependencies to chase the query");
 			query = chaseQuery(query, sigma);
 		}
-		canonicalQuery = getCanonicalQuery(query);
+		CanonicalQueryForCQ c2cq = new CanonicalQueryForCQ(query);
+		canonicalHead = c2cq.getHead();
 		
-		factMap = new HashMap<Predicate, List<Function>>(canonicalQuery.getBody().size() * 2);
-		for (Function atom : canonicalQuery.getBody()) {
-			Function fact = (Function) atom;
-			if (!fact.isDataFunction())
-				continue;
-			
-			addFact(fact);
-		}
+		factMap = c2cq.getBodyAtoms();
 	}
 
 	public CQCUtilities(CQIE query, List<CQIE> rules) {
 
-		factMap = new HashMap<Predicate, List<Function>>();
-		
 		for (Function b : query.getBody())
 			if (b.isBooleanFunction())   
-				return;   // here rules may remain null even if the parameter was non-null
+				return;   // leave canonicalHead = null as a flag of bad state
 		
-		this.rules = rules;
-		if (rules != null && !rules.isEmpty()) {			
-			canonicalQuery = getCanonicalQuery(query);
-						
-			// Map the facts
-			for (Function fact : chaseQuery(canonicalQuery.getBody(), rules)) 
-				addFact(fact);
+		if (rules != null && !rules.isEmpty()) {		
+			query = chaseQuery(query, rules);
+			
+			CanonicalQueryForCQ c2cq = new CanonicalQueryForCQ(query);
+			canonicalHead = c2cq.getHead();
+			factMap = c2cq.getBodyAtoms();			
 		}
 	}
 
-	private void addFact(Function fact) {
-		Predicate p = fact.getPredicate();
-		canonicalpredicates.add(p);
-		List<Function> facts = factMap.get(p);
-		if (facts == null) {
-			facts = new LinkedList<Function>();
-			factMap.put(p, facts);
-		}
-		facts.add(fact);
-	}
 
 	
 	/***
@@ -116,7 +93,7 @@ public class CQCUtilities {
 	 * dependencies. This will introduce atoms that are implied by the presence
 	 * of other atoms. This operation may introduce an infinite number of new
 	 * atoms, since there might be A ISA exists R and exists inv(R) ISA A
-	 * dependencies. To avoid infinite cyles we will chase up to a certain depth
+	 * dependencies. To avoid infinite cycles we will chase up to a certain depth
 	 * only.
 	 * 
 	 * To improve performance, sigma should already be saturated.
@@ -259,10 +236,10 @@ public class CQCUtilities {
 	 * @param rules
 	 * @return
 	 */
-	private static List<Function> chaseQuery(List<Function> body, List<CQIE> rules) {
+	private static CQIE chaseQuery(CQIE query, List<CQIE> rules) {
 
 		List<Function> facts = new ArrayList<Function>();
-		for (Function fact : body) {
+		for (Function fact : query.getBody()) {
 			facts.add(fact);
 			for (CQIE rule : rules) {
 				Function ruleBody = rule.getBody().get(0);
@@ -270,104 +247,132 @@ public class CQCUtilities {
 				if (theta != null && !theta.isEmpty()) {
 					Function ruleHead = rule.getHead();
 					Function newFact = (Function)ruleHead.clone();
-					Unifier.applyUnifierToGetFact(newFact, theta);
+					Unifier.applyUnifier(newFact, theta); // no need to unify into facts
 					facts.add(newFact);
 				}
 			}
 		}
-		return facts;
+		return fac.getCQIE(query.getHead(), facts);
 	}
 	
-	/***
-	 * Computes a query in which all variables have been replaced by
-	 * ValueConstants that have the no type and have the same 'name' as the
-	 * original variable.
-	 * 
-	 * This new query can be used for query containment checking.
-	 * 
-	 * @param q
-	 */
-	public static CQIE getCanonicalQuery(CQIE q) { // public only for the test
-		CQIE canonicalquery = q.clone();
+	public static final class CanonicalQueryForCQ {
+		
+		private final Map<Variable, ValueConstant> substitution = new HashMap<Variable, ValueConstant>(50);
+		
+		/**
+		 * Counter for the naming of the new constants. This
+		 * is needed to provide a numbering to each of the new constants
+		 */
+		private int constantcounter = 1;
+		
+		private final Function head;
+		private final Map<Predicate, List<Function>> factMap;
+		
+		/***
+		 * Computes a query in which all terms have been replaced by
+		 * ValueConstants that have the no type and have the same 'name' as the
+		 * original variable.
+		 * 
+		 * This new query can be used for query containment checking.
+		 * 
+		 * @param q
+		 */
+		
+		public CanonicalQueryForCQ(CQIE q) { 
+			head = (Function) q.getHead().clone();
+			changeAtomIntoCanonical(head);
 
-		int constantcounter = 1;
+			factMap = new HashMap<Predicate, List<Function>>(q.getBody().size() * 2);
 
-		Map<Variable, Term> substitution = new HashMap<Variable, Term>(50);
-		Function head = canonicalquery.getHead();
-		constantcounter = getCanonicalAtom(head, constantcounter, substitution);
-
-		for (Function atom : canonicalquery.getBody()) {
-			constantcounter = getCanonicalAtom(atom, constantcounter, substitution);
-		}
-		return canonicalquery;
-	}
-
-	/***
-	 * Replaces each Variable inside the atom with a constant. It will return
-	 * the counter updated + n, where n is the number of constants introduced by
-	 * the method.
-	 * 
-	 * @param atom
-	 * @param constantcounter
-	 *            an initial counter for the naming of the new constants. This
-	 *            is needed to provide a numbering to each of the new constants
-	 * @return
-	 */
-	private static int getCanonicalAtom(Function atom, int constantcounter, Map<Variable, Term> currentMap) {
-		List<Term> headterms = atom.getTerms();
-		for (int i = 0; i < headterms.size(); i++) {
-			Term term = headterms.get(i);
-			if (term instanceof Variable) {
-				Term substitution = null;
-				if (term instanceof Variable) {
-					substitution = currentMap.get(term);
-					if (substitution == null) {
-						ValueConstant newconstant = fac.getConstantLiteral("CAN" + ((Variable) term).getName() + constantcounter);
-						constantcounter += 1;
-						currentMap.put((Variable) term, newconstant);
-						substitution = newconstant;
+			for (Function atom : q.getBody()) 
+				// not boolean, not algebra, not arithmetic, not datatype
+				if (atom != null && atom.isDataFunction()) {
+					Function fact = (Function) atom.clone();
+					changeAtomIntoCanonical(fact);
+					
+					Predicate p = fact.getPredicate();
+					List<Function> facts = factMap.get(p);
+					if (facts == null) {
+						facts = new LinkedList<Function>();
+						factMap.put(p, facts);
 					}
-				} else if (term instanceof ValueConstant) {
-					ValueConstant newconstant = fac.getConstantLiteral("CAN" + ((ValueConstant) term).getValue() + constantcounter);
-					constantcounter += 1;
-					substitution = newconstant;
-				} else if (term instanceof URIConstant) {
-					ValueConstant newconstant = fac.getConstantLiteral("CAN" + ((URIConstant) term).getURI() + constantcounter);
-					constantcounter += 1;
-					substitution = newconstant;
-				}
-				headterms.set(i, substitution);
-			} else if (term instanceof Function) {
-				Function function = (Function) term;
-				List<Term> functionterms = function.getTerms();
-				for (int j = 0; j < functionterms.size(); j++) {
-					Term fterm = functionterms.get(j);
-					if (fterm instanceof Variable) {
-						Term substitution = null;
-						if (fterm instanceof VariableImpl) {
-							substitution = currentMap.get(fterm);
-							if (substitution == null) {
-								ValueConstant newconstant = fac.getConstantLiteral("CAN" + ((VariableImpl) fterm).getName()
-										+ constantcounter);
-								constantcounter += 1;
-								currentMap.put((Variable) fterm, newconstant);
-								substitution = newconstant;
-
-							}
-						} else {
-							ValueConstant newconstant = fac.getConstantLiteral("CAN" + ((ValueConstant) fterm).getValue()
-									+ constantcounter);
-							constantcounter += 1;
-							substitution = newconstant;
+					facts.add(fact);
+			}
+		}
+		
+		public Function getHead() {
+			return head;
+		}
+		
+		public Map<Predicate, List<Function>> getBodyAtoms() {
+			return factMap;
+		}
+		
+		/***
+		 * Replaces each term inside the atom with a constant. 
+		 * 
+		 * IMPORTANT: this method goes only to level 2 of terms
+		 * 
+		 * @param atom
+		 */
+		private void changeAtomIntoCanonical(Function atom) {
+			List<Term> headterms = atom.getTerms();
+			for (int i = 0; i < headterms.size(); i++) {
+				Term term = headterms.get(i);
+				if (term instanceof Variable) {
+					ValueConstant replacement = null;
+					if (term instanceof Variable) {
+						replacement = substitution.get(term);
+						if (replacement == null) {
+							replacement = getCanonicalConstant(((Variable) term).getName() + constantcounter);
+							constantcounter++;
+							substitution.put((Variable) term, replacement);
 						}
-						functionterms.set(j, substitution);
+					} 
+					else if (term instanceof ValueConstant) {
+						replacement = getCanonicalConstant(((ValueConstant) term).getValue() + constantcounter);
+						constantcounter++;
+					} 
+					else if (term instanceof URIConstant) {
+						replacement = getCanonicalConstant(((URIConstant) term).getURI() + constantcounter);
+						constantcounter++;
+					}
+					headterms.set(i, replacement);
+				} 
+				else if (term instanceof Function) {
+					Function function = (Function) term;
+					List<Term> functionterms = function.getTerms();
+					for (int j = 0; j < functionterms.size(); j++) {
+						Term fterm = functionterms.get(j);
+						if (fterm instanceof Variable) {
+							ValueConstant replacement = null;
+							if (fterm instanceof VariableImpl) {
+								replacement = substitution.get(fterm);
+								if (replacement == null) {
+									replacement = getCanonicalConstant(((VariableImpl)fterm).getName() + constantcounter);
+									constantcounter++;
+									substitution.put((Variable) fterm, replacement);
+								}
+							} 
+							else {
+								replacement = getCanonicalConstant(((ValueConstant)fterm).getValue() + constantcounter);
+								constantcounter++;
+							}
+							functionterms.set(j, replacement);
+						}
 					}
 				}
 			}
 		}
-		return constantcounter;
-	}
 
+		private static ValueConstant getCanonicalConstant(String nameFragment) {
+			return fac.getConstantLiteral("CAN" + nameFragment);		
+		}
+		
+	}
+	
+
+	
 	/***
 	 * True if the query used to construct this CQCUtilities object is is
 	 * contained in 'query'.
@@ -377,7 +382,7 @@ public class CQCUtilities {
 	 */
 	public boolean isContainedIn(CQIE query) {
 
-		if (!query.getHead().getFunctionSymbol().equals(canonicalQuery.getHead().getFunctionSymbol()))
+		if (!query.getHead().getFunctionSymbol().equals(canonicalHead.getFunctionSymbol()))
 			return false;
 
         List<Function> body = query.getBody();
@@ -385,9 +390,8 @@ public class CQCUtilities {
             return false;
         
         for (Function queryatom : body) {
-			if (!canonicalpredicates.contains(queryatom.getFunctionSymbol())) {
+			if (!factMap.containsKey(queryatom.getFunctionSymbol())) 
 				return false;
-			}
 		}
 
 		return hasAnswer(query);
@@ -542,7 +546,7 @@ public class CQCUtilities {
 				// Stopping early if we have chosen an MGU that has no
 				// possibility of being successful because of the head.
 				
-				if (Unifier.getMGU(canonicalQuery.getHead(), newquery.getHead()) == null) {
+				if (Unifier.getMGU(canonicalHead, newquery.getHead()) == null) {
 					
 					// There is no chance to unify the two heads, hence this
 					// fact is not good.
@@ -639,6 +643,9 @@ public class CQCUtilities {
 	 */
 	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, List<CQIE> rules, boolean sort) {
 
+		if (rules == null || rules.isEmpty()) 
+			return queriesInput;
+		
 		List<CQIE> queries = new LinkedList<CQIE>();
 		queries.addAll(queriesInput);
 		
@@ -650,13 +657,11 @@ public class CQCUtilities {
 			// log.debug("Sorting...");
 			Collections.sort(queries, lenghtComparator);
 		}
-
 		
-		if (rules != null && !rules.isEmpty()) {
-			for (int i = 0; i < queries.size(); i++) {
-				CQIE query = queries.get(i);
-				CQCUtilities cqc = new CQCUtilities(query, rules);
-				if (cqc.rules != null)
+		for (int i = 0; i < queries.size(); i++) {
+			CQIE query = queries.get(i);
+			CQCUtilities cqc = new CQCUtilities(query, rules);
+			if (cqc.canonicalHead != null)   // if it is set up properly (i.e., does not contain a boolean atom)
 				for (int j = queries.size() - 1; j > i; j--) {
 					CQIE query2 = queries.get(j);
 					if (cqc.isContainedIn(query2)) {
@@ -666,12 +671,12 @@ public class CQCUtilities {
 						break;
 					}
 				}
-			}
+		}
 
-			if (twopasses) {
-				for (int i = (queries.size() - 1); i >= 0; i--) {
-					CQCUtilities cqc = new CQCUtilities(queries.get(i), rules);
-					if (cqc.rules != null)
+		if (twopasses) {
+			for (int i = (queries.size() - 1); i >= 0; i--) {
+				CQCUtilities cqc = new CQCUtilities(queries.get(i), rules);
+				if (cqc.canonicalHead != null) // if it is set up properly (i.e., does not contain a boolean atom)
 					for (int j = 0; j < i; j++) {
 						if (cqc.isContainedIn(queries.get(j))) {
 //							log.debug("REMOVE (FK): " + queries.get(i));
@@ -679,7 +684,6 @@ public class CQCUtilities {
 							break;
 						}
 					}
-				}
 			}
 		}
 		
@@ -693,6 +697,9 @@ public class CQCUtilities {
 	
 	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, DataDependencies sigma, boolean sort) {
 
+		if (sigma == null) 
+			return queriesInput;
+		
 		List<CQIE> queries = new LinkedList<CQIE>();
 		queries.addAll(queriesInput);
 		
@@ -705,35 +712,34 @@ public class CQCUtilities {
 			Collections.sort(queries, lenghtComparator);
 		}
 
-		if (sigma != null) {
-			for (int i = 0; i < queries.size(); i++) {
-				CQIE query = queries.get(i);
-				CQCUtilities cqc = new CQCUtilities(query, sigma);
-				for (int j = queries.size() - 1; j > i; j--) {
-					CQIE query2 = queries.get(j);
-					if (cqc.isContainedIn(query2)) {
+		for (int i = 0; i < queries.size(); i++) {
+			CQIE query = queries.get(i);
+			CQCUtilities cqc = new CQCUtilities(query, sigma);
+			for (int j = queries.size() - 1; j > i; j--) {
+				CQIE query2 = queries.get(j);
+				if (cqc.isContainedIn(query2)) {
+//					log.debug("REMOVE (SIGMA): " + queries.get(i));
+					queries.remove(i);
+					i -= 1;
+					break;
+				}
+			}
+		}
+
+		if (twopasses) {
+			for (int i = (queries.size() - 1); i >= 0; i--) {
+				CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
+				for (int j = 0; j < i; j++) {
+					if (cqc.isContainedIn(queries.get(j))) {
 //						log.debug("REMOVE (SIGMA): " + queries.get(i));
 						queries.remove(i);
-						i -= 1;
 						break;
 					}
 				}
 			}
-	
-			if (twopasses) {
-				for (int i = (queries.size() - 1); i >= 0; i--) {
-					CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
-					for (int j = 0; j < i; j++) {
-						if (cqc.isContainedIn(queries.get(j))) {
-//							log.debug("REMOVE (SIGMA): " + queries.get(i));
-							queries.remove(i);
-							break;
-						}
-					}
-				}
-			}
 		}
-//		int newsize = queries.size();
+
+		//		int newsize = queries.size();
 //		double endtime = System.currentTimeMillis();
 //		double time = (endtime - startime) / 1000;
 //		log.debug("Resulting size: {}  Time elapsed: {}", newsize, time);
