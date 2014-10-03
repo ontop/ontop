@@ -40,7 +40,7 @@ public class TypeLift {
          */
         TreeBasedDatalogProgram initialDatalogProgram = TreeBasedDatalogProgram.fromRules(inputRules);
         TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> initialRootZipper = TreeZipper.fromTree(
-                initialDatalogProgram.computeRuleTree());
+                initialDatalogProgram.getP3RuleTree());
 
         /**
          * Navigates into the tree until reaching the leftmost leaf.
