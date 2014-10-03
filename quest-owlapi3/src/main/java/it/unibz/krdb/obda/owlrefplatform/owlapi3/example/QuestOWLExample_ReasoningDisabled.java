@@ -29,12 +29,12 @@ import java.io.File;
 public class QuestOWLExample_ReasoningDisabled {
 
     interface ParamConst{
-        public static final String MYSQL  = "src/main/resources/example/ontowis-hierarchy.obda";
-        public static final String POSTGRES = "src/main/resources/example/ontowis-5joins-int-postgres.obda";
-        public static final String DB2 = "src/main/resources/example/ontowis-5joins-int-db2.obda";
-        public static final String MYSQL_VIEW = "src/main/resources/example/ontowis-5joins-int-view.obda";
-        public static final String POSTGRES_VIEW = "src/main/resources/example/ontowis-5joins-int-view-postgres.obda";
-        public static final String DB2_VIEW = "src/main/resources/example/ontowis-5joins-int-view-db2.obda";
+        public static final String MYSQL  = "src/main/resources/example/disableReasoning/ontowis-hierarchy-mysql.obda";
+        public static final String POSTGRES = "src/main/resources/example/disableReasoning/ontowis-hierarchy-postgres.obda";
+        public static final String DB2 = "src/main/resources/example/disableReasoning/ontowis-hierarchy-db2.obda";
+        public static final String MYSQL_VIEW = "src/main/resources/example/disableReasoning/ontowis-5joins-int-view.obda";
+        public static final String POSTGRES_VIEW = "src/main/resources/example/disableReasoning/ontowis-5joins-int-view-postgres.obda";
+        public static final String DB2_VIEW = "src/main/resources/example/disableReasoning/ontowis-5joins-int-view-db2.obda";
     }
 
     public QuestOWLExample_ReasoningDisabled(String obdaFile){
@@ -48,13 +48,13 @@ public class QuestOWLExample_ReasoningDisabled {
      * Please use the pre-bundled H2 server from the above link
      *
      */
-    final String owlfile = "src/main/resources/example/ontowis-hierarchy.owl";
+    final String owlfile = "src/main/resources/example/disableReasoning/ontowis-hierarchy.owl";
     //final String obdafile = "src/main/resources/example/ontowis-5joins-int-view.obda";
     final String obdafile;// = "src/main/resources/example/ontowis-5joins-int-view.obda";
     final String usrConstrinFile = "src/main/resources/example/funcCons.txt";
 
     // Exclude from T-Mappings
-    final String tMappingsConfFile = "src/main/resources/example/ontowis-hierarchy-tm.conf";
+    final String tMappingsConfFile = "src/main/resources/example/disableReasoning/ontowis-hierarchy-tm.conf";
 
     public void runQuery() throws Exception {
 
@@ -91,7 +91,7 @@ public class QuestOWLExample_ReasoningDisabled {
 		 * USR CONSTRAINTS !!!!
 		 */
         ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
-        //factory.setImplicitDBConstraints(constr);
+        factory.setImplicitDBConstraints(constr);
 
 		/*
 		 * T-Mappings Handling!!
@@ -111,10 +111,35 @@ public class QuestOWLExample_ReasoningDisabled {
 		 * Get the book information that is stored in the database
 		 */
 
-        String[] queries = new String[1];
-        String[] results = new String[1];
+        String[] queries = new String[20];
+        String[] results = new String[20];
 
-        queries[0]=	"PREFIX :	<http://www.example.org/> SELECT ?x   WHERE {?x a  :A2}  ";
+
+
+
+        queries[0]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A5}  ";
+        queries[1]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A4}  ";
+        queries[2]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A3}  ";
+        queries[3]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A2}  ";
+        queries[4]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A1}  ";
+
+        queries[5]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A5. ?x a  :B5}  ";
+        queries[6]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A4. ?x a  :B4}  ";
+        queries[7]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A3. ?x a  :B3}  ";
+        queries[8]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A2. ?x a  :B2}  ";
+        queries[9]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A1. ?x a  :B1}  ";
+
+        queries[10]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A5. FILTER (?x < 1000). }  ";
+        queries[11]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A4. FILTER (?x < 1000). }  ";
+        queries[12]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A3. FILTER (?x < 1000). }  ";
+        queries[13]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A2. FILTER (?x < 1000). }  ";
+        queries[14]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A1. FILTER (?x < 1000). }  ";
+
+        queries[15]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A5. ?x a  :B5. FILTER (?x < 1000). }  ";
+        queries[16]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A4. ?x a  :B4. FILTER (?x < 1000). }  ";
+        queries[17]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A3. ?x a  :B3. FILTER (?x < 1000). }  ";
+        queries[18]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A2. ?x a  :B2. FILTER (?x < 1000). }  ";
+        queries[19]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A1. ?x a  :B1. FILTER (?x < 1000). }  ";
 
 
         /*
@@ -184,6 +209,7 @@ public class QuestOWLExample_ReasoningDisabled {
                     long t2 = System.currentTimeMillis();
                     time = time + (t2-t1);
                     System.out.println("partial time:" + time);
+                    System.out.println("query results:" + count);
                     rs.close();
                 }
 

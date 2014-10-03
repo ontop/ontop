@@ -53,22 +53,29 @@
 			<artifactId>owlapi-apibinding</artifactId>
 		</dependency>
 		
-		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<type>jar</type>
-			<!--   <scope>test</scope> Davide> I commented this out -->
-		</dependency>
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<!--   <scope>test</scope> Davide> I commented this out -->
-		</dependency>
+
 		
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryparser-sparql</artifactId>
 		</dependency>
+
+        <!-- Comments out all the jdbc jars not in test scope before merging to develop -->
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <type>jar</type>
+            <!--   <scope>test</scope> Davide> I commented this out -->
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <!--   <scope>test</scope> Davide> I commented this out -->
+        </dependency>
+        <dependency>
+            <groupId>com.ibm</groupId>
+            <artifactId>db2jcc4.jar</artifactId>
+        </dependency>
 	</dependencies>
 	
 	<build>
