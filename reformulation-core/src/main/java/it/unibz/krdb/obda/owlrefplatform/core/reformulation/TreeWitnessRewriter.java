@@ -307,7 +307,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	
 		// extra CQC 
 		if (output.getRules().size() > 1)
-			output = fac.getDatalogProgram(CQCUtilities.removeContainedQueries(output.getRules(), true, sigma));
+			output = fac.getDatalogProgram(CQCUtilities.removeContainedQueries(output.getRules(), sigma));
 		
 		QueryUtils.copyQueryModifiers(dp, output);
 

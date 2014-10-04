@@ -23,7 +23,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
-import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
 
 import java.util.*;
@@ -508,7 +507,6 @@ public class CQCUtilities {
 		Stack<CQIE> queryStack = new Stack<CQIE>();
 		CQIE currentQuery = query;
 		List<Function> currentBody = currentQuery.getBody();
-		Function currentAtom = null;
 		queryStack.push(null);
 
 		HashMap<Integer, Stack<Function>> choicesMap = new HashMap<Integer, Stack<Function>>(bodysize * 2);
@@ -521,8 +519,7 @@ public class CQCUtilities {
 			if (currentAtomIdx > maxIdxReached)
 				maxIdxReached = currentAtomIdx;
 
-			currentAtom = currentBody.get(currentAtomIdx);			
-				
+			Function currentAtom = currentBody.get(currentAtomIdx);							
 			Predicate currentPredicate = currentAtom.getPredicate();
 
 			// Looking for options for this atom 
@@ -604,13 +601,22 @@ public class CQCUtilities {
 	
 
 	
-	public static DatalogProgram removeContainedQueriesSorted(DatalogProgram program, boolean twopasses, List<CQIE> foreignKeyRules) {
+	public static DatalogProgram removeContainedQueriesSorted(DatalogProgram program, List<CQIE> foreignKeyRules) {
+		
+		if (foreignKeyRules == null || foreignKeyRules.isEmpty()) 
+			return program;
+				
 		DatalogProgram result = OBDADataFactoryImpl.getInstance().getDatalogProgram();
 		result.setQueryModifiers(program.getQueryModifiers());
-		List<CQIE> rules = new LinkedList<CQIE>();
-		rules.addAll(program.getRules());
-		rules = removeContainedQueries(rules, twopasses, foreignKeyRules, true);
-		result.appendRule(rules);
+		List<CQIE> queries = new LinkedList<CQIE>();
+		queries.addAll(program.getRules());
+		
+		// log.debug("Sorting...");
+		Collections.sort(queries, lenghtComparator);
+				
+		removeContainedQueries(queries, foreignKeyRules);
+		
+		result.appendRule(queries);
 		return result;
 	}
 	
@@ -625,12 +631,36 @@ public class CQCUtilities {
 	 * 
 	 * @param queries
 	 */
-	public static List<CQIE> removeContainedQueriesSorted(List<CQIE> queries, boolean twopasses, DataDependencies sigma) {
-		return removeContainedQueries(queries, twopasses, sigma, true);
+	
+	// only in TreeRedReformulator
+	public static List<CQIE> removeContainedQueriesSorted(List<CQIE> queries, DataDependencies sigma) {
+		
+		if (sigma == null) 
+			return queries;
+		
+		List<CQIE> queriesCopy = new LinkedList<CQIE>();
+		queriesCopy.addAll(queries);
+		
+		// log.debug("Sorting...");
+		Collections.sort(queriesCopy, lenghtComparator);
+		
+		removeContainedQueriesInternal(queriesCopy, sigma);
+		
+		return queriesCopy;
 	}
 
-	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, DataDependencies sigma) {
-		return removeContainedQueries(queriesInput, twopasses, sigma, false);
+	// only in TreeWitnessRewriter
+	public static List<CQIE> removeContainedQueries(List<CQIE> queries, DataDependencies sigma) {
+		
+		if (sigma == null) 
+			return queries;
+		
+		List<CQIE> queriesCopy = new LinkedList<CQIE>();
+		queriesCopy.addAll(queries);
+		
+		removeContainedQueriesInternal(queriesCopy, sigma);
+		
+		return queriesCopy;
 	}
 
 	
@@ -643,25 +673,14 @@ public class CQCUtilities {
 	 * Removal of queries is done in two main double scans. The first scan goes
 	 * top-down/down-top, the second scan goes down-top/top-down
 	 * 
-	 * @param queriesInput
+	 * @param queries
 	 */
-	private static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, List<CQIE> rules, boolean sort) {
+	private static void removeContainedQueries(List<CQIE> queries, List<CQIE> rules) {
 
-		if (rules == null || rules.isEmpty()) 
-			return queriesInput;
-		
-		List<CQIE> queries = new LinkedList<CQIE>();
-		queries.addAll(queriesInput);
-		
 //		int initialsize = queries.size();
 //		log.debug("Optimzing w.r.t. CQC. Initial size: {}:", initialsize);
 //		double startime = System.currentTimeMillis();
 
-		if (sort) {
-			// log.debug("Sorting...");
-			Collections.sort(queries, lenghtComparator);
-		}
-		
 		for (int i = 0; i < queries.size(); i++) {
 			CQIE query = queries.get(i);
 			if (isOptimizable(query))   {
@@ -678,17 +697,16 @@ public class CQCUtilities {
 			}
 		}
 
-		if (twopasses) {
-			for (int i = (queries.size() - 1); i >= 0; i--) {
-				CQIE query = queries.get(i);
-				if (isOptimizable(query))   {
-					CQCUtilities cqc = new CQCUtilities(query, rules);
-					for (int j = 0; j < i; j++) {
-						if (cqc.isContainedIn(queries.get(j))) {
-//							log.debug("REMOVE (FK): " + queries.get(i));
-							queries.remove(i);
-							break;
-						}
+		// second pass
+		for (int i = (queries.size() - 1); i >= 0; i--) {
+			CQIE query = queries.get(i);
+			if (isOptimizable(query))   {
+				CQCUtilities cqc = new CQCUtilities(query, rules);
+				for (int j = 0; j < i; j++) {
+					if (cqc.isContainedIn(queries.get(j))) {
+//						log.debug("REMOVE (FK): " + queries.get(i));
+						queries.remove(i);
+						break;
 					}
 				}
 			}
@@ -698,26 +716,9 @@ public class CQCUtilities {
 //		double endtime = System.currentTimeMillis();
 //		double time = (endtime - startime) / 1000;
 //		log.debug("Resulting size: {}  Time elapsed: {}", newsize, time);
-		
-		return queries;
 	}
 	
-	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, DataDependencies sigma, boolean sort) {
-
-		if (sigma == null) 
-			return queriesInput;
-		
-		List<CQIE> queries = new LinkedList<CQIE>();
-		queries.addAll(queriesInput);
-		
-//		int initialsize = queries.size();
-//		log.debug("Optimzing w.r.t. CQC. Initial size: {}:", initialsize);
-//		double startime = System.currentTimeMillis();
-
-		if (sort) {
-			// log.debug("Sorting...");
-			Collections.sort(queries, lenghtComparator);
-		}
+	private static void removeContainedQueriesInternal(List<CQIE> queries, DataDependencies sigma) {
 
 		for (int i = 0; i < queries.size(); i++) {
 			CQIE query = queries.get(i);
@@ -733,24 +734,15 @@ public class CQCUtilities {
 			}
 		}
 
-		if (twopasses) {
-			for (int i = (queries.size() - 1); i >= 0; i--) {
-				CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
-				for (int j = 0; j < i; j++) {
-					if (cqc.isContainedIn(queries.get(j))) {
-//						log.debug("REMOVE (SIGMA): " + queries.get(i));
-						queries.remove(i);
-						break;
-					}
+		for (int i = (queries.size() - 1); i >= 0; i--) {
+			CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
+			for (int j = 0; j < i; j++) {
+				if (cqc.isContainedIn(queries.get(j))) {
+//					log.debug("REMOVE (SIGMA): " + queries.get(i));
+					queries.remove(i);
+					break;
 				}
 			}
 		}
-
-		//		int newsize = queries.size();
-//		double endtime = System.currentTimeMillis();
-//		double time = (endtime - startime) / 1000;
-//		log.debug("Resulting size: {}  Time elapsed: {}", newsize, time);
-		
-		return queries;
 	}
 }
