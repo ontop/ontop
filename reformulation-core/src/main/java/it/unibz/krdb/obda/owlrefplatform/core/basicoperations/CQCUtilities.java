@@ -41,12 +41,12 @@ import java.util.*;
  */
 public class CQCUtilities {
 
-	private Function canonicalHead = null;
+	private final Function freezeHead;
 	
 	/***
 	 * An index of all the facts obtained by freezing this query.
 	 */
-	private Map<Predicate, List<Function>> factMap;
+	private final Map<Predicate, List<Function>> freezeChasedBody;
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
@@ -59,33 +59,36 @@ public class CQCUtilities {
 	 * @param sigma
 	 *            A set of ABox dependencies
 	 */
+	public CQCUtilities(CQIE query) {
+		FreezeCQ c2cq = new FreezeCQ(query.getHead(), query.getBody());
+		freezeHead = c2cq.getHead();	
+		freezeChasedBody = c2cq.getBodyAtoms();
+	}
+	
 	public CQCUtilities(CQIE query, DataDependencies sigma) {
-
-		if (sigma != null) {
-			// log.debug("Using dependencies to chase the query");
-			query = chaseQuery(query, sigma);
-		}
-		CanonicalQueryForCQ c2cq = new CanonicalQueryForCQ(query);
-		canonicalHead = c2cq.getHead();
+		Set<Function> chasedBody = chaseAtoms(query.getBody(), sigma);
 		
-		factMap = c2cq.getBodyAtoms();
+		FreezeCQ c2cq = new FreezeCQ(query.getHead(), chasedBody);
+		freezeHead = c2cq.getHead();	
+		freezeChasedBody = c2cq.getBodyAtoms();
 	}
 
-	public CQCUtilities(CQIE query, List<CQIE> rules) {
+	private CQCUtilities(CQIE query, List<CQIE> rules) {
+		// rules are applied only once to each atom (no saturation)
+		Set<Function> chasedBody = chaseAtoms(query.getBody(), rules);
+		
+		FreezeCQ c2cq = new FreezeCQ(query.getHead(), chasedBody);
+		freezeHead = c2cq.getHead();
+		freezeChasedBody = c2cq.getBodyAtoms();				
+	}
 
+	
+	private static boolean isOptimizable(CQIE query) {
 		for (Function b : query.getBody())
 			if (b.isBooleanFunction())   
-				return;   // leave canonicalHead = null as a flag of bad state
-		
-		if (rules != null && !rules.isEmpty()) {		
-			query = chaseQuery(query, rules);
-			
-			CanonicalQueryForCQ c2cq = new CanonicalQueryForCQ(query);
-			canonicalHead = c2cq.getHead();
-			factMap = c2cq.getBodyAtoms();			
-		}
+				return false;   
+		return true;
 	}
-
 
 	
 	/***
@@ -102,13 +105,10 @@ public class CQCUtilities {
 	 * @param sigma
 	 * @return
 	 */
-	private static CQIE chaseQuery(CQIE query, DataDependencies sigma) {
+	private static Set<Function> chaseAtoms(Collection<Function> body, DataDependencies sigma) {
 
-		LinkedHashSet<Function> body = new LinkedHashSet<Function>();
-		body.addAll(query.getBody());
-
-		LinkedHashSet<Function> newbody = new LinkedHashSet<Function>();
-		newbody.addAll(query.getBody());
+		Set<Function> newbody = new LinkedHashSet<Function>();
+		newbody.addAll(body);
 
 		boolean loop = true;
 		while (loop) {
@@ -220,42 +220,44 @@ public class CQCUtilities {
 			}
 		}
 
-		LinkedList<Function> bodylist = new LinkedList<Function>();
-		bodylist.addAll(body);
-		
-		CQIE newquery = fac.getCQIE(query.getHead(), bodylist);
-		newquery.setQueryModifiers(query.getQueryModifiers());
+//		LinkedList<Function> bodylist = new LinkedList<Function>();
+//		bodylist.addAll(body);
+//		
+//		CQIE newquery = fac.getCQIE(query.getHead(), bodylist);
+//		newquery.setQueryModifiers(query.getQueryModifiers());
 
-		return newquery;
+		return newbody;
 	}
 
 	/**
 	 * This method is used to chase foreign key constraint rule in which the rule
 	 * has only one atom in the body.
 	 * 
+	 * IMPORTANT: each rule is applied once to each atom
+	 * 
 	 * @param rules
 	 * @return
 	 */
-	private static CQIE chaseQuery(CQIE query, List<CQIE> rules) {
+	private static Set<Function> chaseAtoms(Collection<Function> atoms, List<CQIE> rules) {
 
-		List<Function> facts = new ArrayList<Function>();
-		for (Function fact : query.getBody()) {
-			facts.add(fact);
+		Set<Function> derivedAtoms = new HashSet<Function>();
+		for (Function fact : atoms) {
+			derivedAtoms.add(fact);
 			for (CQIE rule : rules) {
 				Function ruleBody = rule.getBody().get(0);
 				Map<Variable, Term> theta = Unifier.getMGU(ruleBody, fact);
 				if (theta != null && !theta.isEmpty()) {
 					Function ruleHead = rule.getHead();
 					Function newFact = (Function)ruleHead.clone();
-					Unifier.applyUnifier(newFact, theta); // no need to unify into facts
-					facts.add(newFact);
+					Unifier.applyUnifierToGetFact(newFact, theta); 
+					derivedAtoms.add(newFact);
 				}
 			}
 		}
-		return fac.getCQIE(query.getHead(), facts);
+		return derivedAtoms;
 	}
 	
-	public static final class CanonicalQueryForCQ {
+	public static final class FreezeCQ {
 		
 		private final Map<Variable, ValueConstant> substitution = new HashMap<Variable, ValueConstant>(50);
 		
@@ -278,17 +280,17 @@ public class CQCUtilities {
 		 * @param q
 		 */
 		
-		public CanonicalQueryForCQ(CQIE q) { 
-			head = (Function) q.getHead().clone();
-			changeAtomIntoCanonical(head);
+		public FreezeCQ(Function head, Collection<Function> body) { 
+			this.head = (Function) head.clone();
+			freezeAtom(this.head);
 
-			factMap = new HashMap<Predicate, List<Function>>(q.getBody().size() * 2);
+			factMap = new HashMap<Predicate, List<Function>>(body.size() * 2);
 
-			for (Function atom : q.getBody()) 
+			for (Function atom : body) 
 				// not boolean, not algebra, not arithmetic, not datatype
 				if (atom != null && atom.isDataFunction()) {
 					Function fact = (Function) atom.clone();
-					changeAtomIntoCanonical(fact);
+					freezeAtom(fact);
 					
 					Predicate p = fact.getPredicate();
 					List<Function> facts = factMap.get(p);
@@ -315,7 +317,7 @@ public class CQCUtilities {
 		 * 
 		 * @param atom
 		 */
-		private void changeAtomIntoCanonical(Function atom) {
+		private void freezeAtom(Function atom) {
 			List<Term> headterms = atom.getTerms();
 			for (int i = 0; i < headterms.size(); i++) {
 				Term term = headterms.get(i);
@@ -382,7 +384,7 @@ public class CQCUtilities {
 	 */
 	public boolean isContainedIn(CQIE query) {
 
-		if (!query.getHead().getFunctionSymbol().equals(canonicalHead.getFunctionSymbol()))
+		if (!query.getHead().getFunctionSymbol().equals(freezeHead.getFunctionSymbol()))
 			return false;
 
         List<Function> body = query.getBody();
@@ -390,7 +392,7 @@ public class CQCUtilities {
             return false;
         
         for (Function queryatom : body) {
-			if (!factMap.containsKey(queryatom.getFunctionSymbol())) 
+			if (!freezeChasedBody.containsKey(queryatom.getFunctionSymbol())) 
 				return false;
 		}
 
@@ -529,7 +531,7 @@ public class CQCUtilities {
 				// of choices from the original fact list.
 				 
 				factChoices = new Stack<Function>();
-				factChoices.addAll(factMap.get(currentPredicate));
+				factChoices.addAll(freezeChasedBody.get(currentPredicate));
 				choicesMap.put(currentAtomIdx, factChoices);
 			}
 
@@ -546,7 +548,7 @@ public class CQCUtilities {
 				// Stopping early if we have chosen an MGU that has no
 				// possibility of being successful because of the head.
 				
-				if (Unifier.getMGU(canonicalHead, newquery.getHead()) == null) {
+				if (Unifier.getMGU(freezeHead, newquery.getHead()) == null) {
 					
 					// There is no chance to unify the two heads, hence this
 					// fact is not good.
@@ -563,7 +565,7 @@ public class CQCUtilities {
 				
 				// Reseting choices state and backtracking and resetting the set
 				// of choices for the current position
-				factChoices.addAll(factMap.get(currentPredicate));
+				factChoices.addAll(freezeChasedBody.get(currentPredicate));
 				currentAtomIdx -= 1;
 				if (currentAtomIdx == -1)
 					break;
@@ -641,7 +643,7 @@ public class CQCUtilities {
 	 * 
 	 * @param queriesInput
 	 */
-	public static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, List<CQIE> rules, boolean sort) {
+	private static List<CQIE> removeContainedQueries(List<CQIE> queriesInput, boolean twopasses, List<CQIE> rules, boolean sort) {
 
 		if (rules == null || rules.isEmpty()) 
 			return queriesInput;
@@ -660,8 +662,8 @@ public class CQCUtilities {
 		
 		for (int i = 0; i < queries.size(); i++) {
 			CQIE query = queries.get(i);
-			CQCUtilities cqc = new CQCUtilities(query, rules);
-			if (cqc.canonicalHead != null)   // if it is set up properly (i.e., does not contain a boolean atom)
+			if (isOptimizable(query))   {
+				CQCUtilities cqc = new CQCUtilities(query, rules);
 				for (int j = queries.size() - 1; j > i; j--) {
 					CQIE query2 = queries.get(j);
 					if (cqc.isContainedIn(query2)) {
@@ -671,12 +673,14 @@ public class CQCUtilities {
 						break;
 					}
 				}
+			}
 		}
 
 		if (twopasses) {
 			for (int i = (queries.size() - 1); i >= 0; i--) {
-				CQCUtilities cqc = new CQCUtilities(queries.get(i), rules);
-				if (cqc.canonicalHead != null) // if it is set up properly (i.e., does not contain a boolean atom)
+				CQIE query = queries.get(i);
+				if (isOptimizable(query))   {
+					CQCUtilities cqc = new CQCUtilities(query, rules);
 					for (int j = 0; j < i; j++) {
 						if (cqc.isContainedIn(queries.get(j))) {
 //							log.debug("REMOVE (FK): " + queries.get(i));
@@ -684,6 +688,7 @@ public class CQCUtilities {
 							break;
 						}
 					}
+				}
 			}
 		}
 		

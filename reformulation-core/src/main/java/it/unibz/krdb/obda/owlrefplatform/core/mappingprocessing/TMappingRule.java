@@ -41,7 +41,7 @@ public class TMappingRule {
 		}
 		Function newhead = (Function)head.clone();
 		stripped = fac.getCQIE(newhead, newbody);
-		cqc = new CQCUtilities(stripped, (DataDependencies)null /*sigma*/);
+		cqc = new CQCUtilities(stripped);
 	}
 
 	public TMappingRule(Function head, TMappingRule baseRule) {
@@ -58,7 +58,7 @@ public class TMappingRule {
 		}
 		Function newhead = (Function)head.clone();
 		stripped = fac.getCQIE(newhead, newbody);
-		cqc = new CQCUtilities(stripped, (DataDependencies)null /*sigma*/); // could be null -- no optimization is used
+		cqc = new CQCUtilities(stripped); // sigma is null -- no optimization is used
 	}
 	
 	
