@@ -84,6 +84,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -499,19 +500,21 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		 */
 
 		reformulationReasoner = new TBoxReasonerImpl(inputTBox);
-		Ontology reformulationOntology;
+		Set<Predicate> reformulationVocabulary;
+		
 		if (bOptimizeEquivalences) {
 			// this is used to simplify the vocabulary of ABox assertions and mappings
 			equivalenceMaps = EquivalenceMap.getEquivalenceMap(reformulationReasoner);
 			// generate a new TBox with a simpler vocabulary
-			reformulationOntology = EquivalenceTBoxOptimizer.getOptimalTBox(reformulationReasoner, 
+			Ontology reformulationOntology = EquivalenceTBoxOptimizer.getOptimalTBox(reformulationReasoner, 
 												equivalenceMaps, inputTBox.getVocabulary());
 			reformulationReasoner = new TBoxReasonerImpl(reformulationOntology);			
-		} else {
+			reformulationVocabulary = reformulationOntology.getVocabulary();
+		} 
+		else {
 			equivalenceMaps = EquivalenceMap.getEmptyEquivalenceMap();
-			reformulationOntology = inputTBox;
+			reformulationVocabulary = inputTBox.getVocabulary();
 		}
-		// Set<Predicate> reformulationVocabulary = reformulationOntology.getVocabulary();
 
 		try {
 
@@ -797,9 +800,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (bOptimizeTBoxSigma) {
 				TBoxReasoner sigmaReasoner = sigma.getReasoner();
 				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner, 
-						reformulationOntology.getVocabulary(), sigmaReasoner);
+						reformulationVocabulary, sigmaReasoner);
 				reasoner = new TBoxReasonerImpl(reducer.getReducedOntology());
-			} else {
+			} 
+			else {
 				reasoner = reformulationReasoner;
 			}
 
