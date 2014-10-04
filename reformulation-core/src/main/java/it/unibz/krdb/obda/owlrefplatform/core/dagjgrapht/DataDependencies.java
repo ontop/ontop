@@ -32,6 +32,7 @@ public class DataDependencies {
 	private final Ontology sigma;
 	/* TBox axioms translated into rules (used by QuestStatement) */ 
 	private final Map<Predicate, List<CQIE>> rulesIndex;
+	private final List<CQIE> rules;
 
 	private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	private static final Logger log = LoggerFactory.getLogger(DataDependencies.class);
@@ -40,6 +41,7 @@ public class DataDependencies {
 		sigma = TBoxReasonerToOntology.getOntology(reasoner, true);
 		sigma.saturate();
 
+		rules = createSigmaRules(sigma);
 		rulesIndex = createSigmaRulesIndex(sigma);				
 	}
 	
@@ -49,6 +51,7 @@ public class DataDependencies {
 		this.sigma = sigma;
 		sigma.saturate();
 		
+		rules = createSigmaRules(sigma);
 		rulesIndex = createSigmaRulesIndex(sigma);				
 	}
 
@@ -98,6 +101,32 @@ public class DataDependencies {
 		return sigmaRulesMap;
 	}
 
+	private static List<CQIE> createSigmaRules(Ontology sigma) {
+		Ontology saturatedSigma = sigma.clone();
+		saturatedSigma.saturate();
+		
+		List<CQIE> sigmaRules = new LinkedList<CQIE>();
+		
+		for (Axiom assertion : saturatedSigma.getAssertions()) {
+			try {
+				CQIE rule = AxiomToRuleTranslator.translate(assertion);
+				// ESSENTIAL: FRESH RULES
+				if (rule != null) {
+					rule = DatalogUnfolder.getFreshRule(rule, 4022013); // Random suffix number
+					sigmaRules.add(rule);
+				}
+			} 
+			catch (UnsupportedOperationException e) {
+				log.warn(e.getMessage());
+			}
+		}
+		return sigmaRules;
+	}
+	
+	public List<CQIE> getRules() {
+		return rules;
+	}
+	
 	/**
 	 * 
 	 * @param program

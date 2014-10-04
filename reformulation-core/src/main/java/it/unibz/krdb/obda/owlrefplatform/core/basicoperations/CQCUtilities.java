@@ -66,7 +66,7 @@ public class CQCUtilities {
 	}
 	
 	public CQCUtilities(CQIE query, DataDependencies sigma) {
-		Set<Function> chasedBody = chaseAtoms(query.getBody(), sigma);
+		Set<Function> chasedBody = chaseAtoms(query.getBody(), sigma.getRules());
 		
 		FreezeCQ c2cq = new FreezeCQ(query.getHead(), chasedBody);
 		freezeHead = c2cq.getHead();	
@@ -105,6 +105,7 @@ public class CQCUtilities {
 	 * @param sigma
 	 * @return
 	 */
+/*	
 	private static Set<Function> chaseAtoms(Collection<Function> body, DataDependencies sigma) {
 
 		Set<Function> newbody = new LinkedHashSet<Function>();
@@ -228,7 +229,7 @@ public class CQCUtilities {
 
 		return newbody;
 	}
-
+*/
 	/**
 	 * This method is used to chase foreign key constraint rule in which the rule
 	 * has only one atom in the body.
@@ -246,6 +247,7 @@ public class CQCUtilities {
 			for (CQIE rule : rules) {
 				Function ruleBody = rule.getBody().get(0);
 				Map<Variable, Term> theta = Unifier.getMGU(ruleBody, fact);
+				// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH"
 				if (theta != null && !theta.isEmpty()) {
 					Function ruleHead = rule.getHead();
 					Function newFact = (Function)ruleHead.clone();
