@@ -6,7 +6,6 @@ import java.util.Map;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
@@ -18,18 +17,20 @@ public class EquivalenceMap {
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
-	private Map<Predicate, Description> equivalenceMap;
+	private final Map<Predicate, OClass> classEquivalenceMap;
+	private final Map<Predicate, Property> propertyEquivalenceMap;
 
-	private EquivalenceMap(Map<Predicate, Description> equivalenceMap) {
-		this.equivalenceMap = equivalenceMap;
+	private EquivalenceMap(Map<Predicate, OClass> classEquivalenceMap, Map<Predicate, Property> propertyEquivalenceMap) {
+		this.classEquivalenceMap = classEquivalenceMap;
+		this.propertyEquivalenceMap = propertyEquivalenceMap;
 	}
 		
 	public OClass getClassRepresentative(Predicate p) {
-		return (OClass)equivalenceMap.get(p);
+		return classEquivalenceMap.get(p);
 	}
 	
 	public Property getPropertyRepresentative(Predicate p) {
-		return (Property)equivalenceMap.get(p);
+		return propertyEquivalenceMap.get(p);
 	}
 	
 	
@@ -48,7 +49,7 @@ public class EquivalenceMap {
 		
 	public static EquivalenceMap getEquivalenceMap(TBoxReasoner reasoner) {
 		
-		Map<Predicate, Description> equivalenceMap = new HashMap<Predicate, Description>();
+		Map<Predicate, Property> propertyEquivalenceMap = new HashMap<Predicate, Property>();
 
 		for(Equivalences<Property> nodes : reasoner.getProperties()) {
 			Property prop = nodes.getRepresentative();
@@ -64,11 +65,13 @@ public class EquivalenceMap {
 				// if the property is different from its inverse, an entry is created 
 				// (taking the inverses into account)
 				if (equiProp.isInverse()) 
-					equivalenceMap.put(equiProp.getPredicate(), inverseProp);
+					propertyEquivalenceMap.put(equiProp.getPredicate(), inverseProp);
 				else 
-					equivalenceMap.put(equiProp.getPredicate(), prop);
+					propertyEquivalenceMap.put(equiProp.getPredicate(), prop);
 			}
 		}
+
+		Map<Predicate, OClass> classEquivalenceMap = new HashMap<Predicate, OClass>();
 		
 		for(Equivalences<BasicClassDescription> nodes : reasoner.getClasses()) {
 			BasicClassDescription node = nodes.getRepresentative();
@@ -79,16 +82,16 @@ public class EquivalenceMap {
 				if (equivalent instanceof OClass) {
 					// an entry is created for a named class
 					OClass equiClass = (OClass) equivalent;
-					equivalenceMap.put(equiClass.getPredicate(), node);
+					classEquivalenceMap.put(equiClass.getPredicate(), (OClass)node);
 				}
 			}
 		}			
 		
-		return new EquivalenceMap(equivalenceMap);
+		return new EquivalenceMap(classEquivalenceMap, propertyEquivalenceMap);
 	}
 	
 	public static EquivalenceMap getEmptyEquivalenceMap() {
-		return new EquivalenceMap(Collections.<Predicate, Description> emptyMap());
+		return new EquivalenceMap(Collections.<Predicate, OClass> emptyMap(), Collections.<Predicate, Property> emptyMap());
 	}
 	
 }
