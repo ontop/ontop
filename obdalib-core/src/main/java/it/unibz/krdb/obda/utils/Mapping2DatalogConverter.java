@@ -41,6 +41,7 @@ import it.unibz.krdb.sql.api.SelectJSQL;
 import it.unibz.krdb.sql.api.SelectionJSQL;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -98,8 +99,9 @@ public class Mapping2DatalogConverter {
 		sqlQueryParser = new SQLQueryParser(dbMetadata);
 	}
 
-	public DatalogProgram constructDatalogProgram() {
-		DatalogProgram datalogProgram = factory.getDatalogProgram();
+	public List<CQIE> constructDatalogProgram() {
+		//DatalogProgram datalogProgram = factory.getDatalogProgram();
+		List<CQIE> datalogProgram = new LinkedList<CQIE>();
 		List<String> errorMessages = new ArrayList<>();
 		for (OBDAMappingAxiom mappingAxiom : mappingAxioms) {
 			try {
@@ -137,7 +139,7 @@ public class Mapping2DatalogConverter {
                     Function head = createHeadAtom(atom, lookupTable);
                     // Create a new rule from the new head and the body
                     CQIE rule = factory.getCQIE(head, bodyAtoms);
-                    datalogProgram.appendRule(rule);
+                    datalogProgram.add(rule);
                 }
 
 			} catch (Exception e) {

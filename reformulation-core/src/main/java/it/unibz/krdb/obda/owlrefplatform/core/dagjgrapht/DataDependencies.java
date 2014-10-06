@@ -20,17 +20,15 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.AxiomToRuleTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 
 public class DataDependencies {
 	
 	private final Ontology sigma;
-	/* TBox axioms translated into rules (used by QuestStatement) */ 
+	/* TBox axioms translated into rules (used only here) */ 
 	private final Map<Predicate, List<CQIE>> rulesIndex;
 	private final List<CQIE> rules;
 
@@ -59,27 +57,17 @@ public class DataDependencies {
 		return new TBoxReasonerImpl(sigma);		
 	}
 	
+	// only in TreeRedReformulator
 	@Deprecated
-	public Ontology getOntology() {
-		return sigma;
-	}
-	
-	@Deprecated
-	public Set<Axiom> getAssertions() {
-		return sigma.getAssertions();
+	public int getAssertionsSize() {
+		return sigma.getAssertions().size();
 	}
 
-	public Set<SubDescriptionAxiom> getByIncluded(Predicate pred) {
-		return sigma.getByIncluded(pred);
-	}
-	
 	private static Map<Predicate, List<CQIE>> createSigmaRulesIndex(Ontology sigma) {
-		Ontology saturatedSigma = sigma.clone();
-		saturatedSigma.saturate();
 		
 		Map<Predicate, List<CQIE>> sigmaRulesMap = new HashMap<Predicate, List<CQIE>>();
 		
-		for (Axiom assertion : saturatedSigma.getAssertions()) {
+		for (Axiom assertion : sigma.getAssertions()) {
 			try {
 				CQIE rule = AxiomToRuleTranslator.translate(assertion);
                 if(rule != null) {
@@ -102,12 +90,10 @@ public class DataDependencies {
 	}
 
 	private static List<CQIE> createSigmaRules(Ontology sigma) {
-		Ontology saturatedSigma = sigma.clone();
-		saturatedSigma.saturate();
 		
 		List<CQIE> sigmaRules = new LinkedList<CQIE>();
 		
-		for (Axiom assertion : saturatedSigma.getAssertions()) {
+		for (Axiom assertion : sigma.getAssertions()) {
 			try {
 				CQIE rule = AxiomToRuleTranslator.translate(assertion);
 				// ESSENTIAL: FRESH RULES

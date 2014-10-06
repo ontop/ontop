@@ -284,7 +284,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		// if (resultlist.size() < 300) {
 
 		if (sigma != null) {
-			log.debug("Removing redundant queries by CQC. Using {} ABox dependencies.", sigma.getAssertions().size());
+			log.debug("Removing redundant queries by CQC. Using {} ABox dependencies.", sigma.getAssertionsSize());
 		} else {
 			log.debug("Removing redundatnt queries by CQC.");
 		}
@@ -392,7 +392,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		
 		this.sigma = sigmap;
 		if (this.sigma != null) {
-			log.debug("Using {} dependencies.", sigma.getAssertions().size());
+			log.debug("Using {} dependencies.", sigma.getAssertionsSize());
 			//this.sigma.saturate();
 		}
 

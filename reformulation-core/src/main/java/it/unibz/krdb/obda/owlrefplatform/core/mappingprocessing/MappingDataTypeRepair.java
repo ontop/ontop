@@ -134,14 +134,13 @@ public class MappingDataTypeRepair {
                  * @throws OBDAException
                  */
 
-    public void insertDataTyping(DatalogProgram mappingDatalog) throws OBDAException {
+    public void insertDataTyping(List<CQIE> mappingRules) throws OBDAException {
 
         //get all the datatypes in the ontology
         getDataTypeFromOntology();
 
 		QueryVocabularyValidator qvv = new QueryVocabularyValidator(tBoxReasoner);
 
-		List<CQIE> mappingRules = mappingDatalog.getRules();
 		for (CQIE rule : mappingRules) {
 			prepareIndex(rule);
 			Function atom = rule.getHead();

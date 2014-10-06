@@ -212,10 +212,10 @@ public class TMappingProcessor {
 	 * @return A new DatalogProgram that has been normalized in the way
 	 *         described above.
 	 */
-	private static DatalogProgram normalizeConstants(DatalogProgram originalMappings) {
-		DatalogProgram newProgram = fac.getDatalogProgram();
-		newProgram.setQueryModifiers(originalMappings.getQueryModifiers());
-		for (CQIE currentMapping : originalMappings.getRules()) {
+	private static List<CQIE> normalizeConstants(List<CQIE> originalMappings) {
+		List<CQIE> newProgram = new LinkedList<CQIE>();
+		
+		for (CQIE currentMapping : originalMappings) {
 			int freshVarCount = 0;
 
 			Function head = (Function)currentMapping.getHead().clone();
@@ -242,7 +242,7 @@ public class TMappingProcessor {
 				}
 			}
 			CQIE normalizedMapping = fac.getCQIE(head, newBody);
-			newProgram.appendRule(normalizedMapping);
+			newProgram.add(normalizedMapping);
 		}
 		return newProgram;
 	}
@@ -255,7 +255,7 @@ public class TMappingProcessor {
 	 * @return
 	 */
 
-	public static DatalogProgram getTMappings(DatalogProgram originalMappings, TBoxReasoner reasoner, boolean full) {
+	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full) {
 
 		/*
 		 * Normalizing constants
@@ -271,7 +271,7 @@ public class TMappingProcessor {
 		 * list.
 		 */
 		
-		for (CQIE mapping : originalMappings.getRules()) {
+		for (CQIE mapping : originalMappings) {
 			TMappingIndexEntry set = getMappings(mappingIndex, (mapping.getHead().getPredicate()));
 			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody());
 			set.mergeMappingsWithCQC(rule);
@@ -309,8 +309,11 @@ public class TMappingProcessor {
 					 */
 					boolean requiresInverse = (current.isInverse() != childproperty.isInverse());
 
-					for (CQIE childmapping : originalMappings.getRules(childproperty.getPredicate())) {
+					for (CQIE childmapping : originalMappings) {
 
+						if (!childmapping.getHead().getFunctionSymbol().equals(childproperty.getPredicate()))
+							continue;
+						
 						List<Term> terms = childmapping.getHead().getTerms();
 
 						Function newMappingHead;
@@ -397,7 +400,11 @@ public class TMappingProcessor {
 					else 
 						throw new RuntimeException("Unknown type of node in DAG: " + childDescription);
 					
-					for (CQIE childmapping : originalMappings.getRules(childPredicate)) {
+					for (CQIE childmapping : originalMappings) {
+						
+						if (!childmapping.getHead().getFunctionSymbol().equals(childPredicate))
+							continue;
+						
 						List<Term> terms = childmapping.getHead().getTerms();
 
 						Function newMappingHead;
@@ -434,10 +441,10 @@ public class TMappingProcessor {
 			}
 		}
 		
-		DatalogProgram tmappingsProgram = fac.getDatalogProgram();
+		List<CQIE> tmappingsProgram = new LinkedList<CQIE>();
 		for (Predicate key : mappingIndex.keySet()) {
 			for (TMappingRule mapping : mappingIndex.get(key)) 
-				tmappingsProgram.appendRule(mapping.asCQIE());
+				tmappingsProgram.add(mapping.asCQIE());
 		}
 		
 		tmappingsProgram = DatalogNormalizer.enforceEqualities(tmappingsProgram);

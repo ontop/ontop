@@ -33,7 +33,6 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
@@ -70,17 +69,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private static final long serialVersionUID = 6088558456135748487L;
 
-	private DatalogProgram unfoldingProgram;
-
 	private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 
 	private static final Logger log = LoggerFactory.getLogger(DatalogUnfolder.class);
-
-	private enum UnfoldingMode {
-		UCQ, DATALOG
-	};
-
-	private UnfoldingMode unfoldingMode = UnfoldingMode.UCQ;
 
 	private Map<Predicate, List<Integer>> primaryKeys = new HashMap<Predicate, List<Integer>>();
 
@@ -98,19 +89,26 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	private Set<Predicate> extensionalPredicates = new HashSet<Predicate>();
 
 	public DatalogUnfolder(DatalogProgram unfoldingProgram) {
+		this(unfoldingProgram.getRules(), new HashMap<Predicate, List<Integer>>());
+	}
+	
+	public DatalogUnfolder(List<CQIE> unfoldingProgram) {
 		this(unfoldingProgram, new HashMap<Predicate, List<Integer>>());
 	}
 
 	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys) {
+		this(unfoldingProgram.getRules(), primaryKeys);
+	}
+	
+	public DatalogUnfolder(List<CQIE> unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys) {
 		this.primaryKeys = primaryKeys;
-		this.unfoldingProgram = unfoldingProgram;
 
 		/*
 		 * Creating a local index for the rules according to their predicate
 		 */
 
 		HashSet<Predicate> allPredicates = new HashSet<Predicate>();
-		for (CQIE mappingrule : unfoldingProgram.getRules()) {
+		for (CQIE mappingrule : unfoldingProgram) {
 			Function head = mappingrule.getHead();
 
 			List<CQIE> rules = ruleIndex.get(head.getFunctionSymbol());
@@ -233,7 +231,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 *  possible that there is still some EQ(...) in the Program resultdp
 		 * 
 		 */
-		DatalogNormalizer.enforceEqualities(resultdp, false);
+		DatalogNormalizer.enforceEqualities(resultdp.getRules(), false);
 		
 		return resultdp;
 	}
@@ -261,28 +259,32 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param inputquery
 	 * @return
 	 */
+/*	
 	private DatalogProgram unfoldToDatalog(DatalogProgram inputquery) {
 		HashSet<CQIE> relevantrules = new HashSet<CQIE>();
 		for (CQIE cq : inputquery.getRules()) {
 			for (Function atom : cq.getBody()) {
-				for (CQIE rule : unfoldingProgram.getRules(atom.getFunctionSymbol())) {
-					/*
-					 * No repeteatin is assured by the HashSet and the hashing
-					 * implemented in each CQIE
-					 */
+				for (CQIE rule : unfoldingProgram) {
+
+					if (!rule.getHead().getFunctionSymbol().equals(atom.getFunctionSymbol()))
+						continue;
+					
+					
+					// No repeteatin is assured by the HashSet and the hashing
+					 // implemented in each CQIE
 					relevantrules.add(rule);
 				}
 			}
 		}
-		/**
-		 * Done collecting relevant rules, appending the original query.
-		 */
+		
+		// Done collecting relevant rules, appending the original query.
+		 
 		LinkedList<CQIE> result = new LinkedList<CQIE>();
 		result.addAll(inputquery.getRules());
 		result.addAll(relevantrules);
 		return termFactory.getDatalogProgram(result);
 	}
-
+*/
 
 	@Override
 	/***

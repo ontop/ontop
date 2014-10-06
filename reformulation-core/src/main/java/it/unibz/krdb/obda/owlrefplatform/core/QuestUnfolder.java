@@ -45,7 +45,7 @@ public class QuestUnfolder {
 	private DBMetadata metadata;
 	
 	/* As unfolding OBDAModel, but experimental */
-	private DatalogProgram unfoldingProgram;
+	private List<CQIE> unfoldingProgram;
 
 	/*
 	 * These are pattern matchers that will help transforming the URI's in
@@ -70,7 +70,7 @@ public class QuestUnfolder {
 	}
 	
 	public List<CQIE> getRules() {
-		return unfoldingProgram.getRules();
+		return unfoldingProgram;
 	}
 	
 	/**
@@ -85,7 +85,7 @@ public class QuestUnfolder {
 		// Adding "triple(x,y,z)" mappings for support of unbounded
 		// predicates and variables as class names (implemented in the
 		// sparql translator)
-		unfoldingProgram.appendRule(generateTripleMappings());
+		unfoldingProgram.addAll(generateTripleMappings());
 		
 		Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
@@ -113,7 +113,7 @@ public class QuestUnfolder {
 
 		final long endTime = System.currentTimeMillis();
 
-		log.debug("TMapping size: {}", unfoldingProgram.getRules().size());
+		log.debug("TMapping size: {}", unfoldingProgram.size());
 		log.debug("TMapping processing time: {} ms", (endTime - startTime));
 	}
 
@@ -134,7 +134,7 @@ public class QuestUnfolder {
 	
 	public void addNOTNULLToMappings() {
 
-		for (CQIE mapping : unfoldingProgram.getRules()) {
+		for (CQIE mapping : unfoldingProgram) {
 			Set<Variable> headvars = mapping.getHead().getReferencedVariables();
 			for (Variable var : headvars) {
 				Function notnull = fac.getFunctionIsNotNull(var);
@@ -151,7 +151,7 @@ public class QuestUnfolder {
 	 */
 
 	public void normalizeLanguageTagsinMappings() {
-		for (CQIE mapping : unfoldingProgram.getRules()) {
+		for (CQIE mapping : unfoldingProgram) {
 			Function head = mapping.getHead();
 			for (Term term : head.getTerms()) {
 				if (!(term instanceof Function)) {
@@ -197,7 +197,7 @@ public class QuestUnfolder {
 		for (Assertion a : assertions) {
 			CQIE fact = ABoxToFactRuleConverter.getRule(a);
 			if (fact != null) {
-				unfoldingProgram.appendRule(fact);
+				unfoldingProgram.add(fact);
 				count++;
 			}
 		}
@@ -212,7 +212,7 @@ public class QuestUnfolder {
 		templateStrings.clear();
 		uriTemplateMatcher.clear();
 
-		for (CQIE mapping : unfoldingProgram.getRules()) { // int i = 0; i < unfoldingProgram.getRules().size(); i++) {
+		for (CQIE mapping : unfoldingProgram) { // int i = 0; i < unfoldingProgram.getRules().size(); i++) {
 
 			// Looking for mappings with exactly 2 data atoms
 			// CQIE mapping = unfoldingProgram.getRules().get(i);
@@ -288,7 +288,7 @@ public class QuestUnfolder {
 	private List<CQIE> generateTripleMappings() {
 		List<CQIE> newmappings = new LinkedList<CQIE>();
 
-		for (CQIE mapping : unfoldingProgram.getRules()) {
+		for (CQIE mapping : unfoldingProgram) {
 			Function newhead = null;
 			Function currenthead = mapping.getHead();
 			Predicate pred = OBDAVocabulary.QUEST_TRIPLE_PRED;

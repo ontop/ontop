@@ -601,23 +601,24 @@ public class CQCUtilities {
 	
 
 	
-	public static DatalogProgram removeContainedQueriesSorted(DatalogProgram program, List<CQIE> foreignKeyRules) {
+	public static List<CQIE> removeContainedQueriesSorted(List<CQIE> program, List<CQIE> foreignKeyRules) {
 		
 		if (foreignKeyRules == null || foreignKeyRules.isEmpty()) 
 			return program;
 				
-		DatalogProgram result = OBDADataFactoryImpl.getInstance().getDatalogProgram();
-		result.setQueryModifiers(program.getQueryModifiers());
+//		DatalogProgram result = OBDADataFactoryImpl.getInstance().getDatalogProgram();
+//		result.setQueryModifiers(program.getQueryModifiers());
 		List<CQIE> queries = new LinkedList<CQIE>();
-		queries.addAll(program.getRules());
+		queries.addAll(program);
 		
 		// log.debug("Sorting...");
 		Collections.sort(queries, lenghtComparator);
 				
 		removeContainedQueries(queries, foreignKeyRules);
-		
-		result.appendRule(queries);
-		return result;
+	
+		return queries;
+//		result.appendRule(queries);
+//		return result;
 	}
 	
 	/***

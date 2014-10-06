@@ -376,7 +376,7 @@ public class DatalogNormalizer {
 	 * @return
 	 * @see #enforceEqualities(CQIE, boolean)
 	 */
-	public static DatalogProgram enforceEqualities(DatalogProgram dp) {
+	public static List<CQIE> enforceEqualities(List<CQIE> dp) {
 
 		return enforceEqualities(dp, true);
 	}
@@ -390,17 +390,22 @@ public class DatalogNormalizer {
 	 * @return
 	 * @see #enforceEqualities(CQIE, boolean)
 	 */
-	public static DatalogProgram enforceEqualities(DatalogProgram dp, boolean clone) {
-		List<CQIE> queries = dp.getRules();
+	public static List<CQIE> enforceEqualities(List<CQIE> queries, boolean clone) {
+//		List<CQIE> queries = dp.getRules();
+		List<CQIE> dp = null;
 		if (clone) {
-			OBDAQueryModifiers queryModifiers = dp.getQueryModifiers();
-			dp = fac.getDatalogProgram();
-			dp.setQueryModifiers(queryModifiers);
+//			OBDAQueryModifiers queryModifiers = dp.getQueryModifiers();
+//			dp = fac.getDatalogProgram();
+//			dp.setQueryModifiers(queryModifiers);
+			dp = new LinkedList<CQIE>();
 		}
+		else
+			dp = queries;
+		
 		for (CQIE cq : queries) {
 			cq = enforceEqualities(cq, clone);
 			if (clone) {
-				dp.appendRule(cq);
+				dp.add(cq);
 			}
 		}
 		return dp;
