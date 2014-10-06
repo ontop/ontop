@@ -35,17 +35,19 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.File;
 
-public class QuestOWLExample {
+public class QuestOWLExampleNotLatin {
 	
 	/*
 	 * Use the sample database using H2 from
 	 * https://github.com/ontop/ontop/wiki/InstallingTutorialDatabases
 	 * 
 	 * Please use the pre-bundled H2 server from the above link
+	 *
+	 * Test with not latin Character
 	 * 
 	 */
-	final String owlfile = "src/test/resources/exampleBooksNotLatin.owl";
-	final String obdafile = "src/test/resources/exampleBooksNotLatin.obda";
+	final String owlfile = "src/test/resources/exampleBooks/exampleBooksNotLatin.owl";
+	final String obdafile = "src/test/resources/exampleBooks/exampleBooksNotLatin.obda";
 
 	public void runQuery() throws Exception {
 
@@ -90,9 +92,9 @@ public class QuestOWLExample {
 		String sparqlQuery = 
 				"PREFIX : <http://meraka/moss/exampleBooks.owl#> \n" +
 				"SELECT DISTINCT ?x ?title ?author ?genre ?edition \n" +
-				"WHERE { ?x a :Book; :title ?title; :genre ?genre; :writtenBy ?y; :hasEdition ?z. \n" +
-				"		 ?y a :Автор; :name ?author. \n" +
-				"		 ?z a :Edition; :editionNumber ?edition }";
+				"WHERE { ?x a :книга; :title ?title; :النوع ?genre; :writtenBy ?y; :hasÉdition ?z. \n" +
+				"		 ?y a :作者; :name ?author. \n" +
+				"		 ?z a :Édition; :editionNumber ?edition }";
 
 		try {
             long t1 = System.currentTimeMillis();
@@ -148,7 +150,7 @@ public class QuestOWLExample {
 	 */
 	public static void main(String[] args) {
 		try {
-			QuestOWLExample example = new QuestOWLExample();
+			QuestOWLExampleNotLatin example = new QuestOWLExampleNotLatin();
 			example.runQuery();
 		} catch (Exception e) {
 			e.printStackTrace();
