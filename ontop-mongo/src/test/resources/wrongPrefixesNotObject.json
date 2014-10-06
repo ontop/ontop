@@ -1,4 +1,10 @@
 {
+	"db" : {
+		"url" : "some/url",
+		"username" : "user",
+		"password" : "password",
+		"driver" : "mongo.driver"
+	},
     "prefixes": "xsd:",
     "mappings": [
         {

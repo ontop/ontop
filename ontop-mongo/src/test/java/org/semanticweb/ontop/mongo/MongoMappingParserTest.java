@@ -14,7 +14,10 @@ import com.google.gson.JsonSyntaxException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MongoMappingParserTest {
     @Test
@@ -24,18 +27,32 @@ public class MongoMappingParserTest {
         List<OBDAMappingAxiom> mappings =  parser.parse();
      
         Assert.assertEquals(3, mappings.size());
-        
-        StringBuilder idsBuilder = new StringBuilder();
-        StringBuilder criteriaBuilder = new StringBuilder();
+     
+        Set<String> ids = new HashSet<>();
+        Set<String> criteria = new HashSet<>();
         for( OBDAMappingAxiom mapping: mappings ) {
         	Assert.assertEquals("students", ((MongoMappingAxiom)mapping).getSourceQuery().getCollectionName());
-        	idsBuilder.append(((MongoMappingAxiom)mapping).getId()).append(" ");
-            criteriaBuilder.append(((MongoMappingAxiom)mapping).getSourceQuery().getFilterCriteria().toString());
+        	
+        	ids.add(((MongoMappingAxiom)mapping).getId());
+            criteria.add(((MongoMappingAxiom)mapping).getSourceQuery().getFilterCriteria().toString());
+
             Assert.assertNotNull(((MongoMappingAxiom)mapping).getTargetQuery());
         }
+
+        Set<String> expectedIds = new HashSet<>();
+        expectedIds.add("UndergraduateStudent");
+        expectedIds.add("GraduateStudent");
+        expectedIds.add("Student");
+
+        Set<String> expectedCriteria = new HashSet<>();
+        expectedCriteria.add("{\"type\":1}");
+        expectedCriteria.add("{\"type\":2}");
+        expectedCriteria.add("{}");
+
+        Assert.assertEquals(expectedIds, ids);
+        Assert.assertEquals(expectedCriteria, criteria);
         
-        Assert.assertEquals("UndergraduateStudent GraduateStudent Student ", idsBuilder.toString());
-        Assert.assertEquals("{\"type\":1}{\"type\":2}{}", criteriaBuilder.toString());
+        MongoSchemaExtractor.extractCollectionDefinition(mappings);
     }
 
     @Test
@@ -46,17 +63,29 @@ public class MongoMappingParserTest {
      
         Assert.assertEquals(3, mappings.size());
         
-        StringBuilder idsBuilder = new StringBuilder();
-        StringBuilder criteriaBuilder = new StringBuilder();
+        Set<String> ids = new HashSet<>();
+        Set<String> criteria = new HashSet<>();
         for( OBDAMappingAxiom mapping: mappings ) {
         	Assert.assertEquals("students", ((MongoMappingAxiom)mapping).getSourceQuery().getCollectionName());
-        	idsBuilder.append(((MongoMappingAxiom)mapping).getId()).append(" ");
-            criteriaBuilder.append(((MongoMappingAxiom)mapping).getSourceQuery().getFilterCriteria().toString());
+        	
+        	ids.add(((MongoMappingAxiom)mapping).getId());
+            criteria.add(((MongoMappingAxiom)mapping).getSourceQuery().getFilterCriteria().toString());
+
             Assert.assertNotNull(((MongoMappingAxiom)mapping).getTargetQuery());
         }
-        
-        Assert.assertEquals("UndergraduateStudent GraduateStudent Student ", idsBuilder.toString());
-        Assert.assertEquals("{\"type\":1}{\"type\":2}{}", criteriaBuilder.toString());
+
+        Set<String> expectedIds = new HashSet<>();
+        expectedIds.add("UndergraduateStudent");
+        expectedIds.add("GraduateStudent");
+        expectedIds.add("Student");
+
+        Set<String> expectedCriteria = new HashSet<>();
+        expectedCriteria.add("{\"type\":1}");
+        expectedCriteria.add("{\"type\":2}");
+        expectedCriteria.add("{}");
+
+        Assert.assertEquals(expectedIds, ids);
+        Assert.assertEquals(expectedCriteria, criteria);
     }
 
     @Test(expected=JsonSyntaxException.class)
@@ -67,8 +96,56 @@ public class MongoMappingParserTest {
     }
 
     @Test
+    public void testParseDatabase1() throws IOException, InvalidMongoMappingException {
+    	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongDatabaseNoDatabase.json");
+        MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
+        try {
+        	parser.parse();
+        	fail();
+        } catch (InvalidMongoMappingException e) {
+        	Assert.assertEquals(MongoMappingParser.MISSING_DATABASE_KEY, e.getMessage());
+        }
+    }
+
+    @Test
+    public void testParseDatabase2() throws IOException, InvalidMongoMappingException {
+    	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongDatabaseNotObject.json");
+        MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
+        try {
+        	parser.parse();
+        	fail();
+        } catch (InvalidMongoMappingException e) {
+        	Assert.assertEquals(MongoMappingParser.INVALID_DATABASE_TYPE, e.getMessage());
+        }
+    }
+
+    @Test
+    public void testParseDatabase3() throws IOException, InvalidMongoMappingException {
+    	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongDatabaseNoURL.json");
+        MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
+        try {
+        	parser.parse();
+        	fail();
+        } catch (InvalidMongoMappingException e) {
+        	Assert.assertEquals(MongoMappingParser.MISSING_ONE_OF_DATABASE_KEYS, e.getMessage());
+        }
+    }
+
+    @Test
+    public void testParseDatabase4() throws IOException, InvalidMongoMappingException {
+    	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongDatabaseUsernameNotString.json");
+        MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
+        try {
+        	parser.parse();
+        	fail();
+        } catch (InvalidMongoMappingException e) {
+        	Assert.assertEquals(MongoMappingParser.INVALID_DATABASE_VALUE_TYPE, e.getMessage());
+        }
+    }
+
+    @Test
     public void testParsePrefixes1() throws IOException, InvalidMongoMappingException {
-    	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingPrefixesNotObject.json");
+    	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongPrefixesNotObject.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
         	parser.parse();
@@ -80,7 +157,7 @@ public class MongoMappingParserTest {
     
     @Test
     public void testParsePrefixes2() throws IOException, InvalidMongoMappingException {
-    	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingPrefixNotString.json");
+    	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongPrefixNotString.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
         	parser.parse();
@@ -222,5 +299,17 @@ public class MongoMappingParserTest {
         	throw e.getCause();
         }
     }
+
+    @Test
+    public void testExtractSchemaInformation() throws IOException, InvalidMongoMappingException {
+        InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/conflictTypes.json");
+        MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
+        List<OBDAMappingAxiom> mappings =  parser.parse();
+     
+        Assert.assertEquals(3, mappings.size());
+             
+        MongoSchemaExtractor.extractCollectionDefinition(mappings);
+    }
+
 
 }

@@ -1,9 +1,9 @@
 {
 	"db" : {
-		"url" : "",
-		"username" : "",
-		"password" : "",
-		"driver" : ""
+		"url" : "some/url",
+		"username" : "user",
+		"password" : "password",
+		"driver" : "mongo.driver"
 	},
     "prefixes": {
         "xsd:" : "http://www.w3.org/2001/XMLSchema#",
