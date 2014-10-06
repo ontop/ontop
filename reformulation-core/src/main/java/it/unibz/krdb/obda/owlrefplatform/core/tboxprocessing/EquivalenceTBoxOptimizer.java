@@ -66,11 +66,11 @@ public class EquivalenceTBoxOptimizer {
 	 * inverse of a property.
 	 */
 
-	public static Ontology getOptimalTBox(TBoxReasoner reasoner, final EquivalenceMap equivalenceMap, Set<Predicate> originalVocabulary) {
+	public static Ontology getOptimalTBox(TBoxReasoner reasoner, final EquivalenceMap equivalenceMap) {
 		
 		final Ontology optimizedTBox = ofac.createOntology();
-		final Set<Predicate> extraVocabulary = new HashSet<Predicate>();
-		extraVocabulary.addAll(originalVocabulary);
+		//final Set<Predicate> extraVocabulary = new HashSet<Predicate>();
+		//extraVocabulary.addAll(originalVocabulary);
 		//extraVocabulary.removeAll(equivalenceMap.keySet());
 		
 		TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
@@ -99,18 +99,14 @@ public class EquivalenceTBoxOptimizer {
 				if (desc instanceof OClass) {
 					Predicate pred = ((OClass)desc).getPredicate();
 					OClass rep = equivalenceMap.getClassRepresentative(pred);
-					if (rep != null) {
-						extraVocabulary.remove(pred);
+					if (rep != null) 
 						return true;
-					}
 				}
 				else if (desc instanceof PropertySomeRestriction) {
 					Predicate pred = ((PropertySomeRestriction)desc).getPredicate();
 					Property rep = equivalenceMap.getPropertyRepresentative(pred);
-					if (rep != null) {
-						extraVocabulary.remove(pred);
+					if (rep != null) 
 						return true;
-					}
 				}
 				return false;
 			}
@@ -118,18 +114,13 @@ public class EquivalenceTBoxOptimizer {
 				//Predicate pred = VocabularyExtractor.getPredicate(desc);				
 				//return ((pred != null) && equivalenceMap.containsKey(pred));			
 				Property rep = equivalenceMap.getPropertyRepresentative(desc.getPredicate());
-				if (rep != null) {
-					extraVocabulary.remove(desc.getPredicate());
+				if (rep != null) 
 					return true;
-				}
+				
 				return false;
 			}
 		});
 
-		// Last, add references to all the vocabulary of the original TBox
-		
-		optimizedTBox.addEntities(extraVocabulary);
-		
 		return optimizedTBox;
 	}
 }

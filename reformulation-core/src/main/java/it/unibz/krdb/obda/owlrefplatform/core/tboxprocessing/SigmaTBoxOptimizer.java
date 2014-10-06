@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -48,12 +48,9 @@ public class SigmaTBoxOptimizer {
 	private static final OntologyFactory fac = OntologyFactoryImpl.getInstance();
 	private static final Logger	log	= LoggerFactory.getLogger(SigmaTBoxOptimizer.class);
 
-	private final Set<Predicate> vocabulary;
 	private Ontology optimizedTBox = null;
 
-	public SigmaTBoxOptimizer(TBoxReasoner isa, Set<Predicate> vocabulary, TBoxReasoner sigma) {
-		
-		this.vocabulary = vocabulary;
+	public SigmaTBoxOptimizer(TBoxReasoner isa, TBoxReasoner sigma) {		
 		this.isa = isa;
 		
 		//isa = new TBoxReasonerImpl(isat);
@@ -66,7 +63,7 @@ public class SigmaTBoxOptimizer {
 	public Ontology getReducedOntology() {
 		if (optimizedTBox == null) {
 			optimizedTBox = fac.createOntology("http://it.unibz.krdb/obda/auxontology");
-			optimizedTBox.addEntities(vocabulary);
+			//optimizedTBox.addEntities(vocabulary);
 
 			log.debug("Starting semantic-reduction");
 
@@ -74,14 +71,20 @@ public class SigmaTBoxOptimizer {
 
 				@Override
 				public void onInclusion(Property sub, Property sup) {
-					if (!check_redundant_role(sup, sub)) 
-						optimizedTBox.addAssertion(fac.createSubPropertyAxiom(sub, sup));
+					if (!check_redundant_role(sup, sub)) {
+						Axiom axiom = fac.createSubPropertyAxiom(sub, sup);
+						optimizedTBox.addEntities(axiom.getReferencedEntities());
+						optimizedTBox.addAssertion(axiom);
+					}
 				}
 
 				@Override
 				public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
-					if (!check_redundant(sup, sub)) 
-						optimizedTBox.addAssertion(fac.createSubClassAxiom(sub, sup));
+					if (!check_redundant(sup, sub))  {
+						Axiom axiom = fac.createSubClassAxiom(sub, sup);
+						optimizedTBox.addEntities(axiom.getReferencedEntities());
+						optimizedTBox.addAssertion(axiom);
+					}
 				}
 			});
 		}

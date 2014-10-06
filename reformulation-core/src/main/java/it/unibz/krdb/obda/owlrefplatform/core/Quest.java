@@ -500,20 +500,17 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		 */
 
 		reformulationReasoner = new TBoxReasonerImpl(inputTBox);
-		Set<Predicate> reformulationVocabulary;
 		
 		if (bOptimizeEquivalences) {
 			// this is used to simplify the vocabulary of ABox assertions and mappings
 			equivalenceMaps = EquivalenceMap.getEquivalenceMap(reformulationReasoner);
 			// generate a new TBox with a simpler vocabulary
 			Ontology reformulationOntology = EquivalenceTBoxOptimizer.getOptimalTBox(reformulationReasoner, 
-												equivalenceMaps, inputTBox.getVocabulary());
+												equivalenceMaps);
 			reformulationReasoner = new TBoxReasonerImpl(reformulationOntology);			
-			reformulationVocabulary = reformulationOntology.getVocabulary();
 		} 
 		else {
 			equivalenceMaps = EquivalenceMap.getEmptyEquivalenceMap();
-			reformulationVocabulary = inputTBox.getVocabulary();
 		}
 
 		try {
@@ -799,8 +796,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			TBoxReasoner reasoner;
 			if (bOptimizeTBoxSigma) {
 				TBoxReasoner sigmaReasoner = sigma.getReasoner();
-				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner, 
-						reformulationVocabulary, sigmaReasoner);
+				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner, sigmaReasoner);
 				reasoner = new TBoxReasonerImpl(reducer.getReducedOntology());
 			} 
 			else {

@@ -61,7 +61,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 		EquivalenceMap eqMap = EquivalenceMap.getEquivalenceMap(reasoner);
-		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap, ontology.getVocabulary());
+		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap);
 
 		assertEquals(3, simpleonto.getConcepts().size());
 		assertEquals(0, simpleonto.getRoles().size());
@@ -109,7 +109,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 		EquivalenceMap eqMap = EquivalenceMap.getEquivalenceMap(reasoner);
-		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap, ontology.getVocabulary());
+		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap);
 
 		assertEquals(0, simpleonto.getConcepts().size());
 		assertEquals(3, simpleonto.getRoles().size());
@@ -156,7 +156,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 		EquivalenceMap eqMap = EquivalenceMap.getEquivalenceMap(reasoner);
-		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap, ontology.getVocabulary());
+		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap);
 
 		assertEquals(simpleonto.getConcepts().toString(), 3, simpleonto.getConcepts().size());
 		assertEquals(3, simpleonto.getRoles().size());
@@ -200,7 +200,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 		EquivalenceMap eqMap = EquivalenceMap.getEquivalenceMap(reasoner);
-		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap, ontology.getVocabulary());
+		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap);
 
 		assertEquals(12, simpleonto.getAssertions().size());
 		assertEquals(0, simpleonto.getConcepts().size());

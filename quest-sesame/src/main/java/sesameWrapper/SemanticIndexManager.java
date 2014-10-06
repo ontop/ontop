@@ -74,7 +74,7 @@ public class SemanticIndexManager {
 		// this is used to simplify the vocabulary of ABox assertions and mappings
 		equivalenceMaps = EquivalenceMap.getEquivalenceMap(reasoner);
 		// generate a new TBox with a simpler vocabulary
-		optimizedOntology = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, equivalenceMaps, ontologyClosure.getVocabulary());
+		optimizedOntology = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, equivalenceMaps);
 			
 		dataRepository = new RDBMSSIRepositoryManager(/*optimizedOntology.getVocabulary()*/);
 		TBoxReasoner optimizedDag = new TBoxReasonerImpl(optimizedOntology);
