@@ -1,8 +1,13 @@
 package it.unibz.krdb.obda.reformulation.owlapi3;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import it.unibz.krdb.config.tmappings.parser.TMappingsConfParser;
+import it.unibz.krdb.obda.exception.InvalidMappingException;
+import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -12,34 +17,107 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
-import it.unibz.krdb.sql.ImplicitDBConstraints;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import junit.framework.TestCase;
 
 public class TMappingDisablingTest extends TestCase {
 	
-	// Let's use emptiesDatabase
-	final String owlfile = "src/test/resources/test/tmapping/exampleTMapping.owl";
-	final String obdafile = "src/test/resources/test/tmapping/exampleTMapping.obda";
-//	final String usrConstrinFile = "src/main/resources/example/funcCons.txt";
-
-	// Exclude from T-Mappings
-	final String tMappingsConfFile = "src/test/resources/test/tmapping/exampleTMappingConf.conf";
+	private QuestOWLConnection conn;
+	private Connection connection;
 	
+
+	Logger log = LoggerFactory.getLogger(this.getClass());
+	
+	private final String owlfile = "src/test/resources/test/tmapping/exampleTMapping.owl";
+	private final String obdafile = "src/test/resources/test/tmapping/exampleTMapping.obda";
+	private final String tMappingsConfFile = "src/test/resources/test/tmapping/tMappingsConf.conf";
+
+	@Before
+	public void setUp() throws Exception {
+		createTables();
+	}
+
+	@After
+	public void tearDown() throws Exception{
+		dropTables();
+		connection.close();
+	}
+	
+	private void createTables() throws SQLException, IOException {
+		// String driver = "org.h2.Driver";
+		String url = "jdbc:h2:mem:questjunitdb;";
+		String username = "sa";
+		String password = "";
+		
+		connection = DriverManager.getConnection(url, username, password);
+		Statement st = connection.createStatement();
+
+		FileReader reader = new FileReader("src/test/resources/test/tmapping/create-tables.sql");
+		BufferedReader in = new BufferedReader(reader);
+		StringBuilder bf = new StringBuilder();
+		String line = in.readLine();
+		while (line != null) {
+			bf.append(line);
+			line = in.readLine();
+		}
+
+		st.executeUpdate(bf.toString());
+		connection.commit();
+		in.close();
+	}
+	
+	private void dropTables() throws SQLException, IOException {
+
+		Statement st = connection.createStatement();
+
+		FileReader reader = new FileReader("src/test/resources/test/tmapping/drop-tables.sql");
+		BufferedReader in = new BufferedReader(reader);
+		StringBuilder bf = new StringBuilder();
+		String line = in.readLine();
+		while (line != null) {
+			bf.append(line);
+			line = in.readLine();
+		}
+
+		st.executeUpdate(bf.toString());
+		st.close();
+		connection.commit();
+		in.close();
+	}
+		
 	public void testDisableTMappings(){
 		/*
 		 * Load the ontology from an external .owl file.
 		 */
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+		OWLOntology ontology = null;
+		try {
+			ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+		} catch (OWLOntologyCreationException e1) {
+			e1.printStackTrace();
+			System.exit(1);
+		}
 		
 		/*
 		 * Load the OBDA model from an external .obda file
@@ -47,7 +125,12 @@ public class TMappingDisablingTest extends TestCase {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		OBDAModel obdaModel = fac.getOBDAModel();
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
+		try {
+			ioManager.load(obdafile);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 		
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
@@ -64,57 +147,121 @@ public class TMappingDisablingTest extends TestCase {
 		factory.setOBDAController(obdaModel);
 		factory.setPreferenceHolder(preference);
 		
-//		/*
-//		 * USR CONSTRAINTS !!!!
-//		 */
-//		ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
-//		factory.setImplicitDBConstraints(constr);
-//		
-//		/*
-//		 * T-Mappings Handling!!
-//		 */
-//		TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
-//		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
+		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		
+		/*
+		 * Prepare the data connection for querying.
+		 */
+		QuestOWLConnection conn = null;
+		try {
+			conn = reasoner.getConnection();
+		} catch (OBDAException e1) {
+			e1.printStackTrace();
+		}
+		
+		
+		String sparqlQuery = 
+				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
+				+ "SELECT ?y WHERE { ?y a :Boy }";
+		
+		String sparqlQuery1 = 
+				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
+				+ "SELECT ?y WHERE { ?y a :Man }";
+		QuestOWLStatement st = null;
+		try {
+			st = conn.createStatement();
+			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+			assertTrue(!rs.nextRow());
+			rs.close();
+			rs = st.executeTuple(sparqlQuery1);
+			assertTrue(rs.nextRow());
+			rs.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		reasoner.dispose();
+	}
+	
+	public void testDisableSelectedTMappings(){
+		/*
+		 * Load the ontology from an external .owl file.
+		 */
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLOntology ontology = null;
+		try {
+			ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+		} catch (OWLOntologyCreationException e1) {
+			e1.printStackTrace();
+		}
+		
+		/*
+		 * Load the OBDA model from an external .obda file
+		 */
+		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+		OBDAModel obdaModel = fac.getOBDAModel();
+		ModelIOManager ioManager = new ModelIOManager(obdaModel);
+		try {
+			ioManager.load(obdafile);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (InvalidPredicateDeclarationException e1) {
+			e1.printStackTrace();
+		} catch (InvalidMappingException e1) {
+			e1.printStackTrace();
+		}
+		
+		/*
+		 * Prepare the configuration for the Quest instance. The example below shows the setup for
+		 * "Virtual ABox" mode
+		 */
+		QuestPreferences preference = new QuestPreferences();
+		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		
+		/*
+		 * Create the instance of Quest OWL reasoner.
+		 */
+		QuestOWLFactory factory = new QuestOWLFactory();
+		factory.setOBDAController(obdaModel);
+		factory.setPreferenceHolder(preference);
+		
+		/*
+		 * T-Mappings Handling!!
+		 */
+		TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
+		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 		
 		/*
 		 * Prepare the data connection for querying.
 		 */
-		QuestOWLConnection conn = reasoner.getConnection();
+		QuestOWLConnection conn = null;
+		try {
+			conn = reasoner.getConnection();
+		} catch (OBDAException e1) {
+			e1.printStackTrace();
+		}
 		
-
-		/*
-		 * Get the book information that is stored in the database
-		 */
 		
+		String sparqlQuery = 
+				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
+				+ "SELECT ?y WHERE { ?y a :Boy }";
 		
-		
-			
-			
-			String sparqlQuery = "PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :1Tab1 . ?x :Tab2unique2Tab2 ?y .}  ";;
-				QuestOWLStatement st = conn.createStatement();
-				try {
-		            
-					long time = 0;
-					int count = 0;
-					
-					for (int i=0; i<4; i++){
-						long t1 = System.currentTimeMillis();
-						QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
-						int columnSize = rs.getColumnCount();
-						 count = 0;
-						while (rs.nextRow()) {
-							count ++;
-							for (int idx = 1; idx <= columnSize; idx++) {
-								OWLObject binding = rs.getOWLObject(idx);
-								//System.out.print(binding.toString() + ", ");
-							}
-							//System.out.print("\n");
-						}
-						long t2 = System.currentTimeMillis();
-						time = time + (t2-t1);
-						System.out.println("partial time:" + time);
-						rs.close();
+		String sparqlQuery1 = 
+				"PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> "
+				+ "SELECT ?y WHERE { ?y a :Man }";
+		QuestOWLStatement st = null;
+		try {
+			st = conn.createStatement();
+			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+			assertTrue(!rs.nextRow());
+			rs.close();
+			rs = st.executeTuple(sparqlQuery1);
+			assertTrue(rs.nextRow());
+			rs.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		reasoner.dispose();
 	}
 }

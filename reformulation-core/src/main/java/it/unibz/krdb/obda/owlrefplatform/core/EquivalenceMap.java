@@ -63,6 +63,7 @@ public class EquivalenceMap {
 
 				// if the property is different from its inverse, an entry is created 
 				// (taking the inverses into account)
+				
 				if (equiProp.isInverse()) 
 					equivalenceMap.put(equiProp.getPredicate(), inverseProp);
 				else 
@@ -89,6 +90,5 @@ public class EquivalenceMap {
 	
 	public static EquivalenceMap getEmptyEquivalenceMap() {
 		return new EquivalenceMap(Collections.<Predicate, Description> emptyMap());
-	}
-	
+	}	
 }

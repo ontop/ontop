@@ -528,7 +528,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		reformulationReasoner = new TBoxReasonerImpl(inputTBox);
 		Ontology reformulationOntology;
-		if (bOptimizeEquivalences) {
+		if (bOptimizeEquivalences && tMappings) { // Davide> Added && !tMappings
 			// this is used to simplify the vocabulary of ABox assertions and mappings
 			equivalenceMaps = EquivalenceMap.getEquivalenceMap(reformulationReasoner);
 			// generate a new TBox with a simpler vocabulary
@@ -541,6 +541,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 		// Set<Predicate> reformulationVocabulary = reformulationOntology.getVocabulary();
 
+		// Davide> Remove from equivalenceMaps the ones for which t-mappings are
+		//         forbidden
+//		if( applyExcludeFromTMappings ){
+//			removeExcludeFromTMappingsFROMEquivalenceMaps(); // TODO This approach is not feasible
+//		}
+		
 		try {
 
 			/*
@@ -805,7 +811,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				
 				// Davide> Option to disable T-Mappings (TODO: Test)
 				if( tMappings ){
-				unfolder.applyTMappings(reformulationReasoner, true);
+					unfolder.applyTMappings(reformulationReasoner, true);
 				}
 
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
@@ -879,8 +885,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			}
 		}
 	}
-
-
 
 	private void setupRewriter(TBoxReasoner reformulationR, Ontology sigma) {
 		if (reformulate == false) {
