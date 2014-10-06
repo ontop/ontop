@@ -532,7 +532,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	return false;
 }
 
-    private boolean detectAggregateInArgument(Term arg) {
+    protected static boolean detectAggregateInArgument(Term arg) {
         if (arg instanceof Function) {
             Function compositeTerm = ((Function) arg);
             Predicate functionSymbol = compositeTerm.getFunctionSymbol();
@@ -2252,9 +2252,6 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	}
 
 
-	
-	
-
 	/**
 	 * This method will remove the types in the head of the source query. For instance, if the rules is
 	 * <p>
@@ -2299,7 +2296,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					isProblemTemplate = true;
 				}
 			}
-			untypedArguments.addAll(getUntypedArgumentFromTerm( t,termIdx,isProblemTemplate,termsToExclude));
+			untypedArguments.addAll(getUntypedArgumentFromTerm( t, isProblemTemplate,termsToExclude));
 			termIdx++;
 		}
 
@@ -2319,11 +2316,10 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	/**
 	 * Takes a Term of the form Type(x) and returns the list [x]
 	 * @param t
-	 * @param termIdx 
 	 * @param isProblemTemplate 
 	 */
-	private  List<Term>  getUntypedArgumentFromTerm(
-			Term t, int termIdx, boolean isProblemTemplate, List<Term> termsToExclude) {
+	protected static  List<Term>  getUntypedArgumentFromTerm(
+			Term t, boolean isProblemTemplate, List<Term> termsToExclude) {
 		
 	
 		List<Term> untypedArguments = new LinkedList<Term>();
@@ -2494,13 +2490,12 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	 * @param fatherRule
 	 * @return
 	 */
-	private  CQIE addTypes(Function sourceHead, CQIE sourceRule, Function targetAtom, CQIE fatherRule,
+	protected static CQIE addTypes(Function sourceHead, CQIE sourceRule, Function targetAtom, CQIE fatherRule,
                            List<Term> exclude, Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
 
-		//TODO: Check this variable!!!
-		Map<Variable, Term> mgu = new HashMap<Variable,Term>();
 		boolean oneWayMGU = true;
-		mgu = Unifier.getMGU(sourceHead, targetAtom, oneWayMGU, multiTypedFunctionSymbolIndex);
+        //TODO: Check this variable!!!
+        Map<Variable, Term> mgu = Unifier.getMGU(sourceHead, targetAtom, oneWayMGU, multiTypedFunctionSymbolIndex);
 		
 		
 		

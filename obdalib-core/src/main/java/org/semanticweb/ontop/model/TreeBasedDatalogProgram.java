@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.model;
 
 import java.util.*;
+import java.util.Set;
 
 import com.google.common.collect.Multimap;
 import fj.*;
@@ -67,30 +68,21 @@ public class TreeBasedDatalogProgram {
 
 
     /**
-     * Converts the P3 rule tree into a P2 tree without the type proposal element.
+     * Persistent (immutable) list of rules.
      */
-    private static Tree<P2<Predicate, List<CQIE>>> convertP32P2RuleTree(Tree<P3<Predicate, List<CQIE>, Option<Function>>> p3Tree) {
-        return p3Tree.fmap(new F<P3<Predicate, List<CQIE>, Option<Function>>, P2<Predicate, List<CQIE>>>() {
-            @Override
-            public P2<Predicate, List<CQIE>> f(P3<Predicate, List<CQIE>, Option<Function>> label) {
-                return P.p(label._1(), label._2());
-            }
-        });
-    }
-
     public List<CQIE> getRules() {
         return List.join(List.iterableList(ruleTree.fmap(P2.<Predicate, List<CQIE>>__2())));
     }
 
     /**
-     * Normal immutable rule tree.
+     * Normal persistent (immutable) rule tree.
      */
     public Tree<P2<Predicate, List<CQIE>>> getRuleTree() {
         return ruleTree;
     }
 
     /**
-     * Gets a P3 rule tree.
+     * Gets a persistent (immutable) P3 rule tree.
      *
      * This tree can be seen as a merge of the predicate tree
      * and the predicate definition map.
@@ -109,6 +101,20 @@ public class TreeBasedDatalogProgram {
                     }
                 });
         return ruleTree;
+    }
+
+    @Override
+    public String toString() {
+        return ruleTree.draw(Show.showS(new F<P2<Predicate, List<CQIE>>, String>() {
+            @Override
+            public String f(P2<Predicate, List<CQIE>> label) {
+                StringBuilder builder = new StringBuilder();
+                for (CQIE rule: label._2()) {
+                    builder.append(rule.toString() + "\n");
+                }
+                return builder.toString();
+            }
+        }));
     }
 
     private static Tree<P2<Predicate, List<CQIE>>> convertDependencyGraphToRuleTree(DatalogDependencyGraphGenerator
@@ -130,15 +136,28 @@ public class TreeBasedDatalogProgram {
      */
     private static Tree<P2<Predicate, List<CQIE>>> createSubTree(Predicate predicate, DirectedGraph<Predicate, DefaultEdge> originalGraph,
                                                                  Multimap<Predicate, CQIE> ruleIndex) {
-
         java.util.List<Tree<P2<Predicate, List<CQIE>>>> subTrees = new ArrayList<>();
 
         for (DefaultEdge edge: originalGraph.outgoingEdgesOf(predicate)) {
-            Predicate subPredicate = (Predicate)edge.getTarget();
+            // Do not try to call edge.getEdgeTarget(), it does not works... Nice API, isn't it?
+            Predicate subPredicate = originalGraph.getEdgeTarget(edge);
             subTrees.add(createSubTree(subPredicate, originalGraph, ruleIndex));
         }
 
         P2<Predicate, List<CQIE>> label = P.p(predicate, List.iterableList(ruleIndex.get(predicate)));
         return Tree.node(label, List.iterableList(subTrees));
     }
+
+    /**
+     * Converts the P3 rule tree into a P2 tree without the type proposal element.
+     */
+    private static Tree<P2<Predicate, List<CQIE>>> convertP32P2RuleTree(Tree<P3<Predicate, List<CQIE>, Option<Function>>> p3Tree) {
+        return p3Tree.fmap(new F<P3<Predicate, List<CQIE>, Option<Function>>, P2<Predicate, List<CQIE>>>() {
+            @Override
+            public P2<Predicate, List<CQIE>> f(P3<Predicate, List<CQIE>, Option<Function>> label) {
+                return P.p(label._1(), label._2());
+            }
+        });
+    }
+
 }

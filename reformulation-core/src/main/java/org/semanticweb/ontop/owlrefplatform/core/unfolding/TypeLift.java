@@ -1,17 +1,18 @@
 package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import fj.F;
-import fj.P;
-import fj.P3;
+import fj.*;
 import fj.data.*;
-import org.semanticweb.ontop.model.CQIE;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.TreeBasedDatalogProgram;
-import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * TODO: describe it
@@ -23,8 +24,10 @@ import java.util.ArrayList;
  */
 public class TypeLift {
 
-    private class MultiTypeException extends Exception {
+    private static class MultiTypeException extends Exception {
     };
+
+    private static Logger LOGGER = LoggerFactory.getLogger(TypeLift.class);
 
     /**
      * Type lifting implementation based on tree zippers (persistent data structures).
@@ -55,7 +58,10 @@ public class TypeLift {
                 leftmostTreeZipper, multiTypedFunctionSymbolIndex);
         TreeBasedDatalogProgram newDatalogProgram = TreeBasedDatalogProgram.fromP3RuleTree(newTreeZipper.toTree());
 
-        return new ArrayList<>(newDatalogProgram.getRules().toCollection());
+        LOGGER.debug(newDatalogProgram.toString());
+
+        java.util.List<CQIE> newRules = new ArrayList<>(newDatalogProgram.getRules().toCollection());
+        return newRules;
     }
 
     /**
@@ -186,59 +192,248 @@ public class TypeLift {
         return cleanedZipper.setLabel(P.p(parentLabel._1(), parentLabel._2(), parentProposal));
     }
 
+
     /**
      * If the children proposals are compatible, throws a MultiTypeException
      */
     private static Option<Function> buildProposal(final TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> currentZipper)
             throws MultiTypeException {
 
-        List<Function> childrenProposals = retrieveChildrenProposals(currentZipper);
-        Option<Function> currentProposal = proposeType(currentZipper);
+        HashMap<Predicate, List<Function>> childProposalIndex = retrieveChildrenProposals(currentZipper);
 
-        if (childrenProposals.isEmpty()) {
-            return currentProposal;
+        /**
+         * If there is no child proposal, no need to unify.
+         * Returns the local proposal.
+         */
+        if (childProposalIndex.isEmpty()) {
+            return proposeType(currentZipper);
         }
 
-        //TODO: analyze the proposals
+        List<CQIE> currentRules = currentZipper.getLabel()._2();
 
-        // Extract the node proposal
+        // A parent node without rules does not make sense
+
+        /**
+         * Use the head of the first rule.
+         * TODO: will it make sense to use the proposal instead?
+         */
+        Function currentHead = currentRules.head().getHead();
+
+        /**
+         * TODO: explain
+         */
+        HashMap<Predicate, List<Function>> ruleBodyIndex = computeRuleBodyIndex(currentRules);
+
+        /**
+         * Unifies all these proposals.
+         *
+         * If such unification is not possible,  a MultiTypeException will be thrown.
+         */
+        Function newProposal = unifyProposals(currentHead, ruleBodyIndex, childProposalIndex,
+                childProposalIndex.keys());
+
+        return Option.some(newProposal);
+    }
+
+    /**
+     * TODO: describe what we mean here by rule body index
+     */
+    private static HashMap<Predicate,List<Function>> computeRuleBodyIndex(List<CQIE> currentRules) {
+        //TODO: implement it
         return null;
     }
 
-    private static List<CQIE> applyTypeToRules(List<CQIE> initialRules, Function typeProposal) {
-        //TODO: implement it
-        return null;
+    /**
+     * TODO: describe
+     *
+     * Tail-recursive
+     *
+     * Assumptions:
+     *   - There are at least of child proposals
+     *   - There are multiple current rules (tree consistency)
+     *
+     */
+     private static Function unifyProposals(Function currentHead, HashMap<Predicate, List<Function>> ruleBodyIndex,
+                                          HashMap<Predicate, List<Function>> childProposalIndex,
+                                          List<Predicate> remainingPredicates) throws MultiTypeException {
+        /**
+         * Stop condition (no more atom to unify).
+         */
+        if (remainingPredicates.isEmpty())
+            return currentHead;
+
+         Predicate currentPredicate = remainingPredicates.head();
+
+         Function newHead = unifyVariable(currentHead, crossProduct(ruleBodyIndex.get(currentPredicate).some(),
+                 childProposalIndex.get(currentPredicate).some()));
+
+        // Tail recursive
+        return unifyProposals(newHead, ruleBodyIndex, childProposalIndex, remainingPredicates.tail());
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static Function unifyVariable(Function currentHead, List<P2<Function, Function>> bodyAndHeadAtoms)
+        throws MultiTypeException {
+
+        if (bodyAndHeadAtoms.isEmpty())
+            return currentHead;
+
+        P2<Function, Function> bodyAndHeadPair = bodyAndHeadAtoms.head();
+        Function bodyAtom = bodyAndHeadPair._1();
+        Function headAtom = bodyAndHeadPair._2();
+
+        Map<Variable, Term> mgu = Unifier.getMGU(bodyAtom, headAtom, true, ImmutableMultimap.<Predicate,Integer>of());
+
+        /**
+         * Impossible to unify the multiple types proposed for this predicate.
+         */
+        if (mgu == null) {
+            throw new MultiTypeException();
+        }
+
+        //Mutable!!
+        Function newHead = (Function)currentHead.clone();
+        // Side-effect (newHead is updated)
+        Unifier.applySelectiveUnifier(newHead, mgu);
+
+        // Tail recursion
+        return unifyVariable(newHead, bodyAndHeadAtoms.tail());
+    }
+
+    /**
+     *
+     */
+    private static List<CQIE> applyTypeToRules(List<CQIE> initialRules, final Function typeProposal) {
+        return initialRules.map(new F<CQIE, CQIE>() {
+            @Override
+            public CQIE f(CQIE initialRule) {
+                CQIE newRule = initialRule.clone();
+                newRule.updateHead((Function)typeProposal.clone());
+                return newRule;
+//                // Was adapted from DatalogUnfolder.addTypes().
+//                // This index seems to be not needed here.
+//                Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex = ImmutableMultimap.of();
+//                Map<Variable, Term> mgu = Unifier.getMGU(initialRule.getHead(), typeProposal, true, multiTypedFunctionSymbolIndex);
+//
+//                //Mutable!!
+//                Function newHead = (Function)initialRule.getHead().clone();
+//                // Side-effect (newHead is updated)
+//                Unifier.applySelectiveUnifier(newHead, mgu);
+//
+//                //New rule (CQIE are mutable!)
+//                CQIE newRule = initialRule.clone();
+//                //Side-effect (newRule is updated)
+//                newRule.updateHead(newHead);
+//                return newRule;
+            }
+        });
     }
 
     private static List<CQIE> removeTypesFromRules(List<CQIE> initialRules) {
-        //TODO: implement it
-        return null;
+        return initialRules.map(new F<CQIE, CQIE>() {
+            @Override
+            public CQIE f(CQIE initialRule) {
+                Function initialHead = initialRule.getHead();
+                List<Term> initialHeadTerms =  List.iterableList(initialHead.getTerms());
+
+                /**
+                 * Computes untyped arguments for the head predicate.
+                 *
+                 */
+                List<Term> newHeadTerms = initialHeadTerms.map(new F<Term, Term>() {
+                    @Override
+                    public Term f(Term term) {
+                        // TODO: clean the called method
+                        return DatalogUnfolder.getUntypedArgumentFromTerm(term, false, new ArrayList<Term>()).get(0);
+                    }
+                });
+
+                /**
+                 * Builds a new rule.
+                 * TODO: modernize the CQIE API (make it immutable).
+                 */
+                CQIE newRule = initialRule.clone();
+                Function newHead = (Function)initialHead.clone();
+                newHead.updateTerms(new ArrayList<>(newHeadTerms.toCollection()));
+                newRule.updateHead(newHead);
+                return newRule;
+
+                // return initialRule;
+            }
+        });
     }
 
+    /**
+     * Returns the first head of its rules if types have been detected in it.
+     *
+     * TODO: consider case where there is multiple rules.
+     */
     private static Option<Function> proposeType(TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> currentZipper) {
-        //TODO: implement
-        return null;
+        List<CQIE> currentRules = currentZipper.getLabel()._2();
+        if (currentRules.isEmpty()) {
+            return Option.none();
+        }
+        // TODO: detect types
+
+        // Head of the first rule (cloned because mutable).
+        return Option.some((Function)currentRules.head().getHead().clone());
     }
 
-    private static List<Function> retrieveChildrenProposals(final TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> parentZipper) {
-        Option<TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>>> optionalFirstChild = parentZipper.firstChild();
-        if (optionalFirstChild.isNone()) {
-            return List.nil();
+    private static HashMap<Predicate, List<Function>> retrieveChildrenProposals(final TreeZipper<P3<Predicate, List<CQIE>,
+            Option<Function>>> parentZipper) {
+        /**
+         * Child forest
+         */
+        Stream<Tree<P3<Predicate, List<CQIE>, Option<Function>>>> subForest = parentZipper.focus().subForest()._1();
+        if (subForest.isEmpty()) {
+            return HashMap.from(Stream.<P2<Predicate, List<Function>>>nil());
         }
-        TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> leftmostChildZipper = optionalFirstChild.some();
 
         /**
          * Children labels (roots of the child forest)
          */
-        Stream<P3<Predicate, List<CQIE>, Option<Function>>> childrenLabels =  leftmostChildZipper.toForest().map(
+        Stream<P3<Predicate, List<CQIE>, Option<Function>>> childrenLabels =  subForest.map(
                 Tree.<P3<Predicate, List<CQIE>, Option<Function>>>root_());
 
         Stream<Option<Function>> proposals = childrenLabels.map(P3.<Predicate, List<CQIE>, Option<Function>>__3());
 
         /**
-         * Only returns positive proposals
+         * Only positive proposals
          */
-        return Option.somes(proposals).toList();
+        List<Function> proposedHeads = Option.somes(proposals).toList();
+
+
+        /**
+         * Computes and returns the equivalent predicate index
+         */
+        List<P2<Predicate, List<Function>>> predicateHeadList = proposedHeads.group(
+                /**
+                 * Groups by predicate
+                 */
+                Equal.equal(new F<Function, F<Function, Boolean>>() {
+            @Override
+            public F<Function, Boolean> f(final Function atom) {
+                return new F<Function, Boolean>() {
+                    @Override
+                    public Boolean f(Function other) {
+                        return other.getFunctionSymbol().equals(atom.getFunctionSymbol());
+                    }
+                };
+            }
+        })).map(
+                /**
+                 * Transforms it into a P2 list (predicate and list of functions).
+                 */
+                new F<List<Function>, P2<Predicate, List<Function>>>() {
+            @Override
+            public P2<Predicate, List<Function>> f(List<Function> atoms) {
+                return P.p(atoms.head().getFunctionSymbol(), atoms);
+            }
+        });
+
+        return HashMap.from(predicateHeadList);
     }
 
     /**
@@ -347,5 +542,22 @@ public class TypeLift {
         }
     };
 
+    /**
+     * TODO: find the corresponding generic method
+     */
+    private static List<P2<Function, Function>> crossProduct(List<Function> l1, final List<Function> l2) {
+        List<List<P2<Function, Function>>> intermediateList = l1.map(new F<Function, List<P2<Function, Function>>>() {
+            @Override
+            public List<P2<Function, Function>> f(final Function atom1) {
+                return l2.map(new F<Function, P2<Function, Function>>() {
+                    @Override
+                    public P2<Function, Function> f(Function atom2) {
+                        return P.p(atom1, atom2);
+                    };
+                });
+            }
+        });
+        return List.join(intermediateList);
+    }
 
 }
