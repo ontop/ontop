@@ -61,10 +61,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	public TBoxReasonerImpl(Ontology onto) {
 		propertyGraph = OntologyGraph.getPropertyGraph(onto);
-		propertyDAG = new EquivalencesDAGImpl<Property>(propertyGraph);
+		propertyDAG = EquivalencesDAGImpl.getEquivalencesDAG(propertyGraph);
 		
 		classGraph = OntologyGraph.getClassGraph(onto, propertyGraph, false);
-		classDAG = new EquivalencesDAGImpl<BasicClassDescription>(classGraph);
+		classDAG = EquivalencesDAGImpl.getEquivalencesDAG(classGraph);
 
 		choosePropertyRepresentatives(propertyDAG);
 		chooseClassRepresentatives(classDAG, propertyDAG);
@@ -75,10 +75,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 	public TBoxReasonerImpl(Ontology onto, Map<Predicate, OClass> classEquivalenceMap, Map<Predicate, Property> propertyEquivalenceMap) {
 		propertyGraph = OntologyGraph.getPropertyGraph(onto);
-		propertyDAG = new EquivalencesDAGImpl<Property>(propertyGraph);
+		propertyDAG = EquivalencesDAGImpl.getEquivalencesDAG(propertyGraph);
 		
 		classGraph = OntologyGraph.getClassGraph(onto, propertyGraph, false);
-		classDAG = new EquivalencesDAGImpl<BasicClassDescription>(classGraph);
+		classDAG = EquivalencesDAGImpl.getEquivalencesDAG(classGraph);
 
 		choosePropertyRepresentatives(propertyDAG);
 		chooseClassRepresentatives(classDAG, propertyDAG);
@@ -91,10 +91,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	private TBoxReasonerImpl(DefaultDirectedGraph<Property,DefaultEdge> propertyGraph, 
 					DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph) {
 		this.propertyGraph = propertyGraph;
-		propertyDAG = new EquivalencesDAGImpl<Property>(propertyGraph);
+		propertyDAG = EquivalencesDAGImpl.getEquivalencesDAG(propertyGraph);
 		
 		this.classGraph = classGraph;
-		classDAG = new EquivalencesDAGImpl<BasicClassDescription>(classGraph);
+		classDAG = EquivalencesDAGImpl.getEquivalencesDAG(classGraph);
 
 		choosePropertyRepresentatives(propertyDAG);
 		chooseClassRepresentatives(classDAG, propertyDAG);

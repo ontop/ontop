@@ -55,11 +55,9 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	private final Map<Equivalences<T>, Set<Equivalences<T>>> cacheSub;
 	private final Map<T, Set<T>> cacheSubRep;
 
-	public EquivalencesDAGImpl(DefaultDirectedGraph<T,DefaultEdge> graph) {
-		
-		this.equivalencesMap = new HashMap<T, Equivalences<T>>();
-		SimpleDirectedGraph<Equivalences<T>,DefaultEdge> dag0 = factorize(graph, this.equivalencesMap);
-		this.dag = removeRedundantEdges(dag0);
+	public EquivalencesDAGImpl(SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag, Map<T, Equivalences<T>> equivalencesMap) {	
+		this.equivalencesMap = equivalencesMap;
+		this.dag = dag;
 		
 		this.cacheSub = new HashMap<Equivalences<T>, Set<Equivalences<T>>>();
 		this.cacheSubRep = new HashMap<T, Set<T>>();
@@ -205,8 +203,9 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	 *  construction: main algorithms (static generic methods)
 	 */
 	
-	private static <TT> SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> factorize(DefaultDirectedGraph<TT,DefaultEdge> graph, 
-																				Map<TT, Equivalences<TT>> equivalencesMap) {
+	public static <TT> EquivalencesDAGImpl<TT> getEquivalencesDAG(DefaultDirectedGraph<TT,DefaultEdge> graph) {
+		
+		
 		// each set contains vertices which together form a strongly connected
 		// component within the given graph
 		GabowSCC<TT, DefaultEdge> inspector = new GabowSCC<TT, DefaultEdge>(graph);
@@ -214,6 +213,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 
 		SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> dag0 = 
 					new SimpleDirectedGraph<Equivalences<TT>,DefaultEdge>(DefaultEdge.class);
+		Map<TT, Equivalences<TT>> equivalencesMap = new HashMap<TT, Equivalences<TT>>();
 
 		for (Equivalences<TT> equivalenceSet : equivalenceSets)  {
 			for (TT node : equivalenceSet) 
@@ -236,7 +236,9 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 				}
 			}
 		}
-		return removeRedundantEdges(dag0);
+		
+		SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> dag = removeRedundantEdges(dag0);
+		return new EquivalencesDAGImpl<TT>(dag, equivalencesMap);
 	}
 
 	private static <TT> SimpleDirectedGraph<TT,DefaultEdge> removeRedundantEdges(SimpleDirectedGraph<TT,DefaultEdge> graph) {
