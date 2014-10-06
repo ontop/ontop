@@ -55,9 +55,13 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	private final Map<Equivalences<T>, Set<Equivalences<T>>> cacheSub;
 	private final Map<T, Set<T>> cacheSubRep;
 
-	public EquivalencesDAGImpl(SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag, Map<T, Equivalences<T>> equivalencesMap) {	
-		this.equivalencesMap = equivalencesMap;
+	
+	private DefaultDirectedGraph<T,DefaultEdge> graph; // used in tests and SIGMA reduction
+	
+	public EquivalencesDAGImpl(DefaultDirectedGraph<T,DefaultEdge> graph, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag, Map<T, Equivalences<T>> equivalencesMap) {	
+		this.graph = graph;
 		this.dag = dag;
+		this.equivalencesMap = equivalencesMap;
 		
 		this.cacheSub = new HashMap<Equivalences<T>, Set<Equivalences<T>>>();
 		this.cacheSubRep = new HashMap<T, Set<T>>();
@@ -199,6 +203,26 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	}
 	
 	
+	public DefaultDirectedGraph<T,DefaultEdge> getGraph() {
+		if (graph == null) {
+			graph = new DefaultDirectedGraph<T,DefaultEdge>(DefaultEdge.class);
+
+			for (Equivalences<T> node : dag.vertexSet()) {
+				for (T v : node) 
+					graph.addVertex(v);
+				for (T v : node)  {
+					graph.addEdge(v, node.getRepresentative());
+					graph.addEdge(node.getRepresentative(), v);
+				}
+			}
+			
+			for (DefaultEdge edge : dag.edgeSet()) 
+				graph.addEdge(dag.getEdgeSource(edge).getRepresentative(), dag.getEdgeTarget(edge).getRepresentative());
+		}
+		return graph;
+		
+	}
+	
 	
 	
 	/*
@@ -239,28 +263,26 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 			}
 		}
 		
-		SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> dag = removeRedundantEdges(dag0);
-		return new EquivalencesDAGImpl<TT>(dag, equivalencesMap);
-	}
 
-	private static <TT> SimpleDirectedGraph<TT,DefaultEdge> removeRedundantEdges(SimpleDirectedGraph<TT,DefaultEdge> graph) {
+		// removed redundant edges
+		
+		SimpleDirectedGraph <Equivalences<TT>,DefaultEdge> dag = 
+						new SimpleDirectedGraph <Equivalences<TT>,DefaultEdge> (DefaultEdge.class);
 
-		SimpleDirectedGraph <TT,DefaultEdge> dag = new SimpleDirectedGraph <TT,DefaultEdge> (DefaultEdge.class);
-
-		for (TT v : graph.vertexSet())
+		for (Equivalences<TT> v : dag0.vertexSet())
 			dag.addVertex(v);
 
-		for (DefaultEdge edge : graph.edgeSet()) {
-			TT v1 = graph.getEdgeSource(edge);
-			TT v2 = graph.getEdgeTarget(edge);
+		for (DefaultEdge edge : dag0.edgeSet()) {
+			Equivalences<TT> v1 = dag0.getEdgeSource(edge);
+			Equivalences<TT> v2 = dag0.getEdgeTarget(edge);
 			boolean redundant = false;
 
-			if (graph.outDegreeOf(v1) > 1) {
+			if (dag0.outDegreeOf(v1) > 1) {
 				// an edge is redundant if 
 				//  its source has an edge going to a vertex 
 				//         from which the target is reachable (in one step) 
-				for (DefaultEdge e2 : graph.outgoingEdgesOf(v1)) 
-					if (graph.containsEdge(graph.getEdgeTarget(e2), v2)) {
+				for (DefaultEdge e2 : dag0.outgoingEdgesOf(v1)) 
+					if (dag0.containsEdge(dag0.getEdgeTarget(e2), v2)) {
 						redundant = true;
 						break;
 					}
@@ -268,6 +290,8 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 			if (!redundant)
 				dag.addEdge(v1, v2);
 		}
-		return dag;
+		
+		return new EquivalencesDAGImpl<TT>(graph, dag, equivalencesMap);
 	}
+
 }

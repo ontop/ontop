@@ -56,7 +56,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeRedReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
 import it.unibz.krdb.obda.utils.MappingParser;

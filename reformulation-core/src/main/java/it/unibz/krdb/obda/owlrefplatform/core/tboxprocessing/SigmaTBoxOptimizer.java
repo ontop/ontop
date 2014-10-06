@@ -53,10 +53,8 @@ public class SigmaTBoxOptimizer {
 	public SigmaTBoxOptimizer(TBoxReasoner isa, TBoxReasoner sigma) {		
 		this.isa = isa;
 		
-		//isa = new TBoxReasonerImpl(isat);
 		isaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)isa);
 		
-		//TBoxReasonerImpl reasonerSigma = new TBoxReasonerImpl(sigmat);		
 		sigmaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)sigma);
 	}
 
