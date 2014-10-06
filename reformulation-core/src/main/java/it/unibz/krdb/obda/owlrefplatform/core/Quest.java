@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
+import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -44,6 +45,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
@@ -80,6 +82,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -176,6 +179,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 */
 	private boolean applyUserConstraints;
 
+	/** Davide> Exclude specific predicates from T-Mapping approach **/
+	private List<SimplePredicate> excludeFromTMappings;
+	
+	/** Davide> Whether to exclude the user-supplied predicates from the
+	 *          TMapping procedure (that is, the mapping assertions for 
+	 *          those predicates should not be extended according to the 
+	 *          TBox hierarchies
+	 */
+	private boolean applyExcludeFromTMappings;
+	
 	/***
 	 * General flags and fields
 	 */
@@ -220,6 +233,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private String aboxJdbcDriver;
 
+	/** Davide> Options about T-Mappings **/
+	private Boolean tMappings = true;
+		
 	/*
 	 * The following are caches to queries that Quest has seen in the past. They
 	 * are used by the statements
@@ -303,6 +319,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public Quest(Ontology tbox, OBDAModel mappings, DBMetadata metadata, Properties config) {
 		this(tbox, mappings, config);
 		this.metadata = metadata;
+	}
+
+	/** Davide> Exclude specific predicates from T-Mapping approach **/
+	public void setExcludeFromTMappings(List<SimplePredicate> excludeFromTMappings){
+		assert(excludeFromTMappings != null);
+		this.excludeFromTMappings = excludeFromTMappings;
+
+        this.applyExcludeFromTMappings = true;
 	}
 
 	/**
@@ -408,6 +432,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
         sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
 
+        // Davide> T-Mappings
+        tMappings = Boolean.valueOf((String) preferences.get(QuestPreferences.T_MAPPINGS));
+        
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
 			aboxJdbcUser = preferences.getProperty(QuestPreferences.DBUSER);
@@ -607,7 +634,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				/* Setting up the OBDA model */
 
 				unfoldingOBDAModel.addSource(obdaSource);
-				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());				
+				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
 			} 
 			else if (aboxMode.equals(QuestConstants.VIRTUAL)) {
 
@@ -776,7 +803,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 // Normalizing equalities
 				unfolder.normalizeEqualities();
 				
+				// Davide> Option to disable T-Mappings (TODO: Test)
+				if( tMappings ){
 				unfolder.applyTMappings(reformulationReasoner, true);
+				}
 
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
                 unfolder.addABoxAssertionsAsFacts(inputTBox.getABox());
@@ -1019,23 +1049,23 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private  Map<Predicate, List<CQIE>> createSigmaRulesIndex(Ontology sigma) {
 		Ontology saturatedSigma = sigma.clone();
 		saturatedSigma.saturate();
-		
+
 		Map<Predicate, List<CQIE>> sigmaRulesMap = new HashMap<Predicate, List<CQIE>>();
-		
+
 		for (Axiom assertion : saturatedSigma.getAssertions()) {
 			try {
 				CQIE rule = AxiomToRuleTranslator.translate(assertion);
-                if(rule != null) {
-        			Function atom = rule.getBody().get(0); // The rule always has one
+				if(rule != null) {
+					Function atom = rule.getBody().get(0); // The rule always has one
 					// body atom
-        			Predicate predicate = atom.getFunctionSymbol();
-        			List<CQIE> rules = sigmaRulesMap.get(predicate);
-        			if (rules == null) {
-        				rules = new LinkedList<CQIE>();
-        				sigmaRulesMap.put(predicate, rules);
-        			}
-        			rules.add(rule);
-                }
+					Predicate predicate = atom.getFunctionSymbol();
+					List<CQIE> rules = sigmaRulesMap.get(predicate);
+					if (rules == null) {
+						rules = new LinkedList<CQIE>();
+						sigmaRulesMap.put(predicate, rules);
+					}
+					rules.add(rule);
+				}
 			} 
 			catch (UnsupportedOperationException e) {
 				log.warn(e.getMessage());
@@ -1175,7 +1205,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public DatalogProgram unfold(DatalogProgram query, String targetPredicate) throws OBDAException {
 		return unfolder.unfold(query, targetPredicate);
 	}
-	
+
 	public void repositoryChanged() {
 		// clear cache
 		this.querycache.clear();
@@ -1184,7 +1214,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public boolean isSemIdx() {
 		return (dataRepository != null);
 	}
-	
+
 	public RDBMSSIRepositoryManager getSamanticIndexRepository() {
 		return dataRepository;
 	}
