@@ -43,7 +43,8 @@ public class QuestUnfolder {
 	/* The active unfolding engine */
 	private UnfoldingMechanism unfolder;
 
-	private DBMetadata metadata;
+	private final DBMetadata metadata;
+	private final Mapping2DatalogConverter analyzer;
 	
 	/* As unfolding OBDAModel, but experimental */
 	private List<CQIE> unfoldingProgram;
@@ -73,11 +74,11 @@ public class QuestUnfolder {
 
 	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata)
 	{
-		this.metadata = metadata;
+		this.metadata = metadata;	
 		
-		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(mappings, metadata);
+		analyzer = new Mapping2DatalogConverter(metadata);
 
-		unfoldingProgram = analyzer.constructDatalogProgram();
+		unfoldingProgram = analyzer.constructDatalogProgram(mappings);
 	}
 	
 	/**
@@ -92,11 +93,11 @@ public class QuestUnfolder {
 	 */
 	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata, List<SimplePredicate> excludeFromTMappings)
 	{
-		this.metadata = metadata;
+		this.metadata = metadata;		
 		
-		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(mappings, metadata);
+		analyzer = new Mapping2DatalogConverter(metadata);
 
-		unfoldingProgram = analyzer.constructDatalogProgram();
+		unfoldingProgram = analyzer.constructDatalogProgram(mappings);
 		
 		// Davide>T-Mappings handling
 		this.excludeFromTMappings = excludeFromTMappings;
@@ -135,24 +136,16 @@ public class QuestUnfolder {
 		// Davide> Here now I put another TMappingProcessor taking
 		//         also a list of Predicates as input, that represents
 		//         what needs to be excluded from the T-Mappings
-		if( applyExcludeFromTMappings )
+		if (applyExcludeFromTMappings)
 			unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full, excludeFromTMappings);
 		else
 			unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full);
 		
-		/*
-		 * Eliminating redundancy from the unfolding program
-		 */
-
-			// ROMAN: THIS HAS NO EFFECT 
-//            unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
-			
-		List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
+		// Eliminating redundancy from the unfolding program
+		List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);		
 		unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, foreignKeyRules);
 
-
 		final long endTime = System.currentTimeMillis();
-
 		log.debug("TMapping size: {}", unfoldingProgram.size());
 		log.debug("TMapping processing time: {} ms", (endTime - startTime));
 	}
@@ -163,8 +156,8 @@ public class QuestUnfolder {
 	
 	public void extendTypesWithMetadata(TBoxReasoner tBoxReasoner) throws OBDAException {
 
-		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(tBoxReasoner, metadata);
-		typeRepair.insertDataTyping(unfoldingProgram);
+		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
+		typeRepair.insertDataTyping(unfoldingProgram, tBoxReasoner);
 	}
 
 	/***
@@ -247,7 +240,7 @@ public class QuestUnfolder {
 
 	
 	
-	public void generateURITemplateMatchers() {
+	private void generateURITemplateMatchers() {
 
 		templateStrings.clear();
 		uriTemplateMatcher.clear();
@@ -307,11 +300,9 @@ public class QuestUnfolder {
 	
 	public void updateSemanticIndexMappings(List<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner) throws OBDAException {
 
-		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(mappings, metadata);
+		unfoldingProgram = analyzer.constructDatalogProgram(mappings);
 
-		unfoldingProgram = analyzer.constructDatalogProgram();
-
-		applyTMappings(/*true, */reformulationReasoner, false);
+		applyTMappings(reformulationReasoner, false);
 		
 		setupUnfolder();
 
