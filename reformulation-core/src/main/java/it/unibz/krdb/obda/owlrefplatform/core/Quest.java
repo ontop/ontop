@@ -155,11 +155,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private OBDAModel unfoldingOBDAModel;
 	
 	private QuestUnfolder unfolder;
-	
-	/* The equivalence map for the classes/properties that have been simplified */
-	private EquivalenceMap equivalenceMaps;
-
-	
+		
 	/**
 	 * This represents user-supplied constraints, i.e. primary
 	 * and foreign keys not present in the database metadata
@@ -322,6 +318,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return signaturecache;
 	}
 	
+	public TBoxReasoner getReasoner() {
+		return reformulationReasoner;
+	}
+	
 	public DataDependencies getDataDependencies() {
 		return sigma;
 	}
@@ -359,10 +359,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	}
 
 
-
-	public EquivalenceMap getEquivalenceMap() {
-		return equivalenceMaps;
-	}
 
 	public void dispose() {
 		try {
@@ -502,16 +498,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		reformulationReasoner = new TBoxReasonerImpl(inputTBox);
 		
 		if (bOptimizeEquivalences) {
-			// this is used to simplify the vocabulary of ABox assertions and mappings
-			equivalenceMaps = EquivalenceMap.getEquivalenceMap(reformulationReasoner);
 			// generate a new TBox with a simpler vocabulary
-			Ontology reformulationOntology = EquivalenceTBoxOptimizer.getOptimalTBox(reformulationReasoner, 
-												equivalenceMaps);
-			reformulationReasoner = new TBoxReasonerImpl(reformulationOntology);			
+			reformulationReasoner = EquivalenceTBoxOptimizer.getOptimalTBox(reformulationReasoner);
 		} 
-		else {
-			equivalenceMaps = EquivalenceMap.getEmptyEquivalenceMap();
-		}
 
 		try {
 
@@ -637,7 +626,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 				MappingVocabularyTranslator mtrans = new MappingVocabularyTranslator();
 				Collection<OBDAMappingAxiom> newMappings = mtrans.translateMappings(
-						inputOBDAModel.getMappings(obdaSource.getSourceID()), equivalenceMaps);
+						inputOBDAModel.getMappings(obdaSource.getSourceID()), reformulationReasoner);
 
 				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), newMappings);
 
@@ -774,7 +763,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
                 unfolder.addABoxAssertionsAsFacts(inputTBox.getABox());
 
 				// Adding data typing on the mapping axioms.
-				unfolder.extendTypesWithMetadata(reformulationReasoner, equivalenceMaps);
+				unfolder.extendTypesWithMetadata(reformulationReasoner);
 
 				
 				 // Adding NOT NULL conditions to the variables used in the head
@@ -793,15 +782,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/*
 			 * Setting up the TBox we will use for the reformulation
 			 */
-			TBoxReasoner reasoner;
+			TBoxReasoner reasoner = reformulationReasoner;
 			if (bOptimizeTBoxSigma) {
 				TBoxReasoner sigmaReasoner = sigma.getReasoner();
 				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner, sigmaReasoner);
 				reasoner = new TBoxReasonerImpl(reducer.getReducedOntology());
 			} 
-			else {
-				reasoner = reformulationReasoner;
-			}
 
 			/*
 			 * Setting up the reformulation engine
@@ -828,7 +814,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
-			vocabularyValidator = new QueryVocabularyValidator(/*reformulationVocabulary,*/ equivalenceMaps);
+			vocabularyValidator = new QueryVocabularyValidator(reformulationReasoner);
 
 			log.debug("... Quest has been initialized.");
 		} catch (Exception e) {

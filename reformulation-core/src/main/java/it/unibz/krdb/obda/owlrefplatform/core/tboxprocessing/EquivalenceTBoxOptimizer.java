@@ -29,11 +29,10 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 
 /***
  * An optimizer that will eliminate equivalences implied by the ontology,
@@ -66,12 +65,15 @@ public class EquivalenceTBoxOptimizer {
 	 * inverse of a property.
 	 */
 
-	public static Ontology getOptimalTBox(TBoxReasoner reasoner, final EquivalenceMap equivalenceMap) {
+	public static TBoxReasoner getOptimalTBox(final TBoxReasoner reasoner) {
 		
 		final Ontology optimizedTBox = ofac.createOntology();
 		//final Set<Predicate> extraVocabulary = new HashSet<Predicate>();
 		//extraVocabulary.addAll(originalVocabulary);
 		//extraVocabulary.removeAll(equivalenceMap.keySet());
+		
+		final Map<Predicate, Property> propertyMap = TBoxReasonerImpl.getPropertyEquivalenceMap(reasoner);
+		final Map<Predicate, OClass> classMap = TBoxReasonerImpl.getClassEquivalenceMap(reasoner);
 		
 		TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
 
@@ -98,13 +100,13 @@ public class EquivalenceTBoxOptimizer {
 			public boolean isInMap(BasicClassDescription desc) {
 				if (desc instanceof OClass) {
 					Predicate pred = ((OClass)desc).getPredicate();
-					OClass rep = equivalenceMap.getClassRepresentative(pred);
+					OClass rep = classMap.get(pred);
 					if (rep != null) 
 						return true;
 				}
 				else if (desc instanceof PropertySomeRestriction) {
 					Predicate pred = ((PropertySomeRestriction)desc).getPredicate();
-					Property rep = equivalenceMap.getPropertyRepresentative(pred);
+					Property rep = propertyMap.get(pred);
 					if (rep != null) 
 						return true;
 				}
@@ -113,7 +115,7 @@ public class EquivalenceTBoxOptimizer {
 			public boolean isInMap(Property desc) {
 				//Predicate pred = VocabularyExtractor.getPredicate(desc);				
 				//return ((pred != null) && equivalenceMap.containsKey(pred));			
-				Property rep = equivalenceMap.getPropertyRepresentative(desc.getPredicate());
+				Property rep = propertyMap.get(desc.getPredicate());
 				if (rep != null) 
 					return true;
 				
@@ -121,6 +123,6 @@ public class EquivalenceTBoxOptimizer {
 			}
 		});
 
-		return optimizedTBox;
+		return new TBoxReasonerImpl(optimizedTBox, classMap, propertyMap);			
 	}
 }

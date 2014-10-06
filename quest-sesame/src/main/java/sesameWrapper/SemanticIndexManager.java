@@ -22,7 +22,6 @@ package sesameWrapper;
 
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
-import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -58,9 +57,7 @@ public class SemanticIndexManager {
 
 	Ontology ontologyClosure = null;
 
-	Ontology optimizedOntology = null;
-
-	private EquivalenceMap equivalenceMaps;
+	private TBoxReasoner reasoner;
 
 	private RDBMSSIRepositoryManager dataRepository = null;
 
@@ -70,15 +67,12 @@ public class SemanticIndexManager {
 		conn = connection;
 		ontologyClosure = QuestOWL.loadOntologies(tbox);
 
-		TBoxReasoner reasoner = new TBoxReasonerImpl(ontologyClosure);
-		// this is used to simplify the vocabulary of ABox assertions and mappings
-		equivalenceMaps = EquivalenceMap.getEquivalenceMap(reasoner);
+		TBoxReasoner ontoReasoner = new TBoxReasonerImpl(ontologyClosure);
 		// generate a new TBox with a simpler vocabulary
-		optimizedOntology = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, equivalenceMaps);
+		reasoner = EquivalenceTBoxOptimizer.getOptimalTBox(ontoReasoner);
 			
-		dataRepository = new RDBMSSIRepositoryManager(/*optimizedOntology.getVocabulary()*/);
-		TBoxReasoner optimizedDag = new TBoxReasonerImpl(optimizedOntology);
-		dataRepository.setTBox(optimizedDag);
+		dataRepository = new RDBMSSIRepositoryManager();
+		dataRepository.setTBox(reasoner);
 
 		log.debug("TBox has been processed. Ready to ");
 	}
@@ -110,7 +104,7 @@ public class SemanticIndexManager {
 	public int insertData(OWLOntology ontology, int commitInterval, int batchSize) throws SQLException {
 
 		OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(ontology.getOWLOntologyManager().getImportsClosure(ontology));
-		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
+		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, reasoner);
 		int result = dataRepository.insertData(conn, newData, commitInterval, batchSize);
 
 		log.info("Loaded {} items into the DB.", result);
@@ -128,7 +122,7 @@ public class SemanticIndexManager {
 		
 		parser.setRDFHandler(aBoxIter);
 		
-		final EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
+		final EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, reasoner);
 
 
 		Thread t = new Thread() {

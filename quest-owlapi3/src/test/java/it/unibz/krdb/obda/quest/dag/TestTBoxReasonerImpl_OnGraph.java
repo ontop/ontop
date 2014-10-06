@@ -20,7 +20,9 @@ package it.unibz.krdb.obda.quest.dag;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
@@ -374,5 +376,17 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 	}
 	public DefaultDirectedGraph<BasicClassDescription, DefaultEdge> getClassGraph() {
 		return classGraph;
+	}
+
+	@Override
+	public OClass getClassRepresentative(Predicate p) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Property getPropertyRepresentative(Predicate p) {
+		// TODO Auto-generated method stub
+		return null;
 	}	
 }

@@ -121,9 +121,9 @@ public class QuestUnfolder {
 	 * Adding data typing on the mapping axioms.
 	 */
 	
-	public void extendTypesWithMetadata(TBoxReasoner tBoxReasoner, EquivalenceMap equivalenceMaps) throws OBDAException {
+	public void extendTypesWithMetadata(TBoxReasoner tBoxReasoner) throws OBDAException {
 
-		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(tBoxReasoner, equivalenceMaps, metadata);
+		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(tBoxReasoner, metadata);
 		typeRepair.insertDataTyping(unfoldingProgram);
 	}
 

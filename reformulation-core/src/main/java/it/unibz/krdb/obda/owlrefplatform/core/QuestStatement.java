@@ -950,7 +950,7 @@ public class QuestStatement implements OBDAStatement {
 	public int insertData(Iterator<Assertion> data, boolean useFile, int commit, int batch) throws SQLException {
 		int result = -1;
 
-		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(data, questInstance.getEquivalenceMap());
+		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(data, questInstance.getReasoner());
 
 		if (!useFile) {
 

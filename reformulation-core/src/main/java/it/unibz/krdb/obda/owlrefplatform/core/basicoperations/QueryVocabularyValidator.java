@@ -28,21 +28,20 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.List;
 import java.util.Set;
 
 public class QueryVocabularyValidator {
 
-	private final EquivalenceMap equivalences;
+	private final TBoxReasoner reasoner;
 	
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
 
-	public QueryVocabularyValidator(/*Set<Predicate> vocabulary, */ EquivalenceMap equivalences) {
-		//this.vocabulary = vocabulary;
-		this.equivalences = equivalences;
+	public QueryVocabularyValidator(TBoxReasoner reasoner) {
+		this.reasoner = reasoner;
 	}
 /*
 	public boolean validatePredicates0(DatalogProgram input) {
@@ -134,12 +133,12 @@ public class QueryVocabularyValidator {
 		Predicate p = atom.getPredicate();
 		
 		if (p.getArity() == 1) {
-			OClass equivalent = equivalences.getClassRepresentative(p);
+			OClass equivalent = reasoner.getClassRepresentative(p);
 			if (equivalent != null)
 				return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 		} 
 		else {
-			Property equivalent = equivalences.getPropertyRepresentative(p);
+			Property equivalent = reasoner.getPropertyRepresentative(p);
 			if (equivalent != null) {
 				if (!equivalent.isInverse()) 
 					return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());

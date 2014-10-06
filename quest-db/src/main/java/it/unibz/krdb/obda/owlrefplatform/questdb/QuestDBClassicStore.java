@@ -159,7 +159,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			log.debug("Loading data from Ontology into the database");
 			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure);
 			EquivalentTriplePredicateIterator aBoxNormalIter = 
-							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getEquivalenceMap());
+							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
 			
 			int count = st.insertData(aBoxNormalIter, 5000, 500);
 			log.debug("Inserted {} triples from the ontology.", count);

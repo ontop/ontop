@@ -21,17 +21,15 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
  */
 
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 
 public class MappingVocabularyTranslator {
 
@@ -60,9 +58,9 @@ public class MappingVocabularyTranslator {
 	 * @return
 	 */
 	public static Collection<OBDAMappingAxiom> translateMappings(Collection<OBDAMappingAxiom> originalMappings,
-			EquivalenceMap equivalencesMap) {
+			TBoxReasoner reasoner) {
 		
-		QueryVocabularyValidator qvv = new QueryVocabularyValidator(equivalencesMap);
+		QueryVocabularyValidator qvv = new QueryVocabularyValidator(reasoner);
 		
 		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
 		for (OBDAMappingAxiom mapping : originalMappings) {

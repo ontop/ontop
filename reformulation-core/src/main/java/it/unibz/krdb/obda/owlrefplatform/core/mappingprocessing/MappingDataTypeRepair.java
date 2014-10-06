@@ -34,7 +34,6 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.*;
 import it.unibz.krdb.obda.ontology.*;
-import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxTraversal;
@@ -55,9 +54,7 @@ public class MappingDataTypeRepair {
 
     private TBoxReasoner tBoxReasoner;
 
-    private EquivalenceMap equivalenceMap;
-
-	private Map<String, List<Object[]>> termOccurenceIndex;
+ 	private Map<String, List<Object[]>> termOccurenceIndex;
 
     private Map<Predicate, Predicate> dataTypesMap;
 
@@ -81,13 +78,11 @@ public class MappingDataTypeRepair {
      * @param metadata The database metadata.
      *
      */
-    public MappingDataTypeRepair(TBoxReasoner tBoxReasoner, EquivalenceMap equivalenceMap, DBMetadata metadata) {
+    public MappingDataTypeRepair(TBoxReasoner tBoxReasoner, DBMetadata metadata) {
 
         this.tBoxReasoner = tBoxReasoner;
 
         this.metadata = metadata;
-
-        this.equivalenceMap = equivalenceMap;
 
         this.dataTypesMap =  new HashMap<>();
 
@@ -144,7 +139,7 @@ public class MappingDataTypeRepair {
         //get all the datatypes in the ontology
         getDataTypeFromOntology();
 
-		QueryVocabularyValidator qvv = new QueryVocabularyValidator(equivalenceMap);
+		QueryVocabularyValidator qvv = new QueryVocabularyValidator(tBoxReasoner);
 
 		List<CQIE> mappingRules = mappingDatalog.getRules();
 		for (CQIE rule : mappingRules) {

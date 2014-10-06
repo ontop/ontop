@@ -21,7 +21,9 @@ package it.unibz.krdb.obda.quest.dag;
  */
 
 
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
@@ -208,5 +210,18 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 			// TODO Auto-generated method stub
 			return null;
 		}
+	}
+
+	@Override
+	public OClass getClassRepresentative(Predicate p) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public Property getPropertyRepresentative(Predicate p) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
