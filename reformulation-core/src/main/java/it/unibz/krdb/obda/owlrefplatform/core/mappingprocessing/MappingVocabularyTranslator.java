@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -58,9 +57,7 @@ public class MappingVocabularyTranslator {
 	 * @return
 	 */
 	public static Collection<OBDAMappingAxiom> translateMappings(Collection<OBDAMappingAxiom> originalMappings,
-			TBoxReasoner reasoner) {
-		
-		QueryVocabularyValidator qvv = new QueryVocabularyValidator(reasoner);
+			QueryVocabularyValidator validator) {
 		
 		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
@@ -76,7 +73,7 @@ public class MappingVocabularyTranslator {
 			}
 			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);
 			*/
-			CQIE newTargetQuery = qvv.replaceEquivalences(targetQuery, false);
+			CQIE newTargetQuery = validator.replaceEquivalences(targetQuery, false);
 			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(),((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
 
 		}

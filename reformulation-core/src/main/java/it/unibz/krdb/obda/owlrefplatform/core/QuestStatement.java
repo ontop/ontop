@@ -91,11 +91,7 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestStatement implements OBDAStatement {
 
-	private QueryRewriter rewriter = null;
-
 	private SQLQueryGenerator querygenerator = null;
-
-	private QueryVocabularyValidator validator = null;
 
 	private boolean canceled = false;
 	
@@ -104,8 +100,6 @@ public class QuestStatement implements OBDAStatement {
 	private ParsedQuery parsedQ = null;
 
 	private Statement sqlstatement;
-
-	private RDBMSDataRepositoryManager repository;
 
 	private QuestConnection conn;
 
@@ -161,14 +155,11 @@ public class QuestStatement implements OBDAStatement {
 		this.isconstructcache = questinstance.getIsConstructCache();
 		this.isdescribecache = questinstance.getIsDescribeCache();
 
-		this.repository = questinstance.getSamanticIndexRepository();
 		this.conn = conn;
-		this.rewriter = questinstance.rewriter;
 		// this.unfoldingmechanism = questinstance.unfolder;
 		this.querygenerator = questinstance.datasourceQueryGenerator;
 
 		this.sqlstatement = st;
-		this.validator = questinstance.vocabularyValidator;
 	}
 
 	private class QueryExecutionThread extends Thread {
@@ -497,7 +488,7 @@ public class QuestStatement implements OBDAStatement {
 			
 		}
 		log.debug("Replacing equivalences...");
-		program = validator.replaceEquivalences(program);
+		program = questInstance.getVocabularyValidator().replaceEquivalences(program);
 		return program;
 		
 	}
@@ -647,7 +638,7 @@ public class QuestStatement implements OBDAStatement {
 		DatalogProgram initialProgram = translateAndPreProcess(query, signatureContainer);
 		
 		// Perform the query rewriting
-		DatalogProgram programAfterRewriting = rewriter.rewrite(initialProgram);
+		DatalogProgram programAfterRewriting = questInstance.getRewriter().rewrite(initialProgram);
 		
 		// Translate the output datalog program back to SPARQL string
 		// TODO Re-enable the prefix manager using Sesame prefix manager
@@ -664,7 +655,7 @@ public class QuestStatement implements OBDAStatement {
 
 		DatalogProgram program = translateAndPreProcess(query, signature);
 
-		DatalogProgram rewriting = rewriter.rewrite(program);
+		DatalogProgram rewriting = questInstance.getRewriter().rewrite(program);
 		return DatalogProgramRenderer.encode(rewriting);
 	}
 	
@@ -747,7 +738,7 @@ public class QuestStatement implements OBDAStatement {
 			log.debug("Start the rewriting process...");
 			try {
 				final long startTime = System.currentTimeMillis();
-				programAfterRewriting = rewriter.rewrite(program);
+				programAfterRewriting = questInstance.getRewriter().rewrite(program);
 				final long endTime = System.currentTimeMillis();
 				rewritingTime = endTime - startTime;
 
@@ -954,12 +945,12 @@ public class QuestStatement implements OBDAStatement {
 
 		if (!useFile) {
 
-			result = repository.insertData(conn.conn, newData, commit, batch);
+			result = questInstance.getSamanticIndexRepository().insertData(conn.conn, newData, commit, batch);
 		} else {
 			try {
 				// File temporalFile = new File("quest-copy.tmp");
 				// FileOutputStream os = new FileOutputStream(temporalFile);
-				result = (int) repository.loadWithFile(conn.conn, newData);
+				result = (int) questInstance.getSamanticIndexRepository().loadWithFile(conn.conn, newData);
 				// os.close();
 
 			} catch (IOException e) {
@@ -989,23 +980,23 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 	public void createIndexes() throws Exception {
-		repository.createIndexes(conn.conn);
+		questInstance.getSamanticIndexRepository().createIndexes(conn.conn);
 	}
 
 	public void dropIndexes() throws Exception {
-		repository.dropIndexes(conn.conn);
+		questInstance.getSamanticIndexRepository().dropIndexes(conn.conn);
 	}
 
 	public boolean isIndexed() {
-		if (repository == null)
+		if (questInstance.getSamanticIndexRepository() == null)
 			return false;
-		return repository.isIndexed(conn.conn);
+		return questInstance.getSamanticIndexRepository().isIndexed(conn.conn);
 	}
 
 	public void dropRepository() throws SQLException {
-		if (repository == null)
+		if (questInstance.getSamanticIndexRepository() == null)
 			return;
-		repository.dropDBSchema(conn.conn);
+		questInstance.getSamanticIndexRepository().dropDBSchema(conn.conn);
 	}
 
 	/***
@@ -1015,12 +1006,12 @@ public class QuestStatement implements OBDAStatement {
 	 * @throws SQLException
 	 */
 	public void createDB() throws SQLException {
-		repository.createDBSchema(conn.conn, false);
-		repository.insertMetadata(conn.conn);
+		questInstance.getSamanticIndexRepository().createDBSchema(conn.conn, false);
+		questInstance.getSamanticIndexRepository().insertMetadata(conn.conn);
 	}
 
 	public void analyze() throws Exception {
-		repository.collectStatistics(conn.conn);
+		questInstance.getSamanticIndexRepository().collectStatistics(conn.conn);
 	}
 
 	/*

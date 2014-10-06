@@ -31,7 +31,6 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.List;
-import java.util.Set;
 
 public class QueryVocabularyValidator {
 

@@ -126,13 +126,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	// /* The query answering engine */
 	// private TechniqueWrapper techwrapper = null;
 
-	protected QueryVocabularyValidator vocabularyValidator;
+	private QueryVocabularyValidator vocabularyValidator;
 
 	/* The active connection used to get metadata from the DBMS */
 	private transient Connection localConnection = null;
 
 	/* The active query rewriter */
-	protected QueryRewriter rewriter = null;
+	private QueryRewriter rewriter;
 
 	/* The active SQL generator */
 	protected SQLQueryGenerator datasourceQueryGenerator = null;
@@ -146,7 +146,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private DataDependencies sigma;
 	
 	/* The merge and translation of all loaded ontologies */
-	private Ontology inputTBox = null;
+	private Ontology inputOntology;
 
 	/* The input OBDA model */
 	private OBDAModel inputOBDAModel = null;
@@ -272,7 +272,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		if (tbox == null)
 			throw new InvalidParameterException("TBox cannot be null");
 		
-		inputTBox = tbox;
+		inputOntology = tbox;
 
 		setPreferences(config);
 
@@ -322,8 +322,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return reformulationReasoner;
 	}
 	
+	public QueryRewriter getRewriter() {
+		return this.rewriter;
+	}
+	
 	public DataDependencies getDataDependencies() {
 		return sigma;
+	}
+	
+	public QueryVocabularyValidator getVocabularyValidator() {
+		return this.vocabularyValidator;
 	}
 
 //	protected Map<String, Query> getJenaQueryCache() {
@@ -483,9 +491,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		/*
 		 * Fixing the typing of predicates, in case they are not properly given.
 		 */
-		if (inputOBDAModel != null && !inputTBox.getVocabulary().isEmpty()) {
+		if (inputOBDAModel != null && !inputOntology.getVocabulary().isEmpty()) {
 			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
-			repairmodel.fixOBDAModel(inputOBDAModel, inputTBox.getVocabulary());
+			repairmodel.fixOBDAModel(inputOBDAModel, inputOntology.getVocabulary());
 		}
 
 		unfoldingOBDAModel = fac.getOBDAModel();
@@ -495,12 +503,13 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		 * Simplifying the vocabulary of the TBox
 		 */
 
-		reformulationReasoner = new TBoxReasonerImpl(inputTBox);
+		reformulationReasoner = new TBoxReasonerImpl(inputOntology);
 		
 		if (bOptimizeEquivalences) {
 			// generate a new TBox with a simpler vocabulary
 			reformulationReasoner = EquivalenceTBoxOptimizer.getOptimalTBox(reformulationReasoner);
 		} 
+		vocabularyValidator = new QueryVocabularyValidator(reformulationReasoner);
 
 		try {
 
@@ -624,9 +633,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * simplification
 				 */
 
-				MappingVocabularyTranslator mtrans = new MappingVocabularyTranslator();
-				Collection<OBDAMappingAxiom> newMappings = mtrans.translateMappings(
-						inputOBDAModel.getMappings(obdaSource.getSourceID()), reformulationReasoner);
+				Collection<OBDAMappingAxiom> newMappings = MappingVocabularyTranslator.translateMappings(
+						inputOBDAModel.getMappings(obdaSource.getSourceID()), vocabularyValidator);
 
 				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), newMappings);
 
@@ -760,7 +768,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfolder.applyTMappings(reformulationReasoner, true);
 
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
-                unfolder.addABoxAssertionsAsFacts(inputTBox.getABox());
+                unfolder.addABoxAssertionsAsFacts(inputOntology.getABox());
 
 				// Adding data typing on the mapping axioms.
 				unfolder.extendTypesWithMetadata(reformulationReasoner);
@@ -814,7 +822,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			/*
 			 * Done, sending a new reasoner with the modules we just configured
 			 */
-			vocabularyValidator = new QueryVocabularyValidator(reformulationReasoner);
 
 			log.debug("... Quest has been initialized.");
 		} catch (Exception e) {
