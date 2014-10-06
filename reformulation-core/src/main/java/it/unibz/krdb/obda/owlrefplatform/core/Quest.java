@@ -33,13 +33,11 @@ import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RepositoryChangedListener;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
-import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
@@ -88,7 +86,6 @@ import org.openrdf.query.parser.ParsedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import com.hp.hpl.jena.query.Query;
 
 public class Quest implements Serializable, RepositoryChangedListener {
 
@@ -118,7 +115,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	// /* The query answering engine */
 	// private TechniqueWrapper techwrapper = null;
 
-	private QueryVocabularyValidator vocabularyValidator;
+	private VocabularyValidator vocabularyValidator;
 
 	/* The active connection used to get metadata from the DBMS */
 	private transient Connection localConnection = null;
@@ -343,7 +340,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return sigma;
 	}
 	
-	public QueryVocabularyValidator getVocabularyValidator() {
+	public VocabularyValidator getVocabularyValidator() {
 		return this.vocabularyValidator;
 	}
 
@@ -525,7 +522,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			// generate a new TBox with a simpler vocabulary
 			reformulationReasoner = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reformulationReasoner);
 		} 
-		vocabularyValidator = new QueryVocabularyValidator(reformulationReasoner);
+		vocabularyValidator = new VocabularyValidator(reformulationReasoner);
 
 		try {
 
@@ -649,8 +646,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 * simplification
 				 */
 
-				Collection<OBDAMappingAxiom> newMappings = MappingVocabularyTranslator.translateMappings(
-						inputOBDAModel.getMappings(obdaSource.getSourceID()), vocabularyValidator);
+				Collection<OBDAMappingAxiom> newMappings = 
+						vocabularyValidator.replaceEquivalences(inputOBDAModel.getMappings(obdaSource.getSourceID()));
 
 				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), newMappings);
 
@@ -782,9 +779,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfolder.normalizeEqualities();
 				
 				// Davide> Option to disable T-Mappings (TODO: Test)
-				if( tMappings ){
-				unfolder.applyTMappings(reformulationReasoner, true);
-				}
+				if (tMappings)
+					unfolder.applyTMappings(reformulationReasoner, true);
 
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
                 unfolder.addABoxAssertionsAsFacts(inputOntology.getABox());

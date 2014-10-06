@@ -24,7 +24,6 @@ import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
@@ -62,70 +61,70 @@ public class TMappingProcessor {
 		private final Set<TMappingRule> rules = new HashSet<TMappingRule>();
 	
 
-	@Override
+		@Override
 		public Iterator<TMappingRule> iterator() {
 			return rules.iterator();
 		}
 
-	/***
-	 * 
-	 * This is an optimization mechanism that allows T-mappings to produce a
-	 * smaller number of mappings, and hence, the unfolding will be able to
-	 * produce fewer queries.
-	 * 
-	 * Given a set of mappings for a class/property A in {@link currentMappings}
-	 * , this method tries to add a the data coming from a new mapping for A in
-	 * an optimal way, that is, this method will attempt to include the content
-	 * of coming from {@link newmapping} by modifying an existing mapping
-	 * instead of adding a new mapping.
-	 * 
-	 * <p/>
-	 * 
-	 * To do this, this method will strip {@link newmapping} from any
-	 * (in)equality conditions that hold over the variables of the query,
-	 * leaving only the raw body. Then it will look for another "stripped"
-	 * mapping <bold>m</bold> in {@link currentMappings} such that m is
-	 * equivalent to stripped(newmapping). If such a m is found, this method
-	 * will add the extra semantics of newmapping to "m" by appending
-	 * newmapping's conditions into an OR atom, together with the existing
-	 * conditions of m.
-	 * 
-	 * </p>
+		/***
+		 * 
+		 * This is an optimization mechanism that allows T-mappings to produce a
+		 * smaller number of mappings, and hence, the unfolding will be able to
+		 * produce fewer queries.
+		 * 
+		 * Given a set of mappings for a class/property A in {@link currentMappings}
+		 * , this method tries to add a the data coming from a new mapping for A in
+		 * an optimal way, that is, this method will attempt to include the content
+		 * of coming from {@link newmapping} by modifying an existing mapping
+		 * instead of adding a new mapping.
+		 * 
+		 * <p/>
+		 * 
+		 * To do this, this method will strip {@link newmapping} from any
+		 * (in)equality conditions that hold over the variables of the query,
+		 * leaving only the raw body. Then it will look for another "stripped"
+		 * mapping <bold>m</bold> in {@link currentMappings} such that m is
+		 * equivalent to stripped(newmapping). If such a m is found, this method
+		 * will add the extra semantics of newmapping to "m" by appending
+		 * newmapping's conditions into an OR atom, together with the existing
+		 * conditions of m.
+		 * 
+		 * </p>
 		 * If no such m is found, then this method simply adds newmapping to
-	 * currentMappings.
-	 * 
-	 * 
-	 * <p/>
-	 * For example. If new mapping is equal to
-	 * <p/>
-	 * 
-	 * S(x,z) :- R(x,y,z), y = 2
-	 * 
-	 * <p/>
-	 * and there exists a mapping m
-	 * <p/>
-	 * S(x,z) :- R(x,y,z), y > 7
-	 * 
-	 * This method would modify 'm' as follows:
-	 * 
-	 * <p/>
-	 * S(x,z) :- R(x,y,z), OR(y > 7, y = 2)
-	 * 
-	 * <p/>
-	 * 
-	 * @param newmapping
-	 *            The new mapping for A/P
-	 */
+		 * currentMappings.
+		 * 
+		 * 
+		 * <p/>
+		 * For example. If new mapping is equal to
+		 * <p/>
+		 * 
+		 * S(x,z) :- R(x,y,z), y = 2
+		 * 
+		 * <p/>
+		 * and there exists a mapping m
+		 * <p/>
+		 * S(x,z) :- R(x,y,z), y > 7
+		 * 
+		 * This method would modify 'm' as follows:
+		 * 
+		 * <p/>
+		 * S(x,z) :- R(x,y,z), OR(y > 7, y = 2)
+		 * 
+		 * <p/>
+		 * 
+		 * @param newmapping
+		 *            The new mapping for A/P
+		 */
 		public void mergeMappingsWithCQC(TMappingRule newRule) {
 		
 			// Facts are just added
 			if (newRule.isFact()) {
 				rules.add(newRule);
-			return;
-		}
+				return;
+			}
 		
 			Iterator<TMappingRule> mappingIterator = rules.iterator();
-		while (mappingIterator.hasNext()) {
+			while (mappingIterator.hasNext()) {
 
 				TMappingRule currentRule = mappingIterator.next(); 
 				
@@ -135,42 +134,41 @@ public class TMappingProcessor {
 				if (!currentRule.isContainedIn(newRule))
 				continue;
 
-			/*
-			 * We found an equivalence, we will try to merge the conditions of
-			 * newmapping into the currentMapping.
-			 */
+				
+				// We found an equivalence, we will try to merge the conditions of
+				// newmapping into the currentMapping.
+				
 				if (!newRule.isConditionsEmpty() && currentRule.isConditionsEmpty()) {
-				/*
-				 * There is a containment and there is no need to add the new
-				 * mapping since there there is no extra conditions in the new
-				 * mapping
-				 */
-				return;
-				} else if (newRule.isConditionsEmpty() && !currentRule.isConditionsEmpty()) {
-				/*
-				 * The existing query is more specific than the new query, so we
-				 * need to add the new query and remove the old
-				 */
-				mappingIterator.remove();
-				break;
-				} else if (newRule.isConditionsEmpty() && currentRule.isConditionsEmpty()) {
-				/*
-				 * There are no conditions, and the new mapping is redundant, do not add anything
-				 */
-				return;
-			} else {
-				/*
-				 * Here we can merge conditions of the new query with the one we
-				 * just found.
-				 */
+					// There is a containment and there is no need to add the new
+					// mapping since there there is no extra conditions in the new
+					// mapping
+					return;
+				} 
+				else if (newRule.isConditionsEmpty() && !currentRule.isConditionsEmpty()) {
+				
+					// The existing query is more specific than the new query, so we
+					// need to add the new query and remove the old	 
+					mappingIterator.remove();
+					break;
+				} 
+				else if (newRule.isConditionsEmpty() && currentRule.isConditionsEmpty()) {
+				
+					// There are no conditions, and the new mapping is redundant, do not add anything					
+					return;
+				} 
+				else {
+				
+				 	// Here we can merge conditions of the new query with the one we
+					// just found.
+				 
 					Function newconditions = newRule.getMergedConditions();
 					Function existingconditions = currentRule.getMergedConditions();
 				
 	                // we do not add a new mapping if the conditions are exactly the same
-	                if (existingconditions.equals(newconditions)) {
+	                if (existingconditions.equals(newconditions)) 
 	                    continue;
-				}			
-				mappingIterator.remove();
+	                			
+	                mappingIterator.remove();
 
 					// ROMAN: i do not quite understand the code (in particular, the 1 atom in the body)
 					//        (but leave this fragment with minimal changes)
@@ -183,17 +181,18 @@ public class TMappingProcessor {
 					Function orAtom = fac.getFunctionOR(existingconditions, newconditions);
 					newmapping.getBody().add(orAtom);
 				
-				if (mgu != null) {
-					newmapping = Unifier.applyUnifier(newmapping, mgu);
-				}
+					if (mgu != null) {
+						newmapping = Unifier.applyUnifier(newmapping, mgu);
+					}
 					newRule = new TMappingRule(newmapping.getHead(), newmapping.getBody());
-				break;
+					break;
+				}
 			}
-		}
 			rules.add(newRule);
-	}
+		}
 	}
 
+	// end of the inner class
 
 
 	/***
@@ -291,7 +290,7 @@ public class TMappingProcessor {
 		 */
 		
 		for (CQIE mapping : originalMappings) {
-			TMappingIndexEntry set = getMappings(mappingIndex, (mapping.getHead().getPredicate()));
+			TMappingIndexEntry set = getMappings(mappingIndex, mapping.getHead().getPredicate());
 			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody());
 			set.mergeMappingsWithCQC(rule);
 		}
@@ -316,7 +315,7 @@ public class TMappingProcessor {
 			// Davide> Let's skip?
 			SimplePredicate curSimp = new SimplePredicate(current.getPredicate());
 			
-			if( excludeFromTMappings.contains(curSimp) ){
+			if(excludeFromTMappings.contains(curSimp)) {
 				// Skip this guy
 				continue;
 			}				
@@ -400,7 +399,7 @@ public class TMappingProcessor {
 			// Davide> Let's skip?
 			SimplePredicate curSimp = new SimplePredicate(current.getPredicate());
 			
-			if( excludeFromTMappings.contains(curSimp) ){
+			if (excludeFromTMappings.contains(curSimp)) {
 				// Skip this guy
 				continue;
 			}	

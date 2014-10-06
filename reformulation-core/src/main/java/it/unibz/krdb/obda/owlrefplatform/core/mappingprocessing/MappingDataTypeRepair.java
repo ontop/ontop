@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
 
 import it.unibz.krdb.obda.model.BNodePredicate;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -34,7 +33,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.*;
 import it.unibz.krdb.obda.ontology.*;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxTraversal;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxTraverseListener;
@@ -139,7 +138,7 @@ public class MappingDataTypeRepair {
         //get all the datatypes in the ontology
         getDataTypeFromOntology();
 
-		QueryVocabularyValidator qvv = new QueryVocabularyValidator(tBoxReasoner);
+		VocabularyValidator qvv = new VocabularyValidator(tBoxReasoner);
 
 		for (CQIE rule : mappingRules) {
 			prepareIndex(rule);
