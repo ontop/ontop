@@ -55,8 +55,6 @@ public class SemanticIndexManager {
 
 	Connection conn = null;
 
-	Ontology ontologyClosure = null;
-
 	private TBoxReasoner reasoner;
 
 	private RDBMSSIRepositoryManager dataRepository = null;
@@ -65,11 +63,11 @@ public class SemanticIndexManager {
 
 	public SemanticIndexManager(OWLOntology tbox, Connection connection) throws Exception {
 		conn = connection;
-		ontologyClosure = QuestOWL.loadOntologies(tbox);
+		Ontology ontologyClosure = QuestOWL.loadOntologies(tbox);
 
 		TBoxReasoner ontoReasoner = new TBoxReasonerImpl(ontologyClosure);
 		// generate a new TBox with a simpler vocabulary
-		reasoner = EquivalenceTBoxOptimizer.getOptimalTBox(ontoReasoner);
+		reasoner = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(ontoReasoner);
 			
 		dataRepository = new RDBMSSIRepositoryManager();
 		dataRepository.setTBox(reasoner);

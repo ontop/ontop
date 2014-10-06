@@ -63,10 +63,6 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 		this.cacheSubRep = new HashMap<T, Set<T>>();
 	}
 	
-	public Set<Equivalences<T>> vertexSet() {
-		return dag.vertexSet();
-	}
-	
 	/** 
 	 * 
 	 */
@@ -193,9 +189,15 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	 */
 	
 	@Deprecated
-	public int edgeSetSize() {
+	int edgeSetSize() {
 		return dag.edgeSet().size();
 	}
+
+	@Deprecated 
+	public int vertexSetSize() { 
+		return dag.vertexSet().size();
+	}
+	
 	
 	
 	

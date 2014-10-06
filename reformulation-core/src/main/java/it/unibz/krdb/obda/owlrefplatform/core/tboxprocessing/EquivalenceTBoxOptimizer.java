@@ -65,8 +65,10 @@ public class EquivalenceTBoxOptimizer {
 	 * inverse of a property.
 	 */
 
-	public static TBoxReasoner getOptimalTBox(final TBoxReasoner reasoner) {
+	public static TBoxReasoner getOptimalTBox0(final TBoxReasoner reasoner) {
 		
+		return TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
+/*		
 		final Ontology optimizedTBox = ofac.createOntology();
 		//final Set<Predicate> extraVocabulary = new HashSet<Predicate>();
 		//extraVocabulary.addAll(originalVocabulary);
@@ -123,6 +125,7 @@ public class EquivalenceTBoxOptimizer {
 			}
 		});
 
-		return new TBoxReasonerImpl(optimizedTBox, classMap, propertyMap);			
+		return new TBoxReasonerImpl(optimizedTBox, classMap, propertyMap);		
+*/	
 	}
 }

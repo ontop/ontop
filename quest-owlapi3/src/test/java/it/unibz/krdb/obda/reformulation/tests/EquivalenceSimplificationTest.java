@@ -60,7 +60,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = translator.translate(owlonto);
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
-		TBoxReasoner simple = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner);
+		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
 		Ontology simpleonto = TBoxReasonerToOntology.getOntology(simple);
 
 		assertEquals(3, simpleonto.getConcepts().size());
@@ -108,7 +108,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = translator.translate(owlonto);
 		
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
-		TBoxReasoner simple = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner);
+		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
 		Ontology simpleonto = TBoxReasonerToOntology.getOntology(simple);
 
 		assertEquals(0, simpleonto.getConcepts().size());
@@ -155,7 +155,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = translator.translate(owlonto);
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
-		TBoxReasoner simple = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner);
+		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
 		Ontology simpleonto = TBoxReasonerToOntology.getOntology(simple);
 
 		assertEquals(simpleonto.getConcepts().toString(), 3, simpleonto.getConcepts().size());
@@ -199,7 +199,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = translator.translate(owlonto);
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
-		TBoxReasoner simple = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner);
+		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
 		Ontology simpleonto = TBoxReasonerToOntology.getOntology(simple);
 
 		assertEquals(12, simpleonto.getAssertions().size());
