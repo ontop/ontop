@@ -119,6 +119,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	public static final String attribute_table_integer = "QUEST_DATA_PROPERTY_INTEGER_ASSERTION";
 
+    public static final String attribute_table_long = "QUEST_DATA_PROPERTY_LONG_ASSERTION";
+
 	public static final String attribute_table_decimal = "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION";
 
 	public static final String attribute_table_double = "QUEST_DATA_PROPERTY_DOUBLE_ASSERTION";
@@ -180,6 +182,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String attribute_table_integer_create = "CREATE TABLE " + attribute_table_integer + " ( "
 			+ "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+    public static final String attribute_table_long_create = "CREATE TABLE " + attribute_table_long + " ( "
+            + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	public static final String attribute_table_decimal_create = "CREATE TABLE " + attribute_table_decimal + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL DECIMAL NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
@@ -203,6 +208,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String attribute_table_literal_drop = "DROP TABLE " + attribute_table_literal;
 	public static final String attribute_table_string_drop = "DROP TABLE " + attribute_table_string;
 	public static final String attribute_table_integer_drop = "DROP TABLE " + attribute_table_integer;
+    public static final String attribute_table_long_drop = "DROP TABLE " + attribute_table_long;
 	public static final String attribute_table_decimal_drop = "DROP TABLE " + attribute_table_decimal;
 	public static final String attribute_table_double_drop = "DROP TABLE " + attribute_table_double;
 	public static final String attribute_table_datetime_drop = "DROP TABLE " + attribute_table_datetime;
@@ -221,6 +227,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
 	public static final String attribute_table_integer_insert = "INSERT INTO " + attribute_table_integer
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
+    public static final String attribute_table_long_insert = "INSERT INTO " + attribute_table_long
+            + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
 	public static final String attribute_table_decimal_insert = "INSERT INTO " + attribute_table_decimal
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
 	public static final String attribute_table_double_insert = "INSERT INTO " + attribute_table_double
@@ -251,6 +259,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String attribute_literal_index = "IDX_LITERAL_ATTRIBUTE";
 	public static final String attribute_string_index = "IDX_STRING_ATTRIBUTE";
 	public static final String attribute_integer_index = "IDX_INTEGER_ATTRIBUTE";
+    public static final String attribute_long_index = "IDX_INTEGER_ATTRIBUTE";
 	public static final String attribute_decimal_index = "IDX_DECIMAL_ATTRIBUTE";
 	public static final String attribute_double_index = "IDX_DOUBLE_ATTRIBUTE";
 	public static final String attribute_datetime_index = "IDX_DATETIME_ATTRIBUTE";
@@ -262,6 +271,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			+ " (URI)";
 	public static final String indexattribute_integer1 = "CREATE INDEX " + attribute_integer_index + "1" + " ON " + attribute_table_integer
 			+ " (URI)";
+    public static final String indexattribute_long1 = "CREATE INDEX " + attribute_long_index + "1" + " ON " + attribute_table_long
+            + " (URI)";
 	public static final String indexattribute_decimal1 = "CREATE INDEX " + attribute_decimal_index + "1" + " ON " + attribute_table_decimal
 			+ " (URI)";
 	public static final String indexattribute_double1 = "CREATE INDEX " + attribute_double_index + "1" + " ON " + attribute_table_double
@@ -277,6 +288,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			+ " (IDX)";
 	public static final String indexattribute_integer2 = "CREATE INDEX " + attribute_integer_index + "2" + " ON " + attribute_table_integer
 			+ " (IDX)";
+    public static final String indexattribute_long2 = "CREATE INDEX " + attribute_long_index + "2" + " ON " + attribute_table_long
+            + " (IDX)";
 	public static final String indexattribute_decimal2 = "CREATE INDEX " + attribute_decimal_index + "2" + " ON " + attribute_table_decimal
 			+ " (IDX)";
 	public static final String indexattribute_double2 = "CREATE INDEX " + attribute_double_index + "2" + " ON " + attribute_table_double
@@ -292,6 +305,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			+ " (VAL)";
 	public static final String indexattribute_integer3 = "CREATE INDEX " + attribute_integer_index + "3" + " ON " + attribute_table_integer
 			+ " (VAL)";
+    public static final String indexattribute_long3 = "CREATE INDEX " + attribute_long_index + "3" + " ON " + attribute_table_long
+            + " (VAL)";
 	public static final String indexattribute_decimal3 = "CREATE INDEX " + attribute_decimal_index + "3" + " ON " + attribute_table_decimal
 			+ " (VAL)";
 	public static final String indexattribute_double3 = "CREATE INDEX " + attribute_double_index + "3" + " ON " + attribute_table_double
@@ -315,6 +330,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String dropindexattribute_literal1 = "DROP INDEX " + attribute_literal_index + "1";
 	public static final String dropindexattribute_string1 = "DROP INDEX " + attribute_string_index + "1";
 	public static final String dropindexattribute_integer1 = "DROP INDEX " + attribute_integer_index + "1";
+    public static final String dropindexattribute_long1 = "DROP INDEX " + attribute_long_index + "1";
 	public static final String dropindexattribute_decimal1 = "DROP INDEX " + attribute_decimal_index + "1";
 	public static final String dropindexattribute_double1 = "DROP INDEX " + attribute_double_index + "1";
 	public static final String dropindexattribute_datetime1 = "DROP INDEX " + attribute_datetime_index + "1";
@@ -323,6 +339,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String dropindexattribute_literal2 = "DROP INDEX " + attribute_literal_index + "2";
 	public static final String dropindexattribute_string2 = "DROP INDEX " + attribute_string_index + "2";
 	public static final String dropindexattribute_integer2 = "DROP INDEX " + attribute_integer_index + "2";
+    public static final String dropindexattribute_long2 = "DROP INDEX " + attribute_long_index + "2";
 	public static final String dropindexattribute_decimal2 = "DROP INDEX " + attribute_decimal_index + "2";
 	public static final String dropindexattribute_double2 = "DROP INDEX " + attribute_double_index + "2";
 	public static final String dropindexattribute_datetime2 = "DROP INDEX " + attribute_datetime_index + "2";
@@ -331,6 +348,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String dropindexattribute_literal3 = "DROP INDEX " + attribute_literal_index + "3";
 	public static final String dropindexattribute_string3 = "DROP INDEX " + attribute_string_index + "3";
 	public static final String dropindexattribute_integer3 = "DROP INDEX " + attribute_integer_index + "3";
+    public static final String dropindexattribute_long3 = "DROP INDEX " + attribute_long_index + "3";
 	public static final String dropindexattribute_decimal3 = "DROP INDEX " + attribute_decimal_index + "3";
 	public static final String dropindexattribute_double3 = "DROP INDEX " + attribute_double_index + "3";
 	public static final String dropindexattribute_datetime3 = "DROP INDEX " + attribute_datetime_index + "3";
@@ -347,6 +365,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String select_mapping_class_attribute_literal_left = "SELECT \"URI\" as X FROM " + attribute_table_literal;
 	public static final String select_mapping_class_attribute_string_left = "SELECT \"URI\" as X FROM " + attribute_table_string;
 	public static final String select_mapping_class_attribute_integer_left = "SELECT \"URI\" as X FROM " + attribute_table_integer;
+    public static final String select_mapping_class_attribute_long_left = "SELECT \"URI\" as X FROM " + attribute_table_long;
 	public static final String select_mapping_class_attribute_decimal_left = "SELECT \"URI\" as X FROM " + attribute_table_decimal;
 	public static final String select_mapping_class_attribute_double_left = "SELECT \"URI\" as X FROM " + attribute_table_double;
 	public static final String select_mapping_class_attribute_datetime_left = "SELECT \"URI\" as X FROM " + attribute_table_datetime;
@@ -361,6 +380,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	public static final String select_mapping_attribute_string = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_string;
 	public static final String select_mapping_attribute_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_integer;
+    public static final String select_mapping_attribute_long = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_long;
 	public static final String select_mapping_attribute_decimal = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_decimal;
 	public static final String select_mapping_attribute_double = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_double;
 	public static final String select_mapping_attribute_datetime = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_datetime;
@@ -448,6 +468,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		out.append(";\n");
 		out.append(attribute_table_integer_create);
 		out.append(";\n");
+        out.append(attribute_table_long_create);
+        out.append(";\n");
 		out.append(attribute_table_decimal_create);
 		out.append(";\n");
 		out.append(attribute_table_double_create);
@@ -482,6 +504,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		out.append(";\n");
 		out.append(indexattribute_integer1);
 		out.append(";\n");
+        out.append(indexattribute_long1);
+        out.append(";\n");
 		out.append(indexattribute_decimal1);
 		out.append(";\n");
 		out.append(indexattribute_double1);
@@ -497,6 +521,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		out.append(";\n");
 		out.append(indexattribute_integer2);
 		out.append(";\n");
+        out.append(indexattribute_long2);
+        out.append(";\n");
 		out.append(indexattribute_decimal2);
 		out.append(";\n");
 		out.append(indexattribute_double2);
@@ -512,6 +538,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		out.append(";\n");
 		out.append(indexattribute_integer3);
 		out.append(";\n");
+        out.append(indexattribute_long3);
+        out.append(";\n");
 		out.append(indexattribute_decimal3);
 		out.append(";\n");
 		out.append(indexattribute_double3);
@@ -534,6 +562,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		String attribute_insert_literal_str = attribute_table_literal_insert.replace("?", "%s");
 		String attribute_insert_string_str = attribute_table_string_insert.replace("?", "%s");
 		String attribute_insert_integer_str = attribute_table_integer_insert.replace("?", "%s");
+        String attribute_insert_long_str = attribute_table_long_insert.replace("?", "%s");
 		String attribute_insert_decimal_str = attribute_table_decimal_insert.replace("?", "%s");
 		String attribute_insert_double_str = attribute_table_double_insert.replace("?", "%s");
 		String attribute_insert_date_str = attribute_table_datetime_insert.replace("?", "%s");
@@ -594,6 +623,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					case INTEGER:
 						out.append(String.format(attribute_insert_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
 						break;
+                    case LONG:
+                        out.append(String.format(attribute_insert_long_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
+                        break;
 					case DECIMAL:
 						out.append(String.format(attribute_insert_decimal_str, getQuotedString(uri), parseBigDecimal(lit), idx, c1isBNode));
 						break;
@@ -719,6 +751,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(attribute_table_literal_create);
 		st.addBatch(attribute_table_string_create);
 		st.addBatch(attribute_table_integer_create);
+        st.addBatch(attribute_table_long_create);
 		st.addBatch(attribute_table_decimal_create);
 		st.addBatch(attribute_table_double_create);
 		st.addBatch(attribute_table_datetime_create);
@@ -745,6 +778,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(indexattribute_literal1);
 		st.addBatch(indexattribute_string1);
 		st.addBatch(indexattribute_integer1);
+        st.addBatch(indexattribute_long1);
 		st.addBatch(indexattribute_decimal1);
 		st.addBatch(indexattribute_double1);
 		st.addBatch(indexattribute_datetime1);
@@ -753,6 +787,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(indexattribute_literal2);
 		st.addBatch(indexattribute_string2);
 		st.addBatch(indexattribute_integer2);
+        st.addBatch(indexattribute_long2);
 		st.addBatch(indexattribute_decimal2);
 		st.addBatch(indexattribute_double2);
 		st.addBatch(indexattribute_datetime2);
@@ -761,6 +796,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(indexattribute_literal3);
 		st.addBatch(indexattribute_string3);
 		st.addBatch(indexattribute_integer3);
+        st.addBatch(indexattribute_long3);
 		st.addBatch(indexattribute_decimal3);
 		st.addBatch(indexattribute_double3);
 		st.addBatch(indexattribute_datetime3);
@@ -799,6 +835,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(attribute_table_literal_drop);
 		st.addBatch(attribute_table_string_drop);
 		st.addBatch(attribute_table_integer_drop);
+        st.addBatch(attribute_table_long_drop);
 		st.addBatch(attribute_table_decimal_drop);
 		st.addBatch(attribute_table_double_drop);
 		st.addBatch(attribute_table_datetime_drop);
@@ -831,6 +868,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		PreparedStatement attributeLiteralStm = conn.prepareStatement(attribute_table_literal_insert);
 		PreparedStatement attributeStringStm = conn.prepareStatement(attribute_table_string_insert);
 		PreparedStatement attributeIntegerStm = conn.prepareStatement(attribute_table_integer_insert);
+        PreparedStatement attributeLongStm = conn.prepareStatement(attribute_table_long_insert);
 		PreparedStatement attributeDecimalStm = conn.prepareStatement(attribute_table_decimal_insert);
 		PreparedStatement attributeDoubleStm = conn.prepareStatement(attribute_table_double_insert);
 		PreparedStatement attributeDateStm = conn.prepareStatement(attribute_table_datetime_insert);
@@ -851,7 +889,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				batchCount += 1;
 				commitCount += 1;
 
-				addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStringStm, attributeIntegerStm, attributeDecimalStm,
+				addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStringStm, attributeIntegerStm, attributeLongStm, attributeDecimalStm,
 						attributeDoubleStm, attributeDateStm, attributeBooleanStm, monitor, ax);
 
 				/*
@@ -877,6 +915,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				executeBatch(attributeLiteralStm);
 				executeBatch(attributeStringStm);
 				executeBatch(attributeIntegerStm);
+                executeBatch(attributeLongStm);
 				executeBatch(attributeDecimalStm);
 				executeBatch(attributeDoubleStm);
 				executeBatch(attributeDateStm);
@@ -898,6 +937,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		executeBatch(attributeLiteralStm);
 		executeBatch(attributeStringStm);
 		executeBatch(attributeIntegerStm);
+        executeBatch(attributeLongStm);
 		executeBatch(attributeDecimalStm);
 		executeBatch(attributeDoubleStm);
 		executeBatch(attributeDateStm);
@@ -911,6 +951,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		closeStatement(attributeLiteralStm);
 		closeStatement(attributeStringStm);
 		closeStatement(attributeIntegerStm);
+        closeStatement(attributeLongStm);
 		closeStatement(attributeDecimalStm);
 		closeStatement(attributeDoubleStm);
 		closeStatement(attributeDateStm);
@@ -937,7 +978,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement classStm, PreparedStatement roleStm, PreparedStatement attributeLiteralStm,
-			PreparedStatement attributeStringStm, PreparedStatement attributeIntegerStm, PreparedStatement attributeDecimalStm,
+			PreparedStatement attributeStringStm, PreparedStatement attributeIntegerStm, PreparedStatement attributeLongStm, PreparedStatement attributeDecimalStm,
 			PreparedStatement attributeDoubleStm, PreparedStatement attributeDateStm, PreparedStatement attributeBooleanStm,
 			InsertionMonitor monitor, Assertion ax) throws SQLException {
 		int uri_id = 0;
@@ -1028,9 +1069,15 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				// log.debug("string");
 				break;
 			case INTEGER:
+                if (value.charAt(0) == '+')
+                    value = value.substring(1, value.length());
+                setInputStatement(attributeIntegerStm, uri_id, Long.parseLong(value), idx, c1isBNode);
+                // log.debug("Int");
+                break;
+            case LONG:
 				if (value.charAt(0) == '+')
 					value = value.substring(1, value.length());
-				setInputStatement(attributeIntegerStm, uri_id, Long.parseLong(value), idx, c1isBNode);
+				setInputStatement(attributeLongStm, uri_id, Long.parseLong(value), idx, c1isBNode);
 				// log.debug("Int");
 				break;
 			case DECIMAL:
@@ -1894,6 +1941,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.INTEGER, 2))
 				currentMappings.add(basicmapping);
 
+            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.LONG);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.LONG);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.LONG, 2))
+                currentMappings.add(basicmapping);
+
 			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.STRING);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.STRING);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
@@ -1952,6 +2005,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.INTEGER, 2))
 				currentMappings.add(basicmapping);
 			;
+
+            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.LONG);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.LONG);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.LONG, 2))
+                currentMappings.add(basicmapping);
+            ;
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.STRING);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.STRING);
@@ -2100,10 +2160,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	/***
-	 * We use 1 for classes 2 for proeprties. Tells you if there has been
+	 * We use 1 for classes 2 for properties. Tells you if there has been
 	 * inserts that can make this mapping non empty.
 	 * 
-	 * @param predicate
+	 * @param iri
 	 * @param type1
 	 * @param type2
 	 * @param classPredicate
@@ -2138,6 +2198,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			table = SITable.DPROPDoub;
 		else if (type2 == COL_TYPE.INTEGER)
 			table = SITable.DPROPInte;
+        else if (type2 == COL_TYPE.LONG)
+            table = SITable.DPROPLong;
 		else if (type2 == COL_TYPE.LITERAL || type2 == COL_TYPE.LITERAL_LANG)
 			table = SITable.DPROPLite;
 		else if (type2 == COL_TYPE.STRING)
@@ -2227,7 +2289,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			objectTerm = dfac.getFunction(dfac.getDataTypePredicateInteger(), dfac.getVariable("Y"));
 
-		} else if (type2 == COL_TYPE.STRING) {
+		}  else if (type2 == COL_TYPE.LONG) {
+
+            objectTerm = dfac.getFunction(dfac.getDataTypePredicateLong(), dfac.getVariable("Y"));
+
+       }
+
+    else if (type2 == COL_TYPE.STRING) {
 
 			objectTerm = dfac.getFunction(dfac.getDataTypePredicateString(), dfac.getVariable("Y"));
 
@@ -2261,7 +2329,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			sql.append(select_mapping_attribute_string);
 			break;
 		case INTEGER:
-			sql.append(select_mapping_attribute_integer);
+            sql.append(select_mapping_attribute_integer);
+            break;
+        case LONG:
+			sql.append(select_mapping_attribute_long);
 			break;
 		case DECIMAL:
 			sql.append(select_mapping_attribute_decimal);
@@ -3065,6 +3136,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(dropindexattribute_literal1);
 		st.addBatch(dropindexattribute_string1);
 		st.addBatch(dropindexattribute_integer1);
+        st.addBatch(dropindexattribute_long1);
 		st.addBatch(dropindexattribute_decimal1);
 		st.addBatch(dropindexattribute_double1);
 		st.addBatch(dropindexattribute_datetime1);
@@ -3073,6 +3145,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(dropindexattribute_literal2);
 		st.addBatch(dropindexattribute_string2);
 		st.addBatch(dropindexattribute_integer2);
+        st.addBatch(dropindexattribute_long2);
 		st.addBatch(dropindexattribute_decimal2);
 		st.addBatch(dropindexattribute_double2);
 		st.addBatch(dropindexattribute_datetime2);
@@ -3081,6 +3154,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(dropindexattribute_literal3);
 		st.addBatch(dropindexattribute_string3);
 		st.addBatch(dropindexattribute_integer3);
+        st.addBatch(dropindexattribute_long3);
 		st.addBatch(dropindexattribute_decimal3);
 		st.addBatch(dropindexattribute_double3);
 		st.addBatch(dropindexattribute_datetime3);
@@ -3107,6 +3181,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_literal));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_string));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_integer));
+            st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_long));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_decimal));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_double));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_datetime));

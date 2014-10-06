@@ -1082,23 +1082,30 @@ public class OWLAPI3Translator {
 			return Predicate.COL_TYPE.LITERAL;
 		} else if (datatype.isInteger()
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INTEGER // xsd:integer
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INT // xsd:int
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_LONG // xsd:long
+                || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_NEGATIVE_INTEGER) {
+            return Predicate.COL_TYPE.INTEGER;
+        } else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INT // xsd:int
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_POSITIVE_INTEGER
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NEGATIVE_INTEGER
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_POSITIVE_INTEGER
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_NEGATIVE_INTEGER
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_INT
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_LONG) {
+                || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_INT) {
+            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
 			return Predicate.COL_TYPE.INTEGER;
 		} else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DECIMAL) { // xsd:decimal
 			return Predicate.COL_TYPE.DECIMAL;
-		} else if (datatype.isFloat() || datatype.isDouble() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DOUBLE // xsd:double
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_FLOAT) { // xsd:float
+        } else if (datatype.isFloat() || datatype.isDouble() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DOUBLE) { // xsd:double
+            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
 			return Predicate.COL_TYPE.DOUBLE;
+        } else if (datatype.isFloat() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_FLOAT) { // xsd:float
+            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
+            return Predicate.COL_TYPE.DOUBLE;
 		} else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DATE_TIME) {
 			return Predicate.COL_TYPE.DATETIME;
+        } else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_LONG) {
+            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
+            return Predicate.COL_TYPE.LONG;
 		} else if (datatype.isBoolean() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_BOOLEAN) { // xsd:boolean
+            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
 			return Predicate.COL_TYPE.BOOLEAN;
 		} else {
 			throw new TranslationException("Unsupported data range: " + datatype.toString());

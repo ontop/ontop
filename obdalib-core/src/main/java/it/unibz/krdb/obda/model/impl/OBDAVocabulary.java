@@ -135,6 +135,8 @@ public class OBDAVocabulary {
 
 	public static final String XSD_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#integer";
 
+    public static final String XSD_LONG_URI = "http://www.w3.org/2001/XMLSchema#long";
+
 	public static final String XSD_DECIMAL_URI = "http://www.w3.org/2001/XMLSchema#decimal";
 
 	public static final String XSD_FLOAT_URI = "http://www.w3.org/2001/XMLSchema#float";
@@ -164,6 +166,9 @@ public class OBDAVocabulary {
 
 	public static final Predicate XSD_INTEGER = new DataTypePredicateImpl(
 			XSD_INTEGER_URI, COL_TYPE.INTEGER);
+
+    public static final Predicate XSD_LONG = new DataTypePredicateImpl(
+            XSD_LONG_URI, COL_TYPE.LONG);
 
 	public static final Predicate XSD_DECIMAL = new DataTypePredicateImpl(
 			XSD_DECIMAL_URI, COL_TYPE.DECIMAL);

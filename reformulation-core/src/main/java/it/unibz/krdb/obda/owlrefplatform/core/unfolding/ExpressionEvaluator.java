@@ -498,6 +498,8 @@ public class ExpressionEvaluator {
 					return OBDAVocabulary.RDFS_LITERAL;
 				case INTEGER:
 					return OBDAVocabulary.XSD_INTEGER;
+                case LONG:
+                    return OBDAVocabulary.XSD_LONG;
 				case DECIMAL:
 					return OBDAVocabulary.XSD_DECIMAL;
 				case DOUBLE:

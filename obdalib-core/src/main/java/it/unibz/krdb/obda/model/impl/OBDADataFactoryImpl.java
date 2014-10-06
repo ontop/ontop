@@ -229,6 +229,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return OBDAVocabulary.XSD_INTEGER;
 	}
 
+    @Override
+    public Predicate getDataTypePredicateLong() {
+        return OBDAVocabulary.XSD_LONG;
+    }
+
 	@Override
 	public Predicate getDataTypePredicateDecimal() {
 		return OBDAVocabulary.XSD_DECIMAL;

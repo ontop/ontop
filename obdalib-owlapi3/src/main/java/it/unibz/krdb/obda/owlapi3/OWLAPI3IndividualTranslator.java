@@ -131,7 +131,10 @@ public class OWLAPI3IndividualTranslator {
 				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_DOUBLE);
 			} else if (v.getType() == COL_TYPE.INTEGER) {
 				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_INTEGER);
-			} else if (v.getType() == COL_TYPE.LITERAL) {
+			} else if (v.getType() == COL_TYPE.LONG) {
+            result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_INTEGER);
+            }
+            else if (v.getType() == COL_TYPE.LITERAL) {
 				result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
 			} else if (v.getType() == COL_TYPE.LITERAL_LANG) {
 				result = dataFactory.getOWLLiteral(value, v.getLanguage());

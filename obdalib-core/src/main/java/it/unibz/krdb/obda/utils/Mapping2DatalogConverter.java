@@ -566,7 +566,16 @@ public class Mapping2DatalogConverter {
         @Override
         public void visit(LongValue expression) {
             String termRightName = expression.getStringValue();
+            Integer.parseInt(termRightName);
+            try {
             result = factory.getConstantLiteral(termRightName, COL_TYPE.INTEGER);
+        }
+            catch (NumberFormatException e )
+            {
+                //TODO : remove the error message, assign value long
+                System.err.println("Long value");
+                result = factory.getConstantLiteral(termRightName, COL_TYPE.LONG);
+                }
         }
 
         @Override

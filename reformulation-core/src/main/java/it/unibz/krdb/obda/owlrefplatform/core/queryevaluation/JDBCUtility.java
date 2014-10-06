@@ -124,7 +124,7 @@ public class JDBCUtility implements Serializable {
 	 * H2, the SQL lexical form would be for "true" "TRUE" (or any combination
 	 * of lower and upper case) or "1" is always
 	 * 
-	 * @param rdfliteral
+	 * @param constant
 	 * @return
 	 */
 	public String getSQLLexicalForm(ValueConstant constant) {
@@ -137,7 +137,7 @@ public class JDBCUtility implements Serializable {
 		} else if (constant.getType() == COL_TYPE.DATETIME) {
 			sql = getSQLLexicalFormDatetime(constant);
 		} else if (constant.getType() == COL_TYPE.DECIMAL || constant.getType() == COL_TYPE.DOUBLE
-				|| constant.getType() == COL_TYPE.INTEGER) {
+				|| constant.getType() == COL_TYPE.INTEGER || constant.getType() == COL_TYPE.LONG) {
 			sql = constant.getValue();
 		} else {
 			sql = "'" + constant.getValue() + "'";

@@ -1089,6 +1089,8 @@ public class SparqlAlgebraToDatalogTranslator {
 			return ofac.getDataTypePredicateString();
 		case INTEGER:
 			return ofac.getDataTypePredicateInteger();
+        case LONG:
+             return ofac.getDataTypePredicateLong();
 		case DECIMAL:
 			return ofac.getDataTypePredicateDecimal();
 		case DOUBLE:
@@ -1129,6 +1131,10 @@ public class SparqlAlgebraToDatalogTranslator {
 							.equalsIgnoreCase(OBDAVocabulary.XSD_INTEGER_URI)) {
 				dataType = COL_TYPE.INTEGER;
 			} else if (dataTypeURI
+                    .equalsIgnoreCase(OBDAVocabulary.XSD_LONG_URI)) {
+                dataType = COL_TYPE.LONG;
+            }
+            else if (dataTypeURI
 					.equalsIgnoreCase(OBDAVocabulary.XSD_DECIMAL_URI)) {
 				// special case for decimal
 				String value = node.getLabel().toString();
@@ -1228,6 +1234,9 @@ public class SparqlAlgebraToDatalogTranslator {
 			if ( (type == XMLSchema.INTEGER) || type.equals(XMLSchema.INTEGER)) constantFunction = ofac.getFunction(ofac
 					.getDataTypePredicateInteger(), ofac.getConstantLiteral(
 							lit.intValue() + "", COL_TYPE.INTEGER));
+            else if ( (type == XMLSchema.LONG) || type.equals(XMLSchema.LONG)) constantFunction = ofac.getFunction(ofac
+                    .getDataTypePredicateLong(), ofac.getConstantLiteral(
+                    lit.intValue() + "", COL_TYPE.LONG));
 			else if ((type == XMLSchema.DECIMAL)  || type.equals(XMLSchema.DECIMAL)) constantFunction = ofac.getFunction(ofac
 					.getDataTypePredicateDecimal(), ofac.getConstantLiteral(
 							lit.decimalValue() + "", COL_TYPE.DECIMAL));
