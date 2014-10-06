@@ -528,7 +528,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		reformulationReasoner = new TBoxReasonerImpl(inputTBox);
 		Ontology reformulationOntology;
-		if (bOptimizeEquivalences && tMappings) { // Davide> Added && !tMappings
+		if (bOptimizeEquivalences) { 
+			// Davide> TODO Remove from equivalenceMaps the predicates for which t-mappings are forbidden
+			
 			// this is used to simplify the vocabulary of ABox assertions and mappings
 			equivalenceMaps = EquivalenceMap.getEquivalenceMap(reformulationReasoner);
 			// generate a new TBox with a simpler vocabulary
@@ -540,12 +542,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			reformulationOntology = inputTBox;
 		}
 		// Set<Predicate> reformulationVocabulary = reformulationOntology.getVocabulary();
-
-		// Davide> Remove from equivalenceMaps the ones for which t-mappings are
-		//         forbidden
-//		if( applyExcludeFromTMappings ){
-//			removeExcludeFromTMappingsFROMEquivalenceMaps(); // TODO This approach is not feasible
-//		}
 		
 		try {
 

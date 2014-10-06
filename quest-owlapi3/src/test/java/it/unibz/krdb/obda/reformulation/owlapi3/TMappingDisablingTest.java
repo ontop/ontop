@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.reformulation.owlapi3;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+
 import it.unibz.krdb.config.tmappings.parser.TMappingsConfParser;
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
@@ -29,9 +28,7 @@ import java.sql.Statement;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -41,15 +38,23 @@ import org.slf4j.LoggerFactory;
 
 import junit.framework.TestCase;
 
+/**
+ * 
+ * @author Davide
+ * 
+ * It tests the options for disabling the t-mappings. Currently it does not work with 
+ * concepts that are equivalent (e.g., the tests will fail when using the ontology
+ * src/test/resources/test/tmapping/exampleTMapping.owl
+ *
+ */
 public class TMappingDisablingTest extends TestCase {
 	
-	private QuestOWLConnection conn;
 	private Connection connection;
 	
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	
-	private final String owlfile = "src/test/resources/test/tmapping/exampleTMapping.owl";
+	private final String owlfile = "src/test/resources/test/tmapping/exampleTMappingNoEquivalence.owl";
 	private final String obdafile = "src/test/resources/test/tmapping/exampleTMapping.obda";
 	private final String tMappingsConfFile = "src/test/resources/test/tmapping/tMappingsConf.conf";
 
