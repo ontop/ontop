@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
+import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -38,6 +39,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingVocabularyTranslator;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
@@ -158,6 +160,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 */
 	private boolean applyUserConstraints;
 
+	/** Davide> Exclude specific predicates from T-Mapping approach **/
+	private List<SimplePredicate> excludeFromTMappings;
+	
+	/** Davide> Whether to exclude the user-supplied predicates from the
+	 *          TMapping procedure (that is, the mapping assertions for 
+	 *          those predicates should not be extended according to the 
+	 *          TBox hierarchies
+	 */
+	private boolean applyExcludeFromTMappings;
+	
 	/***
 	 * General flags and fields
 	 */
@@ -202,6 +214,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private String aboxJdbcDriver;
 
+	/** Davide> Options about T-Mappings **/
+	private Boolean tMappings = true;
+		
 	/*
 	 * The following are caches to queries that Quest has seen in the past. They
 	 * are used by the statements
@@ -285,6 +300,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public Quest(Ontology tbox, OBDAModel mappings, DBMetadata metadata, Properties config) {
 		this(tbox, mappings, config);
 		this.metadata = metadata;
+	}
+
+	/** Davide> Exclude specific predicates from T-Mapping approach **/
+	public void setExcludeFromTMappings(List<SimplePredicate> excludeFromTMappings){
+		assert(excludeFromTMappings != null);
+		this.excludeFromTMappings = excludeFromTMappings;
+
+        this.applyExcludeFromTMappings = true;
 	}
 
 	/**
@@ -402,6 +425,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
         sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
 
+        // Davide> T-Mappings
+        tMappings = Boolean.valueOf((String) preferences.get(QuestPreferences.T_MAPPINGS));
+        
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
 			aboxJdbcUser = preferences.getProperty(QuestPreferences.DBUSER);
@@ -592,7 +618,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				/* Setting up the OBDA model */
 
 				unfoldingOBDAModel.addSource(obdaSource);
-				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());				
+				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), dataRepository.getMappings());
 			} 
 			else if (aboxMode.equals(QuestConstants.VIRTUAL)) {
 				// log.debug("Working in virtual mode");
@@ -755,7 +781,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 // Normalizing equalities
 				unfolder.normalizeEqualities();
 				
+				// Davide> Option to disable T-Mappings (TODO: Test)
+				if( tMappings ){
 				unfolder.applyTMappings(reformulationReasoner, true);
+				}
 
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
                 unfolder.addABoxAssertionsAsFacts(inputOntology.getABox());
@@ -1120,7 +1149,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public DatalogProgram unfold(DatalogProgram query, String targetPredicate) throws OBDAException {
 		return unfolder.unfold(query, targetPredicate);
 	}
-	
+
 	public void repositoryChanged() {
 		// clear cache
 		this.querycache.clear();
@@ -1129,7 +1158,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public boolean isSemIdx() {
 		return (dataRepository != null);
 	}
-	
+
 	public RDBMSSIRepositoryManager getSamanticIndexRepository() {
 		return dataRepository;
 	}
