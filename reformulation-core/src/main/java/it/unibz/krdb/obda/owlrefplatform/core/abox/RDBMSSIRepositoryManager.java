@@ -259,7 +259,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static final String attribute_literal_index = "IDX_LITERAL_ATTRIBUTE";
 	public static final String attribute_string_index = "IDX_STRING_ATTRIBUTE";
 	public static final String attribute_integer_index = "IDX_INTEGER_ATTRIBUTE";
-    public static final String attribute_long_index = "IDX_INTEGER_ATTRIBUTE";
+    public static final String attribute_long_index = "IDX_LONG_ATTRIBUTE";
 	public static final String attribute_decimal_index = "IDX_DECIMAL_ATTRIBUTE";
 	public static final String attribute_double_index = "IDX_DOUBLE_ATTRIBUTE";
 	public static final String attribute_datetime_index = "IDX_DATETIME_ATTRIBUTE";

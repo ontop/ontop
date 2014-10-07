@@ -700,6 +700,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			if (p.toString() == OBDAVocabulary.XSD_BOOLEAN_URI) return Types.BOOLEAN;
 			if (p.toString() == OBDAVocabulary.XSD_INT_URI)  return Types.INTEGER;
 			if (p.toString() == OBDAVocabulary.XSD_INTEGER_URI)  return Types.INTEGER;
+            if (p.toString() == OBDAVocabulary.XSD_LONG_URI)  return Types.BIGINT;
 			if (p.toString() == OBDAVocabulary.XSD_DOUBLE_URI) return Types.DOUBLE;
 			if (p.toString() == OBDAVocabulary.XSD_STRING_URI) return Types.VARCHAR;
 			if (p.toString() == OBDAVocabulary.RDFS_LITERAL_URI) return Types.VARCHAR;
