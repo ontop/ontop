@@ -23,7 +23,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Variable;
@@ -32,9 +31,7 @@ import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,17 +40,14 @@ import java.util.List;
 
 public class QueryAnonymizer {
 
-	private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	public static DatalogProgram anonymize(DatalogProgram prog) {
 
-		DatalogProgram newProg = termFactory.getDatalogProgram();
+		DatalogProgram newProg = fac.getDatalogProgram();
 		List<CQIE> rules = prog.getRules();
-		Iterator<CQIE> it = rules.iterator();
-		while (it.hasNext()) {
-			CQIE q = it.next();
+		for (CQIE q : rules) 
 			newProg.appendRule(anonymize(q));
-		}
 
 		return newProg;
 	}
@@ -63,6 +57,8 @@ public class QueryAnonymizer {
 	 * Note that this will actually change the query terms by calling
 	 * body.getTerms().set(i, new UndisintguishedVariable()) for each position i
 	 * in the atom that can be anonymized.
+	 * 
+	 * Used only in DLRPerfectReformulator
 	 * 
 	 * @param q
 	 * @param focusatomIndex
@@ -117,18 +113,10 @@ public class QueryAnonymizer {
 				 */
 				if (!isSharedTerm) {
 					atom.getTerms().set(i,
-							termFactory.getVariableNondistinguished());
+							fac.getVariableNondistinguished());
 				}
 			}
 		}
-	}
-
-	public static Collection<CQIE> anonymize(Collection<CQIE> cqs) {
-		HashSet<CQIE> anonymous = new HashSet<CQIE>(1000);
-		for (CQIE cq : cqs) {
-			anonymous.add(anonymize(cq));
-		}
-		return anonymous;
 	}
 
 	public static CQIE anonymize(CQIE q) {
@@ -165,16 +153,16 @@ public class QueryAnonymizer {
 					list = auxmap.get(((VariableImpl) t).getName());
 				}
 				if (list != null && list.size() < 2 && !isVariableInHead(q, t)) {
-					vex.add(termFactory.getVariableNondistinguished());
+					vex.add(fac.getVariableNondistinguished());
 				} else {
 					vex.add(t);
 				}
 			}
-			Function newatom = termFactory
+			Function newatom = fac
 					.getFunction(atom.getPredicate().clone(), vex);
 			newBody.add(newatom);
 		}
-		CQIE query = termFactory.getCQIE(q.getHead(), newBody);
+		CQIE query = fac.getCQIE(q.getHead(), newBody);
 		return query;
 	}
 
@@ -227,65 +215,54 @@ public class QueryAnonymizer {
 	 * algorithm treats each undistinguished variable as a unique variable.
 	 * 
 	 * Needed because the rewriter might generate query bodies like this B(x,_),
-	 * R(x,_), underscores reperesnt uniquie anonymous varaibles. However, the
+	 * R(x,_), underscores represent unique anonymous variables. However, the
 	 * SQL generator needs them to be explicitly unique. replacing B(x,newvar1),
 	 * R(x,newvar2)
 	 * 
 	 * @param dp
 	 */
 	public static DatalogProgram deAnonymize(DatalogProgram dp) {
-		DatalogProgram result = termFactory.getDatalogProgram();
-		Iterator<CQIE> it = dp.getRules().iterator();
-		while (it.hasNext()) {
-			CQIE query = it.next();
-			deAnonymize(query);
-			result.appendRule(query);
-		}
+		DatalogProgram result = fac.getDatalogProgram();
+		for (CQIE query : dp.getRules()) 
+			result.appendRule(deAnonymize(query));
+		
 		result.setQueryModifiers(dp.getQueryModifiers());
 		return result;
 	}
 
-	public static void deAnonymize(CQIE query) {
-		// query = query.clone();
+	public static CQIE deAnonymize(CQIE query) {
+		
+		query = query.clone();
 		Function head = query.getHead();
-		Iterator<Term> hit = head.getTerms().iterator();
-		OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
-		int coutner = 1;
-		int i = 0;
+		
+		int counter = 1;
 		LinkedList<Term> newTerms = new LinkedList<Term>();
-		while (hit.hasNext()) {
-			Term t = hit.next();
+		for (Term t : head.getTerms()) {
 			if (t instanceof AnonymousVariable) {
-				String newName = "_uv-" + coutner;
-				coutner++;
-				Term newT = factory.getVariable(newName);
+				String newName = "_uv-" + counter;
+				counter++;
+				Term newT = fac.getVariable(newName);
 				newTerms.add(newT);
 			} else {
 				newTerms.add(t);
 			}
-			i++;
 		}
 		head.updateTerms(newTerms);
 
-		Iterator<Function> bit = query.getBody().iterator();
-		while (bit.hasNext()) {
-			Function a = (Function) bit.next();
-			Iterator<Term> hit2 = a.getTerms().iterator();
-			i = 0;
+		for (Function a : query.getBody()) {
 			LinkedList<Term> vec = new LinkedList<Term>();
-			while (hit2.hasNext()) {
-				Term t = hit2.next();
+			for (Term t : a.getTerms()) {
 				if (t instanceof AnonymousVariable) {
-					String newName = "_uv-" + coutner;
-					coutner++;
-					Term newT = factory.getVariable(newName);
+					String newName = "_uv-" + counter;
+					counter++;
+					Term newT = fac.getVariable(newName);
 					vec.add(newT);
 				} else {
 					vec.add(t);
 				}
-				i++;
 			}
 			a.updateTerms(vec);
 		}
+		return query;
 	}
 }
