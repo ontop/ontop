@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,12 +26,21 @@ public class LinearInclusionDependencies {
 	private final Map<Predicate, List<CQIE>> rules = new HashMap<Predicate, List<CQIE>>();
 	
 	public List<CQIE> getRules(Predicate pred) {
-		return rules.get(pred);
+		List<CQIE> rrs = rules.get(pred);
+		if (rrs == null)
+			return Collections.emptyList();
+		
+		return rrs;
 	}
 		
-	public Map<Predicate, List<CQIE>> getIndex() {
-		return rules;
-	}
+	/*
+	 * adds a rule to the indexed linear dependencies
+	 * 
+	 * IMPORTANT: this method does NOT rename variables
+	 * 
+	 * @param head: atom
+	 * @param body: atom
+	 */
 	
 	public void addRule(Function head, Function body) {
         CQIE rule = ofac.getCQIE(head, body);

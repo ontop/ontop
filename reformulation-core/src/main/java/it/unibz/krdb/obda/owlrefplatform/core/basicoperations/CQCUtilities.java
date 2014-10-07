@@ -65,26 +65,16 @@ public class CQCUtilities {
 	}
 	
 	public CQCUtilities(CQIE query, LinearInclusionDependencies sigma) {
-		Set<Function> chasedBody = chaseAtoms(query.getBody(), sigma.getIndex());
+		Set<Function> chasedBody = chaseAtoms(query.getBody(), sigma);
 		
 		FreezeCQ c2cq = new FreezeCQ(query.getHead(), chasedBody);
 		freezeHead = c2cq.getHead();	
 		freezeChasedBody = c2cq.getBodyAtoms();
 	}
-
-	private CQCUtilities(CQIE query, Map<Predicate,List<CQIE>> rules) {
-		// rules are applied only once to each atom (no saturation)
-		Set<Function> chasedBody = chaseAtoms(query.getBody(), rules);
-		
-		FreezeCQ c2cq = new FreezeCQ(query.getHead(), chasedBody);
-		freezeHead = c2cq.getHead();
-		freezeChasedBody = c2cq.getBodyAtoms();				
-	}
-
 	
 	private static boolean isOptimizable(CQIE query) {
 		for (Function b : query.getBody())
-			if (b.isBooleanFunction())   
+			if (!b.isDataFunction()) // .isBooleanFunction()   
 				return false;   
 		return true;
 	}
@@ -238,18 +228,15 @@ public class CQCUtilities {
 	 * @param rules
 	 * @return
 	 */
-	private static Set<Function> chaseAtoms(Collection<Function> atoms, Map<Predicate,List<CQIE>> rules) {
+	private static Set<Function> chaseAtoms(Collection<Function> atoms, LinearInclusionDependencies dependencies) {
 
 		Set<Function> derivedAtoms = new HashSet<Function>();
 		for (Function fact : atoms) {
 			derivedAtoms.add(fact);
-			List<CQIE> rrs = rules.get(fact.getFunctionSymbol());
-			if (rrs == null)
-				continue;
-			for (CQIE rule : rrs) {
+			for (CQIE rule : dependencies.getRules(fact.getFunctionSymbol())) {
 				Function ruleBody = rule.getBody().get(0);
 				Map<Variable, Term> theta = Unifier.getMGU(ruleBody, fact);
-				// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH"
+				// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule
 				if (theta != null && !theta.isEmpty()) {
 					Function ruleHead = rule.getHead();
 					Function newFact = (Function)ruleHead.clone();
@@ -373,8 +360,7 @@ public class CQCUtilities {
 
 		private static ValueConstant getCanonicalConstant(String nameFragment) {
 			return fac.getConstantLiteral("CAN" + nameFragment);		
-		}
-		
+		}	
 	}
 	
 
@@ -604,26 +590,6 @@ public class CQCUtilities {
 	
 
 	
-	public static List<CQIE> removeContainedQueriesSorted(List<CQIE> program, Map<Predicate,List<CQIE>> foreignKeyRules) {
-		
-		if (foreignKeyRules == null || foreignKeyRules.isEmpty()) 
-			return program;
-				
-//		DatalogProgram result = OBDADataFactoryImpl.getInstance().getDatalogProgram();
-//		result.setQueryModifiers(program.getQueryModifiers());
-		List<CQIE> queries = new LinkedList<CQIE>();
-		queries.addAll(program);
-		
-		// log.debug("Sorting...");
-		Collections.sort(queries, lenghtComparator);
-				
-		removeContainedQueries(queries, foreignKeyRules);
-	
-		return queries;
-//		result.appendRule(queries);
-//		return result;
-	}
-	
 	/***
 	 * Removes queries that are contained syntactically, using the method
 	 * isContainedInSyntactic(CQIE q1, CQIE 2). To make the process more
@@ -679,20 +645,17 @@ public class CQCUtilities {
 	 * 
 	 * @param queries
 	 */
-	private static void removeContainedQueries(List<CQIE> queries, Map<Predicate,List<CQIE>> rules) {
-
-//		int initialsize = queries.size();
-//		log.debug("Optimzing w.r.t. CQC. Initial size: {}:", initialsize);
-//		double startime = System.currentTimeMillis();
+	
+	private static void removeContainedQueriesInternal(List<CQIE> queries, LinearInclusionDependencies sigma) {
 
 		for (int i = 0; i < queries.size(); i++) {
 			CQIE query = queries.get(i);
 			if (isOptimizable(query))   {
-				CQCUtilities cqc = new CQCUtilities(query, rules);
+				CQCUtilities cqc = new CQCUtilities(query, sigma);
 				for (int j = queries.size() - 1; j > i; j--) {
 					CQIE query2 = queries.get(j);
 					if (cqc.isContainedIn(query2)) {
-//						log.debug("REMOVE (FK): " + queries.get(i));
+//						log.debug("REMOVE (SIGMA): " + queries.get(i));
 						queries.remove(i);
 						i -= 1;
 						break;
@@ -701,50 +664,16 @@ public class CQCUtilities {
 			}
 		}
 
-		// second pass
 		for (int i = (queries.size() - 1); i >= 0; i--) {
 			CQIE query = queries.get(i);
 			if (isOptimizable(query))   {
-				CQCUtilities cqc = new CQCUtilities(query, rules);
+				CQCUtilities cqc = new CQCUtilities(query, sigma);
 				for (int j = 0; j < i; j++) {
 					if (cqc.isContainedIn(queries.get(j))) {
-//						log.debug("REMOVE (FK): " + queries.get(i));
+//						log.debug("REMOVE (SIGMA): " + queries.get(i));
 						queries.remove(i);
 						break;
 					}
-				}
-			}
-		}
-		
-//		int newsize = queries.size();
-//		double endtime = System.currentTimeMillis();
-//		double time = (endtime - startime) / 1000;
-//		log.debug("Resulting size: {}  Time elapsed: {}", newsize, time);
-	}
-	
-	private static void removeContainedQueriesInternal(List<CQIE> queries, LinearInclusionDependencies sigma) {
-
-		for (int i = 0; i < queries.size(); i++) {
-			CQIE query = queries.get(i);
-			CQCUtilities cqc = new CQCUtilities(query, sigma);
-			for (int j = queries.size() - 1; j > i; j--) {
-				CQIE query2 = queries.get(j);
-				if (cqc.isContainedIn(query2)) {
-//					log.debug("REMOVE (SIGMA): " + queries.get(i));
-					queries.remove(i);
-					i -= 1;
-					break;
-				}
-			}
-		}
-
-		for (int i = (queries.size() - 1); i >= 0; i--) {
-			CQCUtilities cqc = new CQCUtilities(queries.get(i), sigma);
-			for (int j = 0; j < i; j++) {
-				if (cqc.isContainedIn(queries.get(j))) {
-//					log.debug("REMOVE (SIGMA): " + queries.get(i));
-					queries.remove(i);
-					break;
 				}
 			}
 		}
@@ -756,30 +685,24 @@ public class CQCUtilities {
 	 * @param rules
 	 */
 	public static void optimizeQueryWithSigmaRules(DatalogProgram program, LinearInclusionDependencies sigma) {
-		List<CQIE> unionOfQueries = new LinkedList<CQIE>(program.getRules());
+		
+		List<CQIE> result = new LinkedList<CQIE>();
+		
 		// for each rule in the query
-		for (int qi = 0; qi < unionOfQueries.size(); qi++) {
-			CQIE query = unionOfQueries.get(qi);
+		for (CQIE query : program.getRules()) {
+			
 			// get query head, body
 			Function queryHead = query.getHead();
 			List<Function> queryBody = query.getBody();
 			// for each atom in query body
 			for (int i = 0; i < queryBody.size(); i++) {
-				Set<Function> removedAtom = new HashSet<Function>();
+				Set<Function> atomsToRemove = new HashSet<Function>();
 				Function atomQuery = queryBody.get(i);
-				Predicate predicate = atomQuery.getPredicate();
 
 				// for each tbox rule
-				List<CQIE> rules = sigma.getRules(predicate);
-				if (rules == null || rules.isEmpty()) {
-					continue;
-				}
-				for (CQIE rule : rules) {
-					// try to unify current query body atom with tbox rule body
-					// atom
-					rule = DatalogUnfolder.getFreshRule(rule, 4022013); // Random
-																		// suffix
-																		// number
+				for (CQIE rule : sigma.getRules(atomQuery.getFunctionSymbol())) {
+					// try to unify current query body atom with tbox rule body atom
+					// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule				
 					Function ruleBody = rule.getBody().get(0);
 					Map<Variable, Term> theta = Unifier.getMGU(ruleBody, atomQuery);
 					if (theta == null || theta.isEmpty()) {
@@ -790,15 +713,15 @@ public class CQCUtilities {
 					Function copyRuleHead = (Function) ruleHead.clone();
 					Unifier.applyUnifier(copyRuleHead, theta);
 
-					removedAtom.add(copyRuleHead);
+					atomsToRemove.add(copyRuleHead);
 				}
 
 				for (int j = 0; j < queryBody.size(); j++) {
 					if (j == i) {
 						continue;
 					}
-					Function toRemove = queryBody.get(j);
-					if (removedAtom.contains(toRemove)) {
+					Function current = queryBody.get(j);
+					if (atomsToRemove.contains(current)) {
 						queryBody.remove(j);
 						j -= 1;
 						if (j < i) {
@@ -807,12 +730,10 @@ public class CQCUtilities {
 					}
 				}
 			}
-			// update query datalog program
-			unionOfQueries.remove(qi);
-			unionOfQueries.add(qi, fac.getCQIE(queryHead, queryBody));
+			result.add(fac.getCQIE(queryHead, queryBody));
 		}
 		program.removeAllRules();
-		program.appendRule(unionOfQueries);
+		program.appendRule(result);
 	}
 	
 }
