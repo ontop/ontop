@@ -2501,99 +2501,109 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		
 		if (mgu == null) {
 			return null;
-		}else{
-			
-			Set<Entry<Variable, Term>> entrySet = mgu.entrySet();
-			
-			Set<Entry<Variable, Term>> entrySetClone = new HashSet<Entry<Variable, Term>>();
-			for (Entry<Variable, Term> a: entrySet){
-				entrySetClone.add(a);
-			}
-			
-			Iterator<Map.Entry<Variable, Term>> vars = entrySetClone.iterator();
-			while (vars.hasNext()) {
-				Map.Entry<Variable, Term> pairs = vars.next();
-
-				Variable key = pairs.getKey();
-				Term value = pairs.getValue();
-
-				if (value instanceof Function){
-
-					Set<Variable> varset =  value.getReferencedVariables();
-					Variable mvar;
-					Iterator<Variable> iterator = varset.iterator();
-					if (!varset.isEmpty()){
-						Map<Variable, Term> minimgu = new HashMap<Variable,Term>();
-						mvar = iterator.next();
-						if (varset.size() == 1) {
-							minimgu.put(mvar, key);
-							Unifier.applyUnifier((Function)value, minimgu, false);
-						} else {
-							//TODO: Complete this!!!
-							
-							
-							/*
-							 * When we do this we have to take into account this case. See test case LeftJoinTest1Virtual Test2
-							 * ans5(nick1,nick2,nick22,p) :- LeftJoin(ans10(nick1,p),ans11(nick2,nick22,p))
-							   ans4(http://www.w3.org/2000/01/rdf-schema#Literal(t2_1),URI("http://www.example.org/test#{}/{}",t1_1,t2_1)) :- people(t1_1,t2_1,t3_1,t4_1,t5_1,t6_1), IS_NOT_NULL(t1_1), IS_NOT_NULL(t2_1), IS_NOT_NULL(t1_1), IS_NOT_NULL(t2_1)
-							   ans10(http://www.w3.org/2000/01/rdf-schema#Literal(t5_3),URI("http://www.example.org/test#{}/{}",t1_3,t2_3)) :- people(t1_3,t2_3,t3_3,t4_3,t5_3,t6_3), IS_NOT_NULL(t1_3), IS_NOT_NULL(t2_3), IS_NOT_NULL(t5_3)
-							   ans11(http://www.w3.org/2000/01/rdf-schema#Literal(t6_4),"null",URI("http://www.example.org/test#{}/{}",t1_4,t2_4)) :- people(t1_4,t2_4,t3_4,t4_4,t5_4,t6_4), IS_NOT_NULL(t1_4), IS_NOT_NULL(t2_4), IS_NOT_NULL(t6_4)
-							 	
-							 	In this case we need to take care of that join in p !!, most of the code is dont so...
-							 */
-							
-							log.debug("Multiple vars in Function: "+ varset.toString() + "Type not pushed!-Complete!");
-							
-							mgu.remove(key);
-							exclude.add(value);
-						/*	//if targetAtom is the only one in the father rule that contains key
-							List<Function> fatherBody = fatherRule.getBody();
-						
-							
-							minimgu.put(mvar, key);
-							Unifier.applyUnifier((Function)value, minimgu, false);
-							OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-							
-							while(iterator.hasNext()){
-								mvar = iterator.next();
-								
-								Function newTarget = (Function)targetAtom.clone();
-								newTarget.getTerms().add(mvar);
-							
-								Predicate oldPredicate = targetAtom.getFunctionSymbol();
-								Predicate newPredicate = dfac.getPredicate(oldPredicate.getName(), oldPredicate.getArity()+1);
-								
-								Function nt = dfac.getFunction(newPredicate, newTarget.getTerms());
-								
-								replaceAtomInBody(targetAtom, fatherBody, nt);
-								
-							}*/
-						}
-					} else{ //no variables!
-						log.debug("This Function has no variables: "+ value + "Type not pushed!-Complete!");
-						
-						mgu.remove(key);
-						exclude.add(value);
-					}
-				} else {
-					log.debug("value: "+value.toString());
-				}
-
-			}
-
-			//updating the rule body
-			Function newHead = (Function) fatherRule.getHead();
-			Unifier.applySelectiveUnifier(newHead, mgu);
-			fatherRule.updateHead(newHead);
-
-
-			
-	
-			return fatherRule;
 		}
+
+        mgu = forceVariableReuse(exclude, mgu);
+
+        //updating the rule body
+        Function newHead = fatherRule.getHead();
+        Unifier.applySelectiveUnifier(newHead, mgu);
+        fatherRule.updateHead(newHead);
+
+        return fatherRule;
 	}
 
-	private void replaceAtomInBody(Function targetAtom,
+    /**
+     * Modifies the most general unifier so that it does not change variable names.
+     *
+     * Use case: when the mgu is used just for lifting types.
+     *
+     * Note that the exclusion list may also be updated.
+     */
+    protected static Map<Variable, Term> forceVariableReuse(List<Term> exclude, Map<Variable, Term> initialMGU) {
+        Map<Variable, Term> mgu = new HashMap<>(initialMGU);
+
+        Set<Entry<Variable, Term>> entrySet = mgu.entrySet();
+
+        Set<Entry<Variable, Term>> entrySetClone = new HashSet<>();
+        for (Entry<Variable, Term> a: entrySet){
+            entrySetClone.add(a);
+        }
+
+        Iterator<Entry<Variable, Term>> vars = entrySetClone.iterator();
+        while (vars.hasNext()) {
+            Entry<Variable, Term> pairs = vars.next();
+
+            Variable key = pairs.getKey();
+            Term value = pairs.getValue();
+
+            if (value instanceof Function){
+
+                Set<Variable> varset =  value.getReferencedVariables();
+                Variable mvar;
+                Iterator<Variable> iterator = varset.iterator();
+                if (!varset.isEmpty()){
+                    Map<Variable, Term> minimgu = new HashMap<>();
+                    mvar = iterator.next();
+                    if (varset.size() == 1) {
+                        minimgu.put(mvar, key);
+                        Unifier.applyUnifier((Function) value, minimgu, false);
+                    } else {
+                        //TODO: Complete this!!!
+
+
+                        /*
+                         * When we do this we have to take into account this case. See test case LeftJoinTest1Virtual Test2
+                         * ans5(nick1,nick2,nick22,p) :- LeftJoin(ans10(nick1,p),ans11(nick2,nick22,p))
+                           ans4(http://www.w3.org/2000/01/rdf-schema#Literal(t2_1),URI("http://www.example.org/test#{}/{}",t1_1,t2_1)) :- people(t1_1,t2_1,t3_1,t4_1,t5_1,t6_1), IS_NOT_NULL(t1_1), IS_NOT_NULL(t2_1), IS_NOT_NULL(t1_1), IS_NOT_NULL(t2_1)
+                           ans10(http://www.w3.org/2000/01/rdf-schema#Literal(t5_3),URI("http://www.example.org/test#{}/{}",t1_3,t2_3)) :- people(t1_3,t2_3,t3_3,t4_3,t5_3,t6_3), IS_NOT_NULL(t1_3), IS_NOT_NULL(t2_3), IS_NOT_NULL(t5_3)
+                           ans11(http://www.w3.org/2000/01/rdf-schema#Literal(t6_4),"null",URI("http://www.example.org/test#{}/{}",t1_4,t2_4)) :- people(t1_4,t2_4,t3_4,t4_4,t5_4,t6_4), IS_NOT_NULL(t1_4), IS_NOT_NULL(t2_4), IS_NOT_NULL(t6_4)
+
+                            In this case we need to take care of that join in p !!, most of the code is dont so...
+                         */
+
+                        log.debug("Multiple vars in Function: "+ varset.toString() + "Type not pushed!-Complete!");
+
+                        mgu.remove(key);
+                        exclude.add(value);
+                    /*	//if targetAtom is the only one in the father rule that contains key
+                        List<Function> fatherBody = fatherRule.getBody();
+
+
+                        minimgu.put(mvar, key);
+                        Unifier.applyUnifier((Function)value, minimgu, false);
+                        OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+
+                        while(iterator.hasNext()){
+                            mvar = iterator.next();
+
+                            Function newTarget = (Function)targetAtom.clone();
+                            newTarget.getTerms().add(mvar);
+
+                            Predicate oldPredicate = targetAtom.getFunctionSymbol();
+                            Predicate newPredicate = dfac.getPredicate(oldPredicate.getName(), oldPredicate.getArity()+1);
+
+                            Function nt = dfac.getFunction(newPredicate, newTarget.getTerms());
+
+                            replaceAtomInBody(targetAtom, fatherBody, nt);
+
+                        }*/
+                    }
+                } else{ //no variables!
+                    log.debug("This Function has no variables: "+ value + "Type not pushed!-Complete!");
+
+                    mgu.remove(key);
+                    exclude.add(value);
+                }
+            } else {
+                log.debug("value: "+value.toString());
+            }
+
+        }
+        return mgu;
+    }
+
+    private void replaceAtomInBody(Function targetAtom,
 			List<Function> fatherBody, Function newAtom) {
 		for (Function func: fatherBody){
 			

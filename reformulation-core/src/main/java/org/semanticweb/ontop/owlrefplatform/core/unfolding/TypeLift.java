@@ -211,10 +211,10 @@ public class TypeLift {
 
         List<CQIE> currentRules = currentZipper.getLabel()._2();
 
-        // A parent node without rules does not make sense
-
         /**
          * Use the head of the first rule.
+         * Please note that parent node without rule does not make sense.
+         *
          * TODO: will it make sense to use the proposal instead?
          */
         Function currentHead = currentRules.head().getHead();
@@ -239,8 +239,13 @@ public class TypeLift {
      * TODO: describe what we mean here by rule body index
      */
     private static HashMap<Predicate,List<Function>> computeRuleBodyIndex(List<CQIE> currentRules) {
-        //TODO: implement it
-        return null;
+        List<Function> bodies = List.join(currentRules.map(new F<CQIE, List<Function>>() {
+            @Override
+            public List<Function> f(CQIE rule) {
+                return List.iterableList(rule.getBody());
+            }
+        }));
+        return buildPredicateIndex(bodies);
     }
 
     /**
@@ -284,19 +289,32 @@ public class TypeLift {
         Function bodyAtom = bodyAndHeadPair._1();
         Function headAtom = bodyAndHeadPair._2();
 
-        Map<Variable, Term> mgu = Unifier.getMGU(bodyAtom, headAtom, true, ImmutableMultimap.<Predicate,Integer>of());
+        /**
+         * Most General Unifier between the body and head atoms.
+         *
+         */
+        Map<Variable, Term> directMGU = Unifier.getMGU(headAtom, bodyAtom, true, ImmutableMultimap.<Predicate,Integer>of());
 
         /**
          * Impossible to unify the multiple types proposed for this predicate.
          */
-        if (mgu == null) {
+        if (directMGU == null) {
             throw new MultiTypeException();
         }
+
+        /**
+         * The current MGU may change variable names because they were not the same in the two atoms.
+         *
+         * Here, we are just interested in the types but we do not want to change the variable names.
+         * Thus, we force variable reuse.
+         */
+        //TODO: reimplement this method without side effect.
+        Map<Variable, Term> typingMGU = DatalogUnfolder.forceVariableReuse(new ArrayList<Term>(), directMGU);
 
         //Mutable!!
         Function newHead = (Function)currentHead.clone();
         // Side-effect (newHead is updated)
-        Unifier.applySelectiveUnifier(newHead, mgu);
+        Unifier.applySelectiveUnifier(newHead, typingMGU);
 
         // Tail recursion
         return unifyVariable(newHead, bodyAndHeadAtoms.tail());
@@ -312,21 +330,6 @@ public class TypeLift {
                 CQIE newRule = initialRule.clone();
                 newRule.updateHead((Function)typeProposal.clone());
                 return newRule;
-//                // Was adapted from DatalogUnfolder.addTypes().
-//                // This index seems to be not needed here.
-//                Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex = ImmutableMultimap.of();
-//                Map<Variable, Term> mgu = Unifier.getMGU(initialRule.getHead(), typeProposal, true, multiTypedFunctionSymbolIndex);
-//
-//                //Mutable!!
-//                Function newHead = (Function)initialRule.getHead().clone();
-//                // Side-effect (newHead is updated)
-//                Unifier.applySelectiveUnifier(newHead, mgu);
-//
-//                //New rule (CQIE are mutable!)
-//                CQIE newRule = initialRule.clone();
-//                //Side-effect (newRule is updated)
-//                newRule.updateHead(newHead);
-//                return newRule;
             }
         });
     }
@@ -359,8 +362,6 @@ public class TypeLift {
                 newHead.updateTerms(new ArrayList<>(newHeadTerms.toCollection()));
                 newRule.updateHead(newHead);
                 return newRule;
-
-                // return initialRule;
             }
         });
     }
@@ -404,36 +405,12 @@ public class TypeLift {
          */
         List<Function> proposedHeads = Option.somes(proposals).toList();
 
-
         /**
          * Computes and returns the equivalent predicate index
          */
-        List<P2<Predicate, List<Function>>> predicateHeadList = proposedHeads.group(
-                /**
-                 * Groups by predicate
-                 */
-                Equal.equal(new F<Function, F<Function, Boolean>>() {
-            @Override
-            public F<Function, Boolean> f(final Function atom) {
-                return new F<Function, Boolean>() {
-                    @Override
-                    public Boolean f(Function other) {
-                        return other.getFunctionSymbol().equals(atom.getFunctionSymbol());
-                    }
-                };
-            }
-        })).map(
-                /**
-                 * Transforms it into a P2 list (predicate and list of functions).
-                 */
-                new F<List<Function>, P2<Predicate, List<Function>>>() {
-            @Override
-            public P2<Predicate, List<Function>> f(List<Function> atoms) {
-                return P.p(atoms.head().getFunctionSymbol(), atoms);
-            }
-        });
+        return buildPredicateIndex(proposedHeads);
 
-        return HashMap.from(predicateHeadList);
+
     }
 
     /**
@@ -558,6 +535,35 @@ public class TypeLift {
             }
         });
         return List.join(intermediateList);
+    }
+
+    private static HashMap<Predicate, List<Function>> buildPredicateIndex(List<Function> atoms) {
+        List<P2<Predicate, List<Function>>> predicateAtomList = atoms.group(
+                /**
+                 * Groups by predicate
+                 */
+                Equal.equal(new F<Function, F<Function, Boolean>>() {
+                    @Override
+                    public F<Function, Boolean> f(final Function atom) {
+                        return new F<Function, Boolean>() {
+                            @Override
+                            public Boolean f(Function other) {
+                                return other.getFunctionSymbol().equals(atom.getFunctionSymbol());
+                            }
+                        };
+                    }
+                })).map(
+                /**
+                 * Transforms it into a P2 list (predicate and list of functions).
+                 */
+                new F<List<Function>, P2<Predicate, List<Function>>>() {
+                    @Override
+                    public P2<Predicate, List<Function>> f(List<Function> atoms) {
+                        return P.p(atoms.head().getFunctionSymbol(), atoms);
+                    }
+                });
+
+        return HashMap.from(predicateAtomList);
     }
 
 }
