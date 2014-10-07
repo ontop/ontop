@@ -280,52 +280,42 @@ public class CQCUtilitiesTest {
 
 		// Checking containment 5 in 6 and viceversa
 
-		CQCUtilities cqcu = new CQCUtilities(q6);
-		assertTrue(cqcu.isContainedIn(q5));
+		CQCUtilities cqcu = new CQCUtilities();
+		
+		assertTrue(cqcu.isContainedIn(q6, q5));
 
-		cqcu = new CQCUtilities(q5);
-		assertTrue(cqcu.isContainedIn(q6));
+		assertTrue(cqcu.isContainedIn(q5, q6));
 
 		// checking containment of 7 in 8
-		cqcu = new CQCUtilities(q7);
-		assertTrue(cqcu.isContainedIn(q8));
+		assertTrue(cqcu.isContainedIn(q7, q8));
 
 		// checking non-containment of 8 in 7
-		cqcu = new CQCUtilities(q8);
-		assertFalse(cqcu.isContainedIn(q7));
+		assertFalse(cqcu.isContainedIn(q8, q7));
 
 		// Checking contaiment q2 <= q1
-		cqcu = new CQCUtilities(q2);
-		assertTrue(cqcu.isContainedIn(q1));
+		assertTrue(cqcu.isContainedIn(q2, q1));
 
 		// Checking contaiment q1 <= q2
-		cqcu = new CQCUtilities(q1);
-		assertFalse(cqcu.isContainedIn(q2));
+		assertFalse(cqcu.isContainedIn(q1, q2));
 
 		// Checking contaiment q1 <= q3
-		cqcu = new CQCUtilities(q1);
-		assertTrue(cqcu.isContainedIn(q3));
+		assertTrue(cqcu.isContainedIn(q1, q3));
 
 		// Checking contaiment q3 <= q1
-		cqcu = new CQCUtilities(q3);
-		assertFalse(cqcu.isContainedIn(q1));
+		assertFalse(cqcu.isContainedIn(q3, q1));
 
 		// Checking contaiment q1 <= q4
-		cqcu = new CQCUtilities(q1);
-		assertFalse(cqcu.isContainedIn(q4));
+		assertFalse(cqcu.isContainedIn(q1, q4));
 
 		// Checking contaiment q4 <= q1
-		cqcu = new CQCUtilities(q4);
-		assertFalse(cqcu.isContainedIn(q1));
+		assertFalse(cqcu.isContainedIn(q4, q1));
 		
 		
 		// Checking containment q9 <= q10 true
-		cqcu = new CQCUtilities(q9);
-		assertTrue(cqcu.isContainedIn(q10));
+		assertTrue(cqcu.isContainedIn(q9, q10));
 		
 		// Checking containment q10 <= q9 true
-		cqcu = new CQCUtilities(q10);
-		assertTrue(cqcu.isContainedIn(q9));
+		assertTrue(cqcu.isContainedIn(q10, q9));
 	}
 
     @Test
@@ -526,11 +516,11 @@ public class CQCUtilitiesTest {
 			
 			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
 			
-			CQCUtilities cqcutil1 = new CQCUtilities(query1, dep);
-			assertTrue(cqcutil1.isContainedIn(query2));
-
-			CQCUtilities cqcutil2 = new CQCUtilities(query2, dep);
-			assertFalse(cqcutil2.isContainedIn(query1));
+			CQCUtilities cqc = new CQCUtilities(dep);
+			
+			assertTrue(cqc.isContainedIn(query1, query2));
+			
+			assertFalse(cqc.isContainedIn(query2, query1));
 		}
 
 		{
@@ -557,11 +547,11 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
 
-			CQCUtilities cqcutil1 = new CQCUtilities(query1, dep);
-			assertTrue(cqcutil1.isContainedIn(query2));
-
-			CQCUtilities cqcutil2 = new CQCUtilities(query2, dep);
-			assertFalse(cqcutil2.isContainedIn(query1));
+			CQCUtilities cqc = new CQCUtilities(dep);
+			
+			assertTrue(cqc.isContainedIn(query1, query2));
+			
+			assertFalse(cqc.isContainedIn(query2, query1));
 		}
 
 		{
@@ -588,11 +578,11 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
 			
-			CQCUtilities cqcutil1 = new CQCUtilities(query1, dep);
-			assertTrue(cqcutil1.isContainedIn(query2));
-
-			CQCUtilities cqcutil2 = new CQCUtilities(query2, dep);
-			assertFalse(cqcutil2.isContainedIn(query1));
+			CQCUtilities cqc = new CQCUtilities(dep);
+			
+			assertTrue(cqc.isContainedIn(query1, query2));
+			
+			assertFalse(cqc.isContainedIn(query2, query1));
 		}
 
 		{
@@ -620,11 +610,11 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
 
-			CQCUtilities cqcutil1 = new CQCUtilities(query1, dep);
-			assertTrue(cqcutil1.isContainedIn(query2));
-
-			CQCUtilities cqcutil2 = new CQCUtilities(query2, dep);
-			assertFalse(cqcutil2.isContainedIn(query1));
+			CQCUtilities cqc = new CQCUtilities(dep);
+			
+			assertTrue(cqc.isContainedIn(query1, query2));
+			
+			assertFalse(cqc.isContainedIn(query2, query1));
 		}
 
 		{
@@ -652,11 +642,11 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
 
-			CQCUtilities cqcutil1 = new CQCUtilities(query1, dep);
-			assertTrue(cqcutil1.isContainedIn(query2));
-
-			CQCUtilities cqcutil2 = new CQCUtilities(query2, dep);
-			assertFalse(cqcutil2.isContainedIn(query1));
+			CQCUtilities cqc = new CQCUtilities(dep);
+			
+			assertTrue(cqc.isContainedIn(query1, query2));
+			
+			assertFalse(cqc.isContainedIn(query2, query1));
 		}
 
 		// q(x) :- A(x), q(y) :- C(y), with A ISA B, B ISA C
@@ -727,12 +717,12 @@ public class CQCUtilitiesTest {
         CQIE query2 = tfac.getCQIE(head, body);
 
 		LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
-       
-        CQCUtilities cqcutil1 = new CQCUtilities(query1, dep);
-        assertFalse(cqcutil1.isContainedIn(query2));
+ 
+		CQCUtilities cqc = new CQCUtilities(dep);
+				
+        assertFalse(cqc.isContainedIn(query1, query2));
 
-        CQCUtilities cqcutil2 = new CQCUtilities(query2, dep);
-        assertFalse(cqcutil2.isContainedIn(query1));
+        assertFalse(cqc.isContainedIn(query2, query1));
 
         assertFalse(SyntacticCQC.isContainedInSyntactic(query2, query1));
         assertFalse(SyntacticCQC.isContainedInSyntactic(query1, query2));

@@ -57,14 +57,14 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private TreeWitnessReasonerCache reasonerCache;
-	private LinearInclusionDependencies sigma;
+	private CQCUtilities dataDependenciesCQC;
 	
 	@Override
-	public void setTBox(TBoxReasoner reasoner, LinearInclusionDependencies sigmap) {
+	public void setTBox(TBoxReasoner reasoner, LinearInclusionDependencies sigma) {
 		double startime = System.currentTimeMillis();
 
 		reasonerCache = new TreeWitnessReasonerCache(reasoner);
-		sigma = sigmap;
+		dataDependenciesCQC = new CQCUtilities(sigma);
 		
 //		log.debug("SET SIGMA");
 //		for (Axiom ax : sigma.getAssertions()) {
@@ -305,7 +305,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	
 		// extra CQC 
 		if (output.getRules().size() > 1)
-			output = fac.getDatalogProgram(CQCUtilities.removeContainedQueries(output.getRules(), sigma));
+			output = fac.getDatalogProgram(dataDependenciesCQC.removeContainedQueries(output.getRules()));
 		
 		QueryUtils.copyQueryModifiers(dp, output);
 

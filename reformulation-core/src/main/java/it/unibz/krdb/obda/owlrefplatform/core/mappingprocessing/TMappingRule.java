@@ -25,9 +25,9 @@ public class TMappingRule {
 	
 	private final CQIE stripped;	
 	private final List<Function> conditions;	
-	private final CQCUtilities cqc;
+	final CQCUtilities cqc;   // TODO: make private
 	
-	public TMappingRule(Function head, List<Function> body) {
+	public TMappingRule(Function head, List<Function> body, CQCUtilities cqc) {
 		conditions = new LinkedList<Function>();
 		List<Function> newbody = new LinkedList<Function>();
 		for (Function atom : body) {
@@ -39,10 +39,10 @@ public class TMappingRule {
 		}
 		Function newhead = (Function)head.clone();
 		stripped = fac.getCQIE(newhead, newbody);
-		cqc = new CQCUtilities(stripped);
+		this.cqc = cqc;
 	}
 
-	public TMappingRule(Function head, TMappingRule baseRule) {
+	public TMappingRule(Function head, TMappingRule baseRule, CQCUtilities cqc) {
 		conditions = new ArrayList<Function>(baseRule.conditions.size());
 		for (Function atom : baseRule.conditions) {
 			Function clone = (Function)atom.clone();
@@ -56,7 +56,7 @@ public class TMappingRule {
 		}
 		Function newhead = (Function)head.clone();
 		stripped = fac.getCQIE(newhead, newbody);
-		cqc = new CQCUtilities(stripped); // sigma is null -- no optimization is used
+		this.cqc = cqc;
 	}
 	
 	
@@ -65,7 +65,7 @@ public class TMappingRule {
 	}
 	
 	public boolean isContainedIn(TMappingRule other) {
-		return cqc.isContainedIn(other.stripped);
+		return cqc.isContainedIn(stripped, other.stripped);
 	}
 	
 	public CQIE asCQIE() {

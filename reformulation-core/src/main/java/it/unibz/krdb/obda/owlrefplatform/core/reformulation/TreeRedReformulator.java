@@ -71,7 +71,7 @@ public class TreeRedReformulator implements QueryRewriter {
 	 * The set of ABox dependencies that will be used to optimize the
 	 * reformulation.
 	 */
-	private LinearInclusionDependencies sigma = null;
+	private CQCUtilities dataDependenciesCQC = null;
 
 	public TreeRedReformulator() {
 
@@ -283,12 +283,12 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		// if (resultlist.size() < 300) {
 
-		if (sigma != null) {
-			log.debug("Removing redundant queries by CQC. Using {} ABox dependencies.", sigma.toString());
+		if (dataDependenciesCQC != null) {
+			log.debug("Removing redundant queries by CQC. Using {} ABox dependencies.", dataDependenciesCQC.toString());
 		} else {
 			log.debug("Removing redundatnt queries by CQC.");
 		}
-		resultlist = CQCUtilities.removeContainedQueriesSorted(resultlist, sigma);
+		resultlist = dataDependenciesCQC.removeContainedQueriesSorted(resultlist);
 		// }
 
 		DatalogProgram resultprogram = fac.getDatalogProgram();
@@ -380,7 +380,7 @@ public class TreeRedReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(TBoxReasoner reasoner, LinearInclusionDependencies sigmap) {
+	public void setTBox(TBoxReasoner reasoner, LinearInclusionDependencies sigma) {
 		this.ontology = TBoxReasonerToOntology.getOntology(reasoner);
 
 		/*
@@ -390,9 +390,9 @@ public class TreeRedReformulator implements QueryRewriter {
 		this.ontology.saturate();
 		
 		
-		this.sigma = sigmap;
-		if (this.sigma != null) {
-			log.debug("Using {} dependencies.", sigma.toString());
+		dataDependenciesCQC = new CQCUtilities(sigma);
+		if (sigma != null) {
+			log.debug("Using {} dependencies.", dataDependenciesCQC.toString());
 			//this.sigma.saturate();
 		}
 

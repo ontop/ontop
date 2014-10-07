@@ -34,6 +34,7 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
@@ -184,7 +185,7 @@ public class TMappingProcessor {
 					if (mgu != null) {
 						newmapping = Unifier.applyUnifier(newmapping, mgu);
 					}
-					newRule = new TMappingRule(newmapping.getHead(), newmapping.getBody());
+					newRule = new TMappingRule(newmapping.getHead(), newmapping.getBody(), currentRule.cqc);
 					break;
 				}
 			}
@@ -280,6 +281,9 @@ public class TMappingProcessor {
 		 */
 		originalMappings = normalizeConstants(originalMappings);
 		
+		CQCUtilities cqc = new CQCUtilities(); // no dependencies used at the moment
+											   // TODO: use foreign keys here
+		
 		
 		Map<Predicate, TMappingIndexEntry> mappingIndex = new HashMap<Predicate, TMappingIndexEntry>();
 
@@ -290,8 +294,8 @@ public class TMappingProcessor {
 		 */
 		
 		for (CQIE mapping : originalMappings) {
-			TMappingIndexEntry set = getMappings(mappingIndex, mapping.getHead().getPredicate());
-			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody());
+			TMappingIndexEntry set = getMappings(mappingIndex, mapping.getHead().getFunctionSymbol());
+			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc);
 			set.mergeMappingsWithCQC(rule);
 		}
 		
@@ -351,7 +355,7 @@ public class TMappingProcessor {
 						else {
 							newMappingHead = fac.getFunction(currentPredicate, terms.get(1), terms.get(0));
 						}
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody());				
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody(), cqc);				
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -378,7 +382,7 @@ public class TMappingProcessor {
 					else 
 						newhead = fac.getFunction(p, terms.get(1), terms.get(0));
 					
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, cqc);				
 					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
 				}
 			}
@@ -452,7 +456,7 @@ public class TMappingProcessor {
 							else 
 								newMappingHead = fac.getFunction(currentPredicate, terms.get(1));
 						}
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody());				
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody(), cqc);				
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -470,7 +474,7 @@ public class TMappingProcessor {
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
 					Function newhead = fac.getFunction(p, currentNodeMapping.getHeadTerms());
 
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, cqc);				
 					equivalentClassMappings.mergeMappingsWithCQC(newrule);
 				}
 			}

@@ -145,8 +145,9 @@ public class QuestUnfolder {
 		// Eliminating redundancy from the unfolding program
 		// TODO: move the foreign-key optimisation inside t-mapping generation 
 		//              -- at this point it has little effect
-		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);		
-		unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, foreignKeyRules);
+		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);	
+		CQCUtilities foreignKeyCQC = new CQCUtilities(foreignKeyRules);
+		unfoldingProgram = foreignKeyCQC.removeContainedQueriesSorted(unfoldingProgram);
 
 		final long endTime = System.currentTimeMillis();
 		log.debug("TMapping size: {}", unfoldingProgram.size());
