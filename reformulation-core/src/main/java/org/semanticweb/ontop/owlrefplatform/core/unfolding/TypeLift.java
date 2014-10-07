@@ -5,14 +5,15 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import fj.*;
 import fj.data.*;
+import fj.data.HashMap;
+import fj.data.List;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 
 /**
  * TODO: describe it
@@ -24,12 +25,21 @@ import java.util.Map;
  */
 public class TypeLift {
 
+    /**
+     * TODO: explain
+     */
     private static class MultiTypeException extends Exception {
     };
 
+    /**
+     * TODO: explain
+     */
     private static class UnificationException extends Exception {
     };
 
+    /**
+     * TODO: explain
+     */
     private static class TypeApplicationError extends RuntimeException {
     };
 
@@ -222,102 +232,104 @@ public class TypeLift {
             return proposeTypeFromLocalRules(currentZipper);
         }
 
-        List<CQIE> currentRules = currentZipper.getLabel()._2();
-
         /**
-         * Use the head of the first rule.
-         * Please note that parent node without rule does not make sense.
-         *
-         * TODO: will it make sense to use the proposal instead?
-         */
-        Function currentHead = currentRules.head().getHead();
-
-        /**
-         * TODO: explain
-         */
-        HashMap<Predicate, List<Function>> ruleBodyIndex = computeRuleBodyIndex(currentRules);
-
-        /**
-         * Unifies all these proposals.
+         * Unifies all these proposals according to the rules of the current node.
          *
          * If such unification is not possible,  a MultiTypeException will be thrown.
          */
-        Function newProposal = unifyProposals(currentHead, ruleBodyIndex, childProposalIndex,
-                childProposalIndex.keys());
+        List<CQIE> currentRules = currentZipper.getLabel()._2();
+        Function newProposal = unifyProposalsAndRules(Option.<Function>none(), currentRules, childProposalIndex);
 
         return Option.some(newProposal);
     }
 
-    /**
-     * TODO: describe what we mean here by rule body index
-     */
-    private static HashMap<Predicate,List<Function>> computeRuleBodyIndex(List<CQIE> currentRules) {
-        List<Function> bodies = List.join(currentRules.map(new F<CQIE, List<Function>>() {
-            @Override
-            public List<Function> f(CQIE rule) {
-                return List.iterableList(rule.getBody());
-            }
-        }));
-        return buildPredicateIndex(bodies);
-    }
-
-    /**
-     * TODO: describe
-     *
-     * Tail-recursive
-     *
-     * Assumptions:
-     *   - There are at least of child proposals
-     *   - There are multiple current rules (tree consistency)
-     *
-     */
-     private static Function unifyProposals(Function currentHead, HashMap<Predicate, List<Function>> ruleBodyIndex,
-                                          HashMap<Predicate, List<Function>> childProposalIndex,
-                                          List<Predicate> remainingPredicates) throws MultiTypeException {
+    private static Function unifyProposalsAndRules(Option<Function> optionalHead, List<CQIE> remainingRules, HashMap<Predicate,
+            List<Function>> childProposalIndex) throws MultiTypeException {
         /**
-         * Stop condition (no more atom to unify).
+         * Stop condition (no more rule to unify with the proposals).
          */
-        if (remainingPredicates.isEmpty())
-            return currentHead;
+        if (remainingRules.isEmpty()) {
+            if (optionalHead.isNone()) {
+                throw new IllegalArgumentException("Do not give a None head with an empty list of rules");
+            }
+            return optionalHead.some();
+        }
 
-         Predicate currentPredicate = remainingPredicates.head();
+        /**
+         * TODO: explain
+         */
+        CQIE rule = remainingRules.head();
+        Function proposedHead = unifyRule(rule.getHead(), List.iterableList(rule.getBody()), childProposalIndex);
 
-         Function newHead = unifyAtoms(currentHead, crossProduct(ruleBodyIndex.get(currentPredicate).some(),
-                 childProposalIndex.get(currentPredicate).some()));
+        Function newHead;
+        if (optionalHead.isNone()) {
+            newHead = proposedHead;
+        }
+        /**
+         * Uncommon case
+         */
+        else {
+            Function currentHead = optionalHead.some();
+            try {
+                newHead = unifyTypes(currentHead, currentHead, proposedHead);
+            }
+            /**
+             * TODO: explain
+             */
+            catch(UnificationException e) {
+                throw new MultiTypeException();
+            }
+        }
 
-         /**
-          * Tail recursion
-          */
-        return unifyProposals(newHead, ruleBodyIndex, childProposalIndex, remainingPredicates.tail());
+        /**
+         * Tail recursion.
+         */
+        return unifyProposalsAndRules(Option.some(newHead), remainingRules.tail(), childProposalIndex);
     }
 
-    /**
-     * TODO: explain
-     */
-    private static Function unifyAtoms(Function currentHead, List<P2<Function, Function>> bodyAndProposalAtoms)
-        throws MultiTypeException {
+    private static Function unifyRule(Function headAtom, List<Function> remainingBodyAtoms, HashMap<Predicate,
+            List<Function>> childProposalIndex) throws MultiTypeException {
+        if (remainingBodyAtoms.isEmpty()) {
+            return headAtom;
+        }
 
-        if (bodyAndProposalAtoms.isEmpty())
-            return currentHead;
+        Function bodyAtom = remainingBodyAtoms.head();
+        Option<List<Function>> optionalChildProposals = childProposalIndex.get(bodyAtom.getFunctionSymbol());
 
-        P2<Function, Function> bodyAndHeadPair = bodyAndProposalAtoms.head();
-        Function bodyAtom = bodyAndHeadPair._1();
-        Function proposalAtom = bodyAndHeadPair._2();
+        Function newHead;
+        if (optionalChildProposals.isNone()) {
+            newHead = headAtom;
+        }
+        else {
+            newHead = unifyAtom(headAtom, bodyAtom, optionalChildProposals.some());
+        }
+
+        /**
+         * Tail recursion
+         */
+        return unifyRule(newHead, remainingBodyAtoms.tail(), childProposalIndex);
+    }
+
+    private static Function unifyAtom(Function headAtom, Function bodyAtom, List<Function> remainingChildProposals)
+            throws MultiTypeException {
+        if (remainingChildProposals.isEmpty()) {
+            return headAtom;
+        }
 
         try {
-            Function newHead = unifyTypes(currentHead, bodyAtom, proposalAtom);
+            Function newHead = unifyTypes(headAtom, bodyAtom, remainingChildProposals.head());
 
             /**
              * Tail recursion
              */
-            return unifyAtoms(newHead, bodyAndProposalAtoms.tail());
+            return unifyAtom(newHead, bodyAtom, remainingChildProposals.tail());
         }
         /**
          * Impossible to unify.
          * This happens when multiple types are proposed for this predicate.
          */
         catch(UnificationException e) {
-                throw new MultiTypeException();
+            throw new MultiTypeException();
         }
     }
 
@@ -577,23 +589,6 @@ public class TypeLift {
         }
     };
 
-    /**
-     * TODO: find the corresponding generic method
-     */
-    private static List<P2<Function, Function>> crossProduct(List<Function> l1, final List<Function> l2) {
-        List<List<P2<Function, Function>>> intermediateList = l1.map(new F<Function, List<P2<Function, Function>>>() {
-            @Override
-            public List<P2<Function, Function>> f(final Function atom1) {
-                return l2.map(new F<Function, P2<Function, Function>>() {
-                    @Override
-                    public P2<Function, Function> f(Function atom2) {
-                        return P.p(atom1, atom2);
-                    };
-                });
-            }
-        });
-        return List.join(intermediateList);
-    }
 
     /**
      * TODO: explain
@@ -626,5 +621,4 @@ public class TypeLift {
 
         return HashMap.from(predicateAtomList);
     }
-
 }
