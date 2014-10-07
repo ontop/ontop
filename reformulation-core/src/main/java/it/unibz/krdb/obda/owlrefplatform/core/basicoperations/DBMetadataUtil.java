@@ -33,6 +33,7 @@ import it.unibz.krdb.sql.api.Attribute;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,8 +51,9 @@ public class DBMetadataUtil {
 	 * TABLE1.COL1 references TABLE2.COL2 as foreign key then 
 	 * construct CQIE rule TABLE2(P1, P3, COL2, P4) :- TABLE1(COL2, T2, T3).
 	 */
-	public static List<CQIE> generateFKRules(DBMetadata metadata) {
-		List<CQIE> rules = new ArrayList<CQIE>();
+	public static LinearInclusionDependencies generateFKRules(DBMetadata metadata) {
+		LinearInclusionDependencies dependencies = new LinearInclusionDependencies();
+		
 		List<TableDefinition> tableDefs = metadata.getTableList();
 		for (TableDefinition def : tableDefs) {
 			Map<String, List<Attribute>> foreignKeys = def.getForeignKeys();
@@ -108,11 +110,8 @@ public class DBMetadataUtil {
 					}
 					Function head = fac.getFunction(p2, terms2);
 					Function body1 = fac.getFunction(p1, terms1);
-					List<Function> body = new ArrayList<Function>();
-					body.add(body1);
 					
-					CQIE rule = fac.getCQIE(head, body);
-					rules.add(rule);
+					dependencies.addRule(head, body1);
 				
 				} catch (BrokenForeignKeyException e) {
 					// Log the warning message
@@ -120,6 +119,6 @@ public class DBMetadataUtil {
 				}
 			}
 		}		
-		return rules;
+		return dependencies;
 	}
 }

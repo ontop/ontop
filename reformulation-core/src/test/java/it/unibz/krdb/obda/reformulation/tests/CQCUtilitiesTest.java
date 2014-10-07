@@ -29,9 +29,10 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SyntacticCQC;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -522,10 +523,13 @@ public class CQCUtilitiesTest {
 			Function body2 = tfac.getFunction(tfac.getPredicate("C", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
-			CQCUtilities cqcutil1 = new CQCUtilities(query1, new DataDependencies(sigma));
+			
+			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
+			
+			CQCUtilities cqcutil1 = new CQCUtilities(query1, dep);
 			assertTrue(cqcutil1.isContainedIn(query2));
 
-			CQCUtilities cqcutil2 = new CQCUtilities(query2, new DataDependencies(sigma));
+			CQCUtilities cqcutil2 = new CQCUtilities(query2, dep);
 			assertFalse(cqcutil2.isContainedIn(query1));
 		}
 
@@ -551,10 +555,12 @@ public class CQCUtilitiesTest {
 					tfac.getVariable("y"), tfac.getVariable("z"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
-			CQCUtilities cqcutil1 = new CQCUtilities(query1, new DataDependencies(sigma));
+			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
+
+			CQCUtilities cqcutil1 = new CQCUtilities(query1, dep);
 			assertTrue(cqcutil1.isContainedIn(query2));
 
-			CQCUtilities cqcutil2 = new CQCUtilities(query2, new DataDependencies(sigma));
+			CQCUtilities cqcutil2 = new CQCUtilities(query2, dep);
 			assertFalse(cqcutil2.isContainedIn(query1));
 		}
 
@@ -580,10 +586,12 @@ public class CQCUtilitiesTest {
 					tfac.getVariable("z"), tfac.getVariable("y"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
-			CQCUtilities cqcutil1 = new CQCUtilities(query1, new DataDependencies(sigma));
+			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
+			
+			CQCUtilities cqcutil1 = new CQCUtilities(query1, dep);
 			assertTrue(cqcutil1.isContainedIn(query2));
 
-			CQCUtilities cqcutil2 = new CQCUtilities(query2, new DataDependencies(sigma));
+			CQCUtilities cqcutil2 = new CQCUtilities(query2, dep);
 			assertFalse(cqcutil2.isContainedIn(query1));
 		}
 
@@ -610,10 +618,12 @@ public class CQCUtilitiesTest {
 			Function body2 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("z"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
-			CQCUtilities cqcutil1 = new CQCUtilities(query1, new DataDependencies(sigma));
+			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
+
+			CQCUtilities cqcutil1 = new CQCUtilities(query1, dep);
 			assertTrue(cqcutil1.isContainedIn(query2));
 
-			CQCUtilities cqcutil2 = new CQCUtilities(query2, new DataDependencies(sigma));
+			CQCUtilities cqcutil2 = new CQCUtilities(query2, dep);
 			assertFalse(cqcutil2.isContainedIn(query1));
 		}
 
@@ -640,10 +650,12 @@ public class CQCUtilitiesTest {
 			Function body2 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("z"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
-			CQCUtilities cqcutil1 = new CQCUtilities(query1, new DataDependencies(sigma));
+			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
+
+			CQCUtilities cqcutil1 = new CQCUtilities(query1, dep);
 			assertTrue(cqcutil1.isContainedIn(query2));
 
-			CQCUtilities cqcutil2 = new CQCUtilities(query2, new DataDependencies(sigma));
+			CQCUtilities cqcutil2 = new CQCUtilities(query2, dep);
 			assertFalse(cqcutil2.isContainedIn(query1));
 		}
 
@@ -714,10 +726,12 @@ public class CQCUtilitiesTest {
 
         CQIE query2 = tfac.getCQIE(head, body);
 
-        CQCUtilities cqcutil1 = new CQCUtilities(query1, new DataDependencies(sigma));
+		LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
+       
+        CQCUtilities cqcutil1 = new CQCUtilities(query1, dep);
         assertFalse(cqcutil1.isContainedIn(query2));
 
-        CQCUtilities cqcutil2 = new CQCUtilities(query2, new DataDependencies(sigma));
+        CQCUtilities cqcutil2 = new CQCUtilities(query2, dep);
         assertFalse(cqcutil2.isContainedIn(query1));
 
         assertFalse(SyntacticCQC.isContainedInSyntactic(query2, query1));

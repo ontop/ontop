@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactRuleConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
@@ -142,8 +143,8 @@ public class QuestUnfolder {
 			unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full);
 		
 		// Eliminating redundancy from the unfolding program
-		List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);		
-		unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, foreignKeyRules);
+		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);		
+		unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, foreignKeyRules.getIndex());
 
 		final long endTime = System.currentTimeMillis();
 		log.debug("TMapping size: {}", unfoldingProgram.size());

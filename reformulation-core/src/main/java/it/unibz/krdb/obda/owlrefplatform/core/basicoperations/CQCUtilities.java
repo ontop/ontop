@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
+import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 
 import java.util.*;
 
@@ -64,15 +64,15 @@ public class CQCUtilities {
 		freezeChasedBody = c2cq.getBodyAtoms();
 	}
 	
-	public CQCUtilities(CQIE query, DataDependencies sigma) {
-		Set<Function> chasedBody = chaseAtoms(query.getBody(), sigma.getRules());
+	public CQCUtilities(CQIE query, LinearInclusionDependencies sigma) {
+		Set<Function> chasedBody = chaseAtoms(query.getBody(), sigma.getIndex());
 		
 		FreezeCQ c2cq = new FreezeCQ(query.getHead(), chasedBody);
 		freezeHead = c2cq.getHead();	
 		freezeChasedBody = c2cq.getBodyAtoms();
 	}
 
-	private CQCUtilities(CQIE query, List<CQIE> rules) {
+	private CQCUtilities(CQIE query, Map<Predicate,List<CQIE>> rules) {
 		// rules are applied only once to each atom (no saturation)
 		Set<Function> chasedBody = chaseAtoms(query.getBody(), rules);
 		
@@ -238,12 +238,15 @@ public class CQCUtilities {
 	 * @param rules
 	 * @return
 	 */
-	private static Set<Function> chaseAtoms(Collection<Function> atoms, List<CQIE> rules) {
+	private static Set<Function> chaseAtoms(Collection<Function> atoms, Map<Predicate,List<CQIE>> rules) {
 
 		Set<Function> derivedAtoms = new HashSet<Function>();
 		for (Function fact : atoms) {
 			derivedAtoms.add(fact);
-			for (CQIE rule : rules) {
+			List<CQIE> rrs = rules.get(fact.getFunctionSymbol());
+			if (rrs == null)
+				continue;
+			for (CQIE rule : rrs) {
 				Function ruleBody = rule.getBody().get(0);
 				Map<Variable, Term> theta = Unifier.getMGU(ruleBody, fact);
 				// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH"
@@ -601,7 +604,7 @@ public class CQCUtilities {
 	
 
 	
-	public static List<CQIE> removeContainedQueriesSorted(List<CQIE> program, List<CQIE> foreignKeyRules) {
+	public static List<CQIE> removeContainedQueriesSorted(List<CQIE> program, Map<Predicate,List<CQIE>> foreignKeyRules) {
 		
 		if (foreignKeyRules == null || foreignKeyRules.isEmpty()) 
 			return program;
@@ -634,7 +637,7 @@ public class CQCUtilities {
 	 */
 	
 	// only in TreeRedReformulator
-	public static List<CQIE> removeContainedQueriesSorted(List<CQIE> queries, DataDependencies sigma) {
+	public static List<CQIE> removeContainedQueriesSorted(List<CQIE> queries, LinearInclusionDependencies sigma) {
 		
 		if (sigma == null) 
 			return queries;
@@ -651,7 +654,7 @@ public class CQCUtilities {
 	}
 
 	// only in TreeWitnessRewriter
-	public static List<CQIE> removeContainedQueries(List<CQIE> queries, DataDependencies sigma) {
+	public static List<CQIE> removeContainedQueries(List<CQIE> queries, LinearInclusionDependencies sigma) {
 		
 		if (sigma == null) 
 			return queries;
@@ -676,7 +679,7 @@ public class CQCUtilities {
 	 * 
 	 * @param queries
 	 */
-	private static void removeContainedQueries(List<CQIE> queries, List<CQIE> rules) {
+	private static void removeContainedQueries(List<CQIE> queries, Map<Predicate,List<CQIE>> rules) {
 
 //		int initialsize = queries.size();
 //		log.debug("Optimzing w.r.t. CQC. Initial size: {}:", initialsize);
@@ -719,7 +722,7 @@ public class CQCUtilities {
 //		log.debug("Resulting size: {}  Time elapsed: {}", newsize, time);
 	}
 	
-	private static void removeContainedQueriesInternal(List<CQIE> queries, DataDependencies sigma) {
+	private static void removeContainedQueriesInternal(List<CQIE> queries, LinearInclusionDependencies sigma) {
 
 		for (int i = 0; i < queries.size(); i++) {
 			CQIE query = queries.get(i);
@@ -746,4 +749,70 @@ public class CQCUtilities {
 			}
 		}
 	}
+	
+	/**
+	 * 
+	 * @param program
+	 * @param rules
+	 */
+	public static void optimizeQueryWithSigmaRules(DatalogProgram program, LinearInclusionDependencies sigma) {
+		List<CQIE> unionOfQueries = new LinkedList<CQIE>(program.getRules());
+		// for each rule in the query
+		for (int qi = 0; qi < unionOfQueries.size(); qi++) {
+			CQIE query = unionOfQueries.get(qi);
+			// get query head, body
+			Function queryHead = query.getHead();
+			List<Function> queryBody = query.getBody();
+			// for each atom in query body
+			for (int i = 0; i < queryBody.size(); i++) {
+				Set<Function> removedAtom = new HashSet<Function>();
+				Function atomQuery = queryBody.get(i);
+				Predicate predicate = atomQuery.getPredicate();
+
+				// for each tbox rule
+				List<CQIE> rules = sigma.getRules(predicate);
+				if (rules == null || rules.isEmpty()) {
+					continue;
+				}
+				for (CQIE rule : rules) {
+					// try to unify current query body atom with tbox rule body
+					// atom
+					rule = DatalogUnfolder.getFreshRule(rule, 4022013); // Random
+																		// suffix
+																		// number
+					Function ruleBody = rule.getBody().get(0);
+					Map<Variable, Term> theta = Unifier.getMGU(ruleBody, atomQuery);
+					if (theta == null || theta.isEmpty()) {
+						continue;
+					}
+					// if unifiable, apply to head of tbox rule
+					Function ruleHead = rule.getHead();
+					Function copyRuleHead = (Function) ruleHead.clone();
+					Unifier.applyUnifier(copyRuleHead, theta);
+
+					removedAtom.add(copyRuleHead);
+				}
+
+				for (int j = 0; j < queryBody.size(); j++) {
+					if (j == i) {
+						continue;
+					}
+					Function toRemove = queryBody.get(j);
+					if (removedAtom.contains(toRemove)) {
+						queryBody.remove(j);
+						j -= 1;
+						if (j < i) {
+							i -= 1;
+						}
+					}
+				}
+			}
+			// update query datalog program
+			unionOfQueries.remove(qi);
+			unionOfQueries.add(qi, fac.getCQIE(queryHead, queryBody));
+		}
+		program.removeAllRules();
+		program.appendRule(unionOfQueries);
+	}
+	
 }

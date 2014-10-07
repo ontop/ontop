@@ -34,11 +34,11 @@ import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
 import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SemanticQueryOptimizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SyntacticCQC;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import it.unibz.krdb.obda.utils.QueryUtils;
@@ -71,7 +71,7 @@ public class TreeRedReformulator implements QueryRewriter {
 	 * The set of ABox dependencies that will be used to optimize the
 	 * reformulation.
 	 */
-	private DataDependencies sigma = null;
+	private LinearInclusionDependencies sigma = null;
 
 	public TreeRedReformulator() {
 
@@ -284,7 +284,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		// if (resultlist.size() < 300) {
 
 		if (sigma != null) {
-			log.debug("Removing redundant queries by CQC. Using {} ABox dependencies.", sigma.getAssertionsSize());
+			log.debug("Removing redundant queries by CQC. Using {} ABox dependencies.", sigma.toString());
 		} else {
 			log.debug("Removing redundatnt queries by CQC.");
 		}
@@ -380,7 +380,7 @@ public class TreeRedReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(TBoxReasoner reasoner, DataDependencies sigmap) {
+	public void setTBox(TBoxReasoner reasoner, LinearInclusionDependencies sigmap) {
 		this.ontology = TBoxReasonerToOntology.getOntology(reasoner);
 
 		/*
@@ -392,7 +392,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		
 		this.sigma = sigmap;
 		if (this.sigma != null) {
-			log.debug("Using {} dependencies.", sigma.getAssertionsSize());
+			log.debug("Using {} dependencies.", sigma.toString());
 			//this.sigma.saturate();
 		}
 

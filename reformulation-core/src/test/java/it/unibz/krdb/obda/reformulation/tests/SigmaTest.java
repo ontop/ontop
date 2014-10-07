@@ -30,10 +30,10 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import junit.framework.TestCase;
 
 public class SigmaTest extends TestCase {
@@ -60,9 +60,9 @@ public class SigmaTest extends TestCase {
         
        
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
-		DataDependencies sigma = new DataDependencies(reasoner);
-		TBoxReasoner sigmaReasoner = sigma.getReasoner();
-        EquivalencesDAG<BasicClassDescription> classes = sigmaReasoner.getClasses();
+		TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(TBoxReasonerToOntology.getOntology(reasoner, true));						
+
+		EquivalencesDAG<BasicClassDescription> classes = sigmaReasoner.getClasses();
 
         assertTrue(classes.getSub(classes.getVertex(ac)).contains(classes.getVertex(er)));
 

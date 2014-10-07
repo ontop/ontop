@@ -41,10 +41,10 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
@@ -726,7 +726,7 @@ public class QuestStatement implements OBDAStatement {
 				}
 
 				// Query optimization w.r.t Sigma rules
-				DataDependencies.optimizeQueryWithSigmaRules(program, questInstance.getDataDependencies());
+				CQCUtilities.optimizeQueryWithSigmaRules(program, questInstance.getDataDependencies());
 
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
@@ -742,7 +742,7 @@ public class QuestStatement implements OBDAStatement {
 				final long endTime = System.currentTimeMillis();
 				rewritingTime = endTime - startTime;
 
-				DataDependencies.optimizeQueryWithSigmaRules(programAfterRewriting, questInstance.getDataDependencies());
+				CQCUtilities.optimizeQueryWithSigmaRules(programAfterRewriting, questInstance.getDataDependencies());
 
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);

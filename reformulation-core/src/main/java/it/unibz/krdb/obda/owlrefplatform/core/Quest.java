@@ -33,9 +33,9 @@ import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RepositoryChangedListener;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.DataDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
@@ -51,6 +51,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.sql.SQLGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair;
 import it.unibz.krdb.obda.utils.MappingParser;
 import it.unibz.krdb.obda.utils.MappingSplitter;
@@ -132,7 +133,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	/* The TBox used for query reformulation (ROMAN: not really, it can be reduced by Sigma) */
 	private TBoxReasoner reformulationReasoner;
 
-	private DataDependencies sigma;
+	private LinearInclusionDependencies sigma;
 	
 	/* The merge and translation of all loaded ontologies */
 	private Ontology inputOntology;
@@ -336,7 +337,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return this.rewriter;
 	}
 	
-	public DataDependencies getDataDependencies() {
+	public LinearInclusionDependencies getDataDependencies() {
 		return sigma;
 	}
 	
@@ -800,14 +801,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			log.debug("DB Metadata: \n{}", metadata);
 
 			/* The active ABox dependencies */
-			sigma = new DataDependencies(reformulationReasoner);
+			sigma = LinearInclusionDependencies.getABoxDependencies(reformulationReasoner, true);
 			
 			/*
 			 * Setting up the TBox we will use for the reformulation
 			 */
 			TBoxReasoner reasoner = reformulationReasoner;
 			if (bOptimizeTBoxSigma) {
-				TBoxReasoner sigmaReasoner = sigma.getReasoner();
+				TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(TBoxReasonerToOntology.getOntology(reformulationReasoner, true));						
 				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner, sigmaReasoner);
 				reasoner = new TBoxReasonerImpl(reducer.getReducedOntology());
 			} 
