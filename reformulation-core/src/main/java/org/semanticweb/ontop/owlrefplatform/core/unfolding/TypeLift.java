@@ -27,6 +27,12 @@ public class TypeLift {
     private static class MultiTypeException extends Exception {
     };
 
+    private static class UnificationException extends Exception {
+    };
+
+    private static class TypeApplicationError extends RuntimeException {
+    };
+
     private static Logger LOGGER = LoggerFactory.getLogger(TypeLift.class);
 
     /**
@@ -38,6 +44,13 @@ public class TypeLift {
      */
     public static java.util.List<CQIE> liftTypes(java.util.List<CQIE> inputRules,
                                        Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex) {
+        /**
+         * Yes, some **** tests try to lift types while there is no rule...
+         */
+        if (inputRules.isEmpty()) {
+            return inputRules;
+        }
+
         /**
          * Builds a tree zipper from the input Datalog rules.
          */
@@ -206,7 +219,7 @@ public class TypeLift {
          * Returns the local proposal.
          */
         if (childProposalIndex.isEmpty()) {
-            return proposeType(currentZipper);
+            return proposeTypeFromLocalRules(currentZipper);
         }
 
         List<CQIE> currentRules = currentZipper.getLabel()._2();
@@ -269,37 +282,72 @@ public class TypeLift {
 
          Predicate currentPredicate = remainingPredicates.head();
 
-         Function newHead = unifyVariable(currentHead, crossProduct(ruleBodyIndex.get(currentPredicate).some(),
+         Function newHead = unifyAtoms(currentHead, crossProduct(ruleBodyIndex.get(currentPredicate).some(),
                  childProposalIndex.get(currentPredicate).some()));
 
-        // Tail recursive
+         /**
+          * Tail recursion
+          */
         return unifyProposals(newHead, ruleBodyIndex, childProposalIndex, remainingPredicates.tail());
     }
 
     /**
      * TODO: explain
      */
-    private static Function unifyVariable(Function currentHead, List<P2<Function, Function>> bodyAndHeadAtoms)
+    private static Function unifyAtoms(Function currentHead, List<P2<Function, Function>> bodyAndProposalAtoms)
         throws MultiTypeException {
 
-        if (bodyAndHeadAtoms.isEmpty())
+        if (bodyAndProposalAtoms.isEmpty())
             return currentHead;
 
-        P2<Function, Function> bodyAndHeadPair = bodyAndHeadAtoms.head();
+        P2<Function, Function> bodyAndHeadPair = bodyAndProposalAtoms.head();
         Function bodyAtom = bodyAndHeadPair._1();
-        Function headAtom = bodyAndHeadPair._2();
+        Function proposalAtom = bodyAndHeadPair._2();
 
+        try {
+            Function newHead = unifyTypes(currentHead, bodyAtom, proposalAtom);
+
+            /**
+             * Tail recursion
+             */
+            return unifyAtoms(newHead, bodyAndProposalAtoms.tail());
+        }
         /**
-         * Most General Unifier between the body and head atoms.
-         *
+         * Impossible to unify.
+         * This happens when multiple types are proposed for this predicate.
          */
-        Map<Variable, Term> directMGU = Unifier.getMGU(headAtom, bodyAtom, true, ImmutableMultimap.<Predicate,Integer>of());
+        catch(UnificationException e) {
+                throw new MultiTypeException();
+        }
+    }
+
+    /**
+     * Low-level function.
+     *
+     * The goal to transfer proposed types (given by the proposedAtom)
+     * to the localHead.
+     *
+     * Like the localHead, the localAtom belongs to the local rule.
+     * It should have the same predicate than the proposedAtom (which usually
+     * differs from the one of the localHead).
+     *
+     * One sensitive constraint here is to propagate types without changing the
+     * variable names.
+     *
+     * If the unification could not be achieved, throws a UnificationException.
+     */
+    private static Function unifyTypes(Function localHead, Function localAtom, Function proposedAtom)
+            throws UnificationException{
+        /**
+         * Most General Unifier between the proposedAtom and the localAtom.
+         */
+        Map<Variable, Term> directMGU = Unifier.getMGU(proposedAtom, localAtom, true, ImmutableMultimap.<Predicate,Integer>of());
 
         /**
          * Impossible to unify the multiple types proposed for this predicate.
          */
         if (directMGU == null) {
-            throw new MultiTypeException();
+            throw new UnificationException();
         }
 
         /**
@@ -312,24 +360,37 @@ public class TypeLift {
         Map<Variable, Term> typingMGU = DatalogUnfolder.forceVariableReuse(new ArrayList<Term>(), directMGU);
 
         //Mutable!!
-        Function newHead = (Function)currentHead.clone();
+        Function newHead = (Function)localHead.clone();
         // Side-effect (newHead is updated)
         Unifier.applySelectiveUnifier(newHead, typingMGU);
 
-        // Tail recursion
-        return unifyVariable(newHead, bodyAndHeadAtoms.tail());
+        return newHead;
     }
 
     /**
-     *
+     * Applies the type proposal to the rule heads.
      */
-    private static List<CQIE> applyTypeToRules(List<CQIE> initialRules, final Function typeProposal) {
+    private static List<CQIE> applyTypeToRules(List<CQIE> initialRules, final Function typeProposal)
+            throws TypeApplicationError{
         return initialRules.map(new F<CQIE, CQIE>() {
             @Override
             public CQIE f(CQIE initialRule) {
                 CQIE newRule = initialRule.clone();
-                newRule.updateHead((Function)typeProposal.clone());
-                return newRule;
+                Function currentHead = initialRule.getHead();
+                try {
+                    Function newHead = unifyTypes(currentHead, currentHead, typeProposal);
+                    newRule.updateHead(newHead);
+                    return newRule;
+                    /**
+                     * Unification exception should not appear at this level.
+                     * There is an inconsistency somewhere.
+                     *
+                     * Throws a runtime exception (TypeApplicationError)
+                     * that should not be expected.
+                     */
+                } catch(UnificationException e) {
+                    throw new TypeApplicationError();
+                }
             }
         });
     }
@@ -343,7 +404,6 @@ public class TypeLift {
 
                 /**
                  * Computes untyped arguments for the head predicate.
-                 *
                  */
                 List<Term> newHeadTerms = initialHeadTerms.map(new F<Term, Term>() {
                     @Override
@@ -371,7 +431,7 @@ public class TypeLift {
      *
      * TODO: consider case where there is multiple rules.
      */
-    private static Option<Function> proposeType(TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> currentZipper) {
+    private static Option<Function> proposeTypeFromLocalRules(TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> currentZipper) {
         List<CQIE> currentRules = currentZipper.getLabel()._2();
         if (currentRules.isEmpty()) {
             return Option.none();
@@ -409,8 +469,6 @@ public class TypeLift {
          * Computes and returns the equivalent predicate index
          */
         return buildPredicateIndex(proposedHeads);
-
-
     }
 
     /**
@@ -537,6 +595,9 @@ public class TypeLift {
         return List.join(intermediateList);
     }
 
+    /**
+     * TODO: explain
+     */
     private static HashMap<Predicate, List<Function>> buildPredicateIndex(List<Function> atoms) {
         List<P2<Predicate, List<Function>>> predicateAtomList = atoms.group(
                 /**
