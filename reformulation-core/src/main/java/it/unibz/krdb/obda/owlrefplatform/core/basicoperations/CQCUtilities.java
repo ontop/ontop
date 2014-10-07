@@ -23,7 +23,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 
 import java.util.*;
 
@@ -72,13 +71,6 @@ public class CQCUtilities {
 		freezeChasedBody = c2cq.getBodyAtoms();
 	}
 	
-	private static boolean isOptimizable(CQIE query) {
-		for (Function b : query.getBody())
-			if (!b.isDataFunction()) // .isBooleanFunction()   
-				return false;   
-		return true;
-	}
-
 	
 	/***
 	 * This method will "chase" a query with respect to a set of ABox
@@ -305,6 +297,7 @@ public class CQCUtilities {
 		 * Replaces each term inside the atom with a constant. 
 		 * 
 		 * IMPORTANT: this method goes only to level 2 of terms
+		 *            the commented code is never executed (or does not change anything)
 		 * 
 		 * @param atom
 		 */
@@ -313,23 +306,23 @@ public class CQCUtilities {
 			for (int i = 0; i < headterms.size(); i++) {
 				Term term = headterms.get(i);
 				if (term instanceof Variable) {
-					ValueConstant replacement = null;
-					if (term instanceof Variable) {
+					ValueConstant //replacement = null;
+//					if (term instanceof Variable) {
 						replacement = substitution.get(term);
 						if (replacement == null) {
 							replacement = getCanonicalConstant(((Variable) term).getName() + constantcounter);
 							constantcounter++;
 							substitution.put((Variable) term, replacement);
 						}
-					} 
-					else if (term instanceof ValueConstant) {
-						replacement = getCanonicalConstant(((ValueConstant) term).getValue() + constantcounter);
-						constantcounter++;
-					} 
-					else if (term instanceof URIConstant) {
-						replacement = getCanonicalConstant(((URIConstant) term).getURI() + constantcounter);
-						constantcounter++;
-					}
+//					} 
+//					else if (term instanceof ValueConstant) {
+//						replacement = getCanonicalConstant(((ValueConstant) term).getValue() + constantcounter);
+//						constantcounter++;
+//					} 
+//					else if (term instanceof URIConstant) {
+//						replacement = getCanonicalConstant(((URIConstant) term).getURI() + constantcounter);
+//						constantcounter++;
+//					}
 					headterms.set(i, replacement);
 				} 
 				else if (term instanceof Function) {
@@ -338,19 +331,19 @@ public class CQCUtilities {
 					for (int j = 0; j < functionterms.size(); j++) {
 						Term fterm = functionterms.get(j);
 						if (fterm instanceof Variable) {
-							ValueConstant replacement = null;
-							if (fterm instanceof VariableImpl) {
+							ValueConstant // replacement = null;
+//							if (fterm instanceof VariableImpl) {
 								replacement = substitution.get(fterm);
 								if (replacement == null) {
 									replacement = getCanonicalConstant(((VariableImpl)fterm).getName() + constantcounter);
 									constantcounter++;
 									substitution.put((Variable) fterm, replacement);
 								}
-							} 
-							else {
-								replacement = getCanonicalConstant(((ValueConstant)fterm).getValue() + constantcounter);
-								constantcounter++;
-							}
+//							} 
+//							else {
+//								replacement = getCanonicalConstant(((ValueConstant)fterm).getValue() + constantcounter);
+//								constantcounter++;
+//							}
 							functionterms.set(j, replacement);
 						}
 					}
@@ -381,10 +374,9 @@ public class CQCUtilities {
         if (body.isEmpty())
             return false;
         
-        for (Function queryatom : body) {
+        for (Function queryatom : body) 
 			if (!freezeChasedBody.containsKey(queryatom.getFunctionSymbol())) 
 				return false;
-		}
 
 		return hasAnswer(query);
 	}
@@ -631,6 +623,14 @@ public class CQCUtilities {
 		removeContainedQueriesInternal(queriesCopy, sigma);
 		
 		return queriesCopy;
+	}
+	
+
+	private static boolean isOptimizable(CQIE query) {
+		for (Function b : query.getBody())
+			if (!b.isDataFunction()) // .isBooleanFunction()   
+				return false;   
+		return true;
 	}
 
 	
