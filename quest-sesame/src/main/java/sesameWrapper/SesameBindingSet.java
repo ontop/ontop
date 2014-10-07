@@ -118,7 +118,10 @@ public class SesameBindingSet implements BindingSet {
 						} else if (col_type == COL_TYPE.INTEGER) {
 							URI datatype = XMLSchema.INTEGER;
 							value = fact.createLiteral(c.getValue(), datatype);
-						} else if (col_type == COL_TYPE.LITERAL) {
+						} else if (col_type == COL_TYPE.LONG) {
+                            URI datatype = XMLSchema.LONG;
+                            value = fact.createLiteral(c.getValue(), datatype);
+                        }else if (col_type == COL_TYPE.LITERAL) {
 							value = fact.createLiteral(c.getValue());
 						} else if (col_type == COL_TYPE.LITERAL_LANG) {
 							value = fact.createLiteral(c.getValue(), literal.getLanguage());

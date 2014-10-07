@@ -339,35 +339,40 @@ public class QuestResultset implements TupleResultSet {
 	}
 
 	private COL_TYPE getQuestType(int sqltype) {
-		if (sqltype == 1) {
-			return COL_TYPE.OBJECT;
-		} else if (sqltype == 2) {
-			return COL_TYPE.BNODE;
-		} else if (sqltype == 3) {
-			return COL_TYPE.LITERAL;
-		} else if (sqltype == 4) {
-			return COL_TYPE.INTEGER;
-		} else if (sqltype == 5) {
-			return COL_TYPE.DECIMAL;
-		} else if (sqltype == 6) {
-			return COL_TYPE.DOUBLE;
-		} else if (sqltype == 7) {
-			return COL_TYPE.STRING;
-		} else if (sqltype == 8) {
-			return COL_TYPE.DATETIME;
-		} else if (sqltype == 9) {
-			return COL_TYPE.BOOLEAN;
-		} else if (sqltype == 10) {
-			return COL_TYPE.DATE;
-		} else if (sqltype == 11) {
-			return COL_TYPE.TIME;
-		} else if (sqltype == 12) {
-			return COL_TYPE.YEAR;
-		} else if (sqltype == 0) {
-			return null;
-		} else {
-			throw new RuntimeException("COLTYPE unknown: " + sqltype);
-		}
+        switch(sqltype) {
+            case 1:
+                return COL_TYPE.OBJECT;
+            case 2:
+                return COL_TYPE.BNODE;
+            case 3:
+                return COL_TYPE.LITERAL;
+            case 4:
+                return COL_TYPE.INTEGER;
+            case 5:
+                return COL_TYPE.DECIMAL;
+            case 6:
+                return COL_TYPE.DOUBLE;
+            case 7:
+                return COL_TYPE.STRING;
+            case 8:
+                return COL_TYPE.DATETIME;
+            case 9:
+                return COL_TYPE.BOOLEAN;
+            case 10:
+                return COL_TYPE.DATE;
+            case 11:
+                return COL_TYPE.TIME;
+            case 12:
+                return COL_TYPE.YEAR;
+            case 13:
+                return COL_TYPE.LONG;
+            case 0:
+                return null;
+            default:
+                throw new RuntimeException("COLTYPE unknown: " + sqltype);
+
+        }
+
 	}
 
 	// @Override

@@ -154,7 +154,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	/**
 	 * Translate a given SPARQL query object to datalog program.
 	 * 
-	 * @param query
+	 *
 	 *            The Query object.
 	 * @return Datalog program that represents the construction of the SPARQL
 	 *         query.
@@ -803,6 +803,9 @@ public class SparqlAlgebraToDatalogTranslator {
 					OBDAVocabulary.XSD_INTEGER_URI)) {
 				predicate = OBDAVocabulary.XSD_INTEGER;
 			} else if (predicateUri.equals(
+                OBDAVocabulary.XSD_LONG_URI)) {
+                predicate = OBDAVocabulary.XSD_LONG;
+            } else if (predicateUri.equals(
 					OBDAVocabulary.XSD_STRING_URI)) {
 				predicate = OBDAVocabulary.XSD_STRING;
 			} else if (predicateUri.equals(
@@ -922,7 +925,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	/***
 	 * Given a string representing a URI, this method will return a new String in which all percent encoded characters (e.g., %20) will
 	 * be restored to their original characters (e.g., ' '). This is necessary to transform some URIs into the original dtabase values.
-	 * @param uriStr
+	 * @param encodedURI
 	 * @return
 	 */
 	private String decodeURIEscapeCodes(String encodedURI) {

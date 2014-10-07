@@ -522,14 +522,15 @@ public class ExpressionEvaluator {
 	}
 	
 	private boolean isNumeric(Predicate pred) {
-		return (pred.equals(OBDAVocabulary.XSD_INTEGER) || pred.equals(OBDAVocabulary.XSD_DECIMAL) || pred.equals(OBDAVocabulary.XSD_DOUBLE));
+		return (pred.equals(OBDAVocabulary.XSD_INTEGER) || pred.equals(OBDAVocabulary.XSD_LONG) || pred.equals(OBDAVocabulary.XSD_DECIMAL) || pred.equals(OBDAVocabulary.XSD_DOUBLE));
 	}
 	
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
 		return (constantValue.equals(OBDAVocabulary.XSD_INTEGER_URI) 
 				|| constantValue.equals(OBDAVocabulary.XSD_DECIMAL_URI) 
-				|| constantValue.equals(OBDAVocabulary.XSD_DOUBLE_URI));
+				|| constantValue.equals(OBDAVocabulary.XSD_DOUBLE_URI)
+                || constantValue.equals(OBDAVocabulary.XSD_LONG_URI) );
 	}
 
 	/*

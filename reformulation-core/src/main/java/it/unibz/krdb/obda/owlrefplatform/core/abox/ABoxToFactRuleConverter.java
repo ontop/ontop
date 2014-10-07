@@ -87,7 +87,7 @@ public class ABoxToFactRuleConverter {
 		} else if (e == COL_TYPE.INTEGER) {
 			result = XMLSchema.INTEGER.toString();
 		} else if (e == COL_TYPE.LONG) {
-        result = XMLSchema.LONG.toString();
+            result = XMLSchema.LONG.toString();
         }
         else if (e == COL_TYPE.LITERAL) {
 			result = OBDAVocabulary.RDFS_LITERAL_URI;

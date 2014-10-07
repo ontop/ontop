@@ -494,6 +494,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 			return getDataTypePredicateString();
 		case INTEGER:
 			return getDataTypePredicateInteger();
+        case LONG:
+            return getDataTypePredicateLong();
 		case DECIMAL:
 			return getDataTypePredicateDecimal();
 		case DOUBLE:
