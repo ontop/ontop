@@ -192,11 +192,11 @@ public class OBDAVocabulary {
 			XSD_YEAR_URI, COL_TYPE.YEAR);
 
 	public static final Predicate[] QUEST_DATATYPE_PREDICATES = new Predicate[] {
-			RDFS_LITERAL, XSD_STRING, XSD_INTEGER, XSD_DECIMAL, XSD_DOUBLE,
+			RDFS_LITERAL, XSD_STRING, XSD_INTEGER, XSD_LONG, XSD_DECIMAL, XSD_DOUBLE,
 			XSD_DATETIME, XSD_BOOLEAN, XSD_DATE, XSD_TIME, XSD_YEAR };
 	
 	public static final Predicate[] QUEST_NUMERICAL_DATATYPES = new Predicate[] {
-			XSD_INTEGER, XSD_DECIMAL, XSD_DOUBLE };
+			XSD_INTEGER, XSD_DECIMAL, XSD_DOUBLE, XSD_LONG };
 
 	/* Common namespaces and prefixes */
 

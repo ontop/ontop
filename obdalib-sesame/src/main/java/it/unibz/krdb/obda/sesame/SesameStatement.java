@@ -109,6 +109,12 @@ public class SesameStatement implements Statement {
 		else if (literal.getType() == COL_TYPE.DATETIME)
 			datatype = fact
 					.createURI(OBDAVocabulary.XSD_DATETIME_URI);
+        else if (literal.getType() == COL_TYPE.DATE)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_DATE_URI);
+        else if (literal.getType() == COL_TYPE.TIME)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_TIME_URI);
 		else if (literal.getType() == COL_TYPE.DECIMAL)
 			datatype = fact
 					.createURI(OBDAVocabulary.XSD_DECIMAL_URI);

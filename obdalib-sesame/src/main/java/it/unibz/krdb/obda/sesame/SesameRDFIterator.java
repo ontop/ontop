@@ -206,7 +206,11 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 			return Predicate.COL_TYPE.DOUBLE;
 		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_DATETIME_URI)) {
 			return Predicate.COL_TYPE.DATETIME;
-		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_DATE_URI)) {
+            return Predicate.COL_TYPE.DATE;
+        } else if (datatype.stringValue().equals(OBDAVocabulary.XSD_TIME_URI)) {
+            return Predicate.COL_TYPE.TIME;
+        } else if (datatype.stringValue().equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
 			return Predicate.COL_TYPE.BOOLEAN;
 		}
 		return Predicate.COL_TYPE.UNSUPPORTED;

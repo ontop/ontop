@@ -48,7 +48,7 @@ public class TypeMapper {
 		typeMapper.put(Types.NVARCHAR, dfac.getDataTypePredicateLiteral());
 		typeMapper.put(Types.NCHAR, dfac.getDataTypePredicateLiteral());
 		typeMapper.put(Types.INTEGER, dfac.getDataTypePredicateInteger());
-		typeMapper.put(Types.BIGINT, dfac.getDataTypePredicateLong());
+		typeMapper.put(Types.BIGINT, dfac.getDataTypePredicateInteger());
 		typeMapper.put(Types.SMALLINT, dfac.getDataTypePredicateInteger());
 		typeMapper.put(Types.TINYINT, dfac.getDataTypePredicateInteger());
 		typeMapper.put(Types.NUMERIC, dfac.getDataTypePredicateDecimal());

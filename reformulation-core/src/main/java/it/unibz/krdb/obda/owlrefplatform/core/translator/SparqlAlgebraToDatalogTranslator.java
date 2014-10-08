@@ -1236,10 +1236,10 @@ public class SparqlAlgebraToDatalogTranslator {
 			}
 			if ( (type == XMLSchema.INTEGER) || type.equals(XMLSchema.INTEGER)) constantFunction = ofac.getFunction(ofac
 					.getDataTypePredicateInteger(), ofac.getConstantLiteral(
-							lit.intValue() + "", COL_TYPE.INTEGER));
+							lit.integerValue() + "", COL_TYPE.INTEGER));
             else if ( (type == XMLSchema.LONG) || type.equals(XMLSchema.LONG)) constantFunction = ofac.getFunction(ofac
                     .getDataTypePredicateLong(), ofac.getConstantLiteral(
-                    lit.intValue() + "", COL_TYPE.LONG));
+                    lit.longValue() + "", COL_TYPE.LONG));
 			else if ((type == XMLSchema.DECIMAL)  || type.equals(XMLSchema.DECIMAL)) constantFunction = ofac.getFunction(ofac
 					.getDataTypePredicateDecimal(), ofac.getConstantLiteral(
 							lit.decimalValue() + "", COL_TYPE.DECIMAL));
@@ -1249,6 +1249,12 @@ public class SparqlAlgebraToDatalogTranslator {
 			else if ((type == XMLSchema.DATETIME) || type.equals(XMLSchema.DATETIME)) 
 				constantFunction = ofac.getFunction(ofac.getDataTypePredicateDateTime(), ofac.getConstantLiteral(
 						lit.calendarValue() + "", COL_TYPE.DATETIME));
+            else if ((type == XMLSchema.DATE) || type.equals(XMLSchema.DATE))
+                constantFunction = ofac.getFunction(ofac.getDataTypePredicateDate(), ofac.getConstantLiteral(
+                        lit.calendarValue() + "", COL_TYPE.DATE));
+            else if ((type == XMLSchema.TIME) || type.equals(XMLSchema.TIME))
+                constantFunction = ofac.getFunction(ofac.getDataTypePredicateTime(), ofac.getConstantLiteral(
+                        lit.calendarValue() + "", COL_TYPE.TIME));
 			else if ((type == XMLSchema.BOOLEAN) || type.equals(XMLSchema.BOOLEAN)) constantFunction = ofac.getFunction(ofac
 					.getDataTypePredicateBoolean(), ofac.getConstantLiteral(
 							lit.booleanValue() + "", COL_TYPE.BOOLEAN));

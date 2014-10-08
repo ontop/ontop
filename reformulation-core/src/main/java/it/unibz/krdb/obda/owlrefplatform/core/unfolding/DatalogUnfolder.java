@@ -1108,7 +1108,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	}
 
 	/***
-	 * This method asumes that the inner term (termidx) of term is a data atom,
+	 * This method assumes that the inner term (termidx) of term is a data atom,
 	 * or a nested atom.
 	 * <p>
 	 * If the term is a data atom, it returns all the new rule resulting from
@@ -1182,13 +1182,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	}
 
 	/***
-	 * Goes trhough each term, and recursively each inner term trying to resovle
+	 * Goes through each term, and recursively each inner term trying to resolve
 	 * each atom. Returns an empty list if the partial evaluation is completed
-	 * (no atoms can be resovled and each atom is a leaf atom), null if there is
+	 * (no atoms can be resolved and each atom is a leaf atom), null if there is
 	 * at least one atom that is not leaf and cant be resolved, or a list with
-	 * one or more queries if there was one atom that could be resolved againts
+	 * one or more queries if there was one atom that could be resolved against
 	 * one or more rules. The list containts the result of the resolution steps
-	 * againts those rules.
+	 * against those rules.
 	 * 
 	 * @param currentTerms
 	 * @param rule

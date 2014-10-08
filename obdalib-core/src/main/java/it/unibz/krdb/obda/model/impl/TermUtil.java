@@ -46,6 +46,8 @@ public class TermUtil {
 			String value = constant.getValue();
 			switch (constant.getType()) {
 				case STRING:
+                case DATE:
+                case TIME:
 				case DATETIME: sb.append(quoted(value)); break;
 				case INTEGER:
                 case LONG:

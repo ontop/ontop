@@ -80,7 +80,11 @@ public class ABoxToFactRuleConverter {
 			result = XMLSchema.BOOLEAN.toString();
 		} else if (e == COL_TYPE.DATETIME) {
 			result = XMLSchema.DATETIME.toString();
-		} else if (e == COL_TYPE.DECIMAL) {
+		} else if (e == COL_TYPE.TIME) {
+            result = XMLSchema.TIME.toString();
+        } else if (e == COL_TYPE.DATE) {
+            result = XMLSchema.DATE.toString();
+        } else if (e == COL_TYPE.DECIMAL) {
 			result = XMLSchema.DECIMAL.toString();
 		} else if (e == COL_TYPE.DOUBLE) {
 			result = XMLSchema.DOUBLE.toString();
@@ -88,8 +92,7 @@ public class ABoxToFactRuleConverter {
 			result = XMLSchema.INTEGER.toString();
 		} else if (e == COL_TYPE.LONG) {
             result = XMLSchema.LONG.toString();
-        }
-        else if (e == COL_TYPE.LITERAL) {
+        } else if (e == COL_TYPE.LITERAL) {
 			result = OBDAVocabulary.RDFS_LITERAL_URI;
 		} else if (e == COL_TYPE.LITERAL_LANG) {
 			result = OBDAVocabulary.RDFS_LITERAL_URI;

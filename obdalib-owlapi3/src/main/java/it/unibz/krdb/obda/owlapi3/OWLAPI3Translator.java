@@ -937,7 +937,6 @@ public class OWLAPI3Translator {
 	 * translation is straight forward.
 	 * 
 	 * @param axiom
-	 * @param equivalenceMap
 	 * @return
 	 */
 	public Assertion translate(OWLIndividualAxiom axiom) {
@@ -1099,7 +1098,7 @@ public class OWLAPI3Translator {
         } else if (datatype.isFloat() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_FLOAT) { // xsd:float
             System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
             return Predicate.COL_TYPE.DOUBLE;
-		} else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DATE_TIME) {
+		} else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DATE_TIME || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DATE_TIME_STAMP ) {
 			return Predicate.COL_TYPE.DATETIME;
         } else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_LONG) {
             System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");

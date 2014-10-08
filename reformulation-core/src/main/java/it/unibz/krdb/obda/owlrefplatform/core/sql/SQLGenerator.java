@@ -1231,6 +1231,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					String column = getSQLString(term1, index, false);
 					int type = getVariableDataType(term1, index);
 					if (type == Types.INTEGER) return String.format("%s > 0", column);
+                    if (type == Types.BIGINT) return String.format("%s > 0", column);
 					if (type == Types.DOUBLE) return String.format("%s > 0", column);
 					if (type == Types.BOOLEAN) return String.format("%s", column);
 					if (type == Types.VARCHAR) return String.format("LENGTH(%s) > 0", column);

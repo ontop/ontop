@@ -148,14 +148,14 @@ public class OntologyTypesTest{
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		
 		//no value in the mapping
-		//xsd:long is not supported for ontology, it is translated into integer
+		//xsd:long in the ontology, asking for the general case we will not have any result
 		String query1 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
 		runTests(p, query1, 0);
 
         //no value in the mapping
-        //xsd:long is not supported for ontology, it is translated into integer
+        //xsd:long in the ontology
         String query1b = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
 
@@ -224,11 +224,18 @@ public class OntologyTypesTest{
         obdaModel = reader.readModel(dataSource);
 
         //no value in the mapping
-        //xsd:long is not supported for ontology, it is translated into integer
+        //xsd:long in the ontology, asking for the general case we will not have any result
         String query1 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
-        runTests(p, query1, 3);
+        runTests(p, query1, 0);
+
+        //no value in the mapping
+        //xsd:long in the ontology
+        String query1b = "PREFIX : <http://www.company.com/ARES#>" +
+                "select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
+
+        runTests(p, query1b, 3);
 
         //no value in the mapping
         //xsd:string in the ontology
@@ -251,6 +258,14 @@ public class OntologyTypesTest{
                 "select * {?x :AssayID ?y. FILTER(datatype(?y) = xsd:decimal)}";
 
         runTests(p, query4, 3);
+
+        // no value in the ontology
+        //value in the mapping is xsd:long
+
+        String query5 = "PREFIX franz: <http://www.franz.com/>" +
+                "select * {?x  franz:solrDocid ?y. FILTER(datatype(?y) = xsd:long)}";
+
+        runTests(p, query5, 3);
     }
 
 	@Test	
