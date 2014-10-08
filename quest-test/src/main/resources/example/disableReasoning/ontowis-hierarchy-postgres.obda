@@ -68,5 +68,9 @@ source		SELECT * FROM Tab4 WHERE twentyTab4 < 4
 mappingId	MAPID-C5
 target		<http://www.example.org/{Tab5.unique2Tab5}> a <http://www.example.org/C5> . 
 source		SELECT * FROM Tab5 WHERE twentyTab5 < 2
+
+mappingId	MAPID-R
+target		<http://www.example.org/{Tab1.unique2Tab1}> <http://www.example.org/R> <http://www.example.org/{Tab1.unique2Tab1}> .
+source		SELECT * FROM Tab1
 ]]
 
