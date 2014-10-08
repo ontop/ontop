@@ -222,7 +222,7 @@ public class TypeLift {
     private static Option<Function> buildProposal(final TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> currentZipper)
             throws MultiTypeException {
 
-        HashMap<Predicate, List<Function>> childProposalIndex = retrieveChildrenProposals(currentZipper);
+        HashMap<Predicate, Function> childProposalIndex = retrieveChildrenProposals(currentZipper);
 
         /**
          * If there is no child proposal, no need to unify.
@@ -243,8 +243,9 @@ public class TypeLift {
         return Option.some(newProposal);
     }
 
-    private static Function unifyProposalsAndRules(Option<Function> optionalHead, List<CQIE> remainingRules, HashMap<Predicate,
-            List<Function>> childProposalIndex) throws MultiTypeException {
+    private static Function unifyProposalsAndRules(Option<Function> optionalHead, List<CQIE> remainingRules,
+                                                   HashMap<Predicate, Function> childProposalIndex)
+            throws MultiTypeException {
         /**
          * Stop condition (no more rule to unify with the proposals).
          */
@@ -287,50 +288,40 @@ public class TypeLift {
         return unifyProposalsAndRules(Option.some(newHead), remainingRules.tail(), childProposalIndex);
     }
 
-    private static Function unifyRule(Function headAtom, List<Function> remainingBodyAtoms, HashMap<Predicate,
-            List<Function>> childProposalIndex) throws MultiTypeException {
+    /**
+     * TODO: explain
+     *
+     */
+    private static Function unifyRule(Function headAtom, List<Function> remainingBodyAtoms,
+                                      HashMap<Predicate,Function> childProposalIndex) throws MultiTypeException {
         if (remainingBodyAtoms.isEmpty()) {
             return headAtom;
         }
 
         Function bodyAtom = remainingBodyAtoms.head();
-        Option<List<Function>> optionalChildProposals = childProposalIndex.get(bodyAtom.getFunctionSymbol());
+        Option<Function> optionalChildProposal = childProposalIndex.get(bodyAtom.getFunctionSymbol());
 
         Function newHead;
-        if (optionalChildProposals.isNone()) {
+        if (optionalChildProposal.isNone()) {
             newHead = headAtom;
         }
         else {
-            newHead = unifyAtom(headAtom, bodyAtom, optionalChildProposals.some());
+            try {
+                newHead = unifyTypes(headAtom, bodyAtom, optionalChildProposal.some());
+            }
+            /**
+             * Impossible to unify.
+             * This happens when multiple types are proposed for this predicate.
+             */
+            catch(UnificationException e) {
+                throw new MultiTypeException();
+            }
         }
 
         /**
          * Tail recursion
          */
         return unifyRule(newHead, remainingBodyAtoms.tail(), childProposalIndex);
-    }
-
-    private static Function unifyAtom(Function headAtom, Function bodyAtom, List<Function> remainingChildProposals)
-            throws MultiTypeException {
-        if (remainingChildProposals.isEmpty()) {
-            return headAtom;
-        }
-
-        try {
-            Function newHead = unifyTypes(headAtom, bodyAtom, remainingChildProposals.head());
-
-            /**
-             * Tail recursion
-             */
-            return unifyAtom(newHead, bodyAtom, remainingChildProposals.tail());
-        }
-        /**
-         * Impossible to unify.
-         * This happens when multiple types are proposed for this predicate.
-         */
-        catch(UnificationException e) {
-            throw new MultiTypeException();
-        }
     }
 
     /**
@@ -387,10 +378,11 @@ public class TypeLift {
         return initialRules.map(new F<CQIE, CQIE>() {
             @Override
             public CQIE f(CQIE initialRule) {
-                CQIE newRule = initialRule.clone();
                 Function currentHead = initialRule.getHead();
                 try {
                     Function newHead = unifyTypes(currentHead, currentHead, typeProposal);
+                    // Mutable object
+                    CQIE newRule = initialRule.clone();
                     newRule.updateHead(newHead);
                     return newRule;
                     /**
@@ -454,14 +446,14 @@ public class TypeLift {
         return Option.some((Function)currentRules.head().getHead().clone());
     }
 
-    private static HashMap<Predicate, List<Function>> retrieveChildrenProposals(final TreeZipper<P3<Predicate, List<CQIE>,
+    private static HashMap<Predicate, Function> retrieveChildrenProposals(final TreeZipper<P3<Predicate, List<CQIE>,
             Option<Function>>> parentZipper) {
         /**
          * Child forest
          */
         Stream<Tree<P3<Predicate, List<CQIE>, Option<Function>>>> subForest = parentZipper.focus().subForest()._1();
         if (subForest.isEmpty()) {
-            return HashMap.from(Stream.<P2<Predicate, List<Function>>>nil());
+            return HashMap.from(Stream.<P2<Predicate, Function>>nil());
         }
 
         /**
@@ -478,9 +470,30 @@ public class TypeLift {
         List<Function> proposedHeads = Option.somes(proposals).toList();
 
         /**
-         * Computes and returns the equivalent predicate index
+         * Computes equivalent predicate index (generic method).
+         *
          */
-        return buildPredicateIndex(proposedHeads);
+        HashMap<Predicate, List<Function>> predicateIndex = buildPredicateIndex(proposedHeads);
+
+        /**
+         * Because only one proposal can be made per predicate (child),
+         * the structure of this predicate index can be simplified.
+         *
+         * Returns this simplified index.
+         */
+        HashMap<Predicate, Function> simplifiedPredicateIndex = predicateIndex.map(new F<P2<Predicate, List<Function>>, P2<Predicate, Function>>() {
+            @Override
+            public P2<Predicate, Function> f(P2<Predicate, List<Function>> mapEntry) {
+                List<Function> proposals = mapEntry._2();
+                if (proposals.length() != 1) {
+                    // Code inconsistency
+                    throw new InternalError("According to the tree, only one proposal can be made per predicate." +
+                            "If no proposal has been made, should not appear in this map.");
+                }
+                return P.p(mapEntry._1(), proposals.head());
+            }
+        });
+        return simplifiedPredicateIndex;
     }
 
     /**
