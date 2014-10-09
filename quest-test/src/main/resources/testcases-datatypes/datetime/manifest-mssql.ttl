@@ -9,22 +9,32 @@
     rdfs:label "Date-Time Type Tests" ;
     mf:entries
     ( 
-      :date :date-bgp
-      :time :time-bgp
+      :dateLiteral :date :date-bgp
+      :timeLiteral :time :time-bgp
       :datetime
       :datetime2
 
     ) .
 
 ## >>> This test should fail!
-:date rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: DATE" ;
+:dateLiteral rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE LITERAL" ;
     mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <date.rq> ] ;
+            [ qt:query <dateLiteral.rq> ] ;
     mf:result <noresult.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mssql.obda> .
+
+:date rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <date.rq> ] ;
+    mf:result <date.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mssql.obda> .
 
@@ -37,16 +47,28 @@
     mf:result <date.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mssql.obda> .
-    
+
+
 ## >>> This test should fail!
-:time rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: TIME" ;
+:timeLiteral rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME LITERAL" ;
     mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <time.rq> ] ;
+            [ qt:query <timeLiteral.rq> ] ;
     mf:result <noresult.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mssql.obda> .
+
+:time rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME " ;
+    mf:comment	"can now support xsd:time in filter" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <time.rq> ] ;
+    mf:result <time.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mssql.obda> .
 

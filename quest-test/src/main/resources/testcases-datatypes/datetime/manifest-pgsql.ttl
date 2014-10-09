@@ -9,22 +9,33 @@
     rdfs:label "Date-Time Type Tests" ;
     mf:entries
     ( 
-      :date :date-bgp
-      :time :time-bgp
-      :time_tz :time_tz-bgp
+      :dateLiteral :date :date-bgp
+      :timeLiteral :time :time-bgp
+      :time_tz :time_tz_Literal :time_tz-bgp
       :timestamp :timestamp-str
       :timestamp_tz :timestamp_tz-str
     ) .
 
 ## >>> This test should fail!
-:date rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: DATE" ;
+:dateLiteral rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE LITERAL" ;
     mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <date.rq> ] ;
+            [ qt:query <dateLiteral.rq> ] ;
     mf:result <noresult.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
+:date rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE" ;
+    mf:comment	"Quest can now support xsd:date in filter" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <date.rq> ] ;
+    mf:result <date.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
 
@@ -38,7 +49,18 @@
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
 
-## >>> This test should fail!    
+## >>> This test should fail!
+:timeLiteral rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME LITERAL" ;
+    mf:comment	"Quest will assign this column into rdfs:Literal type" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <timeLiteral.rq> ] ;
+    mf:result <noresult.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
 :time rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIME" ;
     mf:comment	"Quest will assign this column into rdfs:Literal type" ;
@@ -46,7 +68,7 @@
     obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <time.rq> ] ;
-    mf:result <noresult.ttl> ;
+    mf:result <time.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
 
@@ -61,14 +83,25 @@
     mf:mappings <datatypes-pgsql.obda> .
 
 ## >>> This test should fail!
-:time_tz rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: TIME WITH TIMEZONE" ;
+:time_tz_Literal rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME WITH TIMEZONE LITERAL" ;
     mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <time_tz.rq> ] ;
+            [ qt:query <time_tz_Literal.rq> ] ;
     mf:result <noresult.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
+
+:time_tz rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME WITH TIMEZONE" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <time_tz.rq> ] ;
+    mf:result <time_tz.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
 

@@ -9,10 +9,10 @@
     rdfs:label "Date-Time Type Tests" ;
     mf:entries
     ( 
-#      :date :date-bgp
-#      :date-str :date-str-bgp
+      :date :date-bgp
+      :date-str :date-str-bgp
       :timestamp 
-#	  :timestamp-str
+	  :timestamp-str
     ) .
 
 ## >>> This test should fail!
@@ -48,7 +48,7 @@
             [ qt:query <date-oracle.rq> ] ;
     mf:result <date.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
-    mf:mappings <datatypes-oracle.obda> .
+    mf:mappings <datatypes-oracle-jdbcbug.obda> .
 
 ## >>> This test should fail!
 :date-str-bgp rdf:type mf:DatatypeEvaluationTest ;
