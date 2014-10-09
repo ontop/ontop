@@ -596,7 +596,7 @@ public class TypeLift {
                      * Uri-templates using more than one variable are not supported.
                      */
                     if (functionalTerm.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)) {
-                        return functionalTerm.getTerms().size() <= 1;
+                        return functionalTerm.getTerms().size() <= 2;
                     }
                 }
                 return true;
