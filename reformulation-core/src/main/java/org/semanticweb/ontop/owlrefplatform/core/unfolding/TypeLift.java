@@ -8,6 +8,7 @@ import fj.data.HashMap;
 import fj.data.List;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,7 +141,6 @@ public class TypeLift {
          * According this order, the last node to be evaluated is the root.
          * This loop breaks after the evaluation of the latter.
          *
-         * TODO: discuss with Martin.
          */
         while (true) {
             /**
@@ -245,18 +245,30 @@ public class TypeLift {
             return parentZipper;
         }
 
+
         /**
          * Removes types from the children rules (as much as possible).
          */
-        TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> cleanedZipper = applyToChildren(removeTypeFunction, parentZipper);
+        final TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> cleanedZipper = applyToChildren(removeTypeFunction, parentZipper);
 
         /**
          * Sets the proposal to the parent node.
-         * Returns the resulting tree zipper.
          */
-        P3<Predicate, List<CQIE>, Option<Function>> parentLabel = cleanedZipper.getLabel();
+        final P3<Predicate, List<CQIE>, Option<Function>> parentLabel = cleanedZipper.getLabel();
+        // Non final (may be re-affected in a special case).
         TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> newTreeZipper =
                 cleanedZipper.setLabel(P.p(parentLabel._1(), parentLabel._2(), parentProposal));
+
+        /**
+         * Special case: if the proposal is not supported for type lifting, applies it directly to the parent node.
+         * It will then not appear as a proposal to the grand-parent node.
+         *
+         * TODO: discuss about it to make sure it is sound.
+         */
+        if (!isSupported(parentProposal.some())) {
+            newTreeZipper = applyTypeFunction.f(newTreeZipper);
+        }
+
         return newTreeZipper;
     }
 
@@ -546,12 +558,50 @@ public class TypeLift {
      */
     private static Option<Function> proposeTypeFromLocalRules(TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> currentZipper) {
         List<CQIE> currentRules = currentZipper.getLabel()._2();
-        if (currentRules.isEmpty()) {
-            return Option.none();
-        }
+        if (currentRules.isNotEmpty()) {
+            // Head of the first rule (cloned because mutable).
+            Function typeProposal = (Function) currentRules.head().getHead().clone();
 
-        // Head of the first rule (cloned because mutable).
-        return Option.some((Function)currentRules.head().getHead().clone());
+            if (isSupported(typeProposal)) {
+                return Option.some(typeProposal);
+            }
+        }
+        return Option.none();
+    }
+
+    /**
+     * Some types cannot be lifted for the moment.
+     * If such a type is detected in a type proposal, returns false.
+     *
+     * Unsupported "types":
+     *   - URI templates using more than one variable.
+     *      Reason: cannot be replaced directly by one variable.
+     *
+     */
+    private static boolean isSupported(Function typeProposal) {
+        List<Term> terms = List.iterableList(typeProposal.getTerms());
+        /**
+         * Makes sure all the terms are supported.
+         */
+        return terms.forall(new F<Term, Boolean>() {
+            /**
+             * Support test (for a given term)
+             */
+            @Override
+            public Boolean f(Term term) {
+                if (term instanceof Function) {
+                    Function functionalTerm = (Function) term;
+
+                    /**
+                     * Uri-templates using more than one variable are not supported.
+                     */
+                    if (functionalTerm.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)) {
+                        return functionalTerm.getTerms().size() <= 1;
+                    }
+                }
+                return true;
+            }
+        });
     }
 
     /**
@@ -705,16 +755,30 @@ public class TypeLift {
     };
 
     /**
-     * Removes types from the rules of the current node.
+     * Removes types from the rules of the current node if the latter has made a proposal in the past.
+     *
+     * If no proposal has been done before, it is maybe because some types should remain local.
      */
     private static F<TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>>, TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>>> removeTypeFunction
             = new F<TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>>, TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>>>() {
         @Override
         public TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> f(TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> treeZipper) {
             P3<Predicate, List<CQIE>, Option<Function>> label = treeZipper.getLabel();
-            List<CQIE> initialRules = label._2();
-            List<CQIE> updatedRules = removeTypesFromRules(initialRules);
-            return treeZipper.setLabel(P.p(label._1(), updatedRules, Option.<Function>none()));
+            Option<Function> typeProposal = label._3();
+            /**
+             * If no previous proposal, no type removal.
+             */
+            if (typeProposal.isNone()) {
+                return treeZipper;
+            }
+            /**
+             * Otherwise, remove types.
+             */
+            else {
+                List<CQIE> initialRules = label._2();
+                List<CQIE> updatedRules = removeTypesFromRules(initialRules);
+                return treeZipper.setLabel(P.p(label._1(), updatedRules, Option.<Function>none()));
+            }
         }
     };
 
