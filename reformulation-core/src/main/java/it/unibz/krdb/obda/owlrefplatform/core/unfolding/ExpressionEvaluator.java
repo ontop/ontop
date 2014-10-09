@@ -506,6 +506,8 @@ public class ExpressionEvaluator {
 					return OBDAVocabulary.XSD_DOUBLE;
 				case DATETIME:
 					return OBDAVocabulary.XSD_DATETIME;
+                case YEAR:
+                    return OBDAVocabulary.XSD_YEAR;
                 case DATE:
                     return OBDAVocabulary.XSD_DATE;
                 case TIME:

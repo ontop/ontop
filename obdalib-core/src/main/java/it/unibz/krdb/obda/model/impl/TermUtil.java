@@ -48,6 +48,7 @@ public class TermUtil {
 				case STRING:
                 case DATE:
                 case TIME:
+                case YEAR:
 				case DATETIME: sb.append(quoted(value)); break;
 				case INTEGER:
                 case LONG:

@@ -13,7 +13,7 @@
       :timeLiteral :time :time-bgp
       :datetime :datetime-str
       :timestamp :timestamp-str
-      :year :year-bgp
+      :year :yearLiteral :year-bgp
     ) .
 
 ## >>> This test should fail!
@@ -123,16 +123,28 @@
     mf:mappings <datatypes-mysql.obda> .
     
 ## >>> This test should fail!
-:year rdf:type mf:DatatypeEvaluationTest ;
+:yearLiteral rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: YEAR" ;
     mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <year.rq> ] ;
+            [ qt:query <yearLiteral.rq> ] ;
     mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mysql.obda> .
+
+
+:year rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: YEAR" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <year.rq> ] ;
+    mf:result <year.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> .
+
     
 :year-bgp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: YEAR - using basic graph pattern" ;

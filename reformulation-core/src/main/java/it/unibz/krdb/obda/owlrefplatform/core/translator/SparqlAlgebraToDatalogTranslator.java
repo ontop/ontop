@@ -1249,6 +1249,9 @@ public class SparqlAlgebraToDatalogTranslator {
 			else if ((type == XMLSchema.DATETIME) || type.equals(XMLSchema.DATETIME)) 
 				constantFunction = ofac.getFunction(ofac.getDataTypePredicateDateTime(), ofac.getConstantLiteral(
 						lit.calendarValue() + "", COL_TYPE.DATETIME));
+            else if ((type == XMLSchema.GYEAR) || type.equals(XMLSchema.GYEAR))
+                constantFunction = ofac.getFunction(ofac.getDataTypePredicateYear(), ofac.getConstantLiteral(
+                        lit.calendarValue() + "", COL_TYPE.YEAR));
             else if ((type == XMLSchema.DATE) || type.equals(XMLSchema.DATE))
                 constantFunction = ofac.getFunction(ofac.getDataTypePredicateDate(), ofac.getConstantLiteral(
                         lit.calendarValue() + "", COL_TYPE.DATE));

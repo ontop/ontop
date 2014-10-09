@@ -1,8 +1,7 @@
 PREFIX : <http://ontop.inf.unibz.it/test/datatypes#>
-PREFIX xsd:	<http://www.w3.org/2001/XMLSchema#>
 
 SELECT ?x ?y
 WHERE {
    ?x a :Row; :hasYear ?y
-   FILTER ( ?y = "2013"^^xsd:gYear ) .
+   FILTER ( ?y = "2013" ) .
 }

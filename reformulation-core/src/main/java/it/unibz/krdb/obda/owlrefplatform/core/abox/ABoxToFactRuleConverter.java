@@ -84,6 +84,8 @@ public class ABoxToFactRuleConverter {
             result = XMLSchema.TIME.toString();
         } else if (e == COL_TYPE.DATE) {
             result = XMLSchema.DATE.toString();
+        } else if (e == COL_TYPE.YEAR) {
+            result = XMLSchema.GYEAR.toString();
         } else if (e == COL_TYPE.DECIMAL) {
 			result = XMLSchema.DECIMAL.toString();
 		} else if (e == COL_TYPE.DOUBLE) {
