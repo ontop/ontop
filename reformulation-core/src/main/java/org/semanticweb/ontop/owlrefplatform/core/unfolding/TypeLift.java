@@ -329,7 +329,7 @@ public class TypeLift {
          * May throw a MultipleTypeException.
          */
         CQIE rule = remainingRules.head();
-        Function proposedHead = unifyRule(rule.getHead(), List.iterableList(rule.getBody()), childProposalIndex);
+        Function proposedHead = unifyRule(rule.getHead(), extractBodyAtoms(rule), childProposalIndex);
 
         /**
          * Checks if this fresh proposal should be unified with the proposal from the previous rules
@@ -749,5 +749,72 @@ public class TypeLift {
                 });
 
         return HashMap.from(predicateAtomList);
+    }
+
+    /**
+     * Sometimes rule bodies contains algebra functions (e.g. left joins).
+     * These should not be considered as atoms.
+     *
+     * These method makes sure only real (non algebra) atoms are returned.
+     * Some of these atoms may be found inside algebra functions.
+     *
+     */
+    private static List<Function> extractBodyAtoms(CQIE rule) {
+        List<Function> directBody = List.iterableList(rule.getBody());
+
+        return List.join(directBody.map(new F<Function, List<Function>>() {
+            @Override
+            public List<Function> f(Function functionalTerm) {
+                return extractAtoms(functionalTerm);
+            }
+        }));
+    }
+
+    /**
+     * Extracts real atoms from a functional term.
+     *
+     * If this functional term is not algebra, it is an atom and is
+     * thus directly returned.
+     *
+     * Otherwise, looks for atoms recursively by looking
+     * at the functional sub terms for the algebra function.
+     *
+     * Recursive function.
+     */
+    private static List<Function> extractAtoms(Function functionalTerm) {
+        /**
+         * Normal case: not an algebra function (e.g. left join).
+         */
+        if (!functionalTerm.isAlgebraFunction()) {
+            return List.cons(functionalTerm, List.<Function>nil());
+        }
+
+        /**
+         * Sub-terms that are functional.
+         */
+        List<Function> subFunctionalTerms = List.iterableList(functionalTerm.getTerms()).filter(new F<Term, Boolean>() {
+            @Override
+            public Boolean f(Term term) {
+                return term instanceof Function;
+            }
+        }).map(new F<Term, Function>() {
+            @Override
+            public Function f(Term term) {
+                return (Function) term;
+            }
+        });
+
+        /**
+         * Recursive call over these functional sub-terms.
+         * The atoms they returned are then joined.
+         * Their union is then returned.
+         */
+        return List.join(subFunctionalTerms.map(new F<Function, List<Function>>() {
+            @Override
+            public List<Function> f(Function functionalTerm) {
+                return extractAtoms(functionalTerm);
+            }
+        }));
+
     }
 }
