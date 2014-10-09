@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Type lifting consists in:
@@ -466,7 +468,7 @@ public class TypeLift {
          * Thus, we force variable reuse.
          */
         //TODO: re-implement this method without side effect.
-        Map<Variable, Term> typingMGU = DatalogUnfolder.forceVariableReuse(new ArrayList<Term>(), directMGU);
+        Map<Variable, Term> typingMGU = forceVariableReuse(directMGU);
 
         //Mutable!!
         Function newHead = (Function)localHead.clone();
@@ -528,7 +530,7 @@ public class TypeLift {
                     @Override
                     public Term f(Term term) {
                         // TODO: clean the called method
-                        return DatalogUnfolder.getUntypedArgumentFromTerm(term, false, new ArrayList<Term>()).get(0);
+                        return getUntypedArgumentFromTerm(term).get(0);
                     }
                 });
 
@@ -880,5 +882,94 @@ public class TypeLift {
             }
         }));
 
+    }
+
+    /**
+     * Moved from the previous implementation of lift types (DatalogUnfolder).
+     * TODO: improve it
+     *
+     * Adapts the most general unifier so that it does not change variable names.
+     */
+    private static Map<Variable, Term> forceVariableReuse(Map<Variable, Term> initialMGU) {
+        Map<Variable, Term> mgu = new java.util.HashMap<>(initialMGU);
+
+        Set<Map.Entry<Variable, Term>> entrySet = mgu.entrySet();
+
+        Set<Map.Entry<Variable, Term>> entrySetClone = new HashSet<>();
+        for (Map.Entry<Variable, Term> a: entrySet){
+            entrySetClone.add(a);
+        }
+
+        Iterator<Map.Entry<Variable, Term>> vars = entrySetClone.iterator();
+        while (vars.hasNext()) {
+            Map.Entry<Variable, Term> pairs = vars.next();
+
+            Variable key = pairs.getKey();
+            Term value = pairs.getValue();
+
+            if (value instanceof Function){
+
+                Set<Variable> varset =  value.getReferencedVariables();
+                Variable mvar;
+                Iterator<Variable> iterator = varset.iterator();
+                if (!varset.isEmpty()){
+                    Map<Variable, Term> minimgu = new java.util.HashMap<>();
+                    mvar = iterator.next();
+                    if (varset.size() == 1) {
+                        minimgu.put(mvar, key);
+                        Unifier.applyUnifier((Function) value, minimgu, false);
+                    } else {
+
+                        LOGGER.debug("Multiple vars in Function: "+ varset.toString() + "Type not pushed!-Complete!");
+
+                        mgu.remove(key);
+                    }
+                } else{ //no variables!
+                    LOGGER.debug("This Function has no variables: "+ value + "Type not pushed!-Complete!");
+
+                    mgu.remove(key);
+                }
+            } else {
+                LOGGER.debug("value: "+value.toString());
+            }
+        }
+        return mgu;
+    }
+
+    /**
+     Moved from the previous implementation of lift types (DatalogUnfolder).
+     * TODO: improve it
+     *
+     * Takes a Term of the form Type(x) and returns the list [x]
+     */
+    private static java.util.List<Term> getUntypedArgumentFromTerm(Term t) {
+
+        java.util.List<Term> untypedArguments = new ArrayList<>();
+
+        /**
+         * Does not untyped aggregations
+         */
+        if (DatalogUnfolder.detectAggregateInArgument(t)) {
+            untypedArguments.add(t);
+        }
+
+        else if (t instanceof Function){
+            //if it is a function, we add the inner variables and values
+            java.util.List<Term> functionArguments = ((Function) t).getTerms();
+
+            Predicate functionSymbol = ((Function) t).getFunctionSymbol();
+            boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
+            if (isURI && functionArguments.size() >1){
+                //I need to remove the URI part and add the rest, usually the variables
+                functionArguments.remove(0);
+            }
+            untypedArguments.addAll(functionArguments);
+
+        }else if(t instanceof Variable){
+            untypedArguments.add(t);
+        }else if (t instanceof Constant){
+            untypedArguments.add(t);
+        }
+        return untypedArguments;
     }
 }
