@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
@@ -258,12 +259,12 @@ public class TMappingProcessor {
 	 * @param originalMappings
 	 * @param reasoner
 	 * @param full
-	 * @param excludeFromTMappings
+
 	 * @return
 	 */
-	public static DatalogProgram getTMappings(DatalogProgram originalMappings, TBoxReasoner reasoner, boolean full, List<SimplePredicate> excludeFromTMappings){
-		TMappingProcessor.excludeFromTMappings.addAll(excludeFromTMappings);
-		return getTMappings(originalMappings, reasoner, full);
+	public static DatalogProgram getTMappings(DatalogProgram originalMappings, TBoxReasoner reasoner, boolean full){
+		//TMappingProcessor.excludeFromTMappings.addAll(excludeFromTMappings);
+		return getTMappings(originalMappings, reasoner, full, Lists.<SimplePredicate>newArrayList());
 	}
 	
 	/**
@@ -271,10 +272,15 @@ public class TMappingProcessor {
 	 * @param originalMappings
 	 * @param reasoner
 	 * @param full (false for the Semantic Index)
+     * @param excludeFromTMappings
 	 * @return
 	 */
 
-	public static DatalogProgram getTMappings(DatalogProgram originalMappings, TBoxReasoner reasoner, boolean full) {
+	public static DatalogProgram getTMappings(DatalogProgram originalMappings, TBoxReasoner reasoner, boolean full, List<SimplePredicate> excludeFromTMappings) {
+
+        if(excludeFromTMappings == null){
+            throw new NullPointerException("excludeFromTMappings");
+        }
 
 		/*
 		 * Normalizing constants

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,14 +63,14 @@ public class QuestUnfolder {
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
 	/** Davide> Exclude specific predicates from T-Mapping approach **/
-	private List<SimplePredicate> excludeFromTMappings;
+	private final List<SimplePredicate> excludeFromTMappings;
 	
 	/** Davide> Whether to exclude the user-supplied predicates from the
 	 *          TMapping procedure (that is, the mapping assertions for 
 	 *          those predicates should not be extended according to the 
 	 *          TBox hierarchies
 	 */
-	private boolean applyExcludeFromTMappings = false;
+	//private boolean applyExcludeFromTMappings = false;
 
 	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata)
 	{
@@ -78,7 +79,10 @@ public class QuestUnfolder {
 		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(mappings, metadata);
 
 		unfoldingProgram = analyzer.constructDatalogProgram();
-	}
+
+        this.excludeFromTMappings = Lists.newArrayList();
+
+    }
 	
 	/**
 	 * The extra parameter <b>excludeFromTMappings</b> defines a list
@@ -100,7 +104,7 @@ public class QuestUnfolder {
 		
 		// Davide>T-Mappings handling
 		this.excludeFromTMappings = excludeFromTMappings;
-		this.applyExcludeFromTMappings = true;
+	//	this.applyExcludeFromTMappings = true;
 	}
 	
 	public List<CQIE> getRules() {
@@ -128,17 +132,17 @@ public class QuestUnfolder {
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
 
-	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full) throws OBDAException  {
+	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, List<SimplePredicate> excludeFromTMappings) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
 		
 		// Davide> Here now I put another TMappingProcessor taking
 		//         also a list of Predicates as input, that represents
 		//         what needs to be excluded from the T-Mappings
-		if( applyExcludeFromTMappings )
+		//if( applyExcludeFromTMappings )
 			unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full, excludeFromTMappings);
-		else
-			unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full);
+		//else
+		//	unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full);
 		
 		/*
 		 * Eliminating redundancy from the unfolding program
@@ -311,7 +315,7 @@ public class QuestUnfolder {
 
 		unfoldingProgram = analyzer.constructDatalogProgram();
 
-		applyTMappings(/*true, */reformulationReasoner, false);
+		applyTMappings(/*true, */reformulationReasoner, false, Lists.<SimplePredicate>newArrayList());
 		
 		setupUnfolder();
 

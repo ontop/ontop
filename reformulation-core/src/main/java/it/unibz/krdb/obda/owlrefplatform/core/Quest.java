@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.CQIE;
@@ -180,14 +181,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private boolean applyUserConstraints;
 
 	/** Davide> Exclude specific predicates from T-Mapping approach **/
-	private List<SimplePredicate> excludeFromTMappings;
+	private List<SimplePredicate> excludeFromTMappings = Lists.newArrayList();
 	
 	/** Davide> Whether to exclude the user-supplied predicates from the
 	 *          TMapping procedure (that is, the mapping assertions for 
 	 *          those predicates should not be extended according to the 
 	 *          TBox hierarchies
 	 */
-	private boolean applyExcludeFromTMappings;
+	//private boolean applyExcludeFromTMappings;
 	
 	/***
 	 * General flags and fields
@@ -326,7 +327,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		assert(excludeFromTMappings != null);
 		this.excludeFromTMappings = excludeFromTMappings;
 
-        this.applyExcludeFromTMappings = true;
+        //this.applyExcludeFromTMappings = true;
 	}
 
 	/**
@@ -806,9 +807,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfolder.normalizeEqualities();
 				
 				// Davide> Option to disable T-Mappings (TODO: Test)
-				if( tMappings ){
-					unfolder.applyTMappings(reformulationReasoner, true);
-				}
+				//if( tMappings ){
+				unfolder.applyTMappings(reformulationReasoner, true, excludeFromTMappings);
+				//}
 
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
                 unfolder.addABoxAssertionsAsFacts(inputTBox.getABox());
