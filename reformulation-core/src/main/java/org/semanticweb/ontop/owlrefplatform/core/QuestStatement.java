@@ -572,8 +572,8 @@ public class QuestStatement implements OBDAStatement {
         }
 
         if (canPush) {
-            List<CQIE> newTypedRules = unfolder.pushTypes(datalogProgram, multiTypedFunctionSymbolMap);
-            //List<CQIE> newTypedRules = TypeLift.liftTypes(datalogProgram.getRules(), multiTypedFunctionSymbolMap);
+            //List<CQIE> newTypedRules = unfolder.pushTypes(datalogProgram, multiTypedFunctionSymbolMap);
+            List<CQIE> newTypedRules = TypeLift.liftTypes(datalogProgram.getRules(), multiTypedFunctionSymbolMap);
 
             //TODO: can we avoid using this intermediate variable???
             datalogProgram.removeAllRules();
@@ -846,7 +846,7 @@ public class QuestStatement implements OBDAStatement {
 
 			try {
 				sql = getSQL(programAfterUnfolding, signatureContainer);
-				// cacheQueryAndPr operties(strquery, sql);
+				// cacheQueryAndProperties(strquery, sql);
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
 

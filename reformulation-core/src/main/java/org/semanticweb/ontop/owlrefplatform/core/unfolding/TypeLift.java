@@ -35,7 +35,7 @@ public class TypeLift {
      * is not possible.
      */
     private static class UnificationException extends Exception {
-    };
+    }
 
     /**
      * Thrown after receiving an UnificationException.
@@ -43,7 +43,7 @@ public class TypeLift {
      * has been tried should be considered as multi-typed.
      */
     private static class MultiTypeException extends Exception {
-    };
+    }
 
     /**
      * Thrown when an UnificationException happens when trying
@@ -52,7 +52,7 @@ public class TypeLift {
      * This error should not be expected (as such).
      */
     private static class TypeApplicationError extends RuntimeException {
-    };
+    }
 
     private static Logger LOGGER = LoggerFactory.getLogger(TypeLift.class);
 

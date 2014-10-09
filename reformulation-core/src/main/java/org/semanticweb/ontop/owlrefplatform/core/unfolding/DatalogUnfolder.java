@@ -2118,6 +2118,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
      * @param multiTypedFunctionSymbolIndex
      *          Function symbols having multiple types
      */
+    @Deprecated
 	public  List<CQIE> pushTypes(DatalogProgram unfolding, Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex) {
 		
 		List<CQIE> workingList = new LinkedList<CQIE>();
