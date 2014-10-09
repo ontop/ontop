@@ -41,6 +41,7 @@ import it.unibz.krdb.obda.utils.QueryUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -304,8 +305,11 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		}
 	
 		// extra CQC 
-		if (output.getRules().size() > 1)
-			output = fac.getDatalogProgram(dataDependenciesCQC.removeContainedQueries(output.getRules()));
+		if (output.getRules().size() > 1) {
+			List<CQIE> list = new LinkedList<CQIE>(output.getRules());
+			dataDependenciesCQC.removeContainedQueries(list);
+			output = fac.getDatalogProgram(list);
+		}
 		
 		QueryUtils.copyQueryModifiers(dp, output);
 

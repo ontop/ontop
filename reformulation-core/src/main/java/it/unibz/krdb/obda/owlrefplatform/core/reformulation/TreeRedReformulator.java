@@ -44,6 +44,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntol
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -279,17 +280,18 @@ public class TreeRedReformulator implements QueryRewriter {
 		/* One last pass of the syntactic containment checker */
 
 		// log.debug("Removing trivially contained queries");
-		SyntacticCQC.removeContainedQueriesSyntacticSorter(resultlist, false);
 
-		// if (resultlist.size() < 300) {
+		Collections.sort(resultlist, CQCUtilities.ComparatorCQIE);		
+		
+		// originally this required only a single pass
+		SyntacticCQC.removeContainedQueriesSyntactic(resultlist);
 
 		if (dataDependenciesCQC != null) {
 			log.debug("Removing redundant queries by CQC. Using {} ABox dependencies.", dataDependenciesCQC.toString());
 		} else {
 			log.debug("Removing redundatnt queries by CQC.");
 		}
-		resultlist = dataDependenciesCQC.removeContainedQueriesSorted(resultlist);
-		// }
+		dataDependenciesCQC.removeContainedQueries(resultlist);
 
 		DatalogProgram resultprogram = fac.getDatalogProgram();
 		resultprogram.appendRule(resultlist);

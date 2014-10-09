@@ -88,13 +88,6 @@ public class SyntacticCQC {
 		}
 		return true;
 	}
-
-	private static final Comparator<CQIE> lenghtComparator = new Comparator<CQIE>() {
-		@Override
-		public int compare(CQIE o1, CQIE o2) {
-			return o2.getBody().size() - o1.getBody().size();
-		}
-	};
 	
 	
 	/***
@@ -108,9 +101,7 @@ public class SyntacticCQC {
 	 * 
 	 * @param queries
 	 */
-	public static void removeContainedQueriesSyntacticSorter(List<CQIE> queries, boolean twopasses) {
-
-		Collections.sort(queries, lenghtComparator);
+	public static void removeContainedQueriesSyntactic(List<CQIE> queries) {
 
 		for (int i = 0; i < queries.size(); i++) {
 			for (int j = queries.size() - 1; j > i; j--) {
@@ -123,7 +114,7 @@ public class SyntacticCQC {
 			}
 		}
 
-		if (twopasses) {
+		{
 			for (int i = queries.size() - 1; i > 0; i--) {
 				for (int j = 0; j < i; j++) {
 					if (isContainedInSyntactic(queries.get(i), queries.get(j))) {

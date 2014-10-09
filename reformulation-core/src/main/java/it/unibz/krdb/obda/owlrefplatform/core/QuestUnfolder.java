@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -147,7 +148,9 @@ public class QuestUnfolder {
 		//              -- at this point it has little effect
 		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);	
 		CQCUtilities foreignKeyCQC = new CQCUtilities(foreignKeyRules);
-		unfoldingProgram = foreignKeyCQC.removeContainedQueriesSorted(unfoldingProgram);
+
+		Collections.sort(unfoldingProgram, CQCUtilities.ComparatorCQIE);
+		foreignKeyCQC.removeContainedQueries(unfoldingProgram);
 
 		final long endTime = System.currentTimeMillis();
 		log.debug("TMapping size: {}", unfoldingProgram.size());

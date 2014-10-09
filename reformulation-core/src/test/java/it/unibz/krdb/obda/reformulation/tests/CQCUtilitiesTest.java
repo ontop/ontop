@@ -455,7 +455,7 @@ public class CQCUtilitiesTest {
 		LinkedList<CQIE> queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q2);
-		SyntacticCQC.removeContainedQueriesSyntacticSorter(queries, true);
+		SyntacticCQC.removeContainedQueriesSyntactic(queries);
 
 		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q2));
@@ -463,7 +463,7 @@ public class CQCUtilitiesTest {
 		queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q3);
-		SyntacticCQC.removeContainedQueriesSyntacticSorter(queries, true);
+		SyntacticCQC.removeContainedQueriesSyntactic(queries);
 
 		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q3));
@@ -471,7 +471,7 @@ public class CQCUtilitiesTest {
 		queries = new LinkedList<CQIE>();
 		queries.add(q2);
 		queries.add(q3);
-		SyntacticCQC.removeContainedQueriesSyntacticSorter(queries, true);
+		SyntacticCQC.removeContainedQueriesSyntactic(queries);
 
 		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
@@ -481,7 +481,7 @@ public class CQCUtilitiesTest {
 		queries.add(q1);
 		queries.add(q2);
 		queries.add(q3);
-		SyntacticCQC.removeContainedQueriesSyntacticSorter(queries, true);
+		SyntacticCQC.removeContainedQueriesSyntactic(queries);
 
 		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));

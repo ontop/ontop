@@ -351,34 +351,12 @@ public class CQCUtilities {
 		return false;
 	}
 
-	
-
-	
-	/***
-	 * Removes queries that are contained syntactically, using the method
-	 * isContainedInSyntactic(CQIE q1, CQIE 2). To make the process more
-	 * efficient, we first sort the list of queries as to have longer queries
-	 * first and shorter queries last.
-	 * 
-	 * Removal of queries is done in two main double scans. The first scan goes
-	 * top-down/down-top, the second scan goes down-top/top-down
-	 * 
-	 * @param queries
-	 */
-	
-	//  in TreeRedReformulator and unfolder (foreign keys)
-	public List<CQIE> removeContainedQueriesSorted(List<CQIE> queries) {
-		// log.debug("Sorting...");
-		Collections.sort(queries, new Comparator<CQIE>() {
-			@Override
-			public int compare(CQIE o1, CQIE o2) {
-				return o2.getBody().size() - o1.getBody().size();
-			}
-		});
-		
-		return removeContainedQueries(queries);
-	}
-
+	public static final Comparator<CQIE> ComparatorCQIE = new Comparator<CQIE>() {
+		@Override
+		public int compare(CQIE o1, CQIE o2) {
+			return o2.getBody().size() - o1.getBody().size();
+		}
+	};
 
 
 	
@@ -394,45 +372,42 @@ public class CQCUtilities {
 	 * @param queries
 	 */
 	
-	// only in TreeWitnessRewriter
-	public List<CQIE> removeContainedQueries(List<CQIE> queries) {
+	public void removeContainedQueries(List<CQIE> queries) {
 
-		List<CQIE> result = new LinkedList<CQIE>();
-		
-		for (CQIE query : queries) {
-			boolean add = true;
-			ListIterator<CQIE> iterator2 = queries.listIterator(queries.size());
-			while (iterator2.hasPrevious()) {
-				CQIE query2 = iterator2.previous(); 
-				if (query2 == query)
-					break;
-				if (isContainedIn(query, query2)) {
-					add = false;
-					break;
-				}
-			}
-			if (add) 
-				result.add(query);
-		}
-
-		// second pass from the end
-		ListIterator<CQIE> iterator = result.listIterator(result.size());
-		while (iterator.hasPrevious()) {
-			CQIE query = iterator.previous();
-			Iterator<CQIE> iterator2 = result.iterator();
-			while (iterator2.hasNext()) {
-				CQIE query2 = iterator2.next();
-				if (query2 == query)
-					break;
-				if (isContainedIn(query, query2)) {
-//					log.debug("REMOVE (SIGMA): " + result.get(i));
-					iterator.remove();
-					break;
+		{
+			Iterator<CQIE> iterator = queries.iterator();
+			while (iterator.hasNext()) {
+				CQIE query = iterator.next();
+				ListIterator<CQIE> iterator2 = queries.listIterator(queries.size());
+				while (iterator2.hasPrevious()) {
+					CQIE query2 = iterator2.previous(); 
+					if (query2 == query)
+						break;
+					if (isContainedIn(query, query2)) {
+						iterator.remove();
+						break;
+					}
 				}
 			}
 		}
-		
-		return result;
+		{
+			// second pass from the end
+			ListIterator<CQIE> iterator = queries.listIterator(queries.size());
+			while (iterator.hasPrevious()) {
+				CQIE query = iterator.previous();
+				Iterator<CQIE> iterator2 = queries.iterator();
+				while (iterator2.hasNext()) {
+					CQIE query2 = iterator2.next();
+					if (query2 == query)
+						break;
+					if (isContainedIn(query, query2)) {
+//						log.debug("REMOVE (SIGMA): " + result.get(i));
+						iterator.remove();
+						break;
+					}
+				}
+			}
+		}
 	}
 	
 	/**
