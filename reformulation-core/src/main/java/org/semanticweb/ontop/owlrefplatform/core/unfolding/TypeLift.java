@@ -6,6 +6,7 @@ import fj.*;
 import fj.data.*;
 import fj.data.HashMap;
 import fj.data.List;
+import fj.data.TreeMap;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
@@ -267,7 +268,7 @@ public class TypeLift {
          *
          * TODO: discuss about it to make sure it is sound.
          */
-        if (!isSupported(parentProposal.some())) {
+        if (!isSupportedProposal(parentProposal.some())) {
             newTreeZipper = applyTypeFunction.f(newTreeZipper);
         }
 
@@ -512,7 +513,7 @@ public class TypeLift {
     /**
      * Removes types from rules.
      *
-     * Reuses the DatalogUnfolder.getUntypedArgumentFromTerm() static method.
+     * Reuses the DatalogUnfolder.untypeTerm() static method.
      *
      * Returns updated rules.
      */
@@ -529,8 +530,7 @@ public class TypeLift {
                 List<Term> newHeadTerms = initialHeadTerms.map(new F<Term, Term>() {
                     @Override
                     public Term f(Term term) {
-                        // TODO: clean the called method
-                        return getUntypedArgumentFromTerm(term).get(0);
+                        return untypeTerm(term);
                     }
                 });
 
@@ -564,7 +564,7 @@ public class TypeLift {
             // Head of the first rule (cloned because mutable).
             Function typeProposal = (Function) currentRules.head().getHead().clone();
 
-            if (isSupported(typeProposal)) {
+            if (isSupportedProposal(typeProposal)) {
                 return Option.some(typeProposal);
             }
         }
@@ -580,7 +580,7 @@ public class TypeLift {
      *      Reason: cannot be replaced directly by one variable.
      *
      */
-    private static boolean isSupported(Function typeProposal) {
+    private static boolean isSupportedProposal(Function typeProposal) {
         List<Term> terms = List.iterableList(typeProposal.getTerms());
         /**
          * Makes sure all the terms are supported.
@@ -591,19 +591,23 @@ public class TypeLift {
              */
             @Override
             public Boolean f(Term term) {
-                if (term instanceof Function) {
-                    Function functionalTerm = (Function) term;
-
-                    /**
-                     * Uri-templates using more than one variable are not supported.
-                     */
-                    if (functionalTerm.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)) {
-                        return functionalTerm.getTerms().size() <= 2;
-                    }
-                }
-                return true;
+                return isSupportedTerm(term);
             }
         });
+    }
+
+    private static Boolean isSupportedTerm(Term term) {
+        if (term instanceof Function) {
+            Function functionalTerm = (Function) term;
+
+            /**
+             * Uri-templates using more than one variable are not supported.
+             */
+            if (functionalTerm.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)) {
+                return functionalTerm.getTerms().size() <= 2;
+            }
+        }
+        return true;
     }
 
     /**
@@ -885,91 +889,125 @@ public class TypeLift {
     }
 
     /**
-     * Moved from the previous implementation of lift types (DatalogUnfolder).
-     * TODO: improve it
+     * Derives a new most general unifier (MGU) that makes sure the replacing term use the replaced variable
+     * when this term is functional.
      *
-     * Adapts the most general unifier so that it does not change variable names.
+     * Functional terms with 0 or more than 1 variable are not added to the new MGU.
+     *
+     * Returns the new MGU.
      */
     private static Map<Variable, Term> forceVariableReuse(Map<Variable, Term> initialMGU) {
-        Map<Variable, Term> mgu = new java.util.HashMap<>(initialMGU);
+        Stream<P2<Variable, Term>> unifierEntries = Stream.iterableStream(TreeMap.fromMutableMap(Ord.<Variable>hashOrd(),
+                initialMGU));
 
-        Set<Map.Entry<Variable, Term>> entrySet = mgu.entrySet();
-
-        Set<Map.Entry<Variable, Term>> entrySetClone = new HashSet<>();
-        for (Map.Entry<Variable, Term> a: entrySet){
-            entrySetClone.add(a);
-        }
-
-        Iterator<Map.Entry<Variable, Term>> vars = entrySetClone.iterator();
-        while (vars.hasNext()) {
-            Map.Entry<Variable, Term> pairs = vars.next();
-
-            Variable key = pairs.getKey();
-            Term value = pairs.getValue();
-
-            if (value instanceof Function){
-
-                Set<Variable> varset =  value.getReferencedVariables();
-                Variable mvar;
-                Iterator<Variable> iterator = varset.iterator();
-                if (!varset.isEmpty()){
-                    Map<Variable, Term> minimgu = new java.util.HashMap<>();
-                    mvar = iterator.next();
-                    if (varset.size() == 1) {
-                        minimgu.put(mvar, key);
-                        Unifier.applyUnifier((Function) value, minimgu, false);
-                    } else {
-
-                        LOGGER.debug("Multiple vars in Function: "+ varset.toString() + "Type not pushed!-Complete!");
-
-                        mgu.remove(key);
-                    }
-                } else{ //no variables!
-                    LOGGER.debug("This Function has no variables: "+ value + "Type not pushed!-Complete!");
-
-                    mgu.remove(key);
+        Stream<P2<Variable, Term>> newUnifierEntries = unifierEntries.filter(
+                /**
+                 * Filters (removes) functional terms with 0 or more than 1 variable
+                 */
+                new F<P2<Variable, Term>, Boolean>() {
+            @Override
+            public Boolean f(P2<Variable, Term> entry) {
+                Term term = entry._2();
+                if (term instanceof Function) {
+                    if (term.getReferencedVariables().size() != 1)
+                        return false;
                 }
-            } else {
-                LOGGER.debug("value: "+value.toString());
+                return true;
             }
-        }
-        return mgu;
+        }).map(
+                /**
+                 * Transforms the unary functional terms so that they reuse
+                 * the same variable.
+                 *
+                 * Others remain the same.
+                 */
+                new F<P2<Variable, Term>, P2<Variable, Term>>() {
+            @Override
+            public P2<Variable, Term> f(P2<Variable, Term> entry) {
+                Variable variableToKeep = entry._1();
+                Term term = entry._2();
+
+                /**
+                 * Transformation only concerns some functional terms.
+                 */
+                if (term instanceof Function) {
+                    Variable variableToChange = term.getReferencedVariables().iterator().next();
+
+                    /**
+                     * When the two variables are not the same,
+                     * makes a unification to update the functional term.
+                     */
+                    if (!variableToChange.equals(variableToKeep)) {
+                        Map<Variable, Term> miniMGU = new java.util.HashMap<>();
+                        miniMGU.put(variableToChange, variableToKeep);
+
+                        Function translatedFunctionalTerm = (Function) term.clone();
+                        //Side-effect update
+                        Unifier.applyUnifier(translatedFunctionalTerm, miniMGU, false);
+
+                        return P.p(variableToKeep, (Term) translatedFunctionalTerm);
+                    }
+                }
+                /**
+                 * No transformation.
+                 */
+                return entry;
+            }
+        });
+
+        Map<Variable, Term> newMGU = HashMap.from(newUnifierEntries).toMap();
+        return newMGU;
     }
+    
+
 
     /**
-     Moved from the previous implementation of lift types (DatalogUnfolder).
-     * TODO: improve it
+     * Removes the type for a given term.
+     * This method also deals with special cases that should not be untyped.
      *
-     * Takes a Term of the form Type(x) and returns the list [x]
+     * Note that type removal only concern functional terms.
      */
-    private static java.util.List<Term> getUntypedArgumentFromTerm(Term t) {
-
-        java.util.List<Term> untypedArguments = new ArrayList<>();
+    private static Term untypeTerm(Term term) {
+        /**
+         * Types are assumed to functional terms.
+         *
+         * Other type of terms are not concerned.
+         */
+        if (!(term instanceof Function)) {
+            return term;
+        }
 
         /**
-         * Does not untyped aggregations
+         * Special cases that should not be untyped:
+         *   - Aggregates
+         *   - Non-supported terms.
          */
-        if (DatalogUnfolder.detectAggregateInArgument(t)) {
-            untypedArguments.add(t);
+        if (DatalogUnfolder.detectAggregateInArgument(term) || (!isSupportedTerm(term)))
+            return term;
+
+        Function functionalTerm = (Function) term;
+        java.util.List<Term> functionArguments = functionalTerm.getTerms();
+        Predicate functionSymbol = functionalTerm.getFunctionSymbol();
+
+        /**
+         * Special case: URI templates using just one variable
+         * (others are not supported).
+         */
+        boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
+        if (isURI && functionArguments.size() == 2) {
+            // Returns the first variable, not the regular expression.
+            return functionArguments.get(1);
         }
 
-        else if (t instanceof Function){
-            //if it is a function, we add the inner variables and values
-            java.util.List<Term> functionArguments = ((Function) t).getTerms();
-
-            Predicate functionSymbol = ((Function) t).getFunctionSymbol();
-            boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
-            if (isURI && functionArguments.size() >1){
-                //I need to remove the URI part and add the rest, usually the variables
-                functionArguments.remove(0);
-            }
-            untypedArguments.addAll(functionArguments);
-
-        }else if(t instanceof Variable){
-            untypedArguments.add(t);
-        }else if (t instanceof Constant){
-            untypedArguments.add(t);
+        /**
+         * Other functional terms are expected to be type
+         * and to have an arity of 1.
+         *
+         * Raises an exception if it is not the case.
+         */
+        if (functionArguments.size() != 1) {
+            throw new RuntimeException("Untyping non-unary functional terms is not supported.");
         }
-        return untypedArguments;
+        return functionArguments.get(0);
     }
 }
