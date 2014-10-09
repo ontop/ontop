@@ -1,0 +1,17 @@
+git a[PrefixDeclaration]
+:		http://it.unibz.krdb/obda/test/simple#
+quest:		http://obda.org/quest#
+
+[SourceDeclaration]
+sourceUri	h2
+connectionUrl	jdbc:h2:mem:questjunitdb
+username	sa
+password	
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	mapping1
+target	:{u} a :A ; :P :{u} ; :U {val} .
+source	SELECT REPLACE(uri, " ", "%20") AS u, val FROM TABLE1
+]]
+

@@ -296,7 +296,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	 */
 	@Override
 	public void visit(Function function) {
-		notSupported=true;
+		//notSupported=true;
 		
 	}
 

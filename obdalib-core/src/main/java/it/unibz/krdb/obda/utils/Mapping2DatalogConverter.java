@@ -393,6 +393,17 @@ public class Mapping2DatalogConverter {
 			}
 			offset += size;
 		}
+
+        for(String item:aliasMap.keySet()){
+            offset++;
+            String alias = aliasMap.get(item);
+            if(lookupTable.lookup(alias) == null){
+                lookupTable.add(item, offset);
+                lookupTable.add(alias, offset);
+            }
+        }
+
+
 		return lookupTable;
 	}
 

@@ -252,7 +252,8 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 			}
 		}
 		else{
-		    unsupported = true;
+		    // FIXME:
+		    // unsupported = true;
 		}
 	}
 

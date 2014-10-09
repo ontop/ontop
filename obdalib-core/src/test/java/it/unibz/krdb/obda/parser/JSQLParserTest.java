@@ -692,6 +692,12 @@ public class JSQLParserTest extends TestCase {
 		printJSQL("testRegexMySQL", result);
 		assertTrue(result);
 	}
+
+    public void test999(){
+        final boolean result = parseUnquotedJSQL("SELECT TVD(clm) FROM pet");
+        printJSQL("testRegexMySQL", result);
+        assertTrue(result);
+    }
 	
 	public void testRegexBinaryMySQL(){
 		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE name REGEXP BINARY '^b'");
