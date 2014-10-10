@@ -753,6 +753,9 @@ public class Unifier {
 	private static boolean isEqual(Term t1, Term t2) {
 		if (t1 == null || t2 == null)
 			return false;
+        // Same object
+        if (t1 == t2)
+            return true;
 		if ((t1 instanceof AnonymousVariable)
 				|| (t2 instanceof AnonymousVariable))
 			return true;

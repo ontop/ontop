@@ -29,28 +29,35 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.RepositoryException;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class SesameAbstractRepo implements
 		org.openrdf.repository.Repository {
 
-	private RepositoryConnection repoConnection;
+    private static final Logger logger = LoggerFactory.getLogger(SesameAbstractRepo.class);
 	private Map<String, String> namespaces;
 	boolean isinitialized = false;
 	
 	public SesameAbstractRepo() {
-		namespaces = new HashMap<String, String>();
+		namespaces = new HashMap<>();
 	}
 
+    /**
+     * Returns a new RepositoryConnection.
+     *
+     * (No repository connection sharing for the sake
+     *  of thread-safeness)
+     *
+     */
 	public RepositoryConnection getConnection() throws RepositoryException {
 		try {
-			this.repoConnection = new RepositoryConnection(this,
-					getQuestConnection());
+			return new RepositoryConnection(this,
+                    getQuestConnection());
 		} catch (OBDAException e) {
-			System.out.println("Error creating repo connection!");
-			e.printStackTrace();
+			logger.error("Error creating repo connection: " + e.getMessage());
+			throw new RepositoryException(e.getMessage());
 		}
-		return repoConnection;
-
 	}
 
 	public File getDataDir() {
@@ -95,9 +102,6 @@ public abstract class SesameAbstractRepo implements
 		// Once shut down, the repository can no longer be used until it is
 		// re-initialized.
 		isinitialized=false;
-		if(repoConnection!=null && repoConnection.isOpen())
-			repoConnection.close();
-		
 	}
 	
 

@@ -38,6 +38,7 @@ import org.semanticweb.ontop.model.OBDAStatement;
 import org.semanticweb.ontop.model.TupleResultSet;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.Quest;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
 
 public class QuestResultset implements TupleResultSet {
@@ -73,12 +74,13 @@ public class QuestResultset implements TupleResultSet {
 	public QuestResultset(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
 		this.set = set;
 		this.st = st;
-		this.isSemIndex = st.questInstance.isSemIdx();
-		this.uriMap = st.questInstance.getUriMap();
+        Quest questInstance = st.getQuestInstance();
+		this.isSemIndex = questInstance.isSemIdx();
+		this.uriMap = questInstance.getUriMap();
 		this.signature = signature;
 		
-		columnMap = new HashMap<String, Integer>(signature.size() * 2);
-		bnodeMap = new HashMap<String, String>(1000);
+		columnMap = new HashMap<>(signature.size() * 2);
+		bnodeMap = new HashMap<>(1000);
 
 		for (int j = 1; j <= signature.size(); j++) {
 			columnMap.put(signature.get(j - 1), j);

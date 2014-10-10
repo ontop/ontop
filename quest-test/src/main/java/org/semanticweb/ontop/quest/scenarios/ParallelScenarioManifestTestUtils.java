@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.quest.datatypes;
+package org.semanticweb.ontop.quest.scenarios;
 
 /*
  * #%L
@@ -22,17 +22,8 @@ package org.semanticweb.ontop.quest.datatypes;
 
 import info.aduna.io.FileUtil;
 import info.aduna.io.ZipUtil;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.JarURLConnection;
-import java.net.URL;
-import java.util.jar.JarFile;
-
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
-
 import org.openrdf.OpenRDFUtil;
 import org.openrdf.model.Resource;
 import org.openrdf.model.ValueFactory;
@@ -44,34 +35,33 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.repository.util.RDFInserter;
-import org.openrdf.rio.ParserConfig;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.Rio;
+import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.BasicParserSettings;
-import org.openrdf.rio.turtle.TurtleParser;
 import org.openrdf.sail.memory.MemoryStore;
-import org.semanticweb.ontop.quest.scenarios.ScenarioManifestTestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QuestDatatypeTestUtils {
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.util.jar.JarFile;
 
-	static final Logger logger = LoggerFactory.getLogger(QuestDatatypeTestUtils.class);
+public class ParallelScenarioManifestTestUtils {
 
-	public static TestSuite suite(QuestDatatypeParent.Factory factory) throws Exception
-	{
+	static final Logger logger = LoggerFactory.getLogger(ParallelScenarioManifestTestUtils.class);
+
+	public static TestSuite suite(ParallelScenarioTest.ParallelFactory factory) throws Exception {
 		final String manifestFile;
 		final File tmpDir;
-		
-		URL url = ScenarioManifestTestUtils.class.getResource(factory.getMainManifestFile());
-			
+
+		URL url = ParallelScenarioManifestTestUtils.class.getResource(factory.getMainManifestFile());
+
 		if ("jar".equals(url.getProtocol())) {
 			// Extract manifest files to a temporary directory
 			try {
-				tmpDir = FileUtil.createTempDir("datatype-evaluation");
+				tmpDir = FileUtil.createTempDir("scenario-evaluation");
 
 				JarURLConnection con = (JarURLConnection) url.openConnection();
 				JarFile jar = con.getJarFile();
@@ -86,22 +76,20 @@ public class QuestDatatypeTestUtils {
 		} else {
 			manifestFile = url.toString();
 			tmpDir = null;
-		}		
-		
-		TestSuite suite = new TestSuite(factory.getClass().getName()) {
+		}
 
+		TestSuite suite = new TestSuite(factory.getClass().getName()) {
 			@Override
 			public void run(TestResult result) {
 				try {
 					super.run(result);
-				}
-				finally {
+				} finally {
 					if (tmpDir != null) {
 						try {
 							FileUtil.deleteDir(tmpDir);
-						}
-						catch (IOException e) {
-							System.err.println("Unable to clean up temporary directory '" + tmpDir + "': " + e.getMessage());
+						} catch (IOException e) {
+							System.err.println("Unable to clean up temporary directory '"
+											+ tmpDir + "': " + e.getMessage());
 						}
 					}
 				}
@@ -115,15 +103,15 @@ public class QuestDatatypeTestUtils {
 		addTurtle(con, new URL(manifestFile), manifestFile);
 
 		String query = "SELECT DISTINCT manifestFile FROM {x} rdf:first {manifestFile} "
-				+ "USING NAMESPACE mf = <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>, "
-				+ "  qt = <http://www.w3.org/2001/sw/DataAccess/tests/test-query#>";
+				+ "USING NAMESPACE mf = <http://obda.org/quest/tests/test-manifest#>, "
+				+ "  qt = <http://obda.org/quest/tests/test-query#>";
 
 		TupleQueryResult manifestResults = con.prepareTupleQuery(QueryLanguage.SERQL, query, manifestFile).evaluate();
 
 		while (manifestResults.hasNext()) {
 			BindingSet bindingSet = manifestResults.next();
 			String subManifestFile = bindingSet.getValue("manifestFile").toString();
-			suite.addTest(QuestDatatypeParent.suite(subManifestFile, factory));
+			suite.addTest(ParallelScenarioTest.extractTest(subManifestFile, factory));
 		}
 
 		manifestResults.close();
@@ -135,26 +123,22 @@ public class QuestDatatypeTestUtils {
 	}
 
 	static void addTurtle(RepositoryConnection con, URL url, String baseURI, Resource... contexts)
-		throws IOException, RepositoryException, RDFParseException
-	{
+			throws IOException, RepositoryException, RDFParseException {
 		if (baseURI == null) {
 			baseURI = url.toExternalForm();
 		}
-
 		InputStream in = url.openStream();
 
 		try {
 			OpenRDFUtil.verifyContextNotNull(contexts);
 			final ValueFactory vf = con.getRepository().getValueFactory();
 			RDFParser rdfParser = Rio.createParser(RDFFormat.TURTLE, vf);
+			
 			ParserConfig config = rdfParser.getParserConfig();
 			// To emulate DatatypeHandling.IGNORE 
 			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
 			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
 			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
-//			rdfParser.setVerifyData(false);
-//			rdfParser.setStopAtFirstError(true);
-//			rdfParser.setDatatypeHandling(RDFParser.DatatypeHandling.IGNORE);
 
 			RDFInserter rdfInserter = new RDFInserter(con);
 			rdfInserter.enforceContext(contexts);
@@ -164,21 +148,17 @@ public class QuestDatatypeTestUtils {
 
 			try {
 				rdfParser.parse(in, baseURI);
-			}
-			catch (RDFHandlerException e) {
+			} catch (RDFHandlerException e) {
 					con.rollback();
 				// RDFInserter only throws wrapped RepositoryExceptions
-				throw (RepositoryException)e.getCause();
-			}
-			catch (RuntimeException e) {
+				throw (RepositoryException) e.getCause();
+			} catch (RuntimeException e) {
 					con.rollback();
 				throw e;
-			}
-			finally {
+			} finally {
 				con.commit();
 			}
-		}
-		finally {
+		} finally {
 			in.close();
 		}
 	}

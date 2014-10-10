@@ -30,21 +30,19 @@ public class QuestUnfolder {
 	/* The active unfolding engine */
 	private UnfoldingMechanism unfolder;
 
-	private DBMetadata metadata;
+    /**
+     * TODO: this structure is not thread-safe at all...
+     */
+	private final DBMetadata metadata;
 	
 	/* As unfolding OBDAModel, but experimental */
 	private DatalogProgram unfoldingProgram;
 
-     /* The list of predicates that are defined in multiple mappings */
-
-    private  Multimap<Predicate,Integer> multiplePredIdx = ArrayListMultimap.create();
 	/*
 	 * These are pattern matchers that will help transforming the URI's in
 	 * queries into Functions, used by the SPARQL translator.
 	 */
-	private final UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
-
-	private final HashSet<String> templateStrings = new HashSet<String>();
+	private UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
 	
 	
 	private static final Logger log = LoggerFactory.getLogger(QuestUnfolder.class);
@@ -59,16 +57,28 @@ public class QuestUnfolder {
 
 		unfoldingProgram = analyzer.constructDatalogProgram();
 	}
-	
+
+    /**
+     * Returns (according to the main implementation of Datalog)
+     * an unmodifiable list
+     */
 	public List<CQIE> getRules() {
 		return unfoldingProgram.getRules();
 	}
+
+
+    /**
+     * Should only be called by the Quest instance
+     *
+     */
+    protected void setup() {
+        setupUnfolder();
+    }
 	
 	/**
 	 * Setting up the unfolder and SQL generation
 	 */
-
-	public void setupUnfolder() {
+	private void setupUnfolder() {
 		
 		// Collecting URI templates
 		generateURITemplateMatchers();
@@ -82,21 +92,16 @@ public class QuestUnfolder {
 
         log.debug("Final set of mappings: \n{}", unfoldingProgram);
 
-        unfolder = new DatalogUnfolder(unfoldingProgram, pkeys, multiplePredIdx);
-
-
-
+        unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
 
     }
 
     public Multimap<Predicate, Integer> processMultipleTemplatePredicates() {
 
-        multiplePredIdx = unfolder.processMultipleTemplatePredicates(unfoldingProgram);
-
-        return multiplePredIdx;
-
+       return unfolder.processMultipleTemplatePredicates(unfoldingProgram);
 
     }
+
 	public void applyTMappings(boolean optimizeMap, TBoxReasoner reformulationReasoner, boolean full) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
@@ -212,10 +217,10 @@ public class QuestUnfolder {
 
 	
 	
-	public void generateURITemplateMatchers() {
+	private void generateURITemplateMatchers() {
 
-		templateStrings.clear();
-		uriTemplateMatcher.clear();
+        Set<String> templateStrings = new HashSet<>();
+        Map<Pattern, Function> matchers = new HashMap<>();
 
 		for (CQIE mapping : unfoldingProgram.getRules()) { // int i = 0; i < unfoldingProgram.getRules().size(); i++) {
 
@@ -243,7 +248,7 @@ public class QuestUnfolder {
 				 */
 				if (fun.getTerms().size() == 1) {
 					/*
-					 * URI without tempalte, we get it direclty from the column
+					 * URI without template, we get it directly from the column
 					 * of the table, and the function is only f(x)
 					 */
 					if (templateStrings.contains("(.+)")) {
@@ -251,7 +256,7 @@ public class QuestUnfolder {
 					}
 					Function templateFunction = fac.getFunction(fac.getUriTemplatePredicate(1), fac.getVariable("x"));
 					Pattern matcher = Pattern.compile("(.+)");
-					uriTemplateMatcher.put(matcher, templateFunction);
+					matchers.put(matcher, templateFunction);
 					templateStrings.add("(.+)");
 				} else {
 					ValueConstant template = (ValueConstant) fun.getTerms().get(0);
@@ -261,15 +266,21 @@ public class QuestUnfolder {
 					if (templateStrings.contains(templateString)) {
 						continue;
 					}
-					Pattern mattcher = Pattern.compile(templateString);
-					uriTemplateMatcher.put(mattcher, fun);
+					Pattern matcher = Pattern.compile(templateString);
+					matchers.put(matcher, fun);
 					templateStrings.add(templateString);
 				}
 			}
 		}
+        this.uriTemplateMatcher = new UriTemplateMatcher(matchers);
 	}
-	
-	
+
+
+    /**
+     * Has side-effects! Dangerous for concurrency!
+     *
+     * TODO: isolate it if this feature is really needed
+     */
 	public void updateSemanticIndexMappings(List<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner) throws OBDAException {
 
 		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(mappings, metadata);

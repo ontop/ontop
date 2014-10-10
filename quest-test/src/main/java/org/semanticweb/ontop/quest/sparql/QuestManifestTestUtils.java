@@ -130,7 +130,7 @@ public class QuestManifestTestUtils {
 		con.close();
 		manifestRep.shutDown();
 
-		logger.info("Created aggregated test suite with " + suite.countTestCases() + " test cases.");
+		logger.info("Created aggregated test extractTest with " + suite.countTestCases() + " test cases.");
 		return suite;
 	}
 
