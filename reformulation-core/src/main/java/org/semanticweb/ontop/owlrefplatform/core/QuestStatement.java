@@ -572,7 +572,6 @@ public class QuestStatement implements OBDAStatement {
         }
 
         if (canPush) {
-            //List<CQIE> newTypedRules = unfolder.pushTypes(datalogProgram, multiTypedFunctionSymbolMap);
             List<CQIE> newTypedRules = TypeLift.liftTypes(datalogProgram.getRules(), multiTypedFunctionSymbolMap);
 
             //TODO: can we avoid using this intermediate variable???

@@ -1,7 +1,6 @@
 package org.semanticweb.ontop.model;
 
 import java.util.*;
-import java.util.Set;
 
 import com.google.common.collect.Multimap;
 import fj.*;
@@ -159,5 +158,4 @@ public class TreeBasedDatalogProgram {
             }
         });
     }
-
 }
