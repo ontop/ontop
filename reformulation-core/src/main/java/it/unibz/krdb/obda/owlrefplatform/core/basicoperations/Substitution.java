@@ -26,8 +26,8 @@ import it.unibz.krdb.obda.model.Variable;
 
 public class Substitution {
 
-	private Variable variable;
-	private Term term;
+	private final Variable variable;
+	private final Term term;
 	
 	public Substitution(Variable v, Term t) {
 		variable = v;
