@@ -45,7 +45,7 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 interface ParamConst{
 	public static final String MYSQL = "src/main/resources/example/ontowis-5joins-int.obda";
-	public static final String POSTGRES = "src/main/resources/example/ontowis-5joins-int-postgres.obda";
+	public static final String POSTGRES = "src/main/resources/example/ontowis-5joins-int-postgress-string-niceURI.obda";
 	public static final String DB2 = "src/main/resources/example/ontowis-5joins-int-db2.obda";
 	public static final String MYSQL_VIEW = "src/main/resources/example/ontowis-5joins-int-view.obda";
 	public static final String POSTGRES_VIEW = "src/main/resources/example/ontowis-5joins-int-view-postgres.obda";
@@ -107,8 +107,8 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * USR CONSTRAINTS !!!!
 		 */
-		ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
-		factory.setImplicitDBConstraints(constr);
+		//ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
+		//factory.setImplicitDBConstraints(constr);
 		
 		/*
 		 * T-Mappings Handling!!
