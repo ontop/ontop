@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import fj.*;
@@ -15,8 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Type lifting consists in:
@@ -66,7 +65,7 @@ public class TypeLift {
      * @param multiTypedFunctionSymbolIndex  Index indicating which predicates are known as multi-typed.
      * @return New list of rules.
      */
-    public static java.util.List<CQIE> liftTypes(java.util.List<CQIE> inputRules,
+    public static java.util.List<CQIE> liftTypes(final java.util.List<CQIE> inputRules,
                                        Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex) {
         /**
          * Yes, some tests try to lift types while there is no rule...
@@ -87,6 +86,13 @@ public class TypeLift {
          */
         TreeZipper<P3<Predicate, List<CQIE>, Option<Function>>> leftmostTreeZipper =
                 navigateToLeftmostLeaf(initialRootZipper);
+
+
+        /**
+         * Makes sure the multi-typed predicate index is complete.
+         * (This step could be disabled in the future once the previous unfolding will be safe enough).
+         */
+        multiTypedFunctionSymbolIndex = updateMultiTypedFunctionSymbolIndex(initialDatalogProgram, multiTypedFunctionSymbolIndex);
 
         /**
          * Computes a new Datalog program by applying type lifting.
@@ -1006,8 +1012,82 @@ public class TypeLift {
          * Raises an exception if it is not the case.
          */
         if (functionArguments.size() != 1) {
-            throw new RuntimeException("Untyping non-unary functional terms is not supported.");
+            throw new RuntimeException("Removing types of non-unary functional terms is not supported.");
         }
         return functionArguments.get(0);
+    }
+
+
+    /**
+     * Looks for predicates are not yet declared as multi-typed (while they should).
+     *
+     * This tests relies on the ability of rules defining one predicate to be unified.
+     *
+     * This class strongly relies on the assumption that the multi-typed predicate index is complete.
+     * This method offers such a protection against non-detections by previous components.
+     */
+    protected static Multimap<Predicate, Integer> updateMultiTypedFunctionSymbolIndex(final TreeBasedDatalogProgram initialDatalogProgram,
+                                                                                      final Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
+        // Mutable index (may be updated)
+        final Multimap<Predicate, Integer> newIndex = ArrayListMultimap.create(multiTypedFunctionSymbolIndex);
+
+        final Stream<P2<Predicate, List<CQIE>>> ruleEntries = Stream.iterableStream(initialDatalogProgram.getRuleTree());
+        /**
+         * Applies the following effect on each rule entry:
+         *   If the predicate has not been declared as multi-typed, checks if it really is.
+         *
+         *   When a false negative is detected, adds it to the index (side-effect).
+         */
+        ruleEntries.foreach(new Effect<P2<Predicate, List<CQIE>>>() {
+            @Override
+            public void e(P2<Predicate, List<CQIE>> ruleEntry) {
+                Predicate predicate = ruleEntry._1();
+                if (multiTypedFunctionSymbolIndex.containsKey(predicate))
+                    return;
+
+                List<CQIE> rules = ruleEntry._2();
+                if (isMultiTypedPredicate(rules)) {
+                    // TODO: Is there some usage for this count?
+                    int count = 1;
+                    newIndex.put(predicate, count);
+                }
+            }
+        });
+        return newIndex;
+    }
+
+    /**
+     * Tests if the rules defining one predicate cannot be unified
+     * because they have different types.
+     *
+     * Returns true if the predicate is detected as multi-typed.
+     */
+    private static boolean isMultiTypedPredicate(List<CQIE> predicateDefinitionRules) {
+        if (predicateDefinitionRules.length() <= 1)
+            return false;
+
+        Function headFirstRule = predicateDefinitionRules.head().getHead();
+
+        return isMultiTypedPredicate(headFirstRule, predicateDefinitionRules.tail());
+    }
+
+    /**
+     * Tail recursive sub-method that "iterates" over the rules.
+     */
+    private static boolean isMultiTypedPredicate(Function currentType, List<CQIE> remainingRules) {
+        if (remainingRules.isEmpty())
+            return false;
+
+        Function ruleHead = remainingRules.head().getHead();
+        try {
+            Function newType = unifyTypes(ruleHead, ruleHead, currentType);
+            // Tail recursion
+            return isMultiTypedPredicate(newType, remainingRules.tail());
+            /**
+             * Multi-type problem detected
+             */
+        } catch (UnificationException e) {
+            return true;
+        }
     }
 }
