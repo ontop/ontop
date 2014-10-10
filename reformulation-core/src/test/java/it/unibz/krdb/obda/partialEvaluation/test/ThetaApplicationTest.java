@@ -83,12 +83,12 @@ public class ThetaApplicationTest extends TestCase {
 		List<Function> body = new Vector<Function>();
 		body.add(atom1);
 
-		Term t7 = termFactory.getVariable("x");
+		Variable t7 = termFactory.getVariable("x");
 		Term t6 = termFactory.getVariable("t");
-		Term t8 = termFactory.getVariable("z");
+		Variable t8 = termFactory.getVariable("z");
 		Term t9 = termFactory.getConstantLiteral("elf");
 		Term t10 = termFactory.getVariable("x");
-		Term t11 = termFactory.getVariable("y");
+		Variable t11 = termFactory.getVariable("y");
 		Term t12 = termFactory.getVariable("p");
 		List<Term> vars3 = new Vector<Term>();
 		vars3.add(t12);

@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /***
  * A Class that provides general utilities related to unification, of terms and
@@ -322,8 +323,8 @@ public class Unifier {
 				Function fterm1 = (Function) term1;
 				Function fterm2 = (Function) term2;
 
-                Predicate functionSymbol1 = fterm1.getFunctionSymbol();
-                Predicate functionSymbol2 = fterm2.getFunctionSymbol();
+//                Predicate functionSymbol1 = fterm1.getFunctionSymbol();
+ //               Predicate functionSymbol2 = fterm2.getFunctionSymbol();
 
                 if (!fterm1.getFunctionSymbol().equals( fterm2.getFunctionSymbol())) {
                    return null;
@@ -396,11 +397,11 @@ public class Unifier {
 	 * @param unifier The unifier that will be composed
 	 * @param s The substitution to compose
 	 */
-	public static void composeUnifiers(Map<Variable, Term> unifier,
-			Substitution s) {
+	public static void composeUnifiers(Map<Variable, Term> unifier, Substitution s) {
 		List<Variable> forRemoval = new LinkedList<Variable>();
-		for (Variable v : unifier.keySet()) {
-			Term t = unifier.get(v);
+		for (Entry<Variable,Term> entry : unifier.entrySet()) {
+			Variable v = entry.getKey();
+			Term t = entry.getValue();
 			if (isEqual(t, s.getVariable())) {
 				if (isEqual(v, s.getTerm())) {
 					/*
@@ -433,7 +434,7 @@ public class Unifier {
 			}
 		}
 		unifier.keySet().removeAll(forRemoval);
-		unifier.put((Variable) s.getVariable(), s.getTerm());
+		unifier.put(s.getVariable(), s.getTerm());
 	}
 
 	/***
@@ -462,14 +463,14 @@ public class Unifier {
 		}
 
 		/* Arranging the terms so that the first is always a variable */
-		Term t1 = null;
+		Variable t1 = null;
 		Term t2 = null;
 
 		if (term1 instanceof VariableImpl) {
-			t1 = term1;
+			t1 = (Variable)term1;
 			t2 = term2;
 		} else {
-			t1 = term2;
+			t1 = (Variable)term2;
 			t2 = term1;
 		}
 

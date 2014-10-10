@@ -99,7 +99,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			if (mgu == null) {
 				computedmgu = null;
 			} else {
-				for (Term var : mgu.keySet()) {
+				for (Variable var : mgu.keySet()) {
 					computedmgu.add(new Substitution(var, mgu.get(var)));
 				}
 			}
