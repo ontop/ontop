@@ -11,18 +11,31 @@ driverClass	org.postgresql.Driver
 [MappingDeclaration] @collection [[
 mappingId	MAPPING-ID2
 target     <http://www.example.org/{unique21}> a <http://www.example.org/1Tab1>; <http://www.example.org/Tab2unique2Tab2> {unique12}^^xsd:integer .
-source   Select unique21 ,unique12 from view12 
+source   Select * from view12 
 
 mappingId	MAPPING-ID3
 target     <http://www.example.org/{unique21}> a <http://www.example.org/2Tab1>; <http://www.example.org/Tab3unique2Tab3> {unique13}^^xsd:integer .
-source   Select unique21 ,unique13 from view123 
+source   Select * from view123 
 
 mappingId	MAPPING-ID4
 target     <http://www.example.org/{unique21}> a <http://www.example.org/3Tab1>; <http://www.example.org/Tab4unique2Tab4> {unique14}^^xsd:integer .
-source   Select unique21 ,unique14 from view1234 
+source   Select * from view1234 
 
 mappingId	MAPPING-ID5
 target     <http://www.example.org/{unique21}> a <http://www.example.org/4Tab1>; <http://www.example.org/Tab5unique2Tab5> {unique15}^^xsd:integer .
-source   Select unique21 ,unique15 from view12345 
+source   Select * from view12345 
+
+
+mappingId	MAPPING-ID6
+target     <http://www.example.org/{unique21}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString1> {stringu11}^^xsd:string .
+source   Select * from view12345 
+
+mappingId	MAPPING-ID7
+target     <http://www.example.org/{unique21}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString2> {stringu21}^^xsd:string .
+source   Select * from view12345 
+
+mappingId	MAPPING-ID8
+target     <http://www.example.org/{unique21}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasAttr> {fiftypercent1}^^xsd:integer .
+source   Select * from view12345 
 
 ]]

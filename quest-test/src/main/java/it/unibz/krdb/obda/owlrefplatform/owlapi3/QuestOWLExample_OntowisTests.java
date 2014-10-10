@@ -45,13 +45,17 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 interface ParamConst{
 	public static final String MYSQL = "src/main/resources/example/ontowis-5joins-int.obda";
-	public static final String POSTGRES = "src/main/resources/example/ontowis-5joins-int-postgress-string-niceURI.obda";
+	public static final String POSTGRES = "src/main/resources/example/ontowis-5joins-int-postgres.obda";
+	public static final String POSTGRESStrNURI = "src/main/resources/example/ontowis-5joins-int-postgress-string-niceURI.obda";
+	public static final String POSTGRESStrBURI = "src/main/resources/example/ontowis-5joins-int-postgress-string-niceURI.obda";
+	public static final String POSTGRESStrViewBURI = "src/main/resources/example/ontowis-5joins-int-view-postgres-Str-View-badURI.obda";
+	public static final String POSTGRESStrViewNURI = "src/main/resources/example/ontowis-5joins-int-view-postgres-Str-View-niceURI.obda";
+
 	public static final String DB2 = "src/main/resources/example/ontowis-5joins-int-db2.obda";
 	public static final String MYSQL_VIEW = "src/main/resources/example/ontowis-5joins-int-view.obda";
 	public static final String POSTGRES_VIEW = "src/main/resources/example/ontowis-5joins-int-view-postgres.obda";
 	public static final String DB2_VIEW = "src/main/resources/example/ontowis-5joins-int-view-db2.obda";
 }
-
 public class QuestOWLExample_OntowisTests {
 	
 	public QuestOWLExample_OntowisTests(String obdaFile){
@@ -68,10 +72,13 @@ public class QuestOWLExample_OntowisTests {
 	final String owlfile = "src/main/resources/example/ontowis-5joins-int.owl";
 	//final String obdafile = "src/main/resources/example/ontowis-5joins-int-view.obda";
 	final String obdafile;// = "src/main/resources/example/ontowis-5joins-int-view.obda";
-	final String usrConstrinFile = "src/main/resources/example/funcCons.txt";
+//	final String obdafile= "src/main/resources/example/ontowis-5joins-int.obda";
+	//final String obdafile= "src/main/resources/example/ontowis-5joins-string-niceURI.obda";
+
+	//final String usrConstrinFile = "src/main/resources/example/funcCons.txt";
 	
 	// Exclude from T-Mappings
-	final String tMappingsConfFile = "src/main/resources/example/tMappingsConf.conf";
+	//final String tMappingsConfFile = "src/main/resources/example/tMappingsConf.conf";
 	
 	public void runQuery() throws Exception {
 
@@ -113,8 +120,8 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * T-Mappings Handling!!
 		 */
-		TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
-		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
+		//TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
+		//factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
@@ -128,9 +135,12 @@ public class QuestOWLExample_OntowisTests {
 		 * Get the book information that is stored in the database
 		 */
 		
-		String[] queries = new String[25];
-		String[] results = new String[25];
+		String[] queries = new String[31];
+		String[] results = new String[31];
 
+		queries[0]="PREFIX :	<http://www.example.org/>  SELECT *  WHERE {?x a  :4Tab1 . ?x :Tab5unique2Tab5 ?y . ?x :hasString1 ?y2 . ?x :hasString2 ?y3 . ?x :hasAttr ?y4 .} ";
+/*
+		
 		queries[0]=	"PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :1Tab1 . ?x :Tab2unique2Tab2 ?y .}  ";
 		queries[1]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 1000)  } ";
 		queries[2]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 2000)  } ";
@@ -164,11 +174,23 @@ public class QuestOWLExample_OntowisTests {
 		queries[22]="PREFIX :	<http://www.example.org/>  select  ?x   ?y3   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y3.  Filter( ?y3 < 10000)  } ";
 		queries[23]="PREFIX :	<http://www.example.org/>  select  ?x   ?y3   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y3.  Filter( ?y3 < 50000)  } ";
 
+		
+		
+		
+		
+		
+		
+		queries[24]="PREFIX :	<http://www.example.org/>  SELECT *  WHERE {?x a  :4Tab1 . ?x :Tab5unique2Tab5 ?y . ?x :hasString1 ?y2 . ?x :hasString2 ?y3 . ?x :hasAttr ?y4 .} ";
+		queries[25]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString1 ?y2 . ?x :hasString2 ?y3 . ?x :hasAttr ?y4 .  Filter( ?y < 1000)  } ";
+		queries[26]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString1 ?y2 . ?x :hasString2 ?y3 . ?x :hasAttr ?y4 . Filter( ?y < 2000)  } ";
+		queries[27]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString1 ?y2 . ?x :hasString2 ?y3 . ?x :hasAttr ?y4 . Filter( ?y < 5000)  } ";
+		queries[28]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString1 ?y2 . ?x :hasString2 ?y3 . ?x :hasAttr ?y4 . Filter( ?y < 10000)  } ";
+		queries[29]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString1 ?y2 . ?x :hasString2 ?y3 . ?x :hasAttr ?y4 . Filter( ?y  < 50000)  } ";
 
 
 
-		queries[24]="PREFIX :	<http://www.example.org/>  SELECT ?x   WHERE {?x a  :4Tab1 . } ";
-
+		queries[30]="PREFIX :	<http://www.example.org/>  SELECT ?x   WHERE {?x a  :4Tab1 . } ";
+*/
 		StringBuilder csvOut = new StringBuilder();
 		
 		
@@ -292,10 +314,28 @@ public class QuestOWLExample_OntowisTests {
 			obdaFile = ParamConst.MYSQL;
 			break;
 		}
+		case "--POSTGRESStrNURI":{
+			obdaFile = ParamConst.POSTGRESStrNURI;
+			break;
+		}
+		
+		case "--POSTGRESStrBURI":{
+			obdaFile = ParamConst.POSTGRESStrBURI;
+			break;
+		}
+		case "--POSTGRESStrViewBURI":{
+			obdaFile = ParamConst.POSTGRESStrViewBURI;
+			break;
+		}
+		case "--POSTGRESStrViewNURI":{
+			obdaFile = ParamConst.POSTGRESStrViewNURI;
+			break;
+		}
 		case "--POSTGRES":{
 			obdaFile = ParamConst.POSTGRES;
 			break;
 		}
+
 		case "--DB2" :{
 			obdaFile = ParamConst.DB2;
 			break;
@@ -313,6 +353,7 @@ public class QuestOWLExample_OntowisTests {
 		}
 		}	
 		try {
+			System.out.println(obdaFile);
 			QuestOWLExample_OntowisTests example = new QuestOWLExample_OntowisTests(obdaFile);
 			example.runQuery();
 		} catch (Exception e) {
