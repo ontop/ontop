@@ -60,6 +60,7 @@ import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTempl
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
+import org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift;
 import org.semanticweb.ontop.renderer.DatalogProgramRenderer;
 import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
 import org.slf4j.Logger;
@@ -553,6 +554,8 @@ public class QuestStatement implements OBDAStatement {
          * TODO: explain what we mean by multi-typed .
          * Happens for instance with URI templates.
          *
+         * TODO: See if this protection is still needed for the new TypeLift.
+         *
          * (former explanation :  "See LeftJoin3Virtual. Problems with the Join.")
          */
         if (!multiTypedFunctionSymbolMap.isEmpty()) {
@@ -569,7 +572,7 @@ public class QuestStatement implements OBDAStatement {
         }
 
         if (canPush) {
-            List<CQIE> newTypedRules = unfolder.pushTypes(datalogProgram, multiTypedFunctionSymbolMap);
+            List<CQIE> newTypedRules = TypeLift.liftTypes(datalogProgram.getRules(), multiTypedFunctionSymbolMap);
 
             //TODO: can we avoid using this intermediate variable???
             datalogProgram.removeAllRules();
@@ -842,7 +845,7 @@ public class QuestStatement implements OBDAStatement {
 
 			try {
 				sql = getSQL(programAfterUnfolding, signatureContainer);
-				// cacheQueryAndPr operties(strquery, sql);
+				// cacheQueryAndProperties(strquery, sql);
 			} catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
 
