@@ -163,8 +163,10 @@ public class DLRPerfectReformulator implements QueryRewriter {
 
 		/* Query preprocessing */
 		log.debug("Anonymizing the query");
-		QueryAnonymizer ano = new QueryAnonymizer();
-		DatalogProgram anonymizedProgram = ano.anonymize(prog);
+		
+		DatalogProgram anonymizedProgram = fac.getDatalogProgram();
+		for (CQIE q : prog.getRules()) 
+			anonymizedProgram.appendRule(QueryAnonymizer.anonymize(q));
 
 		log.debug("Reformulating");
 		DatalogProgram reformulation = reformulate(anonymizedProgram);

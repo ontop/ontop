@@ -70,16 +70,16 @@ public class DatalogQueryServices {
 		
 	}
 	
-	public static DatalogProgram plugInDefinitions(DatalogProgram dp, DatalogProgram defs) {
+	public static List<CQIE> plugInDefinitions(List<CQIE> rules, DatalogProgram defs) {
 		
-		PriorityQueue<CQIE> queue = new PriorityQueue<CQIE>(dp.getRules().size(), new Comparator<CQIE> () {
+		PriorityQueue<CQIE> queue = new PriorityQueue<CQIE>(rules.size(), new Comparator<CQIE> () {
 			@Override
 			public int compare(CQIE arg0, CQIE arg1) {
 				return arg0.getBody().size() - arg1.getBody().size();
 			} 
 			});
 
-		queue.addAll(dp.getRules());
+		queue.addAll(rules);
 				
 		List<CQIE> output = new LinkedList<CQIE>();
 				
@@ -162,7 +162,7 @@ public class DatalogQueryServices {
 			}
 		}
 		
-		return fac.getDatalogProgram(output);
+		return output;
 	}
 	
 	

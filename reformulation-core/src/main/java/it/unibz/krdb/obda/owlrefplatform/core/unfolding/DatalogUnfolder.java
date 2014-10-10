@@ -36,7 +36,6 @@ import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
@@ -207,34 +206,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param inputquery
 	 * @return
 	 */
-	private DatalogProgram flattenUCQ(DatalogProgram inputquery, String targetPredicate) {
-
-		List<CQIE> workingSet = new LinkedList<CQIE>();
-		workingSet.addAll(inputquery.getRules());
-
-		for (CQIE query : workingSet) {	
-			DatalogNormalizer.enforceEqualities(query, false);
-		}
-
-		computePartialEvaluation(workingSet);
-
-		LinkedHashSet<CQIE> result = new LinkedHashSet<CQIE>();
-		for (CQIE query : workingSet) {
-			result.add(query);
-		}
-		
-		
-		DatalogProgram resultdp = termFactory.getDatalogProgram(result);
-		
-		/**
-		 * We need to enforce equality again, because at this point it is 
-		 *  possible that there is still some EQ(...) in the Program resultdp
-		 * 
-		 */
-		DatalogNormalizer.enforceEqualities(resultdp.getRules(), false);
-		
-		return resultdp;
-	}
 
 	/***
 	 * Computes a Datalog unfolding. This is simply the original query, plus all
@@ -286,13 +257,14 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	}
 */
 
-	@Override
 	/***
 	 * Generates a partial evaluation of the rules in <b>inputquery</b> with respect to the
 	 * with respect to the program given when this unfolder was initialized. The goal for
 	 * this partial evaluation is the predicate <b>ans1</b>
 	 * 
+	 * @param targetPredicate IS IGNORED
 	 */
+	@Override
 	public DatalogProgram unfold(DatalogProgram inputquery, String targetPredicate) {
 
 		// log.debug("Unfolding mode: {}. Initial query size: {}",
@@ -303,22 +275,33 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		/*
 		 * Needed because the rewriter might generate query bodies like this
-		 * B(x,_), R(x,_), underscores reperesnt uniquie anonymous varaibles.
+		 * B(x,_), R(x,_), underscores represent unique anonymous variables.
 		 * However, the SQL generator needs them to be explicitly unique.
 		 * replacing B(x,newvar1), R(x,newvar2)
 		 */
-		inputquery = QueryAnonymizer.deAnonymize(inputquery);
-
-		DatalogProgram partialEvaluation = flattenUCQ(inputquery, targetPredicate);
-
-		DatalogProgram dp = termFactory.getDatalogProgram();
 		
-		QueryUtils.copyQueryModifiers(inputquery, dp);
+		List<CQIE> workingSet = new LinkedList<CQIE>();
+		for (CQIE query : inputquery.getRules()) 
+			workingSet.add(QueryAnonymizer.deAnonymize(query));
+				
+		for (CQIE query : workingSet)
+			DatalogNormalizer.enforceEqualities(query, false);
+
+		computePartialEvaluation(workingSet);	
 		
-		dp.appendRule(partialEvaluation.getRules());
+		/**
+		 * We need to enforce equality again, because at this point it is 
+		 *  possible that there is still some EQ(...) in the Program resultdp
+		 * 
+		 */
+		for (CQIE query : workingSet)
+			DatalogNormalizer.enforceEqualities(query, false);
 
+		DatalogProgram result = termFactory.getDatalogProgram();
+		QueryUtils.copyQueryModifiers(inputquery, result);
+		result.appendRule(workingSet);
 
-		return dp;
+		return result;
 	}
 
 	// /***
@@ -622,18 +605,18 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param count
 	 * @return
 	 */
+/*	
 	private void unfoldNestedJoin(CQIE currentQuery) {
 		for (int atomIdx = 0; atomIdx < currentQuery.getBody().size(); atomIdx++) {
 			Function function = currentQuery.getBody().get(atomIdx);
-			/*
-			 * Unfolding the Join atom
-			 */
+			
+			// Unfolding the Join atom
 
 			Predicate innerPredicate = function.getFunctionSymbol();
 			if (!(innerPredicate.getName().toString().equals(OBDAVocabulary.SPARQL_JOIN_URI)))
 				continue;
 
-			/* Found a join, removing the Join term and assimilating its terms */
+			// Found a join, removing the Join term and assimilating its terms 
 			List<Function> body = currentQuery.getBody();
 			body.remove(atomIdx);
 			for (int subtermidx = function.getTerms().size() - 1; subtermidx >= 0; subtermidx--) {
@@ -643,7 +626,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			atomIdx += -1;
 		}
 	}
-
+*/
+	
 	// /***
 	// * Unfolds the inner terms of a literal. If the literal is not a function,
 	// * then returns the same literal. If the literal is a function, it will
@@ -1110,7 +1094,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	}
 
 	/***
-	 * This method asumes that the inner term (termidx) of term is a data atom,
+	 * This method assumes that the inner term (termidx) of term is a data atom,
 	 * or a nested atom.
 	 * <p>
 	 * If the term is a data atom, it returns all the new rule resulting from
@@ -1132,7 +1116,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param termidx
 	 * @return
 	 */
-	public int computePartialEvaluation(List<CQIE> workingList) {
+	private int computePartialEvaluation(List<CQIE> workingList) {
 
 		int[] rcount = { 0, 0 };
 
@@ -1261,7 +1245,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		return new LinkedList<CQIE>();
 	}
 	
-	private final List<CQIE> emptyList = Collections.unmodifiableList(new LinkedList<CQIE>());
 
 	/***
 	 * Applies a resolution step over a non-boolean/non-algebra atom (i.e. data
@@ -1322,7 +1305,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			// has no resolvent rule, and marks the end points to compute
 			// partial evaluations
 
-			return emptyList;
+			return Collections.emptyList();
 		}
 		/*
 		 * This is a real data atom, it either generates something, or null
@@ -1356,7 +1339,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			// than one rull, we
 			// must reutrn an empty result i ndicating its already a partial
 			// evaluation.
-			result = emptyList;
+			result = Collections.emptyList();
 		} else if (result.size() == 0) {
 			if (!isSecondAtomInLeftJoin)
 				return null;

@@ -100,7 +100,9 @@ public class TreeRedReformulator implements QueryRewriter {
 
 		/* Query preprocessing */
 
-		DatalogProgram anonymizedProgram = QueryAnonymizer.anonymize(prog);
+		DatalogProgram anonymizedProgram = fac.getDatalogProgram();
+		for (CQIE q : prog.getRules()) 
+			anonymizedProgram.appendRule(QueryAnonymizer.anonymize(q));
 		
 
 		// log.debug("Removing redundant atoms by query containment");

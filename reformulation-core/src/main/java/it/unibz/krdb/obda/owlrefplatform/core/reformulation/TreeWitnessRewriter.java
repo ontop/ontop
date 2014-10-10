@@ -125,14 +125,16 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 * rewrites a given connected CQ with the rules put into output
 	 */
 	
-	private void rewriteCC(QueryConnectedComponent cc, Function headAtom, DatalogProgram output, DatalogProgram edgeDP) {
+	private List<CQIE> rewriteCC(QueryConnectedComponent cc, Function headAtom,  DatalogProgram edgeDP) {
+		
+		List<CQIE> outputRules = new LinkedList<CQIE>();	
 		String headURI = headAtom.getFunctionSymbol().getName();
 		
 		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasonerCache);
 
 		if (cc.hasNoFreeTerms()) {  
 			for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), fac.getVariableNondistinguished())) {
-				output.appendRule(fac.getCQIE(headAtom, a)); 
+				outputRules.add(fac.getCQIE(headAtom, a)); 
 			}
 		}
 
@@ -206,7 +208,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 							edgeDP.appendRule(fac.getCQIE(twAtom, twfa));
 					}	
 					mainbody.addAllNoCheck(cc.getNonDLAtoms());					
-					output.appendRule(fac.getCQIE(headAtom, mainbody.getAllAtoms())); 
+					outputRules.add(fac.getCQIE(headAtom, mainbody.getAllAtoms())); 
 				}
 			}
 			else {
@@ -238,7 +240,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 						mainbody.addAll(edge.getAtoms());
 				}
 				mainbody.addAllNoCheck(cc.getNonDLAtoms());
-				output.appendRule(fac.getCQIE(headAtom, mainbody.getAllAtoms())); 
+				outputRules.add(fac.getCQIE(headAtom, mainbody.getAllAtoms())); 
 			}
 		}
 		else {
@@ -249,8 +251,9 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			if (loop != null)
 				loopbody.addAll(loop.getAtoms());
 			loopbody.addAllNoCheck(cc.getNonDLAtoms());
-			output.appendRule(fac.getCQIE(headAtom, loopbody.getAllAtoms())); 
+			outputRules.add(fac.getCQIE(headAtom, loopbody.getAllAtoms())); 
 		}
+		return outputRules;
 	}
 	
 	private double time = 0;
@@ -260,7 +263,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		
 		double startime = System.currentTimeMillis();
 		
-		DatalogProgram output = fac.getDatalogProgram();
+		List<CQIE> outputRules = new LinkedList<CQIE>();
 		DatalogProgram ccDP = null;
 		DatalogProgram edgeDP = fac.getDatalogProgram();
 
@@ -273,7 +276,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				log.debug("CONNECTED COMPONENT ({})" + " EXISTS {}", cc.getFreeVariables(), cc.getQuantifiedVariables());
 				log.debug("     WITH EDGES {} AND LOOP {}", cc.getEdges(), cc.getLoop());
 				log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
-				rewriteCC(cc, cqieAtom, output, edgeDP); 				
+				outputRules.addAll(rewriteCC(cc, cqieAtom, edgeDP)); 				
 			}
 			else {
 				if (ccDP == null)
@@ -285,33 +288,32 @@ public class TreeWitnessRewriter implements QueryRewriter {
 					log.debug("     WITH EDGES {} AND LOOP {}", cc.getEdges(), cc.getLoop());
 					log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
 					Function ccAtom = getHeadAtom(cqieURI, "_CC_" + (ccDP.getRules().size() + 1), cc.getFreeVariables());
-					rewriteCC(cc, ccAtom, ccDP, edgeDP); 
+					List<CQIE> list = rewriteCC(cc, ccAtom, edgeDP); 
+					ccDP.appendRule(list);
 					ccBody.add(ccAtom);
 				}
-				output.appendRule(fac.getCQIE(cqieAtom, ccBody));
+				outputRules.add(fac.getCQIE(cqieAtom, ccBody));
 			}
 		}
 		
-		log.debug("REWRITTEN PROGRAM\n{}CC DEFS\n{}", output, ccDP);
+		log.debug("REWRITTEN PROGRAM\n{}CC DEFS\n{}", outputRules, ccDP);
 		if (!edgeDP.getRules().isEmpty()) {
 			log.debug("EDGE DEFS\n{}", edgeDP);			
-			output = DatalogQueryServices.plugInDefinitions(output, edgeDP);
+			outputRules = DatalogQueryServices.plugInDefinitions(outputRules, edgeDP);
 			if (ccDP != null)
-				ccDP = DatalogQueryServices.plugInDefinitions(ccDP, edgeDP);
-			log.debug("INLINE EDGE PROGRAM\n{}CC DEFS\n{}", output, ccDP);
+				ccDP = fac.getDatalogProgram(DatalogQueryServices.plugInDefinitions(ccDP.getRules(), edgeDP));
+			log.debug("INLINE EDGE PROGRAM\n{}CC DEFS\n{}", outputRules, ccDP);
 		}
 		if (ccDP != null) {
-			output = DatalogQueryServices.plugInDefinitions(output, ccDP);
-			log.debug("INLINE CONNECTED COMPONENTS PROGRAM\n{}", output);
+			outputRules = DatalogQueryServices.plugInDefinitions(outputRules, ccDP);
+			log.debug("INLINE CONNECTED COMPONENTS PROGRAM\n{}", outputRules);
 		}
 	
 		// extra CQC 
-		if (output.getRules().size() > 1) {
-			List<CQIE> list = new LinkedList<CQIE>(output.getRules());
-			CQCUtilities.removeContainedQueries(list, dataDependenciesCQC);
-			output = fac.getDatalogProgram(list);
-		}
+		if (outputRules.size() > 1) 
+			CQCUtilities.removeContainedQueries(outputRules, dataDependenciesCQC);
 		
+		DatalogProgram output = fac.getDatalogProgram(outputRules);
 		QueryUtils.copyQueryModifiers(dp, output);
 
 		double endtime = System.currentTimeMillis();

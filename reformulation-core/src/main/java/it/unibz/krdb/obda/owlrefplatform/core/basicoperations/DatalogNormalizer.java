@@ -376,40 +376,15 @@ public class DatalogNormalizer {
 	 * @return
 	 * @see #enforceEqualities(CQIE, boolean)
 	 */
-	public static List<CQIE> enforceEqualities(List<CQIE> dp) {
-
-		return enforceEqualities(dp, true);
-	}
-
-	/***
-	 * Enforces equalities in the variables of the queries in the Datalog
-	 * program returning a copy of the program with all the equalities enforced.
-	 * {@link #enforceEqualities(CQIE, boolean) enforceEqualities}
-	 * 
-	 * @param dp
-	 * @return
-	 * @see #enforceEqualities(CQIE, boolean)
-	 */
-	public static List<CQIE> enforceEqualities(List<CQIE> queries, boolean clone) {
-//		List<CQIE> queries = dp.getRules();
-		List<CQIE> dp = null;
-		if (clone) {
-//			OBDAQueryModifiers queryModifiers = dp.getQueryModifiers();
-//			dp = fac.getDatalogProgram();
-//			dp.setQueryModifiers(queryModifiers);
-			dp = new LinkedList<CQIE>();
-		}
-		else
-			dp = queries;
+	public static List<CQIE> enforceEqualities(List<CQIE> queries) {
+		List<CQIE> dp  = new LinkedList<CQIE>();
 		
-		for (CQIE cq : queries) {
-			cq = enforceEqualities(cq, clone);
-			if (clone) {
-				dp.add(cq);
-			}
-		}
+		for (CQIE cq : queries) 
+			dp.add(enforceEqualities(cq, true));
+			
 		return dp;
 	}
+
 
 	/***
 	 * This method introduces new variable names in each data atom and

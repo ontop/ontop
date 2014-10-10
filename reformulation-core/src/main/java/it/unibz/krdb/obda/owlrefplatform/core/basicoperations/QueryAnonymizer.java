@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Variable;
@@ -41,16 +40,6 @@ import java.util.List;
 public class QueryAnonymizer {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-
-	public static DatalogProgram anonymize(DatalogProgram prog) {
-
-		DatalogProgram newProg = fac.getDatalogProgram();
-		List<CQIE> rules = prog.getRules();
-		for (CQIE q : rules) 
-			newProg.appendRule(anonymize(q));
-
-		return newProg;
-	}
 
 	/**
 	 * Anonymizes the terms of an atom in a query, if they are anonymizable.
@@ -221,14 +210,6 @@ public class QueryAnonymizer {
 	 * 
 	 * @param dp
 	 */
-	public static DatalogProgram deAnonymize(DatalogProgram dp) {
-		DatalogProgram result = fac.getDatalogProgram();
-		for (CQIE query : dp.getRules()) 
-			result.appendRule(deAnonymize(query));
-		
-		result.setQueryModifiers(dp.getQueryModifiers());
-		return result;
-	}
 
 	public static CQIE deAnonymize(CQIE query) {
 		
