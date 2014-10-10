@@ -171,10 +171,6 @@ public class Unifier {
 	// * @param atom
 	// * @param unifier
 	// */
-	// public static void applyUnifier(Function atom, Map<Variable, NewLiteral>
-	// unifier) {
-	// applyUnifier(atom.getTerms(), unifier);
-	// }
 
 	public static void applyUnifier(Function term,
 			Map<Variable, Term> unifier) {
@@ -188,21 +184,14 @@ public class Unifier {
 		applyUnifierToGetFact(terms, unifier);
 	}
 
-	// public static void applyUnifier(List<Function> terms,
-	// Map<Variable, NewLiteral> unifier) {
-	// for (Function f : terms) {
-	// applyUnifier(f, unifier);
-	// }
-	// }
-
 	
 	public static void applyUnifier(List<Term> terms, 
 			Map<Variable, Term> unifier) {
 		applyUnifier(terms, unifier,0);
 	}
 	/***
-	 * Applies the subsitution to all the terms in the list. Note that this
-	 * will not clone the list or the terms insdie the list.
+	 * Applies the substitution to all the terms in the list. Note that this
+	 * will not clone the list or the terms inside the list.
 	 * 
 	 * @param terms
 	 * @param unifier
@@ -350,13 +339,10 @@ public class Unifier {
 						innerterm2 = currentInnerTerm2;
 
 					Substitution s = getSubstitution(innerterm1, innerterm2);
-					if (s == null) {
+					if (s == null) 
 						return null;
-					}
 
-					if (!(s instanceof NeutralSubstitution)) {
-						composeUnifiers(mgu, s);
-					}
+					composeUnifiers(mgu, s);
 				}
 
 			} else {
@@ -365,14 +351,10 @@ public class Unifier {
 				 */
 
 				Substitution s = getSubstitution(term1, term2);
-
-				if (s == null) {
+				if (s == null) 
 					return null;
-				}
 
-				if (!(s instanceof NeutralSubstitution)) {
-					composeUnifiers(mgu, s);
-				}
+				composeUnifiers(mgu, s);
 			}
 
 			/*
@@ -387,7 +369,7 @@ public class Unifier {
 	}
 
 	/***
-	 * This will compose the unfier with the substitution. Note that the unifier
+	 * This will compose the unifier with the substitution. Note that the unifier
 	 * will be modified in this process.
 	 * 
 	 * The operation is as follows
@@ -398,6 +380,10 @@ public class Unifier {
 	 * @param s The substitution to compose
 	 */
 	public static void composeUnifiers(Map<Variable, Term> unifier, Substitution s) {
+		
+		if (s instanceof NeutralSubstitution)
+			return;
+		
 		List<Variable> forRemoval = new LinkedList<Variable>();
 		for (Entry<Variable,Term> entry : unifier.entrySet()) {
 			Variable v = entry.getKey();

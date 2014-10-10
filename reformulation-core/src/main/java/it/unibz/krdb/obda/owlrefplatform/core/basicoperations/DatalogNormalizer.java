@@ -268,11 +268,10 @@ public class DatalogNormalizer {
 
                 if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
                     Substitution s = Unifier.getSubstitution(atom.getTerm(0), atom.getTerm(1));
-                    if (s == null) {
+                    if (s == null) 
                         continue;
-                    } else if (!(s instanceof NeutralSubstitution)) {
-                        Unifier.composeUnifiers(mgu, s);
-                    }
+
+                    Unifier.composeUnifiers(mgu, s);
                     body.remove(i);
                     i -= 1;
                 }
@@ -328,17 +327,12 @@ public class DatalogNormalizer {
                 //in case of equalities do the substitution and remove the term
                 if (t2.getFunctionSymbol() == OBDAVocabulary.EQ) {
                     Substitution s = Unifier.getSubstitution(t2.getTerm(0), t2.getTerm(1));
-
-                    if (s == null) {
+                    if (s == null) 
                         continue;
-                    } else if (!(s instanceof NeutralSubstitution)) {
-                        Unifier.composeUnifiers(mgu, s);
-                    }
-
+                    
+                    Unifier.composeUnifiers(mgu, s);
                     terms.remove(i);
                     i -= 1;
-
-
                 }
                 //consider the case of  AND function. Calls recursive method to consider nested equalities
                 else {
