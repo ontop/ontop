@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -74,8 +75,8 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	 * identified by the TMapping algorithm would NOT add any
 	 * new individual.
 	 */
-	private List<SimplePredicate> excludeFromTMappings = null;
-	private boolean applyExcludeFromTMappings = false;
+	private List<SimplePredicate> excludeFromTMappings = Lists.newArrayList();
+	//private boolean applyExcludeFromTMappings = false;
 	
 	private String name = "Quest";
 
@@ -94,10 +95,10 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	}
 
 	/***
-	 * Sets the user-suppplied database constraints, i.e.
-	 * Foreign and primary keys that are not in the databse
+	 * Sets the user-supplied database constraints, i.e.
+	 * Foreign and primary keys that are not in the database
 	 * 
-	 * @param apic
+	 * @param userConstraints
 	 */
 	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints) {
 		if(userConstraints == null)
@@ -125,7 +126,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 		if( excludeFromTMappings == null ) throw new NullPointerException(); 
 		
 		this.excludeFromTMappings = excludeFromTMappings;
-		this.applyExcludeFromTMappings = true;
+		//this.applyExcludeFromTMappings = true;
 	}
 	
 	@Override
@@ -147,16 +148,16 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
 		if(this.applyUserConstraints){
-			if( this.applyExcludeFromTMappings )
+			//if( this.applyExcludeFromTMappings )
 				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, userConstraints, excludeFromTMappings);
-			else
-				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, userConstraints);
+			//else
+			//	return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, userConstraints);
 		}
 		else{
-			if( this.applyExcludeFromTMappings )
+			//if( this.applyExcludeFromTMappings )
 				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, excludeFromTMappings);
-			else
-				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences);
+			//else
+			//	return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences);
 		}
 		
 	}
@@ -176,16 +177,16 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
 		if(this.applyUserConstraints){
-			if( this.applyExcludeFromTMappings )
+			//if( this.applyExcludeFromTMappings )
 				return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences, userConstraints, excludeFromTMappings);
-			else
-				return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences, userConstraints);
+			//else
+		    //		return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences, userConstraints);
 		}
 		else{
-			if( this.applyExcludeFromTMappings )
+			//if( this.applyExcludeFromTMappings )
 				return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences, excludeFromTMappings);
-			else
-				return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences);
+			//else
+			//	return new QuestOWL(ontology, mappingManager, config, BufferingMode.NON_BUFFERING, preferences);
 		}
 	}
 	
@@ -203,16 +204,16 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
 		if(this.applyUserConstraints){
-			if( this.applyExcludeFromTMappings )
+			//if( this.applyExcludeFromTMappings )
 				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences, userConstraints, excludeFromTMappings);
-			else
-				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences, userConstraints);
+			//else
+			//	return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences, userConstraints);
 		}
 		else{
-			if( this.applyExcludeFromTMappings )
+			//if( this.applyExcludeFromTMappings )
 				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences, excludeFromTMappings);
-			else
-				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences);
+			//else
+			//	return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences);
 		}
 	}
 
@@ -230,16 +231,16 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
 		if(this.applyUserConstraints){
-			if( this.applyExcludeFromTMappings )
+			//if( this.applyExcludeFromTMappings )
 				return  new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences, userConstraints, excludeFromTMappings);
-			else
-				return  new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences, userConstraints);
+			//else
+			//	return  new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences, userConstraints);
 		}
 		else{
-			if( this.applyExcludeFromTMappings )
+			//if( this.applyExcludeFromTMappings )
 				return new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences, excludeFromTMappings);
-			else
-				return new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences);
+			//else
+			//	return new QuestOWL(ontology, mappingManager, config, BufferingMode.BUFFERING, preferences);
 		}
 	}
 

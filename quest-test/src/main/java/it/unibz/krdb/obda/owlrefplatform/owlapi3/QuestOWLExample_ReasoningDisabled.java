@@ -97,7 +97,7 @@ public class QuestOWLExample_ReasoningDisabled {
 		 * T-Mappings Handling!!
 		 */
         TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
-        factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
+        //factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
         QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
@@ -114,34 +114,27 @@ public class QuestOWLExample_ReasoningDisabled {
         String[] queries = new String[20];
         String[] results = new String[20];
 
-
-
-
-        queries[0]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A5}  ";
-        queries[1]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A4}  ";
-        queries[2]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A3}  ";
-        queries[3]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A2}  ";
-        queries[4]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A1}  ";
-
-        queries[5]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A5. ?x a  :B5}  ";
-        queries[6]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A4. ?x a  :B4}  ";
-        queries[7]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A3. ?x a  :B3}  ";
-        queries[8]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A2. ?x a  :B2}  ";
-        queries[9]=	"PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A1. ?x a  :B1}  ";
-
-        queries[10]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A5. FILTER (?x < 1000). }  ";
-        queries[11]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A4. FILTER (?x < 1000). }  ";
-        queries[12]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A3. FILTER (?x < 1000). }  ";
-        queries[13]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A2. FILTER (?x < 1000). }  ";
-        queries[14]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A1. FILTER (?x < 1000). }  ";
-
-        queries[15]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A5. ?x a  :B5. FILTER (?x < 1000). }  ";
-        queries[16]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A4. ?x a  :B4. FILTER (?x < 1000). }  ";
-        queries[17]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A3. ?x a  :B3. FILTER (?x < 1000). }  ";
-        queries[18]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A2. ?x a  :B2. FILTER (?x < 1000). }  ";
-        queries[19]= "PREFIX : <http://www.example.org/> SELECT ?x   WHERE {?x a  :A1. ?x a  :B1. FILTER (?x < 1000). }  ";
-
-
+        queries[0]=	        "PREFIX : <http://www.example.org/> SELECT ?x    WHERE {?x a  :A5}                       ";
+        queries[1]=	        "PREFIX : <http://www.example.org/> SELECT ?x    WHERE {?x a  :A4}                       ";
+        queries[2]=	        "PREFIX : <http://www.example.org/> SELECT ?x    WHERE {?x a  :A3}                       ";
+        queries[3]=	        "PREFIX : <http://www.example.org/> SELECT ?x    WHERE {?x a  :A2}                       ";
+        queries[4]=	        "PREFIX : <http://www.example.org/> SELECT ?x    WHERE {?x a  :A1}                       ";
+        queries[5]=	        "PREFIX : <http://www.example.org/> SELECT ?x ?y WHERE {?x a  :A5. ?x :R ?y. ?y a  :A5}  ";
+        queries[6]=	        "PREFIX : <http://www.example.org/> SELECT ?x ?y WHERE {?x a  :A4. ?x :R ?y. ?y a  :A5}  ";
+        queries[7]=	        "PREFIX : <http://www.example.org/> SELECT ?x ?y WHERE {?x a  :A3. ?x :R ?y. ?y a  :A5}  ";
+        queries[8]=	        "PREFIX : <http://www.example.org/> SELECT ?x ?y WHERE {?x a  :A2. ?x :R ?y. ?y a  :A5}  ";
+        queries[9]=	        "PREFIX : <http://www.example.org/> SELECT ?x ?y WHERE {?x a  :A1. ?x :R ?y. ?y a  :A5}  ";
+        queries[10]=	    "PREFIX : <http://www.example.org/> SELECT ?x ?y WHERE {?x a  :A4. ?x :R ?y. ?y a  :A4}  ";
+        queries[11]=	    "PREFIX : <http://www.example.org/> SELECT ?x ?y WHERE {?x a  :A3. ?x :R ?y. ?y a  :A4}  ";
+        queries[12]=	    "PREFIX : <http://www.example.org/> SELECT ?x ?y WHERE {?x a  :A2. ?x :R ?y. ?y a  :A4}  ";
+        queries[13]=	    "PREFIX : <http://www.example.org/> SELECT ?x ?y WHERE {?x a  :A1. ?x :R ?y. ?y a  :A4}  ";
+        queries[14]=	    "PREFIX : <http://www.example.org/> SELECT ?x ?y WHERE {?x a  :A3. ?x :R ?y. ?y a  :A3}  ";
+        queries[15]=	    "PREFIX : <http://www.example.org/> SELECT ?x ?y WHERE {?x a  :A2. ?x :R ?y. ?y a  :A3}  ";
+        queries[16]=	    "PREFIX : <http://www.example.org/> SELECT ?x ?y WHERE {?x a  :A1. ?x :R ?y. ?y a  :A3}  ";
+        queries[17]=	    "PREFIX : <http://www.example.org/> SELECT ?x ?y WHERE {?x a  :A2. ?x :R ?y. ?y a  :A2}  ";
+        queries[18]=	    "PREFIX : <http://www.example.org/> SELECT ?x ?y WHERE {?x a  :A1. ?x :R ?y. ?y a  :A2}  ";
+        queries[19]=	    "PREFIX : <http://www.example.org/> SELECT ?x ?y WHERE {?x a  :A1. ?x :R ?y. ?y a  :A1}  ";
+ 
         /*
         queries[1]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 1000)  } ";
         queries[2]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 2000)  } ";

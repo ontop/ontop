@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -199,10 +200,10 @@ public class QuestOWL extends OWLReasonerBase {
 	//
 	// //////////////////////////////////////////////////////////////////////////////////////
 
-	private List<SimplePredicate> excludeFromTMappings = null;
+	private List<SimplePredicate> excludeFromTMappings = Lists.newArrayList();
 	
 	/* Used to signal whether to apply the user constraints above */
-	private boolean applyExcludeFromTMappings = false; 
+	//private boolean applyExcludeFromTMappings = false;
 	
 	/**
 	 * Initialization code which is called from both of the two constructors. 
@@ -257,7 +258,7 @@ public class QuestOWL extends OWLReasonerBase {
 	 * This constructor is the same as the default constructor, 
 	 * plus the list of predicates for which TMappings reasoning 
 	 * should be disallowed is supplied 
-	 * @param exclude from TMappings User-supplied predicates for which TMappings should be forbidden
+	 * @param excludeFromTMappings User-supplied predicates for which TMappings should be forbidden
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
 			Properties preferences, List<SimplePredicate> excludeFromTMappings) {
@@ -266,7 +267,7 @@ public class QuestOWL extends OWLReasonerBase {
 		// Davide> T-Mappings handling
 		this.excludeFromTMappings = excludeFromTMappings;
 		assert(excludeFromTMappings != null);
-		this.applyExcludeFromTMappings = true;
+		//this.applyExcludeFromTMappings = true;
 		
 		this.init(rootOntology, obdaModel, configuration, preferences);
 
@@ -276,7 +277,7 @@ public class QuestOWL extends OWLReasonerBase {
 	 * This constructor is the same as the default constructor plus the extra constraints, 
 	 * but the list of predicates for which TMappings reasoning should be disallowed is 
 	 * supplied 
-	 * @param exclude from TMappings User-supplied predicates for which TMappings should be forbidden
+	 * @param excludeFromTMappings User-supplied predicates for which TMappings should be forbidden
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
 			Properties preferences, ImplicitDBConstraints userConstraints, 
@@ -290,7 +291,7 @@ public class QuestOWL extends OWLReasonerBase {
 		// Davide> T-Mappings handling
 		this.excludeFromTMappings = excludeFromTMappings;
 		assert(excludeFromTMappings != null);
-		this.applyExcludeFromTMappings = true;
+		//this.applyExcludeFromTMappings = true;
 		
 		this.init(rootOntology, obdaModel, configuration, preferences);
 	}
@@ -362,7 +363,7 @@ public class QuestOWL extends OWLReasonerBase {
 		if(this.applyUserConstraints)
 			questInstance.setImplicitDBConstraints(userConstraints);
 		
-		if( this.applyExcludeFromTMappings )
+		//if( this.applyExcludeFromTMappings )
 			questInstance.setExcludeFromTMappings(this.excludeFromTMappings);
 		
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
