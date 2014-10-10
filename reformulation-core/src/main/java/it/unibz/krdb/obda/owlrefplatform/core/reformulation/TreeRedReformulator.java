@@ -34,6 +34,7 @@ import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
 import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
@@ -44,6 +45,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntol
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -72,7 +74,7 @@ public class TreeRedReformulator implements QueryRewriter {
 	 * The set of ABox dependencies that will be used to optimize the
 	 * reformulation.
 	 */
-	private CQCUtilities dataDependenciesCQC = null;
+	private CQContainmentCheckUnderLIDs dataDependenciesCQC = null;
 
 	public TreeRedReformulator() {
 
@@ -158,7 +160,7 @@ public class TreeRedReformulator implements QueryRewriter {
 			/*
 			 * Optimizing the set
 			 */
-			newqueriesbyPI = SyntacticCQC.removeDuplicateAtoms(newqueriesbyPI);
+			newqueriesbyPI = removeDuplicateAtoms(newqueriesbyPI);
 
 			/*
 			 * Handling existential inclusions, and unification We will collect
@@ -224,9 +226,9 @@ public class TreeRedReformulator implements QueryRewriter {
 				 * to the set.
 				 */
 
-				newqueriesbyunificationandPI.addAll(SyntacticCQC.removeDuplicateAtoms(piApplicator.applyExistentialInclusions(
+				newqueriesbyunificationandPI.addAll(removeDuplicateAtoms(piApplicator.applyExistentialInclusions(
 						relevantQueries, relevantinverse)));
-				newqueriesbyunificationandPI.addAll(SyntacticCQC.removeDuplicateAtoms(piApplicator.applyExistentialInclusions(
+				newqueriesbyunificationandPI.addAll(removeDuplicateAtoms(piApplicator.applyExistentialInclusions(
 						relevantQueries, relevantnotinverse)));
 			}
 
@@ -234,7 +236,7 @@ public class TreeRedReformulator implements QueryRewriter {
 			 * Removing duplicated atoms in each of the queries to simplify
 			 */
 
-			newqueriesbyPI = SyntacticCQC.removeDuplicateAtoms(newqueriesbyPI);
+			newqueriesbyPI = removeDuplicateAtoms(newqueriesbyPI);
 			/* These queries are final, no need for new passes on these */
 			if (sqoOptimizer != null) {
 				result.addAll(sqoOptimizer.optimizeBySQO(newqueriesbyPI));
@@ -246,7 +248,7 @@ public class TreeRedReformulator implements QueryRewriter {
 			 * Preparing the set of queries for the next iteration.
 			 */
 
-			newqueriesbyunificationandPI = SyntacticCQC.removeDuplicateAtoms(newqueriesbyunificationandPI);
+			newqueriesbyunificationandPI = removeDuplicateAtoms(newqueriesbyunificationandPI);
 			LinkedList<CQIE> newquerieslist = new LinkedList<CQIE>();
 			if (sqoOptimizer != null) {
 				newquerieslist.addAll(sqoOptimizer.optimizeBySQO(newqueriesbyunificationandPI));
@@ -284,14 +286,14 @@ public class TreeRedReformulator implements QueryRewriter {
 		Collections.sort(resultlist, CQCUtilities.ComparatorCQIE);		
 		
 		// originally this required only a single pass
-		SyntacticCQC.removeContainedQueriesSyntactic(resultlist);
+		CQCUtilities.removeContainedQueries(resultlist, CQCUtilities.SYNTACTIC_CHECK);
 
 		if (dataDependenciesCQC != null) {
 			log.debug("Removing redundant queries by CQC. Using {} ABox dependencies.", dataDependenciesCQC.toString());
 		} else {
 			log.debug("Removing redundatnt queries by CQC.");
 		}
-		dataDependenciesCQC.removeContainedQueries(resultlist);
+		CQCUtilities.removeContainedQueries(resultlist, dataDependenciesCQC);
 
 		DatalogProgram resultprogram = fac.getDatalogProgram();
 		resultprogram.appendRule(resultlist);
@@ -381,6 +383,35 @@ public class TreeRedReformulator implements QueryRewriter {
 		return newQueries;
 	}
 
+	/**
+	 * Removes all atoms that are equal (syntactically) and then all the atoms
+	 * that are redundant due to CQC.
+	 * 
+	 * @param queries
+	 */
+	public static HashSet<CQIE> removeDuplicateAtoms(Collection<CQIE> queries) {
+		HashSet<CQIE> newqueries = new HashSet<CQIE>(queries.size() * 2);
+		for (CQIE cq : queries) {
+			List<Function> body = cq.getBody();
+			for (int i = 0; i < body.size(); i++) {
+				Function currentAtom = body.get(i);
+				for (int j = i + 1; j < body.size(); j++) {
+					Function comparisonAtom = body.get(j);
+					if (currentAtom.getPredicate().equals(comparisonAtom.getPredicate())) {
+						if (currentAtom.equals(comparisonAtom)) {
+							body.remove(j);
+						}
+					}
+				}
+			}
+			SyntacticCQC.removeRundantAtoms(cq);
+			newqueries.add(QueryAnonymizer.anonymize(cq));
+		}
+		return newqueries;
+	}
+	
+	
+	
 	@Override
 	public void setTBox(TBoxReasoner reasoner, LinearInclusionDependencies sigma) {
 		this.ontology = TBoxReasonerToOntology.getOntology(reasoner);
@@ -392,7 +423,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		this.ontology.saturate();
 		
 		
-		dataDependenciesCQC = new CQCUtilities(sigma);
+		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma);
 		if (sigma != null) {
 			log.debug("Using {} dependencies.", dataDependenciesCQC.toString());
 			//this.sigma.saturate();

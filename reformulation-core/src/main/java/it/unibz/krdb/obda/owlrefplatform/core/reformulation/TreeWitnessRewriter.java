@@ -31,6 +31,7 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
@@ -58,14 +59,14 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private TreeWitnessReasonerCache reasonerCache;
-	private CQCUtilities dataDependenciesCQC;
+	private CQContainmentCheckUnderLIDs dataDependenciesCQC;
 	
 	@Override
 	public void setTBox(TBoxReasoner reasoner, LinearInclusionDependencies sigma) {
 		double startime = System.currentTimeMillis();
 
 		reasonerCache = new TreeWitnessReasonerCache(reasoner);
-		dataDependenciesCQC = new CQCUtilities(sigma);
+		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma);
 		
 //		log.debug("SET SIGMA");
 //		for (Axiom ax : sigma.getAssertions()) {
@@ -307,7 +308,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		// extra CQC 
 		if (output.getRules().size() > 1) {
 			List<CQIE> list = new LinkedList<CQIE>(output.getRules());
-			dataDependenciesCQC.removeContainedQueries(list);
+			CQCUtilities.removeContainedQueries(list, dataDependenciesCQC);
 			output = fac.getDatalogProgram(list);
 		}
 		

@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,9 +26,9 @@ public class TMappingRule {
 	
 	private final CQIE stripped;	
 	private final List<Function> conditions;	
-	final CQCUtilities cqc;   // TODO: make private
+	final CQContainmentCheckUnderLIDs cqc;   // TODO: make private
 	
-	public TMappingRule(Function head, List<Function> body, CQCUtilities cqc) {
+	public TMappingRule(Function head, List<Function> body, CQContainmentCheckUnderLIDs cqc) {
 		conditions = new LinkedList<Function>();
 		List<Function> newbody = new LinkedList<Function>();
 		for (Function atom : body) {
@@ -42,7 +43,7 @@ public class TMappingRule {
 		this.cqc = cqc;
 	}
 
-	public TMappingRule(Function head, TMappingRule baseRule, CQCUtilities cqc) {
+	public TMappingRule(Function head, TMappingRule baseRule, CQContainmentCheckUnderLIDs cqc) {
 		conditions = new ArrayList<Function>(baseRule.conditions.size());
 		for (Function atom : baseRule.conditions) {
 			Function clone = (Function)atom.clone();

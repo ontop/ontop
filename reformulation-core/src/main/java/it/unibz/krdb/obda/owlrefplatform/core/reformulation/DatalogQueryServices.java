@@ -138,11 +138,11 @@ public class DatalogQueryServices {
 				ListIterator<CQIE> i = output.listIterator();
 				while (i.hasNext()) {
 					CQIE q2 = i.next();
-					if (SyntacticCQC.isContainedInSyntactic(query, q2)) {
+					if (CQCUtilities.SYNTACTIC_CHECK.isContainedIn(query, q2)) {
 						found = true;
 						break;
 					}
-					else if (SyntacticCQC.isContainedInSyntactic(q2, query)) {
+					else if (CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q2, query)) {
 						i.remove();				
 						log.debug("   PRUNED {} BY {}", q2, query);
 					}

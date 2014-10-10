@@ -29,6 +29,8 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckSyntactic;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SyntacticCQC;
@@ -110,7 +112,7 @@ public class CQCUtilitiesTest {
 
     @Test
 	public void testGrounding() {
-		CQCUtilities.FreezeCQ c2cq = new CQCUtilities.FreezeCQ(initialquery1.getHead(), initialquery1.getBody());
+    	CQContainmentCheckUnderLIDs.FreezeCQ c2cq = new CQContainmentCheckUnderLIDs.FreezeCQ(initialquery1.getHead(), initialquery1.getBody());
 
 		List<Term> head = c2cq.getHead().getTerms();
 		assertTrue(head.get(0).equals(tfac.getConstantLiteral("CANx1")));
@@ -280,7 +282,7 @@ public class CQCUtilitiesTest {
 
 		// Checking containment 5 in 6 and viceversa
 
-		CQCUtilities cqcu = new CQCUtilities();
+		CQContainmentCheckUnderLIDs cqcu = new CQContainmentCheckUnderLIDs();
 		
 		assertTrue(cqcu.isContainedIn(q6, q5));
 
@@ -378,13 +380,13 @@ public class CQCUtilitiesTest {
 
 		CQIE q3 = tfac.getCQIE(head, body);
 
-		assertTrue(SyntacticCQC.isContainedInSyntactic(q1, q2));
+		assertTrue(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q1, q2));
 
-		assertTrue(SyntacticCQC.isContainedInSyntactic(q1, q3));
+		assertTrue(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q1, q3));
 
-		assertFalse(SyntacticCQC.isContainedInSyntactic(q2, q1));
+		assertFalse(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q2, q1));
 
-		assertFalse(SyntacticCQC.isContainedInSyntactic(q3, q1));
+		assertFalse(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q3, q1));
 
 	}
 
@@ -455,7 +457,7 @@ public class CQCUtilitiesTest {
 		LinkedList<CQIE> queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q2);
-		SyntacticCQC.removeContainedQueriesSyntactic(queries);
+		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q2));
@@ -463,7 +465,7 @@ public class CQCUtilitiesTest {
 		queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q3);
-		SyntacticCQC.removeContainedQueriesSyntactic(queries);
+		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q3));
@@ -471,7 +473,7 @@ public class CQCUtilitiesTest {
 		queries = new LinkedList<CQIE>();
 		queries.add(q2);
 		queries.add(q3);
-		SyntacticCQC.removeContainedQueriesSyntactic(queries);
+		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
@@ -481,7 +483,7 @@ public class CQCUtilitiesTest {
 		queries.add(q1);
 		queries.add(q2);
 		queries.add(q3);
-		SyntacticCQC.removeContainedQueriesSyntactic(queries);
+		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
@@ -516,7 +518,7 @@ public class CQCUtilitiesTest {
 			
 			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
 			
-			CQCUtilities cqc = new CQCUtilities(dep);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -547,7 +549,7 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
 
-			CQCUtilities cqc = new CQCUtilities(dep);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -578,7 +580,7 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
 			
-			CQCUtilities cqc = new CQCUtilities(dep);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -610,7 +612,7 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
 
-			CQCUtilities cqc = new CQCUtilities(dep);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -642,7 +644,7 @@ public class CQCUtilitiesTest {
 
 			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
 
-			CQCUtilities cqc = new CQCUtilities(dep);
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 			
 			assertTrue(cqc.isContainedIn(query1, query2));
 			
@@ -705,26 +707,23 @@ public class CQCUtilitiesTest {
 
         CQIE query1 = tfac.getCQIE(head, body);
 
-        // Query 2 q(x)
+        // Query 2 q(x) :- (with empty body)
 
         headTerms = new LinkedList<Term>();
         headTerms.add(tfac.getVariable("x"));
-
         head = tfac.getFunction(pfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
-
         body = new LinkedList<Function>();
-
         CQIE query2 = tfac.getCQIE(head, body);
 
 		LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
- 
-		CQCUtilities cqc = new CQCUtilities(dep);
+		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
 				
-        assertFalse(cqc.isContainedIn(query1, query2));
+        assertTrue(cqc.isContainedIn(query1, query2));  // ROMAN: changed from False
 
         assertFalse(cqc.isContainedIn(query2, query1));
 
-        assertFalse(SyntacticCQC.isContainedInSyntactic(query2, query1));
-        assertFalse(SyntacticCQC.isContainedInSyntactic(query1, query2));
+        assertTrue(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(query1, query2)); // ROMAN: changed from False
+        
+        assertFalse(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(query2, query1));
     }
 }

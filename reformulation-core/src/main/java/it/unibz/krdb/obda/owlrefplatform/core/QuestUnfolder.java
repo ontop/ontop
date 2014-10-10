@@ -28,6 +28,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactRuleConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
@@ -147,10 +148,10 @@ public class QuestUnfolder {
 		// TODO: move the foreign-key optimisation inside t-mapping generation 
 		//              -- at this point it has little effect
 		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);	
-		CQCUtilities foreignKeyCQC = new CQCUtilities(foreignKeyRules);
+		CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
 
 		Collections.sort(unfoldingProgram, CQCUtilities.ComparatorCQIE);
-		foreignKeyCQC.removeContainedQueries(unfoldingProgram);
+		CQCUtilities.removeContainedQueries(unfoldingProgram, foreignKeyCQC);
 
 		final long endTime = System.currentTimeMillis();
 		log.debug("TMapping size: {}", unfoldingProgram.size());

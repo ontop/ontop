@@ -35,6 +35,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
@@ -281,7 +282,7 @@ public class TMappingProcessor {
 		 */
 		originalMappings = normalizeConstants(originalMappings);
 		
-		CQCUtilities cqc = new CQCUtilities(); // no dependencies used at the moment
+		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(); // no dependencies used at the moment
 											   // TODO: use foreign keys here
 		
 		
