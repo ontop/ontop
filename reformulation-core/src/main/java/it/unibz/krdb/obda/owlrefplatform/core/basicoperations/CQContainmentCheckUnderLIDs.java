@@ -68,7 +68,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 					Function newFact = (Function)ruleHead.clone();
 					// unify to get fact is needed because the dependencies are not necessarily full
 					// (in other words, they may contain existentials in the head)
-					Unifier.applyUnifierToGetFact(newFact, theta); 
+					Unifier.applyUnifierToGetFact(newFact, theta);
 					derivedAtoms.add(newFact);
 				}
 			}

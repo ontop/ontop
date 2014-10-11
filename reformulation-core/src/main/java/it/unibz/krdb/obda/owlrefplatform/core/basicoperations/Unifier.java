@@ -56,11 +56,6 @@ public class Unifier {
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 		
-	public static Map<Variable, Term> getMGU(CQIE q, int position1,
-			int position2) throws Exception {
-		return getMGU(q.getBody().get(position1), q.getBody().get(position2));
-	}
-
 	/***
 	 * Unifies two atoms in a conjunctive query returning a new conjunctive
 	 * query. To to this we calculate the MGU for atoms, duplicate the query q
@@ -68,7 +63,7 @@ public class Unifier {
 	 * 
 	 * @param q
 	 * @param i
-	 * @param j
+	 * @param j (j > i)
 	 * @return null if the two atoms are not unifiable, else a new conjunctive
 	 *         query produced by the unification of j and i
 	 * 
@@ -76,8 +71,7 @@ public class Unifier {
 	 */
 	public static CQIE unify(CQIE q, int i, int j) {
 
-		Map<Variable, Term> mgu = getMGU(q.getBody().get(i), q.getBody()
-				.get(j));
+		Map<Variable, Term> mgu = getMGU(q.getBody().get(i), q.getBody().get(j));
 		if (mgu == null)
 			return null;
 
@@ -87,42 +81,22 @@ public class Unifier {
 
 		Function atom1 = q.getBody().get(i);
 		Function atom2 = q.getBody().get(j);
-		Function newatom = unify((Function) atom1, (Function) atom2, mgu);
+		//Function newatom = unify((Function) atom1, (Function) atom2, mgu);
+		
+		// take care of anonymous variables
+		Function newatom = (Function) atom1.clone();
+		for (int ii = 0; ii < atom1.getTerms().size(); ii++) {
+			Term t1 = atom1.getTerms().get(ii);
+			if (t1 instanceof AnonymousVariable) 
+				newatom.getTerms().set(ii, atom2.getTerms().get(ii));
+		}
+		applyUnifier(newatom, mgu);
+		
 		unifiedQ.getBody().add(i, newatom);
 
 		return unifiedQ;
-
 	}
 
-	/***
-	 * Returns a new Function a, resulting the unification of atoms atom1 and atom2
-	 * after with the given unifier. Note that this method takes into account
-	 * that a unifier doesn't include substitutions for instances of
-	 * UndistinguishedVariables.
-	 * 
-	 * That is, given 2 terms t1 in atom1, and t2 in atom2 in position i, such
-	 * that t1 or t2 are instances of UndistinguishedVariable, then atom a will
-	 * have in position i the term t1 or t2 that is NOT an undistinguished
-	 * variable, compensating for the missing substitutions.
-	 * 
-	 * @param atom1
-	 * @param atom2
-	 * @param unifier
-	 * @return
-	 */
-	private static Function unify(Function atom1, Function atom2,
-			Map<Variable, Term> unifier) {
-		Function newatom = (Function) atom1.clone();
-		for (int i = 0; i < atom1.getTerms().size(); i++) {
-			Term t1 = atom1.getTerms().get(i);
-			Term t2 = atom2.getTerms().get(i);
-			if (t1 instanceof AnonymousVariable) {
-				newatom.getTerms().set(i, t2);
-			}
-		}
-		applyUnifier(newatom, unifier);
-		return newatom;
-	}
 
 	/***
 	 * This method will return a new query, resulting from the application of
@@ -137,18 +111,17 @@ public class Unifier {
 	public static CQIE applyUnifier(CQIE q, Map<Variable, Term> unifier,
 			boolean clone) {
 
-		CQIE newq = null;
+		CQIE newq;
 		if (clone)
 			newq = q.clone();
 		else
 			newq = q;
 
-		/* applying the unifier to every term in the head */
 		Function head = newq.getHead();
 		applyUnifier(head, unifier);
-		for (Function bodyatom : newq.getBody()) {
+		for (Function bodyatom : newq.getBody()) 
 			applyUnifier(bodyatom, unifier);
-		}
+		
 		return newq;
 	}
 
@@ -172,23 +145,10 @@ public class Unifier {
 	// * @param unifier
 	// */
 
-	public static void applyUnifier(Function term,
-			Map<Variable, Term> unifier) {
-		List<Term> terms = term.getTerms();
-		applyUnifier(terms, unifier);
-	}
-	
-	public static void applyUnifierToGetFact(Function term,
-			Map<Variable, Term> unifier) {
-		List<Term> terms = term.getTerms();
-		applyUnifierToGetFact(terms, unifier);
+	public static void applyUnifier(Function atom, Map<Variable, Term> unifier) {
+		applyUnifier(atom.getTerms(), unifier,0);
 	}
 
-	
-	public static void applyUnifier(List<Term> terms, 
-			Map<Variable, Term> unifier) {
-		applyUnifier(terms, unifier,0);
-	}
 	/***
 	 * Applies the substitution to all the terms in the list. Note that this
 	 * will not clone the list or the terms inside the list.
@@ -196,8 +156,8 @@ public class Unifier {
 	 * @param terms
 	 * @param unifier
 	 */
-	public static void applyUnifier(List<Term> terms, 
-			Map<Variable, Term> unifier, int fromIndex) {
+	public static void applyUnifier(List<Term> terms,  Map<Variable, Term> unifier, int fromIndex) {
+		
 		for (int i = fromIndex; i < terms.size(); i++) {
 			Term t = terms.get(i);
 			/*
@@ -208,21 +168,22 @@ public class Unifier {
 				Term replacement = unifier.get(t);
 				if (replacement != null)
 					terms.set(i, replacement);
-			} else if (t instanceof Function) {
+			} 
+			else if (t instanceof Function) {
 				Function t2 = (Function) t;
 				applyUnifier(t2, unifier);
-
 			}
 		}
 	}
 	
 	/**
 	 * 
-	 * @param terms
+	 * @param atom
 	 * @param unifier
 	 */
-	public static void applyUnifierToGetFact(List<Term> terms,
-			Map<Variable, Term> unifier) {
+	public static void applyUnifierToGetFact(Function atom, Map<Variable, Term> unifier) {
+		
+		List<Term> terms = atom.getTerms();
 		for (int i = 0; i < terms.size(); i++) {
 			Term t = terms.get(i);
 			/*
