@@ -78,14 +78,6 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	
 	public static final class FreezeCQ {
 		
-		private final Map<Variable, ValueConstant> substitution = new HashMap<Variable, ValueConstant>();
-		
-		/**
-		 * Counter for the naming of the new constants. This
-		 * is needed to provide a numbering to each of the new constants
-		 */
-		private int constantcounter = 1;
-		
 		private final Function head;
 		/***
 		 * An index of all the facts obtained by freezing this query.
@@ -103,14 +95,17 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		 */
 		
 		public FreezeCQ(Function head, Collection<Function> body) { 
-			this.head = freezeAtom(head);
+			
+			Map<Variable, ValueConstant> substitution = new HashMap<Variable, ValueConstant>();
+						
+			this.head = freezeAtom(head, substitution);
 
 			factMap = new HashMap<Predicate, List<Function>>(body.size() * 2);
 
 			for (Function atom : body) 
 				// not boolean, not algebra, not arithmetic, not datatype
 				if (atom != null && atom.isDataFunction()) {
-					Function fact = freezeAtom(atom);
+					Function fact = freezeAtom(atom, substitution);
 					
 					Predicate pred = fact.getFunctionSymbol();
 					List<Function> facts = factMap.get(pred);
@@ -139,30 +134,18 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		 * @param atom
 		 * @return freeze atom
 		 */
-		private Function freezeAtom(Function atom) {
+		private static Function freezeAtom(Function atom, Map<Variable, ValueConstant> substitution) {
 			atom = (Function) atom.clone();
 
 			List<Term> headterms = atom.getTerms();
 			for (int i = 0; i < headterms.size(); i++) {
 				Term term = headterms.get(i);
 				if (term instanceof Variable) {
-					ValueConstant //replacement = null;
-//					if (term instanceof Variable) {
-						replacement = substitution.get(term);
-						if (replacement == null) {
-							replacement = getCanonicalConstant(((Variable) term).getName() + constantcounter);
-							constantcounter++;
-							substitution.put((Variable) term, replacement);
-						}
-//					} 
-//					else if (term instanceof ValueConstant) {
-//						replacement = getCanonicalConstant(((ValueConstant) term).getValue() + constantcounter);
-//						constantcounter++;
-//					} 
-//					else if (term instanceof URIConstant) {
-//						replacement = getCanonicalConstant(((URIConstant) term).getURI() + constantcounter);
-//						constantcounter++;
-//					}
+					ValueConstant replacement = substitution.get(term);
+					if (replacement == null) {
+						replacement = fac.getConstantFreshLiteral();
+						substitution.put((Variable) term, replacement);
+					}
 					headterms.set(i, replacement);
 				} 
 				else if (term instanceof Function) {
@@ -171,19 +154,11 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 					for (int j = 0; j < functionterms.size(); j++) {
 						Term fterm = functionterms.get(j);
 						if (fterm instanceof Variable) {
-							ValueConstant // replacement = null;
-//							if (fterm instanceof VariableImpl) {
-								replacement = substitution.get(fterm);
-								if (replacement == null) {
-									replacement = getCanonicalConstant(((VariableImpl)fterm).getName() + constantcounter);
-									constantcounter++;
-									substitution.put((Variable) fterm, replacement);
-								}
-//							} 
-//							else {
-//								replacement = getCanonicalConstant(((ValueConstant)fterm).getValue() + constantcounter);
-//								constantcounter++;
-//							}
+							ValueConstant replacement = substitution.get(fterm);
+							if (replacement == null) {
+								replacement = fac.getConstantFreshLiteral();
+								substitution.put((Variable) fterm, replacement);
+							}
 							functionterms.set(j, replacement);
 						}
 					}
@@ -192,9 +167,6 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 			return atom;
 		}
 
-		private static ValueConstant getCanonicalConstant(String nameFragment) {
-			return fac.getConstantLiteral("CAN" + nameFragment);		
-		}	
 	}
 	
 
