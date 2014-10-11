@@ -110,28 +110,25 @@ public class QueryAnonymizer {
 
 	public static CQIE anonymize(CQIE q) {
 
-		HashMap<String, List<Function>> auxmap = new HashMap<String, List<Function>>();
+		// Collecting number of occurrences of all variables
+		 
+		HashMap<Variable, Integer> auxmap = new HashMap<Variable, Integer>();
+		for (Function atom : q.getBody()) 
+			for (Term t : atom.getTerms()) 
+				collectVariableOccurrences(t, auxmap);
 
-		/*
-		 * Collecting all variables and the places where they appear (Function and
-		 * position)
-		 */
-		List<Function> body = q.getBody();
-		for (Function atom : body) {
-			List<Term> terms = atom.getTerms();
-			for (Term t : terms) 
-				collectAuxiliaries(t, atom, auxmap);
-		}
-
+		if (auxmap.isEmpty())
+			return q;
+		
 		LinkedList<Function> newBody = new LinkedList<Function>();
-		for (Function atom : body) {
+		for (Function atom : q.getBody()) {
 			LinkedList<Term> vex = new LinkedList<Term>();
 			for (Term t : atom.getTerms()) {
-				List<Function> list = null;
-				if (t instanceof VariableImpl) {
-					list = auxmap.get(((VariableImpl) t).getName());
+				Integer list = null;
+				if (t instanceof Variable) {
+					list = auxmap.get(((Variable) t));
 				}
-				if (list != null && list.size() < 2 && !isVariableInHead(q, t)) {
+				if (list != null && list < 2 && !isVariableInHead(q, t)) {
 					vex.add(fac.getVariableNondistinguished());
 				} else {
 					vex.add(t);
@@ -148,26 +145,22 @@ public class QueryAnonymizer {
 	 * collects occurrences of variables
 	 * 
 	 * @param term
-	 * @param atom
 	 * @param auxmap: maps variable names to atoms they occur in
 	 */
 	
-	private static void collectAuxiliaries(Term term, Function atom, HashMap<String, List<Function>> auxmap) {
-		if (term instanceof Variable) {
+	private static void collectVariableOccurrences(Term term, HashMap<Variable, Integer> auxmap) {
+		if ((term instanceof Variable) && !(term instanceof AnonymousVariable)) {
 			Variable var = (Variable) term;
-			//Object[] obj = new Object[2];
-			//obj[0] = atom;
-			List<Function> list = auxmap.get(var.getName());
-			if (list == null) {
-				list = new LinkedList<Function>();
-				auxmap.put(var.getName(), list);
-			}
-			list.add(atom);
+			Integer value = auxmap.get(var);
+			if (value == null) 
+				auxmap.put(var, 1);
+			else
+				value++;
 		} 
 		else if (term instanceof Function) {
 			Function funct = (Function) term;
 			for (Term t : funct.getTerms()) {
-				collectAuxiliaries(t, atom, auxmap);
+				collectVariableOccurrences(t, auxmap);
 			}
 		} 
 		else {
@@ -177,12 +170,10 @@ public class QueryAnonymizer {
 	}
 
 	private static boolean isVariableInHead(CQIE q, Term t) {
-		if (t instanceof AnonymousVariable)
-			return false;
+//		if (t instanceof AnonymousVariable)
+//			return false;
 
-		Function head = q.getHead();
-		List<Term> headterms = head.getTerms();
-		for (Term headterm : headterms) {
+		for (Term headterm : q.getHead().getTerms()) {
 			if (headterm instanceof FunctionalTermImpl) {
 				FunctionalTermImpl fterm = (FunctionalTermImpl) headterm;
 				if (fterm.containsTerm(t))

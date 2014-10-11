@@ -222,7 +222,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 		}
 		return vars;
 	}
-
+/*
 	@Override
 	public Map<Variable, Integer> getVariableCount() {
 		Map<Variable, Integer> currentcount = new HashMap<Variable, Integer>();
@@ -239,7 +239,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 		}
 		return currentcount;
 	}
-
+*/
 	@Override
 	public Term getTerm(int index) {
 		return terms.get(index);
