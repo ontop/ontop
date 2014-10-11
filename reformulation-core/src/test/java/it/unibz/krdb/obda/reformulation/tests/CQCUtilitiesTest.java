@@ -112,14 +112,10 @@ public class CQCUtilitiesTest {
 	public void testGrounding() {
     	CQContainmentCheckUnderLIDs.FreezeCQ c2cq = new CQContainmentCheckUnderLIDs.FreezeCQ(initialquery1.getHead(), initialquery1.getBody());
 
-    	final String CANx1 = "f0";
-    	final String CANy2 = "f1";
-
-    	
 		List<Term> head = c2cq.getHead().getTerms();
-		
-    	System.err.println(head.get(0));
-    	System.err.println(head.get(3));
+		 	
+    	final String CANx1 = ((ValueConstant)head.get(0)).getValue(); //    "f0" if standalone (f46 in travis)
+    	final String CANy2 = ((ValueConstant)head.get(3)).getValue(); //    "f1" if standalone (f47 in travis)
 		
 		assertTrue(head.get(0).equals(tfac.getConstantLiteral(CANx1)));
 		assertTrue(head.get(1).equals(tfac.getConstantURI("URI1")));
