@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SyntacticCQC;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 
@@ -126,7 +127,13 @@ public class DatalogQueryServices {
 												
 						// newquery contains only cloned atoms, so it is safe to unify "in-place"
 						Unifier.applyUnifier(newquery, mgu, false);
-						reduce(newquery);
+						
+						// REDUCE
+						DatalogNormalizer.enforceEqualities(newquery, false);
+						//makeSingleOccurrencesAnonymous(q.getBody(), q.getHead().getTerms());
+						newquery = QueryAnonymizer.anonymize(newquery); // TODO: make it in place
+						SyntacticCQC.removeRundantAtoms(newquery);
+						
 						queue.add(newquery);
 						replaced = true;
 					}
@@ -163,60 +170,5 @@ public class DatalogQueryServices {
 		}
 		
 		return output;
-	}
-	
-	
-	private static void reduce(CQIE q) {
-		DatalogNormalizer.enforceEqualities(q, false);
-		makeSingleOccurrencesAnonymous(q.getBody(), q.getHead().getTerms());
-		SyntacticCQC.removeRundantAtoms(q);
-	}
-
-	//
-	// OPTIMISATION
-	// replace all existentially quantified variables that occur once with _
-	//
-	
-	private static void makeSingleOccurrencesAnonymous(List<Function> body, List<Term> freeVariables) {
-		Map<Term, Function> occurrences = new HashMap<Term, Function>();
-		for (Function a : body)
-			for (Term t : a.getTerms())
-				if ((t instanceof Variable) && !freeVariables.contains(t))
-					if (occurrences.containsKey(t))
-						occurrences.put(t, null);
-					else
-						occurrences.put(t, a);
-		
-		for (Map.Entry<Term, Function> e : occurrences.entrySet()) 
-			if (e.getValue() != null) {
-				ListIterator<Term> i = e.getValue().getTerms().listIterator();
-				while (i.hasNext()) {
-					Term t = i.next();
-					if (t.equals(e.getKey()))
-						i.set(fac.getVariableNondistinguished());
-				}
-//				((PredicateAtomImpl)e.getValue()).listChanged();
-		}
-		
-		Iterator<Function> i = body.iterator();
-		while (i.hasNext()) {
-			Function a = i.next();
-			boolean found = false;
-			for (Function aa : body)
-				if ((a != aa) && (a.getPredicate().equals(aa.getPredicate()))) {
-					// ************
-					// a.equals(aa) would be good but does not work, why?
-					// ************
-					if (a.getTerms().equals(aa.getTerms())) {
-						//log.debug("ATOMS " + a + " AND " + aa + " COINCIDE - REMOVE ONE");
-						found = true;
-						break;
-					}
-				}	
-			if (found) {
-				i.remove();
- 				break;
-			}
-		}		
 	}
 }

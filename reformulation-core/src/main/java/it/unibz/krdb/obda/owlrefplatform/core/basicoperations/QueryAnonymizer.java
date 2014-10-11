@@ -110,34 +110,24 @@ public class QueryAnonymizer {
 
 	public static CQIE anonymize(CQIE q) {
 
-		HashMap<String, List<Object[]>> auxmap = new HashMap<String, List<Object[]>>();
+		HashMap<String, List<Function>> auxmap = new HashMap<String, List<Function>>();
 
 		/*
 		 * Collecting all variables and the places where they appear (Function and
 		 * position)
 		 */
 		List<Function> body = q.getBody();
-		Iterator<Function> it = body.iterator();
-		while (it.hasNext()) {
-			Function atom = (Function) it.next();
+		for (Function atom : body) {
 			List<Term> terms = atom.getTerms();
-			int pos = 0;
-			for (Term t : terms) {
-				collectAuxiliaries(t, atom, pos, auxmap);
-			}
-			pos++;
+			for (Term t : terms) 
+				collectAuxiliaries(t, atom, auxmap);
 		}
 
-		Iterator<Function> it2 = body.iterator();
 		LinkedList<Function> newBody = new LinkedList<Function>();
-		while (it2.hasNext()) {
-			Function atom = (Function) it2.next();
-			List<Term> terms = atom.getTerms();
-			Iterator<Term> term_it = terms.iterator();
+		for (Function atom : body) {
 			LinkedList<Term> vex = new LinkedList<Term>();
-			while (term_it.hasNext()) {
-				Term t = term_it.next();
-				List<Object[]> list = null;
+			for (Term t : atom.getTerms()) {
+				List<Function> list = null;
 				if (t instanceof VariableImpl) {
 					list = auxmap.get(((VariableImpl) t).getName());
 				}
@@ -147,33 +137,40 @@ public class QueryAnonymizer {
 					vex.add(t);
 				}
 			}
-			Function newatom = fac
-					.getFunction(atom.getPredicate().clone(), vex);
+			Function newatom = fac.getFunction(atom.getPredicate().clone(), vex);
 			newBody.add(newatom);
 		}
 		CQIE query = fac.getCQIE(q.getHead(), newBody);
 		return query;
 	}
 
-	private static void collectAuxiliaries(Term term, Function atom, int pos,
-			HashMap<String, List<Object[]>> auxmap) {
+	/**
+	 * collects occurrences of variables
+	 * 
+	 * @param term
+	 * @param atom
+	 * @param auxmap: maps variable names to atoms they occur in
+	 */
+	
+	private static void collectAuxiliaries(Term term, Function atom, HashMap<String, List<Function>> auxmap) {
 		if (term instanceof Variable) {
 			Variable var = (Variable) term;
-			Object[] obj = new Object[2];
-			obj[0] = atom;
-			obj[1] = pos;
-			List<Object[]> list = auxmap.get(var.getName());
+			//Object[] obj = new Object[2];
+			//obj[0] = atom;
+			List<Function> list = auxmap.get(var.getName());
 			if (list == null) {
-				list = new LinkedList<Object[]>();
+				list = new LinkedList<Function>();
+				auxmap.put(var.getName(), list);
 			}
-			list.add(obj);
-			auxmap.put(var.getName(), list);
-		} else if (term instanceof Function) {
+			list.add(atom);
+		} 
+		else if (term instanceof Function) {
 			Function funct = (Function) term;
 			for (Term t : funct.getTerms()) {
-				collectAuxiliaries(t, atom, pos, auxmap);
+				collectAuxiliaries(t, atom, auxmap);
 			}
-		} else {
+		} 
+		else {
 			// NO-OP
 			// Ignore constants
 		}
@@ -190,7 +187,8 @@ public class QueryAnonymizer {
 				FunctionalTermImpl fterm = (FunctionalTermImpl) headterm;
 				if (fterm.containsTerm(t))
 					return true;
-			} else if (headterm.equals(t))
+			} 
+			else if (headterm.equals(t))
 				return true;
 		}
 		return false;
