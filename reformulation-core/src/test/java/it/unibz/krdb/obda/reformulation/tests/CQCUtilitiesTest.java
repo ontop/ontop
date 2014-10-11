@@ -29,11 +29,9 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckSyntactic;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SyntacticCQC;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import org.junit.Before;
@@ -116,8 +114,13 @@ public class CQCUtilitiesTest {
 
     	final String CANx1 = "f0";
     	final String CANy2 = "f1";
+
     	
 		List<Term> head = c2cq.getHead().getTerms();
+		
+    	System.err.println(head.get(0));
+    	System.err.println(head.get(3));
+		
 		assertTrue(head.get(0).equals(tfac.getConstantLiteral(CANx1)));
 		assertTrue(head.get(1).equals(tfac.getConstantURI("URI1")));
 		assertTrue(head.get(2).equals(tfac.getConstantLiteral("m")));
