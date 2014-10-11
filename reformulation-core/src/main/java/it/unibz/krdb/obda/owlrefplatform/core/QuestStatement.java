@@ -27,26 +27,16 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAConnection;
-import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.EmptyQueryResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestGraphResultSet;
@@ -65,12 +55,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import org.openrdf.query.MalformedQueryException;
@@ -81,9 +69,6 @@ import org.openrdf.query.parser.QueryParserUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import com.hp.hpl.jena.query.Query;
-//import com.hp.hpl.jena.query.QueryFactory;
-//import com.hp.hpl.jena.sparql.syntax.Template;
 
 /**
  * The obda statement provides the implementations necessary to query the
@@ -433,35 +418,6 @@ public class QuestStatement implements OBDAStatement {
 	 * @param query
 	 * @return
 	 */
-//	private DatalogProgram translateAndPreProcess(Query query, List<String> signature) throws OBDAException {
-//
-//		// Contruct the datalog program object from the query string
-//		DatalogProgram program = null;
-//		try {
-//			if (questInstance.isSemIdx()) {
-//				translator.setSI();
-//				translator.setUriRef(questInstance.getUriRefIds());
-//			}
-//			program = translator.translate(query, signature);
-//
-//			log.debug("Translated query: \n{}", program);
-//
-//			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
-//			removeNonAnswerQueries(program);
-//
-//			program = unfolder.unfold(program, "ans1");
-//
-//			log.debug("Flattened query: \n{}", program);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			OBDAException ex = new OBDAException(e.getMessage());
-//			ex.setStackTrace(e.getStackTrace());
-//			throw ex;
-//		}
-//		log.debug("Replacing equivalences...");
-//		program = validator.replaceEquivalences(program);
-//		return program;
-//	}
 	
 	private DatalogProgram translateAndPreProcess(ParsedQuery pq, List<String> signature) {
 		DatalogProgram program = null;
@@ -516,7 +472,7 @@ public class QuestStatement implements OBDAStatement {
 		return unfolding;
 	}
 
-	private void removeNonAnswerQueries(DatalogProgram program) {
+	private static void removeNonAnswerQueries(DatalogProgram program) {
 		List<CQIE> toRemove = new LinkedList<CQIE>();
 		for (CQIE rule : program.getRules()) {
 			Predicate headPredicate = rule.getHead().getPredicate();
@@ -631,7 +587,7 @@ public class QuestStatement implements OBDAStatement {
 		
 		// Obtain the query signature
 		List<String> signatureContainer = new LinkedList<String>();
-		getSignature(query, signatureContainer);
+		translator.getSignature(query, signatureContainer);
 		
 		
 		// Translate the SPARQL algebra to datalog program
@@ -678,9 +634,6 @@ public class QuestStatement implements OBDAStatement {
 	public String getUnfolding(String strquery) throws Exception {
 		String sql = "";
 
-		List<String> signatureContainer = new LinkedList<String>();
-		//Query query;
-		ParsedQuery query = null;
 		
 		// Check the cache first if the system has processed the query string
 		// before
@@ -688,10 +641,14 @@ public class QuestStatement implements OBDAStatement {
 			// Obtain immediately the SQL string from cache
 			sql = querycache.get(strquery);
 
-			signatureContainer = signaturecache.get(strquery);
-			query = sesameQueryCache.get(strquery);
+			//signatureContainer = signaturecache.get(strquery);
+			//query = sesameQueryCache.get(strquery);
 
-		} else {
+		} 
+		else {
+			
+
+			ParsedQuery query = null;
 			
 			if (!queryIsParsed){
 				QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
@@ -701,8 +658,9 @@ public class QuestStatement implements OBDAStatement {
 				query = parsedQ;
 				queryIsParsed = false;
 			}
-			//getSignature(query, signatureContainer);
-			getSignature(query, signatureContainer);
+
+			List<String> signatureContainer = new LinkedList<String>();
+			translator.getSignature(query, signatureContainer);
 
 			sesameQueryCache.put(strquery, query);
 			signaturecache.put(strquery, signatureContainer);
@@ -721,60 +679,38 @@ public class QuestStatement implements OBDAStatement {
 				/*
 				 * Empty unfolding, constructing an empty result set
 				 */
-				if (program.getRules().size() < 1) {
+				if (program.getRules().size() < 1) 
 					throw new OBDAException("Error, the translation of the query generated 0 rules. This is not possible for any SELECT query (other queries are not supported by the translator).");
-				}
 
+				log.debug("Start the rewriting process...");
+
+				final long startTime0 = System.currentTimeMillis();
+				
 				// Query optimization w.r.t Sigma rules
 				CQCUtilities.optimizeQueryWithSigmaRules(program, questInstance.getDataDependencies());
-
-			} catch (Exception e1) {
-				log.debug(e1.getMessage(), e1);
-				OBDAException obdaException = new OBDAException(e1);
-				obdaException.setStackTrace(e1.getStackTrace());
-				throw obdaException;
-			}
-
-			log.debug("Start the rewriting process...");
-			try {
-				final long startTime = System.currentTimeMillis();
 				programAfterRewriting = questInstance.getRewriter().rewrite(program);
-				final long endTime = System.currentTimeMillis();
-				rewritingTime = endTime - startTime;
-
 				CQCUtilities.optimizeQueryWithSigmaRules(programAfterRewriting, questInstance.getDataDependencies());
+				
+				rewritingTime = System.currentTimeMillis() - startTime0;
 
-			} catch (Exception e1) {
-				log.debug(e1.getMessage(), e1);
-				OBDAException obdaException = new OBDAException("Error rewriting query. \n" + e1.getMessage());
-				obdaException.setStackTrace(e1.getStackTrace());
-				throw obdaException;
-			}
 
-			try {
 				final long startTime = System.currentTimeMillis();
 				programAfterUnfolding = getUnfolding(programAfterRewriting);
-				final long endTime = System.currentTimeMillis();
-				unfoldingTime = endTime - startTime;
-			} catch (Exception e1) {
-				log.debug(e1.getMessage(), e1);
-				OBDAException obdaException = new OBDAException("Error unfolding query. \n" + e1.getMessage());
-				obdaException.setStackTrace(e1.getStackTrace());
-				throw obdaException;
-			}
+				unfoldingTime = System.currentTimeMillis() - startTime;
 
-			try {
+				
 				sql = getSQL(programAfterUnfolding, signatureContainer);
-				// cacheQueryAndPr operties(strquery, sql);
-			} catch (Exception e1) {
+				// cacheQueryAndProperties(strquery, sql);
+				querycache.put(strquery, sql);
+			} 
+			catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
 
-				OBDAException obdaException = new OBDAException("Error generating SQL. \n" + e1.getMessage());
+				OBDAException obdaException = new OBDAException("Error rewriting and unfolding into SQL\n" + e1.getMessage());
 				obdaException.setStackTrace(e1.getStackTrace());
 				throw obdaException;
 			}
 		}
-		querycache.put(strquery, sql);
 		return sql;
 	}
 
@@ -808,13 +744,6 @@ public class QuestStatement implements OBDAStatement {
 		}
 	}
 
-//	private void getSignature(Query query, List<String> signatureContainer) {
-//		translator.getSignature(query, signatureContainer);
-//	}
-
-	private void getSignature(ParsedQuery query, List<String> signatureContainer) {
-		translator.getSignature(query, signatureContainer);
-	}
 	
 	@Override
 	public void cancel() throws OBDAException {
@@ -1085,11 +1014,11 @@ public class QuestStatement implements OBDAStatement {
 		return (toReturn == Integer.MIN_VALUE) ? 0 : toReturn;
 	}
 
-	public String getSqlString(String sparqlString) {
+	private String getSqlString(String sparqlString) {
 		return querycache.get(sparqlString);
 	}
 
-	private int getBodySize(List<? extends Function> atoms) {
+	private static int getBodySize(List<? extends Function> atoms) {
 		int counter = 0;
 		for (Function atom : atoms) {
 			Predicate predicate = atom.getPredicate();
