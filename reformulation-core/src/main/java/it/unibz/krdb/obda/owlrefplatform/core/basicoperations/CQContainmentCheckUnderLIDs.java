@@ -16,6 +16,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 
@@ -141,11 +142,16 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 			for (int i = 0; i < headterms.size(); i++) {
 				Term term = headterms.get(i);
 				if (term instanceof Variable) {
-					ValueConstant replacement = substitution.get(term);
-					if (replacement == null) {
-						replacement = fac.getConstantFreshLiteral();
-						substitution.put((Variable) term, replacement);
+					ValueConstant replacement;
+					if (!(term instanceof AnonymousVariable)) {
+						replacement = substitution.get(term);
+						if (replacement == null) {
+							replacement = fac.getConstantFreshLiteral();
+							substitution.put((Variable) term, replacement);
+						}
 					}
+					else 
+						replacement = fac.getConstantFreshLiteral();
 					headterms.set(i, replacement);
 				} 
 				else if (term instanceof Function) {
@@ -154,11 +160,16 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 					for (int j = 0; j < functionterms.size(); j++) {
 						Term fterm = functionterms.get(j);
 						if (fterm instanceof Variable) {
-							ValueConstant replacement = substitution.get(fterm);
-							if (replacement == null) {
-								replacement = fac.getConstantFreshLiteral();
-								substitution.put((Variable) fterm, replacement);
+							ValueConstant replacement;
+							if (!(fterm instanceof AnonymousVariable)) {
+								replacement = substitution.get(fterm);
+								if (replacement == null) {
+									replacement = fac.getConstantFreshLiteral();
+									substitution.put((Variable) fterm, replacement);
+								}
 							}
+							else
+								replacement = fac.getConstantFreshLiteral();
 							functionterms.set(j, replacement);
 						}
 					}
@@ -167,6 +178,100 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 			return atom;
 		}
 
+	    /**
+	     * TODO!!!
+	     *
+	     * @param query
+	     * @return
+	     */
+		
+		private boolean hasAnswer(CQIE query) {
+			
+			// query = QueryAnonymizer.deAnonymize(query);
+
+			int bodysize = query.getBody().size();
+			
+			// TODO: fix facts
+			if (bodysize == 0)
+				return true;
+			
+			
+			HashMap<Integer, Stack<Function>> choicesMap = new HashMap<Integer, Stack<Function>>(bodysize * 2);
+			
+			Stack<CQIE> queryStack = new Stack<CQIE>();
+			queryStack.push(null);
+
+			CQIE currentQuery = query;
+			
+			int currentAtomIdx = 0;
+			while (currentAtomIdx >= 0) {
+
+				Function currentAtom = currentQuery.getBody().get(currentAtomIdx);							
+				Predicate currentPredicate = currentAtom.getPredicate();
+
+				// Looking for options for this atom 
+				Stack<Function> factChoices = choicesMap.get(currentAtomIdx);
+				if (factChoices == null) {
+					
+					// we have never reached this atom, setting up the initial list
+					// of choices from the original fact list.
+					 
+					factChoices = new Stack<Function>();
+					factChoices.addAll(factMap.get(currentPredicate));
+					choicesMap.put(currentAtomIdx, factChoices);
+				}
+
+				boolean choiceMade = false;
+				CQIE newquery = null;
+				while (!factChoices.isEmpty()) {
+					Map<Variable, Term> mgu = Unifier.getMGU(currentAtom, factChoices.pop());
+					if (mgu == null) {
+						// No way to use the current fact 
+						continue;
+					}
+					
+					newquery = Unifier.applyUnifier(currentQuery, mgu);
+					
+					// Stopping early if we have chosen an MGU that has no
+					// possibility of being successful because of the head.				
+					if (Unifier.getMGU(head, newquery.getHead()) == null) {					
+						// There is no chance to unify the two heads, hence this
+						// fact is not good.
+						continue;
+					}
+
+					// The current fact was applicable, no conflicts so far, we can
+					// advance to the next atom
+					choiceMade = true;
+					break;
+				}
+				if (!choiceMade) {
+					
+					// Reseting choices state and backtracking and resetting the set
+					// of choices for the current position
+					factChoices.addAll(factMap.get(currentPredicate));
+					currentAtomIdx -= 1;
+					if (currentAtomIdx == -1)
+						break;
+					currentQuery = queryStack.pop();
+				} 
+				else {
+
+					if (currentAtomIdx == bodysize - 1) {
+						// we found a successful set of facts 
+						return true;
+					}
+
+					// Advancing to the next index 
+					queryStack.push(currentQuery);
+					currentAtomIdx += 1;
+					currentQuery = newquery;
+				}
+			}
+
+			return false;
+		}
+		
 	}
 	
 
@@ -205,106 +310,6 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 				return false;
 			}
 				
-		return hasAnswer(q1freeze, q2);
-	}
-
-    /**
-     * TODO!!!
-     *
-     * @param query
-     * @return
-     */
-	
-	private static boolean hasAnswer(FreezeCQ c2cq, CQIE query) {
-		
-		query = QueryAnonymizer.deAnonymize(query);
-
-		int bodysize = query.getBody().size();
-		int maxIdxReached = -1;
-		Stack<CQIE> queryStack = new Stack<CQIE>();
-		CQIE currentQuery = query;
-		List<Function> currentBody = currentQuery.getBody();
-		queryStack.push(null);
-
-		HashMap<Integer, Stack<Function>> choicesMap = new HashMap<Integer, Stack<Function>>(bodysize * 2);
-
-		if (currentBody.size() == 0)
-			return true;
-
-		int currentAtomIdx = 0;
-		while (currentAtomIdx >= 0) {
-			if (currentAtomIdx > maxIdxReached)
-				maxIdxReached = currentAtomIdx;
-
-			Function currentAtom = currentBody.get(currentAtomIdx);							
-			Predicate currentPredicate = currentAtom.getPredicate();
-
-			// Looking for options for this atom 
-			Stack<Function> factChoices = choicesMap.get(currentAtomIdx);
-			if (factChoices == null) {
-				
-				// we have never reached this atom, setting up the initial list
-				// of choices from the original fact list.
-				 
-				factChoices = new Stack<Function>();
-				factChoices.addAll(c2cq.getBodyAtoms().get(currentPredicate));
-				choicesMap.put(currentAtomIdx, factChoices);
-			}
-
-			boolean choiceMade = false;
-			CQIE newquery = null;
-			while (!factChoices.isEmpty()) {
-				Map<Variable, Term> mgu = Unifier.getMGU(currentAtom, factChoices.pop());
-				if (mgu == null) {
-					// No way to use the current fact 
-					continue;
-				}
-				newquery = Unifier.applyUnifier(currentQuery, mgu);
-				
-				// Stopping early if we have chosen an MGU that has no
-				// possibility of being successful because of the head.
-				
-				if (Unifier.getMGU(c2cq.getHead(), newquery.getHead()) == null) {
-					
-					// There is no chance to unify the two heads, hence this
-					// fact is not good.
-					continue;
-				}
-				
-				// The current fact was applicable, no conflicts so far, we can
-				// advance to the next atom
-				choiceMade = true;
-				break;
-
-			}
-			if (!choiceMade) {
-				
-				// Reseting choices state and backtracking and resetting the set
-				// of choices for the current position
-				factChoices.addAll(c2cq.getBodyAtoms().get(currentPredicate));
-				currentAtomIdx -= 1;
-				if (currentAtomIdx == -1)
-					break;
-				currentQuery = queryStack.pop();
-				currentBody = currentQuery.getBody();
-
-			} else {
-
-				if (currentAtomIdx == bodysize - 1) {
-					// we found a successful set of facts 
-					return true;
-				}
-
-				// Advancing to the next index 
-				queryStack.push(currentQuery);
-				currentAtomIdx += 1;
-				currentQuery = newquery;
-				currentBody = currentQuery.getBody();
-			}
-		}
-
-		return false;
-	}
-	
-	
+		return q1freeze.hasAnswer(q2);
+	}	
 }
