@@ -125,11 +125,11 @@ public class CQCUtilitiesTest {
 		assertTrue(f1.getTerms().get(0).equals(tfac.getConstantLiteral(CANx1)));
 		assertTrue(f1.getTerms().get(1).equals(tfac.getConstantLiteral(CANy2)));
 
-		head = c2cq.getBodyAtoms().get(r).get(0).getTerms();
+		head = c2cq.getBodyAtoms(r).get(0).getTerms();
 		assertTrue(head.get(0).equals(tfac.getConstantLiteral(CANx1)));
 		assertTrue(head.get(1).equals(tfac.getConstantLiteral(CANy2)));
 
-		head = c2cq.getBodyAtoms().get(s).get(0).getTerms();
+		head = c2cq.getBodyAtoms(s).get(0).getTerms();
 		assertTrue(head.get(0).equals(tfac.getConstantLiteral("m")));
 		f1 = (FunctionalTermImpl) head.get(1);
 		assertTrue(f1.getTerms().get(0).equals(tfac.getConstantLiteral(CANx1)));

@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,7 +19,6 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 
@@ -101,7 +101,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 						
 			this.head = freezeAtom(head, substitution);
 
-			factMap = new HashMap<Predicate, List<Function>>(body.size() * 2);
+			this.factMap = new HashMap<Predicate, List<Function>>(body.size() * 2);
 
 			for (Function atom : body) 
 				// not boolean, not algebra, not arithmetic, not datatype
@@ -122,62 +122,50 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 			return head;
 		}
 		
-		public Map<Predicate, List<Function>> getBodyAtoms() {
-			return factMap;
+		public List<Function> getBodyAtoms(Predicate p) {
+			return factMap.get(p);
 		}
 		
 		/***
-		 * Replaces each term inside the atom with a constant. 
-		 * 
-		 * IMPORTANT: this method goes only to level 2 of terms
-		 *            the commented code is never executed (or does not change anything)
+		 * Replaces each variable inside the atom with a fresh constant. 
 		 * 
 		 * @param atom
 		 * @return freeze atom
 		 */
 		private static Function freezeAtom(Function atom, Map<Variable, ValueConstant> substitution) {
-			atom = (Function) atom.clone();
-
-			List<Term> headterms = atom.getTerms();
-			for (int i = 0; i < headterms.size(); i++) {
-				Term term = headterms.get(i);
-				if (term instanceof Variable) {
-					ValueConstant replacement;
-					if (!(term instanceof AnonymousVariable)) {
-						replacement = substitution.get(term);
-						if (replacement == null) {
-							replacement = fac.getConstantFreshLiteral();
-							substitution.put((Variable) term, replacement);
-						}
-					}
-					else 
-						replacement = fac.getConstantFreshLiteral();
-					headterms.set(i, replacement);
-				} 
-				else if (term instanceof Function) {
+			
+			List<Term> newTerms = new LinkedList<Term>();
+			for (Term term : atom.getTerms()) 
+				if (term instanceof Function) {
 					Function function = (Function) term;
-					List<Term> functionterms = function.getTerms();
-					for (int j = 0; j < functionterms.size(); j++) {
-						Term fterm = functionterms.get(j);
-						if (fterm instanceof Variable) {
-							ValueConstant replacement;
-							if (!(fterm instanceof AnonymousVariable)) {
-								replacement = substitution.get(fterm);
-								if (replacement == null) {
-									replacement = fac.getConstantFreshLiteral();
-									substitution.put((Variable) fterm, replacement);
-								}
-							}
-							else
-								replacement = fac.getConstantFreshLiteral();
-							functionterms.set(j, replacement);
-						}
-					}
-				}
-			}
-			return atom;
+					newTerms.add(freezeAtom(function, substitution));
+				}	
+				else
+					newTerms.add(freezeTerm(term, substitution));		
+			
+			return fac.getFunction(atom.getFunctionSymbol(), newTerms);
 		}
 
+		private static Term freezeTerm(Term term, Map<Variable, ValueConstant> substitution) {
+			
+			if (term instanceof Variable) {
+				// interface Variables is implemented by VariableImpl and AnonymousVariable  
+				if (!(term instanceof AnonymousVariable)) {
+					ValueConstant replacement = substitution.get(term);
+					if (replacement == null) {
+						replacement = fac.getConstantFreshLiteral();
+						substitution.put((Variable) term, replacement);
+					}
+					return replacement;
+				}
+				else
+					// AnonymousVariablea are replaced simply by fresh constants  
+					return fac.getConstantFreshLiteral();
+			}
+			else 
+				return term;
+		}
+		
 	    /**
 	     * TODO!!!
 	     *
@@ -191,35 +179,36 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 
 			int bodysize = query.getBody().size();
 			
-			// TODO: fix facts
-			if (bodysize == 0)
-				return true;
-			
-			
-			HashMap<Integer, Stack<Function>> choicesMap = new HashMap<Integer, Stack<Function>>(bodysize * 2);
+			// ROMAN: fix for facts
+			if (bodysize == 0) {
+				if (Unifier.getMGU(head, query.getHead()) == null) 
+					return true;
+				return false;
+			}
+					
+			ArrayList<Stack<Function>> choicesMap = new ArrayList<Stack<Function>>(bodysize);
 			
 			Stack<CQIE> queryStack = new Stack<CQIE>();
-			queryStack.push(null);
+			queryStack.push(null);   // to ensure that the last pop works fine
 
-			CQIE currentQuery = query;
-			
+			CQIE currentQuery = query;			
 			int currentAtomIdx = 0;
+			
 			while (currentAtomIdx >= 0) {
 
 				Function currentAtom = currentQuery.getBody().get(currentAtomIdx);							
-				Predicate currentPredicate = currentAtom.getPredicate();
 
-				// Looking for options for this atom 
-				Stack<Function> factChoices = choicesMap.get(currentAtomIdx);
-				if (factChoices == null) {
-					
+				// looking for options for this atom 
+				Stack<Function> factChoices;
+				if (currentAtomIdx >= choicesMap.size()) {			
 					// we have never reached this atom, setting up the initial list
-					// of choices from the original fact list.
-					 
+					// of choices from the original fact list.				 
 					factChoices = new Stack<Function>();
-					factChoices.addAll(factMap.get(currentPredicate));
-					choicesMap.put(currentAtomIdx, factChoices);
+					factChoices.addAll(factMap.get(currentAtom.getPredicate()));
+					choicesMap.add(currentAtomIdx, factChoices);
 				}
+				else
+					factChoices = choicesMap.get(currentAtomIdx);
 
 				boolean choiceMade = false;
 				CQIE newquery = null;
@@ -232,43 +221,40 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 					
 					newquery = Unifier.applyUnifier(currentQuery, mgu);
 					
-					// Stopping early if we have chosen an MGU that has no
+					// stopping early if we have chosen an MGU that has no
 					// possibility of being successful because of the head.				
 					if (Unifier.getMGU(head, newquery.getHead()) == null) {					
-						// There is no chance to unify the two heads, hence this
+						// there is no chance to unify the two heads, hence this
 						// fact is not good.
 						continue;
 					}
 
-					// The current fact was applicable, no conflicts so far, we can
+					// the current fact was applicable, no conflicts so far, we can
 					// advance to the next atom
 					choiceMade = true;
 					break;
 				}
 				if (!choiceMade) {
 					
-					// Reseting choices state and backtracking and resetting the set
+					// reseting choices state and backtracking and resetting the set
 					// of choices for the current position
-					factChoices.addAll(factMap.get(currentPredicate));
-					currentAtomIdx -= 1;
-					if (currentAtomIdx == -1)
-						break;
+					factChoices.addAll(factMap.get(currentAtom.getPredicate()));
+					currentAtomIdx--;
 					currentQuery = queryStack.pop();
 				} 
 				else {
-
 					if (currentAtomIdx == bodysize - 1) {
-						// we found a successful set of facts 
+						// we have found a successful set of facts 
 						return true;
 					}
 
-					// Advancing to the next index 
+					// advancing to the next index 
 					queryStack.push(currentQuery);
-					currentAtomIdx += 1;
+					currentAtomIdx++;
 					currentQuery = newquery;
 				}
 			}
-
+			// exhausted all the choices
 			return false;
 		}
 		
@@ -290,6 +276,8 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		if (!q2.getHead().getFunctionSymbol().equals(q1.getHead().getFunctionSymbol()))
 			return false;
 
+//		ROMAN: this was plain wrong -- facts can also be contained in queries  
+//			   (see the fix in hasAnswer)
 //        List<Function> q2body = q2.getBody();
 //        if (q2body.isEmpty())
 //           return false;
@@ -305,7 +293,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
         }
            
         for (Function q2atom : q2.getBody()) 
-			if (!q1freeze.getBodyAtoms().containsKey(q2atom.getFunctionSymbol())) { 
+			if (!q1freeze.factMap.containsKey(q2atom.getFunctionSymbol())) { 
 				// in particular, !q2atom.isDataFunction() 
 				return false;
 			}
