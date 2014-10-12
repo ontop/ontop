@@ -27,9 +27,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 
 import java.util.List;
 
-import org.openrdf.model.Value;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQuery;
@@ -37,23 +34,12 @@ import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.TupleQueryResultHandler;
 import org.openrdf.query.TupleQueryResultHandlerException;
 
-public class SesameTupleQuery implements TupleQuery {
 
-	private String queryString;
-	private String baseURI;
-	private QuestDBConnection conn;
-	private int queryTimeout;
-	
+public class SesameTupleQuery extends SesameAbstractQuery implements TupleQuery {
+
 	public SesameTupleQuery(String queryString, String baseURI, QuestDBConnection conn) 
 			throws MalformedQueryException {
-//		if (queryString.toLowerCase().contains("select")) {
-			this.queryString = queryString;
-			this.baseURI = baseURI;
-			this.conn = conn;
-			this.queryTimeout = 0;
-//		} else {
-//			throw new MalformedQueryException("Tuple query expected!");
-//		}
+        super(queryString, conn);
 	}
 	
 	// needed by TupleQuery interface
@@ -66,7 +52,7 @@ public class SesameTupleQuery implements TupleQuery {
 			if(this.queryTimeout > 0)
 				stm.setQueryTimeout(this.queryTimeout);
 			try {
-				res = (TupleResultSet) stm.execute(queryString);
+				res = (TupleResultSet) stm.execute(getQueryString());
 			} catch (OBDAException e) {
 				long end = System.currentTimeMillis();
 				if (this.queryTimeout > 0 && (end - start) >= this.queryTimeout * 1000){
@@ -93,54 +79,5 @@ public class SesameTupleQuery implements TupleQuery {
 			handler.handleSolution(result.next());
 		}
 		handler.endQueryResult();
-	}
-
-	@Override
-	public int getMaxQueryTime() {
-		return this.queryTimeout;
-	}
-
-	@Override
-	public void setMaxQueryTime(int maxQueryTime) {
-		assert(maxQueryTime >= 0);
-		this.queryTimeout = maxQueryTime;
-	}
-
-	public void clearBindings() {
-		// NO-OP
-	}
-
-	public BindingSet getBindings() {
-		try {
-			return evaluate().next();
-		} catch (QueryEvaluationException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	public Dataset getDataset() {
-		// TODO Throws an exception instead?
-		return null;
-	}
-
-	public boolean getIncludeInferred() {
-		return true;
-	}
-
-	public void removeBinding(String name) {
-		// TODO Throws an exception instead?
-	}
-
-	public void setBinding(String name, Value value) {
-		// TODO Throws an exception instead?
-	}
-
-	public void setDataset(Dataset dataset) {
-		// TODO Throws an exception instead?
-	}
-
-	public void setIncludeInferred(boolean includeInferred) {
-		// always true
 	}
 }
