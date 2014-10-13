@@ -1,334 +1,46 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
-/*
- * #%L
- * ontop-reformulation-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-/*
- * Note: The the unifier does not distinguish between undistinguished variables
- * i.e.when we have an atom A(#,#) which should be unified with B(b,c) the
- * unifier willreturn two thetas #/b, #/c. So far so good but this will lead to
- * problems whenapplying the thetas because there is no distinction between
- * #-variables, sothe first theta is applied to all #-variables and the rest is
- * ignored.In order to avoid problems one can enumerate the undistinguished
- * variables ie. A(#1,#2)
- */
-
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.*;
+import it.unibz.krdb.obda.model.impl.AlgebraOperatorPredicateImpl;
+import it.unibz.krdb.obda.model.impl.AnonymousVariable;
+import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
+import it.unibz.krdb.obda.model.impl.URIConstantImpl;
+import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
+import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
-/***
- * A Class that provides general utilities related to unification, of terms and
- * atoms.
- * 
- * @author mariano
- * 
- */
 public class Unifier {
 
-	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-		
-	/***
-	 * Unifies two atoms in a conjunctive query returning a new conjunctive
-	 * query. To to this we calculate the MGU for atoms, duplicate the query q
-	 * into q', remove i and j from q', apply the mgu to q', and
-	 * 
-	 * @param q
-	 * @param i
-	 * @param j (j > i)
-	 * @return null if the two atoms are not unifiable, else a new conjunctive
-	 *         query produced by the unification of j and i
-	 * 
-	 * @throws Exception
-	 */
-	public static CQIE unify(CQIE q, int i, int j) {
+	private final Map<VariableImpl, Term> map = new HashMap<VariableImpl, Term>();
+	
 
-		Map<Variable, Term> mgu = getMGU(q.getBody().get(i), q.getBody().get(j));
-		if (mgu == null)
-			return null;
-
-		CQIE unifiedQ = applyUnifier(q, mgu);
-		unifiedQ.getBody().remove(i);
-		unifiedQ.getBody().remove(j - 1);
-
-		Function atom1 = q.getBody().get(i);
-		Function atom2 = q.getBody().get(j);
-		//Function newatom = unify((Function) atom1, (Function) atom2, mgu);
-		
-		// take care of anonymous variables
-		Function newatom = (Function) atom1.clone();
-		for (int ii = 0; ii < atom1.getTerms().size(); ii++) {
-			Term t1 = atom1.getTerms().get(ii);
-			if (t1 instanceof AnonymousVariable) 
-				newatom.getTerms().set(ii, atom2.getTerms().get(ii));
-		}
-		applyUnifier(newatom, mgu);
-		
-		unifiedQ.getBody().add(i, newatom);
-
-		return unifiedQ;
+	public Term get(VariableImpl var) {
+		return map.get(var);
 	}
 
-
-	/***
-	 * This method will return a new query, resulting from the application of
-	 * the unifier to the original query q. To do this, we will call the clone()
-	 * method of the original query and then will call applyUnifier to each atom
-	 * of the cloned query.
-	 * 
-	 * @param q
-	 * @param unifier
-	 * @return
-	 */
-	public static CQIE applyUnifier(CQIE q, Map<Variable, Term> unifier,
-			boolean clone) {
-
-		CQIE newq;
-		if (clone)
-			newq = q.clone();
-		else
-			newq = q;
-
-		Function head = newq.getHead();
-		applyUnifier(head, unifier);
-		for (Function bodyatom : newq.getBody()) 
-			applyUnifier(bodyatom, unifier);
-		
-		return newq;
-	}
-
-	public static CQIE applyUnifier(CQIE q, Map<Variable, Term> unifier) {
-		return applyUnifier(q, unifier, true);
-	}
-
-	// /**
-	// * This method will apply the substitution in the unifier to all the terms
-	// * of the atom. If nested terms occur, it will apply the unifier to ONLY
-	// the
-	// * first level of nesting.
-	// *
-	// * Note that this method will actually change the list of terms of the
-	// atom,
-	// * replacing variables in the domain of the unifier with their
-	// substitution
-	// * term.
-	// *
-	// * @param atom
-	// * @param unifier
-	// */
-
-	public static void applyUnifier(Function atom, Map<Variable, Term> unifier) {
-		applyUnifier(atom.getTerms(), unifier,0);
-	}
-
-	/***
-	 * Applies the substitution to all the terms in the list. Note that this
-	 * will not clone the list or the terms inside the list.
-	 * 
-	 * @param terms
-	 * @param unifier
-	 */
-	public static void applyUnifier(List<Term> terms,  Map<Variable, Term> unifier, int fromIndex) {
-		
-		for (int i = fromIndex; i < terms.size(); i++) {
-			Term t = terms.get(i);
-			/*
-			 * unifiers only apply to variables, simple or inside functional
-			 * terms
-			 */
-			if (t instanceof VariableImpl) {
-				Term replacement = unifier.get(t);
-				if (replacement != null)
-					terms.set(i, replacement);
-			} 
-			else if (t instanceof Function) {
-				Function t2 = (Function) t;
-				applyUnifier(t2, unifier);
-			}
-		}
+	public Term getRaw(Term var) {
+		return map.get(var);
 	}
 	
-	/**
-	 * 
-	 * @param atom
-	 * @param unifier
-	 */
-	public static void applyUnifierToGetFact(Function atom, Map<Variable, Term> unifier) {
-		
-		List<Term> terms = atom.getTerms();
-		for (int i = 0; i < terms.size(); i++) {
-			Term t = terms.get(i);
-			/*
-			 * unifiers only apply to variables, simple or inside functional
-			 * terms
-			 */
-			if (t instanceof VariableImpl) {
-				Term replacement = unifier.get(t);
-				if (replacement != null) {
-					terms.set(i, replacement);
-				} else {
-					terms.set(i, ofac.getConstantFreshLiteral());
-				}
-			} else if (t instanceof Function) {
-				Function t2 = (Function) t;
-				applyUnifier(t2, unifier);
-			}
-		}
+	public boolean isEmpty() {
+		return map.isEmpty();
 	}
-
-	/***
-	 * Computes the Most General Unifier (MGU) for two n-ary atoms. Supports
-	 * atoms with terms: Variable, URIConstant, ValueLiteral, ObjectVariableImpl
-	 * If a term is an ObjectVariableImpl it can't have nested
-	 * ObjectVariableImpl terms.
-	 * 
-	 * @param first
-	 * @param second
-	 * @return
-	 */
-	public static Map<Variable, Term> getMGU(Function first,
-			Function second) {
-
-		/*
-		 * Basic case, predicates are different or their arity is different,
-		 * then no unifier
-		 */
-		Predicate predicate1 = first.getFunctionSymbol();
-		Predicate predicate2 = second.getFunctionSymbol();
-		if ((first.getArity() != second.getArity() || !predicate1
-				.equals(predicate2))) {
-			return null;
-
-		}
-
-		Function firstAtom = (Function) first.clone();
-		Function secondAtom = (Function) second.clone();
-
-		/* Computing the disagreement set */
-
-		int arity = predicate1.getArity();
-		List<Term> terms1 = firstAtom.getTerms();
-		List<Term> terms2 = secondAtom.getTerms();
-
-		Map<Variable, Term> mgu = new HashMap<Variable, Term>();
-
-		for (int termidx = 0; termidx < arity; termidx++) {
-
-			Term term1 = terms1.get(termidx);
-			Term term2 = terms2.get(termidx);
-
-			/*
-			 * Checking if there are already substitutions calculated for the
-			 * current terms. If there are any, then we have to take the
-			 * substitutted terms instead of the original ones.
-			 */
-			Term currentTerm1 = mgu.get(term1);
-			Term currentTerm2 = mgu.get(term2);
-
-			if (currentTerm1 != null)
-				term1 = currentTerm1;
-			if (currentTerm2 != null)
-				term2 = currentTerm2;
-
-			/*
-			 * We have two cases, unifying 'simple' terms, and unifying function
-			 * terms. If Function terms are supported as long as they are not
-			 * nested.
-			 */
-
-			if ((term1 instanceof Function) && (term2 instanceof Function)) {
-				/*
-				 * if both of them are a function term then we need to do some
-				 * check in the inner terms, else we can give it to the MGU
-				 * calculator directly
-				 */
-				Function fterm1 = (Function) term1;
-				Function fterm2 = (Function) term2;
-
-//                Predicate functionSymbol1 = fterm1.getFunctionSymbol();
- //               Predicate functionSymbol2 = fterm2.getFunctionSymbol();
-
-                if (!fterm1.getFunctionSymbol().equals( fterm2.getFunctionSymbol())) {
-                   return null;
-                }
-                if (fterm1.getTerms().size() != fterm2.getTerms().size()) {
-                   return null;
-                }
-
-				int innerarity = fterm1.getTerms().size();
-				List<Term> innerterms1 = fterm1.getTerms();
-				List<Term> innerterms2 = fterm2.getTerms();
-				for (int innertermidx = 0; innertermidx < innerarity; innertermidx++) {
-
-					Term innerterm1 = innerterms1.get(innertermidx);
-					Term innerterm2 = innerterms2.get(innertermidx);
-
-					Term currentInnerTerm1 = mgu.get(innerterm1);
-					Term currentInnerTerm2 = mgu.get(innerterm2);
-
-					if (currentInnerTerm1 != null)
-						innerterm1 = currentInnerTerm1;
-					if (currentInnerTerm2 != null)
-						innerterm2 = currentInnerTerm2;
-
-					Substitution s = getSubstitution(innerterm1, innerterm2);
-					if (s == null) 
-						return null;
-
-					composeUnifiers(mgu, s);
-				}
-
-			} else {
-				/*
-				 * the normal case
-				 */
-
-				Substitution s = getSubstitution(term1, term2);
-				if (s == null) 
-					return null;
-
-				composeUnifiers(mgu, s);
-			}
-
-			/*
-			 * Applying the newly computed substitution to the 'replacement' of
-			 * the existing substitutions
-			 */
-			applyUnifier(terms1, mgu, termidx + 1);
-			applyUnifier(terms2, mgu, termidx + 1);
-
-		}
-		return mgu;
+	
+	public void put(VariableImpl var, Term term) {
+		map.put(var, term);
 	}
-
+	
+	public Set<VariableImpl> keySet() {
+		return map.keySet();
+	}
+	
 	/***
 	 * This will compose the unifier with the substitution. Note that the unifier
 	 * will be modified in this process.
@@ -340,16 +52,16 @@ public class Unifier {
 	 * @param unifier The unifier that will be composed
 	 * @param s The substitution to compose
 	 */
-	public static void composeUnifiers(Map<Variable, Term> unifier, Substitution s) {
+	public void compose(Substitution s) {
 		
 		if (s instanceof NeutralSubstitution)
 			return;
 		
-		List<Variable> forRemoval = new LinkedList<Variable>();
-		for (Entry<Variable,Term> entry : unifier.entrySet()) {
-			Variable v = entry.getKey();
+		List<VariableImpl> forRemoval = new LinkedList<VariableImpl>();
+		for (Entry<VariableImpl,Term> entry : map.entrySet()) {
+			VariableImpl v = entry.getKey();
 			Term t = entry.getValue();
-			if (isEqual(t, s.getVariable())) {
+			if (t.equals(s.getVariable())) { // ROMAN: no need in isEqual(t, s.getVariable())
 				if (isEqual(v, s.getTerm())) {
 					/*
 					 * The substitution for the current variable has become
@@ -358,7 +70,7 @@ public class Unifier {
 					 */
 					forRemoval.add(v);
 				} else {
-					unifier.put(v, s.getTerm());
+					map.put(v, s.getTerm());
 				}
 			} else if (t instanceof FunctionalTermImpl) {
 				FunctionalTermImpl function = (FunctionalTermImpl) t;
@@ -377,16 +89,17 @@ public class Unifier {
 					}
 				}
 				if (innerchanges)
-					unifier.put(v, fclone);
+					map.put(v, fclone);
 			}
 		}
-		unifier.keySet().removeAll(forRemoval);
-		unifier.put(s.getVariable(), s.getTerm());
+		map.keySet().removeAll(forRemoval);
+		map.put(s.getVariable(), s.getTerm());
 	}
-
+	
+	
 	/***
 	 * Computes the substitution that makes two terms equal. Note, two terms of
-	 * class ObjectVariableImpl are not supported. This would require the
+	 * class ObjectVariableImpl (is this outdated?) are not supported. This would require the
 	 * analysis of the terms in each of these, this operation is not supported
 	 * at the moment.
 	 * 
@@ -394,8 +107,7 @@ public class Unifier {
 	 * @param term2
 	 * @return
 	 */
-	public static Substitution getSubstitution(Term term1,
-			Term term2) {
+	public static Substitution getSubstitution(Term term1, Term term2) {
 
 		if (!(term1 instanceof VariableImpl)
 				&& !(term2 instanceof VariableImpl)) {
@@ -409,46 +121,40 @@ public class Unifier {
 				return null;
 		}
 
-		/* Arranging the terms so that the first is always a variable */
-		Variable t1 = null;
-		Term t2 = null;
-
+		// arranging the terms so that the first is always a variable 
+		VariableImpl t1;
+		Term t2;
 		if (term1 instanceof VariableImpl) {
-			t1 = (Variable)term1;
+			t1 = (VariableImpl)term1;
 			t2 = term2;
 		} else {
-			t1 = (Variable)term2;
+			t1 = (VariableImpl)term2;
 			t2 = term1;
 		}
 
-		/*
-		 * Undistinguished variables do not need a substitution, the unifier
-		 * knows about this
-		 */
-		if ((t1 instanceof AnonymousVariable || t2 instanceof AnonymousVariable)) {
+		// Undistinguished variables do not need a substitution, 
+		// the unifier knows about this
+		if (t2 instanceof AnonymousVariable) { // ROMAN: no need in (t1 instanceof AnonymousVariable)
 			return new NeutralSubstitution();
 		}
-
-		if (t2 instanceof VariableImpl) {
-			if (isEqual(t1, t2)) {
+		else if (t2 instanceof VariableImpl) {
+			if (t1.equals(t2))   // ROMAN: no neede in isEqual(t1, t2) -- both are proper variables
 				return new NeutralSubstitution();
-			} else {
+			else 
 				return new Substitution(t1, t2);
-			}
-		} else if (t2 instanceof ValueConstant) {
+		} 
+		else if ((t2 instanceof ValueConstantImpl) || (t2 instanceof URIConstantImpl)) {
 			return new Substitution(t1, t2);
-		} else if (t2 instanceof URIConstantImpl) {
-			return new Substitution(t1, t2);
-		} else if (t2 instanceof FunctionalTermImpl) {
+		} 
+		else if (t2 instanceof FunctionalTermImpl) {
 			FunctionalTermImpl fterm = (FunctionalTermImpl) t2;
 			if (fterm.containsTerm(t1))
 				return null;
 			else
 				return new Substitution(t1, t2);
 		}
-		/* This should never happen */
-		throw new RuntimeException("Unsupported unification case: " + term1
-				+ " " + term2);
+		// this should never happen 
+		throw new RuntimeException("Unsupported unification case: " + term1 + " " + term2);
 	}
 
 	/***
@@ -460,6 +166,8 @@ public class Unifier {
 	 * unification then the unifier must be aware of this special treatment of
 	 * UndistinguishedVariable instances).
 	 * 
+	 * ROMAN: I do not quite understand this method (in particular, lots of type casts)
+	 * 
 	 * @param t1
 	 * @param t2
 	 * @return
@@ -467,6 +175,7 @@ public class Unifier {
 	private static boolean isEqual(Term t1, Term t2) {
 		if (t1 == null || t2 == null)
 			return false;
+		// ROMAN: does this imply that the same substitution is applied to any number of AnonymousVariables?
 		if ((t1 instanceof AnonymousVariable)
 				|| (t2 instanceof AnonymousVariable))
 			return true;
@@ -477,6 +186,7 @@ public class Unifier {
 			VariableImpl ct2 = (VariableImpl) t2;
 			return ct1.equals(ct2);
 		} else if (t1 instanceof AnonymousVariable) {
+			// ROMAN: how can we get here if the check above returns true?!
 			return true;
 		} else if (t1 instanceof FunctionalTermImpl) {
 			FunctionalTermImpl ct1 = (FunctionalTermImpl) t1;
@@ -501,4 +211,6 @@ public class Unifier {
 							+ ", " + t2.getClass());
 		}
 	}
+	
+	
 }

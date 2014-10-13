@@ -36,6 +36,7 @@ import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
@@ -1256,11 +1257,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * unifiable with a, then this method will do the following:
 	 * <ul>
 	 * <li>Compute a most general unifier <strong>mgu</strong> for h and a (see
-	 * {@link Unifier#getMGU(Function, Function)})</li>
+	 * {@link UnifierUtilities#getMGU(Function, Function)})</li>
 	 * <li>Create a clone r' of r</li>
 	 * <li>We replace a in r' with the body of s
 	 * <li>
-	 * <li>We apply mgu to r' (see {@link Unifier#applyUnifier(CQIE, Map)})</li>
+	 * <li>We apply mgu to r' (see {@link UnifierUtilities#applyUnifier(CQIE, Map)})</li>
 	 * <li>return r'
 	 * </ul>
 	 * 
@@ -1288,7 +1289,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 *         rules otherwise</li>
 	 *         <ul>
 	 * 
-	 * @see Unifier
+	 * @see UnifierUtilities
 	 */
 	public List<CQIE> resolveDataAtom(Function focusAtom, CQIE rule, Stack<Integer> termidx, int[] resolutionCount, boolean isLeftJoin,
 			boolean isSecondAtomInLeftJoin) {
@@ -1460,7 +1461,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			/* getting a rule with unique variables */
 			CQIE freshRule = getFreshRule(candidateRule, resolutionCount[0]);
 
-			Map<Variable, Term> mgu = Unifier.getMGU(freshRule.getHead(), focusAtom);
+			Unifier mgu = UnifierUtilities.getMGU(freshRule.getHead(), focusAtom);
 
 			if (mgu == null) {
 				/* Failed attempt */
@@ -1498,7 +1499,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			innerAtoms.remove((int) termidx.peek());
 			innerAtoms.addAll((int) termidx.peek(), freshRule.getBody());
 
-			Unifier.applyUnifier(partialEvalution, mgu, false);
+			UnifierUtilities.applyUnifier(partialEvalution, mgu, false);
 
 			/***
 			 * DONE WITH BASIC RESOLUTION STEP
@@ -1591,15 +1592,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		//freshRule.updateBody(newbody);
 		replaceInnerLJ(freshRule, newbody, termidx1);
-		HashMap<Variable, Term> unifier = new HashMap<Variable, Term>();
+		
+		Unifier unifier = UnifierUtilities.getNullifier(variablesArg2);
 
-		OBDAVocabulary myNull = new OBDAVocabulary();
-		for (Variable var : variablesArg2) {
-			unifier.put(var, myNull.NULL);
-		}
 		// Now I need to add the null to the variables of the second
 		// LJ data argument
-		freshRule = Unifier.applyUnifier(freshRule, unifier, false);
+		freshRule = UnifierUtilities.applyUnifier(freshRule, unifier, false);
 		return freshRule;
 	}
 	
@@ -1701,7 +1699,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			 */
 			Function replacement = null;
 
-			Map<Variable, Term> mgu1 = null;
+			Unifier mgu1 = null;
 			for (int idx2 = 0; idx2 < termidx.peek(); idx2++) {
 				Function tempatom = (Function) innerAtoms.get(idx2);
 
@@ -1722,7 +1720,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 				if (redundant) {
 					/* found a candidate replacement atom */
-					mgu1 = Unifier.getMGU(newatom, tempatom);
+					mgu1 = UnifierUtilities.getMGU(newatom, tempatom);
 					if (mgu1 != null) {
 						replacement = tempatom;
 						break;
@@ -1741,7 +1739,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				continue;
 			}
 
-			Unifier.applyUnifier(partialEvalution, mgu1, false);
+			UnifierUtilities.applyUnifier(partialEvalution, mgu1, false);
 			innerAtoms.remove(newatomidx);
 			newatomidx -= 1;
 			newatomcount -= 1;

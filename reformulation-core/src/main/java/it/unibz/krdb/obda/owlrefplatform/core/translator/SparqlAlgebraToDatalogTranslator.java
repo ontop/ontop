@@ -33,8 +33,10 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 
 import java.util.Collections;
@@ -390,13 +392,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		nullVars.removeAll(atom1VarsSet); // the remaining variables do not
 											// appear in the body assigning
 											// null;
-		Map<Variable, Term> nullifier = new HashMap<Variable, Term>();
-		for (Variable var : nullVars) {
-			nullifier.put(var, OBDAVocabulary.NULL);
-		}
+		Unifier nullifier = UnifierUtilities.getNullifier(nullVars);
 		// making the rule
 		CQIE newrule1 = ofac.getCQIE(head, leftAtom);
-		pr.appendRule(Unifier.applyUnifier(newrule1, nullifier));
+		pr.appendRule(UnifierUtilities.applyUnifier(newrule1, nullifier));
 
 		// finding out null
 		nullVars = new HashSet<Variable>();
@@ -404,13 +403,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		nullVars.removeAll(atom2VarsSet); // the remaining variables do not
 											// appear in the body assigning
 											// null;
-		nullifier = new HashMap<Variable, Term>();
-		for (Variable var : nullVars) {
-			nullifier.put(var, OBDAVocabulary.NULL);
-		}
+		nullifier = UnifierUtilities.getNullifier(nullVars);
 		// making the rule
 		CQIE newrule2 = ofac.getCQIE(head, rightAtom);
-		pr.appendRule(Unifier.applyUnifier(newrule2, nullifier));
+		pr.appendRule(UnifierUtilities.applyUnifier(newrule2, nullifier));
 
 		/*
 		 * Translating the rest

@@ -343,7 +343,7 @@ public class PositiveInclusionApplicator {
 						}
 
 						if (unify) {
-							CQIE unifiedQuery = Unifier.unify(currentcq, i, j);
+							CQIE unifiedQuery = UnifierUtilities.unify(currentcq, i, j);
 							if (unifiedQuery != null) {
 								newset.add(QueryAnonymizer.anonymize(unifiedQuery));
 							}

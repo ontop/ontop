@@ -38,6 +38,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
@@ -175,16 +176,16 @@ public class TMappingProcessor {
 					// ROMAN: i do not quite understand the code (in particular, the 1 atom in the body)
 					//        (but leave this fragment with minimal changes)
 					CQIE newmapping = currentRule.getStripped();
-					Map<Variable,Term> mgu = null;
+					Unifier mgu = null;
 					if (newmapping.getBody().size() == 1) {
-						mgu = Unifier.getMGU(newmapping.getBody().get(0), newRule.getStripped().getBody().get(0));
+						mgu = UnifierUtilities.getMGU(newmapping.getBody().get(0), newRule.getStripped().getBody().get(0));
 					}			
 					
 					Function orAtom = fac.getFunctionOR(existingconditions, newconditions);
 					newmapping.getBody().add(orAtom);
 				
 					if (mgu != null) {
-						newmapping = Unifier.applyUnifier(newmapping, mgu);
+						newmapping = UnifierUtilities.applyUnifier(newmapping, mgu);
 					}
 					newRule = new TMappingRule(newmapping.getHead(), newmapping.getBody(), currentRule.cqc);
 					break;

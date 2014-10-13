@@ -123,14 +123,14 @@ public class CQCUtilities {
 					// try to unify current query body atom with tbox rule body atom
 					// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule				
 					Function ruleBody = rule.getBody().get(0);
-					Map<Variable, Term> theta = Unifier.getMGU(ruleBody, atomQuery);
+					Unifier theta = UnifierUtilities.getMGU(ruleBody, atomQuery);
 					if (theta == null || theta.isEmpty()) {
 						continue;
 					}
 					// if unifiable, apply to head of tbox rule
 					Function ruleHead = rule.getHead();
 					Function copyRuleHead = (Function) ruleHead.clone();
-					Unifier.applyUnifier(copyRuleHead, theta);
+					UnifierUtilities.applyUnifier(copyRuleHead, theta);
 
 					atomsToRemove.add(copyRuleHead);
 				}

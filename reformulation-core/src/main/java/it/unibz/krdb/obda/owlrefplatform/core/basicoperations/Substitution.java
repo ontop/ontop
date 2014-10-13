@@ -21,20 +21,20 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  */
 
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 
 public class Substitution {
 
-	private final Variable variable;
+	private final VariableImpl variable;
 	private final Term term;
 	
-	public Substitution(Variable v, Term t) {
+	public Substitution(VariableImpl v, Term t) {
 		variable = v;
 		term = t;
 	}
 	
-	public Variable getVariable() {
+	public VariableImpl getVariable() {
 		return variable;
 	}
 	

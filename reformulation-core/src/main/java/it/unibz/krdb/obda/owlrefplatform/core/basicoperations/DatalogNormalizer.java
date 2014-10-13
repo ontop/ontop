@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -258,20 +259,20 @@ public class DatalogNormalizer {
 			result = result.clone();
 
 		List<Function> body = result.getBody();
-		Map<Variable, Term> mgu = new HashMap<>();
+		Unifier mgu = new Unifier();
 
 		/* collecting all equalities as substitutions */
 
 		for (int i = 0; i < body.size(); i++) {
 			Function atom = body.get(i);
-			Unifier.applyUnifier(atom, mgu);
+			UnifierUtilities.applyUnifier(atom, mgu);
 
                 if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
                     Substitution s = Unifier.getSubstitution(atom.getTerm(0), atom.getTerm(1));
                     if (s == null) 
                         continue;
 
-                    Unifier.composeUnifiers(mgu, s);
+                    mgu.compose(s);
                     body.remove(i);
                     i -= 1;
                 }
@@ -302,7 +303,7 @@ public class DatalogNormalizer {
 
             }
 
-		result = Unifier.applyUnifier(result, mgu, false);
+		result = UnifierUtilities.applyUnifier(result, mgu, false);
 		return result;
 	}
 
@@ -310,11 +311,11 @@ public class DatalogNormalizer {
     /**
      * We search for equalities in conjunctions. This recursive methods explore AND functions and removes EQ functions,
      * substituting the values using the class
-     * {@link Unifier#getSubstitution(it.unibz.krdb.obda.model.Term, it.unibz.krdb.obda.model.Term)}
+     * {@link UnifierUtilities#getSubstitution(it.unibz.krdb.obda.model.Term, it.unibz.krdb.obda.model.Term)}
      * @param atom the atom that can contain equalities
      * @param mgu mapping between a variable and a term
      */
-    private static void nestedEQSubstitutions(Function atom, Map<Variable, Term> mgu) {
+    private static void nestedEQSubstitutions(Function atom, Unifier mgu) {
         List<Term> terms = atom.getTerms();
         for (int i = 0; i < terms.size(); i++) {
             Term t = terms.get(i);
@@ -322,7 +323,7 @@ public class DatalogNormalizer {
 
             if (t instanceof Function) {
                 Function t2 = (Function) t;
-                Unifier.applyUnifier(t2, mgu);
+                UnifierUtilities.applyUnifier(t2, mgu);
 
                 //in case of equalities do the substitution and remove the term
                 if (t2.getFunctionSymbol() == OBDAVocabulary.EQ) {
@@ -330,7 +331,7 @@ public class DatalogNormalizer {
                     if (s == null) 
                         continue;
                     
-                    Unifier.composeUnifiers(mgu, s);
+                    mgu.compose(s);
                     terms.remove(i);
                     i -= 1;
                 }
@@ -391,7 +392,7 @@ public class DatalogNormalizer {
 	 * @param substitutions
 	 */
 	public static void pullOutEqualities(CQIE query) {
-		Map<Variable, Term> substitutions = new HashMap<Variable, Term>();
+		Unifier substitutions = new Unifier();
 		int[] newVarCounter = { 1 };
 
 		Set<Function> booleanAtoms = new HashSet<Function>();
@@ -406,7 +407,7 @@ public class DatalogNormalizer {
 		 * query.
 		 */
 
-		Unifier.applyUnifier(query, substitutions, false);
+		UnifierUtilities.applyUnifier(query, substitutions, false);
 
 	}
 
@@ -489,7 +490,7 @@ public class DatalogNormalizer {
 	 * @param currentTerms
 	 * @param substitutions
 	 */
-	private static void pullOutEqualities(List currentTerms, Map<Variable, Term> substitutions, List<Function> eqList,
+	private static void pullOutEqualities(List currentTerms, Unifier substitutions, List<Function> eqList,
 			int[] newVarCounter, boolean isLeftJoin) {
 
 		for (int i = 0; i < currentTerms.size(); i++) {
@@ -524,7 +525,7 @@ public class DatalogNormalizer {
 				Term subTerm = subterms.get(j);
 				if (subTerm instanceof Variable) {
 
-					Variable var1 = (Variable) subTerm;
+					VariableImpl var1 = (VariableImpl) subTerm;
 					Variable var2 = (Variable) substitutions.get(var1);
 
 					if (var2 == null) {

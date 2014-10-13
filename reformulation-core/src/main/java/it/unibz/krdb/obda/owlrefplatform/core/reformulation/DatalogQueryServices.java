@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SyntacticCQC;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -116,7 +117,7 @@ public class DatalogQueryServices {
 				
 				for (CQIE rule : chosenDefinitions) {				
 					//CQIE newquery = ResolutionEngine.resolve(rule, query, chosenAtomIdx);					
-					Map<Variable, Term> mgu = Unifier.getMGU(getFreshAtom(rule.getHead(), suffix), 
+					Unifier mgu = UnifierUtilities.getMGU(getFreshAtom(rule.getHead(), suffix), 
 																	query.getBody().get(chosenAtomIdx));
 					if (mgu != null) {
 						CQIE newquery = query.clone();
@@ -126,7 +127,7 @@ public class DatalogQueryServices {
 							newbody.add(getFreshAtom(a, suffix));
 												
 						// newquery contains only cloned atoms, so it is safe to unify "in-place"
-						Unifier.applyUnifier(newquery, mgu, false);
+						UnifierUtilities.applyUnifier(newquery, mgu, false);
 						
 						// REDUCE
 						DatalogNormalizer.enforceEqualities(newquery, false);

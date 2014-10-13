@@ -82,7 +82,7 @@ public class LinearInclusionDependencies {
 			for (Equivalences<BasicClassDescription> subclassNode : reasoner.getClasses().getSub(classNode)) {
 				for (BasicClassDescription subclass : subclassNode) {
 
-	                Function body = translate(subclass);
+	                Function body = translate(subclass, variableYname);
                 	//if (!(subclass instanceof OClass) && !(subclass instanceof PropertySomeRestriction))
 	                if (body == null)
 	                	continue;
@@ -93,8 +93,9 @@ public class LinearInclusionDependencies {
 	                	
 	                	if (cla == subclass)
 	                		continue;
-	                	
-		                Function head = translate(cla);	
+
+	                	// use a different variable name in case th ebody has an existetial as well
+		                Function head = translate(cla, variableZname);	
 		                dependencies.addRule(head, body);
 					}
 				}
@@ -104,11 +105,13 @@ public class LinearInclusionDependencies {
 		return dependencies;
 	}
 
-	private static final String variableSuffix = "_4022013";
+	private static final String variableXname = "x_4022013";
+	private static final String variableYname = "y_4022013";
+	private static final String variableZname = "z_4022013";
 	
     private static Function translate(Property property) {
-		final Variable varX = ofac.getVariable("x" + variableSuffix);
-		final Variable varY = ofac.getVariable("y" + variableSuffix);
+		final Variable varX = ofac.getVariable(variableXname);
+		final Variable varY = ofac.getVariable(variableYname);
 
 		if (property.isInverse()) 
 			return ofac.getFunction(property.getPredicate(), varY, varX);
@@ -116,14 +119,14 @@ public class LinearInclusionDependencies {
 			return ofac.getFunction(property.getPredicate(), varX, varY);
 	}
 	
-    private static Function translate(BasicClassDescription description) {
-		final Variable varX = ofac.getVariable("x" + variableSuffix);
-		final Variable varY = ofac.getVariable("y" + variableSuffix);
+    private static Function translate(BasicClassDescription description, String existentialVariableName) {
+		final Variable varX = ofac.getVariable(variableXname);
 		if (description instanceof OClass) {
 			OClass klass = (OClass) description;
 			return ofac.getFunction(klass.getPredicate(), varX);
 		} 
 		else if (description instanceof PropertySomeRestriction) {
+			final Variable varY = ofac.getVariable(existentialVariableName);
 			PropertySomeRestriction property = (PropertySomeRestriction) description;
 			if (property.isInverse()) 
 				return ofac.getFunction(property.getPredicate(), varY, varX);
