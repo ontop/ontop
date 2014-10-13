@@ -484,12 +484,13 @@ public class TMappingProcessor {
 		
 		List<CQIE> tmappingsProgram = new LinkedList<CQIE>();
 		for (Predicate key : mappingIndex.keySet()) {
-			for (TMappingRule mapping : mappingIndex.get(key)) 
-				tmappingsProgram.add(mapping.asCQIE());
+			for (TMappingRule mapping : mappingIndex.get(key)) {
+				CQIE cq = mapping.asCQIE();
+				DatalogNormalizer.enforceEqualities(cq);
+				tmappingsProgram.add(cq);
+			}
 		}
 		
-		tmappingsProgram = DatalogNormalizer.enforceEqualities(tmappingsProgram);
-
 		return tmappingsProgram;
 	}
 

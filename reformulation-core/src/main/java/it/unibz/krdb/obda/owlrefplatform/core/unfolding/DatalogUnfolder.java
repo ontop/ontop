@@ -286,7 +286,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			workingSet.add(QueryAnonymizer.deAnonymize(query));
 				
 		for (CQIE query : workingSet)
-			DatalogNormalizer.enforceEqualities(query, false);
+			DatalogNormalizer.enforceEqualities(query);
 
 		computePartialEvaluation(workingSet);	
 		
@@ -296,7 +296,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * 
 		 */
 		for (CQIE query : workingSet)
-			DatalogNormalizer.enforceEqualities(query, false);
+			DatalogNormalizer.enforceEqualities(query);
 
 		DatalogProgram result = termFactory.getDatalogProgram();
 		QueryUtils.copyQueryModifiers(inputquery, result);

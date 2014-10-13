@@ -130,7 +130,7 @@ public class DatalogQueryServices {
 						UnifierUtilities.applyUnifier(newquery, mgu, false);
 						
 						// REDUCE
-						DatalogNormalizer.enforceEqualities(newquery, false);
+						DatalogNormalizer.enforceEqualities(newquery);
 						//makeSingleOccurrencesAnonymous(q.getBody(), q.getHead().getTerms());
 						newquery = QueryAnonymizer.anonymize(newquery); // TODO: make it in place
 						SyntacticCQC.removeRundantAtoms(newquery);

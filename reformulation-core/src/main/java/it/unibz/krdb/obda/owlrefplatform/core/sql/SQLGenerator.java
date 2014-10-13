@@ -208,7 +208,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 //			log.debug("Before pushing equalities: \n{}", cq);
 
-			DatalogNormalizer.enforceEqualities(cq, false);
+			DatalogNormalizer.enforceEqualities(cq);
 
 //			log.debug("Before folding Joins: \n{}", cq);
 

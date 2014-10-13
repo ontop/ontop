@@ -105,7 +105,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 				}
 			}
 
-			log.debug("Computed MGU: {}", computedmgu);
+			log.debug("Expected MGU: {}", expectedmgu);
 
 			if (expectedmgu == null) {
 				assertTrue(computedmgu == null);

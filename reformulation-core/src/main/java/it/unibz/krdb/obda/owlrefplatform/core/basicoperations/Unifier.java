@@ -45,6 +45,9 @@ public class Unifier {
 	 * 
 	 * IMPORTANT: Function terms are supported as long as they are not nested.
 	 * 
+	 * IMPORTANT: handling of AnonymousVariables is questionable -- 
+	 *         much is left to UnifierUtilities.apply (and only one version handles them)
+	 * 
 	 * @param first
 	 * @param second
 	 * @return
@@ -87,6 +90,7 @@ public class Unifier {
 				
 				if (!mgu.compose(term1, term2))
 					return null;
+				
 			}
 			else {
 				
@@ -260,6 +264,11 @@ public class Unifier {
 		throw new RuntimeException("Unsupported unification case: " + term1 + " " + term2);
 	}
 
+	@Override
+	public String toString() {
+		return "Unifier: " + map.toString();
+	}
+	
 	/***
 	 * A equality calculation based on the strings that identify the terms.
 	 * Terms of different classes are always different. If any of the two terms

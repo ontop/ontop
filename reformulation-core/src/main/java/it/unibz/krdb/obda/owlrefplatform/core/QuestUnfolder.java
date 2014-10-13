@@ -226,7 +226,10 @@ public class QuestUnfolder {
 	 */
 
 	public void normalizeEqualities() {
-		unfoldingProgram = DatalogNormalizer.enforceEqualities(unfoldingProgram);
+		
+		for (CQIE cq: unfoldingProgram)
+			DatalogNormalizer.enforceEqualities(cq);
+		
 	}
 	
 	/***

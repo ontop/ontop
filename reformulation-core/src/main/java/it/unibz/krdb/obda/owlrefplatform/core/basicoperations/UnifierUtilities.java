@@ -129,25 +129,7 @@ public class UnifierUtilities {
 		return applyUnifier(q, unifier, true);
 	}
 
-	// /**
-	// * This method will apply the substitution in the unifier to all the terms
-	// * of the atom. If nested terms occur, it will apply the unifier to ONLY
-	// the
-	// * first level of nesting.
-	// *
-	// * Note that this method will actually change the list of terms of the
-	// atom,
-	// * replacing variables in the domain of the unifier with their
-	// substitution
-	// * term.
-	// *
-	// * @param atom
-	// * @param unifier
-	// */
 
-	public static void applyUnifier(Function atom, Unifier unifier) {
-		applyUnifier(atom, unifier,0);
-	}
 
 	/***
 	 * Applies the substitution to all the terms in the list. Note that this
@@ -156,16 +138,20 @@ public class UnifierUtilities {
 	 * @param atom
 	 * @param unifier
 	 */
+	
+	public static void applyUnifier(Function atom, Unifier unifier) {
+		applyUnifier(atom, unifier,0);
+	}
+	
 	public static void applyUnifier(Function atom, Unifier unifier, int fromIndex) {
 		
 		List<Term> terms = atom.getTerms();
 		
 		for (int i = fromIndex; i < terms.size(); i++) {
 			Term t = terms.get(i);
-			/*
-			 * unifiers only apply to variables, simple or inside functional
-			 * terms
-			 */
+			
+			// unifiers only apply to variables, simple or inside functional terms
+			
 			if (t instanceof VariableImpl) {
 				Term replacement = unifier.get((VariableImpl)t);
 				if (replacement != null)

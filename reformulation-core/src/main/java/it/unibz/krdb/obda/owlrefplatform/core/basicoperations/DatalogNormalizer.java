@@ -254,9 +254,7 @@ public class DatalogNormalizer {
 	 *            the ORIGINAL query object.
 	 * @return
 	 */
-	public static CQIE enforceEqualities(CQIE result, boolean clone) {
-		if (clone)
-			result = result.clone();
+	public static void enforceEqualities(CQIE result) {
 
 		List<Function> body = result.getBody();
 		Unifier mgu = new Unifier();
@@ -301,8 +299,7 @@ public class DatalogNormalizer {
 
             }
 
-		result = UnifierUtilities.applyUnifier(result, mgu, false);
-		return result;
+		UnifierUtilities.applyUnifier(result, mgu, false);
 	}
 
 
@@ -360,22 +357,6 @@ public class DatalogNormalizer {
 
     }
 
-	/***
-	 * See {@link #enforceEqualities(CQIE, boolean)}
-	 * 
-	 * @param dp
-	 * @return
-	 * @see #enforceEqualities(CQIE, boolean)
-	 */
-	public static List<CQIE> enforceEqualities(List<CQIE> queries) {
-		List<CQIE> dp  = new LinkedList<CQIE>();
-		
-		for (CQIE cq : queries) 
-			dp.add(enforceEqualities(cq, true));
-			
-		return dp;
-	}
-
 
 	/***
 	 * This method introduces new variable names in each data atom and
@@ -407,7 +388,7 @@ public class DatalogNormalizer {
 
 	}
 
-	private static BranchDepthSorter sorter = new BranchDepthSorter();
+//	private static BranchDepthSorter sorter = new BranchDepthSorter();
 
 	/***
 	 * Compares two atoms by the depth of their JOIN/LEFT JOIN branches. This is
@@ -417,6 +398,7 @@ public class DatalogNormalizer {
 	 * @author mariano
 	 * 
 	 */
+/*	
 	private static class BranchDepthSorter implements Comparator<Function> {
 
 		public int getDepth(Function term) {
@@ -442,7 +424,8 @@ public class DatalogNormalizer {
 			return getDepth(arg1) - getDepth(arg0);
 		}
 	}
-
+*/
+	
 	/***
 	 * Adds a trivial equality to a LeftJoin in case the left join doesn't have
 	 * at least one boolean condition. This is necessary to have syntactically
