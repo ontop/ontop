@@ -58,15 +58,22 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
+	private TBoxReasoner reasoner;
 	private TreeWitnessReasonerCache reasonerCache;
 	private CQContainmentCheckUnderLIDs dataDependenciesCQC;
+	
+	private Collection<TreeWitnessGenerator> generators;
 	
 	@Override
 	public void setTBox(TBoxReasoner reasoner, LinearInclusionDependencies sigma) {
 		double startime = System.currentTimeMillis();
 
+		this.reasoner = reasoner;
+		
 		reasonerCache = new TreeWitnessReasonerCache(reasoner);
 		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma);
+		
+		generators = TreeWitnessGenerator.getTreeWitnessGenerators(reasoner);
 		
 //		log.debug("SET SIGMA");
 //		for (Axiom ax : sigma.getAssertions()) {
@@ -96,7 +103,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 */
 
 	private List<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0)  {
-		Collection<BasicClassDescription> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasonerCache);		
+		Collection<BasicClassDescription> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner);		
 		List<Function> genAtoms = new ArrayList<Function>(concepts.size());
 		Term x = fac.getVariableNondistinguished(); 
 		
@@ -126,7 +133,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		List<CQIE> outputRules = new LinkedList<CQIE>();	
 		String headURI = headAtom.getFunctionSymbol().getName();
 		
-		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasonerCache);
+		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasonerCache, generators);
 
 		if (cc.hasNoFreeTerms()) {  
 			for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), fac.getVariableNondistinguished())) {

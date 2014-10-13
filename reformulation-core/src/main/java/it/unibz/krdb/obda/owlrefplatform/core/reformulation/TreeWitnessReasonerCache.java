@@ -23,13 +23,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.ClassDescription;
-import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Collection;
@@ -38,9 +34,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * TreeWitnessReasonerLite
@@ -62,51 +55,16 @@ public class TreeWitnessReasonerCache {
 	private final Map<Predicate, Set<Property>> predicateSubproperties;
 	private final Map<Predicate, Set<Property>> predicateSubpropertiesInv;
 
-	// tree witness generators of the ontology (i.e., positive occurrences of \exists R.B)
-	private final Collection<TreeWitnessGenerator> generators;
-
 	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
-	private static final Logger log = LoggerFactory.getLogger(TreeWitnessReasonerCache.class);	
-
-	public static final OClass owlThing = ontFactory.createClass("http://www.w3.org/TR/2004/REC-owl-semantics-20040210/#owl_Thing");	
-	
 	
 	public TreeWitnessReasonerCache(TBoxReasoner reasoner) {
 		
 		this.reasoner = reasoner;
 
-		Map<ClassDescription, TreeWitnessGenerator> gens = new HashMap<ClassDescription, TreeWitnessGenerator>();
-		
 		predicateSubconcepts = new HashMap<Predicate, Set<BasicClassDescription>>();
 		predicateSubproperties = new HashMap<Predicate, Set<Property>>();
 		predicateSubpropertiesInv = new HashMap<Predicate, Set<Property>>();
 		
-		// COLLECT GENERATING CONCEPTS (together with their declared subclasses)
-		// TODO: improve the algorithm
-		for (Equivalences<BasicClassDescription> set : reasoner.getClasses()) {
-			Set<Equivalences<BasicClassDescription>> subClasses = reasoner.getClasses().getSub(set);
-			boolean couldBeGenerating = set.size() > 1 || subClasses.size() > 1; 
-			for (BasicClassDescription concept : set) {
-				if (concept instanceof PropertySomeRestriction && couldBeGenerating) {
-					PropertySomeRestriction some = (PropertySomeRestriction)concept;
-					TreeWitnessGenerator twg = gens.get(some);
-					if (twg == null) {
-						twg = new TreeWitnessGenerator(this, ontFactory.createObjectProperty(some.getPredicate().getName(), some.isInverse()), owlThing);			
-						gens.put(concept, twg);
-					}
-					for (Equivalences<BasicClassDescription> subClassSet : subClasses) {
-						for (BasicClassDescription subConcept : subClassSet) {
-							if (!subConcept.equals(concept)) {
-								twg.addConcept(subConcept);
-								log.debug("GENERATING CI: {} <= {}", subConcept, some);
-							}
-						}
-					}
-				}				
-			}
-		}
-
-		generators = gens.values();
 	
 	}
 	
@@ -117,9 +75,6 @@ public class TreeWitnessReasonerCache {
 	 * @return the set of subsconcepts of B
 	 */
 	
-	public Set<BasicClassDescription> getSubConcepts(BasicClassDescription con) {
-		return reasoner.getClasses().getSubRepresentatives(con);
-	}
 
 	public IntersectionOfConceptSets getSubConcepts(Collection<Function> atoms) {
 		IntersectionOfConceptSets subc = new IntersectionOfConceptSets();
@@ -159,16 +114,6 @@ public class TreeWitnessReasonerCache {
 	}
 	
 	
-	
-	/**
-	 * getGenerators
-	 * 
-	 * @return the collection of all tree witness generators for the ontology
-	 */
-	
-	public Collection<TreeWitnessGenerator> getGenerators() {
-		return generators;
-	}
 	
 	
 	

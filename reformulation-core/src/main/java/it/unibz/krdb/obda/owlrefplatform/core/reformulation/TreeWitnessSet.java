@@ -50,6 +50,7 @@ public class TreeWitnessSet {
 	private List<TreeWitness> tws = new LinkedList<TreeWitness>();
 	private final QueryConnectedComponent cc;
 	private final TreeWitnessReasonerCache reasoner;
+	private final Collection<TreeWitnessGenerator> allTWgenerators;
 	private PropertiesCache propertiesCache; 
 	private boolean hasConflicts = false;
 	
@@ -60,9 +61,10 @@ public class TreeWitnessSet {
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessSet.class);
 	
-	private TreeWitnessSet(QueryConnectedComponent cc, TreeWitnessReasonerCache reasoner) {
+	private TreeWitnessSet(QueryConnectedComponent cc, TreeWitnessReasonerCache reasoner, Collection<TreeWitnessGenerator> allTWgenerators) {
 		this.cc = cc;
 		this.reasoner = reasoner;
+		this.allTWgenerators = allTWgenerators;
 	}
 	
 	public Collection<TreeWitness> getTWs() {
@@ -73,8 +75,8 @@ public class TreeWitnessSet {
 		return hasConflicts;
 	}
 	
-	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TreeWitnessReasonerCache reasoner) {		
-		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner);
+	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TreeWitnessReasonerCache reasoner, Collection<TreeWitnessGenerator> generators) {		
+		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, generators);
 		
 		if (!cc.isDegenerate())
 			treewitnesses.computeTreeWitnesses();
@@ -225,7 +227,7 @@ public class TreeWitnessSet {
 	private Collection<TreeWitnessGenerator> getTreeWitnessGenerators(QueryFolding qf) {
 		Collection<TreeWitnessGenerator> twg = null;
 		log.debug("CHECKING WHETHER THE FOLDING {} CAN BE GENERATED: ", qf); 
-		for (TreeWitnessGenerator g : reasoner.getGenerators()) {
+		for (TreeWitnessGenerator g : allTWgenerators) {
 			Set<Property> subp = qf.getProperties();
 			if ((subp == null) || !subp.contains(g.getProperty())) {
 				log.debug("      NEGATIVE PROPERTY CHECK {}", g.getProperty());
@@ -446,7 +448,7 @@ public class TreeWitnessSet {
 			IntersectionOfConceptSets subc = reasoner.getSubConcepts(cc.getLoop().getAtoms());
 			log.debug("DEGENERATE DETACHED COMPONENT: {}", cc);
 			if (!subc.isEmpty()) // (subc == null) || 
-				for (TreeWitnessGenerator twg : reasoner.getGenerators()) {
+				for (TreeWitnessGenerator twg : allTWgenerators) {
 					if ((subc.get() == null) || twg.endPointEntailsAnyOf(subc.get())) {
 						log.debug("        ENDTYPE IS FINE: {} FOR {}", subc, twg);
 						generators.add(twg);					
@@ -461,7 +463,7 @@ public class TreeWitnessSet {
 					log.debug("TREE WITNESS {} COVERS THE QUERY",  tw);
 					IntersectionOfConceptSets subc = reasoner.getSubConcepts(tw.getRootAtoms());
 					if (!subc.isEmpty())
-						for (TreeWitnessGenerator twg : reasoner.getGenerators())
+						for (TreeWitnessGenerator twg : allTWgenerators)
 							if ((subc.get() == null) || twg.endPointEntailsAnyOf(subc.get())) {
 								log.debug("        ENDTYPE IS FINE: {} FOR {}",  subc, twg);
 								if (twg.endPointEntailsAnyOf(tw.getGeneratorSubConcepts())) {
@@ -484,7 +486,7 @@ public class TreeWitnessSet {
 				for (TreeWitnessGenerator twg : generators) 
 					subc.addAll(twg.getSubConcepts());
 				
-				for (TreeWitnessGenerator g : reasoner.getGenerators()) 
+				for (TreeWitnessGenerator g : allTWgenerators) 
 					if (g.endPointEntailsAnyOf(subc)) {
 						if (generators.add(g))
 							saturated = false;
