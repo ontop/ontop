@@ -61,21 +61,19 @@ public class Unifier {
 		for (Entry<VariableImpl,Term> entry : map.entrySet()) {
 			VariableImpl v = entry.getKey();
 			Term t = entry.getValue();
-			if (t.equals(s.getVariable())) { // ROMAN: no need in isEqual(t, s.getVariable())
-				if (isEqual(v, s.getTerm())) {
-					/*
-					 * The substitution for the current variable has become
-					 * trivial, e.g., x/x with the current composition. We
-					 * remove it to keep only a non-trivial unifier
-					 */
+			if (s.getVariable().equals(t)) { // ROMAN: no need in isEqual(t, s.getVariable())
+				if (v.equals(s.getTerm())) {  // ROMAN: no need in isEqual(v, s.getTerm())
+					// The substitution for the current variable has become
+					// trivial, e.g., x/x with the current composition. We
+					// remove it to keep only a non-trivial unifier
 					forRemoval.add(v);
-				} else {
+				} else 
 					map.put(v, s.getTerm());
-				}
-			} else if (t instanceof FunctionalTermImpl) {
-				FunctionalTermImpl function = (FunctionalTermImpl) t;
-				List<Term> innerTerms = function.getTerms();
-				FunctionalTermImpl fclone = function.clone();
+				
+			} 
+			else if (t instanceof FunctionalTermImpl) {
+				FunctionalTermImpl fclone = (FunctionalTermImpl)t.clone();
+				List<Term> innerTerms = fclone.getTerms();
 				boolean innerchanges = false;
 				// TODO this ways of changing inner terms in functions is not
 				// optimal, modify
@@ -83,7 +81,7 @@ public class Unifier {
 				for (int i = 0; i < innerTerms.size(); i++) {
 					Term innerTerm = innerTerms.get(i);
 
-					if (isEqual(innerTerm, s.getVariable())) {
+					if (s.getVariable().equals(innerTerm)) { // ROMAN: no need in isEqual(innerTerm, s.getVariable())
 						fclone.getTerms().set(i, s.getTerm());
 						innerchanges = true;
 					}
@@ -98,10 +96,9 @@ public class Unifier {
 	
 	
 	/***
-	 * Computes the substitution that makes two terms equal. Note, two terms of
-	 * class ObjectVariableImpl (is this outdated?) are not supported. This would require the
-	 * analysis of the terms in each of these, this operation is not supported
-	 * at the moment.
+	 * Computes the substitution that makes two terms equal. 
+	 * 
+	 * ROMAN: careful -- does not appear to work correctly with AnonymousVariables
 	 * 
 	 * @param term1
 	 * @param term2
@@ -109,16 +106,25 @@ public class Unifier {
 	 */
 	public static Substitution getSubstitution(Term term1, Term term2) {
 
-		if (!(term1 instanceof VariableImpl)
-				&& !(term2 instanceof VariableImpl)) {
-			/*
-			 * none is a variable, impossible to unify unless the two terms are
-			 * equal, in which case there the substitution is empty
-			 */
-			if (isEqual(term1, term2))
+		if (!(term1 instanceof VariableImpl) && !(term2 instanceof VariableImpl)) {
+			
+			// neither is a variable, impossible to unify unless the two terms are
+			// equal, in which case there the substitution is empty
+			if ((term1 instanceof AnonymousVariable) || (term2 instanceof AnonymousVariable)) {
+				// this is questionable -- consider R(_,_) and R(c,c)
 				return new NeutralSubstitution();
-			else
-				return null;
+			}
+			
+			if ((term1 instanceof VariableImpl) || (term1 instanceof FunctionalTermImpl) 
+					|| (term1 instanceof ValueConstantImpl) || (term1 instanceof URIConstantImpl)) {
+				if (term1.equals(term2))
+					return new NeutralSubstitution();
+				else
+					return null;
+			} 
+			throw new RuntimeException("Exception comparing two terms, unknown term class. Terms: "
+								+ term1 + ", " + term2 + " Classes: " + term1.getClass()
+								+ ", " + term2.getClass());
 		}
 
 		// arranging the terms so that the first is always a variable 
@@ -138,7 +144,7 @@ public class Unifier {
 			return new NeutralSubstitution();
 		}
 		else if (t2 instanceof VariableImpl) {
-			if (t1.equals(t2))   // ROMAN: no neede in isEqual(t1, t2) -- both are proper variables
+			if (t1.equals(t2))   // ROMAN: no need in isEqual(t1, t2) -- both are proper variables
 				return new NeutralSubstitution();
 			else 
 				return new Substitution(t1, t2);
@@ -167,11 +173,13 @@ public class Unifier {
 	 * UndistinguishedVariable instances).
 	 * 
 	 * ROMAN: I do not quite understand this method (in particular, lots of type casts)
+	 *        all uses remove and commented out (some code adapted and moved to getSubstitution)
 	 * 
 	 * @param t1
 	 * @param t2
 	 * @return
 	 */
+/*	
 	private static boolean isEqual(Term t1, Term t2) {
 		if (t1 == null || t2 == null)
 			return false;
@@ -200,7 +208,7 @@ public class Unifier {
 			URIConstantImpl ct1 = (URIConstantImpl) t1;
 			URIConstantImpl ct2 = (URIConstantImpl) t2;
 			return ct1.equals(ct2);
-		} else if (t1 instanceof AlgebraOperatorPredicateImpl) {
+		} else if (t1 instanceof AlgebraOperatorPredicateImpl) { // ROMAN: this is not even a term!
 			AlgebraOperatorPredicateImpl ct1 = (AlgebraOperatorPredicateImpl) t1;
 			AlgebraOperatorPredicateImpl ct2 = (AlgebraOperatorPredicateImpl) t2;
 			return ct1.equals(ct2);
@@ -211,6 +219,6 @@ public class Unifier {
 							+ ", " + t2.getClass());
 		}
 	}
-	
+*/	
 	
 }
