@@ -37,6 +37,7 @@ import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
@@ -199,8 +200,8 @@ public class TMappingProcessor {
 
 
 	/***
-	 * Given a set of mappings in {@link originalMappings}, this method will
-	 * return a new set of mappings in which no constants appear in the body of
+	 * Given a mappings in {@link currentMapping}, this method will
+	 * return a new mappings in which no constants appear in the body of
 	 * database predicates. This is done by replacing the constant occurrence
 	 * with a fresh variable, and adding a new equality condition to the body of
 	 * the mapping.
@@ -215,43 +216,34 @@ public class TMappingProcessor {
 	 * <p>
 	 * A(x) :- T(x,y,z), EQ(z,22)
 	 * 
-	 * @param originalMappings
-	 * @return A new DatalogProgram that has been normalized in the way
-	 *         described above.
+	 * @param currentMapping
+	 * @return a new CQ that has been normalized in the way described above.
 	 */
-	private static List<CQIE> normalizeConstants(List<CQIE> originalMappings) {
-		List<CQIE> newProgram = new LinkedList<CQIE>();
+	private static CQIE normalizeConstants(CQIE currentMapping) {
 		
-		for (CQIE currentMapping : originalMappings) {
-			int freshVarCount = 0;
-
-			Function head = (Function)currentMapping.getHead().clone();
-			List<Function> newBody = new LinkedList<Function>();
-			for (Function currentAtom : currentMapping.getBody()) {
-				if (!(currentAtom.getPredicate() instanceof BuiltinPredicate)) {
-					Function clone = (Function)currentAtom.clone();
-					for (int i = 0; i < clone.getTerms().size(); i++) {
-						Term term = clone.getTerm(i);
-						if (term instanceof Constant) {
-							/*
-							 * Found a constant, replacing with a fresh variable
-							 * and adding the new equality atom.
-							 */
-							freshVarCount += 1;
-							Variable freshVariable = fac.getVariable("?FreshVar" + freshVarCount);
-							newBody.add(fac.getFunctionEQ(freshVariable, term));
-							clone.setTerm(i, freshVariable);
-						}
+		int freshVarCount = 0;
+		List<Function> newBody = new LinkedList<Function>();
+		for (Function currentAtom : currentMapping.getBody()) {
+			if (!(currentAtom.getPredicate() instanceof BuiltinPredicate)) {
+				Function clone = (Function)currentAtom.clone();
+				for (int i = 0; i < clone.getTerms().size(); i++) {
+					Term term = clone.getTerm(i);
+					if (term instanceof Constant) {
+						// Found a constant, replacing with a fresh variable
+						// and adding the new equality atom.
+						freshVarCount++;
+						Variable freshVariable = fac.getVariable("?FreshVar" + freshVarCount);
+						newBody.add(fac.getFunctionEQ(freshVariable, term));
+						clone.setTerm(i, freshVariable);
 					}
-					newBody.add(clone);
-				} else {
-					newBody.add((Function)currentAtom.clone());
 				}
+				newBody.add(clone);
+			} else {
+				newBody.add((Function)currentAtom.clone());
 			}
-			CQIE normalizedMapping = fac.getCQIE(head, newBody);
-			newProgram.add(normalizedMapping);
 		}
-		return newProgram;
+		Function head = (Function)currentMapping.getHead().clone();		
+		return fac.getCQIE(head, newBody);
 	}
 
 	/**
@@ -278,15 +270,9 @@ public class TMappingProcessor {
 
 	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full) {
 
-		/*
-		 * Normalizing constants
-		 */
-		originalMappings = normalizeConstants(originalMappings);
-		
 		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(); // no dependencies used at the moment
 											   // TODO: use foreign keys here
-		
-		
+			
 		Map<Predicate, TMappingIndexEntry> mappingIndex = new HashMap<Predicate, TMappingIndexEntry>();
 
 		/***
@@ -296,8 +282,11 @@ public class TMappingProcessor {
 		 */
 		
 		for (CQIE mapping : originalMappings) {
-			TMappingIndexEntry set = getMappings(mappingIndex, mapping.getHead().getFunctionSymbol());
-			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc);
+			
+			CQIE mapping1 = normalizeConstants(mapping);
+						
+			TMappingIndexEntry set = getMappings(mappingIndex, mapping1.getHead().getFunctionSymbol());
+			TMappingRule rule = new TMappingRule(mapping1.getHead(), mapping1.getBody(), cqc);
 			set.mergeMappingsWithCQC(rule);
 		}
 		
@@ -486,7 +475,7 @@ public class TMappingProcessor {
 		for (Predicate key : mappingIndex.keySet()) {
 			for (TMappingRule mapping : mappingIndex.get(key)) {
 				CQIE cq = mapping.asCQIE();
-				DatalogNormalizer.enforceEqualities(cq);
+				EQNormalizer.enforceEqualities(cq);
 				tmappingsProgram.add(cq);
 			}
 		}

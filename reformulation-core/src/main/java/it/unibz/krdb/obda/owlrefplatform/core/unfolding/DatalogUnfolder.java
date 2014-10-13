@@ -34,6 +34,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
@@ -286,7 +287,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			workingSet.add(QueryAnonymizer.deAnonymize(query));
 				
 		for (CQIE query : workingSet)
-			DatalogNormalizer.enforceEqualities(query);
+			EQNormalizer.enforceEqualities(query);
 
 		computePartialEvaluation(workingSet);	
 		
@@ -296,7 +297,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * 
 		 */
 		for (CQIE query : workingSet)
-			DatalogNormalizer.enforceEqualities(query);
+			EQNormalizer.enforceEqualities(query);
 
 		DatalogProgram result = termFactory.getDatalogProgram();
 		QueryUtils.copyQueryModifiers(inputquery, result);

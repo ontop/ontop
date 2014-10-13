@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SyntacticCQC;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
@@ -130,7 +131,7 @@ public class DatalogQueryServices {
 						UnifierUtilities.applyUnifier(newquery, mgu, false);
 						
 						// REDUCE
-						DatalogNormalizer.enforceEqualities(newquery);
+						EQNormalizer.enforceEqualities(newquery);
 						//makeSingleOccurrencesAnonymous(q.getBody(), q.getHead().getTerms());
 						newquery = QueryAnonymizer.anonymize(newquery); // TODO: make it in place
 						SyntacticCQC.removeRundantAtoms(newquery);
