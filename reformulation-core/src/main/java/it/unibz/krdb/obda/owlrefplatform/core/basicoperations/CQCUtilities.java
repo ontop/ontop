@@ -103,56 +103,39 @@ public class CQCUtilities {
 	 * @param program
 	 * @param rules
 	 */
-	public static void optimizeQueryWithSigmaRules(DatalogProgram program, LinearInclusionDependencies sigma) {
-		
-		List<CQIE> result = new LinkedList<CQIE>();
-		
-		// for each rule in the query
-		for (CQIE query : program.getRules()) {
-			
-			// get query head, body
-			Function queryHead = query.getHead();
-			List<Function> queryBody = query.getBody();
-			// for each atom in query body
-			for (int i = 0; i < queryBody.size(); i++) {
-				Set<Function> atomsToRemove = new HashSet<Function>();
-				Function atomQuery = queryBody.get(i);
+	public static void optimizeQueryWithSigmaRules(List<Function> atoms, LinearInclusionDependencies sigma) {
+				
+		// for each atom in query body
+		for (int i = 0; i < atoms.size(); i++) {
+			Function atom = atoms.get(i);
 
-				// for each tbox rule
-				for (CQIE rule : sigma.getRules(atomQuery.getFunctionSymbol())) {
-					// try to unify current query body atom with tbox rule body atom
-					// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule				
-					Function ruleBody = rule.getBody().get(0);
-					Unifier theta = Unifier.getMGU(ruleBody, atomQuery);
-					if (theta == null || theta.isEmpty()) {
-						continue;
-					}
-					// if unifiable, apply to head of tbox rule
-					Function ruleHead = rule.getHead();
-					Function copyRuleHead = (Function) ruleHead.clone();
-					UnifierUtilities.applyUnifier(copyRuleHead, theta);
-
-					atomsToRemove.add(copyRuleHead);
+			Set<Function> derivedAtoms = new HashSet<Function>();
+			// collect all derived atoms
+			for (CQIE rule : sigma.getRules(atom.getFunctionSymbol())) {
+				// try to unify current query body atom with tbox rule body atom
+				// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule				
+				Function ruleBody = rule.getBody().get(0);
+				Unifier theta = Unifier.getMGU(ruleBody, atom);
+				if (theta == null || theta.isEmpty()) {
+					continue;
 				}
+				// if unifiable, apply to head of tbox rule
+				Function copyRuleHead = (Function) rule.getHead().clone();
+				UnifierUtilities.applyUnifier(copyRuleHead, theta);
 
-				for (int j = 0; j < queryBody.size(); j++) {
-					if (j == i) {
-						continue;
-					}
-					Function current = queryBody.get(j);
-					if (atomsToRemove.contains(current)) {
-						queryBody.remove(j);
-						j -= 1;
-						if (j < i) {
-							i -= 1;
-						}
-					}
-				}
+				derivedAtoms.add(copyRuleHead);
 			}
-			result.add(fac.getCQIE(queryHead, queryBody));
+
+			Iterator<Function> iterator = atoms.iterator();
+			while (iterator.hasNext()) {
+				Function current = iterator.next();
+				if (current == atom)   // if they are not the SAME element
+					continue;
+				
+				if (derivedAtoms.contains(current)) 
+					iterator.remove();
+			}
 		}
-		program.removeAllRules();
-		program.appendRule(result);
 	}
 	
 	

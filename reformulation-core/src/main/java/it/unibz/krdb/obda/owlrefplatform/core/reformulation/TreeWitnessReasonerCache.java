@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
  */
 
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassDescription;
@@ -122,22 +121,20 @@ public class TreeWitnessReasonerCache {
 		return reasoner.getClasses().getSubRepresentatives(con);
 	}
 
-	public Set<BasicClassDescription> getSubConcepts(Predicate pred) {
-		Set<BasicClassDescription> s = predicateSubconcepts.get(pred);
-		if (s == null) {
-			s = getSubConcepts(ontFactory.createClass(pred));
-			predicateSubconcepts.put(pred, s);
-		}
-		return s;
-	}
-
 	public IntersectionOfConceptSets getSubConcepts(Collection<Function> atoms) {
 		IntersectionOfConceptSets subc = new IntersectionOfConceptSets();
 		for (Function a : atoms) {
 			 if (a.getArity() != 1)
 				 return IntersectionOfConceptSets.EMPTY;   // binary predicates R(x,x) cannot be matched to the anonymous part
 
-			 if (!subc.intersect(getSubConcepts(a.getFunctionSymbol())))
+			 Predicate pred = a.getFunctionSymbol();
+			 Set<BasicClassDescription> s = predicateSubconcepts.get(pred);
+			 if (s == null) {
+				 s = reasoner.getClasses().getSubRepresentatives(ontFactory.createClass(pred));
+				predicateSubconcepts.put(pred, s);
+			 }
+			 
+			 if (!subc.intersect(s))
 				 return IntersectionOfConceptSets.EMPTY;
 		}
 		return subc;
@@ -161,40 +158,6 @@ public class TreeWitnessReasonerCache {
 		return s;
 	}
 	
-	public boolean isMoreSpecific(Function a1, Function a2) {
-		if (a1 == a2 || a1.equals(a2))
-			return true;
-
-		if ((a2.getArity() == 1) && (a1.getArity() == 1)) {
-			if (a1.getTerm(0).equals(a2.getTerm(0))) {
-				Set<BasicClassDescription> subconcepts = getSubConcepts(a2.getFunctionSymbol());
-				if (subconcepts.contains(ontFactory.createClass(a1.getFunctionSymbol()))) {
-					log.debug("{} IS MORE SPECIFIC (1-1) THAN {}", a1, a2);
-					return true;
-				}
-			}
-		}
-		else if ((a1.getArity() == 2) && (a2.getArity() == 1)) { // MOST USEFUL
-			Term a2term = a2.getTerm(0);
-			if (a1.getTerm(0).equals(a2term)) {
-				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a1.getFunctionSymbol(), false);
-				if (getSubConcepts(a2.getFunctionSymbol()).contains(prop)) {
-					log.debug("{} IS MORE SPECIFIC (2-1) THAN ", a1, a2);
-					return true;
-				}
-			}
-			if (a1.getTerm(1).equals(a2term)) {
-				PropertySomeRestriction prop = ontFactory.getPropertySomeRestriction(a1.getFunctionSymbol(), true);
-				if (getSubConcepts(a2.getFunctionSymbol()).contains(prop)) {
-					log.debug("{} IS MORE SPECIFIC (2-1) THAN {}", a1, a2);
-					return true;
-				}
-			}
-		}
-		// TODO: implement the (2-2) check
-		
-		return false;
-	}
 	
 	
 	/**

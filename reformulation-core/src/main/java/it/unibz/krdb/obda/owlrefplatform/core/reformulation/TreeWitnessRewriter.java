@@ -80,17 +80,13 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	}
 	
 	
-	public static String getIRI(String base, String suffix) {
-		return base + suffix;
-	}
-
 	
 	/*
 	 * returns an atom with given arguments and the predicate name formed by the given URI basis and string fragment
 	 */
 	
 	private static Function getHeadAtom(String base, String suffix, List<Term> arguments) {
-		Predicate predicate = fac.getPredicate(getIRI(base, suffix), arguments.size(), null);
+		Predicate predicate = fac.getPredicate(base + suffix, arguments.size(), null);
 		return fac.getFunction(predicate, arguments);
 	}
 	
@@ -141,13 +137,13 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		// COMPUTE AND STORE TREE WITNESS FORMULAS
 		for (TreeWitness tw : tws.getTWs()) {
 			log.debug("TREE WITNESS: {}", tw);		
-			MinimalCQProducer twf = new MinimalCQProducer(reasonerCache); 
+			List<Function> twf = new LinkedList<Function>(); 
 			
 			// equality atoms
 			Iterator<Term> i = tw.getRoots().iterator();
 			Term r0 = i.next();
 			while (i.hasNext()) 
-				twf.addNoCheck(fac.getFunctionEQ(i.next(), r0));
+				twf.add(fac.getFunctionEQ(i.next(), r0));
 			
 			// root atoms
 			for (Function a : tw.getRootAtoms()) {
@@ -157,23 +153,23 @@ public class TreeWitnessRewriter implements QueryRewriter {
 			
 			List<Function> genAtoms = getAtomsForGenerators(tw.getGenerators(), r0);			
 			boolean subsumes = false;
-			for (Function a : genAtoms) 				
-				if (twf.subsumes(a)) {
-					subsumes = true;
-					log.debug("TWF {} SUBSUMES {}", twf.getAllAtoms(), a);
-					break;
-				}
+//			for (Function a : genAtoms) 				
+//				if (twf.subsumes(a)) {
+//					subsumes = true;
+//					log.debug("TWF {} SUBSUMES {}", twf.getAllAtoms(), a);
+//					break;
+//				}
 
 			List<List<Function>> twfs = new ArrayList<List<Function>>(subsumes ? 1 : genAtoms.size());			
-			if (!subsumes) {
+//			if (!subsumes) {
 				for (Function a : genAtoms) {				
-					MinimalCQProducer twfa = new MinimalCQProducer(twf);
+					LinkedList<Function> twfa = new LinkedList<Function>(twf);
 					twfa.add(a); // 
-					twfs.add(twfa.getAllAtoms());
+					twfs.add(twfa);
 				}
-			}
-			else
-				twfs.add(twf.getAllAtoms());
+//			}
+//			else
+//				twfs.add(twf.getAllAtoms());
 			
 			tw.setFormula(twfs);
 		}
@@ -186,7 +182,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 				while (iterator.hasNext()) {
 					Collection<TreeWitness> compatibleTWs = iterator.next();
 					log.debug("COMPATIBLE: {}", compatibleTWs);
-					MinimalCQProducer mainbody = new MinimalCQProducer(reasonerCache); 
+					LinkedList<Function> mainbody = new LinkedList<Function>(); 
 					
 					for (Edge edge : cc.getEdges()) {
 						boolean contained = false;
@@ -203,18 +199,18 @@ public class TreeWitnessRewriter implements QueryRewriter {
 					}
 					for (TreeWitness tw : compatibleTWs) {
 						Function twAtom = getHeadAtom(headURI, "_TW_" + (edgeDP.getRules().size() + 1), cc.getVariables());
-						mainbody.addNoCheck(twAtom);				
+						mainbody.add(twAtom);				
 						for (List<Function> twfa : tw.getFormula())
 							edgeDP.appendRule(fac.getCQIE(twAtom, twfa));
 					}	
-					mainbody.addAllNoCheck(cc.getNonDLAtoms());					
-					outputRules.add(fac.getCQIE(headAtom, mainbody.getAllAtoms())); 
+					mainbody.addAll(cc.getNonDLAtoms());					
+					outputRules.add(fac.getCQIE(headAtom, mainbody)); 
 				}
 			}
 			else {
 				// no conflicting tree witnesses
 				// use polynomial tree witness rewriting by treating each edge independently 
-				MinimalCQProducer mainbody = new MinimalCQProducer(reasonerCache); 		
+				LinkedList<Function> mainbody = new LinkedList<Function>(); 		
 				for (Edge edge : cc.getEdges()) {
 					log.debug("EDGE {}", edge);
 					
@@ -225,11 +221,11 @@ public class TreeWitnessRewriter implements QueryRewriter {
 								//IRI atomURI = edge.getBAtoms().iterator().next().getPredicate().getName();
 								edgeAtom = getHeadAtom(headURI, 
 										"_EDGE_" + (edgeDP.getRules().size() + 1) /*+ "_" + atomURI.getRawFragment()*/, cc.getVariables());
-								mainbody.addNoCheck(edgeAtom);				
+								mainbody.add(edgeAtom);				
 								
-								MinimalCQProducer edgeAtoms = new MinimalCQProducer(reasonerCache); 
+								LinkedList<Function> edgeAtoms = new LinkedList<Function>(); 
 								edgeAtoms.addAll(edge.getAtoms());
-								edgeDP.appendRule(fac.getCQIE(edgeAtom, edgeAtoms.getAllAtoms()));													
+								edgeDP.appendRule(fac.getCQIE(edgeAtom, edgeAtoms));													
 							}
 							
 							for (List<Function> twfa : tw.getFormula())
@@ -239,19 +235,19 @@ public class TreeWitnessRewriter implements QueryRewriter {
 					if (edgeAtom == null) // no tree witnesses -- direct insertion into the main body
 						mainbody.addAll(edge.getAtoms());
 				}
-				mainbody.addAllNoCheck(cc.getNonDLAtoms());
-				outputRules.add(fac.getCQIE(headAtom, mainbody.getAllAtoms())); 
+				mainbody.addAll(cc.getNonDLAtoms());
+				outputRules.add(fac.getCQIE(headAtom, mainbody)); 
 			}
 		}
 		else {
 			// degenerate connected component
-			MinimalCQProducer loopbody = new MinimalCQProducer(reasonerCache);
+			LinkedList<Function> loopbody = new LinkedList<Function>();
 			Loop loop = cc.getLoop();
 			log.debug("LOOP {}", loop);
 			if (loop != null)
 				loopbody.addAll(loop.getAtoms());
-			loopbody.addAllNoCheck(cc.getNonDLAtoms());
-			outputRules.add(fac.getCQIE(headAtom, loopbody.getAllAtoms())); 
+			loopbody.addAll(cc.getNonDLAtoms());
+			outputRules.add(fac.getCQIE(headAtom, loopbody)); 
 		}
 		return outputRules;
 	}

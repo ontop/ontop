@@ -687,9 +687,11 @@ public class QuestStatement implements OBDAStatement {
 				final long startTime0 = System.currentTimeMillis();
 				
 				// Query optimization w.r.t Sigma rules
-				CQCUtilities.optimizeQueryWithSigmaRules(program, questInstance.getDataDependencies());
+				for (CQIE cq : program.getRules())
+					CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), questInstance.getDataDependencies());
 				programAfterRewriting = questInstance.getRewriter().rewrite(program);
-				CQCUtilities.optimizeQueryWithSigmaRules(programAfterRewriting, questInstance.getDataDependencies());
+				for (CQIE cq : program.getRules())
+					CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), questInstance.getDataDependencies());
 				
 				rewritingTime = System.currentTimeMillis() - startTime0;
 
