@@ -178,7 +178,7 @@ public class TMappingProcessor {
 					CQIE newmapping = currentRule.getStripped();
 					Unifier mgu = null;
 					if (newmapping.getBody().size() == 1) {
-						mgu = UnifierUtilities.getMGU(newmapping.getBody().get(0), newRule.getStripped().getBody().get(0));
+						mgu = Unifier.getMGU(newmapping.getBody().get(0), newRule.getStripped().getBody().get(0));
 					}			
 					
 					Function orAtom = fac.getFunctionOR(existingconditions, newconditions);

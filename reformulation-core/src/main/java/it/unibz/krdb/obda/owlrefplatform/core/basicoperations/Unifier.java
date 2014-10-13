@@ -1,8 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.AlgebraOperatorPredicateImpl;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.URIConstantImpl;
@@ -24,38 +23,132 @@ public class Unifier {
 	public Term get(VariableImpl var) {
 		return map.get(var);
 	}
-
-	public Term getRaw(Term var) {
-		return map.get(var);
-	}
 	
 	public boolean isEmpty() {
 		return map.isEmpty();
 	}
 	
+	@Deprecated
 	public void put(VariableImpl var, Term term) {
 		map.put(var, term);
 	}
 	
+	@Deprecated
 	public Set<VariableImpl> keySet() {
 		return map.keySet();
 	}
+
+	
 	
 	/***
-	 * This will compose the unifier with the substitution. Note that the unifier
-	 * will be modified in this process.
+	 * Computes the Most General Unifier (MGU) for two n-ary atoms. 
+	 * 
+	 * IMPORTANT: Function terms are supported as long as they are not nested.
+	 * 
+	 * @param first
+	 * @param second
+	 * @return
+	 */
+	public static Unifier getMGU(Function first, Function second) {
+
+		// Basic case: if predicates are different or their arity is different,
+		// then no unifier
+		if ((first.getArity() != second.getArity() 
+				|| !first.getFunctionSymbol().equals(second.getFunctionSymbol()))) {
+			return null;
+		}
+
+		Function firstAtom = (Function) first.clone();
+		Function secondAtom = (Function) second.clone();
+
+		int arity = first.getArity();
+		Unifier mgu = new Unifier();
+
+		// Computing the disagreement set
+		for (int termidx = 0; termidx < arity; termidx++) {
+			
+			// Checking if there are already substitutions calculated for the
+			// current terms. If there are any, then we have to take the
+			// substituted terms instead of the original ones.
+
+			Term term1 = firstAtom.getTerm(termidx);
+			Term currentTerm1 = mgu.map.get(term1);
+			if (currentTerm1 != null)
+				term1 = currentTerm1;
+
+			Term term2 = secondAtom.getTerm(termidx);
+			Term currentTerm2 = mgu.map.get(term2);
+			if (currentTerm2 != null)
+				term2 = currentTerm2;
+
+			
+			// We have two cases, unifying 'simple' terms, and unifying function terms. 
+			if (!(term1 instanceof Function) || !(term2 instanceof Function)) {
+				
+				if (!mgu.compose(term1, term2))
+					return null;
+			}
+			else {
+				
+				// if both of them are function terms then we need to do some
+				// check in the inner terms
+								
+				Function fterm1 = (Function) term1;
+				Function fterm2 = (Function) term2;
+
+                if ((fterm1.getTerms().size() != fterm2.getTerms().size()) || 
+                			!fterm1.getFunctionSymbol().equals(fterm2.getFunctionSymbol())) {
+                   return null;
+                }
+
+				int innerarity = fterm1.getTerms().size();
+				for (int innertermidx = 0; innertermidx < innerarity; innertermidx++) {
+
+					Term innerterm1 = fterm1.getTerm(innertermidx);
+					Term currentInnerTerm1 = mgu.map.get(innerterm1);
+					if (currentInnerTerm1 != null)
+						innerterm1 = currentInnerTerm1;
+
+					Term innerterm2 = fterm2.getTerm(innertermidx);
+					Term currentInnerTerm2 = mgu.map.get(innerterm2);
+					if (currentInnerTerm2 != null)
+						innerterm2 = currentInnerTerm2;
+
+					if (!mgu.compose(innerterm1, innerterm2)) 
+						return null;
+				}
+			} 
+			
+			// Applying the newly computed substitution to the 'replacement' of
+			// the existing substitutions
+			UnifierUtilities.applyUnifier(firstAtom, mgu, termidx + 1);
+			UnifierUtilities.applyUnifier(secondAtom, mgu, termidx + 1);
+		}
+		return mgu;
+	}
+	
+	
+	/***
+	 * This will compose the unifier with the substitution for term1 and term2. 
+	 * 
+	 * Note that the unifier will be modified in this process.
 	 * 
 	 * The operation is as follows
 	 * 
-	 * {x/y, m/y} composed with y/z is equal to {x/z, m/z, y/z}
+	 * {x/y, m/y} composed with (y,z) is equal to {x/z, m/z, y/z}
 	 * 
-	 * @param unifier The unifier that will be composed
-	 * @param s The substitution to compose
+	 * @param term1 
+	 * @param term2 
+	 * @return true if the substitution exists (false if it does not)
 	 */
-	public void compose(Substitution s) {
+	public boolean compose(Term term1, Term term2) {
+	
+		Substitution s = getSubstitution(term1, term2);
+		if (s == null)
+			return false;
 		
 		if (s instanceof NeutralSubstitution)
-			return;
+			return true;
 		
 		List<VariableImpl> forRemoval = new LinkedList<VariableImpl>();
 		for (Entry<VariableImpl,Term> entry : map.entrySet()) {
@@ -92,6 +185,7 @@ public class Unifier {
 		}
 		map.keySet().removeAll(forRemoval);
 		map.put(s.getVariable(), s.getTerm());
+		return true;
 	}
 	
 	
@@ -104,7 +198,7 @@ public class Unifier {
 	 * @param term2
 	 * @return
 	 */
-	public static Substitution getSubstitution(Term term1, Term term2) {
+	private static Substitution getSubstitution(Term term1, Term term2) {
 
 		if (!(term1 instanceof VariableImpl) && !(term2 instanceof VariableImpl)) {
 			
@@ -117,6 +211,9 @@ public class Unifier {
 			
 			if ((term1 instanceof VariableImpl) || (term1 instanceof FunctionalTermImpl) 
 					|| (term1 instanceof ValueConstantImpl) || (term1 instanceof URIConstantImpl)) {
+				
+				// ROMAN: why is BNodeConstantImpl not mentioned?
+				
 				if (term1.equals(term2))
 					return new NeutralSubstitution();
 				else

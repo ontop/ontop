@@ -1461,7 +1461,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			/* getting a rule with unique variables */
 			CQIE freshRule = getFreshRule(candidateRule, resolutionCount[0]);
 
-			Unifier mgu = UnifierUtilities.getMGU(freshRule.getHead(), focusAtom);
+			Unifier mgu = Unifier.getMGU(freshRule.getHead(), focusAtom);
 
 			if (mgu == null) {
 				/* Failed attempt */
@@ -1720,7 +1720,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 				if (redundant) {
 					/* found a candidate replacement atom */
-					mgu1 = UnifierUtilities.getMGU(newatom, tempatom);
+					mgu1 = Unifier.getMGU(newatom, tempatom);
 					if (mgu1 != null) {
 						replacement = tempatom;
 						break;

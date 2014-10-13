@@ -93,11 +93,10 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			List<Function> atoms = generator.getAtoms(atomsstr);
 			List<Substitution> expectedmgu = generator.getMGU(mgustr);
 
-			UnifierUtilities unifier = new UnifierUtilities();
 			List<Substitution> computedmgu = new LinkedList<Substitution>();
 			Exception expectedException = null;
 
-			Unifier mgu = unifier.getMGU(atoms.get(0), atoms.get(1));
+			Unifier mgu = Unifier.getMGU(atoms.get(0), atoms.get(1));
 			if (mgu == null) {
 				computedmgu = null;
 			} else {

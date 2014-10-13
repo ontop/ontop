@@ -78,8 +78,7 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(t2);
 			Function atom2 = tfac.getFunction(pred2, terms2);
 
-			UnifierUtilities unifier = new UnifierUtilities();
-			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+			Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 			assertEquals(0, s.size());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -105,8 +104,7 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(t2);
 			Function atom2 = tfac.getFunction(pred2, terms2);
 
-			UnifierUtilities unifier = new UnifierUtilities();
-			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+			Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 			assertEquals(1, s.size());
 
 			Substitution s0 = s.get(0);
@@ -138,8 +136,7 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(t2);
 			Function atom2 = tfac.getFunction(pred2, terms2);
 
-			UnifierUtilities unifier = new UnifierUtilities();
-			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+			Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 			assertEquals(1, s.size());
 
 			Substitution s0 = s.get(0);
@@ -203,8 +200,7 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(t2);
 			Function atom2 = tfac.getFunction(pred2, terms2);
 
-			UnifierUtilities unifier = new UnifierUtilities();
-			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+			Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 			assertEquals(1, s.size());
 
 			Substitution s0 = s.get(0);
@@ -232,8 +228,7 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(t2);
 			Function atom2 = tfac.getFunction(pred2, terms2);
 
-			UnifierUtilities unifier = new UnifierUtilities();
-			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+			Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 			assertEquals(0, s.size());
 		
 	}
@@ -287,8 +282,7 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(t2);
 			Function atom2 = tfac.getFunction(pred2, terms2);
 
-			UnifierUtilities unifier = new UnifierUtilities();
-			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+			Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 			assertEquals(null, s);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -316,8 +310,7 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(ot);
 			Function atom2 = tfac.getFunction(pred2, terms2);
 
-			UnifierUtilities unifier = new UnifierUtilities();
-			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+			Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 			assertEquals(null, s);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -345,8 +338,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(t2);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -370,8 +362,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(t2);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(1, s.size());
 
 		Substitution sub = s.get(0);
@@ -409,8 +400,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -438,8 +428,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(0, s.size());
 	}
 
@@ -467,8 +456,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(1, s.size());
 
 		Substitution sub = s.get(0);
@@ -505,8 +493,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -534,8 +521,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(1, s.size());
 
 		Substitution sub = s.get(0);
@@ -572,8 +558,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -601,8 +586,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(null, s);
 
 	}
@@ -633,8 +617,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(null, s);
 
 	}
@@ -659,8 +642,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -684,8 +666,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(1, s.size());
 
 		Substitution sub = s.get(0);
@@ -723,8 +704,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot1);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -752,8 +732,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot1);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(1, s.size());
 
 		Substitution sub = s.get(0);
@@ -790,8 +769,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot1);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -819,8 +797,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot1);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(1, s.size());
 
 		Substitution sub = s.get(0);
@@ -857,8 +834,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot1);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(null, s);
 	}
 
@@ -886,8 +862,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot1);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(null, s);
 
 	}
@@ -918,8 +893,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot1);
 		Function atom2 = tfac.getFunction(pred2, terms2);
 
-		UnifierUtilities unifier = new UnifierUtilities();
-		Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+		Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 		assertEquals(null, s);
 
 	}
@@ -941,8 +915,7 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(t2);
 			Function atom2 = tfac.getFunction(pred2, terms2);
 
-			UnifierUtilities unifier = new UnifierUtilities();
-			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+			Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 			assertEquals(0, s.size());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -968,8 +941,7 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(t2);
 			Function atom2 = tfac.getFunction(pred2, terms2);
 
-			UnifierUtilities unifier = new UnifierUtilities();
-			Vector<Substitution> s = getMGUAsVector(unifier.getMGU(atom1, atom2));
+			Vector<Substitution> s = getMGUAsVector(Unifier.getMGU(atom1, atom2));
 			assertEquals(0, s.size());
 		} catch (Exception e) {
 			e.printStackTrace();

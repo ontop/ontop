@@ -23,7 +23,7 @@ public class SyntacticCQC {
 			Function currentAtom = result.getBody().get(i);
 			for (int j = i + 1; j < result.getBody().size(); j++) {
 				Function nextAtom = result.getBody().get(j);
-				Unifier map = UnifierUtilities.getMGU(currentAtom, nextAtom);
+				Unifier map = Unifier.getMGU(currentAtom, nextAtom);
 				if (map != null && map.isEmpty()) {
 					result = UnifierUtilities.unify(result, i, j);
 				}

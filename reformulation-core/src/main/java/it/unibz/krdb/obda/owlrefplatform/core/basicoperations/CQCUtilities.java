@@ -123,7 +123,7 @@ public class CQCUtilities {
 					// try to unify current query body atom with tbox rule body atom
 					// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule				
 					Function ruleBody = rule.getBody().get(0);
-					Unifier theta = UnifierUtilities.getMGU(ruleBody, atomQuery);
+					Unifier theta = Unifier.getMGU(ruleBody, atomQuery);
 					if (theta == null || theta.isEmpty()) {
 						continue;
 					}

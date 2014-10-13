@@ -62,7 +62,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 			derivedAtoms.add(fact);
 			for (CQIE rule : dependencies.getRules(fact.getFunctionSymbol())) {
 				Function ruleBody = rule.getBody().get(0);
-				Unifier theta = UnifierUtilities.getMGU(ruleBody, fact);
+				Unifier theta = Unifier.getMGU(ruleBody, fact);
 				// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule
 				if (theta != null && !theta.isEmpty()) {
 					Function ruleHead = rule.getHead();
@@ -181,7 +181,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 			
 			// ROMAN: fix for facts
 			if (bodysize == 0) {
-				if (UnifierUtilities.getMGU(head, query.getHead()) == null) 
+				if (Unifier.getMGU(head, query.getHead()) == null) 
 					return true;
 				return false;
 			}
@@ -213,7 +213,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 				boolean choiceMade = false;
 				CQIE newquery = null;
 				while (!factChoices.isEmpty()) {
-					Unifier mgu = UnifierUtilities.getMGU(currentAtom, factChoices.pop());
+					Unifier mgu = Unifier.getMGU(currentAtom, factChoices.pop());
 					if (mgu == null) {
 						// No way to use the current fact 
 						continue;
@@ -223,7 +223,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 					
 					// stopping early if we have chosen an MGU that has no
 					// possibility of being successful because of the head.				
-					if (UnifierUtilities.getMGU(head, newquery.getHead()) == null) {					
+					if (Unifier.getMGU(head, newquery.getHead()) == null) {					
 						// there is no chance to unify the two heads, hence this
 						// fact is not good.
 						continue;

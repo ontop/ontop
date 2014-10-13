@@ -117,7 +117,7 @@ public class DatalogQueryServices {
 				
 				for (CQIE rule : chosenDefinitions) {				
 					//CQIE newquery = ResolutionEngine.resolve(rule, query, chosenAtomIdx);					
-					Unifier mgu = UnifierUtilities.getMGU(getFreshAtom(rule.getHead(), suffix), 
+					Unifier mgu = Unifier.getMGU(getFreshAtom(rule.getHead(), suffix), 
 																	query.getBody().get(chosenAtomIdx));
 					if (mgu != null) {
 						CQIE newquery = query.clone();

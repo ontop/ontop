@@ -72,7 +72,7 @@ public class UnifierUtilities {
 	 */
 	public static CQIE unify(CQIE q, int i, int j) {
 
-		Unifier mgu = getMGU(q.getBody().get(i), q.getBody().get(j));
+		Unifier mgu = Unifier.getMGU(q.getBody().get(i), q.getBody().get(j));
 		if (mgu == null)
 			return null;
 
@@ -146,17 +146,19 @@ public class UnifierUtilities {
 	// */
 
 	public static void applyUnifier(Function atom, Unifier unifier) {
-		applyUnifier(atom.getTerms(), unifier,0);
+		applyUnifier(atom, unifier,0);
 	}
 
 	/***
 	 * Applies the substitution to all the terms in the list. Note that this
 	 * will not clone the list or the terms inside the list.
 	 * 
-	 * @param terms
+	 * @param atom
 	 * @param unifier
 	 */
-	public static void applyUnifier(List<Term> terms,  Unifier unifier, int fromIndex) {
+	public static void applyUnifier(Function atom, Unifier unifier, int fromIndex) {
+		
+		List<Term> terms = atom.getTerms();
 		
 		for (int i = fromIndex; i < terms.size(); i++) {
 			Term t = terms.get(i);
@@ -204,130 +206,6 @@ public class UnifierUtilities {
 		}
 	}
 
-	/***
-	 * Computes the Most General Unifier (MGU) for two n-ary atoms. Supports
-	 * atoms with terms: Variable, URIConstant, ValueLiteral, ObjectVariableImpl
-	 * If a term is an ObjectVariableImpl it can't have nested
-	 * ObjectVariableImpl terms.
-	 * 
-	 * @param first
-	 * @param second
-	 * @return
-	 */
-	public static Unifier getMGU(Function first,
-			Function second) {
-
-		/*
-		 * Basic case, predicates are different or their arity is different,
-		 * then no unifier
-		 */
-		Predicate predicate1 = first.getFunctionSymbol();
-		Predicate predicate2 = second.getFunctionSymbol();
-		if ((first.getArity() != second.getArity() || !predicate1
-				.equals(predicate2))) {
-			return null;
-
-		}
-
-		Function firstAtom = (Function) first.clone();
-		Function secondAtom = (Function) second.clone();
-
-		/* Computing the disagreement set */
-
-		int arity = predicate1.getArity();
-		List<Term> terms1 = firstAtom.getTerms();
-		List<Term> terms2 = secondAtom.getTerms();
-
-		Unifier mgu = new Unifier();
-
-		for (int termidx = 0; termidx < arity; termidx++) {
-
-			Term term1 = terms1.get(termidx);
-			Term term2 = terms2.get(termidx);
-
-			/*
-			 * Checking if there are already substitutions calculated for the
-			 * current terms. If there are any, then we have to take the
-			 * substitutted terms instead of the original ones.
-			 */
-			Term currentTerm1 = mgu.getRaw(term1);
-			Term currentTerm2 = mgu.getRaw(term2);
-
-			if (currentTerm1 != null)
-				term1 = currentTerm1;
-			if (currentTerm2 != null)
-				term2 = currentTerm2;
-
-			/*
-			 * We have two cases, unifying 'simple' terms, and unifying function
-			 * terms. If Function terms are supported as long as they are not
-			 * nested.
-			 */
-
-			if ((term1 instanceof Function) && (term2 instanceof Function)) {
-				/*
-				 * if both of them are a function term then we need to do some
-				 * check in the inner terms, else we can give it to the MGU
-				 * calculator directly
-				 */
-				Function fterm1 = (Function) term1;
-				Function fterm2 = (Function) term2;
-
-//                Predicate functionSymbol1 = fterm1.getFunctionSymbol();
- //               Predicate functionSymbol2 = fterm2.getFunctionSymbol();
-
-                if (!fterm1.getFunctionSymbol().equals( fterm2.getFunctionSymbol())) {
-                   return null;
-                }
-                if (fterm1.getTerms().size() != fterm2.getTerms().size()) {
-                   return null;
-                }
-
-				int innerarity = fterm1.getTerms().size();
-				List<Term> innerterms1 = fterm1.getTerms();
-				List<Term> innerterms2 = fterm2.getTerms();
-				for (int innertermidx = 0; innertermidx < innerarity; innertermidx++) {
-
-					Term innerterm1 = innerterms1.get(innertermidx);
-					Term innerterm2 = innerterms2.get(innertermidx);
-
-					Term currentInnerTerm1 = mgu.getRaw(innerterm1);
-					Term currentInnerTerm2 = mgu.getRaw(innerterm2);
-
-					if (currentInnerTerm1 != null)
-						innerterm1 = currentInnerTerm1;
-					if (currentInnerTerm2 != null)
-						innerterm2 = currentInnerTerm2;
-
-					Substitution s = Unifier.getSubstitution(innerterm1, innerterm2);
-					if (s == null) 
-						return null;
-
-					mgu.compose(s);
-				}
-
-			} else {
-				/*
-				 * the normal case
-				 */
-
-				Substitution s = Unifier.getSubstitution(term1, term2);
-				if (s == null) 
-					return null;
-
-				mgu.compose(s);
-			}
-
-			/*
-			 * Applying the newly computed substitution to the 'replacement' of
-			 * the existing substitutions
-			 */
-			applyUnifier(terms1, mgu, termidx + 1);
-			applyUnifier(terms2, mgu, termidx + 1);
-
-		}
-		return mgu;
-	}
 	
 	public static Unifier getNullifier(Collection<Variable> vars) {
 		Unifier unifier = new Unifier();
