@@ -50,14 +50,28 @@ public class SigmaTBoxOptimizer {
 
 	private Ontology optimizedTBox = null;
 
-	public SigmaTBoxOptimizer(TBoxReasoner isa, TBoxReasoner sigma) {		
+	public SigmaTBoxOptimizer(TBoxReasoner isa) {		
 		this.isa = isa;
 		
 		isaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)isa);
+	
+		TBoxReasonerImpl sigma = new TBoxReasonerImpl(TBoxReasonerToOntology.getOntology(isa, true));						
 		
-		sigmaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)sigma);
+		sigmaChain = TBoxReasonerImpl.getChainReasoner(sigma);
 	}
 
+	// USED IN ONE TEST (SemanticReductionTest, with the empty Sigma)
+	@Deprecated 
+	public SigmaTBoxOptimizer(TBoxReasoner isa, TBoxReasonerImpl s) {		
+		this.isa = isa;
+		
+		isaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)isa);
+
+		TBoxReasonerImpl sigma = new TBoxReasonerImpl(OntologyFactoryImpl.getInstance().createOntology());						
+		
+		sigmaChain = TBoxReasonerImpl.getChainReasoner(sigma);
+	}
+	
 	public Ontology getReducedOntology() {
 		if (optimizedTBox == null) {
 			optimizedTBox = fac.createOntology("http://it.unibz.krdb/obda/auxontology");

@@ -808,8 +808,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			 */
 			TBoxReasoner reasoner = reformulationReasoner;
 			if (bOptimizeTBoxSigma) {
-				TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(TBoxReasonerToOntology.getOntology(reformulationReasoner, true));						
-				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner, sigmaReasoner);
+				SigmaTBoxOptimizer reducer = new SigmaTBoxOptimizer(reformulationReasoner);
 				reasoner = new TBoxReasonerImpl(reducer.getReducedOntology());
 			} 
 
