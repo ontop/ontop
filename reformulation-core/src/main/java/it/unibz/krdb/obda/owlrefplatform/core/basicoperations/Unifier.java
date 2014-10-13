@@ -75,15 +75,9 @@ public class Unifier {
 			// substituted terms instead of the original ones.
 
 			Term term1 = firstAtom.getTerm(termidx);
-			Term currentTerm1 = mgu.map.get(term1);
-			if (currentTerm1 != null)
-				term1 = currentTerm1;
-
 			Term term2 = secondAtom.getTerm(termidx);
-			Term currentTerm2 = mgu.map.get(term2);
-			if (currentTerm2 != null)
-				term2 = currentTerm2;
 
+			boolean changed = false;
 			
 			// We have two cases, unifying 'simple' terms, and unifying function terms. 
 			if (!(term1 instanceof Function) || !(term2 instanceof Function)) {
@@ -91,6 +85,7 @@ public class Unifier {
 				if (!mgu.compose(term1, term2))
 					return null;
 				
+				changed = true;
 			}
 			else {
 				
@@ -108,25 +103,24 @@ public class Unifier {
 				int innerarity = fterm1.getTerms().size();
 				for (int innertermidx = 0; innertermidx < innerarity; innertermidx++) {
 
-					Term innerterm1 = fterm1.getTerm(innertermidx);
-					Term currentInnerTerm1 = mgu.map.get(innerterm1);
-					if (currentInnerTerm1 != null)
-						innerterm1 = currentInnerTerm1;
-
-					Term innerterm2 = fterm2.getTerm(innertermidx);
-					Term currentInnerTerm2 = mgu.map.get(innerterm2);
-					if (currentInnerTerm2 != null)
-						innerterm2 = currentInnerTerm2;
-
-					if (!mgu.compose(innerterm1, innerterm2)) 
+					if (!mgu.compose(fterm1.getTerm(innertermidx), fterm2.getTerm(innertermidx))) 
 						return null;
+					
+					changed = true;
+					
+					// Applying the newly computed substitution to the 'replacement' of
+					// the existing substitutions
+					UnifierUtilities.applyUnifier(fterm1, mgu, innertermidx + 1);
+					UnifierUtilities.applyUnifier(fterm2, mgu, innertermidx + 1);
 				}
 			} 
-			
-			// Applying the newly computed substitution to the 'replacement' of
-			// the existing substitutions
-			UnifierUtilities.applyUnifier(firstAtom, mgu, termidx + 1);
-			UnifierUtilities.applyUnifier(secondAtom, mgu, termidx + 1);
+			if (changed) {
+				
+				// Applying the newly computed substitution to the 'replacement' of
+				// the existing substitutions
+				UnifierUtilities.applyUnifier(firstAtom, mgu, termidx + 1);
+				UnifierUtilities.applyUnifier(secondAtom, mgu, termidx + 1);				
+			}
 		}
 		return mgu;
 	}
