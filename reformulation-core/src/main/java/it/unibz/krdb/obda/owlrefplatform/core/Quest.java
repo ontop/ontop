@@ -136,7 +136,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private LinearInclusionDependencies sigma;
 	
 	/* The merge and translation of all loaded ontologies */
-	private Ontology inputOntology;
+	private final Ontology inputOntology;
 
 	/* The input OBDA model */
 	private OBDAModel inputOBDAModel = null;

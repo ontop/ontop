@@ -141,6 +141,8 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 		return result; 
 	}
 	
+
+	
 	/** 
 	 * 
 	 */

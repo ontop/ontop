@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Intersection;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Collection;
@@ -76,12 +77,14 @@ public class TreeWitnessReasonerCache {
 	 */
 	
 
-	public IntersectionOfConceptSets getSubConcepts(Collection<Function> atoms) {
-		IntersectionOfConceptSets subc = new IntersectionOfConceptSets();
+	public Intersection<BasicClassDescription> getSubConcepts(Collection<Function> atoms) {
+		Intersection<BasicClassDescription> subc = new Intersection<BasicClassDescription>();
 		for (Function a : atoms) {
-			 if (a.getArity() != 1)
-				 return IntersectionOfConceptSets.EMPTY;   // binary predicates R(x,x) cannot be matched to the anonymous part
-
+			 if (a.getArity() != 1) {
+				 subc.setToBottom();   // binary predicates R(x,x) cannot be matched to the anonymous part
+				 break;
+			 }
+			 
 			 Predicate pred = a.getFunctionSymbol();
 			 Set<BasicClassDescription> s = predicateSubconcepts.get(pred);
 			 if (s == null) {
@@ -89,8 +92,9 @@ public class TreeWitnessReasonerCache {
 				predicateSubconcepts.put(pred, s);
 			 }
 			 
-			 if (!subc.intersect(s))
-				 return IntersectionOfConceptSets.EMPTY;
+			 subc.intersectWith(s);
+			 if (subc.isBottom())
+				 break;
 		}
 		return subc;
 	}
@@ -113,114 +117,4 @@ public class TreeWitnessReasonerCache {
 		return s;
 	}
 	
-	
-	
-	
-	
-	/**
-	 * computes intersections of sets of properties
-	 * 
-	 * internal representation: the downward-saturated set of properties (including all sub-properties)
-	 * 
-	 * @author roman
-	 *
-	 */
-	
-	public static class IntersectionOfProperties {
-		private Set<Property> set;
-		
-		public IntersectionOfProperties() {
-		}
-		
-		public IntersectionOfProperties(Set<Property> set2) {
-			set = (set2 == null) ? null : new HashSet<Property>(set2);
-		}
-		
-		public boolean intersect(Set<Property> subp) {
-			if (set == null) // first atom
-				set = new HashSet<Property>(subp);
-			else
-				set.retainAll(subp);
-			
-			if (set.isEmpty()) {
-				set = Collections.EMPTY_SET;
-				return false;
-			}
-			else
-				return true;
-		}
-		
-		public void clear() {
-			set = null;
-		}
-		
-		public Set<Property> get() {
-			return set;
-		}
-		
-		@Override
-		public String toString() {
-			return ((set == null) ? "properties TOP" : "properties " + set.toString());
-		}
-	}
-	
-	
-	
-	
-	public static class IntersectionOfConceptSets {
-		public static final IntersectionOfConceptSets EMPTY = new IntersectionOfConceptSets(Collections.EMPTY_SET);
-		
-		private Set<BasicClassDescription> set;
-		
-		public IntersectionOfConceptSets() {			
-		}
-
-		public IntersectionOfConceptSets(Set<BasicClassDescription> subc) {			
-			set = (subc == null) ?  null : (subc.isEmpty() ? Collections.EMPTY_SET : new HashSet<BasicClassDescription>(subc));
-		}
-
-		public IntersectionOfConceptSets(IntersectionOfConceptSets s2) {
-			this(s2.set);
-		}
-		
-		public boolean intersect(IntersectionOfConceptSets subc) {
-			// null denotes \top
-			if (subc.set == null) 
-				return !isEmpty();
-			
-			return intersect(subc.set);
-		}	
-
-		public boolean intersect(Set<BasicClassDescription> subc) {
-			// intersection with the empty set is empty
-			if (subc.isEmpty()) {
-				set = Collections.EMPTY_SET;
-				return false;
-			}
-
-			if (set == null) { // the intersection has not been initialised
-				set = new HashSet<BasicClassDescription>(subc);
-				return true;
-			}
-
-			set.retainAll(subc);
-			if (set.isEmpty()) {
-				set = Collections.EMPTY_SET;
-				return false;
-			}
-			return true;
-		}	
-		
-		public boolean isEmpty() {
-			return ((set != null) && set.isEmpty());
-		}
-		
-		public Set<BasicClassDescription> get() {
-			return set;
-		}
-		
-		public void clear() {
-			set = null;
-		}
-	}	
 }
