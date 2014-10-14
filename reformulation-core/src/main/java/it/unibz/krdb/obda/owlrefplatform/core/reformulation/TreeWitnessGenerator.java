@@ -28,6 +28,7 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Intersection;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Collection;
@@ -184,8 +185,18 @@ public class TreeWitnessGenerator {
 	public Property getProperty() {
 		return property;
 	}
-	
+
 	public boolean endPointEntailsAnyOf(Set<BasicClassDescription> subc) {
+		if (existsRinv == null)
+			existsRinv = ontFactory.createPropertySomeRestriction(property.getPredicate(), !property.isInverse());	
+		
+		return subc.contains(existsRinv) || subc.contains(filler);
+	}
+	
+	public boolean endPointEntailsAnyOf(Intersection<BasicClassDescription> subc) {
+		if (subc.isTop())
+			return true;
+		
 		if (existsRinv == null)
 			existsRinv = ontFactory.createPropertySomeRestriction(property.getPredicate(), !property.isInverse());	
 		

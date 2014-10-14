@@ -59,7 +59,6 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private TBoxReasoner reasoner;
-	private TreeWitnessReasonerCache reasonerCache;
 	private CQContainmentCheckUnderLIDs dataDependenciesCQC;
 	
 	private Collection<TreeWitnessGenerator> generators;
@@ -70,7 +69,6 @@ public class TreeWitnessRewriter implements QueryRewriter {
 
 		this.reasoner = reasoner;
 		
-		reasonerCache = new TreeWitnessReasonerCache(reasoner);
 		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma);
 		
 		generators = TreeWitnessGenerator.getTreeWitnessGenerators(reasoner);
@@ -133,7 +131,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		List<CQIE> outputRules = new LinkedList<CQIE>();	
 		String headURI = headAtom.getFunctionSymbol().getName();
 		
-		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasonerCache, generators);
+		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, generators);
 
 		if (cc.hasNoFreeTerms()) {  
 			for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), fac.getVariableNondistinguished())) {

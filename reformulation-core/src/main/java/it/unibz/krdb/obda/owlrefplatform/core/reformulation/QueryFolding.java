@@ -98,8 +98,7 @@ public class QueryFolding {
 	public boolean extend(Loop root, Edge edge, Loop internalRoot) {
 		assert(status);
 
-		Set<Property> props = propertiesCache.getEdgeProperties(edge, root.getTerm(), internalRoot.getTerm());
-		properties.intersectWith(props);
+		properties.intersectWith(propertiesCache.getEdgeProperties(edge, root.getTerm(), internalRoot.getTerm()));
 		
 		if (!properties.isBottom()) {
 			internalRootConcepts.intersectWith(propertiesCache.getLoopConcepts(internalRoot));
@@ -155,8 +154,8 @@ public class QueryFolding {
 		return internalRoots.contains(t0.getTerm()) && !internalDomain.contains(t1.getTerm()); // && !roots.contains(t1);
 	}
 	
-	public Set<BasicClassDescription> getInternalRootConcepts() {
-		return internalRootConcepts.get();
+	public Intersection<BasicClassDescription> getInternalRootConcepts() {
+		return internalRootConcepts;
 	}
 	
 	public Collection<TreeWitness> getInteriorTreeWitnesses() {
@@ -203,11 +202,11 @@ public class QueryFolding {
 		
 		log.debug("  ROOTTYPE {}", rootAtoms);
 
-		if (rootType.get() == null) // not empty 
+		if (!rootType.isBottom()) // not empty 
 			for (Loop root : roots) {
 				rootType.intersectWith(propertiesCache.getLoopConcepts(root));
-				if (!rootType.isBottom()) { // empty intersection -- not mergeable
-					log.debug("  NOT MERGEABLE: EMPTY ROOT CONCEPT");
+				if (rootType.isBottom()) { // empty intersection -- not mergeable
+					log.debug("  NOT MERGEABLE: BOTTOM ROOT CONCEPT");
 					break;
 				}
 			}

@@ -89,7 +89,7 @@ public class Intersection<T> {
 	}
 	
 	@Deprecated
-	public Set<T> get() {
+	public Set<T> get0() {
 		return elements;
 	}
 	
