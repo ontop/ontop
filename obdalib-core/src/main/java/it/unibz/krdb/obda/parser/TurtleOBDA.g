@@ -483,14 +483,28 @@ typedLiteral returns [Function value]
           functionSymbol = dfac.getDataTypePredicateLiteral();
       } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
           functionSymbol = dfac.getDataTypePredicateString();
-      } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI) || functionName.equals(OBDAVocabulary.XSD_INT_URI)) {
+      } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
           functionSymbol = dfac.getDataTypePredicateInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_INT_URI)) {
+      	  functionSymbol = dfac.getDataTypePredicateInt(); 
+      } else if  (functionName.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)){
+     	functionSymbol = dfac.getDataTypePredicatePositiveInteger(); 
+      } else if (functionName.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)){
+     	functionSymbol = dfac.getDataTypePredicateNegativeInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)){
+     	 functionSymbol = dfac.getDataTypePredicateNonNegativeInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)){
+    	 functionSymbol = dfac.getDataTypePredicateNonPositiveInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) {
+         functionSymbol = dfac.getDataTypePredicateUnsignedInt();             
       } else if (functionName.equals(OBDAVocabulary.XSD_LONG_URI)) {
           functionSymbol = dfac.getDataTypePredicateLong();
       } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
           functionSymbol = dfac.getDataTypePredicateDecimal();
       } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
           functionSymbol = dfac.getDataTypePredicateDouble();
+      } else if (functionName.equals(OBDAVocabulary.XSD_FLOAT_URI)) {
+          functionSymbol = dfac.getDataTypePredicateFloat();
       } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
           functionSymbol = dfac.getDataTypePredicateDateTime();
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
@@ -566,12 +580,26 @@ dataTypeString returns [Term value]
     	functionSymbol = dfac.getDataTypePredicateString();
       } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
      	functionSymbol = dfac.getDataTypePredicateInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_INT_URI)) {
+      	  functionSymbol = dfac.getDataTypePredicateInt(); 
+      } else if  (functionName.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)){
+     	functionSymbol = dfac.getDataTypePredicatePositiveInteger(); 
+      } else if (functionName.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)){
+     	functionSymbol = dfac.getDataTypePredicateNegativeInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)){
+     	 functionSymbol = dfac.getDataTypePredicateNonNegativeInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)){
+    	 functionSymbol = dfac.getDataTypePredicateNonPositiveInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) {
+         functionSymbol = dfac.getDataTypePredicateUnsignedInt();  
       } else if (functionName.equals(OBDAVocabulary.XSD_LONG_URI)) {
      	functionSymbol = dfac.getDataTypePredicateLong();
       } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
     	functionSymbol = dfac.getDataTypePredicateDecimal();
       } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
     	functionSymbol = dfac.getDataTypePredicateDouble();
+	} else if (functionName.equals(OBDAVocabulary.XSD_FLOAT_URI)) {
+          functionSymbol = dfac.getDataTypePredicateFloat();
       } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
     	functionSymbol = dfac.getDataTypePredicateDateTime();
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {

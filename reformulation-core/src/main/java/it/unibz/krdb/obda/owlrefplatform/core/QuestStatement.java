@@ -440,7 +440,7 @@ public class QuestStatement implements OBDAStatement {
 	 * (i.e., renaming atoms that use predicates that have been replaced by a
 	 * canonical one.
 	 * 
-	 * @param query
+
 	 * @return
 	 */
 //	private DatalogProgram translateAndPreProcess(Query query, List<String> signature) throws OBDAException {
@@ -680,8 +680,6 @@ public class QuestStatement implements OBDAStatement {
 	 * If the queyr is not already cached, it will be cached in this process.
 	 * 
 	 * @param strquery
-	 * @param signatureContainer
-	 * @param jenaQueryContainer
 	 * @return
 	 * @throws Exception
 	 */
@@ -794,7 +792,7 @@ public class QuestStatement implements OBDAStatement {
 	/**
 	 * 
 	 * @param program
-	 * @param rules
+	 * @param rulesIndex
 	 */
 	private void optimizeQueryWithSigmaRules(DatalogProgram program, Map<Predicate, List<CQIE>> rulesIndex) {
 		List<CQIE> unionOfQueries = new LinkedList<CQIE>(program.getRules());
@@ -1008,7 +1006,7 @@ public class QuestStatement implements OBDAStatement {
 	 * Inserts a stream of ABox assertions into the repository.
 	 * 
 	 * @param data
-	 * @param recreateIndexes
+
 	 *            Indicates if indexes (if any) should be dropped before
 	 *            inserting the tuples and recreated afterwards. Note, if no
 	 *            index existed before the insert no drop will be done and no

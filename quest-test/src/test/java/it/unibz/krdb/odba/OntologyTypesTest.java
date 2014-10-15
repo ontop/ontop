@@ -153,29 +153,29 @@ public class OntologyTypesTest{
 				"select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
 		runTests(p, query1, 0);
-
-        //no value in the mapping
+//
+//        //no value in the mapping
         //xsd:long in the ontology
         String query1b = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
 
         runTests(p, query1b, 3);
-		
-		//no value in the mapping 
+
+		//no value in the mapping
 		//xsd:string in the ontology
 		String query2 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :assayName ?y. FILTER(datatype(?y) = xsd:string)}";
 
 		runTests(p, query2, 3);
-		
-		//no value in the ontology 
+
+		//no value in the ontology
 		//rdfs:Literal in the mapping
 		String query3 = "PREFIX : <http://www.company.com/ARES#>" +
 				"select * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
 
 		runTests(p, query3, 3);
-		
-		//no value in the ontology 
+
+		//no value in the ontology
 		//no value in the mapping
 		//value in the oracle database is decimal
 		String query4 = "PREFIX : <http://www.company.com/ARES#>" +
@@ -190,6 +190,14 @@ public class OntologyTypesTest{
                 "select * {?x  franz:solrDocid ?y. FILTER(datatype(?y) = xsd:long)}";
 
         runTests(p, query5, 3);
+
+        // no value in the ontology
+        //value in the mapping is xsd:positiveInteger
+
+        String query6 = "PREFIX : <http://www.company.com/ARES#>" +
+                "select * {?x :hasSection ?y. FILTER(datatype(?y) = xsd:positiveInteger)}";
+
+        runTests(p, query6, 3);
 
 		
 	}

@@ -699,8 +699,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 			Predicate p = f.getFunctionSymbol();
 			if (p.toString() == OBDAVocabulary.XSD_BOOLEAN_URI) return Types.BOOLEAN;
 			if (p.toString() == OBDAVocabulary.XSD_INT_URI)  return Types.INTEGER;
-			if (p.toString() == OBDAVocabulary.XSD_INTEGER_URI)  return Types.INTEGER;
+			if (p.toString() == OBDAVocabulary.XSD_INTEGER_URI)  return Types.BIGINT;
             if (p.toString() == OBDAVocabulary.XSD_LONG_URI)  return Types.BIGINT;
+            if (p.toString() == OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)  return Types.BIGINT;
+            if (p.toString() == OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)  return Types.BIGINT;
+            if (p.toString() == OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)  return Types.BIGINT;
+            if (p.toString() == OBDAVocabulary.XSD_UNSIGNED_INT_URI)  return Types.INTEGER;
+            if (p.toString() == OBDAVocabulary.XSD_FLOAT_URI)  return Types.FLOAT;
 			if (p.toString() == OBDAVocabulary.XSD_DOUBLE_URI) return Types.DOUBLE;
 			if (p.toString() == OBDAVocabulary.XSD_STRING_URI) return Types.VARCHAR;
 			if (p.toString() == OBDAVocabulary.RDFS_LITERAL_URI) return Types.VARCHAR;
@@ -915,6 +920,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 				return (String.format(typeStr, 6, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
 				return (String.format(typeStr, 4, signature.get(hpos)));
+            } else if (functionString.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)) {
+                return (String.format(typeStr, 15, signature.get(hpos)));
+            } else if (functionString.equals(OBDAVocabulary.XSD_FLOAT_URI)) {
+                return (String.format(typeStr, 14, signature.get(hpos)));
+            } else if (functionString.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)) {
+                return (String.format(typeStr, 16, signature.get(hpos)));
+            } else if (functionString.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)) {
+                return (String.format(typeStr, 17, signature.get(hpos)));
+            } else if (functionString.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)) {
+                return (String.format(typeStr, 18, signature.get(hpos)));
+            } else if (functionString.equals(OBDAVocabulary.XSD_INT_URI)) {
+                return (String.format(typeStr, 19, signature.get(hpos)));
+            } else if (functionString.equals(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) {
+                return (String.format(typeStr, 20, signature.get(hpos)));
             } else if (functionString.equals(OBDAVocabulary.XSD_LONG_URI)) {
                 return (String.format(typeStr, 13, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_STRING_URI)) {

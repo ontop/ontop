@@ -100,7 +100,7 @@ public class SesameStatement implements Statement {
 		}
 	}
 	
-	private Literal getLiteral(ValueConstant literal)
+	public Literal getLiteral(ValueConstant literal)
 	{
 		URI datatype = null;
 		if (literal.getType() == COL_TYPE.BOOLEAN)
@@ -124,9 +124,30 @@ public class SesameStatement implements Statement {
 		else if (literal.getType() == COL_TYPE.DOUBLE)
 			datatype = fact
 					.createURI(OBDAVocabulary.XSD_DOUBLE_URI);
+        else if (literal.getType() == COL_TYPE.FLOAT)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_FLOAT_URI);
 		else if (literal.getType() == COL_TYPE.INTEGER)
 			datatype = fact
 					.createURI(OBDAVocabulary.XSD_INTEGER_URI);
+        else if (literal.getType() == COL_TYPE.NON_NEGATIVE_INTEGER)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI);
+        else if (literal.getType() == COL_TYPE.POSITIVE_INTEGER)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI);
+        else if (literal.getType() == COL_TYPE.POSITIVE_INTEGER)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI);
+        else if (literal.getType() == COL_TYPE.NON_POSITIVE_INTEGER)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI);
+        else if (literal.getType() == COL_TYPE.UNSIGNED_INT)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_UNSIGNED_INT_URI);
+        else if (literal.getType() == COL_TYPE.INT)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_INT_URI);
         else if (literal.getType() == COL_TYPE.LONG)
             datatype = fact
                     .createURI(OBDAVocabulary.XSD_LONG_URI);

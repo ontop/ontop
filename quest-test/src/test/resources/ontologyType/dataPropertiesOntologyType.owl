@@ -38,6 +38,9 @@
         <DataProperty IRI="#hasDepartment"/>
     </Declaration>
     <Declaration>
+        <DataProperty IRI="#hasSection"/>
+    </Declaration>
+    <Declaration>
         <DataProperty IRI="#hasPTTName"/>
     </Declaration>
     <Declaration>

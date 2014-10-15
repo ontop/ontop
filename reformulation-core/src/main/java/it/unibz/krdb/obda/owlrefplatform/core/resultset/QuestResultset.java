@@ -338,6 +338,10 @@ public class QuestResultset implements TupleResultSet {
 		return getConstant(columnIndex);
 	}
 
+    /**
+     * Numbers sqltype are defined @see #getTypeColumnForSELECT SQLGenerator
+     */
+
 	private COL_TYPE getQuestType(int sqltype) {
         switch(sqltype) {
             case 1:
@@ -366,6 +370,20 @@ public class QuestResultset implements TupleResultSet {
                 return COL_TYPE.YEAR;
             case 13:
                 return COL_TYPE.LONG;
+            case 14:
+                return COL_TYPE.FLOAT;
+            case 15:
+                return COL_TYPE.NEGATIVE_INTEGER;
+            case 16:
+                return COL_TYPE.NON_NEGATIVE_INTEGER;
+            case 17:
+                return COL_TYPE.POSITIVE_INTEGER;
+            case 18:
+                return COL_TYPE.NON_POSITIVE_INTEGER;
+            case 19:
+                return COL_TYPE.INT;
+            case 20:
+                return COL_TYPE.UNSIGNED_INT;
             case 0:
                 return null;
             default:

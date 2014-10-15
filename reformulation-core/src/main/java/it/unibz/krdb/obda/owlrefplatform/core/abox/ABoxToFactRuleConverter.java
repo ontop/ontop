@@ -73,7 +73,8 @@ public class ABoxToFactRuleConverter {
 		} 	
 		return rule;
 	}
-	
+
+    @Deprecated
 	public static String getURIType(COL_TYPE e) {
 		String result = "";
 		if (e == COL_TYPE.BOOLEAN) {

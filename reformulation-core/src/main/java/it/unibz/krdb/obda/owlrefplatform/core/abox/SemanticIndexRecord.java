@@ -36,7 +36,7 @@ import it.unibz.krdb.obda.ontology.ClassAssertion;
 public class SemanticIndexRecord {
 
 	public enum SITable {
-		CLASS, OPROP, DPROPLite, DPROPStri, DPROPInte, DPROPLong, DPROPDeci, DPROPDoub, DPROPDate, DPROPBool
+		CLASS, OPROP, DPROPLite, DPROPStri, DPROPInte, DPROPLong, DPROPDeci, DPROPDoub, DPROPDate, DPROPInt, DPROPUnsignedInt, DPROPNegInte, DPROPNonNegInte, DPROPPosInte, DPROPNonPosInte, DPROPFloat, DPROPBool
 	}
 
 	public enum OBJType {
@@ -170,6 +170,27 @@ public class SemanticIndexRecord {
 			case INTEGER:
 				table = SITable.DPROPInte;
 				break;
+            case INT:
+                table = SITable.DPROPInt;
+                break;
+            case UNSIGNED_INT:
+                table = SITable.DPROPUnsignedInt;
+                break;
+            case NEGATIVE_INTEGER:
+                table = SITable.DPROPNegInte;
+                break;
+            case NON_NEGATIVE_INTEGER:
+                table = SITable.DPROPNonNegInte;
+                break;
+            case POSITIVE_INTEGER:
+                table = SITable.DPROPPosInte;
+                break;
+            case NON_POSITIVE_INTEGER:
+                table = SITable.DPROPNonPosInte;
+                break;
+            case FLOAT:
+                table = SITable.DPROPFloat;
+                break;
             case LONG:
                 table = SITable.DPROPLong;
                 break;

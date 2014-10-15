@@ -44,6 +44,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -161,10 +162,13 @@ public class ExpressionEvaluator {
 					return expr;
 				}
 			}
-			if (p == OBDAVocabulary.XSD_INTEGER) {
+			if (p == OBDAVocabulary.XSD_INTEGER || p == OBDAVocabulary.XSD_NEGATIVE_INTEGER || p == OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER
+                    || p == OBDAVocabulary.XSD_INT || p == OBDAVocabulary.XSD_NON_POSITIVE_INTEGER || p ==OBDAVocabulary.XSD_POSITIVE_INTEGER ||
+                    p == OBDAVocabulary.XSD_UNSIGNED_INT || p == OBDAVocabulary.XSD_LONG) {
+
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
-					int valueInteger = Integer.parseInt(value.getValue());
+					long valueInteger = Long.parseLong(value.getValue());
 					if (valueInteger != 0) {
 						return fac.getConstantTrue();
 					}
@@ -175,7 +179,8 @@ public class ExpressionEvaluator {
 					return expr;
 				}
 			}
-			if (p == OBDAVocabulary.XSD_DOUBLE) {
+
+			if (p == OBDAVocabulary.XSD_DOUBLE || p == OBDAVocabulary.XSD_FLOAT || p== OBDAVocabulary.XSD_DECIMAL) {
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					double valueD = Double.parseDouble(value.getValue());
@@ -498,12 +503,26 @@ public class ExpressionEvaluator {
 					return OBDAVocabulary.RDFS_LITERAL;
 				case INTEGER:
 					return OBDAVocabulary.XSD_INTEGER;
+                case NEGATIVE_INTEGER:
+                    return OBDAVocabulary.XSD_NEGATIVE_INTEGER;
+                case NON_NEGATIVE_INTEGER:
+                    return OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER;
+                case POSITIVE_INTEGER:
+                    return OBDAVocabulary.XSD_POSITIVE_INTEGER;
+                case NON_POSITIVE_INTEGER:
+                    return OBDAVocabulary.XSD_NON_POSITIVE_INTEGER;
+                case INT:
+                    return OBDAVocabulary.XSD_INT;
+                case UNSIGNED_INT:
+                    return OBDAVocabulary.XSD_UNSIGNED_INT;
                 case LONG:
                     return OBDAVocabulary.XSD_LONG;
 				case DECIMAL:
 					return OBDAVocabulary.XSD_DECIMAL;
 				case DOUBLE:
 					return OBDAVocabulary.XSD_DOUBLE;
+                case FLOAT:
+                    return OBDAVocabulary.XSD_FLOAT;
 				case DATETIME:
 					return OBDAVocabulary.XSD_DATETIME;
                 case YEAR:
@@ -524,19 +543,22 @@ public class ExpressionEvaluator {
 	}
 	
 	private boolean isDouble(Predicate pred) {
-		return pred.equals(OBDAVocabulary.XSD_DOUBLE);
+		return (pred.equals(OBDAVocabulary.XSD_DOUBLE) || pred.equals(OBDAVocabulary.XSD_FLOAT));
 	}
 	
 	private boolean isNumeric(Predicate pred) {
-		return (pred.equals(OBDAVocabulary.XSD_INTEGER) || pred.equals(OBDAVocabulary.XSD_LONG) || pred.equals(OBDAVocabulary.XSD_DECIMAL) || pred.equals(OBDAVocabulary.XSD_DOUBLE));
+		return (pred.equals(OBDAVocabulary.XSD_INTEGER) || pred.equals(OBDAVocabulary.XSD_LONG) || pred.equals(OBDAVocabulary.XSD_DECIMAL) ||
+                pred.equals(OBDAVocabulary.XSD_DOUBLE) || pred.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER)|| pred.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER) ||
+                pred.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER) || pred.equals(OBDAVocabulary.XSD_INT) || pred.equals(OBDAVocabulary.XSD_UNSIGNED_INT) ||
+                pred.equals(OBDAVocabulary.XSD_FLOAT)|| pred.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER));
 	}
 	
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
-		return (constantValue.equals(OBDAVocabulary.XSD_INTEGER_URI) 
-				|| constantValue.equals(OBDAVocabulary.XSD_DECIMAL_URI) 
-				|| constantValue.equals(OBDAVocabulary.XSD_DOUBLE_URI)
-                || constantValue.equals(OBDAVocabulary.XSD_LONG_URI) );
+		return (constantValue.equals(OBDAVocabulary.XSD_INTEGER) || constantValue.equals(OBDAVocabulary.XSD_LONG) || constantValue.equals(OBDAVocabulary.XSD_DECIMAL) ||
+                constantValue.equals(OBDAVocabulary.XSD_DOUBLE) || constantValue.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER)|| constantValue.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER) ||
+                constantValue.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER) || constantValue.equals(OBDAVocabulary.XSD_INT) || constantValue.equals(OBDAVocabulary.XSD_UNSIGNED_INT) ||
+                constantValue.equals(OBDAVocabulary.XSD_FLOAT)|| constantValue.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER));
 	}
 
 	/*
