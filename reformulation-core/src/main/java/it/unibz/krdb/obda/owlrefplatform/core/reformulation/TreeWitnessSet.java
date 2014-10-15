@@ -52,7 +52,7 @@ public class TreeWitnessSet {
 	private final List<TreeWitness> tws = new LinkedList<TreeWitness>();
 	private final QueryConnectedComponent cc;
 	private final Collection<TreeWitnessGenerator> allTWgenerators;
-	private final PropertiesCache propertiesCache; 
+	private final QueryConnectedComponentCache cache; 
 	private boolean hasConflicts = false;
 	
 	// working lists (may all be nulls)
@@ -65,7 +65,7 @@ public class TreeWitnessSet {
 	
 	private TreeWitnessSet(QueryConnectedComponent cc, TBoxReasoner reasoner, Collection<TreeWitnessGenerator> allTWgenerators) {
 		this.cc = cc;
-		this.propertiesCache = new PropertiesCache(reasoner);
+		this.cache = new QueryConnectedComponentCache(reasoner);
 		this.allTWgenerators = allTWgenerators;
 	}
 	
@@ -87,7 +87,7 @@ public class TreeWitnessSet {
 	}
 
 	private void computeTreeWitnesses() {		
-		QueryFolding qf = new QueryFolding(propertiesCache); // in-place query folding, so copying is required when creating a tree witness
+		QueryFolding qf = new QueryFolding(cache); // in-place query folding, so copying is required when creating a tree witness
 		
 		for (Loop loop : cc.getQuantifiedVariables()) {
 			Term v = loop.getTerm();
@@ -230,7 +230,7 @@ public class TreeWitnessSet {
 		log.debug("CHECKING WHETHER THE FOLDING {} CAN BE GENERATED: ", qf); 
 		for (TreeWitnessGenerator g : allTWgenerators) {
 			Intersection<Property> subp = qf.getProperties();
-			if (/*(subp == null) || */!subp.contains(g.getProperty())) {
+			if (!subp.subsumes(g.getProperty())) {
 				log.debug("      NEGATIVE PROPERTY CHECK {}", g.getProperty());
 				continue;
 			}
@@ -364,18 +364,26 @@ public class TreeWitnessSet {
 	}
 	
 	
-	static class PropertiesCache {
+	static class QueryConnectedComponentCache {
 		private final Map<TermOrderedPair, Intersection<Property>> propertiesCache = new HashMap<TermOrderedPair, Intersection<Property>>();
 		private final Map<Term, Intersection<BasicClassDescription>> conceptsCache = new HashMap<Term, Intersection<BasicClassDescription>>();
 
 		private final TBoxReasoner reasoner;
 		
-		private PropertiesCache(TBoxReasoner reasoner) {
+		private QueryConnectedComponentCache(TBoxReasoner reasoner) {
 			this.reasoner = reasoner;
 		}
+		
+		public Intersection<BasicClassDescription> getTopClass() {
+			return new Intersection<BasicClassDescription>(reasoner.getClasses());
+		}
 
+		public Intersection<Property> getTopProperty() {
+			return new Intersection<Property>(reasoner.getProperties());
+		}
+		
 		public Intersection<BasicClassDescription> getSubConcepts(Collection<Function> atoms) {
-			Intersection<BasicClassDescription> subc = new Intersection<BasicClassDescription>();
+			Intersection<BasicClassDescription> subc = new Intersection<BasicClassDescription>(reasoner.getClasses());
 			for (Function a : atoms) {
 				 if (a.getArity() != 1) {
 					 subc.setToBottom();   // binary predicates R(x,x) cannot be matched to the anonymous part
@@ -383,8 +391,7 @@ public class TreeWitnessSet {
 				 }
 				 
 				 Predicate pred = a.getFunctionSymbol();
-				 Set<BasicClassDescription> s = reasoner.getClasses().getSubRepresentatives(ontFactory.createClass(pred));
-				 subc.intersectWith(s);
+				 subc.intersectWith(ontFactory.createClass(pred));
 				 if (subc.isBottom())
 					 break;
 			}
@@ -407,7 +414,7 @@ public class TreeWitnessSet {
 			TermOrderedPair idx = new TermOrderedPair(root, nonroot);
 			Intersection<Property> properties = propertiesCache.get(idx);			
 			if (properties == null) {
-				properties = new Intersection<Property>();
+				properties = new Intersection<Property>(reasoner.getProperties());
 				for (Function a : edge.getBAtoms()) {
 					if (a.getPredicate() instanceof BooleanOperationPredicateImpl) {
 						log.debug("EDGE {} HAS PROPERTY {} NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES", edge, a);
@@ -417,8 +424,7 @@ public class TreeWitnessSet {
 					else {
 						log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
 						Property prop = ontFactory.createProperty(a.getPredicate(), !root.equals(a.getTerm(0)));
-						Set<Property> props = reasoner.getProperties().getSubRepresentatives(prop);
-						properties.intersectWith(props);
+						properties.intersectWith(prop);
 						if (properties.isBottom())
 							break;						
 					}
@@ -465,7 +471,7 @@ public class TreeWitnessSet {
 		Set<TreeWitnessGenerator> generators = new HashSet<TreeWitnessGenerator>();
 		
 		if (cc.isDegenerate()) { // do not remove the curly brackets -- dangling else otherwise
-			Intersection<BasicClassDescription> subc = propertiesCache.getSubConcepts(cc.getLoop().getAtoms());
+			Intersection<BasicClassDescription> subc = cache.getSubConcepts(cc.getLoop().getAtoms());
 			log.debug("DEGENERATE DETACHED COMPONENT: {}", cc);
 			if (!subc.isBottom()) // (subc == null) || 
 				for (TreeWitnessGenerator twg : allTWgenerators) {
@@ -481,7 +487,7 @@ public class TreeWitnessSet {
 			for (TreeWitness tw : tws) 
 				if (tw.getDomain().containsAll(cc.getVariables())) {
 					log.debug("TREE WITNESS {} COVERS THE QUERY",  tw);
-					Intersection<BasicClassDescription> subc = propertiesCache.getSubConcepts(tw.getRootAtoms());
+					Intersection<BasicClassDescription> subc = cache.getSubConcepts(tw.getRootAtoms());
 					if (!subc.isBottom())
 						for (TreeWitnessGenerator twg : allTWgenerators)
 							if (twg.endPointEntailsAnyOf(subc)) {

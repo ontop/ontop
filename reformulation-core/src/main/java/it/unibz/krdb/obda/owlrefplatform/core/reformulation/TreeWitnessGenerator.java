@@ -200,7 +200,7 @@ public class TreeWitnessGenerator {
 		if (existsRinv == null)
 			existsRinv = ontFactory.createPropertySomeRestriction(property.getPredicate(), !property.isInverse());	
 		
-		return subc.contains(existsRinv) || subc.contains(filler);
+		return subc.subsumes(existsRinv) || subc.subsumes(filler);
 	}
 	
 	@Override 
