@@ -315,6 +315,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 				int type = getVariableDataType(term, index);
 				if (type == Types.INTEGER) return String.format("NOT %s > 0", column);
+                if (type == Types.BIGINT) return String.format("NOT %s > 0", column);
+                if (type == Types.FLOAT) return String.format("NOT %s > 0", column);
 				if (type == Types.DOUBLE) return String.format("NOT %s > 0", column);
 				if (type == Types.BOOLEAN) return String.format("NOT %s", column);
 				if (type == Types.VARCHAR) return String.format("NOT LENGTH(%s) > 0", column);
@@ -325,6 +327,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				//int type = 8;
 				int type = getVariableDataType(term, index);
 				if (type == Types.INTEGER) return String.format("%s > 0", column);
+                if (type == Types.BIGINT) return String.format("%s > 0", column);
+                if (type == Types.FLOAT) return String.format("%s > 0", column);
 				if (type == Types.DOUBLE) return String.format("%s > 0", column);
 				if (type == Types.BOOLEAN) return String.format("%s", column);
 				if (type == Types.VARCHAR) return String.format("LENGTH(%s) > 0", column);
@@ -1252,6 +1256,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					if (type == Types.INTEGER) return String.format("%s > 0", column);
                     if (type == Types.BIGINT) return String.format("%s > 0", column);
 					if (type == Types.DOUBLE) return String.format("%s > 0", column);
+                    if (type == Types.FLOAT) return String.format("%s > 0", column);
 					if (type == Types.BOOLEAN) return String.format("%s", column);
 					if (type == Types.VARCHAR) return String.format("LENGTH(%s) > 0", column);
 					return "1";

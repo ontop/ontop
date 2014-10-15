@@ -555,10 +555,10 @@ public class ExpressionEvaluator {
 	
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
-		return (constantValue.equals(OBDAVocabulary.XSD_INTEGER) || constantValue.equals(OBDAVocabulary.XSD_LONG) || constantValue.equals(OBDAVocabulary.XSD_DECIMAL) ||
-                constantValue.equals(OBDAVocabulary.XSD_DOUBLE) || constantValue.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER)|| constantValue.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER) ||
-                constantValue.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER) || constantValue.equals(OBDAVocabulary.XSD_INT) || constantValue.equals(OBDAVocabulary.XSD_UNSIGNED_INT) ||
-                constantValue.equals(OBDAVocabulary.XSD_FLOAT)|| constantValue.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER));
+		return (constantValue.equals(OBDAVocabulary.XSD_INTEGER_URI) || constantValue.equals(OBDAVocabulary.XSD_LONG_URI) || constantValue.equals(OBDAVocabulary.XSD_DECIMAL_URI) ||
+                constantValue.equals(OBDAVocabulary.XSD_DOUBLE_URI) || constantValue.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)|| constantValue.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI) ||
+                constantValue.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI) || constantValue.equals(OBDAVocabulary.XSD_INT_URI) || constantValue.equals(OBDAVocabulary.XSD_UNSIGNED_INT_URI) ||
+                constantValue.equals(OBDAVocabulary.XSD_FLOAT_URI)|| constantValue.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI));
 	}
 
 	/*
