@@ -112,15 +112,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
         /**
          * Default case (e.g. .obda file)
          */
-        File file = new File(obdaURI);
-        if (!file.exists()) {
-            throw new IOException("WARNING: Cannot locate OBDA file at: " + file.getPath());
-        }
-        if (!file.canRead()) {
-            throw new IOException(String.format("Error while reading the file located at %s.\n" +
-                    "Make sure you have the read permission at the location specified.", file.getAbsolutePath()));
-        }
-        MappingParser modelParser = nativeQLFactory.create(new FileReader(file));
+        MappingParser modelParser = nativeQLFactory.create(new File(obdaURI));
         OBDAModel obdaModel = modelParser.getOBDAModel();
         return obdaModel;
 	}

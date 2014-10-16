@@ -97,7 +97,7 @@ public class QuestOWLMaterializerCMD {
             /*
              * Load the OBDA model from an external .obda file
              */
-            MappingParser mappingParser = factory.create(new FileReader(obdafile));
+            MappingParser mappingParser = factory.create(new File(obdafile));
             OBDAModel obdaModel = mappingParser.getOBDAModel();
 
 			OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);

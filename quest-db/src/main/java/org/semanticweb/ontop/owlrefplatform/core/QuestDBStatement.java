@@ -140,15 +140,7 @@ public class QuestDBStatement implements OBDAStatement {
 		Iterator<Assertion> assertionIter = null;
 		QuestMaterializer materializer = null;
 		try {
-            File file = new File(uri);
-            if (!file.exists()) {
-                throw new IOException("WARNING: Cannot locate OBDA file at: " + file.getPath());
-            }
-            if (!file.canRead()) {
-                throw new IOException(String.format("Error while reading the file located at %s.\n" +
-                    "Make sure you have the read permission at the location specified.", file.getAbsolutePath()));
-            }
-            MappingParser parser = nativeQLFactory.create(new FileReader(file));
+            MappingParser parser = nativeQLFactory.create(new File(uri));
             OBDAModel obdaModel = parser.getOBDAModel();
 
 			materializer = new QuestMaterializer(obdaModel);

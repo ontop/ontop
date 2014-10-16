@@ -77,7 +77,7 @@ class MappingConverterCMD {
 
                 OBDAModel model;
                 try {
-                    MappingParser mappingParser = factory.create(new FileReader(obdaURI.toString()));
+                    MappingParser mappingParser = factory.create(new File(obdaURI));
                     model = mappingParser.getOBDAModel();
 				} catch (InvalidMappingExceptionWithIndicator e) {
 					e.printStackTrace();

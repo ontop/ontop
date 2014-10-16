@@ -56,7 +56,7 @@ public class OWLAPI3ToFileMaterializer {
 	}
 
 	public static int materialize(File outputFile, File inputFile) throws Exception {
-        MappingParser mappingParser = FACTORY.create(new FileReader(inputFile));
+        MappingParser mappingParser = FACTORY.create(inputFile);
         OBDAModel newModel = mappingParser.getOBDAModel();
 
 		return materializeN3(outputFile, newModel);

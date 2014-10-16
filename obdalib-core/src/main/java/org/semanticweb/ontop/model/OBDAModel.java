@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.io.PrefixManager;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;

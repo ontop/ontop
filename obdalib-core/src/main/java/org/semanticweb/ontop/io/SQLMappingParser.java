@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import org.semanticweb.ontop.exception.*;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.mapping.MappingParser;
@@ -74,54 +75,75 @@ public class SQLMappingParser implements MappingParser {
      */
     private static NativeQueryLanguageComponentFactory FACTORY;
 
-    private final OBDAModel model;
+    private OBDAModel model;
 
-    @Inject
+    /**
+     * Temporary (removed after parsing)
+     */
+    private Reader reader;
+    private final File file;
+
+    @AssistedInject
     private SQLMappingParser(@Assisted Reader reader, NativeQueryLanguageComponentFactory factory)
             throws IOException, InvalidMappingExceptionWithIndicator {
         if (FACTORY == null)
             FACTORY = factory;
-        this.model = load(reader);
+        this.model = null;
+
+        this.reader = reader;
+        this.file = null;
     }
     
-//    /**
-//     * Create an SQL Mapping Parser for generating an OBDA model.
-//     */
-//    @Inject
-//    private SQLMappingParser(@Assisted File file, NativeQueryLanguageComponentFactory factory)
-//            throws IOException, InvalidMappingExceptionWithIndicator {
-//        if (FACTORY == null)
-//            FACTORY = factory;
-//
-//        this.model = load(file);
-//    }
+    /**
+     * Create an SQL Mapping Parser for generating an OBDA model.
+     */
+    @AssistedInject
+    private SQLMappingParser(@Assisted File file, NativeQueryLanguageComponentFactory factory)
+            throws IOException, InvalidMappingExceptionWithIndicator {
+        if (FACTORY == null)
+            FACTORY = factory;
+        this.model = null;
+        this.file = file;
+        this.reader = new FileReader(file);
+    }
 
     /**
-     * TODO: should the parsing be done at that time or at construction?
+     * Parsing is not done at construction time because our dependency
+     * injection framework (Guice) does not manage exceptions nicely.
+     *
      */
     @Override
-    public OBDAModel getOBDAModel() throws InvalidMappingException {
+    public OBDAModel getOBDAModel() throws InvalidMappingException, IOException{
+        if (model == null) {
+            this.model = load(reader, file);
+            reader = null;
+        }
         return model;
     }
 
-//    private static OBDAModel load(File file)
-//            throws IOException, InvalidMappingExceptionWithIndicator {
-//        if (!file.exists()) {
-//            throw new IOException("WARNING: Cannot locate OBDA file at: " + file.getPath());
-//        }
-//        if (!file.canRead()) {
-//            throw new IOException(String.format("Error while reading the file located at %s.\n" +
-//                    "Make sure you have the read permission at the location specified.", file.getAbsolutePath()));
-//        }
-//
-//        return load(new FileReader(file));
-//    }
+    private static void checkFile(File file) throws IOException {
+        if (!file.exists()) {
+            throw new IOException("WARNING: Cannot locate OBDA file at: " + file.getPath());
+        }
+        if (!file.canRead()) {
+            throw new IOException(String.format("Error while reading the file located at %s.\n" +
+                    "Make sure you have the read permission at the location specified.", file.getAbsolutePath()));
+        }
+    }
 
     /**
+     *
+     * File may be null.
+     *
      * TODO: refactor it. Way too complex.
      */
-	private static OBDAModel load(Reader reader) throws IOException,
+	private static OBDAModel load(Reader reader, File file) throws IOException,
 			InvalidMappingExceptionWithIndicator {
+
+        if (file != null) {
+            checkFile(file);
+        }
+
         LineNumberReader lineNumberReader = new LineNumberReader(reader);
 
         final Map<String, String> prefixes = new HashMap<>();
@@ -183,14 +205,22 @@ public class SQLMappingParser implements MappingParser {
 	                throw new IOException("Unknown syntax: " + line);
 	            }
 	       	} catch (Exception e) {
-	        	throw new IOException(String.format("ERROR reading .obda file at line: %s", lineNumberReader.getLineNumber()
+                String fileName =  (file != null) ? file.getName() : ".obda file";
+
+	        	throw new IOException(String.format("ERROR reading %s at line: %s", fileName,
+                        lineNumberReader.getLineNumber()
                         + " \nMESSAGE: " + e.getMessage()), e);
 	        }
         }
+        reader.close();
         
         // Throw some validation exceptions
         if (!invalidMappingIndicators.isEmpty()) {
             throw new InvalidMappingExceptionWithIndicator(invalidMappingIndicators);
+        }
+
+        if (!currentSourceMappings.isEmpty()) {
+            mappingIndex.put(currentDataSource.getSourceID(), ImmutableList.copyOf(currentSourceMappings));
         }
 
         PrefixManager prefixManager = FACTORY.create(prefixes);

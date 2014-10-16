@@ -24,6 +24,7 @@ import java.util.Set;
 public interface NativeQueryLanguageComponentFactory {
 
     public MappingParser create(Reader reader);
+    public MappingParser create(File file);
 
     public OBDAModel create(Set<OBDADataSource> dataSources,
                             Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
