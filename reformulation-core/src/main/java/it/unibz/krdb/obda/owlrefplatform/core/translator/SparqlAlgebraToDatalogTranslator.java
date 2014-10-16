@@ -1277,8 +1277,8 @@ public class SparqlAlgebraToDatalogTranslator {
 			URI type = lit.getDatatype();
 			if (type == null) {
 				return ofac.getFunction(ofac
-						.getDataTypePredicateString(), ofac.getConstantLiteral(
-						v.stringValue(), COL_TYPE.STRING));
+						.getDataTypePredicateLiteral(), ofac.getConstantLiteral(
+						v.stringValue(), COL_TYPE.LITERAL));
 			}
 			if ( (type == XMLSchema.INTEGER) || type.equals(XMLSchema.INTEGER)) constantFunction = ofac.getFunction(ofac
 					.getDataTypePredicateInteger(), ofac.getConstantLiteral(
