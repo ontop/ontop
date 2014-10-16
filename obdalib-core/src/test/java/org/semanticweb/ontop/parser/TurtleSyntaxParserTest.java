@@ -194,9 +194,8 @@ public class TurtleSyntaxParserTest extends TestCase {
 		assertTrue(result);
 	}
 	
-	private boolean parse(String input) {
-        Map<String, String> prefixes = new HashMap<>();
-		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(prefixes);
+	private boolean parse(String input) {;
+		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixManager().getPrefixMap());
 
 		try {
 			parser.parse(input);
