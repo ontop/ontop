@@ -151,6 +151,30 @@ public class SesameStatement implements Statement {
 		return context;
 	}
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SesameStatement that = (SesameStatement) o;
+
+        if (context != null ? !context.equals(that.context) : that.context != null) return false;
+        if (object != null ? !object.equals(that.object) : that.object != null) return false;
+        if (predicate != null ? !predicate.equals(that.predicate) : that.predicate != null) return false;
+        if (subject != null ? !subject.equals(that.subject) : that.subject != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = subject != null ? subject.hashCode() : 0;
+        result = 31 * result + (predicate != null ? predicate.hashCode() : 0);
+        result = 31 * result + (object != null ? object.hashCode() : 0);
+        result = 31 * result + (context != null ? context.hashCode() : 0);
+        return result;
+    }
+
 	@Override
 	public String toString()
 	{
