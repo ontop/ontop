@@ -159,7 +159,6 @@ public class SesameStatement implements Statement {
         SesameStatement that = (SesameStatement) o;
 
         if (context != null ? !context.equals(that.context) : that.context != null) return false;
-        if (fact != null ? !fact.equals(that.fact) : that.fact != null) return false;
         if (object != null ? !object.equals(that.object) : that.object != null) return false;
         if (predicate != null ? !predicate.equals(that.predicate) : that.predicate != null) return false;
         if (subject != null ? !subject.equals(that.subject) : that.subject != null) return false;
@@ -173,7 +172,6 @@ public class SesameStatement implements Statement {
         result = 31 * result + (predicate != null ? predicate.hashCode() : 0);
         result = 31 * result + (object != null ? object.hashCode() : 0);
         result = 31 * result + (context != null ? context.hashCode() : 0);
-        result = 31 * result + (fact != null ? fact.hashCode() : 0);
         return result;
     }
 
