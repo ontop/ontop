@@ -41,8 +41,7 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 public class SesameStatement implements Statement {
-
-	private static final long serialVersionUID = 3398547980791013746L;
+    private static final long serialVersionUID = 3398547980791013746L;
 	private Resource subject = null;
 	private URI predicate = null;
 	private Value object = null;
@@ -151,6 +150,32 @@ public class SesameStatement implements Statement {
 		// TODO Auto-generated method stub
 		return context;
 	}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SesameStatement that = (SesameStatement) o;
+
+        if (context != null ? !context.equals(that.context) : that.context != null) return false;
+        if (fact != null ? !fact.equals(that.fact) : that.fact != null) return false;
+        if (object != null ? !object.equals(that.object) : that.object != null) return false;
+        if (predicate != null ? !predicate.equals(that.predicate) : that.predicate != null) return false;
+        if (subject != null ? !subject.equals(that.subject) : that.subject != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = subject != null ? subject.hashCode() : 0;
+        result = 31 * result + (predicate != null ? predicate.hashCode() : 0);
+        result = 31 * result + (object != null ? object.hashCode() : 0);
+        result = 31 * result + (context != null ? context.hashCode() : 0);
+        result = 31 * result + (fact != null ? fact.hashCode() : 0);
+        return result;
+    }
 
 	@Override
 	public String toString()
