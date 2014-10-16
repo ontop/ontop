@@ -397,19 +397,19 @@ public class ExpressionEvaluator {
 				String datatype = predicate.toString();
 				if (datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
 					return fac.getFunction(
-							fac.getDataTypePredicateString(),
+							fac.getDataTypePredicateLiteral(),
 							fac.getVariable(parameter.toString()));
 				} else if (datatype.equals(OBDAVocabulary.XSD_STRING_URI)) {
 					return fac.getFunction(
-							fac.getDataTypePredicateString(),
+							fac.getDataTypePredicateLiteral(),
 							fac.getVariable(parameter.toString()));
 				} else {
 					return fac.getFunction(
-							fac.getDataTypePredicateString(),
+							fac.getDataTypePredicateLiteral(),
 							fac.getFunction(
 									OBDAVocabulary.QUEST_CAST,
 									fac.getVariable(parameter.toString()),
-									fac.getConstantLiteral(OBDAVocabulary.XSD_STRING_URI)));
+									fac.getConstantLiteral(OBDAVocabulary.RDFS_LITERAL_URI)));
 				}
 			} else if (predicate instanceof URITemplatePredicate) {
 				return fac.getFunction(fac.getDataTypePredicateLiteral(), function.clone());
@@ -569,7 +569,7 @@ public class ExpressionEvaluator {
 
 		// Create a default return constant: blank language with literal type.
 		Term emptyconstant = fac.getFunction(
-				fac.getDataTypePredicateString(), fac.getConstantLiteral("", COL_TYPE.STRING));
+				fac.getDataTypePredicateLiteral(), fac.getConstantLiteral("", COL_TYPE.LITERAL));
 
 		if (!(innerTerm instanceof Function)) {
 			return emptyconstant;
@@ -591,11 +591,11 @@ public class ExpressionEvaluator {
 		} else { // rdfs:Literal(text, lang)
 			Term parameter = function.getTerm(1);
 			if (parameter instanceof Variable) {
-				return fac.getFunction(fac.getDataTypePredicateString(),
+				return fac.getFunction(fac.getDataTypePredicateLiteral(),
 						parameter.clone());
 			} else if (parameter instanceof Constant) {
-				return fac.getFunction(fac.getDataTypePredicateString(),
-						fac.getConstantLiteral(((Constant) parameter).getValue(),COL_TYPE.STRING));
+				return fac.getFunction(fac.getDataTypePredicateLiteral(),
+						fac.getConstantLiteral(((Constant) parameter).getValue(),COL_TYPE.LITERAL));
 			}
 		}
 		return term;

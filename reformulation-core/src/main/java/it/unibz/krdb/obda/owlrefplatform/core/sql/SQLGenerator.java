@@ -1066,7 +1066,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * The function is of the form uri(x), we need to simply return the
 			 * value of X
 			 */
-			return getSQLString(((Variable) t), index, false);
+			return sqladapter.sqlCast(getSQLString(((Variable) t), index, false), Types.VARCHAR);
 			
 		} else if (t instanceof URIConstant) {
 			/*
@@ -1320,7 +1320,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				String datatype = ((Constant) function.getTerm(1)).getValue();
 				int sqlDatatype = -1;
-				if (datatype.equals(OBDAVocabulary.XSD_STRING_URI)) {
+				if (datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
 					sqlDatatype = Types.VARCHAR;
 				}
 				if (isStringColType(function, index)) {

@@ -1100,9 +1100,12 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	}
 
+
 	private Predicate getDataTypePredicate(COL_TYPE dataType)
 			throws RuntimeException {
+        //we do not consider the case of literal because it has already been checked @see #getOntopTerm
 		switch (dataType) {
+
 		case STRING:
 			return ofac.getDataTypePredicateString();
 		case INTEGER:
@@ -1332,7 +1335,7 @@ public class SparqlAlgebraToDatalogTranslator {
 					.getDataTypePredicateBoolean(), ofac.getConstantLiteral(
 							lit.booleanValue() + "", COL_TYPE.BOOLEAN));
 			else if ((type == XMLSchema.STRING) || type.equals(XMLSchema.STRING)) constantFunction = ofac.getFunction(ofac
-					.getDataTypePredicateBoolean(), ofac.getConstantLiteral(
+					.getDataTypePredicateString(), ofac.getConstantLiteral(
 							lit.stringValue() + "", COL_TYPE.STRING));
 			else if ((type == RDFS.LITERAL) || type.equals(RDFS.LITERAL)) constantFunction = ofac.getFunction(ofac
 					.getDataTypePredicateLiteral(), ofac.getConstantLiteral(

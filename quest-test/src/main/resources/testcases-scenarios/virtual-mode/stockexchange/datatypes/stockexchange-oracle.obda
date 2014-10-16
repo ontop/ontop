@@ -15,7 +15,7 @@ driverClass	oracle.jdbc.driver.OracleDriver
 
 [MappingDeclaration] @collection [[
 mappingId	mapping-addresses
-target		:address-{ID} a :Address ; :addressID {ID} ; :inStreet {STREET} ; :hasNumber {NUMBER}^^xsd:integer ; :inCity {CITY} ; :inState {STATE} ; :inCountry {COUNTRY} .
+target		:address-{ID} a :Address ; :addressID {ID} ; :inStreet {STREET} ; :hasNumber {NUMBER}^^xsd:int ; :inCity {CITY} ; :inState {STATE} ; :inCountry {COUNTRY} .
 source		select ID, STREET, "NUMBER", CITY, STATE, COUNTRY from ADDRESS
 
 mappingId	mapping-brokers
