@@ -41,10 +41,7 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.BasicParserSettings;
-import org.semanticweb.ontop.model.GraphResultSet;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.TupleResultSet;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.ClassAssertion;
 import org.semanticweb.ontop.ontology.DataPropertyAssertion;
@@ -53,6 +50,7 @@ import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlapi3.OntopOWLException;
 import org.semanticweb.ontop.owlrefplatform.core.Quest;
+import org.semanticweb.ontop.owlrefplatform.core.QuestImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
@@ -99,14 +97,6 @@ public class QuestOWLStatement {
 	public QuestOWLStatement(QuestStatement st, QuestOWLConnection conn) {
 		this.conn = conn;
 		this.st = st;
-	}
-
-	public QuestStatement getQuestStatement() {
-		return st;
-	}
-
-	public boolean isCanceled(){
-		return st.isCanceled();
 	}
 	
 	public void cancel() throws OWLException {

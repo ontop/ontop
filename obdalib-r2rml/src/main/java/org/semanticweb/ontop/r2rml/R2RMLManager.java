@@ -118,9 +118,9 @@ public class R2RMLManager {
 	 * @param myModel - the Model structure containing mappings
 	 * @return ArrayList<OBDAMappingAxiom> - list of mapping axioms read from the Model
 	 */
-	public ArrayList<OBDAMappingAxiom> getMappings(Model myModel) {
+	public List<OBDAMappingAxiom> getMappings(Model myModel) {
 
-		ArrayList<OBDAMappingAxiom> mappings = new ArrayList<OBDAMappingAxiom>();
+		List<OBDAMappingAxiom> mappings = new ArrayList<OBDAMappingAxiom>();
 
 		// retrieve the TriplesMap nodes
 		Collection<TriplesMap> tripleMaps = r2rmlParser.getMappingNodes(myModel);

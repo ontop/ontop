@@ -24,7 +24,6 @@ import java.util.Vector;
 
 import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
@@ -32,7 +31,7 @@ import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	
 	/** The OBDA model for validating the target query */
-	private SQLOBDAModel obdaModel;
+	private OBDAModel obdaModel;
 
 	/** Data factory **/
 	private OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
@@ -40,7 +39,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	/** List of invalid predicates */
 	private Vector<String> invalidPredicates = new Vector<String>();
 
-	public TargetQueryValidator(SQLOBDAModel obdaModel) {
+	public TargetQueryValidator(OBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
 	}
 	

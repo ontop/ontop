@@ -21,10 +21,9 @@ package org.semanticweb.ontop.protege4.core;
  */
 
 
-import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.QueryIOManager;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OBDAModelValidator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
@@ -490,7 +489,7 @@ public class OBDAModelManager implements Disposable {
 					if (obdaFile.exists()) {
 						try {
 							// Load the OBDA model
-							ModelIOManager modelIO = new ModelIOManager(activeOBDAModel);
+							SQLMappingParser modelIO = new SQLMappingParser(activeOBDAModel);
 							modelIO.load(obdaFile);
 						} catch (Exception ex) {
 							activeOBDAModel.reset();
@@ -540,7 +539,7 @@ public class OBDAModelManager implements Disposable {
 
 					// Save the OBDA model
 					File obdaFile = new File(URI.create(obdaDocumentIri));
-					ModelIOManager ModelIO = new ModelIOManager(activeOBDAModel);
+					SQLMappingParser ModelIO = new SQLMappingParser(activeOBDAModel);
 					ModelIO.save(obdaFile);
 
 					// Save the queries

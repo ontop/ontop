@@ -20,22 +20,20 @@ package org.semanticweb.ontop.sesame;
  * #L%
  */
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 import java.net.URI;
+import java.util.Properties;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.n3.N3Writer;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
-import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlapi3.OBDAModelSynchronizer;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
@@ -74,6 +72,11 @@ class QuestSesameMaterializerCMD {
 		if (args.length == 4)
 			out = args[3].trim();
 		Writer writer = null;
+
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
+                NativeQueryLanguageComponentFactory.class);
+
 		
 		
 		try {
@@ -86,24 +89,26 @@ class QuestSesameMaterializerCMD {
 			
 			URI obdaURI =  new File(obdafile).toURI();
 			//create model
-			SQLOBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
+			OBDAModel model;
 			//obda mapping
-			if (obdaURI.toString().endsWith(".obda"))
+            //r2rml mapping
+			if (obdaURI.toString().endsWith(".ttl"))
 			{
-					ModelIOManager modelIO = new ModelIOManager(model);
-					try {
-						modelIO.load(new File(obdaURI));
-					} catch (IOException e) {
-						e.printStackTrace();
-					} catch (InvalidMappingExceptionWithIndicator e) {
-						e.printStackTrace();
-					}
-			}//r2rml mapping
-			else if (obdaURI.toString().endsWith(".ttl"))
-			{
-				R2RMLReader reader = new R2RMLReader(new File(obdaURI));
+				R2RMLReader reader = new R2RMLReader(new File(obdaURI), nativeQLFactory);
 				model = reader.readModel(obdaURI);
 			}
+            //if (obdaURI.toString().endsWith(".obda"))
+            else
+            {
+//					try {
+                MappingParser mappingParser = nativeQLFactory.create(new FileReader(obdaURI.toString()));
+                model = mappingParser.getOBDAModel();
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					} catch (InvalidMappingException e) {
+//						e.printStackTrace();
+//					}
+            }
 			
 			//create onto
 			Ontology onto = null;

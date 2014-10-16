@@ -29,6 +29,7 @@ import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
+import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMapImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
@@ -58,7 +59,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = translator.translate(owlonto);
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
-		EquivalenceMap eqMap = EquivalenceMap.getEquivalenceMap(reasoner);
+		EquivalenceMap eqMap = EquivalenceMapImpl.getEquivalenceMap(reasoner);
 		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap, ontology.getVocabulary());
 
 		assertEquals(3, simpleonto.getConcepts().size());
@@ -103,7 +104,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = translator.translate(owlonto);
 		
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
-		EquivalenceMap eqMap = EquivalenceMap.getEquivalenceMap(reasoner);
+		EquivalenceMap eqMap = EquivalenceMapImpl.getEquivalenceMap(reasoner);
 		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap, ontology.getVocabulary());
 
 		assertEquals(0, simpleonto.getConcepts().size());
@@ -147,7 +148,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = translator.translate(owlonto);
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
-		EquivalenceMap eqMap = EquivalenceMap.getEquivalenceMap(reasoner);
+		EquivalenceMap eqMap = EquivalenceMapImpl.getEquivalenceMap(reasoner);
 		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap, ontology.getVocabulary());
 
 		assertEquals(simpleonto.getConcepts().toString(), 3, simpleonto.getConcepts().size());
@@ -185,7 +186,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology ontology = translator.translate(owlonto);
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
-		EquivalenceMap eqMap = EquivalenceMap.getEquivalenceMap(reasoner);
+		EquivalenceMap eqMap = EquivalenceMapImpl.getEquivalenceMap(reasoner);
 		Ontology simpleonto = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, eqMap, ontology.getVocabulary());
 
 		assertEquals(12, simpleonto.getAssertions().size());

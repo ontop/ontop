@@ -25,7 +25,6 @@ import java.util.Iterator;
 import javax.swing.JFrame;
 
 import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 
 /*
  * SelectDB.java

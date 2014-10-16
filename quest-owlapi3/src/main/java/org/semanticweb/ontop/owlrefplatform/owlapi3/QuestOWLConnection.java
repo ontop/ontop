@@ -20,6 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
  * #L%
  */
 
+import org.semanticweb.ontop.model.OBDAConnection;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;

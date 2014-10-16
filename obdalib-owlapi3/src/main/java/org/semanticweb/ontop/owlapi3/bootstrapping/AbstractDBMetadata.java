@@ -23,8 +23,9 @@ package org.semanticweb.ontop.owlapi3.bootstrapping;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.SQLOBDAModel;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.owlapi3.directmapping.DirectMappingEngine;
 import org.semanticweb.ontop.sql.DBMetadata;
@@ -33,10 +34,15 @@ import org.semanticweb.owlapi.model.OWLOntology;
 
 public abstract class AbstractDBMetadata
 {
-	
-	private OWLOntology onto;
-	private SQLOBDAModel model;
+
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
+    private OWLOntology onto;
+	private OBDAModel model;
 	private OBDADataSource source;
+
+    protected AbstractDBMetadata(NativeQueryLanguageComponentFactory factory) {
+        this.nativeQLFactory = factory;
+    }
 	
 	protected DBMetadata getMetadata() throws Exception 
 	{
@@ -54,21 +60,23 @@ public abstract class AbstractDBMetadata
 		return metadata;
 	}
 	
-	protected void getOntologyAndDirectMappings(String baseuri, OWLOntology onto, SQLOBDAModel model, OBDADataSource source) throws Exception {
+	protected void getOntologyAndDirectMappings(String baseuri, OWLOntology onto, OBDAModel model, OBDADataSource source) throws Exception {
 		this.source = source;	
-		DirectMappingEngine engine = new DirectMappingEngine(baseuri, model.getMappings(source.getSourceID()).size());
+		DirectMappingEngine engine = new DirectMappingEngine(baseuri, model.getMappings(source.getSourceID()).size(),
+                nativeQLFactory);
 		this.model =  engine.extractMappings(model, source);
 		this.onto =  engine.getOntology(onto, onto.getOWLOntologyManager(), model);
 	}
 	
-	protected void getOntologyAndDirectMappings(DBMetadata metadata, String baseuri, OWLOntology onto, SQLOBDAModel model, OBDADataSource source) throws Exception {
+	protected void getOntologyAndDirectMappings(DBMetadata metadata, String baseuri, OWLOntology onto, OBDAModel model, OBDADataSource source) throws Exception {
 		this.source = source;	
-		DirectMappingEngine engine = new DirectMappingEngine(metadata, baseuri, model.getMappings(source.getSourceID()).size());
+		DirectMappingEngine engine = new DirectMappingEngine(metadata, baseuri, model.getMappings(source.getSourceID()).size(),
+                nativeQLFactory);
 		this.model =  engine.extractMappings(model, source);
 		this.onto =  engine.getOntology(onto, onto.getOWLOntologyManager(), model);
 	}
 	
-	protected SQLOBDAModel getOBDAModel()
+	protected OBDAModel getOBDAModel()
 	{
 		return this.model;
 	}
@@ -77,5 +85,9 @@ public abstract class AbstractDBMetadata
 	{
 		return this.onto;
 	}
+
+    protected NativeQueryLanguageComponentFactory getNativeQLFactory() {
+        return nativeQLFactory;
+    }
 	
 }

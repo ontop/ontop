@@ -26,8 +26,10 @@ import org.openrdf.rio.turtle.TurtleParser;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
+import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMapImpl;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
+import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManagerImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
@@ -70,11 +72,11 @@ public class SemanticIndexManager {
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontologyClosure);
 		// this is used to simplify the vocabulary of ABox assertions and mappings
-		equivalenceMaps = EquivalenceMap.getEquivalenceMap(reasoner);
+		equivalenceMaps = EquivalenceMapImpl.getEquivalenceMap(reasoner);
 		// generate a new TBox with a simpler vocabulary
 		optimizedOntology = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, equivalenceMaps, ontologyClosure.getVocabulary());
 			
-		dataRepository = new RDBMSSIRepositoryManager(optimizedOntology.getVocabulary());
+		dataRepository = new RDBMSSIRepositoryManagerImpl(optimizedOntology.getVocabulary());
 		TBoxReasoner optimizedDag = new TBoxReasonerImpl(optimizedOntology);
 		dataRepository.setTBox(optimizedDag);
 

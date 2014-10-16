@@ -20,10 +20,12 @@ package org.semanticweb.ontop.reformulation.tests;
  * #L%
  */
 
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -40,6 +42,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
@@ -61,14 +64,12 @@ import org.slf4j.LoggerFactory;
  * Use to check that no concurrency error appears. 
  */
 public class TMappingConcurrencyErrorFixTest{
-
-	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
 	private Connection connection;
 	
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private SQLOBDAModel obdaModel;
+	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/tmapping/exampleTMapping.owl";
@@ -83,8 +84,6 @@ public class TMappingConcurrencyErrorFixTest{
 		String url = "jdbc:h2:mem:questjunitdb;";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		connection = DriverManager.getConnection(url, username, password);
 		Statement st = connection.createStatement();
@@ -105,23 +104,28 @@ public class TMappingConcurrencyErrorFixTest{
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-		// Loading the OBDA data
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
+        /**
+         * Factory initialization
+         */
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+
+        /*
+         * Load the OBDA model from an external .obda file
+         */
+        MappingParser mappingParser = factory.create(new FileReader(obdafile));
+        obdaModel = mappingParser.getOBDAModel();
 	
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
+		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
+		questOWLFactory.setOBDAController(obdaModel);
 
-		factory.setPreferenceHolder(p);
+		questOWLFactory.setPreferenceHolder(p);
 
-		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

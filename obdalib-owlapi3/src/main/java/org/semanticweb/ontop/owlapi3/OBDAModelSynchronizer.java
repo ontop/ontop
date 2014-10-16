@@ -21,7 +21,7 @@ package org.semanticweb.ontop.owlapi3;
  */
 
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -39,7 +39,7 @@ public class OBDAModelSynchronizer {
 	 * 
 	 * @return the total number of declared entities.
 	 */
-	public static int declarePredicates(OWLOntology ontology, SQLOBDAModel model) {
+	public static int declarePredicates(OWLOntology ontology, OBDAModel model) {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 		int declarations = 0;

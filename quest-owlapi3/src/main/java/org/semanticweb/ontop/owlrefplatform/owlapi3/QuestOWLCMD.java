@@ -27,11 +27,14 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Properties;
 
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -160,14 +163,17 @@ public class QuestOWLCMD {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-		/*
-		 * Loading the OBDA model (database declaration and mappings) from the
-		 * .obda file (this code will change in the future)
-		 */
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		SQLOBDAModel obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
+        /**
+         * Factory initialization
+         */
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+
+        /*
+         * Load the OBDA model from an external .obda file
+         */
+        MappingParser mappingParser = factory.create(new FileReader(obdafile));
+        OBDAModel obdaModel = mappingParser.getOBDAModel();
 
 		/*
 		 * Preparing the configuration for the new Quest instance, we need to
@@ -177,15 +183,15 @@ public class QuestOWLCMD {
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
 		/*
-		 * Creating the instance of the reasoner using the factory. Remember
+		 * Creating the instance of the reasoner using the FACTORY. Remember
 		 * that the RDBMS that contains the data must be already running and
 		 * accepting connections. The HelloWorld and Books tutorials at our wiki
 		 * show you how to do this.
 		 */
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-		factory.setPreferenceHolder(p);
-		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
+		questOWLFactory.setOBDAController(obdaModel);
+		questOWLFactory.setPreferenceHolder(p);
+		reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology, new SimpleConfiguration());
 
 		/*
 		 * Now we are ready to query. Querying is done as with JDBC. First we

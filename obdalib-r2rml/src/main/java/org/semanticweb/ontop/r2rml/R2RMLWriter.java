@@ -23,9 +23,13 @@ package org.semanticweb.ontop.r2rml;
  * @author timea bagosi
  * Class responsible to write an r2rml turtle file given an obda model
  */
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.exception.DuplicateMappingException;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -34,10 +38,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
@@ -60,7 +61,7 @@ public class R2RMLWriter {
 	private PrefixManager prefixmng;
 	private OWLOntology ontology;
 	
-	public R2RMLWriter(File file, SQLOBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
+	public R2RMLWriter(File file, OBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
 	{
 		this(obdamodel, sourceURI, ontology);
 		try {
@@ -72,7 +73,7 @@ public class R2RMLWriter {
 		}
 	}
 	
-	public R2RMLWriter(SQLOBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
+	public R2RMLWriter(OBDAModel obdamodel, URI sourceURI, OWLOntology ontology)
 	{
 		this.sourceUri = sourceURI;	
 		this.mappings = obdamodel.getMappings(sourceUri);
@@ -80,11 +81,11 @@ public class R2RMLWriter {
 		this.ontology = ontology;
 	}
 	
-	public R2RMLWriter(SQLOBDAModel obdamodel, URI sourceURI){
+	public R2RMLWriter(OBDAModel obdamodel, URI sourceURI){
 		this(obdamodel, sourceURI, null);
 	}
 	
-	public R2RMLWriter(File file, SQLOBDAModel obdamodel, URI sourceURI){
+	public R2RMLWriter(File file, OBDAModel obdamodel, URI sourceURI){
 		this(file, obdamodel, sourceURI, null);
 	}
 
@@ -139,14 +140,18 @@ public class R2RMLWriter {
 			e.printStackTrace();
 		}
 	}
-	
 
 
-	
-	public static void main(String args[])
+    /**
+     * TODO: Should it not be somewhere else?
+     */
+	public static void main(String args[]) throws DuplicateMappingException
 	{
 		String file = "/Users/mindaugas/r2rml/test2.ttl";
-		R2RMLReader reader = new R2RMLReader(file);
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+
+		R2RMLReader reader = new R2RMLReader(file, nativeQLFactory);
 		OWLOntology ontology = null;
 
 		R2RMLWriter writer = new R2RMLWriter(reader.readModel(URI.create("test")),URI.create("test"), ontology);

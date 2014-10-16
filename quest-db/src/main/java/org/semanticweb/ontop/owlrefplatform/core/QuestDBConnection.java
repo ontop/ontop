@@ -20,6 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.core;
  * #L%
  */
 
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.model.OBDAConnection;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
@@ -27,9 +28,12 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
 public class QuestDBConnection implements OBDAConnection {
 
 	private final QuestConnection conn;
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
-	public QuestDBConnection(QuestConnection conn) {
+    public QuestDBConnection(QuestConnection conn,
+                             NativeQueryLanguageComponentFactory nativeQLFactory) {
 		this.conn = conn;
+        this.nativeQLFactory = nativeQLFactory;
 	}
 
 	@Override
@@ -40,7 +44,7 @@ public class QuestDBConnection implements OBDAConnection {
 
 	@Override
 	public QuestDBStatement createStatement() throws OBDAException {
-		return new QuestDBStatement(conn.createStatement());
+		return new QuestDBStatement(conn.createStatement(), nativeQLFactory);
 	}
 
 	@Override

@@ -7,16 +7,16 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3.example;
 
 
 
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
+import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.core.Quest;
+import org.semanticweb.ontop.owlrefplatform.core.*;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 import org.semanticweb.ontop.sql.DBMetadata;
@@ -24,7 +24,9 @@ import org.semanticweb.ontop.sql.TableDefinition;
 import org.semanticweb.ontop.sql.api.Attribute;
 
 import java.io.File;
-import java.util.Set;
+import java.io.FileReader;
+import java.util.*;
+
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -50,13 +52,17 @@ private void setup()  throws Exception {
 	OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 	OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
+    /**
+     * Factory initialization
+     */
+    Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+    NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+
 	/*
 	 * Load the OBDA model from an external .obda file
 	 */
-	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	SQLOBDAModel obdaModel = fac.getOBDAModel();
-	ModelIOManager ioManager = new ModelIOManager(obdaModel);
-	ioManager.load(obdafile);
+    MappingParser mappingParser = factory.create(new FileReader(obdafile));
+    OBDAModel obdaModel = mappingParser.getOBDAModel();
 	
 	/*
 	 * Prepare the configuration for the Quest instance. The example below shows the setup for
@@ -65,14 +71,17 @@ private void setup()  throws Exception {
 	QuestPreferences preference = new QuestPreferences();
 	preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 	DBMetadata dbMetadata = getMeta();
-	Quest qest = new Quest(getOntologyFromOWLOntology(ontology), obdaModel, dbMetadata, preference);
-	qest.setupRepository();
+
+    QuestComponentFactory componentFactory = injector.getInstance(QuestComponentFactory.class);
+	Quest quest = componentFactory.create(getOntologyFromOWLOntology(ontology),
+            obdaModel, dbMetadata, preference);
+	quest.setupRepository();
 	
 	/*
 	 * Prepare the data connection for querying.
 	 */
 	
-	QuestConnection conn =qest.getConnection();
+	QuestConnection conn = (QuestConnection) quest.getConnection();
 	QuestOWLConnection connOWL = new QuestOWLConnection(conn);
 	qst = connOWL.createStatement();
 }

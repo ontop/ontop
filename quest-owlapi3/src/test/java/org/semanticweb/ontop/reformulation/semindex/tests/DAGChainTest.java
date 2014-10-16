@@ -33,11 +33,7 @@ import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.PropertySomeRestriction;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.*;
 
 import junit.framework.TestCase;
 

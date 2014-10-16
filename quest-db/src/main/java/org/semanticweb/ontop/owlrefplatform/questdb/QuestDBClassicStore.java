@@ -42,10 +42,7 @@ import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.BasicParserSettings;
 import org.openrdf.rio.helpers.RDFHandlerBase;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.ontology.Assertion;
@@ -55,11 +52,8 @@ import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
-import org.semanticweb.ontop.owlrefplatform.core.Quest;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
+import org.semanticweb.ontop.owlrefplatform.core.*;
+import org.semanticweb.ontop.owlrefplatform.core.QuestImpl;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -88,18 +82,14 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	
 	private Set<OWLOntology> closure;
 
-	public QuestDBClassicStore(String name, java.net.URI tboxFile) 	throws Exception {
-		this(name, tboxFile, null);
-	}
-
 	public QuestDBClassicStore(String name, java.net.URI tboxFile, QuestPreferences config) throws Exception {
-		super(name);
+		super(name, config);
 		Ontology tbox = readOntology(tboxFile.toASCIIString());
 		setup(tbox, config);
 	}
 	
 	public QuestDBClassicStore(String name, String tboxFile, QuestPreferences config) throws Exception {
-		super(name);
+		super(name, config);
 		Ontology tbox = null;
 		if (tboxFile == null) {
 			tbox = ofac.createOntology(name);
@@ -126,7 +116,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 
 	public QuestDBClassicStore(String name, Dataset data, QuestPreferences config) throws Exception {
-		super(name);
+		super(name, config);
 		Ontology tbox = getTBox(data);
 		setup(tbox, config);
 	}
@@ -144,14 +134,15 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 
 	private void createInstance(Ontology tbox, QuestPreferences config) throws Exception {
-		questInstance = new Quest(tbox,config);
+        questInstance = getComponentFactory().create(tbox, null, null, config);
 
 		questInstance.setupRepository();
 		
 		final boolean bObtainFromOntology = config.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
 		final boolean bObtainFromMappings = config.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
-		QuestConnection conn = questInstance.getNonPoolConnection();
-		QuestStatement st = conn.createStatement();
+		OBDAConnection conn = questInstance.getNonPoolConnection();
+        //TODO: avoid this cast
+		QuestStatement st = (QuestStatement) conn.createStatement();
 		if (bObtainFromOntology) {
 			// Retrieves the ABox from the ontology file.
 			log.debug("Loading data from Ontology into the database");
@@ -162,7 +153,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		if (bObtainFromMappings) {
 			// Retrieves the ABox from the target database via mapping.
 			log.debug("Loading data from Mappings into the database");
-			SQLOBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
+			OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
 			for (Predicate p : tbox.getVocabulary()) {
 				obdaModelForMaterialization.declarePredicate(p);
 			}
@@ -193,7 +184,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	public QuestConnection getQuestConnection() {
 		QuestConnection conn = null;
 		try {
-			conn = questInstance.getConnection();
+            //TODO: avoid this cast
+			conn = (QuestConnection) questInstance.getConnection();
 		} catch (OBDAException e) {
 			e.printStackTrace();
 		}

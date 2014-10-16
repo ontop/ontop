@@ -22,17 +22,15 @@ package org.semanticweb.ontop.owlapi3.directmapping;
 
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import com.google.common.collect.ImmutableList;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.SQLOBDAModelImpl;
+import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.DataDefinition;
 import org.semanticweb.ontop.sql.JDBCConnectionManager;
@@ -47,6 +45,8 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+
+import javax.activation.DataSource;
 
 //import com.hp.hpl.jena.iri.impl.IRIFactoryImpl;
 //import it.unibz.krdb.obda.model.net.IRIFactory;
@@ -68,14 +68,19 @@ public class DirectMappingEngine {
 	private DBMetadata metadata = null;
 	private String baseuri;
 	private int mapidx = 1;
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
 	
-	public DirectMappingEngine(String baseUri, int mapnr){
+	public DirectMappingEngine(String baseUri, int mapnr,
+                               NativeQueryLanguageComponentFactory nativeQLFactory){
+        this.nativeQLFactory = nativeQLFactory;
 		conMan = JDBCConnectionManager.getJDBCConnectionManager();
 		baseuri = baseUri;
 		mapidx = mapnr + 1;
 	}
 	
-	public DirectMappingEngine(DBMetadata metadata, String baseUri, int mapnr){
+	public DirectMappingEngine(DBMetadata metadata, String baseUri, int mapnr,
+                               NativeQueryLanguageComponentFactory nativeQLFactory){
+        this.nativeQLFactory = nativeQLFactory;
 		this.metadata = metadata;
 		baseuri = baseUri;
 		mapidx = mapnr + 1;
@@ -104,13 +109,11 @@ public class DirectMappingEngine {
 	 * 
 	 * @return null
 	 * 		   the ontology is updated
-	 * 
-	 * @throws Exceptions
+	 *
 	 */
 			
-	public void enrichOntology(OWLOntology ontology, SQLOBDAModel model) throws OWLOntologyStorageException, SQLException{
-		List<OBDADataSource> sourcelist = new ArrayList<OBDADataSource>();
-		sourcelist = model.getSources();
+	public void enrichOntology(OWLOntology ontology, OBDAModel model) throws OWLOntologyStorageException, SQLException{
+		Set<OBDADataSource> sources = model.getSources();
 		OntoExpansion oe = new OntoExpansion();
 		if(model.getPrefixManager().getDefaultPrefix().endsWith("/")){
 			oe.setURI(model.getPrefixManager().getDefaultPrefix());
@@ -120,8 +123,8 @@ public class DirectMappingEngine {
 		
 		//For each data source, enrich into the ontology
 		if (metadata == null) {
-			for (int i = 0; i < sourcelist.size(); i++) {
-				oe.enrichOntology(conMan.getMetaData(sourcelist.get(i)),
+			for (OBDADataSource source: sources) {
+				oe.enrichOntology(conMan.getMetaData(source),
 						ontology);
 			}
 		} else
@@ -137,10 +140,10 @@ public class DirectMappingEngine {
 	 * @param model
 	 * 
 	 * @return a new ontology storing all classes and properties used in the mappings
-	 * 
-	 * @throws Exceptions
+	 *
 	 */
-	public OWLOntology getOntology(OWLOntology ontology, OWLOntologyManager manager, SQLOBDAModel model) throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException{
+	public OWLOntology getOntology(OWLOntology ontology, OWLOntologyManager manager, OBDAModel model)
+            throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException{
 		OWLDataFactory dataFactory = manager.getOWLDataFactory();
 		
 		Set<Predicate> classset = model.getDeclaredClasses();
@@ -173,21 +176,26 @@ public class DirectMappingEngine {
 	
 	
 	/***
-	 * extract all the mappings from a datasource
+	 * extract all the mappings from a datasource.
+     *
+     * TODO: refactor.
 	 * 
 	 * @param source
 	 * 
 	 * @return a new OBDA Model containing all the extracted mappings
 	 * @throws Exception 
 	 */
-	public SQLOBDAModel extractMappings(OBDADataSource source) throws Exception{
-		SQLOBDAModelImpl model = new SQLOBDAModelImpl();
-		return extractMappings(model, source);
+	public OBDAModel extractMappings(OBDADataSource source) throws Exception{
+        //TODO: avoid this empty construction
+        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
+        OBDAModel emptyModel = nativeQLFactory.create(new HashSet<OBDADataSource>(),
+                new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(),prefixManager);
+
+		return extractMappings(emptyModel, source);
 	}
 	
-	public SQLOBDAModel extractMappings(SQLOBDAModel model, OBDADataSource source) throws Exception{
-		insertMapping(source, model);
-		return model;
+	public OBDAModel extractMappings(OBDAModel model, OBDADataSource source) throws Exception{
+		return insertMapping(source, model);
 	}
 	
 	
@@ -197,43 +205,60 @@ public class DirectMappingEngine {
 	 * @param source
 	 * @param model
 	 * 
-	 * @return null
+	 * @return the new model
 	 * 
 	 * Duplicate Exception may happen,
 	 * since mapping id is generated randomly and same id may occur
 	 * @throws Exception 
 	 */
-	public void insertMapping(OBDADataSource source, SQLOBDAModel model) throws Exception{
-		model.addSource(source);
-		insertMapping(conMan.getMetaData(source),model,source.getSourceID());
-	}
-	
-	
-	public void insertMapping(DBMetadata metadata, SQLOBDAModel model, URI sourceUri) throws Exception{
+	public OBDAModel insertMapping(OBDADataSource source, OBDAModel model) throws Exception{
+        if (model == null) {
+            throw new IllegalArgumentException("Model should not be null");
+        }
+
+        Set<OBDADataSource> dataSources = new HashSet<>(model.getSources());
+        dataSources.add(source);
+
+        DBMetadata metadata = conMan.getMetaData(source);
+        URI sourceUri = source.getSourceID();
+
 		if (baseuri == null || baseuri.isEmpty())
 			this.baseuri = model.getPrefixManager().getDefaultPrefix();
+
+
 		List<TableDefinition> tables = metadata.getTableList();
-		List<OBDAMappingAxiom> mappingAxioms = new ArrayList<OBDAMappingAxiom>();
+		List<OBDAMappingAxiom> mappingAxioms = new ArrayList<>();
 		for (int i = 0; i < tables.size(); i++) {
 			TableDefinition td = tables.get(i);
-			model.addMappings(sourceUri, getMapping(td, metadata, baseuri));
+            mappingAxioms.addAll(getMapping(td, metadata, baseuri));
 		}
-		model.addMappings(sourceUri, mappingAxioms);
-		for (URI uri : model.getMappings().keySet()) {
-			for (OBDAMappingAxiom mapping : model.getMappings().get(uri)) {
+
+        Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex = new HashMap<>(model.getMappings());
+        if (mappingIndex.containsKey(sourceUri)) {
+            // Should throw an exception when constructing the model if there is duplicates.
+            mappingAxioms.addAll(mappingIndex.get(sourceUri));
+        }
+        mappingIndex.put(sourceUri, ImmutableList.copyOf(mappingAxioms));
+
+        // Inconsistencies should throw an exception
+        OBDAModel newModel = model.newModel(dataSources, mappingIndex);
+
+		for (URI uri : newModel.getMappings().keySet()) {
+			for (OBDAMappingAxiom mapping : newModel.getMappings().get(uri)) {
 				OBDAQuery q = mapping.getTargetQuery();
 				CQIE rule = (CQIE) q;
 				for (Function f : rule.getBody()) {
 					if (f.getArity() == 1)
-						model.declarePredicate(f.getFunctionSymbol());
+                        newModel.declarePredicate(f.getFunctionSymbol());
 					else if (f.getFunctionSymbol().getType(1)
 							.equals(COL_TYPE.OBJECT))
-						model.declareObjectProperty(f.getFunctionSymbol());
+                        newModel.declareObjectProperty(f.getFunctionSymbol());
 					else
-						model.declareDataProperty(f.getFunctionSymbol());
+                        newModel.declareDataProperty(f.getFunctionSymbol());
 				}
 			}
 		}
+        return newModel;
 	}
 	
 	/***

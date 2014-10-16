@@ -24,7 +24,6 @@ import javax.swing.JTextPane;
 import javax.swing.text.DefaultStyledDocument;
 
 import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 
 public class MappingStyledDocument extends DefaultStyledDocument {
 

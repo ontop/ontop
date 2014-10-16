@@ -23,10 +23,14 @@ package org.semanticweb.ontop.owlrefplatform.questdb;
 import java.io.Serializable;
 import java.util.Properties;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.owlrefplatform.core.Quest;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
-import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
+import org.semanticweb.ontop.owlrefplatform.core.*;
+import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentModule;
 
 public abstract class QuestDBAbstractStore implements Serializable {
 
@@ -37,9 +41,23 @@ public abstract class QuestDBAbstractStore implements Serializable {
 
 	protected String name;
 
-	public QuestDBAbstractStore(String name) {
+    private final Injector injector;
+    private final QuestComponentFactory componentFactory;
+
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
+
+	public QuestDBAbstractStore(String name, QuestPreferences config) {
 		this.name = name;
-	}
+
+        /**
+         * Setup the dependency injection for the QuestComponentFactory
+         */
+        injector = Guice.createInjector(new OntopCoreModule(config),
+                new QuestComponentModule(config));
+        nativeQLFactory = injector.getInstance(
+                NativeQueryLanguageComponentFactory.class);
+        componentFactory = injector.getInstance(QuestComponentFactory.class);
+    }
 
 
 	public String getName() {
@@ -62,9 +80,17 @@ public abstract class QuestDBAbstractStore implements Serializable {
 
 	public QuestDBConnection getConnection() throws OBDAException {
 	//	System.out.println("getquestdbconn..");
-		return new QuestDBConnection(getQuestConnection());
+		return new QuestDBConnection(getQuestConnection(), nativeQLFactory);
 	}
 	
 	public abstract QuestConnection getQuestConnection();
+
+    protected QuestComponentFactory getComponentFactory() {
+        return componentFactory;
+    }
+
+    protected NativeQueryLanguageComponentFactory getNativeQLFactory() {
+        return nativeQLFactory;
+    }
 
 }

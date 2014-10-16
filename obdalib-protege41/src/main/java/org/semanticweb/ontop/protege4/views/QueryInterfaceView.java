@@ -38,7 +38,7 @@ import org.protege.editor.core.ProtegeManager;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.ontop.io.PrefixManager;
-import org.semanticweb.ontop.model.impl.SQLOBDAModelImpl;
+import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.owlapi3.OWLResultSetWriter;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
@@ -99,7 +99,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 
 	@Override
 	protected void initialiseOWLView() throws Exception {
-		obdaController = (OBDAModelManager) getOWLEditorKit().get(SQLOBDAModelImpl.class.getName());
+		obdaController = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		obdaController.addListener(this);
 
 		prefixManager = obdaController.getActiveOBDAModel().getPrefixManager();

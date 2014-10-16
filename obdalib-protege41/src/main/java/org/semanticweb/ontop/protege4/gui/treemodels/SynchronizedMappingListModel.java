@@ -28,7 +28,6 @@ import javax.swing.AbstractListModel;
 
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAMappingListener;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 
 public class SynchronizedMappingListModel extends AbstractListModel implements FilteredModel, OBDAMappingListener {
 

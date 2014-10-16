@@ -29,14 +29,17 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Iterator;
+import java.util.*;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.ClassAssertion;
 import org.semanticweb.ontop.ontology.DataPropertyAssertion;
@@ -58,12 +61,22 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 	private Logger log =  LoggerFactory.getLogger(this.getClass());
 
+    private final NativeQueryLanguageComponentFactory factory;
+
 	private static QuestPreferences prefs;
 	static {
 		prefs = new QuestPreferences();
 		prefs.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		prefs.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
 	}
+
+    public QuestOWLMaterializerTest() {
+        /**
+         * Factory initialization
+         */
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+    }
 
 	@Override
 	public void setUp() throws Exception {
@@ -115,10 +128,14 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 	public void testDataWithModel() throws Exception {
 	
-			File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
-			SQLOBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
-			ModelIOManager man = new ModelIOManager(model);
-			man.load(f);
+	    File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
+
+        /*
+         * Load the OBDA model from an external .obda file
+         */
+        MappingParser mappingParser = factory.create(new FileReader(f));
+        OBDAModel model = mappingParser.getOBDAModel();
+
 			QuestMaterializer mat = new QuestMaterializer(model, prefs);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
@@ -144,9 +161,8 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 			// read model
 			File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
-			SQLOBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
-			ModelIOManager man = new ModelIOManager(model);
-			man.load(f);
+            MappingParser mappingParser = factory.create(new FileReader(f));
+            OBDAModel model = mappingParser.getOBDAModel();
 			
 			// read onto 
 			File fo = new File("src/test/resources/test/materializer/MaterializeTest.owl");

@@ -25,7 +25,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
-import org.semanticweb.ontop.model.impl.SQLOBDAModelImpl;
+import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.core.OBDAModelManagerListener;
 import org.semanticweb.ontop.protege4.panels.DatasourceParameterEditorPanel;
@@ -53,7 +53,7 @@ public class DatasourceParametersEditorView extends AbstractOWLViewComponent imp
 		
 		
 		
-		apic = (OBDAModelManager) getOWLEditorKit().get(SQLOBDAModelImpl.class.getName());
+		apic = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		apic.addListener(this);
 
 		panel = new DatasourceParameterEditorPanel(apic.getActiveOBDAModel());

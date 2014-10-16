@@ -28,15 +28,17 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import junit.framework.TestCase;
 
-import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -70,7 +72,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private SQLOBDAModel obdaModel;
+	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/lung-cancer3.owl";
@@ -109,11 +111,17 @@ public class LungCancerH2TestVirtual extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
+        /**
+         * Factory initialization
+         */
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+
+        /*
+         * Load the OBDA model from an external .obda file
+         */
+        MappingParser mappingParser = factory.create(new FileReader(obdafile));
+        obdaModel = mappingParser.getOBDAModel();
 		
 	}
 

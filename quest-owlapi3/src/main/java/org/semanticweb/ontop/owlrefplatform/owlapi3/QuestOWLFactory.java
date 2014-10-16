@@ -20,7 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
  * #L%
  */
 
-import org.semanticweb.ontop.model.SQLOBDAModel;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
@@ -43,16 +43,16 @@ import org.slf4j.LoggerFactory;
  * Note, to create an instance of Quest first you must call the method
  * {@link #setPreferenceHolder(Properties)} with your parameters see Quest.java
  * for a description of the preferences. Also, if you use Quest in Virtual ABox
- * mode you must set an {@link org.semanticweb.ontop.model.SQLOBDAModel} with your mappings.
+ * mode you must set an {@link org.semanticweb.ontop.model.OBDAModel} with your mappings.
  * 
- * @see org.semanticweb.ontop.model.SQLOBDAModel
+ * @see org.semanticweb.ontop.model.OBDAModel
  * 
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
  * 
  */
 public class QuestOWLFactory implements OWLReasonerFactory {
 
-	private SQLOBDAModel mappingManager = null;
+	private OBDAModel mappingManager = null;
 	private Properties preferences = null;
 	
 	/**
@@ -74,7 +74,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	 * 
 	 * @param apic
 	 */
-	public void setOBDAController(SQLOBDAModel apic) {
+	public void setOBDAController(OBDAModel apic) {
 		this.mappingManager = apic;
 	}
 

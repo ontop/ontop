@@ -20,15 +20,25 @@ package org.semanticweb.ontop.reformulation.semindex.tests;
  * #L%
  */
 
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.io.PrefixManager;
+import org.semanticweb.ontop.model.OBDADataSource;
+import org.semanticweb.ontop.model.OBDAMappingAxiom;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 
 import java.io.File;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Properties;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -53,10 +63,19 @@ public class SNOMEDTest {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-		// Loading the OBDA data
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+        /**
+         * Factory initialization
+         */
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 
-		SQLOBDAModel obdaModel = fac.getOBDAModel();
+        /*
+         * Load the OBDA model from an external .obda file
+         */
+        PrefixManager prefixManager = factory.create(new HashMap<String, String>());
+        OBDAModel obdaModel = factory.create(ImmutableSet.<OBDADataSource>of(),
+                new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(),
+                prefixManager);
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -72,14 +91,14 @@ public class SNOMEDTest {
 		 */
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
+		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
+		questOWLFactory.setOBDAController(obdaModel);
 
-		factory.setPreferenceHolder(p);
+		questOWLFactory.setPreferenceHolder(p);
 
 		log.info("Creating the reasoner");
 		
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology, new SimpleConfiguration());
 		
 		log.info("Done");
 		

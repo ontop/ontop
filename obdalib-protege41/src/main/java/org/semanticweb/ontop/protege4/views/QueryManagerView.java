@@ -23,7 +23,7 @@ package org.semanticweb.ontop.protege4.views;
 import java.awt.BorderLayout;
 
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
-import org.semanticweb.ontop.model.impl.SQLOBDAModelImpl;
+import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.core.OBDAModelManagerListener;
 import org.semanticweb.ontop.protege4.panels.SavedQueriesPanel;
@@ -49,7 +49,7 @@ public class QueryManagerView extends AbstractOWLViewComponent implements OBDAMo
 
 	@Override
 	protected void initialiseOWLView() throws Exception {
-		obdaController = (OBDAModelManager) getOWLEditorKit().get(SQLOBDAModelImpl.class.getName());
+		obdaController = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		obdaController.addListener(this);
 
 		setLayout(new BorderLayout());

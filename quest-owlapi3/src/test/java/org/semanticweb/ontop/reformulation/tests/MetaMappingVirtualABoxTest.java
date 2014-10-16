@@ -32,15 +32,17 @@ import java.util.Properties;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*; 
+import static org.junit.Assert.*;
 
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -71,15 +73,21 @@ import org.slf4j.LoggerFactory;
 public class MetaMappingVirtualABoxTest{
 
 
-	private OBDADataFactory fac;
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private SQLOBDAModel obdaModel;
+	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/metamapping.owl";
 	final String obdafile = "src/test/resources/test/metamapping.obda";
+
+    private final NativeQueryLanguageComponentFactory factory;
+
+    public MetaMappingVirtualABoxTest() {
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+    }
 
 	@Before
 	public void setUp() throws Exception {
@@ -92,8 +100,6 @@ public class MetaMappingVirtualABoxTest{
 		String url = "jdbc:h2:mem:questjunitdb_meta;DATABASE_TO_UPPER=FALSE";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -110,10 +116,8 @@ public class MetaMappingVirtualABoxTest{
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
 		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
+        MappingParser mappingParser = factory.create(new FileReader(obdafile));
+        obdaModel = mappingParser.getOBDAModel();
 		
 	}
 

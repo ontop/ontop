@@ -5,10 +5,9 @@ package org.semanticweb.ontop.obda;
  * Created by Sarah on 30/07/14.
  */
 
-        import org.semanticweb.ontop.io.ModelIOManager;
+        import org.semanticweb.ontop.io.SQLMappingParser;
         import org.semanticweb.ontop.io.QueryIOManager;
         import org.semanticweb.ontop.model.OBDADataFactory;
-        import org.semanticweb.ontop.model.SQLOBDAModel;
         import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
         import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
         import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -54,7 +53,7 @@ public class ImdbTestPostgres {
         // Loading the OBDA data
         obdaModel = fac.getOBDAModel();
 
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
+        SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
         ioManager.load(obdaFile);
 
     }

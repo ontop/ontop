@@ -21,10 +21,9 @@ package org.semanticweb.ontop.parser;
  */
 
 
-import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -117,7 +116,7 @@ public class OracleORDERBYTest {
     @Test
     public void testOrderBy() throws Exception {
 
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
+        SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
         ioManager.load(obdaFile);
         String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
                 "SELECT ?x ?name " +

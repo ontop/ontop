@@ -103,7 +103,7 @@ public class MongoMappingParser implements MappingParser {
      * parses the mappingDocument as a list of mapping axioms
      */
     @Override
-    public List<OBDAMappingAxiom> parse() throws InvalidMongoMappingException  {
+    public List<OBDAMappingAxiom> getOBDAModel() throws InvalidMongoMappingException  {
     	JsonParser parser = new JsonParser();
     	JsonElement root = parser.parse(mappingDocument);
   	

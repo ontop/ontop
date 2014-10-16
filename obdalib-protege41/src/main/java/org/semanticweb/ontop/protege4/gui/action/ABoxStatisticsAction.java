@@ -31,8 +31,7 @@ import javax.swing.JPanel;
 
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.SQLOBDAModelImpl;
+import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.panels.OBDAModelStatisticsPanel;
 import org.semanticweb.ontop.protege4.utils.DialogUtils;
@@ -49,7 +48,7 @@ public class ABoxStatisticsAction extends ProtegeAction {
 	@Override
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit)getEditorKit();		
-		obdaModel = ((OBDAModelManager)editorKit.get(SQLOBDAModelImpl.class.getName())).getActiveOBDAModel();
+		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModel();
 		statistics = new VirtualABoxStatistics(obdaModel);
 	}
 

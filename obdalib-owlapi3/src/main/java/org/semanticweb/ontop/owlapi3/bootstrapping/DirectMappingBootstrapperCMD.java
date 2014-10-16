@@ -21,9 +21,14 @@ package org.semanticweb.ontop.owlapi3.bootstrapping;
  */
 
 import java.io.File;
+import java.util.Properties;
 
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.SQLOBDAModel;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.io.OntopMappingWriter;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -72,12 +77,16 @@ public class DirectMappingBootstrapperCMD {
 				if (owlfile != null) {
 					File owl = new File(owlfile);
 					File obda = new File(obdafile);
+
+                    Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+                    NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+
 					DirectMappingBootstrapper dm = new DirectMappingBootstrapper(
-							uri, url, user, passw, driver);
-					SQLOBDAModel model = dm.getModel();
+							uri, url, user, passw, driver, factory);
+					OBDAModel model = dm.getModel();
 					OWLOntology onto = dm.getOntology();
-					ModelIOManager mng = new ModelIOManager(model);
-					mng.save(obda);
+					OntopMappingWriter writer = new OntopMappingWriter(model);
+					writer.save(obda);
 					onto.getOWLOntologyManager().saveOntology(onto,
 							new FileDocumentTarget(owl));
 				} else {

@@ -22,10 +22,9 @@ package org.semanticweb.ontop.r2rml;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Ontology;
@@ -360,7 +359,7 @@ public class R2rmlCheckerTest {
 		fac = OBDADataFactoryImpl.getInstance();
 		obdaModel = fac.getOBDAModel();
 
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
+		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
 		ioManager.load(obdafile);
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();

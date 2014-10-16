@@ -7,18 +7,22 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Scanner;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.junit.After;
 import org.junit.Test;
-import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.owlrefplatform.core.Quest;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -38,7 +42,6 @@ import org.slf4j.LoggerFactory;
  */
 public class TestQuestImplicitDBConstraints {
 
-	Quest quest;
 	static String uc_owlfile = "src/test/resources/userconstraints/uc.owl";
 	static String uc_obdafile = "src/test/resources/userconstraints/uc.obda";
 	static String uc_keyfile = "src/test/resources/userconstraints/keys.lst";
@@ -48,18 +51,24 @@ public class TestQuestImplicitDBConstraints {
 	static String fk_obdafile = "src/test/resources/userconstraints/fk.obda";
 	static String fk_keyfile = "src/test/resources/userconstraints/fk-keys.lst";
 	static String fk_create = "src/test/resources/userconstraints/fk-create.sql";
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
-	
-	private OBDADataFactory fac;
+
+    private OBDADataFactory fac;
 	private QuestOWLConnection conn;
 	private QuestOWLFactory factory;
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private SQLOBDAModel obdaModel;
+	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
+
+    public TestQuestImplicitDBConstraints() {
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+    }
 
 
 	
@@ -85,11 +94,8 @@ public class TestQuestImplicitDBConstraints {
 			ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
 			// Loading the OBDA data
-			fac = OBDADataFactoryImpl.getInstance();
-			obdaModel = fac.getOBDAModel();
-
-			ModelIOManager ioManager = new ModelIOManager(obdaModel);
-			ioManager.load(obdafile);
+            MappingParser parser = nativeQLFactory.create(new FileReader(obdafile));
+			obdaModel = parser.getOBDAModel();
 
 			QuestPreferences p = new QuestPreferences();
 			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);

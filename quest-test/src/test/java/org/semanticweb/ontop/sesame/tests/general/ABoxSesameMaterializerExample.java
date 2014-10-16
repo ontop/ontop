@@ -28,9 +28,8 @@ import java.io.OutputStreamWriter;
 import org.openrdf.model.Statement;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.n3.N3Writer;
-import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.sesame.SesameMaterializer;
 import org.semanticweb.ontop.sesame.SesameStatementIterator;
@@ -51,7 +50,7 @@ public class ABoxSesameMaterializerExample {
 		 */
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		SQLOBDAModel obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
+		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
 		ioManager.load(inputFile);
 
 		/*

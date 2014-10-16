@@ -28,14 +28,19 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import junit.framework.TestCase;
 
-import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
+import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.exception.InvalidPredicateDeclarationException;
-import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -58,10 +63,20 @@ public class MappingAnalyzerTest extends TestCase {
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private SQLOBDAModel obdaModel;
+	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
+    private final NativeQueryLanguageComponentFactory factory;
+
 	final String owlfile = "src/test/resources/test/mappinganalyzer/ontology.owl";
+
+    public MappingAnalyzerTest() {
+        /**
+         * Factory initialization
+         */
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+    }
 
 	@Override
 	public void setUp() throws Exception {
@@ -90,8 +105,8 @@ public class MappingAnalyzerTest extends TestCase {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-		
-		obdaModel = fac.getOBDAModel();
+
+        obdaModel = null;
 	}
 
 	@Override
@@ -136,9 +151,10 @@ public class MappingAnalyzerTest extends TestCase {
 		reasoner.getStatement();
 	}
 
-	public void testMapping_1() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_1.obda");
+	public void testMapping_1() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_1.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -146,9 +162,10 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_2() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_2.obda");
+	public void testMapping_2() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_2.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -156,9 +173,10 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_3() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_3.obda");
+	public void testMapping_3() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_3.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -166,9 +184,10 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_4() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_4.obda");
+	public void testMapping_4() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_4.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -176,9 +195,10 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_5() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_5.obda");
+	public void testMapping_5() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_5.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -186,9 +206,10 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_6() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_6.obda");
+	public void testMapping_6() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_6.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -196,9 +217,10 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_7() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_7.obda");
+	public void testMapping_7() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_7.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -206,9 +228,10 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_8() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_8.obda");
+	public void testMapping_8() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_8.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -216,9 +239,10 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_9() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_9.obda");
+	public void testMapping_9() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_9.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -226,9 +250,10 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_10() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_10.obda");
+	public void testMapping_10() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_10.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -236,9 +261,10 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_11() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_11.obda");
+	public void testMapping_11() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_11.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -246,9 +272,10 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_12() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_12.obda");
+	public void testMapping_12() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_12.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -256,9 +283,10 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_13() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_13.obda");
+	public void testMapping_13() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_13.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -266,9 +294,10 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_14() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_14.obda");
+	public void testMapping_14() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_14.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -276,9 +305,11 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_15() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_15.obda");
+	public void testMapping_15() throws IOException, InvalidPredicateDeclarationException,
+            InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_15.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -286,9 +317,11 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_16() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_16.obda");
+	public void testMapping_16() throws IOException, InvalidPredicateDeclarationException,
+            InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_16.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -296,9 +329,11 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_17() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_17.obda");
+	public void testMapping_17() throws IOException, InvalidPredicateDeclarationException,
+            InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_17.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {
@@ -306,9 +341,11 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_18() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load("src/test/resources/test/mappinganalyzer/case_18.obda");
+	public void testMapping_18() throws IOException, InvalidPredicateDeclarationException,
+            InvalidMappingException {
+        MappingParser mappingParser = factory.create(new FileReader(
+                "src/test/resources/test/mappinganalyzer/case_18.obda"));
+        obdaModel = mappingParser.getOBDAModel();
 		try {
 			runTests();
 		} catch (Exception e) {

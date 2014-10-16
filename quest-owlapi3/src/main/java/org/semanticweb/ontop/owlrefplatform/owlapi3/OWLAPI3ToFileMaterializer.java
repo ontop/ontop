@@ -20,18 +20,15 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
  * #L%
  */
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 import java.net.URI;
+import java.util.Properties;
 
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import com.google.inject.Guice;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlapi3.QuestOWLIndividualIterator;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
@@ -50,7 +47,8 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
  */
 public class OWLAPI3ToFileMaterializer {
 
-	static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+	static NativeQueryLanguageComponentFactory FACTORY = Guice.createInjector(
+            new OntopCoreModule(new Properties())).getInstance(NativeQueryLanguageComponentFactory.class);
 
 	public static int materialize(File outputFile, URI inputFile) throws Exception {
 		File input = new File(inputFile);
@@ -58,20 +56,20 @@ public class OWLAPI3ToFileMaterializer {
 	}
 
 	public static int materialize(File outputFile, File inputFile) throws Exception {
-		SQLOBDAModel newModel = ofac.getOBDAModel();
-		ModelIOManager io = new ModelIOManager(newModel);
-		io.load(inputFile);
+        MappingParser mappingParser = FACTORY.create(new FileReader(inputFile));
+        OBDAModel newModel = mappingParser.getOBDAModel();
+
 		return materializeN3(outputFile, newModel);
 	}
-	public static int materializeN3(File outputFile, SQLOBDAModel model) throws Exception {
+	public static int materializeN3(File outputFile, OBDAModel model) throws Exception {
 		return materializeN3(new FileOutputStream(outputFile), model);
 	}
 	
-	public static int materializeN3(OutputStream outputStream, SQLOBDAModel model) throws Exception {
+	public static int materializeN3(OutputStream outputStream, OBDAModel model) throws Exception {
 		return materializeN3(new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8")), model);
 	}
 
-	public static int materializeN3(Writer bf, SQLOBDAModel model) throws Exception {
+	public static int materializeN3(Writer bf, OBDAModel model) throws Exception {
 		return materializeN3(bf, (new OWLAPI3Materializer(model)).getIterator());
 	}
 	

@@ -22,7 +22,7 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
 
 import java.util.Iterator;
 
-import org.semanticweb.ontop.model.SQLOBDAModel;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlapi3.QuestOWLIndividualIterator;
@@ -33,11 +33,11 @@ public class OWLAPI3Materializer {
 	private Iterator<Assertion> assertions = null;
 	private QuestMaterializer materializer;
 	
-	public OWLAPI3Materializer(SQLOBDAModel model) throws Exception {
+	public OWLAPI3Materializer(OBDAModel model) throws Exception {
 		 this(model, null);
 	}
 	
-	public OWLAPI3Materializer(SQLOBDAModel model, Ontology onto) throws Exception {
+	public OWLAPI3Materializer(OBDAModel model, Ontology onto) throws Exception {
 		 materializer = new QuestMaterializer(model, onto);
 		 assertions = materializer.getAssertionIterator();
 	}

@@ -21,7 +21,11 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
  */
 
 
-import org.semanticweb.ontop.model.SQLOBDAModel;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.Axiom;
 import org.semanticweb.ontop.ontology.DisjointClassAxiom;
@@ -31,11 +35,7 @@ import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.PropertyFunctionalAxiom;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
-import org.semanticweb.ontop.owlrefplatform.core.Quest;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
+import org.semanticweb.ontop.owlrefplatform.core.*;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.semanticweb.ontop.utils.VersionInfo;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
@@ -53,10 +53,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
 
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.ResultSet;
-import org.semanticweb.ontop.model.TupleResultSet;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -127,7 +123,7 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestOWL extends OWLReasonerBase {
 
-	// //////////////////////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////////////////////
 	//
 	// From Structural Reasoner (to be removed later)
 	//
@@ -165,7 +161,7 @@ public class QuestOWL extends OWLReasonerBase {
 	/* The merge and tranlsation of all loaded ontologies */
 	private Ontology translatedOntologyMerge;
 
-	private SQLOBDAModel obdaModel = null;
+	private OBDAModel obdaModel = null;
 
 	private QuestPreferences preferences = new QuestPreferences();
 
@@ -192,13 +188,15 @@ public class QuestOWL extends OWLReasonerBase {
 	/* Used to signal whether to apply the user constraints above */
 	private boolean applyUserConstraints = false;
 
+    private final QuestComponentFactory componentFactory;
+
 	
 	/**
 	 * Initialization code which is called from both of the two constructors. 
 	 * @param obdaModel 
 	 * 
 	 */
-	private void init(OWLOntology rootOntology, SQLOBDAModel obdaModel, OWLReasonerConfiguration configuration, Properties preferences){
+	private void init(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, Properties preferences){
 		pm = configuration.getProgressMonitor();
 		if (pm == null) {
 			pm = new NullReasonerProgressMonitor();
@@ -207,7 +205,7 @@ public class QuestOWL extends OWLReasonerBase {
 		man = rootOntology.getOWLOntologyManager();
 
 		if (obdaModel != null)
-			this.obdaModel = (SQLOBDAModel)obdaModel.clone();
+			this.obdaModel = obdaModel;
 		
 		this.preferences.putAll(preferences);
 
@@ -219,9 +217,11 @@ public class QuestOWL extends OWLReasonerBase {
 	/***
 	 * Default constructor.
 	 */
-	public QuestOWL(OWLOntology rootOntology, SQLOBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences) {
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration,
+                    BufferingMode bufferingMode, Properties preferences) {
 		super(rootOntology, configuration, bufferingMode);
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        componentFactory = injector.getInstance(QuestComponentFactory.class);
 		this.init(rootOntology, obdaModel, configuration, preferences);
 
 	}
@@ -231,13 +231,16 @@ public class QuestOWL extends OWLReasonerBase {
 	 * supplied 
 	 * @param userConstraints User-supplied primary and foreign keys
 	 */
-	public QuestOWL(OWLOntology rootOntology, SQLOBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
 			Properties preferences, ImplicitDBConstraints userConstraints) {
 		super(rootOntology, configuration, bufferingMode);
 		
 		this.userConstraints = userConstraints;
 		assert(userConstraints != null);
 		this.applyUserConstraints = true;
+
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        componentFactory = injector.getInstance(QuestComponentFactory.class);
 		
 		this.init(rootOntology, obdaModel, configuration, preferences);
 	}
@@ -305,7 +308,7 @@ public class QuestOWL extends OWLReasonerBase {
 		// pm.reasonerTaskStarted("Classifying...");
 		// pm.reasonerTaskBusy();
 
-		questInstance = new Quest(translatedOntologyMerge, obdaModel, preferences);
+        questInstance = componentFactory.create(translatedOntologyMerge, obdaModel, null, preferences);
 
 		if(this.applyUserConstraints)
 			questInstance.setImplicitDBConstraints(userConstraints);
@@ -322,13 +325,14 @@ public class QuestOWL extends OWLReasonerBase {
 
 			// Retrives the connection from Quest
 			//conn = questInstance.getConnection();
-			conn = questInstance.getNonPoolConnection();
+			conn = (QuestConnection) questInstance.getNonPoolConnection();
 			owlconn = new QuestOWLConnection(conn);
 			// pm.reasonerTaskProgressChanged(3, 4);
 
 			// Preparing the data source
 			if (unfoldingMode.equals(QuestConstants.CLASSIC)) {
-				QuestStatement st = conn.createStatement();
+                //TODO: avoid this cast
+				QuestStatement st = (QuestStatement)conn.createStatement();
 				if (bObtainFromOntology) {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
@@ -341,7 +345,7 @@ public class QuestOWL extends OWLReasonerBase {
 					// Retrieves the ABox from the target database via mapping.
 					log.debug("Loading data from Mappings into the database");
 
-					SQLOBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
+					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
 					for (Predicate p: translatedOntologyMerge.getVocabulary()) {
 						obdaModelForMaterialization.declarePredicate(p);
 					}
@@ -435,7 +439,7 @@ public class QuestOWL extends OWLReasonerBase {
 	 */
 	public QuestOWLConnection replaceConnection() throws OBDAException {
 		QuestOWLConnection oldconn = this.owlconn;
-		conn = questInstance.getNonPoolConnection();
+		conn = (QuestConnection) questInstance.getNonPoolConnection();
 		owlconn = new QuestOWLConnection(conn);
 		return oldconn;
 	}

@@ -20,10 +20,12 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3.example;
  * #L%
  */
 
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
@@ -34,6 +36,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.File;
+import java.io.FileReader;
+import java.util.Properties;
 
 public class QuestOWLExample_NoReplace {
 	
@@ -55,13 +59,17 @@ public class QuestOWLExample_NoReplace {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		/*
-		 * Load the OBDA model from an external .obda file
-		 */
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		SQLOBDAModel obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
+        /**
+         * Factory initialization
+         */
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+
+        /*
+         * Load the OBDA model from an external .obda file
+         */
+        MappingParser mappingParser = factory.create(new FileReader(obdafile));
+        OBDAModel obdaModel = mappingParser.getOBDAModel();
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
@@ -74,10 +82,10 @@ public class QuestOWLExample_NoReplace {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-		factory.setPreferenceHolder(preference);
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWLFactory questOwlFactory = new QuestOWLFactory();
+		questOwlFactory.setOBDAController(obdaModel);
+		questOwlFactory.setPreferenceHolder(preference);
+		QuestOWL reasoner = (QuestOWL) questOwlFactory.createReasoner(ontology, new SimpleConfiguration());
 
 		/*
 		 * Prepare the data connection for querying.

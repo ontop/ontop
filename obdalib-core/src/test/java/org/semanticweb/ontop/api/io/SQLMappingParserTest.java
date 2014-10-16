@@ -7,6 +7,7 @@ import java.util.Properties;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.ProvisionException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.exception.InvalidPredicateDeclarationException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
@@ -35,9 +36,9 @@ public class SQLMappingParserTest {
 	@Test(expected = IOException.class)
 	public void testEndCollectionSymbolRequirement() throws IOException,
             InvalidPredicateDeclarationException, InvalidMappingException {
-        MappingParser mappingParser = factory.create(new FileReader(
-                "src/test/resources/format/obda/missingCollectionEnding.obda"));
-        mappingParser.getOBDAModel();
+            MappingParser mappingParser = factory.create(new FileReader(
+                    "src/test/resources/format/obda/missingCollectionEnding.obda"));
+            mappingParser.getOBDAModel();
 	}
 
 }

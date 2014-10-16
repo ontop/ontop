@@ -20,15 +20,15 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3.example;
  * #L%
  */
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
+import java.io.*;
+import java.util.Properties;
 
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlapi3.QuestOWLIndividualIterator;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
@@ -51,13 +51,17 @@ public class ABoxMaterializerExample {
 	
 	public void generateTriples() throws Exception {
 
-		/*
-		 * Load the OBDA model from an external .obda file
-		 */
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		SQLOBDAModel obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(inputFile);
+        /**
+         * Factory initialization
+         */
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+
+        /*
+         * Load the OBDA model from an external .obda file
+         */
+        MappingParser mappingParser = factory.create(new FileReader(inputFile));
+        OBDAModel obdaModel = mappingParser.getOBDAModel();
 
 		/*
 		 * Start materializing data from database to triples.

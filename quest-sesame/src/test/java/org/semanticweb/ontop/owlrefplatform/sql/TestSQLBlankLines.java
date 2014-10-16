@@ -1,10 +1,14 @@
 package org.semanticweb.ontop.owlrefplatform.sql;
 
 import static org.junit.Assert.*;
-import org.semanticweb.ontop.io.ModelIOManager;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -13,9 +17,11 @@ import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
+import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Scanner;
 
 import org.junit.After;
@@ -38,11 +44,12 @@ import org.slf4j.LoggerFactory;
 public class TestSQLBlankLines {
 
 
-	private OBDADataFactory fac;
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
+    private OBDADataFactory fac;
 	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private SQLOBDAModel obdaModel;
+	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 	private QuestOWLFactory factory;
 
@@ -55,6 +62,10 @@ public class TestSQLBlankLines {
 
 	private Connection sqlConnection;
 
+    public TestSQLBlankLines() {
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+    }
 
 
 
@@ -97,11 +108,8 @@ public class TestSQLBlankLines {
 			ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
 			// Loading the OBDA data
-			fac = OBDADataFactoryImpl.getInstance();
-			obdaModel = fac.getOBDAModel();
-
-			ModelIOManager ioManager = new ModelIOManager(obdaModel);
-			ioManager.load(obdafile);
+            MappingParser mappingParser = nativeQLFactory.create(new FileReader(obdafile));
+            obdaModel = mappingParser.getOBDAModel();
 
 			QuestPreferences p = new QuestPreferences();
 			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);

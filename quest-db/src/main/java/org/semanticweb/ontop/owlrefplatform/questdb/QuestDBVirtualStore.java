@@ -21,17 +21,19 @@ package org.semanticweb.ontop.owlrefplatform.questdb;
  */
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.openrdf.model.Model;
-import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.SQLOBDAModel;
+import org.semanticweb.ontop.exception.DuplicateMappingException;
+import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
+import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.ontology.Ontology;
@@ -39,7 +41,6 @@ import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OBDAModelSynchronizer;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.ontop.owlapi3.directmapping.DirectMappingEngine;
-import org.semanticweb.ontop.owlrefplatform.core.Quest;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -70,10 +71,6 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	private OWLAPI3Translator translator = new OWLAPI3Translator();
 	
 	private boolean isinitalized = false;
-
-	public QuestDBVirtualStore(String name, URI obdaURI) throws Exception {
-		this(name, null, obdaURI, null);
-	}
 	
 	public QuestDBVirtualStore(String name, URI obdaURI, QuestPreferences config) throws Exception {
 		this(name, null, obdaURI, config);
@@ -97,22 +94,35 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * @param obdaURI - the file URI
 	 * @return the generated OBDAModel
 	 * @throws IOException
-	 * @throws InvalidMappingExceptionWithIndicator
+	 * @throws InvalidMappingException
+     *
 	 */
-	public SQLOBDAModel getObdaModel(URI obdaURI) throws IOException, InvalidMappingExceptionWithIndicator {
-		//create empty model
-		SQLOBDAModel obdaModel = fac.getOBDAModel();
-		// System.out.println(obdaURI.toString());
-		if (obdaURI.toString().endsWith(".obda")) {
-			//read obda file
-			ModelIOManager modelIO = new ModelIOManager(obdaModel);
-			modelIO.load(new File(obdaURI));
-		} else if (obdaURI.toString().endsWith(".ttl")) {
+	public OBDAModel getObdaModel(URI obdaURI) throws IOException, InvalidMappingException,
+            DuplicateMappingException {
+        NativeQueryLanguageComponentFactory nativeQLFactory = getNativeQLFactory();
+        /**
+         * TODO: make it not relying on the file extension.
+         */
+		if (obdaURI.toString().endsWith(".ttl")) {
 			//read R2RML file
-			R2RMLReader reader = new R2RMLReader(new File(obdaURI));
-			obdaModel = reader.readModel(obdaURI);
+			R2RMLReader reader = new R2RMLReader(new File(obdaURI), nativeQLFactory);
+            OBDAModel obdaModel = reader.readModel(obdaURI);
+            return obdaModel;
 		}
-		return obdaModel;
+        /**
+         * Default case (e.g. .obda file)
+         */
+        File file = new File(obdaURI);
+        if (!file.exists()) {
+            throw new IOException("WARNING: Cannot locate OBDA file at: " + file.getPath());
+        }
+        if (!file.canRead()) {
+            throw new IOException(String.format("Error while reading the file located at %s.\n" +
+                    "Make sure you have the read permission at the location specified.", file.getAbsolutePath()));
+        }
+        MappingParser modelParser = nativeQLFactory.create(new FileReader(file));
+        OBDAModel obdaModel = modelParser.getOBDAModel();
+        return obdaModel;
 	}
 
 	/**
@@ -125,12 +135,13 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * @param userConstraints - User-supplied database constraints (or null)
 	 * @throws Exception
 	 */
-	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config, ImplicitDBConstraints userConstraints) throws Exception {
+	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config,
+                               ImplicitDBConstraints userConstraints) throws Exception {
 
-		super(name);
+		super(name, config);
 
 		//obtain the model
-		SQLOBDAModel obdaModel = null;
+		OBDAModel obdaModel = null;
 		if (obdaUri == null) {
 			log.debug("No mappings where given, mappings will be automatically generated.");
 			//obtain model from direct mapping RDB2RDF method
@@ -160,8 +171,11 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			// create empty ontology
 			owlontology = man.createOntology();// createOntology(OBDADataFactoryImpl.getIRI(name));
 			tbox = OntologyFactoryImpl.getInstance().createOntology();
-			if (obdaModel.getSources().size() == 0)
-				obdaModel.addSource(getMemOBDADataSource("MemH2"));
+			if (obdaModel.getSources().size() == 0) {
+                Set<OBDADataSource> dataSources = new HashSet<>(obdaModel.getSources());
+                dataSources.add(getMemOBDADataSource("MemH2"));
+                obdaModel = obdaModel.newModel(dataSources, obdaModel.getMappings());
+            }
 		}
 		OBDAModelSynchronizer.declarePredicates(owlontology, obdaModel);
 
@@ -176,22 +190,22 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * @param name - the name of the triple store
 	 * @param tbox - the OWLOntology
 	 * @param mappings - the RDF Graph (Sesame API)
-	 * @param pref - QuestPreferences
+	 * @param config - QuestPreferences
 	 * @throws Exception
 	 */
-	public QuestDBVirtualStore(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences config) throws Exception {
+	public QuestDBVirtualStore(String name, OWLOntology tbox, Model mappings, DBMetadata metadata,
+                               QuestPreferences config) throws Exception {
 		//call super constructor -> QuestDBAbstractStore
-		super(name);
+		super(name, config);
 		
 		//obtain ontology
 		Ontology ontology = getOntologyFromOWLOntology(tbox);
 		//obtain datasource
 		OBDADataSource source = getDataSourceFromConfig(config);
 		//obtain obdaModel
-		R2RMLReader reader = new R2RMLReader(mappings);
-		SQLOBDAModel obdaModel = reader.readModel(source.getSourceID());
-		//add data source to model
-		obdaModel.addSource(source);
+		R2RMLReader reader = new R2RMLReader(mappings, getNativeQLFactory());
+		OBDAModel obdaModel = reader.readModel(source);
+
 		OBDAModelSynchronizer.declarePredicates(tbox, obdaModel);
 		//setup Quest
 		setupQuest(ontology, obdaModel, metadata, config);
@@ -239,20 +253,16 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 	 */
 	private Ontology getOntologyFromOWLOntology(OWLOntology owlontology) throws Exception{
 		//compute closure first (owlontology might contain include other source declarations)
-		Set<OWLOntology> clousure = owlontology.getOWLOntologyManager().getImportsClosure(owlontology);
-		return translator.mergeTranslateOntologies(clousure);
+		Set<OWLOntology> closure = owlontology.getOWLOntologyManager().getImportsClosure(owlontology);
+		return translator.mergeTranslateOntologies(closure);
 	}
 	
-	private void setupQuest(Ontology tbox, SQLOBDAModel obdaModel, DBMetadata metadata, QuestPreferences pref) throws Exception {
+	private void setupQuest(Ontology tbox, OBDAModel obdaModel, DBMetadata metadata,
+                            QuestPreferences pref) throws Exception {
+        QuestComponentFactory factory = getComponentFactory();
+
 		//start Quest with the given ontology and model and preferences
-		if (metadata == null) {
-			//start up quest by obtaining metadata from given data source 
-			questInstance = new Quest(tbox, obdaModel, pref);
-		}
-		else {
-			//start up quest with given metadata 
-			questInstance = new Quest(tbox, obdaModel, metadata, pref);
-		}
+		questInstance = factory.create(tbox, obdaModel, metadata, pref);
 	}
 	
 	/**
@@ -298,11 +308,12 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 	 * Generate an OBDAModel from Direct Mapping (Bootstrapping)
 	 * @return the OBDAModel
 	 */
-	private SQLOBDAModel getOBDAModelDM() {
+	private OBDAModel getOBDAModelDM() {
 
-		DirectMappingEngine dm = new DirectMappingEngine("http://example.org/base", 0);
+		DirectMappingEngine dm = new DirectMappingEngine("http://example.org/base", 0,
+                getNativeQLFactory());
 		try {
-			SQLOBDAModel model = dm.extractMappings(getMemOBDADataSource("H2m"));
+			OBDAModel model = dm.extractMappings(getMemOBDADataSource("H2m"));
 			return model;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -315,7 +326,7 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 	 * Must be called once after the constructor call and before any queries are run, that is,
 	 * before the call to getQuestConnection.
 	 * 
-	 * Calls {@link Quest.setupRepository()}
+	 * Calls {@link org.semanticweb.ontop.owlrefplatform.core.Quest.setupRepository()}
 	 * @throws Exception
 	 */
 	public void initialize() throws Exception {
@@ -337,7 +348,7 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 			throw new Error("The QuestDBVirtualStore must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
 		try {
 			// System.out.println("getquestconn..");
-			questConn = questInstance.getConnection();
+			questConn = (QuestConnection) questInstance.getConnection();
 		} catch (OBDAException e) {
 			e.printStackTrace();
 		}

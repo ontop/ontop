@@ -34,10 +34,7 @@ import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.Property;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnNamedDAG;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -132,7 +129,7 @@ public class DAGHierarchyTest extends TestCase {
 		Set<BasicClassDescription> equivalents = new HashSet<BasicClassDescription>();
 		equivalents.add(C);
 		equivalents.add(D); // getDescendants is reflexive
-		assertTrue(descendants.contains(new Equivalences<BasicClassDescription>(equivalents)));
+		assertTrue(descendants.contains(new EquivalencesImpl<BasicClassDescription>(equivalents)));
 
 		/**
 		 * The initial node is Node E.
@@ -157,7 +154,7 @@ public class DAGHierarchyTest extends TestCase {
 		equivalents = new HashSet<BasicClassDescription>();
 		equivalents.add(E);
 		equivalents.add(F); // getDescendants is reflexive
-		assertTrue(descendants.contains(new Equivalences<BasicClassDescription>(equivalents)));
+		assertTrue(descendants.contains(new EquivalencesImpl<BasicClassDescription>(equivalents)));
 	}
 
 	/**
@@ -226,7 +223,7 @@ public class DAGHierarchyTest extends TestCase {
 		Set<BasicClassDescription> equivalents = new HashSet<BasicClassDescription>();
 		equivalents.add(C);
 		equivalents.add(D);  // ancestor is reflexive now
-		assertTrue(ancestors.contains(new Equivalences<BasicClassDescription>(equivalents)));
+		assertTrue(ancestors.contains(new EquivalencesImpl<BasicClassDescription>(equivalents)));
 		assertTrue(ancestors.contains(classes.getVertex(E)));
 		assertTrue(ancestors.contains(classes.getVertex(F)));
 
@@ -249,7 +246,7 @@ public class DAGHierarchyTest extends TestCase {
 		equivalents = new HashSet<BasicClassDescription>();
 		equivalents.add(E);
 		equivalents.add(F);  // ancestor is reflexive now
-		assertTrue(ancestors.contains(new Equivalences<BasicClassDescription>(equivalents)));
+		assertTrue(ancestors.contains(new EquivalencesImpl<BasicClassDescription>(equivalents)));
 	}
 
 	/**
@@ -313,7 +310,7 @@ public class DAGHierarchyTest extends TestCase {
 		Set<Property> equivalents = new HashSet<Property>();
 		equivalents.add(R);
 		equivalents.add(S); // getDescendants is reflexive
-		assertTrue(descendants.contains(new Equivalences<Property>(equivalents)));
+		assertTrue(descendants.contains(new EquivalencesImpl<Property>(equivalents)));
 
 		/**
 		 * The initial node is Node T.
@@ -337,7 +334,7 @@ public class DAGHierarchyTest extends TestCase {
 		equivalents = new HashSet<Property>();
 		equivalents.add(T);													// role
 		equivalents.add(U); // getDescendants is reflexive
-		assertTrue(descendants.contains(new Equivalences<Property>(equivalents)));
+		assertTrue(descendants.contains(new EquivalencesImpl<Property>(equivalents)));
 	}
 
 	/**
@@ -404,7 +401,7 @@ public class DAGHierarchyTest extends TestCase {
 		Set<Property> equivalents = new HashSet<Property>();
 		equivalents.add(R);
 		equivalents.add(S); // ancestor is reflexive now
-		assertTrue(ancestors.contains(new Equivalences<Property>(equivalents)));
+		assertTrue(ancestors.contains(new EquivalencesImpl<Property>(equivalents)));
 		
 		assertTrue(ancestors.contains(properties.getVertex(T)));
 		assertTrue(ancestors.contains(properties.getVertex(U)));
@@ -427,6 +424,6 @@ public class DAGHierarchyTest extends TestCase {
 		equivalents = new HashSet<Property>();
 		equivalents.add(T); 
 		equivalents.add(U); // ancestor is reflexive now
-		assertTrue(ancestors.contains(new Equivalences<Property>(equivalents)));		
+		assertTrue(ancestors.contains(new EquivalencesImpl<Property>(equivalents)));
 	}
 }

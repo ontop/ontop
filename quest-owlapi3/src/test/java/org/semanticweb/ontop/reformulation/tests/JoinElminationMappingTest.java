@@ -21,6 +21,7 @@ package org.semanticweb.ontop.reformulation.tests;
  */
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -28,11 +29,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import junit.framework.TestCase;
 
-import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -66,11 +71,21 @@ public class JoinElminationMappingTest extends TestCase {
 	private Connection conn;
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-	private SQLOBDAModel obdaModel;
+	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/ontologies/scenarios/join-elimination-test.owl";
 	final String obdafile = "src/test/resources/test/ontologies/scenarios/join-elimination-test.obda";
+
+    private final NativeQueryLanguageComponentFactory factory;
+
+    public JoinElminationMappingTest() {
+        /**
+         * Factory initialization
+         */
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+    }
 
 	@Override
 	public void setUp() throws Exception {
@@ -96,10 +111,11 @@ public class JoinElminationMappingTest extends TestCase {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(new File(obdafile));
+        /*
+         * Load the OBDA model from an external .obda file
+         */
+        MappingParser mappingParser = factory.create(new FileReader(obdafile));
+        obdaModel = mappingParser.getOBDAModel();
 	}
 
 	@Override

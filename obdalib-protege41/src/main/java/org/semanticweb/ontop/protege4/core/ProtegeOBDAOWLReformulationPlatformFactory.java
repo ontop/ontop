@@ -20,7 +20,6 @@ package org.semanticweb.ontop.protege4.core;
  * #L%
  */
 
-import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 

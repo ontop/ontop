@@ -20,6 +20,9 @@ package org.semanticweb.ontop.owlrefplatform.core;
  * #L%
  */
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -27,13 +30,16 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.QueryParser;
 import org.openrdf.query.parser.QueryParserUtil;
-import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.io.SQLMappingParser;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
@@ -50,12 +56,13 @@ import org.slf4j.LoggerFactory;
 public class QuestDBStatement implements OBDAStatement {
 
 	private final QuestStatement st;
-
-	private Logger log = LoggerFactory.getLogger(QuestDBStatement.class);
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
+    private Logger log = LoggerFactory.getLogger(QuestDBStatement.class);
 
 	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 
-	protected QuestDBStatement(QuestStatement st) {
+	public QuestDBStatement(QuestStatement st, NativeQueryLanguageComponentFactory nativeQLFactory) {
+        this.nativeQLFactory = nativeQLFactory;
 		this.st = st;
 	}
 
@@ -133,9 +140,17 @@ public class QuestDBStatement implements OBDAStatement {
 		Iterator<Assertion> assertionIter = null;
 		QuestMaterializer materializer = null;
 		try {
-			SQLOBDAModel obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();
-			ModelIOManager io = new ModelIOManager(obdaModel);
-			io.load(uri.toString());
+            File file = new File(uri);
+            if (!file.exists()) {
+                throw new IOException("WARNING: Cannot locate OBDA file at: " + file.getPath());
+            }
+            if (!file.canRead()) {
+                throw new IOException(String.format("Error while reading the file located at %s.\n" +
+                    "Make sure you have the read permission at the location specified.", file.getAbsolutePath()));
+            }
+            MappingParser parser = nativeQLFactory.create(new FileReader(file));
+            OBDAModel obdaModel = parser.getOBDAModel();
+
 			materializer = new QuestMaterializer(obdaModel);
 			assertionIter =  materializer.getAssertionIterator();
 			int result = st.insertData(assertionIter, useFile, commit, batch);
@@ -273,7 +288,8 @@ public class QuestDBStatement implements OBDAStatement {
 		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 		ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
 		
-		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(questInstance.getUriTemplateMatcher());
+		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(
+                questInstance.getUriTemplateMatcher());
 		
 		LinkedList<String> signatureContainer = new LinkedList<String>();
 		tr.getSignature(pq, signatureContainer);

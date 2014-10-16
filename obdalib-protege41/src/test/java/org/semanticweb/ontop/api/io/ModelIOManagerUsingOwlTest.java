@@ -23,8 +23,6 @@ package org.semanticweb.ontop.api.io;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -32,11 +30,10 @@ import junit.framework.TestCase;
 
 import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.exception.InvalidPredicateDeclarationException;
-import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.SimplePrefixManager;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.parser.TurtleOBDASyntaxParser;
@@ -54,7 +51,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
 
     private SQLOBDAModel model;
 
-    private ModelIOManager ioManager;
+    private SQLMappingParser ioManager;
 
     private TurtleOBDASyntaxParser parser;
 
@@ -209,7 +206,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
      */
 
     private void saveRegularFile() throws IOException {
-        ioManager = new ModelIOManager(model);
+        ioManager = new SQLMappingParser(model);
         ioManager.save("src/test/java/org/semanticweb/ontop/api/io/SchoolRegularFile.obda");
     }
 
@@ -224,7 +221,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         addMoreSampleMappings(model, datasource2.getSourceID());
 
         // Save the model
-        ioManager = new ModelIOManager(model);
+        ioManager = new SQLMappingParser(model);
         ioManager.save("src/test/java/org/semanticweb/ontop/api/io/SchoolMultipleDataSources.obda");
     }
 
@@ -233,7 +230,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
      */
 
     private void loadRegularFile() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-        ioManager = new ModelIOManager(model);
+        ioManager = new SQLMappingParser(model);
         ioManager.load("src/test/java/org/semanticweb/ontop/api/io/SchoolRegularFile.obda");
 
         // Check the content
@@ -243,7 +240,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
     }
 
     private void loadFileWithMultipleDataSources() throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
-        ioManager = new ModelIOManager(model);
+        ioManager = new SQLMappingParser(model);
         ioManager.load("src/test/java/org/semanticweb/ontop/api/io/SchoolMultipleDataSources.obda");
 
         // Check the content
@@ -254,7 +251,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
 
     private void loadObdaFile(String fileLocation) throws IOException, InvalidPredicateDeclarationException, InvalidMappingExceptionWithIndicator {
         // Load the OBDA model
-        ModelIOManager modelIO = new ModelIOManager(model);
+        SQLMappingParser modelIO = new SQLMappingParser(model);
         modelIO.load(fileLocation);
     }
 

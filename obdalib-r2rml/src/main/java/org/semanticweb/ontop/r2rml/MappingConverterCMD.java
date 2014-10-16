@@ -20,16 +20,22 @@ package org.semanticweb.ontop.r2rml;
  * #L%
  */
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
-import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.io.OntopMappingWriter;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.SQLOBDAModel;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileReader;
 import java.net.URI;
+import java.util.Properties;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -56,24 +62,28 @@ class MappingConverterCMD {
 		String mapFile = args[0].trim();
 
 		try {
+
+            Injector injector = Guice.createInjector(new OntopCoreModule(
+                    new Properties()));
+            NativeQueryLanguageComponentFactory factory =
+                    injector.getInstance(NativeQueryLanguageComponentFactory.class);
+
 			if (mapFile.endsWith(".obda")) {
 				String outfile = mapFile.substring(0, mapFile.length() - 5)
 						.concat(".ttl");
 				File out = new File(outfile);
 				URI obdaURI = new File(mapFile).toURI();
 				// create model
-				SQLOBDAModel model = OBDADataFactoryImpl.getInstance()
-						.getOBDAModel();
 
-				// obda mapping
-				ModelIOManager modelIO = new ModelIOManager(model);
-
-				try {
-					modelIO.load(new File(obdaURI));
-				} catch (IOException | InvalidMappingExceptionWithIndicator e) {
+                OBDAModel model;
+                try {
+                    MappingParser mappingParser = factory.create(new FileReader(obdaURI.toString()));
+                    model = mappingParser.getOBDAModel();
+				} catch (InvalidMappingExceptionWithIndicator e) {
 					e.printStackTrace();
+                    return;
 				}
-				URI srcURI = model.getSources().get(0).getSourceID();
+				URI srcURI = model.getSources().iterator().next().getSourceID();
 
 				OWLOntology ontology = null;
 				if (args.length > 1) {
@@ -96,7 +106,7 @@ class MappingConverterCMD {
 				File out = new File(outfile);
 
 				URI obdaURI = new File(mapFile).toURI();
-				R2RMLReader reader = new R2RMLReader(mapFile);
+				R2RMLReader reader = new R2RMLReader(mapFile, factory);
 				
 				String jdbcurl = "jdbc:h2:tcp://localhost/DBName";
 				String username = "sa";
@@ -107,10 +117,10 @@ class MappingConverterCMD {
 				String sourceUrl =obdaURI.toString();
 				OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
 						username, password, driverclass);
-				SQLOBDAModel model = reader.readModel(dataSource);
+				OBDAModel model = reader.readModel(dataSource);
 
-				ModelIOManager modelIO = new ModelIOManager(model);
-				modelIO.save(out);
+                OntopMappingWriter mappingWriter = new OntopMappingWriter(model);
+				mappingWriter.save(out);
 				
 				/*Add the not standard prefixes to prefix manager.
 				 * If you want them to have the abbreviation in the obda file

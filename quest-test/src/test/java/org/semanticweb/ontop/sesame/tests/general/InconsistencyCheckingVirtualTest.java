@@ -19,8 +19,7 @@ import java.io.File;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.SQLOBDAModel;
+import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -91,7 +90,7 @@ public class InconsistencyCheckingVirtualTest {
 		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
 		questOWLFactory.setPreferenceHolder(p);
 		obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();
-		ModelIOManager mng = new ModelIOManager(obdaModel);
+		SQLMappingParser mng = new SQLMappingParser(obdaModel);
 		try {
 			mng.load(new File(obdafile));
 			questOWLFactory.setOBDAController(obdaModel);

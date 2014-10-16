@@ -23,7 +23,6 @@ package org.semanticweb.ontop.quest.dag;
 
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -31,9 +30,9 @@ import junit.framework.TestCase;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.Description;
 import org.semanticweb.ontop.ontology.Property;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
 import org.slf4j.Logger;
@@ -132,11 +131,11 @@ public class S_TestTransitiveReduction extends TestCase {
 		//number of redundant edges 
 		int numberRedundants=0;
 
-		for(Equivalences<Property> equivalents: d2.getProperties()) 
+		for(Equivalences<Property> equivalents: d2.getProperties())
 			if(equivalents.size()>=2)
 				numberEquivalents += equivalents.size();
 			
-		for(Equivalences<BasicClassDescription> equivalents: d2.getClasses()) 
+		for(Equivalences<BasicClassDescription> equivalents: d2.getClasses())
 			if(equivalents.size()>=2)
 				numberEquivalents += equivalents.size();
 

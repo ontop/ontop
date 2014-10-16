@@ -38,8 +38,7 @@ import org.protege.editor.owl.model.selection.OWLSelectionModelListener;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.protege.editor.owl.ui.view.Findable;
 import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.impl.SQLOBDAModelImpl;
+import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.owlapi3.TargetQueryValidator;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.core.OBDAModelManagerListener;
@@ -68,7 +67,7 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		// Retrieve the editor kit.
 		final OWLEditorKit editor = getOWLEditorKit();
 
-		controller = (OBDAModelManager) editor.get(SQLOBDAModelImpl.class.getName());
+		controller = (OBDAModelManager) editor.get(OBDAModelImpl.class.getName());
 		controller.addListener(this);
 
 		SQLOBDAModel obdaModel = controller.getActiveOBDAModel();

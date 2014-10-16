@@ -27,10 +27,9 @@ import java.io.File;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -125,7 +124,7 @@ public class OracleLIMITTest  {
 	@Test
 	public void testWithShortDriverString() throws Exception {
 		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
+		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
 		ioManager.load(obdafile1);
 		runQuery();
 	}
@@ -140,7 +139,7 @@ public class OracleLIMITTest  {
 	@Test
 	public void testWithLongDriverString() throws Exception {
 		
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
+		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
 		ioManager.load(obdafile2);
 		runQuery();
 	}

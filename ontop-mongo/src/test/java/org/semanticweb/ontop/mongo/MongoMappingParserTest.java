@@ -14,7 +14,6 @@ import com.google.gson.JsonSyntaxException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,7 +23,7 @@ public class MongoMappingParserTest {
     public void testParse() throws IOException, InvalidMongoMappingException {
         InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/simpleMapping.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
-        List<OBDAMappingAxiom> mappings =  parser.parse();
+        List<OBDAMappingAxiom> mappings =  parser.getOBDAModel();
      
         Assert.assertEquals(3, mappings.size());
      
@@ -59,7 +58,7 @@ public class MongoMappingParserTest {
     public void testParse2() throws IOException, InvalidMongoMappingException {
         InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/simpleMappingNoPrefixes.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
-        List<OBDAMappingAxiom> mappings =  parser.parse();
+        List<OBDAMappingAxiom> mappings =  parser.getOBDAModel();
      
         Assert.assertEquals(3, mappings.size());
         
@@ -92,7 +91,7 @@ public class MongoMappingParserTest {
     public void testJsonSyntax() throws IOException, InvalidMongoMappingException {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/invalidJson.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
-        List<OBDAMappingAxiom> mappings =  parser.parse();
+        List<OBDAMappingAxiom> mappings =  parser.getOBDAModel();
     }
 
     @Test
@@ -100,7 +99,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongDatabaseNoDatabase.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
         	fail();
         } catch (InvalidMongoMappingException e) {
         	Assert.assertEquals(MongoMappingParser.MISSING_DATABASE_KEY, e.getMessage());
@@ -112,7 +111,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongDatabaseNotObject.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
         	fail();
         } catch (InvalidMongoMappingException e) {
         	Assert.assertEquals(MongoMappingParser.INVALID_DATABASE_TYPE, e.getMessage());
@@ -124,7 +123,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongDatabaseNoURL.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
         	fail();
         } catch (InvalidMongoMappingException e) {
         	Assert.assertEquals(MongoMappingParser.MISSING_ONE_OF_DATABASE_KEYS, e.getMessage());
@@ -136,7 +135,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongDatabaseUsernameNotString.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
         	fail();
         } catch (InvalidMongoMappingException e) {
         	Assert.assertEquals(MongoMappingParser.INVALID_DATABASE_VALUE_TYPE, e.getMessage());
@@ -148,7 +147,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongPrefixesNotObject.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
         	fail();
         } catch (InvalidMongoMappingException e) {
         	Assert.assertEquals(MongoMappingParser.INVALID_PREFIXES_TYPE, e.getMessage());
@@ -160,7 +159,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongPrefixNotString.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
         	fail();
         } catch (InvalidMongoMappingException e) {
         	String expectedMessage = String.format(MongoMappingParser.INVALID_PREFIX_VALUE_TYPE, "xsd:");
@@ -173,7 +172,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingNoMappings.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
         	fail();
         } catch (InvalidMongoMappingException e) {
         	Assert.assertEquals(MongoMappingParser.MISSING_MAPPINGS_KEY, e.getMessage());
@@ -185,7 +184,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingNotArray.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
         	fail();
         } catch (InvalidMongoMappingException e) {
         	Assert.assertEquals(MongoMappingParser.INVALID_MAPPINGS_TYPE, e.getMessage());
@@ -197,7 +196,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingNotObject.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
         	fail();
         } catch (InvalidMongoMappingException e) {
         	Assert.assertEquals(MongoMappingParser.INVALID_MAPPING_TYPE, e.getMessage());
@@ -209,7 +208,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingNoMappingId.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
          	fail();
         } catch (InvalidMongoMappingException e) {
         	Assert.assertEquals(MongoMappingParser.MISSING_ONE_OF_MAPPING_KEYS, e.getMessage());
@@ -221,7 +220,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingMappingIdNotString.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
          	fail();
         } catch (InvalidMongoMappingException e) {
         	Assert.assertEquals(MongoMappingParser.INVALID_MAPPING_ID_TYPE, e.getMessage());
@@ -233,7 +232,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingSourceNotObject.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
          	fail();
         } catch (InvalidMongoMappingException e) {
         	Assert.assertEquals(MongoMappingParser.INVALID_MAPPING_SOURCE_TYPE, e.getMessage());
@@ -245,7 +244,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingTargetNotString.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
          	fail();
         } catch (InvalidMongoMappingException e) {
         	Assert.assertEquals(MongoMappingParser.INVALID_MAPPING_TARGET_TYPE, e.getMessage());
@@ -257,7 +256,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingSourceNoCollection.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
          	fail();
         } catch (InvalidMongoMappingException e) {
         	Assert.assertEquals(MongoMappingParser.MISSING_ONE_OF_SOURCE_QUERY_KEYS, e.getMessage());
@@ -269,7 +268,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingSourceCollectionNotString.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
          	fail();
         } catch (InvalidMongoMappingException e) {
         	Assert.assertEquals(MongoMappingParser.INVALID_SOURCE_COLLECTION_TYPE, e.getMessage());
@@ -281,7 +280,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingSourceCriteriaNotObject.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
          	fail();
         } catch (InvalidMongoMappingException e) {
         	Assert.assertEquals(MongoMappingParser.INVALID_SOURCE_CRITERIA_TYPE, e.getMessage());
@@ -293,7 +292,7 @@ public class MongoMappingParserTest {
     	InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/wrongMappingTargetSyntaxError.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
         try {
-        	parser.parse();
+        	parser.getOBDAModel();
          	fail();
         } catch (InvalidMongoMappingException e) {
         	throw e.getCause();
@@ -304,7 +303,7 @@ public class MongoMappingParserTest {
     public void testExtractSchemaInformation() throws IOException, InvalidMongoMappingException {
         InputStream stream = MongoMappingParserTest.class.getResourceAsStream("/conflictTypes.json");
         MongoMappingParser parser = new MongoMappingParser(new InputStreamReader(stream));
-        List<OBDAMappingAxiom> mappings =  parser.parse();
+        List<OBDAMappingAxiom> mappings =  parser.getOBDAModel();
      
         Assert.assertEquals(3, mappings.size());
              

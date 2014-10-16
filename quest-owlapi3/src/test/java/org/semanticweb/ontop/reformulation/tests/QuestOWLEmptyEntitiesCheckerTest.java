@@ -32,14 +32,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
-import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -67,7 +70,7 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	private Connection connection;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private SQLOBDAModel obdaModel;
+	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/emptiesDatabase.owl";
@@ -82,6 +85,16 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 	private List<Predicate> emptyRoles = new ArrayList<Predicate>();
 
 	private QuestOWL reasoner;
+
+    private NativeQueryLanguageComponentFactory factory;
+
+    public QuestOWLEmptyEntitiesCheckerTest() {
+        /**
+         * Factory initialization
+         */
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+    }
 
 	@Before
 	public void setUp() throws Exception {
@@ -113,12 +126,11 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-		// Loading the OBDA data
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
-
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
+        /*
+         * Load the OBDA model from an external .obda file
+         */
+        MappingParser mappingParser = factory.create(new FileReader(obdafile));
+        obdaModel = mappingParser.getOBDAModel();
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -138,12 +150,9 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 
 	@After
 	public void tearDown() throws Exception {
-		
 			dropTables();
 			reasoner.dispose();
 			connection.close();
-		
-
 	}
 
 	private void dropTables() throws SQLException, IOException {

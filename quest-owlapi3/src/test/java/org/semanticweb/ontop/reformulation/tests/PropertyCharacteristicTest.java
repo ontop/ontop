@@ -28,12 +28,17 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import junit.framework.TestCase;
 
-import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.SQLOBDAModel;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -150,16 +155,24 @@ public class PropertyCharacteristicTest extends TestCase {
 	private void setupReasoner(File owlFile, File obdaFile) throws Exception {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(owlFile);
-	
-		SQLOBDAModel obdaModel = ofac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdaFile);
+
+        /**
+         * Factory initialization
+         */
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+
+        /*
+         * Load the OBDA model from an external .obda file
+         */
+        MappingParser mappingParser = factory.create(new FileReader(obdaFile));
+        OBDAModel obdaModel = mappingParser.getOBDAModel();
 		
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-		factory.setPreferenceHolder(prefs);
+		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
+		questOWLFactory.setOBDAController(obdaModel);
+		questOWLFactory.setPreferenceHolder(prefs);
 		
-		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology, new SimpleConfiguration());
 	}
 	
 	private QuestOWLResultSet executeQuery(String sparql) throws Exception {

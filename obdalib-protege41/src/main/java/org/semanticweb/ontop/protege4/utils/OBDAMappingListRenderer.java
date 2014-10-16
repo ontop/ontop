@@ -45,7 +45,6 @@ import javax.swing.text.StyledDocument;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.protege4.gui.IconLoader;
 import org.semanticweb.ontop.renderer.SourceQueryRenderer;
