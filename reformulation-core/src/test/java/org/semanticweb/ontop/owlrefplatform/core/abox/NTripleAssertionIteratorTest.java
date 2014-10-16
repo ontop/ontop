@@ -22,8 +22,7 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
 
 import junit.framework.TestCase;
 import org.semanticweb.ontop.ontology.*;
-import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
-import org.semanticweb.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
+import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMapImpl;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +32,7 @@ public class NTripleAssertionIteratorTest extends TestCase {
 	public void testIteratorTest() throws IOException {
 		File testFile = new File("src/test/resources/test/lubm-data.n3");
 		URI fileURI = testFile.toURI();
-		NTripleAssertionIterator iterator = new NTripleAssertionIterator(fileURI, EquivalenceMap.getEmptyEquivalenceMap());
+		NTripleAssertionIterator iterator = new NTripleAssertionIterator(fileURI, EquivalenceMapImpl.getEmptyEquivalenceMap());
 		
 		int typeCount = 0;
 		int objPropCount = 0;

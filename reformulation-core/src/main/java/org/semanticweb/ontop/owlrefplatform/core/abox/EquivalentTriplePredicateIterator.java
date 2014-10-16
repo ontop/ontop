@@ -21,21 +21,8 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
  */
 
 import java.util.Iterator;
-import java.util.Map;
 
-import org.semanticweb.ontop.model.ObjectConstant;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.URIConstant;
-import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.ontology.Assertion;
-import org.semanticweb.ontop.ontology.ClassAssertion;
-import org.semanticweb.ontop.ontology.DataPropertyAssertion;
-import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
-import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
 
 public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {

@@ -100,24 +100,10 @@ public class TargetQueryRenderer {
 	/**
 	 * Prints the short form of the predicate (by omitting the complete URI and
 	 * replacing it by a prefix name).
-	 * 
-	 * Note that by default this method will consider a set of predefined
-	 * prefixes, i.e., rdf:, rdfs:, owl:, xsd: and quest: To support this
-	 * prefixes the method will temporally add the prefixes if they dont exist
-	 * already, taken care to remove them if they didn't exist.
-	 * 
-	 * The implementation requires at the moment, the implementation requires
-	 * cloning the existing prefix manager, and hence this is highly inefficient
-	 * method. *
+	 *
 	 */
 	private static String getAbbreviatedName(String uri, PrefixManager pm, boolean insideQuotes) {
-		// Cloning the existing manager
-		PrefixManager prefManClone = new SimplePrefixManager();
-		Map<String,String> currentMap = pm.getPrefixMap();
-		for (String prefix: currentMap.keySet()) {
-			prefManClone.addPrefix(prefix, pm.getURIDefinition(prefix));
-		}
-		return prefManClone.getShortForm(uri, insideQuotes);
+		return pm.getShortForm(uri, insideQuotes);
 	}
 
 	/**

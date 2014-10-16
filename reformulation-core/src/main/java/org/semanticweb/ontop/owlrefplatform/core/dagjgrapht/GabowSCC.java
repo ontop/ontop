@@ -183,7 +183,7 @@ public class GabowSCC<V, E>
                  L.add(r.getVertex()); 
                  r.setNumber(c);
              } 
-             stronglyConnectedSets.add(new Equivalences<V>(L)); 
+             stronglyConnectedSets.add(new EquivalencesImpl<V>(L));
          } 
     }
 

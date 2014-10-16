@@ -22,12 +22,12 @@ package org.semanticweb.ontop.owlrefplatform.core.mappingprocessing;
  */
 
 
+import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -58,7 +58,7 @@ public class MappingVocabularyTranslator {
 	 * @param equivalencesMap
 	 * @return
 	 */
-	public static List<OBDAMappingAxiom> translateMappings(List<OBDAMappingAxiom> originalMappings, EquivalenceMap equivalencesMap) {
+	public static ImmutableList<OBDAMappingAxiom> translateMappings(List<OBDAMappingAxiom> originalMappings, EquivalenceMap equivalencesMap) {
 		List<OBDAMappingAxiom> result = new ArrayList<OBDAMappingAxiom>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
 			
@@ -71,10 +71,10 @@ public class MappingVocabularyTranslator {
 				newbody.add(newatom);
 			}
 			CQIE newTargetQuery = dfac.getCQIE(targetQuery.getHead(), newbody);
-			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(),((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
+			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), mapping.getSourceQuery().toString(), newTargetQuery));
 
 		}
-		return result;
+		return ImmutableList.copyOf(result);
 
 	}
 }

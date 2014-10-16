@@ -20,7 +20,11 @@ package org.semanticweb.ontop.utils;
  * #L%
  */
 
-import org.semanticweb.ontop.io.SimplePrefixManager;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -30,19 +34,27 @@ import org.semanticweb.ontop.parser.TurtleOBDASyntaxParser;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.TableDefinition;
 import org.semanticweb.ontop.sql.api.Attribute;
-import org.semanticweb.ontop.utils.Mapping2DatalogConverter;
 
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
 public class Mapping2DatalogConverterTest extends TestCase {
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-	
-	private DBMetadata md = new DBMetadata();
-	private SimplePrefixManager pm = new SimplePrefixManager();
+    private final NativeQueryLanguageComponentFactory factory;
+
+    private DBMetadata md = new DBMetadata();
+	private PrefixManager pm;
+
+    public Mapping2DatalogConverterTest() {
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+    }
 	
 	public void setUp() {
 		// Database schema
@@ -68,11 +80,13 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		md.add(table3);
 		
 		// Prefix manager
-		pm.addPrefix(":", "http://www.example.org/university#");
+        Map<String, String> prefixes = new HashMap<>();
+		prefixes.put(":", "http://www.example.org/university#");
+        pm = factory.create(prefixes);
 	}
 	
 	private void runAnalysis(String source, String targetString) throws Exception {
-		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm);
+		TurtleOBDASyntaxParser targetParser = new TurtleOBDASyntaxParser(pm.getPrefixMap());
 		CQIE target = targetParser.parse(targetString);
 		
 		OBDAMappingAxiom mappingAxiom = ofac.getRDBMSMappingAxiom(source, target);

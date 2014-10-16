@@ -20,16 +20,17 @@ package org.semanticweb.ontop.model;
  * #L%
  */
 
-import java.io.Serializable;
 import java.net.URI;
 import java.util.Set;
 
-public interface OBDADataSource extends Cloneable, Serializable {
+public interface OBDADataSource {
 
+    @Deprecated
 	public abstract void setParameter(String parameter_uri, String value);
 
 	public abstract URI getSourceID();
 
+    @Deprecated
 	public abstract void setNewID(URI newid);
 
 	public abstract String getParameter(String parameter_uri);

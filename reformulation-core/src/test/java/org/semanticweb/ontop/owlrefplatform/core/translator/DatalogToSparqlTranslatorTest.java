@@ -23,6 +23,7 @@ package org.semanticweb.ontop.owlrefplatform.core.translator;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.ontop.io.PrefixManager;
@@ -51,8 +52,7 @@ public class DatalogToSparqlTranslatorTest {
 
 	@Before
 	public void setup() {
-		prefixManager = new SimplePrefixManager();
-		prefixManager.addPrefix(":", "http://example.org/");
+		prefixManager = new SimplePrefixManager(ImmutableMap.of(":", "http://example.org/"));
 		datalogTranslator = new DatalogToSparqlTranslator(prefixManager);
 	}
 

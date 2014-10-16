@@ -22,23 +22,18 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
 
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
-import org.semanticweb.ontop.owlrefplatform.core.Quest;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
+import org.semanticweb.ontop.owlrefplatform.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +57,8 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestMaterializer {
 
-	private SQLOBDAModel model;
+    private final QuestComponentFactory factory;
+    private OBDAModel model;
 	private Quest questInstance;
 	private Ontology ontology;
 	
@@ -79,16 +75,16 @@ public class QuestMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public QuestMaterializer(SQLOBDAModel model) throws Exception {
+	public QuestMaterializer(OBDAModel model) throws Exception {
 		this(model, null, getDefaultPreferences());
 	}
 	
-	public QuestMaterializer(SQLOBDAModel model, QuestPreferences pref) throws Exception {
+	public QuestMaterializer(OBDAModel model, QuestPreferences pref) throws Exception {
 		this(model, null, pref);
 		
 	}
 	
-	public QuestMaterializer(SQLOBDAModel model, Ontology onto) throws Exception {
+	public QuestMaterializer(OBDAModel model, Ontology onto) throws Exception {
 		this(model, onto, getDefaultPreferences());
 	}
 	
@@ -98,10 +94,13 @@ public class QuestMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public QuestMaterializer(SQLOBDAModel model, Ontology onto, QuestPreferences preferences) throws Exception {
+	public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences preferences) throws Exception {
 		this.model = model;
 		this.ontology = onto;
-		this.vocabulary = new HashSet<Predicate>();
+		this.vocabulary = new HashSet<>();
+
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        factory = injector.getInstance(QuestComponentFactory.class);
 		
 		if (this.model.getSources()!= null && this.model.getSources().size() > 1)
 			throw new Exception("Cannot materialize with multiple data sources!");
@@ -147,7 +146,7 @@ public class QuestMaterializer {
 		
 		preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
-		questInstance = new Quest(ontology, this.model, preferences);
+		questInstance = factory.create(ontology, this.model, null, preferences);
 					
 		questInstance.setupRepository();
 	}
@@ -214,8 +213,8 @@ public class QuestMaterializer {
 		private String query1 = "CONSTRUCT {?s <%s> ?o} WHERE {?s <%s> ?o}";
 		private String query2 = "CONSTRUCT {?s a <%s>} WHERE {?s a <%s>}";
 
-		private QuestConnection questConn;
-		private QuestStatement stm;
+		private OBDAConnection questConn;
+		private OBDAStatement stm;
 		
 		private boolean read = false, hasNext = false;
 

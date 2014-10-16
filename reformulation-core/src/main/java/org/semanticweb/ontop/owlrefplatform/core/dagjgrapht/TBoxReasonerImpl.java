@@ -282,7 +282,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				new  DefaultDirectedGraph<BasicClassDescription,DefaultEdge>(DefaultEdge.class);
 
 		// clone all the vertex and edges from dag
-		for (Equivalences<BasicClassDescription> v : classes) 
+		for (Equivalences<BasicClassDescription> v : classes)
 			modifiedGraph.addVertex(v.getRepresentative());
 		
 		for (Equivalences<BasicClassDescription> v : classes) {

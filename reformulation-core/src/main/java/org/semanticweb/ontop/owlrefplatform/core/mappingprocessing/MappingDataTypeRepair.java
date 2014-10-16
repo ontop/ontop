@@ -28,7 +28,6 @@ import java.util.Map;
 
 import org.semanticweb.ontop.model.BNodePredicate;
 import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.DataTypePredicate;
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;

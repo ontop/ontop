@@ -43,14 +43,14 @@ import net.sf.jsqlparser.JSQLParserException;
  * @author Dag
  *
  */
-public class SQLMappingParser implements org.semanticweb.ontop.mapping.MappingParser {
+public class SQLMappingSchemaExtractor {
 	
-	private List<OBDAMappingAxiom> mappings;
+	private final List<OBDAMappingAxiom> mappings;
 	private SQLQueryParser sqlQueryParser;
 	private List<ParsedSQLMapping> parsedMappings;
 	private List<RelationJSQL> realTables; // Tables that are not view definitions
 	
-	public SQLMappingParser(Connection conn, List<OBDAMappingAxiom> mappingAxioms) throws SQLException{
+	public SQLMappingSchemaExtractor(Connection conn, List<OBDAMappingAxiom> mappingAxioms) throws SQLException{
 		this.mappings = mappingAxioms;
 		this.sqlQueryParser = new SQLQueryParser(conn);
 		this.parsedMappings = this.parseMappings();
@@ -153,10 +153,4 @@ public class SQLMappingParser implements org.semanticweb.ontop.mapping.MappingPa
 		return parsedMappings;
 				
 	}
-
-    // FIXME: use this method instead of  #getParsedMappings
-    @Override
-    public List<OBDAMappingAxiom> parse() {
-        return mappings;
-    }
 }

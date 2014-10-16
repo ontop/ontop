@@ -106,7 +106,7 @@ public class Test_TBoxReasonerImplOnNamedDAG implements TBoxReasoner {
 		}
 
 		@Override
-		public Equivalences<T> getVertex(T v) {		
+		public Equivalences<T> getVertex(T v) {
 			// either all or none
 			Equivalences<T> vertex = reasonerDAG.getVertex(v);
 			if (dag.containsVertex(vertex.getRepresentative()))

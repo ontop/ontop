@@ -22,6 +22,7 @@ package org.semanticweb.ontop.parser;
 
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
@@ -31,38 +32,23 @@ import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 
 public class TurtleSyntaxParser implements TargetQueryParser {
 
-	private PrefixManager prefMan;
+	private final Map<String, String> prefixes;
 
 	/**
 	 * Default constructor;
 	 */
 	public TurtleSyntaxParser() {
-		this(null);
+        this.prefixes = ImmutableMap.of();
 	}
 
 	/**
-	 * Constructs the parser object with a prefix manager. This manager will
+	 * Constructs the parser object with prefixes. These prefixes will
 	 * help to generate the query header that contains the prefix definitions
 	 * (i.e., the directives @BASE and @PREFIX).
-	 * 
-	 * @param manager
-	 *            The prefix manager.
+	 *
 	 */
-	public TurtleSyntaxParser(PrefixManager manager) {
-		setPrefixManager(manager);
-	}
-
-	/**
-	 * Sets the prefix manager to this parser object. This prefix manager is
-	 * used to construct the directive header. Set <i>null</i> to avoid such
-	 * construction.
-	 * 
-	 * @param manager
-	 *            The prefix manager.
-	 */
-	@Override
-	public void setPrefixManager(PrefixManager manager) {
-		prefMan = manager;
+	public TurtleSyntaxParser(Map<String, String> prefixes) {
+        this.prefixes = prefixes;
 	}
 
 	/**
@@ -79,7 +65,7 @@ public class TurtleSyntaxParser implements TargetQueryParser {
 		if (!bf.substring(bf.length() - 2, bf.length()).equals(" .")) {
 			bf.insert(bf.length() - 1, ' ');
 		}
-		if (prefMan != null) {
+		if (!prefixes.isEmpty()) {
 			// Update the input by appending the directives
 			appendDirectives(bf);
 		}
@@ -102,15 +88,14 @@ public class TurtleSyntaxParser implements TargetQueryParser {
 	 * Adds directives to the query header from the PrefixManager.
 	 */
 	private void appendDirectives(StringBuffer query) {
-		Map<String, String> prefixMap = prefMan.getPrefixMap();
 		StringBuffer sb = new StringBuffer();
-		for (String prefix : prefixMap.keySet()) {
+		for (String prefix : prefixes.keySet()) {
 			sb.append("@PREFIX");
 			sb.append(" ");
 			sb.append(prefix);
 			sb.append(" ");
 			sb.append("<");
-			sb.append(prefixMap.get(prefix));
+			sb.append(prefixes.get(prefix));
 			sb.append(">");
 			sb.append(" .\n");
 		}

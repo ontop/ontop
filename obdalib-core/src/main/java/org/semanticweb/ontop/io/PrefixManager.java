@@ -20,7 +20,7 @@ package org.semanticweb.ontop.io;
  * #L%
  */
 
-import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Abstracts the prefix mapping mechanism.
@@ -28,16 +28,6 @@ import java.util.Map;
 public interface PrefixManager {
 	
 	public static final String DEFAULT_PREFIX = ":";
-	
-	/**
-	 * Registers a prefix. Leave blank for BASE prefix.
-	 * 	 
-	 * @param name
-	 * 			The prefix name (without the colon).
-	 * @param uri
-	 * 			The URI definition for the given prefix.
-	 */
-	public void addPrefix(String prefix, String uri);
 
 	public String getURIDefinition(String prefix);
 
@@ -45,7 +35,7 @@ public interface PrefixManager {
 
 	public String getDefaultPrefix();
 	
-	public Map<String, String> getPrefixMap();
+	public ImmutableMap<String, String> getPrefixMap();
 
 	public String getShortForm(String uri);
 
@@ -56,6 +46,4 @@ public interface PrefixManager {
 	public String getExpandForm(String prefixedName, boolean insideQuotes);
 	
 	public boolean contains(String prefix);
-	
-	public void clear();
 }

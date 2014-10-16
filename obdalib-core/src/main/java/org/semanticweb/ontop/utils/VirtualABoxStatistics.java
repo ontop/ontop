@@ -25,14 +25,14 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.semanticweb.ontop.exception.NoDatasourceSelectedException;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.SQLOBDAModel;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.OBDASQLQuery;
 import org.semanticweb.ontop.model.impl.CQIEImpl;
 import org.semanticweb.ontop.sql.JDBCConnectionManager;
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 public class VirtualABoxStatistics {
 
-	private SQLOBDAModel model;
+	private OBDAModel model;
 
 	private HashMap<String, HashMap<String, Integer>> statistics = new HashMap<String, HashMap<String, Integer>>();
 
@@ -58,7 +58,7 @@ public class VirtualABoxStatistics {
 	 * @param model
 	 *            The mandatory OBDA model.
 	 */
-	public VirtualABoxStatistics(SQLOBDAModel model) {
+	public VirtualABoxStatistics(OBDAModel model) {
 		this.model = model;
 	}
 
@@ -136,9 +136,9 @@ public class VirtualABoxStatistics {
 	}
 
 	public void refresh() {
-		final List<OBDADataSource> sourceList = model.getSources();
+		final Set<OBDADataSource> sources = model.getSources();
 
-		for (OBDADataSource database : sourceList) {
+		for (OBDADataSource database : sources) {
 			URI sourceUri = database.getSourceID();
 			List<OBDAMappingAxiom> mappingList = model.getMappings(sourceUri);
 

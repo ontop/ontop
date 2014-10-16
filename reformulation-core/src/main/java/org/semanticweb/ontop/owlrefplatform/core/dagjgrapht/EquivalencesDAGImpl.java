@@ -93,7 +93,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 
 		LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
 
-		BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator = 
+		BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator =
 					new BreadthFirstIterator<Equivalences<T>, DefaultEdge>(
 							new EdgeReversedGraph<Equivalences<T>, DefaultEdge>(dag), v);
 
@@ -126,7 +126,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 
 		LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
 
-		BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator = 
+		BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator =
 				new BreadthFirstIterator<Equivalences<T>, DefaultEdge>(dag, v);
 
 		while (iterator.hasNext()) {
@@ -166,14 +166,14 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	 *  construction: main algorithms (static generic methods)
 	 */
 	
-	private static <TT> SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> factorize(DefaultDirectedGraph<TT,DefaultEdge> graph, 
+	private static <TT> SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> factorize(DefaultDirectedGraph<TT,DefaultEdge> graph,
 																				Map<TT, Equivalences<TT>> equivalencesMap) {
 		// each set contains vertices which together form a strongly connected
 		// component within the given graph
 		GabowSCC<TT, DefaultEdge> inspector = new GabowSCC<TT, DefaultEdge>(graph);
 		List<Equivalences<TT>> equivalenceSets = inspector.stronglyConnectedSets();
 
-		SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> dag0 = 
+		SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> dag0 =
 					new SimpleDirectedGraph<Equivalences<TT>,DefaultEdge>(DefaultEdge.class);
 
 		for (Equivalences<TT> equivalenceSet : equivalenceSets)  {

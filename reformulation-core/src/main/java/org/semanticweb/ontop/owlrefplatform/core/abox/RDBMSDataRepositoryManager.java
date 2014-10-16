@@ -20,6 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
@@ -171,7 +172,7 @@ public interface RDBMSDataRepositoryManager extends Serializable {
 	 */
 	public boolean checkMetadata(Connection conn) throws SQLException;
 
-	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException;
+	public ImmutableList<OBDAMappingAxiom> getMappings() throws OBDAException;
 
 	public void collectStatistics(Connection conn) throws SQLException;
 

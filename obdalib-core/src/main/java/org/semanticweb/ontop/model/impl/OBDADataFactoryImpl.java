@@ -28,7 +28,6 @@ import java.util.UUID;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.SQLOBDAModel;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.utils.IDGenerator;
 
@@ -65,10 +64,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public static org.openrdf.model.URI getIRI(String s){
 		return getIRIFactory().createURI(s);
 				}
-	
-	public SQLOBDAModel getOBDAModel() {
-		return new SQLOBDAModelImpl();
-	}
+
+    //@Override
+	//public SQLOBDAModel getOBDAModel() {
+	//	return new SQLOBDAModelImpl();
+	//}
 
 	@Deprecated
 	public PredicateImpl getPredicate(String name, int arity) {

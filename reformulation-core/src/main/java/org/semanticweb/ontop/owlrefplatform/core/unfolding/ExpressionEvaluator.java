@@ -21,7 +21,6 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
  */
 
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;

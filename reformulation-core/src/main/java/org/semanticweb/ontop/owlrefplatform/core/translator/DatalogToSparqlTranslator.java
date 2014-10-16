@@ -20,6 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.core.translator;
  * #L%
  */
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.semanticweb.ontop.io.PrefixManager;
@@ -60,9 +61,11 @@ public class DatalogToSparqlTranslator {
 	/**
 	 * Creates the translator with a default prefix manager. The default prefix
 	 * manager contains the common prefixes (e.g., RDF, RDFS, OWL)
+     *
+     * TODO: use the factory to construct this translator
 	 */
 	public DatalogToSparqlTranslator() {
-		this(new SimplePrefixManager());
+		this(new SimplePrefixManager(new HashMap<String, String>()));
 	}
 
 	/**

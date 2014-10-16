@@ -27,7 +27,6 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +38,7 @@ import org.semanticweb.ontop.model.TupleResultSet;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.Quest;
+import org.semanticweb.ontop.owlrefplatform.core.QuestImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
 
 public class QuestResultset implements TupleResultSet {

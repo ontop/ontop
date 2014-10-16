@@ -4,9 +4,14 @@ import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.mapping.sql.ParsedSQLMapping;
 
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
+import org.semanticweb.ontop.model.OBDAModel;
+
 import java.util.List;
 
+/**
+ *
+ */
 public interface MappingParser {
 
-    List<OBDAMappingAxiom> parse() throws InvalidMappingException;
+    OBDAModel getOBDAModel() throws InvalidMappingException;
 }

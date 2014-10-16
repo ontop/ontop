@@ -38,11 +38,11 @@ public class QuestConnection implements OBDAConnection {
 
 	protected Connection conn;
 
-	private Quest questinstance;
+	private QuestImpl questinstance;
 	
 	private boolean isClosed;
 
-	public QuestConnection(Quest questisntance, Connection connection) {
+	public QuestConnection(QuestImpl questisntance, Connection connection) {
 		this.questinstance = questisntance;
 		this.conn = connection;
 		isClosed = false;

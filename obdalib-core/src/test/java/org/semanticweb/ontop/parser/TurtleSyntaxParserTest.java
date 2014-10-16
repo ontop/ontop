@@ -20,18 +20,29 @@ package org.semanticweb.ontop.parser;
  * #L%
  */
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import junit.framework.TestCase;
 
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
 import org.semanticweb.ontop.io.PrefixManager;
-import org.semanticweb.ontop.io.SimplePrefixManager;
-import org.semanticweb.ontop.parser.TargetQueryParserException;
-import org.semanticweb.ontop.parser.TurtleOBDASyntaxParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 public class TurtleSyntaxParserTest extends TestCase {
 
-	final static Logger log = LoggerFactory.getLogger(TurtleSyntaxParserTest.class);
+	private final static Logger log = LoggerFactory.getLogger(TurtleSyntaxParserTest.class);
+    private final NativeQueryLanguageComponentFactory factory;
+
+    public TurtleSyntaxParserTest() {
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+    }
 	
 	public void test_1_1() {
 		final boolean result = parse(":Person-{id} a :Person .");
@@ -184,8 +195,8 @@ public class TurtleSyntaxParserTest extends TestCase {
 	}
 	
 	private boolean parse(String input) {
-		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser();
-		parser.setPrefixManager(getPrefixManager());
+        Map<String, String> prefixes = new HashMap<>();
+		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(prefixes);
 
 		try {
 			parser.parse(input);
@@ -200,9 +211,10 @@ public class TurtleSyntaxParserTest extends TestCase {
 	}
 	
 	private PrefixManager getPrefixManager() {
-		PrefixManager pm = new SimplePrefixManager();
-		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#");
-		pm.addPrefix("ex:", "http://www.example.org/");
+        Map<String, String> prefixes = new HashMap<>();
+		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#");
+		prefixes.put("ex:", "http://www.example.org/");
+        PrefixManager pm = factory.create(prefixes);
 		return pm;
 	}
 }

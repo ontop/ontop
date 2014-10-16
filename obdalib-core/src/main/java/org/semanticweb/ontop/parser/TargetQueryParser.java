@@ -20,12 +20,9 @@ package org.semanticweb.ontop.parser;
  * #L%
  */
 
-import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.CQIE;
 
 public interface TargetQueryParser {
-	
-	public void setPrefixManager(PrefixManager manager);
-	
+
 	public CQIE parse(String input) throws TargetQueryParserException;
 }

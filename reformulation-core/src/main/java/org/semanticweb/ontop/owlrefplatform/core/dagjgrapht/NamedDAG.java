@@ -89,14 +89,14 @@ public class NamedDAG  {
 		
 		SimpleDirectedGraph<T,DefaultEdge>  namedDAG = new SimpleDirectedGraph <T,DefaultEdge> (DefaultEdge.class); 
 
-		for (Equivalences<T> v : dag) 
+		for (Equivalences<T> v : dag)
 			namedDAG.addVertex(v.getRepresentative());
 
-		for (Equivalences<T> s : dag) 
-			for (Equivalences<T> t : dag.getDirectSuper(s)) 
+		for (Equivalences<T> s : dag)
+			for (Equivalences<T> t : dag.getDirectSuper(s))
 				namedDAG.addEdge(s.getRepresentative(), t.getRepresentative());
 
-		for (Equivalences<T> v : dag) 
+		for (Equivalences<T> v : dag)
 			if (!v.isIndexed()) {
 				// eliminate node
 				for (DefaultEdge incEdge : namedDAG.incomingEdgesOf(v.getRepresentative())) { 

@@ -132,7 +132,7 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 								return new Equivalences<Description>(equivalences);
 							}
 						*/
-						return new Equivalences<T>(equivalenceSet, equivalenceSet.iterator().next());
+						return new EquivalencesImpl<T>(equivalenceSet, equivalenceSet.iterator().next());
 					}
 				}
 			}
@@ -148,7 +148,7 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 						return new Equivalences<Description>(equivalences);
 					}
 			}*/
-			return new Equivalences<T>(Collections.singleton(desc), desc);
+			return new EquivalencesImpl<T>(Collections.singleton(desc), desc);
 		}
 
 		@Override
@@ -213,7 +213,7 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 					} */
 				Set<T> sources = new HashSet<T>();
 				sources.add(node);
-				result.add(new Equivalences<T>(sources));
+				result.add(new EquivalencesImpl<T>(sources));
 			}
 			// add each of them to the result
 			return Collections.unmodifiableSet(result);
@@ -280,7 +280,7 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 					} */
 				Set<T> sources = new HashSet<T>();
 				sources.add(node);
-				result.add(new Equivalences<T>(sources));
+				result.add(new EquivalencesImpl<T>(sources));
 			}
 			// add each of them to the result
 			return Collections.unmodifiableSet(result);
@@ -316,9 +316,9 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 			Equivalences<BasicClassDescription> existsNode = classDAG.getVertex(existsR);
 			Equivalences<BasicClassDescription> existsInvNode = classDAG.getVertex(existsRin);
 			
-			Set<Equivalences<BasicClassDescription>> childrenExist 
+			Set<Equivalences<BasicClassDescription>> childrenExist
 					= new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSub(existsNode));
-			Set<Equivalences<BasicClassDescription>> childrenExistInv 
+			Set<Equivalences<BasicClassDescription>> childrenExistInv
 					= new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSub(existsInvNode));
 
 			for (Equivalences<BasicClassDescription> children : childrenExist) {
@@ -330,9 +330,9 @@ public class Test_TBoxReasonerImplOnGraph implements TBoxReasoner {
 					classGraph.addEdge(child, existsR);
 			}
 
-			Set<Equivalences<BasicClassDescription>> parentExist 
+			Set<Equivalences<BasicClassDescription>> parentExist
 					= new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSuper(existsNode));
-			Set<Equivalences<BasicClassDescription>> parentsExistInv 
+			Set<Equivalences<BasicClassDescription>> parentsExistInv
 					= new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSuper(existsInvNode));
 
 			for (Equivalences<BasicClassDescription> parents : parentExist) {

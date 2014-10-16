@@ -143,7 +143,7 @@ public class QuestStatement implements OBDAStatement {
 
 	private long unfoldingTime = 0;
 
-	public QuestStatement(Quest questinstance, QuestConnection conn, Statement st) {
+	public QuestStatement(QuestImpl questinstance, QuestConnection conn, Statement st) {
 
 		this.questInstance = questinstance;
 

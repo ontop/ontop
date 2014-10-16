@@ -20,12 +20,13 @@ package org.semanticweb.ontop.api.io;
  * #L%
  */
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
 import org.semanticweb.ontop.io.PrefixManager;
-import org.semanticweb.ontop.io.SimplePrefixManager;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
@@ -40,12 +41,16 @@ import junit.framework.TestCase;
 
 public class PrefixRendererTest extends TestCase {
 
-	private PrefixManager pm;
 	private DatalogProgram query;
 	private CQIE rule1;
+    private final NativeQueryLanguageComponentFactory factory;
+
+    public PrefixRendererTest() {
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+    }
 	
 	public void setUp() throws Exception {
-		pm = new SimplePrefixManager();
 		OBDADataFactory pfac = OBDADataFactoryImpl.getInstance();
 		OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
 		query = tfac.getDatalogProgram();
@@ -73,7 +78,10 @@ public class PrefixRendererTest extends TestCase {
 	 * short form and those who don't have it are renderered with the full uri
 	 */
 	public void testNamespace1() {
-		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
+        PrefixManager pm;
+        Map<String, String> prefixes = new HashMap<>();
+		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
+        pm = factory.create(prefixes);
 		String name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("http://obda.org/predicates#q"));
 
@@ -84,7 +92,8 @@ public class PrefixRendererTest extends TestCase {
 		name = pm.getShortForm(((FunctionalTermImpl)atom0.getTerms().get(0)).getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("&:;person-individual"));
 
-		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
+		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
+        pm = factory.create(prefixes);
 		name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), true);
 		assertTrue(name, name.equals("&:;q"));
 
@@ -100,8 +109,11 @@ public class PrefixRendererTest extends TestCase {
 	 * This test checks if the prefix are properly handled
 	 */
 	public void testPrefix1() {
-		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
-		pm.addPrefix("obdap:", "http://obda.org/predicates#");
+        PrefixManager pm;
+        Map<String, String> prefixes = new HashMap<>();
+		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/onto.owl#");
+		prefixes.put("obdap:", "http://obda.org/predicates#");
+        pm = factory.create(prefixes);
 
 		String name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), false);
 		assertTrue(name, name.equals("obdap:q"));
@@ -113,8 +125,9 @@ public class PrefixRendererTest extends TestCase {
 		name = pm.getShortForm(((FunctionalTermImpl) atom0.getTerms().get(0)).getFunctionSymbol().toString(), false);
 		assertTrue(name, name.equals(":person-individual"));
 
-		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
-		pm.addPrefix("onto:", "http://obda.org/onto.owl#");
+		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.org/predicates#");
+		prefixes.put("onto:", "http://obda.org/onto.owl#");
+        pm = factory.create(prefixes);
 		name = pm.getShortForm(query.getRules().get(0).getHead().getFunctionSymbol().toString(), false);
 		assertTrue(name, name.equals(":q"));
 
