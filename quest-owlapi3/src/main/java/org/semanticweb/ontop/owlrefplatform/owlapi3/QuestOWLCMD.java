@@ -163,18 +163,6 @@ public class QuestOWLCMD {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-        /**
-         * Factory initialization
-         */
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-
-        /*
-         * Load the OBDA model from an external .obda file
-         */
-        MappingParser mappingParser = factory.create(new File(obdafile));
-        OBDAModel obdaModel = mappingParser.getOBDAModel();
-
 		/*
 		 * Preparing the configuration for the new Quest instance, we need to
 		 * make sure it will be setup for "virtual ABox mode"
@@ -188,9 +176,7 @@ public class QuestOWLCMD {
 		 * accepting connections. The HelloWorld and Books tutorials at our wiki
 		 * show you how to do this.
 		 */
-		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
-		questOWLFactory.setOBDAController(obdaModel);
-		questOWLFactory.setPreferenceHolder(p);
+		QuestOWLFactory questOWLFactory = new QuestOWLFactory(new File(obdafile), p);
 		reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology, new SimpleConfiguration());
 
 		/*

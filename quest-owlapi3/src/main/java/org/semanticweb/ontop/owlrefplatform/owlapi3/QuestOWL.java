@@ -23,7 +23,10 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.ontology.Assertion;
@@ -37,10 +40,13 @@ import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.ontop.owlrefplatform.core.*;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
+import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentModule;
 import org.semanticweb.ontop.utils.VersionInfo;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -161,7 +167,7 @@ public class QuestOWL extends OWLReasonerBase {
 	/* The merge and tranlsation of all loaded ontologies */
 	private Ontology translatedOntologyMerge;
 
-	private OBDAModel obdaModel = null;
+	private final OBDAModel obdaModel;
 
 	private QuestPreferences preferences = new QuestPreferences();
 
@@ -192,20 +198,16 @@ public class QuestOWL extends OWLReasonerBase {
 
 	
 	/**
-	 * Initialization code which is called from both of the two constructors. 
-	 * @param obdaModel 
+	 * Initialization code which is called from both of the two constructors.
 	 * 
 	 */
-	private void init(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, Properties preferences){
+	private void init(OWLOntology rootOntology, OWLReasonerConfiguration configuration, Properties preferences){
 		pm = configuration.getProgressMonitor();
 		if (pm == null) {
 			pm = new NullReasonerProgressMonitor();
 		}
 
 		man = rootOntology.getOWLOntologyManager();
-
-		if (obdaModel != null)
-			this.obdaModel = obdaModel;
 		
 		this.preferences.putAll(preferences);
 
@@ -216,13 +218,17 @@ public class QuestOWL extends OWLReasonerBase {
 	
 	/***
 	 * Default constructor.
+     *
+     * obdaModel can be null.
+     *
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration,
-                    BufferingMode bufferingMode, Properties preferences) {
+                    BufferingMode bufferingMode, Properties preferences, QuestComponentFactory componentFactory) {
 		super(rootOntology, configuration, bufferingMode);
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-        componentFactory = injector.getInstance(QuestComponentFactory.class);
-		this.init(rootOntology, obdaModel, configuration, preferences);
+        this.obdaModel = obdaModel;
+        this.componentFactory = componentFactory;
+
+		this.init(rootOntology, configuration, preferences);
 
 	}
 
@@ -232,17 +238,17 @@ public class QuestOWL extends OWLReasonerBase {
 	 * @param userConstraints User-supplied primary and foreign keys
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, ImplicitDBConstraints userConstraints) {
+			Properties preferences, ImplicitDBConstraints userConstraints, QuestComponentFactory componentFactory) {
 		super(rootOntology, configuration, bufferingMode);
 		
 		this.userConstraints = userConstraints;
 		assert(userConstraints != null);
 		this.applyUserConstraints = true;
 
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-        componentFactory = injector.getInstance(QuestComponentFactory.class);
+        this.obdaModel = obdaModel;
+        this.componentFactory = componentFactory;
 		
-		this.init(rootOntology, obdaModel, configuration, preferences);
+		this.init(rootOntology, configuration, preferences);
 	}
 	 
 	 /**

@@ -21,15 +21,6 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3.example;
  */
 
 import java.io.File;
-import java.io.FileReader;
-import java.util.Properties;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
-import org.semanticweb.ontop.mapping.MappingParser;
-import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -63,18 +54,6 @@ public class QuestOWLExample {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-        /**
-         * Factory initialization
-         */
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-
-        /*
-         * Load the OBDA model from an external .obda file
-         */
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        OBDAModel obdaModel = mappingParser.getOBDAModel();
-
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
@@ -85,9 +64,7 @@ public class QuestOWLExample {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
-		questOWLFactory.setOBDAController(obdaModel);
-		questOWLFactory.setPreferenceHolder(preference);
+		QuestOWLFactory questOWLFactory = new QuestOWLFactory(new File(obdafile), preference);
 		QuestOWL reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology, new SimpleConfiguration());
 
 		/*
@@ -123,8 +100,7 @@ public class QuestOWLExample {
 			/*
 			 * Print the query summary
 			 */
-			QuestOWLStatement qst = (QuestOWLStatement) st;
-			String sqlQuery = qst.getUnfolding(sparqlQuery);
+			String sqlQuery = st.getUnfolding(sparqlQuery);
 
 			System.out.println();
 			System.out.println("The input SPARQL query:");

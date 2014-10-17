@@ -59,18 +59,6 @@ public class QuestOWLExample_NoReplace {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-        /**
-         * Factory initialization
-         */
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-
-        /*
-         * Load the OBDA model from an external .obda file
-         */
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        OBDAModel obdaModel = mappingParser.getOBDAModel();
-
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
@@ -82,9 +70,7 @@ public class QuestOWLExample_NoReplace {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory questOwlFactory = new QuestOWLFactory();
-		questOwlFactory.setOBDAController(obdaModel);
-		questOwlFactory.setPreferenceHolder(preference);
+		QuestOWLFactory questOwlFactory = new QuestOWLFactory(new File(obdafile), preference);
 		QuestOWL reasoner = (QuestOWL) questOwlFactory.createReasoner(ontology, new SimpleConfiguration());
 
 		/*
