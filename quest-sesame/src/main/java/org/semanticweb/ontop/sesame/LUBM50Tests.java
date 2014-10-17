@@ -176,9 +176,6 @@ public class LUBM50Tests {
 	}
 
 	public void test3InitializingQuest() throws Exception {
-
-		QuestOWLFactory fac = new QuestOWLFactory();
-
 		QuestPreferences pref = new QuestPreferences();
 		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
 		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -190,13 +187,12 @@ public class LUBM50Tests {
 		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, password);
 		pref.setCurrentValueOf(QuestPreferences.REWRITE, "true");
 
-		fac.setPreferenceHolder(pref);
-
+        QuestOWLFactory fac = new QuestOWLFactory(pref);
 		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
 
-		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();
+		QuestOWLConnection qconn = quest.getConnection();
 
-		QuestOWLStatement st = (QuestOWLStatement) qconn.createStatement();
+		QuestOWLStatement st = qconn.createStatement();
 
 		QueryController qc = new QueryController();
 		QueryIOManager qman = new QueryIOManager(qc);

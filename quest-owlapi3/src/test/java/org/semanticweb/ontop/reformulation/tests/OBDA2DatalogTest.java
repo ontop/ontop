@@ -60,23 +60,13 @@ import org.slf4j.LoggerFactory;
  */
 public class OBDA2DatalogTest extends TestCase {
 
-    private final NativeQueryLanguageComponentFactory factory;
-    private OBDADataFactory fac;
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/mappinganalyzer/ontology.owl";
 
-    public OBDA2DatalogTest() {
-        /**
-         * Factory initialization
-         */
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-    }
 
 	@Override
 	public void setUp() throws Exception {
@@ -85,8 +75,6 @@ public class OBDA2DatalogTest extends TestCase {
 		String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -105,13 +93,10 @@ public class OBDA2DatalogTest extends TestCase {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-		
-		obdaModel = null;
 	}
 
 	@Override
 	public void tearDown() throws Exception {
-	
 			dropTables();
 			conn.close();
 		
@@ -132,16 +117,14 @@ public class OBDA2DatalogTest extends TestCase {
 		conn.commit();
 	}
 
-	private void runTests() throws Exception {
+	private void runTests(String obdaFileName) throws Exception {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-		factory.setPreferenceHolder(p);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFileName), p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
@@ -150,198 +133,144 @@ public class OBDA2DatalogTest extends TestCase {
 	}
 
 	public void testMapping_1() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_1.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+			runTests("src/test/resources/test/mappinganalyzer/case_1.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_2() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_2.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_2.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_3() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_3.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_3.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_4() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_4.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_4.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_5() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_5.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_5.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), true); // FAIL
 		}
 	}
 	
 	public void testMapping_6() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_6.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_6.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_7() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_7.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_7.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_8() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_8.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_8.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were id map to two different values
 		}
 	}
 	
 	public void testMapping_9() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_9.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_9.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were id map to two different values
 		}
 	}
 	
 	public void testMapping_10() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_10.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_10.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were alias map to two different values
 		}
 	}
 	
 	public void testMapping_11() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_11.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_11.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_12() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_12.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_12.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), true); // FAIL we cannot handle the case in the look up table were name map to two different values
 		}
 	}
 	
 	public void testMapping_13() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_13.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_13.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_14() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_14.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_14.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), true); // FAIL
 		}
 	}
 	
 	public void testMapping_15() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_15.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_15.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_16() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_16.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_16.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}
 	}
 	
 	public void testMapping_17() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_17.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_17.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), true); // FAIL
 		}
 	}
 	
 	public void testMapping_18() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
-		String obdafile = "src/test/resources/test/mappinganalyzer/case_18.obda";
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		try {
-			runTests();
+            runTests("src/test/resources/test/mappinganalyzer/case_18.obda");
 		} catch (Exception e) {
 			assertTrue(e.toString(), false);
 		}

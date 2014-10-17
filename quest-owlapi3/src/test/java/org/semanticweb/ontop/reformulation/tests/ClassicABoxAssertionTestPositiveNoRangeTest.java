@@ -65,8 +65,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
 		
-		QuestOWLFactory fac = new QuestOWLFactory();
-		fac.setPreferenceHolder(pref);
+		QuestOWLFactory fac = new QuestOWLFactory(pref);
 
 		reasoner = (QuestOWL) fac.createReasoner(ontology);
 		reasoner.flush();

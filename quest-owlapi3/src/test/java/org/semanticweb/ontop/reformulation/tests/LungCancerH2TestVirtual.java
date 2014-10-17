@@ -154,10 +154,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 	private void runTests(Properties p) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 

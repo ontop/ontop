@@ -65,36 +65,24 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestOWLEmptyEntitiesCheckerTest {
 
-	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
 	private Connection connection;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/emptiesDatabase.owl";
 	final String obdafile = "src/test/resources/test/emptiesDatabase.obda";
 
-	// final String owlfile =
+	// final String owlFileName =
 	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
-	// final String obdafile =
+	// final String obdaFileName =
 	// "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange-mysql.obda";
 
 	private List<Predicate> emptyConcepts = new ArrayList<Predicate>();
 	private List<Predicate> emptyRoles = new ArrayList<Predicate>();
 
 	private QuestOWL reasoner;
-
-    private NativeQueryLanguageComponentFactory factory;
-
-    public QuestOWLEmptyEntitiesCheckerTest() {
-        /**
-         * Factory initialization
-         */
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-    }
 
 	@Before
 	public void setUp() throws Exception {
@@ -103,8 +91,6 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		String url = "jdbc:h2:mem:questjunitdb;";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		connection = DriverManager.getConnection(url, username, password);
 		Statement st = connection.createStatement();
@@ -126,20 +112,11 @@ public class QuestOWLEmptyEntitiesCheckerTest {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-        /*
-         * Load the OBDA model from an external .obda file
-         */
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
-
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
 
 		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 

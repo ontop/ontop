@@ -64,20 +64,17 @@ public class SemanticIndexLUBMHTest extends TestCase {
 
 	public void test3InitializingQuest() throws Exception {
 		long start = System.nanoTime();
+
+        QuestPreferences pref = new QuestPreferences();
+        pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+        pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 	
-		QuestOWLFactory fac = new QuestOWLFactory();
-
-		QuestPreferences pref = new QuestPreferences();
-		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-
-		fac.setPreferenceHolder(pref);
+		QuestOWLFactory fac = new QuestOWLFactory(pref);
 
 		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
+		QuestOWLConnection qconn = quest.getConnection();
 
-		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();
-
-		QuestOWLStatement st = (QuestOWLStatement) qconn.createStatement();
+		QuestOWLStatement st = qconn.createStatement();
 		long end = System.nanoTime();
 		double init_time = (end - start) / 1000000;
 		start = System.nanoTime();

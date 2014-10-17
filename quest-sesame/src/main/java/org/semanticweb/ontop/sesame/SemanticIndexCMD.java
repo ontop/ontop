@@ -139,27 +139,23 @@ public class SemanticIndexCMD {
 	}
 
 	public void test3InitializingQuest() throws Exception {
+        QuestPreferences pref = new QuestPreferences();
+        pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+        pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+        pref.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.JDBC);
+        pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+        pref.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, driver);
+        pref.setCurrentValueOf(QuestPreferences.JDBC_URL, url);
+        pref.setCurrentValueOf(QuestPreferences.DBUSER, username);
+        pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, password);
 
-		QuestOWLFactory fac = new QuestOWLFactory();
-
-		QuestPreferences pref = new QuestPreferences();
-		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		pref.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.JDBC);
-		pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		pref.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, driver);
-		pref.setCurrentValueOf(QuestPreferences.JDBC_URL, url);
-		pref.setCurrentValueOf(QuestPreferences.DBUSER, username);
-		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, password);
-		
-
-		fac.setPreferenceHolder(pref);
+		QuestOWLFactory fac = new QuestOWLFactory(pref);
 
 		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
 
-		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();
+		QuestOWLConnection qconn = quest.getConnection();
 
-		QuestOWLStatement st = (QuestOWLStatement) qconn.createStatement();
+		QuestOWLStatement st = qconn.createStatement();
 
 		QueryController qc = new QueryController();
 		QueryIOManager qman = new QueryIOManager(qc);
@@ -174,7 +170,7 @@ public class SemanticIndexCMD {
 			log.debug("Query: \n{}", query.getQuery());
 			
 			long start = System.nanoTime();
-			QuestOWLResultSet res = (QuestOWLResultSet)(st.executeTuple(query.getQuery()));
+			QuestOWLResultSet res = st.executeTuple(query.getQuery());
 			long end = System.nanoTime();
 			
 			double time = (end - start) / 1000; 

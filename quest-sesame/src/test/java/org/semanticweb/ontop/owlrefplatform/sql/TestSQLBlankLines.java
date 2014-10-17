@@ -43,16 +43,11 @@ import org.slf4j.LoggerFactory;
 
 public class TestSQLBlankLines {
 
-
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
-    private OBDADataFactory fac;
 	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 	private QuestOWLFactory factory;
-
 
 	private QuestOWL reasoner;
 
@@ -61,11 +56,6 @@ public class TestSQLBlankLines {
 	final String obdafile = "src/test/resources/sqlgenerator/blanklines.obda";
 
 	private Connection sqlConnection;
-
-    public TestSQLBlankLines() {
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-        nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-    }
 
 
 
@@ -107,19 +97,11 @@ public class TestSQLBlankLines {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-			// Loading the OBDA data
-            MappingParser mappingParser = nativeQLFactory.create(new FileReader(obdafile));
-            obdaModel = mappingParser.getOBDAModel();
-
 			QuestPreferences p = new QuestPreferences();
 			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 			// Creating a new instance of the reasoner
-			this.factory = new QuestOWLFactory();
-			factory.setOBDAController(obdaModel);
-
-			factory.setPreferenceHolder(p);
-
+			this.factory = new QuestOWLFactory(new File(obdafile), p);
 
 		} catch (Exception exc) {
 			try {

@@ -41,6 +41,7 @@ import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Ontol
 import junit.framework.TestCase;
 
 import org.junit.Test;
+import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -57,6 +58,8 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
+
+import java.io.IOException;
 
 public class InconsistencyCheckingTest extends TestCase{
 
@@ -91,26 +94,26 @@ public class InconsistencyCheckingTest extends TestCase{
 		);
 	}
 	
-	private void startReasoner() {
+	private void startReasoner() throws IOException, InvalidMappingException {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
-		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
-		questOWLFactory.setPreferenceHolder(p);
+		QuestOWLFactory questOWLFactory = new QuestOWLFactory(p);
 		reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology);
 	}
 	
 	@Test
-	public void testInitialConsistency() {
+	public void testInitialConsistency() throws IOException, InvalidMappingException {
 		//initially the ontology is consistent
 		startReasoner();
 		assertTrue(reasoner.isQuestConsistent());
 	}
 	
 	@Test
-	public void testDisjointClassInconsistency() throws OWLOntologyCreationException {
+	public void testDisjointClassInconsistency() throws OWLOntologyCreationException,
+            IOException, InvalidMappingException {
 
 		//Male(a), Female(a), disjoint(Male, Female)
 		manager.addAxiom(ontology, ClassAssertion(c1, a));
@@ -125,7 +128,8 @@ public class InconsistencyCheckingTest extends TestCase{
 	} 
 	
 	@Test
-	public void testDisjointObjectPropInconsistency() throws OWLOntologyCreationException {
+	public void testDisjointObjectPropInconsistency() throws OWLOntologyCreationException,
+            IOException, InvalidMappingException {
 
 		//hasMother(a, b), hasFather(a,b), disjoint(hasMother, hasFather)
 		manager.addAxiom(ontology,ObjectPropertyAssertion(r1, a, b)); //
@@ -140,7 +144,8 @@ public class InconsistencyCheckingTest extends TestCase{
 	} 
 	
 	@Test
-	public void testDisjointDataPropInconsistency() throws OWLOntologyCreationException {
+	public void testDisjointDataPropInconsistency() throws OWLOntologyCreationException,
+            IOException, InvalidMappingException {
 
 		//hasAgeFirst(a, 21), hasAge(a, 21), disjoint(hasAgeFirst, hasAge)
 		manager.addAxiom(ontology, DataPropertyAssertion(d1, a, Literal(21)));
@@ -155,7 +160,8 @@ public class InconsistencyCheckingTest extends TestCase{
 	} 
 	
 	@Test
-	public void testFunctionalObjPropInconsistency() throws OWLOntologyCreationException {
+	public void testFunctionalObjPropInconsistency() throws OWLOntologyCreationException,
+            IOException, InvalidMappingException {
 
 		//hasMother(a,b), hasMother(a,c), func(hasMother)
 		manager.addAxiom(ontology,ObjectPropertyAssertion(r1, a, b)); //
@@ -170,7 +176,8 @@ public class InconsistencyCheckingTest extends TestCase{
 	} 
 	
 	@Test
-	public void testFunctionalDataPropInconsistency() throws OWLOntologyCreationException {
+	public void testFunctionalDataPropInconsistency() throws OWLOntologyCreationException,
+            IOException, InvalidMappingException {
 
 		//hasAge(a, 18), hasAge(a, 21), func(hasAge)
 		manager.addAxiom(ontology, DataPropertyAssertion(d1, a, Literal(18)));

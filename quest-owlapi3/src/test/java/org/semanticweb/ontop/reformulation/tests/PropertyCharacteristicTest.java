@@ -155,22 +155,8 @@ public class PropertyCharacteristicTest extends TestCase {
 	private void setupReasoner(File owlFile, File obdaFile) throws Exception {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(owlFile);
-
-        /**
-         * Factory initialization
-         */
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-
-        /*
-         * Load the OBDA model from an external .obda file
-         */
-        MappingParser mappingParser = factory.create(new FileReader(obdaFile));
-        OBDAModel obdaModel = mappingParser.getOBDAModel();
 		
-		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
-		questOWLFactory.setOBDAController(obdaModel);
-		questOWLFactory.setPreferenceHolder(prefs);
+		QuestOWLFactory questOWLFactory = new QuestOWLFactory(obdaFile, prefs);
 		
 		reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology, new SimpleConfiguration());
 	}

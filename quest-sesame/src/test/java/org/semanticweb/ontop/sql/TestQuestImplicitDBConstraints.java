@@ -51,25 +51,15 @@ public class TestQuestImplicitDBConstraints {
 	static String fk_obdafile = "src/test/resources/userconstraints/fk.obda";
 	static String fk_keyfile = "src/test/resources/userconstraints/fk-keys.lst";
 	static String fk_create = "src/test/resources/userconstraints/fk-create.sql";
-    private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
-
-    private OBDADataFactory fac;
 	private QuestOWLConnection conn;
 	private QuestOWLFactory factory;
 	
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
-
-    public TestQuestImplicitDBConstraints() {
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-        nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-    }
-
 
 	
 	public void start_reasoner(String owlfile, String obdafile, String sqlfile) throws Exception {
@@ -93,20 +83,12 @@ public class TestQuestImplicitDBConstraints {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-			// Loading the OBDA data
-            MappingParser parser = nativeQLFactory.create(new FileReader(obdafile));
-			obdaModel = parser.getOBDAModel();
-
 			QuestPreferences p = new QuestPreferences();
 			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 			p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-
 			
 			// Creating a new instance of the reasoner
-			this.factory = new QuestOWLFactory();
-			factory.setOBDAController(obdaModel);
-
-			factory.setPreferenceHolder(p);
+			this.factory = new QuestOWLFactory(new File(obdafile), p);
 
 		} catch (Exception exc) {
 			try {

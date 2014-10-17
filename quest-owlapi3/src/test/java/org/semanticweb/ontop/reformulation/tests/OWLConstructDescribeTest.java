@@ -52,14 +52,11 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
  * object property.
  */
 public class OWLConstructDescribeTest extends TestCase{
-
-	Connection con = null;
+    
 	OWLOntology ontology = null;
-	OBDAModel obdaModel = null;
 	QuestOWL reasoner = null;
 	QuestOWLConnection conn = null;
 	QuestOWLStatement st = null;
-	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	String owlFile = "src/test/resources/describeConstruct.owl";
 	
 	@Override
@@ -95,10 +92,7 @@ public class OWLConstructDescribeTest extends TestCase{
 			p.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
 			p.setCurrentValueOf(QuestPreferences.REWRITE, "false");
 			p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-			QuestOWLFactory factory = new QuestOWLFactory();
-//			factory.setOBDAController(obdaModel);
-			factory.setPreferenceHolder(p);
-			//reasoner.setPreferences(preferences);
+			QuestOWLFactory factory = new QuestOWLFactory(p);
 			reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 			conn = reasoner.getConnection();
 			st = conn.createStatement();

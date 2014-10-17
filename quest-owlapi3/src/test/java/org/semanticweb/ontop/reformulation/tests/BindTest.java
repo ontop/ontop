@@ -30,16 +30,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import junit.framework.TestCase;
 
-import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
-import org.semanticweb.ontop.mapping.MappingParser;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -69,15 +61,13 @@ public class BindTest extends TestCase {
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
 
-	private OBDADataFactory fac;
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/simplemapping.owl";
-	final String obdafile = "src/test/resources/test/simplemapping.obda";
+	final String obdaFileName = "src/test/resources/test/simplemapping.obda";
 
 	@Override
 	public void setUp() throws Exception {
@@ -88,8 +78,6 @@ public class BindTest extends TestCase {
 		String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -109,18 +97,6 @@ public class BindTest extends TestCase {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-        /**
-         * Factory initialization
-         */
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-
-        /*
-         * Load the OBDA model from an external .obda file
-         */
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 	}
 
 	@Override
@@ -152,10 +128,7 @@ public class BindTest extends TestCase {
 	private void runTests(Properties p) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFileName), p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 

@@ -63,19 +63,19 @@ public class SNOMEDTest {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-        /**
-         * Factory initialization
-         */
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-
-        /*
-         * Load the OBDA model from an external .obda file
-         */
-        PrefixManager prefixManager = factory.create(new HashMap<String, String>());
-        OBDAModel obdaModel = factory.create(ImmutableSet.<OBDADataSource>of(),
-                new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(),
-                prefixManager);
+//        /**
+//         * Factory initialization
+//         */
+//        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+//        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+//
+//        /*
+//         * Load the OBDA model from an external .obda file
+//         */
+//        PrefixManager prefixManager = factory.create(new HashMap<String, String>());
+//        OBDAModel obdaModel = factory.create(ImmutableSet.<OBDADataSource>of(),
+//                new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(),
+//                prefixManager);
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -91,10 +91,10 @@ public class SNOMEDTest {
 		 */
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
-		questOWLFactory.setOBDAController(obdaModel);
-
-		questOWLFactory.setPreferenceHolder(p);
+        // TODO: should we give an OBDA model?
+        //TODO: check if it makes sense
+		QuestOWLFactory questOWLFactory = new QuestOWLFactory(p);
+		//questOWLFactory.setOBDAController(obdaModel);
 
 		log.info("Creating the reasoner");
 		

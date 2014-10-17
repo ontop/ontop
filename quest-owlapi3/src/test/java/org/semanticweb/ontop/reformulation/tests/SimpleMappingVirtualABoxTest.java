@@ -73,7 +73,6 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/simplemapping.owl";
@@ -111,18 +110,6 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-        /**
-         * Factory initialization
-         */
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-
-        /*
-         * Load the OBDA model from an external .obda file
-         */
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		
 	}
 
@@ -155,10 +142,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 	private void runTests(Properties p) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 

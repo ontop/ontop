@@ -32,17 +32,11 @@ import java.util.Properties;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
-import org.semanticweb.ontop.mapping.MappingParser;
-import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -76,18 +70,10 @@ public class MetaMappingVirtualABoxTest{
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/metamapping.owl";
-	final String obdafile = "src/test/resources/test/metamapping.obda";
-
-    private final NativeQueryLanguageComponentFactory factory;
-
-    public MetaMappingVirtualABoxTest() {
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-    }
+	final String obdaFileName = "src/test/resources/test/metamapping.obda";
 
 	@Before
 	public void setUp() throws Exception {
@@ -114,10 +100,6 @@ public class MetaMappingVirtualABoxTest{
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 		
 	}
 
@@ -150,11 +132,7 @@ public class MetaMappingVirtualABoxTest{
 	private void runTests(Properties p) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
-
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFileName), p);
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying

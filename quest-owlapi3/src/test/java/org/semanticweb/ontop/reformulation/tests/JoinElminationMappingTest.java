@@ -66,26 +66,13 @@ import org.slf4j.LoggerFactory;
  * automatically by the reasoner.
  */
 public class JoinElminationMappingTest extends TestCase {
-
-	private OBDADataFactory fac;
 	private Connection conn;
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/ontologies/scenarios/join-elimination-test.owl";
 	final String obdafile = "src/test/resources/test/ontologies/scenarios/join-elimination-test.obda";
-
-    private final NativeQueryLanguageComponentFactory factory;
-
-    public JoinElminationMappingTest() {
-        /**
-         * Factory initialization
-         */
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-        factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-    }
 
 	@Override
 	public void setUp() throws Exception {
@@ -93,8 +80,6 @@ public class JoinElminationMappingTest extends TestCase {
 		String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
 		String password = "";
-
-		fac = OBDADataFactoryImpl.getInstance();
 
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
@@ -110,20 +95,12 @@ public class JoinElminationMappingTest extends TestCase {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-        /*
-         * Load the OBDA model from an external .obda file
-         */
-        MappingParser mappingParser = factory.create(new FileReader(obdafile));
-        obdaModel = mappingParser.getOBDAModel();
 	}
 
 	@Override
 	public void tearDown() throws Exception {
-
 			dropTables();
 			conn.close();
-		
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -135,10 +112,7 @@ public class JoinElminationMappingTest extends TestCase {
 	
 	private void runTests(Properties p) throws Exception {
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 		reasoner.flush();
