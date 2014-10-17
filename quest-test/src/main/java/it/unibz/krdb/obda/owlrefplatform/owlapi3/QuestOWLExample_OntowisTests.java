@@ -71,8 +71,8 @@ public class QuestOWLExample_OntowisTests {
 	 */
 	final String owlfile = "src/main/resources/example/ontowis-5joins-int.owl";
 	//final String obdafile = "src/main/resources/example/ontowis-5joins-int-view.obda";
-	final String obdafile;// = "src/main/resources/example/ontowis-5joins-int-view.obda";
-//	final String obdafile= "src/main/resources/example/ontowis-5joins-int.obda";
+//	final String obdafile;// = "src/main/resources/example/ontowis-5joins-int-view.obda";
+	final String obdafile;//= "src/main/resources/example/ontowis-5joins-int.obda";
 	//final String obdafile= "src/main/resources/example/ontowis-5joins-string-niceURI.obda";
 
 	//final String usrConstrinFile = "src/main/resources/example/funcCons.txt";
@@ -203,7 +203,7 @@ public class QuestOWLExample_OntowisTests {
 				long time = 0;
 				int count = 0;
 				
-				for (int i=0; i<4; i++){
+				for (int i=0; i<1; i++){
 					long t1 = System.currentTimeMillis();
 					QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
 					int columnSize = rs.getColumnCount();
