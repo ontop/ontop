@@ -56,11 +56,9 @@ public class OracleRegexpTestSpace extends TestCase {
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
 
-	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "resources/regexp/oracle-regexp.owl";
@@ -75,13 +73,6 @@ public class OracleRegexpTestSpace extends TestCase {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
-		
-		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
-		ioManager.load(obdafile);
 	
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -89,10 +80,7 @@ public class OracleRegexpTestSpace extends TestCase {
 		
 		
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
 
 		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 

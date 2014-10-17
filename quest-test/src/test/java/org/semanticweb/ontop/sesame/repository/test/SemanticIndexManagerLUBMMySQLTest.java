@@ -142,8 +142,6 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 	}
 
 	public void test3InitializingQuest() throws Exception {
-		QuestOWLFactory fac = new QuestOWLFactory();
-
 		QuestPreferences pref = new QuestPreferences();
 		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
 		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -154,7 +152,7 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 		pref.setCurrentValueOf(QuestPreferences.DBUSER, username);
 		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, password);
 
-		fac.setPreferenceHolder(pref);
+        QuestOWLFactory fac = new QuestOWLFactory(pref);
 
 		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
 		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();

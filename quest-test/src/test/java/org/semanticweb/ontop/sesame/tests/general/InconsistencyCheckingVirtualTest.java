@@ -88,13 +88,8 @@ public class InconsistencyCheckingVirtualTest {
 	}
 	
 	private void startReasoner(){
-		QuestOWLFactory questOWLFactory = new QuestOWLFactory();
-		questOWLFactory.setPreferenceHolder(p);
-		obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();
-		SQLMappingParser mng = new SQLMappingParser(obdaModel);
-		try {
-			mng.load(new File(obdafile));
-			questOWLFactory.setOBDAController(obdaModel);
+        try {
+		    QuestOWLFactory questOWLFactory = new QuestOWLFactory(new File(obdafile), p);
 			reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology);
 		} catch (Exception e) {
 			e.printStackTrace();

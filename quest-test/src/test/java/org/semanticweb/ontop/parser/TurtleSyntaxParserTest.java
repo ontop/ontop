@@ -23,12 +23,11 @@ package org.semanticweb.ontop.parser;
 import junit.framework.TestCase;
 
 import org.semanticweb.ontop.io.PrefixManager;
-import org.semanticweb.ontop.io.SimplePrefixManager;
-import org.semanticweb.ontop.parser.TargetQueryParserException;
-import org.semanticweb.ontop.parser.TurtleOBDASyntaxParser;
-import org.semanticweb.ontop.parser.TurtleSyntaxParserTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TurtleSyntaxParserTest extends TestCase {
 
@@ -185,8 +184,7 @@ public class TurtleSyntaxParserTest extends TestCase {
 	}
 	
 	private boolean parse(String input) {
-		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser();
-		parser.setPrefixManager(getPrefixManager());
+		TurtleOBDASyntaxParser parser = new TurtleOBDASyntaxParser(getPrefixes());
 
 		try {
 			parser.parse(input);
@@ -200,10 +198,10 @@ public class TurtleSyntaxParserTest extends TestCase {
 		return true;
 	}
 	
-	private PrefixManager getPrefixManager() {
-		PrefixManager pm = new SimplePrefixManager();
-		pm.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#");
-		pm.addPrefix("ex:", "http://www.example.org/");
-		return pm;
+	private Map<String, String> getPrefixes() {
+        Map<String, String> prefixes = new HashMap<>();
+		prefixes.put(PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#");
+		prefixes.put("ex:", "http://www.example.org/");
+		return prefixes;
 	}
 }

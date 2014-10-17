@@ -20,10 +20,6 @@ package org.semanticweb.ontop.quest;
  * #L%
  */
 
-import org.semanticweb.ontop.io.SQLMappingParser;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -55,11 +51,9 @@ import org.slf4j.LoggerFactory;
 
 public class AggregatesTest extends TestCase {
 
-	private OBDADataFactory fac;
 	private Connection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/test/stockexchange-unittest.owl";
@@ -77,8 +71,6 @@ public class AggregatesTest extends TestCase {
 		String password = "fish";
 
 		//?sessionVariables=sql_mode='ANSI'
-		
-		fac = OBDADataFactoryImpl.getInstance();
 
 		conn = DriverManager.getConnection(url, username, password);
 		conn.setAutoCommit(true);
@@ -103,12 +95,6 @@ public class AggregatesTest extends TestCase {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		
-		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
-		ioManager.load(obdafile);
 		
 	}
 
@@ -143,10 +129,7 @@ public class AggregatesTest extends TestCase {
 	private void runTests(QuestPreferences p, String query, int expectedvalue) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 

@@ -22,10 +22,6 @@ package org.semanticweb.ontop.obda;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.ontop.io.SQLMappingParser;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
@@ -37,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.sql.Connection;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -52,11 +47,7 @@ import static org.junit.Assert.assertTrue;
 
 public class OntologyTypesStockexchangeTest {
 
-	private OBDADataFactory fac;
-	private Connection conn;
-
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlFile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/simplecq/stockexchange.owl";
@@ -64,28 +55,17 @@ public class OntologyTypesStockexchangeTest {
 
 	@Before
 	public void setUp() throws Exception {
-
-		fac = OBDADataFactoryImpl.getInstance();
 		
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		
-		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
-		ioManager.load(obdaFile);
 		
 	}
 
 	private void runTests(Properties p, String query1, int numberResults) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
+        QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 

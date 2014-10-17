@@ -20,11 +20,6 @@ package org.semanticweb.ontop.unfold;
  * #L%
  */
 
-
-import org.semanticweb.ontop.io.SQLMappingParser;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
@@ -34,7 +29,6 @@ import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 
 
 import java.io.File;
-import java.sql.Connection;
 import java.util.Properties;
 
 import junit.framework.TestCase;
@@ -53,11 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LeftJoinTest2Virtual extends TestCase {
 
-	private OBDADataFactory fac;
-	private Connection conn;
-
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/person.owl";
@@ -74,7 +64,6 @@ public class LeftJoinTest2Virtual extends TestCase {
 		String username = "fish";
 		String password = "fish";
 
-		fac = OBDADataFactoryImpl.getInstance();
 /*
 		conn = DriverManager.getConnection(url, username, password);
 		log.debug("Creating in-memory DB and inserting data!");
@@ -95,22 +84,12 @@ public class LeftJoinTest2Virtual extends TestCase {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		
-		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
-		ioManager.load(obdafile);
-		
 	}
 
 	private void runTests(Properties p) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 

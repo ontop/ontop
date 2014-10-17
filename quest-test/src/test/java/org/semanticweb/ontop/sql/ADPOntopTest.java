@@ -4,10 +4,6 @@ package org.semanticweb.ontop.sql;
 import java.io.File;
 import java.io.FileReader;
 
-import org.semanticweb.ontop.io.SQLMappingParser;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -36,7 +32,6 @@ public class ADPOntopTest {
 	final String r2rmlfile = "src/test/resources/adp/mapping-fed.ttl";
 
 	public void runQuery() throws Exception {
-
 		
 	
 		/*
@@ -44,16 +39,6 @@ public class ADPOntopTest {
 		 */
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
-		 * Load the OBDA model from an external .obda file
-		 */
-		
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		OBDAModel obdaModel = fac.getOBDAModel();
-		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
-		ioManager.load(obdafile);
-		
 		
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
@@ -66,9 +51,7 @@ public class ADPOntopTest {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-		factory.setPreferenceHolder(preferences);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), preferences);
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
 		/*

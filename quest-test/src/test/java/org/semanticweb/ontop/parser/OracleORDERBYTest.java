@@ -21,11 +21,8 @@ package org.semanticweb.ontop.parser;
  */
 
 
-import org.semanticweb.ontop.io.SQLMappingParser;
-import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -44,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -52,11 +50,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class OracleORDERBYTest {
 
-    private OBDADataFactory fac;
     private QuestOWLConnection conn;
 
     Logger log = LoggerFactory.getLogger(this.getClass());
-    private OBDAModel obdaModel;
     private OWLOntology ontology;
     private QuestOWLFactory factory;
 
@@ -66,20 +62,9 @@ public class OracleORDERBYTest {
 
     @Before
     public void setUp() throws Exception {
-
-
         // Loading the OWL file
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-
-        // Loading the OBDA data
-        fac = OBDADataFactoryImpl.getInstance();
-        obdaModel = fac.getOBDAModel();
-
-
-
-
-
     }
 
     @After
@@ -89,16 +74,13 @@ public class OracleORDERBYTest {
     }
 
 
-    private void runQuery(String query) throws OBDAException, OWLException{
+    private void runQuery(String query) throws OBDAException, OWLException, IOException, InvalidMappingException {
 
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
         // Creating a new instance of the reasoner
-        factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-
-        factory.setPreferenceHolder(p);
+        factory = new QuestOWLFactory(new File(obdaFile), p);
 
         reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
@@ -116,9 +98,6 @@ public class OracleORDERBYTest {
 
     @Test
     public void testOrderBy() throws Exception {
-
-        SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
-        ioManager.load(obdaFile);
         String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
                 "SELECT ?x ?name " +
                 "WHERE { ?x a :Country; :name ?name . } "

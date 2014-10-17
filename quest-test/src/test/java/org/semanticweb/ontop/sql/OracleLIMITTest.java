@@ -23,15 +23,14 @@ package org.semanticweb.ontop.sql;
 
 
 import java.io.File;
+import java.io.IOException;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.io.SQLMappingParser;
-import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -53,12 +52,9 @@ import static org.junit.Assert.assertTrue;
  * Tests with both valid versions of the oracle driverClass string in the SourceDeclaration of the obda file
  */
 public class OracleLIMITTest  {
-
-	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 	private QuestOWLFactory factory;
 	
@@ -74,15 +70,6 @@ public class OracleLIMITTest  {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-
-		// Loading the OBDA data
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
-		
-
-
-
-		
 	}
 
 	@After
@@ -92,16 +79,13 @@ public class OracleLIMITTest  {
 	}
 	
 
-	private void runQuery() throws OBDAException, OWLException{
+	private void runQuery(String obdaFileName) throws OBDAException, OWLException, IOException, InvalidMappingException {
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 		// Creating a new instance of the reasoner
-		factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
+		factory = new QuestOWLFactory(new File(obdaFileName), p);
 
 		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
@@ -124,10 +108,7 @@ public class OracleLIMITTest  {
 	 */
 	@Test
 	public void testWithShortDriverString() throws Exception {
-		
-		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
-		ioManager.load(obdafile1);
-		runQuery();
+		runQuery(obdafile1);
 	}
 
 	
@@ -139,10 +120,7 @@ public class OracleLIMITTest  {
 	 */
 	@Test
 	public void testWithLongDriverString() throws Exception {
-		
-		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
-		ioManager.load(obdafile2);
-		runQuery();
+		runQuery(obdafile2);
 	}
 
 	

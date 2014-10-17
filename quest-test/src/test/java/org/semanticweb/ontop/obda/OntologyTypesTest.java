@@ -80,10 +80,7 @@ public class OntologyTypesTest{
 	private void runTests(Properties p, String query, int numberResults) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-
-		factory.setPreferenceHolder(p);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), p);
 
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
@@ -127,12 +124,6 @@ public class OntologyTypesTest{
 
 	@Test
 	public void testOntologyType() throws Exception {
-
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
-		ioManager.load(obdaFile);
-				
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
@@ -176,11 +167,6 @@ public class OntologyTypesTest{
 	// Ontology datatype http://www.w3.org/2001/XMLSchema#integer for http://www.company.com/ARES#hasARESID
 	// does not correspond to datatype http://www.w3.org/2001/XMLSchema#string in mappings
 	public void failedMapping()  throws Exception  {
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
-		ioManager.load(obdaErroredFile);
-		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
@@ -188,11 +174,7 @@ public class OntologyTypesTest{
 		
 		try {
 			// Creating a new instance of the reasoner
-			QuestOWLFactory factory = new QuestOWLFactory();
-			factory.setOBDAController(obdaModel);
-
-			factory.setPreferenceHolder(p);
-
+			QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), p);
 			QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 			
 		} catch (Exception e) {

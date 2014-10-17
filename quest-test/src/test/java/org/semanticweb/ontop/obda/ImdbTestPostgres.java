@@ -5,38 +5,33 @@ package org.semanticweb.ontop.obda;
  * Created by Sarah on 30/07/14.
  */
 
-        import org.semanticweb.ontop.io.SQLMappingParser;
-        import org.semanticweb.ontop.io.QueryIOManager;
-        import org.semanticweb.ontop.model.OBDADataFactory;
-        import org.semanticweb.ontop.model.OBDAModel;
-        import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-        import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-        import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
-        import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-        import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-        import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-        import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+import org.semanticweb.ontop.io.QueryIOManager;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 
-        import java.io.File;
-        import java.util.Properties;
+import java.io.File;
+import java.util.Properties;
 
-        import org.semanticweb.ontop.querymanager.QueryController;
-        import org.semanticweb.ontop.querymanager.QueryControllerGroup;
-        import org.semanticweb.ontop.querymanager.QueryControllerQuery;
-        import org.junit.Before;
-        import org.junit.Test;
-        import org.semanticweb.owlapi.apibinding.OWLManager;
-        import org.semanticweb.owlapi.model.OWLOntology;
-        import org.semanticweb.owlapi.model.OWLOntologyManager;
-        import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-        import org.slf4j.Logger;
-        import org.slf4j.LoggerFactory;
+import org.semanticweb.ontop.querymanager.QueryController;
+import org.semanticweb.ontop.querymanager.QueryControllerGroup;
+import org.semanticweb.ontop.querymanager.QueryControllerQuery;
+import org.junit.Before;
+import org.junit.Test;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ImdbTestPostgres {
-    private OBDADataFactory fac;
 
     Logger log = LoggerFactory.getLogger(this.getClass());
-    private OBDAModel obdaModel;
     private OWLOntology ontology;
 
     final String owlFile = "src/test/resources/movieontology.owl";
@@ -45,27 +40,15 @@ public class ImdbTestPostgres {
     @Before
     public void setUp() throws Exception {
 
-        fac = OBDADataFactoryImpl.getInstance();
-
         // Loading the OWL file
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-
-        // Loading the OBDA data
-        obdaModel = fac.getOBDAModel();
-
-        SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
-        ioManager.load(obdaFile);
-
     }
 
     private void runTests(Properties p) throws Exception {
 
         // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-
-        factory.setPreferenceHolder(p);
+        QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), p);
 
         QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 

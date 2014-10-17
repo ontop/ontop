@@ -27,15 +27,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Properties;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import junit.framework.TestCase;
 
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.n3.N3Writer;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
+import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
 import org.semanticweb.ontop.io.SQLMappingParser;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Ontology;
@@ -54,20 +61,20 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class SesameMaterializerCmdTest extends TestCase {
-	
-	private OBDAModel model;
+
+	private final OBDAModel model;
 	private Ontology onto;
 	private OWLOntology ontology = null;
-	
-	@Override
-	public void setUp() throws IOException, InvalidMappingExceptionWithIndicator {
-		// obda file
-		File f = new File("src/test/resources/materializer/MaterializeTest.obda");
-		//create model
-		model = OBDADataFactoryImpl.getInstance().getOBDAModel();
-		SQLMappingParser modelIO = new SQLMappingParser(model);
-		modelIO.load(f);
-	}
+
+    public SesameMaterializerCmdTest() throws IOException, InvalidMappingException {
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
+                NativeQueryLanguageComponentFactory.class);
+
+        MappingParser mappingParser = nativeQLFactory.create(
+                new File("src/test/resources/materializer/MaterializeTest.obda"));
+        model = mappingParser.getOBDAModel();
+    }
 	
 	public void setUpOnto() throws OWLOntologyCreationException, PunningException {
 		//create onto

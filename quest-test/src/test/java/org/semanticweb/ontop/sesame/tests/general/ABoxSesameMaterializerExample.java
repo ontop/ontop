@@ -24,12 +24,20 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.util.HashSet;
+import java.util.Properties;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.openrdf.model.Statement;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.n3.N3Writer;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OntopCoreModule;
 import org.semanticweb.ontop.io.SQLMappingParser;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.sesame.SesameMaterializer;
@@ -45,18 +53,16 @@ public class ABoxSesameMaterializerExample {
 	final String outputFile = "src/main/resources/example/exampleBooks.n3";
 	
 	public void generateTriples() throws Exception {
-
-		/*
-		 * Load the OBDA model from an external .obda file
-		 */
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		OBDAModel obdaModel = fac.getOBDAModel();
-		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
-		ioManager.load(inputFile);
-
 		/*
 		 * Start materializing data from database to triples.
+		 * TODO: update the interface of SesameMaterializer to avoid these
+		 * lines
 		 */
+        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
+                NativeQueryLanguageComponentFactory.class);
+        MappingParser mappingParser = nativeQLFactory.create(new File(inputFile));
+        OBDAModel obdaModel = mappingParser.getOBDAModel();
 
 		SesameMaterializer materializer = new SesameMaterializer(obdaModel);
 		

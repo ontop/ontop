@@ -22,10 +22,8 @@ package org.semanticweb.ontop.r2rml;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Ontology;
@@ -60,12 +58,9 @@ import org.slf4j.LoggerFactory;
  * We use the npd database.
  */
 public class R2rmlCheckerTest {
-
-	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 	private Ontology onto;
 
@@ -332,9 +327,7 @@ public class R2rmlCheckerTest {
 	private void loadR2rml(QuestPreferences p, OBDADataSource dataSource) {
 		log.info("Loading r2rml file");
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-
-		factory.setPreferenceHolder(p);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(r2rmlfile), p);
 
 		R2RMLReader reader = new R2RMLReader(r2rmlfile);
 
@@ -357,15 +350,9 @@ public class R2rmlCheckerTest {
 	private void loadOBDA(QuestPreferences p) throws Exception {
 		// Loading the OBDA data
 		log.info("Loading obda file");
-		fac = OBDADataFactoryImpl.getInstance();
-		obdaModel = fac.getOBDAModel();
 
-		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
-		ioManager.load(obdafile);
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-		factory.setPreferenceHolder(p);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
 
 		reasonerOBDA = (QuestOWL) factory.createReasoner(ontology,
 				new SimpleConfiguration());
