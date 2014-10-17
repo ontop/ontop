@@ -24,6 +24,7 @@ import static org.junit.Assert.*;
 
 import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -58,7 +59,7 @@ public class RegexMySQLTest {
 	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private SQLOBDAModel obdaModel;
+	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "src/test/resources/regex/stockBolzanoAddress.owl";

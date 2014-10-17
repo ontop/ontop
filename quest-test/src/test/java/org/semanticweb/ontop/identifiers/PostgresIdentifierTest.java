@@ -27,6 +27,7 @@ import junit.framework.TestCase;
 
 import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -54,7 +55,7 @@ public class PostgresIdentifierTest extends TestCase {
 	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private SQLOBDAModel obdaModel;
+	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "resources/identifiers/identifiers.owl";

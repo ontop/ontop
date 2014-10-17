@@ -6,6 +6,7 @@ import java.io.FileReader;
 
 import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -49,7 +50,7 @@ public class ADPOntopTest {
 		 */
 		
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		SQLOBDAModel obdaModel = fac.getOBDAModel();
+		OBDAModel obdaModel = fac.getOBDAModel();
 		SQLMappingParser ioManager = new SQLMappingParser(obdaModel);
 		ioManager.load(obdafile);
 		

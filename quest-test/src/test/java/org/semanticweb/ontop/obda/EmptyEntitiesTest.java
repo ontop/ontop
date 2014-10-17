@@ -22,6 +22,7 @@ package org.semanticweb.ontop.obda;
 
 import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.BasicClassDescription;
@@ -70,7 +71,7 @@ public class EmptyEntitiesTest {
 	private Connection connection;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private SQLOBDAModel obdaModel;
+	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 //	final String owlfile = "src/test/resources/emptiesDatabase.owl";

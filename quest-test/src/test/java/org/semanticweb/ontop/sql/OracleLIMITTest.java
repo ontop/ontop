@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAException;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -57,7 +58,7 @@ public class OracleLIMITTest  {
 	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private SQLOBDAModel obdaModel;
+	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 	private QuestOWLFactory factory;
 	

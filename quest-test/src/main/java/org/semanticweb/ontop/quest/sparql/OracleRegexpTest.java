@@ -58,7 +58,7 @@ public class OracleRegexpTest extends TestCase {
 	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private SQLOBDAModel obdaModel;
+	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlfile = "resources/regexp/oracle-regexp.owl";

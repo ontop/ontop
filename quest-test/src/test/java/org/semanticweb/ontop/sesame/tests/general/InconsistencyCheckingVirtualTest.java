@@ -20,6 +20,7 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.ontop.io.SQLMappingParser;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -42,7 +43,7 @@ public class InconsistencyCheckingVirtualTest {
 	private QuestOWL reasoner;
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
-	private SQLOBDAModel obdaModel;
+	private OBDAModel obdaModel;
 	
 	QuestPreferences p;
 	

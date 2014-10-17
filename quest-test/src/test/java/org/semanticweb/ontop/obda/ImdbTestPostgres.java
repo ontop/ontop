@@ -8,6 +8,7 @@ package org.semanticweb.ontop.obda;
         import org.semanticweb.ontop.io.SQLMappingParser;
         import org.semanticweb.ontop.io.QueryIOManager;
         import org.semanticweb.ontop.model.OBDADataFactory;
+        import org.semanticweb.ontop.model.OBDAModel;
         import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
         import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
         import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -35,7 +36,7 @@ public class ImdbTestPostgres {
     private OBDADataFactory fac;
 
     Logger log = LoggerFactory.getLogger(this.getClass());
-    private SQLOBDAModel obdaModel;
+    private OBDAModel obdaModel;
     private OWLOntology ontology;
 
     final String owlFile = "src/test/resources/movieontology.owl";
