@@ -154,25 +154,29 @@ public class SesameStatement implements Statement {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o instanceof Statement)) return false;
 
-        SesameStatement that = (SesameStatement) o;
+        Statement that = (Statement) o;
 
-        if (context != null ? !context.equals(that.context) : that.context != null) return false;
-        if (object != null ? !object.equals(that.object) : that.object != null) return false;
-        if (predicate != null ? !predicate.equals(that.predicate) : that.predicate != null) return false;
-        if (subject != null ? !subject.equals(that.subject) : that.subject != null) return false;
+        Resource thatContext = that.getContext();
+        if (context != null ? !context.equals(thatContext) : thatContext != null) return false;
+        Value thatObject = that.getObject();
+        if (object != null ? !object.equals(thatObject) : thatObject != null) return false;
+        URI thatPredicate = that.getPredicate();
+        if (predicate != null ? !predicate.equals(thatPredicate) : thatPredicate != null) return false;
+        Resource thatSubject = that.getSubject();
+        if (subject != null ? !subject.equals(thatSubject) : thatSubject != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = subject != null ? subject.hashCode() : 0;
-        result = 31 * result + (predicate != null ? predicate.hashCode() : 0);
-        result = 31 * result + (object != null ? object.hashCode() : 0);
-        result = 31 * result + (context != null ? context.hashCode() : 0);
-        return result;
+        int contextComponent = context != null ? context.hashCode() : 0;
+        int subjectComponent = subject != null ? subject.hashCode() : 0;
+        int predicateComponent = predicate != null ? predicate.hashCode() : 0;
+        int objectComponent = object != null ? object.hashCode() : 0;
+        return 1013 * contextComponent + 961 * subjectComponent + 31 * predicateComponent + objectComponent;
     }
 
 	@Override
