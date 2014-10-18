@@ -31,7 +31,7 @@ import org.openrdf.rio.n3.N3Writer;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.ontology.Ontology;
@@ -73,7 +73,7 @@ class QuestSesameMaterializerCMD {
 			out = args[3].trim();
 		Writer writer = null;
 
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        Injector injector = Guice.createInjector(new OBDACoreModule(new Properties()));
         NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
                 NativeQueryLanguageComponentFactory.class);
 

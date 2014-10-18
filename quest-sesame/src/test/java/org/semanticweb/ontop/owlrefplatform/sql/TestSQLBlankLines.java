@@ -2,13 +2,6 @@ package org.semanticweb.ontop.owlrefplatform.sql;
 
 import static org.junit.Assert.*;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
-import org.semanticweb.ontop.mapping.MappingParser;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -17,11 +10,9 @@ import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
-import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.Scanner;
 
 import org.junit.After;

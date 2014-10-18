@@ -35,7 +35,8 @@ import com.google.inject.Injector;
 import junit.framework.TestCase;
 
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAModel;
@@ -114,7 +115,7 @@ public class LungCancerH2TestVirtual extends TestCase {
         /**
          * Factory initialization
          */
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
         NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 
         /*
@@ -151,7 +152,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 		conn.commit();
 	}
 
-	private void runTests(Properties p) throws Exception {
+	private void runTests(QuestPreferences p) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);

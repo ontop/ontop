@@ -27,7 +27,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.*;
 
@@ -148,7 +148,7 @@ public class R2RMLWriter {
 	public static void main(String args[]) throws DuplicateMappingException
 	{
 		String file = "/Users/mindaugas/r2rml/test2.ttl";
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        Injector injector = Guice.createInjector(new OBDACoreModule(new Properties()));
         NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 
 		R2RMLReader reader = new R2RMLReader(file, nativeQLFactory);

@@ -38,13 +38,10 @@ import org.openrdf.rio.n3.N3Writer;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
 import org.semanticweb.ontop.exception.InvalidMappingException;
-import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
-import org.semanticweb.ontop.io.SQLMappingParser;
+import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.impl.PunningException;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
@@ -67,7 +64,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 	private OWLOntology ontology = null;
 
     public SesameMaterializerCmdTest() throws IOException, InvalidMappingException {
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        Injector injector = Guice.createInjector(new OBDACoreModule(new Properties()));
         NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
                 NativeQueryLanguageComponentFactory.class);
 

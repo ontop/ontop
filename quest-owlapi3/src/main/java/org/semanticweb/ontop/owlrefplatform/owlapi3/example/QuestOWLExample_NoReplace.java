@@ -20,12 +20,6 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3.example;
  * #L%
  */
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
-import org.semanticweb.ontop.mapping.MappingParser;
-import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
@@ -36,8 +30,6 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.File;
-import java.io.FileReader;
-import java.util.Properties;
 
 public class QuestOWLExample_NoReplace {
 	

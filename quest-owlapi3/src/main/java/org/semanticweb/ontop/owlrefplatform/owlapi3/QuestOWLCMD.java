@@ -27,14 +27,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Properties;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
-import org.semanticweb.ontop.mapping.MappingParser;
-import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.owlapi.apibinding.OWLManager;

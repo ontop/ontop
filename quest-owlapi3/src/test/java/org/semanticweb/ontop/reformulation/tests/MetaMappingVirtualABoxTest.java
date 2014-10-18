@@ -129,7 +129,7 @@ public class MetaMappingVirtualABoxTest{
 		conn.commit();
 	}
 
-	private void runTests(Properties p) throws Exception {
+	private void runTests(QuestPreferences p) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFileName), p);

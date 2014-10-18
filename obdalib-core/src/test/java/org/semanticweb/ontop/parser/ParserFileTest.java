@@ -22,12 +22,9 @@ package org.semanticweb.ontop.parser;
 
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Properties;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -38,7 +35,8 @@ import net.sf.jsqlparser.JSQLParserException;
 
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAModel;
@@ -55,7 +53,7 @@ public class ParserFileTest extends TestCase {
     private final NativeQueryLanguageComponentFactory factory;
 
     public ParserFileTest() {
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
         factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
     }
 

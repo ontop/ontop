@@ -21,12 +21,6 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
  */
 
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import org.semanticweb.ontop.exception.InvalidMappingException;
-import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
-import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.ontology.Assertion;
@@ -40,13 +34,10 @@ import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.ontop.owlrefplatform.core.*;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
-import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentModule;
 import org.semanticweb.ontop.utils.VersionInfo;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

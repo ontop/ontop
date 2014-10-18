@@ -34,17 +34,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Properties;
 
-import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
 import org.openrdf.repository.RepositoryException;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.questdb.QuestDBVirtualStore;
-import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 public class SesameVirtualRepo extends SesameAbstractRepo {
@@ -98,7 +90,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 			File configFile = new File(URI.create(configFileName));
 			pref.readDefaultPropertiesFile(new FileInputStream(configFile));
 		} else {
-			pref.readDefaultPropertiesFile();
+			pref.readDefaultQuestPropertiesFile();
 		}
 		return pref;
 	}

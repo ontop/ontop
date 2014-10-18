@@ -26,7 +26,8 @@ import java.util.*;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.ontology.Assertion;
@@ -99,7 +100,7 @@ public class QuestMaterializer {
 		this.ontology = onto;
 		this.vocabulary = new HashSet<>();
 
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
         factory = injector.getInstance(QuestComponentFactory.class);
 		
 		if (this.model.getSources()!= null && this.model.getSources().size() > 1)

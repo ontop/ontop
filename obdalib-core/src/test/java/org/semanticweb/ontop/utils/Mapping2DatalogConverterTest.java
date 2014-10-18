@@ -23,7 +23,8 @@ package org.semanticweb.ontop.utils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.DatalogProgram;
@@ -52,7 +53,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 	private PrefixManager pm;
 
     public Mapping2DatalogConverterTest() {
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
         factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
     }
 	

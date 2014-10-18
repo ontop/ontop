@@ -20,25 +20,12 @@ package org.semanticweb.ontop.reformulation.semindex.tests;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
-import org.semanticweb.ontop.io.PrefixManager;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 
 import java.io.File;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Properties;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;

@@ -25,7 +25,8 @@ import com.google.inject.Injector;
 import junit.framework.TestCase;
 
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public class TurtleSyntaxParserTest extends TestCase {
     private final NativeQueryLanguageComponentFactory factory;
 
     public TurtleSyntaxParserTest() {
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
         factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
     }
 	

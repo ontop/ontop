@@ -31,19 +31,23 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.assistedinject.Assisted;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
+import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.io.PrefixManager;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.*;
 
 import org.openrdf.model.Model;
 import org.slf4j.LoggerFactory;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-public class R2RMLReader {
+public class R2RMLReader implements MappingParser{
 
 	private final R2RMLManager manager;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
@@ -178,7 +182,7 @@ public class R2RMLReader {
 	{
 		String file = "/Users/mindaugas/r2rml/test26.ttl";
 
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        Injector injector = Guice.createInjector(new OBDACoreModule(new Properties()));
         NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
                 NativeQueryLanguageComponentFactory.class);
 
@@ -189,4 +193,11 @@ public class R2RMLReader {
 		
 	}
 
+    /**
+     * TODO: implement
+     */
+    @Override
+    public OBDAModel getOBDAModel() throws InvalidMappingException, IOException {
+        throw new NotImplementedException();
+    }
 }

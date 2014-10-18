@@ -20,26 +20,24 @@ package org.semanticweb.ontop.owlrefplatform.core;
  * #L%
  */
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * A class that represents the preferences which can be modified by the user.
  */
-public class QuestPreferences extends Properties {
+public class QuestPreferences extends OBDAProperties {
 
 	// TODO create a configuration listener to handle changes in these values
 	private static final long	serialVersionUID		= -5954970472045517594L;
 
-	private static final String	DEFAULT_PROPERTIESFILE	= "QuestDefaults.properties";
+	private static final String DEFAULT_QUEST_PROPERTIES_FILE = "QuestDefaults.properties";
 
 	public static final String	REFORMULATION_TECHNIQUE	= "org.obda.owlreformulationplatform.reformulationTechnique";
 	public static final String	ABOX_MODE				= "org.obda.owlreformulationplatform.aboxmode";
@@ -80,13 +78,14 @@ public class QuestPreferences extends Properties {
 	public static final String KEEP_ALIVE = "keep_alive";
 	
 	
-	private Logger				log						= LoggerFactory.getLogger(QuestPreferences.class);
+	private Logger log = LoggerFactory.getLogger(QuestPreferences.class);
 
 	public QuestPreferences() {
+        super();
 		try {
-			readDefaultPropertiesFile();
+			readDefaultQuestPropertiesFile();
 		} catch (IOException e1) {
-			log.error("Error reading default properties for resoner.");
+			log.error("Error reading default properties for reasoner.");
 			log.debug(e1.getMessage(), e1);
 		}
 	}
@@ -96,19 +95,8 @@ public class QuestPreferences extends Properties {
 		this.putAll(values);
 	}
 
-	public void readDefaultPropertiesFile() throws IOException {
-		InputStream in = QuestPreferences.class.getResourceAsStream(DEFAULT_PROPERTIESFILE);
-		readDefaultPropertiesFile(in);
-	}
-
-	/**
-	 * Reads the properties from the input stream and sets them as default.
-	 * 
-	 * @param in
-	 *            The input stream.
-	 */
-	public void readDefaultPropertiesFile(InputStream in) throws IOException {
-		this.load(in);
+	public void readDefaultQuestPropertiesFile() throws IOException {
+		readPropertiesFile(DEFAULT_QUEST_PROPERTIES_FILE);
 	}
 
 	/**

@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.injection;
 
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-import org.semanticweb.ontop.injection.OntopAbstractModule;
+import org.semanticweb.ontop.injection.OBDAAbstractModule;
 import org.semanticweb.ontop.owlrefplatform.core.Quest;
 import org.semanticweb.ontop.owlrefplatform.core.QuestImpl;
 
@@ -10,7 +10,7 @@ import java.util.Properties;
 /**
  *
  */
-public class QuestComponentModule extends OntopAbstractModule {
+public class QuestComponentModule extends OBDAAbstractModule {
 
     public QuestComponentModule(Properties configuration) {
         super(configuration);

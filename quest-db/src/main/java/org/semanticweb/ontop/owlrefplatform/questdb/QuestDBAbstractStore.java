@@ -26,7 +26,7 @@ import java.util.Properties;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.*;
@@ -52,7 +52,7 @@ public abstract class QuestDBAbstractStore implements Serializable {
         /**
          * Setup the dependency injection for the QuestComponentFactory
          */
-        injector = Guice.createInjector(new OntopCoreModule(config),
+        injector = Guice.createInjector(new OBDACoreModule(config),
                 new QuestComponentModule(config));
         nativeQLFactory = injector.getInstance(
                 NativeQueryLanguageComponentFactory.class);

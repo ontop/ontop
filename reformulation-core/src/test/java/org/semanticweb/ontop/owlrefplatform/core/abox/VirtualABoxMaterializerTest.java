@@ -31,7 +31,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
@@ -48,7 +49,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
 
     public VirtualABoxMaterializerTest() {
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
         nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
     }
 

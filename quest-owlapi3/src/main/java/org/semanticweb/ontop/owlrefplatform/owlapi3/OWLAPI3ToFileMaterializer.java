@@ -26,7 +26,8 @@ import java.util.Properties;
 
 import com.google.inject.Guice;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
@@ -48,7 +49,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 public class OWLAPI3ToFileMaterializer {
 
 	static NativeQueryLanguageComponentFactory FACTORY = Guice.createInjector(
-            new OntopCoreModule(new Properties())).getInstance(NativeQueryLanguageComponentFactory.class);
+            new OBDACoreModule(new OBDAProperties())).getInstance(NativeQueryLanguageComponentFactory.class);
 
 	public static int materialize(File outputFile, URI inputFile) throws Exception {
 		File input = new File(inputFile);

@@ -1,17 +1,16 @@
 package org.semanticweb.ontop.api.io;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.ProvisionException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.exception.InvalidPredicateDeclarationException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.mapping.MappingParser;
 
 import org.junit.Test;
@@ -21,7 +20,7 @@ public class SQLMappingParserTest {
     private final NativeQueryLanguageComponentFactory factory;
 
     public SQLMappingParserTest() {
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
         factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
     }
 

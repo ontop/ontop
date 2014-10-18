@@ -37,7 +37,8 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.injection.OntopCoreModule;
+import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.ontology.Assertion;
@@ -74,7 +75,7 @@ public class QuestOWLMaterializerTest extends TestCase {
         /**
          * Factory initialization
          */
-        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
+        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
         factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
     }
 
