@@ -14,23 +14,23 @@ public class OBDADataSourceFromConfigExtractor {
 
     private final OBDADataSource dataSource;
 
-    public OBDADataSourceFromConfigExtractor(OBDAProperties properties) {
-        dataSource = extract(properties);
+    public OBDADataSourceFromConfigExtractor(OBDAProperties properties)
+            throws InvalidDataSourceException {
+        dataSource = extractProperties(properties);
     }
 
     public OBDADataSource getDataSource() {
         return dataSource;
     }
 
-    /**
-     * TODO: manage exceptions!
-     */
-    private static OBDADataSource extract(OBDAProperties properties) {
-        String id = properties.get(OBDAProperties.DB_NAME).toString();
-        String url = properties.get(OBDAProperties.JDBC_URL).toString();
-        String username = properties.get(OBDAProperties.DB_USER).toString();
-        String password = properties.get(OBDAProperties.DB_PASSWORD).toString();
-        String driver = properties.get(OBDAProperties.JDBC_DRIVER).toString();
+    private static OBDADataSource extractProperties(OBDAProperties properties)
+            throws InvalidDataSourceException {
+
+        String id = extractProperty(OBDAProperties.DB_NAME, properties);
+        String url = extractProperty(OBDAProperties.JDBC_URL, properties);
+        String username = extractProperty(OBDAProperties.DB_USER, properties);
+        String password = extractProperty(OBDAProperties.DB_PASSWORD, properties);
+        String driver = extractProperty(OBDAProperties.JDBC_DRIVER, properties);
 
         OBDADataSource source = OBDADataFactoryImpl.getInstance().getDataSource(URI.create(id));
         source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -39,6 +39,15 @@ public class OBDADataSourceFromConfigExtractor {
         source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 
         return source;
+    }
+
+    private static String extractProperty(String propertyName, OBDAProperties properties)
+            throws InvalidDataSourceException {
+        if (properties.get(propertyName) == null) {
+            throw new InvalidDataSourceException(String.format("Property %s is missing in the configuration." +
+                    "This data source information is required.", propertyName));
+        }
+        return properties.getProperty(propertyName);
     }
 }
 

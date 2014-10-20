@@ -25,6 +25,7 @@ import com.google.inject.Injector;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
@@ -88,7 +89,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
      * @param preferences
      */
     public QuestOWLFactory(File mappingFile, QuestPreferences preferences)
-            throws IOException, InvalidMappingException {
+            throws IOException, InvalidMappingException, InvalidDataSourceException {
 
         Injector injector = Guice.createInjector(new OBDACoreModule(preferences), new QuestComponentModule(preferences));
         this.componentFactory = injector.getInstance(QuestComponentFactory.class);
@@ -114,7 +115,8 @@ public class QuestOWLFactory implements OWLReasonerFactory {
      *
      * @param preferences
      */
-    public QuestOWLFactory(QuestPreferences preferences) throws IOException, InvalidMappingException {
+    public QuestOWLFactory(QuestPreferences preferences) throws IOException, InvalidMappingException,
+            InvalidDataSourceException {
         this(null, preferences);
     }
 

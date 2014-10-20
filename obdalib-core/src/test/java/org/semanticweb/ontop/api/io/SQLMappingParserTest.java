@@ -25,16 +25,14 @@ public class SQLMappingParserTest {
     }
 
 	@Test
-	public void testSpaceBeforeEndCollectionSymbol() throws IOException,
-            InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testSpaceBeforeEndCollectionSymbol() throws Exception {
 		MappingParser mappingParser = factory.create(new File(
                 "src/test/resources/format/obda/unusualCollectionEnding.obda"));
         mappingParser.getOBDAModel();
 	}
 
 	@Test(expected = IOException.class)
-	public void testEndCollectionSymbolRequirement() throws IOException,
-            InvalidPredicateDeclarationException, InvalidMappingException {
+	public void testEndCollectionSymbolRequirement() throws Exception {
             MappingParser mappingParser = factory.create(new File(
                     "src/test/resources/format/obda/missingCollectionEnding.obda"));
             mappingParser.getOBDAModel();

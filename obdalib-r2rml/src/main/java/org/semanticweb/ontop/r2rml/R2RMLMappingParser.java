@@ -9,6 +9,7 @@ import org.openrdf.model.Model;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDAProperties;
+import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.io.OBDADataSourceFromConfigExtractor;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.mapping.MappingParser;
@@ -40,7 +41,6 @@ public class R2RMLMappingParser implements MappingParser {
     @AssistedInject
     private R2RMLMappingParser(@Assisted File mappingFile, NativeQueryLanguageComponentFactory nativeQLFactory,
                                OBDAProperties configuration) {
-        //TODO: complete
         this.nativeQLFactory = nativeQLFactory;
         this.configuration = configuration;
         this.mappingFile = mappingFile;
@@ -56,7 +56,6 @@ public class R2RMLMappingParser implements MappingParser {
     private R2RMLMappingParser(@Assisted Model mappingGraph,
                                NativeQueryLanguageComponentFactory nativeQLFactory,
                                OBDAProperties configuration) {
-        //TODO: complete
         this.nativeQLFactory = nativeQLFactory;
         this.configuration = configuration;
         this.mappingGraph = mappingGraph;
@@ -75,7 +74,7 @@ public class R2RMLMappingParser implements MappingParser {
     }
 
     @Override
-    public OBDAModel getOBDAModel() throws InvalidMappingException, IOException {
+    public OBDAModel getOBDAModel() throws InvalidMappingException, IOException, InvalidDataSourceException {
         /**
          * The OBDA model is only computed once.
          */

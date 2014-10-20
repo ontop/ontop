@@ -30,6 +30,7 @@ import org.openrdf.model.Model;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.io.OBDADataSourceFromConfigExtractor;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.mapping.MappingParser;
@@ -98,7 +99,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
      *
 	 */
 	public OBDAModel getObdaModel(URI obdaURI) throws IOException, InvalidMappingException,
-            DuplicateMappingException {
+            DuplicateMappingException, InvalidDataSourceException {
         NativeQueryLanguageComponentFactory nativeQLFactory = getNativeQLFactory();
         MappingParser modelParser = nativeQLFactory.create(new File(obdaURI));
         OBDAModel obdaModel = modelParser.getOBDAModel();
@@ -195,7 +196,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	}
 	
 	
-    private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
+    private OBDADataSource getDataSourceFromConfig(QuestPreferences config) throws InvalidDataSourceException {
         OBDADataSourceFromConfigExtractor dataSourceExtractor = new OBDADataSourceFromConfigExtractor(config);
         return dataSourceExtractor.getDataSource();
 	}
