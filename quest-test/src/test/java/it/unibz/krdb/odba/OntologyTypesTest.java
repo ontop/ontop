@@ -237,8 +237,8 @@ public class OntologyTypesTest{
                 "select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
         runTests(p, query1, 0);
-
-        //no value in the mapping
+//
+//        //no value in the mapping
         //xsd:long in the ontology
         String query1b = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
@@ -274,6 +274,14 @@ public class OntologyTypesTest{
                 "select * {?x  franz:solrDocid ?y. FILTER(datatype(?y) = xsd:long)}";
 
         runTests(p, query5, 3);
+
+        // no value in the ontology
+        //value in the mapping is xsd:positiveInteger
+
+        String query6 = "PREFIX : <http://www.company.com/ARES#>" +
+                "select * {?x :hasSection ?y. FILTER(datatype(?y) = xsd:positiveInteger)}";
+
+        runTests(p, query6, 3);
     }
 
 	@Test	

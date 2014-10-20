@@ -31,6 +31,7 @@ import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 
+import org.openrdf.model.vocabulary.XMLSchema;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -118,19 +119,13 @@ public class OWLAPI3IndividualTranslator {
 				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_BOOLEAN);
 			} else if (v.getType() == COL_TYPE.DATETIME) {
 				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_DATE_TIME);
-//            } else if (v.getType() == COL_TYPE.DATE) {
-//                //				result = dataFactory.getOWLLiteral(value, this.dataFactory.getOWLDatatype(IRI.create(OBDAVocabulary.XSD_DATE_URI)));
-//                result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
-//            }else if (v.getType() == COL_TYPE.TIME) {
-//                result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
-//            } else if (v.getType() == COL_TYPE.YEAR) {
-//                result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
-			} else if (v.getType() == COL_TYPE.DATE) {
-				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_DATE_TIME);
-			} else if (v.getType() == COL_TYPE.TIME) {
-				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_DATE_TIME);
-			} else if (v.getType() == COL_TYPE.YEAR) {
-				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_DATE_TIME);
+            } else if (v.getType() == COL_TYPE.DATE) {
+                //result = dataFactory.getOWLLiteral(value, this.dataFactory.getOWLDatatype(IRI.create(OBDAVocabulary.XSD_DATE_URI)));
+                result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
+            }else if (v.getType() == COL_TYPE.TIME) {
+                result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
+            } else if (v.getType() == COL_TYPE.YEAR) {
+                result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
 			} else if (v.getType() == COL_TYPE.DECIMAL) {
 				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_DECIMAL);
 			} else if (v.getType() == COL_TYPE.DOUBLE) {

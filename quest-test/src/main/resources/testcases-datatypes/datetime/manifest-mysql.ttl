@@ -144,7 +144,7 @@
     
 ## >>> This test should fail!
 :yearLiteral rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: YEAR" ;
+    mf:name    "Type: YEAR Literal" ;
     mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
