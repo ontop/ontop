@@ -50,6 +50,7 @@ import org.openrdf.model.Model;
 import org.slf4j.LoggerFactory;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+@Deprecated
 public class R2RMLReader{
 
 	private final R2RMLManager manager;
@@ -79,38 +80,6 @@ public class R2RMLReader{
 		this.manager = new R2RMLManager(file);
 		this.m = manager.getModel();
         this.obdaModel = null;
-	}
-		
-	/**
-	 * the method that gives the obda model based on the given graph
-	 * @param sourceUri - the uri of the datasource of the model
-	 * @return the read obda model
-     *
-	 */
-    @Deprecated
-	public OBDAModel readModel(URI sourceUri) throws DuplicateMappingException {
-        Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex = new HashMap<>(obdaModel.getMappings());
-        List<OBDAMappingAxiom> sourceMappings;
-        if (mappingIndex.containsKey(sourceUri))
-            sourceMappings = new ArrayList<>(mappingIndex.get(sourceUri));
-        else
-            sourceMappings = new ArrayList<>();
-
-        sourceMappings.addAll(manager.getMappings(m));
-        mappingIndex.put(sourceUri, ImmutableList.copyOf(sourceMappings));
-
-        /**
-         *
-         */
-        if (obdaModel == null) {
-            LOG.warn("R2RML reader: adds mappings without having declared data sources");
-            PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-            obdaModel = nativeQLFactory.create(ImmutableSet.<OBDADataSource>of(), mappingIndex, prefixManager);
-        }
-        else {
-            obdaModel = obdaModel.newModel(obdaModel.getSources(), mappingIndex);
-        }
-		return obdaModel;
 	}
 	
 	/**

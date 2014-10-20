@@ -38,6 +38,7 @@ import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlapi3.OBDAModelSynchronizer;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
+import org.semanticweb.ontop.r2rml.R2RMLMappingParser;
 import org.semanticweb.ontop.r2rml.R2RMLReader;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -74,11 +75,20 @@ class QuestSesameMaterializerCMD {
 			out = args[3].trim();
 		Writer writer = null;
 
-        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
+        URI obdaURI =  new File(obdafile).toURI();
+
+        OBDAProperties preferences = new OBDAProperties();
+        /**
+         * R2RML case (OBDA Ontop format is the default one).
+         */
+        if (obdaURI.toString().endsWith(".ttl")) {
+            preferences.setProperty(MappingParser.class.getCanonicalName(),
+                    R2RMLMappingParser.class.getCanonicalName());
+        }
+
+        Injector injector = Guice.createInjector(new OBDACoreModule(preferences));
         NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
                 NativeQueryLanguageComponentFactory.class);
-
-		
 		
 		try {
 			final long startTime = System.currentTimeMillis();
@@ -87,33 +97,14 @@ class QuestSesameMaterializerCMD {
 			} else {
 				writer = new BufferedWriter(new OutputStreamWriter(System.out, "UTF-8"));
 			}
-			
-			URI obdaURI =  new File(obdafile).toURI();
+
 			//create model
-			OBDAModel model;
-			//obda mapping
-            //r2rml mapping
-			if (obdaURI.toString().endsWith(".ttl"))
-			{
-				R2RMLReader reader = new R2RMLReader(new File(obdaURI), nativeQLFactory);
-				model = reader.readModel(obdaURI);
-			}
-            //if (obdaURI.toString().endsWith(".obda"))
-            else
-            {
-//					try {
-                MappingParser mappingParser = nativeQLFactory.create(new FileReader(obdaURI.toString()));
-                model = mappingParser.getOBDAModel();
-//					} catch (IOException e) {
-//						e.printStackTrace();
-//					} catch (InvalidMappingException e) {
-//						e.printStackTrace();
-//					}
-            }
+            MappingParser mappingParser = nativeQLFactory.create(new FileReader(obdaURI.toString()));
+            OBDAModel model = mappingParser.getOBDAModel();
 			
 			//create onto
 			Ontology onto = null;
-			OWLOntology ontology = null;
+			OWLOntology ontology;
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			
 			if (owlfile != null) {

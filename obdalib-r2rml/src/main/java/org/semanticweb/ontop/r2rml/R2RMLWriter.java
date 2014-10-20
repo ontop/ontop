@@ -141,27 +141,4 @@ public class R2RMLWriter {
 			e.printStackTrace();
 		}
 	}
-
-
-    /**
-     * TODO: Should it not be somewhere else?
-     */
-	public static void main(String args[]) throws DuplicateMappingException
-	{
-		String file = "/Users/mindaugas/r2rml/test2.ttl";
-        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
-        NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-
-		R2RMLReader reader = new R2RMLReader(file, nativeQLFactory);
-		OWLOntology ontology = null;
-
-		R2RMLWriter writer = new R2RMLWriter(reader.readModel(URI.create("test")),URI.create("test"), ontology);
-		File out = new File("/Users/mindaugas/r2rml/out.ttl");
-//		Graph g = writer.getGraph();
-//		Iterator<Statement> st = g.iterator();
-//		while (st.hasNext())
-//			System.out.println(st.next());
-		writer.write(out);
-		
-	}
 }
