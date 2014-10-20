@@ -45,69 +45,19 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
 import org.semanticweb.ontop.sesame.SesameStatement;
 
-public class SesameGraphQuery implements GraphQuery {
+public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery {
 
 	private static final long serialVersionUID = 1L;
 
-	private String queryString, baseURI;
-	//private QuestDBStatement stm;
-	private QuestDBConnection conn;
-	private SesameAbstractRepo repo;
+	private String baseURI;
 
 	public SesameGraphQuery(String queryString, String baseURI,
 			QuestDBConnection conn) throws MalformedQueryException {
+        super(queryString, conn);
 		if (queryString.toLowerCase().contains("construct") || queryString.toLowerCase().contains("describe")) {
-			this.queryString = queryString;
 			this.baseURI = baseURI;
-			this.conn = conn;
 		} else
 			throw new MalformedQueryException("Graph query expected!");
-	}
-	
-	public void setMaxQueryTime(int maxQueryTime) {
-	}
-
-	public int getMaxQueryTime() {
-		return -1;
-	}
-
-	public void setBinding(String name, Value value) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void removeBinding(String name) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void clearBindings() {
-		// TODO Auto-generated method stub
-
-	}
-
-	public BindingSet getBindings() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void setDataset(Dataset dataset) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public Dataset getDataset() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void setIncludeInferred(boolean includeInferred) {
-		// always true
-
-	}
-
-	public boolean getIncludeInferred() {
-		return true;
 	}
 
 	private Statement createStatement(Assertion assertion) {
@@ -124,7 +74,7 @@ public class SesameGraphQuery implements GraphQuery {
 		QuestDBStatement stm = null;
 		try {
 			stm = conn.createStatement();
-			res = (GraphResultSet) stm.execute(queryString);
+			res = (GraphResultSet) stm.execute(getQueryString());
 			
 			Map<String, String> namespaces = new HashMap<String, String>();
 			List<Statement> results = new LinkedList<Statement>();
