@@ -83,15 +83,16 @@ public class R2RMLMappingParser implements MappingParser {
             return obdaModel;
         }
 
-        R2RMLReader r2rmlReader;
+        R2RMLManager r2rmlManager;
         if (mappingFile != null)
-            r2rmlReader = new R2RMLReader(mappingFile, nativeQLFactory);
+            r2rmlManager = new R2RMLManager(mappingFile);
         else if (mappingGraph != null)
-            r2rmlReader = new R2RMLReader(mappingGraph, nativeQLFactory);
+            r2rmlManager = new R2RMLManager(mappingGraph);
         else
             throw new RuntimeException("Internal inconsistency. A mappingFile or a mappingGraph should be defined.");
 
-        ImmutableList<OBDAMappingAxiom> sourceMappings = r2rmlReader.readMappings();
+        //TODO: make the R2RMLManager simpler.
+        ImmutableList<OBDAMappingAxiom> sourceMappings = r2rmlManager.getMappings(r2rmlManager.getModel());
 
         OBDADataSourceFromConfigExtractor dataSourceExtractor = new OBDADataSourceFromConfigExtractor(configuration);
         OBDADataSource dataSource = dataSourceExtractor.getDataSource() ;

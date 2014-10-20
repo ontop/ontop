@@ -28,14 +28,10 @@ import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.OntopMappingWriter;
 import org.semanticweb.ontop.mapping.MappingParser;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Properties;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -62,13 +58,12 @@ class MappingConverterCMD {
 		String mapFile = args[0].trim();
 
 		try {
-
-            Injector injector = Guice.createInjector(new OBDACoreModule(
-                    new OBDAProperties()));
-            NativeQueryLanguageComponentFactory factory =
-                    injector.getInstance(NativeQueryLanguageComponentFactory.class);
-
 			if (mapFile.endsWith(".obda")) {
+                Injector injector = Guice.createInjector(new OBDACoreModule(
+                        new OBDAProperties()));
+                NativeQueryLanguageComponentFactory factory =
+                        injector.getInstance(NativeQueryLanguageComponentFactory.class);
+
 				String outfile = mapFile.substring(0, mapFile.length() - 5)
 						.concat(".ttl");
 				File out = new File(outfile);
@@ -101,23 +96,25 @@ class MappingConverterCMD {
 				System.out.println("R2RML mapping file " + outfile
 						+ " written!");
 			} else if (mapFile.endsWith(".ttl")) {
+
+                OBDAProperties pref = new OBDAProperties();
+                pref.setProperty(OBDAProperties.DB_NAME, "DBName");
+                pref.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");;
+                pref.setProperty(OBDAProperties.DB_USER, "sa");
+                pref.setProperty(OBDAProperties.DB_PASSWORD, "");
+                pref.setProperty(OBDAProperties.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+
+                Injector injector = Guice.createInjector(new OBDACoreModule(pref));
+                NativeQueryLanguageComponentFactory factory =
+                        injector.getInstance(NativeQueryLanguageComponentFactory.class);
+
 				String outfile = mapFile.substring(0, mapFile.length() - 4)
 						.concat(".obda");
 				File out = new File(outfile);
 
 				URI obdaURI = new File(mapFile).toURI();
-				R2RMLReader reader = new R2RMLReader(mapFile, factory);
-				
-				String jdbcurl = "jdbc:h2:tcp://localhost/DBName";
-				String username = "sa";
-				String password = "";
-				String driverclass = "com.mysql.jdbc.Driver";
-
-				OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-				String sourceUrl =obdaURI.toString();
-				OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-						username, password, driverclass);
-				OBDAModel model = reader.readModel(dataSource);
+                MappingParser mappingParser = factory.create(new File(obdaURI));
+                OBDAModel model = mappingParser.getOBDAModel();
 
                 OntopMappingWriter mappingWriter = new OntopMappingWriter(model);
 				mappingWriter.save(out);

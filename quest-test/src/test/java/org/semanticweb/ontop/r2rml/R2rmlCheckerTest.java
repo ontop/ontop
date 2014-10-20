@@ -333,7 +333,7 @@ public class R2rmlCheckerTest {
 		log.info("Loading r2rml file");
 
         // Make sure the R2RML parser will be used.
-        p.put(MappingParser.class.getCanonicalName(), R2RMLReader.class.getCanonicalName());
+        p.put(MappingParser.class.getCanonicalName(), R2RMLMappingParser.class.getCanonicalName());
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory(new File(r2rmlfile), p);

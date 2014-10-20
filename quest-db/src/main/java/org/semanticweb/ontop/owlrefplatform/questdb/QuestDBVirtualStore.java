@@ -44,7 +44,6 @@ import org.semanticweb.ontop.owlapi3.directmapping.DirectMappingEngine;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.r2rml.R2RMLReader;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 import org.semanticweb.owlapi.apibinding.OWLManager;
