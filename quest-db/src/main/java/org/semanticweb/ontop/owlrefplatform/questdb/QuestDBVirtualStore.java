@@ -89,8 +89,9 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		this(name, tboxFile, obdaUri, config, null);
 	}
 	/**
-	 * The method generates the OBDAModel from an
-	 * obda or ttl (r2rml) file
+	 * The method generates the OBDAModel according to the MappingParser
+     * implementation deduced from the preferences.
+     *
 	 * @param obdaURI - the file URI
 	 * @return the generated OBDAModel
 	 * @throws IOException
@@ -100,18 +101,6 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	public OBDAModel getObdaModel(URI obdaURI) throws IOException, InvalidMappingException,
             DuplicateMappingException {
         NativeQueryLanguageComponentFactory nativeQLFactory = getNativeQLFactory();
-        /**
-         * TODO: make it not relying on the file extension.
-         */
-		if (obdaURI.toString().endsWith(".ttl")) {
-			//read R2RML file
-			R2RMLReader reader = new R2RMLReader(new File(obdaURI), nativeQLFactory);
-            OBDAModel obdaModel = reader.readModel(obdaURI);
-            return obdaModel;
-		}
-        /**
-         * Default case (e.g. .obda file)
-         */
         MappingParser modelParser = nativeQLFactory.create(new File(obdaURI));
         OBDAModel obdaModel = modelParser.getOBDAModel();
         return obdaModel;

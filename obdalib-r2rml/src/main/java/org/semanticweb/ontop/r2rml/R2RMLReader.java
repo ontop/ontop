@@ -80,11 +80,6 @@ public class R2RMLReader{
 		this.m = manager.getModel();
         this.obdaModel = null;
 	}
-
-//  public void setOBDAModel(OBDAModel model)
-//	{
-//		this.obdaModel = model;
-//	}
 		
 	/**
 	 * the method that gives the obda model based on the given graph
