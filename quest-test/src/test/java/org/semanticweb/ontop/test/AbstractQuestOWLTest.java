@@ -24,7 +24,8 @@ public abstract class AbstractQuestOWLTest {
     private final String obdafile = "src/test/resources/person1.obda";
     private final QuestOWL reasoner;
 
-    protected AbstractQuestOWLTest(Properties preferences) throws IOException, InvalidMappingException, OWLOntologyCreationException {
+    protected AbstractQuestOWLTest(QuestPreferences preferences)
+            throws IOException, InvalidMappingException, OWLOntologyCreationException {
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), preferences);
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();

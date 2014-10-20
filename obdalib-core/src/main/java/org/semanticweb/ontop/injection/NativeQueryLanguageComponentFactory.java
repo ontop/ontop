@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.injection;
 
 import com.google.common.collect.ImmutableList;
+import org.openrdf.model.Model;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataSource;
@@ -25,6 +26,8 @@ public interface NativeQueryLanguageComponentFactory {
 
     public MappingParser create(Reader reader);
     public MappingParser create(File file);
+
+    public MappingParser create(Model mappingGraph);
 
     public OBDAModel create(Set<OBDADataSource> dataSources,
                             Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,

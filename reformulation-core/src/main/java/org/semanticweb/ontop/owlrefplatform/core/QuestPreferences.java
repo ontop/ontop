@@ -21,11 +21,13 @@ package org.semanticweb.ontop.owlrefplatform.core;
  */
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 import org.semanticweb.ontop.injection.OBDAProperties;
+import org.semanticweb.ontop.utils.OBDAPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,19 +57,20 @@ public class QuestPreferences extends OBDAProperties {
 	
 	public static final String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
 //	public static final String 	CREATE_TEST_MAPPINGS 	= "org.obda.owlreformulationplatform.createTestMappings";
-	
+
 	public static final String STORAGE_LOCATION = "STORAGE_LOCATION";
-	
-	public static final String JDBC_URL = "JDBC_URL";
-	
-	public static final String DBNAME = "DBNAME";
-	
-	public static final String DBUSER = "DBUSER";
-	
-	public static final String DBPASSWORD = "DBPASSWORD";
-	
-	public static final String JDBC_DRIVER = "JDBC_DRIVER";
-	
+
+    @Deprecated
+	public static final String JDBC_URL = OBDAProperties.JDBC_URL;
+    @Deprecated
+	public static final String DBNAME = OBDAProperties.DB_NAME;
+    @Deprecated
+	public static final String DBUSER = OBDAProperties.DB_USER;
+    @Deprecated
+	public static final String DBPASSWORD = OBDAProperties.DB_PASSWORD;
+    @Deprecated
+	public static final String JDBC_DRIVER = OBDAProperties.JDBC_DRIVER;
+
 	public static final String PRINT_KEYS = "PRINT_KEYS";
 
 	// Tomcat connection pool properties
@@ -98,6 +101,11 @@ public class QuestPreferences extends OBDAProperties {
 	public void readDefaultQuestPropertiesFile() throws IOException {
 		readPropertiesFile(DEFAULT_QUEST_PROPERTIES_FILE);
 	}
+
+    private void readPropertiesFile(String fileName) throws IOException {
+        InputStream in =QuestPreferences.class.getResourceAsStream(fileName);
+        readDefaultPropertiesFile(in);
+    }
 
 	/**
 	 * Returns the current value for the given parameter.

@@ -22,6 +22,8 @@ package org.semanticweb.ontop.r2rml;
 /**
  * @author timea bagosi
  * Class responsible to construct an OBDA model from an R2RML mapping file or graph.
+ *
+ * Please do not call it directly. Use the R2RMLMappingParser instead.
  */
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -34,6 +36,7 @@ import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.*;
@@ -47,7 +50,7 @@ import org.openrdf.model.Model;
 import org.slf4j.LoggerFactory;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-public class R2RMLReader implements MappingParser{
+public class R2RMLReader{
 
 	private final R2RMLManager manager;
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
@@ -55,13 +58,9 @@ public class R2RMLReader implements MappingParser{
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(R2RMLReader.class);
 
 	private OBDAModel obdaModel;
-
-    /**
-     * TODO: make it final
-     */
-	private Model m ;
+	private final Model m ;
 	
-	public R2RMLReader(@Assisted Model m,
+	public R2RMLReader(Model m,
                        NativeQueryLanguageComponentFactory nativeQLFactory) {
 		this.manager = new R2RMLManager(m);
 		this.m = m;
@@ -69,20 +68,12 @@ public class R2RMLReader implements MappingParser{
         this.nativeQLFactory = nativeQLFactory;
 	}
 	
-	public R2RMLReader(@Assisted String file, NativeQueryLanguageComponentFactory nativeQLFactory)
+	public R2RMLReader(String file, NativeQueryLanguageComponentFactory nativeQLFactory)
 	{
 		this(new File(file), nativeQLFactory);
 	}
-	
-	public R2RMLReader(@Assisted File file, @Assisted OBDAModel model,
-                       NativeQueryLanguageComponentFactory nativeQLFactory)
-	{
-		this(file, nativeQLFactory);
-        this.obdaModel = model;
-	}
 
-    @Inject
-	public R2RMLReader(@Assisted File file, NativeQueryLanguageComponentFactory nativeQLFactory)
+	public R2RMLReader(File file, NativeQueryLanguageComponentFactory nativeQLFactory)
 	{
         this.nativeQLFactory = nativeQLFactory;
 		this.manager = new R2RMLManager(file);
@@ -132,6 +123,7 @@ public class R2RMLReader implements MappingParser{
 	 * @param dataSource - the datasource of the model
 	 * @return the read obda model
 	 */
+    @Deprecated
 	public OBDAModel readModel(OBDADataSource dataSource) throws DuplicateMappingException {
         URI sourceUri = dataSource.getSourceID();
 
@@ -170,34 +162,7 @@ public class R2RMLReader implements MappingParser{
 	 * method to read the mappings from the graph
 	 * @return list of obdaMappingAxioms
 	 */
-	public List<OBDAMappingAxiom> readMappings(){
+	public ImmutableList<OBDAMappingAxiom> readMappings(){
 		return manager.getMappings(m);
 	}
-
-
-    /**
-     * TODO: What is it doing here?
-     */
-	public static void main(String args[])
-	{
-		String file = "/Users/mindaugas/r2rml/test26.ttl";
-
-        Injector injector = Guice.createInjector(new OBDACoreModule(new Properties()));
-        NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
-                NativeQueryLanguageComponentFactory.class);
-
-		R2RMLReader reader = new R2RMLReader(file, nativeQLFactory);
-		List<OBDAMappingAxiom> axioms = reader.readMappings();
-		for (OBDAMappingAxiom ax : axioms)
-			System.out.println(ax);
-		
-	}
-
-    /**
-     * TODO: implement
-     */
-    @Override
-    public OBDAModel getOBDAModel() throws InvalidMappingException, IOException {
-        throw new NotImplementedException();
-    }
 }

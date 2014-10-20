@@ -86,7 +86,7 @@ public class LeftJoinTest2Virtual extends TestCase {
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 	}
 
-	private void runTests(Properties p) throws Exception {
+	private void runTests(QuestPreferences p) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);

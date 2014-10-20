@@ -22,7 +22,9 @@ package org.semanticweb.ontop.r2rml;
 
 /**
  * @author timea bagosi
- * The R2RML parser class that breaks down the responsibility of parsing by case
+ * The R2RML parser class that breaks down the responsibility of parsing by case.
+ *
+ * Low-level class that should not be confused with the R2RMLMappingParser.
  */
 import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.DataTypePredicate;

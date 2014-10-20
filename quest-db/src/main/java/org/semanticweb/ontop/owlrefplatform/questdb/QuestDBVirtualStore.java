@@ -21,7 +21,6 @@ package org.semanticweb.ontop.owlrefplatform.questdb;
  */
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashSet;
@@ -31,6 +30,7 @@ import org.openrdf.model.Model;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.io.OBDADataSourceFromConfigExtractor;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.*;
@@ -192,11 +192,14 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		
 		//obtain ontology
 		Ontology ontology = getOntologyFromOWLOntology(tbox);
-		//obtain datasource
-		OBDADataSource source = getDataSourceFromConfig(config);
-		//obtain obdaModel
-		R2RMLReader reader = new R2RMLReader(mappings, getNativeQLFactory());
-		OBDAModel obdaModel = reader.readModel(source);
+//		//obtain datasource
+//		OBDADataSource source = getDataSourceFromConfig(config);
+//		//obtain obdaModel
+//		R2RMLReader reader = new R2RMLReader(mappings, getNativeQLFactory());
+//		OBDAModel obdaModel = reader.readModel(source);
+
+        MappingParser mappingParser = getNativeQLFactory().create(mappings);
+        OBDAModel obdaModel = mappingParser.getOBDAModel();
 
 		OBDAModelSynchronizer.declarePredicates(tbox, obdaModel);
 		//setup Quest
@@ -204,20 +207,9 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	}
 	
 	
-private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
-		String id = config.get(QuestPreferences.DBNAME).toString();
-		String url = config.get(QuestPreferences.JDBC_URL).toString();
-		String username = config.get(QuestPreferences.DBUSER).toString();
-		String password = config.get(QuestPreferences.DBPASSWORD).toString();
-		String driver = config.get(QuestPreferences.JDBC_DRIVER).toString();
-		
-		OBDADataSource source = OBDADataFactoryImpl.getInstance().getDataSource(URI.create(id));
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
-		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
-		
-		return source;
+    private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
+        OBDADataSourceFromConfigExtractor dataSourceExtractor = new OBDADataSourceFromConfigExtractor(config);
+        return dataSourceExtractor.getDataSource();
 	}
 
 	/**

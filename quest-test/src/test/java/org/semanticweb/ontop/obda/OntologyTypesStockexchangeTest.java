@@ -62,7 +62,7 @@ public class OntologyTypesStockexchangeTest {
 		
 	}
 
-	private void runTests(Properties p, String query1, int numberResults) throws Exception {
+	private void runTests(QuestPreferences p, String query1, int numberResults) throws Exception {
 
 		// Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), p);

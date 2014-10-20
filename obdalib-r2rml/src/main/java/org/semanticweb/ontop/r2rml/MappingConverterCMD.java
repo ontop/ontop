@@ -25,6 +25,7 @@ import com.google.inject.Injector;
 import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.OntopMappingWriter;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -63,7 +64,7 @@ class MappingConverterCMD {
 		try {
 
             Injector injector = Guice.createInjector(new OBDACoreModule(
-                    new Properties()));
+                    new OBDAProperties()));
             NativeQueryLanguageComponentFactory factory =
                     injector.getInstance(NativeQueryLanguageComponentFactory.class);
 

@@ -16,6 +16,12 @@ import java.util.Properties;
  */
 public class OBDAProperties extends Properties {
 
+    public static final String JDBC_URL = "JDBC_URL";
+    public static final String DB_NAME = "DB_NAME";
+    public static final String DB_USER = "DBUSER";
+    public static final String DB_PASSWORD = "DBPASSWORD";
+    public static final String JDBC_DRIVER = "JDBC_DRIVER";
+
     public static final String DEFAULT_OBDA_PROPERTIES_FILE = "default_implementations.properties";
     private static Logger LOG = LoggerFactory.getLogger(OBDAProperties.class);
 
@@ -45,7 +51,7 @@ public class OBDAProperties extends Properties {
         this.load(in);
     }
 
-    protected void readPropertiesFile(String fileName) throws IOException {
+    private void readPropertiesFile(String fileName) throws IOException {
         InputStream in =OBDAProperties.class.getResourceAsStream(fileName);
         readDefaultPropertiesFile(in);
     }

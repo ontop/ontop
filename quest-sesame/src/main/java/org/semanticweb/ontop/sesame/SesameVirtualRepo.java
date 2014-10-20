@@ -20,11 +20,13 @@ package org.semanticweb.ontop.sesame;
  * #L%
  */
 
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.questdb.QuestDBVirtualStore;
+import org.semanticweb.ontop.r2rml.R2RMLMappingParser;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
@@ -118,6 +120,13 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	
 	private void createRepo(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences pref) throws Exception 
 	{
+        /**
+         * Security: make sure the R2RML mapping parser has been configured.
+         */
+        String mappingParserName = MappingParser.class.getCanonicalName();
+        if (!pref.contains(mappingParserName)) {
+            pref.setProperty(mappingParserName, R2RMLMappingParser.class.getCanonicalName());
+        }
 		this.virtualStore = new QuestDBVirtualStore(name, tbox, mappings, metadata, pref);
 	}
 	

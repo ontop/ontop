@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import org.openrdf.model.Model;
 import org.semanticweb.ontop.exception.*;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.mapping.MappingParser;
@@ -105,6 +106,16 @@ public class SQLMappingParser implements MappingParser {
         this.model = null;
         this.file = file;
         this.reader = new FileReader(file);
+    }
+
+    /**
+     * RDF graph argument is not supported. This constructor is required by the factory.
+     */
+    @AssistedInject
+    private SQLMappingParser(@Assisted Model mappingGraph, NativeQueryLanguageComponentFactory factory)
+            throws IOException, InvalidMappingExceptionWithIndicator {
+        throw new IllegalArgumentException("Ontop OBDA format has not RDF serialization. Passing a RDF graph" +
+                "to the SQLMappingParser is thus invalid.");
     }
 
     /**

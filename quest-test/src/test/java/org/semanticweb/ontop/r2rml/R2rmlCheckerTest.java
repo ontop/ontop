@@ -22,6 +22,9 @@ package org.semanticweb.ontop.r2rml;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.Predicate;
@@ -38,6 +41,7 @@ import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -324,16 +328,15 @@ public class R2rmlCheckerTest {
 	 * @param p
 	 *            quest preferences for QuestOWL, dataSource for the model
 	 */
-	private void loadR2rml(QuestPreferences p, OBDADataSource dataSource) {
+	private void loadR2rml(QuestPreferences p, OBDADataSource dataSource)
+            throws IOException, InvalidMappingException {
 		log.info("Loading r2rml file");
+
+        // Make sure the R2RML parser will be used.
+        p.put(MappingParser.class.getCanonicalName(), R2RMLReader.class.getCanonicalName());
+
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory(new File(r2rmlfile), p);
-
-		R2RMLReader reader = new R2RMLReader(r2rmlfile);
-
-		obdaModel = reader.readModel(dataSource);
-
-		factory.setOBDAController(obdaModel);
 
 		reasonerR2rml = (QuestOWL) factory.createReasoner(ontology,
 				new SimpleConfiguration());

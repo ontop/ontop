@@ -77,7 +77,7 @@ public class OntologyTypesTest{
 		
 	}
 
-	private void runTests(Properties p, String query, int numberResults) throws Exception {
+	private void runTests(QuestPreferences p, String query, int numberResults) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), p);

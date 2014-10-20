@@ -27,9 +27,9 @@ public abstract class OBDAAbstractModule extends AbstractModule {
         }
     }
 
-    private final Properties configuration;
+    private final OBDAProperties configuration;
 
-    protected OBDAAbstractModule(Properties configuration) {
+    protected OBDAAbstractModule(OBDAProperties configuration) {
         this.configuration = configuration;
     }
 
@@ -57,6 +57,13 @@ public abstract class OBDAAbstractModule extends AbstractModule {
             builder = builder.implement(type, getImplementation(type.getCanonicalName()));
         }
         return builder.build(factoryInterface);
+    }
+
+    /**
+     * TO be called by sub-classes, inside the configure() method.
+     */
+    protected void configureBasically() {
+        bind(OBDAProperties.class).toInstance(configuration);
     }
 
 }

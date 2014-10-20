@@ -37,6 +37,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableList;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.impl.LinkedHashModel;
@@ -118,7 +119,7 @@ public class R2RMLManager {
 	 * @param myModel - the Model structure containing mappings
 	 * @return ArrayList<OBDAMappingAxiom> - list of mapping axioms read from the Model
 	 */
-	public List<OBDAMappingAxiom> getMappings(Model myModel) {
+	public ImmutableList<OBDAMappingAxiom> getMappings(Model myModel) {
 
 		List<OBDAMappingAxiom> mappings = new ArrayList<OBDAMappingAxiom>();
 
@@ -148,7 +149,7 @@ public class R2RMLManager {
 				throw new RuntimeException(e);
 			}
 		}
-		return mappings;
+		return ImmutableList.copyOf(mappings);
 	}
 	/**
 	 * Get OBDA mapping axiom from R2RML TriplesMap 

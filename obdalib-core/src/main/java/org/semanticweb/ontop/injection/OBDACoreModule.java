@@ -16,6 +16,8 @@ public class OBDACoreModule extends OBDAAbstractModule {
 
     @Override
     protected void configure() {
+        configureBasically();
+
         Module nativeQLFactoryModule = buildFactory(ImmutableList.<Class>of(
                         OBDAModel.class,
                         MappingParser.class,
