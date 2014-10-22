@@ -1,28 +1,40 @@
-/*
+ /*
+ * #%L
  * Datalog.g
- * Copyright (C) 2010 Obdalib Team
+ * %%
+ * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * For information on how to redistribute this software under
- * the terms of a license other than GNU General Public License
- * contact TMate Software at support@sqljet.com
- *
- * @author Josef Hardi (josef.hardi@unibz.it)
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
  */
+
 grammar Datalog;
 
 @header {
 package it.unibz.krdb.obda.parser;
 
-import java.net.URI;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -38,20 +50,6 @@ import org.antlr.runtime.ParserRuleReturnScope;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.TokenStream;
-
-import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.Atom;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 }
 
 @lexer::header {
@@ -124,13 +122,13 @@ prog returns [DatalogProgram value]
         variableList.addAll(variables); // Import all the data from the Set to a Vector.
          
         // Get the head atom
-        Atom head = rule.getHead();
-        URI name = head.getPredicate().getName();
+        Function head = rule.getHead();
+        String name = head.getPredicate().getName();
         int size = variableList.size(); 
         
         // Get the predicate atom
         Predicate predicate = dfac.getPredicate(name, size);
-        Atom newhead = dfac.getAtom(predicate, variableList);
+        Function newhead = dfac.getFunction(predicate, variableList);
         rule.updateHead(newhead);
         
         isSelectAll = false;  
@@ -191,13 +189,13 @@ datalog_syntax_alt returns [CQIE value]
       $value = dfac.getCQIE($head.value, $body.value);
     }
   | head INV_IMPLIES {
-      $value = dfac.getCQIE($head.value, new LinkedList<Atom>());
+      $value = dfac.getCQIE($head.value, new LinkedList<Function>());
     }
   ;
 
 swirl_syntax_rule returns [CQIE value]
   : IMPLIES head {
-      $value = dfac.getCQIE($head.value, new LinkedList<Atom>());
+      $value = dfac.getCQIE($head.value, new LinkedList<Function>());
     }
   | swirl_syntax_alt {
       $value = $swirl_syntax_alt.value;
@@ -213,7 +211,7 @@ swirl_syntax_alt returns [CQIE value]
     }
   ;
 
-head returns [Atom value]
+head returns [Function value]
 @init {
   $value = null;
 }
@@ -222,16 +220,16 @@ head returns [Atom value]
     }
   ;
 
-body returns [List<Atom> value]
+body returns [List<Function> value]
 @init {
-  $value = new LinkedList<Atom>();
+  $value = new LinkedList<Function>();
 }
   : a1=atom { $value.add($a1.value); } ((COMMA|CARET) a2=atom { $value.add($a2.value); })*
   ;
 
-atom returns [Atom value]
+atom returns [Function value]
   : predicate LPAREN terms? RPAREN  {
-      URI uri = URI.create($predicate.value);
+      String uri = $predicate.value;
       
       Vector<Term> elements = $terms.elements;
       if (elements == null)
@@ -242,7 +240,7 @@ atom returns [Atom value]
       if (terms == null)
         terms = new Vector<Term>();
         
-      $value = dfac.getAtom(predicate, terms);
+      $value = dfac.getFunction(predicate, terms);
     }
   ;
 
@@ -293,7 +291,7 @@ literal_term returns [ValueConstant value]
       	}
       }
       
-      $value = dfac.getValueConstant(literal);
+      $value = dfac.getConstantLiteral(literal);
     }
   ; 
   
@@ -309,6 +307,8 @@ object_term returns [Function value]
     	functionSymbol = dfac.getDataTypePredicateString();
       } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
      	functionSymbol = dfac.getDataTypePredicateInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_LONG_URI)) {
+     	functionSymbol = dfac.getDataTypePredicateLong();
       } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
     	functionSymbol = dfac.getDataTypePredicateDecimal();
       } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
@@ -320,9 +320,9 @@ object_term returns [Function value]
       } else if (functionName.equals(OBDAVocabulary.QUEST_URI)) {
         functionSymbol = dfac.getUriTemplatePredicate(arity);
       } else {
-        functionSymbol = dfac.getPredicate(URI.create(functionName), arity);
+        functionSymbol = dfac.getPredicate(functionName, arity);
       }
-      $value = dfac.getFunctionalTerm(functionSymbol, $terms.elements);
+      $value = dfac.getFunction(functionSymbol, $terms.elements);
     }
   ;
   
@@ -332,8 +332,7 @@ uri_term returns [URIConstant value]
 }
   : uri { 
       uriText = $uri.text;      
-      URI uri = URI.create(uriText);
-      $value = dfac.getURIConstant(uri);
+      $value = dfac.getConstantURI(uriText);
     }
   ;
   
@@ -356,7 +355,7 @@ qualified_name returns [String value]
       else
         uriref = directives.get(OBDA_DEFAULT_URI);
       if (uriref == null) {
-      	  System.out.println("Unknown prefix");          
+      	  //System.out.println("Unknown prefix");          
           throw new RecognitionException();
       }
       

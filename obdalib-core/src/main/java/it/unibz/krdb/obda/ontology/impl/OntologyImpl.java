@@ -92,6 +92,14 @@ public class OntologyImpl implements Ontology {
 			add(OBDAVocabulary.RDFS_LITERAL);
 			add(OBDAVocabulary.XSD_STRING);
 			add(OBDAVocabulary.XSD_INTEGER);
+            add(OBDAVocabulary.XSD_NEGATIVE_INTEGER);
+            add(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER);
+            add(OBDAVocabulary.XSD_POSITIVE_INTEGER);
+            add(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER);
+            add(OBDAVocabulary.XSD_INT);
+            add(OBDAVocabulary.XSD_UNSIGNED_INT);
+            add(OBDAVocabulary.XSD_FLOAT);
+            add(OBDAVocabulary.XSD_LONG);
 			add(OBDAVocabulary.XSD_DECIMAL);
 			add(OBDAVocabulary.XSD_DOUBLE);
 			add(OBDAVocabulary.XSD_DATETIME);
