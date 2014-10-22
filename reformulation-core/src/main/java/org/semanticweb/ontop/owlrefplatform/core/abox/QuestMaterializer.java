@@ -27,7 +27,6 @@ import java.util.*;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.semanticweb.ontop.injection.OBDACoreModule;
-import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.ontology.Assertion;
@@ -35,6 +34,7 @@ import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.*;
+import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestMaterializer {
 
-    private final QuestComponentFactory factory;
+    private final QuestComponentFactory questComponentFactory;
     private OBDAModel model;
 	private Quest questInstance;
 	private Ontology ontology;
@@ -100,8 +100,9 @@ public class QuestMaterializer {
 		this.ontology = onto;
 		this.vocabulary = new HashSet<>();
 
-        Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
-        factory = injector.getInstance(QuestComponentFactory.class);
+        Injector injector = Guice.createInjector(new OBDACoreModule(preferences),
+                new QuestComponentModule(preferences));
+        questComponentFactory = injector.getInstance(QuestComponentFactory.class);
 		
 		if (this.model.getSources()!= null && this.model.getSources().size() > 1)
 			throw new Exception("Cannot materialize with multiple data sources!");
@@ -147,7 +148,7 @@ public class QuestMaterializer {
 		
 		preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
-		questInstance = factory.create(ontology, this.model, null, preferences);
+		questInstance = questComponentFactory.create(ontology, this.model, null, preferences);
 					
 		questInstance.setupRepository();
 	}
