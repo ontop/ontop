@@ -1,8 +1,12 @@
 package org.semanticweb.ontop.owlrefplatform.injection;
 
+import com.google.common.collect.ImmutableList;
+import com.google.inject.Module;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-import org.semanticweb.ontop.injection.OBDAAbstractModule;
-import org.semanticweb.ontop.injection.OBDAProperties;
+import org.semanticweb.ontop.injection.*;
+import org.semanticweb.ontop.io.PrefixManager;
+import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.Quest;
 import org.semanticweb.ontop.owlrefplatform.core.QuestImpl;
 
@@ -21,12 +25,9 @@ public class QuestComponentModule extends OBDAAbstractModule {
     protected void configure() {
         configureBasically();
 
-        FactoryModuleBuilder builder = new FactoryModuleBuilder();
-
-        //TODO: use the configuration instead (and consider more classes)
-        builder.implement(Quest.class, QuestImpl.class);
-
-        install(builder.build(QuestComponentFactory.class));
+        Module componentFactoryModule = buildFactory(ImmutableList.<Class>of(Quest.class),
+                QuestComponentFactory.class);
+        install(componentFactoryModule);
     }
 
 
