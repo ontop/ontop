@@ -27,6 +27,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAFactoryWithException;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.OntopMappingWriter;
 import org.semanticweb.ontop.model.OBDAModel;
@@ -80,10 +81,12 @@ public class DirectMappingBootstrapperCMD {
 					File obda = new File(obdafile);
 
                     Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
-                    NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+                    NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
+                            NativeQueryLanguageComponentFactory.class);
+                    OBDAFactoryWithException obdaFactory = injector.getInstance(OBDAFactoryWithException.class);
 
 					DirectMappingBootstrapper dm = new DirectMappingBootstrapper(
-							uri, url, user, passw, driver, factory);
+							uri, url, user, passw, driver, nativeQLFactory, obdaFactory);
 					OBDAModel model = dm.getModel();
 					OWLOntology onto = dm.getOntology();
 					OntopMappingWriter writer = new OntopMappingWriter(model);

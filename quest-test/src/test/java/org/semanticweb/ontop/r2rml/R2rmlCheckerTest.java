@@ -23,7 +23,9 @@ package org.semanticweb.ontop.r2rml;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
@@ -329,7 +331,7 @@ public class R2rmlCheckerTest {
 	 *            quest preferences for QuestOWL, dataSource for the model
 	 */
 	private void loadR2rml(QuestPreferences p, OBDADataSource dataSource)
-            throws IOException, InvalidMappingException {
+            throws IOException, InvalidMappingException, DuplicateMappingException, InvalidDataSourceException {
 		log.info("Loading r2rml file");
 
         // Make sure the R2RML parser will be used.

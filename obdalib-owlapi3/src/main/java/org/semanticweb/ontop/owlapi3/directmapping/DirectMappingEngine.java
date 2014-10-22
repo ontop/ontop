@@ -26,6 +26,7 @@ import java.util.*;
 
 import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDAFactoryWithException;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
@@ -63,24 +64,29 @@ import javax.activation.DataSource;
 
 
 public class DirectMappingEngine {
-	
-	private JDBCConnectionManager conMan = null;
+
+    private JDBCConnectionManager conMan = null;
 	private DBMetadata metadata = null;
 	private String baseuri;
 	private int mapidx = 1;
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
+    private final OBDAFactoryWithException obdaFactory;
 	
 	public DirectMappingEngine(String baseUri, int mapnr,
-                               NativeQueryLanguageComponentFactory nativeQLFactory){
+                               NativeQueryLanguageComponentFactory nativeQLFactory,
+                               OBDAFactoryWithException obdaFactory){
         this.nativeQLFactory = nativeQLFactory;
+        this.obdaFactory = obdaFactory;
 		conMan = JDBCConnectionManager.getJDBCConnectionManager();
 		baseuri = baseUri;
 		mapidx = mapnr + 1;
 	}
 	
 	public DirectMappingEngine(DBMetadata metadata, String baseUri, int mapnr,
-                               NativeQueryLanguageComponentFactory nativeQLFactory){
+                               NativeQueryLanguageComponentFactory nativeQLFactory,
+                               OBDAFactoryWithException obdaFactory){
         this.nativeQLFactory = nativeQLFactory;
+        this.obdaFactory = obdaFactory;
 		this.metadata = metadata;
 		baseuri = baseUri;
 		mapidx = mapnr + 1;
@@ -188,7 +194,7 @@ public class DirectMappingEngine {
 	public OBDAModel extractMappings(OBDADataSource source) throws Exception{
         //TODO: avoid this empty construction
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-        OBDAModel emptyModel = nativeQLFactory.create(new HashSet<OBDADataSource>(),
+        OBDAModel emptyModel = obdaFactory.createOBDAModel(new HashSet<OBDADataSource>(),
                 new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(),prefixManager);
 
 		return extractMappings(emptyModel, source);

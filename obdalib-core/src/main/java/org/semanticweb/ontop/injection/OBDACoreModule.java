@@ -24,5 +24,7 @@ public class OBDACoreModule extends OBDAAbstractModule {
                         PrefixManager.class),
                 NativeQueryLanguageComponentFactory.class);
         install(nativeQLFactoryModule);
+
+        bind(OBDAFactoryWithException.class).to(OBDAFactoryWithExceptionImpl.class);
     }
 }

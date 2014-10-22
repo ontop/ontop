@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDAFactoryWithException;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
@@ -36,12 +37,14 @@ public abstract class AbstractDBMetadata
 {
 
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
+    private final OBDAFactoryWithException obdaFactory;
     private OWLOntology onto;
 	private OBDAModel model;
 	private OBDADataSource source;
 
-    protected AbstractDBMetadata(NativeQueryLanguageComponentFactory factory) {
+    protected AbstractDBMetadata(NativeQueryLanguageComponentFactory factory, OBDAFactoryWithException obdaFactory) {
         this.nativeQLFactory = factory;
+        this.obdaFactory = obdaFactory;
     }
 	
 	protected DBMetadata getMetadata() throws Exception 
@@ -63,7 +66,7 @@ public abstract class AbstractDBMetadata
 	protected void getOntologyAndDirectMappings(String baseuri, OWLOntology onto, OBDAModel model, OBDADataSource source) throws Exception {
 		this.source = source;	
 		DirectMappingEngine engine = new DirectMappingEngine(baseuri, model.getMappings(source.getSourceID()).size(),
-                nativeQLFactory);
+                nativeQLFactory, obdaFactory);
 		this.model =  engine.extractMappings(model, source);
 		this.onto =  engine.getOntology(onto, onto.getOWLOntologyManager(), model);
 	}
@@ -71,7 +74,7 @@ public abstract class AbstractDBMetadata
 	protected void getOntologyAndDirectMappings(DBMetadata metadata, String baseuri, OWLOntology onto, OBDAModel model, OBDADataSource source) throws Exception {
 		this.source = source;	
 		DirectMappingEngine engine = new DirectMappingEngine(metadata, baseuri, model.getMappings(source.getSourceID()).size(),
-                nativeQLFactory);
+                nativeQLFactory, obdaFactory);
 		this.model =  engine.extractMappings(model, source);
 		this.onto =  engine.getOntology(onto, onto.getOWLOntologyManager(), model);
 	}

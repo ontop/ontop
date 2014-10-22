@@ -27,6 +27,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAFactoryWithException;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.*;
@@ -36,15 +37,15 @@ public abstract class QuestDBAbstractStore implements Serializable {
 
 	private static final long serialVersionUID = -8088123404566560283L;
 
-	protected Quest questInstance = null;
+    protected Quest questInstance = null;
 	protected QuestConnection questConn = null;
 
 	protected String name;
 
     private final Injector injector;
     private final QuestComponentFactory componentFactory;
-
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
+    private final OBDAFactoryWithException obdaFactory;
 
 	public QuestDBAbstractStore(String name, QuestPreferences config) {
 		this.name = name;
@@ -57,6 +58,7 @@ public abstract class QuestDBAbstractStore implements Serializable {
         nativeQLFactory = injector.getInstance(
                 NativeQueryLanguageComponentFactory.class);
         componentFactory = injector.getInstance(QuestComponentFactory.class);
+        obdaFactory = injector.getInstance(OBDAFactoryWithException.class);
     }
 
 
@@ -91,6 +93,10 @@ public abstract class QuestDBAbstractStore implements Serializable {
 
     protected NativeQueryLanguageComponentFactory getNativeQLFactory() {
         return nativeQLFactory;
+    }
+
+    protected OBDAFactoryWithException getOBDAFactory() {
+        return obdaFactory;
     }
 
 }

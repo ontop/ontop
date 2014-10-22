@@ -30,8 +30,6 @@ import java.util.jar.Manifest;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.*;
@@ -55,13 +53,12 @@ public class OBDAModelImpl implements OBDAModel {
 	// All other predicates (not classes or properties)
     private final Set<Predicate> declaredPredicates = new HashSet<>();
 
-    @Inject
     /**
      * Normal constructor. Used by the QuestComponentFactory.
      */
-    private OBDAModelImpl(@Assisted Set<OBDADataSource> dataSources,
-                          @Assisted Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
-                          @Assisted PrefixManager prefixManager)
+    public OBDAModelImpl(Set<OBDADataSource> dataSources,
+                         Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
+                         PrefixManager prefixManager)
             throws DuplicateMappingException{
         checkDuplicates(newMappings);
         this.mappingIndexByDataSource = ImmutableMap.copyOf(newMappings);

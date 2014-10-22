@@ -28,7 +28,9 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
@@ -79,7 +81,8 @@ public class OracleLIMITTest  {
 	}
 	
 
-	private void runQuery(String obdaFileName) throws OBDAException, OWLException, IOException, InvalidMappingException {
+	private void runQuery(String obdaFileName) throws OBDAException, OWLException, IOException,
+            InvalidMappingException, DuplicateMappingException, InvalidDataSourceException {
 		
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);

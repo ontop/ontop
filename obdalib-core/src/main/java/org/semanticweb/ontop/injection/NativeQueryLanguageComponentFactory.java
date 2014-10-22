@@ -29,9 +29,5 @@ public interface NativeQueryLanguageComponentFactory {
 
     public MappingParser create(Model mappingGraph);
 
-    public OBDAModel create(Set<OBDADataSource> dataSources,
-                            Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
-                            PrefixManager prefixManager);
-
     public PrefixManager create(Map<String, String> prefixToURIMap);
 }

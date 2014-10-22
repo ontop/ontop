@@ -37,10 +37,12 @@ import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.n3.N3Writer;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
+import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.injection.OBDAProperties;
+import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.ontology.Ontology;
@@ -64,7 +66,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 	private Ontology onto;
 	private OWLOntology ontology = null;
 
-    public SesameMaterializerCmdTest() throws IOException, InvalidMappingException {
+    public SesameMaterializerCmdTest() throws IOException, InvalidMappingException, DuplicateMappingException, InvalidDataSourceException {
         Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
         NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
                 NativeQueryLanguageComponentFactory.class);

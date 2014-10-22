@@ -6,8 +6,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.openrdf.model.Model;
+import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDAFactoryWithException;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.io.OBDADataSourceFromConfigExtractor;
@@ -30,6 +32,7 @@ public class R2RMLMappingParser implements MappingParser {
 
     private final OBDAProperties configuration;
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
+    private final OBDAFactoryWithException obdaFactory;
     private OBDAModel obdaModel;
 
     /**
@@ -40,8 +43,9 @@ public class R2RMLMappingParser implements MappingParser {
 
     @AssistedInject
     private R2RMLMappingParser(@Assisted File mappingFile, NativeQueryLanguageComponentFactory nativeQLFactory,
-                               OBDAProperties configuration) {
+                               OBDAFactoryWithException obdaFactory, OBDAProperties configuration) {
         this.nativeQLFactory = nativeQLFactory;
+        this.obdaFactory = obdaFactory;
         this.configuration = configuration;
         this.mappingFile = mappingFile;
         this.mappingGraph = null;
@@ -55,8 +59,9 @@ public class R2RMLMappingParser implements MappingParser {
     @AssistedInject
     private R2RMLMappingParser(@Assisted Model mappingGraph,
                                NativeQueryLanguageComponentFactory nativeQLFactory,
-                               OBDAProperties configuration) {
+                               OBDAFactoryWithException obdaFactory, OBDAProperties configuration) {
         this.nativeQLFactory = nativeQLFactory;
+        this.obdaFactory = obdaFactory;
         this.configuration = configuration;
         this.mappingGraph = mappingGraph;
         this.mappingFile = null;
@@ -74,7 +79,8 @@ public class R2RMLMappingParser implements MappingParser {
     }
 
     @Override
-    public OBDAModel getOBDAModel() throws InvalidMappingException, IOException, InvalidDataSourceException {
+    public OBDAModel getOBDAModel() throws InvalidMappingException, IOException, InvalidDataSourceException,
+            DuplicateMappingException {
         /**
          * The OBDA model is only computed once.
          */
@@ -99,8 +105,8 @@ public class R2RMLMappingParser implements MappingParser {
         //TODO: try to extract prefixes from the R2RML mappings
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
 
-        obdaModel = nativeQLFactory.create(ImmutableSet.of(dataSource), ImmutableMap.of(dataSource.getSourceID(), sourceMappings),
-                prefixManager);
+        obdaModel = obdaFactory.createOBDAModel(ImmutableSet.of(dataSource), ImmutableMap.of(dataSource.getSourceID(),
+                        sourceMappings), prefixManager);
 
     return obdaModel;
     }

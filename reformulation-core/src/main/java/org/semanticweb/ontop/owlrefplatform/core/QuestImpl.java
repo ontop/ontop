@@ -34,6 +34,7 @@ import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.openrdf.query.parser.ParsedQuery;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDAFactoryWithException;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.mapping.sql.SQLMappingSchemaExtractor;
 import org.semanticweb.ontop.model.*;
@@ -84,7 +85,7 @@ public class QuestImpl implements Serializable, Quest {
 
 	private static final long serialVersionUID = -6074403119825754295L;
 
-	private PoolProperties poolProperties;
+    private PoolProperties poolProperties;
 	private DataSource tomcatPool;
 
 	private boolean isSemanticIdx = false;
@@ -245,7 +246,8 @@ public class QuestImpl implements Serializable, Quest {
     /**
      * TODO: explain
      */
-    private NativeQueryLanguageComponentFactory nativeQLFactory;
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
+    private final OBDAFactoryWithException obdaFactory;
 
 	/***
 	 * Will prepare an instance of quest in classic or virtual ABox mode. If the
@@ -275,11 +277,13 @@ public class QuestImpl implements Serializable, Quest {
 	 */
     @Inject
 	private QuestImpl(@Assisted Ontology tbox, @Assisted @Nullable OBDAModel mappings, @Assisted @Nullable DBMetadata metadata,
-                      @Assisted Properties config, NativeQueryLanguageComponentFactory nativeQLFactory) {
+                      @Assisted Properties config, NativeQueryLanguageComponentFactory nativeQLFactory,
+                      OBDAFactoryWithException obdaFactory) throws DuplicateMappingException {
         if (tbox == null)
             throw new InvalidParameterException("TBox cannot be null");
 
         this.nativeQLFactory = nativeQLFactory;
+        this.obdaFactory = obdaFactory;
 
         inputTBox = tbox;
 
@@ -373,7 +377,7 @@ public class QuestImpl implements Serializable, Quest {
         return unfolder;
     }
 
-	private void loadOBDAModel(OBDAModel model) {
+	private void loadOBDAModel(OBDAModel model) throws DuplicateMappingException {
 
 		if (model == null) {
 			//model = OBDADataFactoryImpl.getInstance().getOBDAModel();
@@ -381,7 +385,7 @@ public class QuestImpl implements Serializable, Quest {
             //TODO: add the prefix.
             PrefixManager defaultPrefixManager = nativeQLFactory.create(new HashMap<String, String>());
 
-            model = nativeQLFactory.create(new HashSet<OBDADataSource>(),
+            model = obdaFactory.createOBDAModel(new HashSet<OBDADataSource>(),
                     new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(), defaultPrefixManager);
 		}
 		inputOBDAModel = model;
@@ -553,7 +557,7 @@ public class QuestImpl implements Serializable, Quest {
 		}
 
         // TODO: better use this constructor.
-		unfoldingOBDAModel = nativeQLFactory.create(new HashSet<OBDADataSource>(),
+		unfoldingOBDAModel = obdaFactory.createOBDAModel(new HashSet<OBDADataSource>(),
                 new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(),
                 nativeQLFactory.create(new HashMap<String, String>()));
 

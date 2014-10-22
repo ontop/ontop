@@ -23,6 +23,7 @@ package org.semanticweb.ontop.owlapi3.bootstrapping;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDAFactoryWithException;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
@@ -44,30 +45,33 @@ public class DirectMappingBootstrapper extends AbstractDBMetadata{
 	
 	
 	public DirectMappingBootstrapper(String baseuri, String url, String user, String password, String driver,
-                                     NativeQueryLanguageComponentFactory factory) throws Exception{
-        super(factory);
+                                     NativeQueryLanguageComponentFactory nativeQLFactory,
+                                     OBDAFactoryWithException obdaFactory) throws Exception{
+        super(nativeQLFactory, obdaFactory);
 		OBDADataFactory fact = OBDADataFactoryImpl.getInstance();
 		OBDADataSource source = fact.getJDBCDataSource(url, user, password, driver);
 		//create empty ontology and model, add source to model
 		OWLOntologyManager mng = OWLManager.createOWLOntologyManager();
 		OWLOntology onto = mng.createOntology(IRI.create(baseuri));
         //TODO: avoid creating a model without mappings
-        PrefixManager prefixManager = factory.create(new HashMap<String, String>());
-		OBDAModel model = factory.create(ImmutableSet.of(source),
+        PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
+		OBDAModel model = obdaFactory.createOBDAModel(ImmutableSet.of(source),
                 new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(), prefixManager);
 		getOntologyAndDirectMappings(baseuri, onto, model, source);
 	}
 
 	public DirectMappingBootstrapper(String baseUri, OWLOntology ontology, OBDAModel model, OBDADataSource source,
-                                     NativeQueryLanguageComponentFactory factory) throws Exception{
-        super(factory);
+                                     NativeQueryLanguageComponentFactory nativeQLFactory,
+                                     OBDAFactoryWithException obdaFactory) throws Exception{
+        super(nativeQLFactory, obdaFactory);
 		getOntologyAndDirectMappings(baseUri, ontology, model, source);
 	}
 	
 	public DirectMappingBootstrapper(DBMetadata metadata, String baseUri, OWLOntology ontology, OBDAModel model,
-                                     OBDADataSource source, NativeQueryLanguageComponentFactory factory)
+                                     OBDADataSource source, NativeQueryLanguageComponentFactory nativeQLFactory,
+                                     OBDAFactoryWithException obdaFactory)
             throws Exception{
-        super(factory);
+        super(nativeQLFactory, obdaFactory);
 		getOntologyAndDirectMappings(metadata, baseUri, ontology, model, source);
 	}
 

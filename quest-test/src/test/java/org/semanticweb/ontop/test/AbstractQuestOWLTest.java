@@ -1,6 +1,8 @@
 package org.semanticweb.ontop.test;
 
+import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -25,7 +27,7 @@ public abstract class AbstractQuestOWLTest {
     private final QuestOWL reasoner;
 
     protected AbstractQuestOWLTest(QuestPreferences preferences)
-            throws IOException, InvalidMappingException, OWLOntologyCreationException {
+            throws IOException, InvalidMappingException, OWLOntologyCreationException, DuplicateMappingException, InvalidDataSourceException {
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), preferences);
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();

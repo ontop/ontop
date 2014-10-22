@@ -21,7 +21,9 @@ package org.semanticweb.ontop.parser;
  */
 
 
+import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -74,7 +76,8 @@ public class OracleORDERBYTest {
     }
 
 
-    private void runQuery(String query) throws OBDAException, OWLException, IOException, InvalidMappingException {
+    private void runQuery(String query) throws OBDAException, OWLException, IOException, InvalidMappingException,
+            DuplicateMappingException, InvalidDataSourceException {
 
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);

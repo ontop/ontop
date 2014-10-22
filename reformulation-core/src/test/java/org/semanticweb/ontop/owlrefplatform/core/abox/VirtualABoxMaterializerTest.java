@@ -32,6 +32,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAFactoryWithException;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.*;
@@ -47,10 +48,12 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
     private final OBDADataFactory oldFactory = OBDADataFactoryImpl.getInstance();
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
+    private final OBDAFactoryWithException obdaFactory;
 
     public VirtualABoxMaterializerTest() {
         Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
         nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+        obdaFactory = injector.getInstance(OBDAFactoryWithException.class);
     }
 
 	protected void setUp() throws Exception {
@@ -59,7 +62,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 	public void testNoSource() throws Exception {
         try{
-                OBDAModel model = nativeQLFactory.create(new HashSet<OBDADataSource>(),
+                OBDAModel model = obdaFactory.createOBDAModel(new HashSet<OBDADataSource>(),
                         new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(),
                         nativeQLFactory.create(new HashMap<String, String>()));
 
@@ -153,7 +156,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
         mappings.put(source.getSourceID(), ImmutableList.of(map1));
 
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-		OBDAModel model = nativeQLFactory.create(dataSources, mappings, prefixManager);
+		OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappings, prefixManager);
 
         //TODO: remove this dangerous cast
 		QuestMaterializer materializer = new QuestMaterializer(model);
@@ -254,7 +257,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
             mappingIndex.put(source2.getSourceID(), ImmutableList.of(map1));
 
             PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-            OBDAModel model = nativeQLFactory.create(dataSources, mappingIndex, prefixManager);
+            OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
 
             QuestMaterializer materializer = new QuestMaterializer(model);
 
@@ -360,7 +363,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		OBDAMappingAxiom map1 = oldFactory.getRDBMSMappingAxiom(sql, oldFactory.getCQIE(head, body));
 
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-        OBDAModel model = nativeQLFactory.create(dataSources, mappingIndex, prefixManager);
+        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
 
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
@@ -431,7 +434,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
         dataSources.add(source3);
 
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-        OBDAModel model = nativeQLFactory.create(dataSources, mappingIndex, prefixManager);
+        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
 		List<Assertion> assertions = materializer.getAssertionList();
@@ -537,7 +540,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
         mappingIndex.put(source2.getSourceID(), ImmutableList.of(map1));
 
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-        OBDAModel model = nativeQLFactory.create(dataSources, mappingIndex, prefixManager);
+        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
 
 		QuestMaterializer materializer = new QuestMaterializer(model);
 	
@@ -644,7 +647,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
         mappingIndex.put(source.getSourceID(), ImmutableList.of(map1, map2, map3, map4, map5, map6));
 
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
-        OBDAModel model = nativeQLFactory.create(dataSources, mappingIndex, prefixManager);
+        OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
 
 		QuestMaterializer materializer = new QuestMaterializer(model);
 

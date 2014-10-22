@@ -26,12 +26,12 @@ import java.util.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.openrdf.model.Model;
 import org.semanticweb.ontop.exception.*;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDAFactoryWithException;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
@@ -71,10 +71,9 @@ public class SQLMappingParser implements MappingParser {
 
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private static final Logger LOG = LoggerFactory.getLogger(SQLMappingParser.class);
-    /**
-     * Injected
-     */
-    private static NativeQueryLanguageComponentFactory FACTORY;
+
+    private final NativeQueryLanguageComponentFactory nativeQLFactory;
+    private final OBDAFactoryWithException obdaFactory;
 
     private OBDAModel model;
 
@@ -85,10 +84,11 @@ public class SQLMappingParser implements MappingParser {
     private final File file;
 
     @AssistedInject
-    private SQLMappingParser(@Assisted Reader reader, NativeQueryLanguageComponentFactory factory)
+    private SQLMappingParser(@Assisted Reader reader, NativeQueryLanguageComponentFactory nativeQLFactory,
+                             OBDAFactoryWithException obdaFactory)
             throws IOException, InvalidMappingExceptionWithIndicator {
-        if (FACTORY == null)
-            FACTORY = factory;
+        this.nativeQLFactory = nativeQLFactory;
+        this.obdaFactory = obdaFactory;
         this.model = null;
 
         this.reader = reader;
@@ -99,10 +99,11 @@ public class SQLMappingParser implements MappingParser {
      * Create an SQL Mapping Parser for generating an OBDA model.
      */
     @AssistedInject
-    private SQLMappingParser(@Assisted File file, NativeQueryLanguageComponentFactory factory)
+    private SQLMappingParser(@Assisted File file, NativeQueryLanguageComponentFactory nativeQLFactory,
+                             OBDAFactoryWithException obdaFactory)
             throws IOException, InvalidMappingExceptionWithIndicator {
-        if (FACTORY == null)
-            FACTORY = factory;
+        this.nativeQLFactory = nativeQLFactory;
+        this.obdaFactory = obdaFactory;
         this.model = null;
         this.file = file;
         this.reader = new FileReader(file);
@@ -124,9 +125,9 @@ public class SQLMappingParser implements MappingParser {
      *
      */
     @Override
-    public OBDAModel getOBDAModel() throws InvalidMappingException, IOException{
+    public OBDAModel getOBDAModel() throws InvalidMappingException, IOException, DuplicateMappingException {
         if (model == null) {
-            this.model = load(reader, file);
+            this.model = load(reader, file, nativeQLFactory, obdaFactory);
             reader = null;
         }
         return model;
@@ -148,8 +149,9 @@ public class SQLMappingParser implements MappingParser {
      *
      * TODO: refactor it. Way too complex.
      */
-	private static OBDAModel load(Reader reader, File file) throws IOException,
-			InvalidMappingExceptionWithIndicator {
+	private static OBDAModel load(Reader reader, File file, NativeQueryLanguageComponentFactory nativeQLFactory,
+                                  OBDAFactoryWithException obdaFactory)
+            throws IOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
 
         if (file != null) {
             checkFile(file);
@@ -234,8 +236,8 @@ public class SQLMappingParser implements MappingParser {
             mappingIndex.put(currentDataSource.getSourceID(), ImmutableList.copyOf(currentSourceMappings));
         }
 
-        PrefixManager prefixManager = FACTORY.create(prefixes);
-        OBDAModel model = FACTORY.create(sources, mappingIndex, prefixManager);
+        PrefixManager prefixManager = nativeQLFactory.create(prefixes);
+        OBDAModel model = obdaFactory.createOBDAModel(sources, mappingIndex, prefixManager);
         return model;
 	}
     

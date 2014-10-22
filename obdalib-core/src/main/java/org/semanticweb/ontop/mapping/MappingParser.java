@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.mapping;
 
+import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.mapping.sql.ParsedSQLMapping;
@@ -15,5 +16,5 @@ import java.util.List;
  */
 public interface MappingParser {
 
-    OBDAModel getOBDAModel() throws InvalidMappingException, IOException, InvalidDataSourceException;
+    OBDAModel getOBDAModel() throws InvalidMappingException, IOException, InvalidDataSourceException, DuplicateMappingException;
 }

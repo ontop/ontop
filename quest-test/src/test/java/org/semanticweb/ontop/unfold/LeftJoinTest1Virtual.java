@@ -20,7 +20,9 @@ package org.semanticweb.ontop.unfold;
  * #L%
  */
 
+import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import java.io.IOException;
 
@@ -36,7 +38,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 	//private static Logger log = LoggerFactory.getLogger(LeftJoinTest1Virtual.class);
 
-    public LeftJoinTest1Virtual() throws IOException, InvalidMappingException, OWLOntologyCreationException {
+    public LeftJoinTest1Virtual() throws IOException, InvalidMappingException, OWLOntologyCreationException, DuplicateMappingException, InvalidDataSourceException {
         super(new QuestPreferences());
     }
 
