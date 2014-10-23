@@ -1155,7 +1155,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return (dataRepository != null);
 	}
 
-	public RDBMSSIRepositoryManager getSamanticIndexRepository() {
+	public RDBMSSIRepositoryManager getSemanticIndexRepository() {
 		return dataRepository;
 	}
 }

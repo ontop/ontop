@@ -422,7 +422,7 @@ public class TreeRedReformulator implements QueryRewriter {
 		 * Our strategy requires saturation to minimize the number of cycles
 		 * that will be necessary to compute reformulation.
 		 */
-		this.ontology.saturate();
+		//this.ontology.saturate();
 		
 		
 		dataDependenciesCQC = new CQContainmentCheckUnderLIDs(sigma);

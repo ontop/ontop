@@ -423,7 +423,7 @@ public class QuestStatement implements OBDAStatement {
 		DatalogProgram program = null;
 		try {
 			if (questInstance.isSemIdx()) {
-				translator.setSemanticIndexUriRef(questInstance.getSamanticIndexRepository().getUriMap());
+				translator.setSemanticIndexUriRef(questInstance.getSemanticIndexRepository().getUriMap());
 			}
 			program = translator.translate(pq, signature);
 
@@ -876,12 +876,12 @@ public class QuestStatement implements OBDAStatement {
 
 		if (!useFile) {
 
-			result = questInstance.getSamanticIndexRepository().insertData(conn.conn, newData, commit, batch);
+			result = questInstance.getSemanticIndexRepository().insertData(conn.conn, newData, commit, batch);
 		} else {
 			try {
 				// File temporalFile = new File("quest-copy.tmp");
 				// FileOutputStream os = new FileOutputStream(temporalFile);
-				result = (int) questInstance.getSamanticIndexRepository().loadWithFile(conn.conn, newData);
+				result = (int) questInstance.getSemanticIndexRepository().loadWithFile(conn.conn, newData);
 				// os.close();
 
 			} catch (IOException e) {
@@ -911,23 +911,23 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 	public void createIndexes() throws Exception {
-		questInstance.getSamanticIndexRepository().createIndexes(conn.conn);
+		questInstance.getSemanticIndexRepository().createIndexes(conn.conn);
 	}
 
 	public void dropIndexes() throws Exception {
-		questInstance.getSamanticIndexRepository().dropIndexes(conn.conn);
+		questInstance.getSemanticIndexRepository().dropIndexes(conn.conn);
 	}
 
 	public boolean isIndexed() {
-		if (questInstance.getSamanticIndexRepository() == null)
+		if (questInstance.getSemanticIndexRepository() == null)
 			return false;
-		return questInstance.getSamanticIndexRepository().isIndexed(conn.conn);
+		return questInstance.getSemanticIndexRepository().isIndexed(conn.conn);
 	}
 
 	public void dropRepository() throws SQLException {
-		if (questInstance.getSamanticIndexRepository() == null)
+		if (questInstance.getSemanticIndexRepository() == null)
 			return;
-		questInstance.getSamanticIndexRepository().dropDBSchema(conn.conn);
+		questInstance.getSemanticIndexRepository().dropDBSchema(conn.conn);
 	}
 
 	/***
@@ -937,12 +937,12 @@ public class QuestStatement implements OBDAStatement {
 	 * @throws SQLException
 	 */
 	public void createDB() throws SQLException {
-		questInstance.getSamanticIndexRepository().createDBSchema(conn.conn, false);
-		questInstance.getSamanticIndexRepository().insertMetadata(conn.conn);
+		questInstance.getSemanticIndexRepository().createDBSchema(conn.conn, false);
+		questInstance.getSemanticIndexRepository().insertMetadata(conn.conn);
 	}
 
 	public void analyze() throws Exception {
-		questInstance.getSamanticIndexRepository().collectStatistics(conn.conn);
+		questInstance.getSemanticIndexRepository().collectStatistics(conn.conn);
 	}
 
 	/*

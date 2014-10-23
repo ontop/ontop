@@ -24,14 +24,10 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
-import it.unibz.krdb.obda.ontology.ClassDescription;
-import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertyFunctionalAxiom;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 
 import java.util.Collection;
@@ -40,9 +36,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class OntologyImpl implements Ontology {
 
@@ -61,18 +54,16 @@ public class OntologyImpl implements Ontology {
 	private Set<Axiom> originalassertions = null;
 
 	// Assertions indexed by right side predicate
-	private Map<Predicate, Set<SubDescriptionAxiom>> rightAssertionIndex = null;
+//	private Map<Predicate, Set<SubDescriptionAxiom>> rightAssertionIndex = null;
 
 	private Map<Predicate, Set<SubDescriptionAxiom>> rightNonExistentialIndex = null;
 
 	private Map<Predicate, Set<SubDescriptionAxiom>> rightExistentialIndex = null;
 
 	// Assertions indexed by left side predicate
-	private Map<Predicate, Set<SubDescriptionAxiom>> leftAssertionIndex = null;
+//	private Map<Predicate, Set<SubDescriptionAxiom>> leftAssertionIndex = null;
 
-	private Logger log = LoggerFactory.getLogger(this.getClass());
-
-	public boolean isSaturated = false;
+//	public boolean isSaturated = false;
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
@@ -119,16 +110,18 @@ public class OntologyImpl implements Ontology {
 		clone.originalassertions.addAll(originalassertions);
 		clone.concepts.addAll(concepts);
 		clone.roles.addAll(roles);
-		clone.isSaturated = isSaturated;
+//		clone.isSaturated = isSaturated;
 
 		if (assertions != null) {
 			clone.assertions = new HashSet<SubDescriptionAxiom>();
 			clone.assertions.addAll(assertions);
 		}
+/*		
 		if (rightAssertionIndex != null) {
 			clone.rightAssertionIndex = new HashMap<Predicate, Set<SubDescriptionAxiom>>();
 			clone.rightAssertionIndex.putAll(rightAssertionIndex);
 		}
+*/		
 		if (rightNonExistentialIndex != null) {
 			clone.rightNonExistentialIndex = new HashMap<Predicate, Set<SubDescriptionAxiom>>();
 			clone.rightNonExistentialIndex.putAll(rightNonExistentialIndex);
@@ -137,10 +130,12 @@ public class OntologyImpl implements Ontology {
 			clone.rightExistentialIndex = new HashMap<Predicate, Set<SubDescriptionAxiom>>();
 			clone.rightExistentialIndex.putAll(rightExistentialIndex);
 		}
+/*		
 		if (leftAssertionIndex != null) {
 			clone.leftAssertionIndex = new HashMap<Predicate, Set<SubDescriptionAxiom>>();
 			clone.leftAssertionIndex.putAll(leftAssertionIndex);
 		}
+*/		
 		return clone;
 	}
 
@@ -177,7 +172,7 @@ public class OntologyImpl implements Ontology {
 					+ referencedEntities.toString());
 			throw ex;
 		}
-		isSaturated = false;
+//		isSaturated = false;
 
 		if (assertion instanceof SubDescriptionAxiom) {
 			SubDescriptionAxiom axiom = (SubDescriptionAxiom) assertion;
@@ -235,7 +230,7 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void addAssertions(Collection<Axiom> ass) {
-		isSaturated = false;
+//		isSaturated = false;
 		for (Axiom axiom : ass) {
 			addAssertion(axiom);
 		}
@@ -248,7 +243,7 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void addConcepts(Collection<Predicate> cd) {
-		isSaturated = false;
+//		isSaturated = false;
 		for (Predicate p : cd) {
 			concepts.add(p);
 		}
@@ -256,13 +251,13 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void addRole(Predicate rd) {
-		isSaturated = false;
+//		isSaturated = false;
 		roles.add(rd);
 	}
 
 	@Override
 	public void addRoles(Collection<Predicate> rd) {
-		isSaturated = false;
+//		isSaturated = false;
 		roles.addAll(rd);
 	}
 
@@ -293,10 +288,11 @@ public class OntologyImpl implements Ontology {
 	 * This will return all the assertions whose right side concept description
 	 * refers to the predicate 'pred'
 	 */
+/*	
 	public Set<SubDescriptionAxiom> getByIncluding(Predicate pred) {
 		return rightAssertionIndex.get(pred);
 	}
-
+*/
 	/***
 	 * As before but it will only return assertions where the right side is an
 	 * existential role concept description
@@ -308,29 +304,30 @@ public class OntologyImpl implements Ontology {
 	public Set<SubDescriptionAxiom> getByIncludingNoExist(Predicate pred) {
 		return rightNonExistentialIndex.get(pred);
 	}
-
+/*
 	@Override
 	public Set<SubDescriptionAxiom> getByIncluded(Predicate pred) {
 		return leftAssertionIndex.get(pred);
 	}
-	
+*/
+	/*
 	@Override
 	public void saturate() {
 		if (isSaturated) {
 			return;
 		}
 //		log.debug("Given assertions: {}", originalassertions);
-		/*
-		 * Our strategy requires that for every aciom R ISA S, we also have the
-		 * axioms \exists R ISA \exist S and \exists R- ISA \exists S- this
-		 * allows us to keep the cycles to a minimum
-		 */
+		
+		// Our strategy requires that for every aciom R ISA S, we also have the
+		// axioms \exists R ISA \exist S and \exists R- ISA \exists S- this
+		// allows us to keep the cycles to a minimum
+		//
 		originalassertions.addAll(computeExistentials());
 		saturateAssertions();
 //		log.debug("Computed assertions: {}", this.originalassertions);
 		isSaturated = true;
 	}
-
+*/
 	/***
 	 * Saturates the set of assertions and creates the indexes for these based
 	 * on their predicates. It only takes into account positive inclusions. PIs
@@ -340,6 +337,7 @@ public class OntologyImpl implements Ontology {
 	 * 
 	 * For each pair of assertions C1 ISA C2, C2 ISA C3, we compute C1 ISA C3.
 	 */
+/*	
 	private void saturateAssertions() {
 		assertions = new HashSet<SubDescriptionAxiom>();
 		leftAssertionIndex = new HashMap<Predicate, Set<SubDescriptionAxiom>>();
@@ -347,10 +345,10 @@ public class OntologyImpl implements Ontology {
 		rightNonExistentialIndex = new HashMap<Predicate, Set<SubDescriptionAxiom>>();
 		rightExistentialIndex = new HashMap<Predicate, Set<SubDescriptionAxiom>>();
 
-		/*
-		 * Loading the initial assertions, filtering postive inlusions and
-		 * indexing
-		 */
+		
+		// Loading the initial assertions, filtering postive inlusions and
+		// indexing
+		
 		for (Axiom assertion : originalassertions) {
 			if (assertion instanceof SubDescriptionAxiom) {
 				SubDescriptionAxiom pi = (SubDescriptionAxiom) assertion;
@@ -359,7 +357,7 @@ public class OntologyImpl implements Ontology {
 			}
 		}
 
-		/* Saturating is-a hierachy loop */
+		// Saturating is-a hierachy loop 
 		boolean loop = true;
 		while (loop) {
 			loop = false;
@@ -398,20 +396,22 @@ public class OntologyImpl implements Ontology {
 			}
 		}
 	}
-
+*/
+/*	
 	private void indexAll(Collection<SubDescriptionAxiom> pis) {
 		for (SubDescriptionAxiom pi : pis) {
 			index(pi);
 		}
 	}
-
+*/
+/*
 	private void index(SubDescriptionAxiom pi) {
 		if (pi instanceof SubClassAxiomImpl) {
 			SubClassAxiomImpl cpi = (SubClassAxiomImpl) pi;
 			ClassDescription description1 = cpi.getSub();
 			ClassDescription description2 = cpi.getSuper();
 
-			/* Processing right side */
+			// Processing right side 
 			if (description2 instanceof ClassImpl) {
 				ClassImpl acd = (ClassImpl) description2;
 				Set<SubDescriptionAxiom> rightAssertion = getRight(acd.getPredicate());
@@ -432,7 +432,7 @@ public class OntologyImpl implements Ontology {
 				rightExistential.add(pi);
 			}
 
-			/* Processing left side */
+			// Processing left side 
 			if (description1 instanceof ClassImpl) {
 				ClassImpl acd = (ClassImpl) description1;
 				Set<SubDescriptionAxiom> leftAssertion = getLeft(acd.getPredicate());
@@ -451,7 +451,7 @@ public class OntologyImpl implements Ontology {
 			Property description1 = cpi.getSub();
 			Property description2 = cpi.getSuper();
 
-			/* Processing right side */
+			// Processing right side 
 			if (description2 instanceof PropertyImpl) {
 				PropertyImpl acd = (PropertyImpl) description2;
 				Set<SubDescriptionAxiom> rightAssertion = getRight(acd.getPredicate());
@@ -459,7 +459,7 @@ public class OntologyImpl implements Ontology {
 				Set<SubDescriptionAxiom> rightNonExistential = getRightNotExistential(acd.getPredicate());
 				rightNonExistential.add(pi);
 			}
-			/* Processing left side */
+			// Processing left side 
 			if (description1 instanceof PropertyImpl) {
 				PropertyImpl acd = (PropertyImpl) description1;
 				Set<SubDescriptionAxiom> leftAssertion = getLeft(acd.getPredicate());
@@ -469,7 +469,8 @@ public class OntologyImpl implements Ontology {
 
 		}
 	}
-
+*/
+/*	
 	private Set<SubDescriptionAxiom> getRight(Predicate pred) {
 		Set<SubDescriptionAxiom> assertions = rightAssertionIndex.get(pred);
 		if (assertions == null) {
@@ -487,7 +488,8 @@ public class OntologyImpl implements Ontology {
 		}
 		return assertions;
 	}
-
+*/
+/*	
 	private Set<SubDescriptionAxiom> getRightNotExistential(Predicate pred) {
 		Set<SubDescriptionAxiom> assertions = rightNonExistentialIndex.get(pred);
 		if (assertions == null) {
@@ -505,7 +507,7 @@ public class OntologyImpl implements Ontology {
 		}
 		return assertions;
 	}
-
+*/
 	/***
 	 * This method adds to the TBox a pair of axioms ER ISA ES and ER- ISA ES-
 	 * for each role inclusion R ISA S found in the ontology.
@@ -514,6 +516,7 @@ public class OntologyImpl implements Ontology {
 	 *         the ontology to account for the semantics of role inclusions
 	 *         w.r.t. their domains and ranges.
 	 */
+/*	
 	private Set<Axiom> computeExistentials() {
 		HashSet<Axiom> newassertion = new HashSet<Axiom>(1000);
 		for (Axiom assertion : originalassertions) {
@@ -535,7 +538,7 @@ public class OntologyImpl implements Ontology {
 		}
 		return newassertion;
 	}
-
+*/
 	@Override
 	public void addEntities(Set<Predicate> referencedEntities) {
 		for (Predicate pred : referencedEntities) {

@@ -70,7 +70,7 @@ public class DAGConstructor {
 			sigma.addAssertion(assertion);
 		}
 
-		sigma.saturate();
+		//sigma.saturate();
 		return getISADAG(sigma);
 	}
 

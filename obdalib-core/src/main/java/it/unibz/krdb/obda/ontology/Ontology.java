@@ -58,7 +58,7 @@ public interface Ontology extends Cloneable, Serializable {
 	 * This will retrun all the assertions whose right side concept description
 	 * refers to the predicate 'pred'
 	 */
-	public Set<SubDescriptionAxiom> getByIncluding(Predicate pred);
+//	public Set<SubDescriptionAxiom> getByIncluding(Predicate pred);
 
 	/***
 	 * As before but it will only return assetions where the right side is an
@@ -68,7 +68,7 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public Set<SubDescriptionAxiom> getByIncludingNoExist(Predicate pred);
 
-	public Set<SubDescriptionAxiom> getByIncluded(Predicate pred);
+//	public Set<SubDescriptionAxiom> getByIncluded(Predicate pred);
 
 	public String getUri();
 
@@ -77,7 +77,7 @@ public interface Ontology extends Cloneable, Serializable {
 	 * implied by this ontology are asserted in the ontology and accessible
 	 * through the methods of the ontology.
 	 */
-	public void saturate();
+//	public void saturate();
 
 	public Ontology clone();
 

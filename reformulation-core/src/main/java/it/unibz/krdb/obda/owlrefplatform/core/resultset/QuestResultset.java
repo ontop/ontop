@@ -83,7 +83,7 @@ public class QuestResultset implements TupleResultSet {
 		this.st = st;
 		this.isSemIndex = st.questInstance.isSemIdx();
 		if (isSemIndex) 
-			uriMap = st.questInstance.getSamanticIndexRepository().getUriMap();
+			uriMap = st.questInstance.getSemanticIndexRepository().getUriMap();
 		else
 			uriMap = null;
 		this.signature = signature;
