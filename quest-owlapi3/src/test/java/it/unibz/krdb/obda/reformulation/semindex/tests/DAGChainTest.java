@@ -46,7 +46,7 @@ public class DAGChainTest extends TestCase {
 	SemanticIndexHelper						helper				= new SemanticIndexHelper();
 
 	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
-	private static final OntologyFactory	descFactory			= new OntologyFactoryImpl();
+	private static final OntologyFactory	descFactory			= OntologyFactoryImpl.getInstance();
 
 	private static <T> int sizeOf(Set<Equivalences<T>> set) {
 		int size = 0;
@@ -98,8 +98,8 @@ public class DAGChainTest extends TestCase {
 		Predicate r = predicateFactory.getObjectPropertyPredicate("r");
 		Predicate c = predicateFactory.getClassPredicate("c");
 		OClass ac = descFactory.createClass(a);
-		PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
-		PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
+		PropertySomeRestriction er = descFactory.createPropertySomeRestriction(r, false);
+		PropertySomeRestriction ier = descFactory.createPropertySomeRestriction(r, true);
 		OClass cc = descFactory.createClass(c);
 
 		ontology.addConcept(ac.getPredicate());
@@ -161,8 +161,8 @@ public class DAGChainTest extends TestCase {
 		Predicate d = predicateFactory.getPredicate("d", 1);
 
 		OClass ac = descFactory.createClass(a);
-		PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
-		PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
+		PropertySomeRestriction er = descFactory.createPropertySomeRestriction(r, false);
+		PropertySomeRestriction ier = descFactory.createPropertySomeRestriction(r, true);
 		OClass cc = descFactory.createClass(c);
 		OClass bc = descFactory.createClass(b);
 		OClass dc = descFactory.createClass(d);

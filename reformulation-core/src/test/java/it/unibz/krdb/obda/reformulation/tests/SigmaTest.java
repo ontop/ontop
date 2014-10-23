@@ -39,7 +39,7 @@ import junit.framework.TestCase;
 public class SigmaTest extends TestCase {
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+    private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
     public void test_exists_simple() {
         Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
@@ -49,7 +49,7 @@ public class SigmaTest extends TestCase {
         Predicate r = predicateFactory.getPredicate("r", 2);
         OClass ac = descFactory.createClass(a);
         OClass cc = descFactory.createClass(c);
-        PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
+        PropertySomeRestriction er = descFactory.createPropertySomeRestriction(r, false);
         ontology.addConcept(ac.getPredicate());
         ontology.addConcept(cc.getPredicate());
         ontology.addRole(er.getPredicate());

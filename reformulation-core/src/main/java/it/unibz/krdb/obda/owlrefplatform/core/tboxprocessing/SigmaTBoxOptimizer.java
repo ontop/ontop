@@ -134,10 +134,8 @@ public class SigmaTBoxOptimizer {
 
 	private boolean check_directly_redundant_role(Property parent, Property child) {
 
-		PropertySomeRestriction existParentDesc = 
-				fac.getPropertySomeRestriction(parent.getPredicate(), parent.isInverse());
-		PropertySomeRestriction existChildDesc = 
-				fac.getPropertySomeRestriction(child.getPredicate(), child.isInverse());
+		PropertySomeRestriction existParentDesc = fac.createPropertySomeRestriction(parent);
+		PropertySomeRestriction existChildDesc = fac.createPropertySomeRestriction(child);
 
 		return check_directly_redundant(parent, child) && 
 				check_directly_redundant(existParentDesc, existChildDesc);

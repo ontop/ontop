@@ -265,8 +265,8 @@ public class DAGOperations {
 				Property prop = (Property) cycleheadNode.getDescription();
 
 				Property inverse = fac.createProperty(prop.getPredicate(), !prop.isInverse());
-				PropertySomeRestriction domain = fac.createPropertySomeRestriction(prop.getPredicate(), prop.isInverse());
-				PropertySomeRestriction range = fac.createPropertySomeRestriction(prop.getPredicate(), !prop.isInverse());
+				PropertySomeRestriction domain = fac.createPropertySomeRestriction(prop);
+				PropertySomeRestriction range = fac.createPropertySomeRestriction(inverse);
 
 				cycleheadinverseNode = dag.getNode(inverse);
 				cycleheaddomainNode = dag.getNode(domain);
@@ -302,8 +302,8 @@ public class DAGOperations {
 						Property prop = (Property) cycleheadNode.getDescription();
 
 						Property inverse = fac.createProperty(prop.getPredicate(), !prop.isInverse());
-						PropertySomeRestriction domain = fac.createPropertySomeRestriction(prop.getPredicate(), prop.isInverse());
-						PropertySomeRestriction range = fac.createPropertySomeRestriction(prop.getPredicate(), !prop.isInverse());
+						PropertySomeRestriction domain = fac.createPropertySomeRestriction(prop);
+						PropertySomeRestriction range = fac.createPropertySomeRestriction(inverse);
 
 						cycleheadinverseNode = dag.getNode(inverse);
 						cycleheaddomainNode = dag.getNode(domain);
@@ -345,7 +345,7 @@ public class DAGOperations {
 					Property equiprop = (Property) equivnode.getDescription();
 
 					DAGNode equivinverseNode = dag.getNode(fac.createProperty(equiprop.getPredicate(), !equiprop.isInverse()));
-					DAGNode equivDomainNode = dag.getNode(fac.createPropertySomeRestriction(equiprop.getPredicate(), equiprop.isInverse()));
+					DAGNode equivDomainNode = dag.getNode(fac.createPropertySomeRestriction(equiprop));
 					DAGNode equivRangeNode = dag.getNode(fac.createPropertySomeRestriction(equiprop.getPredicate(), !equiprop.isInverse()));
 
 					/*
@@ -425,7 +425,7 @@ public class DAGOperations {
 					
 
 					DAGNode equivinverseNode = dag.getNode(inverseequiprop);
-					DAGNode equivDomainNode = dag.getNode(fac.createPropertySomeRestriction(equiprop.getPredicate(), equiprop.isInverse()));
+					DAGNode equivDomainNode = dag.getNode(fac.createPropertySomeRestriction(equiprop));
 					DAGNode equivRangeNode = dag.getNode(fac.createPropertySomeRestriction(equiprop.getPredicate(), !equiprop.isInverse()));
 
 					if (!(equivinverseNode == null && equivDomainNode == null && equivRangeNode == null)) {

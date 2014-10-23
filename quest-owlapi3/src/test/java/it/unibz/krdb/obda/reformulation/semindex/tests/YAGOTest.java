@@ -49,7 +49,7 @@ public class YAGOTest {
     private static final Logger log = LoggerFactory.getLogger(YAGOTest.class);
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+    private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
    
 
     public static void main(String[] args) throws IOException, URISyntaxException {
@@ -89,7 +89,7 @@ public class YAGOTest {
                     tbox_count++;
                     Predicate ps = predicateFactory.getPredicate(subject, 2);
                     Predicate po = predicateFactory.getPredicate(object, 1);
-                    ClassDescription rs = descFactory.getPropertySomeRestriction(ps, true);
+                    ClassDescription rs = descFactory.createPropertySomeRestriction(ps, true);
                     ClassDescription co = descFactory.createClass(po);
                     onto.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(rs, co));
                 } 
@@ -97,7 +97,7 @@ public class YAGOTest {
                     tbox_count++;
                     Predicate ps = predicateFactory.getPredicate(subject, 2);
                     Predicate po = predicateFactory.getPredicate(object, 1);
-                    ClassDescription rs = descFactory.getPropertySomeRestriction(ps, false);
+                    ClassDescription rs = descFactory.createPropertySomeRestriction(ps, false);
                     ClassDescription co = descFactory.createClass(po);
                     onto.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(rs, co));
                 } 

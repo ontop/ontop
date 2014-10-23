@@ -287,7 +287,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					PropertySomeRestriction first = (PropertySomeRestriction)equivalenceSet.iterator().next();
 					Property prop = fac.createProperty(first.getPredicate(), first.isInverse());
 					Property propRep = propertyDAG.getVertex(prop).getRepresentative();
-					representative = fac.createPropertySomeRestriction(propRep.getPredicate(), propRep.isInverse());
+					representative = fac.createPropertySomeRestriction(propRep);
 				}
 				else
 					representative = namedRepresentative;

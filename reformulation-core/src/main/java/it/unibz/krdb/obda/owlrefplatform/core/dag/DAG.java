@@ -71,7 +71,7 @@ public class DAG implements Serializable {
 
 	private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
 
-	private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+	private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
 	// public final static String thingStr =
 	// "http://www.w3.org/2002/07/owl#Thing";
@@ -125,8 +125,8 @@ public class DAG implements Serializable {
 			DAGNode rolenodeinv = new DAGNode(roleInv);
 			roles.put(roleInv, rolenodeinv);
 
-			PropertySomeRestriction existsRole = descFactory.getPropertySomeRestriction(role.getPredicate(), role.isInverse());
-			PropertySomeRestriction existsRoleInv = descFactory.getPropertySomeRestriction(role.getPredicate(), !role.isInverse());
+			PropertySomeRestriction existsRole = descFactory.createPropertySomeRestriction(role);
+			PropertySomeRestriction existsRoleInv = descFactory.createPropertySomeRestriction(role.getPredicate(), !role.isInverse());
 			DAGNode existsNode = new DAGNode(existsRole);
 			DAGNode existsNodeInv = new DAGNode(existsRoleInv);
 			classes.put(existsRole, existsNode);
@@ -227,9 +227,9 @@ public class DAG implements Serializable {
 		}
 		addParent(childNode, parentNode);
 
-		ClassDescription existsParent = descFactory.getPropertySomeRestriction(parent.getPredicate(), parent.isInverse());
+		ClassDescription existsParent = descFactory.createPropertySomeRestriction(parent);
 
-		ClassDescription existChild = descFactory.getPropertySomeRestriction(child.getPredicate(), child.isInverse());
+		ClassDescription existChild = descFactory.createPropertySomeRestriction(child);
 
 		addClassEdge(existsParent, existChild);
 		// addClassEdge(thingConcept, existsParent);

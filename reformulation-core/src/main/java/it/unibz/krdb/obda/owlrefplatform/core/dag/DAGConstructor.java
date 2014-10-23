@@ -45,7 +45,7 @@ import java.util.Map;
 public class DAGConstructor {
 
 	private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-	private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+	private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
 	public static DAG getISADAG(Ontology ontology) {
 		return new DAG(ontology);

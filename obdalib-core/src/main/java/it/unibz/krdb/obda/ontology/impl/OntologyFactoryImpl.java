@@ -50,6 +50,10 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
+	private OntologyFactoryImpl() {
+		// NO-OP to make the constructor private
+	}
+	
 	public static OntologyFactory getInstance() {
 		return instance;
 	}
@@ -99,13 +103,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new DataPropertyAssertionImpl(attribute, o1, o2);
 	}
 
-	public PropertySomeRestriction getPropertySomeRestriction(Predicate p, boolean inverse) {
-		if (p.getArity() != 2) {
-			throw new IllegalArgumentException("Roles must have arity = 2");
-		}
-		return new PropertySomeRestrictionImpl(p, inverse);
-	}
-
+	@Override
 	public OClass createClass(Predicate p) {
 		if (p.getArity() != 1) {
 			throw new IllegalArgumentException("Concepts must have arity = 1");
@@ -113,10 +111,12 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new ClassImpl(p);
 	}
 
+	@Override
 	public Property createProperty(Predicate p, boolean inverse) {
 		return new PropertyImpl(p, inverse);
 	}
 
+	@Override
 	public Property createProperty(Predicate p) {
 		return new PropertyImpl(p, false);
 	}
@@ -175,6 +175,11 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	public DisjointObjectPropertyAxiom createDisjointObjectPropertyAxiom(
 			Predicate p1, Predicate p2) {
 			return new DisjointObjectPropertyAxiomImpl(p1, p2);
+	}
+
+	@Override
+	public PropertySomeRestriction createPropertySomeRestriction(Property prop) {
+		return createPropertySomeRestriction(prop.getPredicate(), prop.isInverse());
 	}
 
 }
