@@ -68,15 +68,22 @@ public class OBDAModelImpl implements OBDAModel {
         this.dataSourceIndex = indexDataSources(this.dataSources);
     }
 
+    /**
+     * No mapping should be duplicate among all the data sources.
+     */
     private static void checkDuplicates(Map<URI, ImmutableList<OBDAMappingAxiom>> mappings)
             throws DuplicateMappingException {
+
+        Set<OBDAMappingAxiom> sourceMappingSet = new HashSet<>();
+
         for (URI sourceURI : mappings.keySet()) {
-            List<OBDAMappingAxiom> sourceMappings = mappings.get(sourceURI);
+            List<OBDAMappingAxiom> currentSourceMappings = mappings.get(sourceURI);
 
             // Mutable (may be reused)
-            Set<OBDAMappingAxiom> sourceMappingSet = new HashSet<>(sourceMappings);
+            int previousMappingCount = sourceMappingSet.size();
+            sourceMappingSet.addAll(currentSourceMappings);
 
-            int duplicateCount = sourceMappings.size() - sourceMappingSet.size();
+            int duplicateCount = currentSourceMappings.size() + previousMappingCount - sourceMappingSet.size();
 
             /**
              * If there are some mappings, finds them
@@ -84,7 +91,7 @@ public class OBDAModelImpl implements OBDAModel {
             if (duplicateCount > 0) {
                 Set<String> duplicateIds = new HashSet<>();
                 int remaining = duplicateCount;
-                for (OBDAMappingAxiom mapping : sourceMappings) {
+                for (OBDAMappingAxiom mapping : currentSourceMappings) {
                     if (sourceMappingSet.contains(mapping)) {
                         sourceMappingSet.remove(mapping);
                     }
@@ -111,6 +118,7 @@ public class OBDAModelImpl implements OBDAModel {
             for (OBDAMappingAxiom axiom : axioms) {
                 String id = axiom.getId();
                 if (mappingIndexById.containsKey(id)) {
+                    // Should have already been detected by checkDuplicates.
                     throw new IllegalArgumentException(String.format("Not unique mapping ID found : %s", id));
                 }
                 mappingIndexById.put(id, axiom);

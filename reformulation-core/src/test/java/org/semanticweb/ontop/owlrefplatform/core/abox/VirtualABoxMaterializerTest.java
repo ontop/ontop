@@ -30,6 +30,7 @@ import java.util.*;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.injection.OBDAFactoryWithException;
@@ -265,7 +266,9 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
             conn.close();
 
-        } catch(Exception e) {
+        } catch (DuplicateMappingException e) {
+        }
+        catch(Exception e) {
             assertEquals("Cannot materialize with multiple data sources!", e.getMessage());
         }
 
