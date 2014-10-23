@@ -119,8 +119,8 @@ public class YAGOTest {
                     tbox_count++;
                     Predicate ps = predicateFactory.getPredicate(subject, 1);
                     Predicate po = predicateFactory.getPredicate(object, 1);
-                    Property rs = descFactory.createProperty(ps);
-                    Property ro = descFactory.createProperty(po);
+                    Property rs = descFactory.createProperty(ps, false);
+                    Property ro = descFactory.createProperty(po, false);
                     onto.addAssertion(OntologyFactoryImpl.getInstance().createSubPropertyAxiom(rs, ro));
                 } else {
 //                    log.debug(predicate);

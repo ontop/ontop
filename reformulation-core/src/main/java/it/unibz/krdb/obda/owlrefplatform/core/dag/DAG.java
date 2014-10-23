@@ -116,7 +116,7 @@ public class DAG implements Serializable {
 		 * For each role we add nodes for its inverse, its domain and its range
 		 */
 		for (Predicate rolep : ontology.getRoles()) {
-			Property role = descFactory.createProperty(rolep);
+			Property role = descFactory.createProperty(rolep, false);
 			DAGNode rolenode = new DAGNode(role);
 
 			roles.put(role, rolenode);

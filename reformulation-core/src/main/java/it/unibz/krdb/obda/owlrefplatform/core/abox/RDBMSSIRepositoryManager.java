@@ -635,7 +635,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					 */
 
 					Predicate propPred = dfac.getObjectPropertyPredicate(prop);
-					Property propDesc = ofac.createProperty(propPred);
+					Property propDesc = ofac.createProperty(propPred, false);
 
 					/*if (!reasonerDag.isCanonicalRepresentative(propDesc))*/ {
 						Property desc = reasonerDag.getProperties().getVertex(propDesc).getRepresentative();
@@ -1106,7 +1106,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	private boolean isInverse(Predicate role) {
-		Property property = ofac.createProperty(role);
+		Property property = ofac.createProperty(role, false);
 		Property desc = reasonerDag.getProperties().getVertex(property).getRepresentative();
 		if (!property.equals(desc)) {
 			if (desc.isInverse()) 

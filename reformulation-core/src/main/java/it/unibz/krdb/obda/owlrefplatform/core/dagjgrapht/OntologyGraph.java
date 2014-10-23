@@ -55,7 +55,7 @@ public class OntologyGraph {
 							= new  DefaultDirectedGraph<Property,DefaultEdge>(DefaultEdge.class);
 				
 		for (Predicate rolep : ontology.getRoles()) {
-			Property role = fac.createProperty(rolep);
+			Property role = fac.createProperty(rolep, false);
 			graph.addVertex(role);
 			Property roleInv = fac.createProperty(role.getPredicate(), !role.isInverse());
 			graph.addVertex(roleInv);

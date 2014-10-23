@@ -46,12 +46,12 @@ import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 
 public class OntologyFactoryImpl implements OntologyFactory {
 
-	private static OntologyFactoryImpl instance = new OntologyFactoryImpl();
+	private static final OntologyFactoryImpl instance = new OntologyFactoryImpl();
 
-	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
 	private OntologyFactoryImpl() {
-		// NO-OP to make the constructor private
+		// NO-OP to make the default constructor private
 	}
 	
 	public static OntologyFactory getInstance() {
@@ -85,7 +85,8 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 	@Override
 	public PropertySomeRestriction createPropertySomeRestriction(Predicate p, boolean isInverse) {
-		return new PropertySomeRestrictionImpl(p, isInverse);
+		Property prop = createProperty(p, isInverse);
+		return new PropertySomeRestrictionImpl(prop);
 	}
 
 	@Override
@@ -117,11 +118,6 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public Property createProperty(Predicate p) {
-		return new PropertyImpl(p, false);
-	}
-
-	@Override
 	public OClass createClass(String c) {
 		Predicate classp = ofac.getClassPredicate(c);
 		return createClass(classp);
@@ -134,15 +130,9 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public Property createObjectProperty(String uri) {
-		Predicate prop = ofac.getObjectPropertyPredicate(uri);
-		return createProperty(prop);
-	}
-
-	@Override
 	public Property createDataProperty(String p) {
 		Predicate prop = ofac.getDataPropertyPredicate(p);
-		return createProperty(prop);
+		return createProperty(prop, false);
 	}
 
 
@@ -178,8 +168,8 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public PropertySomeRestriction createPropertySomeRestriction(Property prop) {
-		return createPropertySomeRestriction(prop.getPredicate(), prop.isInverse());
+	public PropertySomeRestriction createPropertySomeRestriction(Property role) {
+		return new PropertySomeRestrictionImpl(role);
 	}
 
 }

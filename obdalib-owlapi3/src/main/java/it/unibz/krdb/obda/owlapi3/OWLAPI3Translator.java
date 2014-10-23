@@ -518,8 +518,8 @@ public class OWLAPI3Translator {
 					Iterator<OWLObjectProperty> iter = disjointProps.iterator();
 					if (!iter.hasNext())
 						throw new TranslationException();
-					Property p1 = ofac.createObjectProperty(iter.next().toStringID());
-					Property p2 = ofac.createObjectProperty(iter.next().toStringID());
+					Property p1 = ofac.createObjectProperty(iter.next().toStringID(), false);
+					Property p2 = ofac.createObjectProperty(iter.next().toStringID(), false);
 					DisjointObjectPropertyAxiom disj = ofac.createDisjointObjectPropertyAxiom(p1.getPredicate(), p2.getPredicate());
 					
 					dl_onto.addAssertion(disj);
@@ -613,7 +613,7 @@ public class OWLAPI3Translator {
 		Property role = null;
 
 		if (rolExpression instanceof OWLObjectProperty) {
-			role = ofac.createObjectProperty((rolExpression.asOWLObjectProperty().getIRI().toString()));
+			role = ofac.createObjectProperty(rolExpression.asOWLObjectProperty().getIRI().toString(), false);
 		} else if (rolExpression instanceof OWLObjectInverseOf) {
 			if (profile.order() < LanguageProfile.OWL2QL.order())
 				throw new TranslationException();
@@ -744,7 +744,7 @@ public class OWLAPI3Translator {
 			Property role = getRoleExpression(owlProperty);
 			ClassDescription filler = getSubclassExpression(owlFiller);
 
-			Property auxRole = ofac.createProperty(dfac.getObjectPropertyPredicate((OntologyImpl.AUXROLEURI + auxRoleCounter)));
+			Property auxRole = ofac.createProperty(dfac.getObjectPropertyPredicate((OntologyImpl.AUXROLEURI + auxRoleCounter)), false);
 			auxRoleCounter += 1;
 
 			auxclass = ofac.createPropertySomeRestriction(auxRole.getPredicate(), role.isInverse());
@@ -778,7 +778,7 @@ public class OWLAPI3Translator {
 			OWLDataRange owlFiller = someexp.getFiller();		
 			BasicClassDescription filler = getDataTypeExpression(owlFiller);
 
-			Property auxRole = ofac.createProperty(dfac.getObjectPropertyPredicate((OntologyImpl.AUXROLEURI + auxRoleCounter)));
+			Property auxRole = ofac.createProperty(dfac.getObjectPropertyPredicate((OntologyImpl.AUXROLEURI + auxRoleCounter)), false);
 			auxRoleCounter += 1;
 
 			auxclass = ofac.createPropertySomeRestriction(auxRole.getPredicate(), role.isInverse());

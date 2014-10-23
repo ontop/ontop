@@ -33,11 +33,7 @@ public interface OntologyFactory {
 
 	public Property createProperty(Predicate p, boolean inverse);
 
-	public Property createProperty(Predicate p);
-	
 	public Property createObjectProperty(String uri, boolean inverse);
-	
-	public Property createObjectProperty(String uri);
 	
 	public Property createDataProperty(String uri);
 	
@@ -54,7 +50,7 @@ public interface OntologyFactory {
 	@Deprecated
 	public PropertySomeRestriction createPropertySomeRestriction(Predicate p, boolean isInverse);
 
-	public PropertySomeRestriction createPropertySomeRestriction(Property prop);
+	public PropertySomeRestriction createPropertySomeRestriction(Property role);
 	
 	public PropertyFunctionalAxiom createPropertyFunctionalAxiom(Property role);
 	
