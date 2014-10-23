@@ -55,6 +55,7 @@ import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlapi3.OBDAModelSynchronizer;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.utils.OBDAProgessMonitor;
 import org.semanticweb.ontop.sesame.SesameMaterializer;
@@ -83,7 +84,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 	private static final long serialVersionUID = -1211395039869926309L;
 
 	private OWLEditorKit editorKit = null;
-	private SQLOBDAModel obdaModel = null;
+	private MutableOBDAModel obdaModel = null;
 	private OWLWorkspace workspace;	
 	private OWLModelManager modelManager;
 	
@@ -198,7 +199,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 				OWLOntology ontology = modelManager.getActiveOntology();
 				OWLOntologyManager manager = modelManager
 						.getOWLOntologyManager();
-				OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
+				OBDAModelSynchronizer.declarePredicates(ontology, obdaModel.getCurrentImmutableOBDAModel());
 				Ontology onto = new OWLAPI3Translator().translate(ontology);
 				
 				final long startTime = System.currentTimeMillis();
@@ -206,7 +207,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 					// we are going to use SESAME MATERIALIZER
 				
 					SesameMaterializer materializer = new SesameMaterializer(
-							obdaModel, onto);
+							obdaModel.getCurrentImmutableOBDAModel(), onto);
 					Iterator<Statement> iterator = materializer.getIterator();
 					RDFWriter writer = null;
 
@@ -234,7 +235,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 				else {
 					// owlxml, OWL materializer
 					OWLAPI3Materializer materializer = new OWLAPI3Materializer(
-							obdaModel, onto);
+							obdaModel.getCurrentImmutableOBDAModel(), onto);
 					Iterator<OWLIndividualAxiom> iterator = materializer.getIterator();
 					while (iterator.hasNext())
 						manager.addAxiom(ontology, iterator.next());
@@ -285,7 +286,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		if (response == JOptionPane.YES_OPTION) {			
 			try {
 			
-				OWLAPI3Materializer individuals = new OWLAPI3Materializer(obdaModel);
+				OWLAPI3Materializer individuals = new OWLAPI3Materializer(obdaModel.getCurrentImmutableOBDAModel());
 				Container container = workspace.getRootPane().getParent();
 				final MaterializeAction action = new MaterializeAction(onto, ontoManager, individuals, container);
 				

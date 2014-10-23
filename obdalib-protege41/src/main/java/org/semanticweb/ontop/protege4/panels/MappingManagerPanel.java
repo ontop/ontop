@@ -48,6 +48,7 @@ import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
+import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
 import org.semanticweb.ontop.protege4.dialogs.MappingValidationDialog;
 import org.semanticweb.ontop.protege4.gui.IconLoader;
 import org.semanticweb.ontop.protege4.gui.treemodels.FilteredModel;
@@ -72,9 +73,9 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 
 	private TargetQueryVocabularyValidator validatortrg;
 
-	private SQLOBDAModel mapc;
+	private MutableOBDAModel mapc;
 
-	private SQLOBDAModel apic;
+	private MutableOBDAModel apic;
 
 	private OBDADataSource selectedSource;
 
@@ -94,7 +95,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 	 * @param preference
 	 *            The preference object.
 	 */
-	public MappingManagerPanel(SQLOBDAModel apic, TargetQueryVocabularyValidator validator) {
+	public MappingManagerPanel(MutableOBDAModel apic, TargetQueryVocabularyValidator validator) {
 
 		validatortrg = validator;
 		
@@ -186,7 +187,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		}
 	}
 
-	public void setOBDAModel(SQLOBDAModel omodel) {
+	public void setOBDAModel(MutableOBDAModel omodel) {
 		
 		this.apic = omodel;
 		this.mapc = apic;
@@ -664,7 +665,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		if (confirm == JOptionPane.NO_OPTION || confirm == JOptionPane.CANCEL_OPTION || confirm == JOptionPane.CLOSED_OPTION) {
 			return;
 		}
-		SQLOBDAModel controller = mapc;
+		MutableOBDAModel controller = mapc;
 		URI current_srcuri = selectedSource.getSourceID();
 
 		for (int i = 0; i < currentSelection.length; i++) {
@@ -719,7 +720,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		// The manager panel can handle multiple deletions.
 		Object[] values = mappingList.getSelectedValues();
 
-		SQLOBDAModel controller = mapc;
+		MutableOBDAModel controller = mapc;
 		URI srcuri = selectedSource.getSourceID();
 
 		for (int i = 0; i < values.length; i++) {

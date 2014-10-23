@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.io.AbstractPrefixManager;
 import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 
@@ -56,8 +57,8 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 	}
 
 	@Override
-	public Map<String, String> getPrefixMap() {
-		return owlmapper.getPrefixName2PrefixMap();
+	public ImmutableMap<String, String> getPrefixMap() {
+		return ImmutableMap.copyOf(owlmapper.getPrefixName2PrefixMap());
 	}
 
 	@Override
@@ -70,12 +71,10 @@ public class PrefixManagerWrapper extends AbstractPrefixManager {
 		return owlmapper.containsPrefixMapping(prefix);
 	}
 
-	@Override
 	public void addPrefix(String name, String uri) {
 		owlmapper.setPrefix(name, getProperPrefixURI(uri));
 	}
 
-	@Override
 	public void clear() {
 		owlmapper.clearPrefixes();
 	}

@@ -53,6 +53,7 @@ import javax.swing.table.TableColumn;
 
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
 import org.semanticweb.ontop.protege4.gui.IconLoader;
 import org.semanticweb.ontop.protege4.gui.MapItem;
 import org.semanticweb.ontop.protege4.gui.PredicateItem;
@@ -62,7 +63,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 
 	private static final long serialVersionUID = 1L;
 
-	private SQLOBDAModel obdaModel;
+	private MutableOBDAModel obdaModel;
 	private PrefixManager prefixManager;
 
 	private boolean isPredicatePropertyValid = false;
@@ -86,7 +87,7 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
 	private static Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
 	private static Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
 	
-	public PropertyMappingPanel(SQLOBDAModel obdaModel) {
+	public PropertyMappingPanel(MutableOBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
 		prefixManager = obdaModel.getPrefixManager();
 		initComponents();

@@ -46,6 +46,7 @@ import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAQuery;
+import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
 import org.semanticweb.ontop.protege4.gui.IconLoader;
 import org.semanticweb.ontop.renderer.SourceQueryRenderer;
 import org.semanticweb.ontop.renderer.TargetQueryRenderer;
@@ -103,7 +104,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer {
 	private QueryPainter painter;
 	private SQLQueryPainter sqlpainter;
 
-	public OBDAMappingListRenderer(SQLOBDAModel obdaModel, TargetQueryVocabularyValidator validator) {
+	public OBDAMappingListRenderer(MutableOBDAModel obdaModel, TargetQueryVocabularyValidator validator) {
 
 		prefixManager = obdaModel.getPrefixManager();
 		

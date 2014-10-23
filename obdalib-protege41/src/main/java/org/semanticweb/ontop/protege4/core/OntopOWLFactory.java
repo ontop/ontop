@@ -2,12 +2,18 @@ package org.semanticweb.ontop.protege4.core;
 
 import javax.swing.JOptionPane;
 
+import org.semanticweb.ontop.exception.DuplicateMappingException;
+import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.io.InvalidDataSourceException;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 
+import java.io.File;
+import java.io.IOException;
 
 
 /**
@@ -18,6 +24,11 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
  *
  */
 public class OntopOWLFactory extends QuestOWLFactory {
+
+    public OntopOWLFactory(File mappingFile, QuestPreferences preferences)
+            throws IOException, InvalidMappingException, InvalidDataSourceException, DuplicateMappingException {
+        super(mappingFile, preferences);
+    }
 
 	
 	private void handleError(Exception e){

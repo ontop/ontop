@@ -41,6 +41,7 @@ import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.OBDAModelListener;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
+import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
 import org.semanticweb.ontop.protege4.gui.IconLoader;
 import org.semanticweb.ontop.protege4.utils.CustomTraversalPolicy;
 import org.semanticweb.ontop.protege4.utils.DatasourceSelectorListener;
@@ -53,7 +54,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 
 	private OBDADataSource selectedDataSource;
 
-	private SQLOBDAModel obdaModel;
+	private MutableOBDAModel obdaModel;
 
 	private DatasourceSelector selector;
 
@@ -64,7 +65,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 	/**
 	 * Creates new form DatasourceParameterEditorPanel
 	 */
-	public DatasourceParameterEditorPanel(SQLOBDAModel model) {
+	public DatasourceParameterEditorPanel(MutableOBDAModel model) {
 
 		timer = new Timer(200, new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -143,7 +144,7 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		}
 	}
 
-	public void setDatasourcesController(SQLOBDAModel model) {
+	public void setDatasourcesController(MutableOBDAModel model) {
 		obdaModel = model;
 		addDataSourceSelector();
 		resetTextFields();

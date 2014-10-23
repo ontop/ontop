@@ -45,9 +45,10 @@ import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.parser.TargetQueryParserException;
 import org.semanticweb.ontop.parser.TurtleOBDASyntaxParser;
+import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
 
 public class QueryPainter {
-	private final SQLOBDAModel apic;
+	private final MutableOBDAModel apic;
 
 	private SimpleAttributeSet black;
 	private SimpleAttributeSet brackets;

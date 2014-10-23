@@ -20,9 +20,15 @@ package org.semanticweb.ontop.protege4.core;
  * #L%
  */
 
+import org.semanticweb.ontop.exception.DuplicateMappingException;
+import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.io.InvalidDataSourceException;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
@@ -31,7 +37,11 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeOWLReasonerInfo {
 
-	OntopOWLFactory factory = new OntopOWLFactory();
+    private final OntopOWLFactory factory;
+
+    public ProtegeOBDAOWLReformulationPlatformFactory(File mappingFile, QuestPreferences preferences) throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
+        this.factory = new OntopOWLFactory(mappingFile, preferences);
+    }
 
 	@Override
 	public BufferingMode getRecommendedBuffering() {
@@ -41,14 +51,6 @@ public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeO
 	@Override
 	public OWLReasonerFactory getReasonerFactory() {
 		return factory;
-	}
-
-	public void setPreferences(Properties preferences) {
-		factory.setPreferenceHolder(preferences);
-	}
-
-	public void setOBDAModel(SQLOBDAModel model) {
-		factory.setOBDAController(model);
 	}
 
 	/**
