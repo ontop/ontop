@@ -848,7 +848,7 @@ public class QuestImpl implements Serializable, Quest {
 			 * Expand the meta mapping 
 			 */
 			MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
-			metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
+			unfoldingOBDAModel = metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
 			
 
 			List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(obdaSource.getSourceID());
