@@ -25,7 +25,6 @@ import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeClassRestriction;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 
@@ -74,9 +73,6 @@ public abstract class AbstractSubDescriptionAxiom implements SubDescriptionAxiom
 			preds.add(((OClass) desc).getPredicate());
 		} else if (desc instanceof PropertySomeRestriction) {
 			preds.add(((PropertySomeRestriction) desc).getPredicate());
-		} else if (desc instanceof PropertySomeClassRestriction) {
-			preds.add(((PropertySomeClassRestriction) desc).getPredicate());
-			preds.add(((PropertySomeClassRestriction) desc).getFiller().getPredicate());
 		} else if (desc instanceof DataType) {
 			preds.add(((DataType) desc).getPredicate());
 		} else {

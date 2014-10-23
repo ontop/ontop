@@ -138,19 +138,19 @@ public class OntologyImpl implements Ontology {
 */		
 		return clone;
 	}
-
+/*
 	@Override
 	public boolean referencesPredicate(Predicate pred) {
 		return concepts.contains(pred) || roles.contains(pred);
 	}
+*/
 
-	@Override
-	public boolean referencesPredicates(Collection<Predicate> preds) {
+//	@Override
+	private boolean referencesPredicates(Collection<Predicate> preds) {
 		for (Predicate pred : preds) {
-			/*
-			 * Make sure we never validate against auxiliary roles introduced by
-			 * the translation of the OWL ontology
-			 */
+			
+			// Make sure we never validate against auxiliary roles introduced by
+			// the translation of the OWL ontology
 			if (preds.toString().contains(AUXROLEURI)) {
 				continue;
 			}

@@ -50,9 +50,9 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public Set<Axiom> getAssertions();
 
-	public boolean referencesPredicate(Predicate pred);
+//	public boolean referencesPredicate(Predicate pred);
 
-	public boolean referencesPredicates(Collection<Predicate> preds);
+//	public boolean referencesPredicates(Collection<Predicate> preds);
 
 	/***
 	 * This will retrun all the assertions whose right side concept description

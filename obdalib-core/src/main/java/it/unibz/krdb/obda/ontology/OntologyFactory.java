@@ -55,9 +55,7 @@ public interface OntologyFactory {
 
 	public PropertySomeRestriction createPropertySomeRestriction(Predicate p, boolean isInverse);
 
-	public PropertySomeClassRestriction createPropertySomeClassRestriction(Predicate p, boolean isInverse, OClass filler);
-
-	public PropertySomeDataTypeRestriction createPropertySomeDataTypeRestriction(Predicate p, boolean isInverse, DataType filler);
+//	public PropertySomeDataTypeRestriction createPropertySomeDataTypeRestriction(Predicate p, boolean isInverse, DataType filler);
 	
 	public PropertyFunctionalAxiom createPropertyFunctionalAxiom(Property role);
 	
