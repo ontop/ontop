@@ -88,13 +88,13 @@ public class QueryPainter {
 	private List<ValidatorListener> validatorListeners = new LinkedList<QueryPainter.ValidatorListener>();
 	private TurtleOBDASyntaxParser textParser;
 
-	public QueryPainter(SQLOBDAModel apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
+	public QueryPainter(MutableOBDAModel apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
 		this.apic = apic;
 		this.parent = parent;
 		this.validator = validator;
 		this.doc = parent.getStyledDocument();
 		this.parent = parent;
-		this.textParser = new TurtleOBDASyntaxParser(apic.getPrefixManager());
+		this.textParser = new TurtleOBDASyntaxParser(apic.getPrefixManager().getPrefixMap());
 
 		prepareStyles();
 		prepareTextPane();

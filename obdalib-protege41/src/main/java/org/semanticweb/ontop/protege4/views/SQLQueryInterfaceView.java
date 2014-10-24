@@ -37,6 +37,7 @@ import javax.swing.border.TitledBorder;
 //import org.apache.log4j.Logger;
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
+import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.core.OBDAModelManagerListener;
 import org.semanticweb.ontop.protege4.panels.DatasourceSelector;
@@ -65,7 +66,7 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 		apic = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		apic.addListener(this);
 
-		SQLOBDAModel dsController = apic.getActiveOBDAModel();
+		MutableOBDAModel dsController = apic.getActiveOBDAModel();
 
 		SQLQueryPanel queryPanel = new SQLQueryPanel();
 		datasourceSelector = new DatasourceSelector(dsController);

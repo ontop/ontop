@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.model;
+package org.semanticweb.ontop.protege4.core;
 
 /*
  * #%L
@@ -19,6 +19,8 @@ package org.semanticweb.ontop.model;
  * limitations under the License.
  * #L%
  */
+
+import org.semanticweb.ontop.model.OBDAMappingAxiom;
 
 import java.io.Serializable;
 import java.net.URI;

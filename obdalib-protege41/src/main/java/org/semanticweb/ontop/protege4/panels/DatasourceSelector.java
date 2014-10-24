@@ -34,7 +34,7 @@ import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
 import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAModelListener;
+import org.semanticweb.ontop.protege4.core.OBDAModelListener;
 import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
 import org.semanticweb.ontop.protege4.utils.DatasourceSelectorListener;
 

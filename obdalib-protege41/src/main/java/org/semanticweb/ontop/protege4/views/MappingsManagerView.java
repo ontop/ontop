@@ -40,6 +40,7 @@ import org.protege.editor.owl.ui.view.Findable;
 import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.owlapi3.TargetQueryValidator;
+import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.core.OBDAModelManagerListener;
 import org.semanticweb.ontop.protege4.panels.DatasourceSelector;
@@ -70,9 +71,9 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 		controller = (OBDAModelManager) editor.get(OBDAModelImpl.class.getName());
 		controller.addListener(this);
 
-		SQLOBDAModel obdaModel = controller.getActiveOBDAModel();
+		MutableOBDAModel obdaModel = controller.getActiveOBDAModel();
 		
-		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel);
+		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getCurrentImmutableOBDAModel());
 		
 		// Init the Mapping Manager panel.
 		mappingPanel = new MappingManagerPanel(obdaModel, validator);
@@ -136,8 +137,8 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 
 	@Override
 	public void activeOntologyChanged() {
-		SQLOBDAModel obdaModel = controller.getActiveOBDAModel();
-		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel);
+		MutableOBDAModel obdaModel = controller.getActiveOBDAModel();
+		TargetQueryVocabularyValidator validator = new TargetQueryValidator(obdaModel.getCurrentImmutableOBDAModel());
 
 		mappingPanel.setOBDAModel(obdaModel);
 		mappingPanel.setTargetQueryValidator(validator);

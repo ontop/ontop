@@ -53,6 +53,8 @@ import org.slf4j.LoggerFactory;
 /***
  * TODO: update comments
  *
+ * Mutable (OWLAPI design and usage in Protege).
+ *
  * Implementation of an OWLReasonerFactory that can create instances of Quest.
  * Note, to create an instance of Quest first you must call the method
  * {@link #setPreferenceHolder(Properties)} with your parameters see Quest.java
@@ -66,9 +68,10 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestOWLFactory implements OWLReasonerFactory {
 
-	private final OBDAModel obdaModel;
-	private final Properties preferences;
-    private final QuestComponentFactory componentFactory;
+	private OBDAModel obdaModel;
+	private Properties preferences;
+    private QuestComponentFactory componentFactory;
+    private File mappingFile;
 
     /**
 	 * The user can supply information about keys that are not in the
@@ -91,7 +94,13 @@ public class QuestOWLFactory implements OWLReasonerFactory {
      */
     public QuestOWLFactory(File mappingFile, QuestPreferences preferences)
             throws IOException, InvalidMappingException, InvalidDataSourceException, DuplicateMappingException {
+        init(mappingFile, preferences);
+    }
 
+    /**
+     * This method is isolated from the constructor because it can
+     */
+    private void init(File mappingFile, QuestPreferences preferences) {
         Injector injector = Guice.createInjector(new OBDACoreModule(preferences), new QuestComponentModule(preferences));
         this.componentFactory = injector.getInstance(QuestComponentFactory.class);
 

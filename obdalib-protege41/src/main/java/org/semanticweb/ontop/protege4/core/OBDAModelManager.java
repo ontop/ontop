@@ -21,6 +21,7 @@ package org.semanticweb.ontop.protege4.core;
  */
 
 
+import org.protege.editor.owl.model.inference.OWLReasonerManager;
 import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.QueryIOManager;
@@ -61,8 +62,6 @@ import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAMappingListener;
-import org.semanticweb.ontop.model.OBDAModelListener;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
@@ -446,7 +445,9 @@ public class OBDAModelManager implements Disposable {
 				}
 				activeOBDAModel.addPrefix(PrefixManager.DEFAULT_PREFIX, defaultPrefix);
 
-				ProtegeOWLReasonerInfo factory = owlEditorKit.getOWLModelManager().getOWLReasonerManager().getCurrentReasonerFactory();
+                OWLReasonerManager reasonerManager = owlEditorKit.getOWLModelManager().getOWLReasonerManager();
+                //TODO: see how to change the Reasoner factory
+				ProtegeOWLReasonerInfo factory = reasonerManager.getCurrentReasonerFactory();
 				if (factory instanceof ProtegeOBDAOWLReformulationPlatformFactory) {
 					ProtegeOBDAOWLReformulationPlatformFactory questfactory = (ProtegeOBDAOWLReformulationPlatformFactory) factory;
 					ProtegeReformulationPlatformPreferences reasonerPreference = (ProtegeReformulationPlatformPreferences) owlEditorKit.get(QuestPreferences.class.getName());

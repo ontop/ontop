@@ -9,7 +9,7 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.protege4.panels.DatasourceSelector;
 
 import java.net.URI;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -63,8 +63,8 @@ public class MutableOBDAModel {
                 newMappings, prefixManager);
     }
 
-    public Set<OBDADataSource> getSources() {
-        return obdaModel.getSources();
+    public ImmutableList<OBDADataSource> getSources() {
+        return ImmutableList.copyOf(obdaModel.getSources());
     }
 
     public OBDADataSource getSource(URI sourceURI) {
@@ -125,10 +125,10 @@ public class MutableOBDAModel {
     public void deletePredicate(Predicate removedPredicate) {
     }
 
-    public void addSourcesListener(OBDAModelManager.ProtegeDatasourcesControllerListener dlistener) {
+    public void addSourcesListener(OBDAModelListener listener) {
     }
 
-    public void addMappingsListener(OBDAModelManager.ProtegeMappingControllerListener mlistener) {
+    public void addMappingsListener(OBDAMappingListener mlistener) {
     }
 
     public void setPrefixManager(PrefixManagerWrapper prefixManager) {
@@ -152,6 +152,7 @@ public class MutableOBDAModel {
     public void addSource(OBDADataSource ds) {
     }
 
+    @Deprecated
     public Predicate[] getDeclaredClasses() {
         return new Predicate[0];
     }
@@ -159,11 +160,14 @@ public class MutableOBDAModel {
     public void fireSourceParametersUpdated() {
     }
 
+    @Deprecated
     public Predicate[] getDeclaredDataProperties() {
         return new Predicate[0];
     }
 
+    @Deprecated
     public Predicate[] getDeclaredObjectProperties() {
+        return new Predicate[0];
     }
 
     public void removeSourcesListener(DatasourceSelector datasourceSelector) {
@@ -171,7 +175,7 @@ public class MutableOBDAModel {
     }
 
 
-    public void addMapping(URI sourceID, OBDAMappingAxiom mappingAxiom) {
+    public void addMapping(URI sourceID, OBDAMappingAxiom mappingAxiom) throws DuplicateMappingException {
     }
 
     public void removeMapping(URI srcuri, String id) {
@@ -185,5 +189,22 @@ public class MutableOBDAModel {
     }
 
     public void updateMapping(URI sourceID, String id, String trim) {
+    }
+
+    public int indexOf(URI currentSource, String mappingId) {
+        ImmutableList<OBDAMappingAxiom> sourceMappings = obdaModel.getMappings(currentSource);
+        if (sourceMappings == null) {
+            return -1;
+        }
+
+        for(int i=0; i < sourceMappings.size(); i++) {
+            if (sourceMappings.get(i).getId() == mappingId)
+                return i;
+        }
+        return -1;
+    }
+
+    public void removeSource(URI sourceID) {
+
     }
 }

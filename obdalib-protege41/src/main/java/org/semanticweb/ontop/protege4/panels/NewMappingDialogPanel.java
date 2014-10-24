@@ -605,7 +605,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private OBDAMappingAxiom mapping;
 
 	private CQIE parse(String query) {
-		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(obdaModel.getPrefixManager());
+		TurtleOBDASyntaxParser textParser = new TurtleOBDASyntaxParser(obdaModel.getPrefixManager().getPrefixMap());
 		try {
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {
