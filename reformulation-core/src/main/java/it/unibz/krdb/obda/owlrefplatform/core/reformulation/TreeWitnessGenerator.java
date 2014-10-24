@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
  */
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
@@ -66,7 +65,7 @@ public class TreeWitnessGenerator {
 
 	public static Collection<TreeWitnessGenerator> getTreeWitnessGenerators(TBoxReasoner reasoner) {
 		
-		Map<ClassDescription, TreeWitnessGenerator> gens = new HashMap<ClassDescription, TreeWitnessGenerator>();				
+		Map<BasicClassDescription, TreeWitnessGenerator> gens = new HashMap<BasicClassDescription, TreeWitnessGenerator>();				
 
 		// COLLECT GENERATING CONCEPTS (together with their declared subclasses)
 		// TODO: improve the algorithm

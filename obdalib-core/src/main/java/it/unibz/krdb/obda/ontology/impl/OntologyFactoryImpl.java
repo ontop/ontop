@@ -27,8 +27,8 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.DisjointClassAxiom;
@@ -79,7 +79,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public SubDescriptionAxiom createSubClassAxiom(ClassDescription concept1, ClassDescription concept2) {
+	public SubDescriptionAxiom createSubClassAxiom(BasicClassDescription concept1, BasicClassDescription concept2) {
 		return new SubClassAxiomImpl(concept1, concept2);
 	}
 

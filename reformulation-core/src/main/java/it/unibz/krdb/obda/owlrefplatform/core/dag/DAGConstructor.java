@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Axiom;
-import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -111,9 +111,9 @@ public class DAGConstructor {
 
 		while (edgeiterator.hasNext()) {
 			Edge edge = edgeiterator.next();
-			if (edge.getLeft().getDescription() instanceof ClassDescription) {
-				ClassDescription sub = (ClassDescription) edge.getLeft().getDescription();
-				ClassDescription superp = (ClassDescription) edge.getRight().getDescription();
+			if (edge.getLeft().getDescription() instanceof BasicClassDescription) {
+				BasicClassDescription sub = (BasicClassDescription) edge.getLeft().getDescription();
+				BasicClassDescription superp = (BasicClassDescription) edge.getRight().getDescription();
 				if (superp instanceof PropertySomeRestriction)
 					continue;
 

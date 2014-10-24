@@ -24,7 +24,7 @@ import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -502,8 +502,8 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- A(x), q(y) :- C(y), with A ISA C
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
-			ClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
-			ClassDescription right = dfac.createClass(tfac.getPredicate("C", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+			BasicClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+			BasicClassDescription right = dfac.createClass(tfac.getPredicate("C", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 			sigma.addConcept(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 			sigma.addConcept(tfac.getPredicate("C", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
@@ -531,8 +531,8 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
-			ClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
-			ClassDescription right = dfac.createPropertySomeRestriction(
+			BasicClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+			BasicClassDescription right = dfac.createPropertySomeRestriction(
 					tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), false);
 			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 
@@ -562,8 +562,8 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
-			ClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
-			ClassDescription right = dfac.createPropertySomeRestriction(
+			BasicClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+			BasicClassDescription right = dfac.createPropertySomeRestriction(
 					tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), true);
 			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 
@@ -593,9 +593,9 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
-			ClassDescription left = dfac.createPropertySomeRestriction(
+			BasicClassDescription left = dfac.createPropertySomeRestriction(
 					tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), false);
-			ClassDescription right = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+			BasicClassDescription right = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 
 			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 
@@ -625,9 +625,9 @@ public class CQCUtilitiesTest {
 		{
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
-			ClassDescription left = dfac.createPropertySomeRestriction(
+			BasicClassDescription left = dfac.createPropertySomeRestriction(
 					tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), true);
-			ClassDescription right = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+			BasicClassDescription right = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 
 			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 
@@ -680,8 +680,8 @@ public class CQCUtilitiesTest {
         // q(x) :- , q(x) :- R(x,y), A(x)
 
         Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
-        ClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
-        ClassDescription right = dfac.createPropertySomeRestriction(
+        BasicClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+        BasicClassDescription right = dfac.createPropertySomeRestriction(
                 tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), false);
         SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 

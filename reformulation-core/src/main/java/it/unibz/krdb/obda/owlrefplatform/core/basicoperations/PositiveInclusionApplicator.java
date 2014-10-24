@@ -27,7 +27,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
@@ -91,7 +91,7 @@ public class PositiveInclusionApplicator {
 			 * side
 			 */
 			Predicate pred = atom.getPredicate();
-			ClassDescription inc = ((SubClassAxiomImpl) pi).getSuper();
+			BasicClassDescription inc = ((SubClassAxiomImpl) pi).getSuper();
 			Predicate inc_predicate = null;
 			if (inc instanceof OClass) {
 				inc_predicate = ((OClass) inc).getPredicate();
@@ -109,7 +109,7 @@ public class PositiveInclusionApplicator {
 			} else if (pred.getArity() == 2 && inc_predicate.getArity() == 2) {
 				Term t2 = atom.getTerms().get(1);
 				Term t1 = atom.getTerms().get(0);
-				ClassDescription including = ((SubClassAxiomImpl) pi).getSuper();
+				BasicClassDescription including = ((SubClassAxiomImpl) pi).getSuper();
 				if (including instanceof PropertySomeRestrictionImpl) {
 					PropertySomeRestrictionImpl imp = (PropertySomeRestrictionImpl) including;
 					if (t2 instanceof AnonymousVariable && !imp.isInverse()) {
@@ -487,8 +487,8 @@ public class PositiveInclusionApplicator {
 
 			if (inclusion instanceof SubClassAxiomImpl) {
 				SubClassAxiomImpl inc = (SubClassAxiomImpl) inclusion;
-				ClassDescription lefthandside = inc.getSub();
-				ClassDescription righthandside = inc.getSuper();
+				BasicClassDescription lefthandside = inc.getSub();
+				BasicClassDescription righthandside = inc.getSuper();
 
 				if (lefthandside instanceof ClassImpl) {
 
@@ -566,7 +566,7 @@ public class PositiveInclusionApplicator {
 			 */
 
 			SubClassAxiomImpl inc = (SubClassAxiomImpl) inclusion;
-			ClassDescription lefthandside = inc.getSub();
+			BasicClassDescription lefthandside = inc.getSub();
 			PropertySomeRestriction righthandside = (PropertySomeRestriction) inc.getSuper();
 
 			Term t1 = a.getTerms().get(0);

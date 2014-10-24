@@ -24,7 +24,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Axiom;
-import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -102,7 +102,7 @@ public class DAG implements Serializable {
 		// classes.put(thingConcept, thing);
 
 		for (Predicate conceptp : ontology.getConcepts()) {
-			ClassDescription concept = descFactory.createClass(conceptp);
+			BasicClassDescription concept = descFactory.createClass(conceptp);
 			DAGNode node = new DAGNode(concept);
 
 			// if (!concept.equals(thingConcept)) {
@@ -145,8 +145,8 @@ public class DAG implements Serializable {
 
 			if (assertion instanceof SubClassAxiomImpl) {
 				SubClassAxiomImpl clsIncl = (SubClassAxiomImpl) assertion;
-				ClassDescription parent = clsIncl.getSuper();
-				ClassDescription child = clsIncl.getSub();
+				BasicClassDescription parent = clsIncl.getSuper();
+				BasicClassDescription child = clsIncl.getSub();
 
 				addClassEdge(parent, child);
 			} else if (assertion instanceof SubPropertyAxiomImpl) {
@@ -178,7 +178,7 @@ public class DAG implements Serializable {
 		this.allnodes = allnodes;
 	}
 
-	private void addClassEdge(ClassDescription parent, ClassDescription child) {
+	private void addClassEdge(BasicClassDescription parent, BasicClassDescription child) {
 
 		DAGNode parentNode;
 		if (classes.containsKey(parent)) {
@@ -227,9 +227,9 @@ public class DAG implements Serializable {
 		}
 		addParent(childNode, parentNode);
 
-		ClassDescription existsParent = descFactory.createPropertySomeRestriction(parent);
+		BasicClassDescription existsParent = descFactory.createPropertySomeRestriction(parent);
 
-		ClassDescription existChild = descFactory.createPropertySomeRestriction(child);
+		BasicClassDescription existChild = descFactory.createPropertySomeRestriction(child);
 
 		addClassEdge(existsParent, existChild);
 		// addClassEdge(thingConcept, existsParent);
@@ -362,7 +362,7 @@ public class DAG implements Serializable {
 	 * @param conceptDescription
 	 * @return
 	 */
-	public DAGNode getClassNode(ClassDescription conceptDescription) {
+	public DAGNode getClassNode(BasicClassDescription conceptDescription) {
 		DAGNode rv = classes.get(conceptDescription);
 		if (rv == null) {
 			rv = classes.get(equi_mappings.get(conceptDescription));

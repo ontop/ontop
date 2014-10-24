@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
-import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
@@ -169,8 +169,8 @@ public class SemanticQueryOptimizer {
 				Function checkAtom = null;
 				if (pi instanceof SubClassAxiomImpl) {
 					SubClassAxiomImpl ci = (SubClassAxiomImpl) pi;
-					ClassDescription including = ci.getSuper();
-					ClassDescription included = ci.getSub();
+					BasicClassDescription including = ci.getSuper();
+					BasicClassDescription included = ci.getSub();
 
 					if (focusAtom.getPredicate().getArity() == 1 && including instanceof OClass) {
 						/* case we work with unary atom A(x) or A(_) */
@@ -201,7 +201,7 @@ public class SemanticQueryOptimizer {
 							continue;
 						}
 
-					} else if (focusAtom.getPredicate().getArity() == 2 && including instanceof ClassDescription) {
+					} else if (focusAtom.getPredicate().getArity() == 2 && including instanceof BasicClassDescription) {
 						/*
 						 * case we work with unary atom R(x,_), R(_,y)
 						 */

@@ -27,16 +27,18 @@ public class DataTypeImpl implements DataType {
 	
 	private static final long serialVersionUID = -6228610469212615956L;
 	
-	private Predicate predicate;
+	private final Predicate predicate;
 	
-	public DataTypeImpl(Predicate p) {
+	DataTypeImpl(Predicate p) {
 		predicate = p;
 	}
 	
+	@Override
 	public Predicate getPredicate() {
 		return predicate;
 	}
 	
+	@Override
 	public int hashCode() {
 		return toString().hashCode();
 	}
@@ -44,5 +46,14 @@ public class DataTypeImpl implements DataType {
 	@Override
 	public String toString() {
 		return predicate.getName().toString();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof DataTypeImpl)) {
+			return false;
+		}
+		DataTypeImpl type2 = (DataTypeImpl) obj;
+		return (predicate.equals(type2.getPredicate()));
 	}
 }

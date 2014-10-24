@@ -45,7 +45,7 @@ public interface OntologyFactory {
 
 	public SubDescriptionAxiom createSubPropertyAxiom(Property included, Property including);
 
-	public SubDescriptionAxiom createSubClassAxiom(ClassDescription concept1, ClassDescription concept2);
+	public SubDescriptionAxiom createSubClassAxiom(BasicClassDescription concept1, BasicClassDescription concept2);
 
 	@Deprecated
 	public PropertySomeRestriction createPropertySomeRestriction(Predicate p, boolean isInverse);

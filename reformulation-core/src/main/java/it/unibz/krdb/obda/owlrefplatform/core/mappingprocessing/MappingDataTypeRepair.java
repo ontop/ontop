@@ -89,11 +89,17 @@ public class MappingDataTypeRepair {
             public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
                 //if sup is a datatype property  we store it in the map
                 //it means that sub is of datatype sup
-
-                Predicate supPredicate = sup.getPredicate();
-                if(supPredicate.isDataTypePredicate()) {
-                    dataTypesMap.put(sub.getPredicate(), supPredicate);
-                }
+            	if (sup instanceof DataType) {
+            		Predicate supPredicate = ((DataType)sup).getPredicate();
+            		if (sub instanceof DataType) {
+            			// datatype inclusion
+            			dataTypesMap.put(((DataType)sub).getPredicate(), supPredicate);
+            		}
+            		else if (sub instanceof PropertySomeRestriction) {
+            			// range 
+            			dataTypesMap.put(((PropertySomeRestriction)sub).getPredicate(), supPredicate);
+            		}
+            	}
             }
         });
 		return dataTypesMap;
