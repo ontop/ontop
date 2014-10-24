@@ -186,6 +186,12 @@ public class UnifierUtilities {
 		}
 	}
 
+	/**
+	 * returns a unifier that assigns NULLs to all variables in the list
+	 * 
+	 * @param vars the list of variables
+	 * @return unifier
+	 */
 	
 	public static Unifier getNullifier(Collection<Variable> vars) {
 		Unifier unifier = new Unifier();

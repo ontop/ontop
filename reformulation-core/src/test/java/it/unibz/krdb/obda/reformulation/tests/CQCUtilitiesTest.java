@@ -32,7 +32,6 @@ import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import org.junit.Before;
@@ -48,7 +47,7 @@ public class CQCUtilitiesTest {
 
 	CQIE initialquery1 = null;
 
-	PositiveInclusionApplicator piapplicator = new PositiveInclusionApplicator();
+	//PositiveInclusionApplicator piapplicator = new PositiveInclusionApplicator();
 
 	OBDADataFactory pfac = OBDADataFactoryImpl.getInstance();
 	OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
