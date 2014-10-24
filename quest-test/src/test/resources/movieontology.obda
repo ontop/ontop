@@ -291,7 +291,7 @@ target		imdb:company/{company_id} mo2:companyName {company_name} .
 source		select company_name.id as company_id, company_name.name as company_name from company_name
 
 mappingId	Movie has title and production year
-target		imdb:title/{id} mo:title {title} ; dbpedia:productionStartYear {production_year}^^xsd:integer . 
+target		imdb:title/{id} mo:title {title} ; dbpedia:productionStartYear {production_year}^^xsd:int .
 source		select id, title, production_year from title
 
 mappingId	Company has country code

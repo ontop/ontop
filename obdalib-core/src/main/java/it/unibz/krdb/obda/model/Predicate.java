@@ -35,8 +35,8 @@ import java.io.Serializable;
 public interface Predicate extends Cloneable, Serializable {
 
 	public enum COL_TYPE {
-		OBJECT, BNODE, LITERAL, LITERAL_LANG, INTEGER, DECIMAL, DOUBLE, STRING, DATETIME, BOOLEAN, UNSUPPORTED, DATE, TIME, YEAR
-	};
+		OBJECT, BNODE, LITERAL, LITERAL_LANG, INTEGER, INT, NON_NEGATIVE_INTEGER, POSITIVE_INTEGER, NEGATIVE_INTEGER, NON_POSITIVE_INTEGER,UNSIGNED_INT, DECIMAL, DOUBLE, FLOAT, STRING, DATETIME, BOOLEAN, UNSUPPORTED, DATE, TIME, YEAR,  LONG
+    };
 
 	/**
 	 * Get the name of the predicate. In practice, the predicate name is

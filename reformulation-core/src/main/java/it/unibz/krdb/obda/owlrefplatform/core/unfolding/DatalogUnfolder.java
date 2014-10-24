@@ -1170,13 +1170,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	}
 
 	/***
-	 * Goes trhough each term, and recursively each inner term trying to resovle
+	 * Goes through each term, and recursively each inner term trying to resolve
 	 * each atom. Returns an empty list if the partial evaluation is completed
-	 * (no atoms can be resovled and each atom is a leaf atom), null if there is
+	 * (no atoms can be resolved and each atom is a leaf atom), null if there is
 	 * at least one atom that is not leaf and cant be resolved, or a list with
-	 * one or more queries if there was one atom that could be resolved againts
+	 * one or more queries if there was one atom that could be resolved against
 	 * one or more rules. The list containts the result of the resolution steps
-	 * againts those rules.
+	 * against those rules.
 	 * 
 	 * @param currentTerms
 	 * @param rule
@@ -1734,7 +1734,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				continue;
 
 			if (mgu1 == null)
-				throw new RuntimeException("Unexcpected case found while performing JOIN elimination. Contact the authors for debugging.");
+				throw new RuntimeException("Unexpected case found while performing JOIN elimination. Contact the authors for debugging.");
 
 			if (currentAtom.isAlgebraFunction() && currentAtom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_LEFTJOIN)) {
 				continue;

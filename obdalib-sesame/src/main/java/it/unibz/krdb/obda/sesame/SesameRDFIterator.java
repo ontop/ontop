@@ -198,13 +198,35 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 			return Predicate.COL_TYPE.LITERAL;
 		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_INTEGER_URI)) {
 			return Predicate.COL_TYPE.INTEGER;
-		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
+		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_INT_URI)) {
+            return Predicate.COL_TYPE.INT;
+        } else if (datatype.stringValue().equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)) {
+            return Predicate.COL_TYPE.NON_NEGATIVE_INTEGER;
+        } else if (datatype.stringValue().equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)) {
+            return Predicate.COL_TYPE.NEGATIVE_INTEGER;
+        } else if (datatype.stringValue().equals(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) {
+            return Predicate.COL_TYPE.UNSIGNED_INT;
+        } else if (datatype.stringValue().equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)) {
+            return Predicate.COL_TYPE.NON_POSITIVE_INTEGER;
+        } else if (datatype.stringValue().equals(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)) {
+            return Predicate.COL_TYPE.POSITIVE_INTEGER;
+        }  else if (datatype.stringValue().equals(OBDAVocabulary.XSD_LONG_URI)) {
+            return Predicate.COL_TYPE.LONG;
+        } else if (datatype.stringValue().equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
 			return Predicate.COL_TYPE.DECIMAL;
+        } else if (datatype.stringValue().equals(OBDAVocabulary.XSD_FLOAT_URI)) {
+            return Predicate.COL_TYPE.FLOAT;
 		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
 			return Predicate.COL_TYPE.DOUBLE;
 		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_DATETIME_URI)) {
 			return Predicate.COL_TYPE.DATETIME;
-		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_DATE_URI)) {
+            return Predicate.COL_TYPE.DATE;
+        } else if (datatype.stringValue().equals(OBDAVocabulary.XSD_TIME_URI)) {
+            return Predicate.COL_TYPE.TIME;
+        } else if (datatype.stringValue().equals(OBDAVocabulary.XSD_YEAR_URI)) {
+            return Predicate.COL_TYPE.YEAR;
+        } else if (datatype.stringValue().equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
 			return Predicate.COL_TYPE.BOOLEAN;
 		}
 		return Predicate.COL_TYPE.UNSUPPORTED;

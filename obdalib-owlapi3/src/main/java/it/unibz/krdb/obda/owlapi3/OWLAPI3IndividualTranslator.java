@@ -31,6 +31,7 @@ import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 
+import org.openrdf.model.vocabulary.XMLSchema;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -118,20 +119,36 @@ public class OWLAPI3IndividualTranslator {
 				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_BOOLEAN);
 			} else if (v.getType() == COL_TYPE.DATETIME) {
 				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_DATE_TIME);
-			} else if (v.getType() == COL_TYPE.DATE) {
-//				result = dataFactory.getOWLLiteral(value, this.dataFactory.getOWLDatatype(IRI.create(OBDAVocabulary.XSD_DATE_URI)));
-				result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
-			} else if (v.getType() == COL_TYPE.TIME) {
-				result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
-			} else if (v.getType() == COL_TYPE.YEAR) {
-				result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
+            } else if (v.getType() == COL_TYPE.DATE) {
+                //result = dataFactory.getOWLLiteral(value, this.dataFactory.getOWLDatatype(IRI.create(OBDAVocabulary.XSD_DATE_URI)));
+                result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
+            }else if (v.getType() == COL_TYPE.TIME) {
+                result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
+            } else if (v.getType() == COL_TYPE.YEAR) {
+                result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
 			} else if (v.getType() == COL_TYPE.DECIMAL) {
 				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_DECIMAL);
 			} else if (v.getType() == COL_TYPE.DOUBLE) {
 				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_DOUBLE);
 			} else if (v.getType() == COL_TYPE.INTEGER) {
 				result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_INTEGER);
-			} else if (v.getType() == COL_TYPE.LITERAL) {
+            } else if (v.getType() == COL_TYPE.NEGATIVE_INTEGER) {
+                result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_NEGATIVE_INTEGER);
+            } else if (v.getType() == COL_TYPE.NON_NEGATIVE_INTEGER) {
+                result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_NON_NEGATIVE_INTEGER);
+            } else if (v.getType() == COL_TYPE.POSITIVE_INTEGER) {
+                result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_POSITIVE_INTEGER);
+            } else if (v.getType() == COL_TYPE.NON_POSITIVE_INTEGER) {
+                result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_NON_POSITIVE_INTEGER);
+            } else if (v.getType() == COL_TYPE.INT) {
+                result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_INT);
+            } else if (v.getType() == COL_TYPE.UNSIGNED_INT) {
+                result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_UNSIGNED_INT);
+            } else if (v.getType() == COL_TYPE.FLOAT) {
+                result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_FLOAT);
+			} else if (v.getType() == COL_TYPE.LONG) {
+                 result = dataFactory.getOWLLiteral(value, OWL2Datatype.XSD_LONG);
+            } else if (v.getType() == COL_TYPE.LITERAL) {
 				result = dataFactory.getOWLLiteral(value, OWL2Datatype.RDF_PLAIN_LITERAL);
 			} else if (v.getType() == COL_TYPE.LITERAL_LANG) {
 				result = dataFactory.getOWLLiteral(value, v.getLanguage());

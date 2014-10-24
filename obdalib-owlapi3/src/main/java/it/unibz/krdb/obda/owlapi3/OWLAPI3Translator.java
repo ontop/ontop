@@ -921,7 +921,6 @@ public class OWLAPI3Translator {
 	 * translation is straight forward.
 	 * 
 	 * @param axiom
-	 * @param equivalenceMap
 	 * @return
 	 */
 	public Assertion translate(OWLIndividualAxiom axiom) {
@@ -1057,32 +1056,48 @@ public class OWLAPI3Translator {
 
 	private Predicate.COL_TYPE getColumnType(OWLDatatype datatype) throws TranslationException {
 		if (datatype == null) {
-			return Predicate.COL_TYPE.LITERAL;
+			return COL_TYPE.LITERAL;
 		}
 		if (datatype.isString() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_STRING) { // xsd:string
-			return Predicate.COL_TYPE.STRING;
+			return COL_TYPE.STRING;
 		} else if (datatype.isRDFPlainLiteral() || datatype.getBuiltInDatatype() == OWL2Datatype.RDF_PLAIN_LITERAL // rdf:PlainLiteral
 				|| datatype.getBuiltInDatatype() == OWL2Datatype.RDFS_LITERAL) { // rdfs:Literal
-			return Predicate.COL_TYPE.LITERAL;
+			return COL_TYPE.LITERAL;
 		} else if (datatype.isInteger()
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INTEGER // xsd:integer
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INT // xsd:int
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_LONG // xsd:long
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_POSITIVE_INTEGER
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NEGATIVE_INTEGER
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_POSITIVE_INTEGER
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_NEGATIVE_INTEGER
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_INT
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_LONG) {
-			return Predicate.COL_TYPE.INTEGER;
+				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INTEGER) {
+            return COL_TYPE.INTEGER;
+        } else if ( datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_NEGATIVE_INTEGER) {
+            return COL_TYPE.NON_NEGATIVE_INTEGER;
+        } else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INT) { // xsd:int
+            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
+            return COL_TYPE.INT;
+        } else if  (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_POSITIVE_INTEGER){
+            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
+            return COL_TYPE.POSITIVE_INTEGER;
+        } else if  (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NEGATIVE_INTEGER) {
+            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
+            return COL_TYPE.NEGATIVE_INTEGER;
+        } else if  (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_POSITIVE_INTEGER){
+            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
+            return COL_TYPE.NON_POSITIVE_INTEGER;
+        } else if  (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_INT) {
+            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
+            return COL_TYPE.UNSIGNED_INT;
 		} else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DECIMAL) { // xsd:decimal
 			return Predicate.COL_TYPE.DECIMAL;
-		} else if (datatype.isFloat() || datatype.isDouble() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DOUBLE // xsd:double
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_FLOAT) { // xsd:float
+        } else if (datatype.isFloat() || datatype.isDouble() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DOUBLE) { // xsd:double
+            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
 			return Predicate.COL_TYPE.DOUBLE;
-		} else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DATE_TIME) {
+        } else if (datatype.isFloat() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_FLOAT) { // xsd:float
+            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
+            return Predicate.COL_TYPE.FLOAT;
+		} else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DATE_TIME || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DATE_TIME_STAMP ) {
 			return Predicate.COL_TYPE.DATETIME;
+        } else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_LONG) {
+            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
+            return Predicate.COL_TYPE.LONG;
 		} else if (datatype.isBoolean() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_BOOLEAN) { // xsd:boolean
+            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
 			return Predicate.COL_TYPE.BOOLEAN;
 		} else {
 			throw new TranslationException("Unsupported data range: " + datatype.toString());

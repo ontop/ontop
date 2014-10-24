@@ -115,10 +115,34 @@ public class SesameBindingSet implements BindingSet {
 						} else if (col_type == COL_TYPE.DOUBLE) {
 							URI datatype = XMLSchema.DOUBLE;
 							value = fact.createLiteral(c.getValue(), datatype);
+                        } else if (col_type == COL_TYPE.FLOAT) {
+                            URI datatype = XMLSchema.FLOAT;
+                            value = fact.createLiteral(c.getValue(), datatype);
 						} else if (col_type == COL_TYPE.INTEGER) {
-							URI datatype = XMLSchema.INTEGER;
-							value = fact.createLiteral(c.getValue(), datatype);
-						} else if (col_type == COL_TYPE.LITERAL) {
+                            URI datatype = XMLSchema.INTEGER;
+                            value = fact.createLiteral(c.getValue(), datatype);
+                        } else if (col_type == COL_TYPE.NON_NEGATIVE_INTEGER) {
+                            URI datatype = XMLSchema.NON_NEGATIVE_INTEGER;
+                            value = fact.createLiteral(c.getValue(), datatype);
+                        } else if (col_type == COL_TYPE.POSITIVE_INTEGER){
+                            URI datatype = XMLSchema.NEGATIVE_INTEGER;
+                            value = fact.createLiteral(c.getValue(), datatype);
+                        } else if (col_type == COL_TYPE.POSITIVE_INTEGER){
+                            URI datatype = XMLSchema.POSITIVE_INTEGER;
+                            value = fact.createLiteral(c.getValue(), datatype);
+                        } else if (col_type == COL_TYPE.NON_POSITIVE_INTEGER) {
+                            URI datatype = XMLSchema.NON_POSITIVE_INTEGER;
+                            value = fact.createLiteral(c.getValue(), datatype);
+                        } else if (col_type == COL_TYPE.UNSIGNED_INT) {
+                            URI datatype = XMLSchema.UNSIGNED_INT;
+                            value = fact.createLiteral(c.getValue(), datatype);
+                        } else if (col_type == COL_TYPE.INT) {
+                            URI datatype = XMLSchema.INT;
+                            value = fact.createLiteral(c.getValue(), datatype);
+						} else if (col_type == COL_TYPE.LONG) {
+                            URI datatype = XMLSchema.LONG;
+                            value = fact.createLiteral(c.getValue(), datatype);
+                        }else if (col_type == COL_TYPE.LITERAL) {
 							value = fact.createLiteral(c.getValue());
 						} else if (col_type == COL_TYPE.LITERAL_LANG) {
 							value = fact.createLiteral(c.getValue(), literal.getLanguage());

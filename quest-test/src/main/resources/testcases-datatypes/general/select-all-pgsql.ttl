@@ -3,4 +3,4 @@
 @prefix :        <http://example.org/#> .
 
 []    rdf:type      rsi:ResultSetInfo ;
-      rsi:size      "49" .
+      rsi:size      "51" .

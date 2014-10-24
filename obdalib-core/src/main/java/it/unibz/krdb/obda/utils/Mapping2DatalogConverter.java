@@ -563,19 +563,19 @@ public class Mapping2DatalogConverter {
         @Override
         public void visit(LongValue expression) {
             String termRightName = expression.getStringValue();
-            result = fac.getConstantLiteral(termRightName, COL_TYPE.INTEGER);
+            result = fac.getConstantLiteral(termRightName, COL_TYPE.LONG);
         }
 
         @Override
         public void visit(DateValue expression) {
             String termRightName = expression.getValue().toString();
-            result = fac.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
+            result = fac.getConstantLiteral(termRightName, COL_TYPE.DATE);
         }
 
         @Override
         public void visit(TimeValue expression) {
             String termRightName = expression.getValue().toString();
-            result = fac.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
+            result = fac.getConstantLiteral(termRightName, COL_TYPE.TIME);
         }
 
         @Override
