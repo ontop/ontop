@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -263,7 +264,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 		@Override
 		public void handleStatement(Statement st) throws RDFHandlerException {
-			ontology.addEntity(getVocabulary(st));
+			ontology.addEntities(Collections.singleton(getVocabulary(st)));
 			Axiom axiom = getTBoxAxiom(st);
 			if (axiom == null) {
 				return;
