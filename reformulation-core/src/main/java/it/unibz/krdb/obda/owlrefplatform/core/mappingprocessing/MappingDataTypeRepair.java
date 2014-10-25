@@ -165,15 +165,16 @@ public class MappingDataTypeRepair {
                                 throw new OBDAException("Ontology datatype " + dataType + " for " + predicate + "\ndoes not correspond to datatype " + functionSymbol + " in mappings");
 
                         }
-                    }
-                    if(isBooleanDB2(dataType.getPredicate())){
+                        
+                        if(isBooleanDB2(dataType.getPredicate())){
 
-                        Variable variable = (Variable)  normal.getTerm(1);
+                            Variable variable = (Variable)  normal.getTerm(1);
 
-                        //No Boolean datatype in DB2 database, the value in the database is used
-                        Predicate replacement = getDataTypeFunctor(termOccurenceIndex, variable);
-                        Term newTerm = fac.getFunction(replacement, variable);
-                        atom.setTerm(1, newTerm);
+                            //No Boolean datatype in DB2 database, the value in the database is used
+                            Predicate replacement = getDataTypeFunctor(termOccurenceIndex, variable);
+                            Term newTerm = fac.getFunction(replacement, variable);
+                            atom.setTerm(1, newTerm);
+                        }
                     }
 
 				} else {
