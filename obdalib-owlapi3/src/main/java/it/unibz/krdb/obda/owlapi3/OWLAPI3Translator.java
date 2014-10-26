@@ -27,6 +27,7 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.DisjointClassAxiom;
@@ -165,7 +166,8 @@ public class OWLAPI3Translator {
 			Ontology aux = translator.translate(onto);
 			translation.addConcepts(aux.getConcepts());
 			translation.addRoles(aux.getRoles());
-			translation.addAssertions(aux.getAssertions());
+			for (Axiom ax : aux.getAssertions())
+				translation.addAssertion(ax);
 			translation.getABox().addAll(aux.getABox());
 			translation.getDisjointDescriptionAxioms().addAll(aux.getDisjointDescriptionAxioms());
 			translation.getFunctionalPropertyAxioms().addAll(aux.getFunctionalPropertyAxioms());

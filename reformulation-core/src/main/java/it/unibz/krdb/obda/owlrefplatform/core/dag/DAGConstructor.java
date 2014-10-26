@@ -118,16 +118,13 @@ public class DAGConstructor {
 					continue;
 
 				Axiom ax = fac.createSubClassAxiom(sub, superp);
-				sigma.addEntities(ax.getReferencedEntities());
-				sigma.addAssertion(ax);
+				sigma.addAssertionWithEntities(ax);
 			} else {
 				Property sub = (Property) edge.getLeft().getDescription();
 				Property superp = (Property) edge.getRight().getDescription();
 
 				Axiom ax = fac.createSubPropertyAxiom(sub, superp);
-				sigma.addEntities(ax.getReferencedEntities());
-
-				sigma.addAssertion(ax);
+				sigma.addAssertionWithEntities(ax);
 			}
 		}
 

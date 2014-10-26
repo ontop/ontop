@@ -177,13 +177,6 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public void addAssertions(Collection<Axiom> ass) {
-		for (Axiom axiom : ass) {
-			addAssertion(axiom);
-		}
-	}
-
-	@Override
 	public void addConcept(Predicate cd) {
 		concepts.add(cd);
 	}
@@ -229,5 +222,11 @@ public class OntologyImpl implements Ontology {
 				addRole(pred);
 			}
 		}
+	}
+
+	@Override
+	public void addAssertionWithEntities(Axiom assertion) {
+		addEntities(assertion.getReferencedEntities());
+		addAssertion(assertion);
 	}
 }

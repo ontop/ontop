@@ -221,7 +221,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			Ontology o = getOntology(((URI) graphURI), graphURI);
 			result.addConcepts(o.getConcepts());
 			result.addRoles(o.getRoles());
-			result.addAssertions(result.getAssertions());
+			for (Axiom ax : result.getAssertions())  // TODO (ROMAN): check whether it's result and not o
+				result.addAssertion(ax);
 		}
 		return result;
 	}

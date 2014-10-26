@@ -85,8 +85,7 @@ public class SigmaTBoxOptimizer {
 				public void onInclusion(Property sub, Property sup) {
 					if (!check_redundant_role(sup, sub)) {
 						Axiom axiom = fac.createSubPropertyAxiom(sub, sup);
-						optimizedTBox.addEntities(axiom.getReferencedEntities());
-						optimizedTBox.addAssertion(axiom);
+						optimizedTBox.addAssertionWithEntities(axiom);
 					}
 				}
 
@@ -94,8 +93,7 @@ public class SigmaTBoxOptimizer {
 				public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
 					if (!check_redundant(sup, sub))  {
 						Axiom axiom = fac.createSubClassAxiom(sub, sup);
-						optimizedTBox.addEntities(axiom.getReferencedEntities());
-						optimizedTBox.addAssertion(axiom);
+						optimizedTBox.addAssertionWithEntities(axiom);
 					}
 				}
 			});

@@ -30,8 +30,8 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public void addAssertion(Axiom assertion);
 
-	public void addAssertions(Collection<Axiom> assertion);
-
+	public void addAssertionWithEntities(Axiom assertion);
+	
 	public void addConcept(Predicate c);
 
 	public void addRole(Predicate role);
@@ -44,14 +44,13 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public Set<Predicate> getConcepts();
 	
-//	public Set<Predicate> getVocabulary();
-
 	public Set<Axiom> getAssertions();
 
 	public String getUri();
 
 	public Ontology clone();
 
+	@Deprecated // just two uses (to be removed)
 	public void addEntities(Set<Predicate> referencedEntities);
 
 	public Set<Assertion> getABox();
