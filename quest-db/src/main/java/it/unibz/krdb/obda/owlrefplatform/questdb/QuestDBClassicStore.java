@@ -169,7 +169,10 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			// Retrieves the ABox from the target database via mapping.
 			log.debug("Loading data from Mappings into the database");
 			OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-			for (Predicate p : tbox.getVocabulary()) {
+			for (Predicate p : tbox.getConcepts()) {
+				obdaModelForMaterialization.declarePredicate(p);
+			}
+			for (Predicate p : tbox.getRoles()) {
 				obdaModelForMaterialization.declarePredicate(p);
 			}
 			QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
@@ -216,7 +219,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 		for (URI graphURI : graphURIs) {
 			Ontology o = getOntology(((URI) graphURI), graphURI);
-			result.addEntities(o.getVocabulary());
+			result.addConcepts(o.getConcepts());
+			result.addRoles(o.getRoles());
 			result.addAssertions(result.getAssertions());
 		}
 		return result;

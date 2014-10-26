@@ -44,7 +44,7 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public Set<Predicate> getConcepts();
 	
-	public Set<Predicate> getVocabulary();
+//	public Set<Predicate> getVocabulary();
 
 	public Set<Axiom> getAssertions();
 

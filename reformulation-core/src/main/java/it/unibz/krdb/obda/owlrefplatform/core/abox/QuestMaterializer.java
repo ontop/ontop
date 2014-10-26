@@ -122,7 +122,12 @@ public class QuestMaterializer {
 		}
 		if (onto != null) {
 			//from ontology
-			for (Predicate p : onto.getVocabulary()) {
+			for (Predicate p : onto.getConcepts()) {
+				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+						&& !vocabulary.contains(p))
+					vocabulary.add(p);
+			}
+			for (Predicate p : onto.getRoles()) {
 				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 						&& !vocabulary.contains(p))
 					vocabulary.add(p);

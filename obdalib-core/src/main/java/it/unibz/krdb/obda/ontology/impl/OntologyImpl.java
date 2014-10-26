@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyFunctionalAxiom;
 import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 
@@ -214,14 +213,6 @@ public class OntologyImpl implements Ontology {
 	@Override
 	public Set<Predicate> getRoles() {
 		return roles;
-	}
-
-	@Override
-	public Set<Predicate> getVocabulary() {
-		HashSet<Predicate> set = new HashSet<Predicate>();
-		set.addAll(getConcepts());
-		set.addAll(getRoles());
-		return set;
 	}
 
 	@Override
