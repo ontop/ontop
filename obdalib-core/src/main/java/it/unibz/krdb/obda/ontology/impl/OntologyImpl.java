@@ -182,20 +182,8 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public void addConcepts(Collection<Predicate> cd) {
-		for (Predicate p : cd) {
-			concepts.add(p);
-		}
-	}
-
-	@Override
 	public void addRole(Predicate rd) {
 		roles.add(rd);
-	}
-
-	@Override
-	public void addRoles(Collection<Predicate> rd) {
-		roles.addAll(rd);
 	}
 
 	@Override

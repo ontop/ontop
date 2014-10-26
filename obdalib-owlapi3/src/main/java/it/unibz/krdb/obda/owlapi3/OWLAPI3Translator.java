@@ -49,6 +49,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -164,8 +165,12 @@ public class OWLAPI3Translator {
 		for (OWLOntology onto : ontologies) {
 			// uris.add(onto.getIRI().toURI());
 			Ontology aux = translator.translate(onto);
-			translation.addConcepts(aux.getConcepts());
-			translation.addRoles(aux.getRoles());
+			// R: cannot just add all referenced entities
+			for (Predicate p : aux.getConcepts())
+				translation.addConcept(p);
+			for (Predicate p : aux.getRoles())
+				translation.addRole(p);
+			
 			for (Axiom ax : aux.getAssertions())
 				translation.addAssertion(ax);
 			translation.getABox().addAll(aux.getABox());

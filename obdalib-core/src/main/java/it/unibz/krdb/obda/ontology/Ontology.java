@@ -36,10 +36,6 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public void addRole(Predicate role);
 
-	public void addConcepts(Collection<Predicate> cd);
-
-	public void addRoles(Collection<Predicate> rd);
-
 	public Set<Predicate> getRoles();
 
 	public Set<Predicate> getConcepts();

@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
  */
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
@@ -54,14 +55,15 @@ public class DAGConstructor {
 	public static DAG getSigma(Ontology ontology) {
 
 		Ontology sigma = descFactory.createOntology("");
-		sigma.addConcepts(ontology.getConcepts());
-		sigma.addRoles(ontology.getRoles());
+		for (Predicate p : ontology.getConcepts())
+			sigma.addConcept(p);
+		for (Predicate p : ontology.getRoles())
+			sigma.addRole(p);
 		for (Axiom assertion : ontology.getAssertions()) {
 
 			if (assertion instanceof SubClassAxiomImpl) {
 				SubClassAxiomImpl inclusion = (SubClassAxiomImpl) assertion;
 				Description parent = inclusion.getSuper();
-				Description child = inclusion.getSub();
 				if (parent instanceof PropertySomeRestriction) {
 					continue;
 				}
@@ -84,14 +86,15 @@ public class DAGConstructor {
 	public static Ontology getSigmaOntology(Ontology ontology) {
 
 		Ontology sigma = descFactory.createOntology("sigma");
-		sigma.addConcepts(ontology.getConcepts());
-		sigma.addRoles(ontology.getRoles());
+		for (Predicate p : ontology.getConcepts())
+			sigma.addConcept(p);
+		for (Predicate p : ontology.getRoles())
+			sigma.addRole(p);
 
 		for (Axiom assertion : ontology.getAssertions()) {
 			if (assertion instanceof SubClassAxiomImpl) {
 				SubClassAxiomImpl inclusion = (SubClassAxiomImpl) assertion;
 				Description parent = inclusion.getSuper();
-				Description child = inclusion.getSub();
 				if (parent instanceof PropertySomeRestriction) {
 					continue;
 				}
