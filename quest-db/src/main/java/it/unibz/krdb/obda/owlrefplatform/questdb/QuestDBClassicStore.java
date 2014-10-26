@@ -271,7 +271,13 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 		@Override
 		public void handleStatement(Statement st) throws RDFHandlerException {
-			ontology.addEntities(Collections.singleton(getVocabulary(st)));
+			Predicate pred = getVocabulary(st);
+				if (pred.getArity() == 1) {
+					ontology.addConcept(pred);
+				} else {
+					ontology.addRole(pred);
+				}
+			
 			Axiom axiom = getTBoxAxiom(st);
 			if (axiom == null) {
 				return;

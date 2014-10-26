@@ -154,7 +154,15 @@ public class QuestMaterializer {
 		//start a quest instance
 		if (ontology == null) {
 			ontology = ofac.createOntology();
-			ontology.addEntities(this.model.getDeclaredPredicates());
+			
+			for (Predicate pred : model.getDeclaredPredicates()) {
+				if (pred.getArity() == 1) {
+					ontology.addConcept(pred);
+				} else {
+					ontology.addRole(pred);
+				}
+			}
+			
 		}
 		
 		

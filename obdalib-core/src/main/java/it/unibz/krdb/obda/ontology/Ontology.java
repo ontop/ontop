@@ -46,9 +46,6 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public Ontology clone();
 
-	@Deprecated // just two uses (to be removed)
-	public void addEntities(Set<Predicate> referencedEntities);
-
 	public Set<Assertion> getABox();
 	
 	public Set<PropertyFunctionalAxiom> getFunctionalPropertyAxioms();

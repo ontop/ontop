@@ -202,19 +202,15 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public void addEntities(Set<Predicate> referencedEntities) {
-		for (Predicate pred : referencedEntities) {
+	public void addAssertionWithEntities(Axiom assertion) {
+		for (Predicate pred : assertion.getReferencedEntities()) {
 			if (pred.getArity() == 1) {
 				addConcept(pred);
 			} else {
 				addRole(pred);
 			}
+			
 		}
-	}
-
-	@Override
-	public void addAssertionWithEntities(Axiom assertion) {
-		addEntities(assertion.getReferencedEntities());
 		addAssertion(assertion);
 	}
 }
