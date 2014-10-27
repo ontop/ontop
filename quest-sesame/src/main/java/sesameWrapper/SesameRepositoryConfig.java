@@ -28,7 +28,6 @@ package sesameWrapper;
 
 import java.io.File;
 
-import org.openrdf.model.BNode;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
@@ -38,13 +37,8 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.util.GraphUtil;
 import org.openrdf.model.util.GraphUtilException;
 import org.openrdf.repository.config.RepositoryConfigException;
-import org.openrdf.repository.config.RepositoryFactory;
-import org.openrdf.repository.config.RepositoryImplConfig;
 import org.openrdf.repository.config.RepositoryImplConfigBase;
-import org.openrdf.repository.config.RepositoryRegistry;
-import org.openrdf.repository.config.RepositoryConfig;
 
-import static org.openrdf.repository.config.RepositoryConfigSchema.REPOSITORYIMPL;
 import static org.openrdf.repository.config.RepositoryConfigSchema.REPOSITORYTYPE;
 
 
@@ -59,22 +53,26 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
     /** <tt>http://inf.unibz.it/krdb/obda/quest#name</tt> */
     public final static URI NAME;
 
-    /** <tt>http://inf.unibz.it/krdb/obda/quest#owlfile/tt> */
+    /** <tt>http://inf.unibz.it/krdb/obda/quest#owlFile/tt> */
     public final static URI OWLFILE;
 
-    /** <tt>http://inf.unibz.it/krdb/obda/quest#obdafile</tt> */
+    /** <tt>http://inf.unibz.it/krdb/obda/quest#obdaFile</tt> */
     public final static URI OBDAFILE;
     
     public final static URI EXISTENTIAL;
     
     public final static URI REWRITING;
+
+    public final static String VIRTUAL_QUEST_TYPE = "ontop-virtual";
+    public final static String REMOTE_QUEST_TYPE = "ontop-remote";
+    public final static String IN_MEMORY_QUEST_TYPE = "ontop-inmemory";
     
     static {
         ValueFactory factory = ValueFactoryImpl.getInstance();
         QUEST_TYPE = factory.createURI(NAMESPACE, "quest_type");
         NAME = factory.createURI(NAMESPACE, "repo_name");
-        OWLFILE = factory.createURI(NAMESPACE, "owlfile");
-        OBDAFILE = factory.createURI(NAMESPACE, "obdafile");
+        OWLFILE = factory.createURI(NAMESPACE, "owlFile");
+        OBDAFILE = factory.createURI(NAMESPACE, "obdaFile");
         EXISTENTIAL = factory.createURI(NAMESPACE, "existential");
         REWRITING = factory.createURI(NAMESPACE, "rewriting");
     }
@@ -82,8 +80,8 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
     
 	private String quest_type;
     private String name;
-    private String owlfile;
-    private String obdafile;
+    private File owlFile;
+    private File obdaFile;
     private boolean existential;
     private String rewriting;
 
@@ -114,24 +112,24 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
     	this.name = name;
     }
     
-    public String getOwlFile()
+    public File getOwlFile()
     {
-    	return owlfile;
+    	return owlFile;
     }
 
-    public void setOwlFile(String file)
+    public void setOwlFile(String fileName)
     {
-    	this.owlfile = file;
+    	this.owlFile = new File(fileName);
     }
     
-    public String getObdaFile()
+    public File getObdaFile()
     {
-    	return obdafile;
+    	return obdaFile;
     }
     
-    public void setObdaFile(String file)
+    public void setObdaFile(String fileName)
     {
-    	this.obdafile = file;
+    	this.obdaFile = new File(fileName);
     }
 
     public boolean getExistential()
@@ -161,12 +159,17 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
         if (quest_type == null || quest_type.isEmpty()) {
             throw new RepositoryConfigException("No type specified for repository implementation");
         }
-        if (owlfile == null || owlfile.isEmpty()){
-        	throw new RepositoryConfigException("No Owl file specified for repository creation!");
-        }
-        if (quest_type.contentEquals("ontop-virtual"))
-        		if (obdafile ==null || obdafile.contentEquals("obdafile") ){
-        	throw new RepositoryConfigException("No OBDA file specified for repository creation!");
+        try {
+            if (owlFile == null || !owlFile.exists()) {
+                throw new RepositoryConfigException("No Owl file specified for repository creation!");
+            }
+            if (quest_type.equals(VIRTUAL_QUEST_TYPE))
+                if (obdaFile == null || !obdaFile.exists()) {
+                    throw new RepositoryConfigException(String.format("No OBDA file specified for repository creation " +
+                                    "in %s mode!", quest_type));
+                }
+        } catch (SecurityException e) {
+            throw new RepositoryConfigException(e.getMessage());
         }
     }
 
@@ -182,11 +185,11 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
         if (name != null) {
             graph.add(implNode, NAME, vf.createLiteral(name));
         }
-        if (owlfile != null) {
-            graph.add(implNode, OWLFILE, vf.createLiteral(owlfile));
+        if (owlFile != null) {
+            graph.add(implNode, OWLFILE, vf.createLiteral(owlFile.getAbsolutePath()));
         }
-        if (obdafile != null) {
-            graph.add(implNode, OBDAFILE, vf.createLiteral(obdafile));
+        if (obdaFile != null) {
+            graph.add(implNode, OBDAFILE, vf.createLiteral(obdaFile.getAbsolutePath()));
         }
         if (existential == false || existential == true) {
         	graph.add(implNode, EXISTENTIAL, vf.createLiteral(existential));

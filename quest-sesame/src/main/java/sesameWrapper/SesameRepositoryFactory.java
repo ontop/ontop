@@ -19,11 +19,11 @@ package sesameWrapper;
  * limitations under the License.
  * #L%
  */
-import org.openrdf.repository.Repository;
 import org.openrdf.repository.config.RepositoryConfigException;
 import org.openrdf.repository.config.RepositoryFactory;
 import org.openrdf.repository.config.RepositoryImplConfig;
-import org.openrdf.repository.config.RepositoryRegistry;
+
+import static sesameWrapper.SesameRepositoryConfig.*;
 
 public class SesameRepositoryFactory implements RepositoryFactory{
 
@@ -40,7 +40,6 @@ public class SesameRepositoryFactory implements RepositoryFactory{
 	
 	public SesameAbstractRepo getRepository(RepositoryImplConfig config)
 			throws RepositoryConfigException {
-		// TODO Auto-generated method stub
 		
 		if (config instanceof SesameRepositoryConfig)
 		{
@@ -49,22 +48,22 @@ public class SesameRepositoryFactory implements RepositoryFactory{
 			{
 				config.validate();
 					String name = ((SesameRepositoryConfig) config).getName();
-					String owlfile = ((SesameRepositoryConfig) config).getOwlFile();
+					String owlFileName = ((SesameRepositoryConfig) config).getOwlFile().getAbsolutePath();
 					boolean existential = ((SesameRepositoryConfig) config).getExistential();
 					String rewriting = ((SesameRepositoryConfig) config).getRewriting();
 					
-					if (((SesameRepositoryConfig) config).getQuestType().equals("ontop-inmemory"))
+					if (((SesameRepositoryConfig) config).getQuestType().equals(IN_MEMORY_QUEST_TYPE))
 					{
-						return new SesameClassicInMemoryRepo(name, owlfile, existential, rewriting);
+						return new SesameClassicInMemoryRepo(name, owlFileName, existential, rewriting);
 					}
-					else if (((SesameRepositoryConfig) config).getQuestType().equals("ontop-remote"))
+					else if (((SesameRepositoryConfig) config).getQuestType().equals(REMOTE_QUEST_TYPE))
 					{
-						return new SesameClassicJDBCRepo(name, owlfile);
+						return new SesameClassicJDBCRepo(name, owlFileName);
 					}
-					else if (((SesameRepositoryConfig) config).getQuestType().equals("ontop-virtual")) 
+					else if (((SesameRepositoryConfig) config).getQuestType().equals(VIRTUAL_QUEST_TYPE))
 					{
-						String obdafile = ((SesameRepositoryConfig) config).getObdaFile();
-						return new SesameVirtualRepo(name, owlfile, obdafile, existential, rewriting);
+						String obdaFileName = ((SesameRepositoryConfig) config).getObdaFile().getAbsolutePath();
+						return new SesameVirtualRepo(name, owlFileName, obdaFileName, existential, rewriting);
 					}
 			}}
 			catch(Exception e)
