@@ -103,7 +103,7 @@ public class MappingVocabularyRepair {
 						
 						/**
 						 * All this part is to handle the case where the predicate or the class is defined
-						 * by the mapping but not present in the ontology. For example rdfs:Literal
+						 * by the mapping but not present in the ontology. For example rdfs:label
 						 */
 						if (newTerms.size()==1){
 							predicate=dfac.getClassPredicate(p.getName());
@@ -128,8 +128,9 @@ public class MappingVocabularyRepair {
                                         predicate=dfac.getDataPropertyPredicate(p.getName());
                                     }
                                 } else {
-                                    Function ft1 = (Function) t1;
-                                    Variable vt2 = (Variable) t2;
+
+                                //if no information about the range is present, we create a data property, the datatype will be assigned by the database
+
                                     predicate = dfac.getDataPropertyPredicate(p.getName());
                                 }
 
