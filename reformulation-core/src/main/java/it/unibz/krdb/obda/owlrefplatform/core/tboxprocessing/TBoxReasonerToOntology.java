@@ -1,11 +1,12 @@
 package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
-import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
+import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
@@ -20,15 +21,19 @@ public class TBoxReasonerToOntology {
 			
 			@Override
 			public void onInclusion(Property sub, Property sup) {
-				Axiom ax = fac.createSubPropertyAxiom(sub, sup);
-				sigma.addAssertionWithEntities(ax);						
+				if (sub != sup) {
+					SubPropertyOfAxiom ax = fac.createSubPropertyAxiom(sub, sup);
+					sigma.addAxiom(ax);						
+				}
 			}
 
 			@Override
 			public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
-				if (!excludeExistentials || !(sup instanceof PropertySomeRestriction)) {
-					Axiom ax = fac.createSubClassAxiom(sub, sup);
-					sigma.addAssertionWithEntities(ax);						
+				if (sub != sup) {
+					if (!excludeExistentials || !(sup instanceof PropertySomeRestriction)) {
+						SubClassOfAxiom ax = fac.createSubClassAxiom(sub, sup);
+						sigma.addAxiom(ax);						
+					}
 				}
 			}
 		});

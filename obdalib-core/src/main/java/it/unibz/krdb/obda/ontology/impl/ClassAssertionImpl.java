@@ -46,6 +46,20 @@ public class ClassAssertionImpl implements ClassAssertion {
 		return concept;
 	}
 	
+	@Override 
+	public boolean equals(Object obj) {
+		if (obj instanceof ClassAssertionImpl) {
+			ClassAssertionImpl other = (ClassAssertionImpl)obj;
+			return concept.equals(other.concept) && object.equals(other.object);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return concept.hashCode() + object.hashCode();
+	}
+	
 	@Override
 	public String toString() {
 		return concept.toString() + "(" + object.toString() + ")";

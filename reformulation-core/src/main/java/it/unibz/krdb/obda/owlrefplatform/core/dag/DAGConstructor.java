@@ -59,7 +59,7 @@ public class DAGConstructor {
 			sigma.addRole(p);
 		
 		for (SubPropertyOfAxiom inclusion : ontology.getSubPropertyAxioms()) {
-			sigma.addAssertion(inclusion);
+			sigma.addAxiom(inclusion);
 		}
 		
 		for (SubClassOfAxiom inclusion : ontology.getSubClassAxioms()) {
@@ -67,7 +67,7 @@ public class DAGConstructor {
 			if (parent instanceof PropertySomeRestriction) {
 				continue;
 			}
-			sigma.addAssertion(inclusion);
+			sigma.addAxiom(inclusion);
 		}
 
 		//sigma.saturate();
@@ -90,7 +90,7 @@ public class DAGConstructor {
 			sigma.addRole(p);
 
 		for (SubPropertyOfAxiom inclusion : ontology.getSubPropertyAxioms()) {
-			sigma.addAssertion(inclusion);
+			sigma.addAssertionWithCheck(inclusion);
 		}
 		
 		for (SubClassOfAxiom inclusion : ontology.getSubClassAxioms()) {
@@ -98,7 +98,7 @@ public class DAGConstructor {
 			if (parent instanceof PropertySomeRestriction) {
 				continue;
 			}
-			sigma.addAssertion(inclusion);
+			sigma.addAxiom(inclusion);
 		}
 
 		return sigma;
@@ -119,14 +119,14 @@ public class DAGConstructor {
 				if (superp instanceof PropertySomeRestriction)
 					continue;
 
-				Axiom ax = fac.createSubClassAxiom(sub, superp);
-				sigma.addAssertionWithEntities(ax);
+				SubClassOfAxiom ax = fac.createSubClassAxiom(sub, superp);
+				sigma.addAxiom(ax);
 			} else {
 				Property sub = (Property) edge.getLeft().getDescription();
 				Property superp = (Property) edge.getRight().getDescription();
 
-				Axiom ax = fac.createSubPropertyAxiom(sub, superp);
-				sigma.addAssertionWithEntities(ax);
+				SubPropertyOfAxiom ax = fac.createSubPropertyAxiom(sub, superp);
+				sigma.addAxiom(ax);
 			}
 		}
 

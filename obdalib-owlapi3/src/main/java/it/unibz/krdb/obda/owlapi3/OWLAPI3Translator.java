@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
@@ -38,6 +39,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
@@ -165,21 +167,25 @@ public class OWLAPI3Translator {
 		for (OWLOntology onto : ontologies) {
 			// uris.add(onto.getIRI().toURI());
 			Ontology aux = translator.translate(onto);
+			translation.merge(aux);
+/*			
 			// R: cannot just add all referenced entities
 			for (Predicate p : aux.getConcepts())
 				translation.addConcept(p);
 			for (Predicate p : aux.getRoles())
 				translation.addRole(p);
 			
-			for (Axiom ax : aux.getSubClassAxioms())
-				translation.addAssertion(ax);
-			for (Axiom ax : aux.getSubPropertyAxioms())
-				translation.addAssertion(ax);
-			translation.getClassAssertions().addAll(aux.getClassAssertions());
-			translation.getPropertyAssertions().addAll(aux.getPropertyAssertions());
+			for (SubClassOfAxiom ax : aux.getSubClassAxioms())
+				translation.addAssertionWithCheck(ax);
+			for (SubPropertyOfAxiom ax : aux.getSubPropertyAxioms())
+				translation.addAssertionWithCheck(ax);
+			// TODO: replace by proper calls, not just by modifying the internal structures
 			translation.getDisjointPropertiesAxioms().addAll(aux.getDisjointPropertiesAxioms());
 			translation.getDisjointClassesAxioms().addAll(aux.getDisjointClassesAxioms());
 			translation.getFunctionalPropertyAxioms().addAll(aux.getFunctionalPropertyAxioms());
+			translation.getClassAssertions().addAll(aux.getClassAssertions());
+			translation.getPropertyAssertions().addAll(aux.getPropertyAssertions());
+*/
 		}
 		/* we translated successfully, now we append the new assertions */
 
@@ -385,7 +391,7 @@ public class OWLAPI3Translator {
 					Property superrole = getRoleExpression(aux.getSuperProperty());
 
 					SubPropertyOfAxiom roleinc = ofac.createSubPropertyAxiom(subrole, superrole);
-					dl_onto.addAssertion(roleinc);
+					dl_onto.addAssertionWithCheck(roleinc);
 
 				} else if (axiom instanceof OWLEquivalentDataPropertiesAxiom) {
 
@@ -412,7 +418,7 @@ public class OWLAPI3Translator {
 					Property role = getRoleExpression(aux.getProperty());
 					FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(role);
 
-					dl_onto.addAssertion(funct);
+					dl_onto.addAssertionWithCheck(funct);
 
 				} else if (axiom instanceof OWLInverseObjectPropertiesAxiom) {
 					if (profile.order() < LanguageProfile.OWL2QL.order())
@@ -430,8 +436,8 @@ public class OWLAPI3Translator {
 					SubPropertyOfAxiom inc1 = ofac.createSubPropertyAxiom(role1, invrole2);
 					SubPropertyOfAxiom inc2 = ofac.createSubPropertyAxiom(role2, invrole1);
 
-					dl_onto.addAssertion(inc1);
-					dl_onto.addAssertion(inc2);
+					dl_onto.addAssertionWithCheck(inc1);
+					dl_onto.addAssertionWithCheck(inc2);
 
 				} else if (axiom instanceof OWLSymmetricObjectPropertyAxiom) {
 					if (profile.order() < LanguageProfile.OWL2QL.order())
@@ -443,7 +449,7 @@ public class OWLAPI3Translator {
 
 					SubPropertyOfAxiom symm = ofac.createSubPropertyAxiom(invrole, role);
 
-					dl_onto.addAssertion(symm);
+					dl_onto.addAssertionWithCheck(symm);
 
 				} else if (axiom instanceof OWLObjectPropertyDomainAxiom) {
 
@@ -473,7 +479,7 @@ public class OWLAPI3Translator {
 
 					SubPropertyOfAxiom roleinc = ofac.createSubPropertyAxiom(subrole, superrole);
 
-					dl_onto.addAssertion(roleinc);
+					dl_onto.addAssertionWithCheck(roleinc);
 
 				} else if (axiom instanceof OWLFunctionalObjectPropertyAxiom) {
 					if (profile.order() < LanguageProfile.OWL2QL.order())
@@ -482,7 +488,7 @@ public class OWLAPI3Translator {
 					Property role = getRoleExpression(aux.getProperty());
 					FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(role);
 
-					dl_onto.addAssertion(funct);
+					dl_onto.addAssertionWithCheck(funct);
 					
 				} else if (axiom instanceof OWLInverseFunctionalObjectPropertyAxiom) {
 					if (profile.order() < LanguageProfile.OWL2QL.order())
@@ -492,7 +498,7 @@ public class OWLAPI3Translator {
 					Property invrole = ofac.createProperty(role.getPredicate(), !role.isInverse());
 					FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(invrole);
 
-					dl_onto.addAssertion(funct);
+					dl_onto.addAssertionWithCheck(funct);
 
 				} else if (axiom instanceof OWLDisjointClassesAxiom) {
 					OWLDisjointClassesAxiom aux = (OWLDisjointClassesAxiom) axiom;
@@ -508,7 +514,7 @@ public class OWLAPI3Translator {
 					OClass c2 = ofac.createClass(iter.next().toStringID());
 					DisjointClassesAxiom disj = ofac.createDisjointClassAxiom(c1, c2);
 					
-					dl_onto.addAssertion(disj);
+					dl_onto.addAssertionWithCheck(disj);
 							
 				} else if (axiom instanceof OWLDisjointDataPropertiesAxiom) {
 					OWLDisjointDataPropertiesAxiom aux = (OWLDisjointDataPropertiesAxiom) axiom;
@@ -520,7 +526,7 @@ public class OWLAPI3Translator {
 					Property p2 = ofac.createDataProperty(iter.next().toStringID());
 					DisjointPropertiesAxiom disj = ofac.createDisjointPropertiesAxiom(p1, p2);
 					
-					dl_onto.addAssertion(disj);
+					dl_onto.addAssertionWithCheck(disj);
 					
 				} else if (axiom instanceof OWLDisjointObjectPropertiesAxiom) {
 					OWLDisjointObjectPropertiesAxiom aux = (OWLDisjointObjectPropertiesAxiom) axiom;
@@ -533,13 +539,23 @@ public class OWLAPI3Translator {
 					Property p2 = ofac.createObjectProperty(iter.next().toStringID(), false);
 					DisjointPropertiesAxiom disj = ofac.createDisjointPropertiesAxiom(p1, p2);
 					
-					dl_onto.addAssertion(disj);
+					dl_onto.addAssertionWithCheck(disj);
 				
 				
-				} else if (axiom instanceof OWLIndividualAxiom) {
-					Axiom translatedAxiom = translate((OWLIndividualAxiom)axiom);
+				} else if (axiom instanceof OWLClassAssertionAxiom) {
+					ClassAssertion translatedAxiom = translate((OWLClassAssertionAxiom)axiom);
 					if (translatedAxiom != null)
-						dl_onto.addAssertion(translatedAxiom);
+						dl_onto.addAssertionWithCheck(translatedAxiom);
+					
+				} else if (axiom instanceof OWLObjectPropertyAssertionAxiom) {
+					PropertyAssertion translatedAxiom = translate((OWLObjectPropertyAssertionAxiom)axiom);
+					if (translatedAxiom != null)
+						dl_onto.addAssertionWithCheck(translatedAxiom);
+					
+				} else if (axiom instanceof OWLDataPropertyAssertionAxiom) {
+					PropertyAssertion translatedAxiom = translate((OWLDataPropertyAssertionAxiom)axiom);
+					if (translatedAxiom != null)
+						dl_onto.addAssertionWithCheck(translatedAxiom);
 					
 				} else if (axiom instanceof OWLAnnotationAxiom) {
 					/*
@@ -595,15 +611,15 @@ public class OWLAPI3Translator {
 			log.warn("NULL: {} {}", subDescription, superDescription);
 		}
 
-			/* We ignore TOP and BOTTOM (Thing and Nothing) */
-			if (superDescription instanceof OClass) {
-				OClass classDescription = (OClass) superDescription;
-				if (classDescription.toString().equals("http://www.w3.org/2002/07/owl#Thing")) {
-					return;
-				}
+		/* We ignore TOP and BOTTOM (Thing and Nothing) */
+		if (superDescription instanceof OClass) {
+			OClass classDescription = (OClass) superDescription;
+			if (classDescription.toString().equals("http://www.w3.org/2002/07/owl#Thing")) {
+				return;
 			}
-			SubClassOfAxiom inc = ofac.createSubClassAxiom(subDescription, superDescription);
-			dl_onto.addAssertion(inc);
+		}
+		SubClassOfAxiom inc = ofac.createSubClassAxiom(subDescription, superDescription);
+		dl_onto.addAssertionWithCheck(inc);
 	}
 
 	private void addSubclassAxioms(Ontology dl_onto, BasicClassDescription subDescription, List<BasicClassDescription> superDescriptions) {
@@ -643,9 +659,9 @@ public class OWLAPI3Translator {
 				BasicClassDescription subclass = roles.get(i);
 				BasicClassDescription superclass = roles.get(j);
 				SubClassOfAxiom inclusion1 = ofac.createSubClassAxiom(subclass, superclass);
-				ontology.addAssertion(inclusion1);
+				ontology.addAssertionWithCheck(inclusion1);
 				SubClassOfAxiom inclusion2 = ofac.createSubClassAxiom(superclass, subclass);
-				ontology.addAssertion(inclusion2);
+				ontology.addAssertionWithCheck(inclusion2);
 			}
 		}
 	}
@@ -656,9 +672,9 @@ public class OWLAPI3Translator {
 				Property subrole = roles.get(i);
 				Property superole = roles.get(j);
 				SubPropertyOfAxiom inclusion1 = ofac.createSubPropertyAxiom(subrole, superole);
-				ontology.addAssertion(inclusion1);
+				ontology.addAssertionWithCheck(inclusion1);
 				SubPropertyOfAxiom inclusion2 = ofac.createSubPropertyAxiom(superole, subrole);
-				ontology.addAssertion(inclusion2);
+				ontology.addAssertionWithCheck(inclusion2);
 			}
 		}
 	}
@@ -763,12 +779,12 @@ public class OWLAPI3Translator {
 
 			/* Creating the new subrole assertions */
 			SubPropertyOfAxiom subrole = ofac.createSubPropertyAxiom(auxRole, ofac.createProperty(role.getPredicate(), false));
-			dl_onto.addAssertion(subrole);
+			dl_onto.addAssertionWithCheck(subrole);
 			
 			/* Creating the range assertion */
 			PropertySomeRestriction propertySomeRestrictionInv = ofac.createPropertySomeRestriction(auxRole.getPredicate(), !role.isInverse());
 			SubClassOfAxiom subclass = ofac.createSubClassAxiom(propertySomeRestrictionInv, filler);
-			dl_onto.addAssertion(subclass);
+			dl_onto.addAssertionWithCheck(subclass);
 		}
 
 		return auxclass;
@@ -797,12 +813,12 @@ public class OWLAPI3Translator {
 
 			/* Creating the new subrole assertions */
 			SubPropertyOfAxiom subrole = ofac.createSubPropertyAxiom(auxRole, ofac.createProperty(role.getPredicate(), false));
-			dl_onto.addAssertion(subrole);
+			dl_onto.addAssertionWithCheck(subrole);
 			
 			/* Creating the range assertion */
 			PropertySomeRestriction propertySomeRestrictionInv = ofac.createPropertySomeRestriction(auxRole.getPredicate(), !role.isInverse());
 			SubClassOfAxiom subclass = ofac.createSubClassAxiom(propertySomeRestrictionInv, filler);
-			dl_onto.addAssertion(subclass);
+			dl_onto.addAssertionWithCheck(subclass);
 		}
 
 		return auxclass;
@@ -935,39 +951,28 @@ public class OWLAPI3Translator {
 	 * @param axiom
 	 * @return
 	 */
-	public Assertion translate(OWLIndividualAxiom axiom) {
+	public ClassAssertion translate(OWLClassAssertionAxiom assertion) {
 
-		if (axiom instanceof OWLClassAssertionAxiom) {
+		OWLClassExpression classExpression = assertion.getClassExpression();
+		if (!(classExpression instanceof OWLClass) || classExpression.isOWLThing() || classExpression.isOWLNothing())
+			return null;
 
-			/*
-			 * Class assertions
-			 */
+		OWLClass namedclass = (OWLClass) classExpression;
+		OWLIndividual indv = assertion.getIndividual();
 
-			OWLClassAssertionAxiom assertion = (OWLClassAssertionAxiom) axiom;
-			OWLClassExpression classExpression = assertion.getClassExpression();
-			if (!(classExpression instanceof OWLClass) || classExpression.isOWLThing() || classExpression.isOWLNothing())
-				return null;
+		if (indv.isAnonymous()) {
+			throw new RuntimeException("Found anonymous individual, this feature is not supported");
+		}
 
-			OWLClass namedclass = (OWLClass) classExpression;
-			OWLIndividual indv = assertion.getIndividual();
+		Predicate classproperty = dfac.getClassPredicate((namedclass.getIRI().toString()));
+		URIConstant c = dfac.getConstantURI(indv.asOWLNamedIndividual().getIRI().toString());
 
-			if (indv.isAnonymous()) {
-				throw new RuntimeException("Found anonymous individual, this feature is not supported");
-			}
-
-			Predicate classproperty = dfac.getClassPredicate((namedclass.getIRI().toString()));
-			URIConstant c = dfac.getConstantURI(indv.asOWLNamedIndividual().getIRI().toString());
-
-			OClass concept = ofac.createClass(classproperty.getName());
-			return ofac.createClassAssertion(concept, c);
-
-		} else if (axiom instanceof OWLObjectPropertyAssertionAxiom) {
-
-			/*
-			 * Role assertions
-			 */
-
-			OWLObjectPropertyAssertionAxiom assertion = (OWLObjectPropertyAssertionAxiom) axiom;
+		OClass concept = ofac.createClass(classproperty.getName());
+		return ofac.createClassAssertion(concept, c);
+	}
+	
+	
+	public PropertyAssertion translate(OWLObjectPropertyAssertionAxiom assertion) {
 			OWLObjectPropertyExpression propertyExperssion = assertion.getProperty();
 
 			String property = null;
@@ -1015,40 +1020,34 @@ public class OWLAPI3Translator {
 //				}
 //			}
 
-		} else if (axiom instanceof OWLDataPropertyAssertionAxiom) {
+	}
+	
+	
+	public PropertyAssertion translate(OWLDataPropertyAssertionAxiom assertion) {
+		
+		OWLDataProperty propertyExperssion = (OWLDataProperty) assertion.getProperty();
 
-			/*
-			 * Attribute assertions
-			 */
+		String property = propertyExperssion.getIRI().toString();
+		OWLIndividual subject = assertion.getSubject();
+		OWLLiteral object = assertion.getObject();
 
-			OWLDataPropertyAssertionAxiom assertion = (OWLDataPropertyAssertionAxiom) axiom;
-			OWLDataProperty propertyExperssion = (OWLDataProperty) assertion.getProperty();
-
-			String property = propertyExperssion.getIRI().toString();
-			OWLIndividual subject = assertion.getSubject();
-			OWLLiteral object = assertion.getObject();
-
-			if (subject.isAnonymous()) {
-				throw new RuntimeException("Found anonymous individual, this feature is not supported");
-			}
-
-			Predicate.COL_TYPE type;
-			try {
-				type = getColumnType(object.getDatatype());
-			} catch (TranslationException e) {
-				throw new RuntimeException(e.getMessage());
-			}
-
-			Predicate p = dfac.getDataPropertyPredicate(property);
-			URIConstant c1 = dfac.getConstantURI(subject.asOWLNamedIndividual().getIRI().toString());
-			ValueConstant c2 = dfac.getConstantLiteral(object.getLiteral(), type);
-
-			Property prop = ofac.createDataProperty(p.getName());
-			return ofac.createPropertyAssertion(prop, c1, c2);
-
-		} else {
-			return null;
+		if (subject.isAnonymous()) {
+			throw new RuntimeException("Found anonymous individual, this feature is not supported");
 		}
+
+		Predicate.COL_TYPE type;
+		try {
+			type = getColumnType(object.getDatatype());
+		} catch (TranslationException e) {
+			throw new RuntimeException(e.getMessage());
+		}
+
+		Predicate p = dfac.getDataPropertyPredicate(property);
+		URIConstant c1 = dfac.getConstantURI(subject.asOWLNamedIndividual().getIRI().toString());
+		ValueConstant c2 = dfac.getConstantLiteral(object.getLiteral(), type);
+
+		Property prop = ofac.createDataProperty(p.getName());
+		return ofac.createPropertyAssertion(prop, c1, c2);
 	}
 
 	private Predicate.COL_TYPE getColumnType(OWLDatatype datatype) throws TranslationException {

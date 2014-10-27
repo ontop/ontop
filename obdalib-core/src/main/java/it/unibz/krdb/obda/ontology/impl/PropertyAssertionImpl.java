@@ -29,19 +29,14 @@ public class PropertyAssertionImpl implements PropertyAssertion {
 
 	private static final long serialVersionUID = -8834975903851540150L;
 	
-	private final Property role;
+	private final Property prop;
 	private final Constant o2;
 	private final ObjectConstant o1;
 
-	PropertyAssertionImpl(Property role, ObjectConstant o1, Constant o2) {
-		this.role = role;
+	PropertyAssertionImpl(Property prop, ObjectConstant o1, Constant o2) {
+		this.prop = prop;
 		this.o1 = o1;
 		this.o2 = o2;
-	}
-
-	@Override
-	public String toString() {
-		return role.toString() + "(" + o1.toString() + ", " + o2.toString() + ")";
 	}
 
 	@Override
@@ -56,6 +51,26 @@ public class PropertyAssertionImpl implements PropertyAssertion {
 
 	@Override
 	public Property getProperty() {
-		return role;
+		return prop;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof PropertyAssertionImpl) {
+			PropertyAssertionImpl other = (PropertyAssertionImpl)obj;
+			return prop.equals(other.prop) && o1.equals(other.o1)  && o2.equals(other.o2);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return prop.hashCode() + o1.hashCode() + o2.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return prop + "(" + o1 + ", " + o2 + ")";
+	}
+
 }

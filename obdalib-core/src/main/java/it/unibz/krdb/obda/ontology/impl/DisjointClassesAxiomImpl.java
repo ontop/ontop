@@ -36,11 +36,6 @@ public class DisjointClassesAxiomImpl implements DisjointClassesAxiom {
 	}
 	
 	@Override
-	public String toString() {
-		return "disjoint(" + class1 + ", " + class2 + ")";
-	}
-
-	@Override
 	public BasicClassDescription getFirst() {
 		return this.class1;
 	}
@@ -49,4 +44,25 @@ public class DisjointClassesAxiomImpl implements DisjointClassesAxiom {
 	public BasicClassDescription getSecond() {
 		return this.class2;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof DisjointClassesAxiomImpl) {
+			DisjointClassesAxiomImpl other = (DisjointClassesAxiomImpl)obj;
+			return class1.equals(other.class1) && class2.equals(other.class2);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return class1.hashCode() + class2.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return "disjoint(" + class1 + ", " + class2 + ")";
+	}
+
+	
 }

@@ -27,33 +27,66 @@ import java.util.Set;
 
 public interface Ontology extends Cloneable, Serializable {
 
-	public void addAssertion(Axiom assertion);
+	public void addAxiom(SubClassOfAxiom assertion);
 
-	public void addAssertionWithEntities(Axiom assertion);
+	public void addAxiom(SubPropertyOfAxiom assertion);
+
+	public void addAxiom(DisjointClassesAxiom assertion);
+
+	public void addAxiom(DisjointPropertiesAxiom assertion);
+
+	public void addAxiom(FunctionalPropertyAxiom assertion);
+
+	public void addAxiom(ClassAssertion assertion);
+
+	public void addAxiom(PropertyAssertion assertion);
 	
+	@Deprecated
+	public void addAssertionWithCheck(SubClassOfAxiom assertion);
+	@Deprecated
+	public void addAssertionWithCheck(SubPropertyOfAxiom assertion);
+	@Deprecated
+	public void addAssertionWithCheck(DisjointClassesAxiom assertion);
+	@Deprecated
+	public void addAssertionWithCheck(DisjointPropertiesAxiom assertion);
+	@Deprecated
+	public void addAssertionWithCheck(FunctionalPropertyAxiom assertion);
+	@Deprecated
+	public void addAssertionWithCheck(ClassAssertion assertion);
+	@Deprecated
+	public void addAssertionWithCheck(PropertyAssertion assertion);
+
+	@Deprecated
 	public void addConcept(Predicate c);
 
+	@Deprecated
 	public void addRole(Predicate role);
 
+	
+	
 	public Set<Predicate> getRoles();
 
 	public Set<Predicate> getConcepts();
 	
 	public String getUri();
 
+	public void merge(Ontology onto);
+	
 	public Ontology clone();
 
+	
+	
 	public Set<SubClassOfAxiom> getSubClassAxioms();
 
 	public Set<SubPropertyOfAxiom> getSubPropertyAxioms();
 	
-	public Set<ClassAssertion> getClassAssertions();
-
-	public Set<PropertyAssertion> getPropertyAssertions();
-	
-	public Set<FunctionalPropertyAxiom> getFunctionalPropertyAxioms();
-	
 	public Set<DisjointClassesAxiom> getDisjointClassesAxioms();
 	
 	public Set<DisjointPropertiesAxiom> getDisjointPropertiesAxioms();
+	
+	public Set<FunctionalPropertyAxiom> getFunctionalPropertyAxioms();
+	
+	public Set<ClassAssertion> getClassAssertions();
+
+	public Set<PropertyAssertion> getPropertyAssertions();
 }

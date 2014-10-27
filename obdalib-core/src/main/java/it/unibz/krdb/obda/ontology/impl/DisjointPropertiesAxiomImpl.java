@@ -36,11 +36,6 @@ public class DisjointPropertiesAxiomImpl implements DisjointPropertiesAxiom {
 	}
 	
 	@Override
-	public String toString() {
-		return "disjoint(" + prop1 + ", " + prop2 + ")";
-	}
-
-	@Override
 	public Property getFirst() {
 		return prop1;
 	}
@@ -50,5 +45,23 @@ public class DisjointPropertiesAxiomImpl implements DisjointPropertiesAxiom {
 		return prop2;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof DisjointPropertiesAxiomImpl) {
+			DisjointPropertiesAxiomImpl other = (DisjointPropertiesAxiomImpl)obj;
+			return prop1.equals(other.prop1) && prop2.equals(other.prop2);
+		}
+		return false;
+	}
 	
+	@Override
+	public int hashCode() {
+		return prop1.hashCode() + prop2.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return "disjoint(" + prop1 + ", " + prop2 + ")";
+	}
+
 }

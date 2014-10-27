@@ -20,12 +20,13 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
+import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -83,17 +84,21 @@ public class SigmaTBoxOptimizer {
 
 				@Override
 				public void onInclusion(Property sub, Property sup) {
-					if (!check_redundant_role(sup, sub)) {
-						Axiom axiom = fac.createSubPropertyAxiom(sub, sup);
-						optimizedTBox.addAssertionWithEntities(axiom);
+					if (sub != sup) {
+						if (!check_redundant_role(sup, sub)) {
+							SubPropertyOfAxiom axiom = fac.createSubPropertyAxiom(sub, sup);
+							optimizedTBox.addAxiom(axiom);
+						}
 					}
 				}
 
 				@Override
 				public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
-					if (!check_redundant(sup, sub))  {
-						Axiom axiom = fac.createSubClassAxiom(sub, sup);
-						optimizedTBox.addAssertionWithEntities(axiom);
+					if (sub != sup) {
+						if (!sup.equals(sub) && !check_redundant(sup, sub))  {
+							SubClassOfAxiom axiom = fac.createSubClassAxiom(sub, sup);
+							optimizedTBox.addAxiom(axiom);
+						}
 					}
 				}
 			});

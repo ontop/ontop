@@ -55,17 +55,17 @@ public class PropertySomeRestrictionImpl implements PropertySomeRestriction {
 	}
 
 	@Override
-	public int hashCode() {
-		return string.hashCode();
+	public boolean equals(Object obj) {
+		if (obj instanceof PropertySomeRestrictionImpl) {
+			PropertySomeRestrictionImpl other = (PropertySomeRestrictionImpl) obj;
+			return property.equals(other.property);
+		}
+		return false;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof PropertySomeRestrictionImpl)) {
-			return false;
-		}
-		PropertySomeRestrictionImpl other = (PropertySomeRestrictionImpl) obj;
-		return property.equals(other.property);
+	public int hashCode() {
+		return string.hashCode();
 	}
 
 	@Override

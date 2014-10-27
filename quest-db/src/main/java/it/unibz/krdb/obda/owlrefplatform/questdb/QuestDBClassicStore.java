@@ -30,6 +30,8 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
+import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
@@ -223,10 +225,10 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 				result.addConcept(p);
 			for (Predicate p : o.getRoles())
 				result.addRole(p);
-			for (Axiom ax : result.getSubPropertyAxioms())  // TODO (ROMAN): check whether it's result and not o
-				result.addAssertion(ax);
-			for (Axiom ax : result.getSubClassAxioms())  // TODO (ROMAN): check whether it's result and not o
-				result.addAssertion(ax);
+			for (SubPropertyOfAxiom ax : result.getSubPropertyAxioms())  // TODO (ROMAN): check whether it's result and not o
+				result.addAssertionWithCheck(ax);
+			for (SubClassOfAxiom ax : result.getSubClassAxioms())  // TODO (ROMAN): check whether it's result and not o
+				result.addAssertionWithCheck(ax);
 		}
 		return result;
 	}
@@ -279,12 +281,14 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 				} else {
 					ontology.addRole(pred);
 				}
-			
+		/*
+		 * ROMAN: this code does nothing because	getTBoxAxiom is null
 			Axiom axiom = getTBoxAxiom(st);
 			if (axiom == null) {
 				return;
 			}
-			ontology.addAssertion(axiom);
+			ontology.addAssertionWithCheck(axiom);
+		*/
 		}
 
 		public Axiom getTBoxAxiom(Statement st) {

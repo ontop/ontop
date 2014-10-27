@@ -51,8 +51,8 @@ public class SigmaTest extends TestCase {
         OClass cc = descFactory.createClass(c);
         PropertySomeRestriction er = descFactory.createPropertySomeRestriction(r, false);
  
-        ontology.addAssertionWithEntities(descFactory.createSubClassAxiom(er, ac));
-        ontology.addAssertionWithEntities(descFactory.createSubClassAxiom(cc, er));
+        ontology.addAxiom(descFactory.createSubClassAxiom(er, ac));
+        ontology.addAxiom(descFactory.createSubClassAxiom(cc, er));
 
         
        

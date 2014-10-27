@@ -41,17 +41,17 @@ public class ClassImpl implements OClass {
 	}
 
 	@Override
-	public int hashCode() {
-		return string.hashCode();
-	}
-
-	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof ClassImpl)) {
 			return false;
 		}
 		ClassImpl concept2 = (ClassImpl) obj;
 		return (predicate.equals(concept2.getPredicate()));
+	}
+	
+	@Override
+	public int hashCode() {
+		return string.hashCode();
 	}
 
 	@Override

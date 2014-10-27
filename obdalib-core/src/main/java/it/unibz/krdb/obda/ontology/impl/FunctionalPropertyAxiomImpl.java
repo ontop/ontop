@@ -27,14 +27,33 @@ public class FunctionalPropertyAxiomImpl implements FunctionalPropertyAxiom{
 
 	private static final long serialVersionUID = 6020134666314925589L;
 	
-	private final Property role;
+	private final Property prop;
 	
-	FunctionalPropertyAxiomImpl(Property role) {
-		this.role = role;
+	FunctionalPropertyAxiomImpl(Property prop) {
+		this.prop = prop;
 	}
 
 	@Override
 	public Property getProperty() {
-		return role;
+		return prop;
 	}	
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof FunctionalPropertyAxiomImpl) {
+			FunctionalPropertyAxiomImpl other = (FunctionalPropertyAxiomImpl)obj;
+			return prop.equals(other.prop);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return prop.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return "func(" + prop + ")";
+	}
 }

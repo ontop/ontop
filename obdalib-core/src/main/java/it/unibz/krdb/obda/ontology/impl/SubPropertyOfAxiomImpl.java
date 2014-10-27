@@ -27,14 +27,11 @@ public class SubPropertyOfAxiomImpl implements SubPropertyOfAxiom {
 
 	private static final long serialVersionUID = -3020225654321319941L;
 
-	private final Property including; // righthand side
+	private final Property including; // right-hand side
 	private final Property included;	
 	private final String string;
 	
 	SubPropertyOfAxiomImpl(Property subDesc, Property superDesc) {
-		if (subDesc == null || superDesc == null) {
-			throw new RuntimeException("Recieved null in property inclusion");
-		}
 		included = subDesc;
 		including = superDesc;
 		StringBuilder bf = new StringBuilder();
@@ -56,14 +53,11 @@ public class SubPropertyOfAxiomImpl implements SubPropertyOfAxiom {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof SubPropertyOfAxiomImpl)) {
-			return false;
+		if (obj instanceof SubPropertyOfAxiomImpl) {
+			SubPropertyOfAxiomImpl inc2 = (SubPropertyOfAxiomImpl) obj;
+			return including.equals(inc2.including) && included.equals(inc2.included);
 		}
-		SubPropertyOfAxiomImpl inc2 = (SubPropertyOfAxiomImpl) obj;
-		if (!including.equals(inc2.including)) {
-			return false;
-		}
-		return (included.equals(inc2.included));
+		return false;
 	}
 
 	@Override
@@ -75,5 +69,4 @@ public class SubPropertyOfAxiomImpl implements SubPropertyOfAxiom {
 	public String toString() {
 		return string;
 	}
-	
 }

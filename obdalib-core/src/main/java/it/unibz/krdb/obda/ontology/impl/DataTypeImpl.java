@@ -39,6 +39,15 @@ public class DataTypeImpl implements DataType {
 	}
 	
 	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof DataTypeImpl) {
+			DataTypeImpl type2 = (DataTypeImpl) obj;
+			return (predicate.equals(type2.getPredicate()));
+		}
+		return false;
+	}
+	
+	@Override
 	public int hashCode() {
 		return toString().hashCode();
 	}
@@ -48,12 +57,4 @@ public class DataTypeImpl implements DataType {
 		return predicate.getName().toString();
 	}
 	
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof DataTypeImpl)) {
-			return false;
-		}
-		DataTypeImpl type2 = (DataTypeImpl) obj;
-		return (predicate.equals(type2.getPredicate()));
-	}
 }

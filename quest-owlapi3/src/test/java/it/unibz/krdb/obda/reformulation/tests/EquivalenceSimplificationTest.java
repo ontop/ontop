@@ -64,6 +64,8 @@ public class EquivalenceSimplificationTest extends TestCase {
 
 		assertEquals(3, simpleonto.getConcepts().size());
 		assertEquals(0, simpleonto.getRoles().size());
+		System.out.println(simpleonto.getSubClassAxioms());
+		System.out.println(simpleonto.getSubPropertyAxioms());
 		assertEquals(3, simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
 //		assertEquals(3, simpleonto.getVocabulary().size());
 

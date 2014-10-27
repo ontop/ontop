@@ -29,14 +29,11 @@ public class SubClassOfAxiomImpl implements SubClassOfAxiom {
 
 	private static final long serialVersionUID = -7590338987239580423L;
 
-	private final BasicClassDescription including; // righthand side
+	private final BasicClassDescription including; // right-hand side
 	private final BasicClassDescription included;
 	private final String string;
 	
 	SubClassOfAxiomImpl(BasicClassDescription subDesc, BasicClassDescription superDesc) {
-		if (subDesc == null || superDesc == null) {
-			throw new RuntimeException("Recieved null in concept inclusion");
-		}
 		included = subDesc;
 		including = superDesc;
 		StringBuilder bf = new StringBuilder();
@@ -58,14 +55,11 @@ public class SubClassOfAxiomImpl implements SubClassOfAxiom {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof SubClassOfAxiomImpl)) {
-			return false;
+		if (obj instanceof SubClassOfAxiomImpl) {
+			SubClassOfAxiomImpl inc2 = (SubClassOfAxiomImpl) obj;
+			return including.equals(inc2.including) && included.equals(inc2.included);
 		}
-		SubClassOfAxiomImpl inc2 = (SubClassOfAxiomImpl) obj;
-		if (!including.equals(inc2.including)) {
-			return false;
-		}
-		return (included.equals(inc2.included));
+		return false;
 	}
 	
 	@Override
@@ -77,5 +71,4 @@ public class SubClassOfAxiomImpl implements SubClassOfAxiom {
 	public String toString() {
 		return string;
 	}
-	
 }

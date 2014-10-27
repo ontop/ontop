@@ -52,22 +52,19 @@ public class PropertyImpl implements Property {
 	}
 
 	@Override
-	public int hashCode() {
-		return string.hashCode();
+	public boolean equals(Object obj) {
+		if (obj instanceof PropertyImpl) {
+			PropertyImpl other = (PropertyImpl) obj;
+			return (inverse == other.inverse) && predicate.equals(other.predicate);
+		}
+		return false;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof PropertyImpl)) {
-			return false;
-		}
-		PropertyImpl concept2 = (PropertyImpl) obj;
-		if (inverse != concept2.inverse) {
-			return false;
-		}
-		return (predicate.equals(concept2.predicate));
+	public int hashCode() {
+		return string.hashCode();
 	}
-
+	
 	@Override
 	public String toString() {
 		return string;
