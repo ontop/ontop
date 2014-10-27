@@ -56,13 +56,13 @@ public class DAGNode implements Serializable {
 	
 	public Set<DAGNode> equivalents = new LinkedHashSet<DAGNode>();
 
-	String string = "";
+	private String string = "";
 
-	int hashcode = 0;
+	private int hashcode = 0;
 
-	boolean hashNeedsUpdate = true;
+	private boolean hashNeedsUpdate = true;
 
-	boolean stringNeedsUpdate = true;
+	private boolean stringNeedsUpdate = true;
 
 	public DAGNode(Description description) {
 		this.description = description;
