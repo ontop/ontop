@@ -26,14 +26,15 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
 
 import java.util.LinkedList;
+
 import org.openrdf.model.vocabulary.XMLSchema;
 
 public class ABoxToFactRuleConverter {
@@ -44,20 +45,23 @@ public class ABoxToFactRuleConverter {
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
 			ObjectConstant c = ca.getObject();
-			Predicate p = ca.getConcept();
+			Predicate p = ca.getConcept().getPredicate();
 			Predicate urifuction = factory.getUriTemplatePredicate(1);
 			Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(c.getValue())));
 			rule = factory.getCQIE(head, new LinkedList<Function>());
 			// head = factory.getFunctionalTerm(p, c);
-		} else if (assertion instanceof ObjectPropertyAssertion) {
-			ObjectPropertyAssertion ca = (ObjectPropertyAssertion) assertion;
-			ObjectConstant s = ca.getFirstObject();
-			ObjectConstant o = ca.getSecondObject();
-			Predicate p = ca.getPredicate();
-			Predicate urifuction = factory.getUriTemplatePredicate(1);
-			Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(s.getValue())), factory.getFunction(urifuction, factory.getConstantLiteral(o.getValue())));
-			rule = factory.getCQIE(head, new LinkedList<Function>());
-		} else if (assertion instanceof DataPropertyAssertion) {
+		} else if (assertion instanceof PropertyAssertion) {
+			PropertyAssertion pa = (PropertyAssertion) assertion;
+			if (!(pa.getValue2() instanceof ValueConstant)) { // WE IGNORE DATA PROPERTY ASSERTIONS UNTIL THE NEXT RELEASE
+				ObjectConstant s = pa.getValue1();
+				ObjectConstant o = (ObjectConstant) pa.getValue2();
+				Predicate p = pa.getProperty().getPredicate();
+				Predicate urifuction = factory.getUriTemplatePredicate(1);
+				Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(s.getValue())), factory.getFunction(urifuction, factory.getConstantLiteral(o.getValue())));
+				rule = factory.getCQIE(head, new LinkedList<Function>());
+			}
+		} 
+//		else if (assertion instanceof DataPropertyAssertion) {
 			/* 
 			 * We ignore these for the moment until next release.
 			 */
@@ -70,7 +74,7 @@ public class ABoxToFactRuleConverter {
 //			Predicate urifuction = factory.getUriTemplatePredicate(1);
 //			head = factory.getFunction(p, factory.getFunction(urifuction, s), factory.getFunction(factory.getPredicate(typeURI,1), o));
 //			rule = factory.getCQIE(head, new LinkedList<Function>());
-		} 	
+//		} 	
 		return rule;
 	}
 

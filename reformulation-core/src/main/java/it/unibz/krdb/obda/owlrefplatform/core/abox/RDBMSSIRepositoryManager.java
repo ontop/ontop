@@ -37,12 +37,10 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.BinaryAssertion;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
@@ -770,16 +768,16 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		while (data.hasNext()) {
 			Assertion ax = data.next();
 
-			if (ax instanceof BinaryAssertion) {
+			if (ax instanceof PropertyAssertion) {
 
-				BinaryAssertion binaryAssertion = (BinaryAssertion) ax;
+				PropertyAssertion binaryAssertion = (PropertyAssertion) ax;
 				Constant c1 = binaryAssertion.getValue1();
 				Constant c2 = binaryAssertion.getValue2();
 
 				if (c2 instanceof ValueConstant) {
 
-					DataPropertyAssertion attributeABoxAssertion = (DataPropertyAssertion) ax;
-					String prop = attributeABoxAssertion.getAttribute().getName().toString();
+					PropertyAssertion attributeABoxAssertion = (PropertyAssertion) ax;
+					String prop = attributeABoxAssertion.getProperty().getPredicate().getName().toString();
 
 					String uri;
 
@@ -790,7 +788,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					else
 						uri = ((URIConstant) c1).getURI().toString();
 
-					ValueConstant value = attributeABoxAssertion.getValue();
+					ValueConstant value = (ValueConstant) attributeABoxAssertion.getValue2();
 					String lit = value.getValue();
 					String lang = value.getLanguage();
 					if (lang != null)
@@ -802,7 +800,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					// dfac.getDataPropertyPredicate(prop);
 					// Property propDesc = ofac.createProperty(propPred);
 
-					int idx = cacheSI.getIndex(attributeABoxAssertion.getPredicate(), 2);
+					int idx = cacheSI.getIndex(attributeABoxAssertion.getProperty().getPredicate(), 2);
 					// Description node = pureIsa.getNode(propDesc);
 					//int idx = engine.getIndex(node);
 
@@ -860,8 +858,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					}
 				} else if (c2 instanceof ObjectConstant) {
 
-					ObjectPropertyAssertion roleABoxAssertion = (ObjectPropertyAssertion) ax;
-					String prop = roleABoxAssertion.getRole().getName().toString();
+					PropertyAssertion roleABoxAssertion = (PropertyAssertion) ax;
+					String prop = roleABoxAssertion.getProperty().getPredicate().getName().toString();
 					String uri1;
 					String uri2;
 
@@ -902,7 +900,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					//Description node = pureIsa.getNode(propDesc);
 					//int idx = engine.getIndex(node);
 
-					int idx = cacheSI.getIndex(roleABoxAssertion.getPredicate(), 2);
+					int idx = cacheSI.getIndex(roleABoxAssertion.getProperty().getPredicate(), 2);
 
 					out.append(String.format(role_insert_str, getQuotedString(uri1), getQuotedString(uri2), idx, c1isBNode, c2isBNode));
 
@@ -924,7 +922,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				// Predicate clsPred = classAssertion.getConcept();
 				// ClassDescription clsDesc = ofac.createClass(clsPred);
 				//
-				int idx = cacheSI.getIndex(classAssertion.getPredicate(), 1);
+				int idx = cacheSI.getIndex(classAssertion.getConcept().getPredicate(), 1);
 
 				//Description node = pureIsa.getNode(clsDesc);
 				//int idx = engine.getIndex(node);
@@ -1159,15 +1157,19 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				 */
 				int index = 0;
 				if (ax instanceof ClassAssertion) {
-					index = cacheSI.getIndex(ax.getPredicate(), 1);
+					index = cacheSI.getIndex(((ClassAssertion) ax).getConcept().getPredicate(), 1);
 				} else {
-					index = cacheSI.getIndex(ax.getPredicate(), 2);
+					index = cacheSI.getIndex(((PropertyAssertion)ax).getProperty().getPredicate(), 2);
 				}
 				SemanticIndexRecord record = SemanticIndexRecord.getRecord(ax, index);
 				nonEmptyEntityRecord.add(record);
 
 			} catch (Exception e) {
-				monitor.fail(ax.getPredicate());
+				if (ax instanceof ClassAssertion) {
+					monitor.fail(((ClassAssertion) ax).getConcept().getPredicate());
+				} else {
+					monitor.fail(((PropertyAssertion)ax).getProperty().getPredicate());
+				}
 			}
 
 			// Check if the batch count is already in the batch limit
@@ -1270,10 +1272,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		int uri_id = 0;
 		int uri2_id = 0;
 //		boolean newUri = false;
-		if (ax instanceof BinaryAssertion) {
+		if (ax instanceof PropertyAssertion) {
 			// Get the data property assertion
-			BinaryAssertion attributeAssertion = (BinaryAssertion) ax;
-			Predicate predicate = attributeAssertion.getPredicate();
+			PropertyAssertion attributeAssertion = (PropertyAssertion) ax;
+			Predicate predicate = attributeAssertion.getProperty().getPredicate();
 
 			Constant object = attributeAssertion.getValue2();
 			Predicate.COL_TYPE attributeType = object.getType();
@@ -1430,7 +1432,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		} else if (ax instanceof ClassAssertion) {
 			// Get the class assertion
 			ClassAssertion classAssertion = (ClassAssertion) ax;
-			Predicate concept = classAssertion.getConcept();
+			Predicate concept = classAssertion.getConcept().getPredicate();
 
 			// Construct the database INSERT statements
 			ObjectConstant c1 = classAssertion.getObject();

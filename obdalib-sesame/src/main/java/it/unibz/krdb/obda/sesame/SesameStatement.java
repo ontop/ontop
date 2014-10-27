@@ -28,9 +28,8 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.BinaryAssertion;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.UnaryAssertion;
 
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
@@ -52,11 +51,11 @@ public class SesameStatement implements Statement {
 		
 		Constant subj;
 
-		if (assertion instanceof BinaryAssertion) {
+		if (assertion instanceof PropertyAssertion) {
 			//object or data property assertion
-			BinaryAssertion ba = (BinaryAssertion) assertion;
+			PropertyAssertion ba = (PropertyAssertion) assertion;
 			subj = ba.getValue1();
-			Predicate pred = ba.getPredicate();
+			Predicate pred = ba.getProperty().getPredicate();
 			Constant obj = ba.getValue2();
 			
 			// convert string into respective type
@@ -77,12 +76,12 @@ public class SesameStatement implements Statement {
 				object = getLiteral((ValueConstant)obj);
 			
 			
-		} else if (assertion instanceof UnaryAssertion) { 
+		} else if (assertion instanceof ClassAssertion) { 
 			//class assertion
-			UnaryAssertion ua = (UnaryAssertion) assertion;
-			subj = ua.getValue();
+			ClassAssertion ua = (ClassAssertion) assertion;
+			subj = ua.getObject();
 			String pred = OBDAVocabulary.RDF_TYPE;
-			Predicate obj = ua.getPredicate();
+			Predicate obj = ua.getConcept().getPredicate();
 			
 			// convert string into respective type
 			if (subj instanceof BNode)

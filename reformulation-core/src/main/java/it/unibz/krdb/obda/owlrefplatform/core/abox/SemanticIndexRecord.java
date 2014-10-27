@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.BinaryAssertion;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 
 /***
@@ -139,7 +139,7 @@ public class SemanticIndexRecord {
 			}
 
 		} else {
-			BinaryAssertion ba = (BinaryAssertion) assertion;
+			PropertyAssertion ba = (PropertyAssertion) assertion;
 			COL_TYPE atype1 = ba.getValue1().getType();
 
 			if (atype1 == COL_TYPE.BNODE) {

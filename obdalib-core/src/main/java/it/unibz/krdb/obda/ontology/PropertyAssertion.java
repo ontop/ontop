@@ -21,8 +21,13 @@ package it.unibz.krdb.obda.ontology;
  */
 
 import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.ObjectConstant;
 
-public interface UnaryAssertion extends Assertion {
+public interface PropertyAssertion extends Assertion {
 
-	public Constant getValue();
+	public Property getProperty();
+	
+	public ObjectConstant getValue1();
+	
+	public Constant getValue2();	
 }

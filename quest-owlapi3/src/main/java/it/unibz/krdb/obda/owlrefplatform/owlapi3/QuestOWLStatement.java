@@ -20,20 +20,16 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.TupleResultSet;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
@@ -44,7 +40,6 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -429,23 +424,25 @@ public class QuestOWLStatement {
 			while (resultSet.hasNext()) {
 				for (Assertion assertion : resultSet.next()) {
 					if (assertion instanceof ClassAssertion) {
-						String subjectIRI = ((ClassAssertion) assertion).getObject().getValue();
-						String classIRI = ((ClassAssertion) assertion).getPredicate().toString();
+						ClassAssertion ca = (ClassAssertion)assertion;
+						String subjectIRI = ca.getObject().getValue();
+						String classIRI = ca.getConcept().toString();
 						OWLAxiom classAxiom = createOWLClassAssertion(classIRI, subjectIRI, factory);
 						axiomList.add(classAxiom);
-					} else if (assertion instanceof ObjectPropertyAssertion) {
-						String propertyIRI = ((ObjectPropertyAssertion) assertion).getPredicate().toString();
-						String subjectIRI = ((ObjectPropertyAssertion) assertion).getFirstObject().getValue();
-						String objectIRI = ((ObjectPropertyAssertion) assertion).getSecondObject().getValue();
-						OWLAxiom objectPropertyAxiom = createOWLObjectPropertyAssertion(propertyIRI, subjectIRI, objectIRI, factory);
-						axiomList.add(objectPropertyAxiom);
-					} else if (assertion instanceof DataPropertyAssertion) {
-						String propertyIRI = ((DataPropertyAssertion) assertion).getPredicate().toString();
-						String subjectIRI = ((DataPropertyAssertion) assertion).getObject().getValue();
-						String objectValue = ((DataPropertyAssertion) assertion).getValue().getValue();
-						OWLAxiom dataPropertyAxiom = createOWLDataPropertyAssertion(propertyIRI, subjectIRI, objectValue, factory);
-						axiomList.add(dataPropertyAxiom);
-					}
+					} else if (assertion instanceof PropertyAssertion) {
+						PropertyAssertion pa = (PropertyAssertion)assertion;
+						String propertyIRI = pa.getProperty().getPredicate().toString();
+						String subjectIRI = pa.getValue1().getValue();
+						String objectIRI = pa.getValue2().getValue();
+						if (pa.getValue2() instanceof ValueConstant) {
+							OWLAxiom objectPropertyAxiom = createOWLObjectPropertyAssertion(propertyIRI, subjectIRI, objectIRI, factory);
+							axiomList.add(objectPropertyAxiom);
+						}
+						else {
+							OWLAxiom objectPropertyAxiom = createOWLDataPropertyAssertion(propertyIRI, subjectIRI, objectIRI, factory);
+							axiomList.add(objectPropertyAxiom);							
+						}
+					} 
 				}
 			}
 		}

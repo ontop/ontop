@@ -23,15 +23,12 @@ package it.unibz.krdb.obda.owlapi3;
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
 
-import org.openrdf.model.vocabulary.XMLSchema;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -65,33 +62,30 @@ public class OWLAPI3IndividualTranslator {
 
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
-			IRI conceptIRI = IRI.create(ca.getConcept().getName().toString());
+			IRI conceptIRI = IRI.create(ca.getConcept().getPredicate().getName().toString());
 
 			OWLClass description = dataFactory.getOWLClass(conceptIRI);
 			OWLIndividual object = (OWLNamedIndividual) translate(ca.getObject());
 
 			return dataFactory.getOWLClassAssertionAxiom(description, object);
 
-		} else if (assertion instanceof ObjectPropertyAssertion) {
-			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
-			IRI roleIRI = IRI.create(opa.getRole().getName().toString());
+		} else if (assertion instanceof PropertyAssertion) {
+			PropertyAssertion opa = (PropertyAssertion) assertion;
+			IRI roleIRI = IRI.create(opa.getProperty().getPredicate().getName().toString());
 
-			OWLObjectProperty property = dataFactory.getOWLObjectProperty(roleIRI);
-			OWLIndividual subject = (OWLNamedIndividual) translate(opa.getFirstObject());
-			OWLIndividual object = (OWLNamedIndividual) translate(opa.getSecondObject());
+			OWLIndividual subject = (OWLNamedIndividual) translate(opa.getValue1());
+			if (opa.getValue2() instanceof ValueConstant) {
+				OWLDataProperty property = dataFactory.getOWLDataProperty(roleIRI);
+				OWLLiteral object = (OWLLiteral) translate(opa.getValue2());
+				return dataFactory.getOWLDataPropertyAssertionAxiom(property, subject, object);			
+			}
+			else {
+				OWLObjectProperty property = dataFactory.getOWLObjectProperty(roleIRI);
+				OWLIndividual object = (OWLNamedIndividual) translate(opa.getValue2());
+				return dataFactory.getOWLObjectPropertyAssertionAxiom(property, subject, object);				
+			}
 
-			return dataFactory.getOWLObjectPropertyAssertionAxiom(property, subject, object);
-
-		} else if (assertion instanceof DataPropertyAssertion) {
-			DataPropertyAssertion dpa = (DataPropertyAssertion) assertion;
-			IRI attributeIRI = IRI.create(dpa.getAttribute().getName().toString());
-
-			OWLDataProperty property = dataFactory.getOWLDataProperty(attributeIRI);
-			OWLIndividual subject = (OWLNamedIndividual) translate(dpa.getObject());
-			OWLLiteral object = (OWLLiteral) translate(dpa.getValue());
-
-			return dataFactory.getOWLDataPropertyAssertionAxiom(property, subject, object);
-		}
+		} 
 		return null;
 	}
 

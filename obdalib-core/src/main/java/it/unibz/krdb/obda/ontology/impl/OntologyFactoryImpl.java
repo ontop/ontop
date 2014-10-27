@@ -29,16 +29,15 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
@@ -59,7 +58,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public ClassAssertion createClassAssertion(Predicate concept, ObjectConstant object) {
+	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant object) {
 		return new ClassAssertionImpl(concept, object);
 	}
 
@@ -95,13 +94,13 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public ObjectPropertyAssertion createObjectPropertyAssertion(Predicate role, ObjectConstant o1, ObjectConstant o2) {
-		return new ObjectPropertyAssertionImpl(role, o1, o2);
+	public PropertyAssertion createObjectPropertyAssertion(Property role, ObjectConstant o1, ObjectConstant o2) {
+		return new PropertyAssertionImpl(role, o1, o2);
 	}
 
 	@Override
-	public DataPropertyAssertion createDataPropertyAssertion(Predicate attribute, ObjectConstant o1, ValueConstant o2) {
-		return new DataPropertyAssertionImpl(attribute, o1, o2);
+	public PropertyAssertion createDataPropertyAssertion(Property attribute, ObjectConstant o1, ValueConstant o2) {
+		return new PropertyAssertionImpl(attribute, o1, o2);
 	}
 
 	@Override
@@ -143,7 +142,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public Assertion createPropertyAssertion(Predicate attribute, ObjectConstant o1, Constant o2) {
+	public Assertion createPropertyAssertion(Property attribute, ObjectConstant o1, Constant o2) {
 		if (o2 instanceof ObjectConstant) {
 			return createObjectPropertyAssertion(attribute, o1, (ObjectConstant) o2);
 		}

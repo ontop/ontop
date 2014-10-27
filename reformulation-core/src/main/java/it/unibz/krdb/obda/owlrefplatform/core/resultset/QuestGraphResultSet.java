@@ -34,9 +34,10 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
 
@@ -147,8 +148,9 @@ public class QuestGraphResultSet implements GraphResultSet {
 			// Determines the type of assertion
 			String predicateName = predicateConstant.getValue();
 			if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
-				Predicate concept = dfac.getClassPredicate(objectConstant
+				Predicate conceptP = dfac.getClassPredicate(objectConstant
 						.getValue());
+				OClass concept = ofac.createClass(conceptP);
 				ClassAssertion ca = ofac.createClassAssertion(concept,
 						(ObjectConstant) subjectConstant);
 				tripleAssertions.add(ca);
@@ -156,24 +158,27 @@ public class QuestGraphResultSet implements GraphResultSet {
 				if (objectConstant instanceof URIConstant) {
 					Predicate role = dfac
 							.getObjectPropertyPredicate(predicateName);
-					ObjectPropertyAssertion op = ofac
-							.createObjectPropertyAssertion(role,
+					Property prop = ofac.createObjectProperty(role.getName(), false);
+					PropertyAssertion op = ofac
+							.createObjectPropertyAssertion(prop,
 									(ObjectConstant) subjectConstant,
 									(ObjectConstant) objectConstant);
 					tripleAssertions.add(op);
 				} else if (objectConstant instanceof BNodeConstantImpl) {
 					Predicate role = dfac
 							.getObjectPropertyPredicate(predicateName);
-					ObjectPropertyAssertion op = ofac
-							.createObjectPropertyAssertion(role,
+					Property prop = ofac.createObjectProperty(role.getName(), false);
+					PropertyAssertion op = ofac
+							.createObjectPropertyAssertion(prop,
 									(ObjectConstant) subjectConstant,
 									(ObjectConstant) objectConstant);
 					tripleAssertions.add(op);
 				} else {
 					Predicate attribute = dfac
 							.getDataPropertyPredicate(predicateName);
-					DataPropertyAssertion dp = ofac
-							.createDataPropertyAssertion(attribute,
+					Property prop = ofac.createDataProperty(attribute.getName());
+					PropertyAssertion dp = ofac
+							.createDataPropertyAssertion(prop,
 									(ObjectConstant) subjectConstant,
 									(ValueConstant) objectConstant);
 					tripleAssertions.add(dp);
