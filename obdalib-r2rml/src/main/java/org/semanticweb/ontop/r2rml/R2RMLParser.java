@@ -291,6 +291,7 @@ public class R2RMLParser {
 		
 		String lan = om.getLanguageTag();
 		Object datatype = om.getDatatype(Object.class);
+
 		
 		//we check if the object map is a constant (can be a iri or a literal)
 		String obj = om.getConstant();
@@ -374,15 +375,24 @@ public class R2RMLParser {
 			Predicate literal = OBDAVocabulary.RDFS_LITERAL_LANG;
 			Term langAtom = fac.getFunction(literal, objectAtom, lang);
 			objectAtom = langAtom;
-		}
-		
-		//we check if it is a typed literal 
-		if (datatype != null)
-		{
-			Predicate dtype =  new DataTypePredicateImpl(datatype.toString(), COL_TYPE.OBJECT);
-			Term dtAtom = fac.getFunction(dtype, objectAtom);
-			objectAtom = dtAtom;
-		}
+		} else {
+
+            //we check if it is a typed literal
+            if (datatype != null) {
+                Predicate dtype = new DataTypePredicateImpl(datatype.toString(), COL_TYPE.OBJECT);
+                Term dtAtom = fac.getFunction(dtype, objectAtom);
+                objectAtom = dtAtom;
+            }
+            else{
+
+                Object type = om.getTermType(Object.class);
+                if(type.equals(R2RMLVocabulary.literal)) {
+                    //it's a simple literal
+                    objectAtom = fac.getFunction(OBDAVocabulary.RDFS_LITERAL, fac.getVariable(col));
+                }
+
+            }
+        }
 
 		return objectAtom;
 	}
