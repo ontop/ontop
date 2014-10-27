@@ -1,0 +1,72 @@
+[PrefixDeclaration]
+:		http://www.example.org/#
+
+[SourceDeclaration]
+sourceUri	viewTest
+connectionUrl	jdbc:db2://10.7.20.39:50001/ontowis
+username	db2inst2
+password	fish
+driverClass	com.ibm.db2.jcc.DB2Driver
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-A1
+target		<http://www.example.org/{Tab1.unique2Tab1}> a <http://www.example.org/A1> . 
+source		SELECT * FROM "Tab1" WHERE twentyTab1 < 10
+
+mappingId	MAPID-A2
+target		<http://www.example.org/{Tab2.unique2Tab2}> a <http://www.example.org/A2> . 
+source		SELECT * FROM "Tab2" WHERE twentyTab2 < 8
+
+mappingId	MAPID-A3
+target		<http://www.example.org/{Tab3.unique2Tab3}> a <http://www.example.org/A3> . 
+source		SELECT * FROM "Tab3" WHERE twentyTab3 < 6
+
+mappingId	MAPID-A4
+target		<http://www.example.org/{Tab4.unique2Tab4}> a <http://www.example.org/A4> . 
+source		SELECT * FROM "Tab4" WHERE twentyTab4 < 4
+
+mappingId	MAPID-A5
+target		<http://www.example.org/{Tab5.unique2Tab5}> a <http://www.example.org/A5> . 
+source		SELECT * FROM "Tab5" WHERE twentyTab5 < 2
+
+mappingId	MAPID-B1
+target		<http://www.example.org/{Tab1.unique2Tab1}> a <http://www.example.org/B1> . 
+source		SELECT * FROM "Tab1" WHERE twentyTab1 < 10
+
+mappingId	MAPID-B2
+target		<http://www.example.org/{Tab2.unique2Tab2}> a <http://www.example.org/B2> . 
+source		SELECT * FROM "Tab2" WHERE twentyTab2 < 8
+
+mappingId	MAPID-B3
+target		<http://www.example.org/{Tab3.unique2Tab3}> a <http://www.example.org/B3> . 
+source		SELECT * FROM "Tab3" WHERE twentyTab3 < 6
+
+mappingId	MAPID-B4
+target		<http://www.example.org/{Tab4.unique2Tab4}> a <http://www.example.org/B4> . 
+source		SELECT * FROM "Tab4" WHERE twentyTab4 < 4
+
+mappingId	MAPID-B5
+target		<http://www.example.org/{Tab5.unique2Tab5}> a <http://www.example.org/B5> . 
+source		SELECT * FROM "Tab5" WHERE twentyTab5 < 2
+
+mappingId	MAPID-C1
+target		<http://www.example.org/{Tab1.unique2Tab1}> a <http://www.example.org/C1> . 
+source		SELECT * FROM "Tab1" WHERE twentyTab1 < 10
+
+mappingId	MAPID-C2
+target		<http://www.example.org/{Tab2.unique2Tab2}> a <http://www.example.org/C2> . 
+source		SELECT * FROM "Tab2" WHERE twentyTab2 < 8
+
+mappingId	MAPID-C3
+target		<http://www.example.org/{Tab3.unique2Tab3}> a <http://www.example.org/C3> . 
+source		SELECT * FROM "Tab3" WHERE twentyTab3 < 6
+
+mappingId	MAPID-C4
+target		<http://www.example.org/{Tab4.unique2Tab4}> a <http://www.example.org/C4> . 
+source		SELECT * FROM "Tab4" WHERE twentyTab4 < 4
+
+mappingId	MAPID-C5
+target		<http://www.example.org/{Tab5.unique2Tab5}> a <http://www.example.org/C5> . 
+source		SELECT * FROM "Tab5" WHERE twentyTab5 < 2
+]]
+

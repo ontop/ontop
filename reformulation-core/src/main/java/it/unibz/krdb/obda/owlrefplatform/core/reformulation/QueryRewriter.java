@@ -20,16 +20,14 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
-import java.io.Serializable;
+public interface QueryRewriter {
 
-public interface QueryRewriter extends Serializable {
-
-	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException;
+	public DatalogProgram rewrite(DatalogProgram input) throws OBDAException;
 
 	/***
 	 * Sets the ontology and the ABox dependencies that this rewriter should 
@@ -38,5 +36,5 @@ public interface QueryRewriter extends Serializable {
 	 * @param ontology
 	 * @param sigma
 	 */
-	public void setTBox(TBoxReasoner ontology, Ontology sigma);
+	public void setTBox(TBoxReasoner ontology, LinearInclusionDependencies sigma);
 }

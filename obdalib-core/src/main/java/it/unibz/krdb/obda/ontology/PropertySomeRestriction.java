@@ -31,4 +31,6 @@ public interface PropertySomeRestriction extends BasicClassDescription {
 	public boolean isInverse();
 
 	public Predicate getPredicate();
+
+	public Property getProperty();	
 }

@@ -9,22 +9,43 @@
     rdfs:label "Date-Time Type Tests" ;
     mf:entries
     ( 
-      :date :date-bgp
-      :time :time-bgp
-      :time_tz :time_tz-bgp
+      :dateLiteral :date :date-str :date-bgp
+      :timeLiteral :time :time-str :time-bgp
+      :time_tz :time_tz_Literal :time_tz-bgp
       :timestamp :timestamp-str
       :timestamp_tz :timestamp_tz-str
     ) .
 
 ## >>> This test should fail!
-:date rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: DATE" ;
+:dateLiteral rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE LITERAL" ;
     mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <date.rq> ] ;
+            [ qt:query <dateLiteral.rq> ] ;
     mf:result <noresult.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
+:date rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE" ;
+    mf:comment	"Quest can now support xsd:date in filter" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <date.rq> ] ;
+    mf:result <date.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
+:date-str rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE cast to xsd:string" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <date-str.rq> ] ;
+    mf:result <date-str.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
 
@@ -38,15 +59,35 @@
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
 
-## >>> This test should fail!    
-:time rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: TIME" ;
+## >>> This test should fail!
+:timeLiteral rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME LITERAL" ;
     mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <time.rq> ] ;
+            [ qt:query <timeLiteral.rq> ] ;
     mf:result <noresult.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
+:time rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <time.rq> ] ;
+    mf:result <time.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
+:time-str rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME casto to xsd-string" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <time-str.rq> ] ;
+    mf:result <time-str.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
 
@@ -61,14 +102,25 @@
     mf:mappings <datatypes-pgsql.obda> .
 
 ## >>> This test should fail!
-:time_tz rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: TIME WITH TIMEZONE" ;
+:time_tz_Literal rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME WITH TIMEZONE LITERAL" ;
     mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <time_tz.rq> ] ;
+            [ qt:query <time_tz_Literal.rq> ] ;
     mf:result <noresult.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-pgsql.obda> .
+
+
+:time_tz rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME WITH TIMEZONE" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <time_tz.rq> ] ;
+    mf:result <time_tz.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
 
@@ -93,12 +145,12 @@
     mf:mappings <datatypes-pgsql.obda> .
 
 :timestamp-str rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: TIMESTAMP - cast to Literal" ;
+    mf:name    "Type: TIMESTAMP - cast to xsd:string" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
             [ qt:query <timestamp-str.rq> ] ;
-    mf:result <timestamp.ttl> ;
+    mf:result <timestamp-str.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-pgsql.obda> .
     

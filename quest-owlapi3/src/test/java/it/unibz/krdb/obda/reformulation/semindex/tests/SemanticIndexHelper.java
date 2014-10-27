@@ -191,7 +191,7 @@ public class SemanticIndexHelper {
 
                 if (type.equals("classes")) {
                     if (exists)
-                        description = descFactory.getPropertySomeRestriction(p, inverse);
+                        description = descFactory.createPropertySomeRestriction(p, inverse);
                     else
                         description = descFactory.createClass(p);
                 } else {

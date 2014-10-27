@@ -24,7 +24,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Axiom;
-import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -71,7 +71,7 @@ public class DAG implements Serializable {
 
 	private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
 
-	private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+	private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
 	// public final static String thingStr =
 	// "http://www.w3.org/2002/07/owl#Thing";
@@ -102,7 +102,7 @@ public class DAG implements Serializable {
 		// classes.put(thingConcept, thing);
 
 		for (Predicate conceptp : ontology.getConcepts()) {
-			ClassDescription concept = descFactory.createClass(conceptp);
+			BasicClassDescription concept = descFactory.createClass(conceptp);
 			DAGNode node = new DAGNode(concept);
 
 			// if (!concept.equals(thingConcept)) {
@@ -116,7 +116,7 @@ public class DAG implements Serializable {
 		 * For each role we add nodes for its inverse, its domain and its range
 		 */
 		for (Predicate rolep : ontology.getRoles()) {
-			Property role = descFactory.createProperty(rolep);
+			Property role = descFactory.createProperty(rolep, false);
 			DAGNode rolenode = new DAGNode(role);
 
 			roles.put(role, rolenode);
@@ -125,8 +125,8 @@ public class DAG implements Serializable {
 			DAGNode rolenodeinv = new DAGNode(roleInv);
 			roles.put(roleInv, rolenodeinv);
 
-			PropertySomeRestriction existsRole = descFactory.getPropertySomeRestriction(role.getPredicate(), role.isInverse());
-			PropertySomeRestriction existsRoleInv = descFactory.getPropertySomeRestriction(role.getPredicate(), !role.isInverse());
+			PropertySomeRestriction existsRole = descFactory.createPropertySomeRestriction(role);
+			PropertySomeRestriction existsRoleInv = descFactory.createPropertySomeRestriction(role.getPredicate(), !role.isInverse());
 			DAGNode existsNode = new DAGNode(existsRole);
 			DAGNode existsNodeInv = new DAGNode(existsRoleInv);
 			classes.put(existsRole, existsNode);
@@ -145,8 +145,8 @@ public class DAG implements Serializable {
 
 			if (assertion instanceof SubClassAxiomImpl) {
 				SubClassAxiomImpl clsIncl = (SubClassAxiomImpl) assertion;
-				ClassDescription parent = clsIncl.getSuper();
-				ClassDescription child = clsIncl.getSub();
+				BasicClassDescription parent = clsIncl.getSuper();
+				BasicClassDescription child = clsIncl.getSub();
 
 				addClassEdge(parent, child);
 			} else if (assertion instanceof SubPropertyAxiomImpl) {
@@ -178,7 +178,7 @@ public class DAG implements Serializable {
 		this.allnodes = allnodes;
 	}
 
-	private void addClassEdge(ClassDescription parent, ClassDescription child) {
+	private void addClassEdge(BasicClassDescription parent, BasicClassDescription child) {
 
 		DAGNode parentNode;
 		if (classes.containsKey(parent)) {
@@ -227,9 +227,9 @@ public class DAG implements Serializable {
 		}
 		addParent(childNode, parentNode);
 
-		ClassDescription existsParent = descFactory.getPropertySomeRestriction(parent.getPredicate(), parent.isInverse());
+		BasicClassDescription existsParent = descFactory.createPropertySomeRestriction(parent);
 
-		ClassDescription existChild = descFactory.getPropertySomeRestriction(child.getPredicate(), child.isInverse());
+		BasicClassDescription existChild = descFactory.createPropertySomeRestriction(child);
 
 		addClassEdge(existsParent, existChild);
 		// addClassEdge(thingConcept, existsParent);
@@ -362,7 +362,7 @@ public class DAG implements Serializable {
 	 * @param conceptDescription
 	 * @return
 	 */
-	public DAGNode getClassNode(ClassDescription conceptDescription) {
+	public DAGNode getClassNode(BasicClassDescription conceptDescription) {
 		DAGNode rv = classes.get(conceptDescription);
 		if (rv == null) {
 			rv = classes.get(equi_mappings.get(conceptDescription));

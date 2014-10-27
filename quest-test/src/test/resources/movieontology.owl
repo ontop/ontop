@@ -35,9 +35,9 @@
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
     <owl:Ontology rdf:about="&www;movieontology.owl">
         <dc:date rdf:datatype="&xsd;string">20.01.2010</dc:date>
-        <dc:contributor rdf:datatype="&xsd;string">Amancio Bouza</dc:contributor>
-        <dc:creator rdf:datatype="&xsd;string">Amancio Bouza</dc:creator>
         <dc:publisher rdf:datatype="&xsd;string">Amancio Bouza</dc:publisher>
+        <dc:creator rdf:datatype="&xsd;string">Amancio Bouza</dc:creator>
+        <dc:contributor rdf:datatype="&xsd;string">Amancio Bouza</dc:contributor>
         <dc:description rdf:datatype="&xsd;string">MO - Movie ontology</dc:description>
         <owl:imports rdf:resource="http://dbpedia.org/ontology/"/>
     </owl:Ontology>
@@ -147,6 +147,16 @@
     
 
 
+    <!-- http://dbpedia.org/ontology/birthName -->
+
+    <rdf:Description rdf:about="&dbpedia;birthName">
+        <rdfs:label xml:lang="el">όνομα_γέννησης</rdfs:label>
+        <rdfs:label xml:lang="en">birth name</rdfs:label>
+        <rdfs:domain rdf:resource="&dbpedia;Person"/>
+    </rdf:Description>
+    
+
+
     <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#belongsToGenre -->
 
     <owl:ObjectProperty rdf:about="&mo;belongsToGenre">
@@ -155,10 +165,10 @@
     
 
 
-    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#containsCountry -->
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#containsCompanyCountry -->
 
-    <owl:ObjectProperty rdf:about="&mo;containsCountry">
-        <rdfs:range rdf:resource="&dbpedia;Country"/>
+    <owl:ObjectProperty rdf:about="&mo;containsCompanyCountry">
+        <rdfs:range rdf:resource="&dbpedia;CompanyCountry"/>
         <rdfs:domain rdf:resource="&mo;Territory"/>
     </owl:ObjectProperty>
     
@@ -260,11 +270,11 @@
     
 
 
-    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasReleasingCountry -->
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#hasReleasingCompanyCountry -->
 
-    <owl:ObjectProperty rdf:about="&mo;hasReleasingCountry">
-        <rdfs:range rdf:resource="&dbpedia;Country"/>
-        <owl:inverseOf rdf:resource="&mo;isReleasingCountryOf"/>
+    <owl:ObjectProperty rdf:about="&mo;hasReleasingCompanyCountry">
+        <rdfs:range rdf:resource="&dbpedia;CompanyCountry"/>
+        <owl:inverseOf rdf:resource="&mo;isReleasingCompanyCountryOf"/>
     </owl:ObjectProperty>
     
 
@@ -404,10 +414,10 @@
     
 
 
-    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isReleasingCountryOf -->
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#isReleasingCompanyCountryOf -->
 
-    <owl:ObjectProperty rdf:about="&mo;isReleasingCountryOf">
-        <rdfs:domain rdf:resource="&dbpedia;Country"/>
+    <owl:ObjectProperty rdf:about="&mo;isReleasingCompanyCountryOf">
+        <rdfs:domain rdf:resource="&dbpedia;CompanyCountry"/>
     </owl:ObjectProperty>
     
 
@@ -438,10 +448,10 @@
     
 
 
-    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#partOfTerritory -->
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#partOfCompanyTerritory -->
 
-    <owl:ObjectProperty rdf:about="&mo;partOfTerritory">
-        <rdfs:domain rdf:resource="&dbpedia;Country"/>
+    <owl:ObjectProperty rdf:about="&mo;partOfCompanyTerritory">
+        <rdfs:domain rdf:resource="&dbpedia;CompanyCountry"/>
         <rdfs:range rdf:resource="&mo;Territory"/>
     </owl:ObjectProperty>
     
@@ -511,7 +521,6 @@
     <owl:DatatypeProperty rdf:about="&dbpedia;birthName">
         <rdfs:label xml:lang="el">όνομα_γέννησης</rdfs:label>
         <rdfs:label xml:lang="en">birth name</rdfs:label>
-        <rdfs:domain rdf:resource="&dbpedia;Person"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
@@ -522,7 +531,7 @@
     <owl:DatatypeProperty rdf:about="&dbpedia;budget">
         <rdfs:label xml:lang="el">προϋπολογισμός ($)</rdfs:label>
         <rdfs:label xml:lang="en">budget ($)</rdfs:label>
-        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;double"/>
     </owl:DatatypeProperty>
     
 
@@ -532,7 +541,7 @@
     <owl:DatatypeProperty rdf:about="&dbpedia;gross">
         <rdfs:label xml:lang="el">ακαθάριστα ($)</rdfs:label>
         <rdfs:label xml:lang="en">gross ($)</rdfs:label>
-        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;double"/>
     </owl:DatatypeProperty>
     
 
@@ -616,9 +625,9 @@
     
 
 
-    <!-- http://dbpedia.org/ontology/Country -->
+    <!-- http://dbpedia.org/ontology/CompanyCountry -->
 
-    <owl:Class rdf:about="&dbpedia;Country"/>
+    <owl:Class rdf:about="&dbpedia;CompanyCountry"/>
     
 
 
@@ -728,6 +737,14 @@
     
 
 
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Center_American_Company -->
+
+    <owl:Class rdf:about="&mo;Center_American_Company">
+        <rdfs:subClassOf rdf:resource="&mo;Location_Company"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Central_America -->
 
     <owl:Class rdf:about="&mo;Central_America">
@@ -771,6 +788,14 @@
 
     <owl:Class rdf:about="&mo;Documentarial_Information">
         <rdfs:subClassOf rdf:resource="&mo;Special-Info"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#East_Asian_Company -->
+
+    <owl:Class rdf:about="&mo;East_Asian_Company">
+        <rdfs:subClassOf rdf:resource="&mo;Location_Company"/>
     </owl:Class>
     
 
@@ -925,6 +950,12 @@
     
 
 
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Location_Company -->
+
+    <owl:Class rdf:about="&mo;Location_Company"/>
+    
+
+
     <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Logical_Thrilling -->
 
     <owl:Class rdf:about="&mo;Logical_Thrilling">
@@ -979,6 +1010,22 @@
     
 
 
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#North_American_Company -->
+
+    <owl:Class rdf:about="&mo;North_American_Company">
+        <rdfs:subClassOf rdf:resource="&mo;Location_Company"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#North_European_Company -->
+
+    <owl:Class rdf:about="&mo;North_European_Company">
+        <rdfs:subClassOf rdf:resource="&mo;Location_Company"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Northern_Africa -->
 
     <owl:Class rdf:about="&mo;Northern_Africa">
@@ -1007,6 +1054,14 @@
 
     <owl:Class rdf:about="&mo;Oceania">
         <rdfs:subClassOf rdf:resource="&mo;Territory"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#Oceanian_Company -->
+
+    <owl:Class rdf:about="&mo;Oceanian_Company">
+        <rdfs:subClassOf rdf:resource="&mo;Location_Company"/>
     </owl:Class>
     
 
@@ -1101,10 +1156,42 @@
     
 
 
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#SouthEast_Asian_Company -->
+
+    <owl:Class rdf:about="&mo;SouthEast_Asian_Company">
+        <rdfs:subClassOf rdf:resource="&mo;Location_Company"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#South_America -->
 
     <owl:Class rdf:about="&mo;South_America">
         <rdfs:subClassOf rdf:resource="&mo;LatinAmerica"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#South_American_Company -->
+
+    <owl:Class rdf:about="&mo;South_American_Company">
+        <rdfs:subClassOf rdf:resource="&mo;Location_Company"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#South_Asian_Company -->
+
+    <owl:Class rdf:about="&mo;South_Asian_Company">
+        <rdfs:subClassOf rdf:resource="&mo;Location_Company"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#South_European_Company -->
+
+    <owl:Class rdf:about="&mo;South_European_Company">
+        <rdfs:subClassOf rdf:resource="&mo;Location_Company"/>
     </owl:Class>
     
 
@@ -1173,6 +1260,14 @@
 
     <owl:Class rdf:about="&mo;Thrilling">
         <rdfs:subClassOf rdf:resource="&mo;Imaginational_Entertainment"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.movieontology.org/2009/10/01/movieontology.owl#West_European_Company -->
+
+    <owl:Class rdf:about="&mo;West_European_Company">
+        <rdfs:subClassOf rdf:resource="&mo;Location_Company"/>
     </owl:Class>
     
 
@@ -3767,81 +3862,6 @@
     
 
 
-    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#Australia -->
-
-    <owl:Thing rdf:about="&www;movieontology.owl#Australia">
-        <rdf:type rdf:resource="&owl;NamedIndividual"/>
-    </owl:Thing>
-    
-
-
-    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#Canada -->
-
-    <owl:Thing rdf:about="&www;movieontology.owl#Canada">
-        <rdf:type rdf:resource="&mo;Northern_America"/>
-        <rdf:type rdf:resource="&owl;NamedIndividual"/>
-    </owl:Thing>
-    
-
-
-    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#China -->
-
-    <owl:Thing rdf:about="&www;movieontology.owl#China">
-        <rdf:type rdf:resource="&owl;NamedIndividual"/>
-    </owl:Thing>
-    
-
-
-    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#Denmark -->
-
-    <owl:Thing rdf:about="&www;movieontology.owl#Denmark">
-        <rdf:type rdf:resource="&mo;Northern_Europe"/>
-        <rdf:type rdf:resource="&owl;NamedIndividual"/>
-    </owl:Thing>
-    
-
-
-    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#France -->
-
-    <owl:Thing rdf:about="&www;movieontology.owl#France">
-        <rdf:type rdf:resource="&mo;Western_Europe"/>
-        <rdf:type rdf:resource="&owl;NamedIndividual"/>
-    </owl:Thing>
-    
-
-
-    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#Great_Britain -->
-
-    <owl:Thing rdf:about="&www;movieontology.owl#Great_Britain">
-        <rdf:type rdf:resource="&owl;NamedIndividual"/>
-    </owl:Thing>
-    
-
-
-    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#India -->
-
-    <owl:Thing rdf:about="&www;movieontology.owl#India">
-        <rdf:type rdf:resource="&owl;NamedIndividual"/>
-    </owl:Thing>
-    
-
-
-    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#Italy -->
-
-    <owl:Thing rdf:about="&www;movieontology.owl#Italy">
-        <rdf:type rdf:resource="&owl;NamedIndividual"/>
-    </owl:Thing>
-    
-
-
-    <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#Mexico -->
-
-    <owl:Thing rdf:about="&www;movieontology.owl#Mexico">
-        <rdf:type rdf:resource="&owl;NamedIndividual"/>
-    </owl:Thing>
-    
-
-
     <!-- http://www.movieontology.org/2009/11/09/movieontology.owl#United_States -->
 
     <owl:Thing rdf:about="&www;movieontology.owl#United_States">
@@ -3859,60 +3879,11 @@
      -->
 
     <rdf:Description>
-        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
-        <owl:members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&mo;Australia_and_New_Zealand"/>
-            <rdf:Description rdf:about="&mo;Melanesia"/>
-            <rdf:Description rdf:about="&mo;Micronesia"/>
-            <rdf:Description rdf:about="&mo;Polynesia"/>
-        </owl:members>
-    </rdf:Description>
-    <rdf:Description>
-        <rdf:type rdf:resource="&owl;AllDifferent"/>
-        <owl:distinctMembers rdf:parseType="Collection">
-            <rdf:Description rdf:about="&mo;Amazon.com_retailer"/>
-            <rdf:Description rdf:about="&mo;Netflix.com_retailer"/>
-        </owl:distinctMembers>
-    </rdf:Description>
-    <rdf:Description>
-        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
-        <owl:members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&mo;Central_Asia"/>
-            <rdf:Description rdf:about="&mo;Eastern_Asia"/>
-            <rdf:Description rdf:about="&mo;Southeastern_Asia"/>
-            <rdf:Description rdf:about="&mo;Southern_Asia"/>
-            <rdf:Description rdf:about="&mo;Western_Asia"/>
-        </owl:members>
-    </rdf:Description>
-    <rdf:Description>
-        <rdf:type rdf:resource="&owl;AllDifferent"/>
-        <owl:distinctMembers rdf:parseType="Collection">
-            <rdf:Description rdf:about="&mo;Amazon.com_retailer"/>
-            <rdf:Description rdf:about="&mo;RottenTomatoes.com_retailer"/>
-        </owl:distinctMembers>
-    </rdf:Description>
-    <rdf:Description>
         <rdf:type rdf:resource="&owl;AllDifferent"/>
         <owl:distinctMembers rdf:parseType="Collection">
             <rdf:Description rdf:about="&mo;Amazon.com_retailer"/>
             <rdf:Description rdf:about="&mo;Blockbuster.com_retailer"/>
         </owl:distinctMembers>
-    </rdf:Description>
-    <rdf:Description>
-        <rdf:type rdf:resource="&owl;AllDifferent"/>
-        <owl:distinctMembers rdf:parseType="Collection">
-            <rdf:Description rdf:about="&mo;Blockbuster.com_retailer"/>
-            <rdf:Description rdf:about="&mo;Netflix.com_retailer"/>
-        </owl:distinctMembers>
-    </rdf:Description>
-    <rdf:Description>
-        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
-        <owl:members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&mo;Eastern_Europe"/>
-            <rdf:Description rdf:about="&mo;Northern_Europe"/>
-            <rdf:Description rdf:about="&mo;Southern_Europe"/>
-            <rdf:Description rdf:about="&mo;Western_Europe"/>
-        </owl:members>
     </rdf:Description>
     <rdf:Description>
         <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
@@ -3933,6 +3904,62 @@
         </owl:members>
     </rdf:Description>
     <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Blockbuster.com_retailer"/>
+            <rdf:Description rdf:about="&mo;RottenTomatoes.com_retailer"/>
+        </owl:distinctMembers>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Central_Asia"/>
+            <rdf:Description rdf:about="&mo;Eastern_Asia"/>
+            <rdf:Description rdf:about="&mo;Southeastern_Asia"/>
+            <rdf:Description rdf:about="&mo;Southern_Asia"/>
+            <rdf:Description rdf:about="&mo;Western_Asia"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Eastern_Europe"/>
+            <rdf:Description rdf:about="&mo;Northern_Europe"/>
+            <rdf:Description rdf:about="&mo;Southern_Europe"/>
+            <rdf:Description rdf:about="&mo;Western_Europe"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Blockbuster.com_retailer"/>
+            <rdf:Description rdf:about="&mo;Netflix.com_retailer"/>
+        </owl:distinctMembers>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Amazon.com_retailer"/>
+            <rdf:Description rdf:about="&mo;RottenTomatoes.com_retailer"/>
+        </owl:distinctMembers>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDifferent"/>
+        <owl:distinctMembers rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Amazon.com_retailer"/>
+            <rdf:Description rdf:about="&mo;Netflix.com_retailer"/>
+        </owl:distinctMembers>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Australia_and_New_Zealand"/>
+            <rdf:Description rdf:about="&mo;Melanesia"/>
+            <rdf:Description rdf:about="&mo;Micronesia"/>
+            <rdf:Description rdf:about="&mo;Polynesia"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
         <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
         <owl:members rdf:parseType="Collection">
             <rdf:Description rdf:about="&mo;Africa"/>
@@ -3946,13 +3973,6 @@
         <rdf:type rdf:resource="&owl;AllDifferent"/>
         <owl:distinctMembers rdf:parseType="Collection">
             <rdf:Description rdf:about="&mo;Netflix.com_retailer"/>
-            <rdf:Description rdf:about="&mo;RottenTomatoes.com_retailer"/>
-        </owl:distinctMembers>
-    </rdf:Description>
-    <rdf:Description>
-        <rdf:type rdf:resource="&owl;AllDifferent"/>
-        <owl:distinctMembers rdf:parseType="Collection">
-            <rdf:Description rdf:about="&mo;Blockbuster.com_retailer"/>
             <rdf:Description rdf:about="&mo;RottenTomatoes.com_retailer"/>
         </owl:distinctMembers>
     </rdf:Description>

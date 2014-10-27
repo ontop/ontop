@@ -24,7 +24,9 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 
 import java.util.ArrayList;
@@ -113,7 +115,7 @@ public class AutomaticMGUTestDataGenerator {
 			if (string.equals(""))
 				continue;
 			String[] elements = string.split("/");
-			Substitution s = new Substitution(getTerm(elements[0]), getTerm(elements[1]));
+			Substitution s = new Substitution((VariableImpl)getTerm(elements[0]), getTerm(elements[1]));
 			mgu.add(s);
 		}
 		return mgu;

@@ -22,12 +22,10 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
 
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.HashSet;
 import java.util.List;

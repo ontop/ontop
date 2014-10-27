@@ -21,36 +21,29 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  */
 
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 
 public class Substitution {
 
-	//TODO make variable an instance of Variable
-	private Term variable = null;
-	private Term term = null;
+	private final VariableImpl variable;
+	private final Term term;
 	
-	public Substitution(Term v, Term t){
+	public Substitution(VariableImpl v, Term t) {
 		variable = v;
 		term = t;
 	}
 	
-	public Term getVariable(){
+	public VariableImpl getVariable() {
 		return variable;
 	}
 	
-	public Term getTerm(){
+	public Term getTerm() {
 		return term;
 	};
-	
-	public void setTerm(Term newTerm){
-		term = newTerm;
-	}
-	
-	public void setVariable(Term newVariable){
-		term = newVariable;
-	}
-	
+		
+	@Override
 	public String toString() {
-		return variable.toString() + "/" + term.toString();
+		return variable + "/" + term;
 	}
 }

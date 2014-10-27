@@ -73,7 +73,7 @@ public interface RDBMSDataRepositoryManager extends Serializable {
 
 	public void setTBox(TBoxReasoner reasonerDag);
 
-	public void setVocabulary(Set<Predicate> vocabulary) throws PunningException;
+	// public void setVocabulary(Set<Predicate> vocabulary) throws PunningException;
 
 	public String getType();
 

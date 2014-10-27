@@ -122,7 +122,12 @@ public class QuestMaterializer {
 		}
 		if (onto != null) {
 			//from ontology
-			for (Predicate p : onto.getVocabulary()) {
+			for (Predicate p : onto.getConcepts()) {
+				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+						&& !vocabulary.contains(p))
+					vocabulary.add(p);
+			}
+			for (Predicate p : onto.getRoles()) {
 				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 						&& !vocabulary.contains(p))
 					vocabulary.add(p);
@@ -149,7 +154,15 @@ public class QuestMaterializer {
 		//start a quest instance
 		if (ontology == null) {
 			ontology = ofac.createOntology();
-			ontology.addEntities(this.model.getDeclaredPredicates());
+			
+			for (Predicate pred : model.getDeclaredPredicates()) {
+				if (pred.getArity() == 1) {
+					ontology.addConcept(pred);
+				} else {
+					ontology.addRole(pred);
+				}
+			}
+			
 		}
 		
 		

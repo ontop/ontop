@@ -38,5 +38,5 @@ public interface CQIE extends OBDAQuery {
 	
 	public Set<Variable> getReferencedVariables();
 	
-	public Map<Variable,Integer> getVariableCount();
+//	public Map<Variable,Integer> getVariableCount();
 }

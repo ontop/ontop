@@ -49,18 +49,22 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 
 public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	
-	private SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag;
-	private Map<T, Equivalences<T>> equivalencesMap;
-
-	public EquivalencesDAGImpl(DefaultDirectedGraph<T,DefaultEdge> graph) {
-		
-		this.equivalencesMap = new HashMap<T, Equivalences<T>>();
-		SimpleDirectedGraph<Equivalences<T>,DefaultEdge> dag0 = factorize(graph, this.equivalencesMap);
-		this.dag = removeRedundantEdges(dag0);
-	}
+	private final SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag;
+	private final Map<T, Equivalences<T>> equivalencesMap;
 	
-	public Set<Equivalences<T>> vertexSet() {
-		return dag.vertexSet();
+	private final Map<Equivalences<T>, Set<Equivalences<T>>> cacheSub;
+	private final Map<T, Set<T>> cacheSubRep;
+
+	
+	private DefaultDirectedGraph<T,DefaultEdge> graph; // used in tests and SIGMA reduction
+	
+	public EquivalencesDAGImpl(DefaultDirectedGraph<T,DefaultEdge> graph, SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag, Map<T, Equivalences<T>> equivalencesMap) {	
+		this.graph = graph;
+		this.dag = dag;
+		this.equivalencesMap = equivalencesMap;
+		
+		this.cacheSub = new HashMap<Equivalences<T>, Set<Equivalences<T>>>();
+		this.cacheSubRep = new HashMap<T, Set<T>>();
 	}
 	
 	/** 
@@ -91,18 +95,53 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	@Override
 	public Set<Equivalences<T>> getSub(Equivalences<T> v) {
 
-		LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+		Set<Equivalences<T>> result = cacheSub.get(v);
+		if (result == null) {
+			result = new LinkedHashSet<Equivalences<T>>();
 
-		BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator = 
-					new BreadthFirstIterator<Equivalences<T>, DefaultEdge>(
-							new EdgeReversedGraph<Equivalences<T>, DefaultEdge>(dag), v);
+			BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator = 
+						new BreadthFirstIterator<Equivalences<T>, DefaultEdge>(
+								new EdgeReversedGraph<Equivalences<T>, DefaultEdge>(dag), v);
 
-		while (iterator.hasNext()) {
-			Equivalences<T> child = iterator.next();
-			result.add(child);
+			while (iterator.hasNext()) {
+				Equivalences<T> child = iterator.next();
+				result.add(child);
+			}
+			result = Collections.unmodifiableSet(result);
+			cacheSub.put(v, result);
 		}
-		return Collections.unmodifiableSet(result);
+		return result; 
 	}
+
+	/** 
+	 * 
+	 */
+	@Override
+	public Set<T> getSubRepresentatives(T v) {
+		Equivalences<T> eq = equivalencesMap.get(v);
+		
+		if (eq == null)
+			return Collections.singleton(v);
+		
+		Set<T> result = cacheSubRep.get(eq.getRepresentative());
+		if (result == null) {
+			result = new LinkedHashSet<T>();
+
+			BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator = 
+						new BreadthFirstIterator<Equivalences<T>, DefaultEdge>(
+								new EdgeReversedGraph<Equivalences<T>, DefaultEdge>(dag), eq);
+
+			while (iterator.hasNext()) {
+				Equivalences<T> child = iterator.next();
+				result.add(child.getRepresentative());
+			}
+			result = Collections.unmodifiableSet(result);
+			cacheSubRep.put(eq.getRepresentative(), result);
+		}
+		return result; 
+	}
+	
+
 	
 	/** 
 	 * 
@@ -156,8 +195,34 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	 */
 	
 	@Deprecated
-	public int edgeSetSize() {
+	int edgeSetSize() {
 		return dag.edgeSet().size();
+	}
+
+	@Deprecated 
+	public int vertexSetSize() { 
+		return dag.vertexSet().size();
+	}
+	
+	
+	public DefaultDirectedGraph<T,DefaultEdge> getGraph() {
+		if (graph == null) {
+			graph = new DefaultDirectedGraph<T,DefaultEdge>(DefaultEdge.class);
+
+			for (Equivalences<T> node : dag.vertexSet()) {
+				for (T v : node) 
+					graph.addVertex(v);
+				for (T v : node)  {
+					graph.addEdge(v, node.getRepresentative());
+					graph.addEdge(node.getRepresentative(), v);
+				}
+			}
+			
+			for (DefaultEdge edge : dag.edgeSet()) 
+				graph.addEdge(dag.getEdgeSource(edge).getRepresentative(), dag.getEdgeTarget(edge).getRepresentative());
+		}
+		return graph;
+		
 	}
 	
 	
@@ -166,8 +231,9 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	 *  construction: main algorithms (static generic methods)
 	 */
 	
-	private static <TT> SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> factorize(DefaultDirectedGraph<TT,DefaultEdge> graph, 
-																				Map<TT, Equivalences<TT>> equivalencesMap) {
+	public static <TT> EquivalencesDAGImpl<TT> getEquivalencesDAG(DefaultDirectedGraph<TT,DefaultEdge> graph) {
+		
+		
 		// each set contains vertices which together form a strongly connected
 		// component within the given graph
 		GabowSCC<TT, DefaultEdge> inspector = new GabowSCC<TT, DefaultEdge>(graph);
@@ -175,6 +241,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 
 		SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> dag0 = 
 					new SimpleDirectedGraph<Equivalences<TT>,DefaultEdge>(DefaultEdge.class);
+		Map<TT, Equivalences<TT>> equivalencesMap = new HashMap<TT, Equivalences<TT>>();
 
 		for (Equivalences<TT> equivalenceSet : equivalenceSets)  {
 			for (TT node : equivalenceSet) 
@@ -197,27 +264,27 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 				}
 			}
 		}
-		return removeRedundantEdges(dag0);
-	}
+		
 
-	private static <TT> SimpleDirectedGraph<TT,DefaultEdge> removeRedundantEdges(SimpleDirectedGraph<TT,DefaultEdge> graph) {
+		// removed redundant edges
+		
+		SimpleDirectedGraph <Equivalences<TT>,DefaultEdge> dag = 
+						new SimpleDirectedGraph <Equivalences<TT>,DefaultEdge> (DefaultEdge.class);
 
-		SimpleDirectedGraph <TT,DefaultEdge> dag = new SimpleDirectedGraph <TT,DefaultEdge> (DefaultEdge.class);
-
-		for (TT v : graph.vertexSet())
+		for (Equivalences<TT> v : dag0.vertexSet())
 			dag.addVertex(v);
 
-		for (DefaultEdge edge : graph.edgeSet()) {
-			TT v1 = graph.getEdgeSource(edge);
-			TT v2 = graph.getEdgeTarget(edge);
+		for (DefaultEdge edge : dag0.edgeSet()) {
+			Equivalences<TT> v1 = dag0.getEdgeSource(edge);
+			Equivalences<TT> v2 = dag0.getEdgeTarget(edge);
 			boolean redundant = false;
 
-			if (graph.outDegreeOf(v1) > 1) {
+			if (dag0.outDegreeOf(v1) > 1) {
 				// an edge is redundant if 
 				//  its source has an edge going to a vertex 
 				//         from which the target is reachable (in one step) 
-				for (DefaultEdge e2 : graph.outgoingEdgesOf(v1)) 
-					if (graph.containsEdge(graph.getEdgeTarget(e2), v2)) {
+				for (DefaultEdge e2 : dag0.outgoingEdgesOf(v1)) 
+					if (dag0.containsEdge(dag0.getEdgeTarget(e2), v2)) {
 						redundant = true;
 						break;
 					}
@@ -225,6 +292,8 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 			if (!redundant)
 				dag.addEdge(v1, v2);
 		}
-		return dag;
+		
+		return new EquivalencesDAGImpl<TT>(graph, dag, equivalencesMap);
 	}
+
 }

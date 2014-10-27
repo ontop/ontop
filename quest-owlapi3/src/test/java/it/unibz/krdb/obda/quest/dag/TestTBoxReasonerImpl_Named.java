@@ -21,10 +21,13 @@ package it.unibz.krdb.obda.quest.dag;
  */
 
 
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Intersection;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Iterator;
@@ -139,6 +142,19 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 		}
 
 		@Override
+		public Set<T> getSubRepresentatives(T v) {
+			Equivalences<T> eq = reasonerDAG.getVertex(v);
+			LinkedHashSet<T> result = new LinkedHashSet<T>();
+			
+			for (Equivalences<T> e : reasonerDAG.getSub(eq)) {
+				Equivalences<T> nodes = getVertex(e.getRepresentative());
+				if (nodes != null)
+					result.add(nodes.getRepresentative());			
+			}
+			return result;
+		}		
+
+		@Override
 		public Set<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
 			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
 			
@@ -166,6 +182,19 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 			}
 			
 			return result;
-		}		
+		}
+	}
+
+	@Override
+	public OClass getClassRepresentative(Predicate p) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public Property getPropertyRepresentative(Predicate p) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
