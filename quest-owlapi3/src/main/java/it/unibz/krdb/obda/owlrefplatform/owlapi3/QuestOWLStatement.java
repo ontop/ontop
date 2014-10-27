@@ -425,14 +425,14 @@ public class QuestOWLStatement {
 				for (Assertion assertion : resultSet.next()) {
 					if (assertion instanceof ClassAssertion) {
 						ClassAssertion ca = (ClassAssertion)assertion;
-						String subjectIRI = ca.getObject().getValue();
+						String subjectIRI = ca.getIndividual().getValue();
 						String classIRI = ca.getConcept().toString();
 						OWLAxiom classAxiom = createOWLClassAssertion(classIRI, subjectIRI, factory);
 						axiomList.add(classAxiom);
 					} else if (assertion instanceof PropertyAssertion) {
 						PropertyAssertion pa = (PropertyAssertion)assertion;
 						String propertyIRI = pa.getProperty().getPredicate().toString();
-						String subjectIRI = pa.getValue1().getValue();
+						String subjectIRI = pa.getSubject().getValue();
 						String objectIRI = pa.getValue2().getValue();
 						if (pa.getValue2() instanceof ValueConstant) {
 							OWLAxiom objectPropertyAxiom = createOWLObjectPropertyAssertion(propertyIRI, subjectIRI, objectIRI, factory);

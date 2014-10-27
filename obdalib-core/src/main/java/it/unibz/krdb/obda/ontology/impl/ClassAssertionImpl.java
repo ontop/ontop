@@ -20,14 +20,9 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.OClass;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class ClassAssertionImpl implements ClassAssertion {
 
@@ -42,7 +37,7 @@ public class ClassAssertionImpl implements ClassAssertion {
 	}
  
 	@Override
-	public ObjectConstant getObject() {
+	public ObjectConstant getIndividual() {
 		return object;
 	}
 
@@ -50,16 +45,10 @@ public class ClassAssertionImpl implements ClassAssertion {
 	public OClass getConcept() {
 		return concept;
 	}
-
+	
+	@Override
 	public String toString() {
 		return concept.toString() + "(" + object.toString() + ")";
-	}
-
-	@Override
-	public Set<Predicate> getReferencedEntities() {
-		Set<Predicate> res = new HashSet<Predicate>();
-		res.add(concept.getPredicate());
-		return res;
 	}
 
 }

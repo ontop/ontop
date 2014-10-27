@@ -54,7 +54,7 @@ public class SesameStatement implements Statement {
 		if (assertion instanceof PropertyAssertion) {
 			//object or data property assertion
 			PropertyAssertion ba = (PropertyAssertion) assertion;
-			subj = ba.getValue1();
+			subj = ba.getSubject();
 			Predicate pred = ba.getProperty().getPredicate();
 			Constant obj = ba.getValue2();
 			
@@ -79,7 +79,7 @@ public class SesameStatement implements Statement {
 		} else if (assertion instanceof ClassAssertion) { 
 			//class assertion
 			ClassAssertion ua = (ClassAssertion) assertion;
-			subj = ua.getObject();
+			subj = ua.getIndividual();
 			String pred = OBDAVocabulary.RDF_TYPE;
 			Predicate obj = ua.getConcept().getPredicate();
 			

@@ -130,7 +130,7 @@ public class SemanticIndexRecord {
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
 			table = SITable.CLASS;
-			COL_TYPE atype1 = ca.getObject().getType();
+			COL_TYPE atype1 = ca.getIndividual().getType();
 
 			if (atype1 == COL_TYPE.BNODE) {
 				t1 = OBJType.BNode;
@@ -140,7 +140,7 @@ public class SemanticIndexRecord {
 
 		} else {
 			PropertyAssertion ba = (PropertyAssertion) assertion;
-			COL_TYPE atype1 = ba.getValue1().getType();
+			COL_TYPE atype1 = ba.getSubject().getType();
 
 			if (atype1 == COL_TYPE.BNODE) {
 				t1 = OBJType.BNode;

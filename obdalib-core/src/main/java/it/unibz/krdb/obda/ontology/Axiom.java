@@ -28,7 +28,7 @@ import java.util.Set;
 /***
  * A logical axiom.
  */
-public interface Axiom  extends Serializable{
+public interface Axiom  extends Serializable {
 
-	public Set<Predicate> getReferencedEntities();
+//	public Set<Predicate> getReferencedEntities();
 }

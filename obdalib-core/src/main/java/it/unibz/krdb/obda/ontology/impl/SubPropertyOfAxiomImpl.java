@@ -20,10 +20,6 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import java.util.HashSet;
-import java.util.Set;
-
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
@@ -68,24 +64,6 @@ public class SubPropertyOfAxiomImpl implements SubPropertyOfAxiom {
 			return false;
 		}
 		return (included.equals(inc2.included));
-	}
-
-	@Override
-	public Set<Predicate> getReferencedEntities() {
-		Set<Predicate> res = new HashSet<Predicate>();
-		for (Predicate p : getPredicates(included)) {
-			res.add(p);
-		}
-		for (Predicate p : getPredicates(including)) {
-			res.add(p);
-		}
-		return res;
-	}
-
-	private Set<Predicate> getPredicates(Property desc) {
-		Set<Predicate> preds = new HashSet<Predicate>();
-		preds.add(desc.getPredicate());
-		return preds;
 	}
 
 	@Override

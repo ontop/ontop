@@ -65,7 +65,7 @@ public class OWLAPI3IndividualTranslator {
 			IRI conceptIRI = IRI.create(ca.getConcept().getPredicate().getName().toString());
 
 			OWLClass description = dataFactory.getOWLClass(conceptIRI);
-			OWLIndividual object = (OWLNamedIndividual) translate(ca.getObject());
+			OWLIndividual object = (OWLNamedIndividual) translate(ca.getIndividual());
 
 			return dataFactory.getOWLClassAssertionAxiom(description, object);
 
@@ -73,7 +73,7 @@ public class OWLAPI3IndividualTranslator {
 			PropertyAssertion opa = (PropertyAssertion) assertion;
 			IRI roleIRI = IRI.create(opa.getProperty().getPredicate().getName().toString());
 
-			OWLIndividual subject = (OWLNamedIndividual) translate(opa.getValue1());
+			OWLIndividual subject = (OWLNamedIndividual) translate(opa.getSubject());
 			if (opa.getValue2() instanceof ValueConstant) {
 				OWLDataProperty property = dataFactory.getOWLDataProperty(roleIRI);
 				OWLLiteral object = (OWLLiteral) translate(opa.getValue2());

@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataType;
@@ -93,14 +92,9 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new FunctionalPropertyAxiomImpl(role);
 	}
 
-	@Override
+	
 	public PropertyAssertion createObjectPropertyAssertion(Property role, ObjectConstant o1, ObjectConstant o2) {
 		return new PropertyAssertionImpl(role, o1, o2);
-	}
-
-	@Override
-	public PropertyAssertion createDataPropertyAssertion(Property attribute, ObjectConstant o1, ValueConstant o2) {
-		return new PropertyAssertionImpl(attribute, o1, o2);
 	}
 
 	@Override
@@ -142,11 +136,8 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public Assertion createPropertyAssertion(Property attribute, ObjectConstant o1, Constant o2) {
-		if (o2 instanceof ObjectConstant) {
-			return createObjectPropertyAssertion(attribute, o1, (ObjectConstant) o2);
-		}
-		return createDataPropertyAssertion(attribute, o1, (ValueConstant) o2);
+	public PropertyAssertion createPropertyAssertion(Property attribute, ObjectConstant o1, Constant o2) {
+		return new PropertyAssertionImpl(attribute, o1, o2);
 	}
 
 	@Override

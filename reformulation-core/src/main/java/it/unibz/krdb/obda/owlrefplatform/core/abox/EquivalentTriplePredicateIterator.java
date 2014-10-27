@@ -71,7 +71,7 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 			OClass description = reasoner.getClassRepresentative(concept);
 			
 			if (description != null) {
-				ObjectConstant object = ca.getObject();
+				ObjectConstant object = ca.getIndividual();
 				return ofac.createClassAssertion(description, object);
 			}			
 		} 
@@ -81,18 +81,18 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 			Property property = reasoner.getPropertyRepresentative(role);
 			
 			if (property != null) {
-				ObjectConstant object1 = opa.getValue1();
+				ObjectConstant object1 = opa.getSubject();
 				if (opa.getValue2() instanceof ValueConstant) {
 					ValueConstant constant = (ValueConstant)opa.getValue2();
-					return ofac.createDataPropertyAssertion(property, object1, constant);					
+					return ofac.createPropertyAssertion(property, object1, constant);					
 				}
 				else {
 					ObjectConstant object2 = (ObjectConstant)opa.getValue2();
 					if (property.isInverse()) {
 						Property notinv = ofac.createObjectProperty(property.getPredicate().getName(), false);
-						return ofac.createObjectPropertyAssertion(notinv, object2, object1);
+						return ofac.createPropertyAssertion(notinv, object2, object1);
 					} else {
-						return ofac.createObjectPropertyAssertion(property, object1, object2);
+						return ofac.createPropertyAssertion(property, object1, object2);
 					}
 				}
 			}

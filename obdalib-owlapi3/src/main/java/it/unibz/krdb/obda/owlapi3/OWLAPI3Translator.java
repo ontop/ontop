@@ -173,7 +173,8 @@ public class OWLAPI3Translator {
 			
 			for (Axiom ax : aux.getAssertions())
 				translation.addAssertion(ax);
-			translation.getABox().addAll(aux.getABox());
+			translation.getClassAssertions().addAll(aux.getClassAssertions());
+			translation.getPropertyAssertions().addAll(aux.getPropertyAssertions());
 			translation.getDisjointPropertiesAxioms().addAll(aux.getDisjointPropertiesAxioms());
 			translation.getDisjointClassesAxioms().addAll(aux.getDisjointClassesAxioms());
 			translation.getFunctionalPropertyAxioms().addAll(aux.getFunctionalPropertyAxioms());
@@ -534,7 +535,7 @@ public class OWLAPI3Translator {
 				
 				
 				} else if (axiom instanceof OWLIndividualAxiom) {
-					Assertion translatedAxiom = translate((OWLIndividualAxiom)axiom);
+					Axiom translatedAxiom = translate((OWLIndividualAxiom)axiom);
 					if (translatedAxiom != null)
 						dl_onto.addAssertion(translatedAxiom);
 					
@@ -1002,7 +1003,7 @@ public class OWLAPI3Translator {
 
 			Property prop = ofac.createObjectProperty(p.getName(), false);
 //			if (equivalent == null)
-				return ofac.createObjectPropertyAssertion(prop, c1, c2);
+				return ofac.createPropertyAssertion(prop, c1, c2);
 //			else {
 //				Property equiProp = (Property) equivalent;
 //				if (!equiProp.isInverse()) {
@@ -1041,7 +1042,7 @@ public class OWLAPI3Translator {
 			ValueConstant c2 = dfac.getConstantLiteral(object.getLiteral(), type);
 
 			Property prop = ofac.createDataProperty(p.getName());
-			return ofac.createDataPropertyAssertion(prop, c1, c2);
+			return ofac.createPropertyAssertion(prop, c1, c2);
 
 		} else {
 			return null;

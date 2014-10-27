@@ -771,13 +771,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			if (ax instanceof PropertyAssertion) {
 
 				PropertyAssertion binaryAssertion = (PropertyAssertion) ax;
-				Constant c1 = binaryAssertion.getValue1();
+				Constant c1 = binaryAssertion.getSubject();
 				Constant c2 = binaryAssertion.getValue2();
 
 				if (c2 instanceof ValueConstant) {
 
 					PropertyAssertion attributeABoxAssertion = (PropertyAssertion) ax;
-					String prop = attributeABoxAssertion.getProperty().getPredicate().getName().toString();
 
 					String uri;
 
@@ -908,7 +907,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			} else if (ax instanceof ClassAssertion) {
 
 				ClassAssertion classAssertion = (ClassAssertion) ax;
-				Constant c1 = classAssertion.getObject();
+				Constant c1 = classAssertion.getIndividual();
 
 				String uri;
 
@@ -1281,7 +1280,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			Predicate.COL_TYPE attributeType = object.getType();
 
 			// Construct the database INSERT statements
-			ObjectConstant subject = (ObjectConstant) attributeAssertion.getValue1();
+			ObjectConstant subject = (ObjectConstant) attributeAssertion.getSubject();
 
 			String uri = subject.getValue();
 			 uri_id = uriMap.idOfURI(uri);
@@ -1435,7 +1434,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			Predicate concept = classAssertion.getConcept().getPredicate();
 
 			// Construct the database INSERT statements
-			ObjectConstant c1 = classAssertion.getObject();
+			ObjectConstant c1 = classAssertion.getIndividual();
 
 			String uri;
 

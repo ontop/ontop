@@ -20,14 +20,8 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class DisjointClassesAxiomImpl implements DisjointClassesAxiom {
 
@@ -44,24 +38,6 @@ public class DisjointClassesAxiomImpl implements DisjointClassesAxiom {
 	@Override
 	public String toString() {
 		return "disjoint(" + class1 + ", " + class2 + ")";
-	}
-
-	@Override
-	public Set<Predicate> getReferencedEntities() {
-		Set<Predicate> res = new HashSet<Predicate>();
-		if (class1 instanceof OClass)
-			res.add(((OClass)class1).getPredicate());
-		else if (class1 instanceof PropertySomeRestriction)
-			res.add(((PropertySomeRestriction)class1).getPredicate());
-		else
-			System.err.println("UNEXPECTED TYPE");
-		if (class2 instanceof OClass)
-			res.add(((OClass)class2).getPredicate());
-		else if (class2 instanceof PropertySomeRestriction)
-			res.add(((PropertySomeRestriction)class2).getPredicate());
-		else
-			System.err.println("UNEXPECTED TYPE");
-		return res;
 	}
 
 	@Override

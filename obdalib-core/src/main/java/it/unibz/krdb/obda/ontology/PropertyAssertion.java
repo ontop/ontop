@@ -27,7 +27,7 @@ public interface PropertyAssertion extends Assertion {
 
 	public Property getProperty();
 	
-	public ObjectConstant getValue1();
+	public ObjectConstant getSubject();
 	
 	public Constant getValue2();	
 }

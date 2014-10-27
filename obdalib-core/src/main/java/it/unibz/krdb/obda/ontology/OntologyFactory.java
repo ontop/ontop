@@ -58,11 +58,7 @@ public interface OntologyFactory {
 	
 	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Property p1, Property p2);
 	
-	public PropertyAssertion createObjectPropertyAssertion(Property role, ObjectConstant o1, ObjectConstant o2);
-
-	public PropertyAssertion createDataPropertyAssertion(Property attribute, ObjectConstant o1, ValueConstant o2);
-	
-	public Assertion createPropertyAssertion(Property attribute, ObjectConstant o1, Constant o2);
+	public PropertyAssertion createPropertyAssertion(Property attribute, ObjectConstant o1, Constant o2);
 	
 	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant object);
 }

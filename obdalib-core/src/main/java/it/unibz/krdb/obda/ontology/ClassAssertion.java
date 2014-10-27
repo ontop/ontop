@@ -33,5 +33,5 @@ public interface ClassAssertion extends Assertion {
 
 	public OClass getConcept();
 	
-	public ObjectConstant getObject();
+	public ObjectConstant getIndividual();
 }

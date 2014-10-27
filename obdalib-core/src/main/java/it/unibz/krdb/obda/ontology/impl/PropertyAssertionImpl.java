@@ -22,12 +22,8 @@ package it.unibz.krdb.obda.ontology.impl;
 
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.Property;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class PropertyAssertionImpl implements PropertyAssertion {
 
@@ -49,14 +45,7 @@ public class PropertyAssertionImpl implements PropertyAssertion {
 	}
 
 	@Override
-	public Set<Predicate> getReferencedEntities() {
-		Set<Predicate> res = new HashSet<Predicate>();
-		res.add(role.getPredicate());
-		return res;
-	}
-
-	@Override
-	public ObjectConstant getValue1() {
+	public ObjectConstant getSubject() {
 		return o1;
 	}
 

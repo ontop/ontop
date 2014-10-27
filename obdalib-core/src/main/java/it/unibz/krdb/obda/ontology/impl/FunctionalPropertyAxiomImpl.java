@@ -20,12 +20,8 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
-
-import java.util.Collections;
-import java.util.Set;
 
 public class FunctionalPropertyAxiomImpl implements FunctionalPropertyAxiom{
 
@@ -35,11 +31,6 @@ public class FunctionalPropertyAxiomImpl implements FunctionalPropertyAxiom{
 	
 	FunctionalPropertyAxiomImpl(Property role) {
 		this.role = role;
-	}
-
-	@Override
-	public Set<Predicate> getReferencedEntities() {
-		return Collections.singleton(role.getPredicate());
 	}
 
 	@Override

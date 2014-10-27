@@ -160,7 +160,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 							.getObjectPropertyPredicate(predicateName);
 					Property prop = ofac.createObjectProperty(role.getName(), false);
 					PropertyAssertion op = ofac
-							.createObjectPropertyAssertion(prop,
+							.createPropertyAssertion(prop,
 									(ObjectConstant) subjectConstant,
 									(ObjectConstant) objectConstant);
 					tripleAssertions.add(op);
@@ -169,7 +169,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 							.getObjectPropertyPredicate(predicateName);
 					Property prop = ofac.createObjectProperty(role.getName(), false);
 					PropertyAssertion op = ofac
-							.createObjectPropertyAssertion(prop,
+							.createPropertyAssertion(prop,
 									(ObjectConstant) subjectConstant,
 									(ObjectConstant) objectConstant);
 					tripleAssertions.add(op);
@@ -178,7 +178,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 							.getDataPropertyPredicate(predicateName);
 					Property prop = ofac.createDataProperty(attribute.getName());
 					PropertyAssertion dp = ofac
-							.createDataPropertyAssertion(prop,
+							.createPropertyAssertion(prop,
 									(ObjectConstant) subjectConstant,
 									(ValueConstant) objectConstant);
 					tripleAssertions.add(dp);

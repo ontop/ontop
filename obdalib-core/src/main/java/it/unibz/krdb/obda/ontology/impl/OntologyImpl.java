@@ -22,12 +22,17 @@ package it.unibz.krdb.obda.ontology.impl;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
+import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
@@ -58,8 +63,10 @@ public class OntologyImpl implements Ontology {
 	
 	public static final String AUXROLEURI = "ER.A-AUXROLE";
 	
-	private final Set<Assertion> aboxAssertions = new HashSet<Assertion>();
+	private final Set<ClassAssertion> classAssertions = new HashSet<ClassAssertion>();
 
+	private final Set<PropertyAssertion> propertyAssertions = new HashSet<PropertyAssertion>();
+	
 
 	static final class ReservedPredicate extends HashSet<Predicate> {
 
@@ -113,12 +120,56 @@ public class OntologyImpl implements Ontology {
 		return true;
 	}
 
+	private Predicate getReferencedEntities(BasicClassDescription desc) {
+		if (desc instanceof OClass) 
+			return (((OClass) desc).getPredicate());
+		else if (desc instanceof PropertySomeRestriction) 
+			return (((PropertySomeRestriction) desc).getPredicate());
+		else if (desc instanceof DataType) 
+			return (((DataType) desc).getPredicate());
+		else 
+			throw new UnsupportedOperationException("Cant understand: " + desc.toString());
+	}
+	
+	private Set<Predicate> getReferencedEntities(Axiom assertion) {
+		Set<Predicate> refs = new HashSet<Predicate>();
+		if (assertion instanceof SubClassOfAxiom) {
+			SubClassOfAxiom ax = (SubClassOfAxiom)assertion;
+			refs.add(getReferencedEntities(ax.getSub()));
+			refs.add(getReferencedEntities(ax.getSuper()));			
+		}
+		else if (assertion instanceof DisjointClassesAxiom) {
+			DisjointClassesAxiom ax = (DisjointClassesAxiom)assertion;
+			refs.add(getReferencedEntities(ax.getFirst()));
+			refs.add(getReferencedEntities(ax.getSecond()));	
+		}
+		else if (assertion instanceof ClassAssertion) 
+			refs.add(((ClassAssertion)assertion).getConcept().getPredicate());
+		else if (assertion instanceof PropertyAssertion) 
+			refs.add(((PropertyAssertion)assertion).getProperty().getPredicate());
+		else if (assertion instanceof SubPropertyOfAxiom) {
+			SubPropertyOfAxiom ax = (SubPropertyOfAxiom)assertion;
+			refs.add(ax.getSub().getPredicate());
+			refs.add(ax.getSuper().getPredicate());			
+		}
+		else if (assertion instanceof DisjointPropertiesAxiom) {
+			DisjointPropertiesAxiom ax = (DisjointPropertiesAxiom)assertion;
+			refs.add(ax.getFirst().getPredicate());
+			refs.add(ax.getSecond().getPredicate());	
+		}
+		else if (assertion instanceof FunctionalPropertyAxiom) {
+			FunctionalPropertyAxiom ax = (FunctionalPropertyAxiom)assertion;
+			refs.add(ax.getProperty().getPredicate());
+		}
+		return refs;
+	}
+	
 	@Override
 	public void addAssertion(Axiom assertion) {
 		if (assertions.contains(assertion)) {
 			return;
 		}
-		Set<Predicate> referencedEntities = assertion.getReferencedEntities();
+		Set<Predicate> referencedEntities = getReferencedEntities(assertion);
 		if (!referencesPredicates(referencedEntities)) {
 			IllegalArgumentException ex = new IllegalArgumentException("At least one of these predicates is unknown: "
 					+ referencedEntities.toString());
@@ -150,15 +201,24 @@ public class OntologyImpl implements Ontology {
 		else if (assertion instanceof DisjointPropertiesAxiom) {
 			disjointPropertiesAxioms.add((DisjointPropertiesAxiom) assertion);
 		} 
-		else if (assertion instanceof Assertion) {
+		else if (assertion instanceof ClassAssertion) {
 			/*ABox assertions */
-			aboxAssertions.add((Assertion)assertion);
+			classAssertions.add((ClassAssertion)assertion);
+		}
+		else if (assertion instanceof PropertyAssertion) {
+			/*ABox assertions */
+			propertyAssertions.add((PropertyAssertion)assertion);
 		}
 	}
 	
 	@Override 
-	public Set<Assertion> getABox() {
-		return aboxAssertions;
+	public Set<ClassAssertion> getClassAssertions() {
+		return classAssertions;
+	}
+	
+	@Override 
+	public Set<PropertyAssertion> getPropertyAssertions() {
+		return propertyAssertions;
 	}
 
 	@Override
@@ -224,7 +284,7 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void addAssertionWithEntities(Axiom assertion) {
-		for (Predicate pred : assertion.getReferencedEntities()) {
+		for (Predicate pred : getReferencedEntities(assertion)) {
 			if (pred.getArity() == 1) {
 				addConcept(pred);
 			} else {

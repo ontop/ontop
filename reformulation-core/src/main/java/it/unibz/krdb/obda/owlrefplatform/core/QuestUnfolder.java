@@ -26,6 +26,8 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactRuleConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
@@ -236,11 +238,15 @@ public class QuestUnfolder {
 	/***
 	 * Adding ontology assertions (ABox) as rules (facts, head with no body).
 	 */
-	public void addABoxAssertionsAsFacts(Iterable<Assertion> assertions) {
+	public <T extends Assertion>  void addABoxAssertionsAsFacts(Iterable<T> assertions) {
 		
 		int count = 0;
-		for (Assertion a : assertions) {
-			CQIE fact = ABoxToFactRuleConverter.getRule(a);
+		for (T a : assertions) {
+			CQIE fact;
+			if (a instanceof ClassAssertion)
+				fact = ABoxToFactRuleConverter.getRule((ClassAssertion)a);
+			else
+				fact = ABoxToFactRuleConverter.getRule((PropertyAssertion)a);
 			if (fact != null) {
 				unfoldingProgram.add(fact);
 				count++;
@@ -248,7 +254,7 @@ public class QuestUnfolder {
 		}
 		log.debug("Appended {} ABox assertions as fact rules", count);		
 	}		
-	
+		
 
 	
 	

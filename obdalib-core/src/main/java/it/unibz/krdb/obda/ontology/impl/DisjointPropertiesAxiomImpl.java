@@ -20,10 +20,6 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import java.util.HashSet;
-import java.util.Set;
-
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.Property;
 
@@ -42,14 +38,6 @@ public class DisjointPropertiesAxiomImpl implements DisjointPropertiesAxiom {
 	@Override
 	public String toString() {
 		return "disjoint(" + prop1 + ", " + prop2 + ")";
-	}
-
-	@Override
-	public Set<Predicate> getReferencedEntities() {
-		Set<Predicate> res = new HashSet<Predicate>();
-		res.add(prop1.getPredicate());
-		res.add(prop2.getPredicate());
-		return res;
 	}
 
 	@Override

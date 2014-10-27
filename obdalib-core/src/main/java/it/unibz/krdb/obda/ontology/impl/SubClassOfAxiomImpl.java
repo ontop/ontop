@@ -1,17 +1,7 @@
 package it.unibz.krdb.obda.ontology.impl;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.DataType;
-import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
-import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
 /*
  * #%L
@@ -78,32 +68,6 @@ public class SubClassOfAxiomImpl implements SubClassOfAxiom {
 		return (included.equals(inc2.included));
 	}
 	
-	@Override
-	public Set<Predicate> getReferencedEntities() {
-		Set<Predicate> res = new HashSet<Predicate>();
-		for (Predicate p : getPredicates(included)) {
-			res.add(p);
-		}
-		for (Predicate p : getPredicates(including)) {
-			res.add(p);
-		}
-		return res;
-	}
-
-	private Set<Predicate> getPredicates(BasicClassDescription desc) {
-		Set<Predicate> preds = new HashSet<Predicate>();
-		if (desc instanceof OClass) {
-			preds.add(((OClass) desc).getPredicate());
-		} else if (desc instanceof PropertySomeRestriction) {
-			preds.add(((PropertySomeRestriction) desc).getPredicate());
-		} else if (desc instanceof DataType) {
-			preds.add(((DataType) desc).getPredicate());
-		} else {
-			throw new UnsupportedOperationException("Cant understand: " + desc.toString());
-		}
-		return preds;
-	}
-
 	@Override
 	public int hashCode() {
 		return string.hashCode();

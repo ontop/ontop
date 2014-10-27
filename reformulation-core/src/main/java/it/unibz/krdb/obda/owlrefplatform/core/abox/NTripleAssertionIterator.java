@@ -82,13 +82,13 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 			URIConstant c1 = obdafac.getConstantURI(currSubject);
 			URIConstant c2 = obdafac.getConstantURI(currObject);
 			Property prop = ofac.createObjectProperty(currentPredicate.getName(), false);
-			assertion = ofac.createObjectPropertyAssertion(prop, c1, c2);
+			assertion = ofac.createPropertyAssertion(prop, c1, c2);
 		} 
 		else if (currentPredicate.getType(1) == Predicate.COL_TYPE.LITERAL) {
 			URIConstant c1 = obdafac.getConstantURI(currSubject);
 			ValueConstant c2 = obdafac.getConstantLiteral(currObject);
 			Property prop = ofac.createDataProperty(currentPredicate.getName());
-			assertion = ofac.createDataPropertyAssertion(prop, c1, c2);
+			assertion = ofac.createPropertyAssertion(prop, c1, c2);
 		} 
 		else {
 			throw new RuntimeException("ERROR, Wrongly type predicate: " + currentPredicate.toString());

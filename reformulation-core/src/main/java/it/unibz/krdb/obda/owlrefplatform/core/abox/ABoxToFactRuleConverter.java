@@ -29,7 +29,6 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
 
@@ -40,27 +39,29 @@ import org.openrdf.model.vocabulary.XMLSchema;
 public class ABoxToFactRuleConverter {
 	private static final OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
 
-	public static CQIE getRule(Assertion assertion) {
+	public static CQIE getRule(ClassAssertion ca) {
 		CQIE rule = null;
-		if (assertion instanceof ClassAssertion) {
-			ClassAssertion ca = (ClassAssertion) assertion;
-			ObjectConstant c = ca.getObject();
-			Predicate p = ca.getConcept().getPredicate();
-			Predicate urifuction = factory.getUriTemplatePredicate(1);
-			Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(c.getValue())));
-			rule = factory.getCQIE(head, new LinkedList<Function>());
-			// head = factory.getFunctionalTerm(p, c);
-		} else if (assertion instanceof PropertyAssertion) {
-			PropertyAssertion pa = (PropertyAssertion) assertion;
-			if (!(pa.getValue2() instanceof ValueConstant)) { // WE IGNORE DATA PROPERTY ASSERTIONS UNTIL THE NEXT RELEASE
-				ObjectConstant s = pa.getValue1();
-				ObjectConstant o = (ObjectConstant) pa.getValue2();
-				Predicate p = pa.getProperty().getPredicate();
-				Predicate urifuction = factory.getUriTemplatePredicate(1);
-				Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(s.getValue())), factory.getFunction(urifuction, factory.getConstantLiteral(o.getValue())));
-				rule = factory.getCQIE(head, new LinkedList<Function>());
-			}
-		} 
+		ObjectConstant c = ca.getIndividual();
+		Predicate p = ca.getConcept().getPredicate();
+		Predicate urifuction = factory.getUriTemplatePredicate(1);
+		Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(c.getValue())));
+		rule = factory.getCQIE(head, new LinkedList<Function>());
+		return rule;
+	}
+
+	public static CQIE getRule(PropertyAssertion pa) {
+		if (pa.getValue2() instanceof ValueConstant) { 
+			// WE IGNORE DATA PROPERTY ASSERTIONS UNTIL THE NEXT RELEASE
+			return null;
+		}
+		ObjectConstant s = pa.getSubject();
+		ObjectConstant o = (ObjectConstant) pa.getValue2();
+		Predicate p = pa.getProperty().getPredicate();
+		Predicate urifuction = factory.getUriTemplatePredicate(1);
+		Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(s.getValue())), factory.getFunction(urifuction, factory.getConstantLiteral(o.getValue())));
+		CQIE rule = factory.getCQIE(head, new LinkedList<Function>());
+		return rule;
+		
 //		else if (assertion instanceof DataPropertyAssertion) {
 			/* 
 			 * We ignore these for the moment until next release.
@@ -75,9 +76,8 @@ public class ABoxToFactRuleConverter {
 //			head = factory.getFunction(p, factory.getFunction(urifuction, s), factory.getFunction(factory.getPredicate(typeURI,1), o));
 //			rule = factory.getCQIE(head, new LinkedList<Function>());
 //		} 	
-		return rule;
 	}
-
+	
     @Deprecated
 	public static String getURIType(COL_TYPE e) {
 		String result = "";
