@@ -119,7 +119,7 @@ public class MappingDataTypeRepair {
                  * the data-type in the mapping, this method simply accepts the function
                  * symbol.
                  *
-                 * @param mappingDatalog
+                 * @param mappingRules
                  *            The set of mapping axioms.
                  * @throws OBDAException
                  */
