@@ -74,4 +74,24 @@ public class OntopOWLFactory extends QuestOWLFactory {
 		}
 	}
 
+    @Override
+    public void reload(QuestPreferences preferences) {
+        try {
+            super.reload(preferences);
+        } catch (Exception e) {
+            handleError(e);
+            //TODO: see if we should return an exception
+        }
+    }
+
+    @Override
+    public void reload(File mappingFile, QuestPreferences preferences) {
+        try {
+            super.reload(mappingFile, preferences);
+        } catch (Exception e) {
+            handleError(e);
+            //TODO: see if we should return an exception
+        }
+    }
+
 }

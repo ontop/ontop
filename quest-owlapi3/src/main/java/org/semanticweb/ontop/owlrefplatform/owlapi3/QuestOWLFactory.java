@@ -51,19 +51,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * TODO: update comments
  *
  * Mutable (OWLAPI design and usage in Protege).
  *
  * Implementation of an OWLReasonerFactory that can create instances of Quest.
- * Note, to create an instance of Quest first you must call the method
- * {@link #setPreferenceHolder(Properties)} with your parameters see Quest.java
- * for a description of the preferences. Also, if you use Quest in Virtual ABox
- * mode you must set an {@link org.semanticweb.ontop.model.OBDAModel} with your mappings.
+ * Note, to create an instance of Quest, QuestPreferences are required.
+ * Also, if you use Quest in Virtual ABox mode you must set a link to the mapping file.
  * 
  * @see org.semanticweb.ontop.model.OBDAModel
  * 
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
+ * Updated by Benjamin Cogrel
  * 
  */
 public class QuestOWLFactory implements OWLReasonerFactory {
@@ -86,7 +84,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 
 
     /**
-     * Virtual mode (because there is a file)
+     * Virtual mode (because there is a mapping file)
      * TODO: further explain
      *
      * @param mappingFile
@@ -100,7 +98,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
     /**
      * This method is isolated from the constructor because it can
      */
-    private void init(File mappingFile, QuestPreferences preferences) {
+    private void init(File mappingFile, QuestPreferences preferences) throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
         Injector injector = Guice.createInjector(new OBDACoreModule(preferences), new QuestComponentModule(preferences));
         this.componentFactory = injector.getInstance(QuestComponentFactory.class);
 
@@ -117,6 +115,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
         }
 
         this.preferences = preferences;
+        this.mappingFile = mappingFile;
     }
 
     /**
@@ -161,6 +160,24 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 //	public void setPreferenceHolder(Properties preference) {
 //		this.preferences = preference;
 //	}
+
+    /**
+     * Re-parses the mapping file and changes the preferences.
+     */
+    public void reload(QuestPreferences newPreferences) throws DuplicateMappingException, InvalidMappingException,
+            InvalidDataSourceException, IOException {
+        init(mappingFile, newPreferences);
+    }
+
+    /**
+     * Re-parses the mapping file and changes the preferences.
+     */
+    public void reload(File mappingFile, QuestPreferences newPreferences) throws DuplicateMappingException, InvalidMappingException,
+            InvalidDataSourceException, IOException {
+        init(mappingFile, newPreferences);
+    }
+
+
 
 	@Override
 	public String getReasonerName() {

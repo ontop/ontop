@@ -63,4 +63,12 @@ public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeO
 			throw new NullPointerException();
 		factory.setImplicitDBConstraints(uc);
 	}
+
+    public void reload(ProtegeReformulationPlatformPreferences reasonerPreferences) {
+        factory.reload(reasonerPreferences);
+    }
+
+    public void reload(File mappingFile, ProtegeReformulationPlatformPreferences reasonerPreferences) {
+        factory.reload(mappingFile, reasonerPreferences);
+    }
 }

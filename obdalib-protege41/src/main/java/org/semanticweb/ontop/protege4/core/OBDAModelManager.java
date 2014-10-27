@@ -29,6 +29,7 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OBDAModelValidator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.ontop.protege4.utils.DialogUtils;
 import org.semanticweb.ontop.querymanager.QueryController;
 import org.semanticweb.ontop.querymanager.QueryControllerEntity;
@@ -446,12 +447,11 @@ public class OBDAModelManager implements Disposable {
 				activeOBDAModel.addPrefix(PrefixManager.DEFAULT_PREFIX, defaultPrefix);
 
                 OWLReasonerManager reasonerManager = owlEditorKit.getOWLModelManager().getOWLReasonerManager();
-                //TODO: see how to change the Reasoner factory
 				ProtegeOWLReasonerInfo factory = reasonerManager.getCurrentReasonerFactory();
 				if (factory instanceof ProtegeOBDAOWLReformulationPlatformFactory) {
 					ProtegeOBDAOWLReformulationPlatformFactory questfactory = (ProtegeOBDAOWLReformulationPlatformFactory) factory;
 					ProtegeReformulationPlatformPreferences reasonerPreference = (ProtegeReformulationPlatformPreferences) owlEditorKit.get(QuestPreferences.class.getName());
-					questfactory.setPreferences(reasonerPreference);
+                    questfactory.reload(reasonerPreference);
 					if(applyUserConstraints)
 						questfactory.setImplicitDBConstraints(userConstraints);
 				}
@@ -516,9 +516,9 @@ public class OBDAModelManager implements Disposable {
 					} else {
 						log.warn("OBDA model couldn't be loaded because no .obda file exists in the same location as the .owl file");
 					}
-					OBDAModelValidator refactorer = new OBDAModelValidator(activeOBDAModel.getCurrentImmutableOBDAModel(),
+					OBDAModelValidator validator = new OBDAModelValidator(activeOBDAModel.getCurrentImmutableOBDAModel(),
                             activeOntology);
-					refactorer.run(); // adding type information to the mapping predicates.
+					validator.run(); // adding type information to the mapping predicates.
 				} catch (Exception e) {
 					OBDAException ex = new OBDAException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());
 					DialogUtils.showQuickErrorDialog(null, ex, "Open file error");
