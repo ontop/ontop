@@ -41,7 +41,8 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertyFunctionalAxiom;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
-import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
+import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
+import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
 
 public class OntologyFactoryImpl implements OntologyFactory {
@@ -74,12 +75,12 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 	
 	@Override
-	public SubDescriptionAxiom createSubPropertyAxiom(Property included, Property including) {
+	public SubPropertyOfAxiom createSubPropertyAxiom(Property included, Property including) {
 		return new SubPropertyAxiomImpl(included, including);
 	}
 
 	@Override
-	public SubDescriptionAxiom createSubClassAxiom(BasicClassDescription concept1, BasicClassDescription concept2) {
+	public SubClassOfAxiom createSubClassAxiom(BasicClassDescription concept1, BasicClassDescription concept2) {
 		return new SubClassAxiomImpl(concept1, concept2);
 	}
 

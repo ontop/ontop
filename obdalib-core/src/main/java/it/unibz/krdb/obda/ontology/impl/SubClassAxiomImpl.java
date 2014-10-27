@@ -10,7 +10,8 @@ import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
-import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
+import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
+import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
 /*
  * #%L
@@ -34,7 +35,7 @@ import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 
 
 
-public class SubClassAxiomImpl implements SubDescriptionAxiom {
+public class SubClassAxiomImpl implements SubClassOfAxiom {
 
 	private static final long serialVersionUID = -7590338987239580423L;
 

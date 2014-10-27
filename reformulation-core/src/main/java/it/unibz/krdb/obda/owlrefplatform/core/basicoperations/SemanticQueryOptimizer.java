@@ -30,10 +30,9 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
-import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
+import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
-import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -49,10 +48,10 @@ import java.util.Set;
 @Deprecated
 public class SemanticQueryOptimizer {
 	
-	 private final Map<Predicate,Set<SubDescriptionAxiom>> axiomIndex;
+	 private final Map<Predicate,Set<SubPropertyOfAxiom>> axiomIndex;
 	 private final OBDADataFactory fac;
 	
-	private SemanticQueryOptimizer(OBDADataFactory fac, Map<Predicate,Set<SubDescriptionAxiom>> includedPredicateIndex) {
+	private SemanticQueryOptimizer(OBDADataFactory fac, Map<Predicate,Set<SubPropertyOfAxiom>> includedPredicateIndex) {
 		this.fac = fac;
 		this.axiomIndex = includedPredicateIndex;
 	}
@@ -160,11 +159,11 @@ public class SemanticQueryOptimizer {
 				continue;
 			}
 
-			Set<SubDescriptionAxiom> pis = axiomIndex.get(focusAtom.getPredicate());
+			Set<SubPropertyOfAxiom> pis = axiomIndex.get(focusAtom.getPredicate());
 			if (pis == null) {
 				continue;
 			}
-			for (SubDescriptionAxiom pi : pis) {
+			for (SubPropertyOfAxiom pi : pis) {
 				boolean breakPICycle = false;
 				Function checkAtom = null;
 				if (pi instanceof SubClassAxiomImpl) {
@@ -266,7 +265,7 @@ public class SemanticQueryOptimizer {
 						// Arity more that 2
 						continue;
 					}
-				} else if (pi instanceof SubPropertyAxiomImpl) {
+				} else if (pi instanceof SubPropertyOfAxiom) {
 
 					/*
 					 * Case with left side of inclusion is S or S- and only for
@@ -277,7 +276,7 @@ public class SemanticQueryOptimizer {
 					 * with anonymous variables
 					 */
 
-					SubPropertyAxiomImpl roleinclusion = (SubPropertyAxiomImpl) pi;
+					SubPropertyOfAxiom roleinclusion = (SubPropertyOfAxiom) pi;
 					Property rightrole = (Property) roleinclusion.getSuper();
 					Property leftrole = (Property) roleinclusion.getSub();
 

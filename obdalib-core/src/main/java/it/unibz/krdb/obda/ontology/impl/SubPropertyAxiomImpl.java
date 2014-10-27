@@ -25,9 +25,9 @@ import java.util.Set;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
+import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
-public class SubPropertyAxiomImpl implements SubDescriptionAxiom {
+public class SubPropertyAxiomImpl implements SubPropertyOfAxiom {
 
 	private static final long serialVersionUID = -3020225654321319941L;
 

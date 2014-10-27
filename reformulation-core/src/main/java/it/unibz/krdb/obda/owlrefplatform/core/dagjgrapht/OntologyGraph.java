@@ -28,9 +28,9 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
-import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
+import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -63,8 +63,8 @@ public class OntologyGraph {
 
 		// property inclusions
 		for (Axiom assertion : ontology.getAssertions()) 
-			if (assertion instanceof SubPropertyAxiomImpl) {
-				SubPropertyAxiomImpl roleIncl = (SubPropertyAxiomImpl) assertion;
+			if (assertion instanceof SubPropertyOfAxiom) {
+				SubPropertyOfAxiom roleIncl = (SubPropertyOfAxiom) assertion;
 				// adds the direct edge and the inverse 
 				// e.g., R ISA S and R- ISA S-,
 				//    or R- ISA S and R ISA S-
@@ -141,8 +141,8 @@ public class OntologyGraph {
 		
 		// class inclusions from the ontology
 		for (Axiom assertion : ontology.getAssertions()) 
-			if (assertion instanceof SubClassAxiomImpl) {
-				SubClassAxiomImpl clsIncl = (SubClassAxiomImpl) assertion;
+			if (assertion instanceof SubClassOfAxiom) {
+				SubClassOfAxiom clsIncl = (SubClassOfAxiom) assertion;
 				BasicClassDescription parent = (BasicClassDescription)clsIncl.getSuper();
 				BasicClassDescription child = (BasicClassDescription)clsIncl.getSub();
 				classGraph.addVertex(child);

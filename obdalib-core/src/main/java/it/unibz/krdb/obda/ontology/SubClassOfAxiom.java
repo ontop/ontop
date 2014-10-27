@@ -20,34 +20,18 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
+/**
+ * Represents SubClassOf, EquivalentClasses, 
+ *            ObjectPropertyDomain, ObjectPropertyRange, 
+ *            DataPropertyDomanin, DataPropertyRange
+ * 
+ * @author roman
+ *
+ */
 
-import java.io.Serializable;
-import java.util.Set;
+public interface SubClassOfAxiom extends Axiom {
 
-public interface Ontology extends Cloneable, Serializable {
+	public BasicClassDescription getSub();
 
-	public void addAssertion(Axiom assertion);
-
-	public void addAssertionWithEntities(Axiom assertion);
-	
-	public void addConcept(Predicate c);
-
-	public void addRole(Predicate role);
-
-	public Set<Predicate> getRoles();
-
-	public Set<Predicate> getConcepts();
-	
-	public Set<Axiom> getAssertions();
-
-	public String getUri();
-
-	public Ontology clone();
-
-	public Set<Assertion> getABox();
-	
-	public Set<PropertyFunctionalAxiom> getFunctionalPropertyAxioms();
-	
-	public Set<DisjointDescriptionAxiom> getDisjointDescriptionAxioms();
+	public BasicClassDescription getSuper();
 }

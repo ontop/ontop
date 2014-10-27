@@ -20,9 +20,18 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
-public interface SubDescriptionAxiom extends Axiom {
+/**
+ * Represents SubObjectPropertyOf, EquivalentObjectProperties, SymmetricObjectProperties,
+ *            SubDataPropertyOf, EquivalentDataProperties
+ * 
+ * @author roman
+ *
+ */
 
-	public Description getSub();
 
-	public Description getSuper();
+public interface SubPropertyOfAxiom extends Axiom {
+
+	public Property getSub();
+
+	public Property getSuper();
 }

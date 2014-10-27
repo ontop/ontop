@@ -30,9 +30,9 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
-import it.unibz.krdb.obda.ontology.impl.SubPropertyAxiomImpl;
+import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -143,14 +143,14 @@ public class DAG implements Serializable {
 
 		for (Axiom assertion : ontology.getAssertions()) {
 
-			if (assertion instanceof SubClassAxiomImpl) {
-				SubClassAxiomImpl clsIncl = (SubClassAxiomImpl) assertion;
+			if (assertion instanceof SubClassOfAxiom) {
+				SubClassOfAxiom clsIncl = (SubClassOfAxiom) assertion;
 				BasicClassDescription parent = clsIncl.getSuper();
 				BasicClassDescription child = clsIncl.getSub();
 
 				addClassEdge(parent, child);
-			} else if (assertion instanceof SubPropertyAxiomImpl) {
-				SubPropertyAxiomImpl roleIncl = (SubPropertyAxiomImpl) assertion;
+			} else if (assertion instanceof SubPropertyOfAxiom) {
+				SubPropertyOfAxiom roleIncl = (SubPropertyOfAxiom) assertion;
 				Property parent = roleIncl.getSuper();
 				Property child = roleIncl.getSub();
 

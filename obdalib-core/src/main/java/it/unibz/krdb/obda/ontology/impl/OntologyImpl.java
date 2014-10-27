@@ -27,7 +27,8 @@ import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.PropertyFunctionalAxiom;
-import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
+import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
+import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -121,18 +122,26 @@ public class OntologyImpl implements Ontology {
 			throw ex;
 		}
 
-		if (assertion instanceof SubDescriptionAxiom) {
-			SubDescriptionAxiom axiom = (SubDescriptionAxiom) assertion;
-			/*
-			 * We avoid redundant axioms
-			 */
-			if (axiom.getSub().equals(axiom.getSuper())) {
+		if (assertion instanceof SubClassOfAxiom) {
+			SubClassOfAxiom axiom = (SubClassOfAxiom) assertion;
+			// We avoid redundant axioms
+			if (axiom.getSub().equals(axiom.getSuper())) 
 				return;
-			}
+
 			assertions.add(assertion);
-		} else if (assertion instanceof PropertyFunctionalAxiom) {
+		} 
+		else if (assertion instanceof SubPropertyOfAxiom) {
+			SubPropertyOfAxiom axiom = (SubPropertyOfAxiom) assertion;
+			 // We avoid redundant axioms
+			if (axiom.getSub().equals(axiom.getSuper())) 
+				return;
+			
+			assertions.add(assertion);
+		}
+		else if (assertion instanceof PropertyFunctionalAxiom) {
 			functionalAxioms.add((PropertyFunctionalAxiom) assertion);
-		} else if (assertion instanceof DisjointDescriptionAxiom) {
+		} 
+		else if (assertion instanceof DisjointDescriptionAxiom) {
 			disjointAxioms.add((DisjointDescriptionAxiom) assertion);
 		} else if (assertion instanceof Assertion) {
 			/*ABox assertions */
