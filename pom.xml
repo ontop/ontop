@@ -531,7 +531,13 @@
 				<artifactId>r2rml-api-sesame-bridge</artifactId>
 				<version>0.1.3</version>
 			</dependency>
-			
+
+
+            <dependency>
+                <groupId>org.functionaljava</groupId>
+                <artifactId>functionaljava</artifactId>
+                <version>4.2-beta-1</version>
+            </dependency>
 		</dependencies>
 	</dependencyManagement>
 

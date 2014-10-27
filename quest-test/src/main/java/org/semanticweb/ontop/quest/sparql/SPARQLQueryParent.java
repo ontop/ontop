@@ -199,9 +199,9 @@ public abstract class SPARQLQueryParent extends TestCase {
 		try {
 			String queryString = readQueryString();
 			Query query = con.prepareQuery(QueryLanguage.SPARQL, queryString, queryFileURL);
-			if (dataset != null) {
-				query.setDataset(dataset);
-			}
+//			if (dataset != null) {
+//				query.setDataset(dataset);
+//			}
 			if (query instanceof TupleQuery) {
 				TupleQueryResult queryResult = ((TupleQuery)query).evaluate();
 
