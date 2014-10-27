@@ -383,15 +383,15 @@ public class R2RMLParser {
                 Term dtAtom = fac.getFunction(dtype, objectAtom);
                 objectAtom = dtAtom;
             }
-            else{
+//            else{
 
-                Object type = om.getTermType(Object.class);
-                if(type.equals(R2RMLVocabulary.literal)) {
-                    //it's a simple literal
-                    objectAtom = fac.getFunction(OBDAVocabulary.RDFS_LITERAL, fac.getVariable(col));
-                }
+//                Object type = om.getTermType(Object.class);
+//                if(type.equals(R2RMLVocabulary.literal)) {
+//                    //it's a simple literal
+//                    objectAtom = fac.getFunction(OBDAVocabulary.RDFS_LITERAL, fac.getVariable(col));
+//                }
 
-            }
+//            }
         }
 
 		return objectAtom;
