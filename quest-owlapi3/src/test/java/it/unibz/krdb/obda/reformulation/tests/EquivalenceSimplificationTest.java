@@ -64,7 +64,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 
 		assertEquals(3, simpleonto.getConcepts().size());
 		assertEquals(0, simpleonto.getRoles().size());
-		assertEquals(3, simpleonto.getAssertions().size());
+		assertEquals(3, simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
 //		assertEquals(3, simpleonto.getVocabulary().size());
 
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -112,7 +112,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 
 		assertEquals(0, simpleonto.getConcepts().size());
 		assertEquals(3, simpleonto.getRoles().size());
-		assertEquals(12, simpleonto.getAssertions().size());
+		assertEquals(12,  simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
 //		assertEquals(3, simpleonto.getVocabulary().size());
 
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -160,7 +160,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(simpleonto.getConcepts().toString(), 3, simpleonto.getConcepts().size());
 		assertEquals(3, simpleonto.getRoles().size());
 		assertEquals(3, simpleonto.getConcepts().size());
-		assertEquals(9, simpleonto.getAssertions().size());
+		assertEquals(9,  simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
 //		assertEquals(6, simpleonto.getVocabulary().size());
 
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -202,7 +202,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
 		Ontology simpleonto = TBoxReasonerToOntology.getOntology(simple);
 
-		assertEquals(12, simpleonto.getAssertions().size());
+		assertEquals(12,  simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
 		assertEquals(0, simpleonto.getConcepts().size());
 		assertEquals(3, simpleonto.getRoles().size());
 //		assertEquals(3, simpleonto.getVocabulary().size());

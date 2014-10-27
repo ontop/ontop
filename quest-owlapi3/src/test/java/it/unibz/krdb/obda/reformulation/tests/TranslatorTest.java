@@ -20,13 +20,12 @@ package it.unibz.krdb.obda.reformulation.tests;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
-import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
-import it.unibz.krdb.obda.ontology.impl.SubClassOfAxiomImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 
 import java.net.URI;
@@ -66,12 +65,12 @@ public class TranslatorTest extends TestCase {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology dlliteonto = translator.translate(onto);
 		
-		Set<Axiom> ass = dlliteonto.getAssertions();
-		Iterator<Axiom> assit = ass.iterator();
+		Set<SubClassOfAxiom> ass = dlliteonto.getSubClassAxioms();
+		Iterator<SubClassOfAxiom> assit = ass.iterator();
 		assertEquals(1, ass.size());
 		
-		SubClassOfAxiomImpl a = (SubClassOfAxiomImpl) assit.next();
-		PropertySomeRestrictionImpl ex = (PropertySomeRestrictionImpl) a.getSub();
+		SubClassOfAxiom a = assit.next();
+		PropertySomeRestriction ex = (PropertySomeRestriction) a.getSub();
 		assertEquals(true, ex.isInverse());
 	}
 	
@@ -92,12 +91,12 @@ public class TranslatorTest extends TestCase {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology dlliteonto = translator.translate(onto);
 		
-		Set<Axiom> ass = dlliteonto.getAssertions();
-		Iterator<Axiom> assit = ass.iterator();
+		Set<SubClassOfAxiom> ass = dlliteonto.getSubClassAxioms();
+		Iterator<SubClassOfAxiom> assit = ass.iterator();
 		assertEquals(1, ass.size());
 		
-		SubClassOfAxiomImpl a = (SubClassOfAxiomImpl) assit.next();
-		PropertySomeRestrictionImpl ex = (PropertySomeRestrictionImpl) a.getSub();
+		SubClassOfAxiom a = assit.next();
+		PropertySomeRestriction ex = (PropertySomeRestriction) a.getSub();
 		assertEquals(false, ex.isInverse());
 	}
 	
@@ -116,25 +115,25 @@ public class TranslatorTest extends TestCase {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology dlliteonto = translator.translate(onto);
 		
-		Set<Axiom> ass = dlliteonto.getAssertions();
-		Iterator<Axiom> assit = ass.iterator();
+		Set<SubPropertyOfAxiom> ass = dlliteonto.getSubPropertyAxioms();
+		Iterator<SubPropertyOfAxiom> assit = ass.iterator();
 		assertEquals(2, ass.size());
 		
-		SubPropertyOfAxiom a = (SubPropertyOfAxiom) assit.next();
-		SubPropertyOfAxiom b = (SubPropertyOfAxiom) assit.next();
-		Property included = (Property) a.getSub();
+		SubPropertyOfAxiom a = assit.next();
+		SubPropertyOfAxiom b = assit.next();
+		Property included =a.getSub();
 		assertEquals(false, included.isInverse());
 		assertEquals("http://example/R", included.getPredicate().getName().toString());
 		
-		Property indlucing = (Property) a.getSuper();
+		Property indlucing = a.getSuper();
 		assertEquals(true, indlucing.isInverse());
 		assertEquals("http://example/S", indlucing.getPredicate().getName().toString());
 		
-		included = (Property) b.getSub();
+		included = b.getSub();
 		assertEquals(false, included.isInverse());
 		assertEquals("http://example/S", included.getPredicate().getName().toString());
 		
-		indlucing = (Property) b.getSuper();
+		indlucing = b.getSuper();
 		assertEquals(true, indlucing.isInverse());
 		assertEquals("http://example/R", indlucing.getPredicate().getName().toString());
 	}
@@ -154,12 +153,12 @@ public class TranslatorTest extends TestCase {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology dlliteonto = translator.translate(onto);
 		
-		Set<Axiom> ass = dlliteonto.getAssertions();
-		Iterator<Axiom> assit = ass.iterator();
+		Set<SubClassOfAxiom> ass = dlliteonto.getSubClassAxioms();
+		Iterator<SubClassOfAxiom> assit = ass.iterator();
 		assertEquals(2, ass.size());
 		
-		SubClassOfAxiomImpl c1 = (SubClassOfAxiomImpl) assit.next();
-		SubClassOfAxiomImpl c2 = (SubClassOfAxiomImpl) assit.next();
+		SubClassOfAxiom c1 = assit.next();
+		SubClassOfAxiom c2 = assit.next();
 		OClass included = (OClass) c1.getSub();
 		assertEquals("http://example/A", included.getPredicate().getName().toString());
 		

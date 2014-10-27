@@ -141,24 +141,20 @@ public class DAG implements Serializable {
 			// addParent(existsNodeInv, thing);
 		}
 
-		for (Axiom assertion : ontology.getAssertions()) {
+		for (SubClassOfAxiom clsIncl : ontology.getSubClassAxioms()) {
+			BasicClassDescription parent = clsIncl.getSuper();
+			BasicClassDescription child = clsIncl.getSub();
 
-			if (assertion instanceof SubClassOfAxiom) {
-				SubClassOfAxiom clsIncl = (SubClassOfAxiom) assertion;
-				BasicClassDescription parent = clsIncl.getSuper();
-				BasicClassDescription child = clsIncl.getSub();
+			addClassEdge(parent, child);
+		} 
+		for (SubPropertyOfAxiom roleIncl : ontology.getSubPropertyAxioms()) {
+			Property parent = roleIncl.getSuper();
+			Property child = roleIncl.getSub();
 
-				addClassEdge(parent, child);
-			} else if (assertion instanceof SubPropertyOfAxiom) {
-				SubPropertyOfAxiom roleIncl = (SubPropertyOfAxiom) assertion;
-				Property parent = roleIncl.getSuper();
-				Property child = roleIncl.getSub();
-
-				// This adds the direct edge and the inverse, e.g., R ISA S and
-				// R- ISA S-,
-				// R- ISA S and R ISA S-
-				addRoleEdge(parent, child);
-			}
+			// This adds the direct edge and the inverse, e.g., R ISA S and
+			// R- ISA S-,
+			// R- ISA S and R ISA S-
+			addRoleEdge(parent, child);
 		}
 		// clean();
 	}

@@ -53,7 +53,9 @@ public class OntologyImpl implements Ontology {
 
 	private final static Set<Predicate> reserved = new ReservedPredicate();
 
-	private final Set<Axiom> assertions = new LinkedHashSet<Axiom>();
+	private final Set<SubClassOfAxiom> subClassAxioms = new LinkedHashSet<SubClassOfAxiom>();
+	
+	private final Set<SubPropertyOfAxiom> subPropertyAxioms = new LinkedHashSet<SubPropertyOfAxiom>();
 
 	private final Set<FunctionalPropertyAxiom> functionalAxioms = new HashSet<FunctionalPropertyAxiom>();
 	
@@ -98,7 +100,8 @@ public class OntologyImpl implements Ontology {
 	@Override
 	public OntologyImpl clone() {
 		OntologyImpl clone = new OntologyImpl(ontouri);
-		clone.assertions.addAll(assertions);
+		clone.subClassAxioms.addAll(subClassAxioms);
+		clone.subPropertyAxioms.addAll(subPropertyAxioms);
 		clone.concepts.addAll(concepts);
 		clone.roles.addAll(roles);
 		return clone;
@@ -166,9 +169,9 @@ public class OntologyImpl implements Ontology {
 	
 	@Override
 	public void addAssertion(Axiom assertion) {
-		if (assertions.contains(assertion)) {
-			return;
-		}
+//		if (assertions.contains(assertion)) {
+//			return;
+//		}
 		Set<Predicate> referencedEntities = getReferencedEntities(assertion);
 		if (!referencesPredicates(referencedEntities)) {
 			IllegalArgumentException ex = new IllegalArgumentException("At least one of these predicates is unknown: "
@@ -182,7 +185,7 @@ public class OntologyImpl implements Ontology {
 			if (axiom.getSub().equals(axiom.getSuper())) 
 				return;
 
-			assertions.add(assertion);
+			subClassAxioms.add(axiom);
 		} 
 		else if (assertion instanceof SubPropertyOfAxiom) {
 			SubPropertyOfAxiom axiom = (SubPropertyOfAxiom) assertion;
@@ -190,7 +193,7 @@ public class OntologyImpl implements Ontology {
 			if (axiom.getSub().equals(axiom.getSuper())) 
 				return;
 			
-			assertions.add(assertion);
+			subPropertyAxioms.add(axiom);
 		}
 		else if (assertion instanceof FunctionalPropertyAxiom) {
 			functionalAxioms.add((FunctionalPropertyAxiom) assertion);
@@ -222,8 +225,13 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public Set<Axiom> getAssertions() {
-		return assertions;
+	public Set<SubClassOfAxiom> getSubClassAxioms() {
+		return subClassAxioms;
+	}
+	
+	@Override
+	public Set<SubPropertyOfAxiom> getSubPropertyAxioms() {
+		return subPropertyAxioms;
 	}
 	
 	@Override 
@@ -245,15 +253,9 @@ public class OntologyImpl implements Ontology {
 	public String toString() {
 		StringBuilder str = new StringBuilder();
 		str.append("[Ontology info.");
-		if (assertions != null) {
-			str.append(String.format(" Axioms: %d", assertions.size()));
-		}
-		if (concepts != null) {
-			str.append(String.format(" Classes: %d", concepts.size()));
-		}
-		if (roles != null) {
-			str.append(String.format(" Properties: %d]", roles.size()));
-		}
+		str.append(String.format(" Axioms: %d", subClassAxioms.size() + subPropertyAxioms.size()));
+		str.append(String.format(" Classes: %d", concepts.size()));
+		str.append(String.format(" Properties: %d]", roles.size()));
 		return str.toString();
 	}
 

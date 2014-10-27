@@ -62,25 +62,23 @@ public class OntologyGraph {
 		}
 
 		// property inclusions
-		for (Axiom assertion : ontology.getAssertions()) 
-			if (assertion instanceof SubPropertyOfAxiom) {
-				SubPropertyOfAxiom roleIncl = (SubPropertyOfAxiom) assertion;
-				// adds the direct edge and the inverse 
-				// e.g., R ISA S and R- ISA S-,
-				//    or R- ISA S and R ISA S-
+		for (SubPropertyOfAxiom roleIncl : ontology.getSubPropertyAxioms()) {
+			// adds the direct edge and the inverse 
+			// e.g., R ISA S and R- ISA S-,
+			//    or R- ISA S and R ISA S-
 
-				Property child = roleIncl.getSub();
-				graph.addVertex(child);
-				Property parent = roleIncl.getSuper();
-				graph.addVertex(parent);
-				graph.addEdge(child, parent);
-				
-				Property childInv = fac.createProperty(child.getPredicate(), !child.isInverse());
-				graph.addVertex(childInv);
-				Property parentInv = fac.createProperty(parent.getPredicate(), !parent.isInverse());
-				graph.addVertex(parentInv);
-				graph.addEdge(childInv, parentInv);
-			}
+			Property child = roleIncl.getSub();
+			graph.addVertex(child);
+			Property parent = roleIncl.getSuper();
+			graph.addVertex(parent);
+			graph.addEdge(child, parent);
+			
+			Property childInv = fac.createProperty(child.getPredicate(), !child.isInverse());
+			graph.addVertex(childInv);
+			Property parentInv = fac.createProperty(parent.getPredicate(), !parent.isInverse());
+			graph.addVertex(parentInv);
+			graph.addEdge(childInv, parentInv);
+		}
 		
 		return graph;
 	}
@@ -140,15 +138,13 @@ public class OntologyGraph {
 			}
 		
 		// class inclusions from the ontology
-		for (Axiom assertion : ontology.getAssertions()) 
-			if (assertion instanceof SubClassOfAxiom) {
-				SubClassOfAxiom clsIncl = (SubClassOfAxiom) assertion;
-				BasicClassDescription parent = (BasicClassDescription)clsIncl.getSuper();
-				BasicClassDescription child = (BasicClassDescription)clsIncl.getSub();
-				classGraph.addVertex(child);
-				classGraph.addVertex(parent);
-				classGraph.addEdge(child, parent);
-			} 
+		for (SubClassOfAxiom clsIncl : ontology.getSubClassAxioms()) {
+			BasicClassDescription parent = (BasicClassDescription)clsIncl.getSuper();
+			BasicClassDescription child = (BasicClassDescription)clsIncl.getSub();
+			classGraph.addVertex(child);
+			classGraph.addVertex(parent);
+			classGraph.addEdge(child, parent);
+		} 
 		return classGraph;
 	}
 	

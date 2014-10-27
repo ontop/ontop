@@ -41,8 +41,8 @@ public class SemanticReductionTest extends TestCase {
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
-		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
-		assertEquals(0, rv.size());
+		Ontology reduced = reduction.getReducedOntology();
+		assertEquals(0, reduced.getSubClassAxioms().size() + reduced.getSubPropertyAxioms().size());
 	}
 
 	public void test_2_0_1() throws Exception {
@@ -50,8 +50,8 @@ public class SemanticReductionTest extends TestCase {
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
-		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
-		assertEquals(0, rv.size());
+		Ontology reduced = reduction.getReducedOntology();
+		assertEquals(0, reduced.getSubClassAxioms().size() + reduced.getSubPropertyAxioms().size());
 	}
 
 	public void test_2_1_0() throws Exception {
@@ -59,8 +59,8 @@ public class SemanticReductionTest extends TestCase {
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
-		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
-		assertEquals(1, rv.size());
+		Ontology reduced = reduction.getReducedOntology();
+		assertEquals(1, reduced.getSubClassAxioms().size() + reduced.getSubPropertyAxioms().size());
 	}
 
 	public void test_1_2_0() throws Exception {
@@ -68,8 +68,8 @@ public class SemanticReductionTest extends TestCase {
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
-		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
-		assertEquals(0, rv.size());
+		Ontology reduced = reduction.getReducedOntology();
+		assertEquals(0, reduced.getSubClassAxioms().size() + reduced.getSubPropertyAxioms().size());
 	}
 
 	public void test_equivalence() throws Exception {
@@ -85,8 +85,7 @@ public class SemanticReductionTest extends TestCase {
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner, null);
-		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
-		//System.out.println(rv);
-		assertEquals(45, rv.size());
+		Ontology reduced = reduction.getReducedOntology();
+		assertEquals(45, reduced.getSubClassAxioms().size() + reduced.getSubPropertyAxioms().size());
 	}
 }

@@ -223,7 +223,9 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 				result.addConcept(p);
 			for (Predicate p : o.getRoles())
 				result.addRole(p);
-			for (Axiom ax : result.getAssertions())  // TODO (ROMAN): check whether it's result and not o
+			for (Axiom ax : result.getSubPropertyAxioms())  // TODO (ROMAN): check whether it's result and not o
+				result.addAssertion(ax);
+			for (Axiom ax : result.getSubClassAxioms())  // TODO (ROMAN): check whether it's result and not o
 				result.addAssertion(ax);
 		}
 		return result;

@@ -39,12 +39,14 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public Set<Predicate> getConcepts();
 	
-	public Set<Axiom> getAssertions();
-
 	public String getUri();
 
 	public Ontology clone();
 
+	public Set<SubClassOfAxiom> getSubClassAxioms();
+
+	public Set<SubPropertyOfAxiom> getSubPropertyAxioms();
+	
 	public Set<ClassAssertion> getClassAssertions();
 
 	public Set<PropertyAssertion> getPropertyAssertions();

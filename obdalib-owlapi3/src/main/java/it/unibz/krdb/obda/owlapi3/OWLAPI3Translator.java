@@ -171,7 +171,9 @@ public class OWLAPI3Translator {
 			for (Predicate p : aux.getRoles())
 				translation.addRole(p);
 			
-			for (Axiom ax : aux.getAssertions())
+			for (Axiom ax : aux.getSubClassAxioms())
+				translation.addAssertion(ax);
+			for (Axiom ax : aux.getSubPropertyAxioms())
 				translation.addAssertion(ax);
 			translation.getClassAssertions().addAll(aux.getClassAssertions());
 			translation.getPropertyAssertions().addAll(aux.getPropertyAssertions());
