@@ -157,18 +157,31 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
         throws RepositoryConfigException
     {
         if (quest_type == null || quest_type.isEmpty()) {
-            throw new RepositoryConfigException("No type specified for repository implementation");
+            throw new RepositoryConfigException("No type specified for repository implementation.");
         }
         try {
-            if (owlFile == null || !owlFile.exists()) {
+            if (owlFile == null) {
                 throw new RepositoryConfigException("No Owl file specified for repository creation!");
             }
-            if (quest_type.equals(VIRTUAL_QUEST_TYPE))
-                if (obdaFile == null || !obdaFile.exists()) {
+            else if ((!owlFile.exists())) {
+                throw new RepositoryConfigException(String.format("The Owl file %s does not exist!",
+                        owlFile.getAbsolutePath()));
+            }
+            else if (quest_type.equals(VIRTUAL_QUEST_TYPE)) {
+                if (obdaFile == null) {
                     throw new RepositoryConfigException(String.format("No OBDA file specified for repository creation " +
-                                    "in %s mode!", quest_type));
+                            "in %s mode!", quest_type));
                 }
-        } catch (SecurityException e) {
+                else if (!obdaFile.exists()) {
+                    throw new RepositoryConfigException(String.format("The OBDA file %s does not exist!",
+                            obdaFile.getAbsolutePath()));
+                }
+            }
+        }
+        /**
+         * No access right to the files.
+         */
+        catch (SecurityException e) {
             throw new RepositoryConfigException(e.getMessage());
         }
     }
