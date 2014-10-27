@@ -71,8 +71,8 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
         ValueFactory factory = ValueFactoryImpl.getInstance();
         QUEST_TYPE = factory.createURI(NAMESPACE, "quest_type");
         NAME = factory.createURI(NAMESPACE, "repo_name");
-        OWLFILE = factory.createURI(NAMESPACE, "owlFile");
-        OBDAFILE = factory.createURI(NAMESPACE, "obdaFile");
+        OWLFILE = factory.createURI(NAMESPACE, "owlfile");
+        OBDAFILE = factory.createURI(NAMESPACE, "obdafile");
         EXISTENTIAL = factory.createURI(NAMESPACE, "existential");
         REWRITING = factory.createURI(NAMESPACE, "rewriting");
     }
