@@ -185,7 +185,6 @@ public class DAGNode implements Serializable {
 
 	public SemanticIndexRange getRange() {
 		return this.range;
-
 	}
 
 	public Set<DAGNode> getChildren() {
@@ -196,32 +195,12 @@ public class DAGNode implements Serializable {
 		return equivalents;
 	}
 
-	public void setAncestors(Set<DAGNode> ancestors) {
-		this.ancestors = ancestors;
-	}
-	
 	public Set<DAGNode> getAncestors() {
 		return ancestors;
 	}
 	
-	public void setDescendants(Set<DAGNode> descendants) {
-		this.descendants = descendants;
-	}
-
 	public Set<DAGNode> getDescendants() {
 		return descendants;
-	}
-
-	public void setChildren(Set<DAGNode> children) {
-		this.children = children;
-		hashNeedsUpdate = true;
-		stringNeedsUpdate = true;
-	}
-
-	public void setParents(Set<DAGNode> parents) {
-		this.parents = parents;
-		hashNeedsUpdate = true;
-		stringNeedsUpdate = true;
 	}
 
 	public Description getDescription() {

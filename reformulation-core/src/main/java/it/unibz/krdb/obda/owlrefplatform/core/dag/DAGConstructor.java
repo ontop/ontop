@@ -21,8 +21,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.Axiom;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -48,89 +46,6 @@ public class DAGConstructor {
 
 	public static DAG getISADAG(Ontology ontology) {
 		return new DAG(ontology);
-	}
-
-	public static DAG getSigma(Ontology ontology) {
-
-		Ontology sigma = descFactory.createOntology("");
-		for (Predicate p : ontology.getConcepts())
-			sigma.addConcept(p);
-		for (Predicate p : ontology.getRoles())
-			sigma.addRole(p);
-		
-		for (SubPropertyOfAxiom inclusion : ontology.getSubPropertyAxioms()) {
-			sigma.addAxiom(inclusion);
-		}
-		
-		for (SubClassOfAxiom inclusion : ontology.getSubClassAxioms()) {
-			Description parent = inclusion.getSuper();
-			if (parent instanceof PropertySomeRestriction) {
-				continue;
-			}
-			sigma.addAxiom(inclusion);
-		}
-
-		//sigma.saturate();
-		return getISADAG(sigma);
-	}
-
-	/***
-	 * DONT USE, BUGGY
-	 * 
-	 * @param ontology
-	 * @return
-	 */
-	@Deprecated
-	public static Ontology getSigmaOntology(Ontology ontology) {
-
-		Ontology sigma = descFactory.createOntology("sigma");
-		for (Predicate p : ontology.getConcepts())
-			sigma.addConcept(p);
-		for (Predicate p : ontology.getRoles())
-			sigma.addRole(p);
-
-		for (SubPropertyOfAxiom inclusion : ontology.getSubPropertyAxioms()) {
-			sigma.addAssertionWithCheck(inclusion);
-		}
-		
-		for (SubClassOfAxiom inclusion : ontology.getSubClassAxioms()) {
-			Description parent = inclusion.getSuper();
-			if (parent instanceof PropertySomeRestriction) {
-				continue;
-			}
-			sigma.addAxiom(inclusion);
-		}
-
-		return sigma;
-	}
-
-	public static Ontology getSigmaOntology(DAG dag) {
-
-		Ontology sigma = descFactory.createOntology("sigma");
-
-		DAGEdgeIterator edgeiterator = new DAGEdgeIterator(dag);
-		OntologyFactory fac = OntologyFactoryImpl.getInstance();
-
-		while (edgeiterator.hasNext()) {
-			Edge edge = edgeiterator.next();
-			if (edge.getLeft().getDescription() instanceof BasicClassDescription) {
-				BasicClassDescription sub = (BasicClassDescription) edge.getLeft().getDescription();
-				BasicClassDescription superp = (BasicClassDescription) edge.getRight().getDescription();
-				if (superp instanceof PropertySomeRestriction)
-					continue;
-
-				SubClassOfAxiom ax = fac.createSubClassAxiom(sub, superp);
-				sigma.addAxiom(ax);
-			} else {
-				Property sub = (Property) edge.getLeft().getDescription();
-				Property superp = (Property) edge.getRight().getDescription();
-
-				SubPropertyOfAxiom ax = fac.createSubPropertyAxiom(sub, superp);
-				sigma.addAxiom(ax);
-			}
-		}
-
-		return sigma;
 	}
 
 	public static DAG filterPureISA(DAG dag) {

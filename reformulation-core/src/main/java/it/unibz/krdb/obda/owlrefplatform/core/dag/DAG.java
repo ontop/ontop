@@ -20,10 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -37,13 +34,9 @@ import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Deprecated
 public class DAG implements Serializable {
@@ -52,8 +45,6 @@ public class DAG implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -9208872698083322721L;
-
-	private static final Logger log = LoggerFactory.getLogger(DAG.class);
 
 	private int index_counter = 1;
 
@@ -68,8 +59,6 @@ public class DAG implements Serializable {
 	public final Map<Description, DAGNode> roles;
 
 	public final Map<Description, DAGNode> allnodes;
-
-	private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
 
 	private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
@@ -345,13 +334,6 @@ public class DAG implements Serializable {
 		return roles.values();
 	}
 
-	public DAGNode get(Description desc) {
-		DAGNode node = allnodes.get(desc);
-		if (node == null)
-			return allnodes.get(equi_mappings.get(desc));
-		return node;
-	}
-
 	/***
 	 * Returns the nodes of this DAG considering the equivalence maps.
 	 * 
@@ -401,14 +383,6 @@ public class DAG implements Serializable {
 			return allnodes.get(equi_mappings.get(description));
 		return n;
 
-	}
-
-	public Map<Description, DAGNode> getAllnodes() {
-		return allnodes;
-	}
-
-	public Iterator<Edge> getTransitiveEdgeIterator() {
-		return null;
 	}
 
 }

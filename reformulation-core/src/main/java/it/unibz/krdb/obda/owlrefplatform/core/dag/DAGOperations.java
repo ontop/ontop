@@ -160,7 +160,7 @@ public class DAGOperations {
 	 * @param childnode
 	 * @param parentnode
 	 */
-	public static void addParentEdge(DAGNode childnode, DAGNode parentnode) {
+	private static void addParentEdge(DAGNode childnode, DAGNode parentnode) {
 
 		if (childnode.equals(parentnode)) {
 			return;
@@ -186,24 +186,6 @@ public class DAGOperations {
 		parentnode.getChildren().remove(childnode);
 	}
 
-	/**
-	 * The methods setups the equivalent relations between n1 and n2. Note that
-	 * this doesn't guarantee that nodes that are equivalent to n2 and n1 are
-	 * also set. For that purpose see {@see addAllEquivalences}.
-	 * 
-	 * @param node1
-	 * @param node2
-	 */
-	public static void addEquivalence(DAGNode node1, DAGNode node2) {
-		if (node1.equals(node2))
-			return;
-
-		node1.getEquivalents().remove(node2);
-		node1.getEquivalents().add(node2);
-
-		node2.getEquivalents().remove(node1);
-		node2.getEquivalents().add(node1);
-	}
 
 	public static void computeTransitiveReduct(Map<Description, DAGNode> dagnodes) {
 		buildDescendants(dagnodes);
