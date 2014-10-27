@@ -27,17 +27,15 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
-public class SubPropertyAxiomImpl implements SubPropertyOfAxiom {
+public class SubPropertyOfAxiomImpl implements SubPropertyOfAxiom {
 
 	private static final long serialVersionUID = -3020225654321319941L;
 
 	private final Property including; // righthand side
-	private final Property included;
-	
+	private final Property included;	
 	private final String string;
-	private final int hash;
 	
-	SubPropertyAxiomImpl(Property subDesc, Property superDesc) {
+	SubPropertyOfAxiomImpl(Property subDesc, Property superDesc) {
 		if (subDesc == null || superDesc == null) {
 			throw new RuntimeException("Recieved null in property inclusion");
 		}
@@ -48,7 +46,6 @@ public class SubPropertyAxiomImpl implements SubPropertyOfAxiom {
 		bf.append(" ISA ");
 		bf.append(including.toString());
 		string = bf.toString();
-		hash = string.hashCode();
 	}
 
 	@Override
@@ -63,10 +60,10 @@ public class SubPropertyAxiomImpl implements SubPropertyOfAxiom {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof SubPropertyAxiomImpl)) {
+		if (!(obj instanceof SubPropertyOfAxiomImpl)) {
 			return false;
 		}
-		SubPropertyAxiomImpl inc2 = (SubPropertyAxiomImpl) obj;
+		SubPropertyOfAxiomImpl inc2 = (SubPropertyOfAxiomImpl) obj;
 		if (!including.equals(inc2.including)) {
 			return false;
 		}
@@ -93,7 +90,7 @@ public class SubPropertyAxiomImpl implements SubPropertyOfAxiom {
 
 	@Override
 	public int hashCode() {
-		return hash;
+		return string.hashCode();
 	}
 
 	@Override

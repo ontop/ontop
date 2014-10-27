@@ -35,17 +35,15 @@ import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
 
 
-public class SubClassAxiomImpl implements SubClassOfAxiom {
+public class SubClassOfAxiomImpl implements SubClassOfAxiom {
 
 	private static final long serialVersionUID = -7590338987239580423L;
 
 	private final BasicClassDescription including; // righthand side
 	private final BasicClassDescription included;
-
 	private final String string;
-	private final int hash;
 	
-	SubClassAxiomImpl(BasicClassDescription subDesc, BasicClassDescription superDesc) {
+	SubClassOfAxiomImpl(BasicClassDescription subDesc, BasicClassDescription superDesc) {
 		if (subDesc == null || superDesc == null) {
 			throw new RuntimeException("Recieved null in concept inclusion");
 		}
@@ -56,7 +54,6 @@ public class SubClassAxiomImpl implements SubClassOfAxiom {
 		bf.append(" ISA ");
 		bf.append(including.toString());
 		string = bf.toString();
-		hash = string.hashCode();
 	}
 
 	@Override
@@ -71,10 +68,10 @@ public class SubClassAxiomImpl implements SubClassOfAxiom {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof SubClassAxiomImpl)) {
+		if (!(obj instanceof SubClassOfAxiomImpl)) {
 			return false;
 		}
-		SubClassAxiomImpl inc2 = (SubClassAxiomImpl) obj;
+		SubClassOfAxiomImpl inc2 = (SubClassOfAxiomImpl) obj;
 		if (!including.equals(inc2.including)) {
 			return false;
 		}
@@ -109,7 +106,7 @@ public class SubClassAxiomImpl implements SubClassOfAxiom {
 
 	@Override
 	public int hashCode() {
-		return hash;
+		return string.hashCode();
 	}
 
 	@Override

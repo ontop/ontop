@@ -28,12 +28,11 @@ public class ClassImpl implements OClass {
 	private static final long serialVersionUID = -4930755519806785384L;
 
 	private final Predicate predicate;
-
-	private final String str;
+	private final String string;
 
 	ClassImpl(Predicate p) {
 		this.predicate = p;
-		str = predicate.toString();
+		string = predicate.toString();
 	}
 
 	@Override
@@ -43,7 +42,7 @@ public class ClassImpl implements OClass {
 
 	@Override
 	public int hashCode() {
-		return toString().hashCode();
+		return string.hashCode();
 	}
 
 	@Override
@@ -57,6 +56,6 @@ public class ClassImpl implements OClass {
 
 	@Override
 	public String toString() {
-		return str;
+		return string;
 	}
 }

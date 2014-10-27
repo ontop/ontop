@@ -24,40 +24,42 @@ import java.util.HashSet;
 import java.util.Set;
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.DisjointPropertyAxiom;
+import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
+import it.unibz.krdb.obda.ontology.Property;
 
-public class DisjointPropertyAxiomImpl implements DisjointPropertyAxiom {
+public class DisjointPropertiesAxiomImpl implements DisjointPropertiesAxiom {
 
 	private static final long serialVersionUID = 4456694617300452114L;
 	
-	private Predicate pred1;
-	private Predicate pred2;
+	private final Property prop1;
+	private final Property prop2;
 	
-	DisjointPropertyAxiomImpl(Predicate p1, Predicate p2){
-		this.pred1 = p1;
-		this.pred2 = p2;
+	DisjointPropertiesAxiomImpl(Property p1, Property p2){
+		this.prop1 = p1;
+		this.prop2 = p2;
 	}
 	
+	@Override
 	public String toString() {
-		return "disjoint(" + pred1.getName() + ", " + pred2.getName() + ")";
+		return "disjoint(" + prop1 + ", " + prop2 + ")";
 	}
 
 	@Override
 	public Set<Predicate> getReferencedEntities() {
 		Set<Predicate> res = new HashSet<Predicate>();
-		res.add(pred1);
-		res.add(pred2);
+		res.add(prop1.getPredicate());
+		res.add(prop2.getPredicate());
 		return res;
 	}
 
 	@Override
-	public Predicate getFirst() {
-		return this.pred1;
+	public Property getFirst() {
+		return prop1;
 	}
 
 	@Override
-	public Predicate getSecond() {
-		return this.pred2;
+	public Property getSecond() {
+		return prop2;
 	}
 	
 	

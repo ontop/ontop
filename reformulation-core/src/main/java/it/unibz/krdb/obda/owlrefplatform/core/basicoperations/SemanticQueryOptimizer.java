@@ -32,7 +32,7 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
-import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
+import it.unibz.krdb.obda.ontology.impl.SubClassOfAxiomImpl;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -166,8 +166,8 @@ public class SemanticQueryOptimizer {
 			for (SubPropertyOfAxiom pi : pis) {
 				boolean breakPICycle = false;
 				Function checkAtom = null;
-				if (pi instanceof SubClassAxiomImpl) {
-					SubClassAxiomImpl ci = (SubClassAxiomImpl) pi;
+				if (pi instanceof SubClassOfAxiomImpl) {
+					SubClassOfAxiomImpl ci = (SubClassOfAxiomImpl) pi;
 					BasicClassDescription including = ci.getSuper();
 					BasicClassDescription included = ci.getSub();
 

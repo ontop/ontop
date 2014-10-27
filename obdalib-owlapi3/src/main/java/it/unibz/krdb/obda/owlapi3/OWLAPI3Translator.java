@@ -30,15 +30,14 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataType;
-import it.unibz.krdb.obda.ontology.DisjointClassAxiom;
-import it.unibz.krdb.obda.ontology.DisjointDataPropertyAxiom;
-import it.unibz.krdb.obda.ontology.DisjointObjectPropertyAxiom;
+import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
+import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.LanguageProfile;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertyFunctionalAxiom;
+import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
@@ -175,7 +174,8 @@ public class OWLAPI3Translator {
 			for (Axiom ax : aux.getAssertions())
 				translation.addAssertion(ax);
 			translation.getABox().addAll(aux.getABox());
-			translation.getDisjointDescriptionAxioms().addAll(aux.getDisjointDescriptionAxioms());
+			translation.getDisjointPropertiesAxioms().addAll(aux.getDisjointPropertiesAxioms());
+			translation.getDisjointClassesAxioms().addAll(aux.getDisjointClassesAxioms());
 			translation.getFunctionalPropertyAxioms().addAll(aux.getFunctionalPropertyAxioms());
 		}
 		/* we translated successfully, now we append the new assertions */
@@ -407,7 +407,7 @@ public class OWLAPI3Translator {
 						throw new TranslationException();
 					OWLFunctionalDataPropertyAxiom aux = (OWLFunctionalDataPropertyAxiom) axiom;
 					Property role = getRoleExpression(aux.getProperty());
-					PropertyFunctionalAxiom funct = ofac.createPropertyFunctionalAxiom(role);
+					FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(role);
 
 					dl_onto.addAssertion(funct);
 
@@ -477,7 +477,7 @@ public class OWLAPI3Translator {
 						throw new TranslationException();
 					OWLFunctionalObjectPropertyAxiom aux = (OWLFunctionalObjectPropertyAxiom) axiom;
 					Property role = getRoleExpression(aux.getProperty());
-					PropertyFunctionalAxiom funct = ofac.createPropertyFunctionalAxiom(role);
+					FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(role);
 
 					dl_onto.addAssertion(funct);
 					
@@ -487,7 +487,7 @@ public class OWLAPI3Translator {
 					OWLInverseFunctionalObjectPropertyAxiom aux = (OWLInverseFunctionalObjectPropertyAxiom) axiom;
 					Property role = getRoleExpression(aux.getProperty());
 					Property invrole = ofac.createProperty(role.getPredicate(), !role.isInverse());
-					PropertyFunctionalAxiom funct = ofac.createPropertyFunctionalAxiom(invrole);
+					FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(invrole);
 
 					dl_onto.addAssertion(funct);
 
@@ -503,7 +503,7 @@ public class OWLAPI3Translator {
 						throw new TranslationException();
 					OClass c1 = ofac.createClass(iter.next().toStringID());
 					OClass c2 = ofac.createClass(iter.next().toStringID());
-					DisjointClassAxiom disj = ofac.createDisjointClassAxiom(c1, c2);
+					DisjointClassesAxiom disj = ofac.createDisjointClassAxiom(c1, c2);
 					
 					dl_onto.addAssertion(disj);
 							
@@ -515,7 +515,7 @@ public class OWLAPI3Translator {
 						throw new TranslationException();
 					Property p1 = ofac.createDataProperty(iter.next().toStringID());
 					Property p2 = ofac.createDataProperty(iter.next().toStringID());
-					DisjointDataPropertyAxiom disj = ofac.createDisjointDataPropertyAxiom(p1.getPredicate(), p2.getPredicate());
+					DisjointPropertiesAxiom disj = ofac.createDisjointPropertiesAxiom(p1, p2);
 					
 					dl_onto.addAssertion(disj);
 					
@@ -525,9 +525,10 @@ public class OWLAPI3Translator {
 					Iterator<OWLObjectProperty> iter = disjointProps.iterator();
 					if (!iter.hasNext())
 						throw new TranslationException();
+					// TODO: handle inverses
 					Property p1 = ofac.createObjectProperty(iter.next().toStringID(), false);
 					Property p2 = ofac.createObjectProperty(iter.next().toStringID(), false);
-					DisjointObjectPropertyAxiom disj = ofac.createDisjointObjectPropertyAxiom(p1.getPredicate(), p2.getPredicate());
+					DisjointPropertiesAxiom disj = ofac.createDisjointPropertiesAxiom(p1, p2);
 					
 					dl_onto.addAssertion(disj);
 				

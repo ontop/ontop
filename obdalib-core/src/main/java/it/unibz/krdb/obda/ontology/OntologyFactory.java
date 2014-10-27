@@ -52,14 +52,12 @@ public interface OntologyFactory {
 
 	public PropertySomeRestriction createPropertySomeRestriction(Property role);
 	
-	public PropertyFunctionalAxiom createPropertyFunctionalAxiom(Property role);
+	public FunctionalPropertyAxiom createPropertyFunctionalAxiom(Property role);
 	
-	public DisjointClassAxiom createDisjointClassAxiom(OClass c1, OClass c2);
+	public DisjointClassesAxiom createDisjointClassAxiom(BasicClassDescription c1, BasicClassDescription c2);
 	
-	public DisjointDataPropertyAxiom createDisjointDataPropertyAxiom(Predicate p1, Predicate p2);
+	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Property p1, Property p2);
 	
-	public DisjointObjectPropertyAxiom createDisjointObjectPropertyAxiom(Predicate p1, Predicate p2);
-
 	public ObjectPropertyAssertion createObjectPropertyAssertion(Predicate role, ObjectConstant o1, ObjectConstant o2);
 
 	public DataPropertyAssertion createDataPropertyAssertion(Predicate attribute, ObjectConstant o1, ValueConstant o2);

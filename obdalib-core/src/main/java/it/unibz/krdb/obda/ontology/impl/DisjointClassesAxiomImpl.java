@@ -21,43 +21,56 @@ package it.unibz.krdb.obda.ontology.impl;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.DisjointClassAxiom;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class DisjointClassAxiomImpl implements DisjointClassAxiom {
+public class DisjointClassesAxiomImpl implements DisjointClassesAxiom {
 
 	private static final long serialVersionUID = 4576840836473365808L;
 	
-	private OClass class1;
-	private OClass class2;
+	private final BasicClassDescription class1;
+	private final BasicClassDescription class2;
 	
-	DisjointClassAxiomImpl(OClass c1, OClass c2) {
+	DisjointClassesAxiomImpl(BasicClassDescription c1, BasicClassDescription c2) {
 		this.class1 = c1;
 		this.class2 = c2;
 	}
 	
+	@Override
 	public String toString() {
-		return "disjoint(" + class1.getPredicate().getName() + ", " + class2.getPredicate().getName() + ")";
+		return "disjoint(" + class1 + ", " + class2 + ")";
 	}
 
 	@Override
 	public Set<Predicate> getReferencedEntities() {
 		Set<Predicate> res = new HashSet<Predicate>();
-		res.add(class1.getPredicate());
-		res.add(class2.getPredicate());
+		if (class1 instanceof OClass)
+			res.add(((OClass)class1).getPredicate());
+		else if (class1 instanceof PropertySomeRestriction)
+			res.add(((PropertySomeRestriction)class1).getPredicate());
+		else
+			System.err.println("UNEXPECTED TYPE");
+		if (class2 instanceof OClass)
+			res.add(((OClass)class2).getPredicate());
+		else if (class2 instanceof PropertySomeRestriction)
+			res.add(((PropertySomeRestriction)class2).getPredicate());
+		else
+			System.err.println("UNEXPECTED TYPE");
 		return res;
 	}
 
 	@Override
-	public OClass getFirst() {
+	public BasicClassDescription getFirst() {
 		return this.class1;
 	}
 
 	@Override
-	public OClass getSecond() {
+	public BasicClassDescription getSecond() {
 		return this.class2;
 	}
 }

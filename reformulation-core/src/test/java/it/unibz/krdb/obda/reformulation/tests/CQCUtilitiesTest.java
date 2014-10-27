@@ -28,7 +28,7 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
+import it.unibz.krdb.obda.ontology.impl.SubClassOfAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
@@ -503,7 +503,7 @@ public class CQCUtilitiesTest {
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
 			BasicClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 			BasicClassDescription right = dfac.createClass(tfac.getPredicate("C", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
-			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+			SubClassOfAxiomImpl inclusion = (SubClassOfAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 			sigma.addAssertionWithEntities(inclusion);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -530,7 +530,7 @@ public class CQCUtilitiesTest {
 			BasicClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 			BasicClassDescription right = dfac.createPropertySomeRestriction(
 					tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), false);
-			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+			SubClassOfAxiomImpl inclusion = (SubClassOfAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 			sigma.addAssertionWithEntities(inclusion);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -557,7 +557,7 @@ public class CQCUtilitiesTest {
 			BasicClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 			BasicClassDescription right = dfac.createPropertySomeRestriction(
 					tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), true);
-			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+			SubClassOfAxiomImpl inclusion = (SubClassOfAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 			sigma.addAssertionWithEntities(inclusion);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -585,7 +585,7 @@ public class CQCUtilitiesTest {
 					tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), false);
 			BasicClassDescription right = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 
-			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+			SubClassOfAxiomImpl inclusion = (SubClassOfAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 			sigma.addAssertionWithEntities(inclusion);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -613,7 +613,7 @@ public class CQCUtilitiesTest {
 					tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), true);
 			BasicClassDescription right = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 
-			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+			SubClassOfAxiomImpl inclusion = (SubClassOfAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
 			sigma.addAssertionWithEntities(inclusion);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
@@ -663,7 +663,7 @@ public class CQCUtilitiesTest {
         BasicClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
         BasicClassDescription right = dfac.createPropertySomeRestriction(
                 tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), false);
-        SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+        SubClassOfAxiomImpl inclusion = (SubClassOfAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
         sigma.addAssertionWithEntities(inclusion);
 
 

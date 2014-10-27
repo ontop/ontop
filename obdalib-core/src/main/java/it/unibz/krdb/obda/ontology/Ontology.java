@@ -47,7 +47,9 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public Set<Assertion> getABox();
 	
-	public Set<PropertyFunctionalAxiom> getFunctionalPropertyAxioms();
+	public Set<FunctionalPropertyAxiom> getFunctionalPropertyAxioms();
 	
-	public Set<DisjointDescriptionAxiom> getDisjointDescriptionAxioms();
+	public Set<DisjointClassesAxiom> getDisjointClassesAxioms();
+	
+	public Set<DisjointPropertiesAxiom> getDisjointPropertiesAxioms();
 }

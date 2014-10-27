@@ -20,10 +20,15 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
-public interface DisjointClassAxiom extends DisjointDescriptionAxiom {
+/**
+ * Represents FunctionalObjectProperty and FunctionalDataProperty (not part of OWL 2 QL)
+ * 
+ * @author roman
+ *
+ */
+
+public interface FunctionalPropertyAxiom extends Axiom {
 	
-	public OClass getFirst();
-	
-	public OClass getSecond();
+	public Property getProperty();
 
 }

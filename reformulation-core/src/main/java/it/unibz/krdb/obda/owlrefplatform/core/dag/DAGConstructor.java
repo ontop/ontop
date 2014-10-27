@@ -32,7 +32,7 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
-import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
+import it.unibz.krdb.obda.ontology.impl.SubClassOfAxiomImpl;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -61,8 +61,8 @@ public class DAGConstructor {
 			sigma.addRole(p);
 		for (Axiom assertion : ontology.getAssertions()) {
 
-			if (assertion instanceof SubClassAxiomImpl) {
-				SubClassAxiomImpl inclusion = (SubClassAxiomImpl) assertion;
+			if (assertion instanceof SubClassOfAxiomImpl) {
+				SubClassOfAxiomImpl inclusion = (SubClassOfAxiomImpl) assertion;
 				Description parent = inclusion.getSuper();
 				if (parent instanceof PropertySomeRestriction) {
 					continue;
@@ -92,8 +92,8 @@ public class DAGConstructor {
 			sigma.addRole(p);
 
 		for (Axiom assertion : ontology.getAssertions()) {
-			if (assertion instanceof SubClassAxiomImpl) {
-				SubClassAxiomImpl inclusion = (SubClassAxiomImpl) assertion;
+			if (assertion instanceof SubClassOfAxiomImpl) {
+				SubClassOfAxiomImpl inclusion = (SubClassOfAxiomImpl) assertion;
 				Description parent = inclusion.getSuper();
 				if (parent instanceof PropertySomeRestriction) {
 					continue;

@@ -27,26 +27,36 @@ public class PropertyImpl implements Property {
 
 	private static final long serialVersionUID = -2514037755762973974L;
 	
-	private boolean inverse = false;
-	private Predicate predicate = null;
+	private final boolean inverse;
+	private final Predicate predicate;
+	private final String string;
 
 	protected PropertyImpl(Predicate p, boolean isInverse) {
 		this.predicate = p;
 		this.inverse = isInverse;
+		StringBuilder bf = new StringBuilder();
+		bf.append(predicate.toString());
+		if (inverse) 
+			bf.append("^-");
+		this.string =  bf.toString();
 	}
 
+	@Override
 	public boolean isInverse() {
 		return inverse;
 	}
 
+	@Override
 	public Predicate getPredicate() {
 		return predicate;
 	}
 
+	@Override
 	public int hashCode() {
-		return toString().hashCode();
+		return string.hashCode();
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof PropertyImpl)) {
 			return false;
@@ -58,12 +68,8 @@ public class PropertyImpl implements Property {
 		return (predicate.equals(concept2.predicate));
 	}
 
+	@Override
 	public String toString() {
-		StringBuilder bf = new StringBuilder();
-		bf.append(predicate.toString());
-		if (inverse) {
-			bf.append("^-");
-		}
-		return bf.toString();
+		return string;
 	}
 }

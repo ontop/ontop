@@ -24,9 +24,10 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
-import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
+import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
+import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.PropertyFunctionalAxiom;
+import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
@@ -49,10 +50,12 @@ public class OntologyImpl implements Ontology {
 
 	private final Set<Axiom> assertions = new LinkedHashSet<Axiom>();
 
-	private final Set<PropertyFunctionalAxiom> functionalAxioms = new HashSet<PropertyFunctionalAxiom>();
+	private final Set<FunctionalPropertyAxiom> functionalAxioms = new HashSet<FunctionalPropertyAxiom>();
 	
-	private final Set<DisjointDescriptionAxiom> disjointAxioms = new HashSet<DisjointDescriptionAxiom>();
+	private final Set<DisjointClassesAxiom> disjointClassesAxioms = new HashSet<DisjointClassesAxiom>();
 
+	private final Set<DisjointPropertiesAxiom> disjointPropertiesAxioms = new HashSet<DisjointPropertiesAxiom>();
+	
 	public static final String AUXROLEURI = "ER.A-AUXROLE";
 	
 	private final Set<Assertion> aboxAssertions = new HashSet<Assertion>();
@@ -138,12 +141,16 @@ public class OntologyImpl implements Ontology {
 			
 			assertions.add(assertion);
 		}
-		else if (assertion instanceof PropertyFunctionalAxiom) {
-			functionalAxioms.add((PropertyFunctionalAxiom) assertion);
+		else if (assertion instanceof FunctionalPropertyAxiom) {
+			functionalAxioms.add((FunctionalPropertyAxiom) assertion);
 		} 
-		else if (assertion instanceof DisjointDescriptionAxiom) {
-			disjointAxioms.add((DisjointDescriptionAxiom) assertion);
-		} else if (assertion instanceof Assertion) {
+		else if (assertion instanceof DisjointClassesAxiom) {
+			disjointClassesAxioms.add((DisjointClassesAxiom) assertion);
+		}
+		else if (assertion instanceof DisjointPropertiesAxiom) {
+			disjointPropertiesAxioms.add((DisjointPropertiesAxiom) assertion);
+		} 
+		else if (assertion instanceof Assertion) {
 			/*ABox assertions */
 			aboxAssertions.add((Assertion)assertion);
 		}
@@ -160,13 +167,18 @@ public class OntologyImpl implements Ontology {
 	}
 	
 	@Override 
-	public Set<PropertyFunctionalAxiom> getFunctionalPropertyAxioms() {
+	public Set<FunctionalPropertyAxiom> getFunctionalPropertyAxioms() {
 		return functionalAxioms;
 	}
 	
 	@Override 
-	public Set<DisjointDescriptionAxiom> getDisjointDescriptionAxioms() {
-		return disjointAxioms;
+	public Set<DisjointClassesAxiom> getDisjointClassesAxioms() {
+		return disjointClassesAxioms;
+	}
+	
+	@Override 
+	public Set<DisjointPropertiesAxiom> getDisjointPropertiesAxioms() {
+		return disjointPropertiesAxioms;
 	}
 
 	@Override

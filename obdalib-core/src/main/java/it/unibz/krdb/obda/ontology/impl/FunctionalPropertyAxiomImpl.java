@@ -21,16 +21,29 @@ package it.unibz.krdb.obda.ontology.impl;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.DisjointObjectPropertyAxiom;
+import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 
-public class DisjointObjectPropertyAxiomImpl extends DisjointPropertyAxiomImpl implements DisjointObjectPropertyAxiom {
+import java.util.Collections;
+import java.util.Set;
 
-	private static final long serialVersionUID = 8438290081979472614L;
+public class FunctionalPropertyAxiomImpl implements FunctionalPropertyAxiom{
 
-	DisjointObjectPropertyAxiomImpl(Predicate p1, Predicate p2) {
-	//	if (p1.isObjectProperty() && p2.isObjectProperty())
-			super(p1, p2);
+	private static final long serialVersionUID = 6020134666314925589L;
+	
+	private final Property role;
+	
+	FunctionalPropertyAxiomImpl(Property role) {
+		this.role = role;
 	}
 
+	@Override
+	public Set<Predicate> getReferencedEntities() {
+		return Collections.singleton(role.getPredicate());
+	}
 
+	@Override
+	public Property getProperty() {
+		return role;
+	}	
 }

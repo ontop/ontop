@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.PropertySomeRestrictionImpl;
-import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
+import it.unibz.krdb.obda.ontology.impl.SubClassOfAxiomImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 
 import java.net.URI;
@@ -70,7 +70,7 @@ public class TranslatorTest extends TestCase {
 		Iterator<Axiom> assit = ass.iterator();
 		assertEquals(1, ass.size());
 		
-		SubClassAxiomImpl a = (SubClassAxiomImpl) assit.next();
+		SubClassOfAxiomImpl a = (SubClassOfAxiomImpl) assit.next();
 		PropertySomeRestrictionImpl ex = (PropertySomeRestrictionImpl) a.getSub();
 		assertEquals(true, ex.isInverse());
 	}
@@ -96,7 +96,7 @@ public class TranslatorTest extends TestCase {
 		Iterator<Axiom> assit = ass.iterator();
 		assertEquals(1, ass.size());
 		
-		SubClassAxiomImpl a = (SubClassAxiomImpl) assit.next();
+		SubClassOfAxiomImpl a = (SubClassOfAxiomImpl) assit.next();
 		PropertySomeRestrictionImpl ex = (PropertySomeRestrictionImpl) a.getSub();
 		assertEquals(false, ex.isInverse());
 	}
@@ -158,8 +158,8 @@ public class TranslatorTest extends TestCase {
 		Iterator<Axiom> assit = ass.iterator();
 		assertEquals(2, ass.size());
 		
-		SubClassAxiomImpl c1 = (SubClassAxiomImpl) assit.next();
-		SubClassAxiomImpl c2 = (SubClassAxiomImpl) assit.next();
+		SubClassOfAxiomImpl c1 = (SubClassOfAxiomImpl) assit.next();
+		SubClassOfAxiomImpl c2 = (SubClassOfAxiomImpl) assit.next();
 		OClass included = (OClass) c1.getSub();
 		assertEquals("http://example/A", included.getPredicate().getName().toString());
 		

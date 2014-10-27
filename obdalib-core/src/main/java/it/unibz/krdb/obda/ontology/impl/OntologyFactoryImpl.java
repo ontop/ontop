@@ -31,15 +31,14 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataType;
-import it.unibz.krdb.obda.ontology.DisjointClassAxiom;
-import it.unibz.krdb.obda.ontology.DisjointDataPropertyAxiom;
-import it.unibz.krdb.obda.ontology.DisjointObjectPropertyAxiom;
+import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
+import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertyFunctionalAxiom;
+import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
@@ -76,12 +75,12 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	
 	@Override
 	public SubPropertyOfAxiom createSubPropertyAxiom(Property included, Property including) {
-		return new SubPropertyAxiomImpl(included, including);
+		return new SubPropertyOfAxiomImpl(included, including);
 	}
 
 	@Override
 	public SubClassOfAxiom createSubClassAxiom(BasicClassDescription concept1, BasicClassDescription concept2) {
-		return new SubClassAxiomImpl(concept1, concept2);
+		return new SubClassOfAxiomImpl(concept1, concept2);
 	}
 
 	@Override
@@ -91,8 +90,8 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public PropertyFunctionalAxiom createPropertyFunctionalAxiom(Property role) {
-		return new PropertyFunctionalAxiomImpl(role);
+	public FunctionalPropertyAxiom createPropertyFunctionalAxiom(Property role) {
+		return new FunctionalPropertyAxiomImpl(role);
 	}
 
 	@Override
@@ -152,22 +151,15 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public DisjointClassAxiom createDisjointClassAxiom(OClass c1, OClass c2) {
-		return new DisjointClassAxiomImpl(c1, c2);
+	public DisjointClassesAxiom createDisjointClassAxiom(BasicClassDescription c1, BasicClassDescription c2) {
+		return new DisjointClassesAxiomImpl(c1, c2);
 	}
 
 	@Override
-	public DisjointDataPropertyAxiom createDisjointDataPropertyAxiom(
-			Predicate p1, Predicate p2) {
-			return new DisjointDataPropertyAxiomImpl(p1, p2);
+	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Property p1, Property p2) {
+			return new DisjointPropertiesAxiomImpl(p1, p2);
 	}
 	
-	@Override
-	public DisjointObjectPropertyAxiom createDisjointObjectPropertyAxiom(
-			Predicate p1, Predicate p2) {
-			return new DisjointObjectPropertyAxiomImpl(p1, p2);
-	}
-
 	@Override
 	public PropertySomeRestriction createPropertySomeRestriction(Property role) {
 		return new PropertySomeRestrictionImpl(role);

@@ -29,9 +29,19 @@ public class PropertySomeRestrictionImpl implements PropertySomeRestriction {
 	private static final long serialVersionUID = 593821958539751283L;
 	
 	private final Property property;
+	private final String string;
 
 	PropertySomeRestrictionImpl(Property property) {
 		this.property = property;
+		StringBuilder bf = new StringBuilder();
+		bf.append("E");
+		bf.append(property.toString());
+		this.string =  bf.toString();
+	}
+
+	@Override
+	public Property getProperty() {
+		return property;
 	}
 
 	@Override
@@ -46,7 +56,7 @@ public class PropertySomeRestrictionImpl implements PropertySomeRestriction {
 
 	@Override
 	public int hashCode() {
-		return toString().hashCode();
+		return string.hashCode();
 	}
 
 	@Override
@@ -54,26 +64,12 @@ public class PropertySomeRestrictionImpl implements PropertySomeRestriction {
 		if (!(obj instanceof PropertySomeRestrictionImpl)) {
 			return false;
 		}
-		PropertySomeRestrictionImpl concept2 = (PropertySomeRestrictionImpl) obj;
-//		if (property != concept2.isInverse) {
-//			return false;
-//		}
-		return property.equals(concept2.property);
+		PropertySomeRestrictionImpl other = (PropertySomeRestrictionImpl) obj;
+		return property.equals(other.property);
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder bf = new StringBuilder();
-		bf.append("E");
-		bf.append(property.toString());
-//		if (isInverse) {
-//			bf.append("^-");
-//		}
-		return bf.toString();
-	}
-
-	@Override
-	public Property getProperty() {
-		return property;
+		return string;
 	}
 }
