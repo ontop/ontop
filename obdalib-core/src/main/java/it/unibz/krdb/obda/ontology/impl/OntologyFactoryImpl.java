@@ -27,8 +27,8 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.ClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.DisjointClassAxiom;
@@ -40,18 +40,20 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertyFunctionalAxiom;
-import it.unibz.krdb.obda.ontology.PropertySomeClassRestriction;
-import it.unibz.krdb.obda.ontology.PropertySomeDataTypeRestriction;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
 
 
 public class OntologyFactoryImpl implements OntologyFactory {
 
-	private static OntologyFactoryImpl instance = new OntologyFactoryImpl();
+	private static final OntologyFactoryImpl instance = new OntologyFactoryImpl();
 
-	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
+	private OntologyFactoryImpl() {
+		// NO-OP to make the default constructor private
+	}
+	
 	public static OntologyFactory getInstance() {
 		return instance;
 	}
@@ -77,13 +79,14 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public SubDescriptionAxiom createSubClassAxiom(ClassDescription concept1, ClassDescription concept2) {
+	public SubDescriptionAxiom createSubClassAxiom(BasicClassDescription concept1, BasicClassDescription concept2) {
 		return new SubClassAxiomImpl(concept1, concept2);
 	}
 
 	@Override
 	public PropertySomeRestriction createPropertySomeRestriction(Predicate p, boolean isInverse) {
-		return new PropertySomeRestrictionImpl(p, isInverse);
+		Property prop = createProperty(p, isInverse);
+		return new PropertySomeRestrictionImpl(prop);
 	}
 
 	@Override
@@ -101,34 +104,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new DataPropertyAssertionImpl(attribute, o1, o2);
 	}
 
-	public PropertySomeRestriction getPropertySomeRestriction(Predicate p, boolean inverse) {
-		if (p.getArity() != 2) {
-			throw new IllegalArgumentException("Roles must have arity = 2");
-		}
-		return new PropertySomeRestrictionImpl(p, inverse);
-	}
-
-	public PropertySomeClassRestriction createPropertySomeClassRestriction(Predicate p, boolean isInverse, OClass filler) {
-		if (p.getArity() != 2) {
-			throw new IllegalArgumentException("Roles must have arity = 2");
-		}
-		if (filler == null) {
-			throw new IllegalArgumentException("Must provide an atomic concept as a filler");
-		}
-		return new PropertySomeClassRestrictionImpl(p, isInverse, filler);
-	}
-
 	@Override
-	public PropertySomeDataTypeRestriction createPropertySomeDataTypeRestriction(Predicate p, boolean isInverse, DataType filler) {
-		if (p.getArity() != 2) {
-			throw new IllegalArgumentException("Roles must have arity = 2");
-		}
-		if (filler == null) {
-			throw new IllegalArgumentException("Must provide a data type object as the filler");
-		}
-		return new PropertySomeDataTypeRestrictionImpl(p, isInverse, filler);
-	}
-
 	public OClass createClass(Predicate p) {
 		if (p.getArity() != 1) {
 			throw new IllegalArgumentException("Concepts must have arity = 1");
@@ -136,12 +112,9 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new ClassImpl(p);
 	}
 
+	@Override
 	public Property createProperty(Predicate p, boolean inverse) {
 		return new PropertyImpl(p, inverse);
-	}
-
-	public Property createProperty(Predicate p) {
-		return new PropertyImpl(p, false);
 	}
 
 	@Override
@@ -157,15 +130,9 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public Property createObjectProperty(String uri) {
-		Predicate prop = ofac.getObjectPropertyPredicate(uri);
-		return createProperty(prop);
-	}
-
-	@Override
 	public Property createDataProperty(String p) {
 		Predicate prop = ofac.getDataPropertyPredicate(p);
-		return createProperty(prop);
+		return createProperty(prop, false);
 	}
 
 
@@ -198,6 +165,11 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	public DisjointObjectPropertyAxiom createDisjointObjectPropertyAxiom(
 			Predicate p1, Predicate p2) {
 			return new DisjointObjectPropertyAxiomImpl(p1, p2);
+	}
+
+	@Override
+	public PropertySomeRestriction createPropertySomeRestriction(Property role) {
+		return new PropertySomeRestrictionImpl(role);
 	}
 
 }

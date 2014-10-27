@@ -238,7 +238,7 @@ public class CQIEImpl implements CQIE, ListListener {
 			}
 		return vars;
 	}
-
+/*
 	@Override
 	public Map<Variable, Integer> getVariableCount() {
 		Map<Variable, Integer> vars = new HashMap<Variable, Integer>();
@@ -265,7 +265,7 @@ public class CQIEImpl implements CQIE, ListListener {
 		}
 		return vars;
 	}
-
+*/
 	@Override
 	public boolean hasModifiers() {
 		return modifiers.hasModifiers();

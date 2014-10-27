@@ -24,25 +24,27 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-public class QueryVocabularyValidator {
+public class VocabularyValidator {
 
-	private final EquivalenceMap equivalences;
+	private final TBoxReasoner reasoner;
 	
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
-
-	public QueryVocabularyValidator(/*Set<Predicate> vocabulary, */ EquivalenceMap equivalences) {
-		//this.vocabulary = vocabulary;
-		this.equivalences = equivalences;
+	public VocabularyValidator(TBoxReasoner reasoner) {
+		this.reasoner = reasoner;
 	}
 /*
 	public boolean validatePredicates0(DatalogProgram input) {
@@ -108,25 +110,28 @@ public class QueryVocabularyValidator {
 		return query;
 	}
 
-	public void replaceEquivalences(List body) {
+	public <T extends Term> void replaceEquivalences(List<T> body) {
 		// Get the predicates in the target query.
 		for (int i = 0; i < body.size(); i++) {
-			Function atom = (Function) body.get(i);
+			Term t = body.get(i);
+			if (t instanceof Function) {
+				Function atom = (Function)t;
 
-			/*
-			 * Calling recursively for nested expressions
-			 */
-			if (atom.isAlgebraFunction()) {
-				replaceEquivalences(atom.getTerms());
-				continue;
+				/*
+				 * Calling recursively for nested expressions
+				 */
+				if (atom.isAlgebraFunction()) {
+					replaceEquivalences(atom.getTerms());
+					continue;
+				}
+				
+				if (atom.isBooleanFunction())
+					continue;
+
+				T newatom = (T)getNormal(atom);
+
+				body.set(i, newatom);
 			}
-			
-			if (atom.isBooleanFunction())
-				continue;
-
-			Function newatom = getNormal(atom);
-
-			body.set(i, newatom);
 		}
 	}
 	
@@ -134,12 +139,12 @@ public class QueryVocabularyValidator {
 		Predicate p = atom.getPredicate();
 		
 		if (p.getArity() == 1) {
-			OClass equivalent = equivalences.getClassRepresentative(p);
+			OClass equivalent = reasoner.getClassRepresentative(p);
 			if (equivalent != null)
 				return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 		} 
 		else {
-			Property equivalent = equivalences.getPropertyRepresentative(p);
+			Property equivalent = reasoner.getPropertyRepresentative(p);
 			if (equivalent != null) {
 				if (!equivalent.isInverse()) 
 					return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
@@ -150,5 +155,40 @@ public class QueryVocabularyValidator {
 		return atom;
 	}
 
+	/***
+	 * Given a collection of mappings and an equivalence map for classes and
+	 * properties, it returns a new collection in which all references to
+	 * class/properties with equivalents has been removed and replaced by the
+	 * equivalents.
+	 * 
+	 * For example, given the map hasFather -> inverse(hasChild)
+	 * 
+	 * If there is a mapping:
+	 * 
+	 * q(x,y):- hasFather(x,y) <- SELECT x, y FROM t
+	 * 
+	 * This will be replaced by the mapping
+	 * 
+	 * q(x,y):- hasChild(y,x) <- SELECT x, y FROM t
+	 * 
+	 * The same is done for classes.
+	 * 
+	 * @param originalMappings
+	 * @param equivalencesMap
+	 * @return
+	 */
+	public Collection<OBDAMappingAxiom> replaceEquivalences(Collection<OBDAMappingAxiom> originalMappings) {
+		
+		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
+		for (OBDAMappingAxiom mapping : originalMappings) {
+			
+			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
+			
+			CQIE newTargetQuery = replaceEquivalences(targetQuery, false);
+			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(),((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
+
+		}
+		return result;
+	}
 	
 }

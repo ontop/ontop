@@ -130,6 +130,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 	@Override
 	public ValueConstant getConstantFreshLiteral() {
+		// TODO: a bit more elaborate name is needed to avoid conflicts
 		return new ValueConstantImpl("f" + (counter++), COL_TYPE.LITERAL);
 	}
 

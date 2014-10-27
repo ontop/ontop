@@ -46,7 +46,7 @@ public class DAGChainTest extends TestCase {
 	SemanticIndexHelper						helper				= new SemanticIndexHelper();
 
 	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
-	private static final OntologyFactory	descFactory			= new OntologyFactoryImpl();
+	private static final OntologyFactory	descFactory			= OntologyFactoryImpl.getInstance();
 
 	private static <T> int sizeOf(Set<Equivalences<T>> set) {
 		int size = 0;
@@ -67,12 +67,8 @@ public class DAGChainTest extends TestCase {
 		OClass bc = descFactory.createClass(b);
 		OClass cc = descFactory.createClass(c);
 
-		ontology.addConcept(ac.getPredicate());
-		ontology.addConcept(bc.getPredicate());
-		ontology.addConcept(cc.getPredicate());
-
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, ac));
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, bc));
+		ontology.addAssertionWithEntities(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, ac));
+		ontology.addAssertionWithEntities(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, bc));
 
 		TBoxReasonerImpl reasoner0 = new TBoxReasonerImpl(ontology);
 		TBoxReasoner reasoner = TBoxReasonerImpl.getChainReasoner(reasoner0);
@@ -98,23 +94,12 @@ public class DAGChainTest extends TestCase {
 		Predicate r = predicateFactory.getObjectPropertyPredicate("r");
 		Predicate c = predicateFactory.getClassPredicate("c");
 		OClass ac = descFactory.createClass(a);
-		PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
-		PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
+		PropertySomeRestriction er = descFactory.createPropertySomeRestriction(r, false);
+		PropertySomeRestriction ier = descFactory.createPropertySomeRestriction(r, true);
 		OClass cc = descFactory.createClass(c);
 
-		ontology.addConcept(ac.getPredicate());
-		ontology.addConcept(cc.getPredicate());
-
-		ontology.addRole(er.getPredicate());
-		ontology.addRole(ier.getPredicate());
-		
-		//System.out.println(er);
-		//System.out.println(ac);
-		//System.out.println(cc);
-		//System.out.println(ier);
-
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
+		ontology.addAssertionWithEntities(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
+		ontology.addAssertionWithEntities(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
 		
 		//generate Graph
 		TBoxReasonerImpl res0 = new  TBoxReasonerImpl(ontology);
@@ -161,24 +146,16 @@ public class DAGChainTest extends TestCase {
 		Predicate d = predicateFactory.getPredicate("d", 1);
 
 		OClass ac = descFactory.createClass(a);
-		PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
-		PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
+		PropertySomeRestriction er = descFactory.createPropertySomeRestriction(r, false);
+		PropertySomeRestriction ier = descFactory.createPropertySomeRestriction(r, true);
 		OClass cc = descFactory.createClass(c);
 		OClass bc = descFactory.createClass(b);
 		OClass dc = descFactory.createClass(d);
 
-		ontology.addConcept(ac.getPredicate());
-		ontology.addConcept(cc.getPredicate());
-		ontology.addConcept(bc.getPredicate());
-		ontology.addConcept(dc.getPredicate());
-
-		ontology.addRole(er.getPredicate());
-		ontology.addRole(ier.getPredicate());
-
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, er));
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(ier, dc));
+		ontology.addAssertionWithEntities(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
+		ontology.addAssertionWithEntities(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
+		ontology.addAssertionWithEntities(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, er));
+		ontology.addAssertionWithEntities(OntologyFactoryImpl.getInstance().createSubClassAxiom(ier, dc));
 
 		//DAGImpl dag221 = DAGBuilder.getDAG(ontology);
 		//TBoxReasonerImpl reasoner221 = new TBoxReasonerImpl(dag221);

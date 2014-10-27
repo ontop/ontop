@@ -33,8 +33,10 @@ import it.unibz.krdb.sql.api.Attribute;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,18 +47,22 @@ public class DBMetadataUtil {
 	
 	private static Logger log = LoggerFactory.getLogger(DBMetadataUtil.class);
 	
+	private static final String variableSuffix = "_4022013_";
+	
 	/*
 	 * generate CQIE rules from foreign key info of db metadata
 	 * TABLE1.COL1 references TABLE2.COL2 as foreign key then 
 	 * construct CQIE rule TABLE2(P1, P3, COL2, P4) :- TABLE1(COL2, T2, T3).
 	 */
-	public static List<CQIE> generateFKRules(DBMetadata metadata) {
-		List<CQIE> rules = new ArrayList<CQIE>();
+	public static LinearInclusionDependencies generateFKRules(DBMetadata metadata) {
+		LinearInclusionDependencies dependencies = new LinearInclusionDependencies();
+		
 		List<TableDefinition> tableDefs = metadata.getTableList();
 		for (TableDefinition def : tableDefs) {
 			Map<String, List<Attribute>> foreignKeys = def.getForeignKeys();
-			for (String fkName : foreignKeys.keySet()) {
-				List<Attribute> fkAttributes = foreignKeys.get(fkName);
+			for (Entry<String, List<Attribute>> fks : foreignKeys.entrySet()) {
+				String fkName = fks.getKey();
+				List<Attribute> fkAttributes = fks.getValue();
 				try {
 					String table1 = def.getName();
 					String table2 = "";
@@ -90,36 +96,32 @@ public class DBMetadataUtil {
 						positionMatch.put(pos1, pos2);
 					}
 					// Construct CQIE
-					Predicate p1 = fac.getPredicate(table1, def.getNumOfAttributes());
-					Predicate p2 = fac.getPredicate(table2, def2.getNumOfAttributes());
-					
-					List<Term> terms1 = new ArrayList<Term>();
-					for (int i=0; i<def.getNumOfAttributes(); i++) {
-						 terms1.add(fac.getVariable("t"+(i+1)));
+					Predicate p1 = fac.getPredicate(table1, def.getNumOfAttributes());					
+					List<Term> terms1 = new ArrayList<Term>(def.getNumOfAttributes());
+					for (int i=0; i < def.getNumOfAttributes(); i++) {
+						 terms1.add(fac.getVariable("t" + variableSuffix + (i+1)));
 					}
-					List<Term> terms2 = new ArrayList<Term>();
-					for (int i=0; i<def2.getNumOfAttributes(); i++) {
-						 terms2.add(fac.getVariable("p"+(i+1)));
+					
+					Predicate p2 = fac.getPredicate(table2, def2.getNumOfAttributes());
+					List<Term> terms2 = new ArrayList<Term>(def2.getNumOfAttributes());
+					for (int i=0; i < def2.getNumOfAttributes(); i++) {
+						 terms2.add(fac.getVariable("p" + variableSuffix + (i+1)));
 					}
 					// Do the swapping
-					for (Integer pos1 : positionMatch.keySet()) {
-						Integer pos2 = positionMatch.get(pos1);
-						terms1.set(pos1, terms2.get(pos2));
-					}
-					Function head = fac.getFunction(p2, terms2);
-					Function body1 = fac.getFunction(p1, terms1);
-					List<Function> body = new ArrayList<Function>();
-					body.add(body1);
+					for (Entry<Integer,Integer> swap : positionMatch.entrySet()) 
+						terms1.set(swap.getKey(), terms2.get(swap.getValue()));
 					
-					CQIE rule = fac.getCQIE(head, body);
-					rules.add(rule);
-				
-				} catch (BrokenForeignKeyException e) {
+					Function head = fac.getFunction(p2, terms2);
+					Function body = fac.getFunction(p1, terms1);
+					
+					dependencies.addRule(head, body);				
+				} 
+				catch (BrokenForeignKeyException e) {
 					// Log the warning message
 					log.warn(e.getMessage());
 				}
 			}
 		}		
-		return rules;
+		return dependencies;
 	}
 }

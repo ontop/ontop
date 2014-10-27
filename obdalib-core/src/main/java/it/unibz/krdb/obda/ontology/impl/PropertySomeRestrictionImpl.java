@@ -21,52 +21,59 @@ package it.unibz.krdb.obda.ontology.impl;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
 
 public class PropertySomeRestrictionImpl implements PropertySomeRestriction {
 
 	private static final long serialVersionUID = 593821958539751283L;
 	
-	private Predicate	predicate	= null;
-	private boolean		isInverse	= false;
+	private final Property property;
 
-	PropertySomeRestrictionImpl(Predicate p, boolean isInverse) {
-		this.predicate = p;
-		this.isInverse = isInverse;
+	PropertySomeRestrictionImpl(Property property) {
+		this.property = property;
 	}
 
 	@Override
 	public boolean isInverse() {
-		return isInverse;
+		return property.isInverse();
 	}
 
 	@Override
 	public Predicate getPredicate() {
-		return predicate;
+		return property.getPredicate();
 	}
 
+	@Override
 	public int hashCode() {
 		return toString().hashCode();
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof PropertySomeRestrictionImpl)) {
 			return false;
 		}
 		PropertySomeRestrictionImpl concept2 = (PropertySomeRestrictionImpl) obj;
-		if (isInverse != concept2.isInverse) {
-			return false;
-		}
-		return (predicate.equals(concept2.getPredicate()));
+//		if (property != concept2.isInverse) {
+//			return false;
+//		}
+		return property.equals(concept2.property);
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
 		bf.append("E");
-		bf.append(predicate.toString());
-		if (isInverse) {
-			bf.append("^-");
-		}
+		bf.append(property.toString());
+//		if (isInverse) {
+//			bf.append("^-");
+//		}
 		return bf.toString();
+	}
+
+	@Override
+	public Property getProperty() {
+		return property;
 	}
 }

@@ -10,17 +10,10 @@ password
 driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
-mappingId	Character Types
-target		:character-{id} a :Row ; :hasVarChar {type_varchar} ; :hasCharacter {type_character} ; :hasText {type_text} ; :hasChar {type_char}; :hasLongText {type_longtext} ; :hasMediumText {type_longtext} ; :hasTinyText {type_tinytext} .   .
-source		select id, type_varchar, type_character, type_text, type_char, type_longtext, type_mediumtext,  from "Characters"
 
 mappingId	Date-Time Types
 target		:datetime-{id} a :Row ; :hasTime {type_time} ; :hasTimeString {type_time}^^xsd:string ; :hasDate {type_date}^^xsd:date ; :hasDateString {type_date}^^xsd:string ; :hasYear {type_year}^^xsd:gYear ; :hasTimestamp {type_timestamp} ; :hasTimestampString {type_timestamp}^^xsd:string .
 source		select id, type_timestamp, type_year, type_date, type_time from "DateTimes"
-
-mappingId	Boolean Types
-target		:boolean-{id} a :Row ; :hasBoolean {type_boolean} .
-source		select id, type_boolean from "Booleans"
 
 
 ]]

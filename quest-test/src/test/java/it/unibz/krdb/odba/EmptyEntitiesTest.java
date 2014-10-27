@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
@@ -306,7 +307,7 @@ public class EmptyEntitiesTest {
 		int c = 0; // number of empty concepts
 		for (Equivalences<BasicClassDescription> concept : tboxreasoner.getClasses()) {
 			BasicClassDescription representative = concept.getRepresentative();
-			if ((!representative.getPredicate().isDataTypePredicate()) && !runSPARQLConceptsQuery("<" + concept.getRepresentative().toString() + ">")) {
+			if ((!(representative instanceof DataType)) && !runSPARQLConceptsQuery("<" + concept.getRepresentative().toString() + ">")) {
 				emptyBasicConcepts.addAll(concept.getMembers());
 				c += concept.size();
 			}
