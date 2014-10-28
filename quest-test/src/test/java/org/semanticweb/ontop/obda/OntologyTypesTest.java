@@ -206,9 +206,9 @@ public class OntologyTypesTest{
         //no value in the mapping
         //xsd:long is not supported for ontology, it is translated into integer
         String query1 = "PREFIX : <http://www.company.com/ARES#>" +
-                "select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
+                "select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
 
-        runTests(p, query1, 3);
+        runTests(p, query1, 0);
 
         //no value in the mapping
         //xsd:string in the ontology
