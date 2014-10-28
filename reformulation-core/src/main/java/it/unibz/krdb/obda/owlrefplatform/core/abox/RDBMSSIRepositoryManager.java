@@ -1893,7 +1893,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	// Attribute datatype from TBox
 	private COL_TYPE getAttributeType(Predicate attribute) {
-		SomeValuesFrom role = ofac.createPropertySomeRestriction(attribute, true);
+		PropertyExpression prop = ofac.createProperty(attribute, true);
+		SomeValuesFrom role = ofac.createPropertySomeRestriction(prop);
 		Equivalences<BasicClassDescription> roleNode = reasonerDag.getClasses().getVertex(role);
 		Set<Equivalences<BasicClassDescription>> ancestors = reasonerDag.getClasses().getSuper(roleNode);
 

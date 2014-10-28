@@ -64,13 +64,8 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public Ontology createOntology(String uri) {
-		return new OntologyImpl(uri);
-	}
-
-	@Override
 	public Ontology createOntology() {
-		return new OntologyImpl(null);
+		return new OntologyImpl();
 	}
 	
 	@Override
@@ -81,12 +76,6 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	@Override
 	public SubClassOfAxiom createSubClassAxiom(SubClassExpression concept1, BasicClassDescription concept2) {
 		return new SubClassOfAxiomImpl(concept1, concept2);
-	}
-
-	@Override
-	public SomeValuesFrom createPropertySomeRestriction(Predicate p, boolean isInverse) {
-		PropertyExpression prop = createProperty(p, isInverse);
-		return new PropertySomeRestrictionImpl(prop);
 	}
 
 	@Override

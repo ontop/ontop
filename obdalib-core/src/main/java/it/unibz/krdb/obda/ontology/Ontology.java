@@ -68,8 +68,6 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public Set<Predicate> getConcepts();
 	
-	public String getUri();
-
 	public void merge(Ontology onto);
 	
 	public Ontology clone();

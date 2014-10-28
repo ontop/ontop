@@ -152,23 +152,17 @@ public class OWLAPI3Translator {
 		 * We will keep track of the loaded ontologies and translate the TBox
 		 * part of them into our internal representation
 		 */
-		String uri = "http://it.unibz.krdb.obda/Quest/auxiliaryontology";
-
-		Ontology translatedOntologyMerge = ofac.createOntology(uri);
-
 		log.debug("Load ontologies called. Translating ontologies.");
 
-		Ontology translation = ofac.createOntology(uri);
+		Ontology translation = ofac.createOntology();
 		for (OWLOntology onto : ontologies) {
 			Ontology aux = translate(onto);
 			translation.merge(aux);
 		}
 
-		translatedOntologyMerge = translation;
+		log.debug("Ontology loaded: {}", translation);
 
-		log.debug("Ontology loaded: {}", translatedOntologyMerge);
-
-		return translatedOntologyMerge;
+		return translation;
 
 	}
 
@@ -218,7 +212,7 @@ public class OWLAPI3Translator {
 			}
 		}
 
-		Ontology dl_onto = ofac.createOntology("http://www.unibz.it/ontology");
+		Ontology dl_onto = ofac.createOntology();
 
 		HashSet<String> objectproperties = new HashSet<String>();
 		HashSet<String> dataproperties = new HashSet<String>();
@@ -781,7 +775,8 @@ public class OWLAPI3Translator {
 			PropertyExpression auxRole = ofac.createProperty(dfac.getObjectPropertyPredicate((OntologyImpl.AUXROLEURI + auxRoleCounter)), false);
 			auxRoleCounter += 1;
 
-			auxclass = ofac.createPropertySomeRestriction(auxRole.getPredicate(), role.isInverse());
+			PropertyExpression exp = ofac.createProperty(auxRole.getPredicate(), role.isInverse());
+			auxclass = ofac.createPropertySomeRestriction(exp);
 			auxiliaryDatatypeProperties.put(someexp, auxclass);
 
 			/* Creating the new subrole assertions */
@@ -789,7 +784,8 @@ public class OWLAPI3Translator {
 			dl_onto.addAssertionWithCheck(subrole);
 			
 			/* Creating the range assertion */
-			SomeValuesFrom propertySomeRestrictionInv = ofac.createPropertySomeRestriction(auxRole.getPredicate(), !role.isInverse());
+			PropertyExpression expInv = ofac.createObjectPropertyInverse(exp);
+			SomeValuesFrom propertySomeRestrictionInv = ofac.createPropertySomeRestriction(expInv);
 			SubClassOfAxiom subclass = ofac.createSubClassAxiom(propertySomeRestrictionInv, filler);
 			dl_onto.addAssertionWithCheck(subclass);
 		}
@@ -821,7 +817,8 @@ public class OWLAPI3Translator {
 			}
 			String uri = (rest.getProperty().asOWLDataProperty().getIRI().toString());
 			Predicate attribute = dfac.getDataPropertyPredicate(uri);
-			cd = ofac.createPropertySomeRestriction(attribute, false);
+			PropertyExpression prop = ofac.createProperty(attribute, false);
+			cd = ofac.createPropertySomeRestriction(prop);
 
 		} else if (owlExpression instanceof OWLObjectMinCardinality) {
 			if (profile.order() < LanguageProfile.DLLITEA.order())
@@ -840,11 +837,14 @@ public class OWLAPI3Translator {
 			String uri = propExp.getNamedProperty().getIRI().toString();
 			Predicate role = dfac.getObjectPropertyPredicate(uri);
 
+			PropertyExpression prop;
+			
 			if (propExp instanceof OWLObjectInverseOf) {
-				cd = ofac.createPropertySomeRestriction(role, true);
+				prop = ofac.createProperty(role, true);
 			} else {
-				cd = ofac.createPropertySomeRestriction(role, false);
+				prop = ofac.createProperty(role, false);
 			}
+			cd = ofac.createPropertySomeRestriction(prop);
 
 		} else if (owlExpression instanceof OWLObjectSomeValuesFrom) {
 			if (profile.order() < LanguageProfile.OWL2QL.order())
@@ -859,11 +859,15 @@ public class OWLAPI3Translator {
 			String uri = propExp.getNamedProperty().getIRI().toString();
 			Predicate role = dfac.getObjectPropertyPredicate(uri);
 
+			PropertyExpression prop;
+			
 			if (propExp instanceof OWLObjectInverseOf) {
-				cd = ofac.createPropertySomeRestriction(role, true);
+				prop = ofac.createProperty(role, true);
 			} else {
-				cd = ofac.createPropertySomeRestriction(role, false);
+				prop = ofac.createProperty(role, false);
 			}
+			cd = ofac.createPropertySomeRestriction(prop);
+			
 		} else if (owlExpression instanceof OWLDataSomeValuesFrom) {
 			if (profile.order() < LanguageProfile.OWL2QL.order())
 				throw new TranslationException();
@@ -876,7 +880,8 @@ public class OWLAPI3Translator {
 			OWLDataProperty propExp = (OWLDataProperty) rest.getProperty();
 			String uri = propExp.getIRI().toString();
 			Predicate role = dfac.getDataPropertyPredicate(uri);
-			cd = ofac.createPropertySomeRestriction(role, false);
+			PropertyExpression prop = ofac.createProperty(role, false);
+			cd = ofac.createPropertySomeRestriction(prop);
 		}
 
 		if (cd == null) {

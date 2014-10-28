@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.ontology.impl;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.Datatype;
@@ -45,8 +44,6 @@ import java.util.Set;
 public class OntologyImpl implements Ontology {
 
 	private static final long serialVersionUID = 758424053258299151L;
-
-	private final String ontouri;
 
 	// signature
 	
@@ -97,13 +94,12 @@ public class OntologyImpl implements Ontology {
 		return datatypes;
 	}
 
-	OntologyImpl(String uri) {
-		this.ontouri = uri;
+	OntologyImpl() {
 	}
 
 	@Override
 	public OntologyImpl clone() {
-		OntologyImpl clone = new OntologyImpl(ontouri);
+		OntologyImpl clone = new OntologyImpl();
 		clone.subClassAxioms.addAll(subClassAxioms);
 		clone.subPropertyAxioms.addAll(subPropertyAxioms);
 		clone.concepts.addAll(concepts);
@@ -319,11 +315,6 @@ public class OntologyImpl implements Ontology {
 	@Override
 	public Set<Predicate> getRoles() {
 		return roles;
-	}
-
-	@Override
-	public String getUri() {
-		return ontouri;
 	}
 
 	@Override

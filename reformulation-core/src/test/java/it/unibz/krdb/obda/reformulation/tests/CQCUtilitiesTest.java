@@ -502,7 +502,7 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- A(x), q(y) :- C(y), with A ISA C
-			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
+			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
 			OClass left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 			OClass right = dfac.createClass(tfac.getPredicate("C", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 			SubClassOfAxiom inclusion = OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
@@ -528,7 +528,7 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
-			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
+			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
 			OClass left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 			PropertyExpression pright = dfac.createProperty(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), false);
 			SomeValuesFrom right = dfac.createPropertySomeRestriction(pright);
@@ -555,7 +555,7 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
-			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
+			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
 			OClass left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 			PropertyExpression pright = dfac.createProperty(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), true);
 			SomeValuesFrom right = dfac.createPropertySomeRestriction(pright);
@@ -582,7 +582,7 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
-			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
+			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
 			PropertyExpression pleft = dfac.createProperty(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), false);
 			SomeValuesFrom left = dfac.createPropertySomeRestriction(pleft);
 			OClass right = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
@@ -610,7 +610,7 @@ public class CQCUtilitiesTest {
 
 		{
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
-			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
+			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
 			PropertyExpression pleft = dfac.createProperty(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), true);
 			SomeValuesFrom left = dfac.createPropertySomeRestriction(pleft);
 			OClass right = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
@@ -661,7 +661,7 @@ public class CQCUtilitiesTest {
 
         // q(x) :- , q(x) :- R(x,y), A(x)
 
-        Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
+        Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
         OClass left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
         PropertyExpression pleft = dfac.createProperty(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), false);
         SomeValuesFrom right = dfac.createPropertySomeRestriction(pleft);

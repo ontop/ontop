@@ -43,7 +43,7 @@ public class SigmaTest extends TestCase {
     private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
     public void test_exists_simple() {
-        Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
+        Ontology ontology = descFactory.createOntology();
 
         Predicate a = predicateFactory.getPredicate("a", 1);
         Predicate c = predicateFactory.getPredicate("c", 1);

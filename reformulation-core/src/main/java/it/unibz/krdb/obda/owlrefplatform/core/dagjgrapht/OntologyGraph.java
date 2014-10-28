@@ -130,7 +130,8 @@ public class OntologyGraph {
 		if (chain) 
 			for (PropertyExpression role : propertyGraph.vertexSet()) {
 				SomeValuesFrom existsRole = fac.createPropertySomeRestriction(role);
-				SomeValuesFrom existsRoleInv = fac.createPropertySomeRestriction(role.getPredicate(), !role.isInverse());
+				PropertyExpression inv = fac.createObjectPropertyInverse(role);
+				SomeValuesFrom existsRoleInv = fac.createPropertySomeRestriction(inv);
 				
 				classGraph.addEdge(existsRoleInv, existsRole);				
 				classGraph.addEdge(existsRole, existsRoleInv);				

@@ -76,7 +76,7 @@ public class SigmaTBoxOptimizer {
 	
 	public Ontology getReducedOntology() {
 		if (optimizedTBox == null) {
-			optimizedTBox = fac.createOntology("http://it.unibz.krdb/obda/auxontology");
+			optimizedTBox = fac.createOntology();
 			//optimizedTBox.addEntities(vocabulary);
 
 			log.debug("Starting semantic-reduction");

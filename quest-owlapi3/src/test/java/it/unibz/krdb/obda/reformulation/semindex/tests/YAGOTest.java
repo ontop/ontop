@@ -69,9 +69,8 @@ public class YAGOTest {
         Pattern pattern = Pattern.compile("<(.+?)>\\s(.+?)\\s[<\"](.+?)[>\"]\\s\\.");
         Matcher matcher;
 
-        Ontology onto = OntologyFactoryImpl.getInstance().createOntology("");
+        Ontology onto = descFactory.createOntology();
 
-        long tbox_count = 0;
         while ((line = triples.readLine()) != null) {
             if (line.startsWith("@")) {
                 log.debug(line);
@@ -87,7 +86,6 @@ public class YAGOTest {
                 object = matcher.group(3);
 
                 if ("rdfs:range".equals(predicate)) {
-                    tbox_count++;
                     Predicate ps = predicateFactory.getPredicate(subject, 2);
                     Predicate po = predicateFactory.getPredicate(object, 1);
                     PropertyExpression psprop = descFactory.createProperty(ps, true);
@@ -96,7 +94,6 @@ public class YAGOTest {
                     onto.addAssertionWithCheck(descFactory.createSubClassAxiom(rs, co));
                 } 
                 else if ("rdfs:domain".equals(predicate)) {
-                    tbox_count++;
                     Predicate ps = predicateFactory.getPredicate(subject, 2);
                     Predicate po = predicateFactory.getPredicate(object, 1);
                     PropertyExpression psprop = descFactory.createProperty(ps, false);
@@ -111,7 +108,6 @@ public class YAGOTest {
                     onto.addConcept(po);
                 }
                 else if ("rdfs:subClassOf".equals(predicate)) {
-                    tbox_count++;
                     Predicate ps = predicateFactory.getPredicate(subject, 1);
                     Predicate po = predicateFactory.getPredicate(object, 1);
                     OClass cs = descFactory.createClass(ps);
@@ -119,7 +115,6 @@ public class YAGOTest {
                     onto.addAssertionWithCheck(descFactory.createSubClassAxiom(cs, co));
                 } 
                 else if ("rdfs:subPropertyOf".equals(predicate)) {
-                    tbox_count++;
                     Predicate ps = predicateFactory.getPredicate(subject, 1);
                     Predicate po = predicateFactory.getPredicate(object, 1);
                     PropertyExpression rs = descFactory.createProperty(ps, false);
@@ -132,6 +127,7 @@ public class YAGOTest {
                 log.debug("Not matched line {}", line);
             }
         }
+        triples.close();
         return onto;
     }
 }

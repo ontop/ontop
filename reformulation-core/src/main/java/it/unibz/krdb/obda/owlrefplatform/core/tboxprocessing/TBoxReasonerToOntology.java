@@ -16,7 +16,7 @@ public class TBoxReasonerToOntology {
 	private static final OntologyFactory fac = OntologyFactoryImpl.getInstance();
 
 	public static Ontology getOntology(TBoxReasoner reasoner, final boolean excludeExistentials) {
-		final Ontology sigma = fac.createOntology("ontology");
+		final Ontology sigma = fac.createOntology();
 
 		TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
 			

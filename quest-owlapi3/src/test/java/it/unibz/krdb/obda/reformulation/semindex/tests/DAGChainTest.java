@@ -58,7 +58,7 @@ public class DAGChainTest extends TestCase {
 	}
 	
 	public void test_simple_isa() {
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
 		Predicate a = predicateFactory.getPredicate("a", 1);
 		Predicate b = predicateFactory.getPredicate("b", 1);
@@ -89,7 +89,7 @@ public class DAGChainTest extends TestCase {
 	}
 
 	public void test_exists_simple() {
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
 		Predicate a = predicateFactory.getClassPredicate("a");
 		Predicate r = predicateFactory.getObjectPropertyPredicate("r");
@@ -140,7 +140,7 @@ public class DAGChainTest extends TestCase {
 
 	public void test_exists_complex() {
 
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
 		Predicate a = predicateFactory.getPredicate("a", 1);
 		Predicate r = predicateFactory.getPredicate("r", 2);

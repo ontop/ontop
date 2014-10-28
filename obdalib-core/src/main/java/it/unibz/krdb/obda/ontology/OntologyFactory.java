@@ -43,16 +43,14 @@ public interface OntologyFactory {
 	
 	public Datatype createDataType(Predicate p);
 	
-	public Ontology createOntology(String uri);
-	
 	public Ontology createOntology();
 
 	public SubPropertyOfAxiom createSubPropertyAxiom(PropertyExpression included, PropertyExpression including);
 
 	public SubClassOfAxiom createSubClassAxiom(SubClassExpression concept1, BasicClassDescription concept2);
 
-	@Deprecated
-	public SomeValuesFrom createPropertySomeRestriction(Predicate p, boolean inverse);
+//	@Deprecated
+//	public SomeValuesFrom createPropertySomeRestriction(Predicate p, boolean inverse);
 
 	public SomeValuesFrom createPropertySomeRestriction(PropertyExpression role);
 	
