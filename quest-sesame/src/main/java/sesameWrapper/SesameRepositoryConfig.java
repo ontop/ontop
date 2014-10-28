@@ -178,6 +178,9 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
             throw new RepositoryConfigException("No type specified for repository implementation.");
         }
         try {
+            /**
+             * Ontology file
+             */
             if (owlFile == null) {
                 throw new RepositoryConfigException("No Owl file specified for repository creation!");
             }
@@ -185,19 +188,31 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
                 throw new RepositoryConfigException(String.format("The Owl file %s does not exist!",
                         owlFile.getAbsolutePath()));
             }
+            if (!owlFile.canRead()) {
+                throw new RepositoryConfigException(String.format("The Owl file %s is not accessible!",
+                        owlFile.getAbsolutePath()));
+            }
+
+            /**
+             * Mapping file
+             */
             if (quest_type.equals(VIRTUAL_QUEST_TYPE)) {
                 if (obdaFile == null) {
-                    throw new RepositoryConfigException(String.format("No OBDA file specified for repository creation " +
+                    throw new RepositoryConfigException(String.format("No mapping file specified for repository creation " +
                             "in %s mode!", quest_type));
                 }
                 if (!obdaFile.exists()) {
-                    throw new RepositoryConfigException(String.format("The OBDA file %s does not exist!",
+                    throw new RepositoryConfigException(String.format("The mapping file %s does not exist!",
+                            obdaFile.getAbsolutePath()));
+                }
+                if (!obdaFile.canRead()) {
+                    throw new RepositoryConfigException(String.format("The mapping file %s is not accessible!",
                             obdaFile.getAbsolutePath()));
                 }
             }
         }
         /**
-         * No access right to the files.
+         * Sometimes thrown when there is no access right to the files.
          */
         catch (SecurityException e) {
             throw new RepositoryConfigException(e.getMessage());
