@@ -84,6 +84,7 @@ public class QuestPreferences extends Properties {
 	//              It would amount to no t-mappings && no rewriting -> no rewriting -> everything
 	public static final String T_MAPPINGS = "t_mappings";
 	
+	
 	private Logger				log						= LoggerFactory.getLogger(QuestPreferences.class);
 
 	public QuestPreferences() {
