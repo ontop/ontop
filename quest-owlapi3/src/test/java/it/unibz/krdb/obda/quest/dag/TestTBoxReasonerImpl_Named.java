@@ -24,7 +24,7 @@ package it.unibz.krdb.obda.quest.dag;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Intersection;
@@ -43,11 +43,11 @@ import java.util.Set;
 @Deprecated
 public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 
-	private EquivalencesDAG<Property> propertyDAG;
+	private EquivalencesDAG<PropertyExpression> propertyDAG;
 	private EquivalencesDAG<BasicClassDescription> classDAG;
 
 	public TestTBoxReasonerImpl_Named(TBoxReasoner reasoner) {
-		this.propertyDAG = new EquivalencesDAGImpl<Property>(reasoner.getProperties());
+		this.propertyDAG = new EquivalencesDAGImpl<PropertyExpression>(reasoner.getProperties());
 		this.classDAG = new EquivalencesDAGImpl<BasicClassDescription>(reasoner.getClasses());
 	}
 
@@ -59,7 +59,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	 */
 
 	@Override
-	public EquivalencesDAG<Property> getProperties() {
+	public EquivalencesDAG<PropertyExpression> getProperties() {
 		return propertyDAG;
 	}
 	
@@ -193,7 +193,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 
 
 	@Override
-	public Property getPropertyRepresentative(Predicate p) {
+	public PropertyExpression getPropertyRepresentative(Predicate p) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -20,17 +20,17 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
+/**
+ * Represents ObjectPropertyExpression and DataPropeprtyExpression 
+ *                (OWL 2 Specification)
+ * 
+ */
+
 import it.unibz.krdb.obda.model.Predicate;
 
-/**
- * A non-qualified property some restriction. Corresponds to DL
- * "exists Property"
- */
-public interface PropertySomeRestriction extends SubClassExpression {
+public interface PropertyExpression extends Description {
 
 	public boolean isInverse();
 
 	public Predicate getPredicate();
-
-	public Property getProperty();	
 }

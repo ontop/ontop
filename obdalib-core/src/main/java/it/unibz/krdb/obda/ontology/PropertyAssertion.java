@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.model.ObjectConstant;
 
 public interface PropertyAssertion extends Assertion {
 
-	public Property getProperty();
+	public PropertyExpression getProperty();
 	
 	public ObjectConstant getSubject();
 	

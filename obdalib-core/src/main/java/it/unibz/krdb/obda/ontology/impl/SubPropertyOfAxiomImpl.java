@@ -20,18 +20,18 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
 public class SubPropertyOfAxiomImpl implements SubPropertyOfAxiom {
 
 	private static final long serialVersionUID = -3020225654321319941L;
 
-	private final Property including; // right-hand side
-	private final Property included;	
+	private final PropertyExpression including; // right-hand side
+	private final PropertyExpression included;	
 	private final String string;
 	
-	SubPropertyOfAxiomImpl(Property subDesc, Property superDesc) {
+	SubPropertyOfAxiomImpl(PropertyExpression subDesc, PropertyExpression superDesc) {
 		included = subDesc;
 		including = superDesc;
 		StringBuilder bf = new StringBuilder();
@@ -42,12 +42,12 @@ public class SubPropertyOfAxiomImpl implements SubPropertyOfAxiom {
 	}
 
 	@Override
-	public Property getSub() {
+	public PropertyExpression getSub() {
 		return included;
 	}
 
 	@Override
-	public Property getSuper() {
+	public PropertyExpression getSuper() {
 		return including;
 	}
 

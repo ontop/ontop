@@ -23,8 +23,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.ArrayList;
@@ -242,13 +242,13 @@ public class DAGOperations {
 			DAGNode cycleheaddomainNode = null;
 			DAGNode cycleheadrangeNode = null;
 
-			if (cycleheadNode.getDescription() instanceof Property) {
+			if (cycleheadNode.getDescription() instanceof PropertyExpression) {
 
-				Property prop = (Property) cycleheadNode.getDescription();
+				PropertyExpression prop = (PropertyExpression) cycleheadNode.getDescription();
 
-				Property inverse = fac.createProperty(prop.getPredicate(), !prop.isInverse());
-				PropertySomeRestriction domain = fac.createPropertySomeRestriction(prop);
-				PropertySomeRestriction range = fac.createPropertySomeRestriction(inverse);
+				PropertyExpression inverse = fac.createProperty(prop.getPredicate(), !prop.isInverse());
+				SomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
+				SomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
 
 				cycleheadinverseNode = dag.getNode(inverse);
 				cycleheaddomainNode = dag.getNode(domain);
@@ -258,7 +258,7 @@ public class DAGOperations {
 			/*
 			 * putting a cyclehead that is a named concept or named role
 			 */
-			if (component.size() > 1 && cycleheadNode.getDescription() instanceof PropertySomeRestriction) {
+			if (component.size() > 1 && cycleheadNode.getDescription() instanceof SomeValuesFrom) {
 
 				for (int i = 1; i < component.size(); i++) {
 					if (component.get(i).getDescription() instanceof OClass) {
@@ -271,21 +271,21 @@ public class DAGOperations {
 				}
 			}
 
-			if (component.size() > 0 && cycleheadNode.getDescription() instanceof Property
-					&& ((Property) cycleheadNode.getDescription()).isInverse()) {
+			if (component.size() > 0 && cycleheadNode.getDescription() instanceof PropertyExpression
+					&& ((PropertyExpression) cycleheadNode.getDescription()).isInverse()) {
 				for (int i = 1; i < component.size(); i++) {
-					if (component.get(i).getDescription() instanceof Property
-							&& !((Property) component.get(i).getDescription()).isInverse()) {
+					if (component.get(i).getDescription() instanceof PropertyExpression
+							&& !((PropertyExpression) component.get(i).getDescription()).isInverse()) {
 						DAGNode tmp = component.get(i);
 						component.set(i, cycleheadNode);
 						component.set(0, tmp);
 						cycleheadNode = tmp;
 
-						Property prop = (Property) cycleheadNode.getDescription();
+						PropertyExpression prop = (PropertyExpression) cycleheadNode.getDescription();
 
-						Property inverse = fac.createProperty(prop.getPredicate(), !prop.isInverse());
-						PropertySomeRestriction domain = fac.createPropertySomeRestriction(prop);
-						PropertySomeRestriction range = fac.createPropertySomeRestriction(inverse);
+						PropertyExpression inverse = fac.createProperty(prop.getPredicate(), !prop.isInverse());
+						SomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
+						SomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
 
 						cycleheadinverseNode = dag.getNode(inverse);
 						cycleheaddomainNode = dag.getNode(domain);
@@ -324,11 +324,12 @@ public class DAGOperations {
 					 * we are dealing with properties, so we need to also
 					 * collapse the inverses and existentials
 					 */
-					Property equiprop = (Property) equivnode.getDescription();
+					PropertyExpression equiprop = (PropertyExpression) equivnode.getDescription();
 
 					DAGNode equivinverseNode = dag.getNode(fac.createProperty(equiprop.getPredicate(), !equiprop.isInverse()));
 					DAGNode equivDomainNode = dag.getNode(fac.createPropertySomeRestriction(equiprop));
-					DAGNode equivRangeNode = dag.getNode(fac.createPropertySomeRestriction(equiprop.getPredicate(), !equiprop.isInverse()));
+					PropertyExpression inv = fac.createObjectPropertyInverse(equiprop);
+					DAGNode equivRangeNode = dag.getNode(fac.createPropertySomeRestriction(inv));
 
 					/*
 					 * Doing the inverses
@@ -387,7 +388,7 @@ public class DAGOperations {
 
 				processedNodes.add(equivnode);
 
-				if (description instanceof Property) {
+				if (description instanceof PropertyExpression) {
 
 					
 					
@@ -396,11 +397,11 @@ public class DAGOperations {
 					 * we are dealing with properties, so we need to also
 					 * collapse the inverses and existentials
 					 */
-					Property equiprop = (Property) equivnode.getDescription();
+					PropertyExpression equiprop = (PropertyExpression) equivnode.getDescription();
 					
-					Property inverseequiprop = fac.createProperty(equiprop.getPredicate(), !equiprop.isInverse());
-					Property cycleheadprop =(Property)cycleheadNode.getDescription(); 
-					Property invesenonredundantprop = fac.createProperty(cycleheadprop.getPredicate(), !cycleheadprop.isInverse());
+					PropertyExpression inverseequiprop = fac.createProperty(equiprop.getPredicate(), !equiprop.isInverse());
+					PropertyExpression cycleheadprop =(PropertyExpression)cycleheadNode.getDescription(); 
+					PropertyExpression invesenonredundantprop = fac.createProperty(cycleheadprop.getPredicate(), !cycleheadprop.isInverse());
 					equi_mapp.put(inverseequiprop, invesenonredundantprop);
 					dag.equi_mappings.put(inverseequiprop, invesenonredundantprop);
 					
@@ -408,7 +409,8 @@ public class DAGOperations {
 
 					DAGNode equivinverseNode = dag.getNode(inverseequiprop);
 					DAGNode equivDomainNode = dag.getNode(fac.createPropertySomeRestriction(equiprop));
-					DAGNode equivRangeNode = dag.getNode(fac.createPropertySomeRestriction(equiprop.getPredicate(), !equiprop.isInverse()));
+					PropertyExpression inv = fac.createObjectPropertyInverse(equiprop);					
+					DAGNode equivRangeNode = dag.getNode(fac.createPropertySomeRestriction(inv));
 
 					if (!(equivinverseNode == null && equivDomainNode == null && equivRangeNode == null)) {
 						/*

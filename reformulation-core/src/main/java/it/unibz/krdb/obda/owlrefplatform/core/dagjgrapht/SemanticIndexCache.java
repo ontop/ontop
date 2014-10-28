@@ -4,7 +4,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.PropertyImpl;
 
@@ -121,8 +121,8 @@ public class SemanticIndexCache {
 			if (index == null) {
 				/* direct name is not indexed, maybe there is an equivalent, we need to test
 				 * with object properties and data properties */
-				Property c = ofac.createObjectProperty(name, false);
-				Property equivalent = reasonerDag.getProperties().getVertex(c).getRepresentative();
+				PropertyExpression c = ofac.createObjectProperty(name, false);
+				PropertyExpression equivalent = reasonerDag.getProperties().getVertex(c).getRepresentative();
 				
 				Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
 				

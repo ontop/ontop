@@ -32,7 +32,7 @@ import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SubClassExpression;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
@@ -663,10 +663,10 @@ public class QuestOWL extends OWLReasonerBase {
 			while (isConsistent && it.hasNext()) {		
 				// TODO: handle role inverses and multiple arguments			
 				DisjointPropertiesAxiom dda = it.next();
-				Set<Property> props = dda.getProperties();
-				Iterator<Property> iterator = props.iterator();
-				Property p1 = iterator.next();
-				Property p2 = iterator.next();
+				Set<PropertyExpression> props = dda.getProperties();
+				Iterator<PropertyExpression> iterator = props.iterator();
+				PropertyExpression p1 = iterator.next();
+				PropertyExpression p2 = iterator.next();
 				String strQuery = String.format(strQueryProp, p1, p2);
 				
 				isConsistent = executeConsistencyQuery(strQuery);

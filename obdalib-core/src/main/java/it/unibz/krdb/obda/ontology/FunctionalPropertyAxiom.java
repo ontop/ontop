@@ -29,6 +29,6 @@ package it.unibz.krdb.obda.ontology;
 
 public interface FunctionalPropertyAxiom extends Axiom {
 	
-	public Property getProperty();
+	public PropertyExpression getProperty();
 
 }

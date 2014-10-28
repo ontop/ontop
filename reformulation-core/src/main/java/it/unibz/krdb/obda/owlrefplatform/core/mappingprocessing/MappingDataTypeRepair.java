@@ -82,7 +82,7 @@ public class MappingDataTypeRepair {
         TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
 
             @Override
-            public void onInclusion(Property sub, Property sup) {
+            public void onInclusion(PropertyExpression sub, PropertyExpression sup) {
             }
 
             @Override
@@ -96,9 +96,9 @@ public class MappingDataTypeRepair {
             			// datatype inclusion
             			key = ((Datatype)sub).getPredicate();
             		}
-            		else if (sub instanceof PropertySomeRestriction) {
+            		else if (sub instanceof SomeValuesFrom) {
             			// range 
-            			key = ((PropertySomeRestriction)sub).getPredicate();
+            			key = ((SomeValuesFrom)sub).getProperty().getPredicate();
             		}
             		else
             			return;

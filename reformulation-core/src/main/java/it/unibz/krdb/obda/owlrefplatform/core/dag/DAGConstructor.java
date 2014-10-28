@@ -23,8 +23,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
 
@@ -53,7 +53,7 @@ public class DAGConstructor {
 
 		for (DAGNode node : dag.getClasses()) {
 
-			if (node.getDescription() instanceof PropertySomeRestriction) {
+			if (node.getDescription() instanceof SomeValuesFrom) {
 				continue;
 			}
 
@@ -68,7 +68,7 @@ public class DAGConstructor {
 			}
 
 			for (DAGNode child : node.getChildren()) {
-				if (child.getDescription() instanceof PropertySomeRestriction) {
+				if (child.getDescription() instanceof SomeValuesFrom) {
 					continue;
 				}
 				DAGNode newChild = classes.get(child.getDescription());
@@ -87,14 +87,14 @@ public class DAGConstructor {
 		}
 
 		for (DAGNode node : dag.getRoles()) {
-			Property nodeDesc = (Property) node.getDescription();
+			PropertyExpression nodeDesc = (PropertyExpression) node.getDescription();
 
 			if (nodeDesc.getPredicate().getName().toString().startsWith(OntologyImpl.AUXROLEURI)) {
 				continue;
 			}
 
 			if (nodeDesc.isInverse()) {
-				Property posNode = descFactory.createProperty(nodeDesc.getPredicate(), false);
+				PropertyExpression posNode = descFactory.createProperty(nodeDesc.getPredicate(), false);
 				DAGNode newNode = roles.get(posNode);
 				if (newNode == null) {
 					newNode = new DAGNode(posNode);
@@ -113,12 +113,12 @@ public class DAGConstructor {
 				allnodes.put(nodeDesc, newNode);
 			}
 			for (DAGNode child : node.getChildren()) {
-				Property childDesc = (Property) child.getDescription();
+				PropertyExpression childDesc = (PropertyExpression) child.getDescription();
 				if (childDesc.getPredicate().getName().toString().startsWith(OntologyImpl.AUXROLEURI)) {
 					continue;
 				}
 				if (childDesc.isInverse()) {
-					Property posChild = descFactory.createProperty(childDesc.getPredicate(), false);
+					PropertyExpression posChild = descFactory.createProperty(childDesc.getPredicate(), false);
 					DAGNode newChild = roles.get(posChild);
 					if (newChild == null) {
 						newChild = new DAGNode(posChild);

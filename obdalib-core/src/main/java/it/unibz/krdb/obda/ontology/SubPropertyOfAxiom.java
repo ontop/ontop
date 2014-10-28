@@ -31,7 +31,7 @@ package it.unibz.krdb.obda.ontology;
 
 public interface SubPropertyOfAxiom extends Axiom {
 
-	public Property getSub();
+	public PropertyExpression getSub();
 
-	public Property getSuper();
+	public PropertyExpression getSuper();
 }

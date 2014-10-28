@@ -21,9 +21,9 @@ package it.unibz.krdb.obda.ontology.impl;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 
-public class PropertyImpl implements Property {
+public class PropertyImpl implements PropertyExpression {
 
 	private static final long serialVersionUID = -2514037755762973974L;
 	

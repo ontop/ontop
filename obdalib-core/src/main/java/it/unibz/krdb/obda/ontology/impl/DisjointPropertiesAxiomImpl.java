@@ -24,15 +24,15 @@ import java.util.Collections;
 import java.util.Set;
 
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 
 public class DisjointPropertiesAxiomImpl implements DisjointPropertiesAxiom {
 
 	private static final long serialVersionUID = 4456694617300452114L;
 	
-	private final Set<Property> props;
+	private final Set<PropertyExpression> props;
 	
-	DisjointPropertiesAxiomImpl(Set<Property> props) {
+	DisjointPropertiesAxiomImpl(Set<PropertyExpression> props) {
 		if (props.size() < 2)
 			throw new IllegalArgumentException("At least 2 properties are expeccted in DisjointClassAxiom");
 		
@@ -40,7 +40,7 @@ public class DisjointPropertiesAxiomImpl implements DisjointPropertiesAxiom {
 	}
 	
 	@Override
-	public Set<Property> getProperties() {
+	public Set<PropertyExpression> getProperties() {
 		return Collections.unmodifiableSet(props);
 	}
 

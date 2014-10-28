@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.BooleanOperationPredicateImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Intersection;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -229,7 +229,7 @@ public class TreeWitnessSet {
 		Collection<TreeWitnessGenerator> twg = null;
 		log.debug("CHECKING WHETHER THE FOLDING {} CAN BE GENERATED: ", qf); 
 		for (TreeWitnessGenerator g : allTWgenerators) {
-			Intersection<Property> subp = qf.getProperties();
+			Intersection<PropertyExpression> subp = qf.getProperties();
 			if (!subp.subsumes(g.getProperty())) {
 				log.debug("      NEGATIVE PROPERTY CHECK {}", g.getProperty());
 				continue;
@@ -365,7 +365,7 @@ public class TreeWitnessSet {
 	
 	
 	static class QueryConnectedComponentCache {
-		private final Map<TermOrderedPair, Intersection<Property>> propertiesCache = new HashMap<TermOrderedPair, Intersection<Property>>();
+		private final Map<TermOrderedPair, Intersection<PropertyExpression>> propertiesCache = new HashMap<TermOrderedPair, Intersection<PropertyExpression>>();
 		private final Map<Term, Intersection<BasicClassDescription>> conceptsCache = new HashMap<Term, Intersection<BasicClassDescription>>();
 
 		private final TBoxReasoner reasoner;
@@ -378,8 +378,8 @@ public class TreeWitnessSet {
 			return new Intersection<BasicClassDescription>(reasoner.getClasses());
 		}
 
-		public Intersection<Property> getTopProperty() {
-			return new Intersection<Property>(reasoner.getProperties());
+		public Intersection<PropertyExpression> getTopProperty() {
+			return new Intersection<PropertyExpression>(reasoner.getProperties());
 		}
 		
 		public Intersection<BasicClassDescription> getSubConcepts(Collection<Function> atoms) {
@@ -410,11 +410,11 @@ public class TreeWitnessSet {
 		}
 		
 		
-		public Intersection<Property> getEdgeProperties(Edge edge, Term root, Term nonroot) {
+		public Intersection<PropertyExpression> getEdgeProperties(Edge edge, Term root, Term nonroot) {
 			TermOrderedPair idx = new TermOrderedPair(root, nonroot);
-			Intersection<Property> properties = propertiesCache.get(idx);			
+			Intersection<PropertyExpression> properties = propertiesCache.get(idx);			
 			if (properties == null) {
-				properties = new Intersection<Property>(reasoner.getProperties());
+				properties = new Intersection<PropertyExpression>(reasoner.getProperties());
 				for (Function a : edge.getBAtoms()) {
 					if (a.getPredicate() instanceof BooleanOperationPredicateImpl) {
 						log.debug("EDGE {} HAS PROPERTY {} NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES", edge, a);
@@ -423,7 +423,7 @@ public class TreeWitnessSet {
 					}
 					else {
 						log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
-						Property prop = ontFactory.createProperty(a.getPredicate(), !root.equals(a.getTerm(0)));
+						PropertyExpression prop = ontFactory.createProperty(a.getPredicate(), !root.equals(a.getTerm(0)));
 						properties.intersectWith(prop);
 						if (properties.isBottom())
 							break;						

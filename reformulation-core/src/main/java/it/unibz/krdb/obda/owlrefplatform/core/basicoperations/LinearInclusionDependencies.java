@@ -14,8 +14,8 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
@@ -58,16 +58,16 @@ public class LinearInclusionDependencies {
 	public static LinearInclusionDependencies getABoxDependencies(TBoxReasoner reasoner, boolean full) {
 		LinearInclusionDependencies dependencies = new LinearInclusionDependencies();
 		
-		for (Equivalences<Property> propNode : reasoner.getProperties()) {
+		for (Equivalences<PropertyExpression> propNode : reasoner.getProperties()) {
 			// super might be more efficient
-			for (Equivalences<Property> subpropNode : reasoner.getProperties().getSub(propNode)) {
-				for (Property subprop : subpropNode) {
+			for (Equivalences<PropertyExpression> subpropNode : reasoner.getProperties().getSub(propNode)) {
+				for (PropertyExpression subprop : subpropNode) {
 					if (subprop.isInverse())
 						continue;
 					
 	                Function body = translate(subprop);
 
-	                for (Property prop : propNode)  {
+	                for (PropertyExpression prop : propNode)  {
 	                	if (prop == subprop)
 	                		continue;
 	                	
@@ -88,7 +88,7 @@ public class LinearInclusionDependencies {
 	                	continue;
 
 	                for (BasicClassDescription cla : classNode)  {
-	                	if (!(cla instanceof OClass) && !(!full && (cla instanceof PropertySomeRestriction)))
+	                	if (!(cla instanceof OClass) && !(!full && (cla instanceof SomeValuesFrom)))
 	                		continue;
 	                	
 	                	if (cla == subclass)
@@ -109,7 +109,7 @@ public class LinearInclusionDependencies {
 	private static final String variableYname = "y_4022013";
 	private static final String variableZname = "z_4022013";
 	
-    private static Function translate(Property property) {
+    private static Function translate(PropertyExpression property) {
 		final Variable varX = ofac.getVariable(variableXname);
 		final Variable varY = ofac.getVariable(variableYname);
 
@@ -125,9 +125,9 @@ public class LinearInclusionDependencies {
 			OClass klass = (OClass) description;
 			return ofac.getFunction(klass.getPredicate(), varX);
 		} 
-		else if (description instanceof PropertySomeRestriction) {
+		else if (description instanceof SomeValuesFrom) {
 			final Variable varY = ofac.getVariable(existentialVariableName);
-			PropertySomeRestriction property = (PropertySomeRestriction) description;
+			PropertyExpression property = ((SomeValuesFrom) description).getProperty();
 			if (property.isInverse()) 
 				return ofac.getFunction(property.getPredicate(), varY, varX);
 			else 

@@ -32,8 +32,8 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
@@ -301,9 +301,9 @@ public class TMappingProcessor {
 		 * the TMappings specification.
 		 */
 
-		for (Equivalences<Property> propertySet : reasoner.getProperties()) {
+		for (Equivalences<PropertyExpression> propertySet : reasoner.getProperties()) {
 
-			Property current = propertySet.getRepresentative();
+			PropertyExpression current = propertySet.getRepresentative();
 			if (current.isInverse())
 				continue;
 			
@@ -319,8 +319,8 @@ public class TMappingProcessor {
 			Predicate currentPredicate = current.getPredicate();
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
 
-			for (Equivalences<Property> descendants : reasoner.getProperties().getSub(propertySet)) {
-				for(Property childproperty : descendants) {
+			for (Equivalences<PropertyExpression> descendants : reasoner.getProperties().getSub(propertySet)) {
+				for(PropertyExpression childproperty : descendants) {
 
 					/*
 					 * adding the mappings of the children as own mappings, the new
@@ -353,7 +353,7 @@ public class TMappingProcessor {
 			}
 
 			/* Setting up mappings for the equivalent classes */
-			for (Property equivProperty : propertySet) {
+			for (PropertyExpression equivProperty : propertySet) {
 			
 				 
 				Predicate p = equivProperty.getPredicate();
@@ -421,8 +421,8 @@ public class TMappingProcessor {
 						isClass = true;
 						isInverse = false;
 					} 
-					else if (childDescription instanceof PropertySomeRestriction) {
-						PropertySomeRestriction some = (PropertySomeRestriction) childDescription;
+					else if (childDescription instanceof SomeValuesFrom) {
+						PropertyExpression some = ((SomeValuesFrom) childDescription).getProperty();
 						childPredicate = some.getPredicate();
 						isClass = false;
 						isInverse = some.isInverse();

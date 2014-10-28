@@ -23,17 +23,17 @@ package it.unibz.krdb.obda.ontology.impl;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 
 public class PropertyAssertionImpl implements PropertyAssertion {
 
 	private static final long serialVersionUID = -8834975903851540150L;
 	
-	private final Property prop;
+	private final PropertyExpression prop;
 	private final Constant o2;
 	private final ObjectConstant o1;
 
-	PropertyAssertionImpl(Property prop, ObjectConstant o1, Constant o2) {
+	PropertyAssertionImpl(PropertyExpression prop, ObjectConstant o1, Constant o2) {
 		this.prop = prop;
 		this.o1 = o1;
 		this.o2 = o2;
@@ -50,7 +50,7 @@ public class PropertyAssertionImpl implements PropertyAssertion {
 	}
 
 	@Override
-	public Property getProperty() {
+	public PropertyExpression getProperty() {
 		return prop;
 	}
 	

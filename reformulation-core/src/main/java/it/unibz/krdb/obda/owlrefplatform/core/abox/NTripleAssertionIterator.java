@@ -29,7 +29,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.io.BufferedReader;
@@ -81,13 +81,13 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 		else if (currentPredicate.getType(1) == Predicate.COL_TYPE.OBJECT) {
 			URIConstant c1 = obdafac.getConstantURI(currSubject);
 			URIConstant c2 = obdafac.getConstantURI(currObject);
-			Property prop = ofac.createObjectProperty(currentPredicate.getName(), false);
+			PropertyExpression prop = ofac.createObjectProperty(currentPredicate.getName(), false);
 			assertion = ofac.createPropertyAssertion(prop, c1, c2);
 		} 
 		else if (currentPredicate.getType(1) == Predicate.COL_TYPE.LITERAL) {
 			URIConstant c1 = obdafac.getConstantURI(currSubject);
 			ValueConstant c2 = obdafac.getConstantLiteral(currObject);
-			Property prop = ofac.createDataProperty(currentPredicate.getName());
+			PropertyExpression prop = ofac.createDataProperty(currentPredicate.getName());
 			assertion = ofac.createPropertyAssertion(prop, c1, c2);
 		} 
 		else {

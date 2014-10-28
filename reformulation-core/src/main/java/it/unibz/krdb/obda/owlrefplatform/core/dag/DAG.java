@@ -25,8 +25,8 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
@@ -105,17 +105,17 @@ public class DAG implements Serializable {
 		 * For each role we add nodes for its inverse, its domain and its range
 		 */
 		for (Predicate rolep : ontology.getRoles()) {
-			Property role = descFactory.createProperty(rolep, false);
+			PropertyExpression role = descFactory.createProperty(rolep, false);
 			DAGNode rolenode = new DAGNode(role);
 
 			roles.put(role, rolenode);
 
-			Property roleInv = descFactory.createProperty(role.getPredicate(), !role.isInverse());
+			PropertyExpression roleInv = descFactory.createProperty(role.getPredicate(), !role.isInverse());
 			DAGNode rolenodeinv = new DAGNode(roleInv);
 			roles.put(roleInv, rolenodeinv);
 
-			PropertySomeRestriction existsRole = descFactory.createPropertySomeRestriction(role);
-			PropertySomeRestriction existsRoleInv = descFactory.createPropertySomeRestriction(role.getPredicate(), !role.isInverse());
+			SomeValuesFrom existsRole = descFactory.createPropertySomeRestriction(role);
+			SomeValuesFrom existsRoleInv = descFactory.createPropertySomeRestriction(roleInv);
 			DAGNode existsNode = new DAGNode(existsRole);
 			DAGNode existsNodeInv = new DAGNode(existsRoleInv);
 			classes.put(existsRole, existsNode);
@@ -137,8 +137,8 @@ public class DAG implements Serializable {
 			addClassEdge(parent, child);
 		} 
 		for (SubPropertyOfAxiom roleIncl : ontology.getSubPropertyAxioms()) {
-			Property parent = roleIncl.getSuper();
-			Property child = roleIncl.getSub();
+			PropertyExpression parent = roleIncl.getSuper();
+			PropertyExpression child = roleIncl.getSub();
 
 			// This adds the direct edge and the inverse, e.g., R ISA S and
 			// R- ISA S-,
@@ -187,14 +187,14 @@ public class DAG implements Serializable {
 
 	}
 
-	private void addRoleEdge(Property parent, Property child) {
+	private void addRoleEdge(PropertyExpression parent, PropertyExpression child) {
 		addRoleEdgeSingle(parent, child);
 
 		addRoleEdgeSingle(descFactory.createProperty(parent.getPredicate(), !parent.isInverse()),
 				descFactory.createProperty(child.getPredicate(), !child.isInverse()));
 	}
 
-	private void addRoleEdgeSingle(Property parent, Property child) {
+	private void addRoleEdgeSingle(PropertyExpression parent, PropertyExpression child) {
 		DAGNode parentNode = roles.get(parent);
 		if (parentNode == null) {
 			parentNode = new DAGNode(parent);
@@ -362,7 +362,7 @@ public class DAG implements Serializable {
 	 * @param conceptDescription
 	 * @return
 	 */
-	public DAGNode getRoleNode(Property roleDescription) {
+	public DAGNode getRoleNode(PropertyExpression roleDescription) {
 		DAGNode rv = roles.get(roleDescription);
 		if (rv == null) {
 			rv = roles.get(equi_mappings.get(roleDescription));

@@ -23,10 +23,11 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 
@@ -35,7 +36,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -90,39 +90,41 @@ public class YAGOTest {
                     tbox_count++;
                     Predicate ps = predicateFactory.getPredicate(subject, 2);
                     Predicate po = predicateFactory.getPredicate(object, 1);
-                    BasicClassDescription rs = descFactory.createPropertySomeRestriction(ps, true);
-                    BasicClassDescription co = descFactory.createClass(po);
-                    onto.addAssertionWithCheck(OntologyFactoryImpl.getInstance().createSubClassAxiom(rs, co));
+                    PropertyExpression psprop = descFactory.createProperty(ps, true);
+                    SomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
+                    OClass co = descFactory.createClass(po);
+                    onto.addAssertionWithCheck(descFactory.createSubClassAxiom(rs, co));
                 } 
                 else if ("rdfs:domain".equals(predicate)) {
                     tbox_count++;
                     Predicate ps = predicateFactory.getPredicate(subject, 2);
                     Predicate po = predicateFactory.getPredicate(object, 1);
-                    BasicClassDescription rs = descFactory.createPropertySomeRestriction(ps, false);
-                    BasicClassDescription co = descFactory.createClass(po);
-                    onto.addAssertionWithCheck(OntologyFactoryImpl.getInstance().createSubClassAxiom(rs, co));
+                    PropertyExpression psprop = descFactory.createProperty(ps, false);
+                    SomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
+                    OClass co = descFactory.createClass(po);
+                    onto.addAssertionWithCheck(descFactory.createSubClassAxiom(rs, co));
                 } 
                 else if ("rdf:type".equals(predicate)) {
                     // a rdf:type A |= A(a)
                     Predicate po = predicateFactory.getPredicate(object, 1);
-                    BasicClassDescription co = descFactory.createClass(po);
+                    OClass co = descFactory.createClass(po);
                     onto.addConcept(po);
                 }
                 else if ("rdfs:subClassOf".equals(predicate)) {
                     tbox_count++;
                     Predicate ps = predicateFactory.getPredicate(subject, 1);
                     Predicate po = predicateFactory.getPredicate(object, 1);
-                    BasicClassDescription cs = descFactory.createClass(ps);
-                    BasicClassDescription co = descFactory.createClass(po);
-                    onto.addAssertionWithCheck(OntologyFactoryImpl.getInstance().createSubClassAxiom(cs, co));
+                    OClass cs = descFactory.createClass(ps);
+                    OClass co = descFactory.createClass(po);
+                    onto.addAssertionWithCheck(descFactory.createSubClassAxiom(cs, co));
                 } 
                 else if ("rdfs:subPropertyOf".equals(predicate)) {
                     tbox_count++;
                     Predicate ps = predicateFactory.getPredicate(subject, 1);
                     Predicate po = predicateFactory.getPredicate(object, 1);
-                    Property rs = descFactory.createProperty(ps, false);
-                    Property ro = descFactory.createProperty(po, false);
-                    onto.addAssertionWithCheck(OntologyFactoryImpl.getInstance().createSubPropertyAxiom(rs, ro));
+                    PropertyExpression rs = descFactory.createProperty(ps, false);
+                    PropertyExpression ro = descFactory.createProperty(po, false);
+                    onto.addAssertionWithCheck(descFactory.createSubPropertyAxiom(rs, ro));
                 } else {
 //                    log.debug(predicate);
                 }

@@ -21,17 +21,17 @@ package it.unibz.krdb.obda.ontology.impl;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 
-public class PropertySomeRestrictionImpl implements PropertySomeRestriction {
+public class PropertySomeRestrictionImpl implements SomeValuesFrom {
 
 	private static final long serialVersionUID = 593821958539751283L;
 	
-	private final Property property;
+	private final PropertyExpression property;
 	private final String string;
 
-	PropertySomeRestrictionImpl(Property property) {
+	PropertySomeRestrictionImpl(PropertyExpression property) {
 		this.property = property;
 		StringBuilder bf = new StringBuilder();
 		bf.append("E");
@@ -40,18 +40,8 @@ public class PropertySomeRestrictionImpl implements PropertySomeRestriction {
 	}
 
 	@Override
-	public Property getProperty() {
+	public PropertyExpression getProperty() {
 		return property;
-	}
-
-	@Override
-	public boolean isInverse() {
-		return property.isInverse();
-	}
-
-	@Override
-	public Predicate getPredicate() {
-		return property.getPredicate();
 	}
 
 	@Override

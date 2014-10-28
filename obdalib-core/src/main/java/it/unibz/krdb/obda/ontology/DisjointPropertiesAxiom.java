@@ -32,6 +32,6 @@ import java.util.Set;
 
 public interface DisjointPropertiesAxiom extends Axiom {
 	
-	public Set<Property> getProperties();
+	public Set<PropertyExpression> getProperties();
 
 }

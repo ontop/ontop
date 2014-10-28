@@ -24,8 +24,8 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -86,15 +86,15 @@ public class DAGNode implements Serializable {
 			return;
 		StringBuilder bf = new StringBuilder();
 		bf.append("DAGNode{");
-		if (description instanceof PropertySomeRestriction) {
+		if (description instanceof SomeValuesFrom) {
 			bf.append("E");
-			Predicate p = ((PropertySomeRestriction) description).getPredicate();
+			Predicate p = ((SomeValuesFrom) description).getProperty().getPredicate();
 			String fragment = p.getName().toString();//.getFragment();
 			if (fragment != null)
 				bf.append(fragment);
 			else
 				bf.append(p.getName());
-			if (((PropertySomeRestriction) description).isInverse())
+			if (((SomeValuesFrom) description).getProperty().isInverse())
 				bf.append("^-");
 		} else if (description instanceof OClass) {
 			
@@ -105,16 +105,16 @@ public class DAGNode implements Serializable {
 			else
 				bf.append(p.getName());
 			
-		} else if (description instanceof Property) {
+		} else if (description instanceof PropertyExpression) {
 			
-			Predicate p = ((Property) description).getPredicate();
+			Predicate p = ((PropertyExpression) description).getPredicate();
 			String fragment = p.getName().toString();//.getFragment();
 			if (fragment != null)
 				bf.append(fragment);
 			else
 				bf.append(p.getName());
 			
-			if (((Property) description).isInverse()) {
+			if (((PropertyExpression) description).isInverse()) {
 				bf.append("^-");
 			}
 			

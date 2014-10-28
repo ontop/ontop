@@ -29,7 +29,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Iterator;
@@ -169,7 +169,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 			assertion = ofac.createClassAssertion(concept, c);
 		} else if (currentPredicate.getArity() == 2) {
 			Constant c2;
-			Property prop;			
+			PropertyExpression prop;			
 			if (currObject instanceof URI) {
 				c2 = obdafac.getConstantURI(currObject.stringValue());
 				prop = ofac.createObjectProperty(currentPredicate.getName(), false);

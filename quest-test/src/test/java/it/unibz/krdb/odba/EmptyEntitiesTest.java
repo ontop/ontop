@@ -28,7 +28,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -92,7 +92,7 @@ public class EmptyEntitiesTest {
 	private List<String> emptyConcepts = new ArrayList<String>();
 	private List<String> emptyRoles = new ArrayList<String>();
 	private Set<BasicClassDescription> emptyBasicConcepts = new HashSet<BasicClassDescription>();
-	private Set<Property> emptyProperties = new HashSet<Property>();
+	private Set<PropertyExpression> emptyProperties = new HashSet<PropertyExpression>();
 
 	private QuestOWL reasoner;
 	private Ontology onto;
@@ -315,7 +315,7 @@ public class EmptyEntitiesTest {
 		log.info(c + " Empty concept/s: " + emptyConcepts);
 
 		int r = 0; // number of empty roles
-		for (Equivalences<Property> properties : tboxreasoner.getProperties()) {
+		for (Equivalences<PropertyExpression> properties : tboxreasoner.getProperties()) {
 			if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
 				emptyProperties.addAll(properties.getMembers());
 				r += properties.size();

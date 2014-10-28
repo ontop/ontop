@@ -22,8 +22,8 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
@@ -70,8 +70,8 @@ public class TranslatorTest extends TestCase {
 		assertEquals(1, ass.size());
 		
 		SubClassOfAxiom a = assit.next();
-		PropertySomeRestriction ex = (PropertySomeRestriction) a.getSub();
-		assertEquals(true, ex.isInverse());
+		SomeValuesFrom ex = (SomeValuesFrom) a.getSub();
+		assertEquals(true, ex.getProperty().isInverse());
 	}
 	
 	public void test_2() throws Exception{
@@ -96,8 +96,8 @@ public class TranslatorTest extends TestCase {
 		assertEquals(1, ass.size());
 		
 		SubClassOfAxiom a = assit.next();
-		PropertySomeRestriction ex = (PropertySomeRestriction) a.getSub();
-		assertEquals(false, ex.isInverse());
+		SomeValuesFrom ex = (SomeValuesFrom) a.getSub();
+		assertEquals(false, ex.getProperty().isInverse());
 	}
 	
 	public void test_3() throws Exception{
@@ -121,11 +121,11 @@ public class TranslatorTest extends TestCase {
 		
 		SubPropertyOfAxiom a = assit.next();
 		SubPropertyOfAxiom b = assit.next();
-		Property included =a.getSub();
+		PropertyExpression included =a.getSub();
 		assertEquals(false, included.isInverse());
 		assertEquals("http://example/R", included.getPredicate().getName().toString());
 		
-		Property indlucing = a.getSuper();
+		PropertyExpression indlucing = a.getSuper();
 		assertEquals(true, indlucing.isInverse());
 		assertEquals("http://example/S", indlucing.getPredicate().getName().toString());
 		

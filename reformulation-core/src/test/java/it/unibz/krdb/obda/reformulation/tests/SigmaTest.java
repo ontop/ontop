@@ -28,7 +28,8 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -49,7 +50,8 @@ public class SigmaTest extends TestCase {
         Predicate r = predicateFactory.getPredicate("r", 2);
         OClass ac = descFactory.createClass(a);
         OClass cc = descFactory.createClass(c);
-        PropertySomeRestriction er = descFactory.createPropertySomeRestriction(r, false);
+        PropertyExpression rprop = descFactory.createProperty(r, false);
+        SomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
  
         ontology.addAxiom(descFactory.createSubClassAxiom(er, ac));
         ontology.addAxiom(descFactory.createSubClassAxiom(cc, er));

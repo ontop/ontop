@@ -31,9 +31,9 @@ import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.SubClassExpression;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
@@ -115,15 +115,15 @@ public class OntologyImpl implements Ontology {
 	private void addReferencedEntries(BasicClassDescription desc) {
 		if (desc instanceof OClass) 
 			addConcept(((OClass) desc).getPredicate());
-		else if (desc instanceof PropertySomeRestriction) 
-			addRole(((PropertySomeRestriction) desc).getPredicate());
+		else if (desc instanceof SomeValuesFrom) 
+			addRole(((SomeValuesFrom) desc).getProperty().getPredicate());
 		else if (desc instanceof Datatype) 
 			addConcept(((Datatype) desc).getPredicate());
 		else 
 			throw new UnsupportedOperationException("Cant understand: " + desc.toString());
 	}
 	
-	private void addReferencedEntries(Property prop) {
+	private void addReferencedEntries(PropertyExpression prop) {
 		Predicate pred = prop.getPredicate();
 		addRole(pred);
 	}
@@ -152,8 +152,8 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void addAxiom(DisjointPropertiesAxiom assertion) {
-		Set<Property> props = assertion.getProperties();
-		for (Property p : props)
+		Set<PropertyExpression> props = assertion.getProperties();
+		for (PropertyExpression p : props)
 			addReferencedEntries(p);
 		disjointPropertiesAxioms.add(assertion);
 	}
@@ -189,14 +189,14 @@ public class OntologyImpl implements Ontology {
 			if (!builtinDatatypes.contains(pred)) 
 				throw new IllegalArgumentException("Datatype predicate is unknown: " + pred.toString());
 		}
-		else if (desc instanceof PropertySomeRestriction) {
-			checkSignature(((PropertySomeRestriction) desc).getProperty());
+		else if (desc instanceof SomeValuesFrom) {
+			checkSignature(((SomeValuesFrom) desc).getProperty());
 		}
 		else 
 			throw new UnsupportedOperationException("Cant understand: " + desc.toString());
 	}
 
-	private void checkSignature(Property prop) {
+	private void checkSignature(PropertyExpression prop) {
 		// Make sure we never validate against auxiliary roles introduced by
 		// the translation of the OWL ontology
 		if (prop.getPredicate().toString().contains(AUXROLEURI)) 
@@ -231,8 +231,8 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void addAssertionWithCheck(DisjointPropertiesAxiom assertion) {
-		Set<Property> props = assertion.getProperties();
-		for (Property p : props)
+		Set<PropertyExpression> props = assertion.getProperties();
+		for (PropertyExpression p : props)
 			checkSignature(p);
 		disjointPropertiesAxioms.add(assertion);
 	}

@@ -33,11 +33,13 @@ public interface OntologyFactory {
 	
 	public OClass createClass(String uri);
 
-	public Property createProperty(Predicate p, boolean inverse);
+	public PropertyExpression createProperty(Predicate p, boolean inverse);
 
-	public Property createObjectProperty(String uri, boolean inverse);
+	public PropertyExpression createObjectProperty(String uri, boolean inverse);
+
+	public PropertyExpression createObjectPropertyInverse(PropertyExpression prop);
 	
-	public Property createDataProperty(String uri);
+	public PropertyExpression createDataProperty(String uri);
 	
 	public Datatype createDataType(Predicate p);
 	
@@ -45,22 +47,24 @@ public interface OntologyFactory {
 	
 	public Ontology createOntology();
 
-	public SubPropertyOfAxiom createSubPropertyAxiom(Property included, Property including);
+	public SubPropertyOfAxiom createSubPropertyAxiom(PropertyExpression included, PropertyExpression including);
 
-	public SubClassOfAxiom createSubClassAxiom(BasicClassDescription concept1, BasicClassDescription concept2);
+	public SubClassOfAxiom createSubClassAxiom(SubClassExpression concept1, BasicClassDescription concept2);
 
 	@Deprecated
-	public PropertySomeRestriction createPropertySomeRestriction(Predicate p, boolean isInverse);
+	public SomeValuesFrom createPropertySomeRestriction(Predicate p, boolean inverse);
 
-	public PropertySomeRestriction createPropertySomeRestriction(Property role);
+	public SomeValuesFrom createPropertySomeRestriction(PropertyExpression role);
 	
-	public FunctionalPropertyAxiom createPropertyFunctionalAxiom(Property role);
+	public SomeValuesFrom createDataPropertyRange(PropertyExpression role);
+	
+	public FunctionalPropertyAxiom createPropertyFunctionalAxiom(PropertyExpression role);
 	
 	public DisjointClassesAxiom createDisjointClassesAxiom(Set<SubClassExpression> classes);
 	
-	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Set<Property> props);
+	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Set<PropertyExpression> props);
 	
-	public PropertyAssertion createPropertyAssertion(Property attribute, ObjectConstant o1, Constant o2);
+	public PropertyAssertion createPropertyAssertion(PropertyExpression attribute, ObjectConstant o1, Constant o2);
 	
 	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant object);
 }

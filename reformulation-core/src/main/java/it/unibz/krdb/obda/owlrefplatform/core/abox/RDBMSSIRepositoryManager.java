@@ -42,8 +42,8 @@ import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
@@ -882,10 +882,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					 */
 
 					Predicate propPred = dfac.getObjectPropertyPredicate(prop);
-					Property propDesc = ofac.createProperty(propPred, false);
+					PropertyExpression propDesc = ofac.createProperty(propPred, false);
 
 					/*if (!reasonerDag.isCanonicalRepresentative(propDesc))*/ {
-						Property desc = reasonerDag.getProperties().getVertex(propDesc).getRepresentative();
+						PropertyExpression desc = reasonerDag.getProperties().getVertex(propDesc).getRepresentative();
 						if (desc.isInverse()) {
 							String tmp = uri1;
 							boolean tmpIsBnode = c1isBNode;
@@ -1475,8 +1475,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	private boolean isInverse(Predicate role) {
-		Property property = ofac.createProperty(role, false);
-		Property desc = reasonerDag.getProperties().getVertex(property).getRepresentative();
+		PropertyExpression property = ofac.createProperty(role, false);
+		PropertyExpression desc = reasonerDag.getProperties().getVertex(property).getRepresentative();
 		if (!property.equals(desc)) {
 			if (desc.isInverse()) 
 				return true;
@@ -1893,7 +1893,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	// Attribute datatype from TBox
 	private COL_TYPE getAttributeType(Predicate attribute) {
-		PropertySomeRestriction role = ofac.createPropertySomeRestriction(attribute, true);
+		SomeValuesFrom role = ofac.createPropertySomeRestriction(attribute, true);
 		Equivalences<BasicClassDescription> roleNode = reasonerDag.getClasses().getVertex(role);
 		Set<Equivalences<BasicClassDescription>> ancestors = reasonerDag.getClasses().getSuper(roleNode);
 
@@ -2013,11 +2013,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	@Override
 	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException {
 
-		Set<Property> roleNodes = new HashSet<Property>();
+		Set<PropertyExpression> roleNodes = new HashSet<PropertyExpression>();
 
-		for (Equivalences<Property> set: reasonerDag.getProperties()) {
+		for (Equivalences<PropertyExpression> set: reasonerDag.getProperties()) {
 
-			Property node = set.getRepresentative();
+			PropertyExpression node = set.getRepresentative();
 			// only named roles are mapped
 			if (node.isInverse()) 
 				continue;
@@ -2152,7 +2152,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		Map<Predicate, List<OBDAMappingAxiom>> mappings = new HashMap<Predicate, List<OBDAMappingAxiom>>();
 
-		for (Property property : roleNodes) {
+		for (PropertyExpression property : roleNodes) {
 
 			// Get the property predicate
 			Predicate role = property.getPredicate();

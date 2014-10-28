@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
@@ -36,10 +35,10 @@ import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.SubClassExpression;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
@@ -75,41 +74,47 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 	
 	@Override
-	public SubPropertyOfAxiom createSubPropertyAxiom(Property included, Property including) {
+	public SubPropertyOfAxiom createSubPropertyAxiom(PropertyExpression included, PropertyExpression including) {
 		return new SubPropertyOfAxiomImpl(included, including);
 	}
 
 	@Override
-	public SubClassOfAxiom createSubClassAxiom(BasicClassDescription concept1, BasicClassDescription concept2) {
+	public SubClassOfAxiom createSubClassAxiom(SubClassExpression concept1, BasicClassDescription concept2) {
 		return new SubClassOfAxiomImpl(concept1, concept2);
 	}
 
 	@Override
-	public PropertySomeRestriction createPropertySomeRestriction(Predicate p, boolean isInverse) {
-		Property prop = createProperty(p, isInverse);
+	public SomeValuesFrom createPropertySomeRestriction(Predicate p, boolean isInverse) {
+		PropertyExpression prop = createProperty(p, isInverse);
 		return new PropertySomeRestrictionImpl(prop);
 	}
 
 	@Override
-	public FunctionalPropertyAxiom createPropertyFunctionalAxiom(Property role) {
+	public SomeValuesFrom createDataPropertyRange(PropertyExpression role) {
+		PropertyExpression prop = createProperty(role.getPredicate(), true);
+		return new PropertySomeRestrictionImpl(prop);
+	}
+	
+	@Override
+	public FunctionalPropertyAxiom createPropertyFunctionalAxiom(PropertyExpression role) {
 		return new FunctionalPropertyAxiomImpl(role);
 	}
 
 	
-	public PropertyAssertion createObjectPropertyAssertion(Property role, ObjectConstant o1, ObjectConstant o2) {
+	public PropertyAssertion createObjectPropertyAssertion(PropertyExpression role, ObjectConstant o1, ObjectConstant o2) {
 		return new PropertyAssertionImpl(role, o1, o2);
 	}
 
 	@Override
 	public OClass createClass(Predicate p) {
-		if (p.getArity() != 1) {
+		if (p.getArity() != 1) 
 			throw new IllegalArgumentException("Concepts must have arity = 1");
-		}
+		
 		return new ClassImpl(p);
 	}
 
 	@Override
-	public Property createProperty(Predicate p, boolean inverse) {
+	public PropertyExpression createProperty(Predicate p, boolean inverse) {
 		return new PropertyImpl(p, inverse);
 	}
 
@@ -120,13 +125,19 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public Property createObjectProperty(String uri, boolean inverse) {
+	public PropertyExpression createObjectProperty(String uri, boolean inverse) {
 		Predicate prop = ofac.getObjectPropertyPredicate(uri);
 		return createProperty(prop, inverse);
 	}
 
 	@Override
-	public Property createDataProperty(String p) {
+	public PropertyExpression createObjectPropertyInverse(PropertyExpression prop) {
+		return createProperty(prop.getPredicate(), !prop.isInverse());		
+	}
+	
+	
+	@Override
+	public PropertyExpression createDataProperty(String p) {
 		Predicate prop = ofac.getDataPropertyPredicate(p);
 		return createProperty(prop, false);
 	}
@@ -139,7 +150,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public PropertyAssertion createPropertyAssertion(Property attribute, ObjectConstant o1, Constant o2) {
+	public PropertyAssertion createPropertyAssertion(PropertyExpression attribute, ObjectConstant o1, Constant o2) {
 		return new PropertyAssertionImpl(attribute, o1, o2);
 	}
 
@@ -149,13 +160,14 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Set<Property> props) {
+	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Set<PropertyExpression> props) {
 			return new DisjointPropertiesAxiomImpl(props);
 	}
 	
 	@Override
-	public PropertySomeRestriction createPropertySomeRestriction(Property role) {
+	public SomeValuesFrom createPropertySomeRestriction(PropertyExpression role) {
 		return new PropertySomeRestrictionImpl(role);
 	}
+
 
 }

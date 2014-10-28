@@ -36,7 +36,7 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
@@ -158,7 +158,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 				if (objectConstant instanceof URIConstant) {
 					Predicate role = dfac
 							.getObjectPropertyPredicate(predicateName);
-					Property prop = ofac.createObjectProperty(role.getName(), false);
+					PropertyExpression prop = ofac.createObjectProperty(role.getName(), false);
 					PropertyAssertion op = ofac
 							.createPropertyAssertion(prop,
 									(ObjectConstant) subjectConstant,
@@ -167,7 +167,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 				} else if (objectConstant instanceof BNodeConstantImpl) {
 					Predicate role = dfac
 							.getObjectPropertyPredicate(predicateName);
-					Property prop = ofac.createObjectProperty(role.getName(), false);
+					PropertyExpression prop = ofac.createObjectProperty(role.getName(), false);
 					PropertyAssertion op = ofac
 							.createPropertyAssertion(prop,
 									(ObjectConstant) subjectConstant,
@@ -176,7 +176,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 				} else {
 					Predicate attribute = dfac
 							.getDataPropertyPredicate(predicateName);
-					Property prop = ofac.createDataProperty(attribute.getName());
+					PropertyExpression prop = ofac.createDataProperty(attribute.getName());
 					PropertyAssertion dp = ofac
 							.createPropertyAssertion(prop,
 									(ObjectConstant) subjectConstant,

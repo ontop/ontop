@@ -27,7 +27,7 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -78,7 +78,7 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 		else if (assertion instanceof PropertyAssertion) {
 			PropertyAssertion opa = (PropertyAssertion) assertion;
 			Predicate role = opa.getProperty().getPredicate();
-			Property property = reasoner.getPropertyRepresentative(role);
+			PropertyExpression property = reasoner.getPropertyRepresentative(role);
 			
 			if (property != null) {
 				ObjectConstant object1 = opa.getSubject();
@@ -89,7 +89,7 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 				else {
 					ObjectConstant object2 = (ObjectConstant)opa.getValue2();
 					if (property.isInverse()) {
-						Property notinv = ofac.createObjectProperty(property.getPredicate().getName(), false);
+						PropertyExpression notinv = ofac.createObjectProperty(property.getPredicate().getName(), false);
 						return ofac.createPropertyAssertion(notinv, object2, object1);
 					} else {
 						return ofac.createPropertyAssertion(property, object1, object2);

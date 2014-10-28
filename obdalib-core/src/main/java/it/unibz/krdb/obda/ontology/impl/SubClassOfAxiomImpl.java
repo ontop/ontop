@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.ontology.impl;
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.SubClassExpression;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 
 /*
@@ -30,10 +31,10 @@ public class SubClassOfAxiomImpl implements SubClassOfAxiom {
 	private static final long serialVersionUID = -7590338987239580423L;
 
 	private final BasicClassDescription including; // right-hand side
-	private final BasicClassDescription included;
+	private final SubClassExpression included;
 	private final String string;
 	
-	SubClassOfAxiomImpl(BasicClassDescription subDesc, BasicClassDescription superDesc) {
+	SubClassOfAxiomImpl(SubClassExpression subDesc, BasicClassDescription superDesc) {
 		included = subDesc;
 		including = superDesc;
 		StringBuilder bf = new StringBuilder();
@@ -44,7 +45,7 @@ public class SubClassOfAxiomImpl implements SubClassOfAxiom {
 	}
 
 	@Override
-	public BasicClassDescription getSub() {
+	public SubClassExpression getSub() {
 		return included;
 	}
 

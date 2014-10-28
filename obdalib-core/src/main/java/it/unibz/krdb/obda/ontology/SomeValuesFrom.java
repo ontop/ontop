@@ -20,11 +20,20 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
 
-public interface Property extends Description {
+/**
+ * Represents ObjectSomeValuesFrom and 
+ *            DataSomeValuesFrom with the inverse(!) data property 
+ *            for the range and qualified existential on the right-hand side 
+ *            of SubClassOf
+ * 
+ * A non-qualified property some restriction. 
+ * 
+ * Corresponds to DL "exists Property"
+ */
 
-	public boolean isInverse();
+public interface SomeValuesFrom extends SubClassExpression {
 
-	public Predicate getPredicate();
+	public PropertyExpression getProperty();	
+
 }

@@ -20,21 +20,21 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 
 public class FunctionalPropertyAxiomImpl implements FunctionalPropertyAxiom{
 
 	private static final long serialVersionUID = 6020134666314925589L;
 	
-	private final Property prop;
+	private final PropertyExpression prop;
 	
-	FunctionalPropertyAxiomImpl(Property prop) {
+	FunctionalPropertyAxiomImpl(PropertyExpression prop) {
 		this.prop = prop;
 	}
 
 	@Override
-	public Property getProperty() {
+	public PropertyExpression getProperty() {
 		return prop;
 	}	
 

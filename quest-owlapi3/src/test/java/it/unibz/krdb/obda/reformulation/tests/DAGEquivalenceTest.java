@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
@@ -204,9 +204,9 @@ public class DAGEquivalenceTest extends TestCase {
 		assertEquals(1, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		EquivalencesDAG<Property> properties = dag.getProperties();
+		EquivalencesDAG<PropertyExpression> properties = dag.getProperties();
 		
-		Property d = properties.getVertex(ofac.createObjectProperty(testURI + "A2", false)).getRepresentative();
+		PropertyExpression d = properties.getVertex(ofac.createObjectProperty(testURI + "A2", false)).getRepresentative();
 		assertTrue(d.equals(ofac.createObjectProperty(testURI + "A1",true)));
 
 		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI

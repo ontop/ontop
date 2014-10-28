@@ -23,8 +23,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.SomeValuesFrom;
+import it.unibz.krdb.obda.ontology.SubClassExpression;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -83,7 +84,7 @@ public class SigmaTBoxOptimizer {
 			TBoxTraversal.traverse(isa, new TBoxTraverseListener() {
 
 				@Override
-				public void onInclusion(Property sub, Property sup) {
+				public void onInclusion(PropertyExpression sub, PropertyExpression sup) {
 					if (sub != sup) {
 						if (!check_redundant_role(sup, sub)) {
 							SubPropertyOfAxiom axiom = fac.createSubPropertyAxiom(sub, sup);
@@ -96,7 +97,7 @@ public class SigmaTBoxOptimizer {
 				public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
 					if (sub != sup) {
 						if (!sup.equals(sub) && !check_redundant(sup, sub))  {
-							SubClassOfAxiom axiom = fac.createSubClassAxiom(sub, sup);
+							SubClassOfAxiom axiom = fac.createSubClassAxiom((SubClassExpression)sub, sup);
 							optimizedTBox.addAxiom(axiom);
 						}
 					}
@@ -114,14 +115,14 @@ public class SigmaTBoxOptimizer {
 	
 	
 	
-	private boolean check_redundant_role(Property parent, Property child) {
+	private boolean check_redundant_role(PropertyExpression parent, PropertyExpression child) {
 
 		if (check_directly_redundant_role(parent, child))
 			return true;
 		else {
 //			log.debug("Not directly redundant role {} {}", parent, child);
-			for (Equivalences<Property> children_prime : isa.getProperties().getDirectSub(isa.getProperties().getVertex(parent))) {
-				Property child_prime = children_prime.getRepresentative();
+			for (Equivalences<PropertyExpression> children_prime : isa.getProperties().getDirectSub(isa.getProperties().getVertex(parent))) {
+				PropertyExpression child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
 						check_directly_redundant_role(child_prime, child) && 
@@ -135,21 +136,21 @@ public class SigmaTBoxOptimizer {
 		return false;
 	}
 
-	private boolean check_directly_redundant_role(Property parent, Property child) {
+	private boolean check_directly_redundant_role(PropertyExpression parent, PropertyExpression child) {
 
-		PropertySomeRestriction existParentDesc = fac.createPropertySomeRestriction(parent);
-		PropertySomeRestriction existChildDesc = fac.createPropertySomeRestriction(child);
+		SomeValuesFrom existParentDesc = fac.createPropertySomeRestriction(parent);
+		SomeValuesFrom existChildDesc = fac.createPropertySomeRestriction(child);
 
 		return check_directly_redundant(parent, child) && 
 				check_directly_redundant(existParentDesc, existChildDesc);
 	}
 
-	private boolean check_redundant(Property parent, Property child) {
+	private boolean check_redundant(PropertyExpression parent, PropertyExpression child) {
 		if (check_directly_redundant(parent, child))
 			return true;
 		else {
-			for (Equivalences<Property> children_prime : isa.getProperties().getDirectSub(isa.getProperties().getVertex(parent))) {
-				Property child_prime = children_prime.getRepresentative();
+			for (Equivalences<PropertyExpression> children_prime : isa.getProperties().getDirectSub(isa.getProperties().getVertex(parent))) {
+				PropertyExpression child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
 						check_directly_redundant(child_prime, child) && 
@@ -178,29 +179,29 @@ public class SigmaTBoxOptimizer {
 		return false;
 	}
 	
-	private boolean check_directly_redundant(Property parent, Property child) {
+	private boolean check_directly_redundant(PropertyExpression parent, PropertyExpression child) {
 		
-		Equivalences<Property> sp = sigmaChain.getProperties().getVertex(parent);
-		Equivalences<Property> sc = sigmaChain.getProperties().getVertex(child);
+		Equivalences<PropertyExpression> sp = sigmaChain.getProperties().getVertex(parent);
+		Equivalences<PropertyExpression> sc = sigmaChain.getProperties().getVertex(child);
 		
 		// if one of them is not in the respective DAG
 		if (sp == null || sc == null) 
 			return false;
 
-		Set<Equivalences<Property>> spChildren =  sigmaChain.getProperties().getDirectSub(sp);
+		Set<Equivalences<PropertyExpression>> spChildren =  sigmaChain.getProperties().getDirectSub(sp);
 		
 		if (!spChildren.contains(sc))
 			return false;
 		
 		
 		
-		Equivalences<Property> tc = isaChain.getProperties().getVertex(child);
+		Equivalences<PropertyExpression> tc = isaChain.getProperties().getVertex(child);
 		// if one of them is not in the respective DAG
 		if (tc == null) 
 			return false;
 		
-		Set<Equivalences<Property>> scChildren = sigmaChain.getProperties().getSub(sc);
-		Set<Equivalences<Property>> tcChildren = isaChain.getProperties().getSub(tc);
+		Set<Equivalences<PropertyExpression>> scChildren = sigmaChain.getProperties().getSub(sc);
+		Set<Equivalences<PropertyExpression>> tcChildren = isaChain.getProperties().getSub(tc);
 
 		return scChildren.containsAll(tcChildren);
 	}

@@ -23,7 +23,11 @@ package it.unibz.krdb.obda.ontology;
 /**
  * Represents SubClassOf, EquivalentClasses, 
  *            ObjectPropertyDomain, ObjectPropertyRange, 
- *            DataPropertyDomanin, DataPropertyRange
+ *            DataPropertyDomain 
+ *        
+ * It also represents DataPropertyRange 
+ *            (sub is SomeValuesFrom with inverse data property; 
+ *             super is a datatype)
  * 
  * @author roman
  *
@@ -31,7 +35,7 @@ package it.unibz.krdb.obda.ontology;
 
 public interface SubClassOfAxiom extends Axiom {
 
-	public BasicClassDescription getSub();
+	public SubClassExpression getSub();
 
 	public BasicClassDescription getSuper();
 }
