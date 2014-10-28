@@ -7,6 +7,8 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
+
+import java.awt.Component;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JOptionPane;
@@ -57,6 +59,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 	private boolean isCanceled = false;
 	private boolean actionStarted = false;
 	private QuestOWL reasoner;
+	private Component rootView;
 
 	private static String QUEST_START_MESSAGE = "Quest must be started before using this feature. To proceed \n * select Quest in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
 
@@ -64,8 +67,9 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 	private static final Logger log = LoggerFactory.getLogger(OBDADataQueryAction.class);
 
 
-	public OBDADataQueryAction(String msg){
+	public OBDADataQueryAction(String msg, Component rootView){
 		this.msg = msg;
+		this.rootView = rootView;
 	}
 
 	/**
@@ -113,12 +117,12 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 				}
 			} else /* reasoner not QuestOWL */ {
 				JOptionPane.showMessageDialog(
-						null,
+						rootView,
 						QUEST_START_MESSAGE);
 			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(
-					null,
+					rootView,
 					e);
 		} finally {
 			monitor.stop();
@@ -151,14 +155,20 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 					result = executeQuery(statement, queryString);
 					latch.countDown();
 				} catch (Exception e) {
-					latch.countDown();
 					if(!isCancelled()){
+						/*try {
+							Thread.sleep(50);
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}*/
 						errorShown = true;
+						latch.countDown();
 						log.error(e.getMessage(), e);
-						DialogUtils.showQuickErrorDialog(null, e);
+						//DialogUtils.showQuickErrorDialog(rootView, e, "Error executing query");
+						JOptionPane.showMessageDialog(rootView, e,  "Error Executing Query", JOptionPane.ERROR_MESSAGE);
 					}
-				}
-
+				}	
 			}
 		};
 		thread.start();
@@ -192,7 +202,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 				this.old_latch.countDown();
 			} catch (Exception e) {
 				this.old_latch.countDown();
-				DialogUtils.showQuickErrorDialog(null, e, "Error executing query.");
+				DialogUtils.showQuickErrorDialog(rootView, e, "Error cancelling query.");
 			}
 		}
 	};
@@ -205,7 +215,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 			Canceller canceller = new Canceller();
 			canceller.start();
 		} catch (OBDAException e) {
-			DialogUtils.showQuickErrorDialog(null, e, "Error creating new database connection.");
+			DialogUtils.showQuickErrorDialog(rootView, e, "Error creating new database connection.");
 		} finally {
 			this.actionStarted = false;
 		}

@@ -147,7 +147,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		setupListeners();
 
 		// Setting up actions for all the buttons of this view.
-		resultTablePanel.setCountAllTuplesActionForUCQ(new OBDADataQueryAction<Integer>("Counting tuples...") {
+		resultTablePanel.setCountAllTuplesActionForUCQ(new OBDADataQueryAction<Integer>("Counting tuples...", QueryInterfaceView.this) {
 			@Override
 			public OWLEditorKit getEditorKit(){
 				return getOWLEditorKit();
@@ -173,7 +173,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 		});
 
-		queryEditorPanel.setExecuteSelectAction(new OBDADataQueryAction<QuestOWLResultSet>("Executing queries...") {
+		queryEditorPanel.setExecuteSelectAction(new OBDADataQueryAction<QuestOWLResultSet>("Executing queries...", QueryInterfaceView.this) {
 			
 			@Override
 			public OWLEditorKit getEditorKit(){
@@ -212,7 +212,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	
 		});
 
-		queryEditorPanel.setExecuteGraphQueryAction(new OBDADataQueryAction<List<OWLAxiom>>("Executing queries...") {
+		queryEditorPanel.setExecuteGraphQueryAction(new OBDADataQueryAction<List<OWLAxiom>>("Executing queries...", QueryInterfaceView.this) {
 			
 			@Override
 			public OWLEditorKit getEditorKit(){
@@ -249,7 +249,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		});
 
 		
-		queryEditorPanel.setRetrieveUCQExpansionAction(new OBDADataQueryAction<String>("Rewriting query...") {
+		queryEditorPanel.setRetrieveUCQExpansionAction(new OBDADataQueryAction<String>("Rewriting query...", QueryInterfaceView.this) {
 
 			@Override
 			public String executeQuery(QuestOWLStatement st, String query) throws OWLException {
@@ -275,7 +275,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			}
 		});
 
-		queryEditorPanel.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction<String>("Unfolding queries...") {
+		queryEditorPanel.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction<String>("Unfolding queries...", QueryInterfaceView.this) {
 			@Override
 			public String executeQuery(QuestOWLStatement st, String query) throws OWLException{
 				return st.getUnfolding(query);
