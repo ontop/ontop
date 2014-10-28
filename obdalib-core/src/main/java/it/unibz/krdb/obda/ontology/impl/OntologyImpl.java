@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataType;
+import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -34,6 +34,7 @@ import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.SubClassExpression;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
@@ -116,8 +117,8 @@ public class OntologyImpl implements Ontology {
 			addConcept(((OClass) desc).getPredicate());
 		else if (desc instanceof PropertySomeRestriction) 
 			addRole(((PropertySomeRestriction) desc).getPredicate());
-		else if (desc instanceof DataType) 
-			addConcept(((DataType) desc).getPredicate());
+		else if (desc instanceof Datatype) 
+			addConcept(((Datatype) desc).getPredicate());
 		else 
 			throw new UnsupportedOperationException("Cant understand: " + desc.toString());
 	}
@@ -143,15 +144,17 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void addAxiom(DisjointClassesAxiom assertion) {
-		addReferencedEntries(assertion.getFirst());
-		addReferencedEntries(assertion.getSecond());
+		Set<SubClassExpression> classes = assertion.getClasses();
+		for (SubClassExpression c : classes)
+			addReferencedEntries(c);
 		disjointClassesAxioms.add(assertion);
 	}
 
 	@Override
 	public void addAxiom(DisjointPropertiesAxiom assertion) {
-		addReferencedEntries(assertion.getFirst());
-		addReferencedEntries(assertion.getSecond());
+		Set<Property> props = assertion.getProperties();
+		for (Property p : props)
+			addReferencedEntries(p);
 		disjointPropertiesAxioms.add(assertion);
 	}
 
@@ -181,8 +184,8 @@ public class OntologyImpl implements Ontology {
 			if (!concepts.contains(pred))
 				throw new IllegalArgumentException("Class predicate is unknown: " + pred.toString());
 		}	
-		else if (desc instanceof DataType) {
-			Predicate pred = ((DataType) desc).getPredicate();
+		else if (desc instanceof Datatype) {
+			Predicate pred = ((Datatype) desc).getPredicate();
 			if (!builtinDatatypes.contains(pred)) 
 				throw new IllegalArgumentException("Datatype predicate is unknown: " + pred.toString());
 		}
@@ -220,15 +223,17 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void addAssertionWithCheck(DisjointClassesAxiom assertion) {	
-		checkSignature(assertion.getFirst());
-		checkSignature(assertion.getSecond());
+		Set<SubClassExpression> classes = assertion.getClasses();
+		for (SubClassExpression c : classes)
+			checkSignature(c);
 		disjointClassesAxioms.add(assertion);
 	}
 
 	@Override
 	public void addAssertionWithCheck(DisjointPropertiesAxiom assertion) {
-		checkSignature(assertion.getFirst());
-		checkSignature(assertion.getSecond());
+		Set<Property> props = assertion.getProperties();
+		for (Property p : props)
+			checkSignature(p);
 		disjointPropertiesAxioms.add(assertion);
 	}
 	

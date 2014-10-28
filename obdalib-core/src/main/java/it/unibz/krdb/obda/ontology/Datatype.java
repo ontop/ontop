@@ -22,7 +22,15 @@ package it.unibz.krdb.obda.ontology;
 
 import it.unibz.krdb.obda.model.Predicate;
 
-public interface DataType extends BasicClassDescription {
+/**
+ * Represents Datatype in OWL 2 Specification
+ * 
+ * @author roman
+ *
+ */
+
+
+public interface Datatype extends BasicClassDescription {
 	
 	public Predicate getPredicate();
 }

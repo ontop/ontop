@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.DataType;
+import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
@@ -118,9 +118,9 @@ public class DAGNode implements Serializable {
 				bf.append("^-");
 			}
 			
-		} else if (description instanceof DataType) {
+		} else if (description instanceof Datatype) {
 		
-			DataType datatype = (DataType) description;
+			Datatype datatype = (Datatype) description;
 			bf.append(datatype.toString());
 			
 		} else {

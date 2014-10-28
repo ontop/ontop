@@ -39,7 +39,7 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataType;
+import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
@@ -1900,8 +1900,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		for (Equivalences<BasicClassDescription> node : ancestors) {
 			for(BasicClassDescription desc: node)
 			{
-				if (desc instanceof DataType) {
-					DataType datatype = (DataType) desc;
+				if (desc instanceof Datatype) {
+					Datatype datatype = (Datatype) desc;
 					return datatype.getPredicate().getType(0); // TODO Put some
 																// check for
 																// multiple types

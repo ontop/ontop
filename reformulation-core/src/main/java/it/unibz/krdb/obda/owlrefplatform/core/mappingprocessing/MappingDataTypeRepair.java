@@ -72,9 +72,9 @@ public class MappingDataTypeRepair {
      * Private method that gets the datatypes already present in the ontology and stores them in a map
      * It will be used later in insertDataTyping
      */
-    private Map<Predicate, DataType> getDataTypeFromOntology(TBoxReasoner reasoner){
+    private Map<Predicate, Datatype> getDataTypeFromOntology(TBoxReasoner reasoner){
 
-    	final Map<Predicate, DataType> dataTypesMap = new HashMap<Predicate, DataType>();
+    	final Map<Predicate, Datatype> dataTypesMap = new HashMap<Predicate, Datatype>();
     	
         /*
         Traverse the graph searching for dataProperty
@@ -89,12 +89,12 @@ public class MappingDataTypeRepair {
             public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
                 //if sup is a datatype property  we store it in the map
                 //it means that sub is of datatype sup
-            	if (sup instanceof DataType) {
-            		DataType supDataType = (DataType)sup;
+            	if (sup instanceof Datatype) {
+            		Datatype supDataType = (Datatype)sup;
             		Predicate key;
-            		if (sub instanceof DataType) {
+            		if (sub instanceof Datatype) {
             			// datatype inclusion
-            			key = ((DataType)sub).getPredicate();
+            			key = ((Datatype)sub).getPredicate();
             		}
             		else if (sub instanceof PropertySomeRestriction) {
             			// range 
@@ -128,7 +128,7 @@ public class MappingDataTypeRepair {
 
 
         //get all the datatypes in the ontology
-    	 Map<Predicate, DataType> dataTypesMap;
+    	 Map<Predicate, Datatype> dataTypesMap;
 
         try {
             dataTypesMap = getDataTypeFromOntology(reasoner);
@@ -162,7 +162,7 @@ public class MappingDataTypeRepair {
 				if (functionSymbol.isDataTypePredicate()) {
 
                     Function normal = qvv.getNormal(atom);
-                    DataType dataType = dataTypesMap.get(normal.getFunctionSymbol());
+                    Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
 
                     //if a datatype was already assigned in the ontology
                     if (dataType != null) {
@@ -198,7 +198,7 @@ public class MappingDataTypeRepair {
 
                 Function normal = qvv.getNormal(atom);
                     //Check if a datatype was already assigned in the ontology
-                DataType dataType = dataTypesMap.get(normal.getFunctionSymbol());
+                Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
 
 
 

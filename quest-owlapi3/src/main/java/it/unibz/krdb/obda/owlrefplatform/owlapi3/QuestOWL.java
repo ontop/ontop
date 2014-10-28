@@ -32,6 +32,8 @@ import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
+import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.SubClassExpression;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
@@ -637,9 +639,13 @@ public class QuestOWL extends OWLReasonerBase {
 			Iterator<DisjointClassesAxiom> it = disjointAxioms.iterator();
 			
 			while (isConsistent && it.hasNext()) {		
-				// TODO: handle complex class expressions
+				// TODO: handle complex class expressions and many pairs of disjoint classes
 				DisjointClassesAxiom dda = it.next();
-				String strQuery = String.format(strQueryClass, dda.getFirst(), dda.getSecond());
+				Set<SubClassExpression> disj = dda.getClasses();
+				Iterator<SubClassExpression> classIterator = disj.iterator();
+				SubClassExpression s1 = classIterator.next();
+				SubClassExpression s2 = classIterator.next();
+				String strQuery = String.format(strQueryClass, s1, s2);
 				
 				isConsistent = executeConsistencyQuery(strQuery);
 				if (!isConsistent) 
@@ -655,9 +661,13 @@ public class QuestOWL extends OWLReasonerBase {
 			Iterator<DisjointPropertiesAxiom> it = disjointAxioms.iterator();
 			
 			while (isConsistent && it.hasNext()) {		
-				// TODO: handle role inverses				
+				// TODO: handle role inverses and multiple arguments			
 				DisjointPropertiesAxiom dda = it.next();
-				String strQuery = String.format(strQueryProp, dda.getFirst(), dda.getSecond());
+				Set<Property> props = dda.getProperties();
+				Iterator<Property> iterator = props.iterator();
+				Property p1 = iterator.next();
+				Property p2 = iterator.next();
+				String strQuery = String.format(strQueryProp, p1, p2);
 				
 				isConsistent = executeConsistencyQuery(strQuery);
 				if (!isConsistent) 

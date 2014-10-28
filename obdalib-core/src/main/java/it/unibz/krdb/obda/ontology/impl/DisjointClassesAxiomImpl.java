@@ -20,49 +20,47 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import java.util.Collections;
+import java.util.Set;
+
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
+import it.unibz.krdb.obda.ontology.SubClassExpression;
 
 public class DisjointClassesAxiomImpl implements DisjointClassesAxiom {
 
 	private static final long serialVersionUID = 4576840836473365808L;
 	
-	private final BasicClassDescription class1;
-	private final BasicClassDescription class2;
+	private final Set<SubClassExpression> classes;
 	
-	DisjointClassesAxiomImpl(BasicClassDescription c1, BasicClassDescription c2) {
-		this.class1 = c1;
-		this.class2 = c2;
+	DisjointClassesAxiomImpl(Set<SubClassExpression> classes) {
+		if (classes.size() < 2)
+			throw new IllegalArgumentException("At least 2 classes are expeccted in DisjointClassAxiom");
+
+		this.classes = classes;
 	}
 	
 	@Override
-	public BasicClassDescription getFirst() {
-		return this.class1;
+	public Set<SubClassExpression> getClasses() {
+		return Collections.unmodifiableSet(classes);
 	}
 
-	@Override
-	public BasicClassDescription getSecond() {
-		return this.class2;
-	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof DisjointClassesAxiomImpl) {
 			DisjointClassesAxiomImpl other = (DisjointClassesAxiomImpl)obj;
-			return class1.equals(other.class1) && class2.equals(other.class2);
+			return classes.equals(other.classes);
 		}
 		return false;
 	}
 	
 	@Override
 	public int hashCode() {
-		return class1.hashCode() + class2.hashCode();
+		return classes.hashCode();
 	}
 	
 	@Override
 	public String toString() {
-		return "disjoint(" + class1 + ", " + class2 + ")";
+		return "disjoint(" + classes + ")";
 	}
-
-	
 }

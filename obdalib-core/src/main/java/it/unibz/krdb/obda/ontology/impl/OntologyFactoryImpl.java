@@ -20,6 +20,8 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
+import java.util.Set;
+
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.ObjectConstant;
@@ -28,7 +30,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataType;
+import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -38,6 +40,7 @@ import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.SubClassExpression;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
@@ -131,8 +134,8 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 
 	@Override
-	public DataType createDataType(Predicate p) {
-		return new DataTypeImpl(p);
+	public Datatype createDataType(Predicate p) {
+		return new DatatypeImpl(p);
 	}
 
 	@Override
@@ -141,13 +144,13 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public DisjointClassesAxiom createDisjointClassAxiom(BasicClassDescription c1, BasicClassDescription c2) {
-		return new DisjointClassesAxiomImpl(c1, c2);
+	public DisjointClassesAxiom createDisjointClassesAxiom(Set<SubClassExpression> classes) {
+		return new DisjointClassesAxiomImpl(classes);
 	}
 
 	@Override
-	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Property p1, Property p2) {
-			return new DisjointPropertiesAxiomImpl(p1, p2);
+	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Set<Property> props) {
+			return new DisjointPropertiesAxiomImpl(props);
 	}
 	
 	@Override

@@ -21,15 +21,15 @@ package it.unibz.krdb.obda.ontology.impl;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.DataType;
+import it.unibz.krdb.obda.ontology.Datatype;
 
-public class DataTypeImpl implements DataType {
+public class DatatypeImpl implements Datatype {
 	
 	private static final long serialVersionUID = -6228610469212615956L;
 	
 	private final Predicate predicate;
 	
-	DataTypeImpl(Predicate p) {
+	DatatypeImpl(Predicate p) {
 		predicate = p;
 	}
 	
@@ -40,8 +40,8 @@ public class DataTypeImpl implements DataType {
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof DataTypeImpl) {
-			DataTypeImpl type2 = (DataTypeImpl) obj;
+		if (obj instanceof DatatypeImpl) {
+			DatatypeImpl type2 = (DatatypeImpl) obj;
 			return (predicate.equals(type2.getPredicate()));
 		}
 		return false;

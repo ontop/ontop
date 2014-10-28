@@ -20,6 +20,9 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
+import java.util.Collections;
+import java.util.Set;
+
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.Property;
 
@@ -27,41 +30,37 @@ public class DisjointPropertiesAxiomImpl implements DisjointPropertiesAxiom {
 
 	private static final long serialVersionUID = 4456694617300452114L;
 	
-	private final Property prop1;
-	private final Property prop2;
+	private final Set<Property> props;
 	
-	DisjointPropertiesAxiomImpl(Property p1, Property p2){
-		this.prop1 = p1;
-		this.prop2 = p2;
+	DisjointPropertiesAxiomImpl(Set<Property> props) {
+		if (props.size() < 2)
+			throw new IllegalArgumentException("At least 2 properties are expeccted in DisjointClassAxiom");
+		
+		this.props = props;
 	}
 	
 	@Override
-	public Property getFirst() {
-		return prop1;
+	public Set<Property> getProperties() {
+		return Collections.unmodifiableSet(props);
 	}
 
-	@Override
-	public Property getSecond() {
-		return prop2;
-	}
-	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof DisjointPropertiesAxiomImpl) {
 			DisjointPropertiesAxiomImpl other = (DisjointPropertiesAxiomImpl)obj;
-			return prop1.equals(other.prop1) && prop2.equals(other.prop2);
+			return props.equals(other.props);
 		}
 		return false;
 	}
 	
 	@Override
 	public int hashCode() {
-		return prop1.hashCode() + prop2.hashCode();
+		return props.hashCode();
 	}
 	
 	@Override
 	public String toString() {
-		return "disjoint(" + prop1 + ", " + prop2 + ")";
+		return "disjoint(" + props + ")";
 	}
 
 }

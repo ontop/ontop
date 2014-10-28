@@ -20,6 +20,8 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
+import java.util.Set;
+
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
@@ -37,7 +39,7 @@ public interface OntologyFactory {
 	
 	public Property createDataProperty(String uri);
 	
-	public DataType createDataType(Predicate p);
+	public Datatype createDataType(Predicate p);
 	
 	public Ontology createOntology(String uri);
 	
@@ -54,9 +56,9 @@ public interface OntologyFactory {
 	
 	public FunctionalPropertyAxiom createPropertyFunctionalAxiom(Property role);
 	
-	public DisjointClassesAxiom createDisjointClassAxiom(BasicClassDescription c1, BasicClassDescription c2);
+	public DisjointClassesAxiom createDisjointClassesAxiom(Set<SubClassExpression> classes);
 	
-	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Property p1, Property p2);
+	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Set<Property> props);
 	
 	public PropertyAssertion createPropertyAssertion(Property attribute, ObjectConstant o1, Constant o2);
 	
