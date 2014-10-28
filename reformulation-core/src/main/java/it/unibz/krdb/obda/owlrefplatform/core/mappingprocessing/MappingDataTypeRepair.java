@@ -104,7 +104,7 @@ public class MappingDataTypeRepair {
             			return;
             		
         			if (dataTypesMap.containsKey(key))
-                        System.err.println("Predicate " + key + " with " + dataTypesMap.get(key) + " is redfined as " + supDataType + " in the ontology");
+                        throw new PredicateRedefinitionException("Predicate " + key + " with " + dataTypesMap.get(key) + " is redefined as " + supDataType + " in the ontology");
         			dataTypesMap.put(key, supDataType);
             	}
             }
@@ -119,15 +119,23 @@ public class MappingDataTypeRepair {
                  * the data-type in the mapping, this method simply accepts the function
                  * symbol.
                  *
-                 * @param mappingDatalog
+                 * @param mappingRules
                  *            The set of mapping axioms.
                  * @throws OBDAException
                  */
 
     public void insertDataTyping(List<CQIE> mappingRules, TBoxReasoner reasoner) throws OBDAException {
 
+
         //get all the datatypes in the ontology
-    	 Map<Predicate, DataType> dataTypesMap = getDataTypeFromOntology(reasoner);
+    	 Map<Predicate, DataType> dataTypesMap;
+
+        try {
+            dataTypesMap = getDataTypeFromOntology(reasoner);
+        } catch (PredicateRedefinitionException pe){
+            throw new OBDAException(pe);
+        }
+
 
 		VocabularyValidator qvv = new VocabularyValidator(reasoner);
 
