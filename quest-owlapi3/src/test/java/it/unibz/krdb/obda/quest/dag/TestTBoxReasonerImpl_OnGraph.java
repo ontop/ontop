@@ -325,7 +325,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 			 */
 
 			SomeValuesFrom existsR = (SomeValuesFrom) node;
-			PropertyExpression inv = fac.createObjectPropertyInverse(existsR.getProperty());
+			PropertyExpression inv = fac.createPropertyInverse(existsR.getProperty());
 			SomeValuesFrom existsRin = fac.createPropertySomeRestriction(inv);
 			
 			Equivalences<BasicClassDescription> existsNode = classDAG.getVertex(existsR);

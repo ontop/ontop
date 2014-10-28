@@ -189,17 +189,15 @@ public class SemanticIndexHelper {
                     inverse = true;
                 }
 
-                p = predicateFactory.getPredicate(uri, arity);
-
                 if (type.equals("classes")) {
                     if (exists) {
-                    	PropertyExpression prop = descFactory.createProperty(p, inverse);
+                    	PropertyExpression prop = descFactory.createProperty(uri, inverse);
                         description = descFactory.createPropertySomeRestriction(prop);
                     }
                     else
                         description = descFactory.createClass(uri);
                 } else {
-                    description = descFactory.createProperty(p, inverse);
+                    description = descFactory.createProperty(uri, inverse);
                 }
 
 

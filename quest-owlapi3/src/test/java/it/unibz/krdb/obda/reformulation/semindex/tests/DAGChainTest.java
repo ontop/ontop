@@ -87,9 +87,8 @@ public class DAGChainTest extends TestCase {
 	public void test_exists_simple() {
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
-		Predicate r = predicateFactory.getObjectPropertyPredicate("r");
-		PropertyExpression rprop = descFactory.createProperty(r, false);
-		PropertyExpression riprop = descFactory.createProperty(r, true);
+		PropertyExpression rprop = descFactory.createObjectProperty("r", false);
+		PropertyExpression riprop = descFactory.createObjectProperty("r", true);
 		OClass ac = descFactory.createClass("a");
 		SomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
 		SomeValuesFrom ier = descFactory.createPropertySomeRestriction(riprop);
@@ -136,9 +135,8 @@ public class DAGChainTest extends TestCase {
 
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
-		Predicate r = predicateFactory.getPredicate("r", 2);
-		PropertyExpression rprop = descFactory.createProperty(r, false);
-		PropertyExpression riprop = descFactory.createProperty(r, true);
+		PropertyExpression rprop = descFactory.createObjectProperty("r", false);
+		PropertyExpression riprop = descFactory.createObjectProperty("r", true);
 
 		OClass ac = descFactory.createClass("a");
 		SomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);

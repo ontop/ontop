@@ -423,7 +423,8 @@ public class TreeWitnessSet {
 					}
 					else {
 						log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
-						PropertyExpression prop = ontFactory.createProperty(a.getPredicate(), !root.equals(a.getTerm(0)));
+						PropertyExpression prop = ontFactory.createObjectProperty(a.getPredicate().getName(), 
+											!root.equals(a.getTerm(0)));
 						properties.intersectWith(prop);
 						if (properties.isBottom())
 							break;						

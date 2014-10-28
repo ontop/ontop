@@ -211,13 +211,13 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				continue;
 				
 			PropertyExpression rep = Collections.min(set.getMembers(), propertyComparator);	
-			PropertyExpression repInv = fac.createObjectPropertyInverse(rep);
+			PropertyExpression repInv = fac.createPropertyInverse(rep);
 			
 			Equivalences<PropertyExpression> setInv = dag.getVertex(repInv);
 			
 			if (rep.isInverse()) {
 				repInv = Collections.min(setInv.getMembers(), propertyComparator);	
-				rep = fac.createObjectPropertyInverse(repInv);	
+				rep = fac.createPropertyInverse(repInv);	
 				
 				setInv.setIndexed();							
 			}
@@ -313,7 +313,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		
 		for(Equivalences<PropertyExpression> node : reasoner.getProperties()) {
 			PropertyExpression prop = node.getRepresentative();
-			PropertyExpression inverseProp = fac.createObjectPropertyInverse(prop);
+			PropertyExpression inverseProp = fac.createPropertyInverse(prop);
 			
 			Set<PropertyExpression> reduced = new HashSet<PropertyExpression>();
 			Equivalences<PropertyExpression> reducedNode = new Equivalences<PropertyExpression>(reduced, prop);
@@ -483,7 +483,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			 */
 
 			PropertyExpression exists = ((SomeValuesFrom) node).getProperty();
-			PropertyExpression inv = fac.createObjectPropertyInverse(exists);
+			PropertyExpression inv = fac.createPropertyInverse(exists);
 			Equivalences<BasicClassDescription> existsInvNode = classes.getVertex(
 						fac.createPropertySomeRestriction(inv));
 			

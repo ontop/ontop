@@ -25,21 +25,21 @@ import java.util.Set;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.ValueConstant;
 
 public interface OntologyFactory {
 
 	public OClass createClass(String uri);
 
+	public Datatype createDataType(Predicate p);
+	
+	@Deprecated // generic property is to be eliminated
 	public PropertyExpression createProperty(String uri, boolean inverse);
 
 	public PropertyExpression createObjectProperty(String uri, boolean inverse);
-
-	public PropertyExpression createObjectPropertyInverse(PropertyExpression prop);
 	
 	public PropertyExpression createDataProperty(String uri);
-	
-	public Datatype createDataType(Predicate p);
+
+	public PropertyExpression createPropertyInverse(PropertyExpression prop);
 	
 	public Ontology createOntology();
 
@@ -63,5 +63,4 @@ public interface OntologyFactory {
 	
 	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant object);
 
-	PropertyExpression createProperty(Predicate p, boolean inverse);
 }

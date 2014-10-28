@@ -110,7 +110,7 @@ public class DAG implements Serializable {
 
 			roles.put(role, rolenode);
 
-			PropertyExpression roleInv = descFactory.createObjectPropertyInverse(role);
+			PropertyExpression roleInv = descFactory.createPropertyInverse(role);
 			DAGNode rolenodeinv = new DAGNode(roleInv);
 			roles.put(roleInv, rolenodeinv);
 
@@ -190,8 +190,8 @@ public class DAG implements Serializable {
 	private void addRoleEdge(PropertyExpression parent, PropertyExpression child) {
 		addRoleEdgeSingle(parent, child);
 
-		addRoleEdgeSingle(descFactory.createObjectPropertyInverse(parent),
-				descFactory.createObjectPropertyInverse(child));
+		addRoleEdgeSingle(descFactory.createPropertyInverse(parent),
+				descFactory.createPropertyInverse(child));
 	}
 
 	private void addRoleEdgeSingle(PropertyExpression parent, PropertyExpression child) {

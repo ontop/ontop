@@ -187,7 +187,7 @@ public class TreeWitnessGenerator {
 
 	public boolean endPointEntailsAnyOf(Set<BasicClassDescription> subc) {
 		if (existsRinv == null) {
-			PropertyExpression inv = ontFactory.createObjectPropertyInverse(property);			
+			PropertyExpression inv = ontFactory.createPropertyInverse(property);			
 			existsRinv = ontFactory.createPropertySomeRestriction(inv);	
 		}
 		return subc.contains(existsRinv) || subc.contains(filler);
@@ -198,7 +198,7 @@ public class TreeWitnessGenerator {
 			return true;
 		
 		if (existsRinv == null) {
-			PropertyExpression inv = ontFactory.createObjectPropertyInverse(property);
+			PropertyExpression inv = ontFactory.createPropertyInverse(property);
 			existsRinv = ontFactory.createPropertySomeRestriction(inv);	
 		}
 		

@@ -80,7 +80,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 	@Override
 	public SomeValuesFrom createDataPropertyRange(PropertyExpression role) {
-		PropertyExpression prop = createProperty(role.getPredicate(), true);
+		PropertyExpression prop = new PropertyImpl(role.getPredicate(), true);
 		return new PropertySomeRestrictionImpl(prop);
 	}
 	
@@ -96,11 +96,6 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 
 	@Override
-	public PropertyExpression createProperty(Predicate p, boolean inverse) {
-		return new PropertyImpl(p, inverse);
-	}
-
-	@Override
 	public OClass createClass(String c) {
 		Predicate classp = ofac.getClassPredicate(c);
 		return new ClassImpl(classp);
@@ -109,25 +104,25 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	@Override
 	public PropertyExpression createObjectProperty(String uri, boolean inverse) {
 		Predicate prop = ofac.getObjectPropertyPredicate(uri);
-		return createProperty(prop, inverse);
+		return new PropertyImpl(prop, inverse);
 	}
 
 	@Override
-	public PropertyExpression createObjectPropertyInverse(PropertyExpression prop) {
-		return createProperty(prop.getPredicate(), !prop.isInverse());		
+	public PropertyExpression createPropertyInverse(PropertyExpression prop) {
+		return new PropertyImpl(prop.getPredicate(), !prop.isInverse());		
 	}
 	
 	
 	@Override
 	public PropertyExpression createDataProperty(String p) {
 		Predicate prop = ofac.getDataPropertyPredicate(p);
-		return createProperty(prop, false);
+		return new PropertyImpl(prop, false);
 	}
 
 	@Override
 	public PropertyExpression createProperty(String uri, boolean inverse) {
 		Predicate prop = ofac.getPredicate(uri, 2);
-		return createProperty(prop, false);
+		return new PropertyImpl(prop, false);
 	}
 
 

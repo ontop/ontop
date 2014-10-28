@@ -881,8 +881,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					 * value positions.
 					 */
 
-					Predicate propPred = dfac.getObjectPropertyPredicate(prop);
-					PropertyExpression propDesc = ofac.createProperty(propPred, false);
+					PropertyExpression propDesc = ofac.createObjectProperty(prop, false);
 
 					/*if (!reasonerDag.isCanonicalRepresentative(propDesc))*/ {
 						PropertyExpression desc = reasonerDag.getProperties().getVertex(propDesc).getRepresentative();
@@ -1475,7 +1474,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	private boolean isInverse(Predicate role) {
-		PropertyExpression property = ofac.createProperty(role, false);
+		PropertyExpression property = ofac.createProperty(role.getName(), false);
 		PropertyExpression desc = reasonerDag.getProperties().getVertex(property).getRepresentative();
 		if (!property.equals(desc)) {
 			if (desc.isInverse()) 
@@ -1893,7 +1892,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	// Attribute datatype from TBox
 	private COL_TYPE getAttributeType(Predicate attribute) {
-		PropertyExpression prop = ofac.createProperty(attribute, true);
+		// TODO: use proper range class
+		PropertyExpression prop = ofac.createObjectProperty(attribute.getName(), true);
 		SomeValuesFrom role = ofac.createPropertySomeRestriction(prop);
 		Equivalences<BasicClassDescription> roleNode = reasonerDag.getClasses().getVertex(role);
 		Set<Equivalences<BasicClassDescription>> ancestors = reasonerDag.getClasses().getSuper(roleNode);
