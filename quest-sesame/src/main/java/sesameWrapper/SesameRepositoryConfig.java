@@ -77,7 +77,6 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
         REWRITING = factory.createURI(NAMESPACE, "rewriting");
     }
     
-    
 	private String quest_type;
     private String name;
     private File owlFile;
@@ -86,10 +85,18 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
     private String rewriting;
 
     /**
-     * Create a new RepositoryConfigImpl.
+     * The repository has to be built by this class
+     * so as to fit the validation and repository instantiation
+     * workflow of Sesame.
+     */
+    private SesameAbstractRepo repository;
+
+    /**
+     * Creates a new RepositoryConfigImpl.
      */
     public SesameRepositoryConfig() {
     	super(SesameRepositoryFactory.REPOSITORY_TYPE);
+        repository = null;
     }
 
   
@@ -152,10 +159,21 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
     	this.rewriting = rew;
     }
 
+    /**
+     * In-depth validation that requires building the repository for validating
+     * the OWL and mapping files.
+     */
     @Override
     public void validate()
         throws RepositoryConfigException
     {
+        buildRepository();
+    }
+
+    /**
+     * Checks that the fields are not missing, and that files exist and are accessible.
+     */
+    private void validateFields() throws RepositoryConfigException {
         if (quest_type == null || quest_type.isEmpty()) {
             throw new RepositoryConfigException("No type specified for repository implementation.");
         }
@@ -185,6 +203,62 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
             throw new RepositoryConfigException(e.getMessage());
         }
     }
+
+    /**
+     * This method has two roles:
+     *   - Validating in depth the configuration : basic field validation + consistency of
+     *     the OWL and mapping files (the latter is done when initializing the repository).
+     *   - Building the repository (as an ordinary factory).
+     *
+     * This method is usually called two times:
+     *   - At validation time (see validate() ).
+     *   - At the repository construction time (see SesameRepositoryFactory.getRepository() ).
+     *
+     * However, the repository is only build once and then kept in cache.
+     */
+    public SesameAbstractRepo buildRepository() throws RepositoryConfigException {
+        /**
+         * Cache (computed only once)
+         */
+        if (repository != null)
+            return repository;
+
+        try {
+            /**
+             * Common validation.
+             * May throw a RepositoryConfigException
+             */
+            validateFields();
+
+            /**
+             * Creates the repository according to the Quest type.
+             */
+            switch (quest_type) {
+                case IN_MEMORY_QUEST_TYPE:
+                    repository = new SesameClassicInMemoryRepo(name, owlFile.getAbsolutePath(), existential, rewriting);
+                    break;
+                case REMOTE_QUEST_TYPE:
+                    repository = new SesameClassicJDBCRepo(name, owlFile.getAbsolutePath());
+                    break;
+                case VIRTUAL_QUEST_TYPE:
+                    repository = new SesameVirtualRepo(name, owlFile.getAbsolutePath(), obdaFile.getAbsolutePath(),
+                            existential, rewriting);
+                    break;
+                default:
+                    throw new RepositoryConfigException("Unknown mode: " + quest_type);
+            }
+        }
+        /**
+         * Problem during the repository instantiation.
+         *   --> Exception is re-thrown as a RepositoryConfigException.
+         */
+        catch(Exception e)
+        {   e.printStackTrace();
+            throw new RepositoryConfigException("Could not create Sesame Repo! Reason: " + e.getMessage());
+        }
+        return repository;
+    }
+
 
     @Override
     public Resource export(Graph graph) {
