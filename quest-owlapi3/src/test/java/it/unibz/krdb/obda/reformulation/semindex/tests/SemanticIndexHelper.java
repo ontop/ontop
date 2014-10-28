@@ -197,7 +197,7 @@ public class SemanticIndexHelper {
                         description = descFactory.createPropertySomeRestriction(prop);
                     }
                     else
-                        description = descFactory.createClass(p);
+                        description = descFactory.createClass(uri);
                 } else {
                     description = descFactory.createProperty(p, inverse);
                 }

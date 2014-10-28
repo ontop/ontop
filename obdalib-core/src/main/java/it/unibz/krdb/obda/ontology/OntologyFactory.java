@@ -29,11 +29,9 @@ import it.unibz.krdb.obda.model.ValueConstant;
 
 public interface OntologyFactory {
 
-	public OClass createClass(Predicate p);
-	
 	public OClass createClass(String uri);
 
-	public PropertyExpression createProperty(Predicate p, boolean inverse);
+	public PropertyExpression createProperty(String uri, boolean inverse);
 
 	public PropertyExpression createObjectProperty(String uri, boolean inverse);
 
@@ -49,9 +47,8 @@ public interface OntologyFactory {
 
 	public SubClassOfAxiom createSubClassAxiom(SubClassExpression concept1, BasicClassDescription concept2);
 
-//	@Deprecated
-//	public SomeValuesFrom createPropertySomeRestriction(Predicate p, boolean inverse);
 
+	
 	public SomeValuesFrom createPropertySomeRestriction(PropertyExpression role);
 	
 	public SomeValuesFrom createDataPropertyRange(PropertyExpression role);
@@ -65,4 +62,6 @@ public interface OntologyFactory {
 	public PropertyAssertion createPropertyAssertion(PropertyExpression attribute, ObjectConstant o1, Constant o2);
 	
 	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant object);
+
+	PropertyExpression createProperty(Predicate p, boolean inverse);
 }

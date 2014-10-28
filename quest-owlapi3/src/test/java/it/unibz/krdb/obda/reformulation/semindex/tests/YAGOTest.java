@@ -86,39 +86,30 @@ public class YAGOTest {
                 object = matcher.group(3);
 
                 if ("rdfs:range".equals(predicate)) {
-                    Predicate ps = predicateFactory.getPredicate(subject, 2);
-                    Predicate po = predicateFactory.getPredicate(object, 1);
-                    PropertyExpression psprop = descFactory.createProperty(ps, true);
+                    PropertyExpression psprop = descFactory.createProperty(subject, true);
                     SomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
-                    OClass co = descFactory.createClass(po);
+                    OClass co = descFactory.createClass(object);
                     onto.addAssertionWithCheck(descFactory.createSubClassAxiom(rs, co));
                 } 
                 else if ("rdfs:domain".equals(predicate)) {
-                    Predicate ps = predicateFactory.getPredicate(subject, 2);
-                    Predicate po = predicateFactory.getPredicate(object, 1);
-                    PropertyExpression psprop = descFactory.createProperty(ps, false);
+                    PropertyExpression psprop = descFactory.createProperty(subject, false);
                     SomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
-                    OClass co = descFactory.createClass(po);
+                    OClass co = descFactory.createClass(object);
                     onto.addAssertionWithCheck(descFactory.createSubClassAxiom(rs, co));
                 } 
                 else if ("rdf:type".equals(predicate)) {
                     // a rdf:type A |= A(a)
-                    Predicate po = predicateFactory.getPredicate(object, 1);
-                    OClass co = descFactory.createClass(po);
-                    onto.addConcept(po);
+                    OClass co = descFactory.createClass(object);
+                    onto.addConcept(co.getPredicate());
                 }
                 else if ("rdfs:subClassOf".equals(predicate)) {
-                    Predicate ps = predicateFactory.getPredicate(subject, 1);
-                    Predicate po = predicateFactory.getPredicate(object, 1);
-                    OClass cs = descFactory.createClass(ps);
-                    OClass co = descFactory.createClass(po);
+                    OClass cs = descFactory.createClass(subject);
+                    OClass co = descFactory.createClass(object);
                     onto.addAssertionWithCheck(descFactory.createSubClassAxiom(cs, co));
                 } 
                 else if ("rdfs:subPropertyOf".equals(predicate)) {
-                    Predicate ps = predicateFactory.getPredicate(subject, 1);
-                    Predicate po = predicateFactory.getPredicate(object, 1);
-                    PropertyExpression rs = descFactory.createProperty(ps, false);
-                    PropertyExpression ro = descFactory.createProperty(po, false);
+                    PropertyExpression rs = descFactory.createProperty(subject, false);
+                    PropertyExpression ro = descFactory.createProperty(object, false);
                     onto.addAssertionWithCheck(descFactory.createSubPropertyAxiom(rs, ro));
                 } else {
 //                    log.debug(predicate);

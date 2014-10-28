@@ -148,9 +148,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 			// Determines the type of assertion
 			String predicateName = predicateConstant.getValue();
 			if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
-				Predicate conceptP = dfac.getClassPredicate(objectConstant
-						.getValue());
-				OClass concept = ofac.createClass(conceptP);
+				OClass concept = ofac.createClass(objectConstant.getValue());
 				ClassAssertion ca = ofac.createClassAssertion(concept,
 						(ObjectConstant) subjectConstant);
 				tripleAssertions.add(ca);

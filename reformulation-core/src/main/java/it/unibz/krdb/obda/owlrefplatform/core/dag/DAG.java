@@ -91,7 +91,7 @@ public class DAG implements Serializable {
 		// classes.put(thingConcept, thing);
 
 		for (Predicate conceptp : ontology.getConcepts()) {
-			BasicClassDescription concept = descFactory.createClass(conceptp);
+			BasicClassDescription concept = descFactory.createClass(conceptp.getName());
 			DAGNode node = new DAGNode(concept);
 
 			// if (!concept.equals(thingConcept)) {
@@ -105,12 +105,12 @@ public class DAG implements Serializable {
 		 * For each role we add nodes for its inverse, its domain and its range
 		 */
 		for (Predicate rolep : ontology.getRoles()) {
-			PropertyExpression role = descFactory.createProperty(rolep, false);
+			PropertyExpression role = descFactory.createObjectProperty(rolep.getName(), false);
 			DAGNode rolenode = new DAGNode(role);
 
 			roles.put(role, rolenode);
 
-			PropertyExpression roleInv = descFactory.createProperty(role.getPredicate(), !role.isInverse());
+			PropertyExpression roleInv = descFactory.createObjectPropertyInverse(role);
 			DAGNode rolenodeinv = new DAGNode(roleInv);
 			roles.put(roleInv, rolenodeinv);
 
@@ -190,8 +190,8 @@ public class DAG implements Serializable {
 	private void addRoleEdge(PropertyExpression parent, PropertyExpression child) {
 		addRoleEdgeSingle(parent, child);
 
-		addRoleEdgeSingle(descFactory.createProperty(parent.getPredicate(), !parent.isInverse()),
-				descFactory.createProperty(child.getPredicate(), !child.isInverse()));
+		addRoleEdgeSingle(descFactory.createObjectPropertyInverse(parent),
+				descFactory.createObjectPropertyInverse(child));
 	}
 
 	private void addRoleEdgeSingle(PropertyExpression parent, PropertyExpression child) {

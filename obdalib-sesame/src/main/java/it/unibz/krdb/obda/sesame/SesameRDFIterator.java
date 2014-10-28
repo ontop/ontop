@@ -165,7 +165,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		// Create the assertion
 		Assertion assertion = null;
 		if (currentPredicate.getArity() == 1) {
-			OClass concept = ofac.createClass(currentPredicate);
+			OClass concept = ofac.createClass(currentPredicate.getName());
 			assertion = ofac.createClassAssertion(concept, c);
 		} else if (currentPredicate.getArity() == 2) {
 			Constant c2;

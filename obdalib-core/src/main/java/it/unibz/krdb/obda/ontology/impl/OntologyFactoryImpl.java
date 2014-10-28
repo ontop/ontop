@@ -94,13 +94,6 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new PropertyAssertionImpl(role, o1, o2);
 	}
 
-	@Override
-	public OClass createClass(Predicate p) {
-		if (p.getArity() != 1) 
-			throw new IllegalArgumentException("Concepts must have arity = 1");
-		
-		return new ClassImpl(p);
-	}
 
 	@Override
 	public PropertyExpression createProperty(Predicate p, boolean inverse) {
@@ -110,7 +103,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	@Override
 	public OClass createClass(String c) {
 		Predicate classp = ofac.getClassPredicate(c);
-		return createClass(classp);
+		return new ClassImpl(classp);
 	}
 
 	@Override
@@ -131,6 +124,11 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return createProperty(prop, false);
 	}
 
+	@Override
+	public PropertyExpression createProperty(String uri, boolean inverse) {
+		Predicate prop = ofac.getPredicate(uri, 2);
+		return createProperty(prop, false);
+	}
 
 
 	@Override
@@ -157,6 +155,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	public SomeValuesFrom createPropertySomeRestriction(PropertyExpression role) {
 		return new PropertySomeRestrictionImpl(role);
 	}
+
 
 
 }

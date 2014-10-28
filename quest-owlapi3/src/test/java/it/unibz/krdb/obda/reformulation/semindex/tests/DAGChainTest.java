@@ -60,13 +60,9 @@ public class DAGChainTest extends TestCase {
 	public void test_simple_isa() {
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
-		Predicate a = predicateFactory.getPredicate("a", 1);
-		Predicate b = predicateFactory.getPredicate("b", 1);
-		Predicate c = predicateFactory.getPredicate("c", 1);
-
-		OClass ac = descFactory.createClass(a);
-		OClass bc = descFactory.createClass(b);
-		OClass cc = descFactory.createClass(c);
+		OClass ac = descFactory.createClass("a");
+		OClass bc = descFactory.createClass("b");
+		OClass cc = descFactory.createClass("c");
 
 		ontology.addAxiom(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, ac));
 		ontology.addAxiom(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, bc));
@@ -91,15 +87,13 @@ public class DAGChainTest extends TestCase {
 	public void test_exists_simple() {
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
-		Predicate a = predicateFactory.getClassPredicate("a");
 		Predicate r = predicateFactory.getObjectPropertyPredicate("r");
 		PropertyExpression rprop = descFactory.createProperty(r, false);
 		PropertyExpression riprop = descFactory.createProperty(r, true);
-		Predicate c = predicateFactory.getClassPredicate("c");
-		OClass ac = descFactory.createClass(a);
+		OClass ac = descFactory.createClass("a");
 		SomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
 		SomeValuesFrom ier = descFactory.createPropertySomeRestriction(riprop);
-		OClass cc = descFactory.createClass(c);
+		OClass cc = descFactory.createClass("c");
 
 		ontology.addAxiom(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
 		ontology.addAxiom(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
@@ -142,20 +136,16 @@ public class DAGChainTest extends TestCase {
 
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
-		Predicate a = predicateFactory.getPredicate("a", 1);
 		Predicate r = predicateFactory.getPredicate("r", 2);
 		PropertyExpression rprop = descFactory.createProperty(r, false);
 		PropertyExpression riprop = descFactory.createProperty(r, true);
-		Predicate c = predicateFactory.getPredicate("c", 1);
-		Predicate b = predicateFactory.getPredicate("b", 1);
-		Predicate d = predicateFactory.getPredicate("d", 1);
 
-		OClass ac = descFactory.createClass(a);
+		OClass ac = descFactory.createClass("a");
 		SomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
 		SomeValuesFrom ier = descFactory.createPropertySomeRestriction(riprop);
-		OClass cc = descFactory.createClass(c);
-		OClass bc = descFactory.createClass(b);
-		OClass dc = descFactory.createClass(d);
+		OClass cc = descFactory.createClass("c");
+		OClass bc = descFactory.createClass("b");
+		OClass dc = descFactory.createClass("d");
 
 		ontology.addAxiom(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
 		ontology.addAxiom(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));

@@ -391,7 +391,7 @@ public class TreeWitnessSet {
 				 }
 				 
 				 Predicate pred = a.getFunctionSymbol();
-				 subc.intersectWith(ontFactory.createClass(pred));
+				 subc.intersectWith(ontFactory.createClass(pred.getName()));
 				 if (subc.isBottom())
 					 break;
 			}

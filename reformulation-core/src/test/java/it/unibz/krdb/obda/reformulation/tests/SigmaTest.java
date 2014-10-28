@@ -45,12 +45,9 @@ public class SigmaTest extends TestCase {
     public void test_exists_simple() {
         Ontology ontology = descFactory.createOntology();
 
-        Predicate a = predicateFactory.getPredicate("a", 1);
-        Predicate c = predicateFactory.getPredicate("c", 1);
-        Predicate r = predicateFactory.getPredicate("r", 2);
-        OClass ac = descFactory.createClass(a);
-        OClass cc = descFactory.createClass(c);
-        PropertyExpression rprop = descFactory.createProperty(r, false);
+        OClass ac = descFactory.createClass("a");
+        OClass cc = descFactory.createClass("c");
+        PropertyExpression rprop = descFactory.createObjectProperty("r", false);
         SomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
  
         ontology.addAxiom(descFactory.createSubClassAxiom(er, ac));

@@ -803,8 +803,7 @@ public class OWLAPI3Translator {
 		SubClassExpression cd = null;
 		if (owlExpression instanceof OWLClass) {
 			String uri = ((OWLClass) owlExpression).getIRI().toString();
-			Predicate p = dfac.getClassPredicate(uri);
-			cd = ofac.createClass(p);
+			cd = ofac.createClass(uri);
 
 		} else if (owlExpression instanceof OWLDataMinCardinality) {
 			if (profile.order() < LanguageProfile.DLLITEA.order())
