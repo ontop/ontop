@@ -55,7 +55,7 @@ public class OntologyGraph {
 							= new  DefaultDirectedGraph<Property,DefaultEdge>(DefaultEdge.class);
 				
 		for (Predicate rolep : ontology.getRoles()) {
-			Property role = fac.createProperty(rolep);
+			Property role = fac.createProperty(rolep, false);
 			graph.addVertex(role);
 			Property roleInv = fac.createProperty(role.getPredicate(), !role.isInverse());
 			graph.addVertex(roleInv);
@@ -114,7 +114,7 @@ public class OntologyGraph {
 
 		// domains and ranges of roles
 		for (Property role : propertyGraph.vertexSet()) {
-			PropertySomeRestriction existsRole = fac.getPropertySomeRestriction(role.getPredicate(), role.isInverse());
+			PropertySomeRestriction existsRole = fac.createPropertySomeRestriction(role);
 			classGraph.addVertex(existsRole);			
 		}
 
@@ -122,8 +122,8 @@ public class OntologyGraph {
 		for (DefaultEdge edge : propertyGraph.edgeSet()) {
 			Property child = propertyGraph.getEdgeSource(edge);
 			Property parent = propertyGraph.getEdgeTarget(edge);
-			BasicClassDescription existChild = fac.getPropertySomeRestriction(child.getPredicate(), child.isInverse());
-			BasicClassDescription existsParent = fac.getPropertySomeRestriction(parent.getPredicate(), parent.isInverse());
+			BasicClassDescription existChild = fac.createPropertySomeRestriction(child);
+			BasicClassDescription existsParent = fac.createPropertySomeRestriction(parent);
 			classGraph.addVertex(existChild);
 			classGraph.addVertex(existsParent);
 			classGraph.addEdge(existChild, existsParent);		
@@ -132,8 +132,8 @@ public class OntologyGraph {
 		// edges between the domain and the range of each property for the chain graph
 		if (chain) 
 			for (Property role : propertyGraph.vertexSet()) {
-				PropertySomeRestriction existsRole = fac.getPropertySomeRestriction(role.getPredicate(), role.isInverse());
-				PropertySomeRestriction existsRoleInv = fac.getPropertySomeRestriction(role.getPredicate(), !role.isInverse());
+				PropertySomeRestriction existsRole = fac.createPropertySomeRestriction(role);
+				PropertySomeRestriction existsRoleInv = fac.createPropertySomeRestriction(role.getPredicate(), !role.isInverse());
 				
 				classGraph.addEdge(existsRoleInv, existsRole);				
 				classGraph.addEdge(existsRole, existsRoleInv);				

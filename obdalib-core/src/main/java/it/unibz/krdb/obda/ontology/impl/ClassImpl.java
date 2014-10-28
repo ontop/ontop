@@ -27,23 +27,26 @@ public class ClassImpl implements OClass {
 
 	private static final long serialVersionUID = -4930755519806785384L;
 
-	private Predicate predicate;
+	private final Predicate predicate;
 
-	private String str;
+	private final String str;
 
 	ClassImpl(Predicate p) {
 		this.predicate = p;
 		str = predicate.toString();
 	}
 
+	@Override
 	public Predicate getPredicate() {
 		return predicate;
 	}
 
+	@Override
 	public int hashCode() {
 		return toString().hashCode();
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof ClassImpl)) {
 			return false;
@@ -52,6 +55,7 @@ public class ClassImpl implements OClass {
 		return (predicate.equals(concept2.getPredicate()));
 	}
 
+	@Override
 	public String toString() {
 		return str;
 	}

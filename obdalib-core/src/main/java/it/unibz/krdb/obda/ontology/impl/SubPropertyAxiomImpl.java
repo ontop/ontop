@@ -20,24 +20,48 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.Property;
+import java.util.HashSet;
+import java.util.Set;
 
-public class SubPropertyAxiomImpl extends AbstractSubDescriptionAxiom {
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
+
+public class SubPropertyAxiomImpl implements SubDescriptionAxiom {
 
 	private static final long serialVersionUID = -3020225654321319941L;
 
-	SubPropertyAxiomImpl(Property included, Property including) {
-		super(included, including);
+	private final Property including; // righthand side
+	private final Property included;
+	
+	private final String string;
+	private final int hash;
+	
+	SubPropertyAxiomImpl(Property subDesc, Property superDesc) {
+		if (subDesc == null || superDesc == null) {
+			throw new RuntimeException("Recieved null in property inclusion");
+		}
+		included = subDesc;
+		including = superDesc;
+		StringBuilder bf = new StringBuilder();
+		bf.append(included.toString());
+		bf.append(" ISA ");
+		bf.append(including.toString());
+		string = bf.toString();
+		hash = string.hashCode();
 	}
 
+	@Override
 	public Property getSub() {
-		return (Property) included;
+		return included;
 	}
 
+	@Override
 	public Property getSuper() {
-		return (Property) including;
+		return including;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof SubPropertyAxiomImpl)) {
 			return false;
@@ -48,4 +72,33 @@ public class SubPropertyAxiomImpl extends AbstractSubDescriptionAxiom {
 		}
 		return (included.equals(inc2.included));
 	}
+
+	@Override
+	public Set<Predicate> getReferencedEntities() {
+		Set<Predicate> res = new HashSet<Predicate>();
+		for (Predicate p : getPredicates(included)) {
+			res.add(p);
+		}
+		for (Predicate p : getPredicates(including)) {
+			res.add(p);
+		}
+		return res;
+	}
+
+	private Set<Predicate> getPredicates(Property desc) {
+		Set<Predicate> preds = new HashSet<Predicate>();
+		preds.add(desc.getPredicate());
+		return preds;
+	}
+
+	@Override
+	public int hashCode() {
+		return hash;
+	}
+
+	@Override
+	public String toString() {
+		return string;
+	}
+	
 }

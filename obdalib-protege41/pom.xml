@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.13.1</version>
+		<version>1.13.2-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -179,7 +179,7 @@
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>stringtemplate</artifactId>
-			<version>3.2</version>
+			<version>4.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>

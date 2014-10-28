@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.model;
  */
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -36,6 +35,6 @@ public interface Term extends Serializable {
 
 	public Set<Variable> getReferencedVariables();
 
-	public Map<Variable, Integer> getVariableCount();
+//	public Map<Variable, Integer> getVariableCount();
 
 }

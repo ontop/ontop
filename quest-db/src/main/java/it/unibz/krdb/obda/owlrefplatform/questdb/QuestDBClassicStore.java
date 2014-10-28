@@ -38,12 +38,14 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -156,15 +158,21 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		if (bObtainFromOntology) {
 			// Retrieves the ABox from the ontology file.
 			log.debug("Loading data from Ontology into the database");
-			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure, questInstance.getEquivalenceMap().getInternalMap());
-			int count = st.insertData(aBoxIter, 5000, 500);
+			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure);
+			EquivalentTriplePredicateIterator aBoxNormalIter = 
+							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
+			
+			int count = st.insertData(aBoxNormalIter, 5000, 500);
 			log.debug("Inserted {} triples from the ontology.", count);
 		}
 		if (bObtainFromMappings) {
 			// Retrieves the ABox from the target database via mapping.
 			log.debug("Loading data from Mappings into the database");
 			OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-			for (Predicate p : tbox.getVocabulary()) {
+			for (Predicate p : tbox.getConcepts()) {
+				obdaModelForMaterialization.declarePredicate(p);
+			}
+			for (Predicate p : tbox.getRoles()) {
 				obdaModelForMaterialization.declarePredicate(p);
 			}
 			QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
@@ -211,8 +219,12 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 		for (URI graphURI : graphURIs) {
 			Ontology o = getOntology(((URI) graphURI), graphURI);
-			result.addEntities(o.getVocabulary());
-			result.addAssertions(result.getAssertions());
+			for (Predicate p : o.getConcepts())
+				result.addConcept(p);
+			for (Predicate p : o.getRoles())
+				result.addRole(p);
+			for (Axiom ax : result.getAssertions())  // TODO (ROMAN): check whether it's result and not o
+				result.addAssertion(ax);
 		}
 		return result;
 	}
@@ -259,7 +271,13 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 		@Override
 		public void handleStatement(Statement st) throws RDFHandlerException {
-			ontology.addEntity(getVocabulary(st));
+			Predicate pred = getVocabulary(st);
+				if (pred.getArity() == 1) {
+					ontology.addConcept(pred);
+				} else {
+					ontology.addRole(pred);
+				}
+			
 			Axiom axiom = getTBoxAxiom(st);
 			if (axiom == null) {
 				return;

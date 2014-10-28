@@ -23,8 +23,10 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -44,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AutomaticMGUGenerationTests extends TestCase {
 
-	private Unifier					unifier		= null;
+	private UnifierUtilities					unifier		= null;
 	private AutomaticMGUTestDataGenerator	generator	= null;
 	private Logger						log			= LoggerFactory.getLogger(AutomaticMGUGenerationTests.class);
 
@@ -58,14 +60,14 @@ public class AutomaticMGUGenerationTests extends TestCase {
 		 * Predicate class instead of FunctionSymbol class
 		 */
 
-		unifier = new Unifier();
+		unifier = new UnifierUtilities();
 		generator = new AutomaticMGUTestDataGenerator();
 
 	}
 
 	/**
 	 * Test method for
-	 * {@link it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier#getMGU(it.unibz.krdb.obda.model.Atom, it.unibz.krdb.obda.model.Atom)}
+	 * {@link it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities#getMGU(it.unibz.krdb.obda.model.Atom, it.unibz.krdb.obda.model.Atom)}
 	 * .
 	 * 
 	 * @throws Exception
@@ -91,20 +93,19 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			List<Function> atoms = generator.getAtoms(atomsstr);
 			List<Substitution> expectedmgu = generator.getMGU(mgustr);
 
-			Unifier unifier = new Unifier();
 			List<Substitution> computedmgu = new LinkedList<Substitution>();
 			Exception expectedException = null;
 
-			Map<Variable, Term> mgu = unifier.getMGU(atoms.get(0), atoms.get(1));
+			Unifier mgu = Unifier.getMGU(atoms.get(0), atoms.get(1));
 			if (mgu == null) {
 				computedmgu = null;
 			} else {
-				for (Term var : mgu.keySet()) {
+				for (VariableImpl var : mgu.keySet()) {
 					computedmgu.add(new Substitution(var, mgu.get(var)));
 				}
 			}
 
-			log.debug("Computed MGU: {}", computedmgu);
+			log.debug("Expected MGU: {}", expectedmgu);
 
 			if (expectedmgu == null) {
 				assertTrue(computedmgu == null);

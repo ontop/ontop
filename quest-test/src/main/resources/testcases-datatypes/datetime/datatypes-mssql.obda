@@ -18,7 +18,7 @@ target		:character-{id} a :Row ; :hasChar {char} ; :hasVarChar {varchar} ; :hasN
 source		select id, char, varchar, nchar, nvarchar, text, ntext from Character
 
 mappingId	Date-Time Types
-target		:datetime-{id} a :Row ; :hasDate {date} ; :hasTime {time} ; :hasDateTime {datetime} ; :hasDateTime2 {datetime2} .
+target		:datetime-{id} a :Row ; :hasDate {date} ; :hasTime {time} ; :hasDateTime {datetime} ; :hasDateTime2 {datetime2}; :hasDateString {date}^^xsd:string ; :hasTimeString {time}^^xsd:string ; :hasDateTimeString {datetime}^^xsd:string ; :hasDateTime2String {datetime2}^^xsd:string .
 source		select id, date, time, datetime, datetime2, datetimeoffset, smalldatetime, timestamp from DateTime
 
 mappingId	Boolean Types

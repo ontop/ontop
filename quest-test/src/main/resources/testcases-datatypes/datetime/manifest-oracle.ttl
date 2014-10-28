@@ -9,10 +9,10 @@
     rdfs:label "Date-Time Type Tests" ;
     mf:entries
     ( 
-#      :date :date-bgp
-#      :date-str :date-str-bgp
+      :date :date-bgp
+      :date-str :date-str-bgp
       :timestamp 
-#	  :timestamp-str
+	  :timestamp-str
     ) .
 
 ## >>> This test should fail!
@@ -45,8 +45,8 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <date-oracle.rq> ] ;
-    mf:result <date.ttl> ;
+            [ qt:query <date_oracle-str.rq> ] ;
+    mf:result <date-str.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-oracle.obda> .
 
@@ -57,7 +57,7 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <date-bgp-oracle.rq> ] ;
+            [ qt:query <date-bgp-oracle-str.rq> ] ;
     mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-oracle.obda> .    
@@ -73,7 +73,7 @@
     mf:mappings <datatypes-oracle.obda> .
     
 :timestamp-str rdf:type mf:DatatypeEvaluationTest ;
-    mf:name    "Type: TIMESTAMP - cast to Literal" ;
+    mf:name    "Type: TIMESTAMP -  cast to xsd:string" ;
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action

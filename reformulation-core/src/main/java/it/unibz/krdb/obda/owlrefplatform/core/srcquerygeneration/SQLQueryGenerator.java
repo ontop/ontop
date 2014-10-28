@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration;
 
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 
 import java.io.Serializable;
 import java.util.List;
@@ -58,10 +59,6 @@ public interface SQLQueryGenerator extends Serializable {
 	 *            the set of URIs of the ontologies integrated into the dlliter
 	 *            ontology
 	 */
-	// public void update(PrefixManager man, DLLiterOntology onto, Set<URI>
-	// uris);
 
-	void setUriIds(Map<String, Integer> uriRefIds);
-
-	// public ViewManager getViewManager();
+	void setUriMap(SemanticIndexURIMap uriRefIds);
 }

@@ -129,7 +129,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $y
 WHERE { 
-   $x a mo:TVSeries; mo:title "24"^^xsd:string; dbpedia:gross $y
+   $x a mo:TVSeries; mo:title "Vendetta"^^xsd:string; dbpedia:gross $y
 }
 
 [QueryItem="Find movie production year"]
@@ -229,15 +229,15 @@ WHERE {
    $y :companyName $z
 }
 
-[QueryItem="Find movie producing company country origin"]
+[QueryItem="Find movie from asian company"]
 PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>
 PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-SELECT $x $z1 $z2
+SELECT $title $company
 WHERE { 
-   $x a mo:Movie. $x mo:title "Finding Nemo"^^xsd:string;  mo:isProducedBy $y .
-   $y :companyName $z1; :hasCompanyLocation $z2
+   $x a mo:Movie. $x mo:title ?title;  mo:isProducedBy $y .
+   $y a mo:East_Asian_Company ; :companyName $company .
 }
 ]]
 
@@ -246,12 +246,13 @@ WHERE {
 PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>
 PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX dbpedia: <http://dbpedia.org/ontology/>
-select ?x ?title ?rating
+select distinct ?x ?title ?year ?rating
 where {
    ?x a mo:Movie; 
         mo:title ?title; 
         mo:imdbrating ?rating;
         mo:belongsToGenre [ a mo:Brute_Action ] .
+   ?x dbpedia:productionStartYear ?year .
 }
 order by desc(?rating)
 limit 25
@@ -260,7 +261,7 @@ limit 25
 PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>
 PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX dbpedia: <http://dbpedia.org/ontology/>
-select ?x ?title ?rating
+select distinct ?x ?title ?rating
 where { 
   ?x a mo:Movie;
        mo:title ?title;
@@ -292,13 +293,13 @@ where {
 [QueryItem="Find production companies in a specific region"]
 PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>
 PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
-select ?x ?company_name ?country_code
+select ?x ?company_name ?country_code 
 where { 
-  ?x :hasCompanyLocation ?y; :companyName ?company_name .
-  ?y a mo:America; :countryCode ?country_code .
+  ?x :hasCompanyLocation ?y; :companyName ?company_name ; :countryCode ?country_code .
+ ?y a mo:Western_Europe .
 }
 
-[QueryItem="Find movie titles produced by production companies in Eastern Asia and has gross revenue over 1 million USD"]
+[QueryItem="Find movie titles produced by production companies in Eastern Asia"]
 PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>
 PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX dbpedia: <http://dbpedia.org/ontology/>
@@ -308,7 +309,7 @@ WHERE {
        dbpedia:productionStartYear ?prod_year;
        mo:isProducedBy ?y .
   ?y :companyName ?name;
-       :hasCompanyLocation [ a mo:Eastern_Asia ] .
+      :hasCompanyLocation [ a mo:Eastern_Asia ] .
   FILTER ( ?prod_year >= 2000 && ?prod_year <= 2010 )
 }
 
@@ -317,7 +318,7 @@ PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>
 PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-SELECT $x $title $company_name
+SELECT DISTINCT $x $title $company_name
 WHERE { 
    $x a mo:Movie; mo:title ?title; mo:isProducedBy $y; mo:belongsToGenre $z .
    $y :companyName $company_name; :hasCompanyLocation [ a mo:Eastern_Asia ] .
@@ -329,7 +330,7 @@ PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>
 PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-SELECT $x $title $company_name
+SELECT DISTINCT $x $title $actor_name $company_name
 WHERE { 
    $m a mo:Movie; mo:title ?title; mo:hasActor ?x; mo:hasDirector ?x; mo:isProducedBy $y; mo:belongsToGenre $z .
    $x dbpedia:birthName $actor_name .

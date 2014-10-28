@@ -20,31 +20,34 @@ package it.unibz.krdb.obda.reformulation.tests;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.SubClassAxiomImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.PositiveInclusionApplicator;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-public class CQCUtilitiesTest extends TestCase {
+public class CQCUtilitiesTest {
 
 	CQIE initialquery1 = null;
 
-	PositiveInclusionApplicator piapplicator = new PositiveInclusionApplicator();
+	//PositiveInclusionApplicator piapplicator = new PositiveInclusionApplicator();
 
 	OBDADataFactory pfac = OBDADataFactoryImpl.getInstance();
 	OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
@@ -62,6 +65,7 @@ public class CQCUtilitiesTest extends TestCase {
 	Term u1 = tfac.getVariableNondistinguished();
 	Term u2 = tfac.getVariableNondistinguished();
 
+    @Before
 	public void setUp() throws Exception {
 		/*
 		 * Creating the query:
@@ -104,31 +108,35 @@ public class CQCUtilitiesTest extends TestCase {
 		initialquery1 = tfac.getCQIE(head, body);
 	}
 
+    @Test
 	public void testGrounding() {
-		Ontology sigma = null;
-		CQCUtilities cqcutil = new CQCUtilities(initialquery1, sigma);
-		CQIE groundedcq = cqcutil.getCanonicalQuery(initialquery1);
+    	CQContainmentCheckUnderLIDs.FreezeCQ c2cq = new CQContainmentCheckUnderLIDs.FreezeCQ(initialquery1.getHead(), initialquery1.getBody());
 
-		List<Term> head = groundedcq.getHead().getTerms();
-		assertTrue(head.get(0).equals(tfac.getConstantLiteral("CANx1")));
+		List<Term> head = c2cq.getHead().getTerms();
+		 	
+    	final String CANx1 = ((ValueConstant)head.get(0)).getValue(); //    "f0" if standalone (f46 in travis)
+    	final String CANy2 = ((ValueConstant)head.get(3)).getValue(); //    "f1" if standalone (f47 in travis)
+		
+		assertTrue(head.get(0).equals(tfac.getConstantLiteral(CANx1)));
 		assertTrue(head.get(1).equals(tfac.getConstantURI("URI1")));
 		assertTrue(head.get(2).equals(tfac.getConstantLiteral("m")));
-		assertTrue(head.get(3).equals(tfac.getConstantLiteral("CANy2")));
+		assertTrue(head.get(3).equals(tfac.getConstantLiteral(CANy2)));
 		FunctionalTermImpl f1 = (FunctionalTermImpl) head.get(4);
-		assertTrue(f1.getTerms().get(0).equals(tfac.getConstantLiteral("CANx1")));
-		assertTrue(f1.getTerms().get(1).equals(tfac.getConstantLiteral("CANy2")));
+		assertTrue(f1.getTerms().get(0).equals(tfac.getConstantLiteral(CANx1)));
+		assertTrue(f1.getTerms().get(1).equals(tfac.getConstantLiteral(CANy2)));
 
-		head = ((Function) groundedcq.getBody().get(0)).getTerms();
-		assertTrue(head.get(0).equals(tfac.getConstantLiteral("CANx1")));
-		assertTrue(head.get(1).equals(tfac.getConstantLiteral("CANy2")));
+		head = c2cq.getBodyAtoms(r).get(0).getTerms();
+		assertTrue(head.get(0).equals(tfac.getConstantLiteral(CANx1)));
+		assertTrue(head.get(1).equals(tfac.getConstantLiteral(CANy2)));
 
-		head = ((Function) groundedcq.getBody().get(1)).getTerms();
+		head = c2cq.getBodyAtoms(s).get(0).getTerms();
 		assertTrue(head.get(0).equals(tfac.getConstantLiteral("m")));
 		f1 = (FunctionalTermImpl) head.get(1);
-		assertTrue(f1.getTerms().get(0).equals(tfac.getConstantLiteral("CANx1")));
-		assertTrue(head.get(2).equals(tfac.getConstantLiteral("CANy2")));
+		assertTrue(f1.getTerms().get(0).equals(tfac.getConstantLiteral(CANx1)));
+		assertTrue(head.get(2).equals(tfac.getConstantLiteral(CANy2)));
 	}
 
+    @Test
 	public void testContainment1() {
 
 		// Query 1 - q(x,y) :- R(x,y), R(y,z)
@@ -273,64 +281,48 @@ public class CQCUtilitiesTest extends TestCase {
 		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("T"), pfac.getVariable("k"), pfac.getVariable("i")));
 
 		CQIE q10 = pfac.getCQIE(head, body);
-		Ontology sigma = null;
 
 		// Checking containment 5 in 6 and viceversa
 
-		CQCUtilities cqcu = new CQCUtilities(q6, sigma);
-		assertTrue(cqcu.isContainedIn(q5));
+		CQContainmentCheckUnderLIDs cqcu = new CQContainmentCheckUnderLIDs();
+		
+		assertTrue(cqcu.isContainedIn(q6, q5));
 
-		cqcu = new CQCUtilities(q5, sigma);
-		assertTrue(cqcu.isContainedIn(q6));
+		assertTrue(cqcu.isContainedIn(q5, q6));
 
 		// checking containment of 7 in 8
-		cqcu = new CQCUtilities(q7, sigma);
-		assertTrue(cqcu.isContainedIn(q8));
+		assertTrue(cqcu.isContainedIn(q7, q8));
 
 		// checking non-containment of 8 in 7
-		cqcu = new CQCUtilities(q8, sigma);
-		assertFalse(cqcu.isContainedIn(q7));
+		assertFalse(cqcu.isContainedIn(q8, q7));
 
 		// Checking contaiment q2 <= q1
-
-		cqcu = new CQCUtilities(q2, sigma);
-		assertTrue(cqcu.isContainedIn(q1));
+		assertTrue(cqcu.isContainedIn(q2, q1));
 
 		// Checking contaiment q1 <= q2
-
-		cqcu = new CQCUtilities(q1, sigma);
-		assertFalse(cqcu.isContainedIn(q2));
+		assertFalse(cqcu.isContainedIn(q1, q2));
 
 		// Checking contaiment q1 <= q3
-
-		cqcu = new CQCUtilities(q1, sigma);
-		assertTrue(cqcu.isContainedIn(q3));
+		assertTrue(cqcu.isContainedIn(q1, q3));
 
 		// Checking contaiment q3 <= q1
-
-		cqcu = new CQCUtilities(q3, sigma);
-		assertFalse(cqcu.isContainedIn(q1));
+		assertFalse(cqcu.isContainedIn(q3, q1));
 
 		// Checking contaiment q1 <= q4
-
-		cqcu = new CQCUtilities(q1, sigma);
-		assertFalse(cqcu.isContainedIn(q4));
+		assertFalse(cqcu.isContainedIn(q1, q4));
 
 		// Checking contaiment q4 <= q1
-
-		cqcu = new CQCUtilities(q4, sigma);
-		assertFalse(cqcu.isContainedIn(q1));
+		assertFalse(cqcu.isContainedIn(q4, q1));
 		
 		
 		// Checking containment q9 <= q10 true
-		cqcu = new CQCUtilities(q9, sigma);
-		assertTrue(cqcu.isContainedIn(q10));
+		assertTrue(cqcu.isContainedIn(q9, q10));
 		
 		// Checking containment q10 <= q9 true
-		cqcu = new CQCUtilities(q10, sigma);
-		assertTrue(cqcu.isContainedIn(q9));
+		assertTrue(cqcu.isContainedIn(q10, q9));
 	}
 
+    @Test
 	public void testSyntacticContainmentCheck() {
 		// Query 1 - q(x) :- R(x,y), R(y,z), A(x)
 		// Query 2 - q(x) :- R(x,y)
@@ -390,16 +382,17 @@ public class CQCUtilitiesTest extends TestCase {
 
 		CQIE q3 = tfac.getCQIE(head, body);
 
-		assertTrue(CQCUtilities.isContainedInSyntactic(q1, q2));
+		assertTrue(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q1, q2));
 
-		assertTrue(CQCUtilities.isContainedInSyntactic(q1, q3));
+		assertTrue(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q1, q3));
 
-		assertFalse(CQCUtilities.isContainedInSyntactic(q2, q1));
+		assertFalse(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q2, q1));
 
-		assertFalse(CQCUtilities.isContainedInSyntactic(q3, q1));
+		assertFalse(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(q3, q1));
 
 	}
 
+    @Test
 	public void testRemovalOfSyntacticContainmentCheck() {
 		/*
 		 * Putting all queries in a list, in the end, query 1 must be removed
@@ -466,7 +459,7 @@ public class CQCUtilitiesTest extends TestCase {
 		LinkedList<CQIE> queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q2);
-		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
+		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q2));
@@ -474,7 +467,7 @@ public class CQCUtilitiesTest extends TestCase {
 		queries = new LinkedList<CQIE>();
 		queries.add(q1);
 		queries.add(q3);
-		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
+		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 1);
 		assertTrue(queries.contains(q3));
@@ -482,7 +475,7 @@ public class CQCUtilitiesTest extends TestCase {
 		queries = new LinkedList<CQIE>();
 		queries.add(q2);
 		queries.add(q3);
-		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
+		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
@@ -492,28 +485,26 @@ public class CQCUtilitiesTest extends TestCase {
 		queries.add(q1);
 		queries.add(q2);
 		queries.add(q3);
-		CQCUtilities.removeContainedQueriesSyntacticSorter(queries, true);
+		CQCUtilities.removeContainedQueries(queries, CQCUtilities.SYNTACTIC_CHECK);
 
 		assertTrue(queries.size() == 2);
 		assertTrue(queries.contains(q2));
 		assertTrue(queries.contains(q3));
 	}
 
+    @Test
 	public void testSemanticContainment() {
-		OntologyFactoryImpl dfac = new OntologyFactoryImpl();
+		OntologyFactory dfac = OntologyFactoryImpl.getInstance();
 
-		/* we allways assert true = isContainedIn(q1, q2) */
+		/* we always assert true = isContainedIn(q1, q2) */
 
 		{
 			// q(x) :- A(x), q(y) :- C(y), with A ISA C
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
-			ClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
-			ClassDescription right = dfac.createClass(tfac.getPredicate("C", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+			BasicClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+			BasicClassDescription right = dfac.createClass(tfac.getPredicate("C", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
-			sigma.addConcept(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
-			sigma.addConcept(tfac.getPredicate("C", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
-
-			sigma.addAssertion(inclusion);
+			sigma.addAssertionWithEntities(inclusion);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
 			Function body1 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -523,25 +514,24 @@ public class CQCUtilitiesTest extends TestCase {
 			Function body2 = tfac.getFunction(tfac.getPredicate("C", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
-			CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);
-			assertTrue(cqcutil1.isContainedIn(query2));
-
-			CQCUtilities cqcutil2 = new CQCUtilities(query2, sigma);
-			assertFalse(cqcutil2.isContainedIn(query1));
+			
+			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
+			
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+			
+			assertTrue(cqc.isContainedIn(query1, query2));
+			
+			assertFalse(cqc.isContainedIn(query2, query1));
 		}
 
 		{
 			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
-			ClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
-			ClassDescription right = dfac.getPropertySomeRestriction(
+			BasicClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+			BasicClassDescription right = dfac.createPropertySomeRestriction(
 					tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), false);
 			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
-
-			sigma.addConcept(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
-			sigma.addRole(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }));
-
-			sigma.addAssertion(inclusion);
+			sigma.addAssertionWithEntities(inclusion);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
 			Function body1 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -552,25 +542,23 @@ public class CQCUtilitiesTest extends TestCase {
 					tfac.getVariable("y"), tfac.getVariable("z"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
-			CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);
-			assertTrue(cqcutil1.isContainedIn(query2));
+			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
 
-			CQCUtilities cqcutil2 = new CQCUtilities(query2, sigma);
-			assertFalse(cqcutil2.isContainedIn(query1));
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+			
+			assertTrue(cqc.isContainedIn(query1, query2));
+			
+			assertFalse(cqc.isContainedIn(query2, query1));
 		}
 
 		{
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
-			ClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
-			ClassDescription right = dfac.getPropertySomeRestriction(
+			BasicClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+			BasicClassDescription right = dfac.createPropertySomeRestriction(
 					tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), true);
 			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
-
-			sigma.addConcept(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
-			sigma.addRole(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }));
-
-			sigma.addAssertion(inclusion);
+			sigma.addAssertionWithEntities(inclusion);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
 			Function body1 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -581,26 +569,24 @@ public class CQCUtilitiesTest extends TestCase {
 					tfac.getVariable("z"), tfac.getVariable("y"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
-			CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);
-			assertTrue(cqcutil1.isContainedIn(query2));
-
-			CQCUtilities cqcutil2 = new CQCUtilities(query2, sigma);
-			assertFalse(cqcutil2.isContainedIn(query1));
+			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
+			
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+			
+			assertTrue(cqc.isContainedIn(query1, query2));
+			
+			assertFalse(cqc.isContainedIn(query2, query1));
 		}
 
 		{
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
-			ClassDescription left = dfac.getPropertySomeRestriction(
+			BasicClassDescription left = dfac.createPropertySomeRestriction(
 					tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), false);
-			ClassDescription right = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+			BasicClassDescription right = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 
 			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
-
-			sigma.addConcept(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
-			sigma.addRole(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }));
-
-			sigma.addAssertion(inclusion);
+			sigma.addAssertionWithEntities(inclusion);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
 			Function body1 = tfac.getFunction(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
@@ -611,26 +597,24 @@ public class CQCUtilitiesTest extends TestCase {
 			Function body2 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("z"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
-			CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);
-			assertTrue(cqcutil1.isContainedIn(query2));
+			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
 
-			CQCUtilities cqcutil2 = new CQCUtilities(query2, sigma);
-			assertFalse(cqcutil2.isContainedIn(query1));
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+			
+			assertTrue(cqc.isContainedIn(query1, query2));
+			
+			assertFalse(cqc.isContainedIn(query2, query1));
 		}
 
 		{
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
-			ClassDescription left = dfac.getPropertySomeRestriction(
+			BasicClassDescription left = dfac.createPropertySomeRestriction(
 					tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), true);
-			ClassDescription right = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+			BasicClassDescription right = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
 
 			SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
-
-			sigma.addConcept(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
-			sigma.addRole(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }));
-
-			sigma.addAssertion(inclusion);
+			sigma.addAssertionWithEntities(inclusion);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
 			Function body1 = tfac.getFunction(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
@@ -641,11 +625,13 @@ public class CQCUtilitiesTest extends TestCase {
 			Function body2 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("z"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
-			CQCUtilities cqcutil1 = new CQCUtilities(query1, sigma);
-			assertTrue(cqcutil1.isContainedIn(query2));
+			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
 
-			CQCUtilities cqcutil2 = new CQCUtilities(query2, sigma);
-			assertFalse(cqcutil2.isContainedIn(query1));
+			CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+			
+			assertTrue(cqc.isContainedIn(query1, query2));
+			
+			assertFalse(cqc.isContainedIn(query2, query1));
 		}
 
 		// q(x) :- A(x), q(y) :- C(y), with A ISA B, B ISA C
@@ -664,4 +650,59 @@ public class CQCUtilitiesTest extends TestCase {
 		// q(x,y) :- R(x,y), q(s,t) :- S(s,t), with inv(R) ISA M, M ISA inv(S)
 
 	}
+
+    //Facts should not be removed by the CQCUtilities
+    @Test
+    public void testFacts() {
+
+        OntologyFactory dfac = OntologyFactoryImpl.getInstance();
+
+        // q(x) :- , q(x) :- R(x,y), A(x)
+
+        Ontology sigma = OntologyFactoryImpl.getInstance().createOntology("test");
+        BasicClassDescription left = dfac.createClass(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }));
+        BasicClassDescription right = dfac.createPropertySomeRestriction(
+                tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), false);
+        SubClassAxiomImpl inclusion = (SubClassAxiomImpl) OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
+        sigma.addAssertionWithEntities(inclusion);
+
+
+        // Query 1 q(x) :- R(x,y), A(x)
+        List<Term> headTerms = new LinkedList<Term>();
+        headTerms.add(x);
+
+        Function head = tfac.getFunction(pfac.getPredicate("q", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), headTerms);
+
+        List<Function> body = new LinkedList<Function>();
+
+        List<Term> terms = new LinkedList<Term>();
+        terms.add(tfac.getVariable("x"));
+        terms.add(tfac.getVariable("y"));
+        body.add(tfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
+
+        terms = new LinkedList<Term>();
+        terms.add(tfac.getVariable("x"));
+        body.add(tfac.getFunction(pfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), terms));
+
+        CQIE query1 = tfac.getCQIE(head, body);
+
+        // Query 2 q(x) :- (with empty body)
+
+        headTerms = new LinkedList<Term>();
+        headTerms.add(tfac.getVariable("x"));
+        head = tfac.getFunction(pfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
+        body = new LinkedList<Function>();
+        CQIE query2 = tfac.getCQIE(head, body);
+
+		LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
+		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(dep);
+				
+        assertTrue(cqc.isContainedIn(query1, query2));  // ROMAN: changed from False
+
+        assertFalse(cqc.isContainedIn(query2, query1));
+
+        assertTrue(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(query1, query2)); // ROMAN: changed from False
+        
+        assertFalse(CQCUtilities.SYNTACTIC_CHECK.isContainedIn(query2, query1));
+    }
 }

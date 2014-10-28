@@ -21,16 +21,14 @@ public class TBoxReasonerToOntology {
 			@Override
 			public void onInclusion(Property sub, Property sup) {
 				Axiom ax = fac.createSubPropertyAxiom(sub, sup);
-				sigma.addEntities(ax.getReferencedEntities());
-				sigma.addAssertion(ax);						
+				sigma.addAssertionWithEntities(ax);						
 			}
 
 			@Override
 			public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
 				if (!excludeExistentials || !(sup instanceof PropertySomeRestriction)) {
 					Axiom ax = fac.createSubClassAxiom(sub, sup);
-					sigma.addEntities(ax.getReferencedEntities());
-					sigma.addAssertion(ax);						
+					sigma.addAssertionWithEntities(ax);						
 				}
 			}
 		});

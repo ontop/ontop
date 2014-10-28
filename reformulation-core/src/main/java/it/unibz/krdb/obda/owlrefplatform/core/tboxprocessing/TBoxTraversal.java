@@ -15,7 +15,7 @@ public class TBoxTraversal {
 			for (Equivalences<Property> descendants : reasoner.getProperties().getSub(nodes)) {
 				Property descendant = descendants.getRepresentative();
 
-				if (!descendant.equals(node))  // exclude trivial inclusions
+				//if (!descendant.equals(node))  // exclude trivial inclusions
 					listener.onInclusion(descendant, node);
 			}
 			for (Property equivalent : nodes) {
@@ -32,7 +32,7 @@ public class TBoxTraversal {
 			for (Equivalences<BasicClassDescription> descendants : reasoner.getClasses().getSub(nodes)) {
 				BasicClassDescription descendant = descendants.getRepresentative();
 
-				if (!descendant.equals(node))  // exclude trivial inclusions
+				//if (!descendant.equals(node))  // exclude trivial inclusions
 					listener.onInclusion(descendant, node);
 			}
 			for (BasicClassDescription equivalent : nodes) {

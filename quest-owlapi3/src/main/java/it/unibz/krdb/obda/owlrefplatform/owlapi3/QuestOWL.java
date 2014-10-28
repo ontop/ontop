@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
+import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
@@ -39,6 +40,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 import it.unibz.krdb.obda.utils.VersionInfo;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
@@ -189,7 +191,18 @@ public class QuestOWL extends OWLReasonerBase {
 	
 	/* Used to signal whether to apply the user constraints above */
 	private boolean applyUserConstraints = false;
+	
+	// //////////////////////////////////////////////////////////////////////////////////////
+	//  Davide>
+	//  T-Mappings Configuration
+	//  
+	//
+	// //////////////////////////////////////////////////////////////////////////////////////
 
+	private List<SimplePredicate> excludeFromTMappings = null;
+	
+	/* Used to signal whether to apply the user constraints above */
+	private boolean applyExcludeFromTMappings = false; 
 	
 	/**
 	 * Initialization code which is called from both of the two constructors. 
@@ -236,6 +249,48 @@ public class QuestOWL extends OWLReasonerBase {
 		this.userConstraints = userConstraints;
 		assert(userConstraints != null);
 		this.applyUserConstraints = true;
+		
+		this.init(rootOntology, obdaModel, configuration, preferences);
+	}
+	
+	/**
+	 * This constructor is the same as the default constructor, 
+	 * plus the list of predicates for which TMappings reasoning 
+	 * should be disallowed is supplied 
+	 * @param exclude from TMappings User-supplied predicates for which TMappings should be forbidden
+	 */
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
+			Properties preferences, List<SimplePredicate> excludeFromTMappings) {
+		super(rootOntology, configuration, bufferingMode);
+		
+		// Davide> T-Mappings handling
+		this.excludeFromTMappings = excludeFromTMappings;
+		assert(excludeFromTMappings != null);
+		this.applyExcludeFromTMappings = true;
+		
+		this.init(rootOntology, obdaModel, configuration, preferences);
+
+	}
+	
+	/**
+	 * This constructor is the same as the default constructor plus the extra constraints, 
+	 * but the list of predicates for which TMappings reasoning should be disallowed is 
+	 * supplied 
+	 * @param exclude from TMappings User-supplied predicates for which TMappings should be forbidden
+	 */
+	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
+			Properties preferences, ImplicitDBConstraints userConstraints, 
+			List<SimplePredicate> excludeFromTMappings) {
+		super(rootOntology, configuration, bufferingMode);
+		
+		this.userConstraints = userConstraints;
+		assert(userConstraints != null);
+		this.applyUserConstraints = true;
+		
+		// Davide> T-Mappings handling
+		this.excludeFromTMappings = excludeFromTMappings;
+		assert(excludeFromTMappings != null);
+		this.applyExcludeFromTMappings = true;
 		
 		this.init(rootOntology, obdaModel, configuration, preferences);
 	}
@@ -307,6 +362,9 @@ public class QuestOWL extends OWLReasonerBase {
 		if(this.applyUserConstraints)
 			questInstance.setImplicitDBConstraints(userConstraints);
 		
+		if( this.applyExcludeFromTMappings )
+			questInstance.setExcludeFromTMappings(this.excludeFromTMappings);
+		
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		
 
@@ -329,9 +387,11 @@ public class QuestOWL extends OWLReasonerBase {
 				if (bObtainFromOntology) {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
-					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure,
-							questInstance.getEquivalenceMap().getInternalMap());
-					int count = st.insertData(aBoxIter, 5000, 500);
+					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure);
+					EquivalentTriplePredicateIterator aBoxNormalIter = 
+							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
+					
+					int count = st.insertData(aBoxNormalIter, 5000, 500);
 					log.debug("Inserted {} triples from the ontology.", count);
 				}
 				if (bObtainFromMappings) {
@@ -339,7 +399,10 @@ public class QuestOWL extends OWLReasonerBase {
 					log.debug("Loading data from Mappings into the database");
 
 					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-					for (Predicate p: translatedOntologyMerge.getVocabulary()) {
+					for (Predicate p: translatedOntologyMerge.getConcepts()) {
+						obdaModelForMaterialization.declarePredicate(p);
+					}
+					for (Predicate p: translatedOntologyMerge.getRoles()) {
 						obdaModelForMaterialization.declarePredicate(p);
 					}
 					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
