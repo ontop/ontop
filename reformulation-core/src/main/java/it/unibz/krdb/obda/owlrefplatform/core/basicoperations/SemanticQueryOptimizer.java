@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
-import it.unibz.krdb.obda.ontology.ClassDescription;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
@@ -42,12 +42,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This class is never used
+ */
+
+@Deprecated
 public class SemanticQueryOptimizer {
 	
-	 Map<Predicate,Set<SubDescriptionAxiom>> axiomIndex;
-	 OBDADataFactory fac;
+	 private final Map<Predicate,Set<SubDescriptionAxiom>> axiomIndex;
+	 private final OBDADataFactory fac;
 	
-	public SemanticQueryOptimizer(OBDADataFactory fac, Map<Predicate,Set<SubDescriptionAxiom>> includedPredicateIndex) {
+	private SemanticQueryOptimizer(OBDADataFactory fac, Map<Predicate,Set<SubDescriptionAxiom>> includedPredicateIndex) {
 		this.fac = fac;
 		this.axiomIndex = includedPredicateIndex;
 	}
@@ -82,8 +87,7 @@ public class SemanticQueryOptimizer {
 	 * @return
 	 */
 	public CQIE optimizeBySQO(CQIE query) {
-		QueryAnonymizer anonymizer = new QueryAnonymizer();
-		CQIE copy = anonymizer.anonymize(query.clone());
+		CQIE copy = QueryAnonymizer.anonymize(query.clone());
 		List<Function> body = copy.getBody();
 		for (int i = 0; i < body.size(); i++) {
 			int previoussize = body.size();
@@ -150,7 +154,7 @@ public class SemanticQueryOptimizer {
 				}
 			}
 			if (previoussize != body.size()) {
-				copy = anonymizer.anonymize(copy);
+				copy = QueryAnonymizer.anonymize(copy);
 				body = copy.getBody();
 				i = 0;
 				continue;
@@ -165,8 +169,8 @@ public class SemanticQueryOptimizer {
 				Function checkAtom = null;
 				if (pi instanceof SubClassAxiomImpl) {
 					SubClassAxiomImpl ci = (SubClassAxiomImpl) pi;
-					ClassDescription including = ci.getSuper();
-					ClassDescription included = ci.getSub();
+					BasicClassDescription including = ci.getSuper();
+					BasicClassDescription included = ci.getSub();
 
 					if (focusAtom.getPredicate().getArity() == 1 && including instanceof OClass) {
 						/* case we work with unary atom A(x) or A(_) */
@@ -197,7 +201,7 @@ public class SemanticQueryOptimizer {
 							continue;
 						}
 
-					} else if (focusAtom.getPredicate().getArity() == 2 && including instanceof ClassDescription) {
+					} else if (focusAtom.getPredicate().getArity() == 2 && including instanceof BasicClassDescription) {
 						/*
 						 * case we work with unary atom R(x,_), R(_,y)
 						 */
@@ -305,7 +309,7 @@ public class SemanticQueryOptimizer {
 
 				}
 				if (previoussize != body.size()) {
-					copy = anonymizer.anonymize(copy);
+					copy = QueryAnonymizer.anonymize(copy);
 					body = copy.getBody();
 					i = 0;
 					continue;

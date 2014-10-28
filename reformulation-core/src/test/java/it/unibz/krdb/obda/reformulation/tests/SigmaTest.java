@@ -33,13 +33,13 @@ import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import junit.framework.TestCase;
 
 public class SigmaTest extends TestCase {
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+    private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
     public void test_exists_simple() {
         Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
@@ -49,20 +49,17 @@ public class SigmaTest extends TestCase {
         Predicate r = predicateFactory.getPredicate("r", 2);
         OClass ac = descFactory.createClass(a);
         OClass cc = descFactory.createClass(c);
-        PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
-        ontology.addConcept(ac.getPredicate());
-        ontology.addConcept(cc.getPredicate());
-        ontology.addRole(er.getPredicate());
-
-        ontology.addAssertion(descFactory.createSubClassAxiom(er, ac));
-        ontology.addAssertion(descFactory.createSubClassAxiom(cc, er));
+        PropertySomeRestriction er = descFactory.createPropertySomeRestriction(r, false);
+ 
+        ontology.addAssertionWithEntities(descFactory.createSubClassAxiom(er, ac));
+        ontology.addAssertionWithEntities(descFactory.createSubClassAxiom(cc, er));
 
         
        
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
-		Ontology ontologySigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
-        TBoxReasoner sigma = new TBoxReasonerImpl(ontologySigma);
-        EquivalencesDAG<BasicClassDescription> classes = sigma.getClasses();
+		TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(TBoxReasonerToOntology.getOntology(reasoner, true));						
+
+		EquivalencesDAG<BasicClassDescription> classes = sigmaReasoner.getClasses();
 
         assertTrue(classes.getSub(classes.getVertex(ac)).contains(classes.getVertex(er)));
 

@@ -29,7 +29,6 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DLRPerfectReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 
 import java.util.List;
@@ -92,7 +91,7 @@ public class UnificationTest2 extends TestCase {
 		CQIE query = tfac.getCQIE(head, body);
 		DatalogProgram prog = tfac.getDatalogProgram();
 		prog.appendRule(query);
-
+/* ROMAN commented out (might be able to restore)
 		// List<Assertion> list = new Vector<Assertion>();
 		QueryRewriter rew = new DLRPerfectReformulator();
 		DatalogProgram aux = (DatalogProgram) rew.rewrite(prog);
@@ -115,7 +114,7 @@ public class UnificationTest2 extends TestCase {
 		assertEquals("y", ((Variable) term2).getName());
 		assertEquals("x", ((Variable) term3).getName());
 		assertTrue(term4 instanceof AnonymousVariable);
-
+*/
 	}
 
 }

@@ -43,6 +43,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
@@ -208,7 +209,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 //			log.debug("Before pushing equalities: \n{}", cq);
 
-			DatalogNormalizer.enforceEqualities(cq, false);
+			EQNormalizer.enforceEqualities(cq);
 
 //			log.debug("Before folding Joins: \n{}", cq);
 

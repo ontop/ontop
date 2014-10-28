@@ -56,13 +56,13 @@ public class MappingVocabularyRepair {
 
 	Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
 
-	public void fixOBDAModel(OBDAModel model, Set<Predicate> vocabulary) {
+	public void fixOBDAModel(OBDAModel model, Set<Predicate> concepts, Set<Predicate> roles) {
 		log.debug("Fixing OBDA Model");
 		for (OBDADataSource source : model.getSources()) {
 			Collection<OBDAMappingAxiom> mappings = new LinkedList<OBDAMappingAxiom>(model.getMappings(source.getSourceID()));
 			model.removeAllMappings(source.getSourceID());
 			try {
-				model.addMappings(source.getSourceID(), fixMappingPredicates(mappings, vocabulary));
+				model.addMappings(source.getSourceID(), fixMappingPredicates(mappings, concepts, roles));
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -77,10 +77,13 @@ public class MappingVocabularyRepair {
 	 * @param equivalencesMap
 	 * @return
 	 */
-	public Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, Set<Predicate> vocabulary) {
+	public Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, Set<Predicate> concepts, Set<Predicate> roles) {
 		//		log.debug("Reparing/validating {} mappings", originalMappings.size());
 		HashMap<String, Predicate> urimap = new HashMap<String, Predicate>();
-		for (Predicate p : vocabulary) {
+		for (Predicate p : concepts) {
+			urimap.put(p.getName(), p);
+		}
+		for (Predicate p : roles) {
 			urimap.put(p.getName(), p);
 		}
 

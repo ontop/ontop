@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -48,25 +48,34 @@ public class SigmaTBoxOptimizer {
 	private static final OntologyFactory fac = OntologyFactoryImpl.getInstance();
 	private static final Logger	log	= LoggerFactory.getLogger(SigmaTBoxOptimizer.class);
 
-	private final Set<Predicate> vocabulary;
 	private Ontology optimizedTBox = null;
 
-	public SigmaTBoxOptimizer(TBoxReasoner isa, Set<Predicate> vocabulary, TBoxReasoner sigma) {
-		
-		this.vocabulary = vocabulary;
+	public SigmaTBoxOptimizer(TBoxReasoner isa) {		
 		this.isa = isa;
 		
-		//isa = new TBoxReasonerImpl(isat);
 		isaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)isa);
+	
+		TBoxReasonerImpl sigma = new TBoxReasonerImpl(TBoxReasonerToOntology.getOntology(isa, true));						
 		
-		//TBoxReasonerImpl reasonerSigma = new TBoxReasonerImpl(sigmat);		
-		sigmaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)sigma);
+		sigmaChain = TBoxReasonerImpl.getChainReasoner(sigma);
 	}
 
+	// USED IN ONE TEST (SemanticReductionTest, with the empty Sigma)
+	@Deprecated 
+	public SigmaTBoxOptimizer(TBoxReasoner isa, TBoxReasonerImpl s) {		
+		this.isa = isa;
+		
+		isaChain = TBoxReasonerImpl.getChainReasoner((TBoxReasonerImpl)isa);
+
+		TBoxReasonerImpl sigma = new TBoxReasonerImpl(OntologyFactoryImpl.getInstance().createOntology());						
+		
+		sigmaChain = TBoxReasonerImpl.getChainReasoner(sigma);
+	}
+	
 	public Ontology getReducedOntology() {
 		if (optimizedTBox == null) {
 			optimizedTBox = fac.createOntology("http://it.unibz.krdb/obda/auxontology");
-			optimizedTBox.addEntities(vocabulary);
+			//optimizedTBox.addEntities(vocabulary);
 
 			log.debug("Starting semantic-reduction");
 
@@ -74,14 +83,18 @@ public class SigmaTBoxOptimizer {
 
 				@Override
 				public void onInclusion(Property sub, Property sup) {
-					if (!check_redundant_role(sup, sub)) 
-						optimizedTBox.addAssertion(fac.createSubPropertyAxiom(sub, sup));
+					if (!check_redundant_role(sup, sub)) {
+						Axiom axiom = fac.createSubPropertyAxiom(sub, sup);
+						optimizedTBox.addAssertionWithEntities(axiom);
+					}
 				}
 
 				@Override
 				public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
-					if (!check_redundant(sup, sub)) 
-						optimizedTBox.addAssertion(fac.createSubClassAxiom(sub, sup));
+					if (!check_redundant(sup, sub))  {
+						Axiom axiom = fac.createSubClassAxiom(sub, sup);
+						optimizedTBox.addAssertionWithEntities(axiom);
+					}
 				}
 			});
 		}
@@ -119,10 +132,8 @@ public class SigmaTBoxOptimizer {
 
 	private boolean check_directly_redundant_role(Property parent, Property child) {
 
-		PropertySomeRestriction existParentDesc = 
-				fac.getPropertySomeRestriction(parent.getPredicate(), parent.isInverse());
-		PropertySomeRestriction existChildDesc = 
-				fac.getPropertySomeRestriction(child.getPredicate(), child.isInverse());
+		PropertySomeRestriction existParentDesc = fac.createPropertySomeRestriction(parent);
+		PropertySomeRestriction existChildDesc = fac.createPropertySomeRestriction(child);
 
 		return check_directly_redundant(parent, child) && 
 				check_directly_redundant(existParentDesc, existChildDesc);
@@ -214,9 +225,5 @@ public class SigmaTBoxOptimizer {
 		Set<Equivalences<BasicClassDescription>> tcChildren = isaChain.getClasses().getSub(tc);
 
 		return scChildren.containsAll(tcChildren);
-	}
-	
-	public static Ontology getSigmaOntology(TBoxReasoner reasoner) {
-		return TBoxReasonerToOntology.getOntology(reasoner, true);
 	}
 }

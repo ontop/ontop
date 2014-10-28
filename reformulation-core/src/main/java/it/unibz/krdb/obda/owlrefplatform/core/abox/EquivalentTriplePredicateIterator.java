@@ -31,20 +31,20 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Iterator;
 
 public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 
 	private final Iterator<Assertion> originalIterator;
-	private final EquivalenceMap equivalenceMap;
+	private final TBoxReasoner reasoner;
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();	
 	
-	public EquivalentTriplePredicateIterator(Iterator<Assertion> iterator, EquivalenceMap equivalences) {
+	public EquivalentTriplePredicateIterator(Iterator<Assertion> iterator, TBoxReasoner reasoner) {
 		originalIterator = iterator;
-		equivalenceMap = equivalences;
+		this.reasoner = reasoner;
 	}
 	
 	@Override
@@ -69,7 +69,7 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
 			Predicate concept = ca.getConcept();
-			OClass description = equivalenceMap.getClassRepresentative(concept);
+			OClass description = reasoner.getClassRepresentative(concept);
 			
 			if (description != null) {
 				ObjectConstant object = ca.getObject();
@@ -79,7 +79,7 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 		else if (assertion instanceof ObjectPropertyAssertion) {
 			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
 			Predicate role = opa.getRole();
-			Property property = equivalenceMap.getPropertyRepresentative(role);
+			Property property = reasoner.getPropertyRepresentative(role);
 			
 			if (property != null) {
 				ObjectConstant object1 = opa.getFirstObject();
@@ -94,7 +94,7 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 		else if (assertion instanceof DataPropertyAssertion) {
 			DataPropertyAssertion dpa = (DataPropertyAssertion) assertion;
 			Predicate attribute = dpa.getAttribute();
-			Property property = equivalenceMap.getPropertyRepresentative(attribute);
+			Property property = reasoner.getPropertyRepresentative(attribute);
 			
 			if (property != null) {
 				ObjectConstant object = dpa.getObject();

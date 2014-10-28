@@ -1,5 +1,17 @@
 package it.unibz.krdb.obda.ontology.impl;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DataType;
+import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.SubDescriptionAxiom;
+
 /*
  * #%L
  * ontop-obdalib-core
@@ -20,24 +32,43 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.ClassDescription;
 
-public class SubClassAxiomImpl extends AbstractSubDescriptionAxiom {
+
+public class SubClassAxiomImpl implements SubDescriptionAxiom {
 
 	private static final long serialVersionUID = -7590338987239580423L;
 
-	SubClassAxiomImpl(ClassDescription concept1, ClassDescription concept2) {
-		super(concept1, concept2);
+	private final BasicClassDescription including; // righthand side
+	private final BasicClassDescription included;
+
+	private final String string;
+	private final int hash;
+	
+	SubClassAxiomImpl(BasicClassDescription subDesc, BasicClassDescription superDesc) {
+		if (subDesc == null || superDesc == null) {
+			throw new RuntimeException("Recieved null in concept inclusion");
+		}
+		included = subDesc;
+		including = superDesc;
+		StringBuilder bf = new StringBuilder();
+		bf.append(included.toString());
+		bf.append(" ISA ");
+		bf.append(including.toString());
+		string = bf.toString();
+		hash = string.hashCode();
 	}
 
-	public ClassDescription getSub() {
-		return (ClassDescription) included;
+	@Override
+	public BasicClassDescription getSub() {
+		return included;
 	}
 
-	public ClassDescription getSuper() {
-		return (ClassDescription) including;
+	@Override
+	public BasicClassDescription getSuper() {
+		return including;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof SubClassAxiomImpl)) {
 			return false;
@@ -48,4 +79,41 @@ public class SubClassAxiomImpl extends AbstractSubDescriptionAxiom {
 		}
 		return (included.equals(inc2.included));
 	}
+	
+	@Override
+	public Set<Predicate> getReferencedEntities() {
+		Set<Predicate> res = new HashSet<Predicate>();
+		for (Predicate p : getPredicates(included)) {
+			res.add(p);
+		}
+		for (Predicate p : getPredicates(including)) {
+			res.add(p);
+		}
+		return res;
+	}
+
+	private Set<Predicate> getPredicates(BasicClassDescription desc) {
+		Set<Predicate> preds = new HashSet<Predicate>();
+		if (desc instanceof OClass) {
+			preds.add(((OClass) desc).getPredicate());
+		} else if (desc instanceof PropertySomeRestriction) {
+			preds.add(((PropertySomeRestriction) desc).getPredicate());
+		} else if (desc instanceof DataType) {
+			preds.add(((DataType) desc).getPredicate());
+		} else {
+			throw new UnsupportedOperationException("Cant understand: " + desc.toString());
+		}
+		return preds;
+	}
+
+	@Override
+	public int hashCode() {
+		return hash;
+	}
+
+	@Override
+	public String toString() {
+		return string;
+	}
+	
 }

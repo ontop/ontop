@@ -272,12 +272,12 @@ public class DAGHierarchyTest extends TestCase {
 		
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		Property P = ofac.createObjectProperty(ontoURI + "P");
-		Property S = ofac.createObjectProperty(ontoURI + "S");
-		Property R = ofac.createObjectProperty(ontoURI + "R");
-		Property Q = ofac.createObjectProperty(ontoURI + "Q");
-		Property T = ofac.createObjectProperty(ontoURI + "T");
-		Property U = ofac.createObjectProperty(ontoURI + "U");
+		Property P = ofac.createObjectProperty(ontoURI + "P", false);
+		Property S = ofac.createObjectProperty(ontoURI + "S", false);
+		Property R = ofac.createObjectProperty(ontoURI + "R", false);
+		Property Q = ofac.createObjectProperty(ontoURI + "Q", false);
+		Property T = ofac.createObjectProperty(ontoURI + "T", false);
+		Property U = ofac.createObjectProperty(ontoURI + "U", false);
 		
 		
 		/**
@@ -360,12 +360,12 @@ public class DAGHierarchyTest extends TestCase {
 		
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		Property P = ofac.createObjectProperty(ontoURI + "P");
-		Property S = ofac.createObjectProperty(ontoURI + "S");
-		Property R = ofac.createObjectProperty(ontoURI + "R");
-		Property Q = ofac.createObjectProperty(ontoURI + "Q");
-		Property T = ofac.createObjectProperty(ontoURI + "T");
-		Property U = ofac.createObjectProperty(ontoURI + "U");
+		Property P = ofac.createObjectProperty(ontoURI + "P", false);
+		Property S = ofac.createObjectProperty(ontoURI + "S", false);
+		Property R = ofac.createObjectProperty(ontoURI + "R", false);
+		Property Q = ofac.createObjectProperty(ontoURI + "Q", false);
+		Property T = ofac.createObjectProperty(ontoURI + "T", false);
+		Property U = ofac.createObjectProperty(ontoURI + "U", false);
 	
 		/**
 		 * The initial node is Node P.

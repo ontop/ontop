@@ -27,6 +27,7 @@ public class NeutralSubstitution extends Substitution {
 		super(null, null);
 	}
 	
+	@Override
 	public String toString() {
 		return "-/-";
 	}

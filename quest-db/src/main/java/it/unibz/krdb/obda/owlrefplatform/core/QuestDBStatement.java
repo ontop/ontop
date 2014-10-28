@@ -117,14 +117,14 @@ public class QuestDBStatement implements OBDAStatement {
 				
 				EquivalentTriplePredicateIterator aBoxNormalIter = 
 						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos), 
-								st.questInstance.getEquivalenceMap());
+								st.questInstance.getReasoner());
 				
 				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
 			} 
 			else if (ext.toLowerCase().equals(".nt")) {				
 				NTripleAssertionIterator it = new NTripleAssertionIterator(rdffile);
 				EquivalentTriplePredicateIterator aBoxNormalIter = 
-						new EquivalentTriplePredicateIterator(it, st.questInstance.getEquivalenceMap());
+						new EquivalentTriplePredicateIterator(it, st.questInstance.getReasoner());
 				
 				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
 			}

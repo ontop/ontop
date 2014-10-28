@@ -21,7 +21,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
  */
 
 
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Property;
 
 
@@ -46,4 +48,15 @@ public interface TBoxReasoner {
 	 */
 
 	public EquivalencesDAG<BasicClassDescription> getClasses();
+	
+	/**
+	 * 
+	 * @param v: a description
+	 * @return null if v is the representative of its own class **or v is not part of the graph**
+	 *         the representative of the equivalence class otherwise  
+	 */
+
+	public OClass getClassRepresentative(Predicate p);
+	
+	public Property getPropertyRepresentative(Predicate p);
 }

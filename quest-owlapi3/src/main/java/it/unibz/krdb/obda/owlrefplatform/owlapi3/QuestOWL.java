@@ -389,7 +389,7 @@ public class QuestOWL extends OWLReasonerBase {
 					log.debug("Loading data from Ontology into the database");
 					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure);
 					EquivalentTriplePredicateIterator aBoxNormalIter = 
-							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getEquivalenceMap());
+							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
 					
 					int count = st.insertData(aBoxNormalIter, 5000, 500);
 					log.debug("Inserted {} triples from the ontology.", count);
@@ -399,7 +399,10 @@ public class QuestOWL extends OWLReasonerBase {
 					log.debug("Loading data from Mappings into the database");
 
 					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-					for (Predicate p: translatedOntologyMerge.getVocabulary()) {
+					for (Predicate p: translatedOntologyMerge.getConcepts()) {
+						obdaModelForMaterialization.declarePredicate(p);
+					}
+					for (Predicate p: translatedOntologyMerge.getRoles()) {
 						obdaModelForMaterialization.declarePredicate(p);
 					}
 					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);

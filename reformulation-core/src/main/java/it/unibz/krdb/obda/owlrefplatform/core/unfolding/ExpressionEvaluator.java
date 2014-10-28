@@ -41,7 +41,9 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 
 import java.math.BigInteger;
@@ -969,7 +971,7 @@ public class ExpressionEvaluator {
 	}
 
 	private Term evalUriFunctionsWithMultipleTerms(Function uriFunction1, Function uriFunction2, boolean isEqual) {
-		Map<Variable, Term> theta = Unifier.getMGU(uriFunction1, uriFunction2);
+		Unifier theta = Unifier.getMGU(uriFunction1, uriFunction2);
 		if (theta == null) {
 			if (isEqual) {
 				return fac.getConstantTrue();
@@ -977,7 +979,7 @@ public class ExpressionEvaluator {
 				return fac.getConstantFalse();
 			}
 		} else {
-			boolean isEmpty = (theta.size() == 0);
+			boolean isEmpty = theta.isEmpty();
 			if (isEmpty) {
 				if (isEqual) {
 					return fac.getConstantFalse();
@@ -987,8 +989,8 @@ public class ExpressionEvaluator {
 			} else {
 				Function result = null;
 				List<Function> temp = new ArrayList<Function>();
-				Set<Variable> keys = theta.keySet();
-				for (Variable var : keys) {
+				Set<VariableImpl> keys = theta.keySet();
+				for (VariableImpl var : keys) {
 					result = createEqNeqFilter(var, theta.get(var), isEqual);
 					temp.add(result);
 					if (temp.size() == 2) {
