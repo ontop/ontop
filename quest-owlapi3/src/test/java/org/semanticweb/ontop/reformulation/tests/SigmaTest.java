@@ -31,6 +31,7 @@ import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.PropertySomeRestriction;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 
@@ -59,9 +60,9 @@ public class SigmaTest extends TestCase {
 
         
        
-		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 		Ontology ontologySigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
-        TBoxReasonerImpl sigma = new TBoxReasonerImpl(ontologySigma);
+        TBoxReasoner sigma = new TBoxReasonerImpl(ontologySigma);
         EquivalencesDAG<BasicClassDescription> classes = sigma.getClasses();
 
         assertTrue(classes.getSub(classes.getVertex(ac)).contains(classes.getVertex(er)));

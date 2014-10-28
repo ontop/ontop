@@ -291,6 +291,7 @@ public class R2RMLParser {
 		
 		String lan = om.getLanguageTag();
 		Object datatype = om.getDatatype(Object.class);
+
 		
 		//we check if the object map is a constant (can be a iri or a literal)
 		String obj = om.getConstant();
@@ -327,6 +328,7 @@ public class R2RMLParser {
 		}
 
 		//we check if the object map is a column (can be only literal)
+        //if it has a datatype or language property we check it later
 		String col = om.getColumn();
 		if (col != null) {
 			col=trim(col);
@@ -334,16 +336,9 @@ public class R2RMLParser {
 			if (!joinCond.isEmpty()){
 				col = joinCond + col;
 			}
-			
-			if (lan != null || datatype != null) 
-			{
+
 				objectAtom = fac.getVariable(col);
-			}
-			else
-			{ //we check later if it has a language tag or if it is a datatype 
-				objectAtom = fac.getFunction(OBDAVocabulary.RDFS_LITERAL, fac.getVariable(col));
-				
-			}
+
 		}
 
 		
@@ -380,15 +375,16 @@ public class R2RMLParser {
 			Predicate literal = OBDAVocabulary.RDFS_LITERAL_LANG;
 			Term langAtom = fac.getFunction(literal, objectAtom, lang);
 			objectAtom = langAtom;
-		}
-		
-		//we check if it is a typed literal 
-		if (datatype != null)
-		{
-			Predicate dtype =  new DataTypePredicateImpl(datatype.toString(), COL_TYPE.OBJECT);
-			Term dtAtom = fac.getFunction(dtype, objectAtom);
-			objectAtom = dtAtom;
-		}
+		} else {
+
+            //we check if it is a typed literal
+            if (datatype != null) {
+                Predicate dtype = new DataTypePredicateImpl(datatype.toString(), COL_TYPE.OBJECT);
+                Term dtAtom = fac.getFunction(dtype, objectAtom);
+                objectAtom = dtAtom;
+            }
+
+        }
 
 		return objectAtom;
 	}

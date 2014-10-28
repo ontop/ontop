@@ -5,7 +5,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x
 WHERE { 
-   $x a :Actress. $x dbpedia:birthName "Pfeiffer, Michelle"
+   $x a :Actress. $x dbpedia:birthName "Pfeiffer, Michelle"^^xsd:string
 }
 
 [QueryItem="Find actor"]
@@ -14,7 +14,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x 
 WHERE { 
-   $x a dbpedia:Actor. $x dbpedia:birthName "Aaker, Lee"
+   $x a dbpedia:Actor. $x dbpedia:birthName "Aaker, Lee"^^xsd:string
 }
 
 [QueryItem="Find movie"]
@@ -23,7 +23,7 @@ PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x 
 WHERE { 
-   $x a mo:Movie. $x mo:title "Finding Nemo"
+   $x a mo:Movie. $x mo:title "Finding Nemo"^^xsd:string
 }
 
 [QueryItem="Find TV series"]
@@ -32,7 +32,7 @@ PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x 
 WHERE { 
-   $x a mo:TVSeries. $x mo:title "24"
+   $x a mo:TVSeries. $x mo:title "24"^^xsd:string
 }
 
 [QueryItem="Find writer"]
@@ -41,7 +41,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x 
 WHERE { 
-   $x a dbpedia:Writer. $x dbpedia:birthName "Barker, Clive"
+   $x a dbpedia:Writer. $x dbpedia:birthName "Barker, Clive"^^xsd:string
 }
 
 [QueryItem="Find producer"]
@@ -51,7 +51,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x 
 WHERE { 
-   $x a mo:Producer. $x dbpedia:birthName "Silver, Joel"
+   $x a mo:Producer. $x dbpedia:birthName "Silver, Joel"^^xsd:string
 }
 
 [QueryItem="Find director"]
@@ -61,7 +61,7 @@ PREFIX page: <http://dbpedia.org/page/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x 
 WHERE { 
-   $x a page:Film_Director. $x dbpedia:birthName "Tarantino, Quentin"
+   $x a page:Film_Director. $x dbpedia:birthName "Tarantino, Quentin"^^xsd:string
 }
 
 [QueryItem="Find editor"]
@@ -71,7 +71,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x 
 WHERE { 
-   $x a mo:Editor. $x dbpedia:birthName "Rawlings, Terry"
+   $x a mo:Editor. $x dbpedia:birthName "Rawlings, Terry"^^xsd:string
 }
 
 [QueryItem="Find movie genre"]
@@ -80,7 +80,7 @@ PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $y 
 WHERE { 
-   $x a mo:Movie; mo:title "Finding Nemo"; mo:belongsToGenre $y 
+   $x a mo:Movie; mo:title "Finding Nemo"^^xsd:string; mo:belongsToGenre $y 
 }
 
 [QueryItem="Find TV series genre"]
@@ -89,7 +89,7 @@ PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $y
 WHERE { 
-   $x a mo:TVSeries; mo:title "24"; mo:belongsToGenre $y
+   $x a mo:TVSeries; mo:title "24"^^xsd:string; mo:belongsToGenre $y
 }
 
 [QueryItem="Find movie budget"]
@@ -99,7 +99,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $y 
 WHERE { 
-   $x a mo:Movie; mo:title "Finding Nemo"; dbpedia:budget $y
+   $x a mo:Movie; mo:title "Finding Nemo"^^xsd:string; dbpedia:budget $y
 }
 
 [QueryItem="Find TV series budget"]
@@ -109,7 +109,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $y
 WHERE { 
-   $x a mo:TVSeries; mo:title "24"; dbpedia:budget $y
+   $x a mo:TVSeries; mo:title "24"^^xsd:string; dbpedia:budget $y
 }
 
 [QueryItem="Find movie gross"]
@@ -119,7 +119,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $y 
 WHERE { 
-   $x a mo:Movie; mo:title "Finding Nemo"; dbpedia:gross $y
+   $x a mo:Movie; mo:title "Finding Nemo"^^xsd:string; dbpedia:gross $y
 }
 
 [QueryItem="Find TV series gross"]
@@ -129,7 +129,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $y
 WHERE { 
-   $x a mo:TVSeries; mo:title "24"; dbpedia:gross $y
+   $x a mo:TVSeries; mo:title "Vendetta"^^xsd:string; dbpedia:gross $y
 }
 
 [QueryItem="Find movie production year"]
@@ -139,7 +139,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $y
 WHERE { 
-   $x a mo:Movie. $x mo:title "Finding Nemo";  dbpedia:productionStartYear $y
+   $x a mo:Movie. $x mo:title "Finding Nemo"^^xsd:string;  dbpedia:productionStartYear $y
 }
 
 [QueryItem="Find TV series production year"]
@@ -149,7 +149,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $y
 WHERE { 
-   $x a mo:TVSeries; mo:title "24"; dbpedia:productionStartYear $y
+   $x a mo:TVSeries; mo:title "24"^^xsd:string; dbpedia:productionStartYear $y
 }
 
 [QueryItem="Find movie actors (male and female)"]
@@ -159,7 +159,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $z
 WHERE { 
-   $x a mo:Movie. $x mo:title "Finding Nemo";  mo:hasActor $y .
+   $x a mo:Movie. $x mo:title "Finding Nemo"^^xsd:string;  mo:hasActor $y .
    $y dbpedia:birthName $z
 }
 
@@ -170,7 +170,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $z
 WHERE { 
-   $x a mo:Movie. $x mo:title "Finding Nemo";  mo:hasMaleActor $y .
+   $x a mo:Movie. $x mo:title "Finding Nemo"^^xsd:string;  mo:hasMaleActor $y .
    $y dbpedia:birthName $z
 }
 
@@ -181,7 +181,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $z
 WHERE { 
-   $x a mo:Movie. $x mo:title "Finding Nemo";  mo:hasActress $y .
+   $x a mo:Movie. $x mo:title "Finding Nemo"^^xsd:string;  mo:hasActress $y .
    $y dbpedia:birthName $z
 }
 
@@ -192,7 +192,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $z
 WHERE { 
-   $x a mo:Movie. $x mo:title "Finding Nemo";  mo:hasDirector $y .
+   $x a mo:Movie. $x mo:title "Finding Nemo"^^xsd:string;  mo:hasDirector $y .
    $y dbpedia:birthName $z
 }
 
@@ -203,7 +203,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $z
 WHERE { 
-   $x a mo:Movie. $x mo:title "Finding Nemo";  mo:hasProducer $y .
+   $x a mo:Movie. $x mo:title "Finding Nemo"^^xsd:string;  mo:hasProducer $y .
    $y dbpedia:birthName $z
 }
 
@@ -214,7 +214,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $z
 WHERE { 
-   $x a mo:Movie. $x mo:title "Finding Nemo";  mo:hasEditor $y .
+   $x a mo:Movie. $x mo:title "Finding Nemo"^^xsd:string;  mo:hasEditor $y .
    $y dbpedia:birthName $z
 }
 
@@ -225,19 +225,19 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $z
 WHERE { 
-   $x a mo:Movie. $x mo:title "Finding Nemo";  mo:isProducedBy $y .
+   $x a mo:Movie. $x mo:title "Finding Nemo"^^xsd:string;  mo:isProducedBy $y .
    $y :companyName $z
 }
 
-[QueryItem="Find movie producing company country origin"]
+[QueryItem="Find movie from asian company"]
 PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>
 PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-SELECT $x $z1 $z2
+SELECT $title $company
 WHERE { 
-   $x a mo:Movie. $x mo:title "Finding Nemo";  mo:isProducedBy $y .
-   $y :companyName $z1; :hasCompanyLocation $z2
+   $x a mo:Movie. $x mo:title ?title;  mo:isProducedBy $y .
+   $y a mo:East_Asian_Company ; :companyName $company .
 }
 ]]
 
@@ -246,12 +246,13 @@ WHERE {
 PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>
 PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX dbpedia: <http://dbpedia.org/ontology/>
-select ?x ?title ?rating
+select distinct ?x ?title ?year ?rating
 where {
    ?x a mo:Movie; 
         mo:title ?title; 
         mo:imdbrating ?rating;
         mo:belongsToGenre [ a mo:Brute_Action ] .
+   ?x dbpedia:productionStartYear ?year .
 }
 order by desc(?rating)
 limit 25
@@ -260,7 +261,7 @@ limit 25
 PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>
 PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX dbpedia: <http://dbpedia.org/ontology/>
-select ?x ?title ?rating
+select distinct ?x ?title ?rating
 where { 
   ?x a mo:Movie;
        mo:title ?title;
@@ -277,7 +278,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 select ?x ?genre ?production_year ?budget ?gross ?rating ?actor_name ?director_name ?producer_name ?editor_name
 where { 
   ?x a mo:Movie;
-       mo:title "Finding Nemo";
+       mo:title "Finding Nemo"^^xsd:string;
        mo:belongsToGenre ?genre;
        dbpedia:productionStartYear ?production_year;
        dbpedia:budget ?budget;
@@ -292,13 +293,13 @@ where {
 [QueryItem="Find production companies in a specific region"]
 PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>
 PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
-select ?x ?company_name ?country_code
+select ?x ?company_name ?country_code 
 where { 
-  ?x :hasCompanyLocation ?y; :companyName ?company_name .
-  ?y a mo:America; :countryCode ?country_code .
+  ?x :hasCompanyLocation ?y; :companyName ?company_name ; :countryCode ?country_code .
+ ?y a mo:Western_Europe .
 }
 
-[QueryItem="Find movie titles produced by production companies in Eastern Asia and has gross revenue over 1 million USD"]
+[QueryItem="Find movie titles produced by production companies in Eastern Asia"]
 PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>
 PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX dbpedia: <http://dbpedia.org/ontology/>
@@ -308,7 +309,7 @@ WHERE {
        dbpedia:productionStartYear ?prod_year;
        mo:isProducedBy ?y .
   ?y :companyName ?name;
-       :hasCompanyLocation [ a mo:Eastern_Asia ] .
+      :hasCompanyLocation [ a mo:Eastern_Asia ] .
   FILTER ( ?prod_year >= 2000 && ?prod_year <= 2010 )
 }
 
@@ -317,7 +318,7 @@ PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>
 PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-SELECT $x $title $company_name
+SELECT DISTINCT $x $title $company_name
 WHERE { 
    $x a mo:Movie; mo:title ?title; mo:isProducedBy $y; mo:belongsToGenre $z .
    $y :companyName $company_name; :hasCompanyLocation [ a mo:Eastern_Asia ] .
@@ -329,7 +330,7 @@ PREFIX : <http://www.movieontology.org/2009/11/09/movieontology.owl#>
 PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>
 PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-SELECT $x $title $company_name
+SELECT DISTINCT $x $title $actor_name $company_name
 WHERE { 
    $m a mo:Movie; mo:title ?title; mo:hasActor ?x; mo:hasDirector ?x; mo:isProducedBy $y; mo:belongsToGenre $z .
    $x dbpedia:birthName $actor_name .
@@ -347,7 +348,7 @@ PREFIX page: <http://dbpedia.org/page/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $title
 WHERE { 
-   $x a page:Film_Director; dbpedia:birthName "Tarantino, Quentin";
+   $x a page:Film_Director; dbpedia:birthName "Tarantino, Quentin"^^xsd:string;
         mo:isDirectorOf $y . $y mo:title $title .
 }
 
@@ -369,7 +370,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $name $birthdate
 WHERE { 
    $x mo:isActorIn $y; dbpedia:birthName $name; dbpedia:birthDate $birthdate . 
-   $y mo:title "Finding Nemo"
+   $y mo:title "Finding Nemo"^^xsd:string
 }
 
 [QueryItem="Q4"]
@@ -379,7 +380,7 @@ PREFIX dbpedia: <http://dbpedia.org/ontology/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT $x $budget $gross $director_name $producer_name $editor_name $company_name
 WHERE { 
-   $x a mo:Movie; mo:title "Finding Nemo";
+   $x a mo:Movie; mo:title "Finding Nemo"^^xsd:string;
         dbpedia:budget $budget;
         dbpedia:gross $gross .
    $x mo:hasDirector $director . $director dbpedia:birthName $director_name .

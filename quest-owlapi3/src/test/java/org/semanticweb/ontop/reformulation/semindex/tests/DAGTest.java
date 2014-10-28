@@ -30,6 +30,7 @@ import org.semanticweb.ontop.ontology.ClassDescription;
 import org.semanticweb.ontop.ontology.Description;
 import org.semanticweb.ontop.ontology.Property;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import junit.framework.TestCase;
@@ -39,7 +40,7 @@ public class DAGTest extends TestCase {
 	SemanticIndexHelper	helper	= new SemanticIndexHelper();
 
 	private void test_dag_index_nodes(String testname) throws Exception {
-		TBoxReasonerImpl reasoner = helper.load_dag(testname);
+		TBoxReasoner reasoner = helper.load_dag(testname);
 		List<List<Description>> exp_idx = helper.get_results(testname);
 
 		Set<BasicClassDescription> classes= new HashSet<BasicClassDescription>();

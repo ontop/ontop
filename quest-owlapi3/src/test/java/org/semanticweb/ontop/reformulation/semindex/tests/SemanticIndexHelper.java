@@ -50,6 +50,7 @@ import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -108,7 +109,7 @@ public class SemanticIndexHelper {
 
     }
 
-    public TBoxReasonerImpl load_dag(String ontoname) throws Exception {
+    public TBoxReasoner load_dag(String ontoname) throws Exception {
 
     	return new TBoxReasonerImpl(load_onto(ontoname));
         //return DAGBuilder.getDAG(load_onto(ontoname));

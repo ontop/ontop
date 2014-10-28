@@ -17,8 +17,8 @@ owl2xml:		http://www.w3.org/2006/12/owl2-xml#
 [SourceDeclaration]
 sourceUri	imdb-obda
 connectionUrl	jdbc:postgresql://10.7.20.39/imdbobda
-username    postgres
-password    postgres
+username	postgres
+password	postgres
 driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
@@ -59,15 +59,15 @@ target		imdb:company/{company_id} a mo:Production_Company .
 source		select company_id from movie_companies where movie_companies.company_type_id = 2
 
 mappingId	Person has Birth Date
-target		imdb:name/{person_id} dbpedia:birthDate {dob}^^xsd:dateTime .
+target		imdb:name/{person_id} dbpedia:birthDate {dob}^^xsd:string . 
 source		select person_id, info as dob from person_info where info_type_id = 21
 
 mappingId	Person has Birth Name
-target		imdb:name/{person_id} dbpedia:birthName {name} .
+target		imdb:name/{person_id} dbpedia:birthName {name} . 
 source		select name.id as person_id, name.name as name from name
 
 mappingId	Movie has rating
-target		imdb:title/{movie_id} mo:imdbrating {rating}^^xsd:double .
+target		imdb:title/{movie_id} mo:imdbrating {rating}^^xsd:double . 
 source		select movie_id, info as rating from movie_info_idx where info_type_id = 101
 
 mappingId	Movies with any types of genre
@@ -83,7 +83,7 @@ target		imdb:genre/{title_id} a mo:Porn .
 source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Adult'
 
 mappingId	Label for Adventure genre
-target		imdb:genre/{title_id} a mo:Imaginational_Entertainment, mo:Actionreach . 
+target		imdb:genre/{title_id} a mo:Imaginational_Entertainment , mo:Actionreach . 
 source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Adventure'
 
 mappingId	Label for Animation genre
@@ -187,11 +187,11 @@ target		imdb:genre/{title_id} a mo:Old_Action .
 source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Western'
 
 mappingId	Movie has production Budget
-target		imdb:title/{movie_id} dbpedia:budget {budget}^^xsd:double .
+target		imdb:title/{movie_id} dbpedia:budget {budget}^^xsd:string . 
 source		select movie_id, info as budget from movie_info where movie_info.info_type_id = 105
 
 mappingId	Movie gets Gross revenue
-target		imdb:title/{movie_id} dbpedia:gross {gross}^^xsd:double .
+target		imdb:title/{movie_id} dbpedia:gross {gross}^^xsd:string . 
 source		select movie_id, info as gross from movie_info where movie_info.info_type_id = 107
 
 mappingId	Movie has Actor
@@ -215,86 +215,87 @@ target		imdb:title/{movie_id} mo:hasProducer imdb:name/{person_id} .
 source		select movie_id, person_id from cast_info where role_id = 3
 
 mappingId	Movie has Production Company
-target		imdb:title/{movie_id} mo:isProducedBy imdb:company/{company_id} . 
-source		select company_id, movie_id from movie_companies where company_type_id = 2
+target		imdb:title/{title_id} mo:isProducedBy imdb:company/{production_cid} . 
+source		select company_name.id as production_cid, movie_companies.movie_id as title_id from company_name, movie_companies where company_name.id = movie_companies.company_id and movie_companies.company_type_id = 2
 
 mappingId	Companies in United States
-target		imdb:company/{cid}#country a mo:Northern_America . 
+target		imdb:company/{cid} a mo:North_American_Company ; mo2:hasCompanyLocation mo:USA . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[us]'
 
 mappingId	Companies in Great Britain
-target		imdb:company/{cid}#country a mo:Northern_Europe . 
+target		imdb:company/{cid} a mo:North_European_Company ; mo2:hasCompanyLocation mo:United_Kingdom . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[gb]'
 
 mappingId	Companies in France
-target		imdb:company/{cid}#country a mo:Western_Europe . 
+target		imdb:company/{cid} a mo:West_European_Company ; mo2:hasCompanyLocation mo:France . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[fr]'
 
 mappingId	Companies in Germany
-target		imdb:company/{cid}#country a mo:Western_Europe . 
+target		imdb:company/{cid} a mo:West_European_Company ; mo2:hasCompanyLocation mo:Germany . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[de]'
 
 mappingId	Companies in Japan
-target		imdb:company/{cid}#country a mo:Eastern_Asia . 
+target		imdb:company/{cid} a mo:East_Asian_Company ; mo2:hasCompanyLocation mo:Japan . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[jp]'
 
 mappingId	Companies in Italy
-target		imdb:company/{cid}#country a mo:Southern_Europe . 
+target		imdb:company/{cid} a mo:South_European_Company ; mo2:hasCompanyLocation mo:Italy . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[it]'
 
 mappingId	Companies in Canada
-target		imdb:company/{cid}#country a mo:Northern_America . 
+target		imdb:company/{cid} a mo:North_American_Company ; mo2:hasCompanyLocation mo:Canada . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[ca]'
 
 mappingId	Companies in Spain
-target		imdb:company/{cid}#country a mo:Southern_Europe . 
+target		imdb:company/{cid} a mo:South_European_Company ; mo2:hasCompanyLocation mo:Spain . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[es]'
 
 mappingId	Companies in Mexico
-target		imdb:company/{cid}#country a mo:Central_America . 
+target		imdb:company/{cid} a mo:Center_American_Company ; mo2:hasCompanyLocation mo:Mexico . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[mx]'
 
 mappingId	Companies in Denmark
-target		imdb:company/{cid}#country a mo:Northern_Europe . 
+target		imdb:company/{cid} a mo:North_European_Company ; mo2:hasCompanyLocation mo:Denmark . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[dk]'
 
 mappingId	Companies in Brazil
-target		imdb:company/{cid}#country a mo:South_America . 
+target		imdb:company/{cid} a mo:South_American_Company ; mo2:hasCompanyLocation mo:Brazil . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[br]'
 
 mappingId	Companies in Australia
-target		imdb:company/{cid}#country a mo:Australia_and_New_Zealand . 
+target		imdb:company/{cid} a mo:Oceanian_Company ; mo2:hasCompanyLocation mo:Australia . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[au]'
 
 mappingId	Companies in Sweden
-target		imdb:company/{cid}#country a mo:Northern_Europe . 
+target		imdb:company/{cid} a mo:North_European_Company ; mo2:hasCompanyLocation mo:Sweden . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[se]'
 
 mappingId	Companies in Belgium
-target		imdb:company/{cid}#country a mo:Western_Europe . 
+target		imdb:company/{cid} a mo:West_European_Company ; mo2:hasCompanyLocation mo:Belgium . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[be]'
 
 mappingId	Companies in Philippines
-target		imdb:company/{cid}#country a mo:Southeastern_Asia . 
+target		imdb:company/{cid} a mo:SouthEast_Asian_Company ; mo2:hasCompanyLocation mo:Philippines . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[ph]'
 
 mappingId	Companies in India
-target		imdb:company/{cid}#country a mo:Southern_Asia . 
+target		imdb:company/{cid} a mo:South_Asian_Company ; mo2:hasCompanyLocation mo:India . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[in]'
 
 mappingId	Companies in China
-target		imdb:company/{cid}#country a mo:Eastern_Asia . 
+target		imdb:company/{cid} a mo:East_Asian_Company ; mo2:hasCompanyLocation mo:China . 
 source		select company_name.id as cid from company_name where company_name.country_code = '[cn]'
 
 mappingId	Company has name
-target		imdb:company/{company_id} mo2:companyName {company_name} .
+target		imdb:company/{company_id} mo2:companyName {company_name} . 
 source		select company_name.id as company_id, company_name.name as company_name from company_name
 
 mappingId	Movie has title and production year
-target		imdb:title/{id} mo:title {title}; dbpedia:productionStartYear {production_year}^^xsd:integer .
+target		imdb:title/{id} mo:title {title} ; dbpedia:productionStartYear {production_year}^^xsd:integer . 
 source		select id, title, production_year from title
 
-mappingId	Country has country code
-target		imdb:company/{cid}#country mo2:countryCode {country_code} . imdb:company/{cid} mo2:hasCompanyLocation imdb:company/{cid}#country .
+mappingId	Company has country code
+target		imdb:company/{cid} mo2:countryCode {country_code} . 
 source		select company_name.id as cid, company_name.country_code as country_code from company_name
 ]]
+

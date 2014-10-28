@@ -40,15 +40,15 @@ import org.semanticweb.ontop.ontology.BasicClassDescription;
 import org.semanticweb.ontop.ontology.Property;
 import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
 import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Loop;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessReasonerLite.IntersectionOfConceptSets;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessReasonerLite.IntersectionOfProperties;
+import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessReasonerCache.IntersectionOfConceptSets;
+import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessReasonerCache.IntersectionOfProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TreeWitnessSet {
 	private List<TreeWitness> tws = new LinkedList<TreeWitness>();
 	private final QueryConnectedComponent cc;
-	private final TreeWitnessReasonerLite reasoner;
+	private final TreeWitnessReasonerCache reasoner;
 	private PropertiesCache propertiesCache; 
 	private boolean hasConflicts = false;
 	
@@ -59,7 +59,7 @@ public class TreeWitnessSet {
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessSet.class);
 	
-	private TreeWitnessSet(QueryConnectedComponent cc, TreeWitnessReasonerLite reasoner) {
+	private TreeWitnessSet(QueryConnectedComponent cc, TreeWitnessReasonerCache reasoner) {
 		this.cc = cc;
 		this.reasoner = reasoner;
 	}
@@ -72,7 +72,7 @@ public class TreeWitnessSet {
 		return hasConflicts;
 	}
 	
-	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TreeWitnessReasonerLite reasoner) {		
+	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TreeWitnessReasonerCache reasoner) {		
 		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner);
 		
 		if (!cc.isDegenerate())
@@ -364,9 +364,9 @@ public class TreeWitnessSet {
 		private Map<TermOrderedPair, Set<Property>> propertiesCache = new HashMap<TermOrderedPair, Set<Property>>();
 		private Map<Term, IntersectionOfConceptSets> conceptsCache = new HashMap<Term, IntersectionOfConceptSets>();
 
-		private final TreeWitnessReasonerLite reasoner;
+		private final TreeWitnessReasonerCache reasoner;
 		
-		private PropertiesCache(TreeWitnessReasonerLite reasoner) {
+		private PropertiesCache(TreeWitnessReasonerCache reasoner) {
 			this.reasoner = reasoner;
 		}
 		

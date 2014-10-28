@@ -77,7 +77,8 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>					
+				<configuration>
+					
 					<source>1.7</source>
 					<target>1.7</target>
 					<testExcludes>

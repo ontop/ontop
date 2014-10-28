@@ -26,16 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.DataTypePredicate;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.OBDASQLQuery;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
@@ -112,7 +103,7 @@ public class MappingVocabularyRepair {
 						
 						/**
 						 * All this part is to handle the case where the predicate or the class is defined
-						 * by the mapping but not present in the ontology.
+						 * by the mapping but not present in the ontology. For example rdfs:label
 						 */
 						if (newTerms.size()==1){
 							predicate=dfac.getClassPredicate(p.getName());
@@ -122,20 +113,29 @@ public class MappingVocabularyRepair {
 							Term t1= newTerms.get(0);
 							Term t2= newTerms.get(1);
 
-							if (( t1 instanceof Function) && ( t2 instanceof Function)){
+                            if ( t1 instanceof Function) {
+                                if ( t2 instanceof Function) {
 
-								Function ft1 = (Function) t1;
-								Function ft2 = (Function) t2;
+                                    Function ft1 = (Function) t1;
+                                    Function ft2 = (Function) t2;
 
-								boolean t1uri = ft1.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI);
-								boolean t2uri = ft2.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI);
+                                    boolean t1uri = ft1.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI);
+                                    boolean t2uri = ft2.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI);
 
-								if (t1uri && t2uri){
-									predicate= dfac.getObjectPropertyPredicate(p.getName());
-								}else{
-									predicate=dfac.getDataPropertyPredicate(p.getName());
-								}
-							} else {
+                                    if (t1uri && t2uri){
+                                        predicate= dfac.getObjectPropertyPredicate(p.getName());
+                                    }else{
+                                        predicate=dfac.getDataPropertyPredicate(p.getName());
+                                    }
+                                } else {
+
+                                //if no information about the range is present, we create a data property, the datatype will be assigned by the database
+
+                                    predicate = dfac.getDataPropertyPredicate(p.getName());
+                                }
+
+
+                            } else {
 								throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + p.getName());
 							}
 						}

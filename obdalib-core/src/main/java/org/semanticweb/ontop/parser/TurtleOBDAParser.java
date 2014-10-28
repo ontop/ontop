@@ -1516,48 +1516,55 @@ public class TurtleOBDAParser extends Parser {
 					break;
 				case 2 :
 					// /Users/Sarah/develop/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:471:5: variable REFERENCE resource
-					{
-					pushFollow(FOLLOW_variable_in_typedLiteral593);
-					variable24=variable();
-					state._fsp--;
+                {
+                    pushFollow(FOLLOW_variable_in_typedLiteral593);
+                    variable24 = variable();
+                    state._fsp--;
 
-					match(input,REFERENCE,FOLLOW_REFERENCE_in_typedLiteral595); 
-					pushFollow(FOLLOW_resource_in_typedLiteral597);
-					resource25=resource();
-					state._fsp--;
+                    match(input, REFERENCE, FOLLOW_REFERENCE_in_typedLiteral595);
+                    pushFollow(FOLLOW_resource_in_typedLiteral597);
+                    resource25 = resource();
+                    state._fsp--;
 
 
-					      Variable var = variable24;
-					      //String functionName = resource25.toString();
-					      // resource25 must be a URIConstant
-					      String functionName = null;
-					      if (resource25 instanceof Function){
-					        functionName = ((ValueConstant) ((Function)resource25).getTerm(0)).getValue();
-					      } else {
-					        throw new IllegalArgumentException("resource25 should be an URI");
-					      }
-					      Predicate functionSymbol = null;
-					      if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateLiteral();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateString();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI) || functionName.equals(OBDAVocabulary.XSD_INT_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateInteger();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateDecimal();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateDouble();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateDateTime();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateBoolean();
-					      } else {
-					          throw new RecognitionException();
-					      }
-					      value = dfac.getFunction(functionSymbol, var);
-					     
-					}
-					break;
+                    Variable var = variable24;
+                    //String functionName = resource25.toString();
+                    // resource25 must be a URIConstant
+                    String functionName = null;
+                    if (resource25 instanceof Function) {
+                        functionName = ((ValueConstant) ((Function) resource25).getTerm(0)).getValue();
+                    } else {
+                        throw new IllegalArgumentException("resource25 should be an URI");
+                    }
+                    Predicate functionSymbol = null;
+                    if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
+                        functionSymbol = dfac.getDataTypePredicateLiteral();
+                    } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
+                        functionSymbol = dfac.getDataTypePredicateString();
+                    } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI)
+                            || functionName.equals(OBDAVocabulary.XSD_INT_URI)) {
+                        functionSymbol = dfac.getDataTypePredicateInteger();
+                    } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
+                        functionSymbol = dfac.getDataTypePredicateDecimal();
+                    } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
+                        functionSymbol = dfac.getDataTypePredicateDouble();
+                    } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
+                        functionSymbol = dfac.getDataTypePredicateDateTime();
+                    } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+                        functionSymbol = dfac.getDataTypePredicateBoolean();
+                    } else if (functionName.equals(OBDAVocabulary.XSD_DATE_URI)) {
+                        functionSymbol = dfac.getDataTypePredicateDate();
+                    } else if (functionName.equals(OBDAVocabulary.XSD_TIME_URI)) {
+                        functionSymbol = dfac.getDataTypePredicateTime();
+                    } else if (functionName.equals(OBDAVocabulary.XSD_YEAR_URI)) {
+                        functionSymbol = dfac.getDataTypePredicateYear();
+                    } else {
+                        throw new RecognitionException();
+                    }
+                    value = dfac.getFunction(functionSymbol, var);
+
+                }
+                break;
 
 			}
 		}

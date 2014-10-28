@@ -777,6 +777,7 @@ public class QuestStatement implements OBDAStatement {
 				// log.debug("Input query:\n{}", strquery);
 
 				for (CQIE q : program.getRules()) {
+					// ROMAN: unfoldJoinTrees clones the query, so the statement below does not change anything
 					DatalogNormalizer.unfoldJoinTrees(q, false);
 				}
 

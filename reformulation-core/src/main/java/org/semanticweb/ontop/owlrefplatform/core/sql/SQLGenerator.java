@@ -1660,6 +1660,12 @@ public class SQLGenerator implements SQLQueryGenerator {
      */
     private int getCodeTypeFromFunctionSymbol(Predicate functionSymbol) {
         switch (functionSymbol.getName()) {
+            case OBDAVocabulary.XSD_YEAR_URI:
+                return 12;
+            case OBDAVocabulary.XSD_TIME_URI:
+                return 11;
+            case OBDAVocabulary.XSD_DATE_URI:
+                return 10;
             case OBDAVocabulary.XSD_BOOLEAN_URI:
                 return 9;
             case OBDAVocabulary.XSD_DATETIME_URI:
