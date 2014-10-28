@@ -181,16 +181,16 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
             if (owlFile == null) {
                 throw new RepositoryConfigException("No Owl file specified for repository creation!");
             }
-            else if ((!owlFile.exists())) {
+            if ((!owlFile.exists())) {
                 throw new RepositoryConfigException(String.format("The Owl file %s does not exist!",
                         owlFile.getAbsolutePath()));
             }
-            else if (quest_type.equals(VIRTUAL_QUEST_TYPE)) {
+            if (quest_type.equals(VIRTUAL_QUEST_TYPE)) {
                 if (obdaFile == null) {
                     throw new RepositoryConfigException(String.format("No OBDA file specified for repository creation " +
                             "in %s mode!", quest_type));
                 }
-                else if (!obdaFile.exists()) {
+                if (!obdaFile.exists()) {
                     throw new RepositoryConfigException(String.format("The OBDA file %s does not exist!",
                             obdaFile.getAbsolutePath()));
                 }
@@ -223,13 +223,13 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
         if (repository != null)
             return repository;
 
-        try {
-            /**
-             * Common validation.
-             * May throw a RepositoryConfigException
-             */
-            validateFields();
+        /**
+         * Common validation.
+         * May throw a RepositoryConfigException
+         */
+        validateFields();
 
+        try {
             /**
              * Creates the repository according to the Quest type.
              */
