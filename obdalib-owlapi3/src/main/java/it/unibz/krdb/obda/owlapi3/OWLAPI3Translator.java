@@ -26,8 +26,6 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.Datatype;
@@ -52,7 +50,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -87,7 +84,6 @@ import org.semanticweb.owlapi.model.OWLEquivalentObjectPropertiesAxiom;
 import org.semanticweb.owlapi.model.OWLFunctionalDataPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLFunctionalObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLInverseFunctionalObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLInverseObjectPropertiesAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;
@@ -112,11 +108,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
- * Translates an OWLOntology into ontops internal ontology representation. It
- * will ignore all ABox assertions and does a syntactic approximation of the
- * ontology, dropping anything not supported by Quest during inference.
- * 
- * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
+ * Translates an OWLOntology into ontop's internal ontology representation. It
+ * does a syntactic approximation of the ontology, dropping anything not supported 
+ * by Quest during inference.
  * 
  */
 public class OWLAPI3Translator {
@@ -150,55 +144,27 @@ public class OWLAPI3Translator {
 	 * 
 	 * @param ontologies
 	 * @return
+	 * @throws PunningException 
 	 * @throws Exception
 	 */
-	public Ontology mergeTranslateOntologies(Set<OWLOntology> ontologies) throws Exception {
+	public Ontology mergeTranslateOntologies(Set<OWLOntology> ontologies) throws PunningException  {
 		/*
-		 * We will keep track of the loaded ontologies and tranlsate the TBox
-		 * part of them into our internal represntation
+		 * We will keep track of the loaded ontologies and translate the TBox
+		 * part of them into our internal representation
 		 */
 		String uri = "http://it.unibz.krdb.obda/Quest/auxiliaryontology";
 
 		Ontology translatedOntologyMerge = ofac.createOntology(uri);
 
 		log.debug("Load ontologies called. Translating ontologies.");
-		OWLAPI3Translator translator = new OWLAPI3Translator();
-		// Set<URI> uris = new HashSet<URI>();
 
 		Ontology translation = ofac.createOntology(uri);
 		for (OWLOntology onto : ontologies) {
-			// uris.add(onto.getIRI().toURI());
-			Ontology aux = translator.translate(onto);
+			Ontology aux = translate(onto);
 			translation.merge(aux);
-/*			
-			// R: cannot just add all referenced entities
-			for (Predicate p : aux.getConcepts())
-				translation.addConcept(p);
-			for (Predicate p : aux.getRoles())
-				translation.addRole(p);
-			
-			for (SubClassOfAxiom ax : aux.getSubClassAxioms())
-				translation.addAssertionWithCheck(ax);
-			for (SubPropertyOfAxiom ax : aux.getSubPropertyAxioms())
-				translation.addAssertionWithCheck(ax);
-			// TODO: replace by proper calls, not just by modifying the internal structures
-			translation.getDisjointPropertiesAxioms().addAll(aux.getDisjointPropertiesAxioms());
-			translation.getDisjointClassesAxioms().addAll(aux.getDisjointClassesAxioms());
-			translation.getFunctionalPropertyAxioms().addAll(aux.getFunctionalPropertyAxioms());
-			translation.getClassAssertions().addAll(aux.getClassAssertions());
-			translation.getPropertyAssertions().addAll(aux.getPropertyAssertions());
-*/
 		}
-		/* we translated successfully, now we append the new assertions */
 
 		translatedOntologyMerge = translation;
-
-		// translatedOntologyMerge.addAssertions(translation.getAssertions());
-		// translatedOntologyMerge.addConcepts(new
-		// ArrayList<ClassDescription>(translation.getConcepts()));
-		// translatedOntologyMerge.addRoles(new
-		// ArrayList<Property>(translation.getRoles()));
-		// translatedOntologyMerge.saturate();
 
 		log.debug("Ontology loaded: {}", translatedOntologyMerge);
 
@@ -206,6 +172,8 @@ public class OWLAPI3Translator {
 
 	}
 
+	// USED IN OBDAModelManager
+	
 	public Predicate getPredicate(OWLEntity entity) {
 		Predicate p = null;
 		if (entity instanceof OWLClass) {
@@ -229,8 +197,6 @@ public class OWLAPI3Translator {
 	}
 
 	public Ontology translate(OWLOntology owl) throws PunningException {
-		// ManchesterOWLSyntaxOWLObjectRendererImpl rend = new
-		// ManchesterOWLSyntaxOWLObjectRendererImpl();
 
 		OWL2QLProfile owlprofile = new OWL2QLProfile();
 
@@ -250,18 +216,12 @@ public class OWLAPI3Translator {
 			} catch (Exception e) {
 
 			}
-			// log.warn(report.toString());
-			// for (OWLProfileViolation violation : report.getViolations())
-			// axiomIgnoresOWL2QL.add(violation.getAxiom());
 		}
 
-		// Ontology dl_onto =
-		// ofac.createOntology((owl.getOntologyID().getOntologyIRI().toString()));
 		Ontology dl_onto = ofac.createOntology("http://www.unibz.it/ontology");
 
 		HashSet<String> objectproperties = new HashSet<String>();
 		HashSet<String> dataproperties = new HashSet<String>();
-		//HashSet<String> classes = new HashSet<String>();
 
 		/*
 		 * First we add all definitions for classes and roles
@@ -515,19 +475,13 @@ public class OWLAPI3Translator {
 					processAxiom(dl_onto, (OWLAsymmetricObjectPropertyAxiom) axiom);
 				
 				} else if (axiom instanceof OWLClassAssertionAxiom) {
-					ClassAssertion translatedAxiom = translate((OWLClassAssertionAxiom)axiom);
-					if (translatedAxiom != null)
-						dl_onto.addAssertionWithCheck(translatedAxiom);
+					processAxiom(dl_onto, (OWLClassAssertionAxiom)axiom);
 					
 				} else if (axiom instanceof OWLObjectPropertyAssertionAxiom) {
-					PropertyAssertion translatedAxiom = translate((OWLObjectPropertyAssertionAxiom)axiom);
-					if (translatedAxiom != null)
-						dl_onto.addAssertionWithCheck(translatedAxiom);
+					processAxiom(dl_onto, (OWLObjectPropertyAssertionAxiom)axiom);
 					
 				} else if (axiom instanceof OWLDataPropertyAssertionAxiom) {
-					PropertyAssertion translatedAxiom = translate((OWLDataPropertyAssertionAxiom)axiom);
-					if (translatedAxiom != null)
-						dl_onto.addAssertionWithCheck(translatedAxiom);
+					processAxiom(dl_onto, (OWLDataPropertyAssertionAxiom)axiom);
 					
 				} else if (axiom instanceof OWLAnnotationAxiom) {
 					/*
@@ -946,110 +900,104 @@ public class OWLAPI3Translator {
 
 
 	/***
-	 * This will translate an OWLABox assertion into our own abox assertions.
-	 * The functioning is straight forward except for the equivalenceMap.
-	 * 
-	 * The equivalenceMap is used to align the ABox assertions with n
-	 * alternative vocabulary. The equivalence map relates a Class or Role with
-	 * another Class or Role (or inverse Role) that should be used instead of
-	 * the original to create the ABox assertions.
-	 * 
-	 * For example, if the equivalenceMap has the mapping hasFather ->
-	 * inverse(hasChild), then, if the ABox assertions is
-	 * "hasFather(mariano,ramon)", the translator will return
-	 * "hasChild(ramon,mariano)".
-	 * 
-	 * If there is no equivalence mapping for a given class or property, the
-	 * translation is straight forward. If the map is empty or it is null, the
-	 * translation is straight forward.
+	 * This will translate an OWLABox assertion into our own ABox assertions.
 	 * 
 	 * @param axiom
 	 * @return
 	 */
-	public ClassAssertion translate(OWLClassAssertionAxiom assertion) {
+	private void processAxiom(Ontology dl_onto, OWLClassAssertionAxiom aux) {
+		ClassAssertion a = translate(aux);
+		if (a != null)
+			dl_onto.addAssertionWithCheck(a);
+	}
+	
+	public ClassAssertion translate(OWLClassAssertionAxiom aux) {
 
-		OWLClassExpression classExpression = assertion.getClassExpression();
-		if (!(classExpression instanceof OWLClass) || classExpression.isOWLThing() || classExpression.isOWLNothing())
+		OWLClassExpression classExpression = aux.getClassExpression();
+		if (!(classExpression instanceof OWLClass))
+			throw new RuntimeException("Found complex class in assertion, this feature is not supported");
+		
+		if (classExpression.isOWLThing())
 			return null;
+		
+		if (classExpression.isOWLNothing())
+			throw new RuntimeException("Unsatisfiable class assertion: " + aux);
 
 		OWLClass namedclass = (OWLClass) classExpression;
-		OWLIndividual indv = assertion.getIndividual();
+		OWLIndividual indv = aux.getIndividual();
 
-		if (indv.isAnonymous()) {
-			throw new RuntimeException("Found anonymous individual, this feature is not supported");
-		}
+		if (indv.isAnonymous()) 
+			throw new RuntimeException("Found anonymous individual, this feature is not supported:" + aux);
 
-		Predicate classproperty = dfac.getClassPredicate((namedclass.getIRI().toString()));
+		Predicate classpred = dfac.getClassPredicate(namedclass.getIRI().toString());
+		OClass concept = ofac.createClass(classpred.getName());
+		
 		URIConstant c = dfac.getConstantURI(indv.asOWLNamedIndividual().getIRI().toString());
 
-		OClass concept = ofac.createClass(classproperty.getName());
-		return ofac.createClassAssertion(concept, c);
+		ClassAssertion assertion = ofac.createClassAssertion(concept, c);
+		return assertion;
 	}
 	
-	
-	public PropertyAssertion translate(OWLObjectPropertyAssertionAxiom assertion) {
-			OWLObjectPropertyExpression propertyExperssion = assertion.getProperty();
-
-			String property = null;
-			OWLIndividual subject = null;
-			OWLIndividual object = null;
-
-			if (propertyExperssion instanceof OWLObjectProperty) {
-				OWLObjectProperty namedclass = (OWLObjectProperty) propertyExperssion;
-				property = namedclass.getIRI().toString();
-
-				subject = assertion.getSubject();
-				object = assertion.getObject();
-
-			} else if (propertyExperssion instanceof OWLObjectInverseOf) {
-				OWLObjectProperty namedclass = ((OWLObjectInverseOf) propertyExperssion).getInverse().getNamedProperty();
-				property = namedclass.getIRI().toString();
-				subject = assertion.getObject();
-				object = assertion.getSubject();
-			}
-
-			if (subject.isAnonymous()) {
-				throw new RuntimeException("Found anonymous individual, this feature is not supported");
-			}
-
-			if (object.isAnonymous()) {
-				throw new RuntimeException("Found anonymous individual, this feature is not supported");
-			}
-			Predicate p = dfac.getObjectPropertyPredicate(property);
-			URIConstant c1 = dfac.getConstantURI(subject.asOWLNamedIndividual().getIRI().toString());
-			URIConstant c2 = dfac.getConstantURI(object.asOWLNamedIndividual().getIRI().toString());
-
-//			Description equivalent = null;
-//			if (equivalenceMap != null)
-//				equivalent = equivalenceMap.get(p);
-
-			Property prop = ofac.createObjectProperty(p.getName(), false);
-//			if (equivalent == null)
-				return ofac.createPropertyAssertion(prop, c1, c2);
-//			else {
-//				Property equiProp = (Property) equivalent;
-//				if (!equiProp.isInverse()) {
-//					return ofac.createObjectPropertyAssertion(equiProp.getPredicate(), c1, c2);
-//				} else {
-//					return ofac.createObjectPropertyAssertion(equiProp.getPredicate(), c2, c1);
-//				}
-//			}
-
+	private void processAxiom(Ontology dl_onto, OWLObjectPropertyAssertionAxiom aux) {
+		PropertyAssertion assertion = translate(aux);
+		dl_onto.addAssertionWithCheck(assertion);
 	}
 	
+	public PropertyAssertion translate(OWLObjectPropertyAssertionAxiom aux) {
+			
+		if (aux.getSubject().isAnonymous() || aux.getObject().isAnonymous()) 
+			throw new RuntimeException("Found anonymous individual, this feature is not supported");			
+
+		OWLObjectPropertyExpression propertyExperssion = aux.getProperty();
+					
+		Property prop;
+		URIConstant c1, c2;
+
+		if (propertyExperssion instanceof OWLObjectProperty) {
+			OWLObjectProperty namedclass = (OWLObjectProperty) propertyExperssion;
+			Predicate p = dfac.getObjectPropertyPredicate(namedclass.getIRI().toString());
+			prop = ofac.createObjectProperty(p.getName(), false);
+			
+			c1 = dfac.getConstantURI(aux.getSubject().asOWLNamedIndividual().getIRI().toString());
+			c2 = dfac.getConstantURI(aux.getObject().asOWLNamedIndividual().getIRI().toString());
+			
+			// TODO: check for bottom
+			
+		} else if (propertyExperssion instanceof OWLObjectInverseOf) {
+			OWLObjectProperty namedclass = ((OWLObjectInverseOf) propertyExperssion).getInverse().getNamedProperty();
+			Predicate p = dfac.getObjectPropertyPredicate(namedclass.getIRI().toString());
+			prop = ofac.createObjectProperty(p.getName(), true);
+			
+			c1 = dfac.getConstantURI(aux.getSubject().asOWLNamedIndividual().getIRI().toString());
+			c2 = dfac.getConstantURI(aux.getObject().asOWLNamedIndividual().getIRI().toString());
+
+			// TODO: check for bottom			
+		}
+		else
+			throw new RuntimeException("Found complex property expression in an asserion, this feature is not supported");
+
+		PropertyAssertion assertion = ofac.createPropertyAssertion(prop, c1, c2);
+		return assertion;
+	}
 	
-	public PropertyAssertion translate(OWLDataPropertyAssertionAxiom assertion) {
+	private void processAxiom(Ontology dl_onto, OWLDataPropertyAssertionAxiom aux) {
+		PropertyAssertion assertion = translate(aux);
+		dl_onto.addAssertionWithCheck(assertion);
+	}
+	
+	public PropertyAssertion translate(OWLDataPropertyAssertionAxiom aux) {
 		
-		OWLDataProperty propertyExperssion = (OWLDataProperty) assertion.getProperty();
+		OWLDataProperty propertyExperssion = (OWLDataProperty) aux.getProperty();
 
 		String property = propertyExperssion.getIRI().toString();
-		OWLIndividual subject = assertion.getSubject();
-		OWLLiteral object = assertion.getObject();
+		OWLIndividual subject = aux.getSubject();
+		OWLLiteral object = aux.getObject();
 
-		if (subject.isAnonymous()) {
+		if (subject.isAnonymous()) 
 			throw new RuntimeException("Found anonymous individual, this feature is not supported");
-		}
 
+		// TODO: CHECK FOR BOT AND TOP
+		
 		Predicate.COL_TYPE type;
 		try {
 			type = getColumnType(object.getDatatype());
@@ -1058,10 +1006,11 @@ public class OWLAPI3Translator {
 		}
 
 		Predicate p = dfac.getDataPropertyPredicate(property);
+		Property prop = ofac.createDataProperty(p.getName());
+		
 		URIConstant c1 = dfac.getConstantURI(subject.asOWLNamedIndividual().getIRI().toString());
 		ValueConstant c2 = dfac.getConstantLiteral(object.getLiteral(), type);
 
-		Property prop = ofac.createDataProperty(p.getName());
 		return ofac.createPropertyAssertion(prop, c1, c2);
 	}
 
