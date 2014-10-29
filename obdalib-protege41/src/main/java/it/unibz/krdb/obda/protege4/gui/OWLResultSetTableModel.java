@@ -93,9 +93,9 @@ public class OWLResultSetTableModel implements TableModel {
 				try {
 					fetchRows(fetchSizeLimit);
 				} catch (Exception e){
-					if(!stopFetching){
-						JOptionPane.showMessageDialog(
-								null,
+					if(!stopFetching){ 
+						JOptionPane.showMessageDialog(	
+								null,			
 								"Error when fetching results. Aborting. " + e.toString());
 					} 
 					e.printStackTrace();
