@@ -94,7 +94,7 @@ public class DAGConstructor {
 			}
 
 			if (nodeDesc.isInverse()) {
-				PropertyExpression posNode = descFactory.createProperty(nodeDesc.getPredicate().getName());
+				PropertyExpression posNode = nodeDesc.getInverse();
 				DAGNode newNode = roles.get(posNode);
 				if (newNode == null) {
 					newNode = new DAGNode(posNode);
@@ -118,7 +118,7 @@ public class DAGConstructor {
 					continue;
 				}
 				if (childDesc.isInverse()) {
-					PropertyExpression posChild = descFactory.createProperty(childDesc.getPredicate().getName());
+					PropertyExpression posChild = childDesc.getInverse();
 					DAGNode newChild = roles.get(posChild);
 					if (newChild == null) {
 						newChild = new DAGNode(posChild);

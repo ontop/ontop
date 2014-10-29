@@ -737,6 +737,9 @@ public class OWLAPI3Translator {
 			PropertyExpression auxRole = ofac.createObjectProperty(OntologyImpl.AUXROLEURI + auxRoleCounter);
 			auxRoleCounter += 1;
 
+			// if \exists R.C then exp = P, auxclass = \exists P, P <= R, \exists P^- <= C
+			// if \exists R^-.C then exp = P^-, auxclass = \exists P^-, P <= R, \exists P <= C
+			
 			PropertyExpression exp = ofac.createObjectProperty(auxRole.getPredicate().getName());
 			if (role.isInverse())
 				exp = exp.getInverse();
@@ -745,7 +748,7 @@ public class OWLAPI3Translator {
 			auxiliaryClassProperties.put(someexp, auxclass);
 
 			/* Creating the new subrole assertions */
-			SubPropertyOfAxiom subrole = ofac.createSubPropertyAxiom(auxRole, ofac.createProperty(role.getPredicate().getName()));
+			SubPropertyOfAxiom subrole = ofac.createSubPropertyAxiom(exp, role);
 			dl_onto.addAssertionWithCheck(subrole);
 			
 			/* Creating the range assertion */
@@ -774,15 +777,15 @@ public class OWLAPI3Translator {
 			BasicClassDescription filler = getDataTypeExpression(owlFiller);
 
 			// TODO: changed to data properties
-			PropertyExpression auxRole = ofac.createObjectProperty(OntologyImpl.AUXROLEURI + auxRoleCounter);
+			PropertyExpression auxRole = ofac.createDataProperty(OntologyImpl.AUXROLEURI + auxRoleCounter);
 			auxRoleCounter += 1;
 
-			PropertyExpression exp = ofac.createProperty(auxRole.getPredicate().getName()/*, role.isInverse()*/);
+			PropertyExpression exp = ofac.createDataProperty(auxRole.getPredicate().getName());
 			auxclass = ofac.createPropertySomeRestriction(exp);
 			auxiliaryDatatypeProperties.put(someexp, auxclass);
 
 			/* Creating the new subrole assertions */
-			SubPropertyOfAxiom subrole = ofac.createSubPropertyAxiom(auxRole, ofac.createProperty(role.getPredicate().getName()));
+			SubPropertyOfAxiom subrole = ofac.createSubPropertyAxiom(auxRole, role);
 			dl_onto.addAssertionWithCheck(subrole);
 			
 			/* Creating the range assertion */

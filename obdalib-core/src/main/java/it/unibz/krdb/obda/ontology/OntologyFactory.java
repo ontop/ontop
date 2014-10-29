@@ -32,7 +32,7 @@ public interface OntologyFactory {
 
 	public Datatype createDataType(Predicate p);
 	
-	@Deprecated // generic property is to be eliminated
+	@Deprecated // generic property is to be eliminated (used in SemIndex and YAGO)
 	public PropertyExpression createProperty(String uri);
 
 	public PropertyExpression createObjectProperty(String uri);
