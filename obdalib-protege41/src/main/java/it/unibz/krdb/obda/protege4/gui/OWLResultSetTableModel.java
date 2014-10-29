@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.protege4.gui;
 
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 
 import java.util.Iterator;
 import java.util.List;

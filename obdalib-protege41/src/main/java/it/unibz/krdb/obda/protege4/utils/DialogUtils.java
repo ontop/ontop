@@ -28,7 +28,6 @@ import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.HeadlessException;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -95,7 +94,6 @@ public class DialogUtils {
 
 		// pass the scrollpane to the joptionpane.
 		JOptionPane.showMessageDialog(parent, scrollPane, message, JOptionPane.ERROR_MESSAGE);
-		
 	}
 
 	public static void centerDialogWRTParent(Component parent, Component dialog) {
