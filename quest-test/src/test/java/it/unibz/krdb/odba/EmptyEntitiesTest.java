@@ -236,7 +236,7 @@ public class EmptyEntitiesTest {
 	@Test
 	public void testEmptyConcepts() throws Exception {
 		int c = 0; // number of empty concepts
-		for (OClass cl : onto.getConcepts()) {
+		for (OClass cl : onto.getClasses()) {
 			Predicate concept = cl.getPredicate();
 			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
 				emptyConcepts.add(concept.getName());
@@ -275,7 +275,7 @@ public class EmptyEntitiesTest {
 	public void testEmpties() throws Exception {
 
 		int c = 0; // number of empty concepts
-		for (OClass cl : onto.getConcepts()) {
+		for (OClass cl : onto.getClasses()) {
 			Predicate concept = cl.getPredicate();
 			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
 				emptyConcepts.add(concept.getName());

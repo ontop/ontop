@@ -54,17 +54,16 @@ public interface Ontology extends Cloneable, Serializable {
 	@Deprecated
 	public void addAssertionWithCheck(PropertyAssertion assertion);
 
-	@Deprecated
-	public void addConcept(OClass c);
 
-	@Deprecated
+	public void addClass(OClass c);
+
 	public void addRole(PropertyExpression role);
 
 	
 	
 	public Set<PropertyExpression> getRoles();
 
-	public Set<OClass> getConcepts();
+	public Set<OClass> getClasses();
 	
 	
 	

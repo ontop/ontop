@@ -112,7 +112,7 @@ public class OntologyImpl implements Ontology {
 	
 	private void addReferencedEntries(BasicClassDescription desc) {
 		if (desc instanceof OClass) 
-			addConcept((OClass) desc);
+			addClass((OClass) desc);
 		else if (desc instanceof SomeValuesFrom) 
 			addRole(((SomeValuesFrom) desc).getProperty());
 		else if (desc instanceof Datatype) 
@@ -307,7 +307,7 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public void addConcept(OClass cd) {
+	public void addClass(OClass cd) {
 		concepts.add(cd);
 	}
 
@@ -320,7 +320,7 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public Set<OClass> getConcepts() {
+	public Set<OClass> getClasses() {
 		return concepts;
 	}
 
@@ -331,7 +331,7 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void merge(Ontology onto) {
-		concepts.addAll(onto.getConcepts());
+		concepts.addAll(onto.getClasses());
 		roles.addAll(onto.getRoles());
 		
 		subClassAxioms.addAll(onto.getSubClassAxioms());

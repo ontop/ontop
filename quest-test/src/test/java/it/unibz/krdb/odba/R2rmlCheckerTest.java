@@ -149,7 +149,7 @@ public class R2rmlCheckerTest {
 
 		// Now we are ready for querying
 		log.debug("Comparing concepts");
-		for (OClass cl : onto.getConcepts()) {
+		for (OClass cl : onto.getClasses()) {
 			Predicate concept = cl.getPredicate();
 					
 			int conceptOBDA = runSPARQLConceptsQuery("<" + concept.getName()

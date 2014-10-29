@@ -237,7 +237,7 @@ public class OWLAPI3Translator {
 			 */
 
 			if (p.isClass()) {
-				dl_onto.addConcept(ofac.createClass(p.getName()));
+				dl_onto.addClass(ofac.createClass(p.getName()));
 
 			} else {
 				if (p.isObjectProperty()) {
@@ -490,7 +490,7 @@ public class OWLAPI3Translator {
 						if (!entity.asOWLClass().isOWLThing()) {
 
 							String uri = entity.asOWLClass().getIRI().toString();
-							dl_onto.addConcept(ofac.createClass(uri));
+							dl_onto.addClass(ofac.createClass(uri));
 						}
 					} else if (entity instanceof OWLObjectProperty) {
 						String uri = entity.asOWLObjectProperty().getIRI().toString();

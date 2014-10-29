@@ -81,7 +81,7 @@ public class DAG implements Serializable {
 
 		int rolenodes = ontology.getRoles().size() * 2;
 
-		int classnodes = ontology.getConcepts().size() + rolenodes * 2;
+		int classnodes = ontology.getClasses().size() + rolenodes * 2;
 
 		classes = new LinkedHashMap<Description, DAGNode>(classnodes * 2);
 		roles = new LinkedHashMap<Description, DAGNode>(rolenodes * 2);
@@ -90,7 +90,7 @@ public class DAG implements Serializable {
 
 		// classes.put(thingConcept, thing);
 
-		for (BasicClassDescription concept : ontology.getConcepts()) {
+		for (BasicClassDescription concept : ontology.getClasses()) {
 			DAGNode node = new DAGNode(concept);
 
 			// if (!concept.equals(thingConcept)) {

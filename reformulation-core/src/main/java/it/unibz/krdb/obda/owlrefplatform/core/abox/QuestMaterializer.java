@@ -118,21 +118,24 @@ public class QuestMaterializer {
 		
 		//add all class/data/object predicates to vocabulary
 		//add declared predicates in model
-		for (Predicate p: model.getDeclaredClasses()) {
+		for (OClass cl : model.getDeclaredClasses()) {
+			Predicate p = cl.getPredicate();
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);
 		}
-		for (Predicate p: model.getDeclaredObjectProperties()) {
+		for (PropertyExpression prop : model.getDeclaredObjectProperties()) {
+			Predicate p = prop.getPredicate();
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);
 		}
-		for (Predicate p: model.getDeclaredDataProperties()) {
+		for (PropertyExpression prop : model.getDeclaredDataProperties()) {
+			Predicate p = prop.getPredicate();
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);
 		}
 		if (onto != null) {
 			//from ontology
-			for (OClass cl : onto.getConcepts()) {
+			for (OClass cl : onto.getClasses()) {
 				Predicate p = cl.getPredicate(); 
 				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 						&& !vocabulary.contains(p))
@@ -167,18 +170,14 @@ public class QuestMaterializer {
 		if (ontology == null) {
 			ontology = ofac.createOntology();
 			
-			for (Predicate pred : model.getDeclaredClasses()) {
-				ontology.addConcept(ofac.createClass(pred.getName()));				
-			}
+			for (OClass pred : model.getDeclaredClasses()) 
+				ontology.addClass(pred);				
 			
-			for (Predicate pred : model.getDeclaredObjectProperties()) {
-				ontology.addRole(ofac.createObjectProperty(pred.getName()));
-			}
+			for (PropertyExpression prop : model.getDeclaredObjectProperties()) 
+				ontology.addRole(prop);
 
-			for (Predicate pred : model.getDeclaredDataProperties()) {
-				ontology.addRole(ofac.createDataProperty(pred.getName()));
-			}
-						
+			for (PropertyExpression prop : model.getDeclaredDataProperties()) 
+				ontology.addRole(prop);
 		}
 		
 		

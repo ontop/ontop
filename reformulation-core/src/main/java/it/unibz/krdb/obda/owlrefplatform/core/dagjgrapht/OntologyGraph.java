@@ -104,7 +104,7 @@ public class OntologyGraph {
 		DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph 
 									= new  DefaultDirectedGraph<BasicClassDescription,DefaultEdge>(DefaultEdge.class);
 		
-		for (OClass concept : ontology.getConcepts()) {
+		for (OClass concept : ontology.getClasses()) {
 		//	BasicClassDescription concept = fac.createClass(conceptp.getName()); // TODO: careful with datatypes
 			classGraph.addVertex(concept);
 		}

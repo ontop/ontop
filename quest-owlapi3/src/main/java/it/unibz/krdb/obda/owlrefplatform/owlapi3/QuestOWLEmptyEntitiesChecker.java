@@ -119,7 +119,7 @@ public class QuestOWLEmptyEntitiesChecker {
 
 	private void runQueries() throws Exception {
 
-		for (OClass cl : onto.getConcepts()) {
+		for (OClass cl : onto.getClasses()) {
 			Predicate concept = cl.getPredicate();
 			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
 				emptyConcepts.add(concept);

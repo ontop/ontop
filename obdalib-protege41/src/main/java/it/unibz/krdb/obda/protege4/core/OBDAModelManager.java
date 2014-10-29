@@ -32,6 +32,10 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OBDAModelValidator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -102,6 +106,7 @@ public class OBDAModelManager implements Disposable {
 	private JDBCConnectionManager connectionManager = JDBCConnectionManager.getJDBCConnectionManager();
 
 	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	private boolean applyUserConstraints = false;
 	private ImplicitDBConstraints userConstraints;
@@ -200,15 +205,15 @@ public class OBDAModelManager implements Disposable {
 						OBDAModel activeOBDAModel = getActiveOBDAModel();
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
-							Predicate c = dfac.getClassPredicate(oc.getIRI().toString());
+							OClass c = ofac.createClass(oc.getIRI().toString());
 							activeOBDAModel.declareClass(c);
 						} else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
-							Predicate r = dfac.getObjectPropertyPredicate(or.getIRI().toString());
+							PropertyExpression r = ofac.createObjectProperty(or.getIRI().toString());
 							activeOBDAModel.declareObjectProperty(r);
 						} else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
-							Predicate p = dfac.getDataPropertyPredicate(op.getIRI().toString());
+							PropertyExpression p = ofac.createDataProperty(op.getIRI().toString());
 							activeOBDAModel.declareDataProperty(p);
 						}
 					}
@@ -220,15 +225,15 @@ public class OBDAModelManager implements Disposable {
 						OBDAModel activeOBDAModel = getActiveOBDAModel();
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
-							Predicate c = dfac.getClassPredicate(oc.getIRI().toString());
+							OClass c = ofac.createClass(oc.getIRI().toString());
 							activeOBDAModel.unDeclareClass(c);
 						} else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
-							Predicate r = dfac.getObjectPropertyPredicate(or.getIRI().toString());
+							PropertyExpression r = ofac.createObjectProperty(or.getIRI().toString());
 							activeOBDAModel.unDeclareObjectProperty(r);
 						} else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
-							Predicate p = dfac.getDataPropertyPredicate(op.getIRI().toString());
+							PropertyExpression p = ofac.createDataProperty(op.getIRI().toString());
 							activeOBDAModel.unDeclareDataProperty(p);
 						}
 					}
@@ -336,15 +341,15 @@ public class OBDAModelManager implements Disposable {
 		for (OWLOntology ontology : ontologies) {
 			// Setup the entity declarations
 			for (OWLClass c : ontology.getClassesInSignature()) {
-				Predicate pred = dfac.getClassPredicate(c.getIRI().toString());
+				OClass pred = ofac.createClass(c.getIRI().toString());
 				activeOBDAModel.declareClass(pred);
 			}
 			for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature()) {
-				Predicate pred = dfac.getObjectPropertyPredicate(r.getIRI().toString());
+				PropertyExpression pred = ofac.createObjectProperty(r.getIRI().toString());
 				activeOBDAModel.declareObjectProperty(pred);
 			}
 			for (OWLDataProperty p : ontology.getDataPropertiesInSignature()) {
-				Predicate pred = dfac.getDataPropertyPredicate(p.getIRI().toString());
+				PropertyExpression pred = ofac.createDataProperty(p.getIRI().toString());
 				activeOBDAModel.declareDataProperty(pred);
 			}
 		}

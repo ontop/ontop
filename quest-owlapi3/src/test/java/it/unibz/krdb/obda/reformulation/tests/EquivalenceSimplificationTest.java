@@ -62,7 +62,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
 		Ontology simpleonto = TBoxReasonerToOntology.getOntology(simple);
 
-		assertEquals(3, simpleonto.getConcepts().size());
+		assertEquals(3, simpleonto.getClasses().size());
 		assertEquals(0, simpleonto.getRoles().size());
 		System.out.println(simpleonto.getSubClassAxioms());
 		System.out.println(simpleonto.getSubPropertyAxioms());
@@ -112,7 +112,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
 		Ontology simpleonto = TBoxReasonerToOntology.getOntology(simple);
 
-		assertEquals(0, simpleonto.getConcepts().size());
+		assertEquals(0, simpleonto.getClasses().size());
 		assertEquals(3, simpleonto.getRoles().size());
 		assertEquals(12,  simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
 //		assertEquals(3, simpleonto.getVocabulary().size());
@@ -159,9 +159,9 @@ public class EquivalenceSimplificationTest extends TestCase {
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
 		Ontology simpleonto = TBoxReasonerToOntology.getOntology(simple);
 
-		assertEquals(simpleonto.getConcepts().toString(), 3, simpleonto.getConcepts().size());
+		assertEquals(simpleonto.getClasses().toString(), 3, simpleonto.getClasses().size());
 		assertEquals(3, simpleonto.getRoles().size());
-		assertEquals(3, simpleonto.getConcepts().size());
+		assertEquals(3, simpleonto.getClasses().size());
 		assertEquals(9,  simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
 //		assertEquals(6, simpleonto.getVocabulary().size());
 
@@ -205,7 +205,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		Ontology simpleonto = TBoxReasonerToOntology.getOntology(simple);
 
 		assertEquals(12,  simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
-		assertEquals(0, simpleonto.getConcepts().size());
+		assertEquals(0, simpleonto.getClasses().size());
 		assertEquals(3, simpleonto.getRoles().size());
 //		assertEquals(3, simpleonto.getVocabulary().size());
 
