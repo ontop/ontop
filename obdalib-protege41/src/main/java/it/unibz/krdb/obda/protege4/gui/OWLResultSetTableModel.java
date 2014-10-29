@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.protege4.gui;
 
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
+import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 
 import java.util.Iterator;
 import java.util.List;
@@ -93,9 +94,9 @@ public class OWLResultSetTableModel implements TableModel {
 				try {
 					fetchRows(fetchSizeLimit);
 				} catch (Exception e){
-					if(!stopFetching){
-						JOptionPane.showMessageDialog(
-								null,
+					if(!stopFetching){ 
+						JOptionPane.showMessageDialog(	
+								null,			
 								"Error when fetching results. Aborting. " + e.toString());
 					} 
 					e.printStackTrace();
