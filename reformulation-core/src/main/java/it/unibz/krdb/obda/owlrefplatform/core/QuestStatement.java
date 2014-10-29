@@ -1116,7 +1116,11 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 	public int getUCQSizeAfterRewriting() {
-		return programAfterRewriting.getRules().size();
+		int result = 0;
+		if( programAfterRewriting.getRules() != null )
+			result = programAfterRewriting.getRules().size();
+		
+		return result;
 	}
 
 	public int getMinQuerySizeAfterRewriting() {
@@ -1144,7 +1148,11 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 	public int getUCQSizeAfterUnfolding() {
-		return programAfterUnfolding.getRules().size();
+		int result = 0;
+		if( programAfterUnfolding.getRules() != null )
+			result = programAfterUnfolding.getRules().size();
+		
+		return result;
 	}
 
 	public int getMinQuerySizeAfterUnfolding() {

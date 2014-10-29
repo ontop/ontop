@@ -470,4 +470,21 @@ public class QuestOWLStatement {
 		st.analyze();
 
 	}
+	
+	// Davide> Benchmarking
+	public long getUnfoldingTime(){
+		return st.getUnfoldingTime();
+	}
+
+	public long getRewritingTime(){
+		return st.getRewritingTime();
+	}
+
+	public int getUCQSizeAfterUnfolding(){
+		return st.getUCQSizeAfterUnfolding();
+	}
+
+	public int getUCQSizeAfterRewriting(){
+		return st.getUCQSizeAfterRewriting();
+	}
 }
