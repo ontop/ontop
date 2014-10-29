@@ -491,6 +491,7 @@ public class OBDAModelImpl implements OBDAModel {
 		mappings.clear();
 	}
 
+/*	
 	@Override
 	public Set<Predicate> getDeclaredPredicates() {
 		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
@@ -500,6 +501,7 @@ public class OBDAModelImpl implements OBDAModel {
 		result.addAll(declaredPredicates);
 		return result;
 	}
+*/
 
 	@Override
 	public Set<Predicate> getDeclaredClasses() {
@@ -521,7 +523,7 @@ public class OBDAModelImpl implements OBDAModel {
 		result.addAll(declaredDataProperties);
 		return result;
 	}
-
+/*
 	@Override
 	public boolean declarePredicate(Predicate predicate) {
 		if (predicate.isClass()) {
@@ -534,7 +536,8 @@ public class OBDAModelImpl implements OBDAModel {
 			return declaredPredicates.add(predicate);
 		}
 	}
-
+*/
+	
 	@Override
 	public boolean declareClass(Predicate classname) {
 		if (!classname.isClass()) {
@@ -558,12 +561,12 @@ public class OBDAModelImpl implements OBDAModel {
 		}
 		return declaredDataProperties.add(property);
 	}
-
+/*
 	@Override
 	public boolean unDeclarePredicate(Predicate predicate) {
 		return declaredPredicates.remove(predicate);
 	}
-
+*/
 	@Override
 	public boolean unDeclareClass(Predicate classname) {
 		return declaredClasses.remove(classname);
@@ -594,8 +597,10 @@ public class OBDAModelImpl implements OBDAModel {
 		return declaredDataProperties.contains(property);
 	}
 
+/*
 	@Override
 	public boolean isDeclared(Predicate predicate) {
 		return (isDeclaredClass(predicate) || isDeclaredObjectProperty(predicate) || isDeclaredDataProperty(predicate) || declaredPredicates.contains(predicate));
 	}
+*/	
 }

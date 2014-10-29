@@ -21,7 +21,9 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 
@@ -117,14 +119,16 @@ public class QuestOWLEmptyEntitiesChecker {
 
 	private void runQueries() throws Exception {
 
-		for (Predicate concept : onto.getConcepts()) {
+		for (OClass cl : onto.getConcepts()) {
+			Predicate concept = cl.getPredicate();
 			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
 				emptyConcepts.add(concept);
 			}
 		}
 		log.debug(emptyConcepts.size() + " Empty concept/s: " + emptyConcepts);
 
-		for (Predicate role : onto.getRoles()) {
+		for (PropertyExpression prop : onto.getRoles()) {
+			Predicate role = prop.getPredicate();
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
 				emptyRoles.add(role);
 			}

@@ -237,22 +237,22 @@ public class OWLAPI3Translator {
 			 */
 
 			if (p.isClass()) {
-				dl_onto.addConcept(p);
+				dl_onto.addConcept(ofac.createClass(p.getName()));
 
 			} else {
 				if (p.isObjectProperty()) {
-					if (dataproperties.contains(p.getName().toString())) {
-						punnedPredicates.add(p.getName().toString());
+					if (dataproperties.contains(p.getName())) {
+						punnedPredicates.add(p.getName());
 					} else {
-						objectproperties.add(p.getName().toString());
-						dl_onto.addRole(p);
+						objectproperties.add(p.getName());
+						dl_onto.addRole(ofac.createObjectProperty(p.getName()));
 					}
 				} else {
-					if (objectproperties.contains(p.getName().toString())) {
+					if (objectproperties.contains(p.getName())) {
 						punnedPredicates.add(p.getName().toString());
 					} else {
-						dataproperties.add(p.getName().toString());
-						dl_onto.addRole(p);
+						dataproperties.add(p.getName());
+						dl_onto.addRole(ofac.createDataProperty(p.getName()));
 					}
 				}
 			}
@@ -490,14 +490,14 @@ public class OWLAPI3Translator {
 						if (!entity.asOWLClass().isOWLThing()) {
 
 							String uri = entity.asOWLClass().getIRI().toString();
-							dl_onto.addConcept(dfac.getClassPredicate(uri));
+							dl_onto.addConcept(ofac.createClass(uri));
 						}
 					} else if (entity instanceof OWLObjectProperty) {
 						String uri = entity.asOWLObjectProperty().getIRI().toString();
-						dl_onto.addRole(dfac.getObjectPropertyPredicate(uri));
+						dl_onto.addRole(ofac.createObjectProperty(uri));
 					} else if (entity instanceof OWLDataProperty) {
 						String uri = entity.asOWLDataProperty().getIRI().toString();
-						dl_onto.addRole(dfac.getDataPropertyPredicate(uri));
+						dl_onto.addRole(ofac.createDataProperty(uri));
 					} else if (entity instanceof OWLIndividual) {
 						/*
 						 * NO OP, individual declarations are ignored silently

@@ -233,7 +233,7 @@ public class DirectMappingEngine {
 				CQIE rule = (CQIE) q;
 				for (Function f : rule.getBody()) {
 					if (f.getArity() == 1)
-						model.declarePredicate(f.getFunctionSymbol());
+						model.declareClass(f.getFunctionSymbol());
 					else if (f.getFunctionSymbol().getType(1)
 							.equals(COL_TYPE.OBJECT))
 						model.declareObjectProperty(f.getFunctionSymbol());

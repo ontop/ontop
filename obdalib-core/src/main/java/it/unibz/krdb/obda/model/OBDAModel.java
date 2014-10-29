@@ -191,23 +191,17 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	public void reset();
 
-	public Set<Predicate> getDeclaredPredicates();
-
 	public Set<Predicate> getDeclaredClasses();
 
 	public Set<Predicate> getDeclaredObjectProperties();
 
 	public Set<Predicate> getDeclaredDataProperties();
 
-	public boolean declarePredicate(Predicate predicate);
-
 	public boolean declareClass(Predicate classname);
 
 	public boolean declareObjectProperty(Predicate property);
 
 	public boolean declareDataProperty(Predicate property);
-
-	public boolean unDeclarePredicate(Predicate predicate);
 
 	public boolean unDeclareClass(Predicate classname);
 
@@ -220,7 +214,5 @@ public interface OBDAModel extends Cloneable, Serializable {
 	public boolean isDeclaredObjectProperty(Predicate property);
 
 	public boolean isDeclaredDataProperty(Predicate property);
-
-	public boolean isDeclared(Predicate predicate);
 
 }

@@ -29,8 +29,10 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ResultSet;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
@@ -116,18 +118,28 @@ public class QuestMaterializer {
 		
 		//add all class/data/object predicates to vocabulary
 		//add declared predicates in model
-		for (Predicate p: this.model.getDeclaredPredicates()) {
+		for (Predicate p: model.getDeclaredClasses()) {
+			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+				vocabulary.add(p);
+		}
+		for (Predicate p: model.getDeclaredObjectProperties()) {
+			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+				vocabulary.add(p);
+		}
+		for (Predicate p: model.getDeclaredDataProperties()) {
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);
 		}
 		if (onto != null) {
 			//from ontology
-			for (Predicate p : onto.getConcepts()) {
+			for (OClass cl : onto.getConcepts()) {
+				Predicate p = cl.getPredicate(); 
 				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 						&& !vocabulary.contains(p))
 					vocabulary.add(p);
 			}
-			for (Predicate p : onto.getRoles()) {
+			for (PropertyExpression role : onto.getRoles()) {
+				Predicate p = role.getPredicate();
 				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 						&& !vocabulary.contains(p))
 					vocabulary.add(p);
@@ -155,14 +167,18 @@ public class QuestMaterializer {
 		if (ontology == null) {
 			ontology = ofac.createOntology();
 			
-			for (Predicate pred : model.getDeclaredPredicates()) {
-				if (pred.getArity() == 1) {
-					ontology.addConcept(pred);
-				} else {
-					ontology.addRole(pred);
-				}
+			for (Predicate pred : model.getDeclaredClasses()) {
+				ontology.addConcept(ofac.createClass(pred.getName()));				
 			}
 			
+			for (Predicate pred : model.getDeclaredObjectProperties()) {
+				ontology.addRole(ofac.createObjectProperty(pred.getName()));
+			}
+
+			for (Predicate pred : model.getDeclaredDataProperties()) {
+				ontology.addRole(ofac.createDataProperty(pred.getName()));
+			}
+						
 		}
 		
 		

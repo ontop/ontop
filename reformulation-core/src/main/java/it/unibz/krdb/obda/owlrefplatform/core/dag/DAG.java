@@ -90,8 +90,7 @@ public class DAG implements Serializable {
 
 		// classes.put(thingConcept, thing);
 
-		for (Predicate conceptp : ontology.getConcepts()) {
-			BasicClassDescription concept = descFactory.createClass(conceptp.getName());
+		for (BasicClassDescription concept : ontology.getConcepts()) {
 			DAGNode node = new DAGNode(concept);
 
 			// if (!concept.equals(thingConcept)) {
@@ -104,8 +103,7 @@ public class DAG implements Serializable {
 		/*
 		 * For each role we add nodes for its inverse, its domain and its range
 		 */
-		for (Predicate rolep : ontology.getRoles()) {
-			PropertyExpression role = descFactory.createObjectProperty(rolep.getName());
+		for (PropertyExpression role : ontology.getRoles()) {
 			DAGNode rolenode = new DAGNode(role);
 
 			roles.put(role, rolenode);

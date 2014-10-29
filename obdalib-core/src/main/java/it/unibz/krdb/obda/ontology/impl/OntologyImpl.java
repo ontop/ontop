@@ -47,9 +47,11 @@ public class OntologyImpl implements Ontology {
 
 	// signature
 	
-	private final Set<Predicate> concepts = new HashSet<Predicate>();
+	private final Set<OClass> concepts = new HashSet<OClass>();
 
-	private final Set<Predicate> roles = new HashSet<Predicate>();
+	private final Set<Datatype> datatypes = new HashSet<Datatype>();
+	
+	private final Set<PropertyExpression> roles = new HashSet<PropertyExpression>();
 	
 	// axioms and assertions
 
@@ -110,18 +112,20 @@ public class OntologyImpl implements Ontology {
 	
 	private void addReferencedEntries(BasicClassDescription desc) {
 		if (desc instanceof OClass) 
-			addConcept(((OClass) desc).getPredicate());
+			addConcept((OClass) desc);
 		else if (desc instanceof SomeValuesFrom) 
-			addRole(((SomeValuesFrom) desc).getProperty().getPredicate());
+			addRole(((SomeValuesFrom) desc).getProperty());
 		else if (desc instanceof Datatype) 
-			addConcept(((Datatype) desc).getPredicate());
+			datatypes.add((Datatype) desc);
 		else 
 			throw new UnsupportedOperationException("Cant understand: " + desc.toString());
 	}
 	
 	private void addReferencedEntries(PropertyExpression prop) {
-		Predicate pred = prop.getPredicate();
-		addRole(pred);
+		if (prop.isInverse())
+			addRole(prop.getInverse());
+		else
+			addRole(prop);
 	}
 	
 	@Override
@@ -176,20 +180,19 @@ public class OntologyImpl implements Ontology {
 	private void checkSignature(BasicClassDescription desc) {
 		
 		if (desc instanceof OClass) {
-			Predicate pred = ((OClass) desc).getPredicate();
-			if (!concepts.contains(pred))
-				throw new IllegalArgumentException("Class predicate is unknown: " + pred.toString());
+			if (!concepts.contains((OClass) desc))
+				throw new IllegalArgumentException("Class predicate is unknown: " + desc);
 		}	
 		else if (desc instanceof Datatype) {
 			Predicate pred = ((Datatype) desc).getPredicate();
 			if (!builtinDatatypes.contains(pred)) 
-				throw new IllegalArgumentException("Datatype predicate is unknown: " + pred.toString());
+				throw new IllegalArgumentException("Datatype predicate is unknown: " + pred);
 		}
 		else if (desc instanceof SomeValuesFrom) {
 			checkSignature(((SomeValuesFrom) desc).getProperty());
 		}
 		else 
-			throw new UnsupportedOperationException("Cant understand: " + desc.toString());
+			throw new UnsupportedOperationException("Cant understand: " + desc);
 	}
 
 	private void checkSignature(PropertyExpression prop) {
@@ -198,8 +201,14 @@ public class OntologyImpl implements Ontology {
 		if (prop.getPredicate().toString().contains(AUXROLEURI)) 
 			return;
 
-		if (!roles.contains(prop.getPredicate())) 
-			throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop.toString());
+		if (prop.isInverse()) {
+			if (!roles.contains(prop.getInverse())) 
+				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop.toString());
+		}
+		else {
+			if (!roles.contains(prop)) 
+				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop.toString());			
+		}
 	}
 	
 	
@@ -298,22 +307,25 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public void addConcept(Predicate cd) {
+	public void addConcept(OClass cd) {
 		concepts.add(cd);
 	}
 
 	@Override
-	public void addRole(Predicate rd) {
-		roles.add(rd);
+	public void addRole(PropertyExpression rd) {
+		if (rd.isInverse())
+			roles.add(rd.getInverse());
+		else
+			roles.add(rd);
 	}
 
 	@Override
-	public Set<Predicate> getConcepts() {
+	public Set<OClass> getConcepts() {
 		return concepts;
 	}
 
 	@Override
-	public Set<Predicate> getRoles() {
+	public Set<PropertyExpression> getRoles() {
 		return roles;
 	}
 

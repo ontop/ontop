@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
@@ -53,8 +54,7 @@ public class OntologyGraph {
 		DefaultDirectedGraph<PropertyExpression,DefaultEdge> graph 
 							= new  DefaultDirectedGraph<PropertyExpression,DefaultEdge>(DefaultEdge.class);
 				
-		for (Predicate rolep : ontology.getRoles()) {
-			PropertyExpression role = fac.createProperty(rolep.getName());
+		for (PropertyExpression role : ontology.getRoles()) {
 			graph.addVertex(role);
 			PropertyExpression roleInv = role.getInverse();
 			graph.addVertex(roleInv);
@@ -104,8 +104,8 @@ public class OntologyGraph {
 		DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph 
 									= new  DefaultDirectedGraph<BasicClassDescription,DefaultEdge>(DefaultEdge.class);
 		
-		for (Predicate conceptp : ontology.getConcepts()) {
-			BasicClassDescription concept = fac.createClass(conceptp.getName()); // TODO: careful with datatypes
+		for (OClass concept : ontology.getConcepts()) {
+		//	BasicClassDescription concept = fac.createClass(conceptp.getName()); // TODO: careful with datatypes
 			classGraph.addVertex(concept);
 		}
 

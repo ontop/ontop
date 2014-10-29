@@ -28,7 +28,9 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -147,8 +149,9 @@ public class R2rmlCheckerTest {
 
 		// Now we are ready for querying
 		log.debug("Comparing concepts");
-		for (Predicate concept : onto.getConcepts()) {
-
+		for (OClass cl : onto.getConcepts()) {
+			Predicate concept = cl.getPredicate();
+					
 			int conceptOBDA = runSPARQLConceptsQuery("<" + concept.getName()
 					+ ">", reasonerOBDA.getConnection());
 			int conceptR2rml = runSPARQLConceptsQuery("<" + concept.getName()
@@ -158,8 +161,9 @@ public class R2rmlCheckerTest {
 		}
 
 		log.debug("Comparing roles");
-		for (Predicate role : onto.getRoles()) {
-
+		for (PropertyExpression prop : onto.getRoles()) {
+			Predicate role = prop.getPredicate();
+			
 			log.debug("description " + role);
 			int roleOBDA = runSPARQLRolesQuery("<" + role.getName() + ">",
 					reasonerOBDA.getConnection());

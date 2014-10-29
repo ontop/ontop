@@ -20,8 +20,6 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
-
 import java.io.Serializable;
 import java.util.Set;
 
@@ -57,16 +55,18 @@ public interface Ontology extends Cloneable, Serializable {
 	public void addAssertionWithCheck(PropertyAssertion assertion);
 
 	@Deprecated
-	public void addConcept(Predicate c);
+	public void addConcept(OClass c);
 
 	@Deprecated
-	public void addRole(Predicate role);
+	public void addRole(PropertyExpression role);
 
 	
 	
-	public Set<Predicate> getRoles();
+	public Set<PropertyExpression> getRoles();
 
-	public Set<Predicate> getConcepts();
+	public Set<OClass> getConcepts();
+	
+	
 	
 	public void merge(Ontology onto);
 	
