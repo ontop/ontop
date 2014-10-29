@@ -90,6 +90,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String SUBSTRACT_OPERATOR = "%s - %s";
 	private static final String MULTIPLY_OPERATOR = "%s * %s";
 	
+	
 	private static final String LIKE_OPERATOR = "%s LIKE %s";
 
 	private static final String INDENT = "    ";
@@ -266,7 +267,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		while (queryStringIterator.hasNext()) {
 			result.append("\n");
 			result.append(UNION);
-			result.append("\n\n");
+			result.append("\n");
 			result.append(queryStringIterator.next());
 		}
 
@@ -892,11 +893,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 			/*
 			 * Adding the ColType column to the projection (used in the result
 			 * set to know the type of constant)
+			 * 
+			 * NOTE NULL is IDENTIFIER 0 in QuestResultSet do not USE for any 
+			 * type
 			 */
-			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN.getName().toString())) {
+			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
 				return (String.format(typeStr, 9, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
 				return (String.format(typeStr, 8, signature.get(hpos)));
+			} else if (functionString.equals(OBDAVocabulary.XSD_DATE_URI)) {
+				return (String.format(typeStr, 10, signature.get(hpos)));
+			} else if (functionString.equals(OBDAVocabulary.XSD_TIME_URI)) {
+				return (String.format(typeStr, 11, signature.get(hpos)));
+			} else if (functionString.equals(OBDAVocabulary.XSD_YEAR_URI)) {
+				return (String.format(typeStr, 12, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
 				return (String.format(typeStr, 5, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
@@ -1237,7 +1247,30 @@ public class SQLGenerator implements SQLQueryGenerator {
 					return result;
 				}
 			} else {
-				throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
+				if (functionSymbol == OBDAVocabulary.SPARQL_REGEX) {
+					boolean caseinSensitive = false;
+					boolean multiLine = false;
+					boolean dotAllMode = false;
+					if (function.getArity() == 3) {
+						if (function.getTerm(2).toString().contains("i")) {
+							caseinSensitive = true;
+						}
+						if (function.getTerm(2).toString().contains("m")) {
+							multiLine = true;
+						}
+						if (function.getTerm(2).toString().contains("s")) {
+							dotAllMode = true;
+						}
+					}
+					Term p1 = function.getTerm(0);
+					Term p2 = function.getTerm(1);
+					
+					String column = getSQLString(p1, index, false);
+					String pattern = getSQLString(p2, index, false);
+					return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
+				}
+				else
+					throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
 			}
 			
 		} else if (functionSymbol instanceof NumericalOperationPredicate) {
@@ -1339,7 +1372,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = IS_TRUE_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_LIKE)) {
 			operator = LIKE_OPERATOR;
-		} else {
+		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_REGEX)) {
+			operator = ""; //we do not need the operator for regex, it should not be used, because the sql adapter will take care of this
+		} 
+		else {
 			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);
 		}
 		return operator;

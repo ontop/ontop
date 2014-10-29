@@ -29,3 +29,6 @@ tmp.*
 
 # Ontop specific
 plugin-runtime
+
+ontop-optique-test
+tmp

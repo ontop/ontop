@@ -47,7 +47,7 @@ public class QuestConnection implements OBDAConnection {
 		this.conn = connection;
 		isClosed = false;
 	}
-
+	
 	@Override
 	public void close() throws OBDAException {
 		try {

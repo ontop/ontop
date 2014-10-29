@@ -115,6 +115,7 @@ public class R2RMLParser {
 
 	/**
 	 * Get classes
+     * They can be retrieved only once, after retrieving everything is cleared.
 	 * @return
 	 */
 	public List<Predicate> getClassPredicates() {
@@ -148,6 +149,7 @@ public class R2RMLParser {
 	
 	/**
 	 * Get subject
+     *
 	 * @param tm
 	 * @param joinCond
 	 * @return
@@ -157,6 +159,7 @@ public class R2RMLParser {
 			throws Exception {
 		Term subjectAtom = null;
 		String subj = "";
+        classPredicates.clear();
 
 		// SUBJECT
 		SubjectMap sMap = tm.getSubjectMap();
@@ -277,7 +280,7 @@ public class R2RMLParser {
 	}
 
 	/**
-	 * Get the object atom
+	 * Get the object atom, it can be a constant, a column or a template
 	 * @param pom
 	 * @param joinCond
 	 * @return
@@ -290,50 +293,98 @@ public class R2RMLParser {
 			return null;
 		}
 		ObjectMap om = pom.getObjectMap(0);
+		
+		String lan = om.getLanguageTag();
+		Object datatype = om.getDatatype(Object.class);
+		
+		//we check if the object map is a constant (can be a iri or a literal)
 		String obj = om.getConstant();
 		if (obj != null) {
-			boolean isURI = false;
-			try {
-				java.net.URI.create(obj);
-				isURI = true;
-			} catch (IllegalArgumentException e){
-
-			}
+			// boolean isURI = false;
+			// try {
+			// java.net.URI.create(obj);
+			// isURI = true;
+			// } catch (IllegalArgumentException e){
+			//
+			// }
 			Predicate pred;
-			if (isURI) {
+			if (obj.startsWith("http://")) {
 				pred = fac.getUriTemplatePredicate(1);
 			} else {
-				// TODO: handle typed Literal
+
 				pred = OBDAVocabulary.RDFS_LITERAL;
 			}
-			Term newlit = fac.getConstantLiteral(obj);
-			objectAtom = fac.getFunction(pred, newlit);
-			
+
+			// if the literal has a language property or a datatype property we
+			// create the function object later
+			if (lan != null || datatype != null) 
+			{
+				objectAtom = fac.getConstantLiteral(obj);
+				
+			} 
+			else 
+			{
+				Term newlit = fac.getConstantLiteral(obj);
+				objectAtom = fac.getFunction(pred, newlit);
+
+			}
+
 		}
 
+		//we check if the object map is a column (can be only literal)
+        //if it has a datatype or language property we check it later
 		String col = om.getColumn();
 		if (col != null) {
-			if (!joinCond.isEmpty())
+			col=trim(col);
+			
+			if (!joinCond.isEmpty()){
 				col = joinCond + col;
-			objectAtom = fac.getVariable(col);
+			}
+
+				objectAtom = fac.getVariable(col);
+
 		}
 
+		
+		//we check if the object map is a template (can be a iri, a literal or a blank node)
 		Template t = om.getTemplate();
 		if (t != null) {
-			objectAtom = getTypedFunction(t.toString(), 1, joinCond);
-		}
 
-		String lan = om.getLanguageTag(); 
+			// a template can be a rr:IRI, a
+			// rr:Literal or rr:BlankNode
+				
+			// if the literal has a language property or a datatype property we
+			// create the function object later
+			if (lan != null || datatype != null) {
+				String value = t.getColumnName(0);
+				if (!joinCond.isEmpty()){
+					value = joinCond + value;
+					
+				}
+				objectAtom = fac.getVariable(value);
+			} 
+			else{
+				
+				Object type = om.getTermType(Object.class);
+				
+				//we check if the template is a IRI a simple literal or a blank node and create the function object
+				objectAtom = getTermTypeAtom(t.toString(), type, joinCond);
+			}
+		}
+		
+		//we check if it is a literal with language tag
+		
 		if (lan != null) {
 			Term lang = fac.getConstantLiteral(lan.toLowerCase());
 			Predicate literal = OBDAVocabulary.RDFS_LITERAL_LANG;
 			Term langAtom = fac.getFunction(literal, objectAtom, lang);
 			objectAtom = langAtom;
 		}
-		Object type = om.getDatatype(Object.class);
-		if (type != null)
+		
+		//we check if it is a typed literal 
+		if (datatype != null)
 		{
-			Predicate dtype =  new DataTypePredicateImpl(type.toString(), COL_TYPE.OBJECT);
+			Predicate dtype =  new DataTypePredicateImpl(datatype.toString(), COL_TYPE.OBJECT);
 			Term dtAtom = fac.getFunction(dtype, objectAtom);
 			objectAtom = dtAtom;
 		}
@@ -390,19 +441,19 @@ public class R2RMLParser {
 	 * @param string - the atom as string
 	 * @return the contructed Function atom
 	 */
-	private Function getTermTypeAtom(String type, String string) {
+	private Function getTermTypeAtom(String string, Object type, String joinCond) {
 
-		if (type.contentEquals(R2RMLVocabulary.iri.stringValue())) {
+		if (type.equals(R2RMLVocabulary.iri)) {
 
-			return getURIFunction(string);
+			return getURIFunction(string, joinCond);
 
-		} else if (type.contentEquals(R2RMLVocabulary.blankNode.stringValue())) {
+		} else if (type.equals(R2RMLVocabulary.blankNode)) {
 
-			return getTypedFunction(string, 2);
+			return getTypedFunction(string, 2, joinCond);
 
-		} else if (type.contentEquals(R2RMLVocabulary.literal.stringValue())) {
+		} else if (type.equals(R2RMLVocabulary.literal)) {
 
-			return getTypedFunction(trim(string), 3);
+			return getTypedFunction(trim(string), 3, joinCond);
 		}
 		return null;
 	}
@@ -430,19 +481,25 @@ public class R2RMLParser {
 
 		List<Term> terms = new ArrayList<Term>();
 		String string = (parsedString);
-		if (!string.contains("{"))
-			if (type<3)
+		if (!string.contains("{")){
+			if (type<3){
 				if(!string.startsWith("http://")) 
 				{	string = R2RMLVocabulary.baseuri + "{" + string + "}";
 				if (type == 2)
+				{
 					string = "\"" + string + "\"";
+				}
 				}
 				else
 				{
 					type = 0;
 				}
+			}
+		}
 		if (type == 1 && !string.startsWith("http://"))
+		{
 			string = R2RMLVocabulary.baseuri + string;
+		}
 
 		string = string.replace("\\{", "[");
 		string = string.replace("\\}", "]");
@@ -482,11 +539,10 @@ public class R2RMLParser {
 			uriTemplate = fac.getConstantBNode(string);
 			pred = fac.getBNodeTemplatePredicate(terms.size());
 			break;
-			// LITERAL
+			// simple LITERAL 
 		case 3:
-			uriTemplate = fac.getVariable(string);
-			pred = OBDAVocabulary.RDFS_LITERAL_LANG;//lang?
-			terms.add(OBDAVocabulary.NULL);
+			uriTemplate = terms.remove(0);
+			pred = OBDAVocabulary.RDFS_LITERAL; 
 			break;
 		}
 

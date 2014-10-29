@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
@@ -95,7 +96,7 @@ public class QuestOWLStatement {
 
 	private QuestStatement st;
 	private QuestOWLConnection conn;
-
+	
 	public QuestOWLStatement(QuestStatement st, QuestOWLConnection conn) {
 		this.conn = conn;
 		this.st = st;
@@ -105,6 +106,10 @@ public class QuestOWLStatement {
 		return st;
 	}
 
+	public boolean isCanceled(){
+		return st.isCanceled();
+	}
+	
 	public void cancel() throws OWLException {
 		try {
 			st.cancel();
@@ -126,6 +131,8 @@ public class QuestOWLStatement {
 		try {
 			TupleResultSet executedQuery = (TupleResultSet) st.execute(query);
 			QuestOWLResultSet questOWLResultSet = new QuestOWLResultSet(executedQuery, this);
+
+	 		
 			return questOWLResultSet;
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
@@ -325,7 +332,7 @@ public class QuestOWLStatement {
 
 	public void getMoreResults() throws OWLException {
 		try {
-			st.cancel();
+			st.getMoreResults();
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}

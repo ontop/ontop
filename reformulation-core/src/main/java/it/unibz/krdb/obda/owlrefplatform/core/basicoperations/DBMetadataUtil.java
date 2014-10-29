@@ -39,8 +39,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import com.hp.hpl.jena.iri.IRIFactory;
-
 public class DBMetadataUtil {
 
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
@@ -48,7 +46,7 @@ public class DBMetadataUtil {
 	private static Logger log = LoggerFactory.getLogger(DBMetadataUtil.class);
 	
 	/*
-	 * genereate CQIE rules from foreign key info of db metadata
+	 * generate CQIE rules from foreign key info of db metadata
 	 * TABLE1.COL1 references TABLE2.COL2 as foreign key then 
 	 * construct CQIE rule TABLE2(P1, P3, COL2, P4) :- TABLE1(COL2, T2, T3).
 	 */
@@ -76,6 +74,8 @@ public class DBMetadataUtil {
 						// Get table definition for referenced table
 						def2 = (TableDefinition) metadata.getDefinition(table2);
 						if (def2 == null) { // in case of broken FK
+							// ROMAN: this is not necessarily broken -- the table may not be mentioned in the mappings 
+							//        (which can happen in the NEW abridged metadata)
 							throw new BrokenForeignKeyException(reference, "Missing table: " + table2);
 						}
 						// Get positions of referenced attribute
@@ -90,15 +90,15 @@ public class DBMetadataUtil {
 						positionMatch.put(pos1, pos2);
 					}
 					// Construct CQIE
-					Predicate p1 = fac.getPredicate(table1, def.countAttribute());
-					Predicate p2 = fac.getPredicate(table2, def2.countAttribute());
+					Predicate p1 = fac.getPredicate(table1, def.getNumOfAttributes());
+					Predicate p2 = fac.getPredicate(table2, def2.getNumOfAttributes());
 					
 					List<Term> terms1 = new ArrayList<Term>();
-					for (int i=0; i<def.countAttribute(); i++) {
+					for (int i=0; i<def.getNumOfAttributes(); i++) {
 						 terms1.add(fac.getVariable("t"+(i+1)));
 					}
 					List<Term> terms2 = new ArrayList<Term>();
-					for (int i=0; i<def2.countAttribute(); i++) {
+					for (int i=0; i<def2.getNumOfAttributes(); i++) {
 						 terms2.add(fac.getVariable("p"+(i+1)));
 					}
 					// Do the swapping

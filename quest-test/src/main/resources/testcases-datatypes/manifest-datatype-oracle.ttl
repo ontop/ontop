@@ -12,4 +12,5 @@
         #<boolean/manifest-oracle.ttl>
         #<binary/manifest-oracle.ttl>
         #<others/manifest-oracle.ttl>
+		<general/manifest-oracle.ttl>
     ).

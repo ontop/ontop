@@ -96,8 +96,6 @@ public class QuestStatement implements OBDAStatement {
 
 	private QueryVocabularyValidator validator = null;
 
-	private OBDAModel unfoldingOBDAModel = null;
-
 	private boolean canceled = false;
 	
 	private boolean queryIsParsed = false;
@@ -172,7 +170,6 @@ public class QuestStatement implements OBDAStatement {
 
 		this.sqlstatement = st;
 		this.validator = questinstance.vocabularyValidator;
-		this.unfoldingOBDAModel = questinstance.unfoldingOBDAModel;
 	}
 
 	private class QueryExecutionThread extends Thread {
@@ -228,6 +225,7 @@ public class QuestStatement implements OBDAStatement {
 		}
 
 		public void cancel() throws SQLException {
+			canceled = true;
 			if (!executingSQL) {
 				this.stop();
 			} else {
@@ -373,7 +371,11 @@ public class QuestStatement implements OBDAStatement {
 			} else if (SPARQLQueryUtility.isURIDescribe(strquery)) {
 				// DESCRIBE <uri> gives direct results, so we put the
 				// <uri> constant directly in the list of constants
-				constants.add(SPARQLQueryUtility.getDescribeURI(strquery));
+				try {
+					constants.add(SPARQLQueryUtility.getDescribeURI(strquery));
+				} catch (MalformedQueryException e) {
+					e.printStackTrace();
+				}
 			}
 
 			QuestGraphResultSet describeResultSet = null;
@@ -492,12 +494,9 @@ public class QuestStatement implements OBDAStatement {
 			e.printStackTrace();
 			OBDAException ex = new OBDAException(e.getMessage());
 			ex.setStackTrace(e.getStackTrace());
-			try {
+		
 				throw e;
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			
 		}
 		log.debug("Replacing equivalences...");
 		program = validator.replaceEquivalences(program);
@@ -511,7 +510,7 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Start the partial evaluation process...");
 
-		DatalogProgram unfolding = questInstance.unfolder.unfold((DatalogProgram) query, "ans1");
+		DatalogProgram unfolding = questInstance.unfold((DatalogProgram) query, "ans1");
 		log.debug("Partial evaluation: \n{}", unfolding);
 
 		removeNonAnswerQueries(unfolding);
@@ -737,7 +736,7 @@ public class QuestStatement implements OBDAStatement {
 					DatalogNormalizer.unfoldJoinTrees(q, false);
 				}
 
-				log.debug("Normalized program: \n{}", program);
+ 				log.debug("Normalized program: \n{}", program);
 
 				/*
 				 * Empty unfolding, constructing an empty result set
@@ -905,6 +904,7 @@ public class QuestStatement implements OBDAStatement {
 	
 	@Override
 	public void cancel() throws OBDAException {
+		canceled = true;
 		try {
 			QuestStatement.this.executionthread.cancel();
 		} catch (Exception e) {
@@ -912,6 +912,14 @@ public class QuestStatement implements OBDAStatement {
 		}
 	}
 
+	/**
+	 * Called to check whether the statement was cancelled on purpose
+	 * @return
+	 */
+	public boolean isCanceled(){
+		return canceled;
+	}
+	
 	@Override
 	public int executeUpdate(String query) throws OBDAException {
 		// TODO Auto-generated method stub
@@ -1010,7 +1018,7 @@ public class QuestStatement implements OBDAStatement {
 	 * 
 	 * @param data
 	 * @param recreateIndexes
-	 *            Indicates if indexes (if any) should be droped before
+	 *            Indicates if indexes (if any) should be dropped before
 	 *            inserting the tuples and recreated afterwards. Note, if no
 	 *            index existed before the insert no drop will be done and no
 	 *            new index will be created.

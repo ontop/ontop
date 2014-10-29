@@ -493,8 +493,14 @@ typedLiteral returns [Function value]
           functionSymbol = dfac.getDataTypePredicateDateTime();
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
           functionSymbol = dfac.getDataTypePredicateBoolean();
+      } else if (functionName.equals(OBDAVocabulary.XSD_DATE_URI)) {
+          functionSymbol = dfac.getDataTypePredicateDate();
+      } else if (functionName.equals(OBDAVocabulary.XSD_TIME_URI)) {
+          functionSymbol = dfac.getDataTypePredicateTime();
+      } else if (functionName.equals(OBDAVocabulary.XSD_YEAR_URI)) {
+          functionSymbol = dfac.getDataTypePredicateYear();
       } else {
-          throw new RecognitionException();
+	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
       }
       $value = dfac.getFunction(functionSymbol, var);
      }
@@ -566,8 +572,14 @@ dataTypeString returns [Term value]
     	functionSymbol = dfac.getDataTypePredicateDateTime();
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
     	functionSymbol = dfac.getDataTypePredicateBoolean();
+      } else if (functionName.equals(OBDAVocabulary.XSD_DATE_URI)) {
+    	functionSymbol = dfac.getDataTypePredicateDate();
+      } else if (functionName.equals(OBDAVocabulary.XSD_TIME_URI)) {
+    	functionSymbol = dfac.getDataTypePredicateTime();
+      } else if (functionName.equals(OBDAVocabulary.XSD_YEAR_URI)) {
+    	functionSymbol = dfac.getDataTypePredicateYear();
       } else {
-        throw new RuntimeException("Unknown datatype: " + functionName);
+        throw new RuntimeException("Unsupported datatype: " + functionName);
       }
       $value = dfac.getFunction(functionSymbol, constant);
     }

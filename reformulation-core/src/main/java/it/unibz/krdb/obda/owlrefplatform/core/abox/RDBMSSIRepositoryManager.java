@@ -43,7 +43,6 @@ import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataType;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
-import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
@@ -55,8 +54,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexCache;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -81,7 +79,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Queue;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -383,30 +380,17 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	
 	private int maxURIId = -1;
 	
-	private Properties config;
-
-	private TBoxReasonerImpl reasonerDag;
+	private TBoxReasoner reasonerDag;
 
 	private SemanticIndexCache cacheSI;
 	
-	private Ontology aboxDependencies;
-
-	private Ontology ontology;
-
 	private boolean isIndexed;
 
 	private static final boolean mergeUniions = false;
 
-	// private HashMap<Integer, Boolean> emptynessIndexes = new HashMap<Integer,
-	// Boolean>();
-
 	private HashSet<SemanticIndexRecord> nonEmptyEntityRecord = new HashSet<SemanticIndexRecord>();
 
 	private List<RepositoryChangedListener> changeList;
-
-	public RDBMSSIRepositoryManager() {
-		this(null);
-	}
 
 	public RDBMSSIRepositoryManager(Set<Predicate> vocabulary) {
 
@@ -421,14 +405,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		this.changeList.add(list);
 	}
 
-	// public HashMap<Predicate, Integer> getIndexes() {
-	// return indexes;
-	// }
-
-	// public HashMap<Integer, Boolean> getEmptynessIndexes() {
-	// return emptynessIndexes;
-	// }
-
 	public boolean getIsIndexed() {
 		return this.isIndexed;
 	}
@@ -439,45 +415,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	@Override
 	public void setConfig(Properties config) {
-		this.config = config;
 	}
 
-//	public DAGImpl getDAG() {
-//		return dag;
-//	}
-
 	@Override
-	public void setTBox(Ontology ontology) {
-
-		this.ontology = ontology;
-
-		log.debug("Ontology: {}", ontology.toString());
-
-		/*
-		 * 
-		 * PART 1: Collecting relevant nodes for mappings
-		 */
-
-		/*
-		 * Collecting relevant nodes for each role. For a Role P, the relevant
-		 * nodes are, the DAGNode for P, and the top most inverse children of P
-		 */
-		
-		reasonerDag = new TBoxReasonerImpl(ontology);
-		
-		aboxDependencies =  SigmaTBoxOptimizer.getSigmaOntology(reasonerDag);
-				
+	public void setTBox(TBoxReasoner reasonerDag) {
+		this.reasonerDag = reasonerDag;		
 		cacheSI = new SemanticIndexCache(reasonerDag);
-		
-
-		// try {
-		// GraphGenerator.dumpISA(dag, "no-cycles");
-		// GraphGenerator.dumpISA(pureIsa, "isa-indexed");
-		//
-		// } catch (IOException e) {
-		//
-		// }
-
 	}
 
 	@Override
@@ -1619,11 +1562,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	@Override
-	public Ontology getABoxDependencies() {
-		return aboxDependencies;
-	}
-	
-	@Override
 	public void loadMetadata(Connection conn) throws SQLException {
 		log.debug("Loading semantic index metadata from the database *");
 
@@ -1725,14 +1663,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	@Override
 	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException {
 
-
 		Set<Property> roleNodes = new HashSet<Property>();
-//		Map<Property, List<Property>> roleInverseMaps = new HashMap<Property, List<Property>>();
 
-		for (Predicate rolepred : ontology.getRoles()) {
+		for (Equivalences<Property> set: reasonerDag.getProperties()) {
 
-			Property node = reasonerDag.getProperties().getVertex(ofac.createProperty(rolepred)).getRepresentative();
-			// We only map named roles
+			Property node = set.getRepresentative();
+			// only named roles are mapped
 			if (node.isInverse()) 
 				continue;
 			

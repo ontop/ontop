@@ -19,10 +19,10 @@ diskos:		http://sws.ifi.uio.no/data/diskos/
 diskosv:		http://sws.ifi.uio.no/vocab/diskos#
 
 [SourceDeclaration]
-sourceUri	npd-v2
-connectionUrl	jdbc:mysql://hostname/npd
-username	user
-password	pass
+sourceUri	http://sws.ifi.uio.no/vocab/npd-v2
+connectionUrl	jdbc:mysql://10.7.20.39/npd
+username	fish
+password	fish
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
@@ -807,7 +807,7 @@ target		npd:licence/{prlNpdidLicence}/transfer/{prlTransferDirection}/{cmpNpdidC
 source		SELECT prlNpdidLicence,prlTransferDirection,cmpNpdidCompany,prlTransferDateValidFrom,prlTransferredInterest FROM licence_transfer_hst
 
 mappingId	Mapping:00197:Literal:facility_fixed:fclPhase
-target		npd:facility/{fclNpdidFacility} npdv:status {fclPhase} . 
+target		npd:facility/{fclNpdidFacility} npdv:status {fclPhase}^^xsd:string .
 source		SELECT fclNpdidFacility,fclPhase FROM facility_fixed
 
 mappingId	Mapping:00198:Literal:wellbore_exploration_all:wlbNsSec
@@ -2283,7 +2283,7 @@ target		npd:company/{cmpNpdidCompany}/reserve/{fldNpdidField} npdv:recoverableGa
 source		SELECT cmpNpdidCompany,fldNpdidField,cmpRecoverableGas FROM company_reserves
 
 mappingId	Mapping:00566:Literal:discovery:dscCurrentActivityStatus
-target		npd:discovery/{dscNpdidDiscovery} npdv:status {dscCurrentActivityStatus}^^xsd:string . 
+target		npd:discovery/{dscNpdidDiscovery} npdv:status {dscCurrentActivityStatus} .
 source		SELECT dscNpdidDiscovery,dscCurrentActivityStatus FROM discovery
 
 mappingId	Mapping:00567:Literal:company:cmpNpdidCompany
@@ -3107,7 +3107,7 @@ target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:dateSyncNPD {dateSyncNPD}^^
 source		SELECT wlbNamePart1,wlbNamePart2,dateSyncNPD FROM wellbore_shallow_all WHERE dateSyncNPD <> '9999-12-31T00:00:00'
 
 mappingId	Mapping:00772:Literal:Extra:ex6:wlbNamePart1
-target		npd:quadrant/{wlbNamePart1} npdv:name {wlbNamePart1}^^xsd:integer . 
+target		npd:quadrant/{wlbNamePart1} npdv:name {wlbNamePart1} .
 source		SELECT wlbNamePart1 FROM wellbore_exploration_all
 
 mappingId	Mapping:00773:Literal:Extra:ex12:dateSyncNPD
@@ -3147,7 +3147,7 @@ target		npd:stratum/{lsuNpdidLithoStrat} npdv:stratigraphicParent npd:stratum/{l
 source		SELECT lsuNpdidLithoStrat,lsuNpdidLithoStratParent FROM wellbore_formation_top
 
 mappingId	Mapping:00782:Literal:Extra:ex9:wlbNamePart2
-target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:name {wlbNamePart2}^^xsd:integer . 
+target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:name {wlbNamePart2} .
 source		SELECT wlbNamePart1,wlbNamePart2 FROM wellbore_exploration_all
 
 mappingId	Mapping:00783:Literal:Extra:ex9:wlbNamePart1
@@ -3155,7 +3155,7 @@ target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:quadrantLocation npd:quadra
 source		SELECT wlbNamePart1,wlbNamePart2 FROM wellbore_exploration_all
 
 mappingId	Mapping:00784:Literal:Extra:ex5:wlbNamePart1
-target		npd:quadrant/{wlbNamePart1} npdv:name {wlbNamePart1}^^xsd:integer . 
+target		npd:quadrant/{wlbNamePart1} npdv:name {wlbNamePart1} .
 source		SELECT wlbNamePart1 FROM wellbore_development_all
 
 mappingId	Mapping:00785:Literal:Extra:ex10:wlbNpdidWellbore
@@ -3215,7 +3215,7 @@ target		npd:well/{wlbWell} npdv:name {wlbWell} .
 source		SELECT wlbWell FROM wellbore_npdid_overview
 
 mappingId	Mapping:00800:Literal:Extra:ex10:wlbNamePart2
-target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:name {wlbNamePart2}^^xsd:integer . 
+target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:name {wlbNamePart2} .
 source		SELECT wlbNamePart1,wlbNamePart2 FROM wellbore_shallow_all
 
 mappingId	Mapping:00801:Literal:Extra:ex13:wlbNumberOfCores
@@ -3223,7 +3223,7 @@ target		npd:wellbore/{wlbNpdidWellbore}/cores npdv:coresTotalNo {wlbNumberOfCore
 source		SELECT wlbNpdidWellbore,wlbNumberOfCores FROM wellbore_core
 
 mappingId	Mapping:00802:Literal:Extra:ex8:wlbNamePart2
-target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:name {wlbNamePart2}^^xsd:integer . 
+target		npd:block/{wlbNamePart1}/{wlbNamePart2} npdv:name {wlbNamePart2} .
 source		SELECT wlbNamePart1,wlbNamePart2 FROM wellbore_development_all
 
 mappingId	Mapping:00803:Literal:Extra:ex8:dateSyncNPD
