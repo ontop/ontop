@@ -197,10 +197,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private String aboxJdbcPassword;
 
 	private String aboxJdbcDriver;
-		
-	/** Davide> Options about T-Mappings **/
-	private Boolean tMappings = true;
-		
+				
 	/*
 	 * The following are caches to queries that Quest has seen in the past. They
 	 * are used by the statements
@@ -400,10 +397,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		printKeys = Boolean.valueOf((String) preferences.get(QuestPreferences.PRINT_KEYS));
 
         sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
-        
-        // Davide> T-Mappings
-        tMappings = Boolean.valueOf((String) preferences.get(QuestPreferences.T_MAPPINGS));
-        
+                
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
 			aboxJdbcUser = preferences.getProperty(QuestPreferences.DBUSER);
@@ -757,9 +751,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				 // Normalizing equalities
 				unfolder.normalizeEqualities();
 				
-				// Davide> Option to disable T-Mappings (TODO: Test)
-				if (tMappings)
-					unfolder.applyTMappings(reformulationReasoner, true);
+				// Apply TMappings
+				unfolder.applyTMappings(reformulationReasoner, true);
 				
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
                 unfolder.addABoxAssertionsAsFacts(inputOntology.getABox());
