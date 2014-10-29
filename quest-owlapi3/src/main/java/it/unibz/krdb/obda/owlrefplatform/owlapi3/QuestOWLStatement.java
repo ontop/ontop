@@ -103,10 +103,6 @@ public class QuestOWLStatement {
 		this.st = st;
 	}
 
-	public QuestStatement getQuestStatement() {
-		return st;
-	}
-
 	public boolean isCanceled(){
 		return st.isCanceled();
 	}
@@ -477,5 +473,22 @@ public class QuestOWLStatement {
 	public void analyze() throws Exception {
 		st.analyze();
 
+	}
+	
+	// Davide> Benchmarking
+	public long getUnfoldingTime(){
+		return st.getUnfoldingTime();
+	}
+
+	public long getRewritingTime(){
+		return st.getRewritingTime();
+	}
+	
+	public int getUCQSizeAfterUnfolding(){
+		return st.getUCQSizeAfterUnfolding();
+	}
+	
+	public int getUCQSizeAfterRewriting(){
+		return st.getUCQSizeAfterRewriting();
 	}
 }
