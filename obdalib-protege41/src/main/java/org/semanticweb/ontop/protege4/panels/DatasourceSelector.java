@@ -34,8 +34,8 @@ import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
 import org.semanticweb.ontop.model.OBDADataSource;
+import org.semanticweb.ontop.protege4.core.OBDAModelFacade;
 import org.semanticweb.ontop.protege4.core.OBDAModelListener;
-import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
 import org.semanticweb.ontop.protege4.utils.DatasourceSelectorListener;
 
 /**
@@ -52,18 +52,18 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 
 	private Vector<DatasourceSelectorListener> listeners = new Vector<DatasourceSelectorListener>();
 
-	private MutableOBDAModel obdaModel = null;
+	private OBDAModelFacade obdaModel = null;
 
 	/** 
 	 * Creates new form DatasourceListSelector 
 	 */
-	public DatasourceSelector(MutableOBDAModel model) {
+	public DatasourceSelector(OBDAModelFacade model) {
 		setDatasourceController(model);		
 		initComponents();
 		cboDatasource.setFocusable(false);
 	}
 
-	public void setDatasourceController(MutableOBDAModel model) {
+	public void setDatasourceController(OBDAModelFacade model) {
 		if (obdaModel != null) {
 			obdaModel.removeSourcesListener(this);
 		}

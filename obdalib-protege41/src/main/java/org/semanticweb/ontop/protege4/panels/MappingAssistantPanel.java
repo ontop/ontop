@@ -56,7 +56,7 @@ import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
-import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
+import org.semanticweb.ontop.protege4.core.OBDAModelFacade;
 import org.semanticweb.ontop.protege4.gui.IconLoader;
 import org.semanticweb.ontop.protege4.gui.MapItem;
 import org.semanticweb.ontop.protege4.gui.PredicateItem;
@@ -80,7 +80,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private static final long serialVersionUID = 1L;
 
-	private MutableOBDAModel obdaModel;
+	private OBDAModelFacade obdaModel;
 	
 	private PrefixManager prefixManager;
 	
@@ -99,7 +99,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	private static Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
 	private static Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
 	
-	public MappingAssistantPanel(MutableOBDAModel model) {
+	public MappingAssistantPanel(OBDAModelFacade model) {
 		obdaModel = model;
 		prefixManager = obdaModel.getPrefixManager();
 		initComponents();

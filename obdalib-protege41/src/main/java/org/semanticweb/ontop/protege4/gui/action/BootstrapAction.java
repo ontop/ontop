@@ -34,14 +34,20 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAFactoryWithException;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
-import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
+import org.semanticweb.ontop.protege4.core.OBDAModelFacade;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.utils.OBDAProgessMonitor;
 import org.semanticweb.ontop.protege4.utils.OBDAProgressListener;
@@ -58,7 +64,7 @@ public class BootstrapAction extends ProtegeAction {
 	private DirectMappingBootstrapper dm = null;
 	private String baseUri = "";
 	private OWLOntology currentOnto;
-	private MutableOBDAModel currentModel;
+	private OBDAModelFacade currentModel;
 	private OBDADataSource currentSource;
 
 	private Logger log = LoggerFactory.getLogger(BootstrapAction.class);
@@ -81,7 +87,7 @@ public class BootstrapAction extends ProtegeAction {
 	public void actionPerformed(ActionEvent e) {
 
 		currentOnto = owlManager.getActiveOntology();
-		currentModel = modelManager.getActiveOBDAModel();
+		currentModel = modelManager.getActiveOBDAModelFacade();
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
@@ -157,10 +163,20 @@ public class BootstrapAction extends ProtegeAction {
 		}
 
 		public void run(String baseUri, OWLOntology currentOnto,
-				MutableOBDAModel currentModel, OBDADataSource currentSource)
+				OBDAModelFacade currentModel, OBDADataSource currentSource)
 				throws Exception {
-			dm = new DirectMappingBootstrapper(baseUri, currentOnto,
-					currentModel.getCurrentImmutableOBDAModel(), currentSource);
+
+            // TODO: Retrieve the effective Quest preferences (not just the default ones).
+            OBDAProperties defaultProperties = new OBDAProperties();
+            Injector injector = Guice.createInjector(new OBDACoreModule(defaultProperties));
+            NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
+                    NativeQueryLanguageComponentFactory.class);
+            OBDAFactoryWithException factoryWithException = injector.getInstance(
+                    OBDAFactoryWithException.class);
+
+            dm = new DirectMappingBootstrapper(baseUri, currentOnto,
+					currentModel.getCurrentImmutableOBDAModel(), currentSource,
+                    nativeQLFactory, factoryWithException);
 		}
 
 		@Override

@@ -24,14 +24,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.protege.editor.core.editorkit.EditorKit;
 import org.protege.editor.core.editorkit.plugin.EditorKitHook;
 import org.protege.editor.core.prefs.Preferences;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
+import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentModule;
 import org.semanticweb.ontop.utils.OBDAPreferences;
 
 /***
@@ -59,14 +64,32 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 	
 	@Override
 	public void initialise() throws Exception {
-		
+
+        /***
+         * Preferences for the OBDA plugin (gui, etc)
+         */
+        obdaPref = new ProtegeOBDAPreferences();
+        getEditorKit().put(OBDAPreferences.class.getName(), obdaPref);
+
+        /***
+         * Preferences for Quest
+         */
+        refplatPref = new ProtegeReformulationPlatformPreferences();
+        getEditorKit().put(QuestPreferences.class.getName(),refplatPref);
+        loadPreferences();
+
+        Injector injector = Guice.createInjector(new OBDACoreModule(refplatPref),
+                new QuestComponentModule(refplatPref));
+
+        NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
+                NativeQueryLanguageComponentFactory.class);
 		
 		/***
 		 * Each editor kit has its own instance of the ProtegePluginController.
 		 * Note, the OBDA model is inside this object (do
 		 * .getOBDAModelManager())
 		 */
-		instance = new OBDAModelManager(this.getEditorKit());
+		instance = new OBDAModelManager(this.getEditorKit(), nativeQLFactory);
 		getEditorKit().put(OBDAEditorKitSynchronizerPlugin.class.getName(), this);
 		kit = (OWLEditorKit)getEditorKit();
 //		mmgr = (OWLModelManager)kit.getModelManager();
@@ -75,19 +98,6 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 
 		// getEditorKit().getModelManager().put(APIController.class.getName(),
 		// instance);
-
-		/***
-		 * Preferences for the OBDA plugin (gui, etc)
-		 */
-		obdaPref = new ProtegeOBDAPreferences();
-		getEditorKit().put(OBDAPreferences.class.getName(), obdaPref);
-
-		/***
-		 * Preferences for Quest
-		 */
-		refplatPref = new ProtegeReformulationPlatformPreferences();
-		getEditorKit().put(QuestPreferences.class.getName(),refplatPref);
-		loadPreferences();
 	}
 
 	@Override

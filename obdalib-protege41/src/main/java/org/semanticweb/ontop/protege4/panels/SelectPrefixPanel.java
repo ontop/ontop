@@ -53,14 +53,7 @@ public class SelectPrefixPanel extends javax.swing.JPanel {
 	 */
 	public SelectPrefixPanel(PrefixManager manager, JTextPane parent) {
 		super();
-
-		// Cloning the existing manager
-		PrefixManager prefManClone = new SimplePrefixManager();
-		Map<String, String> currentMap = manager.getPrefixMap();
-		for (String prefix : currentMap.keySet()) {
-			prefManClone.addPrefix(prefix, manager.getURIDefinition(prefix));
-		}
-		prefixMap = prefManClone.getPrefixMap();
+		prefixMap = manager.getPrefixMap();
 		querypane = parent;
 		
 		initComponents();

@@ -25,7 +25,7 @@ import java.util.Iterator;
 import javax.swing.JFrame;
 
 import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
+import org.semanticweb.ontop.protege4.core.OBDAModelFacade;
 
 /*
  * SelectDB.java
@@ -44,7 +44,7 @@ public class SelectDB extends javax.swing.JDialog {
 	 * 
 	 */
 	private static final long	serialVersionUID	= -1787461016329735072L;
-	private MutableOBDAModel apic				= null;
+	private OBDAModelFacade apic				= null;
 	private SetParametersDialog	dialog				= null;
 
 	String						selectedSource		= null;
@@ -53,7 +53,7 @@ public class SelectDB extends javax.swing.JDialog {
 	// private Set<OWLOntology> ontologies = null;
 
 	/** Creates new form SelectDB */
-	public SelectDB(java.awt.Frame parent, boolean modal, MutableOBDAModel apic) {
+	public SelectDB(java.awt.Frame parent, boolean modal, OBDAModelFacade apic) {
 		super(parent, modal);
 		this.apic = apic;
 		// this.dumper = dumper;

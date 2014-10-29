@@ -55,7 +55,7 @@ import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlapi3.OBDAModelSynchronizer;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
-import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
+import org.semanticweb.ontop.protege4.core.OBDAModelFacade;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.utils.OBDAProgessMonitor;
 import org.semanticweb.ontop.sesame.SesameMaterializer;
@@ -84,7 +84,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 	private static final long serialVersionUID = -1211395039869926309L;
 
 	private OWLEditorKit editorKit = null;
-	private MutableOBDAModel obdaModel = null;
+	private OBDAModelFacade obdaModel = null;
 	private OWLWorkspace workspace;	
 	private OWLModelManager modelManager;
 	
@@ -95,7 +95,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		editorKit = (OWLEditorKit)getEditorKit();
 		workspace = editorKit.getWorkspace();	
 		modelManager = editorKit.getOWLModelManager();
-		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModel();
+		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModelFacade();
 	}
 
 	@Override

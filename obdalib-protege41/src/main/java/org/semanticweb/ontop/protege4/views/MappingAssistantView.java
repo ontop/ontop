@@ -33,7 +33,7 @@ import javax.swing.border.TitledBorder;
 
 import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
-import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
+import org.semanticweb.ontop.protege4.core.OBDAModelFacade;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.core.OBDAModelManagerListener;
 import org.semanticweb.ontop.protege4.panels.DatasourceSelector;
@@ -62,7 +62,7 @@ public class MappingAssistantView extends AbstractOWLViewComponent implements OB
 		apic = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		apic.addListener(this);
 
-		MutableOBDAModel dsController = apic.getActiveOBDAModel();
+		OBDAModelFacade dsController = apic.getActiveOBDAModelFacade();
 
 		MappingAssistantPanel queryPanel = new MappingAssistantPanel(dsController);
 		datasourceSelector = new DatasourceSelector(dsController);
@@ -103,6 +103,6 @@ public class MappingAssistantView extends AbstractOWLViewComponent implements OB
 
 	@Override
 	public void activeOntologyChanged() {
-		datasourceSelector.setDatasourceController(apic.getActiveOBDAModel());
+		datasourceSelector.setDatasourceController(apic.getActiveOBDAModelFacade());
 	}
 }

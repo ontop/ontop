@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.api.io;
+package org.semanticweb.ontop.io;
 
 import java.io.File;
 import java.io.IOException;

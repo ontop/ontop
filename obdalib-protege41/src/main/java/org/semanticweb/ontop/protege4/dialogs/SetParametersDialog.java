@@ -31,7 +31,7 @@ import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
-import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
+import org.semanticweb.ontop.protege4.core.OBDAModelFacade;
 
 /*
  * SetParametersDialog.java
@@ -50,10 +50,10 @@ public class SetParametersDialog extends javax.swing.JDialog {
 	 * 
 	 */
 	private static final long serialVersionUID = -395702104656733013L;
-	private MutableOBDAModel apic = null;
+	private OBDAModelFacade apic = null;
 	
     /** Creates new form SetParametersDialog */
-    public SetParametersDialog(java.awt.Frame parent, boolean modal, MutableOBDAModel apic) {
+    public SetParametersDialog(java.awt.Frame parent, boolean modal, OBDAModelFacade apic) {
         super(parent, modal);
         this.apic = apic;
         initComponents();

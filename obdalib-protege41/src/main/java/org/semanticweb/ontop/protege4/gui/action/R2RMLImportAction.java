@@ -28,6 +28,8 @@ import java.net.URI;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.protege.editor.core.Disposable;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
@@ -35,11 +37,15 @@ import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAFactoryWithException;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
-import org.semanticweb.ontop.protege4.core.MutableOBDAModel;
+import org.semanticweb.ontop.protege4.core.OBDAModelFacade;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.r2rml.R2RMLMappingParser;
 import org.slf4j.Logger;
@@ -50,15 +56,27 @@ public class R2RMLImportAction extends ProtegeAction {
 	private static final long serialVersionUID = -1211395039869926309L;
 
 	private OWLEditorKit editorKit = null;
-	private MutableOBDAModel obdaModelController = null;
+	private OBDAModelFacade obdaModelController = null;
 
 	private Logger log = LoggerFactory.getLogger(R2RMLImportAction.class);
+    private NativeQueryLanguageComponentFactory nativeQLFactory;
 
-	@Override
+    @Override
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit) getEditorKit();
 		obdaModelController = ((OBDAModelManager) editorKit.get(OBDAModelImpl.class
-				.getName())).getActiveOBDAModel();
+				.getName())).getActiveOBDAModelFacade();
+
+        /**
+         * OBDA properties for building a R2RML mapping parser
+         */
+        OBDAProperties r2rmlProperties = new OBDAProperties();
+        r2rmlProperties.setProperty(MappingParser.class.getCanonicalName(),
+                R2RMLMappingParser.class.getCanonicalName());
+
+        Injector injector = Guice.createInjector(new OBDACoreModule(r2rmlProperties));
+        nativeQLFactory = injector.getInstance(
+                NativeQueryLanguageComponentFactory.class);
 	}
 
 	@Override
@@ -88,8 +106,8 @@ public class R2RMLImportAction extends ProtegeAction {
 			}
 			if (file != null) {
                 Disposable d = editorKit.get(NativeQueryLanguageComponentFactory.class.getName());
-				R2RMLMappingParser parser = new R2RMLReader(file);
 
+                MappingParser parser = nativeQLFactory.create(file);
 				URI sourceID = obdaModelController.getSources().get(0).getSourceID();
 
 				try {

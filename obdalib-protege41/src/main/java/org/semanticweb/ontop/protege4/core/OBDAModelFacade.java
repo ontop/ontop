@@ -16,7 +16,7 @@ import java.util.Set;
 /**
  * TODO: describe
  */
-public class MutableOBDAModel {
+public class OBDAModelFacade {
 
     /**
      *  Immutable OBDA model.
@@ -26,7 +26,7 @@ public class MutableOBDAModel {
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private PrefixManagerWrapper prefixManager;
 
-    public MutableOBDAModel(NativeQueryLanguageComponentFactory nativeQLFactory) {
+    public OBDAModelFacade(NativeQueryLanguageComponentFactory nativeQLFactory) {
         this.nativeQLFactory = nativeQLFactory;
     }
 
