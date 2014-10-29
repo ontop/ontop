@@ -54,9 +54,9 @@ public class OntologyGraph {
 							= new  DefaultDirectedGraph<PropertyExpression,DefaultEdge>(DefaultEdge.class);
 				
 		for (Predicate rolep : ontology.getRoles()) {
-			PropertyExpression role = fac.createProperty(rolep.getName(), false);
+			PropertyExpression role = fac.createProperty(rolep.getName());
 			graph.addVertex(role);
-			PropertyExpression roleInv = fac.createPropertyInverse(role);
+			PropertyExpression roleInv = role.getInverse();
 			graph.addVertex(roleInv);
 		}
 
@@ -72,9 +72,9 @@ public class OntologyGraph {
 			graph.addVertex(parent);
 			graph.addEdge(child, parent);
 			
-			PropertyExpression childInv = fac.createPropertyInverse(child);
+			PropertyExpression childInv = child.getInverse();
 			graph.addVertex(childInv);
-			PropertyExpression parentInv = fac.createPropertyInverse(parent);
+			PropertyExpression parentInv = parent.getInverse();
 			graph.addVertex(parentInv);
 			graph.addEdge(childInv, parentInv);
 		}
@@ -130,7 +130,7 @@ public class OntologyGraph {
 		if (chain) 
 			for (PropertyExpression role : propertyGraph.vertexSet()) {
 				SomeValuesFrom existsRole = fac.createPropertySomeRestriction(role);
-				PropertyExpression inv = fac.createPropertyInverse(role);
+				PropertyExpression inv = role.getInverse();
 				SomeValuesFrom existsRoleInv = fac.createPropertySomeRestriction(inv);
 				
 				classGraph.addEdge(existsRoleInv, existsRole);				

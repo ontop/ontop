@@ -530,7 +530,7 @@ public class CQCUtilitiesTest {
 			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
 			OClass left = dfac.createClass("A");
-			PropertyExpression pright = dfac.createObjectProperty("R", false);
+			PropertyExpression pright = dfac.createObjectProperty("R");
 			SomeValuesFrom right = dfac.createPropertySomeRestriction(pright);
 			SubClassOfAxiom inclusion = dfac.createSubClassAxiom(left, right);
 			sigma.addAxiom(inclusion);
@@ -557,7 +557,7 @@ public class CQCUtilitiesTest {
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
 			OClass left = dfac.createClass("A");
-			PropertyExpression pright = dfac.createObjectProperty("R", true);
+			PropertyExpression pright = dfac.createObjectProperty("R").getInverse();
 			SomeValuesFrom right = dfac.createPropertySomeRestriction(pright);
 			SubClassOfAxiom inclusion =  dfac.createSubClassAxiom(left, right);
 			sigma.addAxiom(inclusion);
@@ -583,7 +583,7 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
 			Ontology sigma = dfac.createOntology();
-			PropertyExpression pleft = dfac.createObjectProperty("R", false);
+			PropertyExpression pleft = dfac.createObjectProperty("R");
 			SomeValuesFrom left = dfac.createPropertySomeRestriction(pleft);
 			OClass right = dfac.createClass("A");
 
@@ -611,7 +611,7 @@ public class CQCUtilitiesTest {
 		{
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
 			Ontology sigma = dfac.createOntology();
-			PropertyExpression pleft = dfac.createObjectProperty("R", true);
+			PropertyExpression pleft = dfac.createObjectProperty("R").getInverse();
 			SomeValuesFrom left = dfac.createPropertySomeRestriction(pleft);
 			OClass right = dfac.createClass("A");
 
@@ -663,7 +663,7 @@ public class CQCUtilitiesTest {
 
         Ontology sigma = dfac.createOntology();
         OClass left = dfac.createClass("A");
-        PropertyExpression pleft = dfac.createObjectProperty("R", false);
+        PropertyExpression pleft = dfac.createObjectProperty("R");
         SomeValuesFrom right = dfac.createPropertySomeRestriction(pleft);
         SubClassOfAxiom inclusion = OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
         sigma.addAxiom(inclusion);

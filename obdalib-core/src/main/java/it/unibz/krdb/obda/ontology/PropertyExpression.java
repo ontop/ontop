@@ -33,4 +33,6 @@ public interface PropertyExpression extends Description {
 	public boolean isInverse();
 
 	public Predicate getPredicate();
+	
+	public PropertyExpression getInverse();
 }

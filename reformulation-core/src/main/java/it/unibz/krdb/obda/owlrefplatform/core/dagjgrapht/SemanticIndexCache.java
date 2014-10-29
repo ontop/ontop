@@ -6,7 +6,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.PropertyImpl;
+import it.unibz.krdb.obda.ontology.impl.PropertyExpressionImpl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -67,8 +67,8 @@ public class SemanticIndexCache {
 				classIntervals.put(iri, intervals);
 
 			} 
-			else if (description instanceof PropertyImpl) {
-				PropertyImpl cdesc = (PropertyImpl) description;
+			else if (description instanceof PropertyExpressionImpl) {
+				PropertyExpressionImpl cdesc = (PropertyExpressionImpl) description;
 
 				if (cdesc.isInverse()) {
 					/* Inverses don't get indexes or intervals */
@@ -121,7 +121,7 @@ public class SemanticIndexCache {
 			if (index == null) {
 				/* direct name is not indexed, maybe there is an equivalent, we need to test
 				 * with object properties and data properties */
-				PropertyExpression c = ofac.createObjectProperty(name, false);
+				PropertyExpression c = ofac.createObjectProperty(name);
 				PropertyExpression equivalent = reasonerDag.getProperties().getVertex(c).getRepresentative();
 				
 				Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());

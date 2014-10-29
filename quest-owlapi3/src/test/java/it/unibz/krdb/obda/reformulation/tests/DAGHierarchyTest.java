@@ -272,12 +272,12 @@ public class DAGHierarchyTest extends TestCase {
 		
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		PropertyExpression P = ofac.createObjectProperty(ontoURI + "P", false);
-		PropertyExpression S = ofac.createObjectProperty(ontoURI + "S", false);
-		PropertyExpression R = ofac.createObjectProperty(ontoURI + "R", false);
-		PropertyExpression Q = ofac.createObjectProperty(ontoURI + "Q", false);
-		PropertyExpression T = ofac.createObjectProperty(ontoURI + "T", false);
-		PropertyExpression U = ofac.createObjectProperty(ontoURI + "U", false);
+		PropertyExpression P = ofac.createObjectProperty(ontoURI + "P");
+		PropertyExpression S = ofac.createObjectProperty(ontoURI + "S");
+		PropertyExpression R = ofac.createObjectProperty(ontoURI + "R");
+		PropertyExpression Q = ofac.createObjectProperty(ontoURI + "Q");
+		PropertyExpression T = ofac.createObjectProperty(ontoURI + "T");
+		PropertyExpression U = ofac.createObjectProperty(ontoURI + "U");
 		
 		
 		/**
@@ -360,12 +360,12 @@ public class DAGHierarchyTest extends TestCase {
 		
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		PropertyExpression P = ofac.createObjectProperty(ontoURI + "P", false);
-		PropertyExpression S = ofac.createObjectProperty(ontoURI + "S", false);
-		PropertyExpression R = ofac.createObjectProperty(ontoURI + "R", false);
-		PropertyExpression Q = ofac.createObjectProperty(ontoURI + "Q", false);
-		PropertyExpression T = ofac.createObjectProperty(ontoURI + "T", false);
-		PropertyExpression U = ofac.createObjectProperty(ontoURI + "U", false);
+		PropertyExpression P = ofac.createObjectProperty(ontoURI + "P");
+		PropertyExpression S = ofac.createObjectProperty(ontoURI + "S");
+		PropertyExpression R = ofac.createObjectProperty(ontoURI + "R");
+		PropertyExpression Q = ofac.createObjectProperty(ontoURI + "Q");
+		PropertyExpression T = ofac.createObjectProperty(ontoURI + "T");
+		PropertyExpression U = ofac.createObjectProperty(ontoURI + "U");
 	
 		/**
 		 * The initial node is Node P.

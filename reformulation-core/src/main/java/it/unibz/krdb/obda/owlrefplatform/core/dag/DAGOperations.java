@@ -246,7 +246,7 @@ public class DAGOperations {
 
 				PropertyExpression prop = (PropertyExpression) cycleheadNode.getDescription();
 
-				PropertyExpression inverse = fac.createPropertyInverse(prop);
+				PropertyExpression inverse = prop.getInverse();
 				SomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
 				SomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
 
@@ -283,7 +283,7 @@ public class DAGOperations {
 
 						PropertyExpression prop = (PropertyExpression) cycleheadNode.getDescription();
 
-						PropertyExpression inverse = fac.createPropertyInverse(prop);
+						PropertyExpression inverse = prop.getInverse();
 						SomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
 						SomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
 
@@ -326,9 +326,9 @@ public class DAGOperations {
 					 */
 					PropertyExpression equiprop = (PropertyExpression) equivnode.getDescription();
 
-					DAGNode equivinverseNode = dag.getNode(fac.createPropertyInverse(equiprop));
+					DAGNode equivinverseNode = dag.getNode(equiprop.getInverse());
 					DAGNode equivDomainNode = dag.getNode(fac.createPropertySomeRestriction(equiprop));
-					PropertyExpression inv = fac.createPropertyInverse(equiprop);
+					PropertyExpression inv = equiprop.getInverse();
 					DAGNode equivRangeNode = dag.getNode(fac.createPropertySomeRestriction(inv));
 
 					/*
@@ -399,9 +399,9 @@ public class DAGOperations {
 					 */
 					PropertyExpression equiprop = (PropertyExpression) equivnode.getDescription();
 					
-					PropertyExpression inverseequiprop = fac.createPropertyInverse(equiprop);
+					PropertyExpression inverseequiprop = equiprop.getInverse();
 					PropertyExpression cycleheadprop =(PropertyExpression)cycleheadNode.getDescription(); 
-					PropertyExpression invesenonredundantprop = fac.createPropertyInverse(cycleheadprop);
+					PropertyExpression invesenonredundantprop = cycleheadprop.getInverse();
 					equi_mapp.put(inverseequiprop, invesenonredundantprop);
 					dag.equi_mappings.put(inverseequiprop, invesenonredundantprop);
 					
@@ -409,7 +409,7 @@ public class DAGOperations {
 
 					DAGNode equivinverseNode = dag.getNode(inverseequiprop);
 					DAGNode equivDomainNode = dag.getNode(fac.createPropertySomeRestriction(equiprop));
-					PropertyExpression inv = fac.createPropertyInverse(equiprop);					
+					PropertyExpression inv = equiprop.getInverse();					
 					DAGNode equivRangeNode = dag.getNode(fac.createPropertySomeRestriction(inv));
 
 					if (!(equivinverseNode == null && equivDomainNode == null && equivRangeNode == null)) {

@@ -23,39 +23,57 @@ package it.unibz.krdb.obda.ontology.impl;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 
-public class PropertyImpl implements PropertyExpression {
+public class PropertyExpressionImpl implements PropertyExpression {
 
 	private static final long serialVersionUID = -2514037755762973974L;
 	
-	private final boolean inverse;
+	private final boolean isInverse;
 	private final Predicate predicate;
 	private final String string;
+	private final PropertyExpressionImpl inverseProperty;
 
-	protected PropertyImpl(Predicate p, boolean isInverse) {
+	PropertyExpressionImpl(Predicate p, boolean isInverse) {
 		this.predicate = p;
-		this.inverse = isInverse;
+		this.isInverse = isInverse;
+		this.inverseProperty = new PropertyExpressionImpl(p, !isInverse, this);
 		StringBuilder bf = new StringBuilder();
 		bf.append(predicate.toString());
-		if (inverse) 
+		if (isInverse) 
+			bf.append("^-");
+		this.string =  bf.toString();
+	}
+
+	private PropertyExpressionImpl(Predicate p, boolean isInverse, PropertyExpressionImpl inverseProperty) {
+		this.predicate = p;
+		this.isInverse = isInverse;
+		this.inverseProperty = inverseProperty;
+		StringBuilder bf = new StringBuilder();
+		bf.append(predicate.toString());
+		if (isInverse) 
 			bf.append("^-");
 		this.string =  bf.toString();
 	}
 
 	@Override
 	public boolean isInverse() {
-		return inverse;
+		return isInverse;
 	}
 
 	@Override
 	public Predicate getPredicate() {
 		return predicate;
 	}
+	
+	@Override
+	public PropertyExpression getInverse() {
+		return inverseProperty;
+	}	
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof PropertyImpl) {
-			PropertyImpl other = (PropertyImpl) obj;
-			return (inverse == other.inverse) && predicate.equals(other.predicate);
+		if (obj instanceof PropertyExpressionImpl) {
+			PropertyExpressionImpl other = (PropertyExpressionImpl) obj;
+			return (isInverse == other.isInverse) && predicate.equals(other.predicate);
 		}
 		return false;
 	}

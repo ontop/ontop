@@ -172,10 +172,10 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 			PropertyExpression prop;			
 			if (currObject instanceof URI) {
 				c2 = obdafac.getConstantURI(currObject.stringValue());
-				prop = ofac.createObjectProperty(currentPredicate.getName(), false);
+				prop = ofac.createObjectProperty(currentPredicate.getName());
 			} else if (currObject instanceof BNode) {
 				c2 = obdafac.getConstantBNode(currObject.stringValue());
-				prop = ofac.createObjectProperty(currentPredicate.getName(), false);
+				prop = ofac.createObjectProperty(currentPredicate.getName());
 			} else if (currObject instanceof Literal) {
 				Literal l = (Literal) currObject;
 				Predicate.COL_TYPE type = getColumnType(l.getDatatype());

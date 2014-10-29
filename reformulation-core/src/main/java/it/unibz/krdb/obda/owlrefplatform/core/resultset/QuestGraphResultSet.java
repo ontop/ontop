@@ -154,27 +154,21 @@ public class QuestGraphResultSet implements GraphResultSet {
 				tripleAssertions.add(ca);
 			} else {
 				if (objectConstant instanceof URIConstant) {
-					Predicate role = dfac
-							.getObjectPropertyPredicate(predicateName);
-					PropertyExpression prop = ofac.createObjectProperty(role.getName(), false);
+					PropertyExpression prop = ofac.createObjectProperty(predicateName);
 					PropertyAssertion op = ofac
 							.createPropertyAssertion(prop,
 									(ObjectConstant) subjectConstant,
 									(ObjectConstant) objectConstant);
 					tripleAssertions.add(op);
 				} else if (objectConstant instanceof BNodeConstantImpl) {
-					Predicate role = dfac
-							.getObjectPropertyPredicate(predicateName);
-					PropertyExpression prop = ofac.createObjectProperty(role.getName(), false);
+					PropertyExpression prop = ofac.createObjectProperty(predicateName);
 					PropertyAssertion op = ofac
 							.createPropertyAssertion(prop,
 									(ObjectConstant) subjectConstant,
 									(ObjectConstant) objectConstant);
 					tripleAssertions.add(op);
 				} else {
-					Predicate attribute = dfac
-							.getDataPropertyPredicate(predicateName);
-					PropertyExpression prop = ofac.createDataProperty(attribute.getName());
+					PropertyExpression prop = ofac.createDataProperty(predicateName);
 					PropertyAssertion dp = ofac
 							.createPropertyAssertion(prop,
 									(ObjectConstant) subjectConstant,

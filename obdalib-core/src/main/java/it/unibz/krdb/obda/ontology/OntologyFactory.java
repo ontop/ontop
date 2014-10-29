@@ -33,14 +33,12 @@ public interface OntologyFactory {
 	public Datatype createDataType(Predicate p);
 	
 	@Deprecated // generic property is to be eliminated
-	public PropertyExpression createProperty(String uri, boolean inverse);
+	public PropertyExpression createProperty(String uri);
 
-	public PropertyExpression createObjectProperty(String uri, boolean inverse);
+	public PropertyExpression createObjectProperty(String uri);
 	
 	public PropertyExpression createDataProperty(String uri);
 
-	public PropertyExpression createPropertyInverse(PropertyExpression prop);
-	
 	public Ontology createOntology();
 
 	public SubPropertyOfAxiom createSubPropertyAxiom(PropertyExpression included, PropertyExpression including);

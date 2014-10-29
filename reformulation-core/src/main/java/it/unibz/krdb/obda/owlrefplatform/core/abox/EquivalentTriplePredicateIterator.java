@@ -89,7 +89,7 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 				else {
 					ObjectConstant object2 = (ObjectConstant)opa.getValue2();
 					if (property.isInverse()) {
-						PropertyExpression notinv = ofac.createObjectProperty(property.getPredicate().getName(), false);
+						PropertyExpression notinv = property.getInverse();
 						return ofac.createPropertyAssertion(notinv, object2, object1);
 					} else {
 						return ofac.createPropertyAssertion(property, object1, object2);

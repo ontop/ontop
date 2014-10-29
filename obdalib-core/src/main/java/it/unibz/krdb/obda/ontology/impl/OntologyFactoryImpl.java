@@ -80,7 +80,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 	@Override
 	public SomeValuesFrom createDataPropertyRange(PropertyExpression role) {
-		PropertyExpression prop = new PropertyImpl(role.getPredicate(), true);
+		PropertyExpression prop = new PropertyExpressionImpl(role.getPredicate(), true);
 		return new PropertySomeRestrictionImpl(prop);
 	}
 	
@@ -102,27 +102,22 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public PropertyExpression createObjectProperty(String uri, boolean inverse) {
+	public PropertyExpression createObjectProperty(String uri) {
 		Predicate prop = ofac.getObjectPropertyPredicate(uri);
-		return new PropertyImpl(prop, inverse);
+		return new PropertyExpressionImpl(prop, false);
 	}
 
-	@Override
-	public PropertyExpression createPropertyInverse(PropertyExpression prop) {
-		return new PropertyImpl(prop.getPredicate(), !prop.isInverse());		
-	}
-	
 	
 	@Override
 	public PropertyExpression createDataProperty(String p) {
 		Predicate prop = ofac.getDataPropertyPredicate(p);
-		return new PropertyImpl(prop, false);
+		return new PropertyExpressionImpl(prop, false);
 	}
 
 	@Override
-	public PropertyExpression createProperty(String uri, boolean inverse) {
+	public PropertyExpression createProperty(String uri) {
 		Predicate prop = ofac.getPredicate(uri, 2);
-		return new PropertyImpl(prop, false);
+		return new PropertyExpressionImpl(prop, false);
 	}
 
 

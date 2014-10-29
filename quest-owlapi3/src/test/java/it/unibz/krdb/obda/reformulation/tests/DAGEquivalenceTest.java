@@ -133,48 +133,42 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		
-		List<Interval> nodeInterval = engine.getIntervals(ofac
-				.createObjectProperty(testURI + "R1", false));
+		List<Interval> nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI + "R1"));
 
 		assertEquals(nodeInterval.size(), 1);
 		Interval interval = nodeInterval.get(0);
 		assertEquals(interval.getStart(), 2);
 		assertEquals(interval.getEnd(), 2);
 
-		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
-				+ "R2", false));
+		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI + "R2"));
 
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(interval.getStart(), 2);
 		assertEquals(interval.getEnd(), 2);
 
-		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
-				+ "R3", false));
+		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI + "R3"));
 
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(interval.getStart(), 2);
 		assertEquals(interval.getEnd(), 2);
 
-		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
-				+ "S1", false));
+		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI + "S1"));
 
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(interval.getStart(), 1);
 		assertEquals(interval.getEnd(), 2);
 
-		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
-				+ "S2", false));
+		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI + "S2"));
 
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(interval.getStart(), 1);
 		assertEquals(interval.getEnd(), 2);
 
-		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
-				+ "S3", false));
+		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI + "S3"));
 
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
@@ -196,8 +190,7 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		
-		List<Interval> nodeInterval = engine.getIntervals(ofac
-				.createObjectProperty(testURI + "A1", false));
+		List<Interval> nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI + "A1"));
 
 		assertEquals(nodeInterval.size(), 1);
 		Interval interval = nodeInterval.get(0);
@@ -206,46 +199,41 @@ public class DAGEquivalenceTest extends TestCase {
 
 		EquivalencesDAG<PropertyExpression> properties = dag.getProperties();
 		
-		PropertyExpression d = properties.getVertex(ofac.createObjectProperty(testURI + "A2", false)).getRepresentative();
-		assertTrue(d.equals(ofac.createObjectProperty(testURI + "A1",true)));
+		PropertyExpression d = properties.getVertex(ofac.createObjectProperty(testURI + "A2")).getRepresentative();
+		assertTrue(d.equals(ofac.createObjectProperty(testURI + "A1").getInverse()));
 
-		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
-				+ "A3", false));
+		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI + "A3"));
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(1, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
-				+ "C1", false));
+		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI + "C1"));
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(3, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		d = properties.getVertex(ofac.createObjectProperty(testURI + "C2", false)).getRepresentative();
-		assertTrue(d.equals(properties.getVertex(ofac.createObjectProperty(testURI + "C1",true)).getRepresentative()));
+		d = properties.getVertex(ofac.createObjectProperty(testURI + "C2")).getRepresentative();
+		assertTrue(d.equals(properties.getVertex(ofac.createObjectProperty(testURI + "C1").getInverse()).getRepresentative()));
 
-		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
-				+ "C3", false));
+		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI + "C3"));
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(3, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
-				+ "B1", false));
+		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI + "B1"));
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 
 		assertEquals(2, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		d = properties.getVertex(ofac.createObjectProperty(testURI + "B2", false)).getRepresentative();
-		assertTrue(d.equals(properties.getVertex(ofac.createObjectProperty(testURI + "B3",true)).getRepresentative()));
+		d = properties.getVertex(ofac.createObjectProperty(testURI + "B2")).getRepresentative();
+		assertTrue(d.equals(properties.getVertex(ofac.createObjectProperty(testURI + "B3").getInverse()).getRepresentative()));
 
-		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI
-				+ "B3", false));
+		nodeInterval = engine.getIntervals(ofac.createObjectProperty(testURI + "B3"));
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(2, interval.getStart());

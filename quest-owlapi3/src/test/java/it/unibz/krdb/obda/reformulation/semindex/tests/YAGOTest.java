@@ -86,13 +86,13 @@ public class YAGOTest {
                 object = matcher.group(3);
 
                 if ("rdfs:range".equals(predicate)) {
-                    PropertyExpression psprop = descFactory.createProperty(subject, true);
+                    PropertyExpression psprop = descFactory.createProperty(subject).getInverse();
                     SomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
                     OClass co = descFactory.createClass(object);
                     onto.addAssertionWithCheck(descFactory.createSubClassAxiom(rs, co));
                 } 
                 else if ("rdfs:domain".equals(predicate)) {
-                    PropertyExpression psprop = descFactory.createProperty(subject, false);
+                    PropertyExpression psprop = descFactory.createProperty(subject);
                     SomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
                     OClass co = descFactory.createClass(object);
                     onto.addAssertionWithCheck(descFactory.createSubClassAxiom(rs, co));
@@ -108,8 +108,8 @@ public class YAGOTest {
                     onto.addAssertionWithCheck(descFactory.createSubClassAxiom(cs, co));
                 } 
                 else if ("rdfs:subPropertyOf".equals(predicate)) {
-                    PropertyExpression rs = descFactory.createProperty(subject, false);
-                    PropertyExpression ro = descFactory.createProperty(object, false);
+                    PropertyExpression rs = descFactory.createProperty(subject);
+                    PropertyExpression ro = descFactory.createProperty(object);
                     onto.addAssertionWithCheck(descFactory.createSubPropertyAxiom(rs, ro));
                 } else {
 //                    log.debug(predicate);

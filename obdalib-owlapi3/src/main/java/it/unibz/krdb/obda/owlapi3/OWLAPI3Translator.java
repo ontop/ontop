@@ -386,8 +386,8 @@ public class OWLAPI3Translator {
 					PropertyExpression role1 = getRoleExpression(exp1);
 					PropertyExpression role2 = getRoleExpression(exp2);
 
-					PropertyExpression invrole1 = ofac.createPropertyInverse(role1);
-					PropertyExpression invrole2 = ofac.createPropertyInverse(role2);
+					PropertyExpression invrole1 = role1.getInverse();
+					PropertyExpression invrole2 = role2.getInverse();
 
 					SubPropertyOfAxiom inc1 = ofac.createSubPropertyAxiom(role1, invrole2);
 					SubPropertyOfAxiom inc2 = ofac.createSubPropertyAxiom(role2, invrole1);
@@ -401,7 +401,7 @@ public class OWLAPI3Translator {
 					OWLSymmetricObjectPropertyAxiom aux = (OWLSymmetricObjectPropertyAxiom) axiom;
 					OWLObjectPropertyExpression exp1 = aux.getProperty();
 					PropertyExpression role = getRoleExpression(exp1);
-					PropertyExpression invrole = ofac.createPropertyInverse(role);
+					PropertyExpression invrole = role.getInverse();
 
 					SubPropertyOfAxiom symm = ofac.createSubPropertyAxiom(invrole, role);
 
@@ -421,7 +421,7 @@ public class OWLAPI3Translator {
 
 					OWLObjectPropertyRangeAxiom aux = (OWLObjectPropertyRangeAxiom) axiom;
 					PropertyExpression role = getRoleExpression(aux.getProperty());
-					PropertyExpression inv = ofac.createPropertyInverse(role);
+					PropertyExpression inv = role.getInverse();
 					
 					SomeValuesFrom subclass = ofac.createPropertySomeRestriction(inv);
 					List<BasicClassDescription> superDescriptions = getSuperclassExpressions(aux.getRange(), dl_onto);
@@ -452,7 +452,7 @@ public class OWLAPI3Translator {
 						throw new TranslationException();
 					OWLInverseFunctionalObjectPropertyAxiom aux = (OWLInverseFunctionalObjectPropertyAxiom) axiom;
 					PropertyExpression role = getRoleExpression(aux.getProperty());
-					PropertyExpression invrole = ofac.createPropertyInverse(role);
+					PropertyExpression invrole = role.getInverse();
 					FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(invrole);
 
 					dl_onto.addAssertionWithCheck(funct);
@@ -563,8 +563,7 @@ public class OWLAPI3Translator {
 		OWLObjectPropertyExpression prop = aux.getProperty(); 
 		PropertyExpression p = getRoleExpression(prop);
 		disjointProperties.add(p);
-		PropertyExpression inv = ofac.createObjectProperty(p.getPredicate().getName(), !p.isInverse());
-		disjointProperties.add(inv);
+		disjointProperties.add(p.getInverse());
 		
 		DisjointPropertiesAxiom disj = ofac.createDisjointPropertiesAxiom(disjointProperties);				
 		dl_onto.addAssertionWithCheck(disj);		
@@ -604,12 +603,12 @@ public class OWLAPI3Translator {
 		PropertyExpression role = null;
 
 		if (rolExpression instanceof OWLObjectProperty) {
-			role = ofac.createObjectProperty(rolExpression.asOWLObjectProperty().getIRI().toString(), false);
+			role = ofac.createObjectProperty(rolExpression.asOWLObjectProperty().getIRI().toString());
 		} else if (rolExpression instanceof OWLObjectInverseOf) {
 			if (profile.order() < LanguageProfile.OWL2QL.order())
 				throw new TranslationException();
 			OWLObjectInverseOf aux = (OWLObjectInverseOf) rolExpression;
-			role = ofac.createObjectProperty(aux.getInverse().asOWLObjectProperty().getIRI().toString(), true);
+			role = ofac.createObjectProperty(aux.getInverse().asOWLObjectProperty().getIRI().toString()).getInverse();
 		} else {
 			throw new TranslationException();
 		}
@@ -735,20 +734,22 @@ public class OWLAPI3Translator {
 			PropertyExpression role = getRoleExpression(owlProperty);
 			BasicClassDescription filler = getSubclassExpression(owlFiller);
 
-			PropertyExpression auxRole = ofac.createObjectProperty(OntologyImpl.AUXROLEURI + auxRoleCounter, false);
+			PropertyExpression auxRole = ofac.createObjectProperty(OntologyImpl.AUXROLEURI + auxRoleCounter);
 			auxRoleCounter += 1;
 
-			PropertyExpression exp = ofac.createObjectProperty(auxRole.getPredicate().getName(), role.isInverse());
+			PropertyExpression exp = ofac.createObjectProperty(auxRole.getPredicate().getName());
+			if (role.isInverse())
+				exp = exp.getInverse();
 			
 			auxclass = ofac.createPropertySomeRestriction(exp);
 			auxiliaryClassProperties.put(someexp, auxclass);
 
 			/* Creating the new subrole assertions */
-			SubPropertyOfAxiom subrole = ofac.createSubPropertyAxiom(auxRole, ofac.createProperty(role.getPredicate().getName(), false));
+			SubPropertyOfAxiom subrole = ofac.createSubPropertyAxiom(auxRole, ofac.createProperty(role.getPredicate().getName()));
 			dl_onto.addAssertionWithCheck(subrole);
 			
 			/* Creating the range assertion */
-			PropertyExpression expInv = ofac.createPropertyInverse(exp);
+			PropertyExpression expInv = exp.getInverse();
 			SomeValuesFrom propertySomeRestrictionInv = ofac.createPropertySomeRestriction(expInv);
 			SubClassOfAxiom subclass = ofac.createSubClassAxiom(propertySomeRestrictionInv, filler);
 			dl_onto.addAssertionWithCheck(subclass);
@@ -773,19 +774,19 @@ public class OWLAPI3Translator {
 			BasicClassDescription filler = getDataTypeExpression(owlFiller);
 
 			// TODO: changed to data properties
-			PropertyExpression auxRole = ofac.createObjectProperty(OntologyImpl.AUXROLEURI + auxRoleCounter, false);
+			PropertyExpression auxRole = ofac.createObjectProperty(OntologyImpl.AUXROLEURI + auxRoleCounter);
 			auxRoleCounter += 1;
 
-			PropertyExpression exp = ofac.createProperty(auxRole.getPredicate().getName(), role.isInverse());
+			PropertyExpression exp = ofac.createProperty(auxRole.getPredicate().getName()/*, role.isInverse()*/);
 			auxclass = ofac.createPropertySomeRestriction(exp);
 			auxiliaryDatatypeProperties.put(someexp, auxclass);
 
 			/* Creating the new subrole assertions */
-			SubPropertyOfAxiom subrole = ofac.createSubPropertyAxiom(auxRole, ofac.createProperty(role.getPredicate().getName(), false));
+			SubPropertyOfAxiom subrole = ofac.createSubPropertyAxiom(auxRole, ofac.createProperty(role.getPredicate().getName()));
 			dl_onto.addAssertionWithCheck(subrole);
 			
 			/* Creating the range assertion */
-			PropertyExpression expInv = ofac.createPropertyInverse(exp);
+			PropertyExpression expInv = exp.getInverse();
 			SomeValuesFrom propertySomeRestrictionInv = ofac.createPropertySomeRestriction(expInv);
 			SubClassOfAxiom subclass = ofac.createSubClassAxiom(propertySomeRestrictionInv, filler);
 			dl_onto.addAssertionWithCheck(subclass);
@@ -838,9 +839,9 @@ public class OWLAPI3Translator {
 			PropertyExpression prop;
 			
 			if (propExp instanceof OWLObjectInverseOf) {
-				prop = ofac.createObjectProperty(uri, true);
+				prop = ofac.createObjectProperty(uri).getInverse();
 			} else {
-				prop = ofac.createObjectProperty(uri, false);
+				prop = ofac.createObjectProperty(uri);
 			}
 			cd = ofac.createPropertySomeRestriction(prop);
 
@@ -859,9 +860,9 @@ public class OWLAPI3Translator {
 			PropertyExpression prop;
 			
 			if (propExp instanceof OWLObjectInverseOf) {
-				prop = ofac.createObjectProperty(uri, true);
+				prop = ofac.createObjectProperty(uri).getInverse();
 			} else {
-				prop = ofac.createObjectProperty(uri, false);
+				prop = ofac.createObjectProperty(uri);
 			}
 			cd = ofac.createPropertySomeRestriction(prop);
 			
@@ -961,7 +962,7 @@ public class OWLAPI3Translator {
 		if (propertyExperssion instanceof OWLObjectProperty) {
 			OWLObjectProperty namedclass = (OWLObjectProperty) propertyExperssion;
 			Predicate p = dfac.getObjectPropertyPredicate(namedclass.getIRI().toString());
-			prop = ofac.createObjectProperty(p.getName(), false);
+			prop = ofac.createObjectProperty(p.getName());
 			
 			c1 = dfac.getConstantURI(aux.getSubject().asOWLNamedIndividual().getIRI().toString());
 			c2 = dfac.getConstantURI(aux.getObject().asOWLNamedIndividual().getIRI().toString());
@@ -971,7 +972,7 @@ public class OWLAPI3Translator {
 		} else if (propertyExperssion instanceof OWLObjectInverseOf) {
 			OWLObjectProperty namedclass = ((OWLObjectInverseOf) propertyExperssion).getInverse().getNamedProperty();
 			Predicate p = dfac.getObjectPropertyPredicate(namedclass.getIRI().toString());
-			prop = ofac.createObjectProperty(p.getName(), true);
+			prop = ofac.createObjectProperty(p.getName()).getInverse();
 			
 			c1 = dfac.getConstantURI(aux.getSubject().asOWLNamedIndividual().getIRI().toString());
 			c2 = dfac.getConstantURI(aux.getObject().asOWLNamedIndividual().getIRI().toString());

@@ -191,13 +191,19 @@ public class SemanticIndexHelper {
 
                 if (type.equals("classes")) {
                     if (exists) {
-                    	PropertyExpression prop = descFactory.createProperty(uri, inverse);
+                    	PropertyExpression prop = descFactory.createProperty(uri);
+                    	if (inverse)
+                    		prop = prop.getInverse();
                         description = descFactory.createPropertySomeRestriction(prop);
                     }
                     else
                         description = descFactory.createClass(uri);
                 } else {
-                    description = descFactory.createProperty(uri, inverse);
+                	PropertyExpression prop = descFactory.createProperty(uri);
+                    if (inverse)
+                    	description = prop.getInverse();
+                    else
+                    	description = prop;
                 }
 
 

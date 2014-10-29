@@ -81,7 +81,7 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 		else if (currentPredicate.getType(1) == Predicate.COL_TYPE.OBJECT) {
 			URIConstant c1 = obdafac.getConstantURI(currSubject);
 			URIConstant c2 = obdafac.getConstantURI(currObject);
-			PropertyExpression prop = ofac.createObjectProperty(currentPredicate.getName(), false);
+			PropertyExpression prop = ofac.createObjectProperty(currentPredicate.getName());
 			assertion = ofac.createPropertyAssertion(prop, c1, c2);
 		} 
 		else if (currentPredicate.getType(1) == Predicate.COL_TYPE.LITERAL) {
