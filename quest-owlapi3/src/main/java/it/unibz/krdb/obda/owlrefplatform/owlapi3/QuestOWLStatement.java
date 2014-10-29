@@ -102,10 +102,6 @@ public class QuestOWLStatement {
 		this.st = st;
 	}
 
-	public QuestStatement getQuestStatement() {
-		return st;
-	}
-
 	public boolean isCanceled(){
 		return st.isCanceled();
 	}
