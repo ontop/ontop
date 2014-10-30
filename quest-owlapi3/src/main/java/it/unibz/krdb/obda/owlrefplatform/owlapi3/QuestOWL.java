@@ -403,14 +403,7 @@ public class QuestOWL extends OWLReasonerBase {
 					log.debug("Loading data from Mappings into the database");
 
 					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-					for (OClass c : translatedOntologyMerge.getClasses()) 
-						obdaModelForMaterialization.declareClass(c);
-					
-					for (ObjectPropertyExpression prop: translatedOntologyMerge.getObjectProperties()) 
-						obdaModelForMaterialization.declareObjectProperty(prop);
-					
-					for (DataPropertyExpression prop: translatedOntologyMerge.getDataProperties()) 
-						obdaModelForMaterialization.declareDataProperty(prop);							
+					obdaModelForMaterialization.declareAll(translatedOntologyMerge.getVocabulary());
 					
 					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
 					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();

@@ -55,25 +55,14 @@ public interface Ontology extends Cloneable, Serializable {
 	public void addAssertionWithCheck(PropertyAssertion assertion);
 
 
-	public void declareClass(OClass c);
-
-	public void declareObjectProperty(ObjectPropertyExpression role);
-
-	public void declareDataProperty(DataPropertyExpression role);
-	
-	
-	public Set<ObjectPropertyExpression> getObjectProperties();
-
-	public Set<DataPropertyExpression> getDataProperties();
-	
-	public Set<OClass> getClasses();
-	
 	
 	
 	public void merge(Ontology onto);
 	
 	public Ontology clone();
 
+	
+	public OntologyVocabulary getVocabulary();
 	
 	
 	public Set<SubClassOfAxiom> getSubClassAxioms();

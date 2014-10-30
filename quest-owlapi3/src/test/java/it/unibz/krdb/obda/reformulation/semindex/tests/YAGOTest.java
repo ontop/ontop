@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
  */
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -99,8 +98,8 @@ public class YAGOTest {
                 } 
                 else if ("rdf:type".equals(predicate)) {
                     // a rdf:type A |= A(a)
-                    OClass co = descFactory.createClass(object);
-                    onto.declareClass(co);
+                    String co = object;
+                    onto.getVocabulary().declareClass(co);
                 }
                 else if ("rdfs:subClassOf".equals(predicate)) {
                     OClass cs = descFactory.createClass(subject);

@@ -54,12 +54,12 @@ public class OntologyGraph {
 		DefaultDirectedGraph<PropertyExpression,DefaultEdge> graph 
 							= new  DefaultDirectedGraph<PropertyExpression,DefaultEdge>(DefaultEdge.class);
 				
-		for (PropertyExpression role : ontology.getObjectProperties()) {
+		for (PropertyExpression role : ontology.getVocabulary().getObjectProperties()) {
 			graph.addVertex(role);
 			graph.addVertex(role.getInverse());
 		}
 		
-		for (PropertyExpression role : ontology.getDataProperties()) {
+		for (PropertyExpression role : ontology.getVocabulary().getDataProperties()) {
 			graph.addVertex(role);
 			graph.addVertex(role.getInverse());
 		}
@@ -108,7 +108,7 @@ public class OntologyGraph {
 		DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph 
 									= new  DefaultDirectedGraph<BasicClassDescription,DefaultEdge>(DefaultEdge.class);
 		
-		for (OClass concept : ontology.getClasses()) {
+		for (OClass concept : ontology.getVocabulary().getClasses()) {
 		//	BasicClassDescription concept = fac.createClass(conceptp.getName()); // TODO: careful with datatypes
 			classGraph.addVertex(concept);
 		}

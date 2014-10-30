@@ -238,7 +238,7 @@ public class EmptyEntitiesTest {
 	@Test
 	public void testEmptyConcepts() throws Exception {
 		int c = 0; // number of empty concepts
-		for (OClass cl : onto.getClasses()) {
+		for (OClass cl : onto.getVocabulary().getClasses()) {
 			Predicate concept = cl.getPredicate();
 			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
 				emptyConcepts.add(concept.getName());
@@ -257,7 +257,7 @@ public class EmptyEntitiesTest {
 	@Test
 	public void testEmptyRoles() throws Exception {
 		int r = 0; // number of empty roles
-		for (ObjectPropertyExpression prop : onto.getObjectProperties()) {
+		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
 			Predicate role = prop.getPredicate();
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
 				emptyRoles.add(role.getName());
@@ -267,7 +267,7 @@ public class EmptyEntitiesTest {
 		log.info(r + " Empty role/s: " + emptyRoles);
 
 		r = 0; // number of empty roles
-		for (DataPropertyExpression prop : onto.getDataProperties()) {
+		for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
 			Predicate role = prop.getPredicate();
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
 				emptyRoles.add(role.getName());
@@ -286,7 +286,7 @@ public class EmptyEntitiesTest {
 	public void testEmpties() throws Exception {
 
 		int c = 0; // number of empty concepts
-		for (OClass cl : onto.getClasses()) {
+		for (OClass cl : onto.getVocabulary().getClasses()) {
 			Predicate concept = cl.getPredicate();
 			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
 				emptyConcepts.add(concept.getName());
@@ -296,7 +296,7 @@ public class EmptyEntitiesTest {
 		log.info(c + " Empty concept/s: " + emptyConcepts);
 
 		int r = 0; // number of empty roles
-		for (ObjectPropertyExpression prop : onto.getObjectProperties()) {
+		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
 			Predicate role = prop.getPredicate();
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
 				emptyRoles.add(role.getName());
@@ -306,7 +306,7 @@ public class EmptyEntitiesTest {
 		log.info(r + " Empty role/s: " + emptyRoles);
 
 		r = 0; // number of empty roles
-		for (DataPropertyExpression prop : onto.getDataProperties()) {
+		for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
 			Predicate role = prop.getPredicate();
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
 				emptyRoles.add(role.getName());

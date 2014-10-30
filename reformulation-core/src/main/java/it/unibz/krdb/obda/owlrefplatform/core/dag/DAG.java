@@ -81,9 +81,9 @@ public class DAG implements Serializable {
 	 */
 	public DAG(Ontology ontology) {
 
-		int rolenodes = (ontology.getObjectProperties().size() + ontology.getDataProperties().size()) * 2;
+		int rolenodes = (ontology.getVocabulary().getObjectProperties().size() + ontology.getVocabulary().getDataProperties().size()) * 2;
 
-		int classnodes = ontology.getClasses().size() + rolenodes * 2;
+		int classnodes = ontology.getVocabulary().getClasses().size() + rolenodes * 2;
 
 		classes = new LinkedHashMap<Description, DAGNode>(classnodes * 2);
 		roles = new LinkedHashMap<Description, DAGNode>(rolenodes * 2);
@@ -92,7 +92,7 @@ public class DAG implements Serializable {
 
 		// classes.put(thingConcept, thing);
 
-		for (BasicClassDescription concept : ontology.getClasses()) {
+		for (BasicClassDescription concept : ontology.getVocabulary().getClasses()) {
 			DAGNode node = new DAGNode(concept);
 
 			// if (!concept.equals(thingConcept)) {
@@ -106,8 +106,8 @@ public class DAG implements Serializable {
 		 * For each role we add nodes for its inverse, its domain and its range
 		 */
 		Set<PropertyExpression> allroles = new HashSet<PropertyExpression>();
-		allroles.addAll(ontology.getObjectProperties());
-		allroles.addAll(ontology.getDataProperties());
+		allroles.addAll(ontology.getVocabulary().getObjectProperties());
+		allroles.addAll(ontology.getVocabulary().getDataProperties());
 		
 		for (PropertyExpression role : allroles) {
 			DAGNode rolenode = new DAGNode(role);

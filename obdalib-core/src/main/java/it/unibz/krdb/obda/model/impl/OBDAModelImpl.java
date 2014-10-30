@@ -36,6 +36,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.querymanager.QueryController;
 
@@ -559,6 +560,19 @@ public class OBDAModelImpl implements OBDAModel {
 //		}
 		return declaredDataProperties.add(property);
 	}
+	
+	@Override
+	public void declareAll(OntologyVocabulary vocabulary) {
+		for (OClass p : vocabulary.getClasses()) 
+			declareClass(p);
+		
+		for (ObjectPropertyExpression p : vocabulary.getObjectProperties()) 
+			declareObjectProperty(p);
+		
+		for (DataPropertyExpression p : vocabulary.getDataProperties()) 
+			declareDataProperty(p);
+	}
+	
 /*
 	@Override
 	public boolean unDeclarePredicate(Predicate predicate) {

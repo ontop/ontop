@@ -46,6 +46,7 @@ import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
+import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.krdb.obda.ontology.impl.PunningException;
 
 import java.io.BufferedWriter;
@@ -239,7 +240,7 @@ public class OWLAPI3Translator {
 			 */
 
 			if (p.isClass()) {
-				dl_onto.declareClass(ofac.createClass(p.getName()));
+				dl_onto.getVocabulary().declareClass(p.getName());
 
 			} else {
 				if (p.isObjectProperty()) {
@@ -247,14 +248,14 @@ public class OWLAPI3Translator {
 						punnedPredicates.add(p.getName());
 					} else {
 						objectproperties.add(p.getName());
-						dl_onto.declareObjectProperty(ofac.createObjectProperty(p.getName()));
+						dl_onto.getVocabulary().declareObjectProperty(p.getName());
 					}
 				} else {
 					if (objectproperties.contains(p.getName())) {
 						punnedPredicates.add(p.getName().toString());
 					} else {
 						dataproperties.add(p.getName());
-						dl_onto.declareDataProperty(ofac.createDataProperty(p.getName()));
+						dl_onto.getVocabulary().declareDataProperty(p.getName());
 					}
 				}
 			}
@@ -492,14 +493,14 @@ public class OWLAPI3Translator {
 						if (!entity.asOWLClass().isOWLThing()) {
 
 							String uri = entity.asOWLClass().getIRI().toString();
-							dl_onto.declareClass(ofac.createClass(uri));
+							dl_onto.getVocabulary().declareClass(uri);
 						}
 					} else if (entity instanceof OWLObjectProperty) {
 						String uri = entity.asOWLObjectProperty().getIRI().toString();
-						dl_onto.declareObjectProperty(ofac.createObjectProperty(uri));
+						dl_onto.getVocabulary().declareObjectProperty(uri);
 					} else if (entity instanceof OWLDataProperty) {
 						String uri = entity.asOWLDataProperty().getIRI().toString();
-						dl_onto.declareDataProperty(ofac.createDataProperty(uri));
+						dl_onto.getVocabulary().declareDataProperty(uri);
 					} else if (entity instanceof OWLIndividual) {
 						/*
 						 * NO OP, individual declarations are ignored silently
@@ -749,7 +750,7 @@ public class OWLAPI3Translator {
 			ObjectPropertyExpression role = getRoleExpression(owlProperty);
 			BasicClassDescription filler = getSubclassExpression(owlFiller);
 
-			PropertyExpression auxRole = ofac.createObjectProperty(OntologyImpl.AUXROLEURI + auxRoleCounter);
+			PropertyExpression auxRole = ofac.createObjectProperty(OntologyVocabularyImpl.AUXROLEURI + auxRoleCounter);
 			auxRoleCounter += 1;
 
 			// if \exists R.C then exp = P, auxclass = \exists P, P <= R, \exists P^- <= C
@@ -791,7 +792,7 @@ public class OWLAPI3Translator {
 			OWLDataRange owlFiller = someexp.getFiller();		
 			BasicClassDescription filler = getDataTypeExpression(owlFiller);
 
-			DataPropertyExpression auxRole = ofac.createDataProperty(OntologyImpl.AUXROLEURI + auxRoleCounter);
+			DataPropertyExpression auxRole = ofac.createDataProperty(OntologyVocabularyImpl.AUXROLEURI + auxRoleCounter);
 			auxRoleCounter += 1;
 
 			DataPropertyExpression exp = ofac.createDataProperty(auxRole.getPredicate().getName());

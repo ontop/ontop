@@ -20,8 +20,6 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
@@ -32,6 +30,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
@@ -39,7 +38,6 @@ import it.unibz.krdb.obda.ontology.SubClassExpression;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -47,15 +45,7 @@ public class OntologyImpl implements Ontology {
 
 	private static final long serialVersionUID = 758424053258299151L;
 
-	// signature
-	
-	private final Set<OClass> concepts = new HashSet<OClass>();
-
-	private final Set<Datatype> datatypes = new HashSet<Datatype>();
-	
-	private final Set<ObjectPropertyExpression> objectProperties = new HashSet<ObjectPropertyExpression>();
-
-	private final Set<DataPropertyExpression> dataProperties = new HashSet<DataPropertyExpression>();
+	private final OntologyVocabularyImpl vocabulary = new OntologyVocabularyImpl();
 	
 	// axioms and assertions
 
@@ -74,31 +64,6 @@ public class OntologyImpl implements Ontology {
 	private final Set<PropertyAssertion> propertyAssertions = new LinkedHashSet<PropertyAssertion>();
 	
 	
-	// auxiliary symbols and built-in datatypes 
-	
-	public static final String AUXROLEURI = "ER.A-AUXROLE";
-		
-	private final static Set<Predicate> builtinDatatypes = initializeReserved();
-
-	private static Set<Predicate> initializeReserved() { // static block
-		Set<Predicate> datatypes = new HashSet<Predicate>();
-		datatypes.add(OBDAVocabulary.RDFS_LITERAL);
-		datatypes.add(OBDAVocabulary.XSD_STRING);
-		datatypes.add(OBDAVocabulary.XSD_INTEGER);
-		datatypes.add(OBDAVocabulary.XSD_NEGATIVE_INTEGER);
-		datatypes.add(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER);
-		datatypes.add(OBDAVocabulary.XSD_POSITIVE_INTEGER);
-		datatypes.add(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER);
-		datatypes.add(OBDAVocabulary.XSD_INT);
-		datatypes.add(OBDAVocabulary.XSD_UNSIGNED_INT);
-		datatypes.add(OBDAVocabulary.XSD_FLOAT);
-		datatypes.add(OBDAVocabulary.XSD_LONG);
-		datatypes.add(OBDAVocabulary.XSD_DECIMAL);
-		datatypes.add(OBDAVocabulary.XSD_DOUBLE);
-		datatypes.add(OBDAVocabulary.XSD_DATETIME);
-		datatypes.add(OBDAVocabulary.XSD_BOOLEAN);
-		return datatypes;
-	}
 
 	OntologyImpl() {
 	}
@@ -108,29 +73,29 @@ public class OntologyImpl implements Ontology {
 		OntologyImpl clone = new OntologyImpl();
 		clone.subClassAxioms.addAll(subClassAxioms);
 		clone.subPropertyAxioms.addAll(subPropertyAxioms);
-		clone.concepts.addAll(concepts);
-		clone.objectProperties.addAll(objectProperties);
-		clone.dataProperties.addAll(dataProperties);
+		clone.vocabulary.merge(vocabulary);
 		return clone;
 	}
 
 	
 	private void addReferencedEntries(BasicClassDescription desc) {
 		if (desc instanceof OClass) 
-			declareClass((OClass) desc);
+			vocabulary.declareClass((OClass) desc);
 		else if (desc instanceof SomeValuesFrom) 
 			addReferencedEntries(((SomeValuesFrom) desc).getProperty());
-		else if (desc instanceof Datatype) 
-			datatypes.add((Datatype) desc);
+		else if (desc instanceof Datatype)  {
+			// NO-OP
+			// datatypes.add((Datatype) desc);
+		}
 		else 
 			throw new UnsupportedOperationException("Cant understand: " + desc.toString());
 	}
 	
 	private void addReferencedEntries(PropertyExpression prop) {
 		if (prop instanceof ObjectPropertyExpression) 
-			declareObjectProperty((ObjectPropertyExpression)prop);
+			vocabulary.declareObjectProperty((ObjectPropertyExpression)prop);
 		else
-			declareDataProperty((DataPropertyExpression)prop);
+			vocabulary.declareDataProperty((DataPropertyExpression)prop);
 	}
 	
 	@Override
@@ -182,55 +147,17 @@ public class OntologyImpl implements Ontology {
 	}
 	
 	
-	private void checkSignature(BasicClassDescription desc) {
-		
-		if (desc instanceof OClass) {
-			if (!concepts.contains((OClass) desc))
-				throw new IllegalArgumentException("Class predicate is unknown: " + desc);
-		}	
-		else if (desc instanceof Datatype) {
-			Predicate pred = ((Datatype) desc).getPredicate();
-			if (!builtinDatatypes.contains(pred)) 
-				throw new IllegalArgumentException("Datatype predicate is unknown: " + pred);
-		}
-		else if (desc instanceof SomeValuesFrom) {
-			checkSignature(((SomeValuesFrom) desc).getProperty());
-		}
-		else 
-			throw new UnsupportedOperationException("Cant understand: " + desc);
-	}
-
-	private void checkSignature(PropertyExpression prop) {
-		// Make sure we never validate against auxiliary roles introduced by
-		// the translation of the OWL ontology
-		if (prop.getPredicate().toString().contains(AUXROLEURI)) 
-			return;
-
-		if (prop.isInverse()) {
-			if ((prop instanceof ObjectPropertyExpression) && !objectProperties.contains(prop.getInverse())) 
-				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
-			if ((prop instanceof DataPropertyExpression) && !dataProperties.contains(prop.getInverse())) 
-				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
-		}
-		else {
-			if ((prop instanceof ObjectPropertyExpression) && !objectProperties.contains(prop)) 
-				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);			
-			if ((prop instanceof DataPropertyExpression) && !dataProperties.contains(prop)) 
-				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);			
-		}
-	}
-		
 	@Override
 	public void addAssertionWithCheck(SubClassOfAxiom assertion) {		
-		checkSignature(assertion.getSub());
-		checkSignature(assertion.getSuper());
+		vocabulary.checkSignature(assertion.getSub());
+		vocabulary.checkSignature(assertion.getSuper());
 		subClassAxioms.add(assertion);
 	}
 
 	@Override
 	public void addAssertionWithCheck(SubPropertyOfAxiom assertion) {
-		checkSignature(assertion.getSub());
-		checkSignature(assertion.getSuper());
+		vocabulary.checkSignature(assertion.getSub());
+		vocabulary.checkSignature(assertion.getSuper());
 		subPropertyAxioms.add(assertion);
 	}
 
@@ -238,7 +165,7 @@ public class OntologyImpl implements Ontology {
 	public void addAssertionWithCheck(DisjointClassesAxiom assertion) {	
 		Set<SubClassExpression> classes = assertion.getClasses();
 		for (SubClassExpression c : classes)
-			checkSignature(c);
+			vocabulary.checkSignature(c);
 		disjointClassesAxioms.add(assertion);
 	}
 
@@ -246,25 +173,25 @@ public class OntologyImpl implements Ontology {
 	public void addAssertionWithCheck(DisjointPropertiesAxiom assertion) {
 		Set<PropertyExpression> props = assertion.getProperties();
 		for (PropertyExpression p : props)
-			checkSignature(p);
+			vocabulary.checkSignature(p);
 		disjointPropertiesAxioms.add(assertion);
 	}
 	
 	@Override
 	public void addAssertionWithCheck(FunctionalPropertyAxiom assertion) {
-		checkSignature(assertion.getProperty());
+		vocabulary.checkSignature(assertion.getProperty());
 		functionalityAxioms.add(assertion);
 	}
 	
 	@Override
 	public void addAssertionWithCheck(ClassAssertion assertion) {
-		checkSignature(assertion.getConcept());
+		vocabulary.checkSignature(assertion.getConcept());
 		classAssertions.add(assertion);
 	}
 
 	@Override
 	public void addAssertionWithCheck(PropertyAssertion assertion) {
-		checkSignature(assertion.getProperty());
+		vocabulary.checkSignature(assertion.getProperty());
 		propertyAssertions.add(assertion);
 	}
 	
@@ -309,53 +236,15 @@ public class OntologyImpl implements Ontology {
 		StringBuilder str = new StringBuilder();
 		str.append("[Ontology info.");
 		str.append(String.format(" Axioms: %d", subClassAxioms.size() + subPropertyAxioms.size()));
-		str.append(String.format(" Classes: %d", concepts.size()));
-		str.append(String.format(" Object Properties: %d", objectProperties.size()));
-		str.append(String.format(" Data Properties: %d]", dataProperties.size()));
+		str.append(String.format(" Classes: %d", getVocabulary().getClasses().size()));
+		str.append(String.format(" Object Properties: %d", getVocabulary().getObjectProperties().size()));
+		str.append(String.format(" Data Properties: %d]", getVocabulary().getDataProperties().size()));
 		return str.toString();
 	}
 
 	@Override
-	public void declareClass(OClass cd) {
-		concepts.add(cd);
-	}
-
-	@Override
-	public void declareObjectProperty(ObjectPropertyExpression rd) {
-		if (rd.isInverse())
-			objectProperties.add(rd.getInverse());
-		else
-			objectProperties.add(rd);
-	}
-	
-	@Override
-	public void declareDataProperty(DataPropertyExpression rd) {
-		if (rd.isInverse())
-			dataProperties.add(rd.getInverse());
-		else
-			dataProperties.add(rd);
-	}
-
-	@Override
-	public Set<OClass> getClasses() {
-		return concepts;
-	}
-
-	@Override
-	public Set<ObjectPropertyExpression> getObjectProperties() {
-		return objectProperties;
-	}
-
-	@Override
-	public Set<DataPropertyExpression> getDataProperties() {
-		return dataProperties;
-	}
-	
-	@Override
 	public void merge(Ontology onto) {
-		concepts.addAll(onto.getClasses());
-		objectProperties.addAll(onto.getObjectProperties());
-		dataProperties.addAll(onto.getDataProperties());
+		vocabulary.merge(onto.getVocabulary());
 		
 		subClassAxioms.addAll(onto.getSubClassAxioms());
 		subPropertyAxioms.addAll(onto.getSubPropertyAxioms());
@@ -364,5 +253,10 @@ public class OntologyImpl implements Ontology {
 		functionalityAxioms.addAll(onto.getFunctionalPropertyAxioms());
 		classAssertions.addAll(onto.getClassAssertions());
 		propertyAssertions.addAll(onto.getPropertyAssertions());
+	}
+
+	@Override
+	public OntologyVocabulary getVocabulary() {
+		return vocabulary;
 	}
 }

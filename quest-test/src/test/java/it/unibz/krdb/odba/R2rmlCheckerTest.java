@@ -149,7 +149,7 @@ public class R2rmlCheckerTest {
 
 		// Now we are ready for querying
 		log.debug("Comparing concepts");
-		for (OClass cl : onto.getClasses()) {
+		for (OClass cl : onto.getVocabulary().getClasses()) {
 			Predicate concept = cl.getPredicate();
 					
 			int conceptOBDA = runSPARQLConceptsQuery("<" + concept.getName()
@@ -161,7 +161,7 @@ public class R2rmlCheckerTest {
 		}
 
 		log.debug("Comparing object properties");
-		for (PropertyExpression prop : onto.getObjectProperties()) {
+		for (PropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
 			Predicate role = prop.getPredicate();
 			
 			log.debug("description " + role);
@@ -174,7 +174,7 @@ public class R2rmlCheckerTest {
 		}
 
 		log.debug("Comparing data properties");
-		for (PropertyExpression prop : onto.getDataProperties()) {
+		for (PropertyExpression prop : onto.getVocabulary().getDataProperties()) {
 			Predicate role = prop.getPredicate();
 			
 			log.debug("description " + role);

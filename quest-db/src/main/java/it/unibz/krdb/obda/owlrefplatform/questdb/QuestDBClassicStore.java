@@ -20,21 +20,13 @@ package it.unibz.krdb.obda.owlrefplatform.questdb;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -52,7 +44,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -176,14 +167,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			// Retrieves the ABox from the target database via mapping.
 			log.debug("Loading data from Mappings into the database");
 			OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-			for (OClass p : tbox.getClasses()) 
-				obdaModelForMaterialization.declareClass(p);
-			
-			for (ObjectPropertyExpression p : tbox.getObjectProperties()) 
-				obdaModelForMaterialization.declareObjectProperty(p);
-			
-			for (DataPropertyExpression p : tbox.getDataProperties()) 
-					obdaModelForMaterialization.declareDataProperty(p);
+			obdaModelForMaterialization.declareAll(tbox.getVocabulary());
 			
 			QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
 			Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
@@ -229,12 +213,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 		for (URI graphURI : graphURIs) {
 			Ontology o = getOntology(((URI) graphURI), graphURI);
-			for (OClass p : o.getClasses())
-				result.declareClass(p);
-			for (ObjectPropertyExpression p : o.getObjectProperties())
-				result.declareObjectProperty(p);
-			for (DataPropertyExpression p : o.getDataProperties())
-				result.declareDataProperty(p);
+			result.getVocabulary().merge(o.getVocabulary());
+			
 			for (SubPropertyOfAxiom ax : result.getSubPropertyAxioms())  // TODO (ROMAN): check whether it's result and not o
 				result.addAssertionWithCheck(ax);
 			for (SubClassOfAxiom ax : result.getSubClassAxioms())  // TODO (ROMAN): check whether it's result and not o
@@ -287,16 +267,16 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			URI pred = st.getPredicate();
 			Value obj = st.getObject();
 			if (obj instanceof Literal) {
-				DataPropertyExpression dataProperty = ofac.createDataProperty(pred.stringValue());
-				ontology.declareDataProperty(dataProperty);
+				String dataProperty = pred.stringValue();
+				ontology.getVocabulary().declareDataProperty(dataProperty);
 			} 
 			else if (pred.stringValue().equals(OBDAVocabulary.RDF_TYPE)) {
-				OClass className = ofac.createClass(obj.stringValue());
-				ontology.declareClass(className);
+				String className = obj.stringValue();
+				ontology.getVocabulary().declareClass(className);
 			} 
 			else {
-				ObjectPropertyExpression objectProperty = ofac.createObjectProperty(pred.stringValue());
-				ontology.declareObjectProperty(objectProperty);
+				String objectProperty = pred.stringValue();
+				ontology.getVocabulary().declareObjectProperty(objectProperty);
 			}
 
 		/*

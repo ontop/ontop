@@ -46,6 +46,7 @@ import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
+import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
@@ -2163,7 +2164,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			// We need to make sure we make no mappings for Auxiliary roles
 			// introduced by the Ontology translation process.
-			if (role.toString().contains(OntologyImpl.AUXROLEURI)) {
+			if (OntologyVocabularyImpl.isAuxiliaryProperty(property)) {
 				continue;
 			}
 

@@ -27,6 +27,7 @@ import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
+import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -89,7 +90,7 @@ public class DAGConstructor {
 		for (DAGNode node : dag.getRoles()) {
 			PropertyExpression nodeDesc = (PropertyExpression) node.getDescription();
 
-			if (nodeDesc.getPredicate().getName().toString().startsWith(OntologyImpl.AUXROLEURI)) {
+			if (OntologyVocabularyImpl.isAuxiliaryProperty(nodeDesc)) {
 				continue;
 			}
 
@@ -114,7 +115,7 @@ public class DAGConstructor {
 			}
 			for (DAGNode child : node.getChildren()) {
 				PropertyExpression childDesc = (PropertyExpression) child.getDescription();
-				if (childDesc.getPredicate().getName().toString().startsWith(OntologyImpl.AUXROLEURI)) {
+				if (OntologyVocabularyImpl.isAuxiliaryProperty(childDesc)) {
 					continue;
 				}
 				if (childDesc.isInverse()) {

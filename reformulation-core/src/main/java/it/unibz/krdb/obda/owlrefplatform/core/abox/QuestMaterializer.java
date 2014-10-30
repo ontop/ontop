@@ -41,7 +41,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 
 import java.net.URI;
 import java.sql.SQLException;
@@ -137,19 +136,19 @@ public class QuestMaterializer {
 		}
 		if (onto != null) {
 			//from ontology
-			for (OClass cl : onto.getClasses()) {
+			for (OClass cl : onto.getVocabulary().getClasses()) {
 				Predicate p = cl.getPredicate(); 
 				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 						&& !vocabulary.contains(p))
 					vocabulary.add(p);
 			}
-			for (ObjectPropertyExpression role : onto.getObjectProperties()) {
+			for (ObjectPropertyExpression role : onto.getVocabulary().getObjectProperties()) {
 				Predicate p = role.getPredicate();
 				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 						&& !vocabulary.contains(p))
 					vocabulary.add(p);
 			}
-			for (DataPropertyExpression role : onto.getDataProperties()) {
+			for (DataPropertyExpression role : onto.getVocabulary().getDataProperties()) {
 				Predicate p = role.getPredicate();
 				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 						&& !vocabulary.contains(p))
@@ -178,14 +177,16 @@ public class QuestMaterializer {
 		if (ontology == null) {
 			ontology = ofac.createOntology();
 			
+			// TODO: use Vocabulary for OBDAModel as well
+			
 			for (OClass pred : model.getDeclaredClasses()) 
-				ontology.declareClass(pred);				
+				ontology.getVocabulary().declareClass(pred.getPredicate().getName());				
 			
 			for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) 
-				ontology.declareObjectProperty(prop);
+				ontology.getVocabulary().declareObjectProperty(prop.getPredicate().getName());
 
 			for (DataPropertyExpression prop : model.getDeclaredDataProperties()) 
-				ontology.declareDataProperty(prop);
+				ontology.getVocabulary().declareDataProperty(prop.getPredicate().getName());
 		}
 		
 		
