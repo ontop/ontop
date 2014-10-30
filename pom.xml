@@ -84,7 +84,6 @@
 
 		<module>quest-test</module>
         <module>ontop-cli</module>
-        <module>ontop-mongo</module>
 
     </modules>
 
@@ -533,12 +532,6 @@
                 <groupId>org.functionaljava</groupId>
                 <artifactId>functionaljava</artifactId>
                 <version>4.2-beta-1</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.mongodb</groupId>
-                <artifactId>mongo-java-driver</artifactId>
-                <version>2.12.3</version>
             </dependency>
 
             <dependency>
