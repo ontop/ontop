@@ -2,9 +2,11 @@ package org.semanticweb.ontop.protege4.core;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.injection.OBDAFactoryWithException;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.mapping.MappingParser;
@@ -20,6 +22,11 @@ import java.util.Set;
 
 /**
  * TODO: describe
+ *
+ * For the moment, this class always use the same factories
+ * built according to INITIAL Quest preferences.
+ * Late modified preferences are not taken into account.
+ *
  */
 public class OBDAModelWrapper {
 
@@ -27,34 +34,31 @@ public class OBDAModelWrapper {
      *  Immutable OBDA model.
      *  This variable is frequently re-affected.
      */
-    private OBDAModel obdaModel;
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
+    private final OBDAFactoryWithException obdaFactory;
+
+    private OBDAModel obdaModel;
     private PrefixManagerWrapper prefixManager;
 
-    public OBDAModelWrapper(NativeQueryLanguageComponentFactory nativeQLFactory) {
+    public OBDAModelWrapper(NativeQueryLanguageComponentFactory nativeQLFactory,
+                            OBDAFactoryWithException obdaFactory, PrefixManagerWrapper prefixManager) {
         this.nativeQLFactory = nativeQLFactory;
+        this.obdaFactory = obdaFactory;
+        this.prefixManager = prefixManager;
+        this.obdaModel = createNewOBDAModel(obdaFactory, prefixManager);
     }
 
     public OBDAModel getCurrentImmutableOBDAModel() {
         return obdaModel;
     }
 
-    public void parseOBDAModel(Reader reader) throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
-        MappingParser mappingParser = nativeQLFactory.create(reader);
-        obdaModel = mappingParser.getOBDAModel();
-    }
-
-    public void parseOBDAModel(File file) throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
-        MappingParser mappingParser = nativeQLFactory.create(file);
+    public void parseMappings(File mappingFile) throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
+        MappingParser mappingParser = nativeQLFactory.create(mappingFile);
         obdaModel = mappingParser.getOBDAModel();
     }
 
     public PrefixManager getPrefixManager() {
         return obdaModel.getPrefixManager();
-    }
-
-    public OBDAMappingAxiom getMapping(String mappingId) {
-        return obdaModel.getMapping(mappingId);
     }
 
     public ImmutableList<OBDAMappingAxiom> getMappings(URI sourceUri) {
@@ -65,43 +69,24 @@ public class OBDAModelWrapper {
         return obdaModel.getMappings();
     }
 
-    public OBDAModel newModel(Set<OBDADataSource> dataSources,
-                              Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings) throws DuplicateMappingException {
-        return obdaModel.newModel(dataSources,
-                newMappings);
-    }
-
-    public OBDAModel newModel(Set<OBDADataSource> dataSources,
-                              Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings, PrefixManager prefixManager) throws DuplicateMappingException {
-        return obdaModel.newModel(dataSources,
-                newMappings, prefixManager);
-    }
+//    public OBDAModel newModel(Set<OBDADataSource> dataSources,
+//                              Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings) throws DuplicateMappingException {
+//        return obdaModel.newModel(dataSources,
+//                newMappings);
+//    }
+//
+//    public OBDAModel newModel(Set<OBDADataSource> dataSources,
+//                              Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings, PrefixManager prefixManager) throws DuplicateMappingException {
+//        return obdaModel.newModel(dataSources,
+//                newMappings, prefixManager);
+//    }
 
     public ImmutableList<OBDADataSource> getSources() {
         return ImmutableList.copyOf(obdaModel.getSources());
     }
 
-    public OBDADataSource getSource(URI sourceURI) {
-        return obdaModel.getSource(sourceURI);
-    }
-
     public boolean containsSource(URI sourceURI) {
         return obdaModel.containsSource(sourceURI);
-    }
-
-    @Deprecated
-    public String getVersion() {
-        return obdaModel.getVersion();
-    }
-
-    @Deprecated
-    public String getBuiltDate() {
-        return obdaModel.getBuiltDate();
-    }
-
-    @Deprecated
-    public String getBuiltBy() {
-        return obdaModel.getBuiltBy();
     }
 
     public OBDAMappingAxiom getMapping(URI sourceUri, String mappingId) {
@@ -145,19 +130,32 @@ public class OBDAModelWrapper {
     public void addMappingsListener(OBDAMappingListener mlistener) {
     }
 
-    public void setPrefixManager(PrefixManagerWrapper prefixManager) {
-        this.prefixManager = prefixManager;
-
-        try {
-            obdaModel = obdaModel.newModel(obdaModel.getSources(), obdaModel.getMappings(),
-                    prefixManager);
-        } catch (DuplicateMappingException e) {
-            throw new RuntimeException("Duplicate mappings should have been detected earlier!");
-        }
-    }
+//    public void setPrefixManager(PrefixManagerWrapper prefixManager) {
+//        this.prefixManager = prefixManager;
+//
+//        try {
+//            obdaModel = obdaModel.newModel(obdaModel.getSources(), obdaModel.getMappings(),
+//                    prefixManager);
+//        } catch (DuplicateMappingException e) {
+//            throw new RuntimeException("Duplicate mappings should have been detected earlier!");
+//        }
+//    }
 
     public void reset() {
+        obdaModel = createNewOBDAModel(obdaFactory, prefixManager);
+    }
 
+    private static OBDAModel createNewOBDAModel(OBDAFactoryWithException obdaFactory, PrefixManagerWrapper prefixManager) {
+        try {
+            return obdaFactory.createOBDAModel(ImmutableSet.<OBDADataSource>of(), ImmutableMap.<URI, ImmutableList<OBDAMappingAxiom>>of(),
+                    prefixManager);
+            /**
+             * No mapping so should never happen
+             */
+        } catch(DuplicateMappingException e) {
+            throw new RuntimeException("A DuplicateMappingException has been thrown while no mapping has been given." +
+                    "What is going on? Message: " + e.getMessage());
+        }
     }
 
     public void updateSource(URI sourceID, OBDADataSource aux) {
@@ -166,7 +164,6 @@ public class OBDAModelWrapper {
     public void addSource(OBDADataSource ds) {
     }
 
-    @Deprecated
     public Predicate[] getDeclaredClasses() {
         return new Predicate[0];
     }
@@ -174,12 +171,10 @@ public class OBDAModelWrapper {
     public void fireSourceParametersUpdated() {
     }
 
-    @Deprecated
     public Predicate[] getDeclaredDataProperties() {
         return new Predicate[0];
     }
 
-    @Deprecated
     public Predicate[] getDeclaredObjectProperties() {
         return new Predicate[0];
     }

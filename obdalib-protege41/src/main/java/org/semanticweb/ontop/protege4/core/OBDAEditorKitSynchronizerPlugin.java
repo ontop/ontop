@@ -33,6 +33,7 @@ import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.OWLEditorKit;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
+import org.semanticweb.ontop.injection.OBDAFactoryWithException;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -83,13 +84,17 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 
         NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
                 NativeQueryLanguageComponentFactory.class);
+
+        OBDAFactoryWithException obdaFactoryWithException = injector.getInstance(
+                OBDAFactoryWithException.class);
 		
 		/***
 		 * Each editor kit has its own instance of the ProtegePluginController.
 		 * Note, the OBDA model is inside this object (do
 		 * .getOBDAModelManager())
 		 */
-		instance = new OBDAModelManager(this.getEditorKit(), nativeQLFactory);
+		instance = new OBDAModelManager(this.getEditorKit(), nativeQLFactory,
+                obdaFactoryWithException);
 		getEditorKit().put(OBDAEditorKitSynchronizerPlugin.class.getName(), this);
 		kit = (OWLEditorKit)getEditorKit();
 //		mmgr = (OWLModelManager)kit.getModelManager();
