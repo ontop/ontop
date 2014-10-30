@@ -25,11 +25,13 @@ import java.util.Set;
 
 public interface Ontology extends Cloneable, Serializable {
 
-	public void addSubClassOfAxiomWithRefencedEntities(SubClassExpression concept1, BasicClassDescription concept2);
+	public void addSubClassOfAxiomWithReferencedEntities(DataRangeExpression concept1, DataRangeExpression concept2);
+	
+	public void addSubClassOfAxiomWithReferencedEntities(ClassExpression concept1, ClassExpression concept2);
 
-	public void addSubPropertyOfAxiomWithRefencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including);
+	public void addSubPropertyOfAxiomWithReferencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including);
 
-	public void addSubPropertyOfAxiomWithRefencedEntities(DataPropertyExpression included, DataPropertyExpression including);
+	public void addSubPropertyOfAxiomWithReferencedEntities(DataPropertyExpression included, DataPropertyExpression including);
 
 	
 	

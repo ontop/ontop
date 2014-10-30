@@ -28,7 +28,7 @@ import it.unibz.krdb.obda.model.Predicate;
  * Represents Class from OWL 2 Specification
  * 
  */
-public interface OClass extends SubClassExpression {
+public interface OClass extends ClassExpression {
 	
 	public Predicate getPredicate();
 }

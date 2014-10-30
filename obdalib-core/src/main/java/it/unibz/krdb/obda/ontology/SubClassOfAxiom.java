@@ -35,7 +35,7 @@ package it.unibz.krdb.obda.ontology;
 
 public interface SubClassOfAxiom extends Axiom {
 
-	public SubClassExpression getSub();
+	public BasicClassDescription getSub();
 
 	public BasicClassDescription getSuper();
 }

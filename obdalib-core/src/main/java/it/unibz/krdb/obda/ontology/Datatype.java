@@ -30,7 +30,7 @@ import it.unibz.krdb.obda.model.Predicate;
  */
 
 
-public interface Datatype extends BasicClassDescription {
+public interface Datatype extends DataRangeExpression {
 	
 	public Predicate getPredicate();
 }

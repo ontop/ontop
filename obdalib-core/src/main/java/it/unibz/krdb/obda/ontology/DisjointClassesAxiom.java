@@ -31,6 +31,6 @@ import java.util.Set;
 
 public interface DisjointClassesAxiom extends Axiom {
 
-	public Set<SubClassExpression> getClasses();
+	public Set<ClassExpression> getClasses();
 
 }

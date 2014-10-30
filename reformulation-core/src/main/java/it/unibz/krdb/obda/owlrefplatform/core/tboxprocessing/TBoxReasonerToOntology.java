@@ -1,15 +1,12 @@
 package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
-import it.unibz.krdb.obda.ontology.SubClassExpression;
-import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
-import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
@@ -23,20 +20,31 @@ public class TBoxReasonerToOntology {
 		TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
 			
 			@Override
-			public void onInclusion(PropertyExpression sub, PropertyExpression sup) {
+			public void onInclusion(ObjectPropertyExpression sub, ObjectPropertyExpression sup) {
 				if (sub != sup) {
-					if (sub instanceof ObjectPropertyExpression)
-						sigma.addSubPropertyOfAxiomWithRefencedEntities((ObjectPropertyExpression)sub, (ObjectPropertyExpression)sup);
-					else
-						sigma.addSubPropertyOfAxiomWithRefencedEntities((DataPropertyExpression)sub, (DataPropertyExpression)sup);
+					sigma.addSubPropertyOfAxiomWithReferencedEntities(sub, sup);
+				}
+			}
+			@Override
+			public void onInclusion(DataPropertyExpression sub, DataPropertyExpression sup) {
+				if (sub != sup) {
+					sigma.addSubPropertyOfAxiomWithReferencedEntities(sub, sup);
 				}
 			}
 
 			@Override
-			public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
+			public void onInclusion(ClassExpression sub, ClassExpression sup) {
 				if (sub != sup) {
 					if (!excludeExistentials || !(sup instanceof SomeValuesFrom)) {
-						sigma.addSubClassOfAxiomWithRefencedEntities((SubClassExpression)sub, sup);						
+						sigma.addSubClassOfAxiomWithReferencedEntities(sub, sup);
+					}
+				}
+			}
+			@Override
+			public void onInclusion(DataRangeExpression sub, DataRangeExpression sup) {
+				if (sub != sup) {
+					if (!excludeExistentials || !(sup instanceof SomeValuesFrom)) {
+						sigma.addSubClassOfAxiomWithReferencedEntities(sub, sup);
 					}
 				}
 			}

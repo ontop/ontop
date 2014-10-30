@@ -24,15 +24,15 @@ import java.util.Collections;
 import java.util.Set;
 
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
-import it.unibz.krdb.obda.ontology.SubClassExpression;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 
 public class DisjointClassesAxiomImpl implements DisjointClassesAxiom {
 
 	private static final long serialVersionUID = 4576840836473365808L;
 	
-	private final Set<SubClassExpression> classes;
+	private final Set<ClassExpression> classes;
 	
-	DisjointClassesAxiomImpl(Set<SubClassExpression> classes) {
+	DisjointClassesAxiomImpl(Set<ClassExpression> classes) {
 		if (classes.size() < 2)
 			throw new IllegalArgumentException("At least 2 classes are expeccted in DisjointClassAxiom");
 
@@ -40,7 +40,7 @@ public class DisjointClassesAxiomImpl implements DisjointClassesAxiom {
 	}
 	
 	@Override
-	public Set<SubClassExpression> getClasses() {
+	public Set<ClassExpression> getClasses() {
 		return Collections.unmodifiableSet(classes);
 	}
 

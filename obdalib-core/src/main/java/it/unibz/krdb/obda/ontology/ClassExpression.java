@@ -7,6 +7,6 @@ package it.unibz.krdb.obda.ontology;
  *
  */
 
-public interface SubClassExpression extends BasicClassDescription {
+public interface ClassExpression extends BasicClassDescription {
 
 }

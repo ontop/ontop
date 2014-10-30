@@ -22,12 +22,15 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
+import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
-import it.unibz.krdb.obda.ontology.SubClassExpression;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -86,22 +89,34 @@ public class SigmaTBoxOptimizer {
 			TBoxTraversal.traverse(isa, new TBoxTraverseListener() {
 
 				@Override
-				public void onInclusion(PropertyExpression sub, PropertyExpression sup) {
+				public void onInclusion(ObjectPropertyExpression sub, ObjectPropertyExpression sup) {
 					if (sub != sup) {
 						if (!check_redundant_role(sup, sub)) {
-							if (sub instanceof ObjectPropertyExpression)
-								optimizedTBox.addSubPropertyOfAxiomWithRefencedEntities((ObjectPropertyExpression)sub, (ObjectPropertyExpression)sup);
-							else
-								optimizedTBox.addSubPropertyOfAxiomWithRefencedEntities((DataPropertyExpression)sub, (DataPropertyExpression)sup);
+							optimizedTBox.addSubPropertyOfAxiomWithReferencedEntities(sub, sup);
+						}
+					}
+				}
+				@Override
+				public void onInclusion(DataPropertyExpression sub, DataPropertyExpression sup) {
+					if (sub != sup) {
+						if (!check_redundant_role(sup, sub)) {
+							optimizedTBox.addSubPropertyOfAxiomWithReferencedEntities(sub, sup);
 						}
 					}
 				}
 
 				@Override
-				public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
+				public void onInclusion(DataRangeExpression sub, DataRangeExpression sup) {
 					if (sub != sup) {
 						if (!sup.equals(sub) && !check_redundant(sup, sub))  {
-							optimizedTBox.addSubClassOfAxiomWithRefencedEntities((SubClassExpression)sub, sup);
+							optimizedTBox.addSubClassOfAxiomWithReferencedEntities(sub, sup);
+						}
+					}
+				}
+				public void onInclusion(ClassExpression sub, ClassExpression sup) {
+					if (sub != sup) {
+						if (!sup.equals(sub) && !check_redundant(sup, sub))  {
+							optimizedTBox.addSubClassOfAxiomWithReferencedEntities(sub, sup);
 						}
 					}
 				}

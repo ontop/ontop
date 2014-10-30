@@ -32,19 +32,20 @@ public interface OntologyFactory {
 
 	public Datatype createDataType(Predicate p);
 	
-	@Deprecated // generic property is to be eliminated (used in SemIndex and YAGO)
-	public PropertyExpression createProperty(String uri);
-
 	public ObjectPropertyExpression createObjectProperty(String uri);
 	
 	public DataPropertyExpression createDataProperty(String uri);
 
+	
+	
 	public Ontology createOntology();
 
 
 	
-	public SubClassOfAxiom createSubClassAxiom(SubClassExpression concept1, BasicClassDescription concept2);
+	public SubClassOfAxiom createSubClassAxiom(ClassExpression concept1, BasicClassDescription concept2);
 
+	public SubClassOfAxiom createSubClassAxiom(DataRangeExpression concept1, DataRangeExpression concept2);
+	
 	public SubPropertyOfAxiom createSubPropertyAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including);
 
 	public SubPropertyOfAxiom createSubPropertyAxiom(DataPropertyExpression included, DataPropertyExpression including);
@@ -52,15 +53,18 @@ public interface OntologyFactory {
 	@Deprecated // used only in YAGOTest 
 	public SubPropertyOfAxiom createSubPropertyAxiom(PropertyExpression included, PropertyExpression including);
 	
+	@Deprecated // generic property is to be eliminated (used in SemIndex and YAGO)
+	public PropertyExpression createProperty(String uri);
+	
 	
 	public SomeValuesFrom createPropertySomeRestriction(PropertyExpression role);
 	
-	public SomeValuesFrom createDataPropertyRange(DataPropertyExpression role);
+	public DataPropertyRangeExpression createDataPropertyRange(DataPropertyExpression role);
 	
 	
 	public FunctionalPropertyAxiom createPropertyFunctionalAxiom(PropertyExpression role);
 	
-	public DisjointClassesAxiom createDisjointClassesAxiom(Set<SubClassExpression> classes);
+	public DisjointClassesAxiom createDisjointClassesAxiom(Set<ClassExpression> classes);
 	
 	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Set<PropertyExpression> props);
 	

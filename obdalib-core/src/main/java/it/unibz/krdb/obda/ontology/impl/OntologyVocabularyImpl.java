@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -126,6 +127,9 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		}
 		else if (desc instanceof SomeValuesFrom) {
 			checkSignature(((SomeValuesFrom) desc).getProperty());
+		}
+		else if (desc instanceof DataPropertyRangeExpression) {
+			checkSignature(((DataPropertyRangeExpression) desc).getProperty());
 		}
 		else 
 			throw new UnsupportedOperationException("Cant understand: " + desc);

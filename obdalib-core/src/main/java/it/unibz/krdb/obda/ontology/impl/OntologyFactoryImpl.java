@@ -30,6 +30,8 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
@@ -41,7 +43,7 @@ import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
-import it.unibz.krdb.obda.ontology.SubClassExpression;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
@@ -86,13 +88,18 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public SubClassOfAxiom createSubClassAxiom(SubClassExpression concept1, BasicClassDescription concept2) {
+	public SubClassOfAxiom createSubClassAxiom(ClassExpression concept1, BasicClassDescription concept2) {
 		return new SubClassOfAxiomImpl(concept1, concept2);
 	}
 
 	@Override
-	public SomeValuesFrom createDataPropertyRange(DataPropertyExpression role) {
-		return new PropertySomeRestrictionImpl(role.getInverse());
+	public SubClassOfAxiom createSubClassAxiom(DataRangeExpression concept1, DataRangeExpression concept2) {
+		return new SubClassOfAxiomImpl(concept1, concept2);
+	}
+	
+	@Override
+	public DataPropertyRangeExpression createDataPropertyRange(DataPropertyExpression role) {
+		return new DataPropertyRangeExpressionImpl(role.getInverse());
 	}
 	
 	@Override
@@ -143,7 +150,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public DisjointClassesAxiom createDisjointClassesAxiom(Set<SubClassExpression> classes) {
+	public DisjointClassesAxiom createDisjointClassesAxiom(Set<ClassExpression> classes) {
 		return new DisjointClassesAxiomImpl(classes);
 	}
 
@@ -156,7 +163,4 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	public SomeValuesFrom createPropertySomeRestriction(PropertyExpression role) {
 		return new PropertySomeRestrictionImpl(role);
 	}
-
-
-
 }

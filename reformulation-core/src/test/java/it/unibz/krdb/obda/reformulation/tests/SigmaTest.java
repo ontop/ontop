@@ -50,8 +50,8 @@ public class SigmaTest extends TestCase {
         PropertyExpression rprop = descFactory.createObjectProperty("r");
         SomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
  
-        ontology.addSubClassOfAxiomWithRefencedEntities(er, ac);
-        ontology.addSubClassOfAxiomWithRefencedEntities(cc, er);
+        ontology.addSubClassOfAxiomWithReferencedEntities(er, ac);
+        ontology.addSubClassOfAxiomWithReferencedEntities(cc, er);
 
        
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);

@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
@@ -41,7 +42,7 @@ import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
-import it.unibz.krdb.obda.ontology.SubClassExpression;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -299,14 +300,14 @@ public class OWLAPI3Translator {
 
 					OWLEquivalentClassesAxiom aux = (OWLEquivalentClassesAxiom) axiom;
 					Set<OWLClassExpression> equivalents = aux.getClassExpressions();
-					List<SubClassExpression> vec = getSubclassExpressions(equivalents);
+					List<ClassExpression> vec = getSubclassExpressions(equivalents);
 
 					addConceptEquivalences(dl_onto, vec);
 
 				} else if (axiom instanceof OWLSubClassOfAxiom) {
 
 					OWLSubClassOfAxiom aux = (OWLSubClassOfAxiom) axiom;
-					SubClassExpression subDescription = getSubclassExpression(aux.getSubClass());
+					ClassExpression subDescription = getSubclassExpression(aux.getSubClass());
 					List<BasicClassDescription> superDescriptions = getSuperclassExpressions(aux.getSuperClass(), dl_onto);
 
 					addSubclassAxioms(dl_onto, subDescription, superDescriptions);
@@ -326,7 +327,7 @@ public class OWLAPI3Translator {
 					OWLDataPropertyRangeAxiom aux = (OWLDataPropertyRangeAxiom) axiom;
 					DataPropertyExpression role = getRoleExpression(aux.getProperty());
 
-					SomeValuesFrom subclass = ofac.createDataPropertyRange(role);
+					DataPropertyRangeExpression subclass = ofac.createDataPropertyRange(role);
 
 					if (aux.getRange().isDatatype()) {
 						OWLDatatype rangeDatatype = aux.getRange().asOWLDatatype();
@@ -335,7 +336,8 @@ public class OWLAPI3Translator {
 
 							Predicate.COL_TYPE columnType = getColumnType(rangeDatatype);
 							Datatype datatype = ofac.createDataType(dfac.getTypePredicate(columnType));
-							addSubclassAxiom(dl_onto, subclass, datatype);
+							SubClassOfAxiom inc = ofac.createSubClassAxiom(subclass, datatype);
+							dl_onto.add(inc);
 						} else {
 							log.warn("Ignoring range axiom since it refers to a non-supported datatype: " + axiom.toString());
 						}
@@ -530,10 +532,10 @@ public class OWLAPI3Translator {
 	}
 	
 	private void processAxiom(Ontology dl_onto, OWLDisjointClassesAxiom aux) throws TranslationException {
-		Set<SubClassExpression> disjointClasses = new HashSet<SubClassExpression>();
+		Set<ClassExpression> disjointClasses = new HashSet<ClassExpression>();
 		for (OWLClassExpression oc : aux.getClassExpressionsAsList()) {
 			BasicClassDescription c = getSubclassExpression(oc);
-			disjointClasses.add((SubClassExpression) c);
+			disjointClasses.add((ClassExpression) c);
 		}
 		
 		DisjointClassesAxiom disj = ofac.createDisjointClassesAxiom(disjointClasses);				
@@ -571,7 +573,7 @@ public class OWLAPI3Translator {
 		dl_onto.add(disj);		
 	}
 	
-	private void addSubclassAxiom(Ontology dl_onto, SubClassExpression subDescription, BasicClassDescription superDescription) {
+	private void addSubclassAxiom(Ontology dl_onto, ClassExpression subDescription, BasicClassDescription superDescription) {
 		if (superDescription == null || subDescription == null) {
 			log.warn("NULL: {} {}", subDescription, superDescription);
 		}
@@ -587,14 +589,14 @@ public class OWLAPI3Translator {
 		dl_onto.add(inc);
 	}
 
-	private void addSubclassAxioms(Ontology dl_onto, SubClassExpression subDescription, List<BasicClassDescription> superDescriptions) {
+	private void addSubclassAxioms(Ontology dl_onto, ClassExpression subDescription, List<BasicClassDescription> superDescriptions) {
 		for (BasicClassDescription superDescription : superDescriptions) {
 			addSubclassAxiom(dl_onto, subDescription, superDescription);
 		}
 	}
 
-	private List<SubClassExpression> getSubclassExpressions(Collection<OWLClassExpression> owlExpressions) throws TranslationException {
-		List<SubClassExpression> descriptions = new LinkedList<SubClassExpression>();
+	private List<ClassExpression> getSubclassExpressions(Collection<OWLClassExpression> owlExpressions) throws TranslationException {
+		List<ClassExpression> descriptions = new LinkedList<ClassExpression>();
 		for (OWLClassExpression OWLClassExpression : owlExpressions) {
 			descriptions.add(getSubclassExpression(OWLClassExpression));
 		}
@@ -618,11 +620,11 @@ public class OWLAPI3Translator {
 
 	}
 
-	private void addConceptEquivalences(Ontology ontology, List<SubClassExpression> roles) {
+	private void addConceptEquivalences(Ontology ontology, List<ClassExpression> roles) {
 		for (int i = 0; i < roles.size(); i++) {
 			for (int j = i + 1; j < roles.size(); j++) {
-				SubClassExpression subclass = roles.get(i);
-				SubClassExpression superclass = roles.get(j);
+				ClassExpression subclass = roles.get(i);
+				ClassExpression superclass = roles.get(j);
 				SubClassOfAxiom inclusion1 = ofac.createSubClassAxiom(subclass, superclass);
 				ontology.add(inclusion1);
 				SubClassOfAxiom inclusion2 = ofac.createSubClassAxiom(superclass, subclass);
@@ -789,7 +791,7 @@ public class OWLAPI3Translator {
 			DataPropertyExpression role = getRoleExpression(owlProperty);
 
 			OWLDataRange owlFiller = someexp.getFiller();		
-			BasicClassDescription filler = getDataTypeExpression(owlFiller);
+			Datatype filler = getDataTypeExpression(owlFiller);
 
 			DataPropertyExpression auxRole = ofac.createDataProperty(OntologyVocabularyImpl.AUXROLEURI + auxRoleCounter);
 			auxRoleCounter += 1;
@@ -803,7 +805,7 @@ public class OWLAPI3Translator {
 			dl_onto.add(subrole);
 			
 			/* Creating the range assertion */
-			SomeValuesFrom propertySomeRestrictionInv = ofac.createDataPropertyRange(exp);
+			DataPropertyRangeExpression propertySomeRestrictionInv = ofac.createDataPropertyRange(exp);
 			SubClassOfAxiom subclass = ofac.createSubClassAxiom(propertySomeRestrictionInv, filler);
 			dl_onto.add(subclass);
 		}
@@ -817,8 +819,8 @@ public class OWLAPI3Translator {
 		return ofac.createDataType(dfac.getTypePredicate(datatype));
 	}
 
-	private SubClassExpression getSubclassExpression(OWLClassExpression owlExpression) throws TranslationException {
-		SubClassExpression cd = null;
+	private ClassExpression getSubclassExpression(OWLClassExpression owlExpression) throws TranslationException {
+		ClassExpression cd = null;
 		if (owlExpression instanceof OWLClass) {
 			String uri = ((OWLClass) owlExpression).getIRI().toString();
 			cd = ofac.createClass(uri);

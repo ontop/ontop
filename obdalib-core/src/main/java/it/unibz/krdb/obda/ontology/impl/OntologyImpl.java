@@ -23,6 +23,8 @@ package it.unibz.krdb.obda.ontology.impl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
@@ -35,7 +37,7 @@ import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
-import it.unibz.krdb.obda.ontology.SubClassExpression;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
@@ -90,6 +92,9 @@ public class OntologyImpl implements Ontology {
 			// NO-OP
 			// datatypes.add((Datatype) desc);
 		}
+		else if (desc instanceof DataPropertyRangeExpression) {
+			addReferencedEntries(((DataPropertyRangeExpression) desc).getProperty());			
+		}
 		else 
 			throw new UnsupportedOperationException("Cant understand: " + desc.toString());
 	}
@@ -102,16 +107,23 @@ public class OntologyImpl implements Ontology {
 	}
 	
 	@Override
-	public void addSubClassOfAxiomWithRefencedEntities(SubClassExpression concept1, BasicClassDescription concept2) {	
+	public void addSubClassOfAxiomWithReferencedEntities(ClassExpression concept1, ClassExpression concept2) {	
 		SubClassOfAxiom assertion = ofac.createSubClassAxiom(concept1, concept2);
 		addReferencedEntries(assertion.getSub());
 		addReferencedEntries(assertion.getSuper());
 		subClassAxioms.add(assertion);
 	}
 
+	@Override
+	public void addSubClassOfAxiomWithReferencedEntities(DataRangeExpression concept1, DataRangeExpression concept2) {
+		SubClassOfAxiom assertion = ofac.createSubClassAxiom(concept1, concept2);
+		addReferencedEntries(assertion.getSub());
+		addReferencedEntries(assertion.getSuper());
+		subClassAxioms.add(assertion);
+	}
 	
 	@Override
-	public void addSubPropertyOfAxiomWithRefencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including) {
+	public void addSubPropertyOfAxiomWithReferencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including) {
 		SubPropertyOfAxiom assertion = ofac.createSubPropertyAxiom(included, including);
 		addReferencedEntries(assertion.getSub());
 		addReferencedEntries(assertion.getSuper());
@@ -119,7 +131,7 @@ public class OntologyImpl implements Ontology {
 	}
 	
 	@Override
-	public void addSubPropertyOfAxiomWithRefencedEntities(DataPropertyExpression included, DataPropertyExpression including) {
+	public void addSubPropertyOfAxiomWithReferencedEntities(DataPropertyExpression included, DataPropertyExpression including) {
 		SubPropertyOfAxiom assertion = ofac.createSubPropertyAxiom(included, including);
 		addReferencedEntries(assertion.getSub());
 		addReferencedEntries(assertion.getSuper());
@@ -143,8 +155,8 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void add(DisjointClassesAxiom assertion) {	
-		Set<SubClassExpression> classes = assertion.getClasses();
-		for (SubClassExpression c : classes)
+		Set<ClassExpression> classes = assertion.getClasses();
+		for (ClassExpression c : classes)
 			vocabulary.checkSignature(c);
 		disjointClassesAxioms.add(assertion);
 	}

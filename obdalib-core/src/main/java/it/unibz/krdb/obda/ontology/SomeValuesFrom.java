@@ -32,7 +32,7 @@ package it.unibz.krdb.obda.ontology;
  * Corresponds to DL "exists Property"
  */
 
-public interface SomeValuesFrom extends SubClassExpression {
+public interface SomeValuesFrom extends ClassExpression {
 
 	public PropertyExpression getProperty();	
 

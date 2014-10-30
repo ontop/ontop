@@ -82,11 +82,17 @@ public class MappingDataTypeRepair {
         TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
 
             @Override
-            public void onInclusion(PropertyExpression sub, PropertyExpression sup) {
+            public void onInclusion(ObjectPropertyExpression sub, ObjectPropertyExpression sup) {
+            }
+            @Override
+            public void onInclusion(DataPropertyExpression sub, DataPropertyExpression sup) {
+            }
+            @Override
+            public void onInclusion(ClassExpression sub, ClassExpression sup) {
             }
 
             @Override
-            public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
+            public void onInclusion(DataRangeExpression sub, DataRangeExpression sup) {
                 //if sup is a datatype property  we store it in the map
                 //it means that sub is of datatype sup
             	if (sup instanceof Datatype) {
@@ -96,9 +102,9 @@ public class MappingDataTypeRepair {
             			// datatype inclusion
             			key = ((Datatype)sub).getPredicate();
             		}
-            		else if (sub instanceof SomeValuesFrom) {
+            		else if (sub instanceof DataPropertyRangeExpression) {
             			// range 
-            			key = ((SomeValuesFrom)sub).getProperty().getPredicate();
+            			key = ((DataPropertyRangeExpression)sub).getProperty().getPredicate();
             		}
             		else
             			return;

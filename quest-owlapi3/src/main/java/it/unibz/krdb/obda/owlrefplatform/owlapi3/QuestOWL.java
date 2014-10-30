@@ -36,7 +36,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SubClassExpression;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
@@ -640,10 +640,10 @@ public class QuestOWL extends OWLReasonerBase {
 			while (isConsistent && it.hasNext()) {		
 				// TODO: handle complex class expressions and many pairs of disjoint classes
 				DisjointClassesAxiom dda = it.next();
-				Set<SubClassExpression> disj = dda.getClasses();
-				Iterator<SubClassExpression> classIterator = disj.iterator();
-				SubClassExpression s1 = classIterator.next();
-				SubClassExpression s2 = classIterator.next();
+				Set<ClassExpression> disj = dda.getClasses();
+				Iterator<ClassExpression> classIterator = disj.iterator();
+				ClassExpression s1 = classIterator.next();
+				ClassExpression s2 = classIterator.next();
 				String strQuery = String.format(strQueryClass, s1, s2);
 				
 				isConsistent = executeConsistencyQuery(strQuery);
