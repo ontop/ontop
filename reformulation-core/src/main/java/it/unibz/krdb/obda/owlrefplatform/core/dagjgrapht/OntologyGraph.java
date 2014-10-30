@@ -23,7 +23,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
@@ -54,12 +56,12 @@ public class OntologyGraph {
 		DefaultDirectedGraph<PropertyExpression,DefaultEdge> graph 
 							= new  DefaultDirectedGraph<PropertyExpression,DefaultEdge>(DefaultEdge.class);
 				
-		for (PropertyExpression role : ontology.getVocabulary().getObjectProperties()) {
+		for (ObjectPropertyExpression role : ontology.getVocabulary().getObjectProperties()) {
 			graph.addVertex(role);
 			graph.addVertex(role.getInverse());
 		}
 		
-		for (PropertyExpression role : ontology.getVocabulary().getDataProperties()) {
+		for (DataPropertyExpression role : ontology.getVocabulary().getDataProperties()) {
 			graph.addVertex(role);
 			graph.addVertex(role.getInverse());
 		}

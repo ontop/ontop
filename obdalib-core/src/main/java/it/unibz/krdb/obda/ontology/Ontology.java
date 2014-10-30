@@ -25,34 +25,28 @@ import java.util.Set;
 
 public interface Ontology extends Cloneable, Serializable {
 
-	public void addAxiom(SubClassOfAxiom assertion);
+	public void addSubClassOfAxiomWithRefencedEntities(SubClassExpression concept1, BasicClassDescription concept2);
 
-	public void addAxiom(SubPropertyOfAxiom assertion);
+	public void addSubPropertyOfAxiomWithRefencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including);
 
-	public void addAxiom(DisjointClassesAxiom assertion);
+	public void addSubPropertyOfAxiomWithRefencedEntities(DataPropertyExpression included, DataPropertyExpression including);
 
-	public void addAxiom(DisjointPropertiesAxiom assertion);
-
-	public void addAxiom(FunctionalPropertyAxiom assertion);
-
-	public void addAxiom(ClassAssertion assertion);
-
-	public void addAxiom(PropertyAssertion assertion);
 	
-	@Deprecated
-	public void addAssertionWithCheck(SubClassOfAxiom assertion);
-	@Deprecated
-	public void addAssertionWithCheck(SubPropertyOfAxiom assertion);
-	@Deprecated
-	public void addAssertionWithCheck(DisjointClassesAxiom assertion);
-	@Deprecated
-	public void addAssertionWithCheck(DisjointPropertiesAxiom assertion);
-	@Deprecated
-	public void addAssertionWithCheck(FunctionalPropertyAxiom assertion);
-	@Deprecated
-	public void addAssertionWithCheck(ClassAssertion assertion);
-	@Deprecated
-	public void addAssertionWithCheck(PropertyAssertion assertion);
+	
+	
+	public void add(SubClassOfAxiom assertion);
+
+	public void add(SubPropertyOfAxiom assertion);
+
+	public void add(DisjointClassesAxiom assertion);
+
+	public void add(DisjointPropertiesAxiom assertion);
+
+	public void add(FunctionalPropertyAxiom assertion);
+
+	public void add(ClassAssertion assertion);
+
+	public void add(PropertyAssertion assertion);
 
 
 	

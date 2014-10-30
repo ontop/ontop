@@ -21,6 +21,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
  */
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
@@ -87,8 +89,10 @@ public class SigmaTBoxOptimizer {
 				public void onInclusion(PropertyExpression sub, PropertyExpression sup) {
 					if (sub != sup) {
 						if (!check_redundant_role(sup, sub)) {
-							SubPropertyOfAxiom axiom = fac.createSubPropertyAxiom(sub, sup);
-							optimizedTBox.addAxiom(axiom);
+							if (sub instanceof ObjectPropertyExpression)
+								optimizedTBox.addSubPropertyOfAxiomWithRefencedEntities((ObjectPropertyExpression)sub, (ObjectPropertyExpression)sup);
+							else
+								optimizedTBox.addSubPropertyOfAxiomWithRefencedEntities((DataPropertyExpression)sub, (DataPropertyExpression)sup);
 						}
 					}
 				}
@@ -97,8 +101,7 @@ public class SigmaTBoxOptimizer {
 				public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
 					if (sub != sup) {
 						if (!sup.equals(sub) && !check_redundant(sup, sub))  {
-							SubClassOfAxiom axiom = fac.createSubClassAxiom((SubClassExpression)sub, sup);
-							optimizedTBox.addAxiom(axiom);
+							optimizedTBox.addSubClassOfAxiomWithRefencedEntities((SubClassExpression)sub, sup);
 						}
 					}
 				}

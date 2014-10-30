@@ -505,8 +505,7 @@ public class CQCUtilitiesTest {
 			Ontology sigma = dfac.createOntology();
 			OClass left = dfac.createClass("A");
 			OClass right = dfac.createClass("C");
-			SubClassOfAxiom inclusion = dfac.createSubClassAxiom(left, right);
-			sigma.addAxiom(inclusion);
+			sigma.addSubClassOfAxiomWithRefencedEntities(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
 			Function body1 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -532,8 +531,7 @@ public class CQCUtilitiesTest {
 			OClass left = dfac.createClass("A");
 			PropertyExpression pright = dfac.createObjectProperty("R");
 			SomeValuesFrom right = dfac.createPropertySomeRestriction(pright);
-			SubClassOfAxiom inclusion = dfac.createSubClassAxiom(left, right);
-			sigma.addAxiom(inclusion);
+			sigma.addSubClassOfAxiomWithRefencedEntities(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
 			Function body1 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -559,8 +557,7 @@ public class CQCUtilitiesTest {
 			OClass left = dfac.createClass("A");
 			PropertyExpression pright = dfac.createObjectProperty("R").getInverse();
 			SomeValuesFrom right = dfac.createPropertySomeRestriction(pright);
-			SubClassOfAxiom inclusion =  dfac.createSubClassAxiom(left, right);
-			sigma.addAxiom(inclusion);
+			sigma.addSubClassOfAxiomWithRefencedEntities(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
 			Function body1 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -587,8 +584,7 @@ public class CQCUtilitiesTest {
 			SomeValuesFrom left = dfac.createPropertySomeRestriction(pleft);
 			OClass right = dfac.createClass("A");
 
-			SubClassOfAxiom inclusion = dfac.createSubClassAxiom(left, right);
-			sigma.addAxiom(inclusion);
+			sigma.addSubClassOfAxiomWithRefencedEntities(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
 			Function body1 = tfac.getFunction(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
@@ -614,9 +610,7 @@ public class CQCUtilitiesTest {
 			PropertyExpression pleft = dfac.createObjectProperty("R").getInverse();
 			SomeValuesFrom left = dfac.createPropertySomeRestriction(pleft);
 			OClass right = dfac.createClass("A");
-
-			SubClassOfAxiom inclusion = dfac.createSubClassAxiom(left, right);
-			sigma.addAxiom(inclusion);
+			sigma.addSubClassOfAxiomWithRefencedEntities(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
 			Function body1 = tfac.getFunction(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
@@ -665,8 +659,7 @@ public class CQCUtilitiesTest {
         OClass left = dfac.createClass("A");
         PropertyExpression pleft = dfac.createObjectProperty("R");
         SomeValuesFrom right = dfac.createPropertySomeRestriction(pleft);
-        SubClassOfAxiom inclusion = OntologyFactoryImpl.getInstance().createSubClassAxiom(left, right);
-        sigma.addAxiom(inclusion);
+        sigma.addSubClassOfAxiomWithRefencedEntities(left, right);
 
 
         // Query 1 q(x) :- R(x,y), A(x)

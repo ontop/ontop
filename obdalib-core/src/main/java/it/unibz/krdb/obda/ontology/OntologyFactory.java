@@ -49,7 +49,7 @@ public interface OntologyFactory {
 
 	public SubPropertyOfAxiom createSubPropertyAxiom(DataPropertyExpression included, DataPropertyExpression including);
 
-	@Deprecated // used in YAGO and twice in TBoxTraversal applications
+	@Deprecated // used only in YAGOTest 
 	public SubPropertyOfAxiom createSubPropertyAxiom(PropertyExpression included, PropertyExpression including);
 	
 	

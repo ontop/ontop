@@ -350,7 +350,7 @@ public class OWLAPI3Translator {
 					DataPropertyExpression superrole = getRoleExpression(aux.getSuperProperty());
 
 					SubPropertyOfAxiom roleinc = ofac.createSubPropertyAxiom(subrole, superrole);
-					dl_onto.addAssertionWithCheck(roleinc);
+					dl_onto.add(roleinc);
 
 				} else if (axiom instanceof OWLEquivalentDataPropertiesAxiom) {
 
@@ -377,7 +377,7 @@ public class OWLAPI3Translator {
 					PropertyExpression role = getRoleExpression(aux.getProperty());
 					FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(role);
 
-					dl_onto.addAssertionWithCheck(funct);
+					dl_onto.add(funct);
 
 				} else if (axiom instanceof OWLInverseObjectPropertiesAxiom) {
 					if (profile.order() < LanguageProfile.OWL2QL.order())
@@ -393,10 +393,10 @@ public class OWLAPI3Translator {
 					ObjectPropertyExpression invrole2 = role2.getInverse();
 
 					SubPropertyOfAxiom inc1 = ofac.createSubPropertyAxiom(role1, invrole2);
-					SubPropertyOfAxiom inc2 = ofac.createSubPropertyAxiom(role2, invrole1);
+					dl_onto.add(inc1);
 
-					dl_onto.addAssertionWithCheck(inc1);
-					dl_onto.addAssertionWithCheck(inc2);
+					SubPropertyOfAxiom inc2 = ofac.createSubPropertyAxiom(role2, invrole1);
+					dl_onto.add(inc2);
 
 				} else if (axiom instanceof OWLSymmetricObjectPropertyAxiom) {
 					if (profile.order() < LanguageProfile.OWL2QL.order())
@@ -408,7 +408,7 @@ public class OWLAPI3Translator {
 
 					SubPropertyOfAxiom symm = ofac.createSubPropertyAxiom(invrole, role);
 
-					dl_onto.addAssertionWithCheck(symm);
+					dl_onto.add(symm);
 
 				} else if (axiom instanceof OWLObjectPropertyDomainAxiom) {
 
@@ -423,8 +423,8 @@ public class OWLAPI3Translator {
 				} else if (axiom instanceof OWLObjectPropertyRangeAxiom) {
 
 					OWLObjectPropertyRangeAxiom aux = (OWLObjectPropertyRangeAxiom) axiom;
-					PropertyExpression role = getRoleExpression(aux.getProperty());
-					PropertyExpression inv = role.getInverse();
+					ObjectPropertyExpression role = getRoleExpression(aux.getProperty());
+					ObjectPropertyExpression inv = role.getInverse();
 					
 					SomeValuesFrom subclass = ofac.createPropertySomeRestriction(inv);
 					List<BasicClassDescription> superDescriptions = getSuperclassExpressions(aux.getRange(), dl_onto);
@@ -438,27 +438,26 @@ public class OWLAPI3Translator {
 					ObjectPropertyExpression superrole = getRoleExpression(aux.getSuperProperty());
 
 					SubPropertyOfAxiom roleinc = ofac.createSubPropertyAxiom(subrole, superrole);
-
-					dl_onto.addAssertionWithCheck(roleinc);
+					dl_onto.add(roleinc);
 
 				} else if (axiom instanceof OWLFunctionalObjectPropertyAxiom) {
 					if (profile.order() < LanguageProfile.OWL2QL.order())
 						throw new TranslationException();
 					OWLFunctionalObjectPropertyAxiom aux = (OWLFunctionalObjectPropertyAxiom) axiom;
 					PropertyExpression role = getRoleExpression(aux.getProperty());
+					
 					FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(role);
-
-					dl_onto.addAssertionWithCheck(funct);
+					dl_onto.add(funct);
 					
 				} else if (axiom instanceof OWLInverseFunctionalObjectPropertyAxiom) {
 					if (profile.order() < LanguageProfile.OWL2QL.order())
 						throw new TranslationException();
 					OWLInverseFunctionalObjectPropertyAxiom aux = (OWLInverseFunctionalObjectPropertyAxiom) axiom;
-					PropertyExpression role = getRoleExpression(aux.getProperty());
-					PropertyExpression invrole = role.getInverse();
+					ObjectPropertyExpression role = getRoleExpression(aux.getProperty());
+					ObjectPropertyExpression invrole = role.getInverse();
 					FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(invrole);
 
-					dl_onto.addAssertionWithCheck(funct);
+					dl_onto.add(funct);
 
 				} else if (axiom instanceof OWLDisjointClassesAxiom) {
 					processAxiom(dl_onto, (OWLDisjointClassesAxiom) axiom);
@@ -538,7 +537,7 @@ public class OWLAPI3Translator {
 		}
 		
 		DisjointClassesAxiom disj = ofac.createDisjointClassesAxiom(disjointClasses);				
-		dl_onto.addAssertionWithCheck(disj);
+		dl_onto.add(disj);
 	}
 
 	private void processAxiom(Ontology dl_onto, OWLDisjointDataPropertiesAxiom aux) throws TranslationException {
@@ -548,7 +547,7 @@ public class OWLAPI3Translator {
 			disjointProperties.add(p);
 		}
 		DisjointPropertiesAxiom disj = ofac.createDisjointPropertiesAxiom(disjointProperties);
-		dl_onto.addAssertionWithCheck(disj);		
+		dl_onto.add(disj);		
 	}
 	
 	private void processAxiom(Ontology dl_onto, OWLDisjointObjectPropertiesAxiom aux) throws TranslationException {
@@ -558,18 +557,18 @@ public class OWLAPI3Translator {
 			disjointProperties.add(p);
 		}
 		DisjointPropertiesAxiom disj = ofac.createDisjointPropertiesAxiom(disjointProperties);				
-		dl_onto.addAssertionWithCheck(disj);		
+		dl_onto.add(disj);		
 	}
 	
 	private void processAxiom(Ontology dl_onto, OWLAsymmetricObjectPropertyAxiom aux) throws TranslationException {
 		Set<PropertyExpression> disjointProperties = new HashSet<PropertyExpression>();
 		OWLObjectPropertyExpression prop = aux.getProperty(); 
-		PropertyExpression p = getRoleExpression(prop);
+		ObjectPropertyExpression p = getRoleExpression(prop);
 		disjointProperties.add(p);
 		disjointProperties.add(p.getInverse());
 		
 		DisjointPropertiesAxiom disj = ofac.createDisjointPropertiesAxiom(disjointProperties);				
-		dl_onto.addAssertionWithCheck(disj);		
+		dl_onto.add(disj);		
 	}
 	
 	private void addSubclassAxiom(Ontology dl_onto, SubClassExpression subDescription, BasicClassDescription superDescription) {
@@ -585,7 +584,7 @@ public class OWLAPI3Translator {
 			}
 		}
 		SubClassOfAxiom inc = ofac.createSubClassAxiom(subDescription, superDescription);
-		dl_onto.addAssertionWithCheck(inc);
+		dl_onto.add(inc);
 	}
 
 	private void addSubclassAxioms(Ontology dl_onto, SubClassExpression subDescription, List<BasicClassDescription> superDescriptions) {
@@ -625,9 +624,9 @@ public class OWLAPI3Translator {
 				SubClassExpression subclass = roles.get(i);
 				SubClassExpression superclass = roles.get(j);
 				SubClassOfAxiom inclusion1 = ofac.createSubClassAxiom(subclass, superclass);
-				ontology.addAssertionWithCheck(inclusion1);
+				ontology.add(inclusion1);
 				SubClassOfAxiom inclusion2 = ofac.createSubClassAxiom(superclass, subclass);
-				ontology.addAssertionWithCheck(inclusion2);
+				ontology.add(inclusion2);
 			}
 		}
 	}
@@ -638,9 +637,9 @@ public class OWLAPI3Translator {
 				DataPropertyExpression subrole = roles.get(i);
 				DataPropertyExpression superole = roles.get(j);
 				SubPropertyOfAxiom inclusion1 = ofac.createSubPropertyAxiom(subrole, superole);
-				ontology.addAssertionWithCheck(inclusion1);
+				ontology.add(inclusion1);
 				SubPropertyOfAxiom inclusion2 = ofac.createSubPropertyAxiom(superole, subrole);
-				ontology.addAssertionWithCheck(inclusion2);
+				ontology.add(inclusion2);
 			}
 		}
 	}
@@ -651,9 +650,9 @@ public class OWLAPI3Translator {
 				ObjectPropertyExpression subrole = roles.get(i);
 				ObjectPropertyExpression superole = roles.get(j);
 				SubPropertyOfAxiom inclusion1 = ofac.createSubPropertyAxiom(subrole, superole);
-				ontology.addAssertionWithCheck(inclusion1);
+				ontology.add(inclusion1);
 				SubPropertyOfAxiom inclusion2 = ofac.createSubPropertyAxiom(superole, subrole);
-				ontology.addAssertionWithCheck(inclusion2);
+				ontology.add(inclusion2);
 			}
 		}
 	}
@@ -765,13 +764,13 @@ public class OWLAPI3Translator {
 
 			/* Creating the new subrole assertions */
 			SubPropertyOfAxiom subrole = ofac.createSubPropertyAxiom(exp, role);
-			dl_onto.addAssertionWithCheck(subrole);
+			dl_onto.add(subrole);
 			
 			/* Creating the range assertion */
 			PropertyExpression expInv = exp.getInverse();
 			SomeValuesFrom propertySomeRestrictionInv = ofac.createPropertySomeRestriction(expInv);
 			SubClassOfAxiom subclass = ofac.createSubClassAxiom(propertySomeRestrictionInv, filler);
-			dl_onto.addAssertionWithCheck(subclass);
+			dl_onto.add(subclass);
 		}
 
 		return auxclass;
@@ -801,13 +800,12 @@ public class OWLAPI3Translator {
 
 			/* Creating the new subrole assertions */
 			SubPropertyOfAxiom subrole = ofac.createSubPropertyAxiom(auxRole, role);
-			dl_onto.addAssertionWithCheck(subrole);
+			dl_onto.add(subrole);
 			
 			/* Creating the range assertion */
-			PropertyExpression expInv = exp.getInverse();
-			SomeValuesFrom propertySomeRestrictionInv = ofac.createPropertySomeRestriction(expInv);
+			SomeValuesFrom propertySomeRestrictionInv = ofac.createDataPropertyRange(exp);
 			SubClassOfAxiom subclass = ofac.createSubClassAxiom(propertySomeRestrictionInv, filler);
-			dl_onto.addAssertionWithCheck(subclass);
+			dl_onto.add(subclass);
 		}
 
 		return auxclass;
@@ -932,7 +930,7 @@ public class OWLAPI3Translator {
 	private void processAxiom(Ontology dl_onto, OWLClassAssertionAxiom aux) {
 		ClassAssertion a = translate(aux);
 		if (a != null)
-			dl_onto.addAssertionWithCheck(a);
+			dl_onto.add(a);
 	}
 	
 	public ClassAssertion translate(OWLClassAssertionAxiom aux) {
@@ -964,7 +962,7 @@ public class OWLAPI3Translator {
 	
 	private void processAxiom(Ontology dl_onto, OWLObjectPropertyAssertionAxiom aux) {
 		PropertyAssertion assertion = translate(aux);
-		dl_onto.addAssertionWithCheck(assertion);
+		dl_onto.add(assertion);
 	}
 	
 	public PropertyAssertion translate(OWLObjectPropertyAssertionAxiom aux) {
@@ -1006,7 +1004,7 @@ public class OWLAPI3Translator {
 	
 	private void processAxiom(Ontology dl_onto, OWLDataPropertyAssertionAxiom aux) {
 		PropertyAssertion assertion = translate(aux);
-		dl_onto.addAssertionWithCheck(assertion);
+		dl_onto.add(assertion);
 	}
 	
 	public PropertyAssertion translate(OWLDataPropertyAssertionAxiom aux) {

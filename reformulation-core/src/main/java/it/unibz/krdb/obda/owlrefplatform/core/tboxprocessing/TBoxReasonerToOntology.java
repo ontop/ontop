@@ -1,6 +1,8 @@
 package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
@@ -23,8 +25,10 @@ public class TBoxReasonerToOntology {
 			@Override
 			public void onInclusion(PropertyExpression sub, PropertyExpression sup) {
 				if (sub != sup) {
-					SubPropertyOfAxiom ax = fac.createSubPropertyAxiom(sub, sup);
-					sigma.addAxiom(ax);						
+					if (sub instanceof ObjectPropertyExpression)
+						sigma.addSubPropertyOfAxiomWithRefencedEntities((ObjectPropertyExpression)sub, (ObjectPropertyExpression)sup);
+					else
+						sigma.addSubPropertyOfAxiomWithRefencedEntities((DataPropertyExpression)sub, (DataPropertyExpression)sup);
 				}
 			}
 
@@ -32,8 +36,7 @@ public class TBoxReasonerToOntology {
 			public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
 				if (sub != sup) {
 					if (!excludeExistentials || !(sup instanceof SomeValuesFrom)) {
-						SubClassOfAxiom ax = fac.createSubClassAxiom((SubClassExpression)sub, sup);
-						sigma.addAxiom(ax);						
+						sigma.addSubClassOfAxiomWithRefencedEntities((SubClassExpression)sub, sup);						
 					}
 				}
 			}

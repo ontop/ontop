@@ -216,9 +216,9 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			result.getVocabulary().merge(o.getVocabulary());
 			
 			for (SubPropertyOfAxiom ax : result.getSubPropertyAxioms())  // TODO (ROMAN): check whether it's result and not o
-				result.addAssertionWithCheck(ax);
+				result.add(ax);
 			for (SubClassOfAxiom ax : result.getSubClassAxioms())  // TODO (ROMAN): check whether it's result and not o
-				result.addAssertionWithCheck(ax);
+				result.add(ax);
 		}
 		return result;
 	}

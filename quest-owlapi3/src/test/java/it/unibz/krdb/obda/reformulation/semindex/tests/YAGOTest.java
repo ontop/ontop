@@ -88,13 +88,13 @@ public class YAGOTest {
                     PropertyExpression psprop = descFactory.createProperty(subject).getInverse();
                     SomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
                     OClass co = descFactory.createClass(object);
-                    onto.addAssertionWithCheck(descFactory.createSubClassAxiom(rs, co));
+                    onto.add(descFactory.createSubClassAxiom(rs, co));
                 } 
                 else if ("rdfs:domain".equals(predicate)) {
                     PropertyExpression psprop = descFactory.createProperty(subject);
                     SomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
                     OClass co = descFactory.createClass(object);
-                    onto.addAssertionWithCheck(descFactory.createSubClassAxiom(rs, co));
+                    onto.add(descFactory.createSubClassAxiom(rs, co));
                 } 
                 else if ("rdf:type".equals(predicate)) {
                     // a rdf:type A |= A(a)
@@ -104,12 +104,12 @@ public class YAGOTest {
                 else if ("rdfs:subClassOf".equals(predicate)) {
                     OClass cs = descFactory.createClass(subject);
                     OClass co = descFactory.createClass(object);
-                    onto.addAssertionWithCheck(descFactory.createSubClassAxiom(cs, co));
+                    onto.add(descFactory.createSubClassAxiom(cs, co));
                 } 
                 else if ("rdfs:subPropertyOf".equals(predicate)) {
                     PropertyExpression rs = descFactory.createProperty(subject);
                     PropertyExpression ro = descFactory.createProperty(object);
-                    onto.addAssertionWithCheck(descFactory.createSubPropertyAxiom(rs, ro));
+                    onto.add(descFactory.createSubPropertyAxiom(rs, ro));
                 } else {
 //                    log.debug(predicate);
                 }

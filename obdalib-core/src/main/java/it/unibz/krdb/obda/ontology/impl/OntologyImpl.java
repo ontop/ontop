@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
@@ -44,6 +45,8 @@ import java.util.Set;
 public class OntologyImpl implements Ontology {
 
 	private static final long serialVersionUID = 758424053258299151L;
+	
+	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	private final OntologyVocabularyImpl vocabulary = new OntologyVocabularyImpl();
 	
@@ -99,70 +102,47 @@ public class OntologyImpl implements Ontology {
 	}
 	
 	@Override
-	public void addAxiom(SubClassOfAxiom assertion) {
+	public void addSubClassOfAxiomWithRefencedEntities(SubClassExpression concept1, BasicClassDescription concept2) {	
+		SubClassOfAxiom assertion = ofac.createSubClassAxiom(concept1, concept2);
 		addReferencedEntries(assertion.getSub());
 		addReferencedEntries(assertion.getSuper());
 		subClassAxioms.add(assertion);
 	}
 
+	
 	@Override
-	public void addAxiom(SubPropertyOfAxiom assertion) {
+	public void addSubPropertyOfAxiomWithRefencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including) {
+		SubPropertyOfAxiom assertion = ofac.createSubPropertyAxiom(included, including);
+		addReferencedEntries(assertion.getSub());
+		addReferencedEntries(assertion.getSuper());
+		subPropertyAxioms.add(assertion);
+	}
+	
+	@Override
+	public void addSubPropertyOfAxiomWithRefencedEntities(DataPropertyExpression included, DataPropertyExpression including) {
+		SubPropertyOfAxiom assertion = ofac.createSubPropertyAxiom(included, including);
 		addReferencedEntries(assertion.getSub());
 		addReferencedEntries(assertion.getSuper());
 		subPropertyAxioms.add(assertion);
 	}
 
-	@Override
-	public void addAxiom(DisjointClassesAxiom assertion) {
-		Set<SubClassExpression> classes = assertion.getClasses();
-		for (SubClassExpression c : classes)
-			addReferencedEntries(c);
-		disjointClassesAxioms.add(assertion);
-	}
-
-	@Override
-	public void addAxiom(DisjointPropertiesAxiom assertion) {
-		Set<PropertyExpression> props = assertion.getProperties();
-		for (PropertyExpression p : props)
-			addReferencedEntries(p);
-		disjointPropertiesAxioms.add(assertion);
-	}
-
-	@Override
-	public void addAxiom(FunctionalPropertyAxiom assertion) {
-		addReferencedEntries(assertion.getProperty());
-		functionalityAxioms.add(assertion);
-	}
-
-	@Override
-	public void addAxiom(ClassAssertion assertion) {
-		addReferencedEntries(assertion.getConcept());
-		classAssertions.add(assertion);
-	}
-
-	@Override
-	public void addAxiom(PropertyAssertion assertion) {
-		addReferencedEntries(assertion.getProperty());
-		propertyAssertions.add(assertion);
-	}
-	
 	
 	@Override
-	public void addAssertionWithCheck(SubClassOfAxiom assertion) {		
+	public void add(SubClassOfAxiom assertion) {		
 		vocabulary.checkSignature(assertion.getSub());
 		vocabulary.checkSignature(assertion.getSuper());
 		subClassAxioms.add(assertion);
 	}
 
 	@Override
-	public void addAssertionWithCheck(SubPropertyOfAxiom assertion) {
+	public void add(SubPropertyOfAxiom assertion) {
 		vocabulary.checkSignature(assertion.getSub());
 		vocabulary.checkSignature(assertion.getSuper());
 		subPropertyAxioms.add(assertion);
 	}
 
 	@Override
-	public void addAssertionWithCheck(DisjointClassesAxiom assertion) {	
+	public void add(DisjointClassesAxiom assertion) {	
 		Set<SubClassExpression> classes = assertion.getClasses();
 		for (SubClassExpression c : classes)
 			vocabulary.checkSignature(c);
@@ -170,7 +150,7 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public void addAssertionWithCheck(DisjointPropertiesAxiom assertion) {
+	public void add(DisjointPropertiesAxiom assertion) {
 		Set<PropertyExpression> props = assertion.getProperties();
 		for (PropertyExpression p : props)
 			vocabulary.checkSignature(p);
@@ -178,19 +158,19 @@ public class OntologyImpl implements Ontology {
 	}
 	
 	@Override
-	public void addAssertionWithCheck(FunctionalPropertyAxiom assertion) {
+	public void add(FunctionalPropertyAxiom assertion) {
 		vocabulary.checkSignature(assertion.getProperty());
 		functionalityAxioms.add(assertion);
 	}
 	
 	@Override
-	public void addAssertionWithCheck(ClassAssertion assertion) {
+	public void add(ClassAssertion assertion) {
 		vocabulary.checkSignature(assertion.getConcept());
 		classAssertions.add(assertion);
 	}
 
 	@Override
-	public void addAssertionWithCheck(PropertyAssertion assertion) {
+	public void add(PropertyAssertion assertion) {
 		vocabulary.checkSignature(assertion.getProperty());
 		propertyAssertions.add(assertion);
 	}

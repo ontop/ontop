@@ -64,8 +64,8 @@ public class DAGChainTest extends TestCase {
 		OClass bc = descFactory.createClass("b");
 		OClass cc = descFactory.createClass("c");
 
-		ontology.addAxiom(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, ac));
-		ontology.addAxiom(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, bc));
+		ontology.addSubClassOfAxiomWithRefencedEntities(bc, ac);
+		ontology.addSubClassOfAxiomWithRefencedEntities(cc, bc);
 
 		TBoxReasonerImpl reasoner0 = new TBoxReasonerImpl(ontology);
 		TBoxReasoner reasoner = TBoxReasonerImpl.getChainReasoner(reasoner0);
@@ -94,8 +94,8 @@ public class DAGChainTest extends TestCase {
 		SomeValuesFrom ier = descFactory.createPropertySomeRestriction(riprop);
 		OClass cc = descFactory.createClass("c");
 
-		ontology.addAxiom(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
-		ontology.addAxiom(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
+		ontology.addSubClassOfAxiomWithRefencedEntities(er, ac);
+		ontology.addSubClassOfAxiomWithRefencedEntities(cc, ier);
 		
 		//generate Graph
 		TBoxReasonerImpl res0 = new  TBoxReasonerImpl(ontology);
@@ -145,10 +145,10 @@ public class DAGChainTest extends TestCase {
 		OClass bc = descFactory.createClass("b");
 		OClass dc = descFactory.createClass("d");
 
-		ontology.addAxiom(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
-		ontology.addAxiom(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
-		ontology.addAxiom(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, er));
-		ontology.addAxiom(OntologyFactoryImpl.getInstance().createSubClassAxiom(ier, dc));
+		ontology.addSubClassOfAxiomWithRefencedEntities(er, ac);
+		ontology.addSubClassOfAxiomWithRefencedEntities(cc, ier);
+		ontology.addSubClassOfAxiomWithRefencedEntities(bc, er);
+		ontology.addSubClassOfAxiomWithRefencedEntities(ier, dc);
 
 		//DAGImpl dag221 = DAGBuilder.getDAG(ontology);
 		//TBoxReasonerImpl reasoner221 = new TBoxReasonerImpl(dag221);
