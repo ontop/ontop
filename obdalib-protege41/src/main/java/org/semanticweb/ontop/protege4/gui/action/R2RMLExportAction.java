@@ -50,7 +50,7 @@ public class R2RMLExportAction extends ProtegeAction {
 	@Override
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit)getEditorKit();		
-		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModelFacade();
+		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModelWrapper();
 		modelManager = editorKit.getOWLModelManager();
 	}
 

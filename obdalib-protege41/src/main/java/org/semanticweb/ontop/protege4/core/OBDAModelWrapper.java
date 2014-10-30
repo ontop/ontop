@@ -3,11 +3,17 @@ package org.semanticweb.ontop.protege4.core;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
+import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
+import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.io.PrefixManager;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.protege4.panels.DatasourceSelector;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
 import java.net.URI;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +39,15 @@ public class OBDAModelWrapper {
         return obdaModel;
     }
 
+    public void parseOBDAModel(Reader reader) throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
+        MappingParser mappingParser = nativeQLFactory.create(reader);
+        obdaModel = mappingParser.getOBDAModel();
+    }
+
+    public void parseOBDAModel(File file) throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
+        MappingParser mappingParser = nativeQLFactory.create(file);
+        obdaModel = mappingParser.getOBDAModel();
+    }
 
     public PrefixManager getPrefixManager() {
         return obdaModel.getPrefixManager();

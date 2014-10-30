@@ -87,7 +87,7 @@ public class BootstrapAction extends ProtegeAction {
 	public void actionPerformed(ActionEvent e) {
 
 		currentOnto = owlManager.getActiveOntology();
-		currentModel = modelManager.getActiveOBDAModelFacade();
+		currentModel = modelManager.getActiveOBDAModelWrapper();
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));

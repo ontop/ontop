@@ -62,7 +62,7 @@ public class MappingAssistantView extends AbstractOWLViewComponent implements OB
 		apic = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		apic.addListener(this);
 
-		OBDAModelWrapper dsController = apic.getActiveOBDAModelFacade();
+		OBDAModelWrapper dsController = apic.getActiveOBDAModelWrapper();
 
 		MappingAssistantPanel queryPanel = new MappingAssistantPanel(dsController);
 		datasourceSelector = new DatasourceSelector(dsController);
@@ -103,6 +103,6 @@ public class MappingAssistantView extends AbstractOWLViewComponent implements OB
 
 	@Override
 	public void activeOntologyChanged() {
-		datasourceSelector.setDatasourceController(apic.getActiveOBDAModelFacade());
+		datasourceSelector.setDatasourceController(apic.getActiveOBDAModelWrapper());
 	}
 }

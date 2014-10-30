@@ -66,7 +66,7 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 		apic = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		apic.addListener(this);
 
-		OBDAModelWrapper dsController = apic.getActiveOBDAModelFacade();
+		OBDAModelWrapper dsController = apic.getActiveOBDAModelWrapper();
 
 		SQLQueryPanel queryPanel = new SQLQueryPanel();
 		datasourceSelector = new DatasourceSelector(dsController);
@@ -107,6 +107,6 @@ public class SQLQueryInterfaceView extends AbstractOWLViewComponent implements O
 
 	@Override
 	public void activeOntologyChanged() {
-		datasourceSelector.setDatasourceController(apic.getActiveOBDAModelFacade());
+		datasourceSelector.setDatasourceController(apic.getActiveOBDAModelWrapper());
 	}
 }

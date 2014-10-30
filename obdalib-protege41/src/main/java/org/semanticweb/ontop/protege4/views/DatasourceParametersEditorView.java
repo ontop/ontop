@@ -56,7 +56,7 @@ public class DatasourceParametersEditorView extends AbstractOWLViewComponent imp
 		apic = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		apic.addListener(this);
 
-		panel = new DatasourceParameterEditorPanel(apic.getActiveOBDAModelFacade());
+		panel = new DatasourceParameterEditorPanel(apic.getActiveOBDAModelWrapper());
 		panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 		
 		setLayout(new GridBagLayout());
@@ -77,6 +77,6 @@ public class DatasourceParametersEditorView extends AbstractOWLViewComponent imp
 
 	@Override
 	public void activeOntologyChanged() {
-		panel.setDatasourcesController(apic.getActiveOBDAModelFacade());
+		panel.setDatasourcesController(apic.getActiveOBDAModelWrapper());
 	}
 }

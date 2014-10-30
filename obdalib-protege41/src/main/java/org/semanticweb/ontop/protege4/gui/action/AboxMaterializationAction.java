@@ -95,7 +95,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 		editorKit = (OWLEditorKit)getEditorKit();
 		workspace = editorKit.getWorkspace();	
 		modelManager = editorKit.getOWLModelManager();
-		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModelFacade();
+		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModelWrapper();
 	}
 
 	@Override

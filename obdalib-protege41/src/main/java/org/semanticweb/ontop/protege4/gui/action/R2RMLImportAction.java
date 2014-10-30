@@ -64,7 +64,7 @@ public class R2RMLImportAction extends ProtegeAction {
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit) getEditorKit();
 		obdaModelController = ((OBDAModelManager) editorKit.get(OBDAModelImpl.class
-				.getName())).getActiveOBDAModelFacade();
+				.getName())).getActiveOBDAModelWrapper();
 
         /**
          * OBDA properties for building a R2RML mapping parser

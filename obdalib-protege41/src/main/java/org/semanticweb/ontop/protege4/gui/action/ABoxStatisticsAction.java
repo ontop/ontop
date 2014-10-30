@@ -49,7 +49,7 @@ public class ABoxStatisticsAction extends ProtegeAction {
 	@Override
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit)getEditorKit();		
-		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModelFacade();
+		obdaModel = ((OBDAModelManager)editorKit.get(OBDAModelImpl.class.getName())).getActiveOBDAModelWrapper();
 		statistics = new VirtualABoxStatistics(obdaModel.getCurrentImmutableOBDAModel());
 	}
 

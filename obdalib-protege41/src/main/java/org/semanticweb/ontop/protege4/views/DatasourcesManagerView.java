@@ -53,7 +53,7 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 
 		setLayout(new BorderLayout());
 
-		editor = new DatasourceParameterEditorPanel(apic.getActiveOBDAModelFacade());
+		editor = new DatasourceParameterEditorPanel(apic.getActiveOBDAModelWrapper());
 		add(editor, BorderLayout.NORTH);
 
 		log.debug("Datasource browser initialized");
@@ -61,6 +61,6 @@ public class DatasourcesManagerView extends AbstractOWLViewComponent implements 
 
 	@Override
 	public void activeOntologyChanged() {
-		editor.setDatasourcesController(apic.getActiveOBDAModelFacade());
+		editor.setDatasourcesController(apic.getActiveOBDAModelWrapper());
 	}
 }
