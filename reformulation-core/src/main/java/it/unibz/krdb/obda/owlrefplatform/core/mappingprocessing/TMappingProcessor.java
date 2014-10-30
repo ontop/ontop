@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
-import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
@@ -55,11 +54,6 @@ import java.util.Set;
 public class TMappingProcessor {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-
-	/** List of predicates that need to be excluded from T-Mappings **/
-	// Davide> I moved the initialization out of the constructor, as
-	//         the field became static due to some changes
-	private static List<SimplePredicate> excludeFromTMappings = new ArrayList<SimplePredicate>();
 
 	private static class TMappingIndexEntry implements Iterable<TMappingRule> {
 		private final Set<TMappingRule> rules = new HashSet<TMappingRule>();
@@ -247,20 +241,6 @@ public class TMappingProcessor {
 	}
 
 	/**
-	 * Davide> This methods allows to specify whether T-Mapping should
-	 *         be disabled for certain predicates
-	 * @param originalMappings
-	 * @param reasoner
-	 * @param full
-	 * @param excludeFromTMappings
-	 * @return
-	 */
-	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, List<SimplePredicate> excludeFromTMappings){
-		TMappingProcessor.excludeFromTMappings.addAll(excludeFromTMappings);
-		return getTMappings(originalMappings, reasoner, full);
-	}
-	
-	/**
 	 * 
 	 * @param originalMappings
 	 * @param reasoner
@@ -307,14 +287,6 @@ public class TMappingProcessor {
 			if (current.isInverse())
 				continue;
 			
-			// Davide> Let's skip?
-			SimplePredicate curSimp = new SimplePredicate(current.getPredicate());
-			
-			if(excludeFromTMappings.contains(curSimp)) {
-				// Skip this guy
-				continue;
-			}				
-
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
@@ -390,14 +362,6 @@ public class TMappingProcessor {
 				continue;
 
 			OClass current = (OClass)classSet.getRepresentative();
-
-			// Davide> Let's skip?
-			SimplePredicate curSimp = new SimplePredicate(current.getPredicate());
-			
-			if (excludeFromTMappings.contains(curSimp)) {
-				// Skip this guy
-				continue;
-			}	
 
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();

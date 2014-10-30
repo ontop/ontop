@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -68,16 +67,6 @@ public class QuestUnfolder {
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
-	/** Davide> Exclude specific predicates from T-Mapping approach **/
-	private List<SimplePredicate> excludeFromTMappings;
-	
-	/** Davide> Whether to exclude the user-supplied predicates from the
-	 *          TMapping procedure (that is, the mapping assertions for 
-	 *          those predicates should not be extended according to the 
-	 *          TBox hierarchies
-	 */
-	private boolean applyExcludeFromTMappings = false;
-
 	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata)
 	{
 		this.metadata = metadata;	
@@ -86,30 +75,7 @@ public class QuestUnfolder {
 
 		unfoldingProgram = analyzer.constructDatalogProgram(mappings);
 	}
-	
-	/**
-	 * The extra parameter <b>excludeFromTMappings</b> defines a list
-	 * of predicates for which the T-Mappings procedure should be 
-	 * disabled.
-	 *  
-	 * @author Davide
-	 * @param mappings
-	 * @param metadata
-	 * @param excludeFromTMappings
-	 */
-	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata, List<SimplePredicate> excludeFromTMappings)
-	{
-		this.metadata = metadata;		
 		
-		analyzer = new Mapping2DatalogConverter(metadata);
-
-		unfoldingProgram = analyzer.constructDatalogProgram(mappings);
-		
-		// Davide>T-Mappings handling
-		this.excludeFromTMappings = excludeFromTMappings;
-		this.applyExcludeFromTMappings = true;
-	}
-	
 	public List<CQIE> getRules() {
 		return unfoldingProgram;
 	}
@@ -139,13 +105,7 @@ public class QuestUnfolder {
 		
 		final long startTime = System.currentTimeMillis();
 		
-		// Davide> Here now I put another TMappingProcessor taking
-		//         also a list of Predicates as input, that represents
-		//         what needs to be excluded from the T-Mappings
-		if (applyExcludeFromTMappings)
-			unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full, excludeFromTMappings);
-		else
-			unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full);
+		unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full);
 		
 		// Eliminating redundancy from the unfolding program
 		// TODO: move the foreign-key optimisation inside t-mapping generation 
