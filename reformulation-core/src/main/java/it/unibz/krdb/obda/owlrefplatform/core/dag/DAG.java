@@ -34,9 +34,11 @@ import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 @Deprecated
 public class DAG implements Serializable {
@@ -79,7 +81,7 @@ public class DAG implements Serializable {
 	 */
 	public DAG(Ontology ontology) {
 
-		int rolenodes = ontology.getRoles().size() * 2;
+		int rolenodes = (ontology.getObjectProperties().size() + ontology.getDataProperties().size()) * 2;
 
 		int classnodes = ontology.getClasses().size() + rolenodes * 2;
 
@@ -103,7 +105,11 @@ public class DAG implements Serializable {
 		/*
 		 * For each role we add nodes for its inverse, its domain and its range
 		 */
-		for (PropertyExpression role : ontology.getRoles()) {
+		Set<PropertyExpression> allroles = new HashSet<PropertyExpression>();
+		allroles.addAll(ontology.getObjectProperties());
+		allroles.addAll(ontology.getDataProperties());
+		
+		for (PropertyExpression role : allroles) {
 			DAGNode rolenode = new DAGNode(role);
 
 			roles.put(role, rolenode);

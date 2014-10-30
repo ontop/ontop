@@ -160,8 +160,8 @@ public class R2rmlCheckerTest {
 			assertEquals(conceptOBDA, conceptR2rml);
 		}
 
-		log.debug("Comparing roles");
-		for (PropertyExpression prop : onto.getRoles()) {
+		log.debug("Comparing object properties");
+		for (PropertyExpression prop : onto.getObjectProperties()) {
 			Predicate role = prop.getPredicate();
 			
 			log.debug("description " + role);
@@ -170,10 +170,21 @@ public class R2rmlCheckerTest {
 			int roleR2rml = runSPARQLRolesQuery("<" + role.getName() + ">",
 					reasonerR2rml.getConnection());
 
-			assertEquals(roleOBDA, roleR2rml);
-			
+			assertEquals(roleOBDA, roleR2rml);			
 		}
 
+		log.debug("Comparing data properties");
+		for (PropertyExpression prop : onto.getDataProperties()) {
+			Predicate role = prop.getPredicate();
+			
+			log.debug("description " + role);
+			int roleOBDA = runSPARQLRolesQuery("<" + role.getName() + ">",
+					reasonerOBDA.getConnection());
+			int roleR2rml = runSPARQLRolesQuery("<" + role.getName() + ">",
+					reasonerR2rml.getConnection());
+
+			assertEquals(roleOBDA, roleR2rml);			
+		}
 	}
 
 	/**

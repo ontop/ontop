@@ -30,7 +30,9 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -58,13 +60,13 @@ public class MappingVocabularyRepair {
 
 	Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
 
-	public void fixOBDAModel(OBDAModel model, Set<OClass> concepts, Set<PropertyExpression> roles) {
+	public void fixOBDAModel(OBDAModel model, Set<OClass> concepts, Set<ObjectPropertyExpression> roles1, Set<DataPropertyExpression> roles2) {
 		log.debug("Fixing OBDA Model");
 		for (OBDADataSource source : model.getSources()) {
 			Collection<OBDAMappingAxiom> mappings = new LinkedList<OBDAMappingAxiom>(model.getMappings(source.getSourceID()));
 			model.removeAllMappings(source.getSourceID());
 			try {
-				model.addMappings(source.getSourceID(), fixMappingPredicates(mappings, concepts, roles));
+				model.addMappings(source.getSourceID(), fixMappingPredicates(mappings, concepts, roles1, roles2));
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -79,15 +81,17 @@ public class MappingVocabularyRepair {
 	 * @param equivalencesMap
 	 * @return
 	 */
-	public Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, Set<OClass> concepts, Set<PropertyExpression> roles) {
+	public Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, Set<OClass> concepts, Set<ObjectPropertyExpression> roles1, Set<DataPropertyExpression> roles2) {
 		//		log.debug("Reparing/validating {} mappings", originalMappings.size());
 		HashMap<String, Predicate> urimap = new HashMap<String, Predicate>();
-		for (OClass p : concepts) {
+		for (OClass p : concepts) 
 			urimap.put(p.getPredicate().getName(), p.getPredicate());
-		}
-		for (PropertyExpression p : roles) {
+
+		for (ObjectPropertyExpression p : roles1) 
 			urimap.put(p.getPredicate().getName(), p.getPredicate());
-		}
+		
+		for (DataPropertyExpression p : roles2) 
+			urimap.put(p.getPredicate().getName(), p.getPredicate());
 
 		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
 		for (OBDAMappingAxiom mapping : originalMappings) {

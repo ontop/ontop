@@ -28,11 +28,13 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.LanguageProfile;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
@@ -237,7 +239,7 @@ public class OWLAPI3Translator {
 			 */
 
 			if (p.isClass()) {
-				dl_onto.addClass(ofac.createClass(p.getName()));
+				dl_onto.declareClass(ofac.createClass(p.getName()));
 
 			} else {
 				if (p.isObjectProperty()) {
@@ -245,14 +247,14 @@ public class OWLAPI3Translator {
 						punnedPredicates.add(p.getName());
 					} else {
 						objectproperties.add(p.getName());
-						dl_onto.addRole(ofac.createObjectProperty(p.getName()));
+						dl_onto.declareObjectProperty(ofac.createObjectProperty(p.getName()));
 					}
 				} else {
 					if (objectproperties.contains(p.getName())) {
 						punnedPredicates.add(p.getName().toString());
 					} else {
 						dataproperties.add(p.getName());
-						dl_onto.addRole(ofac.createDataProperty(p.getName()));
+						dl_onto.declareDataProperty(ofac.createDataProperty(p.getName()));
 					}
 				}
 			}
@@ -321,7 +323,7 @@ public class OWLAPI3Translator {
 				} else if (axiom instanceof OWLDataPropertyRangeAxiom) {
 
 					OWLDataPropertyRangeAxiom aux = (OWLDataPropertyRangeAxiom) axiom;
-					PropertyExpression role = getRoleExpression(aux.getProperty());
+					DataPropertyExpression role = getRoleExpression(aux.getProperty());
 
 					SomeValuesFrom subclass = ofac.createDataPropertyRange(role);
 
@@ -343,8 +345,8 @@ public class OWLAPI3Translator {
 				} else if (axiom instanceof OWLSubDataPropertyOfAxiom) {
 
 					OWLSubDataPropertyOfAxiom aux = (OWLSubDataPropertyOfAxiom) axiom;
-					PropertyExpression subrole = getRoleExpression(aux.getSubProperty());
-					PropertyExpression superrole = getRoleExpression(aux.getSuperProperty());
+					DataPropertyExpression subrole = getRoleExpression(aux.getSubProperty());
+					DataPropertyExpression superrole = getRoleExpression(aux.getSuperProperty());
 
 					SubPropertyOfAxiom roleinc = ofac.createSubPropertyAxiom(subrole, superrole);
 					dl_onto.addAssertionWithCheck(roleinc);
@@ -355,8 +357,8 @@ public class OWLAPI3Translator {
 						throw new TranslationException();
 
 					OWLEquivalentDataPropertiesAxiom aux = (OWLEquivalentDataPropertiesAxiom) axiom;
-					List<PropertyExpression> vec = getDataRoleExpressions(aux.getProperties());
-					addRoleEquivalences(dl_onto, vec);
+					List<DataPropertyExpression> vec = getDataRoleExpressions(aux.getProperties());
+					addRoleEquivalencesD(dl_onto, vec);
 
 				} else if (axiom instanceof OWLEquivalentObjectPropertiesAxiom) {
 
@@ -364,8 +366,8 @@ public class OWLAPI3Translator {
 						throw new TranslationException();
 
 					OWLEquivalentObjectPropertiesAxiom aux = (OWLEquivalentObjectPropertiesAxiom) axiom;
-					List<PropertyExpression> vec = getObjectRoleExpressions(aux.getProperties());
-					addRoleEquivalences(dl_onto, vec);
+					List<ObjectPropertyExpression> vec = getObjectRoleExpressions(aux.getProperties());
+					addRoleEquivalencesO(dl_onto, vec);
 
 				} else if (axiom instanceof OWLFunctionalDataPropertyAxiom) {
 					if (profile.order() < LanguageProfile.DLLITEA.order())
@@ -383,11 +385,11 @@ public class OWLAPI3Translator {
 					OWLInverseObjectPropertiesAxiom aux = (OWLInverseObjectPropertiesAxiom) axiom;
 					OWLObjectPropertyExpression exp1 = aux.getFirstProperty();
 					OWLObjectPropertyExpression exp2 = aux.getSecondProperty();
-					PropertyExpression role1 = getRoleExpression(exp1);
-					PropertyExpression role2 = getRoleExpression(exp2);
+					ObjectPropertyExpression role1 = getRoleExpression(exp1);
+					ObjectPropertyExpression role2 = getRoleExpression(exp2);
 
-					PropertyExpression invrole1 = role1.getInverse();
-					PropertyExpression invrole2 = role2.getInverse();
+					ObjectPropertyExpression invrole1 = role1.getInverse();
+					ObjectPropertyExpression invrole2 = role2.getInverse();
 
 					SubPropertyOfAxiom inc1 = ofac.createSubPropertyAxiom(role1, invrole2);
 					SubPropertyOfAxiom inc2 = ofac.createSubPropertyAxiom(role2, invrole1);
@@ -400,8 +402,8 @@ public class OWLAPI3Translator {
 						throw new TranslationException();
 					OWLSymmetricObjectPropertyAxiom aux = (OWLSymmetricObjectPropertyAxiom) axiom;
 					OWLObjectPropertyExpression exp1 = aux.getProperty();
-					PropertyExpression role = getRoleExpression(exp1);
-					PropertyExpression invrole = role.getInverse();
+					ObjectPropertyExpression role = getRoleExpression(exp1);
+					ObjectPropertyExpression invrole = role.getInverse();
 
 					SubPropertyOfAxiom symm = ofac.createSubPropertyAxiom(invrole, role);
 
@@ -431,8 +433,8 @@ public class OWLAPI3Translator {
 				} else if (axiom instanceof OWLSubObjectPropertyOfAxiom) {
 
 					OWLSubObjectPropertyOfAxiom aux = (OWLSubObjectPropertyOfAxiom) axiom;
-					PropertyExpression subrole = getRoleExpression(aux.getSubProperty());
-					PropertyExpression superrole = getRoleExpression(aux.getSuperProperty());
+					ObjectPropertyExpression subrole = getRoleExpression(aux.getSubProperty());
+					ObjectPropertyExpression superrole = getRoleExpression(aux.getSuperProperty());
 
 					SubPropertyOfAxiom roleinc = ofac.createSubPropertyAxiom(subrole, superrole);
 
@@ -490,14 +492,14 @@ public class OWLAPI3Translator {
 						if (!entity.asOWLClass().isOWLThing()) {
 
 							String uri = entity.asOWLClass().getIRI().toString();
-							dl_onto.addClass(ofac.createClass(uri));
+							dl_onto.declareClass(ofac.createClass(uri));
 						}
 					} else if (entity instanceof OWLObjectProperty) {
 						String uri = entity.asOWLObjectProperty().getIRI().toString();
-						dl_onto.addRole(ofac.createObjectProperty(uri));
+						dl_onto.declareObjectProperty(ofac.createObjectProperty(uri));
 					} else if (entity instanceof OWLDataProperty) {
 						String uri = entity.asOWLDataProperty().getIRI().toString();
-						dl_onto.addRole(ofac.createDataProperty(uri));
+						dl_onto.declareDataProperty(ofac.createDataProperty(uri));
 					} else if (entity instanceof OWLIndividual) {
 						/*
 						 * NO OP, individual declarations are ignored silently
@@ -599,8 +601,8 @@ public class OWLAPI3Translator {
 		return descriptions;
 	}
 
-	private PropertyExpression getRoleExpression(OWLObjectPropertyExpression rolExpression) throws TranslationException {
-		PropertyExpression role = null;
+	private ObjectPropertyExpression getRoleExpression(OWLObjectPropertyExpression rolExpression) throws TranslationException {
+		ObjectPropertyExpression role = null;
 
 		if (rolExpression instanceof OWLObjectProperty) {
 			role = ofac.createObjectProperty(rolExpression.asOWLObjectProperty().getIRI().toString());
@@ -629,11 +631,11 @@ public class OWLAPI3Translator {
 		}
 	}
 
-	private void addRoleEquivalences(Ontology ontology, List<PropertyExpression> roles) {
+	private void addRoleEquivalencesD(Ontology ontology, List<DataPropertyExpression> roles) {
 		for (int i = 0; i < roles.size(); i++) {
 			for (int j = i + 1; j < roles.size(); j++) {
-				PropertyExpression subrole = roles.get(i);
-				PropertyExpression superole = roles.get(j);
+				DataPropertyExpression subrole = roles.get(i);
+				DataPropertyExpression superole = roles.get(j);
 				SubPropertyOfAxiom inclusion1 = ofac.createSubPropertyAxiom(subrole, superole);
 				ontology.addAssertionWithCheck(inclusion1);
 				SubPropertyOfAxiom inclusion2 = ofac.createSubPropertyAxiom(superole, subrole);
@@ -642,24 +644,37 @@ public class OWLAPI3Translator {
 		}
 	}
 
-	private List<PropertyExpression> getObjectRoleExpressions(Collection<OWLObjectPropertyExpression> rolExpressions) throws TranslationException {
-		List<PropertyExpression> result = new LinkedList<PropertyExpression>();
+	private void addRoleEquivalencesO(Ontology ontology, List<ObjectPropertyExpression> roles) {
+		for (int i = 0; i < roles.size(); i++) {
+			for (int j = i + 1; j < roles.size(); j++) {
+				ObjectPropertyExpression subrole = roles.get(i);
+				ObjectPropertyExpression superole = roles.get(j);
+				SubPropertyOfAxiom inclusion1 = ofac.createSubPropertyAxiom(subrole, superole);
+				ontology.addAssertionWithCheck(inclusion1);
+				SubPropertyOfAxiom inclusion2 = ofac.createSubPropertyAxiom(superole, subrole);
+				ontology.addAssertionWithCheck(inclusion2);
+			}
+		}
+	}
+
+	private List<ObjectPropertyExpression> getObjectRoleExpressions(Collection<OWLObjectPropertyExpression> rolExpressions) throws TranslationException {
+		List<ObjectPropertyExpression> result = new LinkedList<ObjectPropertyExpression>();
 		for (OWLObjectPropertyExpression rolExpression : rolExpressions) {
 			result.add(getRoleExpression(rolExpression));
 		}
 		return result;
 	}
 
-	private List<PropertyExpression> getDataRoleExpressions(Collection<OWLDataPropertyExpression> rolExpressions) throws TranslationException {
-		List<PropertyExpression> result = new LinkedList<PropertyExpression>();
+	private List<DataPropertyExpression> getDataRoleExpressions(Collection<OWLDataPropertyExpression> rolExpressions) throws TranslationException {
+		List<DataPropertyExpression> result = new LinkedList<DataPropertyExpression>();
 		for (OWLDataPropertyExpression rolExpression : rolExpressions) {
 			result.add(getRoleExpression(rolExpression));
 		}
 		return result;
 	}
 
-	private PropertyExpression getRoleExpression(OWLDataPropertyExpression rolExpression) throws TranslationException {
-		PropertyExpression role = null;
+	private DataPropertyExpression getRoleExpression(OWLDataPropertyExpression rolExpression) throws TranslationException {
+		DataPropertyExpression role = null;
 
 		if (rolExpression instanceof OWLDataProperty) {
 			role = ofac.createDataProperty((rolExpression.asOWLDataProperty().getIRI().toString()));
@@ -731,7 +746,7 @@ public class OWLAPI3Translator {
 			OWLObjectPropertyExpression owlProperty = someexp.getProperty();
 			OWLClassExpression owlFiller = someexp.getFiller();
 			
-			PropertyExpression role = getRoleExpression(owlProperty);
+			ObjectPropertyExpression role = getRoleExpression(owlProperty);
 			BasicClassDescription filler = getSubclassExpression(owlFiller);
 
 			PropertyExpression auxRole = ofac.createObjectProperty(OntologyImpl.AUXROLEURI + auxRoleCounter);
@@ -740,7 +755,7 @@ public class OWLAPI3Translator {
 			// if \exists R.C then exp = P, auxclass = \exists P, P <= R, \exists P^- <= C
 			// if \exists R^-.C then exp = P^-, auxclass = \exists P^-, P <= R, \exists P <= C
 			
-			PropertyExpression exp = ofac.createObjectProperty(auxRole.getPredicate().getName());
+			ObjectPropertyExpression exp = ofac.createObjectProperty(auxRole.getPredicate().getName());
 			if (role.isInverse())
 				exp = exp.getInverse();
 			
@@ -771,16 +786,15 @@ public class OWLAPI3Translator {
 			 */
 			
 			OWLDataPropertyExpression owlProperty = someexp.getProperty();
-			PropertyExpression role = getRoleExpression(owlProperty);
+			DataPropertyExpression role = getRoleExpression(owlProperty);
 
 			OWLDataRange owlFiller = someexp.getFiller();		
 			BasicClassDescription filler = getDataTypeExpression(owlFiller);
 
-			// TODO: changed to data properties
-			PropertyExpression auxRole = ofac.createDataProperty(OntologyImpl.AUXROLEURI + auxRoleCounter);
+			DataPropertyExpression auxRole = ofac.createDataProperty(OntologyImpl.AUXROLEURI + auxRoleCounter);
 			auxRoleCounter += 1;
 
-			PropertyExpression exp = ofac.createDataProperty(auxRole.getPredicate().getName());
+			DataPropertyExpression exp = ofac.createDataProperty(auxRole.getPredicate().getName());
 			auxclass = ofac.createPropertySomeRestriction(exp);
 			auxiliaryDatatypeProperties.put(someexp, auxclass);
 

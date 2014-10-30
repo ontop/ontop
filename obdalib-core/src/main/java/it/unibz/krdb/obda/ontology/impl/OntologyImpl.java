@@ -24,10 +24,12 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
@@ -51,7 +53,9 @@ public class OntologyImpl implements Ontology {
 
 	private final Set<Datatype> datatypes = new HashSet<Datatype>();
 	
-	private final Set<PropertyExpression> roles = new HashSet<PropertyExpression>();
+	private final Set<ObjectPropertyExpression> objectProperties = new HashSet<ObjectPropertyExpression>();
+
+	private final Set<DataPropertyExpression> dataProperties = new HashSet<DataPropertyExpression>();
 	
 	// axioms and assertions
 
@@ -105,16 +109,17 @@ public class OntologyImpl implements Ontology {
 		clone.subClassAxioms.addAll(subClassAxioms);
 		clone.subPropertyAxioms.addAll(subPropertyAxioms);
 		clone.concepts.addAll(concepts);
-		clone.roles.addAll(roles);
+		clone.objectProperties.addAll(objectProperties);
+		clone.dataProperties.addAll(dataProperties);
 		return clone;
 	}
 
 	
 	private void addReferencedEntries(BasicClassDescription desc) {
 		if (desc instanceof OClass) 
-			addClass((OClass) desc);
+			declareClass((OClass) desc);
 		else if (desc instanceof SomeValuesFrom) 
-			addRole(((SomeValuesFrom) desc).getProperty());
+			addReferencedEntries(((SomeValuesFrom) desc).getProperty());
 		else if (desc instanceof Datatype) 
 			datatypes.add((Datatype) desc);
 		else 
@@ -122,10 +127,10 @@ public class OntologyImpl implements Ontology {
 	}
 	
 	private void addReferencedEntries(PropertyExpression prop) {
-		if (prop.isInverse())
-			addRole(prop.getInverse());
+		if (prop instanceof ObjectPropertyExpression) 
+			declareObjectProperty((ObjectPropertyExpression)prop);
 		else
-			addRole(prop);
+			declareDataProperty((DataPropertyExpression)prop);
 	}
 	
 	@Override
@@ -202,16 +207,19 @@ public class OntologyImpl implements Ontology {
 			return;
 
 		if (prop.isInverse()) {
-			if (!roles.contains(prop.getInverse())) 
-				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop.toString());
+			if ((prop instanceof ObjectPropertyExpression) && !objectProperties.contains(prop.getInverse())) 
+				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
+			if ((prop instanceof DataPropertyExpression) && !dataProperties.contains(prop.getInverse())) 
+				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
 		}
 		else {
-			if (!roles.contains(prop)) 
-				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop.toString());			
+			if ((prop instanceof ObjectPropertyExpression) && !objectProperties.contains(prop)) 
+				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);			
+			if ((prop instanceof DataPropertyExpression) && !dataProperties.contains(prop)) 
+				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);			
 		}
 	}
-	
-	
+		
 	@Override
 	public void addAssertionWithCheck(SubClassOfAxiom assertion) {		
 		checkSignature(assertion.getSub());
@@ -302,21 +310,30 @@ public class OntologyImpl implements Ontology {
 		str.append("[Ontology info.");
 		str.append(String.format(" Axioms: %d", subClassAxioms.size() + subPropertyAxioms.size()));
 		str.append(String.format(" Classes: %d", concepts.size()));
-		str.append(String.format(" Properties: %d]", roles.size()));
+		str.append(String.format(" Object Properties: %d", objectProperties.size()));
+		str.append(String.format(" Data Properties: %d]", dataProperties.size()));
 		return str.toString();
 	}
 
 	@Override
-	public void addClass(OClass cd) {
+	public void declareClass(OClass cd) {
 		concepts.add(cd);
 	}
 
 	@Override
-	public void addRole(PropertyExpression rd) {
+	public void declareObjectProperty(ObjectPropertyExpression rd) {
 		if (rd.isInverse())
-			roles.add(rd.getInverse());
+			objectProperties.add(rd.getInverse());
 		else
-			roles.add(rd);
+			objectProperties.add(rd);
+	}
+	
+	@Override
+	public void declareDataProperty(DataPropertyExpression rd) {
+		if (rd.isInverse())
+			dataProperties.add(rd.getInverse());
+		else
+			dataProperties.add(rd);
 	}
 
 	@Override
@@ -325,14 +342,20 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public Set<PropertyExpression> getRoles() {
-		return roles;
+	public Set<ObjectPropertyExpression> getObjectProperties() {
+		return objectProperties;
 	}
 
 	@Override
+	public Set<DataPropertyExpression> getDataProperties() {
+		return dataProperties;
+	}
+	
+	@Override
 	public void merge(Ontology onto) {
 		concepts.addAll(onto.getClasses());
-		roles.addAll(onto.getRoles());
+		objectProperties.addAll(onto.getObjectProperties());
+		dataProperties.addAll(onto.getDataProperties());
 		
 		subClassAxioms.addAll(onto.getSubClassAxioms());
 		subPropertyAxioms.addAll(onto.getSubPropertyAxioms());

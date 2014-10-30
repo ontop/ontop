@@ -26,8 +26,10 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
@@ -255,7 +257,7 @@ public class EmptyEntitiesTest {
 	@Test
 	public void testEmptyRoles() throws Exception {
 		int r = 0; // number of empty roles
-		for (PropertyExpression prop : onto.getRoles()) {
+		for (ObjectPropertyExpression prop : onto.getObjectProperties()) {
 			Predicate role = prop.getPredicate();
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
 				emptyRoles.add(role.getName());
@@ -264,6 +266,15 @@ public class EmptyEntitiesTest {
 		}
 		log.info(r + " Empty role/s: " + emptyRoles);
 
+		r = 0; // number of empty roles
+		for (DataPropertyExpression prop : onto.getDataProperties()) {
+			Predicate role = prop.getPredicate();
+			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
+				emptyRoles.add(role.getName());
+				r++;
+			}
+		}
+		log.info(r + " Empty role/s: " + emptyRoles);
 	}
 
 	/**
@@ -285,7 +296,7 @@ public class EmptyEntitiesTest {
 		log.info(c + " Empty concept/s: " + emptyConcepts);
 
 		int r = 0; // number of empty roles
-		for (PropertyExpression prop : onto.getRoles()) {
+		for (ObjectPropertyExpression prop : onto.getObjectProperties()) {
 			Predicate role = prop.getPredicate();
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
 				emptyRoles.add(role.getName());
@@ -294,6 +305,15 @@ public class EmptyEntitiesTest {
 		}
 		log.info(r + " Empty role/s: " + emptyRoles);
 
+		r = 0; // number of empty roles
+		for (DataPropertyExpression prop : onto.getDataProperties()) {
+			Predicate role = prop.getPredicate();
+			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
+				emptyRoles.add(role.getName());
+				r++;
+			}
+		}
+		log.info(r + " Empty role/s: " + emptyRoles);
 	}
 
 	/**

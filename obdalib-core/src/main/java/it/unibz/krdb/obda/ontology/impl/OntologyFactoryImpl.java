@@ -29,10 +29,12 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
@@ -69,6 +71,16 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 	
 	@Override
+	public SubPropertyOfAxiom createSubPropertyAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including) {
+		return new SubPropertyOfAxiomImpl(included, including);
+	}
+	
+	@Override
+	public SubPropertyOfAxiom createSubPropertyAxiom(DataPropertyExpression included, DataPropertyExpression including) {
+		return new SubPropertyOfAxiomImpl(included, including);
+	}
+	
+	@Override
 	public SubPropertyOfAxiom createSubPropertyAxiom(PropertyExpression included, PropertyExpression including) {
 		return new SubPropertyOfAxiomImpl(included, including);
 	}
@@ -79,9 +91,8 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public SomeValuesFrom createDataPropertyRange(PropertyExpression role) {
-		PropertyExpression prop = new PropertyExpressionImpl(role.getPredicate(), true);
-		return new PropertySomeRestrictionImpl(prop);
+	public SomeValuesFrom createDataPropertyRange(DataPropertyExpression role) {
+		return new PropertySomeRestrictionImpl(role.getInverse());
 	}
 	
 	@Override
@@ -102,22 +113,22 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 
 	@Override
-	public PropertyExpression createObjectProperty(String uri) {
+	public ObjectPropertyExpression createObjectProperty(String uri) {
 		Predicate prop = ofac.getObjectPropertyPredicate(uri);
-		return new PropertyExpressionImpl(prop, false);
+		return new ObjectPropertyExpressionImpl(prop, false);
 	}
 
 	
 	@Override
-	public PropertyExpression createDataProperty(String p) {
+	public DataPropertyExpression createDataProperty(String p) {
 		Predicate prop = ofac.getDataPropertyPredicate(p);
-		return new PropertyExpressionImpl(prop, false);
+		return new DataPropertyExpressionImpl(prop, false);
 	}
 
 	@Override
 	public PropertyExpression createProperty(String uri) {
 		Predicate prop = ofac.getPredicate(uri, 2);
-		return new PropertyExpressionImpl(prop, false);
+		return new ObjectPropertyExpressionImpl(prop, false);
 	}
 
 

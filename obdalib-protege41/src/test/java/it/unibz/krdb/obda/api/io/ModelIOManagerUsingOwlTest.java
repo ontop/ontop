@@ -31,7 +31,9 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -110,11 +112,11 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
             model.declareClass(pred);
         }
         for (OWLObjectProperty r : schoolOntology.getObjectPropertiesInSignature()) {
-        	PropertyExpression pred = ofac.createObjectProperty(r.getIRI().toString());
+        	ObjectPropertyExpression pred = ofac.createObjectProperty(r.getIRI().toString());
             model.declareObjectProperty(pred);
         }
         for (OWLDataProperty p : schoolOntology.getDataPropertiesInSignature()) {
-        	PropertyExpression pred = ofac.createDataProperty(p.getIRI().toString());
+        	DataPropertyExpression pred = ofac.createDataProperty(p.getIRI().toString());
             model.declareDataProperty(pred);
         }
     }

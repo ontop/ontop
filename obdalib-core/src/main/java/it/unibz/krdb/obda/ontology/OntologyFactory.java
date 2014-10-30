@@ -35,21 +35,28 @@ public interface OntologyFactory {
 	@Deprecated // generic property is to be eliminated (used in SemIndex and YAGO)
 	public PropertyExpression createProperty(String uri);
 
-	public PropertyExpression createObjectProperty(String uri);
+	public ObjectPropertyExpression createObjectProperty(String uri);
 	
-	public PropertyExpression createDataProperty(String uri);
+	public DataPropertyExpression createDataProperty(String uri);
 
 	public Ontology createOntology();
 
-	public SubPropertyOfAxiom createSubPropertyAxiom(PropertyExpression included, PropertyExpression including);
 
+	
 	public SubClassOfAxiom createSubClassAxiom(SubClassExpression concept1, BasicClassDescription concept2);
 
+	public SubPropertyOfAxiom createSubPropertyAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including);
 
+	public SubPropertyOfAxiom createSubPropertyAxiom(DataPropertyExpression included, DataPropertyExpression including);
+
+	@Deprecated // used in YAGO and twice in TBoxTraversal applications
+	public SubPropertyOfAxiom createSubPropertyAxiom(PropertyExpression included, PropertyExpression including);
+	
 	
 	public SomeValuesFrom createPropertySomeRestriction(PropertyExpression role);
 	
-	public SomeValuesFrom createDataPropertyRange(PropertyExpression role);
+	public SomeValuesFrom createDataPropertyRange(DataPropertyExpression role);
+	
 	
 	public FunctionalPropertyAxiom createPropertyFunctionalAxiom(PropertyExpression role);
 	
@@ -60,5 +67,6 @@ public interface OntologyFactory {
 	public PropertyAssertion createPropertyAssertion(PropertyExpression attribute, ObjectConstant o1, Constant o2);
 	
 	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant object);
+
 
 }

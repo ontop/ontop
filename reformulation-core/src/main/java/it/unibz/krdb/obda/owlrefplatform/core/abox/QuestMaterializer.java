@@ -29,7 +29,9 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ResultSet;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
@@ -141,7 +143,13 @@ public class QuestMaterializer {
 						&& !vocabulary.contains(p))
 					vocabulary.add(p);
 			}
-			for (PropertyExpression role : onto.getRoles()) {
+			for (ObjectPropertyExpression role : onto.getObjectProperties()) {
+				Predicate p = role.getPredicate();
+				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+						&& !vocabulary.contains(p))
+					vocabulary.add(p);
+			}
+			for (DataPropertyExpression role : onto.getDataProperties()) {
 				Predicate p = role.getPredicate();
 				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 						&& !vocabulary.contains(p))
@@ -171,13 +179,13 @@ public class QuestMaterializer {
 			ontology = ofac.createOntology();
 			
 			for (OClass pred : model.getDeclaredClasses()) 
-				ontology.addClass(pred);				
+				ontology.declareClass(pred);				
 			
-			for (PropertyExpression prop : model.getDeclaredObjectProperties()) 
-				ontology.addRole(prop);
+			for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) 
+				ontology.declareObjectProperty(prop);
 
-			for (PropertyExpression prop : model.getDeclaredDataProperties()) 
-				ontology.addRole(prop);
+			for (DataPropertyExpression prop : model.getDeclaredDataProperties()) 
+				ontology.declareDataProperty(prop);
 		}
 		
 		

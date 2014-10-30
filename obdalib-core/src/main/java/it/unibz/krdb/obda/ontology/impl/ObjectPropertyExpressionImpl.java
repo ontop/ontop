@@ -21,21 +21,21 @@ package it.unibz.krdb.obda.ontology.impl;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 
-public class PropertyExpressionImpl implements PropertyExpression {
+public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 
 	private static final long serialVersionUID = -2514037755762973974L;
 	
 	private final boolean isInverse;
 	private final Predicate predicate;
 	private final String string;
-	private final PropertyExpressionImpl inverseProperty;
+	private final ObjectPropertyExpressionImpl inverseProperty;
 
-	PropertyExpressionImpl(Predicate p, boolean isInverse) {
+	ObjectPropertyExpressionImpl(Predicate p, boolean isInverse) {
 		this.predicate = p;
 		this.isInverse = isInverse;
-		this.inverseProperty = new PropertyExpressionImpl(p, !isInverse, this);
+		this.inverseProperty = new ObjectPropertyExpressionImpl(p, !isInverse, this);
 		StringBuilder bf = new StringBuilder();
 		bf.append(predicate.toString());
 		if (isInverse) 
@@ -43,7 +43,7 @@ public class PropertyExpressionImpl implements PropertyExpression {
 		this.string =  bf.toString();
 	}
 
-	private PropertyExpressionImpl(Predicate p, boolean isInverse, PropertyExpressionImpl inverseProperty) {
+	private ObjectPropertyExpressionImpl(Predicate p, boolean isInverse, ObjectPropertyExpressionImpl inverseProperty) {
 		this.predicate = p;
 		this.isInverse = isInverse;
 		this.inverseProperty = inverseProperty;
@@ -65,15 +65,22 @@ public class PropertyExpressionImpl implements PropertyExpression {
 	}
 	
 	@Override
-	public PropertyExpression getInverse() {
+	public ObjectPropertyExpression getInverse() {
 		return inverseProperty;
 	}	
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof PropertyExpressionImpl) {
-			PropertyExpressionImpl other = (PropertyExpressionImpl) obj;
+		if (obj instanceof ObjectPropertyExpressionImpl) {
+			ObjectPropertyExpressionImpl other = (ObjectPropertyExpressionImpl) obj;
 			return (isInverse == other.isInverse) && predicate.equals(other.predicate);
+		}
+		
+		// the two types of properties share the same name space
+
+		if (obj instanceof DataPropertyExpressionImpl) {
+			DataPropertyExpressionImpl other = (DataPropertyExpressionImpl) obj;
+			return (isInverse == other.isInverse()) && predicate.equals(other.getPredicate());
 		}
 		return false;
 	}

@@ -127,7 +127,7 @@ public class QuestOWLEmptyEntitiesChecker {
 		}
 		log.debug(emptyConcepts.size() + " Empty concept/s: " + emptyConcepts);
 
-		for (PropertyExpression prop : onto.getRoles()) {
+		for (PropertyExpression prop : onto.getObjectProperties()) {
 			Predicate role = prop.getPredicate();
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
 				emptyRoles.add(role);
@@ -135,6 +135,14 @@ public class QuestOWLEmptyEntitiesChecker {
 		}
 		log.debug(emptyRoles.size() + " Empty role/s: " + emptyRoles);
 
+		for (PropertyExpression prop : onto.getDataProperties()) {
+			Predicate role = prop.getPredicate();
+			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
+				emptyRoles.add(role);
+			}
+		}
+		log.debug(emptyRoles.size() + " Empty role/s: " + emptyRoles);
+		
 	}
 
 	private boolean runSPARQLConceptsQuery(String description) throws Exception {

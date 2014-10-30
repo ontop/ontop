@@ -30,7 +30,9 @@ import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -156,8 +158,8 @@ public class DirectMappingEngine {
 		OWLDataFactory dataFactory = manager.getOWLDataFactory();
 		
 		Set<OClass> classset = model.getDeclaredClasses();
-		Set<PropertyExpression> objectset = model.getDeclaredObjectProperties();
-		Set<PropertyExpression> dataset = model.getDeclaredDataProperties();
+		Set<ObjectPropertyExpression> objectset = model.getDeclaredObjectProperties();
+		Set<DataPropertyExpression> dataset = model.getDeclaredDataProperties();
 		
 		//Add all the classes
 		for(Iterator<OClass> it = classset.iterator(); it.hasNext(); ) {
@@ -167,14 +169,14 @@ public class DirectMappingEngine {
 		}
 		
 		//Add all the object properties
-		for(Iterator<PropertyExpression> it = objectset.iterator(); it.hasNext();){
+		for(Iterator<ObjectPropertyExpression> it = objectset.iterator(); it.hasNext();){
 			OWLObjectProperty newclass = dataFactory.getOWLObjectProperty(IRI.create(it.next().getPredicate().getName().toString()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );
 		}
 		
 		//Add all the data properties
-		for(Iterator<PropertyExpression> it = dataset.iterator(); it.hasNext();){
+		for(Iterator<DataPropertyExpression> it = dataset.iterator(); it.hasNext();){
 			OWLDataProperty newclass = dataFactory.getOWLDataProperty(IRI.create(it.next().getPredicate().getName().toString()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );

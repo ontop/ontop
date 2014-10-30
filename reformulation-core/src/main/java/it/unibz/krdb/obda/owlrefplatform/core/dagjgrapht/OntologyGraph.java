@@ -54,10 +54,14 @@ public class OntologyGraph {
 		DefaultDirectedGraph<PropertyExpression,DefaultEdge> graph 
 							= new  DefaultDirectedGraph<PropertyExpression,DefaultEdge>(DefaultEdge.class);
 				
-		for (PropertyExpression role : ontology.getRoles()) {
+		for (PropertyExpression role : ontology.getObjectProperties()) {
 			graph.addVertex(role);
-			PropertyExpression roleInv = role.getInverse();
-			graph.addVertex(roleInv);
+			graph.addVertex(role.getInverse());
+		}
+		
+		for (PropertyExpression role : ontology.getDataProperties()) {
+			graph.addVertex(role);
+			graph.addVertex(role.getInverse());
 		}
 
 		// property inclusions

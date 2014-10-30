@@ -23,7 +23,9 @@ package it.unibz.krdb.obda.model;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.io.PrefixManager;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.querymanager.QueryController;
 
@@ -195,29 +197,29 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	public Set<OClass> getDeclaredClasses();
 
-	public Set<PropertyExpression> getDeclaredObjectProperties();
+	public Set<ObjectPropertyExpression> getDeclaredObjectProperties();
 
-	public Set<PropertyExpression> getDeclaredDataProperties();
+	public Set<DataPropertyExpression> getDeclaredDataProperties();
 
 	
 	public boolean declareClass(OClass classname);
 
-	public boolean declareObjectProperty(PropertyExpression property);
+	public boolean declareObjectProperty(ObjectPropertyExpression property);
 
-	public boolean declareDataProperty(PropertyExpression property);
+	public boolean declareDataProperty(DataPropertyExpression property);
 
 	
 	public boolean unDeclareClass(OClass classname);
 
-	public boolean unDeclareObjectProperty(PropertyExpression property);
+	public boolean unDeclareObjectProperty(ObjectPropertyExpression property);
 
-	public boolean unDeclareDataProperty(PropertyExpression property);
+	public boolean unDeclareDataProperty(DataPropertyExpression property);
 
 	
 	public boolean isDeclaredClass(OClass classname);
 
-	public boolean isDeclaredObjectProperty(PropertyExpression property);
+	public boolean isDeclaredObjectProperty(ObjectPropertyExpression property);
 
-	public boolean isDeclaredDataProperty(PropertyExpression property);
+	public boolean isDeclaredDataProperty(DataPropertyExpression property);
 
 }

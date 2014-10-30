@@ -32,9 +32,10 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OBDAModelValidator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
@@ -209,11 +210,11 @@ public class OBDAModelManager implements Disposable {
 							activeOBDAModel.declareClass(c);
 						} else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
-							PropertyExpression r = ofac.createObjectProperty(or.getIRI().toString());
+							ObjectPropertyExpression r = ofac.createObjectProperty(or.getIRI().toString());
 							activeOBDAModel.declareObjectProperty(r);
 						} else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
-							PropertyExpression p = ofac.createDataProperty(op.getIRI().toString());
+							DataPropertyExpression p = ofac.createDataProperty(op.getIRI().toString());
 							activeOBDAModel.declareDataProperty(p);
 						}
 					}
@@ -229,11 +230,11 @@ public class OBDAModelManager implements Disposable {
 							activeOBDAModel.unDeclareClass(c);
 						} else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
-							PropertyExpression r = ofac.createObjectProperty(or.getIRI().toString());
+							ObjectPropertyExpression r = ofac.createObjectProperty(or.getIRI().toString());
 							activeOBDAModel.unDeclareObjectProperty(r);
 						} else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
-							PropertyExpression p = ofac.createDataProperty(op.getIRI().toString());
+							DataPropertyExpression p = ofac.createDataProperty(op.getIRI().toString());
 							activeOBDAModel.unDeclareDataProperty(p);
 						}
 					}
@@ -345,11 +346,11 @@ public class OBDAModelManager implements Disposable {
 				activeOBDAModel.declareClass(pred);
 			}
 			for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature()) {
-				PropertyExpression pred = ofac.createObjectProperty(r.getIRI().toString());
+				ObjectPropertyExpression pred = ofac.createObjectProperty(r.getIRI().toString());
 				activeOBDAModel.declareObjectProperty(pred);
 			}
 			for (OWLDataProperty p : ontology.getDataPropertiesInSignature()) {
-				PropertyExpression pred = ofac.createDataProperty(p.getIRI().toString());
+				DataPropertyExpression pred = ofac.createDataProperty(p.getIRI().toString());
 				activeOBDAModel.declareDataProperty(pred);
 			}
 		}

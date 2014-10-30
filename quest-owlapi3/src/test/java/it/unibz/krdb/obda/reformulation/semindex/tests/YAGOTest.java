@@ -100,7 +100,7 @@ public class YAGOTest {
                 else if ("rdf:type".equals(predicate)) {
                     // a rdf:type A |= A(a)
                     OClass co = descFactory.createClass(object);
-                    onto.addClass(co);
+                    onto.declareClass(co);
                 }
                 else if ("rdfs:subClassOf".equals(predicate)) {
                     OClass cs = descFactory.createClass(subject);

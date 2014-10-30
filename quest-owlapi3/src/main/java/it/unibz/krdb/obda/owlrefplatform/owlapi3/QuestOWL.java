@@ -28,9 +28,11 @@ import it.unibz.krdb.obda.model.ResultSet;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
@@ -401,16 +403,15 @@ public class QuestOWL extends OWLReasonerBase {
 					log.debug("Loading data from Mappings into the database");
 
 					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-					for (OClass c : translatedOntologyMerge.getClasses()) {
+					for (OClass c : translatedOntologyMerge.getClasses()) 
 						obdaModelForMaterialization.declareClass(c);
-					}
-					for (PropertyExpression prop: translatedOntologyMerge.getRoles()) {
-						Predicate p = prop.getPredicate();
-						if (p.isObjectProperty())
-							obdaModelForMaterialization.declareObjectProperty(prop);
-						else
-							obdaModelForMaterialization.declareDataProperty(prop);							
-					}
+					
+					for (ObjectPropertyExpression prop: translatedOntologyMerge.getObjectProperties()) 
+						obdaModelForMaterialization.declareObjectProperty(prop);
+					
+					for (DataPropertyExpression prop: translatedOntologyMerge.getDataProperties()) 
+						obdaModelForMaterialization.declareDataProperty(prop);							
+					
 					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
 					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
 					int count = st.insertData(assertionIter, 5000, 500);

@@ -33,7 +33,9 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.querymanager.QueryController;
 
@@ -77,9 +79,9 @@ public class OBDAModelImpl implements OBDAModel {
 
 	private final Set<OClass> declaredClasses = new LinkedHashSet<OClass>();
 
-	private final Set<PropertyExpression> declaredObjectProperties = new LinkedHashSet<PropertyExpression>();
+	private final Set<ObjectPropertyExpression> declaredObjectProperties = new LinkedHashSet<ObjectPropertyExpression>();
 
-	private final Set<PropertyExpression> declaredDataProperties = new LinkedHashSet<PropertyExpression>();
+	private final Set<DataPropertyExpression> declaredDataProperties = new LinkedHashSet<DataPropertyExpression>();
 
 	// All other predicates (not classes or properties)
 	// private final LinkedHashSet<Predicate> declaredPredicates = new LinkedHashSet<Predicate>();
@@ -511,12 +513,12 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public Set<PropertyExpression> getDeclaredObjectProperties() {
+	public Set<ObjectPropertyExpression> getDeclaredObjectProperties() {
 		return Collections.unmodifiableSet(declaredObjectProperties);
 	}
 
 	@Override
-	public Set<PropertyExpression> getDeclaredDataProperties() {
+	public Set<DataPropertyExpression> getDeclaredDataProperties() {
 		return Collections.unmodifiableSet(declaredDataProperties);
 	}
 /*
@@ -543,18 +545,18 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public boolean declareObjectProperty(PropertyExpression property) {
-		if (!property.getPredicate().isObjectProperty()) {
-			throw new RuntimeException("Cannot declare a non-object property predicate as an object property. Offending predicate: " + property);
-		}
+	public boolean declareObjectProperty(ObjectPropertyExpression property) {
+//		if (!property.getPredicate().isObjectProperty()) {
+//			throw new RuntimeException("Cannot declare a non-object property predicate as an object property. Offending predicate: " + property);
+//		}
 		return declaredObjectProperties.add(property);
 	}
 
 	@Override
-	public boolean declareDataProperty(PropertyExpression property) {
-		if (!property.getPredicate().isDataProperty()) {
-			throw new RuntimeException("Cannot declare a non-data property predicate as an data property. Offending predicate: " + property);
-		}
+	public boolean declareDataProperty(DataPropertyExpression property) {
+//		if (!property.getPredicate().isDataProperty()) {
+//			throw new RuntimeException("Cannot declare a non-data property predicate as an data property. Offending predicate: " + property);
+//		}
 		return declaredDataProperties.add(property);
 	}
 /*
@@ -569,12 +571,12 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public boolean unDeclareObjectProperty(PropertyExpression property) {
+	public boolean unDeclareObjectProperty(ObjectPropertyExpression property) {
 		return declaredObjectProperties.remove(property);
 	}
 
 	@Override
-	public boolean unDeclareDataProperty(PropertyExpression property) {
+	public boolean unDeclareDataProperty(DataPropertyExpression property) {
 		return declaredDataProperties.remove(property);
 	}
 	
@@ -584,12 +586,12 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public boolean isDeclaredObjectProperty(PropertyExpression property) {
+	public boolean isDeclaredObjectProperty(ObjectPropertyExpression property) {
 		return declaredObjectProperties.contains(property);
 	}
 
 	@Override
-	public boolean isDeclaredDataProperty(PropertyExpression property) {
+	public boolean isDeclaredDataProperty(DataPropertyExpression property) {
 		return declaredDataProperties.contains(property);
 	}
 
