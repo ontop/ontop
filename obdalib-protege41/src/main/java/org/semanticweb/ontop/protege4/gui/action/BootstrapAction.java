@@ -47,7 +47,7 @@ import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.owlapi3.bootstrapping.DirectMappingBootstrapper;
-import org.semanticweb.ontop.protege4.core.OBDAModelFacade;
+import org.semanticweb.ontop.protege4.core.OBDAModelWrapper;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.utils.OBDAProgessMonitor;
 import org.semanticweb.ontop.protege4.utils.OBDAProgressListener;
@@ -64,7 +64,7 @@ public class BootstrapAction extends ProtegeAction {
 	private DirectMappingBootstrapper dm = null;
 	private String baseUri = "";
 	private OWLOntology currentOnto;
-	private OBDAModelFacade currentModel;
+	private OBDAModelWrapper currentModel;
 	private OBDADataSource currentSource;
 
 	private Logger log = LoggerFactory.getLogger(BootstrapAction.class);
@@ -163,7 +163,7 @@ public class BootstrapAction extends ProtegeAction {
 		}
 
 		public void run(String baseUri, OWLOntology currentOnto,
-				OBDAModelFacade currentModel, OBDADataSource currentSource)
+				OBDAModelWrapper currentModel, OBDADataSource currentSource)
 				throws Exception {
 
             // TODO: Retrieve the effective Quest preferences (not just the default ones).

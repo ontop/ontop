@@ -38,14 +38,13 @@ import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
-import org.semanticweb.ontop.injection.OBDAFactoryWithException;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
-import org.semanticweb.ontop.protege4.core.OBDAModelFacade;
+import org.semanticweb.ontop.protege4.core.OBDAModelWrapper;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.r2rml.R2RMLMappingParser;
 import org.slf4j.Logger;
@@ -56,7 +55,7 @@ public class R2RMLImportAction extends ProtegeAction {
 	private static final long serialVersionUID = -1211395039869926309L;
 
 	private OWLEditorKit editorKit = null;
-	private OBDAModelFacade obdaModelController = null;
+	private OBDAModelWrapper obdaModelController = null;
 
 	private Logger log = LoggerFactory.getLogger(R2RMLImportAction.class);
     private NativeQueryLanguageComponentFactory nativeQLFactory;

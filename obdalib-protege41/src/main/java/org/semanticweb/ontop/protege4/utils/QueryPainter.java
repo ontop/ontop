@@ -45,10 +45,10 @@ import org.semanticweb.ontop.io.TargetQueryVocabularyValidator;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.parser.TargetQueryParserException;
 import org.semanticweb.ontop.parser.TurtleOBDASyntaxParser;
-import org.semanticweb.ontop.protege4.core.OBDAModelFacade;
+import org.semanticweb.ontop.protege4.core.OBDAModelWrapper;
 
 public class QueryPainter {
-	private final OBDAModelFacade apic;
+	private final OBDAModelWrapper apic;
 
 	private SimpleAttributeSet black;
 	private SimpleAttributeSet brackets;
@@ -88,7 +88,7 @@ public class QueryPainter {
 	private List<ValidatorListener> validatorListeners = new LinkedList<QueryPainter.ValidatorListener>();
 	private TurtleOBDASyntaxParser textParser;
 
-	public QueryPainter(OBDAModelFacade apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
+	public QueryPainter(OBDAModelWrapper apic, JTextPane parent, TargetQueryVocabularyValidator validator) {
 		this.apic = apic;
 		this.parent = parent;
 		this.validator = validator;

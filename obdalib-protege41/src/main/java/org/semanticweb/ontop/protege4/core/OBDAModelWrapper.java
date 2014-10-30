@@ -9,24 +9,23 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.protege4.panels.DatasourceSelector;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * TODO: describe
  */
-public class OBDAModelFacade {
+public class OBDAModelWrapper {
 
     /**
      *  Immutable OBDA model.
-     *  This variable is frequently reaffected.
+     *  This variable is frequently re-affected.
      */
     private OBDAModel obdaModel;
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private PrefixManagerWrapper prefixManager;
 
-    public OBDAModelFacade(NativeQueryLanguageComponentFactory nativeQLFactory) {
+    public OBDAModelWrapper(NativeQueryLanguageComponentFactory nativeQLFactory) {
         this.nativeQLFactory = nativeQLFactory;
     }
 

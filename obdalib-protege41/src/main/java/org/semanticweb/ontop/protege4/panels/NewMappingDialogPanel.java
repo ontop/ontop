@@ -48,7 +48,7 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.parser.TargetQueryParserException;
 import org.semanticweb.ontop.parser.TurtleOBDASyntaxParser;
-import org.semanticweb.ontop.protege4.core.OBDAModelFacade;
+import org.semanticweb.ontop.protege4.core.OBDAModelWrapper;
 import org.semanticweb.ontop.protege4.gui.IconLoader;
 import org.semanticweb.ontop.protege4.gui.treemodels.IncrementalResultSetTableModel;
 import org.semanticweb.ontop.protege4.utils.CustomTraversalPolicy;
@@ -69,7 +69,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private static final long serialVersionUID = 4351696247473906680L;
 
 	/** Fields */
-	private OBDAModelFacade obdaModel;
+	private OBDAModelWrapper obdaModel;
 	private OBDADataSource dataSource;
 	private JDialog parent;
 	private TargetQueryVocabularyValidator validator;
@@ -83,7 +83,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	/**
 	 * Create the dialog for inserting a new mapping.
 	 */
-	public NewMappingDialogPanel(OBDAModelFacade obdaModel, JDialog parent, OBDADataSource dataSource, TargetQueryVocabularyValidator validator) {
+	public NewMappingDialogPanel(OBDAModelWrapper obdaModel, JDialog parent, OBDADataSource dataSource, TargetQueryVocabularyValidator validator) {
 
 		DialogUtils.installEscapeCloseOperation(parent);
 		this.obdaModel = obdaModel;
@@ -202,7 +202,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 			final boolean isValid = validator.validate(targetQuery);
 			if (isValid) {
 				try {
-					OBDAModelFacade mapcon = obdaModel;
+					OBDAModelWrapper mapcon = obdaModel;
 					URI sourceID = dataSource.getSourceID();
 					System.out.println(sourceID.toString()+" \n");
 					

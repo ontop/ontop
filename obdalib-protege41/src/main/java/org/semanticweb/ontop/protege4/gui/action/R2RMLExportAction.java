@@ -31,7 +31,7 @@ import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
-import org.semanticweb.ontop.protege4.core.OBDAModelFacade;
+import org.semanticweb.ontop.protege4.core.OBDAModelWrapper;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.r2rml.R2RMLWriter;
 import org.slf4j.Logger;
@@ -42,7 +42,7 @@ public class R2RMLExportAction extends ProtegeAction {
 	private static final long serialVersionUID = -1211395039869926309L;
 
 	private OWLEditorKit editorKit = null;
-	private OBDAModelFacade obdaModel = null;
+	private OBDAModelWrapper obdaModel = null;
 	private OWLModelManager modelManager= null;
 	
 	private Logger log = LoggerFactory.getLogger(R2RMLExportAction.class);
