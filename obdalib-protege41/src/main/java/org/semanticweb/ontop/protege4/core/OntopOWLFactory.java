@@ -14,6 +14,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 
 
 /**
@@ -94,4 +95,13 @@ public class OntopOWLFactory extends QuestOWLFactory {
         }
     }
 
+    @Override
+    public void reload(Reader mappingReader, QuestPreferences preferences) {
+        try {
+            super.reload(mappingReader, preferences);
+        } catch (Exception e) {
+            handleError(e);
+            //TODO: see if we should return an exception
+        }
+    }
 }

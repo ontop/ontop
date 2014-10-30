@@ -29,6 +29,7 @@ import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.Properties;
 
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
@@ -68,7 +69,7 @@ public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeO
         factory.reload(reasonerPreferences);
     }
 
-    public void reload(File mappingFile, ProtegeReformulationPlatformPreferences reasonerPreferences) {
-        factory.reload(mappingFile, reasonerPreferences);
+    public void reload(Reader mappingReader, ProtegeReformulationPlatformPreferences reasonerPreferences) {
+        factory.reload(mappingReader, reasonerPreferences);
     }
 }

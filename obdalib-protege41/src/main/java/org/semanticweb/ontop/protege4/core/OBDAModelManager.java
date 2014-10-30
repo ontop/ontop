@@ -465,8 +465,8 @@ public class OBDAModelManager implements Disposable {
 
             // Save the OBDA model
             File obdaFile = new File(URI.create(obdaDocumentIri));
-OBDAModel obdaModel = getActiveOBDAModelWrapper().getCurrentImmutableOBDAModel();
-OntopMappingWriter writer = new OntopMappingWriter(obdaModel);
+            OBDAModel obdaModel = getActiveOBDAModelWrapper().getCurrentImmutableOBDAModel();
+            OntopMappingWriter writer = new OntopMappingWriter(obdaModel);
             writer.save(obdaFile);
 
             // Save the queries

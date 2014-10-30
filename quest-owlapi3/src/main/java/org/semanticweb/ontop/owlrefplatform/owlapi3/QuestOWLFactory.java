@@ -38,6 +38,7 @@ import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.Properties;
 
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -96,7 +97,41 @@ public class QuestOWLFactory implements OWLReasonerFactory {
     }
 
     /**
-     * This method is isolated from the constructor because it can
+     * Virtual mode (because there is readable mappings)
+     * TODO: further explain
+     */
+    public QuestOWLFactory(QuestPreferences preferences, Reader mappingReader)
+            throws IOException, InvalidMappingException, InvalidDataSourceException, DuplicateMappingException {
+        mappingFile = null;
+        init(mappingReader, preferences);
+    }
+
+    /**
+     * This method is isolated from the constructor because it also used for reloading the preferences and the mappings.
+     */
+    private void init(Reader mappingReader, QuestPreferences preferences) throws DuplicateMappingException, InvalidMappingException,
+            InvalidDataSourceException, IOException {
+        Injector injector = Guice.createInjector(new OBDACoreModule(preferences), new QuestComponentModule(preferences));
+        this.componentFactory = injector.getInstance(QuestComponentFactory.class);
+
+        /**
+         * OBDA model extraction (virtual mode)
+         */
+        if (mappingReader != null) {
+            NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+            MappingParser mappingParser = nativeQLFactory.create(mappingReader);
+            this.obdaModel = mappingParser.getOBDAModel();
+        }
+        else {
+            this.obdaModel = null;
+        }
+
+        this.preferences = preferences;
+        // Does not touch the mapping file.
+    }
+
+    /**
+     * This method is isolated from the constructor because it also used for reloading the preferences and the mappings.
      */
     private void init(File mappingFile, QuestPreferences preferences) throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
         Injector injector = Guice.createInjector(new OBDACoreModule(preferences), new QuestComponentModule(preferences));
@@ -175,6 +210,14 @@ public class QuestOWLFactory implements OWLReasonerFactory {
     public void reload(File mappingFile, QuestPreferences newPreferences) throws DuplicateMappingException, InvalidMappingException,
             InvalidDataSourceException, IOException {
         init(mappingFile, newPreferences);
+    }
+
+    /**
+     * Re-parses the readable mappings and changes the preferences.
+     */
+    public void reload(Reader mappingReader, QuestPreferences newPreferences) throws DuplicateMappingException, InvalidMappingException,
+            InvalidDataSourceException, IOException {
+        init(mappingReader, newPreferences);
     }
 
 
