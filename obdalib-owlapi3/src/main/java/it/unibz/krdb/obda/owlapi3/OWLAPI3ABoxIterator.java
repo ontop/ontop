@@ -53,11 +53,7 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 	private Iterator<OWLOntology> ontologies = null;
 	private Assertion next = null;
 
-	private final OWLAPI3Translator translator = new OWLAPI3Translator();
-	//private final Map<Predicate, Description> equivalenceMap;
-
 	public OWLAPI3ABoxIterator(Collection<OWLOntology> ontologies) {
-		//this.equivalenceMap = equivalenceMap;
 		if (ontologies.size() > 0) {
 			this.ontologies = ontologies.iterator();
 			this.owlaxiomiterator = this.ontologies.next().getAxioms().iterator();
@@ -150,15 +146,15 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 	private Assertion translate(OWLAxiom axiom) {
 		
 		if (axiom instanceof OWLClassAssertionAxiom) {
-			ClassAssertion translatedAxiom = translator.translate((OWLClassAssertionAxiom)axiom);
+			ClassAssertion translatedAxiom = OWLAPI3Translator.translate((OWLClassAssertionAxiom)axiom);
 			return translatedAxiom;
 		} 
 		else if (axiom instanceof OWLObjectPropertyAssertionAxiom) {
-			PropertyAssertion translatedAxiom = translator.translate((OWLObjectPropertyAssertionAxiom)axiom);
+			PropertyAssertion translatedAxiom = OWLAPI3Translator.translate((OWLObjectPropertyAssertionAxiom)axiom);
 			return translatedAxiom;		
 		} 
 		else if (axiom instanceof OWLDataPropertyAssertionAxiom) {
-			PropertyAssertion translatedAxiom = translator.translate((OWLDataPropertyAssertionAxiom)axiom);
+			PropertyAssertion translatedAxiom = OWLAPI3Translator.translate((OWLDataPropertyAssertionAxiom)axiom);
 			return translatedAxiom;
 		}		
 		return null;

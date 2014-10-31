@@ -46,14 +46,12 @@ import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.krdb.obda.ontology.impl.PunningException;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -119,7 +117,7 @@ import org.slf4j.LoggerFactory;
  */
 public class OWLAPI3Translator {
 
-	private final LanguageProfile profile = LanguageProfile.DLLITEA;
+	private static final LanguageProfile profile = LanguageProfile.DLLITEA;
 
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -172,7 +170,7 @@ public class OWLAPI3Translator {
 
 	// USED IN OBDAModelManager
 	
-	public Predicate getPredicate(OWLEntity entity) {
+	public static Predicate getPredicate(OWLEntity entity) {
 		Predicate p = null;
 		if (entity instanceof OWLClass) {
 			/* We ignore TOP and BOTTOM (Thing and Nothing) */
@@ -303,30 +301,9 @@ public class OWLAPI3Translator {
 				else if (axiom instanceof OWLDataPropertyDomainAxiom) 
 					processAxiom(dl_onto, (OWLDataPropertyDomainAxiom) axiom);
 					
-				else if (axiom instanceof OWLDataPropertyRangeAxiom) {
+				else if (axiom instanceof OWLDataPropertyRangeAxiom) 
+					processAxiom(dl_onto, (OWLDataPropertyRangeAxiom) axiom);
 
-					OWLDataPropertyRangeAxiom aux = (OWLDataPropertyRangeAxiom) axiom;
-					DataPropertyExpression role = getRoleExpression(aux.getProperty());
-
-					DataPropertyRangeExpression subclass = ofac.createDataPropertyRange(role);
-
-					if (aux.getRange().isDatatype()) {
-						OWLDatatype rangeDatatype = aux.getRange().asOWLDatatype();
-
-						if (rangeDatatype.isBuiltIn()) {
-
-							Predicate.COL_TYPE columnType = getColumnType(rangeDatatype);
-							Datatype datatype = ofac.createDataType(dfac.getTypePredicate(columnType));
-							SubClassOfAxiom inc = ofac.createSubClassAxiom(subclass, datatype);
-							dl_onto.add(inc);
-						} else {
-							log.warn("Ignoring range axiom since it refers to a non-supported datatype: " + axiom.toString());
-						}
-					} else {
-						log.warn("Ignoring range axiom since it is not a datatype: " + axiom.toString());
-					}
-
-				} 
 				else if (axiom instanceof OWLSubDataPropertyOfAxiom) 
 					processAxiom(dl_onto, (OWLSubDataPropertyOfAxiom) axiom);
 				
@@ -336,16 +313,9 @@ public class OWLAPI3Translator {
 				else if (axiom instanceof OWLEquivalentObjectPropertiesAxiom) 
 					processAxiom(dl_onto, (OWLEquivalentObjectPropertiesAxiom) axiom);
 
-				else if (axiom instanceof OWLFunctionalDataPropertyAxiom) {
-					if (profile.order() < LanguageProfile.DLLITEA.order())
-						throw new TranslationException();
-					OWLFunctionalDataPropertyAxiom aux = (OWLFunctionalDataPropertyAxiom) axiom;
-					PropertyExpression role = getRoleExpression(aux.getProperty());
-					FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(role);
+				else if (axiom instanceof OWLFunctionalDataPropertyAxiom) 
+					processAxiom(dl_onto, (OWLFunctionalDataPropertyAxiom) axiom);
 
-					dl_onto.add(funct);
-
-				} 
 				else if (axiom instanceof OWLInverseObjectPropertiesAxiom) 
 					processAxiom(dl_onto, (OWLInverseObjectPropertiesAxiom) axiom);
 				
@@ -361,26 +331,12 @@ public class OWLAPI3Translator {
 				else if (axiom instanceof OWLSubObjectPropertyOfAxiom) 
 					processAxiom(dl_onto, (OWLSubObjectPropertyOfAxiom) axiom); 
 				
-				else if (axiom instanceof OWLFunctionalObjectPropertyAxiom) {
-					if (profile.order() < LanguageProfile.OWL2QL.order())
-						throw new TranslationException();
-					OWLFunctionalObjectPropertyAxiom aux = (OWLFunctionalObjectPropertyAxiom) axiom;
-					PropertyExpression role = getRoleExpression(aux.getProperty());
-					
-					FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(role);
-					dl_onto.add(funct);				
-				} 
-				else if (axiom instanceof OWLInverseFunctionalObjectPropertyAxiom) {
-					if (profile.order() < LanguageProfile.OWL2QL.order())
-						throw new TranslationException();
-					OWLInverseFunctionalObjectPropertyAxiom aux = (OWLInverseFunctionalObjectPropertyAxiom) axiom;
-					ObjectPropertyExpression role = getRoleExpression(aux.getProperty());
-					ObjectPropertyExpression invrole = role.getInverse();
-					FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(invrole);
+				else if (axiom instanceof OWLFunctionalObjectPropertyAxiom) 
+					processAxiom(dl_onto, (OWLFunctionalObjectPropertyAxiom) axiom);
 
-					dl_onto.add(funct);
-
-				} 
+				else if (axiom instanceof OWLInverseFunctionalObjectPropertyAxiom) 
+					processAxiom(dl_onto,  (OWLInverseFunctionalObjectPropertyAxiom) axiom); 
+				
 				else if (axiom instanceof OWLDisjointClassesAxiom) 
 					processAxiom(dl_onto, (OWLDisjointClassesAxiom) axiom);
 							
@@ -465,7 +421,10 @@ public class OWLAPI3Translator {
 			throw new TranslationException();
 
 		Set<OWLClassExpression> equivalents = aux.getClassExpressions();
-		List<ClassExpression> vec = getSubclassExpressions(equivalents);
+		
+		List<ClassExpression> vec = new LinkedList<ClassExpression>();
+		for (OWLClassExpression OWLClassExpression : equivalents) 
+			vec.add(getSubclassExpression(OWLClassExpression));
 
 		for (int i = 0; i < vec.size(); i++) {
 			for (int j = i + 1; j < vec.size(); j++) {
@@ -641,6 +600,64 @@ public class OWLAPI3Translator {
 	
 	
 	
+	private void processAxiom(Ontology dl_onto, OWLDataPropertyRangeAxiom aux) throws TranslationException {
+
+		DataPropertyExpression role = getRoleExpression(aux.getProperty());
+
+		DataPropertyRangeExpression subclass = ofac.createDataPropertyRange(role);
+
+		if (aux.getRange().isDatatype()) {
+			OWLDatatype rangeDatatype = aux.getRange().asOWLDatatype();
+
+			if (rangeDatatype.isBuiltIn()) {
+
+				Predicate.COL_TYPE columnType = getColumnType(rangeDatatype);
+				Datatype datatype = ofac.createDataType(dfac.getTypePredicate(columnType));
+				SubClassOfAxiom inc = ofac.createSubClassAxiom(subclass, datatype);
+				dl_onto.add(inc);
+			} else {
+				log.warn("Ignoring range axiom since it refers to a non-supported datatype: " + aux);
+			}
+		} else {
+			log.warn("Ignoring range axiom since it is not a datatype: " + aux);
+		}
+		
+	}
+
+	
+	
+	
+	
+	private void processAxiom(Ontology dl_onto, OWLFunctionalObjectPropertyAxiom aux) throws TranslationException {
+		if (profile.order() < LanguageProfile.OWL2QL.order())
+			throw new TranslationException();
+		PropertyExpression role = getRoleExpression(aux.getProperty());
+		
+		FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(role);
+		dl_onto.add(funct);				
+	}	
+	
+	private void processAxiom(Ontology dl_onto, OWLFunctionalDataPropertyAxiom aux) throws TranslationException {
+		if (profile.order() < LanguageProfile.DLLITEA.order())
+			throw new TranslationException();
+		PropertyExpression role = getRoleExpression(aux.getProperty());
+		FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(role);
+
+		dl_onto.add(funct);		
+	}
+	
+	private void processAxiom(Ontology dl_onto, OWLInverseFunctionalObjectPropertyAxiom aux) throws TranslationException {
+		if (profile.order() < LanguageProfile.OWL2QL.order())
+			throw new TranslationException();
+		ObjectPropertyExpression role = getRoleExpression(aux.getProperty());
+		ObjectPropertyExpression invrole = role.getInverse();
+		FunctionalPropertyAxiom funct = ofac.createPropertyFunctionalAxiom(invrole);
+
+		dl_onto.add(funct);
+	}
+	
+	
+	
 	
 	
 	
@@ -660,16 +677,11 @@ public class OWLAPI3Translator {
 		dl_onto.add(inc);
 	}
 
+	
+	
 
-	private List<ClassExpression> getSubclassExpressions(Collection<OWLClassExpression> owlExpressions) throws TranslationException {
-		List<ClassExpression> descriptions = new LinkedList<ClassExpression>();
-		for (OWLClassExpression OWLClassExpression : owlExpressions) {
-			descriptions.add(getSubclassExpression(OWLClassExpression));
-		}
-		return descriptions;
-	}
 
-	private ObjectPropertyExpression getRoleExpression(OWLObjectPropertyExpression rolExpression) throws TranslationException {
+	private static ObjectPropertyExpression getRoleExpression(OWLObjectPropertyExpression rolExpression) throws TranslationException {
 		ObjectPropertyExpression role = null;
 
 		if (rolExpression instanceof OWLObjectProperty) {
@@ -686,8 +698,6 @@ public class OWLAPI3Translator {
 
 	}
 
-
-
 	private DataPropertyExpression getRoleExpression(OWLDataPropertyExpression rolExpression) throws TranslationException {
 		DataPropertyExpression role = null;
 
@@ -699,6 +709,8 @@ public class OWLAPI3Translator {
 		return role;
 
 	}
+	
+	
 
 	private List<BasicClassDescription> getSuperclassExpressions(OWLClassExpression owlExpression, Ontology dl_onto) throws TranslationException {
 		List<BasicClassDescription> result = new LinkedList<BasicClassDescription>();
@@ -749,6 +761,9 @@ public class OWLAPI3Translator {
 		return result;
 	}
 
+	
+	
+	
 	private BasicClassDescription getPropertySomeClassRestriction(OWLObjectSomeValuesFrom someexp, Ontology dl_onto) throws TranslationException {
 		
 		SomeValuesFrom auxclass = auxiliaryClassProperties.get(someexp);
@@ -828,7 +843,7 @@ public class OWLAPI3Translator {
 		return auxclass;
 	}
 	
-	private ClassExpression getSubclassExpression(OWLClassExpression owlExpression) throws TranslationException {
+	private static ClassExpression getSubclassExpression(OWLClassExpression owlExpression) throws TranslationException {
 		ClassExpression cd = null;
 		if (owlExpression instanceof OWLClass) {
 			String uri = ((OWLClass) owlExpression).getIRI().toString();
@@ -916,6 +931,8 @@ public class OWLAPI3Translator {
 
 	
 	
+	
+	
 	private static class TranslationException extends Exception {
 
 		/**
@@ -958,7 +975,7 @@ public class OWLAPI3Translator {
 	
 	
 	
-	public ClassAssertion translate(OWLClassAssertionAxiom aux) {
+	public static ClassAssertion translate(OWLClassAssertionAxiom aux) {
 
 		OWLClassExpression classExpression = aux.getClassExpression();
 		if (!(classExpression instanceof OWLClass))
@@ -985,7 +1002,7 @@ public class OWLAPI3Translator {
 		return assertion;
 	}
 	
-	public PropertyAssertion translate(OWLObjectPropertyAssertionAxiom aux) {
+	public static PropertyAssertion translate(OWLObjectPropertyAssertionAxiom aux) {
 			
 		if (aux.getSubject().isAnonymous() || aux.getObject().isAnonymous()) 
 			throw new RuntimeException("Found anonymous individual, this feature is not supported");			
@@ -1022,7 +1039,7 @@ public class OWLAPI3Translator {
 		return assertion;
 	}
 	
-	public PropertyAssertion translate(OWLDataPropertyAssertionAxiom aux) {
+	public static PropertyAssertion translate(OWLDataPropertyAssertionAxiom aux) {
 		
 		OWLDataProperty propertyExperssion = (OWLDataProperty) aux.getProperty();
 
