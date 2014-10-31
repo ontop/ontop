@@ -47,9 +47,10 @@ import static org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicat
 import static org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants.*;
 
 /**
- * This class manages saving and loading an OBDA file.
+ * Mapping parser specific to the Ontop Native Mapping Language for SQL.
  *
- * TODO: the OBDA model should be generated after load.
+ * Available through a Guice-enabled factory.
+ *
  */
 public class OntopNativeMappingParser implements MappingParser {
 

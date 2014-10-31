@@ -17,7 +17,12 @@ import static org.semanticweb.ontop.io.OntopNativeMappingParser.END_COLLECTION_S
 import static org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants.*;
 
 /**
- * TODO: describe
+ *
+ * Serializer for the Ontop Native Mapping Language (SQL-specific).
+ *
+ * TODO: add a MappingSerializer interface.
+ * TODO: consider build from a factory, but make it optional.
+ *
  */
 public class OntopNativeMappingSerializer {
 

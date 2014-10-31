@@ -21,7 +21,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * TODO: describe
+ * Mutable wrapper that follows the previous implementation of OBDAModel.
+ * The latter implementation is now immutable.
+ *
  *
  * For the moment, this class always use the same factories
  * built according to INITIAL Quest preferences.
@@ -101,45 +103,43 @@ public class OBDAModelWrapper {
     }
 
     public void declareClass(Predicate c) {
+        //TODO: implement it
     }
 
     public void declareObjectProperty(Predicate r) {
     }
 
     public void declareDataProperty(Predicate p) {
+        //TODO: implement it
     }
 
     public void unDeclareClass(Predicate c) {
+        //TODO: implement it
     }
 
     public void unDeclareObjectProperty(Predicate r) {
+        //TODO: implement it
     }
 
     public void unDeclareDataProperty(Predicate p) {
+        //TODO: implement it
     }
 
     public void renamePredicate(Predicate removedPredicate, Predicate newPredicate) {
+        //TODO: implement it
     }
 
     public void deletePredicate(Predicate removedPredicate) {
+        //TODO: implement it
     }
 
     public void addSourcesListener(OBDAModelListener listener) {
+        //TODO: implement it
     }
 
     public void addMappingsListener(OBDAMappingListener mlistener) {
+        //TODO: implement it
     }
-
-//    public void setPrefixManager(PrefixManagerWrapper prefixManager) {
-//        this.prefixManager = prefixManager;
-//
-//        try {
-//            obdaModel = obdaModel.newModel(obdaModel.getSources(), obdaModel.getMappings(),
-//                    prefixManager);
-//        } catch (DuplicateMappingException e) {
-//            throw new RuntimeException("Duplicate mappings should have been detected earlier!");
-//        }
-//    }
 
     public void reset() {
         obdaModel = createNewOBDAModel(obdaFactory, prefixManager);
@@ -159,9 +159,11 @@ public class OBDAModelWrapper {
     }
 
     public void updateSource(URI sourceID, OBDADataSource aux) {
+        //TODO: implement it
     }
 
     public void addSource(OBDADataSource ds) {
+        //TODO: implement it
     }
 
     public Predicate[] getDeclaredClasses() {
@@ -169,6 +171,7 @@ public class OBDAModelWrapper {
     }
 
     public void fireSourceParametersUpdated() {
+        //TODO: implement it
     }
 
     public Predicate[] getDeclaredDataProperties() {
@@ -180,24 +183,29 @@ public class OBDAModelWrapper {
     }
 
     public void removeSourcesListener(DatasourceSelector datasourceSelector) {
+        //TODO: implement it
 
     }
 
 
     public void addMapping(URI sourceID, OBDAMappingAxiom mappingAxiom) throws DuplicateMappingException {
+        //TODO: implement it
     }
 
     public void removeMapping(URI srcuri, String id) {
+        //TODO: implement it
     }
 
     public void updateMappingsSourceQuery(URI sourceID, String id, OBDASQLQuery body) {
-        
+        //TODO: implement it
     }
 
     public void updateTargetQueryMapping(URI sourceID, String id, CQIE targetQuery) {
+        //TODO: implement it
     }
 
     public void updateMapping(URI sourceID, String id, String trim) {
+        //TODO: implement it
     }
 
     public int indexOf(URI currentSource, String mappingId) {
@@ -214,6 +222,6 @@ public class OBDAModelWrapper {
     }
 
     public void removeSource(URI sourceID) {
-
+        //TODO: implement it
     }
 }

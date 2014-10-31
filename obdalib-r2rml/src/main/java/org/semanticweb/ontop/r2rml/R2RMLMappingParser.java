@@ -27,6 +27,8 @@ import java.util.Properties;
 
 /**
  * High-level class that implements the MappingParser interface for R2RML.
+ *
+ * Guice-enabled, available through factories.
  */
 public class R2RMLMappingParser implements MappingParser {
 
