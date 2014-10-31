@@ -12,21 +12,21 @@ import java.io.*;
 import java.net.URI;
 import java.util.Map;
 
-import static org.semanticweb.ontop.io.SQLMappingParser.*;
-import static org.semanticweb.ontop.io.SQLMappingParser.END_COLLECTION_SYMBOL;
+import static org.semanticweb.ontop.io.OntopNativeMappingParser.*;
+import static org.semanticweb.ontop.io.OntopNativeMappingParser.END_COLLECTION_SYMBOL;
 import static org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants.*;
 
 /**
  * TODO: describe
  */
-public class OntopMappingWriter {
+public class OntopNativeMappingSerializer {
 
     private final OBDAModel model;
 
     /**
      * TODO: may consider building it through Assisted Injection.
      */
-    public OntopMappingWriter(OBDAModel model) {
+    public OntopNativeMappingSerializer(OBDAModel model) {
         this.model = model;
     }
 

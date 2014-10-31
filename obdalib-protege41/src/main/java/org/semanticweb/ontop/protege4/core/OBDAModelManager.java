@@ -24,7 +24,7 @@ package org.semanticweb.ontop.protege4.core;
 import org.protege.editor.owl.model.inference.OWLReasonerManager;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDAFactoryWithException;
-import org.semanticweb.ontop.io.OntopMappingWriter;
+import org.semanticweb.ontop.io.OntopNativeMappingSerializer;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.QueryIOManager;
 import org.semanticweb.ontop.model.*;
@@ -465,7 +465,7 @@ public class OBDAModelManager implements Disposable {
             // Save the OBDA model
             File obdaFile = new File(URI.create(obdaDocumentIri));
             OBDAModel obdaModel = getActiveOBDAModelWrapper().getCurrentImmutableOBDAModel();
-            OntopMappingWriter writer = new OntopMappingWriter(obdaModel);
+            OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(obdaModel);
             writer.save(obdaFile);
 
             // Save the queries

@@ -21,8 +21,6 @@ package org.semanticweb.ontop.owlrefplatform.core;
  */
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -30,17 +28,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.QueryParser;
 import org.openrdf.query.parser.QueryParserUtil;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
-import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;

@@ -146,7 +146,7 @@ public class SQLMappingParserUsingOwlTest {
         OBDAModel model = modelFactory.createOBDAModel(ImmutableSet.<OBDADataSource>of(),
                 ImmutableMap.<URI, ImmutableList<OBDAMappingAxiom>>of(),
                 nativeQLFactory.create(ImmutableMap.<String, String>of()));
-        OntopMappingWriter writer = new OntopMappingWriter(model);
+        OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(model);
         writer.save(new File("src/test/java/org/semanticweb/ontop/io/SchoolRegularFile.obda"));
     }
 
@@ -161,7 +161,7 @@ public class SQLMappingParserUsingOwlTest {
 
         OBDAModel model = modelFactory.createOBDAModel(ImmutableSet.of(dataSource, datasource2),
                 ImmutableMap.copyOf(mappingIndex), nativeQLFactory.create(prefixes));
-        OntopMappingWriter writer = new OntopMappingWriter(model);
+        OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(model);
 
         // Save the model
         writer.save(new File("src/test/java/org/semanticweb/ontop/io/SchoolMultipleDataSources.obda"));

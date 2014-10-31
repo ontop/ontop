@@ -5,7 +5,7 @@ import javax.swing.JOptionPane;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
-import org.semanticweb.ontop.io.OntopMappingWriter;
+import org.semanticweb.ontop.io.OntopNativeMappingSerializer;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
@@ -108,7 +108,7 @@ public class OntopOWLFactory extends QuestOWLFactory {
     public void reload(OBDAModel currentModel, QuestPreferences preferences) {
         try {
             //TODO: make it generic (not OntopNativeMapping-specific).
-            OntopMappingWriter mappingSerializer = new OntopMappingWriter(currentModel);
+            OntopNativeMappingSerializer mappingSerializer = new OntopNativeMappingSerializer(currentModel);
             StringWriter stringWriter = new StringWriter();
 
             mappingSerializer.save(stringWriter);

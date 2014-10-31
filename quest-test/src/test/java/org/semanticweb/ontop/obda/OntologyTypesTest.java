@@ -25,11 +25,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.sql.Connection;
-import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.ontop.io.SQLMappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;

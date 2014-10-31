@@ -51,7 +51,7 @@ import static org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants.*;
  *
  * TODO: the OBDA model should be generated after load.
  */
-public class SQLMappingParser implements MappingParser {
+public class OntopNativeMappingParser implements MappingParser {
 
     protected enum Label {
         /* Source decl.: */sourceUri, connectionUrl, username, password, driverClass,
@@ -70,7 +70,7 @@ public class SQLMappingParser implements MappingParser {
     protected static final String COMMENT_SYMBOL = ";";
 
     private static final OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-    private static final Logger LOG = LoggerFactory.getLogger(SQLMappingParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OntopNativeMappingParser.class);
 
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
@@ -84,8 +84,8 @@ public class SQLMappingParser implements MappingParser {
     private final File file;
 
     @AssistedInject
-    private SQLMappingParser(@Assisted Reader reader, NativeQueryLanguageComponentFactory nativeQLFactory,
-                             OBDAFactoryWithException obdaFactory)
+    private OntopNativeMappingParser(@Assisted Reader reader, NativeQueryLanguageComponentFactory nativeQLFactory,
+                                     OBDAFactoryWithException obdaFactory)
             throws IOException, InvalidMappingExceptionWithIndicator {
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
@@ -99,8 +99,8 @@ public class SQLMappingParser implements MappingParser {
      * Create an SQL Mapping Parser for generating an OBDA model.
      */
     @AssistedInject
-    private SQLMappingParser(@Assisted File file, NativeQueryLanguageComponentFactory nativeQLFactory,
-                             OBDAFactoryWithException obdaFactory)
+    private OntopNativeMappingParser(@Assisted File file, NativeQueryLanguageComponentFactory nativeQLFactory,
+                                     OBDAFactoryWithException obdaFactory)
             throws IOException, InvalidMappingExceptionWithIndicator {
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
@@ -113,10 +113,10 @@ public class SQLMappingParser implements MappingParser {
      * RDF graph argument is not supported. This constructor is required by the factory.
      */
     @AssistedInject
-    private SQLMappingParser(@Assisted Model mappingGraph, NativeQueryLanguageComponentFactory factory)
+    private OntopNativeMappingParser(@Assisted Model mappingGraph, NativeQueryLanguageComponentFactory factory)
             throws IOException, InvalidMappingExceptionWithIndicator {
-        throw new IllegalArgumentException("Ontop OBDA format has not RDF serialization. Passing a RDF graph" +
-                "to the SQLMappingParser is thus invalid.");
+        throw new IllegalArgumentException("The Ontop native mapping language has no RDF serialization. Passing a RDF graph" +
+                "to the OntopNativeMappingParser is thus invalid.");
     }
 
     /**

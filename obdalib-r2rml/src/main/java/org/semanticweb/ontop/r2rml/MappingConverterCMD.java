@@ -26,7 +26,7 @@ import org.semanticweb.ontop.exception.InvalidMappingExceptionWithIndicator;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.injection.OBDAProperties;
-import org.semanticweb.ontop.io.OntopMappingWriter;
+import org.semanticweb.ontop.io.OntopNativeMappingSerializer;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAModel;
 
@@ -116,7 +116,7 @@ class MappingConverterCMD {
                 MappingParser mappingParser = factory.create(new File(obdaURI));
                 OBDAModel model = mappingParser.getOBDAModel();
 
-                OntopMappingWriter mappingWriter = new OntopMappingWriter(model);
+                OntopNativeMappingSerializer mappingWriter = new OntopNativeMappingSerializer(model);
 				mappingWriter.save(out);
 				
 				/*Add the not standard prefixes to prefix manager.

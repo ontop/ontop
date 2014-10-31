@@ -21,7 +21,6 @@ package org.semanticweb.ontop.owlapi3.bootstrapping;
  */
 
 import java.io.File;
-import java.util.Properties;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -29,7 +28,7 @@ import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.injection.OBDAFactoryWithException;
 import org.semanticweb.ontop.injection.OBDAProperties;
-import org.semanticweb.ontop.io.OntopMappingWriter;
+import org.semanticweb.ontop.io.OntopNativeMappingSerializer;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -89,7 +88,7 @@ public class DirectMappingBootstrapperCMD {
 							uri, url, user, passw, driver, nativeQLFactory, obdaFactory);
 					OBDAModel model = dm.getModel();
 					OWLOntology onto = dm.getOntology();
-					OntopMappingWriter writer = new OntopMappingWriter(model);
+					OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(model);
 					writer.save(obda);
 					onto.getOWLOntologyManager().saveOntology(onto,
 							new FileDocumentTarget(owl));

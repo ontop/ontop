@@ -23,14 +23,12 @@ package org.semanticweb.ontop.protege4.core;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
-import org.semanticweb.ontop.io.OntopMappingWriter;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 
 import java.io.*;
-import java.util.Properties;
 
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
