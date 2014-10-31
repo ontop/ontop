@@ -264,6 +264,16 @@
 	   		<artifactId>jsqlparser</artifactId>
 		</dependency>
 
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-assistedinject</artifactId>
+        </dependency>
+
 	</dependencies>
 
 
@@ -364,6 +374,7 @@
 							javax.naming.*,javax.management.*,javax.sql.*,
 							javax.xml.parsers.*,org.xml.sax.*,
 							it.unibz.krdb.obda.*,
+                            com.google.inject.*,
 							org.protege.osgi.jdbc, org.protege.osgi.*,
 							uk.ac.manchester.*,
 							org.protege.*,
