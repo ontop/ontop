@@ -5,6 +5,8 @@ import javax.swing.JOptionPane;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
+import org.semanticweb.ontop.io.OntopMappingWriter;
+import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -12,9 +14,7 @@ import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 
 
 /**
@@ -98,6 +98,23 @@ public class OntopOWLFactory extends QuestOWLFactory {
     @Override
     public void reload(Reader mappingReader, QuestPreferences preferences) {
         try {
+            super.reload(mappingReader, preferences);
+        } catch (Exception e) {
+            handleError(e);
+            //TODO: see if we should return an exception
+        }
+    }
+
+    public void reload(OBDAModel currentModel, QuestPreferences preferences) {
+        try {
+            //TODO: make it generic (not OntopNativeMapping-specific).
+            OntopMappingWriter mappingSerializer = new OntopMappingWriter(currentModel);
+            StringWriter stringWriter = new StringWriter();
+
+            mappingSerializer.save(stringWriter);
+            String mappingDump = stringWriter.toString();
+
+            Reader mappingReader = new StringReader(mappingDump);
             super.reload(mappingReader, preferences);
         } catch (Exception e) {
             handleError(e);

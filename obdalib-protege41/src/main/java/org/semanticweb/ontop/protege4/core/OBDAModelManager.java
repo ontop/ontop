@@ -42,8 +42,7 @@ import org.semanticweb.ontop.sql.JDBCConnectionManager;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.util.*;
 
@@ -563,7 +562,9 @@ public class OBDAModelManager implements Disposable {
             ProtegeOBDAOWLReformulationPlatformFactory questFactory = (ProtegeOBDAOWLReformulationPlatformFactory) factory;
             ProtegeReformulationPlatformPreferences reasonerPreference = (ProtegeReformulationPlatformPreferences) owlEditorKit.get(
                     QuestPreferences.class.getName());
-            questFactory.reload(reasonerPreference);
+
+            OBDAModel currentOBDAModel = getActiveOBDAModelWrapper().getCurrentImmutableOBDAModel();
+            questFactory.reload(currentOBDAModel, reasonerPreference);
             if(applyUserConstraints)
                 questFactory.setImplicitDBConstraints(userConstraints);
         }
