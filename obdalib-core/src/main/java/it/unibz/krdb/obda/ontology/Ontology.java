@@ -53,8 +53,6 @@ public interface Ontology extends Cloneable, Serializable {
 
 	
 	
-	public void merge(Ontology onto);
-	
 	public Ontology clone();
 
 	

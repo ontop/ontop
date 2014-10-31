@@ -106,13 +106,13 @@ public class OBDAModelManager implements Disposable {
 
 	private JDBCConnectionManager connectionManager = JDBCConnectionManager.getJDBCConnectionManager();
 
-	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	private boolean applyUserConstraints = false;
 	private ImplicitDBConstraints userConstraints;
 	
-	private static Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
+	private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
 
 	/***
 	 * This is the instance responsible for listening for Protege ontology
@@ -164,7 +164,6 @@ public class OBDAModelManager implements Disposable {
 	 */
 	public class OntologyRefactoringListener implements OWLOntologyChangeListener {
 
-		OWLAPI3Translator translator = new OWLAPI3Translator();
 
 		@Override
 		public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
@@ -274,19 +273,42 @@ public class OBDAModelManager implements Disposable {
 
 				// This set of changes appears to be a "renaming" operation,
 				// hence we will modify the OBDA model accordingly
-				Predicate removedPredicate = translator.getPredicate(removedEntity);
-				Predicate newPredicate = translator.getPredicate(newEntity);
+				Predicate removedPredicate = getPredicate(removedEntity);
+				Predicate newPredicate = getPredicate(newEntity);
 
 				obdamodel.renamePredicate(removedPredicate, newPredicate);
 			}
 
 			// Applying the deletions to the obda model
 			for (OWLEntity removede : removals) {
-				Predicate removedPredicate = translator.getPredicate(removede);
+				Predicate removedPredicate = getPredicate(removede);
 				obdamodel.deletePredicate(removedPredicate);
 			}
 		}
 	}
+	
+	private static Predicate getPredicate(OWLEntity entity) {
+		Predicate p = null;
+		if (entity instanceof OWLClass) {
+			/* We ignore TOP and BOTTOM (Thing and Nothing) */
+			if (((OWLClass) entity).isOWLThing() || ((OWLClass) entity).isOWLNothing()) {
+				return null;
+			}
+			String uri = entity.getIRI().toString();
+
+			p = dfac.getClassPredicate(uri);
+		} else if (entity instanceof OWLObjectProperty) {
+			String uri = entity.getIRI().toString();
+
+			p = dfac.getObjectPropertyPredicate(uri);
+		} else if (entity instanceof OWLDataProperty) {
+			String uri = entity.getIRI().toString();
+
+			p = dfac.getDataPropertyPredicate(uri);
+		}
+		return p;
+	}
+	
 
 	public void addListener(OBDAModelManagerListener listener) {
 		obdaManagerListeners.add(listener);

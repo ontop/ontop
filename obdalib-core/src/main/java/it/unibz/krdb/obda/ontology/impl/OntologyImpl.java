@@ -213,19 +213,6 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public void merge(Ontology onto) {
-		vocabulary.merge(onto.getVocabulary());
-		
-		subClassAxioms.addAll(onto.getSubClassAxioms());
-		subPropertyAxioms.addAll(onto.getSubPropertyAxioms());
-		disjointPropertiesAxioms.addAll(onto.getDisjointPropertiesAxioms());
-		disjointClassesAxioms.addAll(onto.getDisjointClassesAxioms());
-		functionalityAxioms.addAll(onto.getFunctionalPropertyAxioms());
-		classAssertions.addAll(onto.getClassAssertions());
-		propertyAssertions.addAll(onto.getPropertyAssertions());
-	}
-
-	@Override
 	public OntologyVocabulary getVocabulary() {
 		return vocabulary;
 	}
