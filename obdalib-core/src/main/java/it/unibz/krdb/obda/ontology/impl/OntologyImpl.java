@@ -83,58 +83,36 @@ public class OntologyImpl implements Ontology {
 	}
 
 	
-	private void addReferencedEntries(BasicClassDescription desc) {
-		if (desc instanceof OClass) 
-			vocabulary.declareClass((OClass) desc);
-		else if (desc instanceof SomeValuesFrom) 
-			addReferencedEntries(((SomeValuesFrom) desc).getProperty());
-		else if (desc instanceof Datatype)  {
-			// NO-OP
-			// datatypes.add((Datatype) desc);
-		}
-		else if (desc instanceof DataPropertyRangeExpression) {
-			addReferencedEntries(((DataPropertyRangeExpression) desc).getProperty());			
-		}
-		else 
-			throw new UnsupportedOperationException("Cant understand: " + desc.toString());
-	}
-	
-	private void addReferencedEntries(PropertyExpression prop) {
-		if (prop instanceof ObjectPropertyExpression) 
-			vocabulary.declareObjectProperty((ObjectPropertyExpression)prop);
-		else
-			vocabulary.declareDataProperty((DataPropertyExpression)prop);
-	}
 	
 	@Override
 	public void addSubClassOfAxiomWithReferencedEntities(ClassExpression concept1, ClassExpression concept2) {	
 		SubClassOfAxiom assertion = ofac.createSubClassAxiom(concept1, concept2);
-		addReferencedEntries(assertion.getSub());
-		addReferencedEntries(assertion.getSuper());
+		vocabulary.addReferencedEntries(assertion.getSub());
+		vocabulary.addReferencedEntries(assertion.getSuper());
 		subClassAxioms.add(assertion);
 	}
 
 	@Override
 	public void addSubClassOfAxiomWithReferencedEntities(DataRangeExpression concept1, DataRangeExpression concept2) {
 		SubClassOfAxiom assertion = ofac.createSubClassAxiom(concept1, concept2);
-		addReferencedEntries(assertion.getSub());
-		addReferencedEntries(assertion.getSuper());
+		vocabulary.addReferencedEntries(assertion.getSub());
+		vocabulary.addReferencedEntries(assertion.getSuper());
 		subClassAxioms.add(assertion);
 	}
 	
 	@Override
 	public void addSubPropertyOfAxiomWithReferencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including) {
 		SubPropertyOfAxiom assertion = ofac.createSubPropertyAxiom(included, including);
-		addReferencedEntries(assertion.getSub());
-		addReferencedEntries(assertion.getSuper());
+		vocabulary.addReferencedEntries(assertion.getSub());
+		vocabulary.addReferencedEntries(assertion.getSuper());
 		subPropertyAxioms.add(assertion);
 	}
 	
 	@Override
 	public void addSubPropertyOfAxiomWithReferencedEntities(DataPropertyExpression included, DataPropertyExpression including) {
 		SubPropertyOfAxiom assertion = ofac.createSubPropertyAxiom(included, including);
-		addReferencedEntries(assertion.getSub());
-		addReferencedEntries(assertion.getSuper());
+		vocabulary.addReferencedEntries(assertion.getSub());
+		vocabulary.addReferencedEntries(assertion.getSuper());
 		subPropertyAxioms.add(assertion);
 	}
 

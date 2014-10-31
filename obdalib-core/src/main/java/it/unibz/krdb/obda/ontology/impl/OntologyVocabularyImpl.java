@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.ontology.impl;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -54,55 +55,48 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		return datatypes;
 	}
 	
+	public static final OClass owlThing = ofac.createClass("http://www.w3.org/2002/07/owl#Thing");
+	public static final OClass owlNothing = ofac.createClass("http://www.w3.org/2002/07/owl#Nothing");
+	public static final ObjectPropertyExpression owlTopObjectProperty = ofac.createObjectProperty("http://www.w3.org/2002/07/owl#topObjectProperty");
+	public static final ObjectPropertyExpression owlBottomObjectProperty = ofac.createObjectProperty("http://www.w3.org/2002/07/owl#bottomObjectProperty");
+	public static final DataPropertyExpression owlTopDataProperty = ofac.createDataProperty("http://www.w3.org/2002/07/owl#topDataProperty");
+	public static final DataPropertyExpression owlBottomDataProperty = ofac.createDataProperty("http://www.w3.org/2002/07/owl#bottomDataProperty");
+	
+	
 	@Override
 	public void declareClass(String uri) {
 		OClass cd = ofac.createClass(uri);
-		concepts.add(cd);
+		if (!cd.equals(owlThing) && !cd.equals(owlNothing))
+			concepts.add(cd);
 	}
 
 	@Override
 	public void declareObjectProperty(String uri) {
 		ObjectPropertyExpression rd = ofac.createObjectProperty(uri);
-		objectProperties.add(rd);
+		if (!rd.equals(owlTopObjectProperty) && !rd.equals(owlBottomObjectProperty))
+			objectProperties.add(rd);
 	}
 	
 	@Override
 	public void declareDataProperty(String uri) {
 		DataPropertyExpression rd = ofac.createDataProperty(uri);
-		dataProperties.add(rd);
-	}
-
-	void declareClass(OClass cd) {
-		concepts.add(cd);
-	}
-
-	void declareObjectProperty(ObjectPropertyExpression rd) {
-		if (rd.isInverse())
-			objectProperties.add(rd.getInverse());
-		else
-			objectProperties.add(rd);
-	}
-	
-	void declareDataProperty(DataPropertyExpression rd) {
-		if (rd.isInverse())
-			dataProperties.add(rd.getInverse());
-		else
+		if (!rd.equals(owlTopDataProperty) && !rd.equals(owlBottomDataProperty))
 			dataProperties.add(rd);
 	}
-	
+
 	@Override
 	public Set<OClass> getClasses() {
-		return concepts;
+		return Collections.unmodifiableSet(concepts);
 	}
 
 	@Override
 	public Set<ObjectPropertyExpression> getObjectProperties() {
-		return objectProperties;
+		return Collections.unmodifiableSet(objectProperties);
 	}
 
 	@Override
 	public Set<DataPropertyExpression> getDataProperties() {
-		return dataProperties;
+		return Collections.unmodifiableSet(dataProperties);
 	}
 	
 	public static final String AUXROLEURI = "ER.A-AUXROLE"; // TODO: make private
@@ -112,12 +106,48 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 
 	
+	void addReferencedEntries(BasicClassDescription desc) {
+		if (desc instanceof OClass) {
+			OClass cl = (OClass)desc;
+			if (!cl.equals(owlThing) && !cl.equals(owlNothing))
+				concepts.add(cl);
+		}
+		else if (desc instanceof SomeValuesFrom) 
+			addReferencedEntries(((SomeValuesFrom) desc).getProperty());
+		else if (desc instanceof Datatype)  {
+			// NO-OP
+			// datatypes.add((Datatype) desc);
+		}
+		else if (desc instanceof DataPropertyRangeExpression) {
+			addReferencedEntries(((DataPropertyRangeExpression) desc).getProperty());			
+		}
+		else 
+			throw new UnsupportedOperationException("Cant understand: " + desc.toString());
+	}
+	
+	void addReferencedEntries(PropertyExpression prop) {
+		if (prop instanceof ObjectPropertyExpression) {
+			ObjectPropertyExpression p = (ObjectPropertyExpression)prop;
+			if (p.isInverse())
+				p = p.getInverse();
+			if (!p.equals(owlTopObjectProperty) && !p.equals(owlBottomObjectProperty))
+				objectProperties.add(p);
+		}
+		else {
+			DataPropertyExpression p = (DataPropertyExpression)prop;
+			if (p.isInverse())
+				p = p.getInverse();
+			if (!p.equals(owlTopDataProperty) && !p.equals(owlBottomDataProperty))
+				dataProperties.add(p);
+		}
+	}
+	
 	
 	
 	void checkSignature(BasicClassDescription desc) {
 		
 		if (desc instanceof OClass) {
-			if (!concepts.contains((OClass) desc))
+			if (!concepts.contains(desc) && !desc.equals(owlThing) && !desc.equals(owlNothing))
 				throw new IllegalArgumentException("Class predicate is unknown: " + desc);
 		}	
 		else if (desc instanceof Datatype) {
@@ -136,22 +166,27 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 
 	void checkSignature(PropertyExpression prop) {
-		// Make sure we never validate against auxiliary roles introduced by
-		// the translation of the OWL ontology
-		if (isAuxiliaryProperty(prop)) 
-			return;
 
 		if (prop.isInverse()) {
-			if ((prop instanceof ObjectPropertyExpression) && !objectProperties.contains(prop.getInverse())) 
-				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
-			if ((prop instanceof DataPropertyExpression) && !dataProperties.contains(prop.getInverse())) 
-				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
+			checkSignature(prop.getInverse());
 		}
 		else {
-			if ((prop instanceof ObjectPropertyExpression) && !objectProperties.contains(prop)) 
-				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);			
-			if ((prop instanceof DataPropertyExpression) && !dataProperties.contains(prop)) 
-				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);			
+			// Make sure we never validate against auxiliary roles introduced by
+			// the translation of the OWL ontology
+			if (isAuxiliaryProperty(prop)) 
+				return;
+			
+			if ((prop instanceof ObjectPropertyExpression) && 
+					!objectProperties.contains(prop) && 
+					!prop.equals(owlTopObjectProperty) &&
+					!prop.equals(owlBottomObjectProperty)) 
+				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
+			
+			if ((prop instanceof DataPropertyExpression) && 
+					!dataProperties.contains(prop) &&
+					!prop.equals(owlTopDataProperty) && 
+					!prop.equals(owlBottomDataProperty)) 
+				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
 		}
 	}
 

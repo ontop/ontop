@@ -38,6 +38,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
@@ -168,8 +169,8 @@ public class OWLAPI3Translator {
 
 	}
 
-	// USED IN OBDAModelManager
-	
+	// USED ONLY IN OBDAModelManager
+	@Deprecated
 	public static Predicate getPredicate(OWLEntity entity) {
 		Predicate p = null;
 		if (entity instanceof OWLClass) {
@@ -191,14 +192,19 @@ public class OWLAPI3Translator {
 		}
 		return p;
 	}
+	
+	
+	/**
+	 * 
+	 * @param owl
+	 * @return
+	 * @throws PunningException
+	 */
 
 	public Ontology translate(OWLOntology owl) throws PunningException {
 
 		OWL2QLProfile owlprofile = new OWL2QLProfile();
-
 		OWLProfileReport report = owlprofile.checkOntology(owl);
-		Set<OWLAxiom> axiomIgnoresOWL2QL = new HashSet<OWLAxiom>();
-
 		if (!report.isInProfile()) {
 			log.warn("WARNING. The current ontology is not in the OWL 2 QL profile.");
 			try {
@@ -216,74 +222,9 @@ public class OWLAPI3Translator {
 
 		Ontology dl_onto = ofac.createOntology();
 
-		HashSet<String> objectproperties = new HashSet<String>();
-		HashSet<String> dataproperties = new HashSet<String>();
-
-		/*
-		 * First we add all definitions for classes and roles
-		 */
-		Set<OWLEntity> entities = owl.getSignature();
-		Iterator<OWLEntity> eit = entities.iterator();
-
-		HashSet<String> punnedPredicates = new HashSet<String>();
-
-		while (eit.hasNext()) {
-			OWLEntity entity = eit.next();
-			Predicate p = getPredicate(entity);
-			if (p == null)
-				continue;
-
-			/*
-			 * When we register predicates punning is not allowed between data
-			 * and object properties
-			 */
-
-			if (p.isClass()) {
-				dl_onto.getVocabulary().declareClass(p.getName());
-
-			} else {
-				if (p.isObjectProperty()) {
-					if (dataproperties.contains(p.getName())) {
-						punnedPredicates.add(p.getName());
-					} else {
-						objectproperties.add(p.getName());
-						dl_onto.getVocabulary().declareObjectProperty(p.getName());
-					}
-				} else {
-					if (objectproperties.contains(p.getName())) {
-						punnedPredicates.add(p.getName().toString());
-					} else {
-						dataproperties.add(p.getName());
-						dl_onto.getVocabulary().declareDataProperty(p.getName());
-					}
-				}
-			}
-		}
-
-		/*
-		 * Generating a WARNING about all punned predicates which have been
-		 * ignored
-		 */
-		if (!punnedPredicates.isEmpty()) {
-			log.warn("Quest can become unstable with properties declared as both, data and object property. Offending properties: ");
-			for (String predicates : punnedPredicates) {
-				log.warn("  " + predicates);
-			}
-		}
-
-		Set<OWLAxiom> axioms = owl.getAxioms();
-		Iterator<OWLAxiom> it = axioms.iterator();
-		while (it.hasNext()) {
-
-			OWLAxiom axiom = it.next();
-
-			if (axiomIgnoresOWL2QL.contains(axiom)) {
-				/*
-				 * This axiom is not part of OWL 2 QL according to the OWLAPI,
-				 * we need to ignore it
-				 */
-				continue;
-			}
+		processEntities(dl_onto.getVocabulary(), owl);
+		
+		for (OWLAxiom axiom : owl.getAxioms()) {
 
 			/***
 			 * Important to use the negated normal form of the axioms, and not
@@ -359,44 +300,12 @@ public class OWLAPI3Translator {
 					processAxiom(dl_onto, (OWLDataPropertyAssertionAxiom)axiom);
 					
 				else if (axiom instanceof OWLAnnotationAxiom) {
-					/*
-					 * Annotations axioms are intentionally ignored by the
-					 * translator
-					 */
-				} else if (axiom instanceof OWLDeclarationAxiom) {
-					OWLDeclarationAxiom owld = (OWLDeclarationAxiom) axiom;
-					OWLEntity entity = owld.getEntity();
-					if (entity instanceof OWLClass) {
-						if (!entity.asOWLClass().isOWLThing()) {
-
-							String uri = entity.asOWLClass().getIRI().toString();
-							dl_onto.getVocabulary().declareClass(uri);
-						}
-					} else if (entity instanceof OWLObjectProperty) {
-						String uri = entity.asOWLObjectProperty().getIRI().toString();
-						dl_onto.getVocabulary().declareObjectProperty(uri);
-					} else if (entity instanceof OWLDataProperty) {
-						String uri = entity.asOWLDataProperty().getIRI().toString();
-						dl_onto.getVocabulary().declareDataProperty(uri);
-					} else if (entity instanceof OWLIndividual) {
-						/*
-						 * NO OP, individual declarations are ignored silently
-						 * during TBox translation
-						 */
-					} else {
-						log.info("Ignoring declaration axiom: {}", axiom);
-					}
-
-					/*
-					 * Annotations axioms are intentionally ignored by the
-					 * translator
-					 */
+					// NO-OP: annotation axioms are intentionally ignored by the translator
+				} 
+				else if (axiom instanceof OWLDeclarationAxiom) {
+					// NO-OP: declaration axioms are ignored at this stage 
+					// (all entities have been processed)
 				}
-				// else if (axiom instanceof OWLImportsDeclaration) {
-				// /*
-				// * Imports
-				// */
-				// }
 				else {
 					log.warn("Axiom not yet supported by Quest: {}", axiom.toString());
 				}
@@ -405,6 +314,65 @@ public class OWLAPI3Translator {
 			}
 		}
 		return dl_onto;
+	}
+	
+	
+
+	private void processEntities(OntologyVocabulary vocabulary, OWLOntology owl) {
+		
+		Set<String> objectproperties = new HashSet<String>();
+		Set<String> dataproperties = new HashSet<String>();
+		Set<String> punnedPredicates = new HashSet<String>();
+		
+		/*
+		 * First we add all definitions for classes and roles
+		 */
+					
+		for (OWLClass entity : owl.getClassesInSignature()) {
+			/* We ignore TOP and BOTTOM (Thing and Nothing) */
+			//if (entity.isOWLThing() || entity.isOWLNothing()) 
+			//	continue;				
+			String uri = entity.getIRI().toString();
+			vocabulary.declareClass(uri);
+		}
+
+		/*
+		 * When we register predicates punning is not allowed between data
+		 * and object properties
+		 */
+		for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) {
+			//if (prop.isOWLTopObjectProperty() || prop.isOWLBottomObjectProperty()) 
+			//	continue;
+			String uri = prop.getIRI().toString();
+			if (dataproperties.contains(uri)) 
+				punnedPredicates.add(uri); 
+			else {
+				objectproperties.add(uri);
+				vocabulary.declareObjectProperty(uri);
+			}
+		} 
+		for (OWLDataProperty prop : owl.getDataPropertiesInSignature()) {
+			//if (prop.isOWLTopDataProperty() || prop.isOWLBottomDataProperty()) 
+			//	continue;
+			String uri = prop.getIRI().toString();
+			if (objectproperties.contains(uri)) 
+				punnedPredicates.add(uri);
+			else {
+				dataproperties.add(uri);
+				vocabulary.declareDataProperty(uri);
+			}
+		}
+		
+
+		/*
+		 * Generating a WARNING about all punned predicates which have been
+		 * ignored
+		 */
+		if (!punnedPredicates.isEmpty()) {
+			log.warn("Quest can become unstable with properties declared as both, data and object property. Offending properties: ");
+			for (String predicates : punnedPredicates) 
+				log.warn("  " + predicates);
+		}		
 	}
 	
 	
@@ -993,8 +961,7 @@ public class OWLAPI3Translator {
 		if (indv.isAnonymous()) 
 			throw new RuntimeException("Found anonymous individual, this feature is not supported:" + aux);
 
-		Predicate classpred = dfac.getClassPredicate(namedclass.getIRI().toString());
-		OClass concept = ofac.createClass(classpred.getName());
+		OClass concept = ofac.createClass(namedclass.getIRI().toString());
 		
 		URIConstant c = dfac.getConstantURI(indv.asOWLNamedIndividual().getIRI().toString());
 
@@ -1014,18 +981,17 @@ public class OWLAPI3Translator {
 
 		if (propertyExperssion instanceof OWLObjectProperty) {
 			OWLObjectProperty namedclass = (OWLObjectProperty) propertyExperssion;
-			Predicate p = dfac.getObjectPropertyPredicate(namedclass.getIRI().toString());
-			prop = ofac.createObjectProperty(p.getName());
+			prop = ofac.createObjectProperty(namedclass.getIRI().toString());
 			
 			c1 = dfac.getConstantURI(aux.getSubject().asOWLNamedIndividual().getIRI().toString());
 			c2 = dfac.getConstantURI(aux.getObject().asOWLNamedIndividual().getIRI().toString());
 			
 			// TODO: check for bottom
 			
-		} else if (propertyExperssion instanceof OWLObjectInverseOf) {
+		} 
+		else if (propertyExperssion instanceof OWLObjectInverseOf) {
 			OWLObjectProperty namedclass = ((OWLObjectInverseOf) propertyExperssion).getInverse().getNamedProperty();
-			Predicate p = dfac.getObjectPropertyPredicate(namedclass.getIRI().toString());
-			prop = ofac.createObjectProperty(p.getName()).getInverse();
+			prop = ofac.createObjectProperty(namedclass.getIRI().toString()).getInverse();
 			
 			c1 = dfac.getConstantURI(aux.getSubject().asOWLNamedIndividual().getIRI().toString());
 			c2 = dfac.getConstantURI(aux.getObject().asOWLNamedIndividual().getIRI().toString());
@@ -1059,8 +1025,7 @@ public class OWLAPI3Translator {
 			throw new RuntimeException(e.getMessage());
 		}
 
-		Predicate p = dfac.getDataPropertyPredicate(property);
-		PropertyExpression prop = ofac.createDataProperty(p.getName());
+		PropertyExpression prop = ofac.createDataProperty(property);
 		
 		URIConstant c1 = dfac.getConstantURI(subject.asOWLNamedIndividual().getIRI().toString());
 		ValueConstant c2 = dfac.getConstantLiteral(object.getLiteral(), type);
