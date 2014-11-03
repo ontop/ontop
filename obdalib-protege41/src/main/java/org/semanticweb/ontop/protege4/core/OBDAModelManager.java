@@ -324,7 +324,7 @@ public class OBDAModelManager implements Disposable {
 
 		activeOBDAModelWrapper = new OBDAModelWrapper(nativeQLFactory, obdaFactory, prefixWrapper);
 
-		activeOBDAModelWrapper.addSourcesListener(dlistener);
+		activeOBDAModelWrapper.addSourceListener(dlistener);
 		activeOBDAModelWrapper.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);
 

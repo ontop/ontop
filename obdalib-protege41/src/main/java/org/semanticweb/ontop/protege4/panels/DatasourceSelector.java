@@ -68,7 +68,7 @@ public class DatasourceSelector extends javax.swing.JPanel implements OBDAModelL
 			obdaModel.removeSourcesListener(this);
 		}
 		obdaModel = model;
-		obdaModel.addSourcesListener(this);
+		obdaModel.addSourceListener(this);
 		initSources();
 	}
 

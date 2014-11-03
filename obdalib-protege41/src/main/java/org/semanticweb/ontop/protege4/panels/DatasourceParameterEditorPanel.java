@@ -91,34 +91,34 @@ public class DatasourceParameterEditorPanel extends javax.swing.JPanel implement
 		this.setFocusTraversalPolicy(new CustomTraversalPolicy(order));
 
 		lblSourcesNumber.setText(Integer.toString(obdaModel.getSources().size()));
-		model.addSourcesListener(new OBDAModelListener() {
-			private static final long serialVersionUID = -415753131971100104L;
+		model.addSourceListener(new OBDAModelListener() {
+            private static final long serialVersionUID = -415753131971100104L;
 
-			@Override
-			public void datasourceUpdated(String oldname, OBDADataSource currendata) {
-				// NO OP
-			}
+            @Override
+            public void datasourceUpdated(String oldname, OBDADataSource currendata) {
+                // NO OP
+            }
 
-			@Override
-			public void datasourceDeleted(OBDADataSource source) {
-				lblSourcesNumber.setText(Integer.toString(obdaModel.getSources().size()));
-			}
+            @Override
+            public void datasourceDeleted(OBDADataSource source) {
+                lblSourcesNumber.setText(Integer.toString(obdaModel.getSources().size()));
+            }
 
-			@Override
-			public void datasourceAdded(OBDADataSource source) {
-				lblSourcesNumber.setText(Integer.toString(obdaModel.getSources().size()));
-			}
+            @Override
+            public void datasourceAdded(OBDADataSource source) {
+                lblSourcesNumber.setText(Integer.toString(obdaModel.getSources().size()));
+            }
 
-			@Override
-			public void datasourcParametersUpdated() {
-				// NO OP
-			}
+            @Override
+            public void datasourcParametersUpdated() {
+                // NO OP
+            }
 
-			@Override
-			public void alldatasourcesDeleted() {
-				lblSourcesNumber.setText(Integer.toString(obdaModel.getSources().size()));
-			}
-		});
+            @Override
+            public void alldatasourcesDeleted() {
+                lblSourcesNumber.setText(Integer.toString(obdaModel.getSources().size()));
+            }
+        });
 
 		
 	}
