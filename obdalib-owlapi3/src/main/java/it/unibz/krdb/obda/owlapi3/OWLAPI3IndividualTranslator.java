@@ -52,7 +52,7 @@ import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
  */
 public class OWLAPI3IndividualTranslator {
 
-	private OWLDataFactory dataFactory = null;
+	private final OWLDataFactory dataFactory;
 
 	public OWLAPI3IndividualTranslator() {
 		dataFactory = new OWLDataFactoryImpl();

@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
@@ -55,7 +55,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		File file = new File(path + "test_401.owl");
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 		Ontology ontology = translator.translate(owlonto);
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
@@ -105,7 +105,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		File file = new File(path + "test_402.owl");
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 		Ontology ontology = translator.translate(owlonto);
 		
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
@@ -152,7 +152,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		File file = new File(path + "test_403.owl");
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 		Ontology ontology = translator.translate(owlonto);
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
@@ -197,7 +197,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		File file = new File(path + "test_404.owl");
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 		Ontology ontology = translator.translate(owlonto);
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);

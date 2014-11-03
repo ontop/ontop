@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 
 import java.net.URI;
 import java.util.Iterator;
@@ -62,7 +62,7 @@ public class TranslatorTest extends TestCase {
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(prop));
 		manager.addAxiom(onto, ax);
 		
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 		Ontology dlliteonto = translator.translate(onto);
 		
 		Set<SubClassOfAxiom> ass = dlliteonto.getSubClassAxioms();
@@ -88,7 +88,7 @@ public class TranslatorTest extends TestCase {
 		
 		manager.addAxiom(onto, ax);
 		
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 		Ontology dlliteonto = translator.translate(onto);
 		
 		Set<SubClassOfAxiom> ass = dlliteonto.getSubClassAxioms();
@@ -112,7 +112,7 @@ public class TranslatorTest extends TestCase {
 		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
 		manager.addAxiom(onto, ax);
 		
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 		Ontology dlliteonto = translator.translate(onto);
 		
 		Set<SubPropertyOfAxiom> ass = dlliteonto.getSubPropertyAxioms();
@@ -150,7 +150,7 @@ public class TranslatorTest extends TestCase {
 		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
 		manager.addAxiom(onto, ax);
 		
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 		Ontology dlliteonto = translator.translate(onto);
 		
 		Set<SubClassOfAxiom> ass = dlliteonto.getSubClassAxioms();

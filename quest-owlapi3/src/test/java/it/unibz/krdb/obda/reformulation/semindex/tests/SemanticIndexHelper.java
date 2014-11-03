@@ -29,7 +29,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
@@ -109,7 +109,7 @@ public class SemanticIndexHelper {
     public Ontology load_onto(String ontoname) throws Exception {
         String owlfile = owlloc + ontoname + ".owl";
         OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-        OWLAPI3Translator translator = new OWLAPI3Translator();
+        OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 
         Ontology ontology = translator.translate(owlOntology);
         return ontology;

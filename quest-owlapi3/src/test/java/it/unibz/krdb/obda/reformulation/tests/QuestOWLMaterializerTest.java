@@ -28,7 +28,7 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
@@ -155,7 +155,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 			File fo = new File("src/test/resources/test/materializer/MaterializeTest.owl");
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLOntology owl_onto = manager.loadOntologyFromOntologyDocument(fo);
-			Ontology onto =  new OWLAPI3Translator().translate(owl_onto);
+			Ontology onto =  new OWLAPI3TranslatorUtility().translate(owl_onto);
 			System.out.println(onto.getSubPropertyAxioms());
 			System.out.println(onto.getSubClassAxioms());
 			

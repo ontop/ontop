@@ -31,7 +31,7 @@ import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -111,7 +111,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 	
 	private Ontology readOntology(String tboxFile) throws Exception {
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 		File f = new File(tboxFile);
 		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(f.getParentFile(), false);
 		man.addIRIMapper(iriMapper);
