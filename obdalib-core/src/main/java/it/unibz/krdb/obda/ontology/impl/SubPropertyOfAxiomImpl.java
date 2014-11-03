@@ -20,18 +20,17 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
-public class SubPropertyOfAxiomImpl implements SubPropertyOfAxiom {
+public class SubPropertyOfAxiomImpl<T> implements SubPropertyOfAxiom<T> {
 
 	private static final long serialVersionUID = -3020225654321319941L;
 
-	private final PropertyExpression including; // right-hand side
-	private final PropertyExpression included;	
+	private final T including; // right-hand side
+	private final T included;	
 	private final String string;
 	
-	SubPropertyOfAxiomImpl(PropertyExpression subDesc, PropertyExpression superDesc) {
+	SubPropertyOfAxiomImpl(T subDesc, T superDesc) {
 		included = subDesc;
 		including = superDesc;
 		StringBuilder bf = new StringBuilder();
@@ -42,19 +41,19 @@ public class SubPropertyOfAxiomImpl implements SubPropertyOfAxiom {
 	}
 
 	@Override
-	public PropertyExpression getSub() {
+	public T getSub() {
 		return included;
 	}
 
 	@Override
-	public PropertyExpression getSuper() {
+	public T getSuper() {
 		return including;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof SubPropertyOfAxiomImpl) {
-			SubPropertyOfAxiomImpl inc2 = (SubPropertyOfAxiomImpl) obj;
+		if (obj instanceof SubPropertyOfAxiomImpl<?>) {
+			SubPropertyOfAxiomImpl<T> inc2 = (SubPropertyOfAxiomImpl<T>) obj;
 			return including.equals(inc2.including) && included.equals(inc2.included);
 		}
 		return false;

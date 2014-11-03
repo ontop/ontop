@@ -55,8 +55,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		File file = new File(path + "test_401.owl");
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-		Ontology ontology = translator.translate(owlonto);
+		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
@@ -65,8 +64,11 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(3, simpleonto.getVocabulary().getClasses().size());
 		assertEquals(0, simpleonto.getVocabulary().getObjectProperties().size());
 		System.out.println(simpleonto.getSubClassAxioms());
-		System.out.println(simpleonto.getSubPropertyAxioms());
-		assertEquals(3, simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
+		System.out.println(simpleonto.getSubObjectPropertyAxioms());
+		System.out.println(simpleonto.getSubDataPropertyAxioms());
+		assertEquals(3, simpleonto.getSubClassAxioms().size() 
+					+ simpleonto.getSubObjectPropertyAxioms().size() 
+					+ simpleonto.getSubDataPropertyAxioms().size());
 //		assertEquals(3, simpleonto.getVocabulary().size());
 
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -105,8 +107,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		File file = new File(path + "test_402.owl");
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-		Ontology ontology = translator.translate(owlonto);
+		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
 		
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
@@ -114,7 +115,9 @@ public class EquivalenceSimplificationTest extends TestCase {
 
 		assertEquals(0, simpleonto.getVocabulary().getClasses().size());
 		assertEquals(3, simpleonto.getVocabulary().getObjectProperties().size());
-		assertEquals(12,  simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
+		assertEquals(12,  simpleonto.getSubClassAxioms().size() 
+							+ simpleonto.getSubObjectPropertyAxioms().size() 
+							+ simpleonto.getSubDataPropertyAxioms().size());
 //		assertEquals(3, simpleonto.getVocabulary().size());
 
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -152,8 +155,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		File file = new File(path + "test_403.owl");
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-		Ontology ontology = translator.translate(owlonto);
+		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
@@ -162,7 +164,9 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(simpleonto.getVocabulary().getClasses().toString(), 3, simpleonto.getVocabulary().getClasses().size());
 		assertEquals(3, simpleonto.getVocabulary().getObjectProperties().size());
 		assertEquals(3, simpleonto.getVocabulary().getClasses().size());
-		assertEquals(9,  simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
+		assertEquals(9,  simpleonto.getSubClassAxioms().size() 
+							+ simpleonto.getSubObjectPropertyAxioms().size() 
+							+ simpleonto.getSubDataPropertyAxioms().size());
 //		assertEquals(6, simpleonto.getVocabulary().size());
 
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -197,14 +201,15 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		File file = new File(path + "test_404.owl");
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-		Ontology ontology = translator.translate(owlonto);
+		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
 		Ontology simpleonto = TBoxReasonerToOntology.getOntology(simple);
 
-		assertEquals(12,  simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
+		assertEquals(12,  simpleonto.getSubClassAxioms().size() 
+								+ simpleonto.getSubObjectPropertyAxioms().size() 
+								+ simpleonto.getSubDataPropertyAxioms().size());
 		assertEquals(0, simpleonto.getVocabulary().getClasses().size());
 		assertEquals(3, simpleonto.getVocabulary().getObjectProperties().size());
 //		assertEquals(3, simpleonto.getVocabulary().size());

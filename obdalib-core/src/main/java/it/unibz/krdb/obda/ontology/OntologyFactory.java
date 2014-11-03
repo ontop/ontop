@@ -39,9 +39,12 @@ public interface OntologyFactory {
 	
 	public Ontology createOntology();
 
-
-
+	@Deprecated 
 	public SomeValuesFrom createPropertySomeRestriction(PropertyExpression role);
+
+	public SomeValuesFrom createPropertySomeRestriction(ObjectPropertyExpression role);
+
+	public SomeValuesFrom createPropertySomeRestriction(DataPropertyExpression role);
 	
 	public DataPropertyRangeExpression createDataPropertyRange(DataPropertyExpression role);
 		

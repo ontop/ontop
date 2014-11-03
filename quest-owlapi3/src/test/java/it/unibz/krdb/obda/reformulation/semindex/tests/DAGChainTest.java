@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
@@ -85,8 +86,8 @@ public class DAGChainTest extends TestCase {
 	public void test_exists_simple() {
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
-		PropertyExpression rprop = descFactory.createObjectProperty("r");
-		PropertyExpression riprop = rprop.getInverse();
+		ObjectPropertyExpression rprop = descFactory.createObjectProperty("r");
+		ObjectPropertyExpression riprop = rprop.getInverse();
 		OClass ac = descFactory.createClass("a");
 		SomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
 		SomeValuesFrom ier = descFactory.createPropertySomeRestriction(riprop);
@@ -133,8 +134,8 @@ public class DAGChainTest extends TestCase {
 
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
-		PropertyExpression rprop = descFactory.createObjectProperty("r");
-		PropertyExpression riprop = rprop.getInverse();
+		ObjectPropertyExpression rprop = descFactory.createObjectProperty("r");
+		ObjectPropertyExpression riprop = rprop.getInverse();
 
 		OClass ac = descFactory.createClass("a");
 		SomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);

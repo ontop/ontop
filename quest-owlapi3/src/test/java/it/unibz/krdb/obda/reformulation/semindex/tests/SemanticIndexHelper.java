@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
@@ -33,6 +34,7 @@ import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
+
 
 
 
@@ -189,7 +191,7 @@ public class SemanticIndexHelper {
                 if (type.equals("classes")) {
                     if (exists) {
                     	// TODO: check whether object properties are enough
-                    	PropertyExpression prop = descFactory.createObjectProperty(uri);
+                    	ObjectPropertyExpression prop = descFactory.createObjectProperty(uri);
                     	if (inverse)
                     		prop = prop.getInverse();
                         description = descFactory.createPropertySomeRestriction(prop);
@@ -198,7 +200,7 @@ public class SemanticIndexHelper {
                         description = descFactory.createClass(uri);
                 } else {
                 	// TODO: check whether object properties are enough
-                	PropertyExpression prop = descFactory.createObjectProperty(uri);
+                	ObjectPropertyExpression prop = descFactory.createObjectProperty(uri);
                     if (inverse)
                     	description = prop.getInverse();
                     else

@@ -21,17 +21,19 @@ package it.unibz.krdb.obda.ontology;
  */
 
 /**
- * Represents SubObjectPropertyOf, EquivalentObjectProperties, SymmetricObjectProperties,
- *            SubDataPropertyOf, EquivalentDataProperties
+ * Represents the following from OWL 2 Specification:
+ * 
+ *      SubObjectPropertyOf, EquivalentObjectProperties, SymmetricObjectProperties for T = ObjectPropertyExpression
+ *      SubDataPropertyOf, EquivalentDataProperties for T = DataPropertyExpression
  * 
  * @author roman
  *
  */
 
 
-public interface SubPropertyOfAxiom extends Axiom {
+public interface SubPropertyOfAxiom<T> extends Axiom {
 
-	public PropertyExpression getSub();
+	public T getSub();
 
-	public PropertyExpression getSuper();
+	public T getSuper();
 }

@@ -21,8 +21,8 @@ package it.unibz.krdb.obda.reformulation.tests;
  */
 
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
@@ -62,8 +62,7 @@ public class TranslatorTest extends TestCase {
 		manager.addAxiom(onto, factory.getOWLDeclarationAxiom(prop));
 		manager.addAxiom(onto, ax);
 		
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-		Ontology dlliteonto = translator.translate(onto);
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
 		
 		Set<SubClassOfAxiom> ass = dlliteonto.getSubClassAxioms();
 		Iterator<SubClassOfAxiom> assit = ass.iterator();
@@ -88,8 +87,7 @@ public class TranslatorTest extends TestCase {
 		
 		manager.addAxiom(onto, ax);
 		
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-		Ontology dlliteonto = translator.translate(onto);
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
 		
 		Set<SubClassOfAxiom> ass = dlliteonto.getSubClassAxioms();
 		Iterator<SubClassOfAxiom> assit = ass.iterator();
@@ -112,20 +110,19 @@ public class TranslatorTest extends TestCase {
 		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
 		manager.addAxiom(onto, ax);
 		
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-		Ontology dlliteonto = translator.translate(onto);
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
 		
-		Set<SubPropertyOfAxiom> ass = dlliteonto.getSubPropertyAxioms();
-		Iterator<SubPropertyOfAxiom> assit = ass.iterator();
+		Set<SubPropertyOfAxiom<ObjectPropertyExpression>> ass = dlliteonto.getSubObjectPropertyAxioms();
+		Iterator<SubPropertyOfAxiom<ObjectPropertyExpression>> assit = ass.iterator();
 		assertEquals(2, ass.size());
 		
-		SubPropertyOfAxiom a = assit.next();
-		SubPropertyOfAxiom b = assit.next();
-		PropertyExpression included =a.getSub();
+		SubPropertyOfAxiom<ObjectPropertyExpression> a = assit.next();
+		SubPropertyOfAxiom<ObjectPropertyExpression> b = assit.next();
+		ObjectPropertyExpression included =a.getSub();
 		assertEquals(false, included.isInverse());
 		assertEquals("http://example/R", included.getPredicate().getName().toString());
 		
-		PropertyExpression indlucing = a.getSuper();
+		ObjectPropertyExpression indlucing = a.getSuper();
 		assertEquals(true, indlucing.isInverse());
 		assertEquals("http://example/S", indlucing.getPredicate().getName().toString());
 		
@@ -150,8 +147,7 @@ public class TranslatorTest extends TestCase {
 		OWLOntology onto = manager.createOntology(IRI.create(URI.create("http://example/testonto")));
 		manager.addAxiom(onto, ax);
 		
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-		Ontology dlliteonto = translator.translate(onto);
+		Ontology dlliteonto = OWLAPI3TranslatorUtility.translate(onto);
 		
 		Set<SubClassOfAxiom> ass = dlliteonto.getSubClassAxioms();
 		Iterator<SubClassOfAxiom> assit = ass.iterator();

@@ -38,6 +38,8 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
@@ -1971,9 +1973,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	// Attribute datatype from TBox
 	private COL_TYPE getAttributeType(Predicate attribute) {
-		// TODO: use proper range class
-		PropertyExpression prop = ofac.createObjectProperty(attribute.getName()).getInverse();
-		SomeValuesFrom role = ofac.createPropertySomeRestriction(prop);
+		DataPropertyExpression prop = ofac.createDataProperty(attribute.getName());
+		DataPropertyRangeExpression role = ofac.createDataPropertyRange(prop); 
 		Equivalences<BasicClassDescription> roleNode = reasonerDag.getClasses().getVertex(role);
 		Set<Equivalences<BasicClassDescription>> ancestors = reasonerDag.getClasses().getSuper(roleNode);
 

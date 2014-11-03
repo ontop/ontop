@@ -43,15 +43,15 @@ public class OntologyImpl implements Ontology {
 
 	private static final long serialVersionUID = 758424053258299151L;
 	
-	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-
 	private final OntologyVocabularyImpl vocabulary = new OntologyVocabularyImpl();
 	
 	// axioms and assertions
 
 	private final Set<SubClassOfAxiom> subClassAxioms = new LinkedHashSet<SubClassOfAxiom>();
 	
-	private final Set<SubPropertyOfAxiom> subPropertyAxioms = new LinkedHashSet<SubPropertyOfAxiom>();
+	private final Set<SubPropertyOfAxiom<ObjectPropertyExpression>> subObjectPropertyAxioms = new LinkedHashSet<SubPropertyOfAxiom<ObjectPropertyExpression>>();
+	
+	private final Set<SubPropertyOfAxiom<DataPropertyExpression>> subDataPropertyAxioms = new LinkedHashSet<SubPropertyOfAxiom<DataPropertyExpression>>();
 
 	private final Set<DisjointnessAxiom<ClassExpression>> disjointClassesAxioms = new LinkedHashSet<DisjointnessAxiom<ClassExpression>>();
 
@@ -59,9 +59,9 @@ public class OntologyImpl implements Ontology {
 
 	private final Set<DisjointnessAxiom<DataPropertyExpression>> disjointDataPropertiesAxioms = new LinkedHashSet<DisjointnessAxiom<DataPropertyExpression>>();
 	
-	private final Set<FunctionalPropertyAxiom<ObjectPropertyExpression>> functionalObjectPropertyAxioms = new LinkedHashSet<FunctionalPropertyAxiom<ObjectPropertyExpression>>();
+	private final Set<ObjectPropertyExpression> functionalObjectPropertyAxioms = new LinkedHashSet<ObjectPropertyExpression>();
 
-	private final Set<FunctionalPropertyAxiom<DataPropertyExpression>> functionalDataPropertyAxioms = new LinkedHashSet<FunctionalPropertyAxiom<DataPropertyExpression>>();
+	private final Set<DataPropertyExpression> functionalDataPropertyAxioms = new LinkedHashSet<DataPropertyExpression>();
 	
 	private final Set<ClassAssertion> classAssertions = new LinkedHashSet<ClassAssertion>();
 
@@ -77,7 +77,8 @@ public class OntologyImpl implements Ontology {
 	public OntologyImpl clone() {
 		OntologyImpl clone = new OntologyImpl();
 		clone.subClassAxioms.addAll(subClassAxioms);
-		clone.subPropertyAxioms.addAll(subPropertyAxioms);
+		clone.subObjectPropertyAxioms.addAll(subObjectPropertyAxioms);
+		clone.subDataPropertyAxioms.addAll(subDataPropertyAxioms);
 		clone.vocabulary.merge(vocabulary);
 		return clone;
 	}
@@ -102,18 +103,18 @@ public class OntologyImpl implements Ontology {
 	
 	@Override
 	public void addSubPropertyOfAxiomWithReferencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including) {
-		SubPropertyOfAxiom assertion = new SubPropertyOfAxiomImpl(included, including);
+		SubPropertyOfAxiom<ObjectPropertyExpression> assertion = new SubPropertyOfAxiomImpl<ObjectPropertyExpression>(included, including);
 		vocabulary.addReferencedEntries(assertion.getSub());
 		vocabulary.addReferencedEntries(assertion.getSuper());
-		subPropertyAxioms.add(assertion);
+		subObjectPropertyAxioms.add(assertion);
 	}
 	
 	@Override
 	public void addSubPropertyOfAxiomWithReferencedEntities(DataPropertyExpression included, DataPropertyExpression including) {
-		SubPropertyOfAxiom assertion = new SubPropertyOfAxiomImpl(included, including);
+		SubPropertyOfAxiom<DataPropertyExpression> assertion = new SubPropertyOfAxiomImpl<DataPropertyExpression>(included, including);
 		vocabulary.addReferencedEntries(assertion.getSub());
 		vocabulary.addReferencedEntries(assertion.getSuper());
-		subPropertyAxioms.add(assertion);
+		subDataPropertyAxioms.add(assertion);
 	}
 
 	@Override
@@ -136,16 +137,16 @@ public class OntologyImpl implements Ontology {
 	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including) {
 		vocabulary.checkSignature(included);
 		vocabulary.checkSignature(including);
-		SubPropertyOfAxiom ax = new SubPropertyOfAxiomImpl(included, including);
-		subPropertyAxioms.add(ax);
+		SubPropertyOfAxiom<ObjectPropertyExpression> ax = new SubPropertyOfAxiomImpl<ObjectPropertyExpression>(included, including);
+		subObjectPropertyAxioms.add(ax);
 	}
 	
 	@Override
 	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including) {
 		vocabulary.checkSignature(included);
 		vocabulary.checkSignature(including);
-		SubPropertyOfAxiom ax = new SubPropertyOfAxiomImpl(included, including);
-		subPropertyAxioms.add(ax);
+		SubPropertyOfAxiom<DataPropertyExpression> ax = new SubPropertyOfAxiomImpl<DataPropertyExpression>(included, including);
+		subDataPropertyAxioms.add(ax);
 	}
 
 	@Override
@@ -175,15 +176,13 @@ public class OntologyImpl implements Ontology {
 	@Override
 	public void addFunctionalObjectPropertyAxiom(ObjectPropertyExpression prop) {
 		vocabulary.checkSignature(prop);
-		FunctionalPropertyAxiom<ObjectPropertyExpression> ax = new FunctionalPropertyAxiomImpl<ObjectPropertyExpression>(prop);
-		functionalObjectPropertyAxioms.add(ax);
+		functionalObjectPropertyAxioms.add(prop);
 	}
 
 	@Override
 	public void addFunctionalDataPropertyAxiom(DataPropertyExpression prop) {
 		vocabulary.checkSignature(prop);
-		FunctionalPropertyAxiom<DataPropertyExpression> ax = new FunctionalPropertyAxiomImpl<DataPropertyExpression>(prop);
-		functionalDataPropertyAxioms.add(ax);
+		functionalDataPropertyAxioms.add(prop);
 	}
 	
 	@Override
@@ -226,17 +225,22 @@ public class OntologyImpl implements Ontology {
 	}
 	
 	@Override
-	public Set<SubPropertyOfAxiom> getSubPropertyAxioms() {
-		return subPropertyAxioms;
+	public Set<SubPropertyOfAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms() {
+		return subObjectPropertyAxioms;
+	}
+	
+	@Override
+	public Set<SubPropertyOfAxiom<DataPropertyExpression>> getSubDataPropertyAxioms() {
+		return subDataPropertyAxioms;
 	}
 	
 	@Override 
-	public Set<FunctionalPropertyAxiom<ObjectPropertyExpression>> getFunctionalObjectPropertyAxioms() {
+	public Set<ObjectPropertyExpression> getFunctionalObjectProperties() {
 		return functionalObjectPropertyAxioms;
 	}
 	
 	@Override 
-	public Set<FunctionalPropertyAxiom<DataPropertyExpression>> getFunctionalDataPropertyAxioms() {
+	public Set<DataPropertyExpression> getFunctionalDataProperties() {
 		return functionalDataPropertyAxioms;
 	}
 	
@@ -260,7 +264,7 @@ public class OntologyImpl implements Ontology {
 	public String toString() {
 		StringBuilder str = new StringBuilder();
 		str.append("[Ontology info.");
-		str.append(String.format(" Axioms: %d", subClassAxioms.size() + subPropertyAxioms.size()));
+		str.append(String.format(" Axioms: %d", subClassAxioms.size() + subObjectPropertyAxioms.size() + subDataPropertyAxioms.size()));
 		str.append(String.format(" Classes: %d", getVocabulary().getClasses().size()));
 		str.append(String.format(" Object Properties: %d", getVocabulary().getObjectProperties().size()));
 		str.append(String.format(" Data Properties: %d]", getVocabulary().getDataProperties().size()));

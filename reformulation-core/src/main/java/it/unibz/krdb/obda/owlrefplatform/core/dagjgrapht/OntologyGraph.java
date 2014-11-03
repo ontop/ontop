@@ -67,24 +67,42 @@ public class OntologyGraph {
 		}
 
 		// property inclusions
-		for (SubPropertyOfAxiom roleIncl : ontology.getSubPropertyAxioms()) {
+		for (SubPropertyOfAxiom<ObjectPropertyExpression> roleIncl : ontology.getSubObjectPropertyAxioms()) {
 			// adds the direct edge and the inverse 
 			// e.g., R ISA S and R- ISA S-,
 			//    or R- ISA S and R ISA S-
 
-			PropertyExpression child = roleIncl.getSub();
+			ObjectPropertyExpression child = roleIncl.getSub();
 			graph.addVertex(child);
-			PropertyExpression parent = roleIncl.getSuper();
+			ObjectPropertyExpression parent = roleIncl.getSuper();
 			graph.addVertex(parent);
 			graph.addEdge(child, parent);
 			
-			PropertyExpression childInv = child.getInverse();
+			ObjectPropertyExpression childInv = child.getInverse();
 			graph.addVertex(childInv);
-			PropertyExpression parentInv = parent.getInverse();
+			ObjectPropertyExpression parentInv = parent.getInverse();
 			graph.addVertex(parentInv);
 			graph.addEdge(childInv, parentInv);
 		}
 		
+		// property inclusions
+		for (SubPropertyOfAxiom<DataPropertyExpression> roleIncl : ontology.getSubDataPropertyAxioms()) {
+			// adds the direct edge and the inverse 
+			// e.g., R ISA S and R- ISA S-,
+			//    or R- ISA S and R ISA S-
+
+			DataPropertyExpression child = roleIncl.getSub();
+			graph.addVertex(child);
+			DataPropertyExpression parent = roleIncl.getSuper();
+			graph.addVertex(parent);
+			graph.addEdge(child, parent);
+			
+			DataPropertyExpression childInv = child.getInverse();
+			graph.addVertex(childInv);
+			DataPropertyExpression parentInv = parent.getInverse();
+			graph.addVertex(parentInv);
+			graph.addEdge(childInv, parentInv);
+		}
 		return graph;
 	}
 	

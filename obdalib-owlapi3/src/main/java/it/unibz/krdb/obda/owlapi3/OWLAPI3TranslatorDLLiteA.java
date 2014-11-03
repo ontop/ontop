@@ -224,7 +224,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	@Override
 	public void visit(OWLDataPropertyDomainAxiom ax) {
 		try {
-			PropertyExpression role = getPropertyExpression(ax.getProperty());
+			DataPropertyExpression role = getPropertyExpression(ax.getProperty());
 			SomeValuesFrom subclass = ofac.createPropertySomeRestriction(role);
 			addSubClassAxioms(subclass, ax.getDomain().asConjunctSet());		
 		} catch (TranslationException e) {
@@ -240,7 +240,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	@Override
 	public void visit(OWLObjectPropertyDomainAxiom ax) {
 		try {
-			PropertyExpression role = getPropertyExpression(ax.getProperty());
+			ObjectPropertyExpression role = getPropertyExpression(ax.getProperty());
 			SomeValuesFrom subclass = ofac.createPropertySomeRestriction(role);
 			addSubClassAxioms(subclass, ax.getDomain().asConjunctSet());
 		} catch (TranslationException e) {
@@ -693,7 +693,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			dl_onto.addSubPropertyOfAxiom(exp, role);
 			
 			/* Creating the range assertion */
-			PropertyExpression expInv = exp.getInverse();
+			ObjectPropertyExpression expInv = exp.getInverse();
 			SomeValuesFrom propertySomeRestrictionInv = ofac.createPropertySomeRestriction(expInv);
 			dl_onto.addSubClassOfAxiom(propertySomeRestrictionInv, filler);
 		}

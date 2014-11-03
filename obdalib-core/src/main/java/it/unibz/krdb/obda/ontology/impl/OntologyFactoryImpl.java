@@ -20,20 +20,15 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import java.util.Set;
-
-import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
-import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
@@ -42,9 +37,6 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
-import it.unibz.krdb.obda.ontology.ClassExpression;
-import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
-import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
 
 public class OntologyFactoryImpl implements OntologyFactory {
@@ -114,6 +106,16 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 	@Override
 	public SomeValuesFrom createPropertySomeRestriction(PropertyExpression role) {
+		return new PropertySomeRestrictionImpl(role);
+	}
+	
+	@Override
+	public SomeValuesFrom createPropertySomeRestriction(ObjectPropertyExpression role) {
+		return new PropertySomeRestrictionImpl(role);
+	}
+	
+	@Override
+	public SomeValuesFrom createPropertySomeRestriction(DataPropertyExpression role) {
 		return new PropertySomeRestrictionImpl(role);
 	}
 }

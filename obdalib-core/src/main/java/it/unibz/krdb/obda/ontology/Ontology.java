@@ -70,7 +70,9 @@ public interface Ontology extends Cloneable, Serializable {
 	
 	public Set<SubClassOfAxiom> getSubClassAxioms();
 
-	public Set<SubPropertyOfAxiom> getSubPropertyAxioms();
+	public Set<SubPropertyOfAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms();
+
+	public Set<SubPropertyOfAxiom<DataPropertyExpression>> getSubDataPropertyAxioms();
 	
 	public Set<DisjointnessAxiom<ClassExpression>> getDisjointClassesAxioms();
 	
@@ -78,9 +80,9 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public Set<DisjointnessAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms();
 
-	public Set<FunctionalPropertyAxiom<ObjectPropertyExpression>> getFunctionalObjectPropertyAxioms();
+	public Set<ObjectPropertyExpression> getFunctionalObjectProperties();
 
-	public Set<FunctionalPropertyAxiom<DataPropertyExpression>> getFunctionalDataPropertyAxioms();
+	public Set<DataPropertyExpression> getFunctionalDataProperties();
 	
 	public Set<ClassAssertion> getClassAssertions();
 

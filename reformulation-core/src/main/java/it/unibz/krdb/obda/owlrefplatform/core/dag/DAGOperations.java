@@ -20,8 +20,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
  * #L%
  */
 
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
@@ -242,11 +244,23 @@ public class DAGOperations {
 			DAGNode cycleheaddomainNode = null;
 			DAGNode cycleheadrangeNode = null;
 
-			if (cycleheadNode.getDescription() instanceof PropertyExpression) {
+			if (cycleheadNode.getDescription() instanceof ObjectPropertyExpression) {
 
-				PropertyExpression prop = (PropertyExpression) cycleheadNode.getDescription();
+				ObjectPropertyExpression prop = (ObjectPropertyExpression) cycleheadNode.getDescription();
 
-				PropertyExpression inverse = prop.getInverse();
+				ObjectPropertyExpression inverse = prop.getInverse();
+				SomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
+				SomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
+
+				cycleheadinverseNode = dag.getNode(inverse);
+				cycleheaddomainNode = dag.getNode(domain);
+				cycleheadrangeNode = dag.getNode(range);
+			}
+			else if (cycleheadNode.getDescription() instanceof DataPropertyExpression) {
+
+				DataPropertyExpression prop = (DataPropertyExpression) cycleheadNode.getDescription();
+
+				DataPropertyExpression inverse = prop.getInverse();
 				SomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
 				SomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
 

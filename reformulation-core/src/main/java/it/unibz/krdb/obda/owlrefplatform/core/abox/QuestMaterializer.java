@@ -73,13 +73,13 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestMaterializer {
 
-	private OBDAModel model;
-	private Quest questInstance;
+	private final OBDAModel model;
+	private final Quest questInstance;
 	private Ontology ontology;
 	
-	private Set<Predicate> vocabulary;
+	private final Set<Predicate> vocabulary;
 
-	protected long counter = 0;
+	private long counter = 0;
 	private VirtualTripleIterator iterator;
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -154,8 +154,8 @@ public class QuestMaterializer {
 						&& !vocabulary.contains(p))
 					vocabulary.add(p);
 			}
-		} else
-		{
+		} 
+		else {
 			//from mapping undeclared predicates (can happen)
 			for (URI uri : this.model.getMappings().keySet()){
 				for (OBDAMappingAxiom axiom : this.model.getMappings(uri))

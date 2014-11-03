@@ -148,7 +148,7 @@ public class QuestOWL extends OWLReasonerBase {
 
 	private boolean questready = false;
 	
-	private Axiom inconsistent = null;
+	private Object inconsistent = null;
 
 	// / holds the error that quest had when initializing
 	private String errorMessage = "";
@@ -554,12 +554,12 @@ public class QuestOWL extends OWLReasonerBase {
 
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public boolean isConsistent(){
+	public boolean isConsistent() {
 		return true;
 	}
 	
 	//info to return which axiom was inconsistent during the check
-	public Axiom getInconsistentAxiom() {
+	public Object getInconsistentAxiom() {
 		return inconsistent;
 	}
 	
@@ -639,10 +639,9 @@ public class QuestOWL extends OWLReasonerBase {
 
 		final String strQueryFunc = "ASK { ?x <%s> ?y; <%s> ?z. FILTER (?z != ?y) }";
 		
-		for (FunctionalPropertyAxiom<ObjectPropertyExpression> pfa : 
-							translatedOntologyMerge.getFunctionalObjectPropertyAxioms()) {
+		for (ObjectPropertyExpression pfa : translatedOntologyMerge.getFunctionalObjectProperties()) {
 			// TODO: handle inverses
-			String propFunc = pfa.getProperty().getPredicate().getName();
+			String propFunc = pfa.getPredicate().getName();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
 			boolean isConsistent = executeConsistencyQuery(strQuery);
@@ -652,9 +651,8 @@ public class QuestOWL extends OWLReasonerBase {
 			}
 		}
 		
-		for (FunctionalPropertyAxiom<DataPropertyExpression> pfa : 
-							translatedOntologyMerge.getFunctionalDataPropertyAxioms()) {
-			String propFunc = pfa.getProperty().getPredicate().getName();
+		for (DataPropertyExpression pfa : translatedOntologyMerge.getFunctionalDataProperties()) {
+			String propFunc = pfa.getPredicate().getName();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
 			boolean isConsistent = executeConsistencyQuery(strQuery);

@@ -21,7 +21,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
  */
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
@@ -184,12 +186,22 @@ public class TreeWitnessGenerator {
 	public PropertyExpression getProperty() {
 		return property;
 	}
+	
+	private void ensureExistsRinv() {
+		if (existsRinv == null) {
+			if (property instanceof ObjectPropertyExpression) {
+				ObjectPropertyExpression inv = ((ObjectPropertyExpression)property).getInverse();			
+				existsRinv = ontFactory.createPropertySomeRestriction(inv);	
+			}
+			else {
+				DataPropertyExpression inv = ((DataPropertyExpression)property).getInverse();			
+				existsRinv = ontFactory.createPropertySomeRestriction(inv);					
+			}
+		}		
+	}
 
 	public boolean endPointEntailsAnyOf(Set<BasicClassDescription> subc) {
-		if (existsRinv == null) {
-			PropertyExpression inv = property.getInverse();			
-			existsRinv = ontFactory.createPropertySomeRestriction(inv);	
-		}
+		ensureExistsRinv();
 		return subc.contains(existsRinv) || subc.contains(filler);
 	}
 	
@@ -197,10 +209,7 @@ public class TreeWitnessGenerator {
 		if (subc.isTop())
 			return true;
 		
-		if (existsRinv == null) {
-			PropertyExpression inv = property.getInverse();
-			existsRinv = ontFactory.createPropertySomeRestriction(inv);	
-		}
+		ensureExistsRinv();
 		
 		return subc.subsumes(existsRinv) || subc.subsumes(filler);
 	}

@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
@@ -39,7 +40,6 @@ import junit.framework.TestCase;
 
 public class SigmaTest extends TestCase {
 
-    private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
     private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
     public void test_exists_simple() {
@@ -47,7 +47,7 @@ public class SigmaTest extends TestCase {
 
         OClass ac = descFactory.createClass("a");
         OClass cc = descFactory.createClass("c");
-        PropertyExpression rprop = descFactory.createObjectProperty("r");
+        ObjectPropertyExpression rprop = descFactory.createObjectProperty("r");
         SomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
  
         ontology.addSubClassOfAxiomWithReferencedEntities(er, ac);

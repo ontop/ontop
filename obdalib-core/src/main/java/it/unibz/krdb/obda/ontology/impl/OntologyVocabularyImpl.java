@@ -112,8 +112,13 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 			if (!cl.equals(owlThing) && !cl.equals(owlNothing))
 				concepts.add(cl);
 		}
-		else if (desc instanceof SomeValuesFrom) 
-			addReferencedEntries(((SomeValuesFrom) desc).getProperty());
+		else if (desc instanceof SomeValuesFrom)  {
+			PropertyExpression prop = ((SomeValuesFrom) desc).getProperty();
+			if (prop instanceof ObjectPropertyExpression)
+				addReferencedEntries((ObjectPropertyExpression)prop);
+			else
+				addReferencedEntries((DataPropertyExpression)prop);
+		}
 		else if (desc instanceof Datatype)  {
 			// NO-OP
 			// datatypes.add((Datatype) desc);
@@ -125,21 +130,18 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 			throw new UnsupportedOperationException("Cant understand: " + desc.toString());
 	}
 	
-	void addReferencedEntries(PropertyExpression prop) {
-		if (prop instanceof ObjectPropertyExpression) {
-			ObjectPropertyExpression p = (ObjectPropertyExpression)prop;
-			if (p.isInverse())
-				p = p.getInverse();
-			if (!p.equals(owlTopObjectProperty) && !p.equals(owlBottomObjectProperty))
-				objectProperties.add(p);
-		}
-		else {
-			DataPropertyExpression p = (DataPropertyExpression)prop;
-			if (p.isInverse())
-				p = p.getInverse();
-			if (!p.equals(owlTopDataProperty) && !p.equals(owlBottomDataProperty))
-				dataProperties.add(p);
-		}
+	void addReferencedEntries(ObjectPropertyExpression prop) {
+		if (prop.isInverse())
+			prop = prop.getInverse();
+		if (!prop.equals(owlTopObjectProperty) && !prop.equals(owlBottomObjectProperty))
+			objectProperties.add(prop);
+	}
+	
+	void addReferencedEntries(DataPropertyExpression prop) {
+		if (prop.isInverse())
+			prop = prop.getInverse();
+		if (!prop.equals(owlTopDataProperty) && !prop.equals(owlBottomDataProperty))
+			dataProperties.add(prop);
 	}
 	
 	
