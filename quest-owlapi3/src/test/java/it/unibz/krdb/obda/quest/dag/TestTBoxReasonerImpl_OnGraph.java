@@ -336,9 +336,15 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 			 */
 
 			SomeValuesFrom existsR = (SomeValuesFrom) node;
-			PropertyExpression inv = existsR.getProperty().getInverse();
-			SomeValuesFrom existsRin = fac.createPropertySomeRestriction(inv);
-			
+			PropertyExpression exists = existsR.getProperty();
+			BasicClassDescription existsRin;
+			if (exists instanceof ObjectPropertyExpression) 
+				existsRin = fac.createPropertySomeRestriction(((ObjectPropertyExpression)exists).getInverse());
+			else
+				existsRin = fac.createPropertySomeRestriction(((DataPropertyExpression)exists).getInverse());
+				// TODO: fix DataRange
+//				existsRin = fac.createDataPropertyRange((DataPropertyExpression)exists);
+						
 			Equivalences<BasicClassDescription> existsNode = classDAG.getVertex(existsR);
 			Equivalences<BasicClassDescription> existsInvNode = classDAG.getVertex(existsRin);
 			

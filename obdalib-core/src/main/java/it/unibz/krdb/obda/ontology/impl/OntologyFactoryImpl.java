@@ -103,11 +103,6 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression attribute, ObjectConstant o1, ValueConstant o2) {
 		return new DataPropertyAssertionImpl(attribute, o1, o2);
 	}
-
-	@Override
-	public SomeValuesFrom createPropertySomeRestriction(PropertyExpression role) {
-		return new PropertySomeRestrictionImpl(role);
-	}
 	
 	@Override
 	public SomeValuesFrom createPropertySomeRestriction(ObjectPropertyExpression role) {

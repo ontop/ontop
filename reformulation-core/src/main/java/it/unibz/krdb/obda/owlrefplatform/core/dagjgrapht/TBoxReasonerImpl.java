@@ -562,9 +562,15 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			 */
 
 			PropertyExpression exists = ((SomeValuesFrom) node).getProperty();
-			PropertyExpression inv = exists.getInverse();
-			Equivalences<BasicClassDescription> existsInvNode = classes.getVertex(
-						fac.createPropertySomeRestriction(inv));
+			BasicClassDescription invNode;
+			if (exists instanceof ObjectPropertyExpression) 
+				invNode = fac.createPropertySomeRestriction(((ObjectPropertyExpression)exists).getInverse());
+			else
+				invNode = fac.createPropertySomeRestriction(((DataPropertyExpression)exists).getInverse());
+			// TODO: fix DataRange
+//				invNode = fac.createDataPropertyRange((DataPropertyExpression)exists);
+				
+			Equivalences<BasicClassDescription> existsInvNode = classes.getVertex(invNode);
 			
 			for (Equivalences<BasicClassDescription> children : classes.getDirectSub(existsNode)) {
 				BasicClassDescription child = children.getRepresentative(); 
