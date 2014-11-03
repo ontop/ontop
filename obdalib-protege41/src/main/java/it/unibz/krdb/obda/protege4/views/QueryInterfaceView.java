@@ -55,6 +55,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 import org.protege.editor.core.ProtegeManager;
@@ -106,11 +107,12 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		obdaController.removeListener(this);
 	}
 
+	
 	@Override
 	protected void initialiseOWLView() throws Exception {
 		obdaController = (OBDAModelManager) getOWLEditorKit().get(OBDAModelImpl.class.getName());
 		obdaController.addListener(this);
-
+		
 		prefixManager = obdaController.getActiveOBDAModel().getPrefixManager();
 
 		queryEditorPanel = new QueryInterfacePanel(obdaController.getActiveOBDAModel(), obdaController.getQueryController());
@@ -132,20 +134,26 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		JPanel pnlQueryInterfacePane = new JPanel();
 		pnlQueryInterfacePane.setLayout(new BorderLayout());
 		pnlQueryInterfacePane.add(splQueryInterface, BorderLayout.CENTER);
-
 		setLayout(new BorderLayout());		
 		add(pnlQueryInterfacePane, BorderLayout.CENTER);
+		
 
 		// Setting up model listeners
 		ontologyListener = new OWLOntologyChangeListener() {
 			@Override
 			public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
-				resultTablePanel.setTableModel(new DefaultTableModel());
+				Runnable runner = new Runnable(){
+					public void run(){
+						resultTablePanel.setTableModel(new DefaultTableModel());
+					}
+				};
+				SwingUtilities.invokeLater(runner);
 			}
 		};
+
 		this.getOWLModelManager().addOntologyChangeListener(ontologyListener);
 		setupListeners();
-
+		
 		// Setting up actions for all the buttons of this view.
 		resultTablePanel.setCountAllTuplesActionForUCQ(new OBDADataQueryAction<Integer>("Counting tuples...", QueryInterfaceView.this) {
 			@Override
@@ -160,13 +168,13 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public void handleResult(Integer result){
 				updateTablePanelStatus(result);	
 			}
-			
+
 
 			@Override
 			public Integer executeQuery(QuestOWLStatement st, String query) throws OWLException {
 				return st.getTupleCount(query);
 			}
-			
+
 			@Override
 			public boolean isRunning() {
 				return false;
@@ -179,13 +187,13 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public OWLEditorKit getEditorKit(){
 				return getOWLEditorKit();
 			}
-			
+
 			@Override
 			public void handleResult(QuestOWLResultSet result) throws OWLException{
 				createTableModelFromResultSet(result);
 				showTupleResultInTablePanel();
 			}
-			
+
 			@Override
 			public void run(String query){
 				removeResultTable();
@@ -209,7 +217,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					String queryString) throws OWLException {
 				return st.executeTuple(queryString);
 			}
-	
+
 		});
 
 		queryEditorPanel.setExecuteGraphQueryAction(new OBDADataQueryAction<List<OWLAxiom>>("Executing queries...", QueryInterfaceView.this) {
@@ -218,19 +226,19 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public OWLEditorKit getEditorKit(){
 				return getOWLEditorKit();
 			}
-			
+
 			@Override
 			public List<OWLAxiom> executeQuery(QuestOWLStatement st, String queryString) throws OWLException {
 				return st.executeGraph(queryString); 
 			}
-			
+
 			@Override
 			public void handleResult(List<OWLAxiom> result){
 				OWLAxiomToTurtleVisitor owlVisitor = new OWLAxiomToTurtleVisitor(prefixManager);
 				populateResultUsingVisitor(result, owlVisitor);
 				showGraphResultInTextPanel(owlVisitor);	
 			}
-			
+
 			@Override
 			public int getNumberOfRows() {
 				OWLResultSetTableModel tm = getTableModel();
@@ -244,8 +252,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					return false;
 				return tm.isFetching();
 			}
-			
-		
+
+
 		});
 
 		
@@ -260,7 +268,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public OWLEditorKit getEditorKit(){
 				return getOWLEditorKit();
 			}
-			
+
 			@Override
 			public void handleResult(String result){
 				showActionResultInTextPanel("UCQ Expansion Result", result);
@@ -326,40 +334,77 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		log.debug("Query Manager view initialized");
 	}
 
-
+	
+	private class UCQExpansionPanel implements Runnable{
+		String title;
+		String result;
+		OBDADataQueryAction<?> action;
+		UCQExpansionPanel(String title, String result, OBDADataQueryAction<?> action){
+			this.title = title;
+			this.result = result;
+			this.action = action;
+		}
+		public void run(){
+			TextMessageFrame panel = new TextMessageFrame(title);
+			JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
+			DialogUtils.centerDialogWRTParent(protegeFrame, panel);
+			DialogUtils.installEscapeCloseOperation(panel);
+			panel.setTextMessage(result);
+			panel.setTimeProcessingMessage(String.format("Amount of processing time: %s sec", action.getExecutionTime()/1000));
+			panel.setVisible(true);
+		}
+	};
 
 	private void showActionResultInTextPanel(String title, String result) {
-
 		if (result == null) {
 			return;
 		}
-		TextMessageFrame panel = new TextMessageFrame(title);
-		JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
-		DialogUtils.centerDialogWRTParent(protegeFrame, panel);
-		DialogUtils.installEscapeCloseOperation(panel);
-		OBDADataQueryAction action = queryEditorPanel.getRetrieveUCQExpansionAction();
-		panel.setTextMessage(result);
-		panel.setTimeProcessingMessage(String.format("Amount of processing time: %s sec", action.getExecutionTime()/1000));
-		panel.setVisible(true);
+		OBDADataQueryAction<?> action = queryEditorPanel.getRetrieveUCQExpansionAction();
+		UCQExpansionPanel alter_result_panel = new UCQExpansionPanel(title, result, action);
+		SwingUtilities.invokeLater(alter_result_panel);
 	}
 
+	
+	private class QueryStatusUpdater implements Runnable{
+		int result;
+		QueryStatusUpdater(int result){
+			this.result = result;
+		}
+		
+		public void run(){
+			queryEditorPanel.updateStatus(result);
+		}
+	}
 	protected void updateTablePanelStatus(int result) {
 		if (result != -1) {
-			queryEditorPanel.updateStatus(result);
+			Runnable status_updater = new QueryStatusUpdater(result);
+			SwingUtilities.invokeLater(status_updater);
 		}		
 	}
 
+	
+	private class TableModelSetter implements Runnable{
+		OWLResultSetTableModel currentTableModel;
+		TableModelSetter(OWLResultSetTableModel currentTableModel){
+			this.currentTableModel = currentTableModel;
+		}
+		public void run(){
+				resultTablePanel.setTableModel(currentTableModel);
+		}
+	};
+	
 	private int showTupleResultInTablePanel() throws OWLException {
 		OWLResultSetTableModel currentTableModel = getTableModel();
 		if (currentTableModel != null) {
-			resultTablePanel.setTableModel(currentTableModel);
+			SwingUtilities.invokeLater(new TableModelSetter(currentTableModel));
 			return currentTableModel.getRowCount();
 		} else {
 			return 0;
 		}
 	}
 
-	private void createTableModelFromResultSet(QuestOWLResultSet result) throws OWLException {
+	
+	private synchronized void createTableModelFromResultSet(QuestOWLResultSet result) throws OWLException {
 		if (result == null)
 			throw new NullPointerException("An error occured. createTableModelFromResultSet cannot use a null QuestOWLResultSet");
 		if (result != null) {
@@ -377,7 +422,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	 * Not necessary when replacing with a new result, just to remove old 
 	 * results that are outdated 
 	 */
-	private void removeResultTable(){
+	private synchronized void removeResultTable(){
 		OWLResultSetTableModel tm = getTableModel();
 		if (tm != null){
 			tm.close();
@@ -388,14 +433,27 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		return tableModel;
 	}
 
-	private void showGraphResultInTextPanel(OWLAxiomToTurtleVisitor visitor) {
-		try {
+	
+	private class ResultUpdater implements Runnable {
+		OWLAxiomToTurtleVisitor visitor;
+		
+		ResultUpdater(OWLAxiomToTurtleVisitor visitor){
+			super();
+			this.visitor = visitor;
+		}
+		public void run(){
 			TextMessageFrame panel = new TextMessageFrame("Query Result");
 			JFrame protegeFrame = ProtegeManager.getInstance().getFrame(getWorkspace());
 			DialogUtils.centerDialogWRTParent(protegeFrame, panel);
 			DialogUtils.installEscapeCloseOperation(panel);
 			panel.setTextMessage(visitor.getString());
 			panel.setVisible(true);
+		}
+	};
+	private synchronized void showGraphResultInTextPanel(OWLAxiomToTurtleVisitor visitor) {
+		try {
+			ResultUpdater result_updater = new ResultUpdater(visitor);
+			SwingUtilities.invokeLater(result_updater);
 		} catch (Exception e) {
 			DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
 		}
@@ -410,7 +468,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		}
 	}
 
-	public void selectedQuerychanged(String new_group, String new_query, String new_id) {
+	public synchronized void selectedQuerychanged(String new_group, String new_query, String new_id) {
 		this.queryEditorPanel.selectedQuerychanged(new_group, new_query, new_id);
 	}
 
