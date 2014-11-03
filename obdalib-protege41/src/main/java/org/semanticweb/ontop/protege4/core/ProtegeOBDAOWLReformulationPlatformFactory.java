@@ -34,12 +34,21 @@ import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
+/**
+ * As a Protege plugin, this class can only provide a default constructor.
+ *
+ * Because the ReasonerFactory needs some parameters to be initialized,
+ * please make sure to call the load() method at least one before getting the
+ * reasoner factory.
+ *
+ */
 public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeOWLReasonerInfo {
 
-    private final OntopOWLFactory factory;
+    private OntopOWLFactory factory;
 
-    public ProtegeOBDAOWLReformulationPlatformFactory(File mappingFile, QuestPreferences preferences) throws DuplicateMappingException, InvalidMappingException, InvalidDataSourceException, IOException {
-        this.factory = new OntopOWLFactory(mappingFile, preferences);
+    public ProtegeOBDAOWLReformulationPlatformFactory() {
+        // Please call the load() method ASAP.
+        factory = null;
     }
 
 	@Override
@@ -49,7 +58,7 @@ public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeO
 
 	@Override
 	public OWLReasonerFactory getReasonerFactory() {
-		return factory;
+        return factory;
 	}
 
 	/**
@@ -63,11 +72,22 @@ public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeO
 		factory.setImplicitDBConstraints(uc);
 	}
 
-    public void reload(ProtegeReformulationPlatformPreferences reasonerPreferences) {
-        factory.reload(reasonerPreferences);
-    }
-
-    public void reload(OBDAModel currentModel, ProtegeReformulationPlatformPreferences reasonerPreferences) {
-        factory.reload(currentModel, reasonerPreferences);
+    /**
+     * Loads or reloads.
+     *
+     * Must be called before getting the reasoner factory.
+     *
+     */
+    public void load(OBDAModel currentModel, ProtegeReformulationPlatformPreferences reasonerPreferences) {
+        if (factory == null) {
+            try {
+                factory = new OntopOWLFactory(currentModel, reasonerPreferences);
+            } catch (Exception e) {
+                OntopOWLFactory.handleError(e);
+            }
+        }
+        else {
+            factory.reload(currentModel, reasonerPreferences);
+        }
     }
 }

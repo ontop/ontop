@@ -564,7 +564,7 @@ public class OBDAModelManager implements Disposable {
                     QuestPreferences.class.getName());
 
             OBDAModel currentOBDAModel = getActiveOBDAModelWrapper().getCurrentImmutableOBDAModel();
-            questFactory.reload(currentOBDAModel, reasonerPreference);
+            questFactory.load(currentOBDAModel, reasonerPreference);
             if(applyUserConstraints)
                 questFactory.setImplicitDBConstraints(userConstraints);
         }

@@ -26,13 +26,13 @@ import java.io.*;
  */
 public class OntopOWLFactory extends QuestOWLFactory {
 
-    public OntopOWLFactory(File mappingFile, QuestPreferences preferences)
+    public OntopOWLFactory(OBDAModel obdaModel, QuestPreferences preferences)
             throws IOException, InvalidMappingException, InvalidDataSourceException, DuplicateMappingException {
-        super(mappingFile, preferences);
+        super(preferences, convertOBDAModelToReader(obdaModel));
     }
 
 	
-	private void handleError(Exception e){
+	public static void handleError(Exception e){
 		String message = "Error during reasoner initialization: " + e;
 		JOptionPane.showMessageDialog(null, message, "Ontop Initialization Error", JOptionPane.ERROR_MESSAGE);
 	}
@@ -107,18 +107,25 @@ public class OntopOWLFactory extends QuestOWLFactory {
 
     public void reload(OBDAModel currentModel, QuestPreferences preferences) {
         try {
-            //TODO: make it generic (not OntopNativeMapping-specific).
-            OntopNativeMappingSerializer mappingSerializer = new OntopNativeMappingSerializer(currentModel);
-            StringWriter stringWriter = new StringWriter();
-
-            mappingSerializer.save(stringWriter);
-            String mappingDump = stringWriter.toString();
-
-            Reader mappingReader = new StringReader(mappingDump);
+            Reader mappingReader = convertOBDAModelToReader(currentModel);
             super.reload(mappingReader, preferences);
         } catch (Exception e) {
             handleError(e);
             //TODO: see if we should return an exception
         }
+    }
+
+    /**
+     * TODO: make it generic (not OntopNativeMapping-specific).
+     *
+     */
+    private static Reader convertOBDAModelToReader(OBDAModel currentModel) throws IOException {
+        OntopNativeMappingSerializer mappingSerializer = new OntopNativeMappingSerializer(currentModel);
+        StringWriter stringWriter = new StringWriter();
+
+        mappingSerializer.save(stringWriter);
+        String mappingDump = stringWriter.toString();
+
+        return new StringReader(mappingDump);
     }
 }

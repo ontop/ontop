@@ -76,7 +76,7 @@ public class SavedQueriesPanel extends JPanel implements QueryControllerListener
 	}
 
 	public void changeQueryController(QueryController newQueryController) {
-		// Reset and reload the current tree model
+		// Reset and load the current tree model
 		queryControllerModel.reset();
 		queryControllerModel.synchronize(queryController.getElements());
 		queryControllerModel.reload();
