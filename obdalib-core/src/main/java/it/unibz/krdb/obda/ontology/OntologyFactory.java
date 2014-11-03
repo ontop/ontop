@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.ontology;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.ValueConstant;
 
 public interface OntologyFactory {
 
@@ -45,7 +46,9 @@ public interface OntologyFactory {
 	public DataPropertyRangeExpression createDataPropertyRange(DataPropertyExpression role);
 		
 	
-	public PropertyAssertion createPropertyAssertion(PropertyExpression attribute, ObjectConstant o1, Constant o2);
+	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression attribute, ObjectConstant o1, ObjectConstant o2);
+
+	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression attribute, ObjectConstant o1, ValueConstant o2);
 	
 	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant object);
 

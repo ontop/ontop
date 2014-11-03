@@ -37,7 +37,9 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.PropertyAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -769,145 +771,143 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		while (data.hasNext()) {
 			Assertion ax = data.next();
 
-			if (ax instanceof PropertyAssertion) {
+			if (ax instanceof DataPropertyAssertion) {
 
-				PropertyAssertion binaryAssertion = (PropertyAssertion) ax;
-				Constant c1 = binaryAssertion.getSubject();
-				Constant c2 = binaryAssertion.getValue2();
+				DataPropertyAssertion attributeABoxAssertion = (DataPropertyAssertion) ax;
+				ObjectConstant c1 = attributeABoxAssertion.getSubject();
+				ValueConstant value = attributeABoxAssertion.getValue();
 
-				if (c2 instanceof ValueConstant) {
+				String uri;
 
-					PropertyAssertion attributeABoxAssertion = (PropertyAssertion) ax;
+				boolean c1isBNode = c1 instanceof BNode;
 
-					String uri;
+				if (c1isBNode)
+					uri = ((BNode) c1).getName();
+				else
+					uri = ((URIConstant) c1).getURI().toString();
 
-					boolean c1isBNode = c1 instanceof BNode;
+				String lit = value.getValue();
+				String lang = value.getLanguage();
+				if (lang != null)
+					lang = lang.toLowerCase();
 
-					if (c1isBNode)
-						uri = ((BNode) c1).getName();
-					else
-						uri = ((URIConstant) c1).getURI().toString();
+				Predicate.COL_TYPE attributeType = value.getType();
 
-					ValueConstant value = (ValueConstant) attributeABoxAssertion.getValue2();
-					String lit = value.getValue();
-					String lang = value.getLanguage();
-					if (lang != null)
-						lang = lang.toLowerCase();
+				// Predicate propPred =
+				// dfac.getDataPropertyPredicate(prop);
+				// Property propDesc = ofac.createProperty(propPred);
 
-					Predicate.COL_TYPE attributeType = value.getType();
-
-					// Predicate propPred =
-					// dfac.getDataPropertyPredicate(prop);
-					// Property propDesc = ofac.createProperty(propPred);
-
-					int idx = cacheSI.getIndex(attributeABoxAssertion.getProperty().getPredicate(), 2);
-					// Description node = pureIsa.getNode(propDesc);
-					//int idx = engine.getIndex(node);
+				int idx = cacheSI.getIndex(attributeABoxAssertion.getProperty());
+				// Description node = pureIsa.getNode(propDesc);
+				//int idx = engine.getIndex(node);
 
 
 
 
-					switch (attributeType) {
-					case LITERAL:
-						out.append(String.format(attribute_insert_literal_str, getQuotedString(uri), getQuotedString(lit),
-								getQuotedString(lang), idx, c1isBNode));
-						break;
-					case STRING:
-						out.append(String.format(attribute_insert_string_str, getQuotedString(uri), getQuotedString(lit), idx, c1isBNode));
-						break;
-                    case INT:
-                        out.append(String.format(attribute_insert_int_str, getQuotedString(uri), Integer.parseInt(lit), idx, c1isBNode));
-                        break;
-                    case UNSIGNED_INT:
-                        out.append(String.format(attribute_insert_unsigned_int_str, getQuotedString(uri), Integer.parseInt(lit), idx, c1isBNode));
-                        break;
-                    case NEGATIVE_INTEGER:
-                        out.append(String.format(attribute_insert_negative_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
-                        break;
-                    case NON_NEGATIVE_INTEGER:
-                        out.append(String.format(attribute_insert_non_negative_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
-                        break;
-                    case NON_POSITIVE_INTEGER:
-                        out.append(String.format(attribute_insert_non_positive_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
-                        break;
-                    case POSITIVE_INTEGER:
-                        out.append(String.format(attribute_insert_positive_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
-                        break;
-					case INTEGER:
-						out.append(String.format(attribute_insert_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
-						break;
-                    case LONG:
-                        out.append(String.format(attribute_insert_long_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
-                        break;
-					case DECIMAL:
-						out.append(String.format(attribute_insert_decimal_str, getQuotedString(uri), parseBigDecimal(lit), idx, c1isBNode));
-						break;
-					case DOUBLE:
-						out.append(String.format(attribute_insert_double_str, getQuotedString(uri), Double.parseDouble(lit), idx, c1isBNode));
-						break;
-                    case FLOAT:
-                        out.append(String.format(attribute_insert_float_str, getQuotedString(uri), Float.parseFloat(lit), idx, c1isBNode));
-                        break;
-					case DATETIME:
-						out.append(String.format(attribute_insert_date_str, getQuotedString(uri), parseTimestamp(lit), idx, c1isBNode));
-						break;
-					case BOOLEAN:
-						out.append(String.format(attribute_insert_boolean_str, getQuotedString(uri), Boolean.parseBoolean(lit), idx,
-								c1isBNode));
-						break;
-					}
-				} else if (c2 instanceof ObjectConstant) {
-
-					PropertyAssertion roleABoxAssertion = (PropertyAssertion) ax;
-					String prop = roleABoxAssertion.getProperty().getPredicate().getName().toString();
-					String uri1;
-					String uri2;
-
-					boolean c1isBNode = c1 instanceof BNode;
-					boolean c2isBNode = c2 instanceof BNode;
-
-					if (c1isBNode)
-						uri1 = ((BNode) c1).getName();
-					else
-						uri1 = ((URIConstant) c1).getURI().toString();
-
-					if (c2isBNode)
-						uri2 = ((BNode) c2).getName();
-					else
-						uri2 = ((URIConstant) c2).getURI().toString();
-
-					/***
-					 * Dealing with any equivalent canonical properties. If
-					 * there is any, and it is inverse we need to invert the
-					 * value positions.
-					 */
-
-					PropertyExpression propDesc = ofac.createObjectProperty(prop);
-
-					/*if (!reasonerDag.isCanonicalRepresentative(propDesc))*/ {
-						PropertyExpression desc = reasonerDag.getProperties().getVertex(propDesc).getRepresentative();
-						if (desc.isInverse()) {
-							String tmp = uri1;
-							boolean tmpIsBnode = c1isBNode;
-
-							uri1 = uri2;
-							c1isBNode = c2isBNode;
-							uri2 = tmp;
-							c2isBNode = tmpIsBnode;
-						}
-					}
-					//Description node = pureIsa.getNode(propDesc);
-					//int idx = engine.getIndex(node);
-
-					int idx = cacheSI.getIndex(roleABoxAssertion.getProperty().getPredicate(), 2);
-
-					out.append(String.format(role_insert_str, getQuotedString(uri1), getQuotedString(uri2), idx, c1isBNode, c2isBNode));
-
+				switch (attributeType) {
+				case LITERAL:
+					out.append(String.format(attribute_insert_literal_str, getQuotedString(uri), getQuotedString(lit),
+							getQuotedString(lang), idx, c1isBNode));
+					break;
+				case STRING:
+					out.append(String.format(attribute_insert_string_str, getQuotedString(uri), getQuotedString(lit), idx, c1isBNode));
+					break;
+                case INT:
+                    out.append(String.format(attribute_insert_int_str, getQuotedString(uri), Integer.parseInt(lit), idx, c1isBNode));
+                    break;
+                case UNSIGNED_INT:
+                    out.append(String.format(attribute_insert_unsigned_int_str, getQuotedString(uri), Integer.parseInt(lit), idx, c1isBNode));
+                    break;
+                case NEGATIVE_INTEGER:
+                    out.append(String.format(attribute_insert_negative_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
+                    break;
+                case NON_NEGATIVE_INTEGER:
+                    out.append(String.format(attribute_insert_non_negative_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
+                    break;
+                case NON_POSITIVE_INTEGER:
+                    out.append(String.format(attribute_insert_non_positive_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
+                    break;
+                case POSITIVE_INTEGER:
+                    out.append(String.format(attribute_insert_positive_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
+                    break;
+				case INTEGER:
+					out.append(String.format(attribute_insert_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
+					break;
+                case LONG:
+                    out.append(String.format(attribute_insert_long_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
+                    break;
+				case DECIMAL:
+					out.append(String.format(attribute_insert_decimal_str, getQuotedString(uri), parseBigDecimal(lit), idx, c1isBNode));
+					break;
+				case DOUBLE:
+					out.append(String.format(attribute_insert_double_str, getQuotedString(uri), Double.parseDouble(lit), idx, c1isBNode));
+					break;
+                case FLOAT:
+                    out.append(String.format(attribute_insert_float_str, getQuotedString(uri), Float.parseFloat(lit), idx, c1isBNode));
+                    break;
+				case DATETIME:
+					out.append(String.format(attribute_insert_date_str, getQuotedString(uri), parseTimestamp(lit), idx, c1isBNode));
+					break;
+				case BOOLEAN:
+					out.append(String.format(attribute_insert_boolean_str, getQuotedString(uri), Boolean.parseBoolean(lit), idx,
+							c1isBNode));
+					break;
 				}
-			} else if (ax instanceof ClassAssertion) {
+				
+			} 
+			else if (ax instanceof ObjectPropertyAssertion) {
+
+				ObjectPropertyAssertion roleABoxAssertion = (ObjectPropertyAssertion) ax;
+				ObjectConstant c1 = roleABoxAssertion.getSubject();
+				ObjectConstant c2 = roleABoxAssertion.getObject();
+				String prop = roleABoxAssertion.getProperty().getPredicate().getName().toString();
+				String uri1;
+				String uri2;
+
+				boolean c1isBNode = c1 instanceof BNode;
+				boolean c2isBNode = c2 instanceof BNode;
+
+				if (c1isBNode)
+					uri1 = ((BNode) c1).getName();
+				else
+					uri1 = ((URIConstant) c1).getURI().toString();
+
+				if (c2isBNode)
+					uri2 = ((BNode) c2).getName();
+				else
+					uri2 = ((URIConstant) c2).getURI().toString();
+
+				/***
+				 * Dealing with any equivalent canonical properties. If
+				 * there is any, and it is inverse we need to invert the
+				 * value positions.
+				 */
+
+				ObjectPropertyExpression propDesc = ofac.createObjectProperty(prop);
+
+				/*if (!reasonerDag.isCanonicalRepresentative(propDesc))*/ {
+					PropertyExpression desc = reasonerDag.getProperties().getVertex(propDesc).getRepresentative();
+					if (desc.isInverse()) {
+						String tmp = uri1;
+						boolean tmpIsBnode = c1isBNode;
+
+						uri1 = uri2;
+						c1isBNode = c2isBNode;
+						uri2 = tmp;
+						c2isBNode = tmpIsBnode;
+					}
+				}
+				//Description node = pureIsa.getNode(propDesc);
+				//int idx = engine.getIndex(node);
+
+				int idx = cacheSI.getIndex(roleABoxAssertion.getProperty());
+
+				out.append(String.format(role_insert_str, getQuotedString(uri1), getQuotedString(uri2), idx, c1isBNode, c2isBNode));
+			} 
+			else if (ax instanceof ClassAssertion) {
 
 				ClassAssertion classAssertion = (ClassAssertion) ax;
-				Constant c1 = classAssertion.getIndividual();
+				ObjectConstant c1 = classAssertion.getIndividual();
 
 				String uri;
 
@@ -921,7 +921,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				// Predicate clsPred = classAssertion.getConcept();
 				// ClassDescription clsDesc = ofac.createClass(clsPred);
 				//
-				int idx = cacheSI.getIndex(classAssertion.getConcept().getPredicate(), 1);
+				int idx = cacheSI.getIndex(classAssertion.getConcept());
 
 				//Description node = pureIsa.getNode(clsDesc);
 				//int idx = engine.getIndex(node);
@@ -1156,18 +1156,26 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				 */
 				int index = 0;
 				if (ax instanceof ClassAssertion) {
-					index = cacheSI.getIndex(((ClassAssertion) ax).getConcept().getPredicate(), 1);
-				} else {
-					index = cacheSI.getIndex(((PropertyAssertion)ax).getProperty().getPredicate(), 2);
+					index = cacheSI.getIndex(((ClassAssertion) ax).getConcept());
+				} 
+				else if (ax instanceof ObjectPropertyAssertion) {
+					index = cacheSI.getIndex(((ObjectPropertyAssertion)ax).getProperty());
+				}
+				else /* (ax instanceof DataPropertyAssertion) */ {
+					index = cacheSI.getIndex(((DataPropertyAssertion)ax).getProperty());
 				}
 				SemanticIndexRecord record = SemanticIndexRecord.getRecord(ax, index);
 				nonEmptyEntityRecord.add(record);
 
 			} catch (Exception e) {
 				if (ax instanceof ClassAssertion) {
-					monitor.fail(((ClassAssertion) ax).getConcept().getPredicate());
-				} else {
-					monitor.fail(((PropertyAssertion)ax).getProperty().getPredicate());
+					monitor.fail(((ClassAssertion)ax).getConcept().getPredicate());
+				} 
+				else if (ax instanceof ObjectPropertyAssertion) {
+					monitor.fail(((ObjectPropertyAssertion)ax).getProperty().getPredicate());
+				}
+				else /* if (ax instanceof DataPropertyAssertion)*/ {
+					monitor.fail(((DataPropertyAssertion)ax).getProperty().getPredicate());
 				}
 			}
 
@@ -1271,12 +1279,81 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		int uri_id = 0;
 		int uri2_id = 0;
 //		boolean newUri = false;
-		if (ax instanceof PropertyAssertion) {
+		if (ax instanceof ObjectPropertyAssertion) {
 			// Get the data property assertion
-			PropertyAssertion attributeAssertion = (PropertyAssertion) ax;
+			ObjectPropertyAssertion attributeAssertion = (ObjectPropertyAssertion) ax;
+			ObjectPropertyExpression prop = attributeAssertion.getProperty();
+
+			ObjectConstant object = attributeAssertion.getObject();
+
+			// Construct the database INSERT statements
+			ObjectConstant subject = attributeAssertion.getSubject();
+
+			String uri = subject.getValue();
+			 uri_id = uriMap.idOfURI(uri);
+				uriidStm.setInt(1, uri_id);
+				uriidStm.setString(2, uri);
+				uriidStm.addBatch();
+			
+			boolean c1isBNode = subject instanceof BNode;
+
+			int idx = cacheSI.getIndex(prop);
+
+				// Get the object property assertion
+				String uri2 = object.getValue();
+				boolean c2isBNode = object instanceof BNode;
+
+				if (isInverse(prop)) {
+
+					/* Swapping values */
+
+					String tmp = uri;
+					uri = uri2;
+					uri2 = tmp;
+
+					boolean tmpb = c1isBNode;
+					c1isBNode = c2isBNode;
+					c2isBNode = tmpb;
+				}
+
+				// Construct the database INSERT statement
+				// replace URIs with their ids
+				
+				uri_id = uriMap.idOfURI(uri);
+				uriidStm.setInt(1, uri_id);
+				uriidStm.setString(2, uri);
+				uriidStm.addBatch();
+
+				uri2_id = uriMap.idOfURI(uri2);
+				uriidStm.setInt(1, uri2_id);
+				uriidStm.setString(2, uri2);
+				uriidStm.addBatch();
+				
+				//roleStm.setString(1, uri);
+				//roleStm.setString(2, uri2);
+				roleStm.setInt(1, uri_id);
+				roleStm.setInt(2, uri2_id);
+				
+				
+				roleStm.setInt(3, idx);
+				roleStm.setBoolean(4, c1isBNode);
+				roleStm.setBoolean(5, c2isBNode);
+				roleStm.addBatch();
+
+				// log.debug("role");
+
+				// log.debug("inserted: {} {}", uri, uri2);
+				// log.debug("inserted: {} property", idx);
+
+			monitor.success(); // advanced the success counter
+
+		} 
+		else if (ax instanceof DataPropertyAssertion) {
+			// Get the data property assertion
+			DataPropertyAssertion attributeAssertion = (DataPropertyAssertion) ax;
 			PropertyExpression prop = attributeAssertion.getProperty();
 
-			Constant object = attributeAssertion.getValue2();
+			ValueConstant object = attributeAssertion.getValue();
 			Predicate.COL_TYPE attributeType = object.getType();
 
 			// Construct the database INSERT statements
@@ -1290,7 +1367,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			
 			boolean c1isBNode = subject instanceof BNode;
 
-			int idx = cacheSI.getIndex(prop.getPredicate(), 2);
+			int idx = cacheSI.getIndex(prop);
 
 			// The insertion is based on the datatype from TBox
 			String value = object.getValue();
@@ -1428,10 +1505,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			}
 			monitor.success(); // advanced the success counter
 
-		} else if (ax instanceof ClassAssertion) {
+		} 
+		else if (ax instanceof ClassAssertion) {
 			// Get the class assertion
 			ClassAssertion classAssertion = (ClassAssertion) ax;
-			Predicate concept = classAssertion.getConcept().getPredicate();
+			OClass concept = classAssertion.getConcept();
 
 			// Construct the database INSERT statements
 			ObjectConstant c1 = classAssertion.getIndividual();
@@ -1452,7 +1530,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			uriidStm.addBatch();			
 
 			classStm.setInt(1, uri_id);
-			int conceptIndex = cacheSI.getIndex(concept, 1);
+			int conceptIndex = cacheSI.getIndex(concept);
 			classStm.setInt(2, conceptIndex);
 			classStm.setBoolean(3, c1isBNode);
 			classStm.addBatch();

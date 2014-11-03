@@ -26,12 +26,11 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.PropertyAssertion;
-
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import java.util.LinkedList;
 
 import org.openrdf.model.vocabulary.XMLSchema;
@@ -49,13 +48,14 @@ public class ABoxToFactRuleConverter {
 		return rule;
 	}
 
-	public static CQIE getRule(PropertyAssertion pa) {
-		if (pa.getValue2() instanceof ValueConstant) { 
-			// WE IGNORE DATA PROPERTY ASSERTIONS UNTIL THE NEXT RELEASE
-			return null;
-		}
+	public static CQIE getRule(DataPropertyAssertion da) {
+		// WE IGNORE DATA PROPERTY ASSERTIONS UNTIL THE NEXT RELEASE
+		return null;		
+	}
+	
+	public static CQIE getRule(ObjectPropertyAssertion pa) {
 		ObjectConstant s = pa.getSubject();
-		ObjectConstant o = (ObjectConstant) pa.getValue2();
+		ObjectConstant o = pa.getObject();
 		Predicate p = pa.getProperty().getPredicate();
 		Predicate urifuction = factory.getUriTemplatePredicate(1);
 		Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(s.getValue())), factory.getFunction(urifuction, factory.getConstantLiteral(o.getValue())));

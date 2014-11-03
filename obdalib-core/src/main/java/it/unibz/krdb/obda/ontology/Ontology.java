@@ -54,10 +54,11 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public void addFunctionalDataPropertyAxiom(DataPropertyExpression prop);
 	
-	public void add(ClassAssertion assertion);
+	public void addClassAssertion(ClassAssertion assertion);
 
-	public void add(PropertyAssertion assertion);
+	public void addObjectPropertyAssertion(ObjectPropertyAssertion assertion);
 
+	public void addDataPropertyAssertion(DataPropertyAssertion assertion);
 
 	
 	
@@ -83,5 +84,8 @@ public interface Ontology extends Cloneable, Serializable {
 	
 	public Set<ClassAssertion> getClassAssertions();
 
-	public Set<PropertyAssertion> getPropertyAssertions();
+	public Set<ObjectPropertyAssertion> getObjectPropertyAssertions();
+	
+	public Set<DataPropertyAssertion> getDataPropertyAssertions();
+
 }

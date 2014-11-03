@@ -21,16 +21,17 @@ package it.unibz.krdb.obda.ontology.impl;
  */
 
 import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.DisjointnessAxiom;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.PropertyAssertion;
+
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
@@ -64,8 +65,9 @@ public class OntologyImpl implements Ontology {
 	
 	private final Set<ClassAssertion> classAssertions = new LinkedHashSet<ClassAssertion>();
 
-	private final Set<PropertyAssertion> propertyAssertions = new LinkedHashSet<PropertyAssertion>();
+	private final Set<ObjectPropertyAssertion> objectPropertyAssertions = new LinkedHashSet<ObjectPropertyAssertion>();
 	
+	private final Set<DataPropertyAssertion> dataPropertyAssertions = new LinkedHashSet<DataPropertyAssertion>();
 	
 
 	OntologyImpl() {
@@ -185,15 +187,21 @@ public class OntologyImpl implements Ontology {
 	}
 	
 	@Override
-	public void add(ClassAssertion assertion) {
+	public void addClassAssertion(ClassAssertion assertion) {
 		vocabulary.checkSignature(assertion.getConcept());
 		classAssertions.add(assertion);
 	}
 
 	@Override
-	public void add(PropertyAssertion assertion) {
+	public void addObjectPropertyAssertion(ObjectPropertyAssertion assertion) {
 		vocabulary.checkSignature(assertion.getProperty());
-		propertyAssertions.add(assertion);
+		objectPropertyAssertions.add(assertion);
+	}
+	
+	@Override
+	public void addDataPropertyAssertion(DataPropertyAssertion assertion) {
+		vocabulary.checkSignature(assertion.getProperty());
+		dataPropertyAssertions.add(assertion);
 	}
 	
 	
@@ -203,8 +211,13 @@ public class OntologyImpl implements Ontology {
 	}
 	
 	@Override 
-	public Set<PropertyAssertion> getPropertyAssertions() {
-		return propertyAssertions;
+	public Set<ObjectPropertyAssertion> getObjectPropertyAssertions() {
+		return objectPropertyAssertions;
+	}
+
+	@Override 
+	public Set<DataPropertyAssertion> getDataPropertyAssertions() {
+		return dataPropertyAssertions;
 	}
 
 	@Override

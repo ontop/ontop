@@ -8,16 +8,16 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
 import it.unibz.krdb.obda.ontology.Datatype;
-import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
-import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -313,8 +313,8 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 
 	@Override
 	public void visit(OWLObjectPropertyAssertionAxiom ax) {
-		PropertyAssertion assertion = translate(ax);
-		dl_onto.add(assertion);
+		ObjectPropertyAssertion assertion = translate(ax);
+		dl_onto.addObjectPropertyAssertion(assertion);
 	}
 
 	@Override
@@ -404,7 +404,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	public void visit(OWLClassAssertionAxiom ax) {
 		ClassAssertion a = translate(ax);
 		if (a != null)
-			dl_onto.add(a);
+			dl_onto.addClassAssertion(a);
 	}
 
 	@Override
@@ -430,8 +430,8 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 
 	@Override
 	public void visit(OWLDataPropertyAssertionAxiom ax) {
-		PropertyAssertion assertion = translate(ax);
-		dl_onto.add(assertion);
+		DataPropertyAssertion assertion = translate(ax);
+		dl_onto.addDataPropertyAssertion(assertion);
 	}
 
 	@Override
@@ -742,23 +742,23 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 
 	
 	
-	public static PropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax) {
+	public static ObjectPropertyAssertion translate(OWLObjectPropertyAssertionAxiom ax) {
 		
 		URIConstant c1 = getIndividual(ax.getSubject());
 		URIConstant c2 = getIndividual(ax.getObject());
 
-		PropertyExpression prop = getPropertyExpression(ax.getProperty());
+		ObjectPropertyExpression prop = getPropertyExpression(ax.getProperty());
 
 		// TODO: check for bottom			
 		
 		if (prop.isInverse()) 
-			return ofac.createPropertyAssertion(prop.getInverse(), c2, c1);			
+			return ofac.createObjectPropertyAssertion(prop.getInverse(), c2, c1);			
 		else 
-			return ofac.createPropertyAssertion(prop, c1, c2);						
+			return ofac.createObjectPropertyAssertion(prop, c1, c2);						
 	}
 	
 	
-	public static PropertyAssertion translate(OWLDataPropertyAssertionAxiom aux) {
+	public static DataPropertyAssertion translate(OWLDataPropertyAssertionAxiom aux) {
 		
 		try {
 			OWLLiteral object = aux.getObject();
@@ -766,13 +766,13 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			Predicate.COL_TYPE type = getColumnType(object.getDatatype());
 			ValueConstant c2 = dfac.getConstantLiteral(object.getLiteral(), type);
 
-			PropertyExpression prop = getPropertyExpression(aux.getProperty());
+			DataPropertyExpression prop = getPropertyExpression(aux.getProperty());
 
 			// TODO: CHECK FOR BOT AND TOP
 			
 			URIConstant c1 = getIndividual(aux.getSubject());
 
-			return ofac.createPropertyAssertion(prop, c1, c2);
+			return ofac.createDataPropertyAssertion(prop, c1, c2);
 		
 		} catch (TranslationException e) {
 			throw new RuntimeException(e.getMessage());

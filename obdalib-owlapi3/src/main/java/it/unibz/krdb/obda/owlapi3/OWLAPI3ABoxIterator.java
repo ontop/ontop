@@ -22,7 +22,8 @@ package it.unibz.krdb.obda.owlapi3;
 
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.PropertyAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -146,11 +147,11 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 			return translatedAxiom;
 		} 
 		else if (axiom instanceof OWLObjectPropertyAssertionAxiom) {
-			PropertyAssertion translatedAxiom = OWLAPI3TranslatorDLLiteA.translate((OWLObjectPropertyAssertionAxiom)axiom);
+			ObjectPropertyAssertion translatedAxiom = OWLAPI3TranslatorDLLiteA.translate((OWLObjectPropertyAssertionAxiom)axiom);
 			return translatedAxiom;		
 		} 
 		else if (axiom instanceof OWLDataPropertyAssertionAxiom) {
-			PropertyAssertion translatedAxiom = OWLAPI3TranslatorDLLiteA.translate((OWLDataPropertyAssertionAxiom)axiom);
+			DataPropertyAssertion translatedAxiom = OWLAPI3TranslatorDLLiteA.translate((OWLDataPropertyAssertionAxiom)axiom);
 			return translatedAxiom;
 		}		
 		return null;

@@ -24,10 +24,13 @@ import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -167,29 +170,33 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		if (currentPredicate.getArity() == 1) {
 			OClass concept = ofac.createClass(currentPredicate.getName());
 			assertion = ofac.createClassAssertion(concept, c);
-		} else if (currentPredicate.getArity() == 2) {
-			Constant c2;
-			PropertyExpression prop;			
+		} 
+		else if (currentPredicate.getArity() == 2) {
 			if (currObject instanceof URI) {
-				c2 = obdafac.getConstantURI(currObject.stringValue());
-				prop = ofac.createObjectProperty(currentPredicate.getName());
-			} else if (currObject instanceof BNode) {
-				c2 = obdafac.getConstantBNode(currObject.stringValue());
-				prop = ofac.createObjectProperty(currentPredicate.getName());
-			} else if (currObject instanceof Literal) {
+				ObjectConstant c2 = obdafac.getConstantURI(currObject.stringValue());
+				ObjectPropertyExpression prop = ofac.createObjectProperty(currentPredicate.getName());
+				assertion = ofac.createObjectPropertyAssertion(prop, c, c2);
+			} 
+			else if (currObject instanceof BNode) {
+				ObjectConstant c2 = obdafac.getConstantBNode(currObject.stringValue());
+				ObjectPropertyExpression prop = ofac.createObjectProperty(currentPredicate.getName());
+				assertion = ofac.createObjectPropertyAssertion(prop, c, c2);
+			} 
+			else if (currObject instanceof Literal) {
 				Literal l = (Literal) currObject;
 				Predicate.COL_TYPE type = getColumnType(l.getDatatype());
 				String lang = l.getLanguage();
+				ValueConstant c2;
 				if (lang == null) {
 					c2 = obdafac.getConstantLiteral(l.getLabel(), type);
 				} else {
 					c2 = obdafac.getConstantLiteral(l.getLabel(), lang);
 				}
-				prop = ofac.createDataProperty(currentPredicate.getName());
+				DataPropertyExpression prop = ofac.createDataProperty(currentPredicate.getName());
+				assertion = ofac.createDataPropertyAssertion(prop, c, c2);			
 			} else {
 				throw new RuntimeException("Unsupported object found in triple: " + st.toString() + " (Required URI, BNode or Literal)");
 			}
-			assertion = ofac.createPropertyAssertion(prop, c, c2);
 		} else {
 			throw new RuntimeException("Unsupported statement: " + st.toString());
 		}
