@@ -23,7 +23,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 
 
@@ -39,8 +41,16 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<PropertyExpression> getProperties();
+	public EquivalencesDAG<ObjectPropertyExpression> getObjectProperties();
 	
+	/**
+	 * Return the DAG of properties
+	 * 
+	 * @return DAG 
+	 */
+
+	public EquivalencesDAG<DataPropertyExpression> getDataProperties();
+
 	/**
 	 * Return the DAG of classes
 	 * 
@@ -58,5 +68,7 @@ public interface TBoxReasoner {
 
 	public OClass getClassRepresentative(Predicate p);
 	
-	public PropertyExpression getPropertyRepresentative(Predicate p);
+	public ObjectPropertyExpression getObjectPropertyRepresentative(Predicate p);
+	
+	public DataPropertyExpression getDataPropertyRepresentative(Predicate p);
 }

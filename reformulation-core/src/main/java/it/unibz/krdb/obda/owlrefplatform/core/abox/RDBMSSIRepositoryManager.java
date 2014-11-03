@@ -888,7 +888,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				ObjectPropertyExpression propDesc = ofac.createObjectProperty(prop);
 
 				/*if (!reasonerDag.isCanonicalRepresentative(propDesc))*/ {
-					PropertyExpression desc = reasonerDag.getProperties().getVertex(propDesc).getRepresentative();
+					ObjectPropertyExpression desc = reasonerDag.getObjectProperties().getVertex(propDesc).getRepresentative();
 					if (desc.isInverse()) {
 						String tmp = uri1;
 						boolean tmpIsBnode = c1isBNode;
@@ -1353,7 +1353,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		else if (ax instanceof DataPropertyAssertion) {
 			// Get the data property assertion
 			DataPropertyAssertion attributeAssertion = (DataPropertyAssertion) ax;
-			PropertyExpression prop = attributeAssertion.getProperty();
+			DataPropertyExpression prop = attributeAssertion.getProperty();
 
 			ValueConstant object = attributeAssertion.getValue();
 			Predicate.COL_TYPE attributeType = object.getType();
@@ -1378,53 +1378,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			switch (attributeType) {
 			case BNODE:
 			case OBJECT:
-				// Get the object property assertion
-				String uri2 = object.getValue();
-				boolean c2isBNode = object instanceof BNode;
-
-				if (isInverse(prop)) {
-
-					/* Swapping values */
-
-					String tmp = uri;
-					uri = uri2;
-					uri2 = tmp;
-
-					boolean tmpb = c1isBNode;
-					c1isBNode = c2isBNode;
-					c2isBNode = tmpb;
-				}
-
-				// Construct the database INSERT statement
-				// replace URIs with their ids
-				
-				uri_id = uriMap.idOfURI(uri);
-				uriidStm.setInt(1, uri_id);
-				uriidStm.setString(2, uri);
-				uriidStm.addBatch();
-
-				uri2_id = uriMap.idOfURI(uri2);
-				uriidStm.setInt(1, uri2_id);
-				uriidStm.setString(2, uri2);
-				uriidStm.addBatch();
-				
-				//roleStm.setString(1, uri);
-				//roleStm.setString(2, uri2);
-				roleStm.setInt(1, uri_id);
-				roleStm.setInt(2, uri2_id);
-				
-				
-				roleStm.setInt(3, idx);
-				roleStm.setBoolean(4, c1isBNode);
-				roleStm.setBoolean(5, c2isBNode);
-				roleStm.addBatch();
-
-				// log.debug("role");
-
-				// log.debug("inserted: {} {}", uri, uri2);
-				// log.debug("inserted: {} property", idx);
-
-				break;
+				throw new RuntimeException("Data property cannot have a URI as object");
 			case LITERAL:
 			case LITERAL_LANG:
 				setInputStatement(attributeLiteralStm, uri_id, value, lang, idx, c1isBNode);
@@ -1554,9 +1508,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		statement.clearBatch();
 	}
 
-	private boolean isInverse(PropertyExpression property) {
+	private boolean isInverse(ObjectPropertyExpression property) {
 	
-		PropertyExpression desc = reasonerDag.getProperties().getVertex(property).getRepresentative();
+		PropertyExpression desc = reasonerDag.getObjectProperties().getVertex(property).getRepresentative();
 		if (!property.equals(desc)) {
 			if (desc.isInverse()) 
 				return true;
@@ -2096,7 +2050,17 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		Set<PropertyExpression> roleNodes = new HashSet<PropertyExpression>();
 
-		for (Equivalences<PropertyExpression> set: reasonerDag.getProperties()) {
+		for (Equivalences<ObjectPropertyExpression> set: reasonerDag.getObjectProperties()) {
+
+			PropertyExpression node = set.getRepresentative();
+			// only named roles are mapped
+			if (node.isInverse()) 
+				continue;
+			
+			roleNodes.add(node);
+		}
+		
+		for (Equivalences<DataPropertyExpression> set: reasonerDag.getDataProperties()) {
 
 			PropertyExpression node = set.getRepresentative();
 			// only named roles are mapped

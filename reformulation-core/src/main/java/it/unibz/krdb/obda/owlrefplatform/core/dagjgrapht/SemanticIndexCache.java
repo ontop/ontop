@@ -131,14 +131,14 @@ public class SemanticIndexCache {
 		return index;
 	}
 	
-	public int getIndex(PropertyExpression p) {
+	public int getIndex(ObjectPropertyExpression p) {
 		String name = p.getPredicate().getName();
 		Integer index = roleIndexes.get(name);
 		
 		if (index == null) {
 			// direct name is not indexed, maybe there is an equivalent, we need to test
 			// with object properties and data properties 
-			PropertyExpression equivalent = reasonerDag.getProperties().getVertex(p).getRepresentative();
+			ObjectPropertyExpression equivalent = reasonerDag.getObjectProperties().getVertex(p).getRepresentative();
 			
 			Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
 			
@@ -153,6 +153,28 @@ public class SemanticIndexCache {
 		return index;				
 	}
 
+	public int getIndex(DataPropertyExpression p) {
+		String name = p.getPredicate().getName();
+		Integer index = roleIndexes.get(name);
+		
+		if (index == null) {
+			// direct name is not indexed, maybe there is an equivalent, we need to test
+			// with object properties and data properties 
+			DataPropertyExpression equivalent = reasonerDag.getDataProperties().getVertex(p).getRepresentative();
+			
+			Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
+			
+			if (index1 != null)
+				return index1;
+			
+			// TODO: object property equivalent failed, we now look for data property equivalent 
+			
+			System.out.println(name + " IN " + roleIndexes);
+		}
+		
+		return index;				
+	}
+	
 	public void setIndex(String iri, int type, Integer idx) {
 		if (type == CLASS_TYPE) {
 			classIndexes.put(iri, idx);

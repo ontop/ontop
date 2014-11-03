@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
@@ -268,23 +269,23 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
 
-		EquivalencesDAG<PropertyExpression> properties = namedReasoner.getProperties();
+		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.getObjectProperties();
 		
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		PropertyExpression P = ofac.createObjectProperty(ontoURI + "P");
-		PropertyExpression S = ofac.createObjectProperty(ontoURI + "S");
-		PropertyExpression R = ofac.createObjectProperty(ontoURI + "R");
-		PropertyExpression Q = ofac.createObjectProperty(ontoURI + "Q");
-		PropertyExpression T = ofac.createObjectProperty(ontoURI + "T");
-		PropertyExpression U = ofac.createObjectProperty(ontoURI + "U");
+		ObjectPropertyExpression P = ofac.createObjectProperty(ontoURI + "P");
+		ObjectPropertyExpression S = ofac.createObjectProperty(ontoURI + "S");
+		ObjectPropertyExpression R = ofac.createObjectProperty(ontoURI + "R");
+		ObjectPropertyExpression Q = ofac.createObjectProperty(ontoURI + "Q");
+		ObjectPropertyExpression T = ofac.createObjectProperty(ontoURI + "T");
+		ObjectPropertyExpression U = ofac.createObjectProperty(ontoURI + "U");
 		
 		
 		/**
 		 * The initial node is Node P.
 		 */
-		Equivalences<PropertyExpression> initialNode = properties.getVertex(P);
-		Set<Equivalences<PropertyExpression>> descendants = properties.getSub(initialNode);
+		Equivalences<ObjectPropertyExpression> initialNode = properties.getVertex(P);
+		Set<Equivalences<ObjectPropertyExpression>> descendants = properties.getSub(initialNode);
 		assertEquals(descendants.size(), 1);  // getDescendants is reflexive
 
 		/**
@@ -356,22 +357,22 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
 		
-		EquivalencesDAG<PropertyExpression> properties = namedReasoner.getProperties();
+		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.getObjectProperties();
 		
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		PropertyExpression P = ofac.createObjectProperty(ontoURI + "P");
-		PropertyExpression S = ofac.createObjectProperty(ontoURI + "S");
-		PropertyExpression R = ofac.createObjectProperty(ontoURI + "R");
-		PropertyExpression Q = ofac.createObjectProperty(ontoURI + "Q");
-		PropertyExpression T = ofac.createObjectProperty(ontoURI + "T");
-		PropertyExpression U = ofac.createObjectProperty(ontoURI + "U");
+		ObjectPropertyExpression P = ofac.createObjectProperty(ontoURI + "P");
+		ObjectPropertyExpression S = ofac.createObjectProperty(ontoURI + "S");
+		ObjectPropertyExpression R = ofac.createObjectProperty(ontoURI + "R");
+		ObjectPropertyExpression Q = ofac.createObjectProperty(ontoURI + "Q");
+		ObjectPropertyExpression T = ofac.createObjectProperty(ontoURI + "T");
+		ObjectPropertyExpression U = ofac.createObjectProperty(ontoURI + "U");
 	
 		/**
 		 * The initial node is Node P.
 		 */
-		Equivalences<PropertyExpression> initialNode = properties.getVertex(P);
-		Set<Equivalences<PropertyExpression>> ancestors = properties.getSuper(initialNode);
+		Equivalences<ObjectPropertyExpression> initialNode = properties.getVertex(P);
+		Set<Equivalences<ObjectPropertyExpression>> ancestors = properties.getSuper(initialNode);
 		assertEquals(sizeOf(ancestors), 4); // ancestor is reflexive now
 
 		assertTrue(ancestors.contains(properties.getVertex(Q)));

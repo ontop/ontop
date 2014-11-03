@@ -22,7 +22,9 @@ package it.unibz.krdb.obda.quest.dag;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
@@ -55,17 +57,21 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 @Deprecated
 public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 
-	private DefaultDirectedGraph<PropertyExpression,DefaultEdge> propertyGraph;
+	private DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> objectPropertyGraph;
+	private DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> dataPropertyGraph;
 	private DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph;
 	
-	private EquivalencesDAGImplOnGraph<PropertyExpression> propertyDAG;
+	private EquivalencesDAGImplOnGraph<ObjectPropertyExpression> objectPropertyDAG;
+	private EquivalencesDAGImplOnGraph<DataPropertyExpression> dataPropertyDAG;
 	private EquivalencesDAGImplOnGraph<BasicClassDescription> classDAG;
 
 	public TestTBoxReasonerImpl_OnGraph(TBoxReasonerImpl reasoner) {	
-		this.propertyGraph = reasoner.getPropertyGraph();
+		this.objectPropertyGraph = reasoner.getObjectPropertyGraph();
+		this.dataPropertyGraph = reasoner.getDataPropertyGraph();
 		this.classGraph = reasoner.getClassGraph();
 		
-		this.propertyDAG = new EquivalencesDAGImplOnGraph<PropertyExpression>(propertyGraph);
+		this.objectPropertyDAG = new EquivalencesDAGImplOnGraph<ObjectPropertyExpression>(objectPropertyGraph);
+		this.dataPropertyDAG = new EquivalencesDAGImplOnGraph<DataPropertyExpression>(dataPropertyGraph);
 		this.classDAG = new EquivalencesDAGImplOnGraph<BasicClassDescription>(classGraph);
 	}
 	
@@ -76,8 +82,13 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 	 */
 
 	@Override
-	public EquivalencesDAG<PropertyExpression> getProperties() {
-		return propertyDAG;
+	public EquivalencesDAG<ObjectPropertyExpression> getObjectProperties() {
+		return objectPropertyDAG;
+	}
+	
+	@Override
+	public EquivalencesDAG<DataPropertyExpression> getDataProperties() {
+		return dataPropertyDAG;
 	}
 	
 	/**
@@ -366,15 +377,18 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 	}
 
 	public int vertexSetSize() {
-		return propertyGraph.vertexSet().size() + classGraph.vertexSet().size();
+		return objectPropertyGraph.vertexSet().size() + dataPropertyGraph.vertexSet().size() + classGraph.vertexSet().size();
 	}
 
 	public int edgeSetSize() {
-		return propertyGraph.edgeSet().size() + classGraph.edgeSet().size();
+		return objectPropertyGraph.edgeSet().size() + dataPropertyGraph.edgeSet().size() +  classGraph.edgeSet().size();
 	}
 
-	public DefaultDirectedGraph<PropertyExpression, DefaultEdge> getPropertyGraph() {
-		return propertyGraph;
+	public DefaultDirectedGraph<ObjectPropertyExpression, DefaultEdge> getObjectPropertyGraph() {
+		return objectPropertyGraph;
+	}
+	public DefaultDirectedGraph<DataPropertyExpression, DefaultEdge> getDataPropertyGraph() {
+		return dataPropertyGraph;
 	}
 	public DefaultDirectedGraph<BasicClassDescription, DefaultEdge> getClassGraph() {
 		return classGraph;
@@ -387,7 +401,13 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 	}
 
 	@Override
-	public PropertyExpression getPropertyRepresentative(Predicate p) {
+	public ObjectPropertyExpression getObjectPropertyRepresentative(Predicate p) {
+		// TODO Auto-generated method stub
+		return null;
+	}	
+	
+	@Override
+	public DataPropertyExpression getDataPropertyRepresentative(Predicate p) {
 		// TODO Auto-generated method stub
 		return null;
 	}	

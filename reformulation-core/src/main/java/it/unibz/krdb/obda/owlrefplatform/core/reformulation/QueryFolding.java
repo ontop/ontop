@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Intersection;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
@@ -42,7 +43,7 @@ import org.slf4j.LoggerFactory;
 public class QueryFolding {
 	private final QueryConnectedComponentCache cache;
 	
-	private Intersection<PropertyExpression> properties; 
+	private Intersection<ObjectPropertyExpression> properties; 
 	private Set<Loop> roots; 
 	private Intersection<BasicClassDescription> internalRootConcepts;
 	private Set<Term> internalRoots;
@@ -73,7 +74,7 @@ public class QueryFolding {
 	public QueryFolding(QueryFolding qf) {
 		this.cache = qf.cache;
 
-		properties = new Intersection<PropertyExpression>(qf.properties); 
+		properties = new Intersection<ObjectPropertyExpression>(qf.properties); 
 		roots = new HashSet<Loop>(qf.roots); 
 		internalRootConcepts = new Intersection<BasicClassDescription>(qf.internalRootConcepts); 
 		internalRoots = new HashSet<Term>(qf.internalRoots);
@@ -134,7 +135,7 @@ public class QueryFolding {
 	}
 
 	
-	public Intersection<PropertyExpression> getProperties() {
+	public Intersection<ObjectPropertyExpression> getProperties() {
 		return properties;
 	}
 	

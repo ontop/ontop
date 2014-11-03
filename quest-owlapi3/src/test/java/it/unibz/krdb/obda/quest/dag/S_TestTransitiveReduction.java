@@ -23,6 +23,8 @@ package it.unibz.krdb.obda.quest.dag;
 
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -107,7 +109,7 @@ public class S_TestTransitiveReduction extends TestCase {
 			TestTBoxReasonerImpl_OnGraph reasonerd1 = new TestTBoxReasonerImpl_OnGraph(dag2);
 
 			log.debug("Input number {}", i+1 );
-			log.info("First graph {}", dag2.getPropertyGraph());
+			log.info("First graph {}", dag2.getObjectPropertyGraph());
 			log.info("First graph {}", dag2.getClassGraph());
 			log.info("Second dag {}", dag2);
 						
@@ -130,37 +132,37 @@ public class S_TestTransitiveReduction extends TestCase {
 		//number of redundant edges 
 		int numberRedundants=0;
 
-		for(Equivalences<PropertyExpression> equivalents: d2.getProperties()) 
+		for (Equivalences<ObjectPropertyExpression> equivalents: d2.getObjectProperties()) 
 			if(equivalents.size()>=2)
 				numberEquivalents += equivalents.size();
-			
-		for(Equivalences<BasicClassDescription> equivalents: d2.getClasses()) 
+		
+		for (Equivalences<BasicClassDescription> equivalents: d2.getClasses()) 
 			if(equivalents.size()>=2)
 				numberEquivalents += equivalents.size();
 
 
 		{
-			DefaultDirectedGraph<PropertyExpression,DefaultEdge> g1 = 	reasonerd1.getPropertyGraph();	
-			for (Equivalences<PropertyExpression> equivalents: reasonerd1.getProperties()) {
+			DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> g1 = 	reasonerd1.getObjectPropertyGraph();	
+			for (Equivalences<ObjectPropertyExpression> equivalents: reasonerd1.getObjectProperties()) {
 				
 				log.info("equivalents {} ", equivalents);
 				
 				//check if there are redundant edges
-				for (PropertyExpression vertex: equivalents) {
+				for (ObjectPropertyExpression vertex: equivalents) {
 					if(g1.incomingEdgesOf(vertex).size()!= g1.inDegreeOf(vertex)) //check that there anren't two edges pointing twice to the same nodes
 						numberRedundants +=g1.inDegreeOf(vertex)- g1.incomingEdgesOf(vertex).size();
 				
 					
 					//descendants of the vertex
-					Set<Equivalences<PropertyExpression>> descendants = d2.getProperties().getSub(equivalents);
-					Set<Equivalences<PropertyExpression>> children = d2.getProperties().getDirectSub(equivalents);
+					Set<Equivalences<ObjectPropertyExpression>> descendants = d2.getObjectProperties().getSub(equivalents);
+					Set<Equivalences<ObjectPropertyExpression>> children = d2.getObjectProperties().getDirectSub(equivalents);
 
 					log.info("descendants{} ", descendants);
 					log.info("children {} ", children);
 
 					for(DefaultEdge edge: g1.incomingEdgesOf(vertex)) {
-						PropertyExpression source=g1.getEdgeSource(edge);
-						for(Equivalences<PropertyExpression> descendant:descendants) {
+						ObjectPropertyExpression source=g1.getEdgeSource(edge);
+						for(Equivalences<ObjectPropertyExpression> descendant:descendants) {
 							if (!children.contains(descendant) & ! equivalents.contains(descendant.iterator().next()) &descendant.contains(source))
 								numberRedundants +=1;	
 						}

@@ -40,6 +40,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.ArrayList;
@@ -240,6 +241,84 @@ public class TMappingProcessor {
 		return fac.getCQIE(head, newBody);
 	}
 
+	private static <T extends PropertyExpression> void getTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, 
+			List<CQIE> originalMappings,
+			EquivalencesDAG<T> dag, 
+			CQContainmentCheckUnderLIDs cqc,
+			boolean full) {
+		
+		for (Equivalences<T> propertySet : dag) {
+
+			T current = propertySet.getRepresentative();
+			if (current.isInverse())
+				continue;
+			
+			/* Getting the current node mappings */
+			Predicate currentPredicate = current.getPredicate();
+			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
+
+			for (Equivalences<T> descendants : dag.getSub(propertySet)) {
+				for(T childproperty : descendants) {
+
+					/*
+					 * adding the mappings of the children as own mappings, the new
+					 * mappings use the current predicate instead of the child's
+					 * predicate and, if the child is inverse and the current is
+					 * positive, it will also invert the terms in the head
+					 */
+					boolean requiresInverse = (current.isInverse() != childproperty.isInverse());
+
+					for (CQIE childmapping : originalMappings) {
+
+						if (!childmapping.getHead().getFunctionSymbol().equals(childproperty.getPredicate()))
+							continue;
+						
+						List<Term> terms = childmapping.getHead().getTerms();
+
+						Function newMappingHead;
+						if (!requiresInverse) {
+							if (!full)
+								continue;
+							newMappingHead = fac.getFunction(currentPredicate, terms);
+						} 
+						else {
+							newMappingHead = fac.getFunction(currentPredicate, terms.get(1), terms.get(0));
+						}
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody(), cqc);				
+						currentNodeMappings.mergeMappingsWithCQC(newmapping);
+					}
+				}
+			}
+
+			/* Setting up mappings for the equivalent classes */
+			for (T equivProperty : propertySet) {
+			
+				 
+				Predicate p = equivProperty.getPredicate();
+
+				// skip the property and its inverse (if it is symmetric)
+				if (p.equals(current.getPredicate()))
+					continue;
+				
+				TMappingIndexEntry equivalentPropertyMappings = getMappings(mappingIndex, p);
+					
+				for (TMappingRule currentNodeMapping : currentNodeMappings) {
+					List<Term> terms = currentNodeMapping.getHeadTerms();
+					
+					Function newhead;
+					if (equivProperty.isInverse() == current.isInverse()) 
+						newhead = fac.getFunction(p, terms);
+					else 
+						newhead = fac.getFunction(p, terms.get(1), terms.get(0));
+					
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, cqc);				
+					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
+				}
+			}
+		} // Properties loop ended
+		
+	}
+	
 	/**
 	 * 
 	 * @param originalMappings
@@ -281,75 +360,8 @@ public class TMappingProcessor {
 		 * the TMappings specification.
 		 */
 
-		for (Equivalences<PropertyExpression> propertySet : reasoner.getProperties()) {
-
-			PropertyExpression current = propertySet.getRepresentative();
-			if (current.isInverse())
-				continue;
-			
-			/* Getting the current node mappings */
-			Predicate currentPredicate = current.getPredicate();
-			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
-
-			for (Equivalences<PropertyExpression> descendants : reasoner.getProperties().getSub(propertySet)) {
-				for(PropertyExpression childproperty : descendants) {
-
-					/*
-					 * adding the mappings of the children as own mappings, the new
-					 * mappings use the current predicate instead of the child's
-					 * predicate and, if the child is inverse and the current is
-					 * positive, it will also invert the terms in the head
-					 */
-					boolean requiresInverse = (current.isInverse() != childproperty.isInverse());
-
-					for (CQIE childmapping : originalMappings) {
-
-						if (!childmapping.getHead().getFunctionSymbol().equals(childproperty.getPredicate()))
-							continue;
-						
-						List<Term> terms = childmapping.getHead().getTerms();
-
-						Function newMappingHead;
-						if (!requiresInverse) {
-							if (!full)
-								continue;
-							newMappingHead = fac.getFunction(currentPredicate, terms);
-						} 
-						else {
-							newMappingHead = fac.getFunction(currentPredicate, terms.get(1), terms.get(0));
-						}
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody(), cqc);				
-						currentNodeMappings.mergeMappingsWithCQC(newmapping);
-					}
-				}
-			}
-
-			/* Setting up mappings for the equivalent classes */
-			for (PropertyExpression equivProperty : propertySet) {
-			
-				 
-				Predicate p = equivProperty.getPredicate();
-
-				// skip the property and its inverse (if it is symmetric)
-				if (p.equals(current.getPredicate()))
-					continue;
-				
-				TMappingIndexEntry equivalentPropertyMappings = getMappings(mappingIndex, p);
-					
-				for (TMappingRule currentNodeMapping : currentNodeMappings) {
-					List<Term> terms = currentNodeMapping.getHeadTerms();
-					
-					Function newhead;
-					if (equivProperty.isInverse() == current.isInverse()) 
-						newhead = fac.getFunction(p, terms);
-					else 
-						newhead = fac.getFunction(p, terms.get(1), terms.get(0));
-					
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, cqc);				
-					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
-				}
-			}
-		} // Properties loop ended
+		getTMappings(mappingIndex, originalMappings, reasoner.getObjectProperties(), cqc, full);
+		getTMappings(mappingIndex, originalMappings, reasoner.getDataProperties(), cqc, full);
 
 		/*
 		 * Property t-mappings are done, we now continue with class t-mappings.

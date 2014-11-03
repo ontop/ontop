@@ -29,7 +29,9 @@ import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
@@ -144,12 +146,21 @@ public class VocabularyValidator {
 				return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 		} 
 		else {
-			PropertyExpression equivalent = reasoner.getPropertyRepresentative(p);
+			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyRepresentative(p);
 			if (equivalent != null) {
 				if (!equivalent.isInverse()) 
 					return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 				else 
 					return dfac.getFunction(equivalent.getPredicate(), atom.getTerm(1), atom.getTerm(0));
+			}
+			else {
+				DataPropertyExpression equiv2 = reasoner.getDataPropertyRepresentative(p);
+				if (equiv2 != null) {
+					if (!equiv2.isInverse()) 
+						return dfac.getFunction(equiv2.getPredicate(), atom.getTerms());
+					else 
+						return dfac.getFunction(equiv2.getPredicate(), atom.getTerm(1), atom.getTerm(0));
+				}				
 			}
 		}
 		return atom;

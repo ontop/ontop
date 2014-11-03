@@ -13,7 +13,9 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
@@ -58,16 +60,35 @@ public class LinearInclusionDependencies {
 	public static LinearInclusionDependencies getABoxDependencies(TBoxReasoner reasoner, boolean full) {
 		LinearInclusionDependencies dependencies = new LinearInclusionDependencies();
 		
-		for (Equivalences<PropertyExpression> propNode : reasoner.getProperties()) {
+		for (Equivalences<ObjectPropertyExpression> propNode : reasoner.getObjectProperties()) {
 			// super might be more efficient
-			for (Equivalences<PropertyExpression> subpropNode : reasoner.getProperties().getSub(propNode)) {
-				for (PropertyExpression subprop : subpropNode) {
+			for (Equivalences<ObjectPropertyExpression> subpropNode : reasoner.getObjectProperties().getSub(propNode)) {
+				for (ObjectPropertyExpression subprop : subpropNode) {
 					if (subprop.isInverse())
 						continue;
 					
 	                Function body = translate(subprop);
 
-	                for (PropertyExpression prop : propNode)  {
+	                for (ObjectPropertyExpression prop : propNode)  {
+	                	if (prop == subprop)
+	                		continue;
+	                	
+		                Function head = translate(prop);	
+		                dependencies.addRule(head, body);
+					}
+				}
+			}
+		}
+		for (Equivalences<DataPropertyExpression> propNode : reasoner.getDataProperties()) {
+			// super might be more efficient
+			for (Equivalences<DataPropertyExpression> subpropNode : reasoner.getDataProperties().getSub(propNode)) {
+				for (DataPropertyExpression subprop : subpropNode) {
+					if (subprop.isInverse())
+						continue;
+					
+	                Function body = translate(subprop);
+
+	                for (DataPropertyExpression prop : propNode)  {
 	                	if (prop == subprop)
 	                		continue;
 	                	

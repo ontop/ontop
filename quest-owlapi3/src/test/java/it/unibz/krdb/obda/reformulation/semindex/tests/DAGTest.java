@@ -22,7 +22,9 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
 
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -48,8 +50,12 @@ public class DAGTest extends TestCase {
 		}
 		
 		Set<PropertyExpression> roles= new HashSet<PropertyExpression>();
-		for(Equivalences<PropertyExpression> node : reasoner.getProperties()) {
-			for(PropertyExpression r: node)
+		for (Equivalences<ObjectPropertyExpression> node : reasoner.getObjectProperties()) {
+			for (ObjectPropertyExpression r: node)
+				roles.add(r);
+		}
+		for (Equivalences<DataPropertyExpression> node : reasoner.getDataProperties()) {
+			for (DataPropertyExpression r: node)
 				roles.add(r);
 		}
 		

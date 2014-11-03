@@ -23,7 +23,9 @@ package it.unibz.krdb.obda.quest.dag;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
@@ -43,11 +45,13 @@ import java.util.Set;
 @Deprecated
 public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 
-	private EquivalencesDAG<PropertyExpression> propertyDAG;
+	private EquivalencesDAG<ObjectPropertyExpression> objectPropertyDAG;
+	private EquivalencesDAG<DataPropertyExpression> dataPropertyDAG;
 	private EquivalencesDAG<BasicClassDescription> classDAG;
 
 	public TestTBoxReasonerImpl_Named(TBoxReasoner reasoner) {
-		this.propertyDAG = new EquivalencesDAGImpl<PropertyExpression>(reasoner.getProperties());
+		this.objectPropertyDAG = new EquivalencesDAGImpl<ObjectPropertyExpression>(reasoner.getObjectProperties());
+		this.dataPropertyDAG = new EquivalencesDAGImpl<DataPropertyExpression>(reasoner.getDataProperties());
 		this.classDAG = new EquivalencesDAGImpl<BasicClassDescription>(reasoner.getClasses());
 	}
 
@@ -59,8 +63,18 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	 */
 
 	@Override
-	public EquivalencesDAG<PropertyExpression> getProperties() {
-		return propertyDAG;
+	public EquivalencesDAG<ObjectPropertyExpression> getObjectProperties() {
+		return objectPropertyDAG;
+	}
+	/**
+	 * Return the DAG of properties
+	 * 
+	 * @return DAG 
+	 */
+
+	@Override
+	public EquivalencesDAG<DataPropertyExpression> getDataProperties() {
+		return dataPropertyDAG;
 	}
 	
 	/**
@@ -193,7 +207,13 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 
 
 	@Override
-	public PropertyExpression getPropertyRepresentative(Predicate p) {
+	public ObjectPropertyExpression getObjectPropertyRepresentative(Predicate p) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public DataPropertyExpression getDataPropertyRepresentative(Predicate p) {
 		// TODO Auto-generated method stub
 		return null;
 	}

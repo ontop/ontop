@@ -43,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TreeWitnessGenerator {
-	private final PropertyExpression property;
+	private final ObjectPropertyExpression property;
 	private final OClass filler;
 
 	private final Set<BasicClassDescription> concepts = new HashSet<BasicClassDescription>();
@@ -55,7 +55,7 @@ public class TreeWitnessGenerator {
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessGenerator.class);	
 	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
 	
-	public TreeWitnessGenerator(TBoxReasoner reasoner, PropertyExpression property, OClass filler) {
+	public TreeWitnessGenerator(TBoxReasoner reasoner, ObjectPropertyExpression property, OClass filler) {
 		this.reasoner = reasoner;
 		this.property = property;
 		this.filler = filler;
@@ -79,7 +79,7 @@ public class TreeWitnessGenerator {
 					SomeValuesFrom some = (SomeValuesFrom)concept;
 					TreeWitnessGenerator twg = gens.get(some);
 					if (twg == null) {
-						twg = new TreeWitnessGenerator(reasoner, some.getProperty(), owlThing);			
+						twg = new TreeWitnessGenerator(reasoner, (ObjectPropertyExpression)some.getProperty(), owlThing);			
 						gens.put(concept, twg);
 					}
 					for (Equivalences<BasicClassDescription> subClassSet : subClasses) {
@@ -148,8 +148,8 @@ public class TreeWitnessGenerator {
 				for (BasicClassDescription b : concepts) 
 					if (b instanceof SomeValuesFrom) {
 						SomeValuesFrom some = (SomeValuesFrom)b;
-						PropertyExpression prop = some.getProperty();
-						Set<PropertyExpression> bsubproperties = reasoner.getProperties().getSubRepresentatives(prop);
+						ObjectPropertyExpression prop = (ObjectPropertyExpression) some.getProperty();
+						Set<ObjectPropertyExpression> bsubproperties = reasoner.getObjectProperties().getSubRepresentatives(prop);
 						Iterator<BasicClassDescription> i = concepts.iterator();
 						while (i.hasNext()) {
 							BasicClassDescription bp = i.next();
@@ -183,7 +183,7 @@ public class TreeWitnessGenerator {
 	}
 	
 	
-	public PropertyExpression getProperty() {
+	public ObjectPropertyExpression getProperty() {
 		return property;
 	}
 	

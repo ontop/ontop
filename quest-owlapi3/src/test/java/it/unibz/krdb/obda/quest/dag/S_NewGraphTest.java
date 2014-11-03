@@ -53,14 +53,13 @@ public class S_NewGraphTest  extends TestCase{
 
 		log.info("Translating");
 
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-		Ontology o = translator.translate(ontology);
+		Ontology o = OWLAPI3TranslatorUtility.translate(ontology);
 
 		log.info("Generating graph");
 		TBoxReasonerImpl r = new TBoxReasonerImpl(o);
 		
 		log.info("See information");
-		log.debug("properties {}", r.getPropertyGraph());
+		log.debug("properties {}", r.getObjectPropertyGraph());
 		log.debug("classes {}", r.getClassGraph());
 //		
 		log.info("From graph to dag");
@@ -68,7 +67,7 @@ public class S_NewGraphTest  extends TestCase{
 		
 		log.info("See information");
 		System.out.println(r.getClasses());
-		System.out.println(r.getProperties());
+		System.out.println(r.getObjectProperties());
 		//System.out.println(r.getDAG());
 		
 //		log.info("See relations");
@@ -89,7 +88,7 @@ public class S_NewGraphTest  extends TestCase{
 		
 		log.info("See information named DAG");
 		System.out.println(r.getClasses());
-		System.out.println(r.getProperties());
+		System.out.println(r.getObjectProperties());
 		System.out.println(namedDAG);
 		
 //		log.info("See relations named DAG");
