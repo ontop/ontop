@@ -75,21 +75,19 @@ import org.xml.sax.SAXException;
  *
  * @author Sergejs Pugac
  */
+
+// USED IN TWO TESTS ONLY
+
 public class SemanticIndexHelper {
     public final static Logger log = LoggerFactory.getLogger(SemanticIndexHelper.class);
 
-
-
     public OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-   
-    
-    public String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
+       
+    public static final String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
     
     public transient Connection conn;
 
-    private  OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    
-    private  OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
+    private final  OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
     private String owl_exists = "::__exists__::";
     private String owl_inverse_exists = "::__inverse__exists__::";
@@ -113,7 +111,6 @@ public class SemanticIndexHelper {
 
         Ontology ontology = translator.translate(owlOntology);
         return ontology;
-
     }
 
     public TBoxReasoner load_dag(String ontoname) throws Exception {
@@ -191,7 +188,8 @@ public class SemanticIndexHelper {
 
                 if (type.equals("classes")) {
                     if (exists) {
-                    	PropertyExpression prop = descFactory.createProperty(uri);
+                    	// TODO: check whether object properties are enough
+                    	PropertyExpression prop = descFactory.createObjectProperty(uri);
                     	if (inverse)
                     		prop = prop.getInverse();
                         description = descFactory.createPropertySomeRestriction(prop);
@@ -199,7 +197,8 @@ public class SemanticIndexHelper {
                     else
                         description = descFactory.createClass(uri);
                 } else {
-                	PropertyExpression prop = descFactory.createProperty(uri);
+                	// TODO: check whether object properties are enough
+                	PropertyExpression prop = descFactory.createObjectProperty(uri);
                     if (inverse)
                     	description = prop.getInverse();
                     else

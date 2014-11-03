@@ -1274,13 +1274,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		if (ax instanceof PropertyAssertion) {
 			// Get the data property assertion
 			PropertyAssertion attributeAssertion = (PropertyAssertion) ax;
-			Predicate predicate = attributeAssertion.getProperty().getPredicate();
+			PropertyExpression prop = attributeAssertion.getProperty();
 
 			Constant object = attributeAssertion.getValue2();
 			Predicate.COL_TYPE attributeType = object.getType();
 
 			// Construct the database INSERT statements
-			ObjectConstant subject = (ObjectConstant) attributeAssertion.getSubject();
+			ObjectConstant subject = attributeAssertion.getSubject();
 
 			String uri = subject.getValue();
 			 uri_id = uriMap.idOfURI(uri);
@@ -1290,7 +1290,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			
 			boolean c1isBNode = subject instanceof BNode;
 
-			int idx = cacheSI.getIndex(predicate, 2);
+			int idx = cacheSI.getIndex(prop.getPredicate(), 2);
 
 			// The insertion is based on the datatype from TBox
 			String value = object.getValue();
@@ -1303,7 +1303,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				String uri2 = object.getValue();
 				boolean c2isBNode = object instanceof BNode;
 
-				if (isInverse(predicate)) {
+				if (isInverse(prop)) {
 
 					/* Swapping values */
 
@@ -1474,8 +1474,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		statement.clearBatch();
 	}
 
-	private boolean isInverse(Predicate role) {
-		PropertyExpression property = ofac.createProperty(role.getName());
+	private boolean isInverse(PropertyExpression property) {
+	
 		PropertyExpression desc = reasonerDag.getProperties().getVertex(property).getRepresentative();
 		if (!property.equals(desc)) {
 			if (desc.isInverse()) 

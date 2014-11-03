@@ -23,14 +23,17 @@ package it.unibz.krdb.obda.ontology;
 import java.util.Set;
 
 /**
- * Represents DisjointClasses from OWL 2 Specification
+ * Represents the following from OWL 2 Specification:
+ *         DisjointClasses for T = ClassExpression
+ *         DisjointObjectProperties and AsymmetricObjectProperty for T = ObjectPropertyExpression 
+ *         DisjointDataProperties for T = DataPropertyExpression 
  * 
  * @author roman
  *
  */
 
-public interface DisjointClassesAxiom extends Axiom {
+public interface DisjointnessAxiom<T> extends Axiom {
 
-	public Set<ClassExpression> getClasses();
+	public Set<T> getComponents();
 
 }

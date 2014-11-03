@@ -20,15 +20,12 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -48,26 +45,21 @@ public class YAGOTest {
     private final static String dataFile = "yago2core_20110315.n3";
     private static final Logger log = LoggerFactory.getLogger(YAGOTest.class);
 
-    private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
     private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
    
 
     public static void main(String[] args) throws IOException, URISyntaxException {
         Ontology onto = parse_tbox(dataFile);
-        DAG dag = new DAG(onto);
+ //       DAG dag = new DAG(onto);
     }
 
     private static Ontology parse_tbox(String filename) throws IOException, URISyntaxException {
         BufferedReader triples = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));
 
         String line;
-        String subject;
-        String object;
-        String predicate;
 
         Pattern pattern = Pattern.compile("<(.+?)>\\s(.+?)\\s[<\"](.+?)[>\"]\\s\\.");
-        Matcher matcher;
-
+ 
         Ontology onto = descFactory.createOntology();
 
         while ((line = triples.readLine()) != null) {
@@ -75,26 +67,28 @@ public class YAGOTest {
                 log.debug(line);
                 continue;
             }
-            matcher = pattern.matcher(line);
+            Matcher matcher = pattern.matcher(line);
 
             boolean matchFound = matcher.find();
 
             if (matchFound) {
-                subject = matcher.group(1);
-                predicate = matcher.group(2);
-                object = matcher.group(3);
+            	String subject = matcher.group(1);
+            	String predicate = matcher.group(2);
+            	String object = matcher.group(3);
 
+            	// TODO (ROMAN): not necessarily object properties?
+            	
                 if ("rdfs:range".equals(predicate)) {
-                    PropertyExpression psprop = descFactory.createProperty(subject).getInverse();
+                    ObjectPropertyExpression psprop = descFactory.createObjectProperty(subject).getInverse();
                     SomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
                     OClass co = descFactory.createClass(object);
-                    onto.add(descFactory.createSubClassAxiom(rs, co));
+                    onto.addSubClassOfAxiom(rs, co);
                 } 
                 else if ("rdfs:domain".equals(predicate)) {
-                    PropertyExpression psprop = descFactory.createProperty(subject);
+                    ObjectPropertyExpression psprop = descFactory.createObjectProperty(subject);
                     SomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
                     OClass co = descFactory.createClass(object);
-                    onto.add(descFactory.createSubClassAxiom(rs, co));
+                    onto.addSubClassOfAxiom(rs, co);
                 } 
                 else if ("rdf:type".equals(predicate)) {
                     // a rdf:type A |= A(a)
@@ -104,12 +98,12 @@ public class YAGOTest {
                 else if ("rdfs:subClassOf".equals(predicate)) {
                     OClass cs = descFactory.createClass(subject);
                     OClass co = descFactory.createClass(object);
-                    onto.add(descFactory.createSubClassAxiom(cs, co));
+                    onto.addSubClassOfAxiom(cs, co);
                 } 
                 else if ("rdfs:subPropertyOf".equals(predicate)) {
-                    PropertyExpression rs = descFactory.createProperty(subject);
-                    PropertyExpression ro = descFactory.createProperty(object);
-                    onto.add(descFactory.createSubPropertyAxiom(rs, ro));
+                    ObjectPropertyExpression rs = descFactory.createObjectProperty(subject);
+                    ObjectPropertyExpression ro = descFactory.createObjectProperty(object);
+                    onto.addSubPropertyOfAxiom(rs, ro);
                 } else {
 //                    log.debug(predicate);
                 }

@@ -36,16 +36,24 @@ public interface Ontology extends Cloneable, Serializable {
 	
 	
 	
-	public void add(SubClassOfAxiom assertion);
+	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2);
 
-	public void add(SubPropertyOfAxiom assertion);
+	public void addSubClassOfAxiom(DataRangeExpression concept1, DataRangeExpression concept2);
+	
+	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including);
 
-	public void add(DisjointClassesAxiom assertion);
+	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including);
 
-	public void add(DisjointPropertiesAxiom assertion);
+	public void addDisjointClassesAxiom(Set<ClassExpression> classes);
 
-	public void add(FunctionalPropertyAxiom assertion);
+	public void addDisjointObjectPropertiesAxiom(Set<ObjectPropertyExpression> properties);
+	
+	public void addDisjointDataPropertiesAxiom(Set<DataPropertyExpression> properties);
 
+	public void addFunctionalObjectPropertyAxiom(ObjectPropertyExpression prop);
+
+	public void addFunctionalDataPropertyAxiom(DataPropertyExpression prop);
+	
 	public void add(ClassAssertion assertion);
 
 	public void add(PropertyAssertion assertion);
@@ -63,11 +71,15 @@ public interface Ontology extends Cloneable, Serializable {
 
 	public Set<SubPropertyOfAxiom> getSubPropertyAxioms();
 	
-	public Set<DisjointClassesAxiom> getDisjointClassesAxioms();
+	public Set<DisjointnessAxiom<ClassExpression>> getDisjointClassesAxioms();
 	
-	public Set<DisjointPropertiesAxiom> getDisjointPropertiesAxioms();
-	
-	public Set<FunctionalPropertyAxiom> getFunctionalPropertyAxioms();
+	public Set<DisjointnessAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms();
+
+	public Set<DisjointnessAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms();
+
+	public Set<FunctionalPropertyAxiom<ObjectPropertyExpression>> getFunctionalObjectPropertyAxioms();
+
+	public Set<FunctionalPropertyAxiom<DataPropertyExpression>> getFunctionalDataPropertyAxioms();
 	
 	public Set<ClassAssertion> getClassAssertions();
 

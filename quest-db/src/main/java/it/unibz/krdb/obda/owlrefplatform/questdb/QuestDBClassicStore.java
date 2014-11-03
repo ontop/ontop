@@ -126,11 +126,13 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		return translator.mergeTranslateOntologies(closure);
 	}
 
+
 	public QuestDBClassicStore(String name, Dataset data, QuestPreferences config) throws Exception {
 		super(name);
 		Ontology tbox = getTBox(data);
 		setup(tbox, config);
 	}
+
 	
 	private void setup(Ontology onto, QuestPreferences config) throws Exception {
 		if (config == null) {
@@ -212,13 +214,15 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		Ontology result = ofac.createOntology();
 
 		for (URI graphURI : graphURIs) {
-			Ontology o = getOntology(((URI) graphURI), graphURI);
+			Ontology o = getOntology(graphURI, graphURI);
 			result.getVocabulary().merge(o.getVocabulary());
 			
-			for (SubPropertyOfAxiom ax : result.getSubPropertyAxioms())  // TODO (ROMAN): check whether it's result and not o
-				result.add(ax);
-			for (SubClassOfAxiom ax : result.getSubClassAxioms())  // TODO (ROMAN): check whether it's result and not o
-				result.add(ax);
+			// TODO: restore copying ontology axioms (it was copying from result into result, at least since July 2013)
+			
+			//for (SubPropertyOfAxiom ax : result.getSubPropertyAxioms()) 
+			//	result.add(ax);
+			//for (SubClassOfAxiom ax : result.getSubClassAxioms()) 
+			//	result.add(ax);	
 		}
 		return result;
 	}

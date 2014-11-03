@@ -20,15 +20,10 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
-import it.unibz.krdb.obda.ontology.Datatype;
-import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
-import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
-import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.DisjointnessAxiom;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
@@ -36,7 +31,6 @@ import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyAssertion;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
@@ -58,11 +52,15 @@ public class OntologyImpl implements Ontology {
 	
 	private final Set<SubPropertyOfAxiom> subPropertyAxioms = new LinkedHashSet<SubPropertyOfAxiom>();
 
-	private final Set<DisjointClassesAxiom> disjointClassesAxioms = new LinkedHashSet<DisjointClassesAxiom>();
+	private final Set<DisjointnessAxiom<ClassExpression>> disjointClassesAxioms = new LinkedHashSet<DisjointnessAxiom<ClassExpression>>();
 
-	private final Set<DisjointPropertiesAxiom> disjointPropertiesAxioms = new LinkedHashSet<DisjointPropertiesAxiom>();
+	private final Set<DisjointnessAxiom<ObjectPropertyExpression>> disjointObjectPropertiesAxioms = new LinkedHashSet<DisjointnessAxiom<ObjectPropertyExpression>>();
+
+	private final Set<DisjointnessAxiom<DataPropertyExpression>> disjointDataPropertiesAxioms = new LinkedHashSet<DisjointnessAxiom<DataPropertyExpression>>();
 	
-	private final Set<FunctionalPropertyAxiom> functionalityAxioms = new LinkedHashSet<FunctionalPropertyAxiom>();
+	private final Set<FunctionalPropertyAxiom<ObjectPropertyExpression>> functionalObjectPropertyAxioms = new LinkedHashSet<FunctionalPropertyAxiom<ObjectPropertyExpression>>();
+
+	private final Set<FunctionalPropertyAxiom<DataPropertyExpression>> functionalDataPropertyAxioms = new LinkedHashSet<FunctionalPropertyAxiom<DataPropertyExpression>>();
 	
 	private final Set<ClassAssertion> classAssertions = new LinkedHashSet<ClassAssertion>();
 
@@ -86,7 +84,7 @@ public class OntologyImpl implements Ontology {
 	
 	@Override
 	public void addSubClassOfAxiomWithReferencedEntities(ClassExpression concept1, ClassExpression concept2) {	
-		SubClassOfAxiom assertion = ofac.createSubClassAxiom(concept1, concept2);
+		SubClassOfAxiom assertion = new SubClassOfAxiomImpl(concept1, concept2);
 		vocabulary.addReferencedEntries(assertion.getSub());
 		vocabulary.addReferencedEntries(assertion.getSuper());
 		subClassAxioms.add(assertion);
@@ -94,7 +92,7 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void addSubClassOfAxiomWithReferencedEntities(DataRangeExpression concept1, DataRangeExpression concept2) {
-		SubClassOfAxiom assertion = ofac.createSubClassAxiom(concept1, concept2);
+		SubClassOfAxiom assertion = new SubClassOfAxiomImpl(concept1, concept2);
 		vocabulary.addReferencedEntries(assertion.getSub());
 		vocabulary.addReferencedEntries(assertion.getSuper());
 		subClassAxioms.add(assertion);
@@ -102,7 +100,7 @@ public class OntologyImpl implements Ontology {
 	
 	@Override
 	public void addSubPropertyOfAxiomWithReferencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including) {
-		SubPropertyOfAxiom assertion = ofac.createSubPropertyAxiom(included, including);
+		SubPropertyOfAxiom assertion = new SubPropertyOfAxiomImpl(included, including);
 		vocabulary.addReferencedEntries(assertion.getSub());
 		vocabulary.addReferencedEntries(assertion.getSuper());
 		subPropertyAxioms.add(assertion);
@@ -110,47 +108,80 @@ public class OntologyImpl implements Ontology {
 	
 	@Override
 	public void addSubPropertyOfAxiomWithReferencedEntities(DataPropertyExpression included, DataPropertyExpression including) {
-		SubPropertyOfAxiom assertion = ofac.createSubPropertyAxiom(included, including);
+		SubPropertyOfAxiom assertion = new SubPropertyOfAxiomImpl(included, including);
 		vocabulary.addReferencedEntries(assertion.getSub());
 		vocabulary.addReferencedEntries(assertion.getSuper());
 		subPropertyAxioms.add(assertion);
 	}
 
+	@Override
+	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2) {
+		vocabulary.checkSignature(concept1);
+		vocabulary.checkSignature(concept2);
+		SubClassOfAxiom ax = new SubClassOfAxiomImpl(concept1, concept2);
+		subClassAxioms.add(ax);
+	}	
+
+	@Override
+	public void addSubClassOfAxiom(DataRangeExpression concept1, DataRangeExpression concept2) {
+		vocabulary.checkSignature(concept1);
+		vocabulary.checkSignature(concept2);
+		SubClassOfAxiom ax = new SubClassOfAxiomImpl(concept1, concept2);
+		subClassAxioms.add(ax);
+	}
+
+	@Override
+	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including) {
+		vocabulary.checkSignature(included);
+		vocabulary.checkSignature(including);
+		SubPropertyOfAxiom ax = new SubPropertyOfAxiomImpl(included, including);
+		subPropertyAxioms.add(ax);
+	}
 	
 	@Override
-	public void add(SubClassOfAxiom assertion) {		
-		vocabulary.checkSignature(assertion.getSub());
-		vocabulary.checkSignature(assertion.getSuper());
-		subClassAxioms.add(assertion);
+	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including) {
+		vocabulary.checkSignature(included);
+		vocabulary.checkSignature(including);
+		SubPropertyOfAxiom ax = new SubPropertyOfAxiomImpl(included, including);
+		subPropertyAxioms.add(ax);
 	}
 
 	@Override
-	public void add(SubPropertyOfAxiom assertion) {
-		vocabulary.checkSignature(assertion.getSub());
-		vocabulary.checkSignature(assertion.getSuper());
-		subPropertyAxioms.add(assertion);
-	}
-
-	@Override
-	public void add(DisjointClassesAxiom assertion) {	
-		Set<ClassExpression> classes = assertion.getClasses();
+	public void addDisjointClassesAxiom(Set<ClassExpression> classes) {	
 		for (ClassExpression c : classes)
 			vocabulary.checkSignature(c);
-		disjointClassesAxioms.add(assertion);
+		DisjointnessAxiom<ClassExpression> ax = new DisjointnessAxiomImpl<ClassExpression>(classes);
+		disjointClassesAxioms.add(ax);
 	}
 
 	@Override
-	public void add(DisjointPropertiesAxiom assertion) {
-		Set<PropertyExpression> props = assertion.getProperties();
-		for (PropertyExpression p : props)
+	public void addDisjointObjectPropertiesAxiom(Set<ObjectPropertyExpression> props) {
+		for (ObjectPropertyExpression p : props)
 			vocabulary.checkSignature(p);
-		disjointPropertiesAxioms.add(assertion);
+		DisjointnessAxiomImpl<ObjectPropertyExpression> ax = new DisjointnessAxiomImpl<ObjectPropertyExpression>(props);
+		disjointObjectPropertiesAxioms.add(ax);
+	}
+
+	@Override
+	public void addDisjointDataPropertiesAxiom(Set<DataPropertyExpression> props) {
+		for (DataPropertyExpression p : props)
+			vocabulary.checkSignature(p);
+		DisjointnessAxiomImpl<DataPropertyExpression> ax = new DisjointnessAxiomImpl<DataPropertyExpression>(props);
+		disjointDataPropertiesAxioms.add(ax);
 	}
 	
 	@Override
-	public void add(FunctionalPropertyAxiom assertion) {
-		vocabulary.checkSignature(assertion.getProperty());
-		functionalityAxioms.add(assertion);
+	public void addFunctionalObjectPropertyAxiom(ObjectPropertyExpression prop) {
+		vocabulary.checkSignature(prop);
+		FunctionalPropertyAxiom<ObjectPropertyExpression> ax = new FunctionalPropertyAxiomImpl<ObjectPropertyExpression>(prop);
+		functionalObjectPropertyAxioms.add(ax);
+	}
+
+	@Override
+	public void addFunctionalDataPropertyAxiom(DataPropertyExpression prop) {
+		vocabulary.checkSignature(prop);
+		FunctionalPropertyAxiom<DataPropertyExpression> ax = new FunctionalPropertyAxiomImpl<DataPropertyExpression>(prop);
+		functionalDataPropertyAxioms.add(ax);
 	}
 	
 	@Override
@@ -187,20 +218,31 @@ public class OntologyImpl implements Ontology {
 	}
 	
 	@Override 
-	public Set<FunctionalPropertyAxiom> getFunctionalPropertyAxioms() {
-		return functionalityAxioms;
+	public Set<FunctionalPropertyAxiom<ObjectPropertyExpression>> getFunctionalObjectPropertyAxioms() {
+		return functionalObjectPropertyAxioms;
 	}
 	
 	@Override 
-	public Set<DisjointClassesAxiom> getDisjointClassesAxioms() {
+	public Set<FunctionalPropertyAxiom<DataPropertyExpression>> getFunctionalDataPropertyAxioms() {
+		return functionalDataPropertyAxioms;
+	}
+	
+	@Override 
+	public Set<DisjointnessAxiom<ClassExpression>> getDisjointClassesAxioms() {
 		return disjointClassesAxioms;
 	}
 	
 	@Override 
-	public Set<DisjointPropertiesAxiom> getDisjointPropertiesAxioms() {
-		return disjointPropertiesAxioms;
+	public Set<DisjointnessAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms() {
+		return disjointObjectPropertiesAxioms;
 	}
 
+	@Override 
+	public Set<DisjointnessAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms() {
+		return disjointDataPropertiesAxioms;
+	}
+
+	
 	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder();

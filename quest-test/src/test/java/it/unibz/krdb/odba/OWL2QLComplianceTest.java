@@ -137,8 +137,8 @@ public class OWL2QLComplianceTest {
 		System.out.println(onto.getDisjointClassesAxioms());
 		assertEquals(1, onto.getDisjointClassesAxioms().size());
 
-		System.out.println(onto.getDisjointPropertiesAxioms());
-		assertEquals(1, onto.getDisjointPropertiesAxioms().size());
+		System.out.println(onto.getDisjointObjectPropertiesAxioms());
+		assertEquals(1, onto.getDisjointObjectPropertiesAxioms().size());
 	}
 
 }

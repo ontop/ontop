@@ -44,8 +44,6 @@ import junit.framework.TestCase;
 
 public class DAGChainTest extends TestCase {
 
-	SemanticIndexHelper						helper				= new SemanticIndexHelper();
-
 	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
 	private static final OntologyFactory	descFactory			= OntologyFactoryImpl.getInstance();
 
