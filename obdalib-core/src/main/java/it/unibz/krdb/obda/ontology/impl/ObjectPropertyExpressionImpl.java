@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.ontology.impl;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 
 public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 
@@ -31,6 +32,8 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	private final Predicate predicate;
 	private final String string;
 	private final ObjectPropertyExpressionImpl inverseProperty;
+	
+	private final ObjectSomeValuesFromImpl domain;
 
 	ObjectPropertyExpressionImpl(Predicate p, boolean isInverse) {
 		this.predicate = p;
@@ -41,6 +44,8 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 		if (isInverse) 
 			bf.append("^-");
 		this.string =  bf.toString();
+		
+		this.domain = new ObjectSomeValuesFromImpl(this);
 	}
 
 	private ObjectPropertyExpressionImpl(Predicate p, boolean isInverse, ObjectPropertyExpressionImpl inverseProperty) {
@@ -52,6 +57,8 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 		if (isInverse) 
 			bf.append("^-");
 		this.string =  bf.toString();
+
+		this.domain = new ObjectSomeValuesFromImpl(this);		
 	}
 
 	@Override
@@ -69,6 +76,18 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 		return inverseProperty;
 	}	
 
+
+	@Override
+	public ObjectSomeValuesFrom getDomain() {
+		return domain;
+	}
+
+	@Override
+	public ObjectSomeValuesFrom getRange() {
+		return inverseProperty.domain;
+	}
+	
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof ObjectPropertyExpressionImpl) {

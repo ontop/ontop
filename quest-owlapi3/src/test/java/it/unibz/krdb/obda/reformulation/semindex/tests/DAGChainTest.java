@@ -86,8 +86,8 @@ public class DAGChainTest extends TestCase {
 		ObjectPropertyExpression rprop = descFactory.createObjectProperty("r");
 		ObjectPropertyExpression riprop = rprop.getInverse();
 		OClass ac = descFactory.createClass("a");
-		ObjectSomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
-		ObjectSomeValuesFrom ier = descFactory.createPropertySomeRestriction(riprop);
+		ObjectSomeValuesFrom er = rprop.getDomain();
+		ObjectSomeValuesFrom ier = riprop.getDomain();
 		OClass cc = descFactory.createClass("c");
 
 		ontology.addSubClassOfAxiomWithReferencedEntities(er, ac);
@@ -135,8 +135,8 @@ public class DAGChainTest extends TestCase {
 		ObjectPropertyExpression riprop = rprop.getInverse();
 
 		OClass ac = descFactory.createClass("a");
-		ObjectSomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
-		ObjectSomeValuesFrom ier = descFactory.createPropertySomeRestriction(riprop);
+		ObjectSomeValuesFrom er = rprop.getDomain();
+		ObjectSomeValuesFrom ier = riprop.getDomain();
 		OClass cc = descFactory.createClass("c");
 		OClass bc = descFactory.createClass("b");
 		OClass dc = descFactory.createClass("d");

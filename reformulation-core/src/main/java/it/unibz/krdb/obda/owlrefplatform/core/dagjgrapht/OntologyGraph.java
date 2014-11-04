@@ -143,15 +143,15 @@ public class OntologyGraph {
 
 		// domains and ranges of roles
 		for (ObjectPropertyExpression role : objectPropertyGraph.vertexSet()) {
-			ObjectSomeValuesFrom existsRole = fac.createPropertySomeRestriction(role);
+			ObjectSomeValuesFrom existsRole = role.getDomain();
 			classGraph.addVertex(existsRole);			
 		}
 		// edges between the domains and ranges for sub-properties
 		for (DefaultEdge edge : objectPropertyGraph.edgeSet()) {
 			ObjectPropertyExpression child = objectPropertyGraph.getEdgeSource(edge);
 			ObjectPropertyExpression parent = objectPropertyGraph.getEdgeTarget(edge);
-			ObjectSomeValuesFrom existChild = fac.createPropertySomeRestriction(child);
-			ObjectSomeValuesFrom existsParent = fac.createPropertySomeRestriction(parent);
+			ObjectSomeValuesFrom existChild = child.getDomain();
+			ObjectSomeValuesFrom existsParent = parent.getDomain();
 			classGraph.addVertex(existChild);
 			classGraph.addVertex(existsParent);
 			classGraph.addEdge(existChild, existsParent);		
@@ -159,15 +159,15 @@ public class OntologyGraph {
 		
 		// domains and ranges of roles
 		for (DataPropertyExpression role : dataPropertyGraph.vertexSet()) {
-			DataSomeValuesFrom existsRole = fac.createPropertySomeRestriction(role);
+			DataSomeValuesFrom existsRole = role.getDomain();
 			classGraph.addVertex(existsRole);			
 		}
 		// edges between the domains and ranges for sub-properties
 		for (DefaultEdge edge : dataPropertyGraph.edgeSet()) {
 			DataPropertyExpression child = dataPropertyGraph.getEdgeSource(edge);
 			DataPropertyExpression parent = dataPropertyGraph.getEdgeTarget(edge);
-			DataSomeValuesFrom existChild = fac.createPropertySomeRestriction(child);
-			DataSomeValuesFrom existsParent = fac.createPropertySomeRestriction(parent);
+			DataSomeValuesFrom existChild = child.getDomain();
+			DataSomeValuesFrom existsParent = parent.getDomain();
 			classGraph.addVertex(existChild);
 			classGraph.addVertex(existsParent);
 			classGraph.addEdge(existChild, existsParent);		
@@ -177,9 +177,9 @@ public class OntologyGraph {
 		// edges between the domain and the range of each property for the chain graph
 		if (chain)  {
 			for (ObjectPropertyExpression role : objectPropertyGraph.vertexSet()) {
-				ObjectSomeValuesFrom existsRole = fac.createPropertySomeRestriction(role);
+				ObjectSomeValuesFrom existsRole = role.getDomain();
 				ObjectPropertyExpression inv = role.getInverse();
-				ObjectSomeValuesFrom existsRoleInv = fac.createPropertySomeRestriction(inv);
+				ObjectSomeValuesFrom existsRoleInv = inv.getDomain();
 				
 				classGraph.addEdge(existsRoleInv, existsRole);				
 				classGraph.addEdge(existsRole, existsRoleInv);				
@@ -205,15 +205,15 @@ public class OntologyGraph {
 
 		// ranges of roles
 		for (DataPropertyExpression role : dataPropertyGraph.vertexSet()) {
-			DataPropertyRangeExpression existsRole = fac.createDataPropertyRange(role);
+			DataPropertyRangeExpression existsRole = role.getRange();
 			dataRangeGraph.addVertex(existsRole);			
 		}
 		// edges between the ranges for sub-properties
 		for (DefaultEdge edge : dataPropertyGraph.edgeSet()) {
 			DataPropertyExpression child = dataPropertyGraph.getEdgeSource(edge);
 			DataPropertyExpression parent = dataPropertyGraph.getEdgeTarget(edge);
-			DataPropertyRangeExpression existChild = fac.createDataPropertyRange(child);
-			DataPropertyRangeExpression existsParent = fac.createDataPropertyRange(parent);
+			DataPropertyRangeExpression existChild = child.getRange();
+			DataPropertyRangeExpression existsParent = parent.getRange();
 			dataRangeGraph.addVertex(existChild);
 			dataRangeGraph.addVertex(existsParent);
 			dataRangeGraph.addEdge(existChild, existsParent);		

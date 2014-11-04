@@ -348,7 +348,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 			//if (node instanceof ObjectSomeValuesFrom) {
 				ObjectSomeValuesFrom existsR = (ObjectSomeValuesFrom) node;
 				ObjectPropertyExpression exists = existsR.getProperty();
-				existsRin = fac.createPropertySomeRestriction(exists.getInverse());
+				existsRin = exists.getInverse().getDomain();
 			//}
 /*				
 			else {

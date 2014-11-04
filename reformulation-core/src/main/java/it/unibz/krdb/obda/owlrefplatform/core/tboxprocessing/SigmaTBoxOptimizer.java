@@ -174,8 +174,8 @@ public class SigmaTBoxOptimizer {
 	
 	private boolean check_directly_redundant_role(ObjectPropertyExpression parent, ObjectPropertyExpression child) {
 
-		ObjectSomeValuesFrom existParentDesc = fac.createPropertySomeRestriction(parent);
-		ObjectSomeValuesFrom existChildDesc = fac.createPropertySomeRestriction(child);
+		ObjectSomeValuesFrom existParentDesc = parent.getDomain();
+		ObjectSomeValuesFrom existChildDesc = child.getDomain();
 
 		return check_directly_redundant(parent, child) && 
 				check_directly_redundant(existParentDesc, existChildDesc);
@@ -183,8 +183,8 @@ public class SigmaTBoxOptimizer {
 
 	private boolean check_directly_redundant_role(DataPropertyExpression parent, DataPropertyExpression child) {
 
-		DataSomeValuesFrom existParentDesc = fac.createPropertySomeRestriction(parent);
-		DataSomeValuesFrom existChildDesc = fac.createPropertySomeRestriction(child);
+		DataSomeValuesFrom existParentDesc = parent.getDomain();
+		DataSomeValuesFrom existChildDesc = child.getDomain();
 
 		return check_directly_redundant(parent, child) && 
 				check_directly_redundant(existParentDesc, existChildDesc);

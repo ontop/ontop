@@ -62,12 +62,12 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	public Ontology createOntology() {
 		return new OntologyImpl();
 	}
-	
+/*	
 	@Override
 	public DataPropertyRangeExpression createDataPropertyRange(DataPropertyExpression role) {
 		return new DataPropertyRangeExpressionImpl(((DataPropertyExpressionImpl)role).inverseProperty);
 	}
-	
+*/	
 	
 	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression role, ObjectConstant o1, ObjectConstant o2) {
 		return new ObjectPropertyAssertionImpl(role, o1, o2);
@@ -90,7 +90,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	@Override
 	public DataPropertyExpression createDataProperty(String p) {
 		Predicate prop = ofac.getDataPropertyPredicate(p);
-		return new DataPropertyExpressionImpl(prop, false);
+		return new DataPropertyExpressionImpl(prop);
 	}
 
 
@@ -104,13 +104,4 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new DataPropertyAssertionImpl(attribute, o1, o2);
 	}
 	
-	@Override
-	public ObjectSomeValuesFrom createPropertySomeRestriction(ObjectPropertyExpression role) {
-		return new ObjectSomeValuesFromImpl(role);
-	}
-	
-	@Override
-	public DataSomeValuesFrom createPropertySomeRestriction(DataPropertyExpression role) {
-		return new DataSomeValuesFromImpl(role);
-	}
 }

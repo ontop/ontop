@@ -117,8 +117,8 @@ public class DAG implements Serializable {
 			DAGNode rolenodeinv = new DAGNode(roleInv);
 			roles.put(roleInv, rolenodeinv);
 
-			ObjectSomeValuesFrom existsRole = descFactory.createPropertySomeRestriction(role);
-			ObjectSomeValuesFrom existsRoleInv = descFactory.createPropertySomeRestriction(roleInv);
+			ObjectSomeValuesFrom existsRole = role.getDomain();
+			ObjectSomeValuesFrom existsRoleInv = roleInv.getDomain();
 			DAGNode existsNode = new DAGNode(existsRole);
 			DAGNode existsNodeInv = new DAGNode(existsRoleInv);
 			classes.put(existsRole, existsNode);
@@ -141,8 +141,8 @@ public class DAG implements Serializable {
 			//DAGNode rolenodeinv = new DAGNode(roleInv);
 			//roles.put(roleInv, rolenodeinv);
 
-			DataSomeValuesFrom existsRole = descFactory.createPropertySomeRestriction(role);
-			DataPropertyRangeExpression existsRoleInv = descFactory.createDataPropertyRange(role);
+			DataSomeValuesFrom existsRole = role.getDomain(); // descFactory.createPropertySomeRestriction(role);
+			DataPropertyRangeExpression existsRoleInv = role.getRange(); //descFactory.createDataPropertyRange(role);
 					//.createPropertySomeRestriction(roleInv);
 			DAGNode existsNode = new DAGNode(existsRole);
 			DAGNode existsNodeInv = new DAGNode(existsRoleInv);
@@ -284,8 +284,8 @@ public class DAG implements Serializable {
 		}
 		addParent(childNode, parentNode);
 
-		ObjectSomeValuesFrom existsParent = descFactory.createPropertySomeRestriction(parent);
-		ObjectSomeValuesFrom existChild = descFactory.createPropertySomeRestriction(child);
+		ObjectSomeValuesFrom existsParent = parent.getDomain();
+		ObjectSomeValuesFrom existChild = child.getDomain();
 
 		addClassEdge(existsParent, existChild);
 		// addClassEdge(thingConcept, existsParent);
@@ -310,8 +310,8 @@ public class DAG implements Serializable {
 		}
 		addParent(childNode, parentNode);
 
-		DataSomeValuesFrom existsParent = descFactory.createPropertySomeRestriction(parent);
-		DataSomeValuesFrom existChild = descFactory.createPropertySomeRestriction(child);
+		DataSomeValuesFrom existsParent = parent.getDomain(); // descFactory.createPropertySomeRestriction(parent);
+		DataSomeValuesFrom existChild = child.getDomain(); // escFactory.createPropertySomeRestriction(child);
 
 		addClassEdge(existsParent, existChild);
 		// addClassEdge(thingConcept, existsParent);

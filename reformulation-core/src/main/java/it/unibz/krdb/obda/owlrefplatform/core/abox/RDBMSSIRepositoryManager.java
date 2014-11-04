@@ -1925,7 +1925,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	// Attribute datatype from TBox
 	private COL_TYPE getAttributeType(Predicate attribute) {
 		DataPropertyExpression prop = ofac.createDataProperty(attribute.getName());
-		DataPropertyRangeExpression role = ofac.createDataPropertyRange(prop); 
+		DataPropertyRangeExpression role = prop.getRange(); 
 		Equivalences<DataRangeExpression> roleNode = reasonerDag.getDataRanges().getVertex(role);
 		Set<Equivalences<DataRangeExpression>> ancestors = reasonerDag.getDataRanges().getSuper(roleNode);
 

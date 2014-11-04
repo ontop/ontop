@@ -6,4 +6,7 @@ public interface DataPropertyExpression extends Description {
 
 	public Predicate getPredicate();
 	
+	public DataSomeValuesFrom getDomain();
+
+	public DataPropertyRangeExpression getRange();
 }

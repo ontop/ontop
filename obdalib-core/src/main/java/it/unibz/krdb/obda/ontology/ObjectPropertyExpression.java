@@ -10,4 +10,8 @@ public interface ObjectPropertyExpression extends Description {
 	
 	public ObjectPropertyExpression getInverse();
 
+	public ObjectSomeValuesFrom getDomain();
+	
+	public ObjectSomeValuesFrom getRange();
+	
 }

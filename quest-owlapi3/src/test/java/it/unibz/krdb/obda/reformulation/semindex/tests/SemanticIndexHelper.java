@@ -180,7 +180,7 @@ public class SemanticIndexHelper {
                     	ObjectPropertyExpression prop = descFactory.createObjectProperty(uri);
                     	if (inverse)
                     		prop = prop.getInverse();
-                        description = descFactory.createPropertySomeRestriction(prop);
+                        description = prop.getDomain();
                     }
                     else
                         description = descFactory.createClass(uri);

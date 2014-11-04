@@ -359,14 +359,14 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 						ObjectSomeValuesFrom firstp = (ObjectSomeValuesFrom)first;
 						ObjectPropertyExpression prop = firstp.getProperty();
 						ObjectPropertyExpression propRep = objectPropertyDAG.getVertex(prop).getRepresentative();
-						representative = fac.createPropertySomeRestriction(propRep);
+						representative = propRep.getDomain();
 					}
 					else {
 						assert (first instanceof DataSomeValuesFrom); 
 						DataSomeValuesFrom firstp = (DataSomeValuesFrom)first;
 						DataPropertyExpression prop = firstp.getProperty();
 						DataPropertyExpression propRep = dataPropertyDAG.getVertex(prop).getRepresentative();
-						representative = fac.createPropertySomeRestriction(propRep);
+						representative = propRep.getDomain();
 					}
 				}
 				else
@@ -403,7 +403,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				DataPropertyRangeExpression firstp = (DataPropertyRangeExpression)first;
 				DataPropertyExpression prop = firstp.getProperty();
 				DataPropertyExpression propRep = dataPropertyDAG.getVertex(prop).getRepresentative();
-				representative = fac.createDataPropertyRange(propRep);
+				representative = propRep.getRange();
 			}
 			else
 				representative = namedRepresentative;
@@ -647,7 +647,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 			//if (node instanceof ObjectSomeValuesFrom) {
 				ObjectPropertyExpression exists = ((ObjectSomeValuesFrom) node).getProperty();
-				invNode = fac.createPropertySomeRestriction(exists.getInverse());				
+				invNode = exists.getInverse().getDomain();				
 			//}
 			/*	
 			else {

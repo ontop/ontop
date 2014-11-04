@@ -175,7 +175,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		}
 		else {
 			assert (desc instanceof DataPropertyRangeExpression);
-			checkSignature(((DataPropertyExpressionImpl)((DataPropertyRangeExpression) desc).getProperty()).inverseProperty);
+			checkSignature(((DataPropertyRangeExpression) desc).getProperty());
 		}
 	}
 

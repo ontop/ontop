@@ -249,8 +249,8 @@ public class DAGOperations {
 				ObjectPropertyExpression prop = (ObjectPropertyExpression) cycleheadNode.getDescription();
 
 				ObjectPropertyExpression inverse = prop.getInverse();
-				ObjectSomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
-				ObjectSomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
+				ObjectSomeValuesFrom domain = prop.getDomain();
+				ObjectSomeValuesFrom range = inverse.getDomain();
 
 				cycleheadinverseNode = dag.getNode(inverse);
 				cycleheaddomainNode = dag.getNode(domain);
@@ -261,7 +261,7 @@ public class DAGOperations {
 				DataPropertyExpression prop = (DataPropertyExpression) cycleheadNode.getDescription();
 
 				//DataPropertyExpression inverse = prop.getInverse();
-				DataSomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
+				DataSomeValuesFrom domain = prop.getDomain(); //fac.createPropertySomeRestriction(prop);
 				//DataSomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
 
 				//cycleheadinverseNode = dag.getNode(inverse);
@@ -298,8 +298,8 @@ public class DAGOperations {
 
 						ObjectPropertyExpression prop = (ObjectPropertyExpression) cycleheadNode.getDescription();
 						ObjectPropertyExpression inverse = prop.getInverse();
-						ObjectSomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
-						ObjectSomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
+						ObjectSomeValuesFrom domain = prop.getDomain();
+						ObjectSomeValuesFrom range = inverse.getDomain();
 
 						cycleheadinverseNode = dag.getNode(inverse);
 						cycleheaddomainNode = dag.getNode(domain);
@@ -369,9 +369,9 @@ public class DAGOperations {
 						ObjectPropertyExpression equiprop = (ObjectPropertyExpression) equivnode.getDescription();
 
 						equivinverseNode = dag.getNode(equiprop.getInverse());
-						equivDomainNode = dag.getNode(fac.createPropertySomeRestriction(equiprop));
+						equivDomainNode = dag.getNode(equiprop.getDomain());
 						ObjectPropertyExpression inv = equiprop.getInverse();
-						equivRangeNode = dag.getNode(fac.createPropertySomeRestriction(inv));
+						equivRangeNode = dag.getNode(inv.getDomain());
 
 						/*
 						 * Doing the inverses
@@ -390,9 +390,9 @@ public class DAGOperations {
 						DataPropertyExpression equiprop = (DataPropertyExpression) equivnode.getDescription();
 
 						//equivinverseNode = dag.getNode(equiprop.getInverse());
-						equivDomainNode = dag.getNode(fac.createPropertySomeRestriction(equiprop));
+						equivDomainNode = dag.getNode(equiprop.getDomain());
 						//DataPropertyExpression inv = equiprop.getInverse();
-						equivRangeNode = dag.getNode(fac.createDataPropertyRange(equiprop));
+						equivRangeNode = dag.getNode(equiprop.getRange());
 						//.createPropertySomeRestriction(inv)
 					}	
 					
@@ -456,9 +456,9 @@ public class DAGOperations {
 					//dag.equi_mappings.put(inverseequiprop, invesenonredundantprop);
 					
 					//DAGNode equivinverseNode = dag.getNode(inverseequiprop);
-					DAGNode equivDomainNode = dag.getNode(fac.createPropertySomeRestriction(equiprop));
+					DAGNode equivDomainNode = dag.getNode(equiprop.getDomain());
 					//DataPropertyExpression inv = equiprop.getInverse();					
-					DAGNode equivRangeNode = dag.getNode(fac.createDataPropertyRange(equiprop));
+					DAGNode equivRangeNode = dag.getNode(equiprop.getRange());
 					// .createPropertySomeRestriction(inv)
 
 					if (!(/*equivinverseNode == null &&*/ equivDomainNode == null && equivRangeNode == null)) {
@@ -516,9 +516,9 @@ public class DAGOperations {
 					dag.equi_mappings.put(inverseequiprop, invesenonredundantprop);
 					
 					DAGNode equivinverseNode = dag.getNode(inverseequiprop);
-					DAGNode equivDomainNode = dag.getNode(fac.createPropertySomeRestriction(equiprop));
+					DAGNode equivDomainNode = dag.getNode(equiprop.getDomain());
 					ObjectPropertyExpression inv = equiprop.getInverse();					
-					DAGNode equivRangeNode = dag.getNode(fac.createPropertySomeRestriction(inv));
+					DAGNode equivRangeNode = dag.getNode(inv.getDomain());
 
 					if (!(equivinverseNode == null && equivDomainNode == null && equivRangeNode == null)) {
 						/*

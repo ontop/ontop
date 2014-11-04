@@ -80,13 +80,13 @@ public class YAGOTest {
             	
                 if ("rdfs:range".equals(predicate)) {
                     ObjectPropertyExpression psprop = descFactory.createObjectProperty(subject).getInverse();
-                    ObjectSomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
+                    ObjectSomeValuesFrom rs = psprop.getDomain();
                     OClass co = descFactory.createClass(object);
                     onto.addSubClassOfAxiom(rs, co);
                 } 
                 else if ("rdfs:domain".equals(predicate)) {
                     ObjectPropertyExpression psprop = descFactory.createObjectProperty(subject);
-                    ObjectSomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
+                    ObjectSomeValuesFrom rs = psprop.getDomain();
                     OClass co = descFactory.createClass(object);
                     onto.addSubClassOfAxiom(rs, co);
                 } 

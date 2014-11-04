@@ -529,7 +529,7 @@ public class CQCUtilitiesTest {
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
 			OClass left = dfac.createClass("A");
 			ObjectPropertyExpression pright = dfac.createObjectProperty("R");
-			ObjectSomeValuesFrom right = dfac.createPropertySomeRestriction(pright);
+			ObjectSomeValuesFrom right = pright.getDomain();
 			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -555,7 +555,7 @@ public class CQCUtilitiesTest {
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
 			OClass left = dfac.createClass("A");
 			ObjectPropertyExpression pright = dfac.createObjectProperty("R").getInverse();
-			ObjectSomeValuesFrom right = dfac.createPropertySomeRestriction(pright);
+			ObjectSomeValuesFrom right = pright.getDomain();
 			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -580,7 +580,7 @@ public class CQCUtilitiesTest {
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
 			Ontology sigma = dfac.createOntology();
 			ObjectPropertyExpression pleft = dfac.createObjectProperty("R");
-			ObjectSomeValuesFrom left = dfac.createPropertySomeRestriction(pleft);
+			ObjectSomeValuesFrom left = pleft.getDomain();
 			OClass right = dfac.createClass("A");
 
 			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
@@ -607,7 +607,7 @@ public class CQCUtilitiesTest {
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
 			Ontology sigma = dfac.createOntology();
 			ObjectPropertyExpression pleft = dfac.createObjectProperty("R").getInverse();
-			ObjectSomeValuesFrom left = dfac.createPropertySomeRestriction(pleft);
+			ObjectSomeValuesFrom left = pleft.getDomain();
 			OClass right = dfac.createClass("A");
 			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
 
@@ -657,7 +657,7 @@ public class CQCUtilitiesTest {
         Ontology sigma = dfac.createOntology();
         OClass left = dfac.createClass("A");
         ObjectPropertyExpression pleft = dfac.createObjectProperty("R");
-        ObjectSomeValuesFrom right = dfac.createPropertySomeRestriction(pleft);
+        ObjectSomeValuesFrom right = pleft.getDomain();
         sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
 
 

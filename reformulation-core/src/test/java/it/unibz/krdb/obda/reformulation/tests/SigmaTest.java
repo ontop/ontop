@@ -47,7 +47,7 @@ public class SigmaTest extends TestCase {
         OClass ac = descFactory.createClass("a");
         OClass cc = descFactory.createClass("c");
         ObjectPropertyExpression rprop = descFactory.createObjectProperty("r");
-        ObjectSomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
+        ObjectSomeValuesFrom er = rprop.getDomain();
  
         ontology.addSubClassOfAxiomWithReferencedEntities(er, ac);
         ontology.addSubClassOfAxiomWithReferencedEntities(cc, er);

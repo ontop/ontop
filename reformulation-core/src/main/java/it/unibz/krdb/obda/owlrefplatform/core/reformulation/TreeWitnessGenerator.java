@@ -190,7 +190,7 @@ public class TreeWitnessGenerator {
 		if (existsRinv == null) {
 			if (property instanceof ObjectPropertyExpression) {
 				ObjectPropertyExpression inv = ((ObjectPropertyExpression)property).getInverse();			
-				existsRinv = ontFactory.createPropertySomeRestriction(inv);	
+				existsRinv = inv.getDomain();	
 			}
 //			else {
 //				DataPropertyExpression inv = ((DataPropertyExpression)property).getInverse();			
