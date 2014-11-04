@@ -86,8 +86,8 @@ public class OBDAModelWrapper {
         return obdaModel.containsSource(sourceURI);
     }
 
-    public OBDAMappingAxiom getMapping(URI sourceUri, String mappingId) {
-        return obdaModel.getMapping(sourceUri, mappingId);
+    public OBDAMappingAxiom getMapping(String mappingId) {
+        return obdaModel.getMapping(mappingId);
     }
 
     public void addPrefix(String prefix, String uri) {
@@ -361,14 +361,14 @@ public class OBDAModelWrapper {
     }
 
     public void updateMappingsSourceQuery(URI sourceURI, String mappingId, OBDASQLQuery nativeSourceQuery) {
-        OBDAMappingAxiom mapping = getMapping(sourceURI, mappingId);
+        OBDAMappingAxiom mapping = getMapping(mappingId);
         // TODO: make it immutable
         mapping.setSourceQuery(nativeSourceQuery);
         fireMappingUpdated(sourceURI, mapping.getId(), mapping);
     }
 
     public void updateTargetQueryMapping(URI sourceID, String id, CQIE targetQuery) {
-        OBDAMappingAxiom mapping = getMapping(sourceID, id);
+        OBDAMappingAxiom mapping = getMapping(id);
         if (mapping == null) {
             return;
         }
@@ -378,7 +378,7 @@ public class OBDAModelWrapper {
     }
 
     public void updateMapping(URI dataSourceIRI, String formerMappingId, String newMappingId) {
-        OBDAMappingAxiom mapping = getMapping(dataSourceIRI, formerMappingId);
+        OBDAMappingAxiom mapping = getMapping(formerMappingId);
         if (mapping != null) {
             mapping.setId(newMappingId);
             fireMappingUpdated(dataSourceIRI, formerMappingId, mapping);

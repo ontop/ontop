@@ -29,6 +29,7 @@ import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.QueryIOManager;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.owlapi3.OBDAModelSynchronizer;
 import org.semanticweb.ontop.owlapi3.OBDAModelValidator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -542,6 +543,12 @@ public class OBDAModelManager implements Disposable {
             OBDAModelValidator validator = new OBDAModelValidator(activeOBDAModelWrapper.getCurrentImmutableOBDAModel(),
                     activeOntology);
             validator.run(); // adding type information to the mapping predicates.
+
+            /**
+             * Property and class declarations
+             */
+            OBDAModelSynchronizer.declarePredicates(activeOntology, activeOBDAModelWrapper.getCurrentImmutableOBDAModel());
+
         } catch (Exception e) {
             OBDAException ex = new OBDAException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());
             DialogUtils.showQuickErrorDialog(null, ex, "Open file error");

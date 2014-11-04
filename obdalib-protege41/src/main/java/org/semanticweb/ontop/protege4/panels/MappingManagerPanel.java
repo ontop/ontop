@@ -686,7 +686,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			// inserting the new mapping
 			try {
 
-				OBDAMappingAxiom oldmapping = controller.getMapping(current_srcuri, id);
+				OBDAMappingAxiom oldmapping = controller.getMapping(id);
 				OBDAMappingAxiom newmapping = null;
 				newmapping = (OBDAMappingAxiom) oldmapping.clone();
 				newmapping.setId(new_id);

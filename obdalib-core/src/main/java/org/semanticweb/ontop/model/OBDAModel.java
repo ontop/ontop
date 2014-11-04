@@ -14,23 +14,24 @@ import java.util.Set;
 
 /**
  * An OBDA model contains mapping information.
- *
  * This interface is generic regarding the targeted native query language.
- *
  *
  * An OBDA model is a container for the database and mapping declarations needed to define a
  * Virtual ABox or Virtual RDF graph. That is, this is a manager for a
  * collection of JDBC databases (when SQL is the native query language) and their corresponding mappings.
  * It is used as input to any Quest instance (either OWLAPI or Sesame).
  *
+ * An OBDA model also contains lists of the declared properties and classes.
+ * TODO: move this concern into a separated class.
+ *
  * <p>
- * SQLOBDAModels are also used internally by the Protege plugin and many other
+ * OBDAModels are also used indirectly by the Protege plugin and many other
  * utilities including the mapping materializer (e.g. to generate ABox assertions or
  * RDF triples from a .obda file and a database).
  *
  * <p>
- * SQLOBAModels can be serialized and read to/from mapping files using
- * {@link org.semanticweb.ontop.mapping.MappingParser}.
+ * OBDAModels can be serialized and parsed to/from mapping files using
+ * a serializer and a {@link org.semanticweb.ontop.mapping.MappingParser}.
  *
  *
  * @see org.semanticweb.ontop.mapping.MappingParser
@@ -38,11 +39,14 @@ import java.util.Set;
  * Initial author (before refactoring):
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
  *
+ * TODO: remove the side-effect methods so that OBDA models can be truly
+ * immutable.
+ *
  */
 public interface OBDAModel {
 
     /**
-     * TODO: describe
+     * Prefix manager. Normally immutable.
      */
     public PrefixManager getPrefixManager();
 
@@ -66,7 +70,7 @@ public interface OBDAModel {
     /**
      * Constructs a new OBDA model with new mappings.
      *
-     * Note that some ODBA models are immutable so you
+     * Note that normal ODBA models are immutable so you
      * should use this method to "update" them.
      * 
      */
@@ -76,13 +80,28 @@ public interface OBDAModel {
     /**
      * Constructs a new OBDA model with new mappings and a prefix manager.
      *
-     * Note that some ODBA models are immutable so you
+     * Note that normal ODBA models are immutable so you
      * should use this method to "update" them.
      *
      */
     public OBDAModel newModel(Set<OBDADataSource> dataSources,
                               Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
                               PrefixManager prefixManager) throws DuplicateMappingException;
+
+    /**
+     * Constructs a new OBDA model with new mappings, a prefix manager, class and properties
+     * declarations.
+     *
+     * Note that normal ODBA models are immutable so you
+     * should use this method to "update" them.
+     *
+     */
+    public OBDAModel newModel(Set<OBDADataSource> dataSources,
+                              Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
+                              PrefixManager prefixManager, Set<Predicate> declaredClasses,
+                              Set<Predicate> declaredObjectProperties,
+                              Set<Predicate> declaredDataProperties,
+                              Set<Predicate> otherDeclaredPredicates) throws DuplicateMappingException;
 
     /**
      * Returns the set of all sources defined in this OBDA model. This set
@@ -94,49 +113,33 @@ public interface OBDAModel {
 
     public boolean containsSource(URI sourceURI);
 
-    //----------------------------------------
-    // Inherited from the former SQLOBDAModel
-    // TODO: remove them
-    //----------------------------------------
-
-    @Deprecated
-    public String getVersion();
-    @Deprecated
-    public String getBuiltDate();
-    @Deprecated
-    public String getBuiltBy();
-
-    /**
-     * Retrieves the mapping axiom given its id and data source.
-     * Please note that the source URI is irrelevant here.
-     * This method is thus deprecated.
-     *
-     * TODO: remove it.
-     */
-    @Deprecated
-    public OBDAMappingAxiom getMapping(URI sourceUri, String mappingId);
-
-	/*
-	 * Methods related to mappings
-	 */
-
-    @Deprecated
     public Set<Predicate> getDeclaredPredicates();
 
-    @Deprecated
     public Set<Predicate> getDeclaredClasses();
 
-    @Deprecated
     public Set<Predicate> getDeclaredObjectProperties();
 
-    @Deprecated
     public Set<Predicate> getDeclaredDataProperties();
+
+    public boolean isDeclaredClass(Predicate classname);
+
+    public boolean isDeclaredObjectProperty(Predicate property);
+
+    public boolean isDeclaredDataProperty(Predicate property);
+
+    public boolean isDeclared(Predicate predicate);
+
+
+    //--------------------------------
+    // Side-effect methods (mutable)
+    // TODO: remove them
+    //--------------------------------
 
     @Deprecated
     public boolean declarePredicate(Predicate predicate);
 
     @Deprecated
-    public boolean declareClass(Predicate classname);
+    public boolean declareClass(Predicate className);
 
     @Deprecated
     public boolean declareObjectProperty(Predicate property);
@@ -148,25 +151,11 @@ public interface OBDAModel {
     public boolean unDeclarePredicate(Predicate predicate);
 
     @Deprecated
-    public boolean unDeclareClass(Predicate classname);
+    public boolean unDeclareClass(Predicate className);
 
     @Deprecated
     public boolean unDeclareObjectProperty(Predicate property);
 
     @Deprecated
     public boolean unDeclareDataProperty(Predicate property);
-
-    @Deprecated
-    public boolean isDeclaredClass(Predicate classname);
-
-    @Deprecated
-    public boolean isDeclaredObjectProperty(Predicate property);
-
-    @Deprecated
-    public boolean isDeclaredDataProperty(Predicate property);
-
-    @Deprecated
-    public boolean isDeclared(Predicate predicate);
-
-
 }

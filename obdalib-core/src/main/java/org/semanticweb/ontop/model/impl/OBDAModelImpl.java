@@ -20,12 +20,8 @@ package org.semanticweb.ontop.model.impl;
  * #L%
  */
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -44,21 +40,33 @@ public class OBDAModelImpl implements OBDAModel {
     private final ImmutableMap<String, OBDAMappingAxiom> mappingIndexById;
 
     /**
-     * TODO: remove them
+     * TODO: make these sets immutable
      */
-	private final Set<Predicate> declaredClasses = new HashSet<>();
-	private final Set<Predicate> declaredObjectProperties = new HashSet<>();
-	private final Set<Predicate> declaredDataProperties = new HashSet<>();
-
+	private final Set<Predicate> declaredClasses;
+	private final Set<Predicate> declaredObjectProperties;
+	private final Set<Predicate> declaredDataProperties;
 	// All other predicates (not classes or properties)
-    private final Set<Predicate> declaredPredicates = new HashSet<>();
+    private final Set<Predicate> otherDeclaredPredicates;
 
     /**
      * Normal constructor. Used by the QuestComponentFactory.
      */
     public OBDAModelImpl(Set<OBDADataSource> dataSources,
                          Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
-                         PrefixManager prefixManager)
+                         PrefixManager prefixManager) throws DuplicateMappingException {
+
+        this(dataSources, newMappings, prefixManager, new HashSet<Predicate>(),
+                new HashSet<Predicate>(), new HashSet<Predicate>(), new HashSet<Predicate>());
+    }
+
+    public OBDAModelImpl(Set<OBDADataSource> dataSources,
+                         Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
+                         PrefixManager prefixManager,
+                         Set<Predicate> declaredClasses,
+                         Set<Predicate> declaredObjectProperties,
+                         Set<Predicate> declaredDataProperties,
+                         Set<Predicate> otherDeclaredPredicates
+                         )
             throws DuplicateMappingException{
         checkDuplicates(newMappings);
         this.mappingIndexByDataSource = ImmutableMap.copyOf(newMappings);
@@ -66,6 +74,11 @@ public class OBDAModelImpl implements OBDAModel {
         this.prefixManager = prefixManager;
         this.dataSources = ImmutableSet.copyOf(dataSources);
         this.dataSourceIndex = indexDataSources(this.dataSources);
+
+        this.declaredClasses = declaredClasses;
+        this.declaredObjectProperties = declaredObjectProperties;
+        this.declaredDataProperties = declaredDataProperties;
+        this.otherDeclaredPredicates = otherDeclaredPredicates;
     }
 
     /**
@@ -146,47 +159,20 @@ public class OBDAModelImpl implements OBDAModel {
     public OBDAModel newModel(Set<OBDADataSource> dataSources,
                               Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
                               PrefixManager prefixManager) throws DuplicateMappingException {
-        return new OBDAModelImpl(dataSources, newMappings, prefixManager);
+        return newModel(dataSources, newMappings, prefixManager, declaredClasses, declaredObjectProperties, declaredDataProperties,
+                otherDeclaredPredicates);
     }
 
-	@Override
-	public String getVersion() {
-		try {
-			InputStream stream = getClass().getResourceAsStream("/META-INF/MANIFEST.MF");
-			Manifest manifest = new Manifest(stream);
-			Attributes attributes = manifest.getMainAttributes();
-			String implementationVersion = attributes.getValue("Implementation-Version");
-			return implementationVersion;
-		} catch (IOException e) {
-			return "";
-		}
-	}
-
-	@Override
-	public String getBuiltDate() {
-		try {
-			InputStream stream = getClass().getResourceAsStream("/META-INF/MANIFEST.MF");
-			Manifest manifest = new Manifest(stream);
-			Attributes attributes = manifest.getMainAttributes();
-			String builtDate = attributes.getValue("Built-Date");
-			return builtDate;
-		} catch (IOException e) {
-			return "";
-		}
-	}
-
-	@Override
-	public String getBuiltBy() {
-		try {
-			InputStream stream = getClass().getResourceAsStream("/META-INF/MANIFEST.MF");
-			Manifest manifest = new Manifest(stream);
-			Attributes attributes = manifest.getMainAttributes();
-			String builtBy = attributes.getValue("Built-By");
-			return builtBy;
-		} catch (IOException e) {
-			return "";
-		}
-	}
+    @Override
+    public OBDAModel newModel(Set<OBDADataSource> dataSources,
+                              Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
+                              PrefixManager prefixManager, Set<Predicate> declaredClasses,
+                              Set<Predicate> declaredObjectProperties,
+                              Set<Predicate> declaredDataProperties,
+                              Set<Predicate> otherDeclaredPredicates) throws DuplicateMappingException {
+        return new OBDAModelImpl(dataSources, newMappings, prefixManager, declaredClasses, declaredObjectProperties, declaredDataProperties,
+                otherDeclaredPredicates);
+    }
 
 	@Override
 	public PrefixManager getPrefixManager() {
@@ -208,15 +194,6 @@ public class OBDAModelImpl implements OBDAModel {
 		return (getSource(name) != null);
 	}
 
-    /**
-     * Deprecated: sourceUri is irrelevant.
-     */
-    @Deprecated
-	@Override
-	public OBDAMappingAxiom getMapping(URI sourceUri, String mappingId) {
-        return getMapping(mappingId);
-	}
-
     @Override
     public OBDAMappingAxiom getMapping(String mappingId) {
         return mappingIndexById.get(mappingId);
@@ -234,90 +211,27 @@ public class OBDAModelImpl implements OBDAModel {
 
 	@Override
 	public Set<Predicate> getDeclaredPredicates() {
-		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
+		Set<Predicate> result = new HashSet<>();
 		result.addAll(declaredClasses);
 		result.addAll(declaredObjectProperties);
 		result.addAll(declaredDataProperties);
-		result.addAll(declaredPredicates);
+		result.addAll(otherDeclaredPredicates);
 		return result;
 	}
 
 	@Override
 	public Set<Predicate> getDeclaredClasses() {
-		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
-		result.addAll(declaredClasses);
-		return result;
+        return new HashSet<>(declaredClasses);
 	}
 
 	@Override
 	public Set<Predicate> getDeclaredObjectProperties() {
-		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
-		result.addAll(declaredObjectProperties);
-		return result;
+		return new HashSet<>(declaredObjectProperties);
 	}
 
 	@Override
 	public Set<Predicate> getDeclaredDataProperties() {
-		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
-		result.addAll(declaredDataProperties);
-		return result;
-	}
-
-	@Override
-	public boolean declarePredicate(Predicate predicate) {
-		if (predicate.isClass()) {
-			return declaredClasses.add(predicate);
-		} else if (predicate.isObjectProperty()) {
-			return declaredObjectProperties.add(predicate);
-		} else if (predicate.isDataProperty()) {
-			return declaredDataProperties.add(predicate);
-		} else {
-			return declaredPredicates.add(predicate);
-		}
-	}
-
-	@Override
-	public boolean declareClass(Predicate classname) {
-		if (!classname.isClass()) {
-			throw new RuntimeException("Cannot declare a non-class predicate as a class. Offending predicate: " + classname);
-		}
-		return declaredClasses.add(classname);
-	}
-
-	@Override
-	public boolean declareObjectProperty(Predicate property) {
-		if (!property.isObjectProperty()) {
-			throw new RuntimeException("Cannot declare a non-object property predicate as an object property. Offending predicate: " + property);
-		}
-		return declaredObjectProperties.add(property);
-	}
-
-	@Override
-	public boolean declareDataProperty(Predicate property) {
-		if (!property.isDataProperty()) {
-			throw new RuntimeException("Cannot declare a non-data property predicate as an data property. Offending predicate: " + property);
-		}
-		return declaredDataProperties.add(property);
-	}
-
-	@Override
-	public boolean unDeclarePredicate(Predicate predicate) {
-		return declaredPredicates.remove(predicate);
-	}
-
-	@Override
-	public boolean unDeclareClass(Predicate classname) {
-		return declaredClasses.remove(classname);
-	}
-
-	@Override
-	public boolean unDeclareObjectProperty(Predicate property) {
-		return declaredObjectProperties.remove(property);
-	}
-
-	@Override
-	public boolean unDeclareDataProperty(Predicate property) {
-		return declaredDataProperties.remove(property);
+        return new HashSet<>(declaredDataProperties);
 	}
 	
 	@Override
@@ -338,6 +252,68 @@ public class OBDAModelImpl implements OBDAModel {
 	@Override
 	public boolean isDeclared(Predicate predicate) {
 		return (isDeclaredClass(predicate) || isDeclaredObjectProperty(predicate) || isDeclaredDataProperty(predicate)
-                || declaredPredicates.contains(predicate));
+                || otherDeclaredPredicates.contains(predicate));
 	}
+
+    //--------------------------------
+    // Side-effect methods (mutable)
+    // TODO: remove them
+    //--------------------------------
+
+    @Override
+    public boolean declarePredicate(Predicate predicate) {
+        if (predicate.isClass()) {
+            return declaredClasses.add(predicate);
+        } else if (predicate.isObjectProperty()) {
+            return declaredObjectProperties.add(predicate);
+        } else if (predicate.isDataProperty()) {
+            return declaredDataProperties.add(predicate);
+        } else {
+            return otherDeclaredPredicates.add(predicate);
+        }
+    }
+
+    @Override
+    public boolean declareClass(Predicate className) {
+        if (!className.isClass()) {
+            throw new RuntimeException("Cannot declare a non-class predicate as a class. Offending predicate: " + className);
+        }
+        return declaredClasses.add(className);
+    }
+
+    @Override
+    public boolean declareObjectProperty(Predicate property) {
+        if (!property.isObjectProperty()) {
+            throw new RuntimeException("Cannot declare a non-object property predicate as an object property. Offending predicate: " + property);
+        }
+        return declaredObjectProperties.add(property);
+    }
+
+    @Override
+    public boolean declareDataProperty(Predicate property) {
+        if (!property.isDataProperty()) {
+            throw new RuntimeException("Cannot declare a non-data property predicate as an data property. Offending predicate: " + property);
+        }
+        return declaredDataProperties.add(property);
+    }
+
+    @Override
+    public boolean unDeclarePredicate(Predicate predicate) {
+        return otherDeclaredPredicates.remove(predicate);
+    }
+
+    @Override
+    public boolean unDeclareClass(Predicate className) {
+        return declaredClasses.remove(className);
+    }
+
+    @Override
+    public boolean unDeclareObjectProperty(Predicate property) {
+        return declaredObjectProperties.remove(property);
+    }
+
+    @Override
+    public boolean unDeclareDataProperty(Predicate property) {
+        return declaredDataProperties.remove(property);
+    }
 }
