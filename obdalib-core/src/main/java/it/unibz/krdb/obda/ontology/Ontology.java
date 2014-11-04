@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.ontology;
  */
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
 public interface Ontology extends Cloneable, Serializable {
@@ -68,28 +69,28 @@ public interface Ontology extends Cloneable, Serializable {
 	public OntologyVocabulary getVocabulary();
 	
 	
-	public Set<BinaryAxiom<ClassExpression>> getSubClassAxioms();
+	public List<BinaryAxiom<ClassExpression>> getSubClassAxioms();
 
-	public Set<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms();
+	public List<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms();
 	
-	public Set<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms();
+	public List<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms();
 
-	public Set<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms();
+	public List<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms();
 	
-	public Set<NaryAxiom<ClassExpression>> getDisjointClassesAxioms();
+	public List<NaryAxiom<ClassExpression>> getDisjointClassesAxioms();
 	
-	public Set<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms();
+	public List<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms();
 
-	public Set<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms();
+	public List<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms();
 
 	public Set<ObjectPropertyExpression> getFunctionalObjectProperties();
 
 	public Set<DataPropertyExpression> getFunctionalDataProperties();
 	
-	public Set<ClassAssertion> getClassAssertions();
+	public List<ClassAssertion> getClassAssertions();
 
-	public Set<ObjectPropertyAssertion> getObjectPropertyAssertions();
+	public List<ObjectPropertyAssertion> getObjectPropertyAssertions();
 	
-	public Set<DataPropertyAssertion> getDataPropertyAssertions();
+	public List<DataPropertyAssertion> getDataPropertyAssertions();
 
 }

@@ -32,8 +32,6 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -53,8 +51,6 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 
 public class TBoxReasonerImpl implements TBoxReasoner {
 
-	private static final OntologyFactory fac = OntologyFactoryImpl.getInstance();
-	
 	private final EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG;
 	private final EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG;
 	private final EquivalencesDAGImpl<ClassExpression> classDAG;
@@ -631,7 +627,6 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				modifiedGraph.addEdge(s, vp.getRepresentative());
 		}
 
-		OntologyFactory fac = OntologyFactoryImpl.getInstance();
 		HashSet<ClassExpression> processedNodes = new HashSet<ClassExpression>();
 		
 		for (Equivalences<ClassExpression> existsNode : classes) {

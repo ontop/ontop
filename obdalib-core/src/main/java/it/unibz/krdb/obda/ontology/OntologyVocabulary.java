@@ -4,18 +4,18 @@ import java.util.Set;
 
 public interface OntologyVocabulary {
 
-	public void declareClass(String uri);
+	public OClass declareClass(String uri);
 
-	public void declareObjectProperty(String uri);
+	public ObjectPropertyExpression declareObjectProperty(String uri);
 
+	public DataPropertyExpression declareDataProperty(String uri);
+	
 	/**
 	 * auxiliary properties result from NORMALIZATION
 	 * @param uri
 	 */
 
 	public ObjectPropertyExpression createAuxiliaryObjectProperty();
-	
-	public void declareDataProperty(String uri);
 	
 	/**
 	 * auxiliary properties result from NORMALIZATION
@@ -24,14 +24,10 @@ public interface OntologyVocabulary {
 	
 	public DataPropertyExpression createAuxiliaryDataProperty();
 	
+
+	public Set<OClass> getClasses();
 	
 	public Set<ObjectPropertyExpression> getObjectProperties();
-
-	/**
-	 * auxiliary properties result from NORMALIZATION
-	 */
-	
-	public Set<ObjectPropertyExpression> getAuxiliaryObjectProperties();
 	
 	public Set<DataPropertyExpression> getDataProperties();
 	
@@ -39,9 +35,14 @@ public interface OntologyVocabulary {
 	 * auxiliary properties result from NORMALIZATION
 	 */
 	
+	public Set<ObjectPropertyExpression> getAuxiliaryObjectProperties();
+	/**
+	 * auxiliary properties result from NORMALIZATION
+	 */
+	
 	public Set<DataPropertyExpression> getAuxiliaryDataProperties();
 	
-	public Set<OClass> getClasses();
+
 	
 
 	public void merge(OntologyVocabulary v);

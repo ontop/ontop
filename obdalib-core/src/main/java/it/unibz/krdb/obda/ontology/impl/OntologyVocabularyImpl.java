@@ -26,8 +26,6 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	private final Set<OClass> concepts = new HashSet<OClass>();
 
-	// private final Set<Datatype> datatypes = new HashSet<Datatype>();
-	
 	private final Set<ObjectPropertyExpression> objectProperties = new HashSet<ObjectPropertyExpression>();
 
 	private final Set<ObjectPropertyExpression> auxObjectProperties = new HashSet<ObjectPropertyExpression>();
@@ -69,24 +67,27 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	
 	@Override
-	public void declareClass(String uri) {
+	public OClass declareClass(String uri) {
 		OClass cd = ofac.createClass(uri);
 		if (!cd.equals(owlThing) && !cd.equals(owlNothing))
 			concepts.add(cd);
+		return cd;
 	}
 
 	@Override
-	public void declareObjectProperty(String uri) {
+	public ObjectPropertyExpression declareObjectProperty(String uri) {
 		ObjectPropertyExpression rd = ofac.createObjectProperty(uri);
 		if (!rd.equals(owlTopObjectProperty) && !rd.equals(owlBottomObjectProperty))
 			objectProperties.add(rd);
+		return rd;
 	}
 	
 	@Override
-	public void declareDataProperty(String uri) {
+	public DataPropertyExpression declareDataProperty(String uri) {
 		DataPropertyExpression rd = ofac.createDataProperty(uri);
 		if (!rd.equals(owlTopDataProperty) && !rd.equals(owlBottomDataProperty))
 			dataProperties.add(rd);
+		return rd;
 	}
 
 	@Override
@@ -106,8 +107,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 
 	
 	private static final String AUXROLEURI = "ER.A-AUXROLE"; 
-	private int auxCounter = 0;
-	
+	private static int auxCounter = 0; // THIS IS SHARED AMONG ALL INSTANCES!
 	
 	@Override
 	public ObjectPropertyExpression createAuxiliaryObjectProperty() {
@@ -145,51 +145,81 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 
 	
-	void addReferencedEntries(ClassExpression desc) {
+	boolean addReferencedEntries(ClassExpression desc) {
 		if (desc instanceof OClass) {
 			OClass cl = (OClass)desc;
-			if (!cl.equals(owlThing) && !cl.equals(owlNothing))
+			if (!isBuiltIn(cl)) {
 				concepts.add(cl);
+				return true;
+			}
 		}
 		else if (desc instanceof ObjectSomeValuesFrom)  {
 			ObjectPropertyExpression prop = ((ObjectSomeValuesFrom) desc).getProperty();
-			addReferencedEntries(prop);
+			return addReferencedEntries(prop);
 		}
 		else  {
 			assert (desc instanceof DataSomeValuesFrom);
 			DataPropertyExpression prop = ((DataSomeValuesFrom) desc).getProperty();
-			addReferencedEntries(prop);
+			return addReferencedEntries(prop);
 		}
+		return false;
 	}
-	void addReferencedEntries(DataRangeExpression desc) {
+	
+	boolean addReferencedEntries(DataRangeExpression desc) {
 		if (desc instanceof Datatype)  {
 			// NO-OP
 			// datatypes.add((Datatype) desc);
+			return true;
 		}
 		else  {
 			assert (desc instanceof DataPropertyRangeExpression);
-			addReferencedEntries(((DataPropertyRangeExpression) desc).getProperty());			
+			DataPropertyExpression prop = ((DataPropertyRangeExpression) desc).getProperty();
+			return addReferencedEntries(prop);			
 		}
 	}
 	
-	void addReferencedEntries(ObjectPropertyExpression prop) {
-		if (prop.isInverse())
-			prop = prop.getInverse();
-		if (!prop.equals(owlTopObjectProperty) && !prop.equals(owlBottomObjectProperty))
-			objectProperties.add(prop);
+	boolean addReferencedEntries(ObjectPropertyExpression prop) {
+		if (prop.isInverse()) {
+			if (!isBuiltIn(prop.getInverse())) {
+				objectProperties.add(prop.getInverse());
+				return true;
+			}
+		}
+		else {
+			if (!isBuiltIn(prop)) {
+				objectProperties.add(prop);
+				return true;
+			}			
+		}
+		return false;
 	}
 	
-	void addReferencedEntries(DataPropertyExpression prop) {
-		if (!prop.equals(owlTopDataProperty) && !prop.equals(owlBottomDataProperty))
+	boolean addReferencedEntries(DataPropertyExpression prop) {
+		if (!isBuiltIn(prop)) {
 			dataProperties.add(prop);
+			return true;
+		}
+		return false;
 	}
 	
+	private boolean isBuiltIn(OClass cl) {
+		return cl.equals(owlThing) || cl.equals(owlNothing);
+	}
 	
+	private boolean isBuiltIn(ObjectPropertyExpression prop) {
+		return prop.equals(owlTopObjectProperty) || prop.equals(owlBottomObjectProperty) 
+						|| auxObjectProperties.contains(prop);
+	}
+
+	private boolean isBuiltIn(DataPropertyExpression prop) {
+		return prop.equals(owlTopDataProperty) || prop.equals(owlBottomDataProperty) 
+						|| auxDataProperties.contains(prop);
+	}
 	
 	void checkSignature(ClassExpression desc) {
 		
 		if (desc instanceof OClass) {
-			if (!concepts.contains(desc) && !desc.equals(owlThing) && !desc.equals(owlNothing))
+			if (!concepts.contains(desc) && !isBuiltIn((OClass)desc))
 				throw new IllegalArgumentException("Class predicate is unknown: " + desc);
 		}	
 		else if (desc instanceof ObjectSomeValuesFrom) {
@@ -217,28 +247,17 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	void checkSignature(ObjectPropertyExpression prop) {
 
 		if (prop.isInverse()) {
-			checkSignature(prop.getInverse());
+			if (!objectProperties.contains(prop.getInverse()) && !isBuiltIn(prop.getInverse())) 
+				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop.getInverse());
 		}
 		else {
-			// Make sure we never validate against auxiliary roles introduced by
-			// the translation of the OWL ontology
-			if (isAuxiliaryProperty(prop)) 
-				return;
-			
-			if (!objectProperties.contains(prop) && 
-					!prop.equals(owlTopObjectProperty) && !prop.equals(owlBottomObjectProperty)) 
+			if (!objectProperties.contains(prop) && !isBuiltIn(prop)) 
 				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
 		}
 	}
 
 	void checkSignature(DataPropertyExpression prop) {
-		// Make sure we never validate against auxiliary roles introduced by
-		// the translation of the OWL ontology
-		if (isAuxiliaryProperty(prop)) 
-			return;
-		
-		if (!dataProperties.contains(prop) &&
-				!prop.equals(owlTopDataProperty) && !prop.equals(owlBottomDataProperty)) 
+		if (!dataProperties.contains(prop) && !isBuiltIn(prop))
 			throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
 	}
 	
@@ -248,6 +267,8 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		concepts.addAll(v.getClasses());
 		objectProperties.addAll(v.getObjectProperties());
 		dataProperties.addAll(v.getDataProperties());
+		auxObjectProperties.addAll(v.getAuxiliaryObjectProperties());
+		auxDataProperties.addAll(v.getAuxiliaryDataProperties());
 	}
 
 	@Override

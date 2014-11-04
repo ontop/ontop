@@ -29,10 +29,14 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
-
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 public class OntologyImpl implements Ontology {
@@ -43,29 +47,29 @@ public class OntologyImpl implements Ontology {
 	
 	// axioms and assertions
 
-	private final Set<BinaryAxiom<ClassExpression>> subClassAxioms = new LinkedHashSet<BinaryAxiom<ClassExpression>>();
+	private final List<BinaryAxiom<ClassExpression>> subClassAxioms = new ArrayList<BinaryAxiom<ClassExpression>>();
 	
-	private final Set<BinaryAxiom<DataRangeExpression>> subDataRangeAxioms = new LinkedHashSet<BinaryAxiom<DataRangeExpression>>();
+	private final List<BinaryAxiom<DataRangeExpression>> subDataRangeAxioms = new ArrayList<BinaryAxiom<DataRangeExpression>>();
 	
-	private final Set<BinaryAxiom<ObjectPropertyExpression>> subObjectPropertyAxioms = new LinkedHashSet<BinaryAxiom<ObjectPropertyExpression>>();
+	private final List<BinaryAxiom<ObjectPropertyExpression>> subObjectPropertyAxioms = new ArrayList<BinaryAxiom<ObjectPropertyExpression>>();
 	
-	private final Set<BinaryAxiom<DataPropertyExpression>> subDataPropertyAxioms = new LinkedHashSet<BinaryAxiom<DataPropertyExpression>>();
+	private final List<BinaryAxiom<DataPropertyExpression>> subDataPropertyAxioms = new ArrayList<BinaryAxiom<DataPropertyExpression>>();
 
-	private final Set<NaryAxiom<ClassExpression>> disjointClassesAxioms = new LinkedHashSet<NaryAxiom<ClassExpression>>();
+	private final List<NaryAxiom<ClassExpression>> disjointClassesAxioms = new ArrayList<NaryAxiom<ClassExpression>>();
 
-	private final Set<NaryAxiom<ObjectPropertyExpression>> disjointObjectPropertiesAxioms = new LinkedHashSet<NaryAxiom<ObjectPropertyExpression>>();
+	private final List<NaryAxiom<ObjectPropertyExpression>> disjointObjectPropertiesAxioms = new ArrayList<NaryAxiom<ObjectPropertyExpression>>();
 
-	private final Set<NaryAxiom<DataPropertyExpression>> disjointDataPropertiesAxioms = new LinkedHashSet<NaryAxiom<DataPropertyExpression>>();
+	private final List<NaryAxiom<DataPropertyExpression>> disjointDataPropertiesAxioms = new ArrayList<NaryAxiom<DataPropertyExpression>>();
 	
 	private final Set<ObjectPropertyExpression> functionalObjectPropertyAxioms = new LinkedHashSet<ObjectPropertyExpression>();
 
 	private final Set<DataPropertyExpression> functionalDataPropertyAxioms = new LinkedHashSet<DataPropertyExpression>();
 	
-	private final Set<ClassAssertion> classAssertions = new LinkedHashSet<ClassAssertion>();
+	private final List<ClassAssertion> classAssertions = new ArrayList<ClassAssertion>();
 
-	private final Set<ObjectPropertyAssertion> objectPropertyAssertions = new LinkedHashSet<ObjectPropertyAssertion>();
+	private final List<ObjectPropertyAssertion> objectPropertyAssertions = new ArrayList<ObjectPropertyAssertion>();
 	
-	private final Set<DataPropertyAssertion> dataPropertyAssertions = new LinkedHashSet<DataPropertyAssertion>();
+	private final List<DataPropertyAssertion> dataPropertyAssertions = new ArrayList<DataPropertyAssertion>();
 	
 
 	OntologyImpl() {
@@ -87,8 +91,10 @@ public class OntologyImpl implements Ontology {
 	public void addSubClassOfAxiomWithReferencedEntities(ClassExpression concept1, ClassExpression concept2) {	
 		vocabulary.addReferencedEntries(concept1);
 		vocabulary.addReferencedEntries(concept2);
-		BinaryAxiom<ClassExpression> assertion = new BinaryAxiomImpl<ClassExpression>(concept1, concept2);
-		subClassAxioms.add(assertion);
+		if (!concept1.equals(OntologyVocabularyImpl.owlNothing) && !concept2.equals(OntologyVocabularyImpl.owlThing)) {
+			BinaryAxiom<ClassExpression> assertion = new BinaryAxiomImpl<ClassExpression>(concept1, concept2);
+			subClassAxioms.add(assertion);
+		}
 	}
 
 	@Override
@@ -103,24 +109,30 @@ public class OntologyImpl implements Ontology {
 	public void addSubPropertyOfAxiomWithReferencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including) {
 		vocabulary.addReferencedEntries(included);
 		vocabulary.addReferencedEntries(including);
-		BinaryAxiom<ObjectPropertyExpression> assertion = new BinaryAxiomImpl<ObjectPropertyExpression>(included, including);
-		subObjectPropertyAxioms.add(assertion);
+		if (!included.equals(OntologyVocabularyImpl.owlBottomObjectProperty) && !including.equals(OntologyVocabularyImpl.owlTopObjectProperty)) {
+			BinaryAxiom<ObjectPropertyExpression> assertion = new BinaryAxiomImpl<ObjectPropertyExpression>(included, including);
+			subObjectPropertyAxioms.add(assertion);
+		}
 	}
 	
 	@Override
 	public void addSubPropertyOfAxiomWithReferencedEntities(DataPropertyExpression included, DataPropertyExpression including) {
 		vocabulary.addReferencedEntries(included);
 		vocabulary.addReferencedEntries(including);
-		BinaryAxiom<DataPropertyExpression> assertion = new BinaryAxiomImpl<DataPropertyExpression>(included, including);
-		subDataPropertyAxioms.add(assertion);
+		if (!included.equals(OntologyVocabularyImpl.owlBottomDataProperty) && !including.equals(OntologyVocabularyImpl.owlTopDataProperty)) {
+			BinaryAxiom<DataPropertyExpression> assertion = new BinaryAxiomImpl<DataPropertyExpression>(included, including);
+			subDataPropertyAxioms.add(assertion);
+		}
 	}
 
 	@Override
 	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2) {
 		vocabulary.checkSignature(concept1);
 		vocabulary.checkSignature(concept2);
-		BinaryAxiom<ClassExpression> ax = new BinaryAxiomImpl<ClassExpression>(concept1, concept2);
-		subClassAxioms.add(ax);
+		if (!concept1.equals(OntologyVocabularyImpl.owlNothing) && !concept2.equals(OntologyVocabularyImpl.owlThing)) {
+			BinaryAxiom<ClassExpression> ax = new BinaryAxiomImpl<ClassExpression>(concept1, concept2);
+			subClassAxioms.add(ax);
+		}
 	}	
 
 	@Override
@@ -131,24 +143,24 @@ public class OntologyImpl implements Ontology {
 		subDataRangeAxioms.add(ax);
 	}
 
-	// TODO: systematic check for trivial axioms
-	
 	@Override
 	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including) {
 		vocabulary.checkSignature(included);
 		vocabulary.checkSignature(including);
-		if (including.equals(vocabulary.owlTopObjectProperty))
-			return;
-		BinaryAxiom<ObjectPropertyExpression> ax = new BinaryAxiomImpl<ObjectPropertyExpression>(included, including);
-		subObjectPropertyAxioms.add(ax);
+		if (!included.equals(OntologyVocabularyImpl.owlBottomObjectProperty) && !including.equals(OntologyVocabularyImpl.owlTopObjectProperty)) {
+			BinaryAxiom<ObjectPropertyExpression> ax = new BinaryAxiomImpl<ObjectPropertyExpression>(included, including);
+			subObjectPropertyAxioms.add(ax);
+		}
 	}
 	
 	@Override
 	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including) {
 		vocabulary.checkSignature(included);
 		vocabulary.checkSignature(including);
-		BinaryAxiom<DataPropertyExpression> ax = new BinaryAxiomImpl<DataPropertyExpression>(included, including);
-		subDataPropertyAxioms.add(ax);
+		if (!included.equals(OntologyVocabularyImpl.owlBottomDataProperty) && !including.equals(OntologyVocabularyImpl.owlTopDataProperty)) {
+			BinaryAxiom<DataPropertyExpression> ax = new BinaryAxiomImpl<DataPropertyExpression>(included, including);
+			subDataPropertyAxioms.add(ax);
+		}
 	}
 
 	@Override
@@ -207,64 +219,64 @@ public class OntologyImpl implements Ontology {
 	
 	
 	@Override 
-	public Set<ClassAssertion> getClassAssertions() {
-		return classAssertions;
+	public List<ClassAssertion> getClassAssertions() {
+		return Collections.unmodifiableList(classAssertions);
 	}
 	
 	@Override 
-	public Set<ObjectPropertyAssertion> getObjectPropertyAssertions() {
-		return objectPropertyAssertions;
+	public List<ObjectPropertyAssertion> getObjectPropertyAssertions() {
+		return Collections.unmodifiableList(objectPropertyAssertions);
 	}
 
 	@Override 
-	public Set<DataPropertyAssertion> getDataPropertyAssertions() {
-		return dataPropertyAssertions;
+	public List<DataPropertyAssertion> getDataPropertyAssertions() {
+		return Collections.unmodifiableList(dataPropertyAssertions);
 	}
 
 	@Override
-	public Set<BinaryAxiom<ClassExpression>> getSubClassAxioms() {
-		return subClassAxioms;
+	public List<BinaryAxiom<ClassExpression>> getSubClassAxioms() {
+		return Collections.unmodifiableList(subClassAxioms);
 	}
 	
 	@Override
-	public Set<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms() {
-		return subDataRangeAxioms;
+	public List<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms() {
+		return Collections.unmodifiableList(subDataRangeAxioms);
 	}
 	
 	
 	@Override
-	public Set<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms() {
-		return subObjectPropertyAxioms;
+	public List<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms() {
+		return Collections.unmodifiableList(subObjectPropertyAxioms);
 	}
 	
 	@Override
-	public Set<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms() {
-		return subDataPropertyAxioms;
+	public List<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms() {
+		return Collections.unmodifiableList(subDataPropertyAxioms);
 	}
 	
 	@Override 
 	public Set<ObjectPropertyExpression> getFunctionalObjectProperties() {
-		return functionalObjectPropertyAxioms;
+		return Collections.unmodifiableSet(functionalObjectPropertyAxioms);
 	}
 	
 	@Override 
 	public Set<DataPropertyExpression> getFunctionalDataProperties() {
-		return functionalDataPropertyAxioms;
+		return Collections.unmodifiableSet(functionalDataPropertyAxioms);
 	}
 	
 	@Override 
-	public Set<NaryAxiom<ClassExpression>> getDisjointClassesAxioms() {
-		return disjointClassesAxioms;
+	public List<NaryAxiom<ClassExpression>> getDisjointClassesAxioms() {
+		return Collections.unmodifiableList(disjointClassesAxioms);
 	}
 	
 	@Override 
-	public Set<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms() {
-		return disjointObjectPropertiesAxioms;
+	public List<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms() {
+		return Collections.unmodifiableList(disjointObjectPropertiesAxioms);
 	}
 
 	@Override 
-	public Set<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms() {
-		return disjointDataPropertiesAxioms;
+	public List<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms() {
+		return Collections.unmodifiableList(disjointDataPropertiesAxioms);
 	}
 
 	

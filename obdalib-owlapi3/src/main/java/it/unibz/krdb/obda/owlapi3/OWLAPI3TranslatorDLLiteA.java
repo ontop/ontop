@@ -21,7 +21,6 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -618,43 +617,36 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 
 	private void addSubClassAxioms(ClassExpression subDescription, Set<OWLClassExpression> superclasses) throws TranslationException {
 		for (OWLClassExpression superClass : superclasses) {
-			// We ignore owl:Thing  
-			if (!superClass.isOWLThing()) {				
-				ClassExpression superDescription; 
+			ClassExpression superDescription; 
+			if (superClass instanceof OWLObjectSomeValuesFrom) {
+				//if (profile.order() < LanguageProfile.OWL2QL.order()) {
+				//	throw new TranslationException();
+				//}
+				OWLObjectSomeValuesFrom someexp = (OWLObjectSomeValuesFrom) superClass;
+				OWLClassExpression filler = someexp.getFiller();
 				
-				if (superClass instanceof OWLObjectSomeValuesFrom) {
-					//if (profile.order() < LanguageProfile.OWL2QL.order()) {
-					//	throw new TranslationException();
-					//}
-					OWLObjectSomeValuesFrom someexp = (OWLObjectSomeValuesFrom) superClass;
-					OWLClassExpression filler = someexp.getFiller();
-					if (!(filler instanceof OWLClass)) 
-						throw new TranslationException();
-					
-					if (filler.isOWLThing()) 
-						superDescription =  getSubclassExpression0(someexp);
-					else 
-						superDescription = getPropertySomeClassRestriction(someexp);
-				} 
-				else if (superClass instanceof OWLDataSomeValuesFrom) {
-					//if (profile.order() < LanguageProfile.OWL2QL.order()) {
-					//	throw new TranslationException();
-					//}
-					OWLDataSomeValuesFrom someexp = (OWLDataSomeValuesFrom) superClass;
-					OWLDataRange filler = someexp.getFiller();
-
-					if (filler.isTopDatatype()) 
-						superDescription =  getSubclassExpression0(someexp);
-					
-					else
-						superDescription = getPropertySomeDatatypeRestriction(someexp);	
-				} 
+				if (filler.isOWLThing()) 
+					superDescription =  getSubclassExpression0(someexp);
 				else 
-					superDescription = getSubclassExpression(superClass);
-				
-				dl_onto.addSubClassOfAxiom(subDescription, superDescription);
-			}
-		}	
+					superDescription = getPropertySomeClassRestriction(someexp);
+			} 
+			else if (superClass instanceof OWLDataSomeValuesFrom) {
+				//if (profile.order() < LanguageProfile.OWL2QL.order()) {
+				//	throw new TranslationException();
+				//}
+				OWLDataSomeValuesFrom someexp = (OWLDataSomeValuesFrom) superClass;
+				OWLDataRange filler = someexp.getFiller();
+
+				if (filler.isTopDatatype()) 
+					superDescription =  getSubclassExpression0(someexp);		
+				else
+					superDescription = getPropertySomeDatatypeRestriction(someexp);	
+			} 
+			else 
+				superDescription = getSubclassExpression(superClass);
+			
+			dl_onto.addSubClassOfAxiom(subDescription, superDescription);
+		}
 	}
 	
 	
@@ -667,8 +659,9 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 						
 			ObjectPropertyExpression role = getPropertyExpression(someexp.getProperty());
 			
-			// TODO: check that it is a class name 
 			OWLClassExpression owlFiller = someexp.getFiller();
+			if (!(owlFiller instanceof OWLClass)) 
+				throw new TranslationException();
 			ClassExpression filler = getSubclassExpression(owlFiller);
 
 			ObjectPropertyExpression auxRole = dl_onto.getVocabulary().createAuxiliaryObjectProperty();
