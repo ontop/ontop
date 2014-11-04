@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.protege4.core;
 
 import javax.swing.JOptionPane;
 
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
@@ -25,7 +26,7 @@ public class OntopOWLFactory extends QuestOWLFactory {
 	}
 			
 	@Override
-	public OWLReasoner createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
+	public QuestOWL createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		try { 
 			return super.createReasoner(ontology, config);
 		} catch (Exception e){
@@ -34,7 +35,7 @@ public class OntopOWLFactory extends QuestOWLFactory {
 		}
 	}
 	@Override
-	public OWLReasoner createReasoner(OWLOntology ontology) throws IllegalConfigurationException {
+	public QuestOWL createReasoner(OWLOntology ontology) throws IllegalConfigurationException {
 		try { 
 			return super.createReasoner(ontology);
 		} catch (Exception e){
@@ -44,7 +45,7 @@ public class OntopOWLFactory extends QuestOWLFactory {
 	}
 	
 	@Override
-	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
+	public QuestOWL createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		try { 
 			return super.createNonBufferingReasoner(ontology, config);
 		} catch (Exception e){
@@ -53,7 +54,7 @@ public class OntopOWLFactory extends QuestOWLFactory {
 		}
 	}
 	@Override
-	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology) throws IllegalConfigurationException {
+	public QuestOWL createNonBufferingReasoner(OWLOntology ontology) throws IllegalConfigurationException {
 		try { 
 			return super.createNonBufferingReasoner(ontology);
 		} catch (Exception e){

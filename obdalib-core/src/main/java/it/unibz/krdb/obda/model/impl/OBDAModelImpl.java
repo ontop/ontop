@@ -379,13 +379,13 @@ public class OBDAModelImpl implements OBDAModel {
 	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid) throws DuplicateMappingException {
 		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
 
-		// adding a new mapping
+		// adds a new mapping
 		if (!containsMapping(datasource_uri, new_mappingid)) {
 			mapping.setId(new_mappingid);
 			fireMappigUpdated(datasource_uri, mapping_id, mapping);
 			return 0;
 		} 
-		// updating a existing mapping
+		// updates an existing mapping
 		else {
 			// updates the mapping without changing the mapping id
 			if (new_mappingid.equals(mapping_id)) {
