@@ -21,7 +21,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
  */
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -155,9 +157,15 @@ public class DAG implements Serializable {
 			// addParent(existsNodeInv, thing);
 		}
 
-		for (SubClassOfAxiom clsIncl : ontology.getSubClassAxioms()) {
-			BasicClassDescription parent = clsIncl.getSuper();
-			BasicClassDescription child = clsIncl.getSub();
+		for (SubClassOfAxiom<ClassExpression> clsIncl : ontology.getSubClassAxioms()) {
+			ClassExpression parent = clsIncl.getSuper();
+			ClassExpression child = clsIncl.getSub();
+
+			addClassEdge(parent, child);
+		} 
+		for (SubClassOfAxiom<DataRangeExpression> clsIncl : ontology.getSubDataRangeAxioms()) {
+			DataRangeExpression parent = clsIncl.getSuper();
+			DataRangeExpression child = clsIncl.getSub();
 
 			addClassEdge(parent, child);
 		} 

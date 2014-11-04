@@ -45,7 +45,9 @@ public class OntologyImpl implements Ontology {
 	
 	// axioms and assertions
 
-	private final Set<SubClassOfAxiom> subClassAxioms = new LinkedHashSet<SubClassOfAxiom>();
+	private final Set<SubClassOfAxiom<ClassExpression>> subClassAxioms = new LinkedHashSet<SubClassOfAxiom<ClassExpression>>();
+	
+	private final Set<SubClassOfAxiom<DataRangeExpression>> subDataRangeAxioms = new LinkedHashSet<SubClassOfAxiom<DataRangeExpression>>();
 	
 	private final Set<SubPropertyOfAxiom<ObjectPropertyExpression>> subObjectPropertyAxioms = new LinkedHashSet<SubPropertyOfAxiom<ObjectPropertyExpression>>();
 	
@@ -85,7 +87,7 @@ public class OntologyImpl implements Ontology {
 	
 	@Override
 	public void addSubClassOfAxiomWithReferencedEntities(ClassExpression concept1, ClassExpression concept2) {	
-		SubClassOfAxiom assertion = new SubClassOfAxiomImpl(concept1, concept2);
+		SubClassOfAxiom<ClassExpression> assertion = new SubClassOfAxiomImpl<ClassExpression>(concept1, concept2);
 		vocabulary.addReferencedEntries(assertion.getSub());
 		vocabulary.addReferencedEntries(assertion.getSuper());
 		subClassAxioms.add(assertion);
@@ -93,10 +95,10 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void addSubClassOfAxiomWithReferencedEntities(DataRangeExpression concept1, DataRangeExpression concept2) {
-		SubClassOfAxiom assertion = new SubClassOfAxiomImpl(concept1, concept2);
+		SubClassOfAxiom<DataRangeExpression> assertion = new SubClassOfAxiomImpl<DataRangeExpression>(concept1, concept2);
 		vocabulary.addReferencedEntries(assertion.getSub());
 		vocabulary.addReferencedEntries(assertion.getSuper());
-		subClassAxioms.add(assertion);
+		subDataRangeAxioms.add(assertion);
 	}
 	
 	@Override
@@ -119,7 +121,7 @@ public class OntologyImpl implements Ontology {
 	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2) {
 		vocabulary.checkSignature(concept1);
 		vocabulary.checkSignature(concept2);
-		SubClassOfAxiom ax = new SubClassOfAxiomImpl(concept1, concept2);
+		SubClassOfAxiom<ClassExpression> ax = new SubClassOfAxiomImpl<ClassExpression>(concept1, concept2);
 		subClassAxioms.add(ax);
 	}	
 
@@ -127,8 +129,8 @@ public class OntologyImpl implements Ontology {
 	public void addSubClassOfAxiom(DataRangeExpression concept1, DataRangeExpression concept2) {
 		vocabulary.checkSignature(concept1);
 		vocabulary.checkSignature(concept2);
-		SubClassOfAxiom ax = new SubClassOfAxiomImpl(concept1, concept2);
-		subClassAxioms.add(ax);
+		SubClassOfAxiom<DataRangeExpression> ax = new SubClassOfAxiomImpl<DataRangeExpression>(concept1, concept2);
+		subDataRangeAxioms.add(ax);
 	}
 
 	@Override
@@ -218,9 +220,15 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public Set<SubClassOfAxiom> getSubClassAxioms() {
+	public Set<SubClassOfAxiom<ClassExpression>> getSubClassAxioms() {
 		return subClassAxioms;
 	}
+	
+	@Override
+	public Set<SubClassOfAxiom<DataRangeExpression>> getSubDataRangeAxioms() {
+		return subDataRangeAxioms;
+	}
+	
 	
 	@Override
 	public Set<SubPropertyOfAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms() {

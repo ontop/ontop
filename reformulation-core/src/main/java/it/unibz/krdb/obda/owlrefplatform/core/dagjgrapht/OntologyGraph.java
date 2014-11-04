@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -208,9 +209,9 @@ public class OntologyGraph {
 		}
 		
 		// class inclusions from the ontology
-		for (SubClassOfAxiom clsIncl : ontology.getSubClassAxioms()) {
-			BasicClassDescription parent = (BasicClassDescription)clsIncl.getSuper();
-			BasicClassDescription child = (BasicClassDescription)clsIncl.getSub();
+		for (SubClassOfAxiom<ClassExpression> clsIncl : ontology.getSubClassAxioms()) {
+			ClassExpression parent = clsIncl.getSuper();
+			ClassExpression child = clsIncl.getSub();
 			classGraph.addVertex(child);
 			classGraph.addVertex(parent);
 			classGraph.addEdge(child, parent);

@@ -68,8 +68,10 @@ public interface Ontology extends Cloneable, Serializable {
 	public OntologyVocabulary getVocabulary();
 	
 	
-	public Set<SubClassOfAxiom> getSubClassAxioms();
+	public Set<SubClassOfAxiom<ClassExpression>> getSubClassAxioms();
 
+	public Set<SubClassOfAxiom<DataRangeExpression>> getSubDataRangeAxioms();
+	
 	public Set<SubPropertyOfAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms();
 
 	public Set<SubPropertyOfAxiom<DataPropertyExpression>> getSubDataPropertyAxioms();
