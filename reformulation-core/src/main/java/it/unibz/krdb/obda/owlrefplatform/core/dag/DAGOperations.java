@@ -310,6 +310,7 @@ public class DAGOperations {
 					}
 				}
 			}
+/*			
 			else if (component.size() > 0 && cycleheadNode.getDescription() instanceof DataPropertyExpression
 					&& ((PropertyExpression) cycleheadNode.getDescription()).isInverse()) {
 				for (int i = 1; i < component.size(); i++) {
@@ -333,7 +334,7 @@ public class DAGOperations {
 					}
 				}
 			}
-			
+*/			
 			processedNodes.add(cycleheadNode);
 
 			if (cycleheadinverseNode != null) {

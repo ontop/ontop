@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
@@ -228,12 +227,29 @@ public class SigmaTBoxOptimizer {
 	}
 	
 	
-	private boolean check_redundant(BasicClassDescription parent, BasicClassDescription child) {
+	private boolean check_redundant(ClassExpression parent, ClassExpression child) {
 		if (check_directly_redundant(parent, child))
 			return true;
 		else {
-			for (Equivalences<BasicClassDescription> children_prime : isa.getClasses().getDirectSub(isa.getClasses().getVertex(parent))) {
-				BasicClassDescription child_prime = children_prime.getRepresentative();
+			for (Equivalences<ClassExpression> children_prime : isa.getClasses().getDirectSub(isa.getClasses().getVertex(parent))) {
+				ClassExpression child_prime = children_prime.getRepresentative();
+
+				if (!child_prime.equals(child) && 
+						check_directly_redundant(child_prime, child) && 
+						!check_redundant(child_prime, parent)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private boolean check_redundant(DataRangeExpression parent, DataRangeExpression child) {
+		if (check_directly_redundant(parent, child))
+			return true;
+		else {
+			for (Equivalences<DataRangeExpression> children_prime : isa.getDataRanges().getDirectSub(isa.getDataRanges().getVertex(parent))) {
+				DataRangeExpression child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
 						check_directly_redundant(child_prime, child) && 
@@ -300,30 +316,58 @@ public class SigmaTBoxOptimizer {
 		return scChildren.containsAll(tcChildren);
 	}
 	
-	private boolean check_directly_redundant(BasicClassDescription parent, BasicClassDescription child) {
+	private boolean check_directly_redundant(ClassExpression parent, ClassExpression child) {
 		
-		Equivalences<BasicClassDescription> sp = sigmaChain.getClasses().getVertex(parent);
-		Equivalences<BasicClassDescription> sc = sigmaChain.getClasses().getVertex(child);
+		Equivalences<ClassExpression> sp = sigmaChain.getClasses().getVertex(parent);
+		Equivalences<ClassExpression> sc = sigmaChain.getClasses().getVertex(child);
 		
 		// if one of them is not in the respective DAG
 		if (sp == null || sc == null) 
 			return false;
 
-		Set<Equivalences<BasicClassDescription>> spChildren =  sigmaChain.getClasses().getDirectSub(sp);
+		Set<Equivalences<ClassExpression>> spChildren =  sigmaChain.getClasses().getDirectSub(sp);
 		
 		if (!spChildren.contains(sc))
 			return false;
 		
 		
 		
-		Equivalences<BasicClassDescription> tc = isaChain.getClasses().getVertex(child);
+		Equivalences<ClassExpression> tc = isaChain.getClasses().getVertex(child);
 		// if one of them is not in the respective DAG
 		if (tc == null) 
 			return false;
 		
-		Set<Equivalences<BasicClassDescription>> scChildren = sigmaChain.getClasses().getSub(sc);
-		Set<Equivalences<BasicClassDescription>> tcChildren = isaChain.getClasses().getSub(tc);
+		Set<Equivalences<ClassExpression>> scChildren = sigmaChain.getClasses().getSub(sc);
+		Set<Equivalences<ClassExpression>> tcChildren = isaChain.getClasses().getSub(tc);
 
 		return scChildren.containsAll(tcChildren);
 	}
+	
+	private boolean check_directly_redundant(DataRangeExpression parent, DataRangeExpression child) {
+		
+		Equivalences<DataRangeExpression> sp = sigmaChain.getDataRanges().getVertex(parent);
+		Equivalences<DataRangeExpression> sc = sigmaChain.getDataRanges().getVertex(child);
+		
+		// if one of them is not in the respective DAG
+		if (sp == null || sc == null) 
+			return false;
+
+		Set<Equivalences<DataRangeExpression>> spChildren =  sigmaChain.getDataRanges().getDirectSub(sp);
+		
+		if (!spChildren.contains(sc))
+			return false;
+		
+		
+		
+		Equivalences<DataRangeExpression> tc = isaChain.getDataRanges().getVertex(child);
+		// if one of them is not in the respective DAG
+		if (tc == null) 
+			return false;
+		
+		Set<Equivalences<DataRangeExpression>> scChildren = sigmaChain.getDataRanges().getSub(sc);
+		Set<Equivalences<DataRangeExpression>> tcChildren = isaChain.getDataRanges().getSub(tc);
+
+		return scChildren.containsAll(tcChildren);
+	}
+	
 }

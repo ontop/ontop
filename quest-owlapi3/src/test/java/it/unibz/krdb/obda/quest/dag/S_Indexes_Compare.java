@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.quest.dag;
 
 
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -43,11 +43,8 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
-
 import junit.framework.TestCase;
 
-import org.jgrapht.Graphs;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -158,7 +155,7 @@ private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG) {
 			}
 		}
 		else {
-			for (BasicClassDescription parent: namedDAG.getSuccessors((BasicClassDescription)vertex)){
+			for (ClassExpression parent: namedDAG.getSuccessors((ClassExpression)vertex)){
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
 				if (result)
 					break;

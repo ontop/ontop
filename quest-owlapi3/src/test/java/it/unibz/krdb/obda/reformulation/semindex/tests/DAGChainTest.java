@@ -26,7 +26,7 @@ import java.util.Set;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
@@ -65,11 +65,11 @@ public class DAGChainTest extends TestCase {
 
 		TBoxReasonerImpl reasoner0 = new TBoxReasonerImpl(ontology);
 		TBoxReasoner reasoner = TBoxReasonerImpl.getChainReasoner(reasoner0);
-		EquivalencesDAG<BasicClassDescription> classes = reasoner.getClasses();
+		EquivalencesDAG<ClassExpression> classes = reasoner.getClasses();
 		
-		Equivalences<BasicClassDescription> ac0 = classes.getVertex(ac);
-		Equivalences<BasicClassDescription> bc0 = classes.getVertex(bc);
-		Equivalences<BasicClassDescription> cc0 = classes.getVertex(cc);
+		Equivalences<ClassExpression> ac0 = classes.getVertex(ac);
+		Equivalences<ClassExpression> bc0 = classes.getVertex(bc);
+		Equivalences<ClassExpression> cc0 = classes.getVertex(cc);
 		
 		assertTrue(classes.getSub(ac0).contains(bc0));
 		assertTrue(classes.getSub(ac0).contains(cc0));
@@ -106,12 +106,12 @@ public class DAGChainTest extends TestCase {
 		TestTBoxReasonerImpl_OnGraph reasoner = new TestTBoxReasonerImpl_OnGraph(res0);
 		reasoner.convertIntoChainDAG();
 
-		EquivalencesDAG<BasicClassDescription> classes = reasoner.getClasses();
+		EquivalencesDAG<ClassExpression> classes = reasoner.getClasses();
 
-		Equivalences<BasicClassDescription> ac0 = classes.getVertex(ac);
-		Equivalences<BasicClassDescription> cc0 = classes.getVertex(cc);
-		Equivalences<BasicClassDescription> er0 = classes.getVertex(er);
-		Equivalences<BasicClassDescription> ier0 = classes.getVertex(ier);
+		Equivalences<ClassExpression> ac0 = classes.getVertex(ac);
+		Equivalences<ClassExpression> cc0 = classes.getVertex(cc);
+		Equivalences<ClassExpression> er0 = classes.getVertex(er);
+		Equivalences<ClassExpression> ier0 = classes.getVertex(ier);
 		
 		
 		assertTrue(classes.getSub(ac0).contains(er0));
@@ -152,14 +152,14 @@ public class DAGChainTest extends TestCase {
 		TBoxReasonerImpl resoner0 = new TBoxReasonerImpl(ontology);
 		TBoxReasoner reasoner = TBoxReasonerImpl.getChainReasoner(resoner0);
 
-		EquivalencesDAG<BasicClassDescription> classes = reasoner.getClasses();
+		EquivalencesDAG<ClassExpression> classes = reasoner.getClasses();
 		
-		Equivalences<BasicClassDescription> ac0 = classes.getVertex(ac);
-		Equivalences<BasicClassDescription> bc0 = classes.getVertex(bc);
-		Equivalences<BasicClassDescription> cc0 = classes.getVertex(cc);
-		Equivalences<BasicClassDescription> dc0 = classes.getVertex(dc);
-		Equivalences<BasicClassDescription> er0 = classes.getVertex(er);
-		Equivalences<BasicClassDescription> ier0 = classes.getVertex(ier);
+		Equivalences<ClassExpression> ac0 = classes.getVertex(ac);
+		Equivalences<ClassExpression> bc0 = classes.getVertex(bc);
+		Equivalences<ClassExpression> cc0 = classes.getVertex(cc);
+		Equivalences<ClassExpression> dc0 = classes.getVertex(dc);
+		Equivalences<ClassExpression> er0 = classes.getVertex(er);
+		Equivalences<ClassExpression> ier0 = classes.getVertex(ier);
 		
 		assertTrue(classes.getSub(ac0).contains(er0));
 		assertTrue(classes.getSub(ac0).contains(ier0));

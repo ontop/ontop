@@ -22,11 +22,11 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 
 
 
@@ -57,7 +57,15 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<BasicClassDescription> getClasses();
+	public EquivalencesDAG<ClassExpression> getClasses();
+	
+	/**
+	 * Return the DAG of datatypes and data property ranges
+	 * 
+	 * @return DAG 
+	 */
+
+	public EquivalencesDAG<DataRangeExpression> getDataRanges();
 	
 	/**
 	 * 

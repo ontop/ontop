@@ -20,8 +20,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 
@@ -45,12 +46,14 @@ public class NamedDAG  {
 	
 	private final SimpleDirectedGraph <ObjectPropertyExpression,DefaultEdge> objectPropertyDAG;
 	private final SimpleDirectedGraph <DataPropertyExpression,DefaultEdge> dataPropertyDAG;
-	private final SimpleDirectedGraph <BasicClassDescription,DefaultEdge> classDAG;
+	private final SimpleDirectedGraph <ClassExpression,DefaultEdge> classDAG;
+	private final SimpleDirectedGraph <DataRangeExpression,DefaultEdge> dataRangeDAG;
 	
 	public NamedDAG(TBoxReasoner reasoner) {			
 		objectPropertyDAG = getNamedDAG(reasoner.getObjectProperties());
 		dataPropertyDAG = getNamedDAG(reasoner.getDataProperties());
 		classDAG = getNamedDAG(reasoner.getClasses());
+		dataRangeDAG = getNamedDAG(reasoner.getDataRanges());
 	}
 	
 	@Override
@@ -69,8 +72,12 @@ public class NamedDAG  {
 		return dataPropertyDAG;
 	}
 	@Deprecated // USED ONLY IN TESTS (3 calls)
-	public SimpleDirectedGraph <BasicClassDescription,DefaultEdge> getClassDag() {
+	public SimpleDirectedGraph <ClassExpression,DefaultEdge> getClassDag() {
 		return classDAG;
+	}
+	@Deprecated // USED ONLY IN TESTS (3 calls)
+	public SimpleDirectedGraph <DataRangeExpression,DefaultEdge> getDataRangeDag() {
+		return dataRangeDAG;
 	}
 	
 	public List<ObjectPropertyExpression> getSuccessors(ObjectPropertyExpression desc) {
@@ -79,7 +86,7 @@ public class NamedDAG  {
 	public List<DataPropertyExpression> getSuccessors(DataPropertyExpression desc) {
 		return Graphs.successorListOf(dataPropertyDAG, desc);		
 	}
-	public List<BasicClassDescription> getSuccessors(BasicClassDescription desc) {
+	public List<ClassExpression> getSuccessors(ClassExpression desc) {
 		return Graphs.successorListOf(classDAG, desc);		
 	}
 	
@@ -89,7 +96,7 @@ public class NamedDAG  {
 	public List<DataPropertyExpression> getPredecessors(DataPropertyExpression desc) {
 		return Graphs.predecessorListOf(dataPropertyDAG, desc);		
 	}
-	public List<BasicClassDescription> getPredecessors(BasicClassDescription desc) {
+	public List<ClassExpression> getPredecessors(ClassExpression desc) {
 		return Graphs.predecessorListOf(classDAG, desc);		
 	}
 	

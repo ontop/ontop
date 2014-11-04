@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -87,22 +87,22 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
 
-		EquivalencesDAG<BasicClassDescription> classes = namedReasoner.getClasses();
+		EquivalencesDAG<ClassExpression> classes = namedReasoner.getClasses();
 		
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		BasicClassDescription A = ofac.createClass(ontoURI + "A");
-		BasicClassDescription B = ofac.createClass(ontoURI + "B");
-		BasicClassDescription C = ofac.createClass(ontoURI + "C");
-		BasicClassDescription D = ofac.createClass(ontoURI + "D");
-		BasicClassDescription E = ofac.createClass(ontoURI + "E");
-		BasicClassDescription F = ofac.createClass(ontoURI + "F");
+		ClassExpression A = ofac.createClass(ontoURI + "A");
+		ClassExpression B = ofac.createClass(ontoURI + "B");
+		ClassExpression C = ofac.createClass(ontoURI + "C");
+		ClassExpression D = ofac.createClass(ontoURI + "D");
+		ClassExpression E = ofac.createClass(ontoURI + "E");
+		ClassExpression F = ofac.createClass(ontoURI + "F");
 		
 		/**
 		 * The initial node is Node A.
 		 */
-		Equivalences<BasicClassDescription> initialNode = classes.getVertex(A);
-		Set<Equivalences<BasicClassDescription>> descendants = classes.getSub(initialNode);
+		Equivalences<ClassExpression> initialNode = classes.getVertex(A);
+		Set<Equivalences<ClassExpression>> descendants = classes.getSub(initialNode);
 
 		assertEquals(descendants.size(), 1);  // getDescendants is reflexive
 
@@ -132,10 +132,10 @@ public class DAGHierarchyTest extends TestCase {
 
 		assertEquals(descendants.size(), 1);
 
-		Set<BasicClassDescription> equivalents = new HashSet<BasicClassDescription>();
+		Set<ClassExpression> equivalents = new HashSet<ClassExpression>();
 		equivalents.add(C);
 		equivalents.add(D); // getDescendants is reflexive
-		assertTrue(descendants.contains(new Equivalences<BasicClassDescription>(equivalents)));
+		assertTrue(descendants.contains(new Equivalences<ClassExpression>(equivalents)));
 
 		/**
 		 * The initial node is Node E.
@@ -157,10 +157,10 @@ public class DAGHierarchyTest extends TestCase {
 		assertTrue(descendants.contains(classes.getVertex(C)));
 		assertTrue(descendants.contains(classes.getVertex(D)));
 		
-		equivalents = new HashSet<BasicClassDescription>();
+		equivalents = new HashSet<ClassExpression>();
 		equivalents.add(E);
 		equivalents.add(F); // getDescendants is reflexive
-		assertTrue(descendants.contains(new Equivalences<BasicClassDescription>(equivalents)));
+		assertTrue(descendants.contains(new Equivalences<ClassExpression>(equivalents)));
 	}
 
 	/**
@@ -177,23 +177,23 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
 
-		EquivalencesDAG<BasicClassDescription> classes = namedReasoner.getClasses();
+		EquivalencesDAG<ClassExpression> classes = namedReasoner.getClasses();
 		
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-		BasicClassDescription A = ofac.createClass(ontoURI + "A");
-		BasicClassDescription B = ofac.createClass(ontoURI + "B");
-		BasicClassDescription C = ofac.createClass(ontoURI + "C");
-		BasicClassDescription D = ofac.createClass(ontoURI + "D");
-		BasicClassDescription E = ofac.createClass(ontoURI + "E");
-		BasicClassDescription F = ofac.createClass(ontoURI + "F");
+		ClassExpression A = ofac.createClass(ontoURI + "A");
+		ClassExpression B = ofac.createClass(ontoURI + "B");
+		ClassExpression C = ofac.createClass(ontoURI + "C");
+		ClassExpression D = ofac.createClass(ontoURI + "D");
+		ClassExpression E = ofac.createClass(ontoURI + "E");
+		ClassExpression F = ofac.createClass(ontoURI + "F");
 	
 		/**
 		 * The initial node is Node A.
 		 */
 
-		Equivalences<BasicClassDescription> initialNode = classes.getVertex(A);
-		Set<Equivalences<BasicClassDescription>> ancestors = classes.getSuper(initialNode);
+		Equivalences<ClassExpression> initialNode = classes.getVertex(A);
+		Set<Equivalences<ClassExpression>> ancestors = classes.getSuper(initialNode);
 		assertEquals(sizeOf(ancestors), 4);   // ancestors is now reflexive
 
 		assertTrue(ancestors.contains(classes.getVertex(B)));
@@ -226,10 +226,10 @@ public class DAGHierarchyTest extends TestCase {
 		ancestors = classes.getSuper(initialNode);
 		assertEquals(sizeOf(ancestors), 4); // ancestors is now refelxive
 
-		Set<BasicClassDescription> equivalents = new HashSet<BasicClassDescription>();
+		Set<ClassExpression> equivalents = new HashSet<ClassExpression>();
 		equivalents.add(C);
 		equivalents.add(D);  // ancestor is reflexive now
-		assertTrue(ancestors.contains(new Equivalences<BasicClassDescription>(equivalents)));
+		assertTrue(ancestors.contains(new Equivalences<ClassExpression>(equivalents)));
 		assertTrue(ancestors.contains(classes.getVertex(E)));
 		assertTrue(ancestors.contains(classes.getVertex(F)));
 
@@ -249,10 +249,10 @@ public class DAGHierarchyTest extends TestCase {
 
 		assertEquals(ancestors.size(), 1);
 
-		equivalents = new HashSet<BasicClassDescription>();
+		equivalents = new HashSet<ClassExpression>();
 		equivalents.add(E);
 		equivalents.add(F);  // ancestor is reflexive now
-		assertTrue(ancestors.contains(new Equivalences<BasicClassDescription>(equivalents)));
+		assertTrue(ancestors.contains(new Equivalences<ClassExpression>(equivalents)));
 	}
 
 	/**

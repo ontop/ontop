@@ -21,9 +21,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
  */
 
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -98,30 +99,17 @@ public class OntologyGraph {
 		DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> graph 
 							= new  DefaultDirectedGraph<DataPropertyExpression,DefaultEdge>(DefaultEdge.class);
 				
-		// TODO: remove the inverses
-		
 		for (DataPropertyExpression role : ontology.getVocabulary().getDataProperties()) {
 			graph.addVertex(role);
-			graph.addVertex(role.getInverse());
 		}
 
 		// property inclusions
 		for (SubPropertyOfAxiom<DataPropertyExpression> roleIncl : ontology.getSubDataPropertyAxioms()) {
-			// adds the direct edge and the inverse 
-			// e.g., R ISA S and R- ISA S-,
-			//    or R- ISA S and R ISA S-
-
 			DataPropertyExpression child = roleIncl.getSub();
 			graph.addVertex(child);
 			DataPropertyExpression parent = roleIncl.getSuper();
 			graph.addVertex(parent);
 			graph.addEdge(child, parent);
-			
-			DataPropertyExpression childInv = child.getInverse();
-			graph.addVertex(childInv);
-			DataPropertyExpression parentInv = parent.getInverse();
-			graph.addVertex(parentInv);
-			graph.addEdge(childInv, parentInv);
 		}
 		return graph;
 	}
@@ -141,16 +129,15 @@ public class OntologyGraph {
 	 * @return the graph of the concept inclusions
 	 */
 	
-	public static DefaultDirectedGraph<BasicClassDescription,DefaultEdge> getClassGraph (Ontology ontology, 
+	public static DefaultDirectedGraph<ClassExpression,DefaultEdge> getClassGraph (Ontology ontology, 
 													DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> objectPropertyGraph, 
 													DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> dataPropertyGraph,
 													boolean chain) {
 		
-		DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph 
-									= new  DefaultDirectedGraph<BasicClassDescription,DefaultEdge>(DefaultEdge.class);
+		DefaultDirectedGraph<ClassExpression,DefaultEdge> classGraph 
+									= new  DefaultDirectedGraph<ClassExpression,DefaultEdge>(DefaultEdge.class);
 		
 		for (OClass concept : ontology.getVocabulary().getClasses()) {
-		//	BasicClassDescription concept = fac.createClass(conceptp.getName()); // TODO: careful with datatypes
 			classGraph.addVertex(concept);
 		}
 
@@ -170,7 +157,6 @@ public class OntologyGraph {
 			classGraph.addEdge(existChild, existsParent);		
 		}
 		
-		// TODO: remove inverses for data properties
 		// domains and ranges of roles
 		for (DataPropertyExpression role : dataPropertyGraph.vertexSet()) {
 			DataSomeValuesFrom existsRole = fac.createPropertySomeRestriction(role);
@@ -198,14 +184,6 @@ public class OntologyGraph {
 				classGraph.addEdge(existsRoleInv, existsRole);				
 				classGraph.addEdge(existsRole, existsRoleInv);				
 			}
-			for (DataPropertyExpression role : dataPropertyGraph.vertexSet()) {
-				DataSomeValuesFrom existsRole = fac.createPropertySomeRestriction(role);
-				DataPropertyExpression inv = role.getInverse();
-				DataSomeValuesFrom existsRoleInv = fac.createPropertySomeRestriction(inv);
-				
-				classGraph.addEdge(existsRoleInv, existsRole);				
-				classGraph.addEdge(existsRole, existsRoleInv);				
-			}
 		}
 		
 		// class inclusions from the ontology
@@ -218,5 +196,40 @@ public class OntologyGraph {
 		} 
 		return classGraph;
 	}
+
+	public static DefaultDirectedGraph<DataRangeExpression,DefaultEdge> getDataRangeGraph (Ontology ontology, 
+							DefaultDirectedGraph<DataPropertyExpression,DefaultEdge> dataPropertyGraph) {
+
+		DefaultDirectedGraph<DataRangeExpression,DefaultEdge> dataRangeGraph 
+					= new  DefaultDirectedGraph<DataRangeExpression,DefaultEdge>(DefaultEdge.class);
+
+		// ranges of roles
+		for (DataPropertyExpression role : dataPropertyGraph.vertexSet()) {
+			DataPropertyRangeExpression existsRole = fac.createDataPropertyRange(role);
+			dataRangeGraph.addVertex(existsRole);			
+		}
+		// edges between the ranges for sub-properties
+		for (DefaultEdge edge : dataPropertyGraph.edgeSet()) {
+			DataPropertyExpression child = dataPropertyGraph.getEdgeSource(edge);
+			DataPropertyExpression parent = dataPropertyGraph.getEdgeTarget(edge);
+			DataPropertyRangeExpression existChild = fac.createDataPropertyRange(child);
+			DataPropertyRangeExpression existsParent = fac.createDataPropertyRange(parent);
+			dataRangeGraph.addVertex(existChild);
+			dataRangeGraph.addVertex(existsParent);
+			dataRangeGraph.addEdge(existChild, existsParent);		
+		}
+
+
+		// class inclusions from the ontology
+		for (SubClassOfAxiom<DataRangeExpression> clsIncl : ontology.getSubDataRangeAxioms()) {
+			DataRangeExpression parent = clsIncl.getSuper();
+			DataRangeExpression child = clsIncl.getSub();
+			dataRangeGraph.addVertex(child);	
+			dataRangeGraph.addVertex(parent);
+			dataRangeGraph.addEdge(child, parent);
+		} 
+		return dataRangeGraph;
+	}
+	
 	
 }

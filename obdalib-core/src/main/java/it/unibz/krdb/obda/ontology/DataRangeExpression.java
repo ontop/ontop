@@ -8,6 +8,6 @@ package it.unibz.krdb.obda.ontology;
  *
  */
 
-public interface DataRangeExpression extends BasicClassDescription {
+public interface DataRangeExpression extends Description {
 
 }

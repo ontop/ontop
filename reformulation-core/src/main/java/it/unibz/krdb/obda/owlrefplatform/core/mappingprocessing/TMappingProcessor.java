@@ -29,7 +29,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -368,7 +368,7 @@ public class TMappingProcessor {
 		 * Starting with the leafs.
 		 */
 
-		for (Equivalences<BasicClassDescription> classSet : reasoner.getClasses()) {
+		for (Equivalences<ClassExpression> classSet : reasoner.getClasses()) {
 
 			if (!(classSet.getRepresentative() instanceof OClass)) 
 				continue;
@@ -379,8 +379,8 @@ public class TMappingProcessor {
 			Predicate currentPredicate = current.getPredicate();
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);
 
-			for (Equivalences<BasicClassDescription> descendants : reasoner.getClasses().getSub(classSet)) {
-				for (BasicClassDescription childDescription : descendants) {
+			for (Equivalences<ClassExpression> descendants : reasoner.getClasses().getSub(classSet)) {
+				for (ClassExpression childDescription : descendants) {
 
 					/* adding the mappings of the children as own mappings, the new
 					 * mappings. There are three cases, when the child is a named
@@ -403,14 +403,13 @@ public class TMappingProcessor {
 						isClass = false;
 						isInverse = some.isInverse();
 					} 
-					else if (childDescription instanceof DataSomeValuesFrom) {
+					else {
+						assert (childDescription instanceof DataSomeValuesFrom);
 						DataPropertyExpression some = ((DataSomeValuesFrom) childDescription).getProperty();
 						childPredicate = some.getPredicate();
 						isClass = false;
-						isInverse = some.isInverse();
+						isInverse = false;  // can never be an inverse
 					} 
-					else 
-						throw new RuntimeException("Unknown type of node in DAG: " + childDescription);
 					
 					for (CQIE childmapping : originalMappings) {
 						
@@ -437,7 +436,7 @@ public class TMappingProcessor {
 
 			
 			/* Setting up mappings for the equivalent classes */
-			for (BasicClassDescription equiv : classSet) {
+			for (ClassExpression equiv : classSet) {
 				if (!(equiv instanceof OClass) || equiv.equals(current))
 					continue;
 				

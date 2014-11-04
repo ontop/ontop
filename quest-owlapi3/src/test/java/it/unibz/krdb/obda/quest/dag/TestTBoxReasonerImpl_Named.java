@@ -22,14 +22,13 @@ package it.unibz.krdb.obda.quest.dag;
 
 
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Intersection;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Iterator;
@@ -45,14 +44,16 @@ import java.util.Set;
 @Deprecated
 public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 
-	private EquivalencesDAG<ObjectPropertyExpression> objectPropertyDAG;
-	private EquivalencesDAG<DataPropertyExpression> dataPropertyDAG;
-	private EquivalencesDAG<BasicClassDescription> classDAG;
+	private final EquivalencesDAG<ObjectPropertyExpression> objectPropertyDAG;
+	private final EquivalencesDAG<DataPropertyExpression> dataPropertyDAG;
+	private final EquivalencesDAG<ClassExpression> classDAG;
+	private final EquivalencesDAG<DataRangeExpression> dataRangeDAG;
 
 	public TestTBoxReasonerImpl_Named(TBoxReasoner reasoner) {
 		this.objectPropertyDAG = new EquivalencesDAGImpl<ObjectPropertyExpression>(reasoner.getObjectProperties());
 		this.dataPropertyDAG = new EquivalencesDAGImpl<DataPropertyExpression>(reasoner.getDataProperties());
-		this.classDAG = new EquivalencesDAGImpl<BasicClassDescription>(reasoner.getClasses());
+		this.classDAG = new EquivalencesDAGImpl<ClassExpression>(reasoner.getClasses());
+		this.dataRangeDAG = new EquivalencesDAGImpl<DataRangeExpression>(reasoner.getDataRanges());
 	}
 
 
@@ -84,8 +85,13 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	 */
 
 	@Override
-	public EquivalencesDAG<BasicClassDescription> getClasses() {
+	public EquivalencesDAG<ClassExpression> getClasses() {
 		return classDAG;
+	}
+	
+	@Override
+	public EquivalencesDAG<DataRangeExpression> getDataRanges() {
+		return dataRangeDAG;
 	}
 
 	/**

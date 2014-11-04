@@ -36,10 +36,11 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
@@ -1508,7 +1509,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private boolean isInverse(ObjectPropertyExpression property) {
 	
-		PropertyExpression desc = reasonerDag.getObjectProperties().getVertex(property).getRepresentative();
+		ObjectPropertyExpression desc = reasonerDag.getObjectProperties().getVertex(property).getRepresentative();
 		if (!property.equals(desc)) {
 			if (desc.isInverse()) 
 				return true;
@@ -1927,11 +1928,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private COL_TYPE getAttributeType(Predicate attribute) {
 		DataPropertyExpression prop = ofac.createDataProperty(attribute.getName());
 		DataPropertyRangeExpression role = ofac.createDataPropertyRange(prop); 
-		Equivalences<BasicClassDescription> roleNode = reasonerDag.getClasses().getVertex(role);
-		Set<Equivalences<BasicClassDescription>> ancestors = reasonerDag.getClasses().getSuper(roleNode);
+		Equivalences<DataRangeExpression> roleNode = reasonerDag.getDataRanges().getVertex(role);
+		Set<Equivalences<DataRangeExpression>> ancestors = reasonerDag.getDataRanges().getSuper(roleNode);
 
-		for (Equivalences<BasicClassDescription> node : ancestors) {
-			for(BasicClassDescription desc: node)
+		for (Equivalences<DataRangeExpression> node : ancestors) {
+			for(DataRangeExpression desc: node)
 			{
 				if (desc instanceof Datatype) {
 					Datatype datatype = (Datatype) desc;
@@ -2050,7 +2051,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		for (Equivalences<ObjectPropertyExpression> set: reasonerDag.getObjectProperties()) {
 
-			PropertyExpression node = set.getRepresentative();
+			ObjectPropertyExpression node = set.getRepresentative();
 			// only named roles are mapped
 			if (node.isInverse()) 
 				continue;
@@ -2060,10 +2061,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		
 		for (Equivalences<DataPropertyExpression> set: reasonerDag.getDataProperties()) {
 
-			PropertyExpression node = set.getRepresentative();
-			// only named roles are mapped
-			if (node.isInverse()) 
-				continue;
+			DataPropertyExpression node = set.getRepresentative();
 			
 			roleNodes.add(node);
 /*
@@ -2128,11 +2126,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		Set<OClass> classNodesMaps = new HashSet<OClass>();
 //		Map<Description, Set<PropertySomeRestriction>> classExistsMaps = new HashMap<Description, Set<PropertySomeRestriction>>();		
-		EquivalencesDAG<BasicClassDescription> classes = reasonerDag.getClasses();
+		EquivalencesDAG<ClassExpression> classes = reasonerDag.getClasses();
 		
-		for (Equivalences<BasicClassDescription> set : classes) {
+		for (Equivalences<ClassExpression> set : classes) {
 			
-			BasicClassDescription node = set.getRepresentative();
+			ClassExpression node = set.getRepresentative();
 			
 			if (!(node instanceof OClass))
 				continue;

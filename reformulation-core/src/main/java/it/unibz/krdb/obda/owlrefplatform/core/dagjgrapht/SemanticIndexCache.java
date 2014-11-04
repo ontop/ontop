@@ -86,11 +86,6 @@ public class SemanticIndexCache {
 			else if (description instanceof DataPropertyExpression) {
 				DataPropertyExpression cdesc = (DataPropertyExpression) description;
 
-				if (cdesc.isInverse()) {
-					/* Inverses don't get indexes or intervals */
-					continue;
-				}
-
 				int idx = engine.getIndex(cdesc);
 				List<Interval> intervals = engine.getIntervals(cdesc);
 

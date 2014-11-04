@@ -6,9 +6,10 @@ import java.util.Set;
 
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -107,7 +108,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 
 	
-	void addReferencedEntries(BasicClassDescription desc) {
+	void addReferencedEntries(ClassExpression desc) {
 		if (desc instanceof OClass) {
 			OClass cl = (OClass)desc;
 			if (!cl.equals(owlThing) && !cl.equals(owlNothing))
@@ -117,19 +118,21 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 			ObjectPropertyExpression prop = ((ObjectSomeValuesFrom) desc).getProperty();
 			addReferencedEntries(prop);
 		}
-		else if (desc instanceof DataSomeValuesFrom)  {
+		else  {
+			assert (desc instanceof DataSomeValuesFrom);
 			DataPropertyExpression prop = ((DataSomeValuesFrom) desc).getProperty();
 			addReferencedEntries(prop);
 		}
-		else if (desc instanceof Datatype)  {
+	}
+	void addReferencedEntries(DataRangeExpression desc) {
+		if (desc instanceof Datatype)  {
 			// NO-OP
 			// datatypes.add((Datatype) desc);
 		}
-		else if (desc instanceof DataPropertyRangeExpression) {
+		else  {
+			assert (desc instanceof DataPropertyRangeExpression);
 			addReferencedEntries(((DataPropertyRangeExpression) desc).getProperty());			
 		}
-		else 
-			throw new UnsupportedOperationException("Cant understand: " + desc.toString());
 	}
 	
 	void addReferencedEntries(ObjectPropertyExpression prop) {
@@ -140,36 +143,38 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 	
 	void addReferencedEntries(DataPropertyExpression prop) {
-		if (prop.isInverse())
-			prop = prop.getInverse();
 		if (!prop.equals(owlTopDataProperty) && !prop.equals(owlBottomDataProperty))
 			dataProperties.add(prop);
 	}
 	
 	
 	
-	void checkSignature(BasicClassDescription desc) {
+	void checkSignature(ClassExpression desc) {
 		
 		if (desc instanceof OClass) {
 			if (!concepts.contains(desc) && !desc.equals(owlThing) && !desc.equals(owlNothing))
 				throw new IllegalArgumentException("Class predicate is unknown: " + desc);
 		}	
-		else if (desc instanceof Datatype) {
+		else if (desc instanceof ObjectSomeValuesFrom) {
+			checkSignature(((ObjectSomeValuesFrom) desc).getProperty());
+		}
+		else  {
+			assert (desc instanceof DataSomeValuesFrom);
+			checkSignature(((DataSomeValuesFrom) desc).getProperty());
+		}
+	}	
+	
+	void checkSignature(DataRangeExpression desc) {
+		
+		if (desc instanceof Datatype) {
 			Predicate pred = ((Datatype) desc).getPredicate();
 			if (!builtinDatatypes.contains(pred)) 
 				throw new IllegalArgumentException("Datatype predicate is unknown: " + pred);
 		}
-		else if (desc instanceof ObjectSomeValuesFrom) {
-			checkSignature(((ObjectSomeValuesFrom) desc).getProperty());
+		else {
+			assert (desc instanceof DataPropertyRangeExpression);
+			checkSignature(((DataPropertyExpressionImpl)((DataPropertyRangeExpression) desc).getProperty()).inverseProperty);
 		}
-		else if (desc instanceof DataSomeValuesFrom) {
-			checkSignature(((DataSomeValuesFrom) desc).getProperty());
-		}
-		else if (desc instanceof DataPropertyRangeExpression) {
-			checkSignature(((DataPropertyRangeExpression) desc).getProperty());
-		}
-		else 
-			throw new UnsupportedOperationException("Cant understand: " + desc);
 	}
 
 	void checkSignature(ObjectPropertyExpression prop) {
@@ -190,20 +195,14 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 
 	void checkSignature(DataPropertyExpression prop) {
-
-		if (prop.isInverse()) {
-			checkSignature(prop.getInverse());
-		}
-		else {
-			// Make sure we never validate against auxiliary roles introduced by
-			// the translation of the OWL ontology
-			if (isAuxiliaryProperty(prop)) 
-				return;
-			
-			if (!dataProperties.contains(prop) &&
-					!prop.equals(owlTopDataProperty) && !prop.equals(owlBottomDataProperty)) 
-				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
-		}
+		// Make sure we never validate against auxiliary roles introduced by
+		// the translation of the OWL ontology
+		if (isAuxiliaryProperty(prop)) 
+			return;
+		
+		if (!dataProperties.contains(prop) &&
+				!prop.equals(owlTopDataProperty) && !prop.equals(owlBottomDataProperty)) 
+			throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
 	}
 	
 	

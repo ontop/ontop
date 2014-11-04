@@ -27,7 +27,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
@@ -102,11 +102,11 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 */
 
 	private List<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0)  {
-		Collection<BasicClassDescription> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner);		
+		Collection<ClassExpression> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner);		
 		List<Function> genAtoms = new ArrayList<Function>(concepts.size());
 		Term x = fac.getVariableNondistinguished(); 
 		
-		for (BasicClassDescription con : concepts) {
+		for (ClassExpression con : concepts) {
 			log.debug("  BASIC CONCEPT: {}", con);
 			Function atom; 
 			if (con instanceof OClass) {

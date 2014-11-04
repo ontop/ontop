@@ -12,14 +12,13 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
-
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
@@ -85,8 +84,6 @@ public class LinearInclusionDependencies {
 			// super might be more efficient
 			for (Equivalences<DataPropertyExpression> subpropNode : reasoner.getDataProperties().getSub(propNode)) {
 				for (DataPropertyExpression subprop : subpropNode) {
-					if (subprop.isInverse())
-						continue;
 					
 	                Function body = translate(subprop);
 
@@ -100,17 +97,17 @@ public class LinearInclusionDependencies {
 				}
 			}
 		}
-		for (Equivalences<BasicClassDescription> classNode : reasoner.getClasses()) {
+		for (Equivalences<ClassExpression> classNode : reasoner.getClasses()) {
 			// super might be more efficient
-			for (Equivalences<BasicClassDescription> subclassNode : reasoner.getClasses().getSub(classNode)) {
-				for (BasicClassDescription subclass : subclassNode) {
+			for (Equivalences<ClassExpression> subclassNode : reasoner.getClasses().getSub(classNode)) {
+				for (ClassExpression subclass : subclassNode) {
 
 	                Function body = translate(subclass, variableYname);
                 	//if (!(subclass instanceof OClass) && !(subclass instanceof PropertySomeRestriction))
 	                if (body == null)
 	                	continue;
 
-	                for (BasicClassDescription cla : classNode)  {
+	                for (ClassExpression cla : classNode)  {
 	                	if (!(cla instanceof OClass) && !(!full && ((cla instanceof ObjectSomeValuesFrom) || (cla instanceof DataSomeValuesFrom))))
 	                		continue;
 	                	
@@ -132,7 +129,7 @@ public class LinearInclusionDependencies {
 	private static final String variableYname = "y_4022013";
 	private static final String variableZname = "z_4022013";
 	
-    private static Function translate(PropertyExpression property) {
+    private static Function translate(ObjectPropertyExpression property) {
 		final Variable varX = ofac.getVariable(variableXname);
 		final Variable varY = ofac.getVariable(variableYname);
 
@@ -141,8 +138,15 @@ public class LinearInclusionDependencies {
 		else 
 			return ofac.getFunction(property.getPredicate(), varX, varY);
 	}
+    
+    private static Function translate(DataPropertyExpression property) {
+		final Variable varX = ofac.getVariable(variableXname);
+		final Variable varY = ofac.getVariable(variableYname);
+
+		return ofac.getFunction(property.getPredicate(), varX, varY);
+	}
 	
-    private static Function translate(BasicClassDescription description, String existentialVariableName) {
+    private static Function translate(ClassExpression description, String existentialVariableName) {
 		final Variable varX = ofac.getVariable(variableXname);
 		if (description instanceof OClass) {
 			OClass klass = (OClass) description;
@@ -156,16 +160,12 @@ public class LinearInclusionDependencies {
 			else 
 				return ofac.getFunction(property.getPredicate(), varX, varY);
 		} 
-		else if (description instanceof DataSomeValuesFrom) {
+		else {
+			assert (description instanceof DataSomeValuesFrom);
 			final Variable varY = ofac.getVariable(existentialVariableName);
 			DataPropertyExpression property = ((DataSomeValuesFrom) description).getProperty();
-			if (property.isInverse()) 
-				return ofac.getFunction(property.getPredicate(), varY, varX);
-			else 
-				return ofac.getFunction(property.getPredicate(), varX, varY);
+			return ofac.getFunction(property.getPredicate(), varX, varY);
 		} 
-		else 
-			return null;  // if datatype then return null
 	}
 
 }

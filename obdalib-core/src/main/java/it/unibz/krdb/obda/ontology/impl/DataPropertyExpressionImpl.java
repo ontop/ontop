@@ -10,7 +10,7 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	private final boolean isInverse;
 	private final Predicate predicate;
 	private final String string;
-	private final DataPropertyExpressionImpl inverseProperty;
+	public final DataPropertyExpressionImpl inverseProperty;
 
 	DataPropertyExpressionImpl(Predicate p, boolean isInverse) {
 		this.predicate = p;
@@ -46,7 +46,8 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	
 	@Override
 	public DataPropertyExpressionImpl getInverse() {
-		return inverseProperty;
+		throw new RuntimeException("create inverse of DataProperty");
+		//return inverseProperty;
 	}	
 
 	@Override

@@ -109,9 +109,8 @@ public class SemanticIndexHelper {
     public Ontology load_onto(String ontoname) throws Exception {
         String owlfile = owlloc + ontoname + ".owl";
         OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-        OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-
-        Ontology ontology = translator.translate(owlOntology);
+ 
+        Ontology ontology = OWLAPI3TranslatorUtility.translate(owlOntology);
         return ontology;
     }
 

@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -100,7 +100,7 @@ public class SemanticIndexBuilder  {
 				}
 			}
 			else {
-				for (Description ch : namedDAG.getPredecessors((BasicClassDescription)d)) { 
+				for (Description ch : namedDAG.getPredecessors((ClassExpression)d)) { 
 					if (!ch.equals(d)) { // Roman: was !=
 						mergeRangeNode(ch);
 
@@ -170,7 +170,7 @@ public class SemanticIndexBuilder  {
 		else if (d instanceof DataPropertyExpression)
 			node = reasoner.getDataProperties().getVertex((DataPropertyExpression)d).getRepresentative();
 		else
-			node = reasoner.getClasses().getVertex((BasicClassDescription)d).getRepresentative();
+			node = reasoner.getClasses().getVertex((ClassExpression)d).getRepresentative();
 		
 		SemanticIndexRange range = ranges.get(node);
 		if (range == null)

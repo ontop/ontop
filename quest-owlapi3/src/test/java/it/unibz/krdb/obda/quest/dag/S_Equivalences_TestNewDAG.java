@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.quest.dag;
  */
 
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -232,7 +232,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		}
 		
 		
-		for (Equivalences<BasicClassDescription> equivalents : d2.getClasses()) {
+		for (Equivalences<ClassExpression> equivalents : d2.getClasses()) {
 			numberEquivalents += equivalents.size()-1;
 			set2.addAll(equivalents.getMembers());				
 		}
@@ -258,7 +258,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 			if(equivalents.size() >= 2)
 				numberEquivalents += equivalents.size();
 		
-		for (Equivalences<BasicClassDescription> equivalents : d2.getClasses())
+		for (Equivalences<ClassExpression> equivalents : d2.getClasses())
 			//two nodes have two edges, three nodes have three edges...
 			if(equivalents.size() >= 2)
 				numberEquivalents += equivalents.size();

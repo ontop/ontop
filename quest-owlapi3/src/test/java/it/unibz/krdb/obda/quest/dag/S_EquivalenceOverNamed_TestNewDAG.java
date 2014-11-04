@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.quest.dag;
  */
 
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
@@ -519,8 +519,8 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 			if(!reasoner.getDataProperties().getVertex(vertex).isIndexed())
 				return false;
 		}
-		for (Equivalences<BasicClassDescription> node: dag.getClasses()) {
-			BasicClassDescription vertex = node.getRepresentative();
+		for (Equivalences<ClassExpression> node: dag.getClasses()) {
+			ClassExpression vertex = node.getRepresentative();
 			if (!reasoner.getClasses().getVertex(vertex).isIndexed())
 				return false;
 		}

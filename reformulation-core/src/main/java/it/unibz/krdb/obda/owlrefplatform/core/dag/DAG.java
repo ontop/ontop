@@ -20,12 +20,12 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -94,7 +94,7 @@ public class DAG implements Serializable {
 
 		// classes.put(thingConcept, thing);
 
-		for (BasicClassDescription concept : ontology.getVocabulary().getClasses()) {
+		for (OClass concept : ontology.getVocabulary().getClasses()) {
 			DAGNode node = new DAGNode(concept);
 
 			// if (!concept.equals(thingConcept)) {
@@ -205,7 +205,30 @@ public class DAG implements Serializable {
 		this.allnodes = allnodes;
 	}
 
-	private void addClassEdge(BasicClassDescription parent, BasicClassDescription child) {
+	private void addClassEdge(ClassExpression parent, ClassExpression child) {
+
+		DAGNode parentNode;
+		if (classes.containsKey(parent)) {
+			parentNode = classes.get(parent);
+		} else {
+			parentNode = new DAGNode(parent);
+			classes.put(parent, parentNode);
+
+			allnodes.put(parent, parentNode);
+		}
+		DAGNode childNode;
+		if (classes.containsKey(child)) {
+			childNode = classes.get(child);
+		} else {
+			childNode = new DAGNode(child);
+			classes.put(child, childNode);
+
+			allnodes.put(child, childNode);
+		}
+		addParent(childNode, parentNode);
+	}
+	
+	private void addClassEdge(DataRangeExpression parent, DataRangeExpression child) {
 
 		DAGNode parentNode;
 		if (classes.containsKey(parent)) {
@@ -228,6 +251,7 @@ public class DAG implements Serializable {
 		addParent(childNode, parentNode);
 
 	}
+	
 
 	private void addRoleEdge(ObjectPropertyExpression parent, ObjectPropertyExpression child) {
 		addRoleEdgeSingle(parent, child);
@@ -412,7 +436,7 @@ public class DAG implements Serializable {
 	 * @param conceptDescription
 	 * @return
 	 */
-	public DAGNode getClassNode(BasicClassDescription conceptDescription) {
+	public DAGNode getClassNode(ClassExpression conceptDescription) {
 		DAGNode rv = classes.get(conceptDescription);
 		if (rv == null) {
 			rv = classes.get(equi_mappings.get(conceptDescription));

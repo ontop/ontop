@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -42,29 +41,32 @@ public class TBoxTraversal {
 			}
 		}
 		
-		for (Equivalences<BasicClassDescription> nodes : reasoner.getClasses()) {
-			BasicClassDescription node = nodes.getRepresentative();
+		for (Equivalences<ClassExpression> nodes : reasoner.getClasses()) {
+			ClassExpression node = nodes.getRepresentative();
 			
-			for (Equivalences<BasicClassDescription> descendants : reasoner.getClasses().getSub(nodes)) {
-				BasicClassDescription descendant = descendants.getRepresentative();
-
-				//if (!descendant.equals(node))  // exclude trivial inclusions
-				if (descendant instanceof ClassExpression)
-					listener.onInclusion((ClassExpression)descendant, (ClassExpression)node);
-				else
-					listener.onInclusion((DataRangeExpression)descendant, (DataRangeExpression)node);
+			for (Equivalences<ClassExpression> descendants : reasoner.getClasses().getSub(nodes)) {
+				ClassExpression descendant = descendants.getRepresentative();
+				listener.onInclusion(descendant, node);
 					
 			}
-			for (BasicClassDescription equivalent : nodes) {
+			for (ClassExpression equivalent : nodes) {
 				if (!equivalent.equals(node)) {
-					if (node instanceof ClassExpression) {
-						listener.onInclusion((ClassExpression)equivalent, (ClassExpression)node);
-						listener.onInclusion((ClassExpression)node, (ClassExpression)equivalent);
-					}
-					else {
-						listener.onInclusion((DataRangeExpression)node, (DataRangeExpression)equivalent);
-						listener.onInclusion((DataRangeExpression)equivalent, (DataRangeExpression)node);
-					}
+					listener.onInclusion(equivalent, node);
+					listener.onInclusion(node, equivalent);
+				}
+			}
+		}	
+		for (Equivalences<DataRangeExpression> nodes : reasoner.getDataRanges()) {
+			DataRangeExpression node = nodes.getRepresentative();
+			
+			for (Equivalences<DataRangeExpression> descendants : reasoner.getDataRanges().getSub(nodes)) {
+				DataRangeExpression descendant = descendants.getRepresentative();
+				listener.onInclusion(descendant, node);				
+			}
+			for (DataRangeExpression equivalent : nodes) {
+				if (!equivalent.equals(node)) {
+					listener.onInclusion(node, equivalent);
+					listener.onInclusion(equivalent, node);
 				}
 			}
 		}	

@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -94,7 +94,7 @@ public class EmptyEntitiesTest {
 	
 	private List<String> emptyConcepts = new ArrayList<String>();
 	private List<String> emptyRoles = new ArrayList<String>();
-	private Set<BasicClassDescription> emptyBasicConcepts = new HashSet<BasicClassDescription>();
+	private Set<ClassExpression> emptyBasicConcepts = new HashSet<ClassExpression>();
 	private Set<PropertyExpression> emptyProperties = new HashSet<PropertyExpression>();
 
 	private QuestOWL reasoner;
@@ -329,8 +329,8 @@ public class EmptyEntitiesTest {
 		System.out.println(tboxreasoner.getObjectProperties());
 
 		int c = 0; // number of empty concepts
-		for (Equivalences<BasicClassDescription> concept : tboxreasoner.getClasses()) {
-			BasicClassDescription representative = concept.getRepresentative();
+		for (Equivalences<ClassExpression> concept : tboxreasoner.getClasses()) {
+			ClassExpression representative = concept.getRepresentative();
 			if ((!(representative instanceof Datatype)) && !runSPARQLConceptsQuery("<" + concept.getRepresentative().toString() + ">")) {
 				emptyBasicConcepts.addAll(concept.getMembers());
 				c += concept.size();

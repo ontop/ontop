@@ -65,7 +65,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	
 	@Override
 	public DataPropertyRangeExpression createDataPropertyRange(DataPropertyExpression role) {
-		return new DataPropertyRangeExpressionImpl(role.getInverse());
+		return new DataPropertyRangeExpressionImpl(((DataPropertyExpressionImpl)role).inverseProperty);
 	}
 	
 	

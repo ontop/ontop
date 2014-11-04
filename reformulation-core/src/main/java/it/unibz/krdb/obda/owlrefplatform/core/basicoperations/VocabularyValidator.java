@@ -156,10 +156,7 @@ public class VocabularyValidator {
 			else {
 				DataPropertyExpression equiv2 = reasoner.getDataPropertyRepresentative(p);
 				if (equiv2 != null) {
-					if (!equiv2.isInverse()) 
-						return dfac.getFunction(equiv2.getPredicate(), atom.getTerms());
-					else 
-						return dfac.getFunction(equiv2.getPredicate(), atom.getTerm(1), atom.getTerm(0));
+					return dfac.getFunction(equiv2.getPredicate(), atom.getTerms());
 				}				
 			}
 		}
