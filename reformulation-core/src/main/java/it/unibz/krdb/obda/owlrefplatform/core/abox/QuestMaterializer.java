@@ -34,7 +34,6 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
@@ -124,12 +123,12 @@ public class QuestMaterializer {
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);
 		}
-		for (PropertyExpression prop : model.getDeclaredObjectProperties()) {
+		for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) {
 			Predicate p = prop.getPredicate();
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);
 		}
-		for (PropertyExpression prop : model.getDeclaredDataProperties()) {
+		for (DataPropertyExpression prop : model.getDeclaredDataProperties()) {
 			Predicate p = prop.getPredicate();
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);

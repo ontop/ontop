@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
@@ -55,7 +54,7 @@ public class DAGTest extends TestCase {
 				classes.add(c);
 		}
 		
-		List<PropertyExpression> roles= new LinkedList<PropertyExpression>();
+		List<Description> roles= new LinkedList<Description>();
 		for (Equivalences<ObjectPropertyExpression> node : reasoner.getObjectProperties()) {
 			for (ObjectPropertyExpression r: node)
 				roles.add(r);

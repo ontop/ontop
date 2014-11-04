@@ -20,7 +20,6 @@ import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 
@@ -677,7 +676,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			ObjectPropertyExpression role = getPropertyExpression(owlProperty);
 			ClassExpression filler = getSubclassExpression(owlFiller);
 
-			PropertyExpression auxRole = ofac.createObjectProperty(OntologyVocabularyImpl.AUXROLEURI + auxRoleCounter);
+			ObjectPropertyExpression auxRole = ofac.createObjectProperty(OntologyVocabularyImpl.AUXROLEURI + auxRoleCounter);
 			auxRoleCounter += 1;
 
 			// if \exists R.C then exp = P, auxclass = \exists P, P <= R, \exists P^- <= C

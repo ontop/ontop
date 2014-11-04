@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.ontology;
 
 import it.unibz.krdb.obda.model.Predicate;
 
-public interface ObjectPropertyExpression extends PropertyExpression {
+public interface ObjectPropertyExpression extends Description {
 
 	public boolean isInverse();
 

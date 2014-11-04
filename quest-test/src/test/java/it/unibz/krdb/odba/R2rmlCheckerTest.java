@@ -28,9 +28,10 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -161,7 +162,7 @@ public class R2rmlCheckerTest {
 		}
 
 		log.debug("Comparing object properties");
-		for (PropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
+		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
 			Predicate role = prop.getPredicate();
 			
 			log.debug("description " + role);
@@ -174,7 +175,7 @@ public class R2rmlCheckerTest {
 		}
 
 		log.debug("Comparing data properties");
-		for (PropertyExpression prop : onto.getVocabulary().getDataProperties()) {
+		for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
 			Predicate role = prop.getPredicate();
 			
 			log.debug("description " + role);

@@ -80,7 +80,7 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 
 		if (obj instanceof DataPropertyExpressionImpl) {
 			DataPropertyExpressionImpl other = (DataPropertyExpressionImpl) obj;
-			return (isInverse == other.isInverse()) && predicate.equals(other.getPredicate());
+			return /*(isInverse == other.isInverse()) &&*/ predicate.equals(other.getPredicate());
 		}
 		return false;
 	}

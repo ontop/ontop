@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -47,7 +46,6 @@ import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
@@ -2047,7 +2045,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	@Override
 	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException {
 
-		Set<PropertyExpression> roleNodes = new HashSet<PropertyExpression>();
+		Set<Predicate> roleNodes = new HashSet<Predicate>();
 
 		for (Equivalences<ObjectPropertyExpression> set: reasonerDag.getObjectProperties()) {
 
@@ -2055,15 +2053,26 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			// only named roles are mapped
 			if (node.isInverse()) 
 				continue;
+			// We need to make sure we make no mappings for Auxiliary roles
+			// introduced by the Ontology translation process.
+			if (OntologyVocabularyImpl.isAuxiliaryProperty(node)) 
+				continue;
 			
-			roleNodes.add(node);
+			
+			roleNodes.add(node.getPredicate());
 		}
 		
 		for (Equivalences<DataPropertyExpression> set: reasonerDag.getDataProperties()) {
 
 			DataPropertyExpression node = set.getRepresentative();
 			
-			roleNodes.add(node);
+			// We need to make sure we make no mappings for Auxiliary roles
+			// introduced by the Ontology translation process.
+			if (OntologyVocabularyImpl.isAuxiliaryProperty(node)) 
+				continue;
+			
+			roleNodes.add(node.getPredicate());
+			
 /*
  			CODE PRODEUCES A STRICTURE (roleInverseMaps) THAT IS NEVER USED
  
@@ -2193,19 +2202,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		Map<Predicate, List<OBDAMappingAxiom>> mappings = new HashMap<Predicate, List<OBDAMappingAxiom>>();
 
-		for (PropertyExpression property : roleNodes) {
-
-			// Get the property predicate
-			Predicate role = property.getPredicate();
+		for (Predicate role : roleNodes) {
 
 			// Get the indexed node (from the pureIsa dag)
 			//Description indexedNode = pureIsa.getNode(property);
 
-			// We need to make sure we make no mappings for Auxiliary roles
-			// introduced by the Ontology translation process.
-			if (OntologyVocabularyImpl.isAuxiliaryProperty(property)) {
-				continue;
-			}
 
 			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
 			mappings.put(role, currentMappings);

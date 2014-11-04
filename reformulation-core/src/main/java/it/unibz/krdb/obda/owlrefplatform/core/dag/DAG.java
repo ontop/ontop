@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
 
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Description;
@@ -30,7 +31,6 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
@@ -137,12 +137,13 @@ public class DAG implements Serializable {
 
 			roles.put(role, rolenode);
 
-			DataPropertyExpression roleInv = role.getInverse();
-			DAGNode rolenodeinv = new DAGNode(roleInv);
-			roles.put(roleInv, rolenodeinv);
+			//DataPropertyExpression roleInv = role.getInverse();
+			//DAGNode rolenodeinv = new DAGNode(roleInv);
+			//roles.put(roleInv, rolenodeinv);
 
 			DataSomeValuesFrom existsRole = descFactory.createPropertySomeRestriction(role);
-			DataSomeValuesFrom existsRoleInv = descFactory.createPropertySomeRestriction(roleInv);
+			DataPropertyRangeExpression existsRoleInv = descFactory.createDataPropertyRange(role);
+					//.createPropertySomeRestriction(roleInv);
 			DAGNode existsNode = new DAGNode(existsRole);
 			DAGNode existsNodeInv = new DAGNode(existsRoleInv);
 			classes.put(existsRole, existsNode);
@@ -151,7 +152,7 @@ public class DAG implements Serializable {
 			allnodes.put(role, rolenode);
 			allnodes.put(existsRole, existsNode);
 			allnodes.put(existsRoleInv, existsNodeInv);
-			allnodes.put(roleInv, rolenodeinv);
+			//allnodes.put(roleInv, rolenodeinv);
 
 			// addParent(existsNode, thing);
 			// addParent(existsNodeInv, thing);
@@ -262,7 +263,7 @@ public class DAG implements Serializable {
 	private void addRoleEdge(DataPropertyExpression parent, DataPropertyExpression child) {
 		addRoleEdgeSingle(parent, child);
 
-		addRoleEdgeSingle(parent.getInverse(), child.getInverse());
+		//addRoleEdgeSingle(parent.getInverse(), child.getInverse());
 	}
 
 	private void addRoleEdgeSingle(ObjectPropertyExpression parent, ObjectPropertyExpression child) {
@@ -458,7 +459,14 @@ public class DAG implements Serializable {
 	 * @param conceptDescription
 	 * @return
 	 */
-	public DAGNode getRoleNode(PropertyExpression roleDescription) {
+	public DAGNode getRoleNode(ObjectPropertyExpression roleDescription) {
+		DAGNode rv = roles.get(roleDescription);
+		if (rv == null) {
+			rv = roles.get(equi_mappings.get(roleDescription));
+		}
+		return rv;
+	}
+	public DAGNode getRoleNode(DataPropertyExpression roleDescription) {
 		DAGNode rv = roles.get(roleDescription);
 		if (rv == null) {
 			rv = roles.get(equi_mappings.get(roleDescription));

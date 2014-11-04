@@ -28,7 +28,6 @@ import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
@@ -118,7 +117,7 @@ private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 	for(DAGNode d: d1.getRoles()){
 		System.out.println(d );
 		for(DAGNode dd: d.getEquivalents()){
-		System.out.println(d1.getRoleNode(((PropertyExpression)dd.getDescription())));
+		System.out.println(d1.getRoleNode(((ObjectPropertyExpression)dd.getDescription())));
 		;
 		}
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();

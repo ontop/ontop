@@ -34,21 +34,21 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 		this.string =  bf.toString();
 	}
 
-	@Override
-	public boolean isInverse() {
-		return isInverse;
-	}
+//	@Override
+//	public boolean isInverse() {
+//		return isInverse;
+//	}
 
 	@Override
 	public Predicate getPredicate() {
 		return predicate;
 	}
 	
-	@Override
-	public DataPropertyExpressionImpl getInverse() {
-		throw new RuntimeException("create inverse of DataProperty");
-		//return inverseProperty;
-	}	
+//	@Override
+//	public DataPropertyExpressionImpl getInverse() {
+//		throw new RuntimeException("create inverse of DataProperty");
+//		//return inverseProperty;
+//	}	
 
 	@Override
 	public boolean equals(Object obj) {

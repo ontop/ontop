@@ -17,7 +17,6 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 
 public class OntologyVocabularyImpl implements OntologyVocabulary {
 
@@ -103,7 +102,10 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	public static final String AUXROLEURI = "ER.A-AUXROLE"; // TODO: make private
 	
-	public static boolean isAuxiliaryProperty(PropertyExpression role) {
+	public static boolean isAuxiliaryProperty(ObjectPropertyExpression role) {
+		return role.getPredicate().getName().toString().startsWith(AUXROLEURI);	
+	}
+	public static boolean isAuxiliaryProperty(DataPropertyExpression role) {
 		return role.getPredicate().getName().toString().startsWith(AUXROLEURI);	
 	}
 
