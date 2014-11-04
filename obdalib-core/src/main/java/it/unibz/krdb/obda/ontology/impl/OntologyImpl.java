@@ -85,33 +85,33 @@ public class OntologyImpl implements Ontology {
 	
 	@Override
 	public void addSubClassOfAxiomWithReferencedEntities(ClassExpression concept1, ClassExpression concept2) {	
+		vocabulary.addReferencedEntries(concept1);
+		vocabulary.addReferencedEntries(concept2);
 		BinaryAxiom<ClassExpression> assertion = new BinaryAxiomImpl<ClassExpression>(concept1, concept2);
-		vocabulary.addReferencedEntries(assertion.getSub());
-		vocabulary.addReferencedEntries(assertion.getSuper());
 		subClassAxioms.add(assertion);
 	}
 
 	@Override
 	public void addSubClassOfAxiomWithReferencedEntities(DataRangeExpression concept1, DataRangeExpression concept2) {
+		vocabulary.addReferencedEntries(concept1);
+		vocabulary.addReferencedEntries(concept2);
 		BinaryAxiom<DataRangeExpression> assertion = new BinaryAxiomImpl<DataRangeExpression>(concept1, concept2);
-		vocabulary.addReferencedEntries(assertion.getSub());
-		vocabulary.addReferencedEntries(assertion.getSuper());
 		subDataRangeAxioms.add(assertion);
 	}
 	
 	@Override
 	public void addSubPropertyOfAxiomWithReferencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including) {
+		vocabulary.addReferencedEntries(included);
+		vocabulary.addReferencedEntries(including);
 		BinaryAxiom<ObjectPropertyExpression> assertion = new BinaryAxiomImpl<ObjectPropertyExpression>(included, including);
-		vocabulary.addReferencedEntries(assertion.getSub());
-		vocabulary.addReferencedEntries(assertion.getSuper());
 		subObjectPropertyAxioms.add(assertion);
 	}
 	
 	@Override
 	public void addSubPropertyOfAxiomWithReferencedEntities(DataPropertyExpression included, DataPropertyExpression including) {
+		vocabulary.addReferencedEntries(included);
+		vocabulary.addReferencedEntries(including);
 		BinaryAxiom<DataPropertyExpression> assertion = new BinaryAxiomImpl<DataPropertyExpression>(included, including);
-		vocabulary.addReferencedEntries(assertion.getSub());
-		vocabulary.addReferencedEntries(assertion.getSuper());
 		subDataPropertyAxioms.add(assertion);
 	}
 
@@ -131,10 +131,14 @@ public class OntologyImpl implements Ontology {
 		subDataRangeAxioms.add(ax);
 	}
 
+	// TODO: systematic check for trivial axioms
+	
 	@Override
 	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including) {
 		vocabulary.checkSignature(included);
 		vocabulary.checkSignature(including);
+		if (including.equals(vocabulary.owlTopObjectProperty))
+			return;
 		BinaryAxiom<ObjectPropertyExpression> ax = new BinaryAxiomImpl<ObjectPropertyExpression>(included, including);
 		subObjectPropertyAxioms.add(ax);
 	}

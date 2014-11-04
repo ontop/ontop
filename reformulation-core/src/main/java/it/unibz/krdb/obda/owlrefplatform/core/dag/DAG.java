@@ -182,9 +182,7 @@ public class DAG implements Serializable {
 			DataPropertyExpression parent = roleIncl.getSuper();
 			DataPropertyExpression child = roleIncl.getSub();
 
-			// This adds the direct edge and the inverse, e.g., R ISA S and
-			// R- ISA S-,
-			// R- ISA S and R ISA S-
+			// This adds the direct edge 
 			addRoleEdge(parent, child);
 		}
 		// clean();

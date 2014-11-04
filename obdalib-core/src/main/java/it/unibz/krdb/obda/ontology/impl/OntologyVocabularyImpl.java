@@ -30,7 +30,11 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	private final Set<ObjectPropertyExpression> objectProperties = new HashSet<ObjectPropertyExpression>();
 
+	private final Set<ObjectPropertyExpression> auxObjectProperties = new HashSet<ObjectPropertyExpression>();
+
 	private final Set<DataPropertyExpression> dataProperties = new HashSet<DataPropertyExpression>();
+
+	private final Set<DataPropertyExpression> auxDataProperties = new HashSet<DataPropertyExpression>();
 	
 	// auxiliary symbols and built-in datatypes 
 	
@@ -99,8 +103,39 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	public Set<DataPropertyExpression> getDataProperties() {
 		return Collections.unmodifiableSet(dataProperties);
 	}
+
 	
-	public static final String AUXROLEURI = "ER.A-AUXROLE"; // TODO: make private
+	private static final String AUXROLEURI = "ER.A-AUXROLE"; 
+	private int auxCounter = 0;
+	
+	
+	@Override
+	public ObjectPropertyExpression createAuxiliaryObjectProperty() {
+		ObjectPropertyExpression rd = ofac.createObjectProperty(AUXROLEURI + auxCounter);
+		auxCounter++ ;
+		auxObjectProperties.add(rd);
+		return rd;
+	}
+	
+	@Override
+	public DataPropertyExpression createAuxiliaryDataProperty() {
+		DataPropertyExpression rd = ofac.createDataProperty(AUXROLEURI + auxCounter);
+		auxCounter++ ;
+		auxDataProperties.add(rd);
+		return rd;
+	}
+	
+	@Override
+	public Set<ObjectPropertyExpression> getAuxiliaryObjectProperties() {
+		return Collections.unmodifiableSet(auxObjectProperties);
+	}
+
+	@Override
+	public Set<DataPropertyExpression> getAuxiliaryDataProperties() {
+		return Collections.unmodifiableSet(auxDataProperties);
+	}
+	
+	// TODO: remove static
 	
 	public static boolean isAuxiliaryProperty(ObjectPropertyExpression role) {
 		return role.getPredicate().getName().toString().startsWith(AUXROLEURI);	

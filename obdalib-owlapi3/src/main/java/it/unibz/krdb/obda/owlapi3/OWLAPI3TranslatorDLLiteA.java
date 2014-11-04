@@ -105,8 +105,6 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	private final Map<OWLDataSomeValuesFrom, DataSomeValuesFrom> auxiliaryDatatypeProperties 
 							= new HashMap<OWLDataSomeValuesFrom, DataSomeValuesFrom>();
 
-	private int auxRoleCounter = 0;
-	
 	
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
@@ -673,8 +671,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			OWLClassExpression owlFiller = someexp.getFiller();
 			ClassExpression filler = getSubclassExpression(owlFiller);
 
-			ObjectPropertyExpression auxRole = ofac.createObjectProperty(OntologyVocabularyImpl.AUXROLEURI + auxRoleCounter);
-			auxRoleCounter += 1;
+			ObjectPropertyExpression auxRole = dl_onto.getVocabulary().createAuxiliaryObjectProperty();
 
 			// if \exists R.C then auxRole = P, auxclass = \exists P, P <= R, \exists P^- <= C
 			// if \exists R^-.C then auxRole = P^-, auxclass = \exists P^-, P^- <= R^-, \exists P <= C
@@ -706,8 +703,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			COL_TYPE datatype = getColumnType(owlDatatype);
 			Datatype filler = ofac.createDataType(datatype);
 			
-			DataPropertyExpression auxRole = ofac.createDataProperty(OntologyVocabularyImpl.AUXROLEURI + auxRoleCounter);
-			auxRoleCounter += 1;
+			DataPropertyExpression auxRole = dl_onto.getVocabulary().createAuxiliaryDataProperty();
 
 			auxclass = auxRole.getDomain(); 
 			auxiliaryDatatypeProperties.put(someexp, auxclass);
