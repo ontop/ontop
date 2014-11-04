@@ -21,12 +21,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
  */
 
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.OntologyImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 
 import java.util.HashMap;
@@ -40,8 +37,6 @@ import java.util.Map;
 @Deprecated
 public class DAGConstructor {
 
-	private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
-
 	public static DAG getISADAG(Ontology ontology) {
 		return new DAG(ontology);
 	}
@@ -54,7 +49,7 @@ public class DAGConstructor {
 
 		for (DAGNode node : dag.getClasses()) {
 
-			if (node.getDescription() instanceof SomeValuesFrom) {
+			if (!(node.getDescription() instanceof OClass)) {
 				continue;
 			}
 
@@ -69,7 +64,7 @@ public class DAGConstructor {
 			}
 
 			for (DAGNode child : node.getChildren()) {
-				if (child.getDescription() instanceof SomeValuesFrom) {
+				if (!(child.getDescription() instanceof OClass)) {
 					continue;
 				}
 				DAGNode newChild = classes.get(child.getDescription());

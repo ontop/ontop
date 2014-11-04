@@ -39,9 +39,9 @@ public interface OntologyFactory {
 	public Ontology createOntology();
 
 
-	public SomeValuesFrom createPropertySomeRestriction(ObjectPropertyExpression role);
+	public ObjectSomeValuesFrom createPropertySomeRestriction(ObjectPropertyExpression role);
 
-	public SomeValuesFrom createPropertySomeRestriction(DataPropertyExpression role);
+	public DataSomeValuesFrom createPropertySomeRestriction(DataPropertyExpression role);
 	
 	public DataPropertyRangeExpression createDataPropertyRange(DataPropertyExpression role);
 		

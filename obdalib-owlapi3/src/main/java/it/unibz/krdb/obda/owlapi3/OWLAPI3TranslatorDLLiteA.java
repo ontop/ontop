@@ -11,15 +11,16 @@ import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 
@@ -99,11 +100,11 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	 * put them in this map to avoid generating too many auxiliary
 	 * roles/classes.
 	 */
-	private final Map<OWLObjectSomeValuesFrom, SomeValuesFrom> auxiliaryClassProperties 
-							= new HashMap<OWLObjectSomeValuesFrom, SomeValuesFrom>();
+	private final Map<OWLObjectSomeValuesFrom, ObjectSomeValuesFrom> auxiliaryClassProperties 
+							= new HashMap<OWLObjectSomeValuesFrom, ObjectSomeValuesFrom>();
 	
-	private final Map<OWLDataSomeValuesFrom, SomeValuesFrom> auxiliaryDatatypeProperties 
-							= new HashMap<OWLDataSomeValuesFrom, SomeValuesFrom>();
+	private final Map<OWLDataSomeValuesFrom, DataSomeValuesFrom> auxiliaryDatatypeProperties 
+							= new HashMap<OWLDataSomeValuesFrom, DataSomeValuesFrom>();
 
 	private int auxRoleCounter = 0;
 	
@@ -225,7 +226,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	public void visit(OWLDataPropertyDomainAxiom ax) {
 		try {
 			DataPropertyExpression role = getPropertyExpression(ax.getProperty());
-			SomeValuesFrom subclass = ofac.createPropertySomeRestriction(role);
+			DataSomeValuesFrom subclass = ofac.createPropertySomeRestriction(role);
 			addSubClassAxioms(subclass, ax.getDomain().asConjunctSet());		
 		} catch (TranslationException e) {
 			log.warn("Axiom not yet supported by Quest: {}", ax.toString());
@@ -241,7 +242,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	public void visit(OWLObjectPropertyDomainAxiom ax) {
 		try {
 			ObjectPropertyExpression role = getPropertyExpression(ax.getProperty());
-			SomeValuesFrom subclass = ofac.createPropertySomeRestriction(role);
+			ObjectSomeValuesFrom subclass = ofac.createPropertySomeRestriction(role);
 			addSubClassAxioms(subclass, ax.getDomain().asConjunctSet());
 		} catch (TranslationException e) {
 			log.warn("Axiom not yet supported by Quest: {}", ax.toString());
@@ -302,7 +303,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	public void visit(OWLObjectPropertyRangeAxiom ax) {
 		ObjectPropertyExpression role = getPropertyExpression(ax.getProperty());
 		ObjectPropertyExpression inv = role.getInverse();		
-		SomeValuesFrom subclass = ofac.createPropertySomeRestriction(inv);
+		ObjectSomeValuesFrom subclass = ofac.createPropertySomeRestriction(inv);
 		
 		try {
 			addSubClassAxioms(subclass, ax.getRange().asConjunctSet());
@@ -663,7 +664,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 
 	private ClassExpression getPropertySomeClassRestriction(OWLObjectSomeValuesFrom someexp) throws TranslationException {
 		
-		SomeValuesFrom auxclass = auxiliaryClassProperties.get(someexp);
+		ObjectSomeValuesFrom auxclass = auxiliaryClassProperties.get(someexp);
 		if (auxclass == null) {
 			/*
 			 * no auxiliary subclass assertions found for this exists R.A,
@@ -694,7 +695,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			
 			/* Creating the range assertion */
 			ObjectPropertyExpression expInv = exp.getInverse();
-			SomeValuesFrom propertySomeRestrictionInv = ofac.createPropertySomeRestriction(expInv);
+			ObjectSomeValuesFrom propertySomeRestrictionInv = ofac.createPropertySomeRestriction(expInv);
 			dl_onto.addSubClassOfAxiom(propertySomeRestrictionInv, filler);
 		}
 
@@ -703,7 +704,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 
 	private ClassExpression getPropertySomeDatatypeRestriction(OWLDataSomeValuesFrom someexp) throws TranslationException {
 		
-		SomeValuesFrom auxclass = auxiliaryDatatypeProperties.get(someexp);
+		DataSomeValuesFrom auxclass = auxiliaryDatatypeProperties.get(someexp);
 		if (auxclass == null) {
 			/*
 			 * no auxiliary subclass assertions found for this exists R.A,

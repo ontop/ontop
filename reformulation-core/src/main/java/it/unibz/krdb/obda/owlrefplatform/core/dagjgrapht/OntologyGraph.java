@@ -23,12 +23,12 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
@@ -155,15 +155,15 @@ public class OntologyGraph {
 
 		// domains and ranges of roles
 		for (ObjectPropertyExpression role : objectPropertyGraph.vertexSet()) {
-			SomeValuesFrom existsRole = fac.createPropertySomeRestriction(role);
+			ObjectSomeValuesFrom existsRole = fac.createPropertySomeRestriction(role);
 			classGraph.addVertex(existsRole);			
 		}
 		// edges between the domains and ranges for sub-properties
 		for (DefaultEdge edge : objectPropertyGraph.edgeSet()) {
 			ObjectPropertyExpression child = objectPropertyGraph.getEdgeSource(edge);
 			ObjectPropertyExpression parent = objectPropertyGraph.getEdgeTarget(edge);
-			SomeValuesFrom existChild = fac.createPropertySomeRestriction(child);
-			SomeValuesFrom existsParent = fac.createPropertySomeRestriction(parent);
+			ObjectSomeValuesFrom existChild = fac.createPropertySomeRestriction(child);
+			ObjectSomeValuesFrom existsParent = fac.createPropertySomeRestriction(parent);
 			classGraph.addVertex(existChild);
 			classGraph.addVertex(existsParent);
 			classGraph.addEdge(existChild, existsParent);		
@@ -172,15 +172,15 @@ public class OntologyGraph {
 		// TODO: remove inverses for data properties
 		// domains and ranges of roles
 		for (DataPropertyExpression role : dataPropertyGraph.vertexSet()) {
-			SomeValuesFrom existsRole = fac.createPropertySomeRestriction(role);
+			DataSomeValuesFrom existsRole = fac.createPropertySomeRestriction(role);
 			classGraph.addVertex(existsRole);			
 		}
 		// edges between the domains and ranges for sub-properties
 		for (DefaultEdge edge : dataPropertyGraph.edgeSet()) {
 			DataPropertyExpression child = dataPropertyGraph.getEdgeSource(edge);
 			DataPropertyExpression parent = dataPropertyGraph.getEdgeTarget(edge);
-			BasicClassDescription existChild = fac.createPropertySomeRestriction(child);
-			BasicClassDescription existsParent = fac.createPropertySomeRestriction(parent);
+			DataSomeValuesFrom existChild = fac.createPropertySomeRestriction(child);
+			DataSomeValuesFrom existsParent = fac.createPropertySomeRestriction(parent);
 			classGraph.addVertex(existChild);
 			classGraph.addVertex(existsParent);
 			classGraph.addEdge(existChild, existsParent);		
@@ -190,17 +190,17 @@ public class OntologyGraph {
 		// edges between the domain and the range of each property for the chain graph
 		if (chain)  {
 			for (ObjectPropertyExpression role : objectPropertyGraph.vertexSet()) {
-				SomeValuesFrom existsRole = fac.createPropertySomeRestriction(role);
+				ObjectSomeValuesFrom existsRole = fac.createPropertySomeRestriction(role);
 				ObjectPropertyExpression inv = role.getInverse();
-				SomeValuesFrom existsRoleInv = fac.createPropertySomeRestriction(inv);
+				ObjectSomeValuesFrom existsRoleInv = fac.createPropertySomeRestriction(inv);
 				
 				classGraph.addEdge(existsRoleInv, existsRole);				
 				classGraph.addEdge(existsRole, existsRoleInv);				
 			}
 			for (DataPropertyExpression role : dataPropertyGraph.vertexSet()) {
-				SomeValuesFrom existsRole = fac.createPropertySomeRestriction(role);
+				DataSomeValuesFrom existsRole = fac.createPropertySomeRestriction(role);
 				DataPropertyExpression inv = role.getInverse();
-				SomeValuesFrom existsRoleInv = fac.createPropertySomeRestriction(inv);
+				DataSomeValuesFrom existsRoleInv = fac.createPropertySomeRestriction(inv);
 				
 				classGraph.addEdge(existsRoleInv, existsRole);				
 				classGraph.addEdge(existsRole, existsRoleInv);				

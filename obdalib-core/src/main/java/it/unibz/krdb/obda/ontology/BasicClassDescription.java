@@ -9,7 +9,7 @@ package it.unibz.krdb.obda.ontology;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ * BasicClassDescription
  *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.ontology;
  */
 
 /***
- * A ClassExpression or a DataRangeExpression (to be removed eventualy)
+ * A ClassExpression or a DataRangeExpression (to be removed eventually)
  */
 public interface BasicClassDescription extends Description {
 

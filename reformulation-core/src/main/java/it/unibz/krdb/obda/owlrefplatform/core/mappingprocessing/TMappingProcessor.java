@@ -30,12 +30,13 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
@@ -43,7 +44,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -397,8 +397,14 @@ public class TMappingProcessor {
 						isClass = true;
 						isInverse = false;
 					} 
-					else if (childDescription instanceof SomeValuesFrom) {
-						PropertyExpression some = ((SomeValuesFrom) childDescription).getProperty();
+					else if (childDescription instanceof ObjectSomeValuesFrom) {
+						ObjectPropertyExpression some = ((ObjectSomeValuesFrom) childDescription).getProperty();
+						childPredicate = some.getPredicate();
+						isClass = false;
+						isInverse = some.isInverse();
+					} 
+					else if (childDescription instanceof DataSomeValuesFrom) {
+						DataPropertyExpression some = ((DataSomeValuesFrom) childDescription).getProperty();
 						childPredicate = some.getPredicate();
 						isClass = false;
 						isInverse = some.isInverse();

@@ -22,8 +22,8 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
@@ -69,7 +69,7 @@ public class TranslatorTest extends TestCase {
 		assertEquals(1, ass.size());
 		
 		SubClassOfAxiom a = assit.next();
-		SomeValuesFrom ex = (SomeValuesFrom) a.getSub();
+		ObjectSomeValuesFrom ex = (ObjectSomeValuesFrom) a.getSub();
 		assertEquals(true, ex.getProperty().isInverse());
 	}
 	
@@ -94,7 +94,7 @@ public class TranslatorTest extends TestCase {
 		assertEquals(1, ass.size());
 		
 		SubClassOfAxiom a = assit.next();
-		SomeValuesFrom ex = (SomeValuesFrom) a.getSub();
+		ObjectSomeValuesFrom ex = (ObjectSomeValuesFrom) a.getSub();
 		assertEquals(false, ex.getProperty().isInverse());
 	}
 	

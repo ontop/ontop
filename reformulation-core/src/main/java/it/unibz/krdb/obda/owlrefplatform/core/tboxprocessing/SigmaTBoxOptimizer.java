@@ -22,17 +22,13 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
-import it.unibz.krdb.obda.ontology.Datatype;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.ClassExpression;
-import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
-import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -179,8 +175,8 @@ public class SigmaTBoxOptimizer {
 	
 	private boolean check_directly_redundant_role(ObjectPropertyExpression parent, ObjectPropertyExpression child) {
 
-		SomeValuesFrom existParentDesc = fac.createPropertySomeRestriction(parent);
-		SomeValuesFrom existChildDesc = fac.createPropertySomeRestriction(child);
+		ObjectSomeValuesFrom existParentDesc = fac.createPropertySomeRestriction(parent);
+		ObjectSomeValuesFrom existChildDesc = fac.createPropertySomeRestriction(child);
 
 		return check_directly_redundant(parent, child) && 
 				check_directly_redundant(existParentDesc, existChildDesc);
@@ -188,8 +184,8 @@ public class SigmaTBoxOptimizer {
 
 	private boolean check_directly_redundant_role(DataPropertyExpression parent, DataPropertyExpression child) {
 
-		SomeValuesFrom existParentDesc = fac.createPropertySomeRestriction(parent);
-		SomeValuesFrom existChildDesc = fac.createPropertySomeRestriction(child);
+		DataSomeValuesFrom existParentDesc = fac.createPropertySomeRestriction(parent);
+		DataSomeValuesFrom existChildDesc = fac.createPropertySomeRestriction(child);
 
 		return check_directly_redundant(parent, child) && 
 				check_directly_redundant(existParentDesc, existChildDesc);

@@ -23,11 +23,12 @@ package it.unibz.krdb.obda.quest.dag;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
@@ -326,7 +327,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 		OntologyFactory fac = OntologyFactoryImpl.getInstance();
 		HashSet<BasicClassDescription> processedNodes = new HashSet<BasicClassDescription>();
 		for (BasicClassDescription node : nodes) {
-			if (!(node instanceof SomeValuesFrom)
+			if ((!(node instanceof ObjectSomeValuesFrom) && !(node instanceof DataSomeValuesFrom))
 					|| processedNodes.contains(node)) {
 				continue;
 			}
@@ -335,16 +336,23 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 			 * Adding a cycle between exists R and exists R- for each R.
 			 */
 
-			SomeValuesFrom existsR = (SomeValuesFrom) node;
-			PropertyExpression exists = existsR.getProperty();
 			BasicClassDescription existsRin;
-			if (exists instanceof ObjectPropertyExpression) 
-				existsRin = fac.createPropertySomeRestriction(((ObjectPropertyExpression)exists).getInverse());
-			else
-				existsRin = fac.createPropertySomeRestriction(((DataPropertyExpression)exists).getInverse());
-				// TODO: fix DataRange
-//				existsRin = fac.createDataPropertyRange((DataPropertyExpression)exists);
-						
+			
+			if (node instanceof ObjectSomeValuesFrom) {
+				ObjectSomeValuesFrom existsR = (ObjectSomeValuesFrom) node;
+				ObjectPropertyExpression exists = existsR.getProperty();
+				existsRin = fac.createPropertySomeRestriction(exists.getInverse());
+			}
+			else {
+				DataSomeValuesFrom existsR = (DataSomeValuesFrom) node;
+				DataPropertyExpression exists = existsR.getProperty();
+				existsRin = fac.createPropertySomeRestriction(exists.getInverse());
+					// TODO: fix DataRange
+//					existsRin = fac.createDataPropertyRange((DataPropertyExpression)exists);
+			}
+				
+			BasicClassDescription existsR = node;
+			
 			Equivalences<BasicClassDescription> existsNode = classDAG.getVertex(existsR);
 			Equivalences<BasicClassDescription> existsInvNode = classDAG.getVertex(existsRin);
 			

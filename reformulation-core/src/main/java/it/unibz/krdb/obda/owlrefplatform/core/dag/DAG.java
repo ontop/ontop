@@ -20,15 +20,15 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
@@ -36,11 +36,9 @@ import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 
 @Deprecated
 public class DAG implements Serializable {
@@ -117,8 +115,8 @@ public class DAG implements Serializable {
 			DAGNode rolenodeinv = new DAGNode(roleInv);
 			roles.put(roleInv, rolenodeinv);
 
-			SomeValuesFrom existsRole = descFactory.createPropertySomeRestriction(role);
-			SomeValuesFrom existsRoleInv = descFactory.createPropertySomeRestriction(roleInv);
+			ObjectSomeValuesFrom existsRole = descFactory.createPropertySomeRestriction(role);
+			ObjectSomeValuesFrom existsRoleInv = descFactory.createPropertySomeRestriction(roleInv);
 			DAGNode existsNode = new DAGNode(existsRole);
 			DAGNode existsNodeInv = new DAGNode(existsRoleInv);
 			classes.put(existsRole, existsNode);
@@ -141,8 +139,8 @@ public class DAG implements Serializable {
 			DAGNode rolenodeinv = new DAGNode(roleInv);
 			roles.put(roleInv, rolenodeinv);
 
-			SomeValuesFrom existsRole = descFactory.createPropertySomeRestriction(role);
-			SomeValuesFrom existsRoleInv = descFactory.createPropertySomeRestriction(roleInv);
+			DataSomeValuesFrom existsRole = descFactory.createPropertySomeRestriction(role);
+			DataSomeValuesFrom existsRoleInv = descFactory.createPropertySomeRestriction(roleInv);
 			DAGNode existsNode = new DAGNode(existsRole);
 			DAGNode existsNodeInv = new DAGNode(existsRoleInv);
 			classes.put(existsRole, existsNode);
@@ -253,9 +251,8 @@ public class DAG implements Serializable {
 		}
 		addParent(childNode, parentNode);
 
-		SomeValuesFrom existsParent = descFactory.createPropertySomeRestriction(parent);
-
-		SomeValuesFrom existChild = descFactory.createPropertySomeRestriction(child);
+		ObjectSomeValuesFrom existsParent = descFactory.createPropertySomeRestriction(parent);
+		ObjectSomeValuesFrom existChild = descFactory.createPropertySomeRestriction(child);
 
 		addClassEdge(existsParent, existChild);
 		// addClassEdge(thingConcept, existsParent);
@@ -280,9 +277,8 @@ public class DAG implements Serializable {
 		}
 		addParent(childNode, parentNode);
 
-		SomeValuesFrom existsParent = descFactory.createPropertySomeRestriction(parent);
-
-		SomeValuesFrom existChild = descFactory.createPropertySomeRestriction(child);
+		DataSomeValuesFrom existsParent = descFactory.createPropertySomeRestriction(parent);
+		DataSomeValuesFrom existChild = descFactory.createPropertySomeRestriction(child);
 
 		addClassEdge(existsParent, existChild);
 		// addClassEdge(thingConcept, existsParent);

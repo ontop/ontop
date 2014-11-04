@@ -21,12 +21,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
  */
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Intersection;
@@ -48,7 +46,7 @@ public class TreeWitnessGenerator {
 
 	private final Set<BasicClassDescription> concepts = new HashSet<BasicClassDescription>();
 	private Set<BasicClassDescription> subconcepts;
-	private SomeValuesFrom existsRinv;
+	private ObjectSomeValuesFrom existsRinv;
 
 	private final TBoxReasoner reasoner;
 
@@ -75,11 +73,11 @@ public class TreeWitnessGenerator {
 			Set<Equivalences<BasicClassDescription>> subClasses = reasoner.getClasses().getSub(set);
 			boolean couldBeGenerating = set.size() > 1 || subClasses.size() > 1; 
 			for (BasicClassDescription concept : set) {
-				if (concept instanceof SomeValuesFrom && couldBeGenerating) {
-					SomeValuesFrom some = (SomeValuesFrom)concept;
+				if (concept instanceof ObjectSomeValuesFrom && couldBeGenerating) {
+					ObjectSomeValuesFrom some = (ObjectSomeValuesFrom)concept;
 					TreeWitnessGenerator twg = gens.get(some);
 					if (twg == null) {
-						twg = new TreeWitnessGenerator(reasoner, (ObjectPropertyExpression)some.getProperty(), owlThing);			
+						twg = new TreeWitnessGenerator(reasoner, some.getProperty(), owlThing);			
 						gens.put(concept, twg);
 					}
 					for (Equivalences<BasicClassDescription> subClassSet : subClasses) {
@@ -114,7 +112,7 @@ public class TreeWitnessGenerator {
 		// add all sub-concepts of all \exists R
 		Set<BasicClassDescription> extension = new HashSet<BasicClassDescription>();
 		for (BasicClassDescription b : concepts) 
-			if (b instanceof SomeValuesFrom)
+			if (b instanceof ObjectSomeValuesFrom)
 				extension.addAll(reasoner.getClasses().getSubRepresentatives(b));
 		concepts.addAll(extension);
 		
@@ -146,16 +144,16 @@ public class TreeWitnessGenerator {
 			while (modified) {
 				modified = false;
 				for (BasicClassDescription b : concepts) 
-					if (b instanceof SomeValuesFrom) {
-						SomeValuesFrom some = (SomeValuesFrom)b;
+					if (b instanceof ObjectSomeValuesFrom) {
+						ObjectSomeValuesFrom some = (ObjectSomeValuesFrom)b;
 						ObjectPropertyExpression prop = (ObjectPropertyExpression) some.getProperty();
 						Set<ObjectPropertyExpression> bsubproperties = reasoner.getObjectProperties().getSubRepresentatives(prop);
 						Iterator<BasicClassDescription> i = concepts.iterator();
 						while (i.hasNext()) {
 							BasicClassDescription bp = i.next();
-							if ((b != bp) && (bp instanceof SomeValuesFrom)) {
-								SomeValuesFrom somep = (SomeValuesFrom)bp;
-								PropertyExpression propp = somep.getProperty();
+							if ((b != bp) && (bp instanceof ObjectSomeValuesFrom)) {
+								ObjectSomeValuesFrom somep = (ObjectSomeValuesFrom)bp;
+								ObjectPropertyExpression propp = somep.getProperty();
 								
 								if (bsubproperties.contains(propp)) {
 									i.remove();
@@ -193,10 +191,10 @@ public class TreeWitnessGenerator {
 				ObjectPropertyExpression inv = ((ObjectPropertyExpression)property).getInverse();			
 				existsRinv = ontFactory.createPropertySomeRestriction(inv);	
 			}
-			else {
-				DataPropertyExpression inv = ((DataPropertyExpression)property).getInverse();			
-				existsRinv = ontFactory.createPropertySomeRestriction(inv);					
-			}
+//			else {
+//				DataPropertyExpression inv = ((DataPropertyExpression)property).getInverse();			
+//				existsRinv = ontFactory.createPropertySomeRestriction(inv);					
+//			}
 		}		
 	}
 

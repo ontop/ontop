@@ -26,14 +26,12 @@ import java.util.Set;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
@@ -45,7 +43,6 @@ import junit.framework.TestCase;
 
 public class DAGChainTest extends TestCase {
 
-	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
 	private static final OntologyFactory	descFactory			= OntologyFactoryImpl.getInstance();
 
 	private static <T> int sizeOf(Set<Equivalences<T>> set) {
@@ -89,8 +86,8 @@ public class DAGChainTest extends TestCase {
 		ObjectPropertyExpression rprop = descFactory.createObjectProperty("r");
 		ObjectPropertyExpression riprop = rprop.getInverse();
 		OClass ac = descFactory.createClass("a");
-		SomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
-		SomeValuesFrom ier = descFactory.createPropertySomeRestriction(riprop);
+		ObjectSomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
+		ObjectSomeValuesFrom ier = descFactory.createPropertySomeRestriction(riprop);
 		OClass cc = descFactory.createClass("c");
 
 		ontology.addSubClassOfAxiomWithReferencedEntities(er, ac);
@@ -138,8 +135,8 @@ public class DAGChainTest extends TestCase {
 		ObjectPropertyExpression riprop = rprop.getInverse();
 
 		OClass ac = descFactory.createClass("a");
-		SomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
-		SomeValuesFrom ier = descFactory.createPropertySomeRestriction(riprop);
+		ObjectSomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
+		ObjectSomeValuesFrom ier = descFactory.createPropertySomeRestriction(riprop);
 		OClass cc = descFactory.createClass("c");
 		OClass bc = descFactory.createClass("b");
 		OClass dc = descFactory.createClass("d");

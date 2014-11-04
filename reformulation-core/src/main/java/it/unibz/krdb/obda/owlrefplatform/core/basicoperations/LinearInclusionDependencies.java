@@ -14,10 +14,12 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
+
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
@@ -109,7 +111,7 @@ public class LinearInclusionDependencies {
 	                	continue;
 
 	                for (BasicClassDescription cla : classNode)  {
-	                	if (!(cla instanceof OClass) && !(!full && (cla instanceof SomeValuesFrom)))
+	                	if (!(cla instanceof OClass) && !(!full && ((cla instanceof ObjectSomeValuesFrom) || (cla instanceof DataSomeValuesFrom))))
 	                		continue;
 	                	
 	                	if (cla == subclass)
@@ -146,9 +148,17 @@ public class LinearInclusionDependencies {
 			OClass klass = (OClass) description;
 			return ofac.getFunction(klass.getPredicate(), varX);
 		} 
-		else if (description instanceof SomeValuesFrom) {
+		else if (description instanceof ObjectSomeValuesFrom) {
 			final Variable varY = ofac.getVariable(existentialVariableName);
-			PropertyExpression property = ((SomeValuesFrom) description).getProperty();
+			ObjectPropertyExpression property = ((ObjectSomeValuesFrom) description).getProperty();
+			if (property.isInverse()) 
+				return ofac.getFunction(property.getPredicate(), varY, varX);
+			else 
+				return ofac.getFunction(property.getPredicate(), varX, varY);
+		} 
+		else if (description instanceof DataSomeValuesFrom) {
+			final Variable varY = ofac.getVariable(existentialVariableName);
+			DataPropertyExpression property = ((DataSomeValuesFrom) description).getProperty();
 			if (property.isInverse()) 
 				return ofac.getFunction(property.getPredicate(), varY, varX);
 			else 

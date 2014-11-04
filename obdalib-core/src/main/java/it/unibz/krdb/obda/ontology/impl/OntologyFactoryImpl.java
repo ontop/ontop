@@ -29,14 +29,14 @@ import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 
 
 public class OntologyFactoryImpl implements OntologyFactory {
@@ -105,12 +105,12 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	}
 	
 	@Override
-	public SomeValuesFrom createPropertySomeRestriction(ObjectPropertyExpression role) {
-		return new PropertySomeRestrictionImpl(role);
+	public ObjectSomeValuesFrom createPropertySomeRestriction(ObjectPropertyExpression role) {
+		return new ObjectSomeValuesFromImpl(role);
 	}
 	
 	@Override
-	public SomeValuesFrom createPropertySomeRestriction(DataPropertyExpression role) {
-		return new PropertySomeRestrictionImpl(role);
+	public DataSomeValuesFrom createPropertySomeRestriction(DataPropertyExpression role) {
+		return new DataSomeValuesFromImpl(role);
 	}
 }

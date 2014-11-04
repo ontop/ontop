@@ -22,9 +22,9 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
 
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.io.BufferedReader;
@@ -80,13 +80,13 @@ public class YAGOTest {
             	
                 if ("rdfs:range".equals(predicate)) {
                     ObjectPropertyExpression psprop = descFactory.createObjectProperty(subject).getInverse();
-                    SomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
+                    ObjectSomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
                     OClass co = descFactory.createClass(object);
                     onto.addSubClassOfAxiom(rs, co);
                 } 
                 else if ("rdfs:domain".equals(predicate)) {
                     ObjectPropertyExpression psprop = descFactory.createObjectProperty(subject);
-                    SomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
+                    ObjectSomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
                     OClass co = descFactory.createClass(object);
                     onto.addSubClassOfAxiom(rs, co);
                 } 

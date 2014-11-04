@@ -26,11 +26,9 @@ import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
-import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
@@ -531,7 +529,7 @@ public class CQCUtilitiesTest {
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
 			OClass left = dfac.createClass("A");
 			ObjectPropertyExpression pright = dfac.createObjectProperty("R");
-			SomeValuesFrom right = dfac.createPropertySomeRestriction(pright);
+			ObjectSomeValuesFrom right = dfac.createPropertySomeRestriction(pright);
 			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -557,7 +555,7 @@ public class CQCUtilitiesTest {
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
 			OClass left = dfac.createClass("A");
 			ObjectPropertyExpression pright = dfac.createObjectProperty("R").getInverse();
-			SomeValuesFrom right = dfac.createPropertySomeRestriction(pright);
+			ObjectSomeValuesFrom right = dfac.createPropertySomeRestriction(pright);
 			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -582,7 +580,7 @@ public class CQCUtilitiesTest {
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
 			Ontology sigma = dfac.createOntology();
 			ObjectPropertyExpression pleft = dfac.createObjectProperty("R");
-			SomeValuesFrom left = dfac.createPropertySomeRestriction(pleft);
+			ObjectSomeValuesFrom left = dfac.createPropertySomeRestriction(pleft);
 			OClass right = dfac.createClass("A");
 
 			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
@@ -609,7 +607,7 @@ public class CQCUtilitiesTest {
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
 			Ontology sigma = dfac.createOntology();
 			ObjectPropertyExpression pleft = dfac.createObjectProperty("R").getInverse();
-			SomeValuesFrom left = dfac.createPropertySomeRestriction(pleft);
+			ObjectSomeValuesFrom left = dfac.createPropertySomeRestriction(pleft);
 			OClass right = dfac.createClass("A");
 			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
 
@@ -659,7 +657,7 @@ public class CQCUtilitiesTest {
         Ontology sigma = dfac.createOntology();
         OClass left = dfac.createClass("A");
         ObjectPropertyExpression pleft = dfac.createObjectProperty("R");
-        SomeValuesFrom right = dfac.createPropertySomeRestriction(pleft);
+        ObjectSomeValuesFrom right = dfac.createPropertySomeRestriction(pleft);
         sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
 
 

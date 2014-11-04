@@ -24,12 +24,13 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Collections;
@@ -312,18 +313,18 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		
 				if (namedRepresentative == null) {
 					BasicClassDescription first = equivalenceSet.iterator().next();
-					if (first instanceof SomeValuesFrom) {
-						SomeValuesFrom firstp = (SomeValuesFrom)first;
-						PropertyExpression prop = firstp.getProperty();
-						if (prop instanceof ObjectPropertyExpression) {
-							ObjectPropertyExpression propRep = objectPropertyDAG.getVertex((ObjectPropertyExpression)prop).getRepresentative();
-							representative = fac.createPropertySomeRestriction(propRep);
-						}
-						else {
-							assert (prop instanceof DataPropertyExpression); 
-							DataPropertyExpression propRep = dataPropertyDAG.getVertex((DataPropertyExpression)prop).getRepresentative();
-							representative = fac.createPropertySomeRestriction(propRep);								
-						}
+					if (first instanceof ObjectSomeValuesFrom) {
+						ObjectSomeValuesFrom firstp = (ObjectSomeValuesFrom)first;
+						ObjectPropertyExpression prop = firstp.getProperty();
+						ObjectPropertyExpression propRep = objectPropertyDAG.getVertex(prop).getRepresentative();
+						representative = fac.createPropertySomeRestriction(propRep);
+					}
+					else {
+						assert (first instanceof DataSomeValuesFrom); 
+						DataSomeValuesFrom firstp = (DataSomeValuesFrom)first;
+						DataPropertyExpression prop = firstp.getProperty();
+						DataPropertyExpression propRep = dataPropertyDAG.getVertex(prop).getRepresentative();
+						representative = fac.createPropertySomeRestriction(propRep);
 					}
 				}
 				else
@@ -452,10 +453,18 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 					OClass equiClass = (OClass) equi;
 					classEquivalenceMap.put(equiClass.getPredicate(), (OClass)rep);
 				}
-				else if (equi instanceof SomeValuesFrom) {
-					Predicate pred = ((SomeValuesFrom)equi).getProperty().getPredicate();
+				else if (equi instanceof ObjectSomeValuesFrom) {
+					Predicate pred = ((ObjectSomeValuesFrom)equi).getProperty().getPredicate();
 					// the property of the existential is a representative of its equivalence class
-					if ((objectPropertyEquivalenceMap.get(pred) == null) && (dataPropertyEquivalenceMap.get(pred) == null)) {
+					if (objectPropertyEquivalenceMap.get(pred) == null) {
+						classEquivalences.put(equi, reducedNode);
+						reduced.add(equi);
+					}
+				}
+				else if (equi instanceof DataSomeValuesFrom) {
+					Predicate pred = ((DataSomeValuesFrom)equi).getProperty().getPredicate();
+					// the property of the existential is a representative of its equivalence class
+					if (dataPropertyEquivalenceMap.get(pred) == null) {
 						classEquivalences.put(equi, reducedNode);
 						reduced.add(equi);
 					}
@@ -554,21 +563,24 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		for (Equivalences<BasicClassDescription> existsNode : classes) {
 			BasicClassDescription node = existsNode.getRepresentative();
 			
-			if (!(node instanceof SomeValuesFrom) || processedNodes.contains(node)) 
+			if ((!(node instanceof ObjectSomeValuesFrom) && !(node instanceof DataSomeValuesFrom)) || processedNodes.contains(node)) 
 				continue;
 
 			/*
 			 * Adding a cycle between exists R and exists R- for each R.
 			 */
-
-			PropertyExpression exists = ((SomeValuesFrom) node).getProperty();
 			BasicClassDescription invNode;
-			if (exists instanceof ObjectPropertyExpression) 
-				invNode = fac.createPropertySomeRestriction(((ObjectPropertyExpression)exists).getInverse());
-			else
-				invNode = fac.createPropertySomeRestriction(((DataPropertyExpression)exists).getInverse());
+
+			if (node instanceof ObjectSomeValuesFrom) {
+				ObjectPropertyExpression exists = ((ObjectSomeValuesFrom) node).getProperty();
+				invNode = fac.createPropertySomeRestriction(exists.getInverse());				
+			}
+			else {
+				DataPropertyExpression exists = ((DataSomeValuesFrom) node).getProperty();
+				invNode = fac.createPropertySomeRestriction(exists.getInverse());
 			// TODO: fix DataRange
-//				invNode = fac.createDataPropertyRange((DataPropertyExpression)exists);
+//				invNode = fac.createDataPropertyRange((DataPropertyExpression)exists);		
+			}
 				
 			Equivalences<BasicClassDescription> existsInvNode = classes.getVertex(invNode);
 			

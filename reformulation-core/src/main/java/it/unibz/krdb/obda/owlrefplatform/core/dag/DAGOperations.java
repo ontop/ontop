@@ -21,12 +21,13 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
  */
 
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.ArrayList;
@@ -249,8 +250,8 @@ public class DAGOperations {
 				ObjectPropertyExpression prop = (ObjectPropertyExpression) cycleheadNode.getDescription();
 
 				ObjectPropertyExpression inverse = prop.getInverse();
-				SomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
-				SomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
+				ObjectSomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
+				ObjectSomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
 
 				cycleheadinverseNode = dag.getNode(inverse);
 				cycleheaddomainNode = dag.getNode(domain);
@@ -261,8 +262,8 @@ public class DAGOperations {
 				DataPropertyExpression prop = (DataPropertyExpression) cycleheadNode.getDescription();
 
 				DataPropertyExpression inverse = prop.getInverse();
-				SomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
-				SomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
+				DataSomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
+				DataSomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
 
 				cycleheadinverseNode = dag.getNode(inverse);
 				cycleheaddomainNode = dag.getNode(domain);
@@ -272,7 +273,8 @@ public class DAGOperations {
 			/*
 			 * putting a cyclehead that is a named concept or named role
 			 */
-			if (component.size() > 1 && cycleheadNode.getDescription() instanceof SomeValuesFrom) {
+			if (component.size() > 1 && ((cycleheadNode.getDescription() instanceof ObjectSomeValuesFrom) 
+						|| (cycleheadNode.getDescription() instanceof DataSomeValuesFrom))) {
 
 				for (int i = 1; i < component.size(); i++) {
 					if (component.get(i).getDescription() instanceof OClass) {
@@ -297,8 +299,8 @@ public class DAGOperations {
 
 						ObjectPropertyExpression prop = (ObjectPropertyExpression) cycleheadNode.getDescription();
 						ObjectPropertyExpression inverse = prop.getInverse();
-						SomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
-						SomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
+						ObjectSomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
+						ObjectSomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
 
 						cycleheadinverseNode = dag.getNode(inverse);
 						cycleheaddomainNode = dag.getNode(domain);
@@ -320,8 +322,8 @@ public class DAGOperations {
 
 						DataPropertyExpression prop = (DataPropertyExpression) cycleheadNode.getDescription();
 						DataPropertyExpression inverse = prop.getInverse();
-						SomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
-						SomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
+						DataSomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
+						DataSomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
 
 						cycleheadinverseNode = dag.getNode(inverse);
 						cycleheaddomainNode = dag.getNode(domain);
@@ -445,9 +447,9 @@ public class DAGOperations {
 					 */
 					DataPropertyExpression equiprop = (DataPropertyExpression) equivnode.getDescription();
 					
-					PropertyExpression inverseequiprop = equiprop.getInverse();
-					PropertyExpression cycleheadprop =(PropertyExpression)cycleheadNode.getDescription(); 
-					PropertyExpression invesenonredundantprop = cycleheadprop.getInverse();
+					DataPropertyExpression inverseequiprop = equiprop.getInverse();
+					DataPropertyExpression cycleheadprop =(DataPropertyExpression)cycleheadNode.getDescription(); 
+					DataPropertyExpression invesenonredundantprop = cycleheadprop.getInverse();
 					equi_mapp.put(inverseequiprop, invesenonredundantprop);
 					dag.equi_mappings.put(inverseequiprop, invesenonredundantprop);
 					
@@ -504,9 +506,9 @@ public class DAGOperations {
 					 */
 					ObjectPropertyExpression equiprop = (ObjectPropertyExpression) equivnode.getDescription();
 					
-					PropertyExpression inverseequiprop = equiprop.getInverse();
-					PropertyExpression cycleheadprop =(PropertyExpression)cycleheadNode.getDescription(); 
-					PropertyExpression invesenonredundantprop = cycleheadprop.getInverse();
+					ObjectPropertyExpression inverseequiprop = equiprop.getInverse();
+					ObjectPropertyExpression cycleheadprop =(ObjectPropertyExpression)cycleheadNode.getDescription(); 
+					ObjectPropertyExpression invesenonredundantprop = cycleheadprop.getInverse();
 					equi_mapp.put(inverseequiprop, invesenonredundantprop);
 					dag.equi_mappings.put(inverseequiprop, invesenonredundantprop);
 					

@@ -9,13 +9,14 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 
 public class OntologyVocabularyImpl implements OntologyVocabulary {
 
@@ -112,12 +113,13 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 			if (!cl.equals(owlThing) && !cl.equals(owlNothing))
 				concepts.add(cl);
 		}
-		else if (desc instanceof SomeValuesFrom)  {
-			PropertyExpression prop = ((SomeValuesFrom) desc).getProperty();
-			if (prop instanceof ObjectPropertyExpression)
-				addReferencedEntries((ObjectPropertyExpression)prop);
-			else
-				addReferencedEntries((DataPropertyExpression)prop);
+		else if (desc instanceof ObjectSomeValuesFrom)  {
+			ObjectPropertyExpression prop = ((ObjectSomeValuesFrom) desc).getProperty();
+			addReferencedEntries(prop);
+		}
+		else if (desc instanceof DataSomeValuesFrom)  {
+			DataPropertyExpression prop = ((DataSomeValuesFrom) desc).getProperty();
+			addReferencedEntries(prop);
 		}
 		else if (desc instanceof Datatype)  {
 			// NO-OP
@@ -157,8 +159,11 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 			if (!builtinDatatypes.contains(pred)) 
 				throw new IllegalArgumentException("Datatype predicate is unknown: " + pred);
 		}
-		else if (desc instanceof SomeValuesFrom) {
-			checkSignature(((SomeValuesFrom) desc).getProperty());
+		else if (desc instanceof ObjectSomeValuesFrom) {
+			checkSignature(((ObjectSomeValuesFrom) desc).getProperty());
+		}
+		else if (desc instanceof DataSomeValuesFrom) {
+			checkSignature(((DataSomeValuesFrom) desc).getProperty());
 		}
 		else if (desc instanceof DataPropertyRangeExpression) {
 			checkSignature(((DataPropertyRangeExpression) desc).getProperty());
@@ -167,7 +172,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 			throw new UnsupportedOperationException("Cant understand: " + desc);
 	}
 
-	void checkSignature(PropertyExpression prop) {
+	void checkSignature(ObjectPropertyExpression prop) {
 
 		if (prop.isInverse()) {
 			checkSignature(prop.getInverse());
@@ -178,20 +183,30 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 			if (isAuxiliaryProperty(prop)) 
 				return;
 			
-			if ((prop instanceof ObjectPropertyExpression) && 
-					!objectProperties.contains(prop) && 
-					!prop.equals(owlTopObjectProperty) &&
-					!prop.equals(owlBottomObjectProperty)) 
-				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
-			
-			if ((prop instanceof DataPropertyExpression) && 
-					!dataProperties.contains(prop) &&
-					!prop.equals(owlTopDataProperty) && 
-					!prop.equals(owlBottomDataProperty)) 
+			if (!objectProperties.contains(prop) && 
+					!prop.equals(owlTopObjectProperty) && !prop.equals(owlBottomObjectProperty)) 
 				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
 		}
 	}
 
+	void checkSignature(DataPropertyExpression prop) {
+
+		if (prop.isInverse()) {
+			checkSignature(prop.getInverse());
+		}
+		else {
+			// Make sure we never validate against auxiliary roles introduced by
+			// the translation of the OWL ontology
+			if (isAuxiliaryProperty(prop)) 
+				return;
+			
+			if (!dataProperties.contains(prop) &&
+					!prop.equals(owlTopDataProperty) && !prop.equals(owlBottomDataProperty)) 
+				throw new IllegalArgumentException("At least one of these predicates is unknown: " + prop);
+		}
+	}
+	
+	
 	@Override
 	public void merge(OntologyVocabulary v) {
 		concepts.addAll(v.getClasses());
