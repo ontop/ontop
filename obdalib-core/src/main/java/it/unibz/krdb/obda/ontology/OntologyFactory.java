@@ -26,25 +26,49 @@ import it.unibz.krdb.obda.model.ValueConstant;
 
 public interface OntologyFactory {
 
+	public Ontology createOntology();
+	
+	
 	public OClass createClass(String uri);
 
-	public Datatype createDataType(Predicate p);
+	public Datatype createDataType(Predicate.COL_TYPE type);
 	
 	public ObjectPropertyExpression createObjectProperty(String uri);
 	
 	public DataPropertyExpression createDataProperty(String uri);
 
-	
-	
-	public Ontology createOntology();
 
+	/**
+	 * creates an object property assertion 
+	 * (ensures that the property is not inverse by swapping arguments if necessary)
+	 * 
+	 * @param prop
+	 * @param o1
+	 * @param o2
+	 * @return
+	 */
+	
+	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression prop, ObjectConstant o1, ObjectConstant o2);
 
+	/**
+	 * creates a data property assertion 
+	 * 
+	 * @param prop
+	 * @param o1
+	 * @param o2
+	 * @return
+	 */
 	
-	
-	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression attribute, ObjectConstant o1, ObjectConstant o2);
+	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression prop, ObjectConstant o1, ValueConstant o2);
 
-	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression attribute, ObjectConstant o1, ValueConstant o2);
+	/**
+	 * creates a class assertion 
+	 * 
+	 * @param concept
+	 * @param o
+	 * @return
+	 */
 	
-	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant object);
+	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant o);
 
 }

@@ -24,16 +24,14 @@ import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
-import it.unibz.krdb.obda.ontology.DisjointnessAxiom;
+import it.unibz.krdb.obda.ontology.NaryAxiom;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 
 import it.unibz.krdb.obda.ontology.ClassExpression;
-import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
-import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
-
+import it.unibz.krdb.obda.ontology.BinaryAxiom;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -45,19 +43,19 @@ public class OntologyImpl implements Ontology {
 	
 	// axioms and assertions
 
-	private final Set<SubClassOfAxiom<ClassExpression>> subClassAxioms = new LinkedHashSet<SubClassOfAxiom<ClassExpression>>();
+	private final Set<BinaryAxiom<ClassExpression>> subClassAxioms = new LinkedHashSet<BinaryAxiom<ClassExpression>>();
 	
-	private final Set<SubClassOfAxiom<DataRangeExpression>> subDataRangeAxioms = new LinkedHashSet<SubClassOfAxiom<DataRangeExpression>>();
+	private final Set<BinaryAxiom<DataRangeExpression>> subDataRangeAxioms = new LinkedHashSet<BinaryAxiom<DataRangeExpression>>();
 	
-	private final Set<SubPropertyOfAxiom<ObjectPropertyExpression>> subObjectPropertyAxioms = new LinkedHashSet<SubPropertyOfAxiom<ObjectPropertyExpression>>();
+	private final Set<BinaryAxiom<ObjectPropertyExpression>> subObjectPropertyAxioms = new LinkedHashSet<BinaryAxiom<ObjectPropertyExpression>>();
 	
-	private final Set<SubPropertyOfAxiom<DataPropertyExpression>> subDataPropertyAxioms = new LinkedHashSet<SubPropertyOfAxiom<DataPropertyExpression>>();
+	private final Set<BinaryAxiom<DataPropertyExpression>> subDataPropertyAxioms = new LinkedHashSet<BinaryAxiom<DataPropertyExpression>>();
 
-	private final Set<DisjointnessAxiom<ClassExpression>> disjointClassesAxioms = new LinkedHashSet<DisjointnessAxiom<ClassExpression>>();
+	private final Set<NaryAxiom<ClassExpression>> disjointClassesAxioms = new LinkedHashSet<NaryAxiom<ClassExpression>>();
 
-	private final Set<DisjointnessAxiom<ObjectPropertyExpression>> disjointObjectPropertiesAxioms = new LinkedHashSet<DisjointnessAxiom<ObjectPropertyExpression>>();
+	private final Set<NaryAxiom<ObjectPropertyExpression>> disjointObjectPropertiesAxioms = new LinkedHashSet<NaryAxiom<ObjectPropertyExpression>>();
 
-	private final Set<DisjointnessAxiom<DataPropertyExpression>> disjointDataPropertiesAxioms = new LinkedHashSet<DisjointnessAxiom<DataPropertyExpression>>();
+	private final Set<NaryAxiom<DataPropertyExpression>> disjointDataPropertiesAxioms = new LinkedHashSet<NaryAxiom<DataPropertyExpression>>();
 	
 	private final Set<ObjectPropertyExpression> functionalObjectPropertyAxioms = new LinkedHashSet<ObjectPropertyExpression>();
 
@@ -87,7 +85,7 @@ public class OntologyImpl implements Ontology {
 	
 	@Override
 	public void addSubClassOfAxiomWithReferencedEntities(ClassExpression concept1, ClassExpression concept2) {	
-		SubClassOfAxiom<ClassExpression> assertion = new SubClassOfAxiomImpl<ClassExpression>(concept1, concept2);
+		BinaryAxiom<ClassExpression> assertion = new BinaryAxiomImpl<ClassExpression>(concept1, concept2);
 		vocabulary.addReferencedEntries(assertion.getSub());
 		vocabulary.addReferencedEntries(assertion.getSuper());
 		subClassAxioms.add(assertion);
@@ -95,7 +93,7 @@ public class OntologyImpl implements Ontology {
 
 	@Override
 	public void addSubClassOfAxiomWithReferencedEntities(DataRangeExpression concept1, DataRangeExpression concept2) {
-		SubClassOfAxiom<DataRangeExpression> assertion = new SubClassOfAxiomImpl<DataRangeExpression>(concept1, concept2);
+		BinaryAxiom<DataRangeExpression> assertion = new BinaryAxiomImpl<DataRangeExpression>(concept1, concept2);
 		vocabulary.addReferencedEntries(assertion.getSub());
 		vocabulary.addReferencedEntries(assertion.getSuper());
 		subDataRangeAxioms.add(assertion);
@@ -103,7 +101,7 @@ public class OntologyImpl implements Ontology {
 	
 	@Override
 	public void addSubPropertyOfAxiomWithReferencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including) {
-		SubPropertyOfAxiom<ObjectPropertyExpression> assertion = new SubPropertyOfAxiomImpl<ObjectPropertyExpression>(included, including);
+		BinaryAxiom<ObjectPropertyExpression> assertion = new BinaryAxiomImpl<ObjectPropertyExpression>(included, including);
 		vocabulary.addReferencedEntries(assertion.getSub());
 		vocabulary.addReferencedEntries(assertion.getSuper());
 		subObjectPropertyAxioms.add(assertion);
@@ -111,7 +109,7 @@ public class OntologyImpl implements Ontology {
 	
 	@Override
 	public void addSubPropertyOfAxiomWithReferencedEntities(DataPropertyExpression included, DataPropertyExpression including) {
-		SubPropertyOfAxiom<DataPropertyExpression> assertion = new SubPropertyOfAxiomImpl<DataPropertyExpression>(included, including);
+		BinaryAxiom<DataPropertyExpression> assertion = new BinaryAxiomImpl<DataPropertyExpression>(included, including);
 		vocabulary.addReferencedEntries(assertion.getSub());
 		vocabulary.addReferencedEntries(assertion.getSuper());
 		subDataPropertyAxioms.add(assertion);
@@ -121,7 +119,7 @@ public class OntologyImpl implements Ontology {
 	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2) {
 		vocabulary.checkSignature(concept1);
 		vocabulary.checkSignature(concept2);
-		SubClassOfAxiom<ClassExpression> ax = new SubClassOfAxiomImpl<ClassExpression>(concept1, concept2);
+		BinaryAxiom<ClassExpression> ax = new BinaryAxiomImpl<ClassExpression>(concept1, concept2);
 		subClassAxioms.add(ax);
 	}	
 
@@ -129,7 +127,7 @@ public class OntologyImpl implements Ontology {
 	public void addSubClassOfAxiom(DataRangeExpression concept1, DataRangeExpression concept2) {
 		vocabulary.checkSignature(concept1);
 		vocabulary.checkSignature(concept2);
-		SubClassOfAxiom<DataRangeExpression> ax = new SubClassOfAxiomImpl<DataRangeExpression>(concept1, concept2);
+		BinaryAxiom<DataRangeExpression> ax = new BinaryAxiomImpl<DataRangeExpression>(concept1, concept2);
 		subDataRangeAxioms.add(ax);
 	}
 
@@ -137,7 +135,7 @@ public class OntologyImpl implements Ontology {
 	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including) {
 		vocabulary.checkSignature(included);
 		vocabulary.checkSignature(including);
-		SubPropertyOfAxiom<ObjectPropertyExpression> ax = new SubPropertyOfAxiomImpl<ObjectPropertyExpression>(included, including);
+		BinaryAxiom<ObjectPropertyExpression> ax = new BinaryAxiomImpl<ObjectPropertyExpression>(included, including);
 		subObjectPropertyAxioms.add(ax);
 	}
 	
@@ -145,7 +143,7 @@ public class OntologyImpl implements Ontology {
 	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including) {
 		vocabulary.checkSignature(included);
 		vocabulary.checkSignature(including);
-		SubPropertyOfAxiom<DataPropertyExpression> ax = new SubPropertyOfAxiomImpl<DataPropertyExpression>(included, including);
+		BinaryAxiom<DataPropertyExpression> ax = new BinaryAxiomImpl<DataPropertyExpression>(included, including);
 		subDataPropertyAxioms.add(ax);
 	}
 
@@ -153,7 +151,7 @@ public class OntologyImpl implements Ontology {
 	public void addDisjointClassesAxiom(Set<ClassExpression> classes) {	
 		for (ClassExpression c : classes)
 			vocabulary.checkSignature(c);
-		DisjointnessAxiom<ClassExpression> ax = new DisjointnessAxiomImpl<ClassExpression>(classes);
+		NaryAxiom<ClassExpression> ax = new NaryAxiomImpl<ClassExpression>(classes);
 		disjointClassesAxioms.add(ax);
 	}
 
@@ -161,7 +159,7 @@ public class OntologyImpl implements Ontology {
 	public void addDisjointObjectPropertiesAxiom(Set<ObjectPropertyExpression> props) {
 		for (ObjectPropertyExpression p : props)
 			vocabulary.checkSignature(p);
-		DisjointnessAxiomImpl<ObjectPropertyExpression> ax = new DisjointnessAxiomImpl<ObjectPropertyExpression>(props);
+		NaryAxiomImpl<ObjectPropertyExpression> ax = new NaryAxiomImpl<ObjectPropertyExpression>(props);
 		disjointObjectPropertiesAxioms.add(ax);
 	}
 
@@ -169,7 +167,7 @@ public class OntologyImpl implements Ontology {
 	public void addDisjointDataPropertiesAxiom(Set<DataPropertyExpression> props) {
 		for (DataPropertyExpression p : props)
 			vocabulary.checkSignature(p);
-		DisjointnessAxiomImpl<DataPropertyExpression> ax = new DisjointnessAxiomImpl<DataPropertyExpression>(props);
+		NaryAxiomImpl<DataPropertyExpression> ax = new NaryAxiomImpl<DataPropertyExpression>(props);
 		disjointDataPropertiesAxioms.add(ax);
 	}
 	
@@ -220,23 +218,23 @@ public class OntologyImpl implements Ontology {
 	}
 
 	@Override
-	public Set<SubClassOfAxiom<ClassExpression>> getSubClassAxioms() {
+	public Set<BinaryAxiom<ClassExpression>> getSubClassAxioms() {
 		return subClassAxioms;
 	}
 	
 	@Override
-	public Set<SubClassOfAxiom<DataRangeExpression>> getSubDataRangeAxioms() {
+	public Set<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms() {
 		return subDataRangeAxioms;
 	}
 	
 	
 	@Override
-	public Set<SubPropertyOfAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms() {
+	public Set<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms() {
 		return subObjectPropertyAxioms;
 	}
 	
 	@Override
-	public Set<SubPropertyOfAxiom<DataPropertyExpression>> getSubDataPropertyAxioms() {
+	public Set<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms() {
 		return subDataPropertyAxioms;
 	}
 	
@@ -251,17 +249,17 @@ public class OntologyImpl implements Ontology {
 	}
 	
 	@Override 
-	public Set<DisjointnessAxiom<ClassExpression>> getDisjointClassesAxioms() {
+	public Set<NaryAxiom<ClassExpression>> getDisjointClassesAxioms() {
 		return disjointClassesAxioms;
 	}
 	
 	@Override 
-	public Set<DisjointnessAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms() {
+	public Set<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms() {
 		return disjointObjectPropertiesAxioms;
 	}
 
 	@Override 
-	public Set<DisjointnessAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms() {
+	public Set<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms() {
 		return disjointDataPropertiesAxioms;
 	}
 

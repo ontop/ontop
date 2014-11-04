@@ -20,19 +20,26 @@ package it.unibz.krdb.obda.ontology;
 * #L%
 */
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
- * Represents the following from OWL 2 Specification:
- *         DisjointClasses for T = ClassExpression
- *         DisjointObjectProperties and AsymmetricObjectProperty for T = ObjectPropertyExpression 
- *         DisjointDataProperties for T = DataPropertyExpression 
+ * Represents the following from OWL 2 QL Specification:
+ * 
+ * for T = ClassExpression:
+ *         		DisjointClasses 
+ *         
+ * for T = ObjectPropertyExpression:        
+ *         		DisjointObjectProperties and AsymmetricObjectProperty 
+ *         
+ * for T = DataPropertyExpression:        
+ *         		DisjointDataProperties 
  * 
  * @author roman
  *
  */
 
-public interface DisjointnessAxiom<T> extends Axiom {
+public interface NaryAxiom<T> extends Serializable {
 
 	public Set<T> getComponents();
 

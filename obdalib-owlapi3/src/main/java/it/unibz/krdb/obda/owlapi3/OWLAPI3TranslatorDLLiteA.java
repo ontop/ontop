@@ -363,7 +363,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			if (rangeDatatype.isBuiltIn()) {
 				try {
 					Predicate.COL_TYPE columnType = getColumnType(rangeDatatype);
-					Datatype datatype = ofac.createDataType(dfac.getTypePredicate(columnType));
+					Datatype datatype = ofac.createDataType(columnType);
 					dl_onto.addSubClassOfAxiom(subclass, datatype);
 				} catch (TranslationException e) {
 					log.warn("Error in " + ax);
@@ -665,37 +665,28 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		
 		ObjectSomeValuesFrom auxclass = auxiliaryClassProperties.get(someexp);
 		if (auxclass == null) {
-			/*
-			 * no auxiliary subclass assertions found for this exists R.A,
-			 * creating a new one
-			 */
+			// no replacement found for this exists R.A, creating a new one
+						
+			ObjectPropertyExpression role = getPropertyExpression(someexp.getProperty());
 			
-			OWLObjectPropertyExpression owlProperty = someexp.getProperty();
+			// TODO: check that it is a class name 
 			OWLClassExpression owlFiller = someexp.getFiller();
-			
-			ObjectPropertyExpression role = getPropertyExpression(owlProperty);
 			ClassExpression filler = getSubclassExpression(owlFiller);
 
 			ObjectPropertyExpression auxRole = ofac.createObjectProperty(OntologyVocabularyImpl.AUXROLEURI + auxRoleCounter);
 			auxRoleCounter += 1;
 
-			// if \exists R.C then exp = P, auxclass = \exists P, P <= R, \exists P^- <= C
-			// if \exists R^-.C then exp = P^-, auxclass = \exists P^-, P <= R, \exists P <= C
+			// if \exists R.C then auxRole = P, auxclass = \exists P, P <= R, \exists P^- <= C
+			// if \exists R^-.C then auxRole = P^-, auxclass = \exists P^-, P^- <= R^-, \exists P <= C
 			
-			ObjectPropertyExpression exp = ofac.createObjectProperty(auxRole.getPredicate().getName());
 			if (role.isInverse())
-				exp = exp.getInverse();
+				auxRole = auxRole.getInverse();
 			
-			auxclass = exp.getDomain();
+			auxclass = auxRole.getDomain();
 			auxiliaryClassProperties.put(someexp, auxclass);
 
-			// Creating the new subrole assertions 
-			dl_onto.addSubPropertyOfAxiom(exp, role);
-			
-			/* Creating the range assertion */
-			ObjectPropertyExpression expInv = exp.getInverse();
-			ObjectSomeValuesFrom propertySomeRestrictionInv = expInv.getDomain();
-			dl_onto.addSubClassOfAxiom(propertySomeRestrictionInv, filler);
+			dl_onto.addSubPropertyOfAxiom(auxRole, role);
+			dl_onto.addSubClassOfAxiom(auxRole.getRange(), filler);
 		}
 
 		return auxclass;
@@ -704,34 +695,25 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	private ClassExpression getPropertySomeDatatypeRestriction(OWLDataSomeValuesFrom someexp) throws TranslationException {
 		
 		DataSomeValuesFrom auxclass = auxiliaryDatatypeProperties.get(someexp);
-		if (auxclass == null) {
-			/*
-			 * no auxiliary subclass assertions found for this exists R.A,
-			 * creating a new one
-			 */
+		if (auxclass == null) {			
+			// no replacement found for this exists R.A, creating a new one
 			
-			OWLDataPropertyExpression owlProperty = someexp.getProperty();
-			DataPropertyExpression role = getPropertyExpression(owlProperty);
+			DataPropertyExpression role = getPropertyExpression(someexp.getProperty());
 
 			// TODO: handle more complex fillers
 			// if (filler instanceof OWLDatatype);
 			OWLDatatype owlDatatype = (OWLDatatype) someexp.getFiller();
 			COL_TYPE datatype = getColumnType(owlDatatype);
-			Datatype filler = ofac.createDataType(dfac.getTypePredicate(datatype));
+			Datatype filler = ofac.createDataType(datatype);
 			
 			DataPropertyExpression auxRole = ofac.createDataProperty(OntologyVocabularyImpl.AUXROLEURI + auxRoleCounter);
 			auxRoleCounter += 1;
 
-			DataPropertyExpression exp = ofac.createDataProperty(auxRole.getPredicate().getName());
-			auxclass = exp.getDomain(); //ofac.createPropertySomeRestriction(exp);
+			auxclass = auxRole.getDomain(); 
 			auxiliaryDatatypeProperties.put(someexp, auxclass);
 
-			// Creating the new subrole assertions 
 			dl_onto.addSubPropertyOfAxiom(auxRole, role);
-			
-			/* Creating the range assertion */
-			DataPropertyRangeExpression propertySomeRestrictionInv = exp.getRange(); //ofac.createDataPropertyRange(exp);
-			dl_onto.addSubClassOfAxiom(propertySomeRestrictionInv, filler);
+			dl_onto.addSubClassOfAxiom(auxRole.getRange(), filler);
 		}
 
 		return auxclass;
@@ -751,10 +733,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 
 		// TODO: check for bottom			
 		
-		if (prop.isInverse()) 
-			return ofac.createObjectPropertyAssertion(prop.getInverse(), c2, c1);			
-		else 
-			return ofac.createObjectPropertyAssertion(prop, c1, c2);						
+		return ofac.createObjectPropertyAssertion(prop, c1, c2);						
 	}
 	
 	

@@ -4,13 +4,13 @@ package it.unibz.krdb.obda.ontology;
 /**
  * Represents DataSomeValuesFrom from OWL 2 Specification
  * 
- * A non-qualified property some restriction. 
+ * DataSomeValuesFrom := 'DataSomeValuesFrom' '(' DataPropertyExpression { DataPropertyExpression } DataRange ')'
  * 
- * Corresponds to DL "exists Property"
+ * DataRange is always assumed to be owl:TopDataProperty due to the NORMALIZATION of the ontology
+ * (auxiliary data sub-properties are introduced if needed)
  */
 
 public interface DataSomeValuesFrom extends ClassExpression {
 
 	public DataPropertyExpression getProperty();	
-
 }

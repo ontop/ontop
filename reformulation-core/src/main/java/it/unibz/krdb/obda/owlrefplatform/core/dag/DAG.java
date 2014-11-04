@@ -31,9 +31,8 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
+import it.unibz.krdb.obda.ontology.BinaryAxiom;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -158,19 +157,19 @@ public class DAG implements Serializable {
 			// addParent(existsNodeInv, thing);
 		}
 
-		for (SubClassOfAxiom<ClassExpression> clsIncl : ontology.getSubClassAxioms()) {
+		for (BinaryAxiom<ClassExpression> clsIncl : ontology.getSubClassAxioms()) {
 			ClassExpression parent = clsIncl.getSuper();
 			ClassExpression child = clsIncl.getSub();
 
 			addClassEdge(parent, child);
 		} 
-		for (SubClassOfAxiom<DataRangeExpression> clsIncl : ontology.getSubDataRangeAxioms()) {
+		for (BinaryAxiom<DataRangeExpression> clsIncl : ontology.getSubDataRangeAxioms()) {
 			DataRangeExpression parent = clsIncl.getSuper();
 			DataRangeExpression child = clsIncl.getSub();
 
 			addClassEdge(parent, child);
 		} 
-		for (SubPropertyOfAxiom<ObjectPropertyExpression> roleIncl : ontology.getSubObjectPropertyAxioms()) {
+		for (BinaryAxiom<ObjectPropertyExpression> roleIncl : ontology.getSubObjectPropertyAxioms()) {
 			ObjectPropertyExpression parent = roleIncl.getSuper();
 			ObjectPropertyExpression child = roleIncl.getSub();
 
@@ -179,7 +178,7 @@ public class DAG implements Serializable {
 			// R- ISA S and R ISA S-
 			addRoleEdge(parent, child);
 		}
-		for (SubPropertyOfAxiom<DataPropertyExpression> roleIncl : ontology.getSubDataPropertyAxioms()) {
+		for (BinaryAxiom<DataPropertyExpression> roleIncl : ontology.getSubDataPropertyAxioms()) {
 			DataPropertyExpression parent = roleIncl.getSuper();
 			DataPropertyExpression child = roleIncl.getSub();
 

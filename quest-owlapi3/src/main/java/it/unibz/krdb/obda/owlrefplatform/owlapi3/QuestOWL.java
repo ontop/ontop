@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.model.ResultSet;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.DisjointnessAxiom;
+import it.unibz.krdb.obda.ontology.NaryAxiom;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.ClassExpression;
@@ -571,7 +571,7 @@ public class QuestOWL extends OWLReasonerBase {
 		{
 			final String strQueryClass = "ASK {?x a <%s>; a <%s> }";
 			
-			for (DisjointnessAxiom<ClassExpression> dda : translatedOntologyMerge.getDisjointClassesAxioms()) {		
+			for (NaryAxiom<ClassExpression> dda : translatedOntologyMerge.getDisjointClassesAxioms()) {		
 				// TODO: handle complex class expressions and many pairs of disjoint classes
 				Set<ClassExpression> disj = dda.getComponents();
 				Iterator<ClassExpression> classIterator = disj.iterator();
@@ -591,7 +591,7 @@ public class QuestOWL extends OWLReasonerBase {
 		{
 			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
 
-			for(DisjointnessAxiom<ObjectPropertyExpression> dda 
+			for(NaryAxiom<ObjectPropertyExpression> dda 
 						: translatedOntologyMerge.getDisjointObjectPropertiesAxioms()) {		
 				// TODO: handle role inverses and multiple arguments			
 				Set<ObjectPropertyExpression> props = dda.getComponents();
@@ -611,7 +611,7 @@ public class QuestOWL extends OWLReasonerBase {
 		{
 			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
 
-			for(DisjointnessAxiom<DataPropertyExpression> dda 
+			for(NaryAxiom<DataPropertyExpression> dda 
 						: translatedOntologyMerge.getDisjointDataPropertiesAxioms()) {		
 				// TODO: handle role inverses and multiple arguments			
 				Set<DataPropertyExpression> props = dda.getComponents();

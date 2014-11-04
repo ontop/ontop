@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.ontology;
 
+import java.io.Serializable;
+
 /*
  * #%L
  * ontop-obdalib-core
@@ -21,19 +23,28 @@ package it.unibz.krdb.obda.ontology;
  */
 
 /**
- * Represents SubClassOf, EquivalentClasses, 
- *            ObjectPropertyDomain, ObjectPropertyRange, 
- *            DataPropertyDomain with T = ClassExpression
+ * Represents the following from OWL 2 QL Specification:
+ * 
+ * for T = ClassExpression: 
+ * 			SubClassOf, EquivalentClasses, 
+ *          ObjectPropertyDomain, ObjectPropertyRange, 
+ *          DataPropertyDomain 
  *        
- * It also represents DataPropertyRange 
- *            (sub is SomeValuesFrom with inverse data property; 
- *             super is a datatype) with T = DataRangeExpression
+ * for T = DataRangeExpression:
+ * 			DataPropertyRange 
+ *          (sub is DataPropertyRangeExpression; super is Datatype)  
+ *          
+ * for T = ObjectPropertyExpression:
+ *      SubObjectPropertyOf, EquivalentObjectProperties, SymmetricObjectProperties
+ *      
+ * for T = DataPropertyExpression:      
+ *      SubDataPropertyOf, EquivalentDataProperties 
  * 
  * @author roman
  *
  */
 
-public interface SubClassOfAxiom<T> extends Axiom {
+public interface BinaryAxiom<T> extends Serializable {
 
 	public T getSub();
 

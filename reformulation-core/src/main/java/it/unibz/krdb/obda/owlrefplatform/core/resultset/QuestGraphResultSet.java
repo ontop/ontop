@@ -142,7 +142,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 		
 		for (int i = 0; i < size / 3; i++) {
 			
-			Constant subjectConstant = getConstant(peList.getElements().get(i*3), result);
+			ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i*3), result);
 			Constant predicateConstant = getConstant(peList.getElements().get(i*3+1), result);
 			Constant objectConstant = getConstant(peList.getElements().get(i*3+2), result);
 
@@ -150,29 +150,28 @@ public class QuestGraphResultSet implements GraphResultSet {
 			String predicateName = predicateConstant.getValue();
 			if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
 				OClass concept = ofac.createClass(objectConstant.getValue());
-				ClassAssertion ca = ofac.createClassAssertion(concept,
-						(ObjectConstant) subjectConstant);
+				ClassAssertion ca = ofac.createClassAssertion(concept, subjectConstant);
 				tripleAssertions.add(ca);
-			} else {
+			} 
+			else {
 				if (objectConstant instanceof URIConstant) {
 					ObjectPropertyExpression prop = ofac.createObjectProperty(predicateName);
 					ObjectPropertyAssertion op = ofac
-							.createObjectPropertyAssertion(prop,
-									(ObjectConstant) subjectConstant,
+							.createObjectPropertyAssertion(prop, subjectConstant,
 									(ObjectConstant) objectConstant);
 					tripleAssertions.add(op);
-				} else if (objectConstant instanceof BNode) {
+				} 
+				else if (objectConstant instanceof BNode) {
 					ObjectPropertyExpression prop = ofac.createObjectProperty(predicateName);
 					ObjectPropertyAssertion op = ofac
-							.createObjectPropertyAssertion(prop,
-									(ObjectConstant) subjectConstant,
+							.createObjectPropertyAssertion(prop, subjectConstant,
 									(ObjectConstant) objectConstant);
 					tripleAssertions.add(op);
-				} else {
+				} 
+				else {
 					DataPropertyExpression prop = ofac.createDataProperty(predicateName);
 					DataPropertyAssertion dp = ofac
-							.createDataPropertyAssertion(prop,
-									(ObjectConstant) subjectConstant,
+							.createDataPropertyAssertion(prop, subjectConstant,
 									(ValueConstant) objectConstant);
 					tripleAssertions.add(dp);
 				}

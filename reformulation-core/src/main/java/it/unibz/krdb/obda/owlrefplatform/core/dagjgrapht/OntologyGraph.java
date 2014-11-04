@@ -31,9 +31,8 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
+import it.unibz.krdb.obda.ontology.BinaryAxiom;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -63,7 +62,7 @@ public class OntologyGraph {
 		}
 		
 		// property inclusions
-		for (SubPropertyOfAxiom<ObjectPropertyExpression> roleIncl : ontology.getSubObjectPropertyAxioms()) {
+		for (BinaryAxiom<ObjectPropertyExpression> roleIncl : ontology.getSubObjectPropertyAxioms()) {
 			// adds the direct edge and the inverse 
 			// e.g., R ISA S and R- ISA S-,
 			//    or R- ISA S and R ISA S-
@@ -104,12 +103,10 @@ public class OntologyGraph {
 		}
 
 		// property inclusions
-		for (SubPropertyOfAxiom<DataPropertyExpression> roleIncl : ontology.getSubDataPropertyAxioms()) {
-			DataPropertyExpression child = roleIncl.getSub();
-			graph.addVertex(child);
-			DataPropertyExpression parent = roleIncl.getSuper();
-			graph.addVertex(parent);
-			graph.addEdge(child, parent);
+		for (BinaryAxiom<DataPropertyExpression> roleIncl : ontology.getSubDataPropertyAxioms()) {
+			graph.addVertex(roleIncl.getSub());
+			graph.addVertex(roleIncl.getSuper());
+			graph.addEdge(roleIncl.getSub(), roleIncl.getSuper());
 		}
 		return graph;
 	}
@@ -187,7 +184,7 @@ public class OntologyGraph {
 		}
 		
 		// class inclusions from the ontology
-		for (SubClassOfAxiom<ClassExpression> clsIncl : ontology.getSubClassAxioms()) {
+		for (BinaryAxiom<ClassExpression> clsIncl : ontology.getSubClassAxioms()) {
 			ClassExpression parent = clsIncl.getSuper();
 			ClassExpression child = clsIncl.getSub();
 			classGraph.addVertex(child);
@@ -221,7 +218,7 @@ public class OntologyGraph {
 
 
 		// class inclusions from the ontology
-		for (SubClassOfAxiom<DataRangeExpression> clsIncl : ontology.getSubDataRangeAxioms()) {
+		for (BinaryAxiom<DataRangeExpression> clsIncl : ontology.getSubDataRangeAxioms()) {
 			DataRangeExpression parent = clsIncl.getSuper();
 			DataRangeExpression child = clsIncl.getSub();
 			dataRangeGraph.addVertex(child);	

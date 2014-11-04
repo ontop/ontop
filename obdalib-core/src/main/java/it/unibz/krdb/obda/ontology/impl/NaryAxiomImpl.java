@@ -23,17 +23,17 @@ package it.unibz.krdb.obda.ontology.impl;
 import java.util.Collections;
 import java.util.Set;
 
-import it.unibz.krdb.obda.ontology.DisjointnessAxiom;
+import it.unibz.krdb.obda.ontology.NaryAxiom;
 
-public class DisjointnessAxiomImpl<T> implements DisjointnessAxiom<T> {
+public class NaryAxiomImpl<T> implements NaryAxiom<T> {
 
 	private static final long serialVersionUID = 4576840836473365808L;
 	
 	private final Set<T> components;
 	
-	DisjointnessAxiomImpl(Set<T> components) {
+	NaryAxiomImpl(Set<T> components) {
 		if (components.size() < 2)
-			throw new IllegalArgumentException("At least 2 classes are expeccted in DisjointClassAxiom");
+			throw new IllegalArgumentException("At least 2 componets are expeccted in NaryAxiom");
 
 		this.components = components;
 	}
@@ -46,8 +46,8 @@ public class DisjointnessAxiomImpl<T> implements DisjointnessAxiom<T> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof DisjointnessAxiomImpl<?>) {
-			DisjointnessAxiomImpl<T> other = (DisjointnessAxiomImpl<T>)obj;
+		if (obj instanceof NaryAxiomImpl<?>) {
+			NaryAxiomImpl<T> other = (NaryAxiomImpl<T>)obj;
 			return components.equals(other.components);
 		}
 		return false;

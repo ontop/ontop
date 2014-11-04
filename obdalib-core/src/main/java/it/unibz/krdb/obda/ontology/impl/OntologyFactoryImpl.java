@@ -62,15 +62,12 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	public Ontology createOntology() {
 		return new OntologyImpl();
 	}
-/*	
-	@Override
-	public DataPropertyRangeExpression createDataPropertyRange(DataPropertyExpression role) {
-		return new DataPropertyRangeExpressionImpl(((DataPropertyExpressionImpl)role).inverseProperty);
-	}
-*/	
 	
 	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression role, ObjectConstant o1, ObjectConstant o2) {
-		return new ObjectPropertyAssertionImpl(role, o1, o2);
+		if (role.isInverse())
+			return new ObjectPropertyAssertionImpl(role.getInverse(), o2, o1);
+		else
+			return new ObjectPropertyAssertionImpl(role, o1, o2);			
 	}
 
 
@@ -95,8 +92,8 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 
 	@Override
-	public Datatype createDataType(Predicate p) {
-		return new DatatypeImpl(p);
+	public Datatype createDataType(Predicate.COL_TYPE type) {
+		return new DatatypeImpl(ofac.getTypePredicate(type));
 	}
 
 	@Override

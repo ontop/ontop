@@ -68,19 +68,19 @@ public interface Ontology extends Cloneable, Serializable {
 	public OntologyVocabulary getVocabulary();
 	
 	
-	public Set<SubClassOfAxiom<ClassExpression>> getSubClassAxioms();
+	public Set<BinaryAxiom<ClassExpression>> getSubClassAxioms();
 
-	public Set<SubClassOfAxiom<DataRangeExpression>> getSubDataRangeAxioms();
+	public Set<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms();
 	
-	public Set<SubPropertyOfAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms();
+	public Set<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms();
 
-	public Set<SubPropertyOfAxiom<DataPropertyExpression>> getSubDataPropertyAxioms();
+	public Set<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms();
 	
-	public Set<DisjointnessAxiom<ClassExpression>> getDisjointClassesAxioms();
+	public Set<NaryAxiom<ClassExpression>> getDisjointClassesAxioms();
 	
-	public Set<DisjointnessAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms();
+	public Set<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms();
 
-	public Set<DisjointnessAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms();
+	public Set<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms();
 
 	public Set<ObjectPropertyExpression> getFunctionalObjectProperties();
 

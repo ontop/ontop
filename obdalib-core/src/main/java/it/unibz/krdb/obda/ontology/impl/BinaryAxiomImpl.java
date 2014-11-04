@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.ontology.impl;
 
+import it.unibz.krdb.obda.ontology.BinaryAxiom;
+
 /*
  * #%L
  * ontop-obdalib-core
@@ -20,17 +22,17 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
-public class SubPropertyOfAxiomImpl<T> implements SubPropertyOfAxiom<T> {
 
-	private static final long serialVersionUID = -3020225654321319941L;
+public class BinaryAxiomImpl<T> implements BinaryAxiom<T> {
+
+	private static final long serialVersionUID = -7590338987239580423L;
 
 	private final T including; // right-hand side
-	private final T included;	
+	private final T included;
 	private final String string;
 	
-	SubPropertyOfAxiomImpl(T subDesc, T superDesc) {
+	BinaryAxiomImpl(T subDesc, T superDesc) {
 		included = subDesc;
 		including = superDesc;
 		StringBuilder bf = new StringBuilder();
@@ -52,13 +54,13 @@ public class SubPropertyOfAxiomImpl<T> implements SubPropertyOfAxiom<T> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof SubPropertyOfAxiomImpl<?>) {
-			SubPropertyOfAxiomImpl<T> inc2 = (SubPropertyOfAxiomImpl<T>) obj;
+		if (obj instanceof BinaryAxiomImpl<?>) {
+			BinaryAxiomImpl<T> inc2 = (BinaryAxiomImpl<T>) obj;
 			return including.equals(inc2.including) && included.equals(inc2.included);
 		}
 		return false;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		return string.hashCode();
