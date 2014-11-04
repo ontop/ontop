@@ -22,27 +22,11 @@ package it.unibz.krdb.obda.protege4.utils;
 
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.TargetQueryVocabularyValidator;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.parser.TargetQueryParserException;
 import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
-
-import javax.swing.BorderFactory;
-import javax.swing.JTextPane;
-import javax.swing.Timer;
-import javax.swing.ToolTipManager;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -50,6 +34,12 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Vector;
 
 public class QueryPainter {
 	private final OBDAModel apic;
@@ -351,6 +341,7 @@ public class QueryPainter {
 		CQIE current_query = parse(input);
 
 		if (current_query == null) {
+            JOptionPane.showMessageDialog(null, "An error occured while parsing the mappings. For more info, see the logs.");
 			throw new Exception("Unable to parse the query: " + input + ", " + parsingException);
 		}
 		input = doc.getText(0, doc.getLength());
