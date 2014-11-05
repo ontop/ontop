@@ -77,15 +77,15 @@ public class VariableImpl extends AbstractLiteral implements Variable {
 
 	@Override
 	public Set<Variable> getReferencedVariables() {
-		return Collections.singleton((Variable)this);
+		return Collections.<Variable>singleton(this);
 	}
-	
+/*	
 	@Override
 	public Map<Variable, Integer> getVariableCount() {
 		Map<Variable,Integer> count =  new HashMap<Variable,Integer>();
 		count.put(this, 1);
 		return count;
 	}
-	
+*/	
 
 }

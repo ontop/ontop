@@ -3,7 +3,7 @@
 	<groupId>it.unibz.inf.ontop</groupId>
 	<artifactId>ontop</artifactId>
 	<packaging>pom</packaging>
-	<version>1.13.1</version>
+	<version>1.14.0</version>
 	<name>ontop</name>
 	<url>http://ontop.inf.unibz.it/</url>
 
@@ -257,12 +257,12 @@
 			<dependency>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr</artifactId>
-				<version>3.1.3</version>
+				<version>3.5.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr-runtime</artifactId>
-				<version>3.1.3</version>
+				<version>3.5.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.ibm.icu</groupId>

@@ -28,22 +28,19 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAQueryModifiers;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class DatalogNormalizer {
@@ -232,179 +229,7 @@ public class DatalogNormalizer {
 		return count;
 	}
 
-	/***
-	 * Enforces all equalities in the query, that is, for every equivalence
-	 * class (among variables) defined by a set of equalities, it chooses one
-	 * representative variable and replaces all other variables in the equivalence
-	 * class with the representative variable. For example, if the query body
-	 * is R(x,y,z), x=y, y=z. It will choose x and produce the following body
-	 * R(x,x,x).
-	 * <p>
-     * We ignore the equalities with disjunctions. For example R(x,y,z), x=y OR y=z
-	 * Note the process will also remove from the body all the equalities that are
-	 * here processed.
-	 * 
-	 * 
-	 * @param result
-	 * @param clone
-	 *            Indicates if the query should be cloned and the changes done
-	 *            on the clone only, or if the changes are done 'in place'. The
-	 *            first case returns a NEW query object, the second case returns
-	 *            the ORIGINAL query object.
-	 * @return
-	 */
-	public static CQIE enforceEqualities(CQIE result, boolean clone) {
-		if (clone)
-			result = result.clone();
 
-		List<Function> body = result.getBody();
-		Map<Variable, Term> mgu = new HashMap<>();
-
-		/* collecting all equalities as substitutions */
-
-		for (int i = 0; i < body.size(); i++) {
-			Function atom = body.get(i);
-			Unifier.applyUnifier(atom, mgu);
-
-                if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
-                    Substitution s = Unifier.getSubstitution(atom.getTerm(0), atom.getTerm(1));
-                    if (s == null) {
-                        continue;
-                    } else if (!(s instanceof NeutralSubstitution)) {
-                        Unifier.composeUnifiers(mgu, s);
-                    }
-                    body.remove(i);
-                    i -= 1;
-                }
-                //search for nested equalities in AND function
-                else if(atom.getFunctionSymbol() == OBDAVocabulary.AND){
-                    nestedEQSubstitutions(atom, mgu);
-
-                    //we remove the function if empty because all its terms were equalities
-                    if(atom.getTerms().isEmpty()){
-                        body.remove(i);
-                        i -= 1;
-                    }
-                    else{
-
-                        //if there is only a term left we remove the conjunction
-                        if(atom.getTerms().size()==1 ) {
-                            body.set(i, (Function) atom.getTerm(0));
-                        }
-                        else {
-                            //update the body with the new values
-                            body.set(i, atom);
-                        }
-
-                    }
-
-
-                }
-
-            }
-
-		result = Unifier.applyUnifier(result, mgu, false);
-		return result;
-	}
-
-
-    /**
-     * We search for equalities in conjunctions. This recursive methods explore AND functions and removes EQ functions,
-     * substituting the values using the class
-     * {@link Unifier#getSubstitution(it.unibz.krdb.obda.model.Term, it.unibz.krdb.obda.model.Term)}
-     * @param atom the atom that can contain equalities
-     * @param mgu mapping between a variable and a term
-     */
-    private static void nestedEQSubstitutions(Function atom, Map<Variable, Term> mgu) {
-        List<Term> terms = atom.getTerms();
-        for (int i = 0; i < terms.size(); i++) {
-            Term t = terms.get(i);
-
-
-            if (t instanceof Function) {
-                Function t2 = (Function) t;
-                Unifier.applyUnifier(t2, mgu);
-
-                //in case of equalities do the substitution and remove the term
-                if (t2.getFunctionSymbol() == OBDAVocabulary.EQ) {
-                    Substitution s = Unifier.getSubstitution(t2.getTerm(0), t2.getTerm(1));
-
-                    if (s == null) {
-                        continue;
-                    } else if (!(s instanceof NeutralSubstitution)) {
-                        Unifier.composeUnifiers(mgu, s);
-                    }
-
-                    terms.remove(i);
-                    i -= 1;
-
-
-                }
-                //consider the case of  AND function. Calls recursive method to consider nested equalities
-                else {
-                    if (t2.getFunctionSymbol() == OBDAVocabulary.AND) {
-                        nestedEQSubstitutions(t2, mgu);
-
-                        //we remove the function if empty because all its terms were equalities
-                        if (t2.getTerms().isEmpty()) {
-                            terms.remove(i);
-                            i -= 1;
-                        } else {
-
-                            //if there is only a term left we remove the conjunction
-                            //we remove and function and we set  atom equals to the term that remained
-                            if (t2.getTerms().size() == 1) {
-                                atom.setTerm(i, t2.getTerm(0));
-                            }
-
-                        }
-                    }
-                }
-
-            }
-
-        }
-
-
-
-    }
-
-	/***
-	 * See {@link #enforceEqualities(CQIE, boolean)}
-	 * 
-	 * @param dp
-	 * @return
-	 * @see #enforceEqualities(CQIE, boolean)
-	 */
-	public static DatalogProgram enforceEqualities(DatalogProgram dp) {
-
-		return enforceEqualities(dp, true);
-	}
-
-	/***
-	 * Enforces equalities in the variables of the queries in the Datalog
-	 * program returning a copy of the program with all the equalities enforced.
-	 * {@link #enforceEqualities(CQIE, boolean) enforceEqualities}
-	 * 
-	 * @param dp
-	 * @return
-	 * @see #enforceEqualities(CQIE, boolean)
-	 */
-	public static DatalogProgram enforceEqualities(DatalogProgram dp, boolean clone) {
-		List<CQIE> queries = dp.getRules();
-		if (clone) {
-			OBDAQueryModifiers queryModifiers = dp.getQueryModifiers();
-			dp = fac.getDatalogProgram();
-			dp.setQueryModifiers(queryModifiers);
-		}
-		for (CQIE cq : queries) {
-			cq = enforceEqualities(cq, clone);
-			if (clone) {
-				dp.appendRule(cq);
-			}
-		}
-		return dp;
-	}
 
 	/***
 	 * This method introduces new variable names in each data atom and
@@ -417,7 +242,7 @@ public class DatalogNormalizer {
 	 * @param substitutions
 	 */
 	public static void pullOutEqualities(CQIE query) {
-		Map<Variable, Term> substitutions = new HashMap<Variable, Term>();
+		Unifier substitutions = new Unifier();
 		int[] newVarCounter = { 1 };
 
 		Set<Function> booleanAtoms = new HashSet<Function>();
@@ -432,11 +257,11 @@ public class DatalogNormalizer {
 		 * query.
 		 */
 
-		Unifier.applyUnifier(query, substitutions, false);
+		UnifierUtilities.applyUnifier(query, substitutions, false);
 
 	}
 
-	private static BranchDepthSorter sorter = new BranchDepthSorter();
+//	private static BranchDepthSorter sorter = new BranchDepthSorter();
 
 	/***
 	 * Compares two atoms by the depth of their JOIN/LEFT JOIN branches. This is
@@ -446,6 +271,7 @@ public class DatalogNormalizer {
 	 * @author mariano
 	 * 
 	 */
+/*	
 	private static class BranchDepthSorter implements Comparator<Function> {
 
 		public int getDepth(Function term) {
@@ -471,7 +297,8 @@ public class DatalogNormalizer {
 			return getDepth(arg1) - getDepth(arg0);
 		}
 	}
-
+*/
+	
 	/***
 	 * Adds a trivial equality to a LeftJoin in case the left join doesn't have
 	 * at least one boolean condition. This is necessary to have syntactically
@@ -515,7 +342,7 @@ public class DatalogNormalizer {
 	 * @param currentTerms
 	 * @param substitutions
 	 */
-	private static void pullOutEqualities(List currentTerms, Map<Variable, Term> substitutions, List<Function> eqList,
+	private static void pullOutEqualities(List currentTerms, Unifier substitutions, List<Function> eqList,
 			int[] newVarCounter, boolean isLeftJoin) {
 
 		for (int i = 0; i < currentTerms.size(); i++) {
@@ -550,7 +377,7 @@ public class DatalogNormalizer {
 				Term subTerm = subterms.get(j);
 				if (subTerm instanceof Variable) {
 
-					Variable var1 = (Variable) subTerm;
+					VariableImpl var1 = (VariableImpl) subTerm;
 					Variable var2 = (Variable) substitutions.get(var1);
 
 					if (var2 == null) {

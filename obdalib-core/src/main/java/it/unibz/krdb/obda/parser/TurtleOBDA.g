@@ -483,12 +483,28 @@ typedLiteral returns [Function value]
           functionSymbol = dfac.getDataTypePredicateLiteral();
       } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
           functionSymbol = dfac.getDataTypePredicateString();
-      } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI) || functionName.equals(OBDAVocabulary.XSD_INT_URI)) {
+      } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
           functionSymbol = dfac.getDataTypePredicateInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_INT_URI)) {
+      	  functionSymbol = dfac.getDataTypePredicateInt(); 
+      } else if  (functionName.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)){
+     	functionSymbol = dfac.getDataTypePredicatePositiveInteger(); 
+      } else if (functionName.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)){
+     	functionSymbol = dfac.getDataTypePredicateNegativeInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)){
+     	 functionSymbol = dfac.getDataTypePredicateNonNegativeInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)){
+    	 functionSymbol = dfac.getDataTypePredicateNonPositiveInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) {
+         functionSymbol = dfac.getDataTypePredicateUnsignedInt();             
+      } else if (functionName.equals(OBDAVocabulary.XSD_LONG_URI)) {
+          functionSymbol = dfac.getDataTypePredicateLong();
       } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
           functionSymbol = dfac.getDataTypePredicateDecimal();
       } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
           functionSymbol = dfac.getDataTypePredicateDouble();
+      } else if (functionName.equals(OBDAVocabulary.XSD_FLOAT_URI)) {
+          functionSymbol = dfac.getDataTypePredicateFloat();
       } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
           functionSymbol = dfac.getDataTypePredicateDateTime();
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
@@ -564,10 +580,26 @@ dataTypeString returns [Term value]
     	functionSymbol = dfac.getDataTypePredicateString();
       } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
      	functionSymbol = dfac.getDataTypePredicateInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_INT_URI)) {
+      	  functionSymbol = dfac.getDataTypePredicateInt(); 
+      } else if  (functionName.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)){
+     	functionSymbol = dfac.getDataTypePredicatePositiveInteger(); 
+      } else if (functionName.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)){
+     	functionSymbol = dfac.getDataTypePredicateNegativeInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)){
+     	 functionSymbol = dfac.getDataTypePredicateNonNegativeInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)){
+    	 functionSymbol = dfac.getDataTypePredicateNonPositiveInteger();
+      } else if (functionName.equals(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) {
+         functionSymbol = dfac.getDataTypePredicateUnsignedInt();  
+      } else if (functionName.equals(OBDAVocabulary.XSD_LONG_URI)) {
+     	functionSymbol = dfac.getDataTypePredicateLong();
       } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
     	functionSymbol = dfac.getDataTypePredicateDecimal();
       } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
     	functionSymbol = dfac.getDataTypePredicateDouble();
+	} else if (functionName.equals(OBDAVocabulary.XSD_FLOAT_URI)) {
+          functionSymbol = dfac.getDataTypePredicateFloat();
       } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
     	functionSymbol = dfac.getDataTypePredicateDateTime();
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
@@ -691,6 +723,17 @@ CARET:         '^';
 fragment ALPHA
   : 'a'..'z'
   | 'A'..'Z'
+  | '\u00C0'..'\u00D6'
+  | '\u00D8'..'\u00F6'
+  | '\u00F8'..'\u02FF'
+  | '\u0370'..'\u037D'
+  | '\u037F'..'\u1FFF'
+  | '\u200C'..'\u200D'
+  | '\u2070'..'\u218F'
+  | '\u2C00'..'\u2FEF'
+  | '\u3001'..'\uD7FF'
+  | '\uF900'..'\uFDCF'
+  | '\uFDF0'..'\uFFFD'
   ;
 
 fragment DIGIT

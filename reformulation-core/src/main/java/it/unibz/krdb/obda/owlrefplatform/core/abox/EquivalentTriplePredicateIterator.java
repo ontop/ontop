@@ -22,31 +22,28 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Iterator;
-import java.util.Map;
 
 public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 
-	private Iterator<Assertion> originalIterator;
-	private EquivalenceMap equivalenceMap;
+	private final Iterator<Assertion> originalIterator;
+	private final TBoxReasoner reasoner;
+
+	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();	
 	
-	
-	public EquivalentTriplePredicateIterator(Iterator<Assertion> iterator, EquivalenceMap equivalences) {
+	public EquivalentTriplePredicateIterator(Iterator<Assertion> iterator, TBoxReasoner reasoner) {
 		originalIterator = iterator;
-		equivalenceMap = equivalences;
+		this.reasoner = reasoner;
 	}
 	
 	@Override
@@ -57,11 +54,49 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 	@Override
 	public Assertion next() {
 		Assertion assertion = originalIterator.next();
-		return equivalenceMap.getNormal(assertion);
+		return getNormal(assertion);
 	}
 
 	@Override
 	public void remove() {
 		originalIterator.remove();
+	}
+	
+	// used in EquivalentTriplePredicateIterator
+	
+	private Assertion getNormal(Assertion assertion) {
+		if (assertion instanceof ClassAssertion) {
+			ClassAssertion ca = (ClassAssertion) assertion;
+			Predicate concept = ca.getConcept().getPredicate();
+			OClass description = reasoner.getClassRepresentative(concept);
+			
+			if (description != null) {
+				ObjectConstant object = ca.getIndividual();
+				return ofac.createClassAssertion(description, object);
+			}			
+		} 
+		else if (assertion instanceof PropertyAssertion) {
+			PropertyAssertion opa = (PropertyAssertion) assertion;
+			Predicate role = opa.getProperty().getPredicate();
+			PropertyExpression property = reasoner.getPropertyRepresentative(role);
+			
+			if (property != null) {
+				ObjectConstant object1 = opa.getSubject();
+				if (opa.getValue2() instanceof ValueConstant) {
+					ValueConstant constant = (ValueConstant)opa.getValue2();
+					return ofac.createPropertyAssertion(property, object1, constant);					
+				}
+				else {
+					ObjectConstant object2 = (ObjectConstant)opa.getValue2();
+					if (property.isInverse()) {
+						PropertyExpression notinv = property.getInverse();
+						return ofac.createPropertyAssertion(notinv, object2, object1);
+					} else {
+						return ofac.createPropertyAssertion(property, object1, object2);
+					}
+				}
+			}
+		} 
+		return assertion;
 	}
 }

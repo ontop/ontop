@@ -106,10 +106,10 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 	public Set<Variable> getReferencedVariables() {
 		return new LinkedHashSet<Variable>();
 	}
-
+/*
 	@Override
 	public Map<Variable, Integer> getVariableCount() {
 		return new HashMap<Variable, Integer>();
 	}
-
+*/
 }

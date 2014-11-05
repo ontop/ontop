@@ -30,8 +30,10 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	static {
 		SqlDatatypes = new HashMap<Integer, String>();
 		SqlDatatypes.put(Types.INTEGER, "INT");
+        SqlDatatypes.put(Types.BIGINT, "BIGINT");
 		SqlDatatypes.put(Types.DECIMAL, "DECIMAL");
 		SqlDatatypes.put(Types.REAL, "FLOAT");
+        SqlDatatypes.put(Types.FLOAT, "FLOAT");
 		SqlDatatypes.put(Types.DOUBLE, "DOUBLE");
 		SqlDatatypes.put(Types.CHAR, "CHAR");
 		SqlDatatypes.put(Types.VARCHAR, "CHAR(8000) CHARACTER SET utf8");  // for korean, chinese, etc characters we need to use utf8

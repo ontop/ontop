@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
@@ -119,7 +119,7 @@ private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 	for(DAGNode d: d1.getRoles()){
 		System.out.println(d );
 		for(DAGNode dd: d.getEquivalents()){
-		System.out.println(d1.getRoleNode(((Property)dd.getDescription())));
+		System.out.println(d1.getRoleNode(((PropertyExpression)dd.getDescription())));
 		;
 		}
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -141,8 +141,8 @@ private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG) {
 	for(Description vertex: engine.getIndexed()) { // .getNamedDAG().vertexSet()
 		int index= engine.getIndex(vertex);
 		log.info("vertex {} index {}", vertex, index);
-		if (vertex instanceof Property) {
-			for(Description parent: namedDAG.getSuccessors((Property)vertex)){
+		if (vertex instanceof PropertyExpression) {
+			for(Description parent: namedDAG.getSuccessors((PropertyExpression)vertex)){
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
 				if(result)
 					break;

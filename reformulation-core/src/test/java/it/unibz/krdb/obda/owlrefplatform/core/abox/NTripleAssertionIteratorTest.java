@@ -20,18 +20,14 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.HashMap;
 
 import junit.framework.TestCase;
 
@@ -39,7 +35,7 @@ public class NTripleAssertionIteratorTest extends TestCase {
 	public void testIteratorTest() throws IOException {
 		File testFile = new File("src/test/resources/test/lubm-data.n3");
 		URI fileURI = testFile.toURI();
-		NTripleAssertionIterator iterator = new NTripleAssertionIterator(fileURI, EquivalenceMap.getEmptyEquivalenceMap());
+		NTripleAssertionIterator iterator = new NTripleAssertionIterator(fileURI);
 		
 		int typeCount = 0;
 		int objPropCount = 0;
@@ -49,11 +45,14 @@ public class NTripleAssertionIteratorTest extends TestCase {
 			Assertion ass = iterator.next();
 			if (ass instanceof ClassAssertion) {
 				typeCount +=1;
-			} else if (ass instanceof DataPropertyAssertion) {
-				datPropCount +=1;
-			} else if (ass instanceof ObjectPropertyAssertion) {
-				objPropCount +=1;
 			} 
+			else if (ass instanceof PropertyAssertion) {
+				PropertyAssertion ass2 = (PropertyAssertion)ass;
+				if (ass2.getValue2() instanceof ValueConstant)
+					datPropCount +=1;
+				else
+					objPropCount +=1;
+			}  
 		}
 		
 		assertEquals(2, typeCount);

@@ -41,7 +41,9 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
@@ -112,7 +114,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
 	private boolean isSI = false;
-	private Map<String, Integer> uriRefIds;
+	private SemanticIndexURIMap uriRefIds;
 	
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
 
@@ -128,7 +130,7 @@ public class SQLGenerator implements SQLQueryGenerator {
     }
 
     @Override
-	public void setUriIds (Map<String,Integer> uriid){
+	public void setUriMap (SemanticIndexURIMap uriid){
 		this.isSI = true;
 		this.uriRefIds = uriid;
 	}
@@ -207,7 +209,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 //			log.debug("Before pushing equalities: \n{}", cq);
 
-			DatalogNormalizer.enforceEqualities(cq, false);
+			EQNormalizer.enforceEqualities(cq);
 
 //			log.debug("Before folding Joins: \n{}", cq);
 
@@ -314,6 +316,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 				int type = getVariableDataType(term, index);
 				if (type == Types.INTEGER) return String.format("NOT %s > 0", column);
+                if (type == Types.BIGINT) return String.format("NOT %s > 0", column);
+                if (type == Types.FLOAT) return String.format("NOT %s > 0", column);
 				if (type == Types.DOUBLE) return String.format("NOT %s > 0", column);
 				if (type == Types.BOOLEAN) return String.format("NOT %s", column);
 				if (type == Types.VARCHAR) return String.format("NOT LENGTH(%s) > 0", column);
@@ -324,6 +328,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				//int type = 8;
 				int type = getVariableDataType(term, index);
 				if (type == Types.INTEGER) return String.format("%s > 0", column);
+                if (type == Types.BIGINT) return String.format("%s > 0", column);
+                if (type == Types.FLOAT) return String.format("%s > 0", column);
 				if (type == Types.DOUBLE) return String.format("%s > 0", column);
 				if (type == Types.BOOLEAN) return String.format("%s", column);
 				if (type == Types.VARCHAR) return String.format("LENGTH(%s) > 0", column);
@@ -698,7 +704,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 			Predicate p = f.getFunctionSymbol();
 			if (p.toString() == OBDAVocabulary.XSD_BOOLEAN_URI) return Types.BOOLEAN;
 			if (p.toString() == OBDAVocabulary.XSD_INT_URI)  return Types.INTEGER;
-			if (p.toString() == OBDAVocabulary.XSD_INTEGER_URI)  return Types.INTEGER;
+			if (p.toString() == OBDAVocabulary.XSD_INTEGER_URI)  return Types.BIGINT;
+            if (p.toString() == OBDAVocabulary.XSD_LONG_URI)  return Types.BIGINT;
+            if (p.toString() == OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)  return Types.BIGINT;
+            if (p.toString() == OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)  return Types.BIGINT;
+            if (p.toString() == OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)  return Types.BIGINT;
+            if (p.toString() == OBDAVocabulary.XSD_UNSIGNED_INT_URI)  return Types.INTEGER;
+            if (p.toString() == OBDAVocabulary.XSD_FLOAT_URI)  return Types.FLOAT;
 			if (p.toString() == OBDAVocabulary.XSD_DOUBLE_URI) return Types.DOUBLE;
 			if (p.toString() == OBDAVocabulary.XSD_STRING_URI) return Types.VARCHAR;
 			if (p.toString() == OBDAVocabulary.RDFS_LITERAL_URI) return Types.VARCHAR;
@@ -913,6 +925,22 @@ public class SQLGenerator implements SQLQueryGenerator {
 				return (String.format(typeStr, 6, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
 				return (String.format(typeStr, 4, signature.get(hpos)));
+            } else if (functionString.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)) {
+                return (String.format(typeStr, 15, signature.get(hpos)));
+            } else if (functionString.equals(OBDAVocabulary.XSD_FLOAT_URI)) {
+                return (String.format(typeStr, 14, signature.get(hpos)));
+            } else if (functionString.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)) {
+                return (String.format(typeStr, 16, signature.get(hpos)));
+            } else if (functionString.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)) {
+                return (String.format(typeStr, 17, signature.get(hpos)));
+            } else if (functionString.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)) {
+                return (String.format(typeStr, 18, signature.get(hpos)));
+            } else if (functionString.equals(OBDAVocabulary.XSD_INT_URI)) {
+                return (String.format(typeStr, 19, signature.get(hpos)));
+            } else if (functionString.equals(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) {
+                return (String.format(typeStr, 20, signature.get(hpos)));
+            } else if (functionString.equals(OBDAVocabulary.XSD_LONG_URI)) {
+                return (String.format(typeStr, 13, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_STRING_URI)) {
 				return (String.format(typeStr, 7, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
@@ -1039,7 +1067,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * The function is of the form uri(x), we need to simply return the
 			 * value of X
 			 */
-			return getSQLString(((Variable) t), index, false);
+			return sqladapter.sqlCast(getSQLString(((Variable) t), index, false), Types.VARCHAR);
 			
 		} else if (t instanceof URIConstant) {
 			/*
@@ -1176,7 +1204,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			ValueConstant ct = (ValueConstant) term;
 			if (isSI) {
 				if (ct.getType() == COL_TYPE.OBJECT || ct.getType() == COL_TYPE.LITERAL) {
-					int id = getUriid(ct.getValue());
+					int id = uriRefIds.getId(ct.getValue());
 					if (id >= 0)
 						return jdbcutil.getSQLLexicalForm(String.valueOf(id));
 				}
@@ -1185,7 +1213,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (term instanceof URIConstant) {
 			if (isSI) {
 				String uri = term.toString();
-				int id = getUriid(uri);
+				int id = uriRefIds.getId(uri);
 				return jdbcutil.getSQLLexicalForm(String.valueOf(id));
 			}
 			URIConstant uc = (URIConstant) term;
@@ -1227,7 +1255,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 					String column = getSQLString(term1, index, false);
 					int type = getVariableDataType(term1, index);
 					if (type == Types.INTEGER) return String.format("%s > 0", column);
+                    if (type == Types.BIGINT) return String.format("%s > 0", column);
 					if (type == Types.DOUBLE) return String.format("%s > 0", column);
+                    if (type == Types.FLOAT) return String.format("%s > 0", column);
 					if (type == Types.BOOLEAN) return String.format("%s", column);
 					if (type == Types.VARCHAR) return String.format("LENGTH(%s) > 0", column);
 					return "1";
@@ -1291,7 +1321,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				String datatype = ((Constant) function.getTerm(1)).getValue();
 				int sqlDatatype = -1;
-				if (datatype.equals(OBDAVocabulary.XSD_STRING_URI)) {
+				if (datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
 					sqlDatatype = Types.VARCHAR;
 				}
 				if (isStringColType(function, index)) {
@@ -1321,21 +1351,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 
-	/***
-	 * We look for the ID in the list of IDs, if its not there, we return -2, which we know will never appear
-	 * on the DB. This is correct because if a constant appears in a query, and that constant was never inserted
-	 * in the DB, the query must be empty (that atom), by putting -2 as id, we will enforce that.
-	 * @param uri
-	 * @return
-	 */
-	private int getUriid(String uri) {
-		
-		Integer id = uriRefIds.get(uri);
-		if (id != null)
-			return id;
-		return -2;
-					
-	}
 
 	/**
 	 * Returns the SQL string for the boolean operator, including placeholders

@@ -82,5 +82,4 @@ public class Interval implements Comparable<Interval>, Serializable {
     public int getEnd() {
         return end;
     }
-
 }

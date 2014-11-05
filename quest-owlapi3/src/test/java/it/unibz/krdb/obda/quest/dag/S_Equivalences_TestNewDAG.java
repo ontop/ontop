@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -221,7 +221,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 		Set<Description> set2 = new HashSet<Description>();
 		
-		for (Equivalences<Property> equivalents : d2.getProperties()) {
+		for (Equivalences<PropertyExpression> equivalents : d2.getProperties()) {
 			numberEquivalents += equivalents.size()-1;
 			set2.addAll(equivalents.getMembers());	
 		}
@@ -247,7 +247,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		//number of edges between the equivalent nodes
 		int numberEquivalents=0;
 
-		for (Equivalences<Property> equivalents : d2.getProperties())
+		for (Equivalences<PropertyExpression> equivalents : d2.getProperties())
 			//two nodes have two edges, three nodes have three edges...
 			if(equivalents.size() >= 2)
 				numberEquivalents += equivalents.size();
