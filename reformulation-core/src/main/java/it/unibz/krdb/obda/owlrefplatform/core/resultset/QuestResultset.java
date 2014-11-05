@@ -20,29 +20,19 @@ package it.unibz.krdb.obda.owlrefplatform.core.resultset;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAStatement;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
+import it.unibz.krdb.obda.model.impl.XSDDatatypeCodes;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 
 import java.net.URISyntaxException;
-import java.sql.Date;
+import java.sql.*;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.text.*;
+import java.util.HashMap;
+import java.util.List;
 
 public class QuestResultset implements TupleResultSet {
 
@@ -344,47 +334,47 @@ public class QuestResultset implements TupleResultSet {
 
 	private COL_TYPE getQuestType(int sqltype) {
         switch(sqltype) {
-            case 1:
+            case XSDDatatypeCodes.QUEST_URI_CODE:
                 return COL_TYPE.OBJECT;
-            case 2:
+            case XSDDatatypeCodes.QUEST_BNODE_CODE:
                 return COL_TYPE.BNODE;
-            case 3:
+            case XSDDatatypeCodes.RDFS_LITERAL_URI_CODE:
                 return COL_TYPE.LITERAL;
-            case 4:
+            case XSDDatatypeCodes.XSD_INTEGER_URI_CODE:
                 return COL_TYPE.INTEGER;
-            case 5:
+            case XSDDatatypeCodes.XSD_DECIMAL_URI_CODE:
                 return COL_TYPE.DECIMAL;
-            case 6:
+            case XSDDatatypeCodes.XSD_DOUBLE_URI_CODE:
                 return COL_TYPE.DOUBLE;
-            case 7:
+            case XSDDatatypeCodes.XSD_STRING_URI_CODE:
                 return COL_TYPE.STRING;
-            case 8:
+            case XSDDatatypeCodes.XSD_DATETIME_URI_CODE:
                 return COL_TYPE.DATETIME;
-            case 9:
+            case XSDDatatypeCodes.XSD_BOOLEAN_URI_CODE:
                 return COL_TYPE.BOOLEAN;
-            case 10:
+            case XSDDatatypeCodes.XSD_DATE_URI_CODE:
                 return COL_TYPE.DATE;
-            case 11:
+            case XSDDatatypeCodes.XSD_TIME_URI_CODE:
                 return COL_TYPE.TIME;
-            case 12:
+            case XSDDatatypeCodes.XSD_YEAR_URI_CODE:
                 return COL_TYPE.YEAR;
-            case 13:
+            case XSDDatatypeCodes.XSD_LONG_URI_CODE:
                 return COL_TYPE.LONG;
-            case 14:
+            case XSDDatatypeCodes.XSD_FLOAT_URI_CODE:
                 return COL_TYPE.FLOAT;
-            case 15:
+            case XSDDatatypeCodes.XSD_NEGATIVE_INTEGER_URI_CODE:
                 return COL_TYPE.NEGATIVE_INTEGER;
-            case 16:
+            case XSDDatatypeCodes.XSD_NON_NEGATIVE_INTEGER_URI_CODE:
                 return COL_TYPE.NON_NEGATIVE_INTEGER;
-            case 17:
+            case XSDDatatypeCodes.XSD_POSITIVE_INTEGER_URI_CODE:
                 return COL_TYPE.POSITIVE_INTEGER;
-            case 18:
+            case XSDDatatypeCodes.XSD_NON_POSITIVE_INTEGER_URI_CODE:
                 return COL_TYPE.NON_POSITIVE_INTEGER;
-            case 19:
+            case XSDDatatypeCodes.XSD_INT_URI_CODE:
                 return COL_TYPE.INT;
-            case 20:
+            case XSDDatatypeCodes.XSD_UNSIGNED_INT_URI_CODE:
                 return COL_TYPE.UNSIGNED_INT;
-            case 0:
+            case XSDDatatypeCodes.NULL_CODE:
                 return null;
             default:
                 throw new RuntimeException("COLTYPE unknown: " + sqltype);

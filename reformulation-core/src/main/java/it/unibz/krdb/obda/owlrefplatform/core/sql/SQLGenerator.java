@@ -20,27 +20,11 @@ package it.unibz.krdb.obda.owlrefplatform.core.sql;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
-import it.unibz.krdb.obda.model.BNode;
-import it.unibz.krdb.obda.model.BooleanOperationPredicate;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.NumericalOperationPredicate;
-import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.URITemplatePredicate;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.owlrefplatform.core.Quest;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.model.impl.XSDDatatypeCodes;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
@@ -53,25 +37,17 @@ import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
-
-import java.sql.Types;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.openrdf.model.Literal;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Types;
+import java.util.*;
 
 //import com.hp.hpl.jena.rdf.model.Literal;
 
 public class SQLGenerator implements SQLQueryGenerator {
 
-	private static final long serialVersionUID = 7477161929752147045L;
+    private static final long serialVersionUID = 7477161929752147045L;
 
 	/**
 	 * Operator symbols
@@ -910,50 +886,50 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * type
 			 */
 			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-				return (String.format(typeStr, 9, signature.get(hpos)));
+				return (String.format(typeStr, XSDDatatypeCodes.XSD_BOOLEAN_URI_CODE, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-				return (String.format(typeStr, 8, signature.get(hpos)));
+				return (String.format(typeStr, XSDDatatypeCodes.XSD_DATETIME_URI_CODE, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DATE_URI)) {
-				return (String.format(typeStr, 10, signature.get(hpos)));
+				return (String.format(typeStr, XSDDatatypeCodes.XSD_DATE_URI_CODE, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_TIME_URI)) {
-				return (String.format(typeStr, 11, signature.get(hpos)));
+				return (String.format(typeStr, XSDDatatypeCodes.XSD_TIME_URI_CODE, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_YEAR_URI)) {
-				return (String.format(typeStr, 12, signature.get(hpos)));
+				return (String.format(typeStr, XSDDatatypeCodes.XSD_YEAR_URI_CODE, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-				return (String.format(typeStr, 5, signature.get(hpos)));
+				return (String.format(typeStr, XSDDatatypeCodes.XSD_DECIMAL_URI_CODE, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-				return (String.format(typeStr, 6, signature.get(hpos)));
+				return (String.format(typeStr, XSDDatatypeCodes.XSD_DOUBLE_URI_CODE, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
-				return (String.format(typeStr, 4, signature.get(hpos)));
+				return (String.format(typeStr, XSDDatatypeCodes.XSD_INTEGER_URI_CODE, signature.get(hpos)));
             } else if (functionString.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)) {
-                return (String.format(typeStr, 15, signature.get(hpos)));
+                return (String.format(typeStr, XSDDatatypeCodes.XSD_NEGATIVE_INTEGER_URI_CODE, signature.get(hpos)));
             } else if (functionString.equals(OBDAVocabulary.XSD_FLOAT_URI)) {
-                return (String.format(typeStr, 14, signature.get(hpos)));
+                return (String.format(typeStr, XSDDatatypeCodes.XSD_FLOAT_URI_CODE, signature.get(hpos)));
             } else if (functionString.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)) {
-                return (String.format(typeStr, 16, signature.get(hpos)));
+                return (String.format(typeStr, XSDDatatypeCodes.XSD_NON_NEGATIVE_INTEGER_URI_CODE, signature.get(hpos)));
             } else if (functionString.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)) {
-                return (String.format(typeStr, 17, signature.get(hpos)));
+                return (String.format(typeStr, XSDDatatypeCodes.XSD_POSITIVE_INTEGER_URI_CODE, signature.get(hpos)));
             } else if (functionString.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)) {
-                return (String.format(typeStr, 18, signature.get(hpos)));
+                return (String.format(typeStr, XSDDatatypeCodes.XSD_NON_POSITIVE_INTEGER_URI_CODE, signature.get(hpos)));
             } else if (functionString.equals(OBDAVocabulary.XSD_INT_URI)) {
-                return (String.format(typeStr, 19, signature.get(hpos)));
+                return (String.format(typeStr, XSDDatatypeCodes.XSD_INT_URI_CODE, signature.get(hpos)));
             } else if (functionString.equals(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) {
-                return (String.format(typeStr, 20, signature.get(hpos)));
+                return (String.format(typeStr, XSDDatatypeCodes.XSD_UNSIGNED_INT_URI_CODE, signature.get(hpos)));
             } else if (functionString.equals(OBDAVocabulary.XSD_LONG_URI)) {
-                return (String.format(typeStr, 13, signature.get(hpos)));
+                return (String.format(typeStr, XSDDatatypeCodes.XSD_LONG_URI_CODE, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.XSD_STRING_URI)) {
-				return (String.format(typeStr, 7, signature.get(hpos)));
+				return (String.format(typeStr, XSDDatatypeCodes.XSD_STRING_URI_CODE, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-				return (String.format(typeStr, 3, signature.get(hpos)));
+				return (String.format(typeStr, XSDDatatypeCodes.RDFS_LITERAL_URI_CODE, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
-				return (String.format(typeStr, 1, signature.get(hpos)));
+				return (String.format(typeStr, XSDDatatypeCodes.QUEST_URI_CODE, signature.get(hpos)));
 			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
-				return (String.format(typeStr, 2, signature.get(hpos)));
+				return (String.format(typeStr, XSDDatatypeCodes.QUEST_BNODE_CODE, signature.get(hpos)));
 			}
 		} else if (ht instanceof URIConstant) {
-			return (String.format(typeStr, 1, signature.get(hpos)));
+			return (String.format(typeStr, XSDDatatypeCodes.QUEST_URI_CODE, signature.get(hpos)));
 		} else if (ht == OBDAVocabulary.NULL) {
-			return (String.format(typeStr, 0, signature.get(hpos)));
+			return (String.format(typeStr, XSDDatatypeCodes.NULL_CODE, signature.get(hpos)));
 		}
 		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
 
