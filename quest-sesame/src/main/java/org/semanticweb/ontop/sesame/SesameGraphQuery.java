@@ -69,6 +69,7 @@ public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery 
 			return null;
 	}
 
+        @Override
 	public GraphQueryResult evaluate() throws QueryEvaluationException {
 		GraphResultSet res = null;
 		QuestDBStatement stm = null;
@@ -110,6 +111,7 @@ public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery 
 		}
 	}
 
+        @Override
 	public void evaluate(RDFHandler handler) throws QueryEvaluationException,
 			RDFHandlerException {
 		GraphQueryResult result =  evaluate();

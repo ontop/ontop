@@ -29,7 +29,7 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.semanticweb.ontop.ontology.BasicClassDescription;
 import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.Property;
+import org.semanticweb.ontop.ontology.PropertyExpression;
 
 /** 
  * Used to represent a DAG and a named DAG.
@@ -41,7 +41,7 @@ import org.semanticweb.ontop.ontology.Property;
 
 public class NamedDAG  {
 	
-	private final SimpleDirectedGraph <Property,DefaultEdge> propertyDAG;
+	private final SimpleDirectedGraph <PropertyExpression,DefaultEdge> propertyDAG;
 	private final SimpleDirectedGraph <BasicClassDescription,DefaultEdge> classDAG;
 	
 	public NamedDAG(TBoxReasoner reasoner) {			
@@ -57,7 +57,7 @@ public class NamedDAG  {
 	
 	
 	@Deprecated // USED ONLY IN TESTS (3 calls)
-	public SimpleDirectedGraph <Property,DefaultEdge> getPropertyDag() {
+	public SimpleDirectedGraph <PropertyExpression,DefaultEdge> getPropertyDag() {
 		return propertyDAG;
 	}
 	@Deprecated // USED ONLY IN TESTS (3 calls)
@@ -65,14 +65,14 @@ public class NamedDAG  {
 		return classDAG;
 	}
 	
-	public List<Property> getSuccessors(Property desc) {
+	public List<PropertyExpression> getSuccessors(PropertyExpression desc) {
 		return Graphs.successorListOf(propertyDAG, desc);		
 	}
 	public List<BasicClassDescription> getSuccessors(BasicClassDescription desc) {
 		return Graphs.successorListOf(classDAG, desc);		
 	}
 	
-	public List<Property> getPredecessors(Property desc) {
+	public List<PropertyExpression> getPredecessors(PropertyExpression desc) {
 		return Graphs.predecessorListOf(propertyDAG, desc);		
 	}
 	public List<BasicClassDescription> getPredecessors(BasicClassDescription desc) {

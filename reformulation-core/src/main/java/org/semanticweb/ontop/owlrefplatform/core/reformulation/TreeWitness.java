@@ -28,6 +28,7 @@ import java.util.Set;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.ontology.BasicClassDescription;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Intersection;
 
 /**
  * TreeWitness: universal tree witnesses as in the KR 2012 paper
@@ -55,11 +56,11 @@ public class TreeWitness {
 	private final Collection<TreeWitnessGenerator> gens; // the \exists R.B concepts that realise the tree witness 
 	                                          // in the canonical model of the TBox
 	
-	private final TreeWitnessReasonerCache.IntersectionOfConceptSets rootConcepts; // store concept for merging tree witnesses
+	private final Intersection<BasicClassDescription> rootConcepts; // store concept for merging tree witnesses
 	
 	private List<List<Function>> twfs;  // tw-formula: disjunction of conjunctions of atoms
 
-	public TreeWitness(Collection<TreeWitnessGenerator> gens, TermCover terms, Set<Function> rootAtoms, TreeWitnessReasonerCache.IntersectionOfConceptSets rootConcepts) {
+	public TreeWitness(Collection<TreeWitnessGenerator> gens, TermCover terms, Set<Function> rootAtoms, Intersection<BasicClassDescription> rootConcepts) {
 		this.gens = gens;
 		this.terms = terms;
 		this.rootAtoms = rootAtoms;
@@ -75,7 +76,7 @@ public class TreeWitness {
 		return twfs;
 	}
 	
-	public TreeWitnessReasonerCache.IntersectionOfConceptSets getRootConcepts() {
+	public Intersection<BasicClassDescription> getRootConcepts() {
 		return rootConcepts;
 	}
 	
@@ -94,7 +95,7 @@ public class TreeWitness {
 	 * @return true if all root terms are quantified variables and there is the intersection of root concepts is non-empty
 	 */
 	public boolean isMergeable() {
-		return !rootConcepts.isEmpty();
+		return !rootConcepts.isBottom();
 	}
 	
 	/**

@@ -30,6 +30,10 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.OntologyVocabulary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +50,7 @@ public class MappingVocabularyRepair {
 
 	Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
 
-	public void fixOBDAModel(OBDAModel model, Set<Predicate> vocabulary) {
+	public void fixOBDAModel(OBDAModel model, OntologyVocabulary vocabulary) {
 		log.debug("Fixing OBDA Model");
 		for (OBDADataSource source : model.getSources()) {
 			Collection<OBDAMappingAxiom> mappings = new LinkedList<OBDAMappingAxiom>(model.getMappings(source.getSourceID()));
@@ -64,15 +68,20 @@ public class MappingVocabularyRepair {
 	 * vocabualry.
 	 * 
 	 * @param originalMappings
-	 * @param equivalencesMap
+	 * @param vocabulary
 	 * @return
 	 */
-	public Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, Set<Predicate> vocabulary) {
+	public Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, OntologyVocabulary vocabulary) {
 		//		log.debug("Reparing/validating {} mappings", originalMappings.size());
 		HashMap<String, Predicate> urimap = new HashMap<String, Predicate>();
-		for (Predicate p : vocabulary) {
-			urimap.put(p.getName(), p);
-		}
+		for (OClass p : vocabulary.getClasses())
+			urimap.put(p.getPredicate().getName(), p.getPredicate());
+
+		for (ObjectPropertyExpression p : vocabulary.getObjectProperties())
+			urimap.put(p.getPredicate().getName(), p.getPredicate());
+		
+		for (DataPropertyExpression p : vocabulary.getDataProperties())
+			urimap.put(p.getPredicate().getName(), p.getPredicate());
 
 		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
 		for (OBDAMappingAxiom mapping : originalMappings) {

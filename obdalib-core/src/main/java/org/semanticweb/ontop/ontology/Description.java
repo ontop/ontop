@@ -25,6 +25,7 @@ import java.io.Serializable;
 /***
  * An entity descriptor, either role or class.
  */
+@Deprecated
 public interface Description extends Serializable {
 	// NO-OP
 }

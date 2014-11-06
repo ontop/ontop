@@ -20,53 +20,45 @@ package org.semanticweb.ontop.ontology.impl;
  * #L%
  */
 
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.ontology.PropertySomeRestriction;
+import org.semanticweb.ontop.ontology.PropertyExpression;
+import org.semanticweb.ontop.ontology.SomeValuesFrom;
 
-public class PropertySomeRestrictionImpl implements PropertySomeRestriction {
+public class PropertySomeRestrictionImpl implements SomeValuesFrom {
 
 	private static final long serialVersionUID = 593821958539751283L;
 	
-	private Predicate	predicate	= null;
-	private boolean		isInverse	= false;
+	private final PropertyExpression property;
+	private final String string;
 
-	PropertySomeRestrictionImpl(Predicate p, boolean isInverse) {
-		this.predicate = p;
-		this.isInverse = isInverse;
-	}
-
-	@Override
-	public boolean isInverse() {
-		return isInverse;
-	}
-
-	@Override
-	public Predicate getPredicate() {
-		return predicate;
-	}
-
-	public int hashCode() {
-		return toString().hashCode();
-	}
-
-	public boolean equals(Object obj) {
-		if (!(obj instanceof PropertySomeRestrictionImpl)) {
-			return false;
-		}
-		PropertySomeRestrictionImpl concept2 = (PropertySomeRestrictionImpl) obj;
-		if (isInverse != concept2.isInverse) {
-			return false;
-		}
-		return (predicate.equals(concept2.getPredicate()));
-	}
-
-	public String toString() {
+	PropertySomeRestrictionImpl(PropertyExpression property) {
+		this.property = property;
 		StringBuilder bf = new StringBuilder();
 		bf.append("E");
-		bf.append(predicate.toString());
-		if (isInverse) {
-			bf.append("^-");
+		bf.append(property.toString());
+		this.string =  bf.toString();
+	}
+
+	@Override
+	public PropertyExpression getProperty() {
+		return property;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof PropertySomeRestrictionImpl) {
+			PropertySomeRestrictionImpl other = (PropertySomeRestrictionImpl) obj;
+			return property.equals(other.property);
 		}
-		return bf.toString();
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return string.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return string;
 	}
 }

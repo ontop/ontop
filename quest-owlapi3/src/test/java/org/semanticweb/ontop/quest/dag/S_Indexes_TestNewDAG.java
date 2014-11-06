@@ -99,7 +99,7 @@ public void testIndexes() throws Exception{
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		TBoxReasonerImpl dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+		TBoxReasoner dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
 
 
 		//add input named graph
@@ -124,8 +124,8 @@ private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG){
 	for(Description vertex: engine.getIndexed() /*.getNamedDAG().vertexSet()*/){
 		int index= engine.getIndex(vertex);
 		log.info("vertex {} index {}", vertex, index);
-		if (vertex instanceof Property) {
-			for(Description parent: namedDAG.getSuccessors((Property)vertex)){
+		if (vertex instanceof PropertyExpression) {
+			for(Description parent: namedDAG.getSuccessors((PropertyExpression)vertex)){
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
 				if(!result)
 					break;

@@ -71,7 +71,8 @@ public class AnonymousVariable extends AbstractLiteral implements Variable {
 	public Set<Variable> getReferencedVariables() {
 		return new LinkedHashSet<Variable>();
 	}
-	
+
+/*
 	@Override
 	public Map<Variable, Integer> getVariableCount() {
 		// TODO This is wrong but it shouldn't affect query containment
@@ -79,5 +80,5 @@ public class AnonymousVariable extends AbstractLiteral implements Variable {
 		count.put(this, 1);
 		return count;
 	}
-
+*/
 }

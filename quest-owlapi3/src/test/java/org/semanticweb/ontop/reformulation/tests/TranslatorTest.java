@@ -65,13 +65,13 @@ public class TranslatorTest extends TestCase {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology dlliteonto = translator.translate(onto);
 		
-		Set<Axiom> ass = dlliteonto.getAssertions();
-		Iterator<Axiom> assit = ass.iterator();
+		Set<SubClassOfAxiom> ass = dlliteonto.getSubClassAxioms();
+		Iterator<SubClassOfAxiom> assit = ass.iterator();
 		assertEquals(1, ass.size());
 		
-		SubClassAxiomImpl a = (SubClassAxiomImpl) assit.next();
-		PropertySomeRestrictionImpl ex = (PropertySomeRestrictionImpl) a.getSub();
-		assertEquals(true, ex.isInverse());
+		SubClassOfAxiom a = assit.next();
+		SomeValuesFrom ex = (SomeValuesFrom) a.getSub();
+		assertEquals(true, ex.getProperty().isInverse());
 	}
 	
 	public void test_2() throws Exception{
@@ -91,13 +91,13 @@ public class TranslatorTest extends TestCase {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology dlliteonto = translator.translate(onto);
 		
-		Set<Axiom> ass = dlliteonto.getAssertions();
-		Iterator<Axiom> assit = ass.iterator();
+		Set<SubClassOfAxiom> ass = dlliteonto.getSubClassAxioms();
+		Iterator<SubClassOfAxiom> assit = ass.iterator();
 		assertEquals(1, ass.size());
 		
-		SubClassAxiomImpl a = (SubClassAxiomImpl) assit.next();
-		PropertySomeRestrictionImpl ex = (PropertySomeRestrictionImpl) a.getSub();
-		assertEquals(false, ex.isInverse());
+		SubClassOfAxiom a = assit.next();
+		SomeValuesFrom ex = (SomeValuesFrom) a.getSub();
+		assertEquals(false, ex.getProperty().isInverse());
 	}
 	
 	public void test_3() throws Exception{
@@ -115,25 +115,25 @@ public class TranslatorTest extends TestCase {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology dlliteonto = translator.translate(onto);
 		
-		Set<Axiom> ass = dlliteonto.getAssertions();
-		Iterator<Axiom> assit = ass.iterator();
+		Set<SubPropertyOfAxiom> ass = dlliteonto.getSubPropertyAxioms();
+		Iterator<SubPropertyOfAxiom> assit = ass.iterator();
 		assertEquals(2, ass.size());
 		
-		SubPropertyAxiomImpl a = (SubPropertyAxiomImpl) assit.next();
-		SubPropertyAxiomImpl b = (SubPropertyAxiomImpl) assit.next();
-		Property included = (Property) a.getSub();
+		SubPropertyOfAxiom a = assit.next();
+		SubPropertyOfAxiom b = assit.next();
+		PropertyExpression included =a.getSub();
 		assertEquals(false, included.isInverse());
 		assertEquals("http://example/R", included.getPredicate().getName().toString());
 		
-		Property indlucing = (Property) a.getSuper();
+		PropertyExpression indlucing = a.getSuper();
 		assertEquals(true, indlucing.isInverse());
 		assertEquals("http://example/S", indlucing.getPredicate().getName().toString());
 		
-		included = (Property) b.getSub();
+		included = b.getSub();
 		assertEquals(false, included.isInverse());
 		assertEquals("http://example/S", included.getPredicate().getName().toString());
 		
-		indlucing = (Property) b.getSuper();
+		indlucing = b.getSuper();
 		assertEquals(true, indlucing.isInverse());
 		assertEquals("http://example/R", indlucing.getPredicate().getName().toString());
 	}
@@ -153,12 +153,12 @@ public class TranslatorTest extends TestCase {
 		OWLAPI3Translator translator = new OWLAPI3Translator();
 		Ontology dlliteonto = translator.translate(onto);
 		
-		Set<Axiom> ass = dlliteonto.getAssertions();
-		Iterator<Axiom> assit = ass.iterator();
+		Set<SubClassOfAxiom> ass = dlliteonto.getSubClassAxioms();
+		Iterator<SubClassOfAxiom> assit = ass.iterator();
 		assertEquals(2, ass.size());
 		
-		SubClassAxiomImpl c1 = (SubClassAxiomImpl) assit.next();
-		SubClassAxiomImpl c2 = (SubClassAxiomImpl) assit.next();
+		SubClassOfAxiom c1 = assit.next();
+		SubClassOfAxiom c2 = assit.next();
 		OClass included = (OClass) c1.getSub();
 		assertEquals("http://example/A", included.getPredicate().getName().toString());
 		

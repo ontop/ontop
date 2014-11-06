@@ -40,30 +40,24 @@ import junit.framework.TestCase;
 public class SigmaTest extends TestCase {
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+    private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
     public void test_exists_simple() {
-        Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
+        Ontology ontology = descFactory.createOntology();
 
-        Predicate a = predicateFactory.getPredicate("a", 1);
-        Predicate c = predicateFactory.getPredicate("c", 1);
-        Predicate r = predicateFactory.getPredicate("r", 2);
-        OClass ac = descFactory.createClass(a);
-        OClass cc = descFactory.createClass(c);
-        PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
-        ontology.addConcept(ac.getPredicate());
-        ontology.addConcept(cc.getPredicate());
-        ontology.addRole(er.getPredicate());
+        OClass ac = descFactory.createClass("a");
+        OClass cc = descFactory.createClass("c");
+        PropertyExpression rprop = descFactory.createObjectProperty("r");
+        SomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
+ 
+        ontology.addSubClassOfAxiomWithReferencedEntities(er, ac);
+        ontology.addSubClassOfAxiomWithReferencedEntities(cc, er);
 
-        ontology.addAssertion(descFactory.createSubClassAxiom(er, ac));
-        ontology.addAssertion(descFactory.createSubClassAxiom(cc, er));
-
-        
        
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
-		Ontology ontologySigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
-        TBoxReasoner sigma = new TBoxReasonerImpl(ontologySigma);
-        EquivalencesDAG<BasicClassDescription> classes = sigma.getClasses();
+		TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(TBoxReasonerToOntology.getOntology(reasoner, true));						
+
+		EquivalencesDAG<BasicClassDescription> classes = sigmaReasoner.getClasses();
 
         assertTrue(classes.getSub(classes.getVertex(ac)).contains(classes.getVertex(er)));
 

@@ -9,9 +9,9 @@ package org.semanticweb.ontop.quest.dag;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,105 +19,105 @@ package org.semanticweb.ontop.quest.dag;
  * limitations under the License.
  * #L%
  */
-        import java.util.*;
 
-        import org.jgrapht.alg.StrongConnectivityInspector;
-        import org.jgrapht.graph.DefaultDirectedGraph;
-        import org.jgrapht.graph.DefaultEdge;
-        import org.jgrapht.graph.EdgeReversedGraph;
-        import org.jgrapht.traverse.BreadthFirstIterator;
-        import org.semanticweb.ontop.ontology.BasicClassDescription;
-        import org.semanticweb.ontop.ontology.OntologyFactory;
-        import org.semanticweb.ontop.ontology.Property;
-        import org.semanticweb.ontop.ontology.PropertySomeRestriction;
-        import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
-        import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-        import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-        import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-        import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.ontology.*;
+
+import java.util.*;
+
+import org.jgrapht.alg.StrongConnectivityInspector;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.EdgeReversedGraph;
+import org.jgrapht.traverse.BreadthFirstIterator;
+import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 /**
  * Reasoning over the TBox using the ontology graph
- *
+ * 
  * WARNING: THIS CLASS IS FOR TESTING ONLY
  */
 @Deprecated
 public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 
-    private DefaultDirectedGraph<Property,DefaultEdge> propertyGraph;
-    private DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph;
+	private DefaultDirectedGraph<PropertyExpression,DefaultEdge> propertyGraph;
+	private DefaultDirectedGraph<BasicClassDescription,DefaultEdge> classGraph;
+	
+	private EquivalencesDAGImplOnGraph<PropertyExpression> propertyDAG;
+	private EquivalencesDAGImplOnGraph<BasicClassDescription> classDAG;
 
-    private EquivalencesDAGImplOnGraph<Property> propertyDAG;
-    private EquivalencesDAGImplOnGraph<BasicClassDescription> classDAG;
+	public TestTBoxReasonerImpl_OnGraph(TBoxReasonerImpl reasoner) {
+		this.propertyGraph = reasoner.getPropertyGraph();
+		this.classGraph = reasoner.getClassGraph();
+		
+		this.propertyDAG = new EquivalencesDAGImplOnGraph<PropertyExpression>(propertyGraph);
+		this.classDAG = new EquivalencesDAGImplOnGraph<BasicClassDescription>(classGraph);
+	}
+	
+	/**
+	 * Return the DAG of properties
+	 * 
+	 * @return DAG 
+	 */
 
-    public TestTBoxReasonerImpl_OnGraph(TBoxReasonerImpl reasoner) {
-        this.propertyGraph = reasoner.getPropertyGraph();
-        this.classGraph = reasoner.getClassGraph();
+	@Override
+	public EquivalencesDAG<PropertyExpression> getProperties() {
+		return propertyDAG;
+	}
+	
+	/**
+	 * Return the DAG of classes
+	 * 
+	 * @return DAG 
+	 */
+	
+	@Override
+	public EquivalencesDAG<BasicClassDescription> getClasses() {
+		return classDAG;
+	}
 
-        this.propertyDAG = new EquivalencesDAGImplOnGraph<Property>(propertyGraph);
-        this.classDAG = new EquivalencesDAGImplOnGraph<BasicClassDescription>(classGraph);
-    }
+	/**
+	 * Reconstruction of the DAG from the ontology graph
+	 *
+	 * @param <T> Property or BasicClassDescription
+	 */
+		
+	public static final class EquivalencesDAGImplOnGraph<T> implements EquivalencesDAG<T> {
 
-    /**
-     * Return the DAG of properties
-     *
-     * @return DAG
-     */
+		private DefaultDirectedGraph<T,DefaultEdge> graph;
+		
+		public EquivalencesDAGImplOnGraph(DefaultDirectedGraph<T, DefaultEdge> graph) {
+			this.graph = graph;
+		}
 
-    @Override
-    public EquivalencesDAG<Property> getProperties() {
-        return propertyDAG;
-    }
+		@Override
+		public Iterator<Equivalences<T>> iterator() {
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
 
-    /**
-     * Return the DAG of classes
-     *
-     * @return DAG
-     */
+			for (T vertex : graph.vertexSet()) {
+					result.add(getVertex(vertex));
+				}
 
-    @Override
-    public EquivalencesDAG<BasicClassDescription> getClasses() {
-        return classDAG;
-    }
+			return result.iterator();
+		}
 
-    /**
-     * Reconstruction of the DAG from the ontology graph
-     *
-     * @param <T> Property or BasicClassDescription
-     */
+		@Override
+		public Equivalences<T> getVertex(T desc) {
+			// search for cycles
+			StrongConnectivityInspector<T, DefaultEdge> inspector = new StrongConnectivityInspector<T, DefaultEdge>(graph);
 
-    public static final class EquivalencesDAGImplOnGraph<T> implements EquivalencesDAG<T> {
+			// each set contains vertices which together form a strongly
+			// connected component within the given graph
+			List<Set<T>> equivalenceSets = inspector.stronglyConnectedSets();
 
-        private DefaultDirectedGraph<T,DefaultEdge> graph;
-
-        public EquivalencesDAGImplOnGraph(DefaultDirectedGraph<T, DefaultEdge> graph) {
-            this.graph = graph;
-        }
-
-        @Override
-        public Iterator<Equivalences<T>> iterator() {
-            LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
-
-            for (T vertex : graph.vertexSet()) {
-                result.add(getVertex(vertex));
-            }
-
-            return result.iterator();
-        }
-
-        @Override
-        public Equivalences<T> getVertex(T desc) {
-            // search for cycles
-            StrongConnectivityInspector<T, DefaultEdge> inspector = new StrongConnectivityInspector<T, DefaultEdge>(graph);
-
-            // each set contains vertices which together form a strongly
-            // connected component within the given graph
-            List<Set<T>> equivalenceSets = inspector.stronglyConnectedSets();
-
-            // I want to find the equivalent node of desc
-            for (Set<T> equivalenceSet : equivalenceSets) {
-                if (equivalenceSet.size() >= 2) {
-                    if (equivalenceSet.contains(desc)) {
+			// I want to find the equivalent node of desc
+			for (Set<T> equivalenceSet : equivalenceSets) {
+				if (equivalenceSet.size() >= 2) {
+					if (equivalenceSet.contains(desc)) {
 						/* if (named) {
 								Set<Description> equivalences = new LinkedHashSet<Description>();
 								for (Description vertex : equivalenceSet) {
@@ -129,12 +129,12 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 								return new Equivalences<Description>(equivalences);
 							}
 						*/
-                        return new Equivalences<T>(equivalenceSet, equivalenceSet.iterator().next());
-                    }
-                }
-            }
+						return new Equivalences<T>(equivalenceSet, equivalenceSet.iterator().next());
+					}
+				}
+			}
 
-            // if there are not equivalent node return the node or nothing
+			// if there are not equivalent node return the node or nothing
 			/* if (named) {
 				if (namedClasses.contains(desc) | property.contains(desc)) {
 						return new Equivalences<Description>(Collections
@@ -145,26 +145,26 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 						return new Equivalences<Description>(equivalences);
 					}
 			}*/
-            return new Equivalences<T>(Collections.singleton(desc), desc);
-        }
+			return new Equivalences<T>(Collections.singleton(desc), desc);
+		}
 
-        @Override
-        public Set<Equivalences<T>> getDirectSub(Equivalences<T> v) {
-            LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+		@Override
+		public Set<Equivalences<T>> getDirectSub(Equivalences<T> v) {
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
 
-            // I want to consider also the children of the equivalent nodes
-            for (T n : v) {
-                Set<DefaultEdge> edges = graph.incomingEdgesOf(n);
-                for (DefaultEdge edge : edges) {
-                    T source = graph.getEdgeSource(edge);
+			// I want to consider also the children of the equivalent nodes
+			for (T n : v) {
+				Set<DefaultEdge> edges = graph.incomingEdgesOf(n);
+				for (DefaultEdge edge : edges) {
+					T source = graph.getEdgeSource(edge);
 
-                    // I don't want to consider as children the equivalent node
-                    // of the current node desc
-                    if (v.contains(source))
-                        continue;
-
-                    Equivalences<T> equivalences = getVertex(source);
-						/*
+					// I don't want to consider as children the equivalent node
+					// of the current node desc
+					if (v.contains(source)) 
+						continue;
+					
+					Equivalences<T> equivalences = getVertex(source);
+						/* 
 						if (named) { // if true I search only for the named nodes
 
 							Equivalences<Description> namedEquivalences = getEquivalences(source, true);
@@ -182,23 +182,23 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 							}
 						} */
 
-                    //if (!equivalences.isEmpty())
-                    result.add(equivalences);
-                }
-            }
+					//if (!equivalences.isEmpty())
+					result.add(equivalences);
+				}
+			}
+		
+			return Collections.unmodifiableSet(result);
+		}
 
-            return Collections.unmodifiableSet(result);
-        }
+		@Override
+		public Set<Equivalences<T>> getSub(Equivalences<T> v) {
+			
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			BreadthFirstIterator<T, DefaultEdge> iterator = new BreadthFirstIterator<T, DefaultEdge>(
+								new EdgeReversedGraph<T, DefaultEdge>(graph), v.getRepresentative());
 
-        @Override
-        public Set<Equivalences<T>> getSub(Equivalences<T> v) {
-
-            LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
-            BreadthFirstIterator<T, DefaultEdge> iterator = new BreadthFirstIterator<T, DefaultEdge>(
-                    new EdgeReversedGraph<T, DefaultEdge>(graph), v.getRepresentative());
-
-            while (iterator.hasNext()) {
-                T node = iterator.next();
+			while (iterator.hasNext()) {
+				T node = iterator.next();
 
 					/* if (named) { // add only the named classes and property
 						if (namedClasses.contains(node) | property.contains(node)) {
@@ -208,31 +208,31 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 							result.add(new Equivalences<Description>(sources));
 						}
 					} */
-                Set<T> sources = new HashSet<T>();
-                sources.add(node);
-                result.add(new Equivalences<T>(sources));
-            }
-            // add each of them to the result
-            return Collections.unmodifiableSet(result);
-        }
+				Set<T> sources = new HashSet<T>();
+				sources.add(node);
+				result.add(new Equivalences<T>(sources));
+			}
+			// add each of them to the result
+			return Collections.unmodifiableSet(result);
+		}
 
-        @Override
-        public Set<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
-            LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+		@Override
+		public Set<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
 
 
-            // I want to consider also the parents of the equivalent nodes
-            for (T n : v) {
-                Set<DefaultEdge> edges = graph.outgoingEdgesOf(n);
-                for (DefaultEdge edge : edges) {
-                    T target = graph.getEdgeTarget(edge);
+			// I want to consider also the parents of the equivalent nodes
+			for (T n : v) {
+				Set<DefaultEdge> edges = graph.outgoingEdgesOf(n);
+				for (DefaultEdge edge : edges) {
+					T target = graph.getEdgeTarget(edge);
 
-                    // I don't want to consider as parents the equivalent node
-                    // of the current node desc
-                    if (v.contains(target))
-                        continue;
-
-                    Equivalences<T> equivalences = getVertex(target);
+					// I don't want to consider as parents the equivalent node
+					// of the current node desc
+					if (v.contains(target)) 
+						continue;
+					
+					Equivalences<T> equivalences = getVertex(target);
 
 						/* if (named) { // if true I search only for the named nodes
 
@@ -250,22 +250,22 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 							}
 
 						} */
-                    //if (!equivalences.isEmpty())
-                    result.add(equivalences);
-                }
-            }
+					//if (!equivalences.isEmpty())
+					result.add(equivalences);
+				}
+			}
 
-            return Collections.unmodifiableSet(result);
-        }
+			return Collections.unmodifiableSet(result);
+		}
 
-        @Override
-        public Set<Equivalences<T>> getSuper(Equivalences<T> v) {
+		@Override
+		public Set<Equivalences<T>> getSuper(Equivalences<T> v) {
+			
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+			BreadthFirstIterator<T, DefaultEdge> iterator = new BreadthFirstIterator<T, DefaultEdge>(graph, v.getRepresentative());
 
-            LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
-            BreadthFirstIterator<T, DefaultEdge> iterator = new BreadthFirstIterator<T, DefaultEdge>(graph, v.getRepresentative());
-
-            while (iterator.hasNext()) {
-                T node = iterator.next();
+			while (iterator.hasNext()) {
+				T node = iterator.next();
 
 					/* if (named) { // add only the named classes and property
 						if (namedClasses.contains(node) | property.contains(node)) {
@@ -275,96 +275,109 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 							result.add(new Equivalences<Description>(sources));
 						}
 					} */
-                Set<T> sources = new HashSet<T>();
-                sources.add(node);
-                result.add(new Equivalences<T>(sources));
-            }
-            // add each of them to the result
-            return Collections.unmodifiableSet(result);
-        }
+				Set<T> sources = new HashSet<T>();
+				sources.add(node);
+				result.add(new Equivalences<T>(sources));
+			}
+			// add each of them to the result
+			return Collections.unmodifiableSet(result);
+		}
 
-        @Override
-        public Set<T> getSubRepresentatives(T v) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-    }
+		@Override
+		public Set<T> getSubRepresentatives(T v) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+	}
+	
+	
+	/***
+	 * Modifies the DAG so that \exists R = \exists R-, so that the reachability
+	 * relation of the original DAG gets extended to the reachability relation
+	 * of T and Sigma chains.
+	 * 
+	 */
+	
+	public void convertIntoChainDAG() {
 
-
-    /***
-     * Modifies the DAG so that \exists R = \exists R-, so that the reachability
-     * relation of the original DAG gets extended to the reachability relation
-     * of T and Sigma chains.
-     *
-     */
-
-    public void convertIntoChainDAG() {
-
-        Collection<BasicClassDescription> nodes = new HashSet<BasicClassDescription>(classGraph.vertexSet());
-        OntologyFactory fac = OntologyFactoryImpl.getInstance();
-        HashSet<BasicClassDescription> processedNodes = new HashSet<BasicClassDescription>();
-        for (BasicClassDescription node : nodes) {
-            if (!(node instanceof PropertySomeRestriction)
-                    || processedNodes.contains(node)) {
-                continue;
-            }
+		Collection<BasicClassDescription> nodes = new HashSet<BasicClassDescription>(classGraph.vertexSet());
+		OntologyFactory fac = OntologyFactoryImpl.getInstance();
+		HashSet<BasicClassDescription> processedNodes = new HashSet<BasicClassDescription>();
+		for (BasicClassDescription node : nodes) {
+			if (!(node instanceof SomeValuesFrom)
+					|| processedNodes.contains(node)) {
+				continue;
+			}
 
 			/*
 			 * Adding a cycle between exists R and exists R- for each R.
 			 */
 
-            PropertySomeRestriction existsR = (PropertySomeRestriction) node;
-            PropertySomeRestriction existsRin = fac.createPropertySomeRestriction(existsR.getPredicate(),!existsR.isInverse());
+			SomeValuesFrom existsR = (SomeValuesFrom) node;
+			PropertyExpression inv = existsR.getProperty().getInverse();
+			SomeValuesFrom existsRin = fac.createPropertySomeRestriction(inv);
+			
+			Equivalences<BasicClassDescription> existsNode = classDAG.getVertex(existsR);
+			Equivalences<BasicClassDescription> existsInvNode = classDAG.getVertex(existsRin);
+			
+			Set<Equivalences<BasicClassDescription>> childrenExist 
+					= new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSub(existsNode));
+			Set<Equivalences<BasicClassDescription>> childrenExistInv 
+					= new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSub(existsInvNode));
 
-            Equivalences<BasicClassDescription> existsNode = classDAG.getVertex(existsR);
-            Equivalences<BasicClassDescription> existsInvNode = classDAG.getVertex(existsRin);
+			for (Equivalences<BasicClassDescription> children : childrenExist) {
+				for (BasicClassDescription child : children) 
+					classGraph.addEdge(child, existsRin);
+			}
+			for (Equivalences<BasicClassDescription> children : childrenExistInv) {
+				for (BasicClassDescription child : children) 
+					classGraph.addEdge(child, existsR);
+			}
 
-            Set<Equivalences<BasicClassDescription>> childrenExist
-                    = new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSub(existsNode));
-            Set<Equivalences<BasicClassDescription>> childrenExistInv
-                    = new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSub(existsInvNode));
+			Set<Equivalences<BasicClassDescription>> parentExist 
+					= new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSuper(existsNode));
+			Set<Equivalences<BasicClassDescription>> parentsExistInv 
+					= new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSuper(existsInvNode));
 
-            for (Equivalences<BasicClassDescription> children : childrenExist) {
-                for (BasicClassDescription child : children)
-                    classGraph.addEdge(child, existsRin);
-            }
-            for (Equivalences<BasicClassDescription> children : childrenExistInv) {
-                for (BasicClassDescription child : children)
-                    classGraph.addEdge(child, existsR);
-            }
+			for (Equivalences<BasicClassDescription> parents : parentExist) {
+				for (BasicClassDescription parent : parents) 
+					classGraph.addEdge(existsRin, parent);
+			}
 
-            Set<Equivalences<BasicClassDescription>> parentExist
-                    = new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSuper(existsNode));
-            Set<Equivalences<BasicClassDescription>> parentsExistInv
-                    = new HashSet<Equivalences<BasicClassDescription>>(classDAG.getDirectSuper(existsInvNode));
+			for (Equivalences<BasicClassDescription> parents : parentsExistInv) {
+				for (BasicClassDescription parent : parents) 
+					classGraph.addEdge(existsR, parent);
+			}
 
-            for (Equivalences<BasicClassDescription> parents : parentExist) {
-                for (BasicClassDescription parent : parents)
-                    classGraph.addEdge(existsRin, parent);
-            }
+			processedNodes.add(existsRin);
+			processedNodes.add(existsR);
+		}
+	}
 
-            for (Equivalences<BasicClassDescription> parents : parentsExistInv) {
-                for (BasicClassDescription parent : parents)
-                    classGraph.addEdge(existsR, parent);
-            }
+	public int vertexSetSize() {
+		return propertyGraph.vertexSet().size() + classGraph.vertexSet().size();
+	}
 
-            processedNodes.add(existsRin);
-            processedNodes.add(existsR);
-        }
-    }
+	public int edgeSetSize() {
+		return propertyGraph.edgeSet().size() + classGraph.edgeSet().size();
+	}
 
-    public int vertexSetSize() {
-        return propertyGraph.vertexSet().size() + classGraph.vertexSet().size();
-    }
+	public DefaultDirectedGraph<PropertyExpression, DefaultEdge> getPropertyGraph() {
+		return propertyGraph;
+	}
+	public DefaultDirectedGraph<BasicClassDescription, DefaultEdge> getClassGraph() {
+		return classGraph;
+	}
 
-    public int edgeSetSize() {
-        return propertyGraph.edgeSet().size() + classGraph.edgeSet().size();
-    }
+	@Override
+	public OClass getClassRepresentative(Predicate p) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    public DefaultDirectedGraph<Property, DefaultEdge> getPropertyGraph() {
-        return propertyGraph;
-    }
-    public DefaultDirectedGraph<BasicClassDescription, DefaultEdge> getClassGraph() {
-        return classGraph;
-    }
+	@Override
+	public PropertyExpression getPropertyRepresentative(Predicate p) {
+		// TODO Auto-generated method stub
+		return null;
+	}	
 }

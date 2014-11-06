@@ -41,7 +41,6 @@ import org.semanticweb.ontop.model.TupleResultSet;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
-import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
@@ -108,21 +107,24 @@ public class QuestDBStatement implements OBDAStatement {
 		String pathstr = rdffile.toString();
 		int dotidx = pathstr.lastIndexOf('.');
 		String ext = pathstr.substring(dotidx);
-
-        Quest questInstance = st.getQuestInstance();
-
 		int result = -1;
 		try {
 			if (ext.toLowerCase().equals(".owl")) {
 				OWLOntology owlontology = man.loadOntologyFromOntologyDocument(IRI.create(rdffile));
 				Set<OWLOntology> ontos = man.getImportsClosure(owlontology);
-				OWLAPI3ABoxIterator aBoxIter = 
-					new OWLAPI3ABoxIterator(ontos, questInstance.getEquivalenceMap().getInternalMap());
-				result = st.insertData(aBoxIter, useFile, commit, batch);
-			} else if (ext.toLowerCase().equals(".nt")) {
-				NTripleAssertionIterator it = 
-					new NTripleAssertionIterator(rdffile, questInstance.getEquivalenceMap());
-				result = st.insertData(it, useFile, commit, batch);
+				
+				EquivalentTriplePredicateIterator aBoxNormalIter = 
+						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos), 
+								st.questInstance.getReasoner());
+				
+				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
+			} 
+			else if (ext.toLowerCase().equals(".nt")) {				
+				NTripleAssertionIterator it = new NTripleAssertionIterator(rdffile);
+				EquivalentTriplePredicateIterator aBoxNormalIter = 
+						new EquivalentTriplePredicateIterator(it, st.questInstance.getReasoner());
+				
+				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
 			}
 			return result;
 		} catch (Exception e) {

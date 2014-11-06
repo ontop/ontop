@@ -26,7 +26,6 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -101,10 +100,6 @@ public class QuestOWLStatement {
 		this.st = st;
 	}
 
-	public QuestStatement getQuestStatement() {
-		return st;
-	}
-
 	public boolean isCanceled(){
 		return st.isCanceled();
 	}
@@ -130,6 +125,8 @@ public class QuestOWLStatement {
 		try {
 			TupleResultSet executedQuery = (TupleResultSet) st.execute(query);
 			QuestOWLResultSet questOWLResultSet = new QuestOWLResultSet(executedQuery, this);
+
+	 		
 			return questOWLResultSet;
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
@@ -183,7 +180,10 @@ public class QuestOWLStatement {
 
 			// Retrieves the ABox from the ontology file.
 
-			aBoxIter = new OWLAPI3ABoxIterator(set, new HashMap<Predicate, Description>());
+			aBoxIter = new OWLAPI3ABoxIterator(set);
+			// TODO: (ROMAN) -- check whether we need to use 
+			// EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
+
 			return st.insertData(aBoxIter, commitSize, batchsize);
 		} else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
 
@@ -423,23 +423,25 @@ public class QuestOWLStatement {
 			while (resultSet.hasNext()) {
 				for (Assertion assertion : resultSet.next()) {
 					if (assertion instanceof ClassAssertion) {
-						String subjectIRI = ((ClassAssertion) assertion).getObject().getValue();
-						String classIRI = ((ClassAssertion) assertion).getPredicate().toString();
+						ClassAssertion ca = (ClassAssertion)assertion;
+						String subjectIRI = ca.getIndividual().getValue();
+						String classIRI = ca.getConcept().toString();
 						OWLAxiom classAxiom = createOWLClassAssertion(classIRI, subjectIRI, factory);
 						axiomList.add(classAxiom);
-					} else if (assertion instanceof ObjectPropertyAssertion) {
-						String propertyIRI = ((ObjectPropertyAssertion) assertion).getPredicate().toString();
-						String subjectIRI = ((ObjectPropertyAssertion) assertion).getFirstObject().getValue();
-						String objectIRI = ((ObjectPropertyAssertion) assertion).getSecondObject().getValue();
-						OWLAxiom objectPropertyAxiom = createOWLObjectPropertyAssertion(propertyIRI, subjectIRI, objectIRI, factory);
-						axiomList.add(objectPropertyAxiom);
-					} else if (assertion instanceof DataPropertyAssertion) {
-						String propertyIRI = ((DataPropertyAssertion) assertion).getPredicate().toString();
-						String subjectIRI = ((DataPropertyAssertion) assertion).getObject().getValue();
-						String objectValue = ((DataPropertyAssertion) assertion).getValue().getValue();
-						OWLAxiom dataPropertyAxiom = createOWLDataPropertyAssertion(propertyIRI, subjectIRI, objectValue, factory);
-						axiomList.add(dataPropertyAxiom);
-					}
+					} else if (assertion instanceof PropertyAssertion) {
+						PropertyAssertion pa = (PropertyAssertion)assertion;
+						String propertyIRI = pa.getProperty().getPredicate().toString();
+						String subjectIRI = pa.getSubject().getValue();
+						String objectIRI = pa.getValue2().getValue();
+						if (pa.getValue2() instanceof ValueConstant) {
+							OWLAxiom objectPropertyAxiom = createOWLObjectPropertyAssertion(propertyIRI, subjectIRI, objectIRI, factory);
+							axiomList.add(objectPropertyAxiom);
+						}
+						else {
+							OWLAxiom objectPropertyAxiom = createOWLDataPropertyAssertion(propertyIRI, subjectIRI, objectIRI, factory);
+							axiomList.add(objectPropertyAxiom);							
+						}
+					} 
 				}
 			}
 		}
@@ -471,5 +473,22 @@ public class QuestOWLStatement {
 	public void analyze() throws Exception {
 		st.analyze();
 
+	}
+	
+	// Davide> Benchmarking
+	public long getUnfoldingTime(){
+		return st.getUnfoldingTime();
+	}
+
+	public long getRewritingTime(){
+		return st.getRewritingTime();
+	}
+	
+	public int getUCQSizeAfterUnfolding(){
+		return st.getUCQSizeAfterUnfolding();
+	}
+	
+	public int getUCQSizeAfterRewriting(){
+		return st.getUCQSizeAfterRewriting();
 	}
 }

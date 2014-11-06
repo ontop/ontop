@@ -30,7 +30,7 @@ import junit.framework.TestCase;
 
 import org.semanticweb.ontop.ontology.BasicClassDescription;
 import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.Property;
+import org.semanticweb.ontop.ontology.PropertyExpression;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -219,7 +219,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 		Set<Description> set2 = new HashSet<Description>();
 		
-		for (Equivalences<Property> equivalents : d2.getProperties()) {
+		for (Equivalences<PropertyExpression> equivalents : d2.getProperties()) {
 			numberEquivalents += equivalents.size()-1;
 			set2.addAll(equivalents.getMembers());	
 		}
@@ -245,7 +245,7 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		//number of edges between the equivalent nodes
 		int numberEquivalents=0;
 
-		for (Equivalences<Property> equivalents : d2.getProperties())
+		for (Equivalences<PropertyExpression> equivalents : d2.getProperties())
 			//two nodes have two edges, three nodes have three edges...
 			if(equivalents.size() >= 2)
 				numberEquivalents += equivalents.size();

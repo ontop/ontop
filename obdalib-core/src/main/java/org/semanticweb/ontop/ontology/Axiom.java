@@ -21,14 +21,12 @@ package org.semanticweb.ontop.ontology;
  */
 
 import java.io.Serializable;
-import java.util.Set;
 
 import org.semanticweb.ontop.model.Predicate;
 
 /***
  * A logical axiom.
  */
-public interface Axiom  extends Serializable{
+public interface Axiom  extends Serializable {
 
-	public Set<Predicate> getReferencedEntities();
 }

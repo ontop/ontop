@@ -113,7 +113,7 @@ public class AutomaticMGUTestDataGenerator {
 			if (string.equals(""))
 				continue;
 			String[] elements = string.split("/");
-			Substitution s = new Substitution(getTerm(elements[0]), getTerm(elements[1]));
+			Substitution s = new Substitution((VariableImpl)getTerm(elements[0]), getTerm(elements[1]));
 			mgu.add(s);
 		}
 		return mgu;

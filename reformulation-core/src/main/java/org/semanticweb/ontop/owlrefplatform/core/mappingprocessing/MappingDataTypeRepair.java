@@ -28,8 +28,6 @@ import java.util.Map;
 
 import org.semanticweb.ontop.model.BNodePredicate;
 import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.DataTypePredicate;
-import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAException;
@@ -40,9 +38,8 @@ import org.semanticweb.ontop.model.URITemplatePredicate;
 import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.*;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
+import org.semanticweb.ontop.ontology.*;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.TBoxTraversal;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.TBoxTraverseListener;
@@ -55,80 +52,73 @@ import org.slf4j.LoggerFactory;
 
 public class MappingDataTypeRepair {
 
-	private DBMetadata metadata;
+	private final DBMetadata metadata;
 
-    private TBoxReasoner tBoxReasoner;
-
-    private EquivalenceMap equivalenceMap;
-
-	private Map<String, List<Object[]>> termOccurenceIndex;
-
-    private Map<Predicate, Predicate> dataTypesMap;
-
-	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-
-    /***
-     * General flags and fields
-     */
-
-    private Logger log = LoggerFactory.getLogger(MappingDataTypeRepair.class);
+  	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+    private static final Logger log = LoggerFactory.getLogger(MappingDataTypeRepair.class);
 
     /**
      * Constructs a new mapping data type resolution. The object requires an
      * ontology for obtaining the user defined data-type.
-     * If no datatype is defined thant we use
+     * 
+     * If no datatype is defined than we use
      * database metadata for obtaining the table column definition as the
      * default data-type.
-     *  @param tBoxReasoner
-     *            The input TBox.
-     * @param equivalenceMap
+     * 
      * @param metadata The database metadata.
-     *
      */
-    public MappingDataTypeRepair(TBoxReasoner tBoxReasoner, EquivalenceMap equivalenceMap, DBMetadata metadata) {
-
-        this.tBoxReasoner = tBoxReasoner;
-
+    public MappingDataTypeRepair(DBMetadata metadata) {
         this.metadata = metadata;
-
-        this.equivalenceMap = equivalenceMap;
-
-        this.dataTypesMap =  new HashMap<>();
-
     }
 
     /**
      * Private method that gets the datatypes already present in the ontology and stores them in a map
      * It will be used later in insertDataTyping
      */
-    private void getDataTypeFromOntology(){
+    private Map<Predicate, Datatype> getDataTypeFromOntology(TBoxReasoner reasoner){
 
-
+    	final Map<Predicate, Datatype> dataTypesMap = new HashMap<Predicate, Datatype>();
+    	
         /*
         Traverse the graph searching for dataProperty
          */
-        TBoxTraversal.traverse(tBoxReasoner, new TBoxTraverseListener() {
+        TBoxTraversal.traverse(reasoner, new TBoxTraverseListener() {
 
             @Override
-            public void onInclusion(Property sub, Property sup) {
-
+            public void onInclusion(ObjectPropertyExpression sub, ObjectPropertyExpression sup) {
+            }
+            @Override
+            public void onInclusion(DataPropertyExpression sub, DataPropertyExpression sup) {
+            }
+            @Override
+            public void onInclusion(ClassExpression sub, ClassExpression sup) {
             }
 
             @Override
-            public void onInclusion(BasicClassDescription sub, BasicClassDescription sup) {
+            public void onInclusion(DataRangeExpression sub, DataRangeExpression sup) {
                 //if sup is a datatype property  we store it in the map
                 //it means that sub is of datatype sup
-
-                Predicate supPredicate = sup.getPredicate();
-                if (supPredicate.isDataTypePredicate()) {
-                    dataTypesMap.put(sub.getPredicate(), supPredicate);
-                }
+            	if (sup instanceof Datatype) {
+            		Datatype supDataType = (Datatype)sup;
+            		Predicate key;
+            		if (sub instanceof Datatype) {
+            			// datatype inclusion
+            			key = ((Datatype)sub).getPredicate();
+            		}
+            		else if (sub instanceof DataPropertyRangeExpression) {
+            			// range 
+            			key = ((DataPropertyRangeExpression)sub).getProperty().getPredicate();
+            		}
+            		else
+            			return;
+            		
+        			if (dataTypesMap.containsKey(key))
+                        throw new PredicateRedefinitionException("Predicate " + key + " with " + dataTypesMap.get(key) + " is redefined as " + supDataType + " in the ontology");
+        			dataTypesMap.put(key, supDataType);
+            	}
             }
-
-
         });
-
-
+		return dataTypesMap;
     }
 
                 /**
@@ -138,20 +128,28 @@ public class MappingDataTypeRepair {
                  * the data-type in the mapping, this method simply accepts the function
                  * symbol.
                  *
-                 * @param mappingDatalog
+                 * @param mappingRules
                  *            The set of mapping axioms.
                  * @throws OBDAException
                  */
 
-    public void insertDataTyping(DatalogProgram mappingDatalog) throws OBDAException {
+    public void insertDataTyping(List<CQIE> mappingRules, TBoxReasoner reasoner) throws OBDAException {
+
 
         //get all the datatypes in the ontology
-        getDataTypeFromOntology();
+    	 Map<Predicate, Datatype> dataTypesMap;
+
+        try {
+            dataTypesMap = getDataTypeFromOntology(reasoner);
+        } catch (PredicateRedefinitionException pe){
+            throw new OBDAException(pe);
+        }
 
 
-		List<CQIE> mappingRules = mappingDatalog.getRules();
+		VocabularyValidator qvv = new VocabularyValidator(reasoner);
+
 		for (CQIE rule : mappingRules) {
-			prepareIndex(rule);
+			Map<String, List<Object[]>> termOccurenceIndex = createIndex(rule);
 			Function atom = rule.getHead();
 			Predicate predicate = atom.getFunctionSymbol();
 			if (!(predicate.getArity() == 2)) { // we check both for data and object property
@@ -171,28 +169,28 @@ public class MappingDataTypeRepair {
 				Predicate functionSymbol = function.getFunctionSymbol();
 				if (functionSymbol.isDataTypePredicate()) {
 
-                    Function normal = equivalenceMap.getNormal(atom);
-                    Predicate dataType = dataTypesMap.get(normal.getFunctionSymbol());
+                    Function normal = qvv.getNormal(atom);
+                    Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
 
                     //if a datatype was already assigned in the ontology
-                    if(dataType!=null){
+                    if (dataType != null) {
 
                         //check that no datatype mismatch is present
-                        if(!functionSymbol.equals(dataType)){
+                        if(!functionSymbol.equals(dataType.getPredicate())){
 
                                 throw new OBDAException("Ontology datatype " + dataType + " for " + predicate + "\ndoes not correspond to datatype " + functionSymbol + " in mappings");
 
                         }
-                    }
-                    if(isBooleanDB2(dataType)){
+                        
+                        if(isBooleanDB2(dataType.getPredicate())){
 
-                        Variable variable = (Variable)  normal.getTerm(1);
+                            Variable variable = (Variable)  normal.getTerm(1);
 
-                        //No Boolean datatype in DB2 database, the value in the database is used
-                        dataType = getDataTypeFunctor( variable);
-
-                        Term newTerm = dfac.getFunction( dataType, variable);
-                        atom.setTerm(1, newTerm);
+                            //No Boolean datatype in DB2 database, the value in the database is used
+                            Predicate replacement = getDataTypeFunctor(termOccurenceIndex, variable);
+                            Term newTerm = fac.getFunction(replacement, variable);
+                            atom.setTerm(1, newTerm);
+                        }
                     }
 
 				} else {
@@ -204,25 +202,25 @@ public class MappingDataTypeRepair {
 
                 Variable variable = (Variable) term;
 
-                Predicate dataTypeFunctor = null;
-
                 //check in the ontology if we have already information about the datatype
 
-                Function normal = equivalenceMap.getNormal(atom);
+                Function normal = qvv.getNormal(atom);
                     //Check if a datatype was already assigned in the ontology
-                dataTypeFunctor= dataTypesMap.get(normal.getFunctionSymbol());
+                Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
 
 
 
                 // If the term has no data-type predicate then by default the
                 // predicate is created following the database metadata of
                 // column type.
-                if(dataTypeFunctor==null || isBooleanDB2(dataTypeFunctor) ){
-
-                    dataTypeFunctor = getDataTypeFunctor(variable);
+                Predicate replacement;
+                if (dataType == null || isBooleanDB2(dataType.getPredicate()) ){
+                	replacement = getDataTypeFunctor(termOccurenceIndex, variable);
                 }
+                else 
+                	replacement = dataType.getPredicate();
 
-				Term newTerm = dfac.getFunction( dataTypeFunctor, variable);
+				Term newTerm = fac.getFunction(replacement, variable);
 				atom.setTerm(1, newTerm);
 			}
 		}
@@ -245,18 +243,16 @@ public class MappingDataTypeRepair {
 
                 log.warn("Boolean dataType do not exist in DB2 database, the value in the database metadata is used instead.");
                 return true;
-
             }
-
         }
         return false;
-
     }
+    
 //	private boolean isDataProperty(Predicate predicate) {
 //		return predicate.getArity() == 2 && predicate.getType(1) == Predicate.COL_TYPE.LITERAL;
 //	}
 
-	private Predicate getDataTypeFunctor(Variable variable)throws OBDAException {
+	private Predicate getDataTypeFunctor(Map<String, List<Object[]>> termOccurenceIndex, Variable variable) throws OBDAException {
 		List<Object[]> list = termOccurenceIndex.get(variable.getName());
 		if (list == null) {
 			throw new OBDAException("Unknown term in head");
@@ -274,8 +270,8 @@ public class MappingDataTypeRepair {
 		return TypeMapper.getInstance().getPredicate(attribute.getType());
 	}
 
-	private void prepareIndex(CQIE rule) {
-		termOccurenceIndex = new HashMap<String, List<Object[]>>();
+	private Map<String, List<Object[]>> createIndex(CQIE rule) {
+		Map<String, List<Object[]>> termOccurenceIndex = new HashMap<String, List<Object[]>>();
 		List<Function> body = rule.getBody();
 		Iterator<Function> it = body.iterator();
 		while (it.hasNext()) {
@@ -308,5 +304,6 @@ public class MappingDataTypeRepair {
 				}
 			}
 		}
+		return termOccurenceIndex;
 	}
 }

@@ -2,8 +2,7 @@ package org.semanticweb.ontop.owlrefplatform.core.mappingprocessing;
 
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,26 +19,26 @@ public class TMappingRule {
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
-	private final CQIE stripped;
-	private final List<Function> conditions;
-	private final CQCUtilities cqc;
-
-	public TMappingRule(Function head, List<Function> body) {
+	private final CQIE stripped;	
+	private final List<Function> conditions;	
+	final CQContainmentCheckUnderLIDs cqc;   // TODO: make private
+	
+	public TMappingRule(Function head, List<Function> body, CQContainmentCheckUnderLIDs cqc) {
 		conditions = new LinkedList<Function>();
 		List<Function> newbody = new LinkedList<Function>();
 		for (Function atom : body) {
 			Function clone = (Function)atom.clone();
-			if (clone.getPredicate() instanceof BuiltinPredicate)
+			if (clone.getPredicate() instanceof BuiltinPredicate) 
 				conditions.add(clone);
 			else 
 				newbody.add(clone);			
 		}
 		Function newhead = (Function)head.clone();
 		stripped = fac.getCQIE(newhead, newbody);
-		cqc = new CQCUtilities(stripped, (Ontology)null /*sigma*/);
+		this.cqc = cqc;
 	}
 
-	public TMappingRule(Function head, TMappingRule baseRule) {
+	public TMappingRule(Function head, TMappingRule baseRule, CQContainmentCheckUnderLIDs cqc) {
 		conditions = new ArrayList<Function>(baseRule.conditions.size());
 		for (Function atom : baseRule.conditions) {
 			Function clone = (Function)atom.clone();
@@ -53,7 +52,7 @@ public class TMappingRule {
 		}
 		Function newhead = (Function)head.clone();
 		stripped = fac.getCQIE(newhead, newbody);
-		cqc = new CQCUtilities(stripped, (Ontology)null /*sigma*/); // could be null -- no optimization is used
+		this.cqc = cqc;
 	}
 	
 	
@@ -62,7 +61,7 @@ public class TMappingRule {
 	}
 	
 	public boolean isContainedIn(TMappingRule other) {
-		return cqc.isContainedIn(other.stripped);
+		return cqc.isContainedIn(stripped, other.stripped);
 	}
 	
 	public CQIE asCQIE() {

@@ -102,7 +102,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		super(name);
 		Ontology tbox = null;
 		if (tboxFile == null) {
-			tbox = ofac.createOntology(name);
+			tbox = ofac.createOntology();
 		} else {
 			tbox = readOntology(tboxFile);
 		}
@@ -155,17 +155,19 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		if (bObtainFromOntology) {
 			// Retrieves the ABox from the ontology file.
 			log.debug("Loading data from Ontology into the database");
-			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure, questInstance.getEquivalenceMap().getInternalMap());
-			int count = st.insertData(aBoxIter, 5000, 500);
+			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure);
+			EquivalentTriplePredicateIterator aBoxNormalIter = 
+							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
+			
+			int count = st.insertData(aBoxNormalIter, 5000, 500);
 			log.debug("Inserted {} triples from the ontology.", count);
 		}
 		if (bObtainFromMappings) {
 			// Retrieves the ABox from the target database via mapping.
 			log.debug("Loading data from Mappings into the database");
 			OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-			for (Predicate p : tbox.getVocabulary()) {
-				obdaModelForMaterialization.declarePredicate(p);
-			}
+			obdaModelForMaterialization.declareAll(tbox.getVocabulary());
+			
 			QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
 			Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
 			int count = st.insertData(assertionIter, 5000, 500);
@@ -210,8 +212,12 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 		for (URI graphURI : graphURIs) {
 			Ontology o = getOntology(((URI) graphURI), graphURI);
-			result.addEntities(o.getVocabulary());
-			result.addAssertions(result.getAssertions());
+			result.getVocabulary().merge(o.getVocabulary());
+			
+			for (SubPropertyOfAxiom ax : result.getSubPropertyAxioms())  // TODO (ROMAN): check whether it's result and not o
+				result.add(ax);
+			for (SubClassOfAxiom ax : result.getSubClassAxioms())  // TODO (ROMAN): check whether it's result and not o
+				result.add(ax);
 		}
 		return result;
 	}
@@ -244,7 +250,6 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 	public class RDFTBoxReader extends RDFHandlerBase {
 		private Ontology ontology = null;
-		private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 		public Ontology getOntology() {
@@ -258,30 +263,34 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 		@Override
 		public void handleStatement(Statement st) throws RDFHandlerException {
-			ontology.addEntity(getVocabulary(st));
+			URI pred = st.getPredicate();
+			Value obj = st.getObject();
+			if (obj instanceof Literal) {
+				String dataProperty = pred.stringValue();
+				ontology.getVocabulary().declareDataProperty(dataProperty);
+			} 
+			else if (pred.stringValue().equals(OBDAVocabulary.RDF_TYPE)) {
+				String className = obj.stringValue();
+				ontology.getVocabulary().declareClass(className);
+			} 
+			else {
+				String objectProperty = pred.stringValue();
+				ontology.getVocabulary().declareObjectProperty(objectProperty);
+			}
+
+		/*
+		 * ROMAN: this code does nothing because	getTBoxAxiom is null
 			Axiom axiom = getTBoxAxiom(st);
 			if (axiom == null) {
 				return;
 			}
-			ontology.addAssertion(axiom);
+			ontology.addAssertionWithCheck(axiom);
+		*/
 		}
 
 		public Axiom getTBoxAxiom(Statement st) {
 			return null;
 		}
 
-		public Predicate getVocabulary(Statement st) {
-			URI pred = st.getPredicate();
-			Value obj = st.getObject();
-			if (obj instanceof Literal) {
-				Predicate dataProperty = fac.getDataPropertyPredicate(pred.stringValue());
-				return dataProperty;
-			} else if (pred.stringValue().equals(OBDAVocabulary.RDF_TYPE)) {
-				Predicate className = fac.getClassPredicate(obj.stringValue());
-				return className;
-			}
-			Predicate objectProperty = fac.getObjectPropertyPredicate(pred.stringValue());
-			return objectProperty;
-		}
 	}
 }

@@ -13,12 +13,10 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 				<groupId>junit</groupId>
@@ -58,7 +56,6 @@
 		<dependency>
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -71,6 +68,11 @@
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-queryparser-sparql</artifactId>
 		</dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+		</dependency>
 	</dependencies>
 	
 	<build>
@@ -82,11 +84,11 @@
 					<source>1.7</source>
 					<target>1.7</target>
 					<testExcludes>
-						<!-- <exclude>**/DAGCreationFromOntologyTest.java</exclude> --> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
-						<!-- <exclude>**/RDBMSDirect*.java</exclude> -->
-						<!-- <exclude>**/OWLAPI2ABox*.java</exclude> -->
-						<!-- <exclude>**/SemanticIndexTestSuite.java</exclude> -->
-						<!-- <exclude>**/SNOMEDTest.java</exclude>  -->
+						<exclude>**/SNOMEDTestJGraphT.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
+						<exclude>**/DAGCreationFromOntologyTest.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
+						<exclude>**/RDBMSDirect*.java</exclude>
+						<exclude>**/SemanticIndexTestSuite.java</exclude>
+						<exclude>**/SNOMEDTest.java</exclude>
 					</testExcludes>
 				</configuration>
 			</plugin>

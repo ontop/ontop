@@ -22,7 +22,7 @@ package org.semanticweb.ontop.owlrefplatform.core.reformulation;
 
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 /***
@@ -40,7 +40,7 @@ public class DummyReformulator implements QueryRewriter {
 	}
 
 	@Override
-	public void setTBox(TBoxReasoner ontology, Ontology sigma) {
+	public void setTBox(TBoxReasoner ontology, LinearInclusionDependencies sigma) {
 		// NO-OP		
 	}
 }

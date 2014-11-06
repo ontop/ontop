@@ -24,8 +24,8 @@ package org.semanticweb.ontop.obda.quest.dag;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
-import org.semanticweb.ontop.ontology.impl.PunningException;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.File;
@@ -34,7 +34,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 
@@ -67,7 +66,7 @@ public class DAGLoopTest {
 	public void testLoop() throws Exception {
 		
 		// generate DAG
-		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
+		TBoxReasoner dag = new TBoxReasonerImpl(onto);
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 		

@@ -15,7 +15,7 @@ import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 import org.semanticweb.ontop.ontology.BasicClassDescription;
 import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.Property;
+import org.semanticweb.ontop.ontology.PropertyExpression;
 
 
 /** 
@@ -76,8 +76,8 @@ public class SemanticIndexBuilder  {
 		 * */
 		private void mergeRangeNode(Description d) {
 
-			if (d instanceof Property) {
-				for (Description ch : namedDAG.getPredecessors((Property)d)) { 
+			if (d instanceof PropertyExpression) {
+				for (Description ch : namedDAG.getPredecessors((PropertyExpression)d)) { 
 					if (!ch.equals(d)) { // Roman: was !=
 						mergeRangeNode(ch);
 
@@ -152,8 +152,8 @@ public class SemanticIndexBuilder  {
 	public List<Interval> getIntervals(Description d) {
 
 		Description node;
-		if (d instanceof Property)
-			node = reasoner.getProperties().getVertex((Property)d).getRepresentative();
+		if (d instanceof PropertyExpression)
+			node = reasoner.getProperties().getVertex((PropertyExpression)d).getRepresentative();
 		else
 			node = reasoner.getClasses().getVertex((BasicClassDescription)d).getRepresentative();
 		

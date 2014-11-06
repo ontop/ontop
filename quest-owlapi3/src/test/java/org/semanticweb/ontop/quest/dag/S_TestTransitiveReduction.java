@@ -103,7 +103,7 @@ public class S_TestTransitiveReduction extends TestCase {
 			String fileInput=input.get(i);
 
 			TBoxReasonerImpl dag2 = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
-            TestTBoxReasonerImpl_OnGraph reasonerd1 = new TestTBoxReasonerImpl_OnGraph(dag2);
+			TestTBoxReasonerImpl_OnGraph reasonerd1 = new TestTBoxReasonerImpl_OnGraph(dag2);
 
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", dag2.getPropertyGraph());
@@ -129,7 +129,7 @@ public class S_TestTransitiveReduction extends TestCase {
 		//number of redundant edges 
 		int numberRedundants=0;
 
-		for(Equivalences<Property> equivalents: d2.getProperties()) 
+		for(Equivalences<PropertyExpression> equivalents: d2.getProperties()) 
 			if(equivalents.size()>=2)
 				numberEquivalents += equivalents.size();
 			
@@ -139,27 +139,27 @@ public class S_TestTransitiveReduction extends TestCase {
 
 
 		{
-			DefaultDirectedGraph<Property,DefaultEdge> g1 = 	reasonerd1.getPropertyGraph();	
-			for (Equivalences<Property> equivalents: reasonerd1.getProperties()) {
+			DefaultDirectedGraph<PropertyExpression,DefaultEdge> g1 = 	reasonerd1.getPropertyGraph();	
+			for (Equivalences<PropertyExpression> equivalents: reasonerd1.getProperties()) {
 				
 				log.info("equivalents {} ", equivalents);
 				
 				//check if there are redundant edges
-				for (Property vertex: equivalents) {
+				for (PropertyExpression vertex: equivalents) {
 					if(g1.incomingEdgesOf(vertex).size()!= g1.inDegreeOf(vertex)) //check that there anren't two edges pointing twice to the same nodes
 						numberRedundants +=g1.inDegreeOf(vertex)- g1.incomingEdgesOf(vertex).size();
 				
 					
 					//descendants of the vertex
-					Set<Equivalences<Property>> descendants = d2.getProperties().getSub(equivalents);
-					Set<Equivalences<Property>> children = d2.getProperties().getDirectSub(equivalents);
+					Set<Equivalences<PropertyExpression>> descendants = d2.getProperties().getSub(equivalents);
+					Set<Equivalences<PropertyExpression>> children = d2.getProperties().getDirectSub(equivalents);
 
 					log.info("descendants{} ", descendants);
 					log.info("children {} ", children);
 
 					for(DefaultEdge edge: g1.incomingEdgesOf(vertex)) {
-						Property source=g1.getEdgeSource(edge);
-						for(Equivalences<Property> descendant:descendants) {
+						PropertyExpression source=g1.getEdgeSource(edge);
+						for(Equivalences<PropertyExpression> descendant:descendants) {
 							if (!children.contains(descendant) & ! equivalents.contains(descendant.iterator().next()) &descendant.contains(source))
 								numberRedundants +=1;	
 						}

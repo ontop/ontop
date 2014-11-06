@@ -58,10 +58,9 @@ public interface SQLQueryGenerator extends Serializable {
 	 *            the set of URIs of the ontologies integrated into the dlliter
 	 *            ontology
 	 */
-	// public void update(PrefixManager man, DLLiterOntology onto, Set<URI>
-	// uris);
-
-	// public ViewManager getViewManager();
 
     public SQLQueryGenerator cloneGenerator();
+    
+    //TODO: added in version1. Check its relevance.
+    //void setUriMap(SemanticIndexURIMap uriRefIds);
 }

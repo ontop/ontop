@@ -29,7 +29,7 @@ import org.semanticweb.ontop.io.AbstractPrefixManager;
 
 /**
  * A read-only prefix manager that wraps <code>PrefixMapping</code> from Jena-API
- * 
+ *
  * @see com.hp.hpl.jena.shared.PrefixMapping
  */
 public class SparqlPrefixManager extends AbstractPrefixManager {

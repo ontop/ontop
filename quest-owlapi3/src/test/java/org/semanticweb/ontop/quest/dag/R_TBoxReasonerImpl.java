@@ -59,7 +59,7 @@ public class R_TBoxReasonerImpl extends TestCase {
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 		// generate DAG
-		TBoxReasonerImpl dag = new TBoxReasonerImpl(onto);
+		TBoxReasoner dag = new TBoxReasonerImpl(onto);
 /*		
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		List<Interval> nodeInterval = engine.getIntervals(ofac

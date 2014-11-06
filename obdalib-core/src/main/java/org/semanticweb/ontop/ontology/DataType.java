@@ -22,7 +22,7 @@ package org.semanticweb.ontop.ontology;
 
 import org.semanticweb.ontop.model.Predicate;
 
-public interface DataType extends BasicClassDescription {
+public interface Datatype extends BasicClassDescription {
 	
 	public Predicate getPredicate();
 }

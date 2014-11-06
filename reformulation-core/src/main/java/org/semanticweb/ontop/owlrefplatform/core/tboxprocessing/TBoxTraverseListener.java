@@ -1,11 +1,20 @@
 package org.semanticweb.ontop.owlrefplatform.core.tboxprocessing;
 
-import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.Property;
+
+import org.semanticweb.ontop.ontology.ClassExpression;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.DataRangeExpression;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
 
 public interface TBoxTraverseListener {
 	
-	public void onInclusion(Property sub, Property sup);
-	public void onInclusion(BasicClassDescription sub, BasicClassDescription sup);
+	public void onInclusion(DataPropertyExpression sub, DataPropertyExpression sup);
 
+	public void onInclusion(ObjectPropertyExpression sub, ObjectPropertyExpression sup);
+	
+	public void onInclusion(ClassExpression sub, ClassExpression sup);
+
+	public void onInclusion(DataRangeExpression sub, DataRangeExpression sup);
+	
+	
 }
