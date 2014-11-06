@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import com.google.common.collect.Lists;
+import it.unibz.krdb.config.tmappings.parser.TMappingExclusionConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import it.unibz.krdb.config.tmappings.types.SimplePredicate;
+
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -33,7 +33,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactRuleConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
@@ -70,7 +69,7 @@ public class QuestUnfolder {
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
 	/** Davide> Exclude specific predicates from T-Mapping approach **/
-	private final List<SimplePredicate> excludeFromTMappings;
+	private final TMappingExclusionConfiguration excludeFromTMappings;
 	
 	/** Davide> Whether to exclude the user-supplied predicates from the
 	 *          TMapping procedure (that is, the mapping assertions for 
@@ -87,7 +86,7 @@ public class QuestUnfolder {
 
 		unfoldingProgram = analyzer.constructDatalogProgram(mappings);
 
-        this.excludeFromTMappings = Lists.newArrayList();
+        this.excludeFromTMappings = TMappingExclusionConfiguration.empty();
 
     }
 	
@@ -102,7 +101,7 @@ public class QuestUnfolder {
 	 * @param analyzer
 	 * @param excludeFromTMappings
 	 */
-	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata, Mapping2DatalogConverter analyzer, List<SimplePredicate> excludeFromTMappings)
+	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata, Mapping2DatalogConverter analyzer, TMappingExclusionConfiguration excludeFromTMappings)
 	{
 		this.metadata = metadata;
 		
@@ -140,7 +139,7 @@ public class QuestUnfolder {
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
 
-	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, List<SimplePredicate> excludeFromTMappings) throws OBDAException  {
+	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, TMappingExclusionConfiguration excludeFromTMappings) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
 		
@@ -326,7 +325,7 @@ public class QuestUnfolder {
 		unfoldingProgram = analyzer.constructDatalogProgram(mappings);
 
 
-		applyTMappings(/*true, */reformulationReasoner, false, Lists.<SimplePredicate>newArrayList());
+		applyTMappings(/*true, */reformulationReasoner, false, TMappingExclusionConfiguration.empty());
 		
 		setupUnfolder();
 

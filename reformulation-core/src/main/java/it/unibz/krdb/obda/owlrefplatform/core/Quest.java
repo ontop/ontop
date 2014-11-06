@@ -20,9 +20,8 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
-import com.google.common.collect.Lists;
 
-import it.unibz.krdb.config.tmappings.types.SimplePredicate;
+import it.unibz.krdb.config.tmappings.parser.TMappingExclusionConfiguration;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -156,7 +155,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private boolean applyUserConstraints;
 
 	/** Davide> Exclude specific predicates from T-Mapping approach **/
-	private List<SimplePredicate> excludeFromTMappings = Lists.newArrayList();
+	private TMappingExclusionConfiguration excludeFromTMappings = TMappingExclusionConfiguration.empty();
 	
 	/** Davide> Whether to exclude the user-supplied predicates from the
 	 *          TMapping procedure (that is, the mapping assertions for 
@@ -295,11 +294,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	}
 
 	/** Davide> Exclude specific predicates from T-Mapping approach **/
-	public void setExcludeFromTMappings(List<SimplePredicate> excludeFromTMappings){
+	public void setExcludeFromTMappings(TMappingExclusionConfiguration excludeFromTMappings){
 		assert(excludeFromTMappings != null);
 		this.excludeFromTMappings = excludeFromTMappings;
-
-        //this.applyExcludeFromTMappings = true;
 	}
 
 	/**

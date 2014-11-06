@@ -20,22 +20,17 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
-import com.google.common.collect.Lists;
-import it.unibz.krdb.config.tmappings.types.SimplePredicate;
+import it.unibz.krdb.config.tmappings.parser.TMappingExclusionConfiguration;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ResultSet;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.ClassExpression;
-import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
 import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
-import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
@@ -204,7 +199,7 @@ public class QuestOWL extends OWLReasonerBase {
 	//
 	// //////////////////////////////////////////////////////////////////////////////////////
 
-	private List<SimplePredicate> excludeFromTMappings = Lists.newArrayList();
+	private TMappingExclusionConfiguration excludeFromTMappings = TMappingExclusionConfiguration.empty();
 	
 	/* Used to signal whether to apply the user constraints above */
 	//private boolean applyExcludeFromTMappings = false;
@@ -265,13 +260,12 @@ public class QuestOWL extends OWLReasonerBase {
 	 * @param exclude from TMappings User-supplied predicates for which TMappings should be forbidden
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, List<SimplePredicate> excludeFromTMappings) {
+			Properties preferences, TMappingExclusionConfiguration excludeFromTMappings) {
 		super(rootOntology, configuration, bufferingMode);
 		
 		// Davide> T-Mappings handling
 		this.excludeFromTMappings = excludeFromTMappings;
 		assert(excludeFromTMappings != null);
-		//this.applyExcludeFromTMappings = true;
 		
 		this.init(rootOntology, obdaModel, configuration, preferences);
 
@@ -285,14 +279,13 @@ public class QuestOWL extends OWLReasonerBase {
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
 			Properties preferences, ImplicitDBConstraints userConstraints, 
-			List<SimplePredicate> excludeFromTMappings) {
+			TMappingExclusionConfiguration excludeFromTMappings) {
 		super(rootOntology, configuration, bufferingMode);
 		
 		this.userConstraints = userConstraints;
 		assert(userConstraints != null);
 		this.applyUserConstraints = true;
-		
-		// Davide> T-Mappings handling
+
 		this.excludeFromTMappings = excludeFromTMappings;
 		assert(excludeFromTMappings != null);
 		//this.applyExcludeFromTMappings = true;

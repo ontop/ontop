@@ -20,21 +20,17 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
-import com.google.common.collect.Lists;
-import it.unibz.krdb.config.tmappings.types.SimplePredicate;
+import it.unibz.krdb.config.tmappings.parser.TMappingExclusionConfiguration;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 
-import java.util.List;
 import java.util.Properties;
 
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -75,8 +71,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	 * identified by the TMapping algorithm would NOT add any
 	 * new individual.
 	 */
-	private List<SimplePredicate> excludeFromTMappings = Lists.newArrayList();
-	//private boolean applyExcludeFromTMappings = false;
+	private TMappingExclusionConfiguration excludeFromTMappings = TMappingExclusionConfiguration.empty();
 	
 	private String name = "Quest";
 
@@ -121,12 +116,11 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	 * identified by the TMapping algorithm would NOT add any
 	 * new individual in the concept.
 	 */
-	public void setExcludeFromTMappingsPredicates(List<SimplePredicate> excludeFromTMappings){
+	public void setExcludeFromTMappingsPredicates(TMappingExclusionConfiguration excludeFromTMappings){
 		
 		if( excludeFromTMappings == null ) throw new NullPointerException(); 
 		
 		this.excludeFromTMappings = excludeFromTMappings;
-		//this.applyExcludeFromTMappings = true;
 	}
 	
 	@Override
@@ -148,16 +142,10 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
 		if(this.applyUserConstraints){
-			//if( this.applyExcludeFromTMappings )
 				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, userConstraints, excludeFromTMappings);
-			//else
-			//	return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, userConstraints);
 		}
 		else{
-			//if( this.applyExcludeFromTMappings )
 				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, excludeFromTMappings);
-			//else
-			//	return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences);
 		}
 		
 	}

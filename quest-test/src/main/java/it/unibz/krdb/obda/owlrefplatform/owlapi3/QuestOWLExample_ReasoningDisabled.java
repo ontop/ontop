@@ -2,18 +2,13 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 
 
 
-import it.unibz.krdb.config.tmappings.parser.TMappingsConfParser;
+import it.unibz.krdb.config.tmappings.parser.TMappingExclusionConfiguration;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -96,8 +91,7 @@ public class QuestOWLExample_ReasoningDisabled {
 		/*
 		 * T-Mappings Handling!!
 		 */
-        TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
-        factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
+        factory.setExcludeFromTMappingsPredicates(TMappingExclusionConfiguration.parse(tMappingsConfFile));
 
         QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 

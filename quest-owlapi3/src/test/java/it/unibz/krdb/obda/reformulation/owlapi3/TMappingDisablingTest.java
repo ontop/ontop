@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.reformulation.owlapi3;
 
 
-import it.unibz.krdb.config.tmappings.parser.TMappingsConfParser;
+import it.unibz.krdb.config.tmappings.parser.TMappingExclusionConfiguration;
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.io.ModelIOManager;
@@ -232,10 +232,15 @@ public class TMappingDisablingTest extends TestCase {
 		/*
 		 * T-Mappings Handling!!
 		 */
-		TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
-		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
+		//TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
+		//factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
+		try {
+			factory.setExcludeFromTMappingsPredicates(TMappingExclusionConfiguration.parse(tMappingsConfFile));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 		
 		/*
 		 * Prepare the data connection for querying.

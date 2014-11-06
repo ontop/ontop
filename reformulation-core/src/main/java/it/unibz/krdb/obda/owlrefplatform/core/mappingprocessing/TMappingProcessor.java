@@ -20,9 +20,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
-import com.google.common.collect.Lists;
 
-import it.unibz.krdb.config.tmappings.types.SimplePredicate;
+import it.unibz.krdb.config.tmappings.parser.TMappingExclusionConfiguration;
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
@@ -36,16 +35,13 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.SomeValuesFrom;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -252,7 +248,7 @@ public class TMappingProcessor {
      * @param excludeFromTMappings
 	 * @return
 	 */
-	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, List<SimplePredicate> excludeFromTMappings) {
+	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, TMappingExclusionConfiguration excludeFromTMappings) {
 
         if(excludeFromTMappings == null){
             throw new NullPointerException("excludeFromTMappings");
@@ -294,14 +290,11 @@ public class TMappingProcessor {
 			PropertyExpression current = propertySet.getRepresentative();
 			if (current.isInverse())
 				continue;
-			
-			// Davide> Let's skip?
-			SimplePredicate curSimp = new SimplePredicate(current.getPredicate());
-			
-			if( excludeFromTMappings.contains(curSimp) ){
-				// Skip this guy
+
+			// for optimization
+			if(excludeFromTMappings.contains(current)){
 				continue;
-			}				
+			}
 
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();
@@ -379,10 +372,8 @@ public class TMappingProcessor {
 
 			OClass current = (OClass)classSet.getRepresentative();
 
-			SimplePredicate curSimp = new SimplePredicate(current.getPredicate());
-
-			if( excludeFromTMappings.contains(curSimp) ){
-				// Skip this guy
+			// FIXME: consider equivalences
+			if(excludeFromTMappings.contains(current)){
 				continue;
 			}
 
