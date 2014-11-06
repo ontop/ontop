@@ -99,7 +99,7 @@ public class QuestOWLExample_ReasoningDisabled {
         TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
         factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-        QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+        QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		/*
 		 * Prepare the data connection for querying.
@@ -177,7 +177,8 @@ public class QuestOWLExample_ReasoningDisabled {
         StringBuilder csvOut = new StringBuilder();
 
 
-        int j=0;
+        //int j=0;
+        int j = 4;
         while (j < queries.length){
             String sparqlQuery = queries[j];
             QuestOWLStatement st = conn.createStatement();
@@ -238,6 +239,7 @@ public class QuestOWLExample_ReasoningDisabled {
                 }
             }
             j++;
+            break;
         }
 
 		/*

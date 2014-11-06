@@ -58,11 +58,6 @@ public class TMappingProcessor {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	/** List of predicates that need to be excluded from T-Mappings **/
-	// Davide> I moved the initialization out of the constructor, as
-	//         the field became static due to some changes
-	private static List<SimplePredicate> excludeFromTMappings = new ArrayList<SimplePredicate>();
-
 	private static class TMappingIndexEntry implements Iterable<TMappingRule> {
 		private final Set<TMappingRule> rules = new HashSet<TMappingRule>();
 	
@@ -398,6 +393,13 @@ public class TMappingProcessor {
 				continue;
 
 			OClass current = (OClass)classSet.getRepresentative();
+
+			SimplePredicate curSimp = new SimplePredicate(current.getPredicate());
+
+			if( excludeFromTMappings.contains(curSimp) ){
+				// Skip this guy
+				continue;
+			}
 
 			/* Getting the current node mappings */
 			Predicate currentPredicate = current.getPredicate();
