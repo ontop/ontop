@@ -20,58 +20,57 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
+import java.util.Set;
+
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.ValueConstant;
 
 public interface OntologyFactory {
 
-	public PropertySomeRestriction getPropertySomeRestriction(Predicate p, boolean inverse);
-	
-	public OClass createClass(Predicate p);
-	
 	public OClass createClass(String uri);
 
-	public Property createProperty(Predicate p, boolean inverse);
+	public Datatype createDataType(Predicate p);
+	
+	public ObjectPropertyExpression createObjectProperty(String uri);
+	
+	public DataPropertyExpression createDataProperty(String uri);
 
-	public Property createProperty(Predicate p);
 	
-	public Property createObjectProperty(String uri, boolean inverse);
-	
-	public Property createObjectProperty(String uri);
-	
-	public Property createDataProperty(String uri);
-	
-	public DataType createDataType(Predicate p);
-	
-	public Ontology createOntology(String uri);
 	
 	public Ontology createOntology();
 
-	public SubDescriptionAxiom createSubPropertyAxiom(Property included, Property including);
 
-	public SubDescriptionAxiom createSubClassAxiom(ClassDescription concept1, ClassDescription concept2);
+	
+	public SubClassOfAxiom createSubClassAxiom(ClassExpression concept1, BasicClassDescription concept2);
 
-	public PropertySomeRestriction createPropertySomeRestriction(Predicate p, boolean isInverse);
+	public SubClassOfAxiom createSubClassAxiom(DataRangeExpression concept1, DataRangeExpression concept2);
+	
+	public SubPropertyOfAxiom createSubPropertyAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including);
 
-	public PropertySomeClassRestriction createPropertySomeClassRestriction(Predicate p, boolean isInverse, OClass filler);
+	public SubPropertyOfAxiom createSubPropertyAxiom(DataPropertyExpression included, DataPropertyExpression including);
 
-	public PropertySomeDataTypeRestriction createPropertySomeDataTypeRestriction(Predicate p, boolean isInverse, DataType filler);
+	@Deprecated // used only in YAGOTest 
+	public SubPropertyOfAxiom createSubPropertyAxiom(PropertyExpression included, PropertyExpression including);
 	
-	public PropertyFunctionalAxiom createPropertyFunctionalAxiom(Property role);
+	@Deprecated // generic property is to be eliminated (used in SemIndex and YAGO)
+	public PropertyExpression createProperty(String uri);
 	
-	public DisjointClassAxiom createDisjointClassAxiom(OClass c1, OClass c2);
 	
-	public DisjointDataPropertyAxiom createDisjointDataPropertyAxiom(Predicate p1, Predicate p2);
+	public SomeValuesFrom createPropertySomeRestriction(PropertyExpression role);
 	
-	public DisjointObjectPropertyAxiom createDisjointObjectPropertyAxiom(Predicate p1, Predicate p2);
+	public DataPropertyRangeExpression createDataPropertyRange(DataPropertyExpression role);
+	
+	
+	public FunctionalPropertyAxiom createPropertyFunctionalAxiom(PropertyExpression role);
+	
+	public DisjointClassesAxiom createDisjointClassesAxiom(Set<ClassExpression> classes);
+	
+	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Set<PropertyExpression> props);
+	
+	public PropertyAssertion createPropertyAssertion(PropertyExpression attribute, ObjectConstant o1, Constant o2);
+	
+	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant object);
 
-	public ObjectPropertyAssertion createObjectPropertyAssertion(Predicate role, ObjectConstant o1, ObjectConstant o2);
 
-	public DataPropertyAssertion createDataPropertyAssertion(Predicate attribute, ObjectConstant o1, ValueConstant o2);
-	
-	public Assertion createPropertyAssertion(Predicate attribute, ObjectConstant o1, Constant o2);
-	
-	public ClassAssertion createClassAssertion(Predicate concept, ObjectConstant object);
 }

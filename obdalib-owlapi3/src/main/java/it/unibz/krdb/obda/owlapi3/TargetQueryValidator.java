@@ -29,6 +29,8 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.Vector;
 
@@ -39,6 +41,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 
 	/** Data factory **/
 	private OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
+	private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	/** List of invalid predicates */
 	private Vector<String> invalidPredicates = new Vector<String>();
@@ -98,17 +101,17 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 
 	@Override
 	public boolean isClass(Predicate predicate) {
-		return obdaModel.isDeclaredClass(predicate);
+		return obdaModel.isDeclaredClass(ofac.createClass(predicate.getName()));
 	}
 	
 	@Override
 	public boolean isObjectProperty(Predicate predicate) {
-		return obdaModel.isDeclaredObjectProperty(predicate);
+		return obdaModel.isDeclaredObjectProperty(ofac.createObjectProperty(predicate.getName()));
 	}
 
 	@Override
 	public boolean isDataProperty(Predicate predicate) {
-		return obdaModel.isDeclaredDataProperty(predicate);
+		return obdaModel.isDeclaredDataProperty(ofac.createDataProperty(predicate.getName()));
 	}
 	
 	@Override

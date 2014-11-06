@@ -143,7 +143,7 @@ public class TMappingDisablingTest extends TestCase {
 		 */
 		QuestPreferences preference = new QuestPreferences();
 		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
+		//preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
 		
 		/*
 		 * Create the instance of Quest OWL reasoner.

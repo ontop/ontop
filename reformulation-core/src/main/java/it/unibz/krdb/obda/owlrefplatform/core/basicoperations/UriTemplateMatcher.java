@@ -38,9 +38,9 @@ import java.util.regex.Pattern;
 
 public class UriTemplateMatcher {
 
-	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
-	private Map<Pattern, Function> uriTemplateMatcher = new HashMap<Pattern, Function>();
+	private final Map<Pattern, Function> uriTemplateMatcher = new HashMap<Pattern, Function>();
 	
 	public UriTemplateMatcher() {
 		// NO-OP

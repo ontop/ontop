@@ -25,26 +25,25 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Iterator;
 
 public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 
 	private final Iterator<Assertion> originalIterator;
-	private final EquivalenceMap equivalenceMap;
+	private final TBoxReasoner reasoner;
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();	
 	
-	public EquivalentTriplePredicateIterator(Iterator<Assertion> iterator, EquivalenceMap equivalences) {
+	public EquivalentTriplePredicateIterator(Iterator<Assertion> iterator, TBoxReasoner reasoner) {
 		originalIterator = iterator;
-		equivalenceMap = equivalences;
+		this.reasoner = reasoner;
 	}
 	
 	@Override
@@ -68,40 +67,36 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 	private Assertion getNormal(Assertion assertion) {
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
-			Predicate concept = ca.getConcept();
-			OClass description = equivalenceMap.getClassRepresentative(concept);
+			Predicate concept = ca.getConcept().getPredicate();
+			OClass description = reasoner.getClassRepresentative(concept);
 			
 			if (description != null) {
-				ObjectConstant object = ca.getObject();
-				return ofac.createClassAssertion(description.getPredicate(), object);
+				ObjectConstant object = ca.getIndividual();
+				return ofac.createClassAssertion(description, object);
 			}			
 		} 
-		else if (assertion instanceof ObjectPropertyAssertion) {
-			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
-			Predicate role = opa.getRole();
-			Property property = equivalenceMap.getPropertyRepresentative(role);
+		else if (assertion instanceof PropertyAssertion) {
+			PropertyAssertion opa = (PropertyAssertion) assertion;
+			Predicate role = opa.getProperty().getPredicate();
+			PropertyExpression property = reasoner.getPropertyRepresentative(role);
 			
 			if (property != null) {
-				ObjectConstant object1 = opa.getFirstObject();
-				ObjectConstant object2 = opa.getSecondObject();
-				if (property.isInverse()) {
-					return ofac.createObjectPropertyAssertion(property.getPredicate(), object2, object1);
-				} else {
-					return ofac.createObjectPropertyAssertion(property.getPredicate(), object1, object2);
+				ObjectConstant object1 = opa.getSubject();
+				if (opa.getValue2() instanceof ValueConstant) {
+					ValueConstant constant = (ValueConstant)opa.getValue2();
+					return ofac.createPropertyAssertion(property, object1, constant);					
+				}
+				else {
+					ObjectConstant object2 = (ObjectConstant)opa.getValue2();
+					if (property.isInverse()) {
+						PropertyExpression notinv = property.getInverse();
+						return ofac.createPropertyAssertion(notinv, object2, object1);
+					} else {
+						return ofac.createPropertyAssertion(property, object1, object2);
+					}
 				}
 			}
 		} 
-		else if (assertion instanceof DataPropertyAssertion) {
-			DataPropertyAssertion dpa = (DataPropertyAssertion) assertion;
-			Predicate attribute = dpa.getAttribute();
-			Property property = equivalenceMap.getPropertyRepresentative(attribute);
-			
-			if (property != null) {
-				ObjectConstant object = dpa.getObject();
-				ValueConstant constant = dpa.getValue();
-				return ofac.createDataPropertyAssertion(property.getPredicate(), object, constant);
-			}
-		}
 		return assertion;
 	}
 }

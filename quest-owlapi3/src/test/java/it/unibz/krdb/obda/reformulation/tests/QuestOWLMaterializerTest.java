@@ -22,12 +22,12 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -129,10 +129,12 @@ public class QuestOWLMaterializerTest extends TestCase {
 				Assertion assertion = iterator.next();
 				if (assertion instanceof ClassAssertion) {
 					classAss++;
-				} else if (assertion instanceof DataPropertyAssertion) {
-					propAss++;
-				} else if (assertion instanceof ObjectPropertyAssertion) {
-					objAss++;
+				} else if (assertion instanceof PropertyAssertion) {
+					PropertyAssertion assertion2 = (PropertyAssertion)assertion;
+					if (assertion2.getValue2() instanceof ValueConstant)
+						propAss++;
+					else
+						objAss++;
 				}
 			}
 			Assert.assertEquals(3, classAss); //3 data rows for T1
@@ -154,7 +156,8 @@ public class QuestOWLMaterializerTest extends TestCase {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLOntology owl_onto = manager.loadOntologyFromOntologyDocument(fo);
 			Ontology onto =  new OWLAPI3Translator().translate(owl_onto);
-			System.out.println(onto.getAssertions());
+			System.out.println(onto.getSubPropertyAxioms());
+			System.out.println(onto.getSubClassAxioms());
 			
 			QuestMaterializer mat = new QuestMaterializer(model, onto, prefs);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
@@ -165,10 +168,13 @@ public class QuestOWLMaterializerTest extends TestCase {
 				Assertion assertion = iterator.next();
 				if (assertion instanceof ClassAssertion) {
 					classAss++;
-				} else if (assertion instanceof DataPropertyAssertion) {
-					propAss++;
-				} else if (assertion instanceof ObjectPropertyAssertion) {
-					objAss++;
+				} 
+				else {
+					PropertyAssertion assertion2 = (PropertyAssertion)assertion;
+					if (assertion2.getValue2() instanceof ValueConstant)
+						propAss++;
+					else
+						objAss++;
 				}
 			}
 			Assert.assertEquals(6, classAss); //3 data rows x2 for subclass prop

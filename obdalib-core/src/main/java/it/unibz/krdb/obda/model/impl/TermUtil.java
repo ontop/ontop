@@ -46,8 +46,12 @@ public class TermUtil {
 			String value = constant.getValue();
 			switch (constant.getType()) {
 				case STRING:
+                case DATE:
+                case TIME:
+                case YEAR:
 				case DATETIME: sb.append(quoted(value)); break;
 				case INTEGER:
+                case LONG:
 				case DECIMAL:
 				case DOUBLE:
 				case BOOLEAN: sb.append(value); break;

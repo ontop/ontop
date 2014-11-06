@@ -28,41 +28,36 @@ import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertySomeRestriction;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import junit.framework.TestCase;
 
 public class SigmaTest extends TestCase {
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+    private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
     public void test_exists_simple() {
-        Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
+        Ontology ontology = descFactory.createOntology();
 
-        Predicate a = predicateFactory.getPredicate("a", 1);
-        Predicate c = predicateFactory.getPredicate("c", 1);
-        Predicate r = predicateFactory.getPredicate("r", 2);
-        OClass ac = descFactory.createClass(a);
-        OClass cc = descFactory.createClass(c);
-        PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
-        ontology.addConcept(ac.getPredicate());
-        ontology.addConcept(cc.getPredicate());
-        ontology.addRole(er.getPredicate());
+        OClass ac = descFactory.createClass("a");
+        OClass cc = descFactory.createClass("c");
+        PropertyExpression rprop = descFactory.createObjectProperty("r");
+        SomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
+ 
+        ontology.addSubClassOfAxiomWithReferencedEntities(er, ac);
+        ontology.addSubClassOfAxiomWithReferencedEntities(cc, er);
 
-        ontology.addAssertion(descFactory.createSubClassAxiom(er, ac));
-        ontology.addAssertion(descFactory.createSubClassAxiom(cc, er));
-
-        
        
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
-		Ontology ontologySigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
-        TBoxReasoner sigma = new TBoxReasonerImpl(ontologySigma);
-        EquivalencesDAG<BasicClassDescription> classes = sigma.getClasses();
+		TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(TBoxReasonerToOntology.getOntology(reasoner, true));						
+
+		EquivalencesDAG<BasicClassDescription> classes = sigmaReasoner.getClasses();
 
         assertTrue(classes.getSub(classes.getVertex(ac)).contains(classes.getVertex(er)));
 

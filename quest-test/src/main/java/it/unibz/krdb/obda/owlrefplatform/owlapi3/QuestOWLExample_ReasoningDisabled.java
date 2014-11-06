@@ -97,7 +97,7 @@ public class QuestOWLExample_ReasoningDisabled {
 		 * T-Mappings Handling!!
 		 */
         TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
-        //factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
+        factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
         QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 
@@ -209,7 +209,7 @@ public class QuestOWLExample_ReasoningDisabled {
 	 			/*
 				 * Print the query summary
 				 */
-                QuestOWLStatement qst = (QuestOWLStatement) st;
+                QuestOWLStatement qst = st;
                 String sqlQuery = qst.getUnfolding(sparqlQuery);
 
                 System.out.println();

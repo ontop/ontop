@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  */
 
 import com.google.common.collect.Lists;
+import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -38,8 +39,6 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 
 /***
  * Implementation of an OWLReasonerFactory that can create instances of Quest.

@@ -22,8 +22,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Variable;
@@ -32,10 +30,7 @@ import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -43,21 +38,7 @@ import java.util.List;
 
 public class QueryAnonymizer {
 
-	private static final OBDADataFactory termFactory = OBDADataFactoryImpl
-			.getInstance();
-
-	public DatalogProgram anonymize(DatalogProgram prog) {
-
-		DatalogProgram newProg = termFactory.getDatalogProgram();
-		List<CQIE> rules = prog.getRules();
-		Iterator<CQIE> it = rules.iterator();
-		while (it.hasNext()) {
-			CQIE q = it.next();
-			newProg.appendRule(anonymize(q));
-		}
-
-		return newProg;
-	}
+	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * Anonymizes the terms of an atom in a query, if they are anonymizable.
@@ -65,10 +46,12 @@ public class QueryAnonymizer {
 	 * body.getTerms().set(i, new UndisintguishedVariable()) for each position i
 	 * in the atom that can be anonymized.
 	 * 
+	 * Used only in DLRPerfectReformulator
+	 * 
 	 * @param q
 	 * @param focusatomIndex
 	 */
-	public void anonymize(CQIE q, int focusatomIndex) {
+	public static void anonymize(CQIE q, int focusatomIndex) {
 
 		List<Function> body = q.getBody();
 		Function atom = (Function) body.get(focusatomIndex);
@@ -118,103 +101,84 @@ public class QueryAnonymizer {
 				 */
 				if (!isSharedTerm) {
 					atom.getTerms().set(i,
-							termFactory.getVariableNondistinguished());
+							fac.getVariableNondistinguished());
 				}
 			}
 		}
 	}
 
-	public Collection<CQIE> anonymize(Collection<CQIE> cqs) {
-		HashSet<CQIE> anonymous = new HashSet<CQIE>(1000);
-		for (CQIE cq : cqs) {
-			anonymous.add(anonymize(cq));
-		}
-		return anonymous;
-	}
+	public static CQIE anonymize(CQIE q) {
 
-	public CQIE anonymize(CQIE q) {
+		// Collecting number of occurrences of all variables
+		 
+		HashMap<Variable, Integer> auxmap = new HashMap<Variable, Integer>();
+		for (Function atom : q.getBody()) 
+			for (Term t : atom.getTerms()) 
+				collectVariableOccurrences(t, auxmap);
 
-		HashMap<String, List<Object[]>> auxmap = new HashMap<String, List<Object[]>>();
-
-		/*
-		 * Collecting all variables and the places where they appear (Function and
-		 * position)
-		 */
-		List<Function> body = q.getBody();
-		Iterator<Function> it = body.iterator();
-		while (it.hasNext()) {
-			Function atom = (Function) it.next();
-			List<Term> terms = atom.getTerms();
-			int pos = 0;
-			for (Term t : terms) {
-				collectAuxiliaries(t, atom, pos, auxmap);
-			}
-			pos++;
-		}
-
-		Iterator<Function> it2 = body.iterator();
+		if (auxmap.isEmpty())
+			return q;
+		
 		LinkedList<Function> newBody = new LinkedList<Function>();
-		while (it2.hasNext()) {
-			Function atom = (Function) it2.next();
-			List<Term> terms = atom.getTerms();
-			Iterator<Term> term_it = terms.iterator();
+		for (Function atom : q.getBody()) {
 			LinkedList<Term> vex = new LinkedList<Term>();
-			while (term_it.hasNext()) {
-				Term t = term_it.next();
-				List<Object[]> list = null;
-				if (t instanceof VariableImpl) {
-					list = auxmap.get(((VariableImpl) t).getName());
+			for (Term t : atom.getTerms()) {
+				Integer list = null;
+				if (t instanceof Variable) {
+					list = auxmap.get(((Variable) t));
 				}
-				if (list != null && list.size() < 2 && !isVariableInHead(q, t)) {
-					vex.add(termFactory.getVariableNondistinguished());
+				if (list != null && list < 2 && !isVariableInHead(q, t)) {
+					vex.add(fac.getVariableNondistinguished());
 				} else {
 					vex.add(t);
 				}
 			}
-			Function newatom = termFactory
-					.getFunction(atom.getPredicate().clone(), vex);
+			Function newatom = fac.getFunction(atom.getPredicate().clone(), vex);
 			newBody.add(newatom);
 		}
-		CQIE query = termFactory.getCQIE(q.getHead(), newBody);
+		CQIE query = fac.getCQIE(q.getHead(), newBody);
 		return query;
 	}
 
-	private void collectAuxiliaries(Term term, Function atom, int pos,
-			HashMap<String, List<Object[]>> auxmap) {
-		if (term instanceof Variable) {
+	/**
+	 * collects occurrences of variables
+	 * 
+	 * @param term
+	 * @param auxmap: maps variable names to atoms they occur in
+	 */
+	
+	private static void collectVariableOccurrences(Term term, HashMap<Variable, Integer> auxmap) {
+		if ((term instanceof Variable) && !(term instanceof AnonymousVariable)) {
 			Variable var = (Variable) term;
-			Object[] obj = new Object[2];
-			obj[0] = atom;
-			obj[1] = pos;
-			List<Object[]> list = auxmap.get(var.getName());
-			if (list == null) {
-				list = new LinkedList<Object[]>();
-			}
-			list.add(obj);
-			auxmap.put(var.getName(), list);
-		} else if (term instanceof Function) {
+			Integer value = auxmap.get(var);
+			if (value == null) 
+				auxmap.put(var, 1);
+			else
+				value++;
+		} 
+		else if (term instanceof Function) {
 			Function funct = (Function) term;
 			for (Term t : funct.getTerms()) {
-				collectAuxiliaries(t, atom, pos, auxmap);
+				collectVariableOccurrences(t, auxmap);
 			}
-		} else {
+		} 
+		else {
 			// NO-OP
 			// Ignore constants
 		}
 	}
 
-	private boolean isVariableInHead(CQIE q, Term t) {
-		if (t instanceof AnonymousVariable)
-			return false;
+	private static boolean isVariableInHead(CQIE q, Term t) {
+//		if (t instanceof AnonymousVariable)
+//			return false;
 
-		Function head = q.getHead();
-		List<Term> headterms = head.getTerms();
-		for (Term headterm : headterms) {
+		for (Term headterm : q.getHead().getTerms()) {
 			if (headterm instanceof FunctionalTermImpl) {
 				FunctionalTermImpl fterm = (FunctionalTermImpl) headterm;
 				if (fterm.containsTerm(t))
 					return true;
-			} else if (headterm.equals(t))
+			} 
+			else if (headterm.equals(t))
 				return true;
 		}
 		return false;
@@ -228,62 +192,43 @@ public class QueryAnonymizer {
 	 * algorithm treats each undistinguished variable as a unique variable.
 	 * 
 	 * Needed because the rewriter might generate query bodies like this B(x,_),
-	 * R(x,_), underscores reperesnt uniquie anonymous varaibles. However, the
+	 * R(x,_), underscores represent unique anonymous variables. However, the
 	 * SQL generator needs them to be explicitly unique. replacing B(x,newvar1),
 	 * R(x,newvar2)
 	 * 
 	 * @param dp
 	 */
-	public static DatalogProgram deAnonymize(DatalogProgram dp) {
-		DatalogProgram result = termFactory.getDatalogProgram();
-		Iterator<CQIE> it = dp.getRules().iterator();
-		while (it.hasNext()) {
-			CQIE query = it.next();
-			result.appendRule(deAnonymize(query));
-		}
-		result.setQueryModifiers(dp.getQueryModifiers());
-		return result;
-	}
 
 	public static CQIE deAnonymize(CQIE query) {
-		// query = query.clone();
+		
+		query = query.clone();
 		Function head = query.getHead();
-		Iterator<Term> hit = head.getTerms().iterator();
-		OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
-		int coutner = 1;
-		int i = 0;
+		
+		int counter = 1;
 		LinkedList<Term> newTerms = new LinkedList<Term>();
-		while (hit.hasNext()) {
-			Term t = hit.next();
+		for (Term t : head.getTerms()) {
 			if (t instanceof AnonymousVariable) {
-				String newName = "_uv-" + coutner;
-				coutner++;
-				Term newT = factory.getVariable(newName);
+				String newName = "_uv-" + counter;
+				counter++;
+				Term newT = fac.getVariable(newName);
 				newTerms.add(newT);
 			} else {
 				newTerms.add(t);
 			}
-			i++;
 		}
 		head.updateTerms(newTerms);
 
-		Iterator<Function> bit = query.getBody().iterator();
-		while (bit.hasNext()) {
-			Function a = (Function) bit.next();
-			Iterator<Term> hit2 = a.getTerms().iterator();
-			i = 0;
+		for (Function a : query.getBody()) {
 			LinkedList<Term> vec = new LinkedList<Term>();
-			while (hit2.hasNext()) {
-				Term t = hit2.next();
+			for (Term t : a.getTerms()) {
 				if (t instanceof AnonymousVariable) {
-					String newName = "_uv-" + coutner;
-					coutner++;
-					Term newT = factory.getVariable(newName);
+					String newName = "_uv-" + counter;
+					counter++;
+					Term newT = fac.getVariable(newName);
 					vec.add(newT);
 				} else {
 					vec.add(t);
 				}
-				i++;
 			}
 			a.updateTerms(vec);
 		}
