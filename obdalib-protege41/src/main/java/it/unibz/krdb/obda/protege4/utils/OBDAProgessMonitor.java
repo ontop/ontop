@@ -63,18 +63,23 @@ public class OBDAProgessMonitor {
 		SwingUtilities.invokeLater(action);
 	}
 
+	private class Closer implements Runnable{
+		public void run(){
+			parent.setVisible(false);
+			parent.dispose();
+		}
+	};
+	
 	public void stop() {
 		bFinish = true;
 		bCancel = false;
-		parent.setVisible(false);
-		parent.dispose();
+		SwingUtilities.invokeLater(new Closer());
 	}
 
 	public void cancel() throws Exception {
 		bFinish = false;
 		bCancel = true;
-		parent.setVisible(false);
-		parent.dispose();
+		SwingUtilities.invokeLater(new Closer());
 		
 		for (OBDAProgressListener pl : listeners) {
 			pl.actionCanceled();
