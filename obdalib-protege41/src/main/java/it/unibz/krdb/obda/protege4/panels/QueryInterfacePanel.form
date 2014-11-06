@@ -23,7 +23,7 @@
         </MenuItem>
         <MenuItem class="javax.swing.JMenuItem" name="getSPARQLSQLExpansion">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Get expanded/unfolded query for this UCQ..."/>
+            <Property name="text" type="java.lang.String" value="Get SQL translation..."/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="getSPARQLSQLExpansionActionPerformed"/>
