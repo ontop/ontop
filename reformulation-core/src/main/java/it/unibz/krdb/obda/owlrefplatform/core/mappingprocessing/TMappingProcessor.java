@@ -243,19 +243,6 @@ public class TMappingProcessor {
 		return fac.getCQIE(head, newBody);
 	}
 
-	/**
-	 * Davide> This methods allows to specify whether T-Mapping should
-	 *         be disabled for certain predicates
-	 * @param originalMappings
-	 * @param reasoner
-	 * @param full
-
-	 * @return
-	 */
-//	public static DatalogProgram getTMappings(DatalogProgram originalMappings, TBoxReasoner reasoner, boolean full){
-//		//TMappingProcessor.excludeFromTMappings.addAll(excludeFromTMappings);
-//		return getTMappings(originalMappings, reasoner, full, Lists.<SimplePredicate>newArrayList());
-//	}
 	
 	/**
 	 * 
@@ -265,8 +252,6 @@ public class TMappingProcessor {
      * @param excludeFromTMappings
 	 * @return
 	 */
-
-	//public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full) {
 	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, List<SimplePredicate> excludeFromTMappings) {
 
         if(excludeFromTMappings == null){
@@ -274,7 +259,7 @@ public class TMappingProcessor {
         }
 
 		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(); // no dependencies used at the moment
-											   // TODO: use foreign keys here
+		// TODO: use foreign keys here
 			
 		Map<Predicate, TMappingIndexEntry> mappingIndex = new HashMap<Predicate, TMappingIndexEntry>();
 
