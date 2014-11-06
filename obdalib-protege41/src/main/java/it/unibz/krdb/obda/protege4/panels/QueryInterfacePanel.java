@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.protege4.panels;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
@@ -30,18 +29,15 @@ import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.utils.OBDAPreferenceChangeListener;
 
-import java.awt.Color;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyleContext;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 /**
  * Creates a new panel to execute queries. Remember to execute the
@@ -151,7 +147,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 //        });
 //        sparqlPopupMenu.add(getSPARQLExpansion);
 
-        getSPARQLSQLExpansion.setText("Get expanded/unfolded query for this UCQ...");
+        getSPARQLSQLExpansion.setText("Get SQL translation...");
         getSPARQLSQLExpansion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 getSPARQLSQLExpansionActionPerformed(evt);
