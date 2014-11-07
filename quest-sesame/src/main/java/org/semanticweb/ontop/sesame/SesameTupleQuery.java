@@ -49,12 +49,6 @@ import org.openrdf.query.TupleQueryResultHandler;
 import org.openrdf.query.TupleQueryResultHandlerException;
 
 public class SesameTupleQuery extends SesameAbstractQuery implements TupleQuery {
-
-
-	private String queryString;
-	private String baseURI;
-	private QuestDBConnection conn;
-	private int queryTimeout;
 	
 	public SesameTupleQuery(String queryString, String baseURI, QuestDBConnection conn) 
 			throws MalformedQueryException {
