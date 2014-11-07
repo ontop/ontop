@@ -1,7 +1,7 @@
 package it.unibz.krdb.obda.reformulation.owlapi3;
 
 
-import it.unibz.krdb.config.tmappings.parser.TMappingExclusionConfiguration;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.io.ModelIOManager;
@@ -235,7 +235,7 @@ public class TMappingDisablingTest extends TestCase {
 		//TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 		//factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 		try {
-			factory.setExcludeFromTMappingsPredicates(TMappingExclusionConfiguration.parse(tMappingsConfFile));
+			factory.setExcludeFromTMappingsPredicates(TMappingExclusionConfig.parseFile(tMappingsConfFile));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

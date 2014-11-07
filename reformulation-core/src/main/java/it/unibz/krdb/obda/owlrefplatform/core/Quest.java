@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  */
 
 
-import it.unibz.krdb.config.tmappings.parser.TMappingExclusionConfiguration;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -155,7 +155,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private boolean applyUserConstraints;
 
 	/** Davide> Exclude specific predicates from T-Mapping approach **/
-	private TMappingExclusionConfiguration excludeFromTMappings = TMappingExclusionConfiguration.empty();
+	private TMappingExclusionConfig excludeFromTMappings = TMappingExclusionConfig.empty();
 	
 	/** Davide> Whether to exclude the user-supplied predicates from the
 	 *          TMapping procedure (that is, the mapping assertions for 
@@ -294,7 +294,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	}
 
 	/** Davide> Exclude specific predicates from T-Mapping approach **/
-	public void setExcludeFromTMappings(TMappingExclusionConfiguration excludeFromTMappings){
+	public void setExcludeFromTMappings(TMappingExclusionConfig excludeFromTMappings){
 		assert(excludeFromTMappings != null);
 		this.excludeFromTMappings = excludeFromTMappings;
 	}

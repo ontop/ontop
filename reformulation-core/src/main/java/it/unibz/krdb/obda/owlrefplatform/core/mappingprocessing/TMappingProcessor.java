@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
  */
 
 
-import it.unibz.krdb.config.tmappings.parser.TMappingExclusionConfiguration;
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
@@ -248,7 +247,7 @@ public class TMappingProcessor {
      * @param excludeFromTMappings
 	 * @return
 	 */
-	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, TMappingExclusionConfiguration excludeFromTMappings) {
+	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, TMappingExclusionConfig excludeFromTMappings) {
 
         if(excludeFromTMappings == null){
             throw new NullPointerException("excludeFromTMappings");

@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
-import it.unibz.krdb.config.tmappings.parser.TMappingExclusionConfiguration;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -71,7 +71,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	 * identified by the TMapping algorithm would NOT add any
 	 * new individual.
 	 */
-	private TMappingExclusionConfiguration excludeFromTMappings = TMappingExclusionConfiguration.empty();
+	private TMappingExclusionConfig excludeFromTMappings = TMappingExclusionConfig.empty();
 	
 	private String name = "Quest";
 
@@ -116,7 +116,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	 * identified by the TMapping algorithm would NOT add any
 	 * new individual in the concept.
 	 */
-	public void setExcludeFromTMappingsPredicates(TMappingExclusionConfiguration excludeFromTMappings){
+	public void setExcludeFromTMappingsPredicates(TMappingExclusionConfig excludeFromTMappings){
 		
 		if( excludeFromTMappings == null ) throw new NullPointerException(); 
 		

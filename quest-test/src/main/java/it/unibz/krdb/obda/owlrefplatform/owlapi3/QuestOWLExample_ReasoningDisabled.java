@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 
 
 
-import it.unibz.krdb.config.tmappings.parser.TMappingExclusionConfiguration;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -91,7 +91,7 @@ public class QuestOWLExample_ReasoningDisabled {
 		/*
 		 * T-Mappings Handling!!
 		 */
-        factory.setExcludeFromTMappingsPredicates(TMappingExclusionConfiguration.parse(tMappingsConfFile));
+        factory.setExcludeFromTMappingsPredicates(TMappingExclusionConfig.parseFile(tMappingsConfFile));
 
         QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 

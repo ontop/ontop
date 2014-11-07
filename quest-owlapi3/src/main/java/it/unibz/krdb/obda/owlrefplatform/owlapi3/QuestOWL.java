@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
-import it.unibz.krdb.config.tmappings.parser.TMappingExclusionConfiguration;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.ResultSet;
@@ -199,7 +199,7 @@ public class QuestOWL extends OWLReasonerBase {
 	//
 	// //////////////////////////////////////////////////////////////////////////////////////
 
-	private TMappingExclusionConfiguration excludeFromTMappings = TMappingExclusionConfiguration.empty();
+	private TMappingExclusionConfig excludeFromTMappings = TMappingExclusionConfig.empty();
 	
 	/* Used to signal whether to apply the user constraints above */
 	//private boolean applyExcludeFromTMappings = false;
@@ -260,7 +260,7 @@ public class QuestOWL extends OWLReasonerBase {
 	 * @param exclude from TMappings User-supplied predicates for which TMappings should be forbidden
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, TMappingExclusionConfiguration excludeFromTMappings) {
+			Properties preferences, TMappingExclusionConfig excludeFromTMappings) {
 		super(rootOntology, configuration, bufferingMode);
 		
 		// Davide> T-Mappings handling
@@ -279,7 +279,7 @@ public class QuestOWL extends OWLReasonerBase {
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
 			Properties preferences, ImplicitDBConstraints userConstraints, 
-			TMappingExclusionConfiguration excludeFromTMappings) {
+			TMappingExclusionConfig excludeFromTMappings) {
 		super(rootOntology, configuration, bufferingMode);
 		
 		this.userConstraints = userConstraints;

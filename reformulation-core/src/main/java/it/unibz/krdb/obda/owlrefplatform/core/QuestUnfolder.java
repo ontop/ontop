@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import it.unibz.krdb.config.tmappings.parser.TMappingExclusionConfiguration;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +69,7 @@ public class QuestUnfolder {
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
 	/** Davide> Exclude specific predicates from T-Mapping approach **/
-	private final TMappingExclusionConfiguration excludeFromTMappings;
+	private final TMappingExclusionConfig excludeFromTMappings;
 	
 	/** Davide> Whether to exclude the user-supplied predicates from the
 	 *          TMapping procedure (that is, the mapping assertions for 
@@ -86,7 +86,7 @@ public class QuestUnfolder {
 
 		unfoldingProgram = analyzer.constructDatalogProgram(mappings);
 
-        this.excludeFromTMappings = TMappingExclusionConfiguration.empty();
+        this.excludeFromTMappings = TMappingExclusionConfig.empty();
 
     }
 	
@@ -101,7 +101,7 @@ public class QuestUnfolder {
 	 * @param analyzer
 	 * @param excludeFromTMappings
 	 */
-	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata, Mapping2DatalogConverter analyzer, TMappingExclusionConfiguration excludeFromTMappings)
+	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata, Mapping2DatalogConverter analyzer, TMappingExclusionConfig excludeFromTMappings)
 	{
 		this.metadata = metadata;
 		
@@ -139,7 +139,7 @@ public class QuestUnfolder {
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
 
-	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, TMappingExclusionConfiguration excludeFromTMappings) throws OBDAException  {
+	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, TMappingExclusionConfig excludeFromTMappings) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
 		
@@ -325,7 +325,7 @@ public class QuestUnfolder {
 		unfoldingProgram = analyzer.constructDatalogProgram(mappings);
 
 
-		applyTMappings(/*true, */reformulationReasoner, false, TMappingExclusionConfiguration.empty());
+		applyTMappings(/*true, */reformulationReasoner, false, TMappingExclusionConfig.empty());
 		
 		setupUnfolder();
 
