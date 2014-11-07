@@ -484,7 +484,11 @@ public class TypeLift {
         Function newHead = (Function)localHead.clone();
         // Side-effect (newHead is updated)
         UnifierUtilities.applyUnifier(newHead, typingMGU);
-        // TODO: see if this old code should be reintroduced (if applyUnifier does not the job here).
+        /**
+         *The purpose of applySelectiveUnifier() was to prevent
+         * excessive type propagations. Ex: URI(URI(x)) because x appears in two body atoms.
+         * TODO: confirm that it is not needed anymore.
+         */
         //UnifierUtilities.applySelectiveUnifier(newHead, typingMGU);
 
         return newHead;
