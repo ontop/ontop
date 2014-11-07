@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.quest.datatypes;
+package org.semanticweb.ontop.quest.datatypes;
 
 /*
  * #%L

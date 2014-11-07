@@ -1570,7 +1570,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			/* getting a rule with unique variables */
 			CQIE freshRule = getFreshRule(candidateRule, resolutionCount[0]);
 
-			Map<Variable, Term> mgu = Unifier.getMGU(freshRule.getHead(), focusAtom);
+			Unifier mgu = Unifier.getMGU(freshRule.getHead(), focusAtom);
 
 			if (mgu == null) {
 				/* Failed attempt */
@@ -1614,7 +1614,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			
 			innerAtoms.addAll((int) termidx.peek(), freshRule.getBody());
 			
-			Unifier.applyUnifier(partialEvalution, mgu, false);
+			UnifierUtilities.applyUnifier(partialEvalution, mgu, false);
 
 			/***
 			 * DONE WITH BASIC RESOLUTION STEP
@@ -1930,7 +1930,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			 */
 			Function replacement = null;
 
-			Map<Variable, Term> mgu1 = null;
+			Unifier mgu1 = null;
 			for (int idx2 = 0; idx2 < termidx.peek(); idx2++) {
 				Function tempatom = (Function) innerAtoms.get(idx2);
 
@@ -1970,7 +1970,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				continue;
 			}
 
-			Unifier.applyUnifier(partialEvalution, mgu1, false);
+			UnifierUtilities.applyUnifier(partialEvalution, mgu1, false);
 			innerAtoms.remove(newatomidx);
 			newatomidx -= 1;
 			newatomcount -= 1;
@@ -2086,7 +2086,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	/**
 	 * This method returns the predicates that define two different templates
 	 */
-	public Multimap<Predicate,Integer> processMultipleTemplatePredicates(DatalogProgram mappings) {
+	public Multimap<Predicate,Integer> processMultipleTemplatePredicates(List<CQIE> mappings) {
 
         Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex = ArrayListMultimap.create();
 		

@@ -39,6 +39,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
 
 import junit.framework.TestCase;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 
 
 public class ThetaApplicationTest extends TestCase {

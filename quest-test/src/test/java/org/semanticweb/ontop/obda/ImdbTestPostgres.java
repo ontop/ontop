@@ -32,7 +32,7 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-        import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class ImdbTestPostgres {
     private OBDADataFactory fac;

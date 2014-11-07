@@ -42,16 +42,10 @@ import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.BasicParserSettings;
 import org.openrdf.rio.helpers.RDFHandlerBase;
-import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.ontology.Assertion;
-import org.semanticweb.ontop.ontology.Axiom;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.OntologyFactory;
+import org.semanticweb.ontop.ontology.*;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
@@ -60,6 +54,7 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
+import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -156,7 +151,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			// Retrieves the ABox from the ontology file.
 			log.debug("Loading data from Ontology into the database");
 			OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(closure);
-			EquivalentTriplePredicateIterator aBoxNormalIter = 
+			EquivalentTriplePredicateIterator aBoxNormalIter =
 							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
 			
 			int count = st.insertData(aBoxNormalIter, 5000, 500);

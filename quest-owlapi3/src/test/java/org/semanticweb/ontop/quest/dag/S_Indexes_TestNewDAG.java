@@ -27,14 +27,10 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.jgrapht.Graphs;
 import org.semanticweb.ontop.ontology.BasicClassDescription;
 import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.NamedDAG;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import org.semanticweb.ontop.ontology.PropertyExpression;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

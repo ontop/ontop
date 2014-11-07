@@ -29,21 +29,13 @@ import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Variable;
-import org.semanticweb.ontop.model.impl.AnonymousVariable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.DLRPerfectReformulator;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 
 import junit.framework.TestCase;
 
 public class UnificationTest2 extends TestCase {
 
 	/**
-	 * Test method for
-	 * {@link DLRPerfectReformulator#rewrite(org.obda.query.domain.Query)}
-	 * .
-	 * 
 	 * Check if MGU generation/application works properly with multiple atoms
 	 * sharing variables
 	 * 

@@ -100,5 +100,3 @@ public class SesameTupleQuery extends SesameAbstractQuery implements TupleQuery 
 		handler.endQueryResult();
 	}
 }
-	}
-}

@@ -37,7 +37,7 @@ public class EQNormalizer {
 			UnifierUtilities.applyUnifier(atom, mgu);
 
             if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
-                if (!mgu.compose(atom.getTerm(0), atom.getTerm(1), oneWayMGU, multiTypedPredicateIndex))
+                if (!mgu.compose(atom.getTerm(0), atom.getTerm(1)))
                     continue;
 
                 body.remove(i);
@@ -84,7 +84,7 @@ public class EQNormalizer {
 
                 //in case of equalities do the substitution and remove the term
                 if (t2.getFunctionSymbol() == OBDAVocabulary.EQ) {
-                    if (!mgu.compose(t2.getTerm(0), t2.getTerm(1), oneWayMGU, multiTypedPredicateIndex))
+                    if (!mgu.compose(t2.getTerm(0), t2.getTerm(1)))
                         continue;
                     
                     terms.remove(i);

@@ -54,6 +54,7 @@ import javax.swing.table.TableColumn;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.ontology.PropertyExpression;
 import org.semanticweb.ontop.protege4.gui.IconLoader;
 import org.semanticweb.ontop.protege4.gui.MapItem;
 import org.semanticweb.ontop.protege4.gui.PredicateItem;

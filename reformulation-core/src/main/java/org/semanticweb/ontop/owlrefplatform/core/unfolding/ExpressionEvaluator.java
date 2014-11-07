@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
 import org.semanticweb.ontop.model.BNodePredicate;
 import org.semanticweb.ontop.model.BooleanOperationPredicate;
@@ -51,6 +52,7 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 
 //import com.hp.hpl.jena.iri.IRIFactory;
@@ -131,21 +133,19 @@ public class ExpressionEvaluator {
 						Set<Variable> varSet=  right.getReferencedVariables();
 
 						if (!varSet.isEmpty()){ 
-							Variable var = varSet.iterator().next();
-							Map<Variable, Term> mgu = new HashMap<Variable, Term>();   
-							mgu.put(var, OBDAVocabulary.NULL);
-							Unifier.applyUnifier(q, mgu, false);
+							VariableImpl var = (VariableImpl) varSet.iterator().next();
+							Unifier mgu = new Unifier(ImmutableMap.of(var, (Term)OBDAVocabulary.NULL));
+							UnifierUtilities.applyUnifier(q, mgu, false);
 						}
 					}else if (!leftOpIsNULL && rightOpIsNULL){
 
 						Set<Variable> varSet=  left.getReferencedVariables();
 
-						if (!varSet.isEmpty()){ 
-							Variable var = varSet.iterator().next();
-							Map<Variable, Term> mgu = new HashMap<Variable, Term>();   
-							mgu.put(var, OBDAVocabulary.NULL);
+						if (!varSet.isEmpty()){
+                            VariableImpl var = (VariableImpl) varSet.iterator().next();
+                            Unifier mgu = new Unifier(ImmutableMap.of(var, (Term)OBDAVocabulary.NULL));
 							q.getBody().remove(atom);
-							q=Unifier.applyUnifier(q, mgu, false);
+							q= UnifierUtilities.applyUnifier(q, mgu, false);
 							
 						}	 	
 					} //end else if

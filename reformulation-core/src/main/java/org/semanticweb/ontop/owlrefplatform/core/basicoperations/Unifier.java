@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import fj.P;
 import fj.P2;
@@ -16,8 +17,28 @@ import java.util.Set;
 
 public class Unifier {
 
-	private final Map<VariableImpl, Term> map = new HashMap<VariableImpl, Term>();
+	private final Map<VariableImpl, Term> map;
     private static OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
+
+    /**
+     * Default and normal constructor.
+     */
+    public Unifier() {
+        this.map = new HashMap<>();
+    }
+
+    /**
+     * When we want to define a custom unifier.
+     *
+     * Tip: make it immutable if you can.
+     */
+    public Unifier(Map<VariableImpl, Term> substitutions) {
+        this.map = substitutions;
+    }
+
+    public ImmutableMap<VariableImpl, Term> toMap() {
+        return ImmutableMap.copyOf(this.map);
+    }
 
 
     public Term get(VariableImpl var) {

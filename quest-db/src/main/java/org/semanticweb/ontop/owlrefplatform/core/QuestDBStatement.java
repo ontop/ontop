@@ -41,6 +41,7 @@ import org.semanticweb.ontop.model.TupleResultSet;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
+import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
@@ -113,16 +114,16 @@ public class QuestDBStatement implements OBDAStatement {
 				OWLOntology owlontology = man.loadOntologyFromOntologyDocument(IRI.create(rdffile));
 				Set<OWLOntology> ontos = man.getImportsClosure(owlontology);
 				
-				EquivalentTriplePredicateIterator aBoxNormalIter = 
+				EquivalentTriplePredicateIterator aBoxNormalIter =
 						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos), 
-								st.questInstance.getReasoner());
+								st.getQuestInstance().getReasoner());
 				
 				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
 			} 
 			else if (ext.toLowerCase().equals(".nt")) {				
 				NTripleAssertionIterator it = new NTripleAssertionIterator(rdffile);
 				EquivalentTriplePredicateIterator aBoxNormalIter = 
-						new EquivalentTriplePredicateIterator(it, st.questInstance.getReasoner());
+						new EquivalentTriplePredicateIterator(it, st.getQuestInstance().getReasoner());
 				
 				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
 			}

@@ -20,17 +20,10 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  * #L%
  */
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.ontology.PropertySomeDataTypeRestriction;
-import org.semanticweb.ontop.ontology.PropertySomeRestriction;
-import org.semanticweb.ontop.ontology.SubDescriptionAxiom;
 
 /***
  * A class that allows you to perform different operations related to query
@@ -105,8 +98,6 @@ public class CQCUtilities {
 	
 	/**
 	 * 
-	 * @param program
-	 * @param rules
 	 */
 	public static void optimizeQueryWithSigmaRules(List<Function> atoms, LinearInclusionDependencies sigma) {
 				

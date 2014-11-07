@@ -26,13 +26,7 @@ import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.ResultSet;
 import org.semanticweb.ontop.model.TupleResultSet;
-import org.semanticweb.ontop.ontology.Assertion;
-import org.semanticweb.ontop.ontology.Axiom;
-import org.semanticweb.ontop.ontology.DisjointClassAxiom;
-import org.semanticweb.ontop.ontology.DisjointDescriptionAxiom;
-import org.semanticweb.ontop.ontology.DisjointPropertyAxiom;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.PropertyFunctionalAxiom;
+import org.semanticweb.ontop.ontology.*;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.ontop.owlrefplatform.core.Quest;
@@ -40,6 +34,7 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
+import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.semanticweb.ontop.utils.VersionInfo;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
@@ -243,7 +238,7 @@ public class QuestOWL extends OWLReasonerBase {
 	
 	
 	/**
-	 * extract version from {@link it.unibz.krdb.obda.utils.VersionInfo}, which is from the file {@code version.properties}
+	 * extract version from VersionInfo, which is from the file {@code version.properties}
 	 */
 	private void extractVersion() {
 		VersionInfo versionInfo = VersionInfo.getVersionInfo();
@@ -333,7 +328,7 @@ public class QuestOWL extends OWLReasonerBase {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
 					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure);
-					EquivalentTriplePredicateIterator aBoxNormalIter = 
+					EquivalentTriplePredicateIterator aBoxNormalIter =
 							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
 					
 					int count = st.insertData(aBoxNormalIter, 5000, 500);

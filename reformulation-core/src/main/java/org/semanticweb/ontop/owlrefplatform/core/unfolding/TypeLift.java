@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import fj.*;
@@ -11,7 +12,9 @@ import fj.data.TreeMap;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -459,7 +462,7 @@ public class TypeLift {
         /**
          * Most General Unifier between the proposedAtom and the localAtom.
          */
-        Map<Variable, Term> directMGU = Unifier.getMGU(proposedAtom, localAtom, true, ImmutableMultimap.<Predicate,Integer>of());
+        Unifier directMGU = Unifier.getTypePropagatingMGU(proposedAtom, localAtom, ImmutableMultimap.<Predicate,Integer>of());
 
         /**
          * Impossible to unify the multiple types proposed for this predicate.
@@ -475,12 +478,14 @@ public class TypeLift {
          * Thus, we force variable reuse.
          */
         //TODO: re-implement this method without side effect.
-        Map<Variable, Term> typingMGU = forceVariableReuse(directMGU);
+        Unifier typingMGU = forceVariableReuse(directMGU);
 
         //Mutable!!
         Function newHead = (Function)localHead.clone();
         // Side-effect (newHead is updated)
-        Unifier.applySelectiveUnifier(newHead, typingMGU);
+        UnifierUtilities.applyUnifier(newHead, typingMGU);
+        // TODO: see if this old code should be reintroduced (if applyUnifier does not the job here).
+        //UnifierUtilities.applySelectiveUnifier(newHead, typingMGU);
 
         return newHead;
     }
@@ -902,17 +907,17 @@ public class TypeLift {
      *
      * Returns the new MGU.
      */
-    private static Map<Variable, Term> forceVariableReuse(Map<Variable, Term> initialMGU) {
-        Stream<P2<Variable, Term>> unifierEntries = Stream.iterableStream(TreeMap.fromMutableMap(Ord.<Variable>hashOrd(),
-                initialMGU));
+    private static Unifier forceVariableReuse(Unifier initialMGU) {
+        Stream<P2<VariableImpl, Term>> unifierEntries = Stream.iterableStream(TreeMap.fromMutableMap(Ord.<VariableImpl>hashOrd(),
+                initialMGU.toMap()));
 
-        Stream<P2<Variable, Term>> newUnifierEntries = unifierEntries.filter(
+        Stream<P2<VariableImpl, Term>> newUnifierEntries = unifierEntries.filter(
                 /**
                  * Filters (removes) functional terms with 0 or more than 1 variable
                  */
-                new F<P2<Variable, Term>, Boolean>() {
+                new F<P2<VariableImpl, Term>, Boolean>() {
             @Override
-            public Boolean f(P2<Variable, Term> entry) {
+            public Boolean f(P2<VariableImpl, Term> entry) {
                 Term term = entry._2();
                 if (term instanceof Function) {
                     if (term.getReferencedVariables().size() != 1)
@@ -927,29 +932,28 @@ public class TypeLift {
                  *
                  * Others remain the same.
                  */
-                new F<P2<Variable, Term>, P2<Variable, Term>>() {
+                new F<P2<VariableImpl, Term>, P2<VariableImpl, Term>>() {
             @Override
-            public P2<Variable, Term> f(P2<Variable, Term> entry) {
-                Variable variableToKeep = entry._1();
+            public P2<VariableImpl, Term> f(P2<VariableImpl, Term> entry) {
+                VariableImpl variableToKeep = entry._1();
                 Term term = entry._2();
 
                 /**
                  * Transformation only concerns some functional terms.
                  */
                 if (term instanceof Function) {
-                    Variable variableToChange = term.getReferencedVariables().iterator().next();
+                    VariableImpl variableToChange = (VariableImpl) term.getReferencedVariables().iterator().next();
 
                     /**
                      * When the two variables are not the same,
                      * makes a unification to update the functional term.
                      */
                     if (!variableToChange.equals(variableToKeep)) {
-                        Map<Variable, Term> miniMGU = new java.util.HashMap<>();
-                        miniMGU.put(variableToChange, variableToKeep);
+                        Unifier miniMGU = new Unifier(ImmutableMap.of(variableToChange, (Term) variableToKeep));
 
                         Function translatedFunctionalTerm = (Function) term.clone();
                         //Side-effect update
-                        Unifier.applyUnifier(translatedFunctionalTerm, miniMGU, false);
+                        UnifierUtilities.applyUnifier(translatedFunctionalTerm, miniMGU);
 
                         return P.p(variableToKeep, (Term) translatedFunctionalTerm);
                     }
@@ -961,7 +965,7 @@ public class TypeLift {
             }
         });
 
-        Map<Variable, Term> newMGU = HashMap.from(newUnifierEntries).toMap();
+        Unifier newMGU = new Unifier(HashMap.from(newUnifierEntries).toMap());
         return newMGU;
     }
     

@@ -26,7 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.ontology.OClass;
 import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.ontology.PropertyExpression;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;

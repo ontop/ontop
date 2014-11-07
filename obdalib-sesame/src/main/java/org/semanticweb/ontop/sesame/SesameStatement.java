@@ -35,9 +35,8 @@ import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.ontology.Assertion;
-import org.semanticweb.ontop.ontology.BinaryAssertion;
 import org.semanticweb.ontop.ontology.ClassAssertion;
-import org.semanticweb.ontop.ontology.UnaryAssertion;
+import org.semanticweb.ontop.ontology.PropertyAssertion;
 
 public class SesameStatement implements Statement {
     private static final long serialVersionUID = 3398547980791013746L;

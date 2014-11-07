@@ -346,7 +346,7 @@ public class DatalogNormalizer {
 	 * @param substitutions
 	 */
 	@SuppressWarnings("unchecked")
-	private static List<Function> pullOutEqualities(List currentTerms, Map<Variable, Term> substitutions, List<Function> eqList, int[] newVarCounter,
+	private static List<Function> pullOutEqualities(List currentTerms, Unifier substitutions, List<Function> eqList, int[] newVarCounter,
 			boolean isLeftJoin) {
 
 
@@ -435,7 +435,7 @@ public class DatalogNormalizer {
 						// Right now we support only unary functions!!
 						for (Variable var : subtermsset) {
 							renameTerm(substitutions, eqList, newVarCounter,
-									atom, subterms, j, (Function) subTerm, var);
+									atom, subterms, j, (Function) subTerm, (VariableImpl)var);
 						}
 					}
 				}
@@ -488,8 +488,8 @@ public class DatalogNormalizer {
 		}
 	}
 
-	private static void renameTerm(Map<Variable, Term> substitutions, List<Function> eqList, int[] newVarCounter, Function atom,
-			List<Term> subterms, int j, Function subTerm, Variable var1) {
+	private static void renameTerm(Unifier substitutions, List<Function> eqList, int[] newVarCounter, Function atom,
+			List<Term> subterms, int j, Function subTerm, VariableImpl var1) {
 		Predicate head = subTerm.getFunctionSymbol();
 		Variable var2 = (Variable) substitutions.get(var1);
 
@@ -533,10 +533,10 @@ public class DatalogNormalizer {
 
 	}
 
-	private static void renameVariable(Map<Variable, Term> substitutions, List<Function> eqList, int[] newVarCounter, Function atom,
+	private static void renameVariable(Unifier substitutions, List<Function> eqList, int[] newVarCounter, Function atom,
 			List<Term> subterms, int j, Term subTerm) {
         VariableImpl var1 = (VariableImpl) subTerm;
-		Variable var2 = (Variable) substitutions.get(var1);
+		VariableImpl var2 = (VariableImpl) substitutions.get(var1);
 
 
 		if (var2 == null) {
@@ -547,7 +547,7 @@ public class DatalogNormalizer {
 			 */
 //			int randomNum = rand.nextInt(20) + 1;
 			//+ randomNum
-			var2 = fac.getVariable(var1.getName() + "f" + newVarCounter[0] );
+			var2 = (VariableImpl) fac.getVariable(var1.getName() + "f" + newVarCounter[0] );
 
 			substitutions.put(var1, var2);
 			substitutionsTotal.put(var1, var2);
@@ -561,8 +561,8 @@ public class DatalogNormalizer {
 			 * the new value.
 			 */
 			
-			while (substitutions.containsKey(var2)){
-				Variable variable = (Variable) substitutions.get(var2);
+			while (substitutions.get(var2) != null){
+				VariableImpl variable = (VariableImpl) substitutions.get(var2);
 				var2=variable;
 			}
 

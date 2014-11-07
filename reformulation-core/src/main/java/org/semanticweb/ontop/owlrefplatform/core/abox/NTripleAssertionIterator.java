@@ -28,7 +28,6 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.ontology.*;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
-import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -38,8 +37,6 @@ import java.net.URI;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-
-//import com.hp.hpl.jena.iri.IRIFactory;
 
 public class NTripleAssertionIterator implements Iterator<Assertion> {
 

@@ -26,13 +26,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.semanticweb.ontop.ontology.Axiom;
-import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.ontology.impl.PropertySomeRestrictionImpl;
-import org.semanticweb.ontop.ontology.impl.SubClassAxiomImpl;
-import org.semanticweb.ontop.ontology.impl.SubPropertyAxiomImpl;
+import org.semanticweb.ontop.ontology.*;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;

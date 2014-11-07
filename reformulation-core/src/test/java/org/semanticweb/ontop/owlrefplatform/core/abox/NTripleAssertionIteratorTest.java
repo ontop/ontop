@@ -21,15 +21,12 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
  */
 
 import junit.framework.TestCase;
+import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.ontology.*;
-import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
-import org.semanticweb.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-
-import junit.framework.TestCase;
 
 public class NTripleAssertionIteratorTest extends TestCase {
 	public void testIteratorTest() throws IOException {

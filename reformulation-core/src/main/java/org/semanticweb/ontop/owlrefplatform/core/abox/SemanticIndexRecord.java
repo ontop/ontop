@@ -22,8 +22,8 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
 
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.ontology.Assertion;
-import org.semanticweb.ontop.ontology.BinaryAssertion;
 import org.semanticweb.ontop.ontology.ClassAssertion;
+import org.semanticweb.ontop.ontology.PropertyAssertion;
 
 /***
  * A record to keep track of which tables in the semantic index tables have rows

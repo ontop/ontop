@@ -40,7 +40,9 @@ import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.ontology.Assertion;
+import org.semanticweb.ontop.ontology.OClass;
 import org.semanticweb.ontop.ontology.OntologyFactory;
+import org.semanticweb.ontop.ontology.PropertyExpression;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 
 public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assertion> {
@@ -166,7 +168,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 			assertion = ofac.createClassAssertion(concept, c);
 		} else if (currentPredicate.getArity() == 2) {
 			Constant c2;
-			PropertyExpression prop;			
+			PropertyExpression prop;
 			if (currObject instanceof URI) {
 				c2 = obdafac.getConstantURI(currObject.stringValue());
 				prop = ofac.createObjectProperty(currentPredicate.getName());

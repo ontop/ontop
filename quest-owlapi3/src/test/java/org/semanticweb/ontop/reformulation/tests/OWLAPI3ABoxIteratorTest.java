@@ -21,8 +21,6 @@ package org.semanticweb.ontop.reformulation.tests;
  */
 
 import com.google.common.collect.Lists;
-import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 
 import java.io.File;
 import java.util.HashSet;
@@ -30,6 +28,8 @@ import java.util.Iterator;
 
 import junit.framework.TestCase;
 
+import org.semanticweb.ontop.ontology.Assertion;
+import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
