@@ -21,9 +21,8 @@ package it.unibz.krdb.obda.reformulation.tests;
  */
 
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -70,31 +69,31 @@ public class EquivalenceSimplificationTest extends TestCase {
 					+ simpleonto.getSubDataPropertyAxioms().size());
 //		assertEquals(3, simpleonto.getVocabulary().size());
 
-		OBDADataFactory odfac = OBDADataFactoryImpl.getInstance();
+		OntologyVocabulary voc = ontology.getVocabulary();
 
 		//assertEquals(6, eqMap.keySetSize());
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "A1")) != null);
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "B1")) != null);
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "C1")) != null);
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "A2")) != null);
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "A3")) != null);
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "B2")) != null);
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "B3")) != null); // Roman: instead of B1
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "C2")) != null);
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "C3")) != null);
+		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "A1")) != null);
+		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "B1")) != null);
+		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "C1")) != null);
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "A2")) != null);
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "A3")) != null);
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "B2")) != null);
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "B3")) != null); // Roman: instead of B1
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "C2")) != null);
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "C3")) != null);
 		
-		assertEquals(simpleonto.getVocabulary().createClass(testURI + "A1"),
-					simple.getClassRepresentative(odfac.getClassPredicate(testURI + "A2")));
-		assertEquals(simpleonto.getVocabulary().createClass(testURI + "A1"),
-					simple.getClassRepresentative(odfac.getClassPredicate(testURI + "A3")));
-		assertEquals(simpleonto.getVocabulary().createClass(testURI + "B1"),
-					simple.getClassRepresentative(odfac.getClassPredicate(testURI + "B2"))); // Roman: B3 -> B1
-		assertEquals(simpleonto.getVocabulary().createClass(testURI + "B1"),
-					simple.getClassRepresentative(odfac.getClassPredicate(testURI + "B3"))); // Roman: B3 <-> B1
-		assertEquals(simpleonto.getVocabulary().createClass(testURI + "C1"),
-					simple.getClassRepresentative(odfac.getClassPredicate(testURI + "C2")));
-		assertEquals(simpleonto.getVocabulary().createClass(testURI + "C1"),
-					simple.getClassRepresentative(odfac.getClassPredicate(testURI + "C3")));
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "A1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "A2")));
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "A1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "A3")));
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "B1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "B2"))); // Roman: B3 -> B1
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "B1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "B3"))); // Roman: B3 <-> B1
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "C1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "C2")));
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "C1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "C3")));
 
 	}
 	
@@ -124,31 +123,31 @@ public class EquivalenceSimplificationTest extends TestCase {
 							+ simpleonto.getSubDataPropertyAxioms().size());
 //		assertEquals(3, simpleonto.getVocabulary().size());
 
-		OBDADataFactory odfac = OBDADataFactoryImpl.getInstance();
+		OntologyVocabulary voc = ontology.getVocabulary();
 		
 		//assertEquals(6, eqMap.keySetSize());
-		assertFalse(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "A1")) != null);
-		assertFalse(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "B1")) != null);
-		assertFalse(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "C1")) != null);
-		assertTrue(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "A2")) != null);
-		assertTrue(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "A3")) != null);
-		assertTrue(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "B2")) != null);
-		assertTrue(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "B3")) != null); // ROMAN: B1 and B3 ARE SYMMETRIC
-		assertTrue(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "C2")) != null);
-		assertTrue(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "C3")) != null);
+		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A1")) != null);
+		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B1")) != null);
+		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C1")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A2")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A3")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B2")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B3")) != null); // ROMAN: B1 and B3 ARE SYMMETRIC
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C2")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C3")) != null);
 		
-		assertEquals(simpleonto.getVocabulary().createObjectProperty(testURI + "A1"),
-				simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "A2")));
-		assertEquals(simpleonto.getVocabulary().createObjectProperty(testURI + "A1"),
-				simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "A3")));
-		assertEquals(simpleonto.getVocabulary().createObjectProperty(testURI + "B1"),
-				simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "B2"))); // ROMAN: B3 -> B1
-		assertEquals(simpleonto.getVocabulary().createObjectProperty(testURI + "B1"),
-				simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "B3"))); // ROMAN: B3 <-> B1
-		assertEquals(simpleonto.getVocabulary().createObjectProperty(testURI + "C1"),
-				simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "C2")));
-		assertEquals(simpleonto.getVocabulary().createObjectProperty(testURI + "C1"),
-				simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "C3")));
+		assertEquals(voc.getObjectProperty(testURI + "A1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A2")));
+		assertEquals(voc.getObjectProperty(testURI + "A1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A3")));
+		assertEquals(voc.getObjectProperty(testURI + "B1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B2"))); // ROMAN: B3 -> B1
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "B1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B3"))); // ROMAN: B3 <-> B1
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "C1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C2")));
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "C1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C3")));
 	}
 	
 	
@@ -178,25 +177,25 @@ public class EquivalenceSimplificationTest extends TestCase {
 							+ simpleonto.getSubDataPropertyAxioms().size());
 //		assertEquals(6, simpleonto.getVocabulary().size());
 
-		OBDADataFactory odfac = OBDADataFactoryImpl.getInstance();
+		OntologyVocabulary voc = ontology.getVocabulary();
 
 		//assertEquals(3, eqMap.keySetSize());
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "A1")) != null);
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "B1")) != null);
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "C1")) != null);
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "A2")) != null);
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "B2")) != null);
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "C2")) != null);
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "A3")) != null);
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "B3")) != null); // Roman: instead of B1
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate(testURI + "C3")) != null);
+		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "A1")) != null);
+		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "B1")) != null);
+		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "C1")) != null);
+		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "A2")) != null);
+		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "B2")) != null);
+		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "C2")) != null);
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "A3")) != null);
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "B3")) != null); // Roman: instead of B1
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "C3")) != null);
 		
-		assertEquals(simpleonto.getVocabulary().createClass(testURI + "A1"),
-					simple.getClassRepresentative(odfac.getClassPredicate(testURI + "A3")));
-		assertEquals(simpleonto.getVocabulary().createClass(testURI + "B1"),
-					simple.getClassRepresentative(odfac.getClassPredicate(testURI + "B3"))); // Roman B1 <-> B3
-		assertEquals(simpleonto.getVocabulary().createClass(testURI + "C1"),
-					simple.getClassRepresentative(odfac.getClassPredicate(testURI + "C3")));
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "A1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "A3")));
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "B1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "B3"))); // Roman B1 <-> B3
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "C1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "C3")));
 		
 	}
 	
@@ -225,31 +224,31 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(3, simpleonto.getVocabulary().getObjectProperties().size());
 //		assertEquals(3, simpleonto.getVocabulary().size());
 
-		OBDADataFactory odfac = OBDADataFactoryImpl.getInstance();
+		OntologyVocabulary voc = ontology.getVocabulary();
 
 		//assertEquals(6, eqMap.keySetSize());
-		assertFalse(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "A1")) != null);
-		assertFalse(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "B1")) != null);
-		assertFalse(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "C1")) != null);
-		assertTrue(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "A2")) != null);
-		assertTrue(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "A3")) != null);
-		assertTrue(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "B2")) != null);
-		assertTrue(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "B3")) != null); // ROMAN: again, B1 and B3 are symmetric
-		assertTrue(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "C2")) != null);
-		assertTrue(simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "C3")) != null);
+		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A1")) != null);
+		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B1")) != null);
+		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C1")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A2")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A3")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B2")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B3")) != null); // ROMAN: again, B1 and B3 are symmetric
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C2")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C3")) != null);
 		
-		assertEquals(simpleonto.getVocabulary().createObjectProperty(testURI + "A1").getInverse(),
-				simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "A2")));
-		assertEquals(simpleonto.getVocabulary().createObjectProperty(testURI + "A1"),
-				simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "A3")));
-		assertEquals(simpleonto.getVocabulary().createObjectProperty(testURI + "B1").getInverse(),
-				simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "B2"))); // B3 -> B1
-		assertEquals(simpleonto.getVocabulary().createObjectProperty(testURI + "B1"),
-				simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "B3")));  //  B1 <-> B3
-		assertEquals(simpleonto.getVocabulary().createObjectProperty(testURI + "C1").getInverse(),
-				simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "C2")));
-		assertEquals(simpleonto.getVocabulary().createObjectProperty(testURI + "C1"),
-				simple.getObjectPropertyRepresentative(odfac.getObjectPropertyPredicate(testURI + "C3")));
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "A1").getInverse(),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A2")));
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "A1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A3")));
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "B1").getInverse(),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B2"))); // B3 -> B1
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "B1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B3")));  //  B1 <-> B3
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "C1").getInverse(),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C2")));
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "C1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C3")));
 	}
 
 }

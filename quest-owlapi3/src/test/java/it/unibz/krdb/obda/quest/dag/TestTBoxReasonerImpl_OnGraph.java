@@ -417,19 +417,19 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 	}
 
 	@Override
-	public OClass getClassRepresentative(Predicate p) {
+	public OClass getClassRepresentative(OClass p) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ObjectPropertyExpression getObjectPropertyRepresentative(Predicate p) {
+	public ObjectPropertyExpression getObjectPropertyRepresentative(ObjectPropertyExpression p) {
 		// TODO Auto-generated method stub
 		return null;
 	}	
 	
 	@Override
-	public DataPropertyExpression getDataPropertyRepresentative(Predicate p) {
+	public DataPropertyExpression getDataPropertyRepresentative(DataPropertyExpression p) {
 		// TODO Auto-generated method stub
 		return null;
 	}	

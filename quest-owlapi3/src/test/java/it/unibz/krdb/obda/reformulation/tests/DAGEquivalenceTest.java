@@ -73,42 +73,42 @@ public class DAGEquivalenceTest extends TestCase {
 		TBoxReasoner dag = new TBoxReasonerImpl(onto);
 		
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
-		List<Interval> nodeInterval = engine.getIntervals(onto.getVocabulary().createClass(testURI + "B1"));
+		List<Interval> nodeInterval = engine.getIntervals(onto.getVocabulary().getClass(testURI + "B1"));
 
 		assertEquals(nodeInterval.size(), 1);
 		Interval interval = nodeInterval.get(0);
 		assertEquals(interval.getStart(), 2);
 		assertEquals(interval.getEnd(), 2);
 
-		nodeInterval = engine.getIntervals(onto.getVocabulary().createClass(testURI + "B2"));
+		nodeInterval = engine.getIntervals(onto.getVocabulary().getClass(testURI + "B2"));
 
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(interval.getStart(), 2);
 		assertEquals(interval.getEnd(), 2);
 
-		nodeInterval = engine.getIntervals(onto.getVocabulary().createClass(testURI + "B3"));
+		nodeInterval = engine.getIntervals(onto.getVocabulary().getClass(testURI + "B3"));
 
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(interval.getStart(), 2);
 		assertEquals(interval.getEnd(), 2);
 
-		nodeInterval = engine.getIntervals(onto.getVocabulary().createClass(testURI + "A1"));
+		nodeInterval = engine.getIntervals(onto.getVocabulary().getClass(testURI + "A1"));
 
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(interval.getStart(), 1);
 		assertEquals(interval.getEnd(), 2);
 
-		nodeInterval = engine.getIntervals(onto.getVocabulary().createClass(testURI + "A2"));
+		nodeInterval = engine.getIntervals(onto.getVocabulary().getClass(testURI + "A2"));
 
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(interval.getStart(), 1);
 		assertEquals(interval.getEnd(), 2);
 
-		nodeInterval = engine.getIntervals(onto.getVocabulary().createClass(testURI + "A3"));
+		nodeInterval = engine.getIntervals(onto.getVocabulary().getClass(testURI + "A3"));
 
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
@@ -129,42 +129,42 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		
-		List<Interval> nodeInterval = engine.getIntervals(onto.getVocabulary().createObjectProperty(testURI + "R1"));
+		List<Interval> nodeInterval = engine.getIntervals(onto.getVocabulary().getObjectProperty(testURI + "R1"));
 
 		assertEquals(nodeInterval.size(), 1);
 		Interval interval = nodeInterval.get(0);
 		assertEquals(interval.getStart(), 2);
 		assertEquals(interval.getEnd(), 2);
 
-		nodeInterval = engine.getIntervals(onto.getVocabulary().createObjectProperty(testURI + "R2"));
+		nodeInterval = engine.getIntervals(onto.getVocabulary().getObjectProperty(testURI + "R2"));
 
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(interval.getStart(), 2);
 		assertEquals(interval.getEnd(), 2);
 
-		nodeInterval = engine.getIntervals(onto.getVocabulary().createObjectProperty(testURI + "R3"));
+		nodeInterval = engine.getIntervals(onto.getVocabulary().getObjectProperty(testURI + "R3"));
 
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(interval.getStart(), 2);
 		assertEquals(interval.getEnd(), 2);
 
-		nodeInterval = engine.getIntervals(onto.getVocabulary().createObjectProperty(testURI + "S1"));
+		nodeInterval = engine.getIntervals(onto.getVocabulary().getObjectProperty(testURI + "S1"));
 
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(interval.getStart(), 1);
 		assertEquals(interval.getEnd(), 2);
 
-		nodeInterval = engine.getIntervals(onto.getVocabulary().createObjectProperty(testURI + "S2"));
+		nodeInterval = engine.getIntervals(onto.getVocabulary().getObjectProperty(testURI + "S2"));
 
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(interval.getStart(), 1);
 		assertEquals(interval.getEnd(), 2);
 
-		nodeInterval = engine.getIntervals(onto.getVocabulary().createObjectProperty(testURI + "S3"));
+		nodeInterval = engine.getIntervals(onto.getVocabulary().getObjectProperty(testURI + "S3"));
 
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
@@ -185,7 +185,7 @@ public class DAGEquivalenceTest extends TestCase {
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		
-		List<Interval> nodeInterval = engine.getIntervals(onto.getVocabulary().createObjectProperty(testURI + "A1"));
+		List<Interval> nodeInterval = engine.getIntervals(onto.getVocabulary().getObjectProperty(testURI + "A1"));
 
 		assertEquals(nodeInterval.size(), 1);
 		Interval interval = nodeInterval.get(0);
@@ -194,41 +194,41 @@ public class DAGEquivalenceTest extends TestCase {
 
 		EquivalencesDAG<ObjectPropertyExpression> properties = dag.getObjectProperties();
 		
-		ObjectPropertyExpression d = properties.getVertex(onto.getVocabulary().createObjectProperty(testURI + "A2")).getRepresentative();
-		assertTrue(d.equals(onto.getVocabulary().createObjectProperty(testURI + "A1").getInverse()));
+		ObjectPropertyExpression d = properties.getVertex(onto.getVocabulary().getObjectProperty(testURI + "A2")).getRepresentative();
+		assertTrue(d.equals(onto.getVocabulary().getObjectProperty(testURI + "A1").getInverse()));
 
-		nodeInterval = engine.getIntervals(onto.getVocabulary().createObjectProperty(testURI + "A3"));
+		nodeInterval = engine.getIntervals(onto.getVocabulary().getObjectProperty(testURI + "A3"));
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(1, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		nodeInterval = engine.getIntervals(onto.getVocabulary().createObjectProperty(testURI + "C1"));
+		nodeInterval = engine.getIntervals(onto.getVocabulary().getObjectProperty(testURI + "C1"));
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(3, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		d = properties.getVertex(onto.getVocabulary().createObjectProperty(testURI + "C2")).getRepresentative();
-		assertTrue(d.equals(properties.getVertex(onto.getVocabulary().createObjectProperty(testURI + "C1").getInverse()).getRepresentative()));
+		d = properties.getVertex(onto.getVocabulary().getObjectProperty(testURI + "C2")).getRepresentative();
+		assertTrue(d.equals(properties.getVertex(onto.getVocabulary().getObjectProperty(testURI + "C1").getInverse()).getRepresentative()));
 
-		nodeInterval = engine.getIntervals(onto.getVocabulary().createObjectProperty(testURI + "C3"));
+		nodeInterval = engine.getIntervals(onto.getVocabulary().getObjectProperty(testURI + "C3"));
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(3, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		nodeInterval = engine.getIntervals(onto.getVocabulary().createObjectProperty(testURI + "B1"));
+		nodeInterval = engine.getIntervals(onto.getVocabulary().getObjectProperty(testURI + "B1"));
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 
 		assertEquals(2, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		d = properties.getVertex(onto.getVocabulary().createObjectProperty(testURI + "B2")).getRepresentative();
-		assertTrue(d.equals(properties.getVertex(onto.getVocabulary().createObjectProperty(testURI + "B3").getInverse()).getRepresentative()));
+		d = properties.getVertex(onto.getVocabulary().getObjectProperty(testURI + "B2")).getRepresentative();
+		assertTrue(d.equals(properties.getVertex(onto.getVocabulary().getObjectProperty(testURI + "B3").getInverse()).getRepresentative()));
 
-		nodeInterval = engine.getIntervals(onto.getVocabulary().createObjectProperty(testURI + "B3"));
+		nodeInterval = engine.getIntervals(onto.getVocabulary().getObjectProperty(testURI + "B3"));
 		assertEquals(nodeInterval.size(), 1);
 		interval = nodeInterval.get(0);
 		assertEquals(2, interval.getStart());

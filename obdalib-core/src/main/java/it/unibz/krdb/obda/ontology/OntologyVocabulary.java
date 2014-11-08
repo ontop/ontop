@@ -14,6 +14,16 @@ public interface OntologyVocabulary {
 	public OClass createClass(String uri);
 
 	/**
+	 * check whether the class has been declared and return the class object
+	 * 
+	 * @param uri
+	 * @return
+	 * @throws RuntimeException if the class has not been declared
+	 */
+	
+	public OClass getClass(String uri);
+	
+	/**
 	 * create and declare object property
 	 * 
 	 * @param uri property name
@@ -23,6 +33,16 @@ public interface OntologyVocabulary {
 	public ObjectPropertyExpression createObjectProperty(String uri);
 
 	/**
+	 * check whether the object property has been declared and return the class object
+	 * 
+	 * @param uri
+	 * @return
+	 * @throws RuntimeException if the object property has not been declared
+	 */
+	
+	public ObjectPropertyExpression getObjectProperty(String uri);
+	
+	/**
 	 * create and declare data property
 	 * 
 	 * @param uri property name
@@ -30,6 +50,16 @@ public interface OntologyVocabulary {
 	 */
 	
 	public DataPropertyExpression createDataProperty(String uri);
+
+	/**
+	 * check whether the data property has been declared and return the class object
+	 * 
+	 * @param uri
+	 * @return
+	 * @throws RuntimeException if the data property has not been declared
+	 */
+	
+	public DataPropertyExpression getDataProperty(String uri);
 	
 	/**
 	 * auxiliary properties result from NORMALIZATION

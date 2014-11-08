@@ -75,10 +75,26 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 
 	@Override
+	public OClass getClass(String uri) {
+		OClass cd = ofac.createClass(uri);
+		if (!cd.equals(owlThing) && !cd.equals(owlNothing) && !concepts.contains(cd))
+			throw new RuntimeException("Class not found: " + uri);
+		return cd;
+	}
+	
+	@Override
 	public ObjectPropertyExpression createObjectProperty(String uri) {
 		ObjectPropertyExpression rd = ofac.createObjectProperty(uri);
 		if (!rd.equals(owlTopObjectProperty) && !rd.equals(owlBottomObjectProperty))
 			objectProperties.add(rd);
+		return rd;
+	}
+
+	@Override
+	public ObjectPropertyExpression getObjectProperty(String uri) {
+		ObjectPropertyExpression rd = ofac.createObjectProperty(uri);
+		if (!rd.equals(owlTopObjectProperty) && !rd.equals(owlBottomObjectProperty) && !objectProperties.contains(rd))
+			throw new RuntimeException("Object property not found: " + uri);
 		return rd;
 	}
 	
@@ -87,6 +103,14 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		DataPropertyExpression rd = ofac.createDataProperty(uri);
 		if (!rd.equals(owlTopDataProperty) && !rd.equals(owlBottomDataProperty))
 			dataProperties.add(rd);
+		return rd;
+	}
+
+	@Override
+	public DataPropertyExpression getDataProperty(String uri) {
+		DataPropertyExpression rd = ofac.createDataProperty(uri);
+		if (!rd.equals(owlTopDataProperty) && !rd.equals(owlBottomDataProperty) && !dataProperties.contains(rd))
+			throw new RuntimeException("Data property not found: " + uri);			
 		return rd;
 	}
 

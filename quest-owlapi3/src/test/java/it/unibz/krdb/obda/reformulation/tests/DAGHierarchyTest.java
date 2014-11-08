@@ -86,12 +86,12 @@ public class DAGHierarchyTest extends TestCase {
 
 		EquivalencesDAG<ClassExpression> classes = namedReasoner.getClasses();
 		
-		ClassExpression A = onto.getVocabulary().createClass(ontoURI + "A");
-		ClassExpression B = onto.getVocabulary().createClass(ontoURI + "B");
-		ClassExpression C = onto.getVocabulary().createClass(ontoURI + "C");
-		ClassExpression D = onto.getVocabulary().createClass(ontoURI + "D");
-		ClassExpression E = onto.getVocabulary().createClass(ontoURI + "E");
-		ClassExpression F = onto.getVocabulary().createClass(ontoURI + "F");
+		ClassExpression A = onto.getVocabulary().getClass(ontoURI + "A");
+		ClassExpression B = onto.getVocabulary().getClass(ontoURI + "B");
+		ClassExpression C = onto.getVocabulary().getClass(ontoURI + "C");
+		ClassExpression D = onto.getVocabulary().getClass(ontoURI + "D");
+		ClassExpression E = onto.getVocabulary().getClass(ontoURI + "E");
+		ClassExpression F = onto.getVocabulary().getClass(ontoURI + "F");
 		
 		/**
 		 * The initial node is Node A.
@@ -174,12 +174,12 @@ public class DAGHierarchyTest extends TestCase {
 
 		EquivalencesDAG<ClassExpression> classes = namedReasoner.getClasses();
 		
-		ClassExpression A = onto.getVocabulary().createClass(ontoURI + "A");
-		ClassExpression B = onto.getVocabulary().createClass(ontoURI + "B");
-		ClassExpression C = onto.getVocabulary().createClass(ontoURI + "C");
-		ClassExpression D = onto.getVocabulary().createClass(ontoURI + "D");
-		ClassExpression E = onto.getVocabulary().createClass(ontoURI + "E");
-		ClassExpression F = onto.getVocabulary().createClass(ontoURI + "F");
+		ClassExpression A = onto.getVocabulary().getClass(ontoURI + "A");
+		ClassExpression B = onto.getVocabulary().getClass(ontoURI + "B");
+		ClassExpression C = onto.getVocabulary().getClass(ontoURI + "C");
+		ClassExpression D = onto.getVocabulary().getClass(ontoURI + "D");
+		ClassExpression E = onto.getVocabulary().getClass(ontoURI + "E");
+		ClassExpression F = onto.getVocabulary().getClass(ontoURI + "F");
 	
 		/**
 		 * The initial node is Node A.
@@ -264,12 +264,12 @@ public class DAGHierarchyTest extends TestCase {
 
 		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.getObjectProperties();
 		
-		ObjectPropertyExpression P = onto.getVocabulary().createObjectProperty(ontoURI + "P");
-		ObjectPropertyExpression S = onto.getVocabulary().createObjectProperty(ontoURI + "S");
-		ObjectPropertyExpression R = onto.getVocabulary().createObjectProperty(ontoURI + "R");
-		ObjectPropertyExpression Q = onto.getVocabulary().createObjectProperty(ontoURI + "Q");
-		ObjectPropertyExpression T = onto.getVocabulary().createObjectProperty(ontoURI + "T");
-		ObjectPropertyExpression U = onto.getVocabulary().createObjectProperty(ontoURI + "U");
+		ObjectPropertyExpression P = onto.getVocabulary().getObjectProperty(ontoURI + "P");
+		ObjectPropertyExpression S = onto.getVocabulary().getObjectProperty(ontoURI + "S");
+		ObjectPropertyExpression R = onto.getVocabulary().getObjectProperty(ontoURI + "R");
+		ObjectPropertyExpression Q = onto.getVocabulary().getObjectProperty(ontoURI + "Q");
+		ObjectPropertyExpression T = onto.getVocabulary().getObjectProperty(ontoURI + "T");
+		ObjectPropertyExpression U = onto.getVocabulary().getObjectProperty(ontoURI + "U");
 		
 		
 		/**
@@ -350,12 +350,12 @@ public class DAGHierarchyTest extends TestCase {
 		
 		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.getObjectProperties();
 		
-		ObjectPropertyExpression P = onto.getVocabulary().createObjectProperty(ontoURI + "P");
-		ObjectPropertyExpression S = onto.getVocabulary().createObjectProperty(ontoURI + "S");
-		ObjectPropertyExpression R = onto.getVocabulary().createObjectProperty(ontoURI + "R");
-		ObjectPropertyExpression Q = onto.getVocabulary().createObjectProperty(ontoURI + "Q");
-		ObjectPropertyExpression T = onto.getVocabulary().createObjectProperty(ontoURI + "T");
-		ObjectPropertyExpression U = onto.getVocabulary().createObjectProperty(ontoURI + "U");
+		ObjectPropertyExpression P = onto.getVocabulary().getObjectProperty(ontoURI + "P");
+		ObjectPropertyExpression S = onto.getVocabulary().getObjectProperty(ontoURI + "S");
+		ObjectPropertyExpression R = onto.getVocabulary().getObjectProperty(ontoURI + "R");
+		ObjectPropertyExpression Q = onto.getVocabulary().getObjectProperty(ontoURI + "Q");
+		ObjectPropertyExpression T = onto.getVocabulary().getObjectProperty(ontoURI + "T");
+		ObjectPropertyExpression U = onto.getVocabulary().getObjectProperty(ontoURI + "U");
 	
 		/**
 		 * The initial node is Node P.

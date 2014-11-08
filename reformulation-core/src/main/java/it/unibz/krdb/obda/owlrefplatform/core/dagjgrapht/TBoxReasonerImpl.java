@@ -184,18 +184,18 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	}
 	
 	@Override
-	public OClass getClassRepresentative(Predicate p) {
-		return classEquivalenceMap.get(p);
+	public OClass getClassRepresentative(OClass p) {
+		return classEquivalenceMap.get(p.getPredicate());
 	}
 
 	@Override
-	public ObjectPropertyExpression getObjectPropertyRepresentative(Predicate p) {
-		return objectPropertyEquivalenceMap.get(p);
+	public ObjectPropertyExpression getObjectPropertyRepresentative(ObjectPropertyExpression p) {
+		return objectPropertyEquivalenceMap.get(p.getPredicate());
 	}
 		
 	@Override
-	public DataPropertyExpression getDataPropertyRepresentative(Predicate p) {
-		return dataPropertyEquivalenceMap.get(p);
+	public DataPropertyExpression getDataPropertyRepresentative(DataPropertyExpression p) {
+		return dataPropertyEquivalenceMap.get(p.getPredicate());
 	}
 	
 	// INTERNAL DETAILS
