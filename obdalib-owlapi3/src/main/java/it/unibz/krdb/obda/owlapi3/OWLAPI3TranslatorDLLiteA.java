@@ -142,7 +142,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	}
 
 	@Override
-	public void visit(OWLDeclarationAxiom arg0) {
+	public void visit(OWLDeclarationAxiom ax) {
 		// Declaration Axioms are ignored
 	}
 
@@ -475,8 +475,10 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		ObjectPropertyExpression role1 = getPropertyExpression(ax.getFirstProperty());
 		ObjectPropertyExpression role2 = getPropertyExpression(ax.getSecondProperty());
 
-		dl_onto.addSubPropertyOfAxiom(role1, role2.getInverse());
-		dl_onto.addSubPropertyOfAxiom(role2, role1.getInverse());		
+		if (!role1.equals(role2.getInverse())) {
+			dl_onto.addSubPropertyOfAxiom(role1, role2.getInverse());
+			dl_onto.addSubPropertyOfAxiom(role2, role1.getInverse());		
+		}
 	}
 
 	@Override
