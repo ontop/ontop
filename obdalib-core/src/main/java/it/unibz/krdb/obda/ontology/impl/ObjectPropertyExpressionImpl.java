@@ -20,7 +20,10 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 
@@ -34,23 +37,56 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	private final ObjectPropertyExpressionImpl inverseProperty;
 	
 	private final ObjectSomeValuesFromImpl domain;
+	
+	private final boolean isTop, isBottom;
 
+	public static final String owlTopObjectPropertyIRI = "http://www.w3.org/2002/07/owl#topObjectProperty";
+	public static final String owlBottomObjectPropertyIRI = "http://www.w3.org/2002/07/owl#bottomObjectProperty";
+	
+	static final ObjectPropertyExpression owlTopObjectProperty = initialize(owlTopObjectPropertyIRI); 
+	static final ObjectPropertyExpression owlBottomObjectProperty = initialize(owlBottomObjectPropertyIRI); 
+	    
+	private static ObjectPropertyExpression initialize(String uri) {
+		final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+		Predicate prop = ofac.getDataPropertyPredicate(uri);
+		return new ObjectPropertyExpressionImpl(prop);  	
+	}
+	
 	ObjectPropertyExpressionImpl(Predicate p) {
 		this.predicate = p;
 		this.isInverse = false;
-		this.inverseProperty = new ObjectPropertyExpressionImpl(p, !isInverse, this);
-		StringBuilder bf = new StringBuilder();
-		bf.append(predicate.toString());
-		if (isInverse) 
+		this.isTop = predicate.getName().equals(owlTopObjectPropertyIRI);
+		this.isBottom = predicate.getName().equals(owlBottomObjectPropertyIRI);
+		if (isTop || isBottom) 
+			this.inverseProperty = this;			
+		else
+			this.inverseProperty = new ObjectPropertyExpressionImpl(p, !isInverse, this);
+		
+		if (isInverse) {
+			StringBuilder bf = new StringBuilder();
+			bf.append(predicate.toString());
 			bf.append("^-");
-		this.string =  bf.toString();
+			this.string =  bf.toString();
+		}
+		else 
+			this.string = predicate.toString();
 		
 		this.domain = new ObjectSomeValuesFromImpl(this);
 	}
+	
+	/**
+	 * special constructor for creating the inverse of an object property
+	 * 
+	 * @param p
+	 * @param isInverse
+	 * @param inverseProperty
+	 */
 
 	private ObjectPropertyExpressionImpl(Predicate p, boolean isInverse, ObjectPropertyExpressionImpl inverseProperty) {
 		this.predicate = p;
 		this.isInverse = isInverse;
+		this.isTop = false; // cannot be the top property
+		this.isBottom = false; // cannot be the bottom property
 		this.inverseProperty = inverseProperty;
 		StringBuilder bf = new StringBuilder();
 		bf.append(predicate.toString());
@@ -99,7 +135,7 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 
 		if (obj instanceof DataPropertyExpressionImpl) {
 			DataPropertyExpressionImpl other = (DataPropertyExpressionImpl) obj;
-			return /*(isInverse == other.isInverse()) &&*/ predicate.equals(other.getPredicate());
+			return (isInverse == false) && predicate.equals(other.getPredicate());
 		}
 		return false;
 	}
@@ -112,5 +148,15 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	@Override
 	public String toString() {
 		return string;
+	}
+
+	@Override
+	public boolean isBottom() {
+		return isBottom;
+	}
+
+	@Override
+	public boolean isTop() {
+		return isTop;
 	}
 }

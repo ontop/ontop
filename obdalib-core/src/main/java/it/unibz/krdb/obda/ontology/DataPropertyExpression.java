@@ -53,4 +53,8 @@ public interface DataPropertyExpression extends Description {
 	 * @return
 	 */
 	public DataPropertyRangeExpression getRange();
+	
+	public boolean isBottom();
+	
+	public boolean isTop();
 }

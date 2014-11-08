@@ -58,18 +58,11 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		return datatypes;
 	}
 	
-	public static final OClass owlThing = ofac.createClass("http://www.w3.org/2002/07/owl#Thing");
-	public static final OClass owlNothing = ofac.createClass("http://www.w3.org/2002/07/owl#Nothing");
-	public static final ObjectPropertyExpression owlTopObjectProperty = ofac.createObjectProperty("http://www.w3.org/2002/07/owl#topObjectProperty");
-	public static final ObjectPropertyExpression owlBottomObjectProperty = ofac.createObjectProperty("http://www.w3.org/2002/07/owl#bottomObjectProperty");
-	public static final DataPropertyExpression owlTopDataProperty = ofac.createDataProperty("http://www.w3.org/2002/07/owl#topDataProperty");
-	public static final DataPropertyExpression owlBottomDataProperty = ofac.createDataProperty("http://www.w3.org/2002/07/owl#bottomDataProperty");
-	
 	
 	@Override
 	public OClass createClass(String uri) {
 		OClass cd = ofac.createClass(uri);
-		if (!cd.equals(owlThing) && !cd.equals(owlNothing))
+		if (!cd.equals(ofac.getThing()) && !cd.equals(ofac.getNothing()))
 			concepts.add(cd);
 		return cd;
 	}
@@ -77,7 +70,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	@Override
 	public OClass getClass(String uri) {
 		OClass cd = ofac.createClass(uri);
-		if (!cd.equals(owlThing) && !cd.equals(owlNothing) && !concepts.contains(cd))
+		if (!cd.equals(ofac.getThing()) && !cd.equals(ofac.getNothing()) && !concepts.contains(cd))
 			throw new RuntimeException("Class not found: " + uri);
 		return cd;
 	}
@@ -85,7 +78,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	@Override
 	public ObjectPropertyExpression createObjectProperty(String uri) {
 		ObjectPropertyExpression rd = ofac.createObjectProperty(uri);
-		if (!rd.equals(owlTopObjectProperty) && !rd.equals(owlBottomObjectProperty))
+		if (!rd.isBottom() && !rd.isTop())
 			objectProperties.add(rd);
 		return rd;
 	}
@@ -93,7 +86,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	@Override
 	public ObjectPropertyExpression getObjectProperty(String uri) {
 		ObjectPropertyExpression rd = ofac.createObjectProperty(uri);
-		if (!rd.equals(owlTopObjectProperty) && !rd.equals(owlBottomObjectProperty) && !objectProperties.contains(rd))
+		if (!rd.isBottom() && !rd.isTop() && !objectProperties.contains(rd))
 			throw new RuntimeException("Object property not found: " + uri);
 		return rd;
 	}
@@ -101,7 +94,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	@Override
 	public DataPropertyExpression createDataProperty(String uri) {
 		DataPropertyExpression rd = ofac.createDataProperty(uri);
-		if (!rd.equals(owlTopDataProperty) && !rd.equals(owlBottomDataProperty))
+		if (!rd.isBottom() && !rd.isTop())
 			dataProperties.add(rd);
 		return rd;
 	}
@@ -109,7 +102,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	@Override
 	public DataPropertyExpression getDataProperty(String uri) {
 		DataPropertyExpression rd = ofac.createDataProperty(uri);
-		if (!rd.equals(owlTopDataProperty) && !rd.equals(owlBottomDataProperty) && !dataProperties.contains(rd))
+		if (!rd.isBottom() && !rd.isTop() && !dataProperties.contains(rd))
 			throw new RuntimeException("Data property not found: " + uri);			
 		return rd;
 	}
@@ -227,17 +220,15 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 	
 	private boolean isBuiltIn(OClass cl) {
-		return cl.equals(owlThing) || cl.equals(owlNothing);
+		return cl.equals(ofac.getThing()) || cl.equals(ofac.getNothing());
 	}
 	
 	private boolean isBuiltIn(ObjectPropertyExpression prop) {
-		return prop.equals(owlTopObjectProperty) || prop.equals(owlBottomObjectProperty) 
-						|| auxObjectProperties.contains(prop);
+		return prop.isBottom() || prop.isTop() || auxObjectProperties.contains(prop);
 	}
 
 	private boolean isBuiltIn(DataPropertyExpression prop) {
-		return prop.equals(owlTopDataProperty) || prop.equals(owlBottomDataProperty) 
-						|| auxDataProperties.contains(prop);
+		return prop.isBottom() || prop.isTop() || auxDataProperties.contains(prop);
 	}
 	
 	void checkSignature(ClassExpression desc) {

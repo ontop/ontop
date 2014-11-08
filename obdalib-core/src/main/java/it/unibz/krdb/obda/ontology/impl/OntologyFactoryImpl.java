@@ -42,6 +42,11 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
+	
+	private final OClass owlThing = createClass("http://www.w3.org/2002/07/owl#Thing");
+	private final OClass owlNothing = createClass("http://www.w3.org/2002/07/owl#Nothing");
+	
+	
 	private OntologyFactoryImpl() {
 		// NO-OP to make the default constructor private
 	}
@@ -96,6 +101,36 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	@Override
 	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression attribute, ObjectConstant o1, ValueConstant o2) {
 		return new DataPropertyAssertionImpl(attribute, o1, o2);
+	}
+
+	@Override
+	public OClass getThing() {
+		return owlThing;
+	}
+
+	@Override
+	public OClass getNothing() {
+		return owlNothing;
+	}
+
+	@Override
+	public ObjectPropertyExpression getTopObjectProperty() {
+		return ObjectPropertyExpressionImpl.owlTopObjectProperty;
+	}
+
+	@Override
+	public ObjectPropertyExpression getBottomObjectProperty() {
+		return ObjectPropertyExpressionImpl.owlBottomObjectProperty;
+	}
+
+	@Override
+	public DataPropertyExpression getTopDataProperty() {
+		return DataPropertyExpressionImpl.owlTopDataProperty;
+	}
+
+	@Override
+	public DataPropertyExpression getBottomDataProperty() {
+		return DataPropertyExpressionImpl.owlBottomDataProperty;
 	}
 	
 }
