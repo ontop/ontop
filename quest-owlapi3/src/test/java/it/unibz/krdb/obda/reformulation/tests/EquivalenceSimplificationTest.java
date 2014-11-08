@@ -75,7 +75,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "A1")) != null);
 		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "B1")) != null);
 		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "C1")) != null);
-		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "A2")) != null);
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "A2")) != null); // no A2 in the ontology
 		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "A3")) != null);
 		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "B2")) != null);
 		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "B3")) != null); // Roman: instead of B1
@@ -183,9 +183,8 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "A1")) != null);
 		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "B1")) != null);
 		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "C1")) != null);
-		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "A2")) != null);
-		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "B2")) != null);
-		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "C2")) != null);
+//		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "B2")) != null); // Roman: no B2 in the ontology
+//		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "C2")) != null); // Roman: no C2 in the ontology
 		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "A3")) != null);
 		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "B3")) != null); // Roman: instead of B1
 		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "C3")) != null);
