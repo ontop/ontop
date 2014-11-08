@@ -48,7 +48,7 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	    
 	private static ObjectPropertyExpression initialize(String uri) {
 		final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-		Predicate prop = ofac.getDataPropertyPredicate(uri);
+		Predicate prop = ofac.getObjectPropertyPredicate(uri);
 		return new ObjectPropertyExpressionImpl(prop);  	
 	}
 	

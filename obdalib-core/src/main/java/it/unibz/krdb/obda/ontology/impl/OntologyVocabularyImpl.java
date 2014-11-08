@@ -62,7 +62,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	@Override
 	public OClass createClass(String uri) {
 		OClass cd = ofac.createClass(uri);
-		if (!cd.equals(ofac.getThing()) && !cd.equals(ofac.getNothing()))
+		if (!cd.isNothing() && !cd.isThing())
 			concepts.add(cd);
 		return cd;
 	}
@@ -70,7 +70,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	@Override
 	public OClass getClass(String uri) {
 		OClass cd = ofac.createClass(uri);
-		if (!cd.equals(ofac.getThing()) && !cd.equals(ofac.getNothing()) && !concepts.contains(cd))
+		if (!cd.isNothing() && !cd.isThing() && !concepts.contains(cd))
 			throw new RuntimeException("Class not found: " + uri);
 		return cd;
 	}
@@ -220,7 +220,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 	
 	private boolean isBuiltIn(OClass cl) {
-		return cl.equals(ofac.getThing()) || cl.equals(ofac.getNothing());
+		return cl.isNothing() || cl.isThing();
 	}
 	
 	private boolean isBuiltIn(ObjectPropertyExpression prop) {

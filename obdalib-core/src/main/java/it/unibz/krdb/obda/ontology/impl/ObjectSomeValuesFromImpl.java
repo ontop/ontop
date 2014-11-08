@@ -41,4 +41,14 @@ public class ObjectSomeValuesFromImpl implements ObjectSomeValuesFrom {
 	public String toString() {
 		return string;
 	}
+
+	@Override
+	public boolean isNothing() {
+		return property.isBottom();
+	}
+
+	@Override
+	public boolean isThing() {
+		return property.isTop();
+	}
 }

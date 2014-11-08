@@ -43,9 +43,6 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
 	
-	private final OClass owlThing = createClass("http://www.w3.org/2002/07/owl#Thing");
-	private final OClass owlNothing = createClass("http://www.w3.org/2002/07/owl#Nothing");
-	
 	
 	private OntologyFactoryImpl() {
 		// NO-OP to make the default constructor private
@@ -105,12 +102,12 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 	@Override
 	public OClass getThing() {
-		return owlThing;
+		return ClassImpl.owlThing;
 	}
 
 	@Override
 	public OClass getNothing() {
-		return owlNothing;
+		return ClassImpl.owlNothing;
 	}
 
 	@Override

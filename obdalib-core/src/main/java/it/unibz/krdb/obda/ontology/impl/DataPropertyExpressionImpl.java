@@ -17,7 +17,6 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	private final DataSomeValuesFromImpl domain;
 	private final DataPropertyRangeExpressionImpl range;
 
-	
 	public static final String owlTopDataPropertyIRI = "http://www.w3.org/2002/07/owl#topDataProperty";
 	public static final String owlBottomDataPropertyIRI  = "http://www.w3.org/2002/07/owl#bottomDataProperty";
 	

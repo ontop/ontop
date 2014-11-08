@@ -93,7 +93,7 @@ public class OntologyImpl implements Ontology {
 	public void addSubClassOfAxiomWithReferencedEntities(ClassExpression concept1, ClassExpression concept2) {	
 		vocabulary.addReferencedEntries(concept1);
 		vocabulary.addReferencedEntries(concept2);
-		if (!concept1.equals(ofac.getNothing()) && !concept2.equals(ofac.getThing())) {
+		if (!concept1.isNothing() && !concept2.isThing()) {
 			BinaryAxiom<ClassExpression> assertion = new BinaryAxiomImpl<ClassExpression>(concept1, concept2);
 			subClassAxioms.add(assertion);
 		}
@@ -131,7 +131,7 @@ public class OntologyImpl implements Ontology {
 	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2) {
 		vocabulary.checkSignature(concept1);
 		vocabulary.checkSignature(concept2);
-		if (!concept1.equals(ofac.getNothing()) && !concept2.equals(ofac.getThing())) {
+		if (!concept1.isNothing() && !concept2.isThing()) {
 			BinaryAxiom<ClassExpression> ax = new BinaryAxiomImpl<ClassExpression>(concept1, concept2);
 			subClassAxioms.add(ax);
 		}
