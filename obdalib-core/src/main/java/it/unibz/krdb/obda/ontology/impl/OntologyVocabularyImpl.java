@@ -67,7 +67,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	
 	@Override
-	public OClass declareClass(String uri) {
+	public OClass createClass(String uri) {
 		OClass cd = ofac.createClass(uri);
 		if (!cd.equals(owlThing) && !cd.equals(owlNothing))
 			concepts.add(cd);
@@ -75,7 +75,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 
 	@Override
-	public ObjectPropertyExpression declareObjectProperty(String uri) {
+	public ObjectPropertyExpression createObjectProperty(String uri) {
 		ObjectPropertyExpression rd = ofac.createObjectProperty(uri);
 		if (!rd.equals(owlTopObjectProperty) && !rd.equals(owlBottomObjectProperty))
 			objectProperties.add(rd);
@@ -83,7 +83,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 	
 	@Override
-	public DataPropertyExpression declareDataProperty(String uri) {
+	public DataPropertyExpression createDataProperty(String uri) {
 		DataPropertyExpression rd = ofac.createDataProperty(uri);
 		if (!rd.equals(owlTopDataProperty) && !rd.equals(owlBottomDataProperty))
 			dataProperties.add(rd);
@@ -119,7 +119,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	@Override
 	public DataPropertyExpression createAuxiliaryDataProperty() {
-		DataPropertyExpression rd = ofac.createDataProperty(AUXROLEURI + auxCounter);
+		DataPropertyExpression rd = createDataProperty(AUXROLEURI + auxCounter);
 		auxCounter++ ;
 		auxDataProperties.add(rd);
 		return rd;

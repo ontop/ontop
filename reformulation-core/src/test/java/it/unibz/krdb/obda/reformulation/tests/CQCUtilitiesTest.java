@@ -502,9 +502,9 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- A(x), q(y) :- C(y), with A ISA C
 			Ontology sigma = dfac.createOntology();
-			OClass left = dfac.createClass("A");
-			OClass right = dfac.createClass("C");
-			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
+			OClass left = sigma.getVocabulary().createClass("A");
+			OClass right = sigma.getVocabulary().createClass("C");
+			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
 			Function body1 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -527,10 +527,10 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
-			OClass left = dfac.createClass("A");
-			ObjectPropertyExpression pright = dfac.createObjectProperty("R");
+			OClass left = sigma.getVocabulary().createClass("A");
+			ObjectPropertyExpression pright = sigma.getVocabulary().createObjectProperty("R");
 			ObjectSomeValuesFrom right = pright.getDomain();
-			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
+			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
 			Function body1 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -553,10 +553,10 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
-			OClass left = dfac.createClass("A");
-			ObjectPropertyExpression pright = dfac.createObjectProperty("R").getInverse();
+			OClass left = sigma.getVocabulary().createClass("A");
+			ObjectPropertyExpression pright = sigma.getVocabulary().createObjectProperty("R").getInverse();
 			ObjectSomeValuesFrom right = pright.getDomain();
-			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
+			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
 			Function body1 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
@@ -579,11 +579,10 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
 			Ontology sigma = dfac.createOntology();
-			ObjectPropertyExpression pleft = dfac.createObjectProperty("R");
+			ObjectPropertyExpression pleft = sigma.getVocabulary().createObjectProperty("R");
 			ObjectSomeValuesFrom left = pleft.getDomain();
-			OClass right = dfac.createClass("A");
-
-			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
+			OClass right = sigma.getVocabulary().createClass("A");
+			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
 			Function body1 = tfac.getFunction(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
@@ -606,10 +605,10 @@ public class CQCUtilitiesTest {
 		{
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
 			Ontology sigma = dfac.createOntology();
-			ObjectPropertyExpression pleft = dfac.createObjectProperty("R").getInverse();
+			ObjectPropertyExpression pleft = sigma.getVocabulary().createObjectProperty("R").getInverse();
 			ObjectSomeValuesFrom left = pleft.getDomain();
-			OClass right = dfac.createClass("A");
-			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
+			OClass right = sigma.getVocabulary().createClass("A");
+			sigma.addSubClassOfAxiom(left, right);
 
 			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
 			Function body1 = tfac.getFunction(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
@@ -655,10 +654,10 @@ public class CQCUtilitiesTest {
         // q(x) :- , q(x) :- R(x,y), A(x)
 
         Ontology sigma = dfac.createOntology();
-        OClass left = dfac.createClass("A");
-        ObjectPropertyExpression pleft = dfac.createObjectProperty("R");
+        OClass left = sigma.getVocabulary().createClass("A");
+        ObjectPropertyExpression pleft = sigma.getVocabulary().createObjectProperty("R");
         ObjectSomeValuesFrom right = pleft.getDomain();
-        sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
+        sigma.addSubClassOfAxiom(left, right);
 
 
         // Query 1 q(x) :- R(x,y), A(x)

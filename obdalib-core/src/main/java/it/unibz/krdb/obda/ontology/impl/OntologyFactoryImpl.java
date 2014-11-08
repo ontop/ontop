@@ -28,13 +28,10 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
-import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 
@@ -80,7 +77,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	@Override
 	public ObjectPropertyExpression createObjectProperty(String uri) {
 		Predicate prop = ofac.getObjectPropertyPredicate(uri);
-		return new ObjectPropertyExpressionImpl(prop, false);
+		return new ObjectPropertyExpressionImpl(prop);
 	}
 
 	

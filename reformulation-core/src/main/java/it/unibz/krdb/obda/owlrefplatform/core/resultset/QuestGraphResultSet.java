@@ -178,7 +178,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 			}
 		}
 		}
-		return (tripleAssertions);
+		return tripleAssertions;
 	}
 	
 	@Override

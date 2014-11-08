@@ -44,13 +44,13 @@ public class SigmaTest extends TestCase {
     public void test_exists_simple() {
         Ontology ontology = descFactory.createOntology();
 
-        OClass ac = descFactory.createClass("a");
-        OClass cc = descFactory.createClass("c");
-        ObjectPropertyExpression rprop = descFactory.createObjectProperty("r");
+        OClass ac = ontology.getVocabulary().createClass("a");
+        OClass cc = ontology.getVocabulary().createClass("c");
+        ObjectPropertyExpression rprop = ontology.getVocabulary().createObjectProperty("r");
         ObjectSomeValuesFrom er = rprop.getDomain();
  
-        ontology.addSubClassOfAxiomWithReferencedEntities(er, ac);
-        ontology.addSubClassOfAxiomWithReferencedEntities(cc, er);
+        ontology.addSubClassOfAxiom(er, ac);
+        ontology.addSubClassOfAxiom(cc, er);
 
        
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);

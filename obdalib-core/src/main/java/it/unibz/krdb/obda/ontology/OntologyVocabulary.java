@@ -4,11 +4,32 @@ import java.util.Set;
 
 public interface OntologyVocabulary {
 
-	public OClass declareClass(String uri);
+	/**
+	 * create and declare class
+	 * 
+	 * @param uri
+	 * @return
+	 */
+	
+	public OClass createClass(String uri);
 
-	public ObjectPropertyExpression declareObjectProperty(String uri);
+	/**
+	 * create and declare object property
+	 * 
+	 * @param uri property name
+	 * @return
+	 */
+	
+	public ObjectPropertyExpression createObjectProperty(String uri);
 
-	public DataPropertyExpression declareDataProperty(String uri);
+	/**
+	 * create and declare data property
+	 * 
+	 * @param uri property name
+	 * @return
+	 */
+	
+	public DataPropertyExpression createDataProperty(String uri);
 	
 	/**
 	 * auxiliary properties result from NORMALIZATION

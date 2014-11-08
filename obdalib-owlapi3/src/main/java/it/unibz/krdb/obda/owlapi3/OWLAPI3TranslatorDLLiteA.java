@@ -840,7 +840,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		//if (entity.isOWLThing() || entity.isOWLNothing()) 
 		//	continue;				
 		String uri = entity.getIRI().toString();
-		dl_onto.getVocabulary().declareClass(uri);
+		dl_onto.getVocabulary().createClass(uri);
 	}
 
 	@Override
@@ -854,7 +854,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		}
 		else {
 			objectproperties.add(uri);
-			dl_onto.getVocabulary().declareObjectProperty(uri);
+			dl_onto.getVocabulary().createObjectProperty(uri);
 		}
 	}
 
@@ -869,7 +869,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		}
 		else {
 			dataproperties.add(uri);
-			dl_onto.getVocabulary().declareDataProperty(uri);
+			dl_onto.getVocabulary().createDataProperty(uri);
 		}
 	}
 	

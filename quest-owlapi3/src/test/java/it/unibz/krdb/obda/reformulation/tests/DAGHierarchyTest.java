@@ -25,9 +25,8 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -58,10 +57,9 @@ public class DAGHierarchyTest extends TestCase {
 	private final String inputFile2 = "src/test/resources/test/dag/test-role-hierarchy.owl";
 
 	private static Ontology loadOntology(String filename) throws Exception  {
-		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(filename));
-		Ontology onto = t.translate(owlonto);
+		Ontology onto = OWLAPI3TranslatorUtility.translate(owlonto);
 		return onto;
 	}
 	
@@ -88,14 +86,12 @@ public class DAGHierarchyTest extends TestCase {
 
 		EquivalencesDAG<ClassExpression> classes = namedReasoner.getClasses();
 		
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-
-		ClassExpression A = ofac.createClass(ontoURI + "A");
-		ClassExpression B = ofac.createClass(ontoURI + "B");
-		ClassExpression C = ofac.createClass(ontoURI + "C");
-		ClassExpression D = ofac.createClass(ontoURI + "D");
-		ClassExpression E = ofac.createClass(ontoURI + "E");
-		ClassExpression F = ofac.createClass(ontoURI + "F");
+		ClassExpression A = onto.getVocabulary().createClass(ontoURI + "A");
+		ClassExpression B = onto.getVocabulary().createClass(ontoURI + "B");
+		ClassExpression C = onto.getVocabulary().createClass(ontoURI + "C");
+		ClassExpression D = onto.getVocabulary().createClass(ontoURI + "D");
+		ClassExpression E = onto.getVocabulary().createClass(ontoURI + "E");
+		ClassExpression F = onto.getVocabulary().createClass(ontoURI + "F");
 		
 		/**
 		 * The initial node is Node A.
@@ -178,14 +174,12 @@ public class DAGHierarchyTest extends TestCase {
 
 		EquivalencesDAG<ClassExpression> classes = namedReasoner.getClasses();
 		
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-
-		ClassExpression A = ofac.createClass(ontoURI + "A");
-		ClassExpression B = ofac.createClass(ontoURI + "B");
-		ClassExpression C = ofac.createClass(ontoURI + "C");
-		ClassExpression D = ofac.createClass(ontoURI + "D");
-		ClassExpression E = ofac.createClass(ontoURI + "E");
-		ClassExpression F = ofac.createClass(ontoURI + "F");
+		ClassExpression A = onto.getVocabulary().createClass(ontoURI + "A");
+		ClassExpression B = onto.getVocabulary().createClass(ontoURI + "B");
+		ClassExpression C = onto.getVocabulary().createClass(ontoURI + "C");
+		ClassExpression D = onto.getVocabulary().createClass(ontoURI + "D");
+		ClassExpression E = onto.getVocabulary().createClass(ontoURI + "E");
+		ClassExpression F = onto.getVocabulary().createClass(ontoURI + "F");
 	
 		/**
 		 * The initial node is Node A.
@@ -205,7 +199,7 @@ public class DAGHierarchyTest extends TestCase {
 		 */
 		initialNode = classes.getVertex(B);
 		ancestors = classes.getSuper(initialNode);
-		assertEquals(sizeOf(ancestors), 3); // ancestors is now refelxive
+		assertEquals(sizeOf(ancestors), 3); // ancestors is now reflexive
 
 		assertTrue(ancestors.contains(classes.getVertex(F)));
 		assertTrue(ancestors.contains(classes.getVertex(E)));
@@ -223,7 +217,7 @@ public class DAGHierarchyTest extends TestCase {
 		 */
 		initialNode = classes.getVertex(D);
 		ancestors = classes.getSuper(initialNode);
-		assertEquals(sizeOf(ancestors), 4); // ancestors is now refelxive
+		assertEquals(sizeOf(ancestors), 4); // ancestors is now reflexive
 
 		Set<ClassExpression> equivalents = new HashSet<ClassExpression>();
 		equivalents.add(C);
@@ -270,14 +264,12 @@ public class DAGHierarchyTest extends TestCase {
 
 		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.getObjectProperties();
 		
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-
-		ObjectPropertyExpression P = ofac.createObjectProperty(ontoURI + "P");
-		ObjectPropertyExpression S = ofac.createObjectProperty(ontoURI + "S");
-		ObjectPropertyExpression R = ofac.createObjectProperty(ontoURI + "R");
-		ObjectPropertyExpression Q = ofac.createObjectProperty(ontoURI + "Q");
-		ObjectPropertyExpression T = ofac.createObjectProperty(ontoURI + "T");
-		ObjectPropertyExpression U = ofac.createObjectProperty(ontoURI + "U");
+		ObjectPropertyExpression P = onto.getVocabulary().createObjectProperty(ontoURI + "P");
+		ObjectPropertyExpression S = onto.getVocabulary().createObjectProperty(ontoURI + "S");
+		ObjectPropertyExpression R = onto.getVocabulary().createObjectProperty(ontoURI + "R");
+		ObjectPropertyExpression Q = onto.getVocabulary().createObjectProperty(ontoURI + "Q");
+		ObjectPropertyExpression T = onto.getVocabulary().createObjectProperty(ontoURI + "T");
+		ObjectPropertyExpression U = onto.getVocabulary().createObjectProperty(ontoURI + "U");
 		
 		
 		/**
@@ -358,14 +350,12 @@ public class DAGHierarchyTest extends TestCase {
 		
 		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.getObjectProperties();
 		
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-
-		ObjectPropertyExpression P = ofac.createObjectProperty(ontoURI + "P");
-		ObjectPropertyExpression S = ofac.createObjectProperty(ontoURI + "S");
-		ObjectPropertyExpression R = ofac.createObjectProperty(ontoURI + "R");
-		ObjectPropertyExpression Q = ofac.createObjectProperty(ontoURI + "Q");
-		ObjectPropertyExpression T = ofac.createObjectProperty(ontoURI + "T");
-		ObjectPropertyExpression U = ofac.createObjectProperty(ontoURI + "U");
+		ObjectPropertyExpression P = onto.getVocabulary().createObjectProperty(ontoURI + "P");
+		ObjectPropertyExpression S = onto.getVocabulary().createObjectProperty(ontoURI + "S");
+		ObjectPropertyExpression R = onto.getVocabulary().createObjectProperty(ontoURI + "R");
+		ObjectPropertyExpression Q = onto.getVocabulary().createObjectProperty(ontoURI + "Q");
+		ObjectPropertyExpression T = onto.getVocabulary().createObjectProperty(ontoURI + "T");
+		ObjectPropertyExpression U = onto.getVocabulary().createObjectProperty(ontoURI + "U");
 	
 		/**
 		 * The initial node is Node P.

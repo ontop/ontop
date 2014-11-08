@@ -179,13 +179,13 @@ public class QuestMaterializer {
 			// TODO: use Vocabulary for OBDAModel as well
 			
 			for (OClass pred : model.getDeclaredClasses()) 
-				ontology.getVocabulary().declareClass(pred.getPredicate().getName());				
+				ontology.getVocabulary().createClass(pred.getPredicate().getName());				
 			
 			for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) 
-				ontology.getVocabulary().declareObjectProperty(prop.getPredicate().getName());
+				ontology.getVocabulary().createObjectProperty(prop.getPredicate().getName());
 
 			for (DataPropertyExpression prop : model.getDeclaredDataProperties()) 
-				ontology.getVocabulary().declareDataProperty(prop.getPredicate().getName());
+				ontology.getVocabulary().createDataProperty(prop.getPredicate().getName());
 		}
 		
 		

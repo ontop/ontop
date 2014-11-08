@@ -35,9 +35,9 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 	
 	private final ObjectSomeValuesFromImpl domain;
 
-	ObjectPropertyExpressionImpl(Predicate p, boolean isInverse) {
+	ObjectPropertyExpressionImpl(Predicate p) {
 		this.predicate = p;
-		this.isInverse = isInverse;
+		this.isInverse = false;
 		this.inverseProperty = new ObjectPropertyExpressionImpl(p, !isInverse, this);
 		StringBuilder bf = new StringBuilder();
 		bf.append(predicate.toString());
