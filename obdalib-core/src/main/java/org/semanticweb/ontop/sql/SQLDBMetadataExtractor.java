@@ -2,7 +2,6 @@ package org.semanticweb.ontop.sql;
 
 
 import com.google.inject.assistedinject.AssistedInject;
-import com.sun.istack.internal.Nullable;
 import net.sf.jsqlparser.JSQLParserException;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.mapping.sql.SQLTableNameExtractor;
@@ -12,6 +11,7 @@ import org.semanticweb.ontop.nativeql.DBMetadataException;
 import org.semanticweb.ontop.nativeql.DBMetadataExtractor;
 import org.semanticweb.ontop.sql.api.RelationJSQL;
 
+import javax.annotation.Nullable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -31,13 +31,13 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
     @Override
     public DBMetadata extract(OBDADataSource dataSource, Connection dbConnection, OBDAModel obdaModel,
                               @Nullable ImplicitDBConstraints userConstraints) throws DBMetadataException {
-        try {
-            if (obtainFullMetadata) {
-                DBMetadata metadata = JDBCConnectionManager.getMetaData(dbConnection);
-                return metadata;
-            } else {
-                boolean applyUserConstraints = (userConstraints != null);
+        boolean applyUserConstraints = (userConstraints != null);
 
+        try {
+            DBMetadata metadata;
+            if (obtainFullMetadata) {
+                 metadata = JDBCConnectionManager.getMetaData(dbConnection);
+            } else {
                 // This is the NEW way of obtaining part of the metadata
                 // (the schema.table names) by parsing the mappings
 
@@ -49,17 +49,12 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
                 if (applyUserConstraints) {
                     // Add the tables referred to by user-supplied foreign keys
                     userConstraints.addReferredTables(realTables);
-                    //Adds keys from the text file
                 }
 
-                DBMetadata metadata = JDBCConnectionManager.getMetaData(dbConnection, realTables);
-
-                if (applyUserConstraints) {
-                    userConstraints.addConstraints(metadata);
-                }
-
-                return metadata;
+                metadata = JDBCConnectionManager.getMetaData(dbConnection, realTables);
             }
+            return metadata;
+
         } catch (JSQLParserException e) {
             throw new DBMetadataException("Error obtaining the tables" + e);
         } catch (SQLException e) {

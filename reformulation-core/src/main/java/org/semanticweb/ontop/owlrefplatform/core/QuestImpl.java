@@ -27,7 +27,6 @@ import com.google.common.collect.Multimap;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import net.sf.jsqlparser.JSQLParserException;
 
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
@@ -35,9 +34,7 @@ import org.openrdf.query.parser.ParsedQuery;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDAFactoryWithException;
-import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.PrefixManager;
-import org.semanticweb.ontop.mapping.sql.SQLTableNameExtractor;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
@@ -64,10 +61,8 @@ import org.semanticweb.ontop.owlrefplatform.core.translator.MappingVocabularyRep
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
-import org.semanticweb.ontop.sql.JDBCConnectionManager;
 import org.semanticweb.ontop.sql.TableDefinition;
 import org.semanticweb.ontop.sql.api.Attribute;
-import org.semanticweb.ontop.sql.api.RelationJSQL;
 import org.semanticweb.ontop.mapping.MappingSplitter;
 import org.semanticweb.ontop.utils.MetaMappingExpander;
 import org.slf4j.Logger;
@@ -772,6 +767,10 @@ public class QuestImpl implements Serializable, Quest {
 				}		
 			}
 
+            //Adds keys from the text file
+            if (userConstraints != null) {
+                userConstraints.addConstraints(metadata);
+            }
 
             /*
              * We do not clone metadata here but because it will be updated during

@@ -1,11 +1,11 @@
 package org.semanticweb.ontop.nativeql;
 
-import com.sun.istack.internal.Nullable;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
+import javax.annotation.Nullable;
 import java.sql.Connection;
 
 /**
