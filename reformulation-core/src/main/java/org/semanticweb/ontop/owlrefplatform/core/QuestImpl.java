@@ -826,9 +826,12 @@ public class QuestImpl implements Serializable, Quest {
             else {
                 dataSourceQueryGenerator = questComponentFactory.create(metadata, datasource);
             }
-            String parameter = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-            SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(parameter);
 
+            /**
+             * TODO: find a way to isolate (or remove if possible) this SQL-specific horror.
+             */
+            String parameter = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+            SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(parameter, (QuestPreferences) preferences);
 			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
 
 			

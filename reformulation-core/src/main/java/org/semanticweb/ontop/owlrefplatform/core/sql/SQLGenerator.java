@@ -181,7 +181,7 @@ public class SQLGenerator implements NativeQueryGenerator {
 
         this.metadata = metadata;
         this.jdbcutil = new JDBCUtility(driverURI);
-        this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI);
+        this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI, preferences);
         this.dataTypePredicateUnifyTable = buildPredicateUnifyTable();
 
         this.generatingREPLACE = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));

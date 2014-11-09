@@ -21,41 +21,49 @@ package org.semanticweb.ontop.owlrefplatform.core.queryevaluation;
  */
 
 
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.InvocationTargetException;
 
 public class SQLAdapterFactory {
 
 	private static Logger log = LoggerFactory.getLogger(SQLAdapterFactory.class);
 
-	public static SQLDialectAdapter getSQLDialectAdapter(String className) {
+	public static SQLDialectAdapter getSQLDialectAdapter(String className, QuestPreferences preferences) {
 
-		if (className.equals("org.postgresql.Driver")) {
+		switch (className) {
+        case "org.postgresql.Driver":
 			return new PostgreSQLDialectAdapter();
-		} else if (className.equals("com.mysql.jdbc.Driver")) {
+        case "com.mysql.jdbc.Driver":
 			return new Mysql2SQLDialectAdapter();
-		} else if (className.equals("org.h2.Driver")) {
+        case "org.h2.Driver":
 			return new H2SQLDialectAdapter();
-		} else if (className.equals("com.ibm.db2.jcc.DB2Driver")) {
+        case "com.ibm.db2.jcc.DB2Driver":
 			return new DB2SQLDialectAdapter();
-		} else if (className.equals("oracle.jdbc.driver.OracleDriver") || className.equals("oracle.jdbc.OracleDriver")) {
+        case "oracle.jdbc.driver.OracleDriver":
+        case "oracle.jdbc.OracleDriver":
 			return new OracleSQLDialectAdapter();
-		} else if (className.equals("org.teiid.jdbc.TeiidDriver")) {
+        case "org.teiid.jdbc.TeiidDriver":
 			return new TeiidSQLDialectAdapter();
-		} else if (className.equals("com.microsoft.sqlserver.jdbc.SQLServerDriver")) {
+        case "com.microsoft.sqlserver.jdbc.SQLServerDriver":
 			return new SQLServerSQLDialectAdapter();
-		} else if (className.equals("org.hsqldb.jdbc.JDBCDriver")) {
+        case "org.hsqldb.jdbc.JDBCDriver":
 			return new HSQLSQLDialectAdapter();
-		} else if (className.equals("madgik.adp.federatedjdbc.AdpDriver")){
+        case "madgik.adp.federatedjdbc.AdpDriver":
 			return new AdpSQLDialectAdapter();
-		} else {
+        default:
 			log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Ontop.");
 			log.warn("WARNING: Contact the authors for further support.");
-			return new SQL99DialectAdapter();
+            String adapterClassName = preferences.getProperty(SQLDialectAdapter.class.getCanonicalName());
+            try {
+                Class adapterClass = Class.forName(adapterClassName);
+                return (SQLDialectAdapter) adapterClass.getConstructor().newInstance();
+            } catch (Exception e) {
+             throw new RuntimeException("Impossible to initialize the SQL adapter: " + e.getMessage());
+            }
 		}
-
-		
-
 	}
 
 }

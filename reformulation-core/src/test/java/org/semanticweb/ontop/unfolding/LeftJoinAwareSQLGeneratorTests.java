@@ -36,6 +36,7 @@ import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.JDBCUtility;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
@@ -116,7 +117,8 @@ public class LeftJoinAwareSQLGeneratorTests extends TestCase {
 		signature.add("x");
 
 		
-		SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter("com.mysql.jdbc.Driver");
+		SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter("com.mysql.jdbc.Driver",
+                new QuestPreferences());
 		JDBCUtility jdbcutil = new JDBCUtility("com.mysql.jdbc.Driver");
 
 		 gen = new SQLGenerator(md, jdbcutil, sqladapter);
