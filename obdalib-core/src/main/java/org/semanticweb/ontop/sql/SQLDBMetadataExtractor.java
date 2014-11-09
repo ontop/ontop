@@ -53,6 +53,12 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
 
                 metadata = JDBCConnectionManager.getMetaData(dbConnection, realTables);
             }
+
+            //Adds keys from the text file
+            if (userConstraints != null) {
+                userConstraints.addConstraints(metadata);
+            }
+
             return metadata;
 
         } catch (JSQLParserException e) {

@@ -732,44 +732,54 @@ public class QuestImpl implements Serializable, Quest {
 
 
             // TODO: make the code generic enough so that this boolean is not needed.
-			
-			//if the metadata was not already set
+
+            /**
+             * if the metadata was not already set,
+             * extracts DB metadata completely.
+             */
+
 			if (metadata == null) {
                 DBMetadataExtractor dbMetadataExtractor = nativeQLFactory.create();
                 metadata = dbMetadataExtractor.extract(datasource, localConnection, unfoldingOBDAModel,
                         userConstraints);
 			}
+            /**
+             * Otherwise, if partially configured, complete it by applying
+             * the user-defined constraints.
+             */
+            else {
+                //Adds keys from the text file
+                if (userConstraints != null) {
+                    userConstraints.addConstraints(metadata);
+                }
+            }
+
 			
 			// This is true if the QuestDefaults.properties contains PRINT_KEYS=true
 			// Very useful for debugging of User Constraints (also for the end user)
-			if (printKeys) { 
-				// Prints all primary keys
-				log.debug("\n====== Primary keys ==========");
-				List<TableDefinition> table_list = metadata.getTableList();
-				for(TableDefinition dd : table_list){
-					log.debug("\n" + dd.getName() + ":");
-					for(Attribute attr : dd.getPrimaryKeys() ){
-						log.debug(attr.getName() + ",");
-					}
-				}
-				// Prints all foreign keys
-				log.debug("\n====== Foreign keys ==========");
-				for(TableDefinition dd : table_list){
-					log.debug("\n" + dd.getName() + ":");
-					Map<String, List<Attribute>> fkeys = dd.getForeignKeys();
-					for(String fkName : fkeys.keySet() ){
-						log.debug("(" + fkName + ":");
-							for(Attribute attr : fkeys.get(fkName)){
-								log.debug(attr.getName() + ",");
-							}
-							log.debug("),");
-					}
-				}		
-			}
-
-            //Adds keys from the text file
-            if (userConstraints != null) {
-                userConstraints.addConstraints(metadata);
+			if (printKeys) {
+                // Prints all primary keys
+                log.debug("\n====== Primary keys ==========");
+                List<TableDefinition> table_list = metadata.getTableList();
+                for (TableDefinition dd : table_list) {
+                    log.debug("\n" + dd.getName() + ":");
+                    for (Attribute attr : dd.getPrimaryKeys()) {
+                        log.debug(attr.getName() + ",");
+                    }
+                }
+                // Prints all foreign keys
+                log.debug("\n====== Foreign keys ==========");
+                for (TableDefinition dd : table_list) {
+                    log.debug("\n" + dd.getName() + ":");
+                    Map<String, List<Attribute>> fkeys = dd.getForeignKeys();
+                    for (String fkName : fkeys.keySet()) {
+                        log.debug("(" + fkName + ":");
+                        for (Attribute attr : fkeys.get(fkName)) {
+                            log.debug(attr.getName() + ",");
+                        }
+                        log.debug("),");
+                    }
+                }
             }
 
             /*
