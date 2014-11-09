@@ -53,6 +53,7 @@ import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
@@ -955,7 +956,9 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 					try {
 						// Construct the sql query
 						final String dbType = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType);
+
+                        //TODO: find a way to get the current preferences. Necessary if an third-party adapter should be used.
+						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, new QuestPreferences());
 						String sqlString = txtQueryEditor.getText();
 						int rowCount = fetchSize();
 						if (rowCount >= 0) { // add the limit filter
