@@ -35,11 +35,13 @@ import org.openrdf.query.parser.ParsedQuery;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDAFactoryWithException;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.PrefixManager;
-import org.semanticweb.ontop.mapping.sql.SQLMappingSchemaExtractor;
+import org.semanticweb.ontop.mapping.sql.SQLTableNameExtractor;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
+import org.semanticweb.ontop.nativeql.DBMetadataExtractor;
 import org.semanticweb.ontop.ontology.Axiom;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
@@ -173,13 +175,7 @@ public class QuestImpl implements Serializable, Quest {
 	 * This represents user-supplied constraints, i.e. primary
 	 * and foreign keys not present in the database metadata
 	 */
-	private ImplicitDBConstraints userConstraints;
-	
-	/*
-	 * Whether to apply the user-supplied database constraints given above
-	 * userConstraints must be initialized and non-null whenever this is true
-	 */
-	private boolean applyUserConstraints;
+	private ImplicitDBConstraints userConstraints = null;
 
 	/***
 	 * General flags and fields
@@ -202,10 +198,6 @@ public class QuestImpl implements Serializable, Quest {
 	private boolean bObtainFromOntology = true;
 
 	private boolean bObtainFromMappings = true;
-	
-	private boolean obtainFullMetadata = false;
-
-    private boolean sqlGenerateReplace = true;
 
 	private String aboxMode = QuestConstants.CLASSIC;
 
@@ -320,7 +312,6 @@ public class QuestImpl implements Serializable, Quest {
     public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
 		assert(userConstraints != null);
 		this.userConstraints = userConstraints;
-		this.applyUserConstraints = true;
 	}
 
     @Override
@@ -460,11 +451,8 @@ public class QuestImpl implements Serializable, Quest {
 		aboxMode = (String) preferences.get(QuestPreferences.ABOX_MODE);
 		aboxSchemaType = (String) preferences.get(QuestPreferences.DBTYPE);
 		inmemory = preferences.getProperty(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
-		
-		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));	
-		printKeys = Boolean.valueOf((String) preferences.get(QuestPreferences.PRINT_KEYS));
 
-        sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
+		printKeys = Boolean.valueOf((String) preferences.get(QuestPreferences.PRINT_KEYS));
 
 		if (!inmemory) {
 			aboxJdbcURL = preferences.getProperty(QuestPreferences.JDBC_URL);
@@ -747,42 +735,14 @@ public class QuestImpl implements Serializable, Quest {
 			OBDADataSource datasource = unfoldingOBDAModel.getSources().iterator().next();
 			URI sourceId = datasource.getSourceID();
 
-			
+
+            // TODO: make the code generic enough so that this boolean is not needed.
 			
 			//if the metadata was not already set
 			if (metadata == null) {
-				// if we have to parse the full metadata or just the table list in the mappings
-				if (obtainFullMetadata) {
-					metadata = JDBCConnectionManager.getMetaData(localConnection);
-				} else {
-					// This is the NEW way of obtaining part of the metadata
-					// (the schema.table names) by parsing the mappings
-					
-					// Parse mappings. Just to get the table names in use
-					SQLMappingSchemaExtractor mParser = new SQLMappingSchemaExtractor(localConnection, unfoldingOBDAModel.getMappings(sourceId));
-							
-					try{
-						List<RelationJSQL> realTables = mParser.getRealTables();
-						
-						if (applyUserConstraints) {
-							// Add the tables referred to by user-supplied foreign keys
-							userConstraints.addReferredTables(realTables);
-						}
-
-						metadata = JDBCConnectionManager.getMetaData(localConnection, realTables);
-					}catch (JSQLParserException e){
-						System.out.println("Error obtaining the tables"+ e);
-					}catch( SQLException e ){
-						System.out.println("Error obtaining the Metadata"+ e);
-					
-					}
-					
-				}
-			}
-			
-			//Adds keys from the text file
-			if (applyUserConstraints) {
-				userConstraints.addConstraints(metadata);
+                DBMetadataExtractor dbMetadataExtractor = nativeQLFactory.create();
+                metadata = dbMetadataExtractor.extract(datasource, localConnection, unfoldingOBDAModel,
+                        userConstraints);
 			}
 			
 			// This is true if the QuestDefaults.properties contains PRINT_KEYS=true
@@ -813,15 +773,16 @@ public class QuestImpl implements Serializable, Quest {
 			}
 
 
+            /*
+             * We do not clone metadata here but because it will be updated during
+             * the repository setup.
+             * TODO: see if this comment is still relevant.
+             *
+             * However, please note that SQL Generator will never be used directly
+             * but cloned for each QuestStatement.
+             * When cloned, metadata is also cloned, so it should be "safe".
+             */
 			if (isSemanticIdx) {
-                /*
-                 * We do not clone metadata here but because it will be updated during
-                 * the repository setup.
-                 *
-                 * However, please note that SQL Generator will never be used directly
-                 * but cloned for each QuestStatement.
-                 * When cloned, metadata is also cloned, so it should be "safe".
-                 */
                 dataSourceQueryGenerator = questComponentFactory.create(metadata, datasource, uriRefIds);
 			}
             else {

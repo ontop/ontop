@@ -22,6 +22,8 @@ public class OBDAProperties extends Properties {
     public static final String DB_PASSWORD = "DBPASSWORD";
     public static final String JDBC_DRIVER = "JDBC_DRIVER";
 
+    public static final String OBTAIN_FULL_METADATA = "OBTAIN_FULL_METADATA";
+
     public static final String DEFAULT_OBDA_PROPERTIES_FILE = "default_implementations.properties";
     private static Logger LOG = LoggerFactory.getLogger(OBDAProperties.class);
 

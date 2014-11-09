@@ -43,14 +43,14 @@ import net.sf.jsqlparser.JSQLParserException;
  * @author Dag
  *
  */
-public class SQLMappingSchemaExtractor {
+public class SQLTableNameExtractor {
 	
 	private final List<OBDAMappingAxiom> mappings;
 	private SQLQueryParser sqlQueryParser;
 	private List<ParsedSQLMapping> parsedMappings;
 	private List<RelationJSQL> realTables; // Tables that are not view definitions
 	
-	public SQLMappingSchemaExtractor(Connection conn, List<OBDAMappingAxiom> mappingAxioms) throws SQLException{
+	public SQLTableNameExtractor(Connection conn, List<OBDAMappingAxiom> mappingAxioms) throws SQLException{
 		this.mappings = mappingAxioms;
 		this.sqlQueryParser = new SQLQueryParser(conn);
 		this.parsedMappings = this.parseMappings();

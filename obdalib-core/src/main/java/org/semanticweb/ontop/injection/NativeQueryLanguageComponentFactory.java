@@ -7,6 +7,7 @@ import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.nativeql.DBMetadataExtractor;
 
 import java.io.File;
 import java.io.Reader;
@@ -21,6 +22,10 @@ import java.util.Set;
  *
  * Builds core components that we want to be modular.
  *
+ * Please note that the NativeQueryGenerator is NOT PART
+ * of this factory because it belongs to another module
+ * (see the QuestComponentFactory).
+ *
  */
 public interface NativeQueryLanguageComponentFactory {
 
@@ -30,4 +35,6 @@ public interface NativeQueryLanguageComponentFactory {
     public MappingParser create(Model mappingGraph);
 
     public PrefixManager create(Map<String, String> prefixToURIMap);
+
+    public DBMetadataExtractor create();
 }
