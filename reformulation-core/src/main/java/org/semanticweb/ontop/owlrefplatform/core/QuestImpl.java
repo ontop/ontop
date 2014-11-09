@@ -732,7 +732,8 @@ public class QuestImpl implements Serializable, Quest {
 
 				URI sourceUri = obdaSource.getSourceID();
 				ImmutableList<OBDAMappingAxiom> originalMappings = inputOBDAModel.getMappings(sourceUri);
-				ImmutableList<OBDAMappingAxiom> translatedMappings = MappingVocabularyTranslator.translateMappings(originalMappings, equivalenceMaps);
+				ImmutableList<OBDAMappingAxiom> translatedMappings = MappingVocabularyTranslator.translateMappings(
+                        originalMappings, equivalenceMaps);
 				
 				Map<URI, ImmutableList<OBDAMappingAxiom>> mappings = new HashMap<>();
 				mappings.put(sourceUri, translatedMappings);
@@ -830,9 +831,13 @@ public class QuestImpl implements Serializable, Quest {
             /**
              * TODO: find a way to isolate (or remove if possible) this SQL-specific horror.
              */
-            String parameter = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-            SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(parameter, (QuestPreferences) preferences);
-			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
+            boolean isSQL = preferences.getProperty(NativeQueryGenerator.class.getCanonicalName()).equals(
+                    SQLGenerator.class.getCanonicalName());
+            if (isSQL) {
+                String parameter = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+                SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(parameter, (QuestPreferences) preferences);
+                preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
+            }
 
 			
 			/***
