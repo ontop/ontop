@@ -51,6 +51,7 @@ import com.mysql.jdbc.Statement;
  * This is a new test case for the SQL generator that handle arbitrary programs.
  * @author mrezk
  *
+ * TODO: Last usage of a deprecated constructor of SQLGenerator. Update it or remove it.
  */
 @Ignore("check if we still need it or not")
 public class LeftJoinAwareSQLGeneratorTests extends TestCase {

@@ -54,7 +54,7 @@ import org.semanticweb.ontop.owlrefplatform.core.resultset.BooleanOWLOBDARefResu
 import org.semanticweb.ontop.owlrefplatform.core.resultset.EmptyQueryResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestGraphResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestResultset;
-import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
+import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.translator.DatalogToSparqlTranslator;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
@@ -82,7 +82,7 @@ public class QuestStatement implements OBDAStatement {
 
 	private QueryRewriter rewriter = null;
 
-	private SQLQueryGenerator querygenerator = null;
+	private NativeQueryGenerator querygenerator = null;
 
 	private QueryVocabularyValidator validator = null;
 
@@ -159,7 +159,7 @@ public class QuestStatement implements OBDAStatement {
 		this.repository = questinstance.getDataRepository();
 		this.conn = conn;
 		this.rewriter = questinstance.getRewriter();
-		this.querygenerator = questinstance.cloneDataSourceQueryGenerator();
+		this.querygenerator = questinstance.cloneIfNecessaryNativeQueryGenerator();
 
 		this.sqlstatement = st;
 		this.validator = questinstance.getVocabularyValidator();

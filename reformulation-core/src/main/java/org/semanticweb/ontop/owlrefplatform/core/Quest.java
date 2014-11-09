@@ -8,7 +8,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatc
 import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import org.semanticweb.ontop.owlrefplatform.core.abox.RepositoryChangedListener;
 import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryRewriter;
-import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
+import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 import java.sql.Connection;
@@ -32,7 +32,7 @@ public interface Quest extends RepositoryChangedListener {
 
     QueryRewriter getRewriter();
 
-    SQLQueryGenerator cloneDataSourceQueryGenerator();
+    NativeQueryGenerator cloneIfNecessaryNativeQueryGenerator();
 
     Map<String, Boolean> getIsDescribeCache();
 

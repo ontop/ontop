@@ -55,10 +55,11 @@ import org.semanticweb.ontop.owlrefplatform.core.mappingprocessing.MappingVocabu
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.*;
 import org.semanticweb.ontop.owlrefplatform.core.reformulation.*;
 import org.semanticweb.ontop.owlrefplatform.core.sql.SQLGenerator;
-import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
+import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.translator.MappingVocabularyRepair;
+import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 import org.semanticweb.ontop.sql.JDBCConnectionManager;
@@ -121,8 +122,8 @@ public class QuestImpl implements Serializable, Quest {
 	/* The active query rewriter */
 	private QueryRewriter rewriter;
 
-	/* The active SQL generator */
-	private SQLQueryGenerator dataSourceQueryGenerator;
+	/* Native query generator */
+	private NativeQueryGenerator dataSourceQueryGenerator;
 
 	/* The active query evaluation engine */
 	//private EvaluationEngine evaluationEngine;
@@ -247,6 +248,7 @@ public class QuestImpl implements Serializable, Quest {
      * TODO: explain
      */
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
+    private final QuestComponentFactory questComponentFactory;
     private final OBDAFactoryWithException obdaFactory;
 
 	/***
@@ -278,12 +280,13 @@ public class QuestImpl implements Serializable, Quest {
     @Inject
 	private QuestImpl(@Assisted Ontology tbox, @Assisted @Nullable OBDAModel mappings, @Assisted @Nullable DBMetadata metadata,
                       @Assisted Properties config, NativeQueryLanguageComponentFactory nativeQLFactory,
-                      OBDAFactoryWithException obdaFactory) throws DuplicateMappingException {
+                      OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory) throws DuplicateMappingException {
         if (tbox == null)
             throw new InvalidParameterException("TBox cannot be null");
 
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
+        this.questComponentFactory = questComponentFactory;
 
         inputTBox = tbox;
 
@@ -339,8 +342,8 @@ public class QuestImpl implements Serializable, Quest {
      * Clones the SQL generator.
      */
     @Override
-    public SQLQueryGenerator cloneDataSourceQueryGenerator() {
-        return dataSourceQueryGenerator.cloneGenerator();
+    public NativeQueryGenerator cloneIfNecessaryNativeQueryGenerator() {
+        return dataSourceQueryGenerator.cloneIfNecessary();
     }
 	
 	protected Map<String, String> getSQLCache() {
@@ -807,11 +810,7 @@ public class QuestImpl implements Serializable, Quest {
 					}
 				}		
 			}
-				
 
-			String parameter = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-			SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(parameter);
-			JDBCUtility jdbcutil = new JDBCUtility(parameter);
 
 			if (isSemanticIdx) {
                 /*
@@ -822,12 +821,13 @@ public class QuestImpl implements Serializable, Quest {
                  * but cloned for each QuestStatement.
                  * When cloned, metadata is also cloned, so it should be "safe".
                  */
-                dataSourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,	sqladapter, sqlGenerateReplace,
-                        true, uriRefIds);
+                dataSourceQueryGenerator = questComponentFactory.create(metadata, datasource, uriRefIds);
 			}
             else {
-                dataSourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,	sqladapter, sqlGenerateReplace);
+                dataSourceQueryGenerator = questComponentFactory.create(metadata, datasource);
             }
+            String parameter = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+            SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(parameter);
 
 			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
 

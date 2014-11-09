@@ -2,30 +2,32 @@ package org.semanticweb.ontop.owlrefplatform.injection;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
-import com.google.inject.assistedinject.FactoryModuleBuilder;
 import org.semanticweb.ontop.injection.*;
-import org.semanticweb.ontop.io.PrefixManager;
-import org.semanticweb.ontop.mapping.MappingParser;
-import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.Quest;
-import org.semanticweb.ontop.owlrefplatform.core.QuestImpl;
-
-import java.util.Properties;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 
 /**
  *
  */
 public class QuestComponentModule extends OBDAAbstractModule {
 
-    public QuestComponentModule(OBDAProperties configuration) {
+    public QuestComponentModule(QuestPreferences configuration) {
         super(configuration);
     }
 
     @Override
-    protected void configure() {
-        configureBasically();
+    protected void configurePreferences() {
+        super.configurePreferences();
+        bind(QuestPreferences.class).toInstance((QuestPreferences) getPreferences());
+    }
 
-        Module componentFactoryModule = buildFactory(ImmutableList.<Class>of(Quest.class),
+    @Override
+    protected void configure() {
+        configurePreferences();
+
+        Module componentFactoryModule = buildFactory(ImmutableList.<Class>of(Quest.class,
+                        NativeQueryGenerator.class),
                 QuestComponentFactory.class);
         install(componentFactoryModule);
     }

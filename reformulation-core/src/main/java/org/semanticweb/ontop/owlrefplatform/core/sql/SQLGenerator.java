@@ -21,33 +21,19 @@ package org.semanticweb.ontop.owlrefplatform.core.sql;
  */
 
 
-import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
-import org.semanticweb.ontop.model.BNode;
-import org.semanticweb.ontop.model.BooleanOperationPredicate;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DataTypePredicate;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.NonBooleanOperationPredicate;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.NumericalOperationPredicate;
-import org.semanticweb.ontop.model.OBDAException;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
-import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
-import org.semanticweb.ontop.model.URIConstant;
-import org.semanticweb.ontop.model.URITemplatePredicate;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
+import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
-import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.JDBCUtility;
-import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
-import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
+import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.*;
+import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.DataDefinition;
 import org.semanticweb.ontop.sql.TableDefinition;
@@ -66,7 +52,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.openrdf.model.Literal;
-import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.HSQLSQLDialectAdapter;
 import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
 import org.semanticweb.ontop.mapping.QueryUtils;
 import org.slf4j.LoggerFactory;
@@ -88,7 +73,7 @@ import com.google.common.collect.Multimap;
  * @author mrezk, mariano, guohui
  * 
  */
-public class SQLGenerator implements SQLQueryGenerator {
+public class SQLGenerator implements NativeQueryGenerator {
 
 	private static final long serialVersionUID = 7477161929752147045L;
 
@@ -132,17 +117,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 
     private static final int UNDEFINED_TYPE_CODE = -1;
 
-	private ImmutableTable<Predicate, Predicate, Predicate> dataTypePredicateUnifyTable;
+	private final ImmutableTable<Predicate, Predicate, Predicate> dataTypePredicateUnifyTable;
 	
 
-    private boolean generatingREPLACE = true;
+    private final boolean generatingREPLACE;
+	private final boolean isSI;
 
-	private boolean isDistinct = false;
-	private boolean isOrderBy = false;
-	private boolean isSI = false;
-
-	private boolean havingCond = false;
-	private String havingStr = "";
+    /**
+     * Mutable (query-dependent)
+     */
+    private boolean isDistinct = false;
+    private boolean isOrderBy = false;
 
 	private Map<String, Integer> uriRefIds;
 
@@ -167,24 +152,55 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 *            com.mysql.jdbc.Driver.
 	 * @param sqladapter
 	 *            This contains the syntax that each DB uses.
+     *
+     * TODO: remove
 	 */
+    @Deprecated
 	public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil,
-			SQLDialectAdapter sqladapter) {
+                        SQLDialectAdapter sqladapter) {
 		this.metadata = metadata;
 		this.jdbcutil = jdbcutil;
 		this.sqladapter = sqladapter;
 		dataTypePredicateUnifyTable = buildPredicateUnifyTable();
+        this.isSI = false;
+        this.generatingREPLACE = true;
 	}
  
 
-	public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace) {
-        this(metadata, jdbcutil, sqladapter);
-        this.generatingREPLACE = sqlGenerateReplace;
+    @AssistedInject
+	private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource, QuestPreferences preferences) {
+        // TODO: make these attributes immutable.
+        //TODO: avoid the null value
+        this(metadata, dataSource, null, preferences);
     }
 
-    public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace,
-                        boolean isSI,  Map<String, Integer> uriRefIds) {
-        this(metadata, jdbcutil, sqladapter, sqlGenerateReplace);
+    @AssistedInject
+    private SQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource,
+                         @Assisted Map<String, Integer> uriRefIds, QuestPreferences preferences) {
+        String driverURI = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
+
+        this.metadata = metadata;
+        this.jdbcutil = new JDBCUtility(driverURI);
+        this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI);
+        this.dataTypePredicateUnifyTable = buildPredicateUnifyTable();
+
+        this.generatingREPLACE = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
+
+        String aBoxMode = (String) preferences.get(QuestPreferences.ABOX_MODE);
+        this.isSI = aBoxMode.equals(QuestConstants.CLASSIC);
+        this.uriRefIds = uriRefIds;
+    }
+
+    /**
+     * For clone purposes only
+     */
+    private SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqlAdapter, boolean generatingReplace,
+                         boolean isSI, Map<String, Integer> uriRefIds) {
+        this.metadata = metadata;
+        this.jdbcutil = jdbcutil;
+        this.sqladapter = sqlAdapter;
+        this.dataTypePredicateUnifyTable = buildPredicateUnifyTable();
+        this.generatingREPLACE = generatingReplace;
         this.isSI = isSI;
         this.uriRefIds = uriRefIds;
     }
@@ -195,7 +211,7 @@ public class SQLGenerator implements SQLQueryGenerator {
      *
      * @return A cloned object without any query-dependent value
      */
-    public SQLQueryGenerator cloneGenerator() {
+    public NativeQueryGenerator cloneIfNecessary() {
         return new SQLGenerator(metadata.clone(), jdbcutil, sqladapter, generatingREPLACE,
                 isSI, uriRefIds);
     }
@@ -1838,9 +1854,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 						repl = replace1
 								+ sqladapter
 										.sqlCast(
-												getSQLString(currentTerm,
-														index, false),
-												Types.VARCHAR) + replace2;
+                                                getSQLString(currentTerm,
+                                                        index, false),
+                                                Types.VARCHAR) + replace2;
 					}
 					vex.add(repl);
 					if (termIndex < split.length) {

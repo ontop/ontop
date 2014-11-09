@@ -62,7 +62,7 @@ public class JDBCUtility implements Serializable {
 	 *            The driver class name.
 	 * @throws Exception
 	 */
-	public JDBCUtility(String className) throws Exception {
+	public JDBCUtility(String className) {
 		if (className.equals("org.postgresql.Driver")) {
 			driver = Driver.PGSQL;
 		} else if (className.equals("com.mysql.jdbc.Driver")) {

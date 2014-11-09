@@ -6,8 +6,6 @@ import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAModel;
 
-import java.util.Properties;
-
 public class OBDACoreModule extends OBDAAbstractModule {
 
     public OBDACoreModule(OBDAProperties configuration) {
@@ -16,7 +14,7 @@ public class OBDACoreModule extends OBDAAbstractModule {
 
     @Override
     protected void configure() {
-        configureBasically();
+        configurePreferences();
 
         Module nativeQLFactoryModule = buildFactory(ImmutableList.<Class>of(
                         OBDAModel.class,

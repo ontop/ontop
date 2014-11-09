@@ -22,20 +22,15 @@ package org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.OBDAException;
 
 /**
- * A general interface which should be use to implement new source query
- * generation which can than be integrated in to a technique wrapper
- * 
- * @author Manfred Gerstgrasser
- * 
+ * Generates a source query in a given native query language.
+ *
  */
-
-public interface SQLQueryGenerator extends Serializable {
+public interface NativeQueryGenerator extends Serializable {
 
 	/**
 	 * Translates the given datalog program into a source query, which can later
@@ -47,21 +42,10 @@ public interface SQLQueryGenerator extends Serializable {
 	 * @throws Exception
 	 */
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException;
-	/**
-	 * Updates the current view manager with the new given parameters
-	 * 
-	 * @param man
-	 *            the new prefix manager
-	 * @param onto
-	 *            the new dlliter ontology
-	 * @param uris
-	 *            the set of URIs of the ontologies integrated into the dlliter
-	 *            ontology
-	 */
-	// public void update(PrefixManager man, DLLiterOntology onto, Set<URI>
-	// uris);
 
-	// public ViewManager getViewManager();
-
-    public SQLQueryGenerator cloneGenerator();
+    /**
+     * If the generator is immutable, the generator
+     * can return itself instead of a clone.
+     */
+    public NativeQueryGenerator cloneIfNecessary();
 }

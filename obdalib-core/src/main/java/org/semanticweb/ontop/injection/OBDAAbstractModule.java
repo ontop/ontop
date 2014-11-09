@@ -62,8 +62,12 @@ public abstract class OBDAAbstractModule extends AbstractModule {
     /**
      * TO be called by sub-classes, inside the configure() method.
      */
-    protected void configureBasically() {
+    protected void configurePreferences() {
         bind(OBDAProperties.class).toInstance(configuration);
+    }
+
+    protected OBDAProperties getPreferences() {
+        return configuration;
     }
 
 }
