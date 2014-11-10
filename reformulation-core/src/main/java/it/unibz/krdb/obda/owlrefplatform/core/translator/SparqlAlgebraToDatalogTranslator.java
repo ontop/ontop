@@ -775,38 +775,36 @@ public class SparqlAlgebraToDatalogTranslator {
 			if (predicateUri == null) {
 				// NO OP, already assigned
 			} 
-			else if (predicateUri.equals(
-					OBDAVocabulary.RDFS_LITERAL_URI)) {
-				predicate = OBDAVocabulary.RDFS_LITERAL;
+			else if (predicateUri.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
+				predicate = ofac.getDataTypePredicateLiteral(); // OBDAVocabulary.RDFS_LITERAL;
 			} 
-			else if (predicateUri.equals(
-                    OBDAVocabulary.XSD_NEGATIVE_INTEGER)) {
-                predicate = OBDAVocabulary.XSD_NEGATIVE_INTEGER;
-            } else if (predicateUri.equals(
-                    OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER)) {
-                predicate = OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER;
-            } else if (predicateUri.equals(
-                    OBDAVocabulary.XSD_POSITIVE_INTEGER)) {
-                predicate = OBDAVocabulary.XSD_POSITIVE_INTEGER;
-            } else if (predicateUri.equals(
-                    OBDAVocabulary.XSD_NON_POSITIVE_INTEGER)) {
-                predicate = OBDAVocabulary.XSD_NON_POSITIVE_INTEGER;
-            } else if (predicateUri.equals(
-                    OBDAVocabulary.XSD_UNSIGNED_INT)) {
-                predicate = OBDAVocabulary.XSD_UNSIGNED_INT;
-			} else if (predicateUri.equals(
-					OBDAVocabulary.XSD_INT_URI)) {
-				predicate = OBDAVocabulary.XSD_INT;
-			} else if (predicateUri.equals(
-					OBDAVocabulary.XSD_INTEGER_URI)) {
-				predicate = OBDAVocabulary.XSD_INTEGER;
-			} else if (predicateUri.equals(
-                OBDAVocabulary.XSD_LONG_URI)) {
-                predicate = OBDAVocabulary.XSD_LONG;
-            } else if (predicateUri.equals(
-					OBDAVocabulary.XSD_STRING_URI)) {
-				predicate = OBDAVocabulary.XSD_STRING;
+			else if (predicateUri.equals(OBDAVocabulary.XSD_STRING_URI)) {
+				predicate = ofac.getDataTypePredicateString(); // .XSD_STRING;
 			} 
+            else if (predicateUri.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
+				predicate = ofac.getDataTypePredicateInteger(); // OBDAVocabulary.XSD_INTEGER;
+			} 
+			else if (predicateUri.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)) {
+                predicate = ofac.getDataTypePredicateNegativeInteger(); // .XSD_NEGATIVE_INTEGER;
+            } 
+            else if (predicateUri.equals(OBDAVocabulary.XSD_INT_URI)) {
+				predicate = ofac.getDataTypePredicateInt(); // OBDAVocabulary.XSD_INT;
+			} 
+			else if (predicateUri.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)) { // R: URI was missing from the name
+                predicate = ofac.getDataTypePredicateNonNegativeInteger(); // .XSD_NON_NEGATIVE_INTEGER;
+            } 
+            else if (predicateUri.equals(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) { // R: URI was missing from the name
+                predicate = ofac.getDataTypePredicateUnsignedInt(); // .XSD_UNSIGNED_INT;
+			} 
+            else if (predicateUri.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)) { // R: URI was missing from the name
+                predicate = ofac.getDataTypePredicatePositiveInteger(); // .XSD_POSITIVE_INTEGER;
+            } 
+            else if (predicateUri.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)) { // R: URI was missing from the name
+                predicate = ofac.getDataTypePredicateNonPositiveInteger(); // OBDAVocabulary.XSD_NON_POSITIVE_INTEGER;
+            } 
+			else if (predicateUri.equals(OBDAVocabulary.XSD_LONG_URI)) {
+				predicate = ofac.getDataTypePredicateLong(); //OBDAVocabulary.XSD_LONG;
+	        } 
 			else if (predicateUri.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
 				predicate = ofac.getDataTypePredicateDecimal(); // OBDAVocabulary.XSD_DECIMAL;
 			} 

@@ -198,7 +198,6 @@ public class OBDAVocabulary {
     public static final Predicate XSD_LONG = new DataTypePredicateImpl(
             XSD_LONG_URI, COL_TYPE.LONG);
 
-    // R: stopped here
 	public static final Predicate XSD_DECIMAL = new DataTypePredicateImpl(
 			XSD_DECIMAL_URI, COL_TYPE.DECIMAL);
 

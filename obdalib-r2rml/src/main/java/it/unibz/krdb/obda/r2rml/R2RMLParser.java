@@ -312,7 +312,7 @@ public class R2RMLParser {
 				pred = fac.getUriTemplatePredicate(1);
 			} else {
 
-				pred = OBDAVocabulary.RDFS_LITERAL;
+				pred = fac.getDataTypePredicateLiteral(); // .RDFS_LITERAL;
 			}
 
 			// if the literal has a language property or a datatype property we
@@ -376,7 +376,7 @@ public class R2RMLParser {
 		
 		if (lan != null) {
 			Term lang = fac.getConstantLiteral(lan.toLowerCase());
-			Predicate literal = OBDAVocabulary.RDFS_LITERAL_LANG;
+			Predicate literal = fac.getDataTypePredicateLiteralLang();
 			Term langAtom = fac.getFunction(literal, objectAtom, lang);
 			objectAtom = langAtom;
 		}
@@ -542,7 +542,7 @@ public class R2RMLParser {
 			// simple LITERAL 
 		case 3:
 			uriTemplate = terms.remove(0);
-			pred = OBDAVocabulary.RDFS_LITERAL; 
+			pred = fac.getDataTypePredicateLiteral(); // OBDAVocabulary.RDFS_LITERAL; 
 			break;
 		}
 

@@ -164,9 +164,14 @@ public class ExpressionEvaluator {
 					return expr;
 				}
 			}
-			else if (p == OBDAVocabulary.XSD_INTEGER || p == OBDAVocabulary.XSD_NEGATIVE_INTEGER || p == OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER
-                    || p == OBDAVocabulary.XSD_INT || p == OBDAVocabulary.XSD_NON_POSITIVE_INTEGER || p ==OBDAVocabulary.XSD_POSITIVE_INTEGER ||
-                    p == OBDAVocabulary.XSD_UNSIGNED_INT || p == OBDAVocabulary.XSD_LONG) {
+			else if (p == fac.getDataTypePredicateInteger() || 
+					p == fac.getDataTypePredicateNegativeInteger() || 
+                    p == fac.getDataTypePredicateInt() || 
+        			p == fac.getDataTypePredicateNonNegativeInteger() ||
+                    p == fac.getDataTypePredicateUnsignedInt() || 
+                    p == fac.getDataTypePredicatePositiveInteger() ||
+                    p == fac.getDataTypePredicateNonPositiveInteger() || 
+                    p == fac.getDataTypePredicateLong()) {
 
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
@@ -195,7 +200,7 @@ public class ExpressionEvaluator {
 					return expr;
 				}
 			}
-			else if (p == OBDAVocabulary.XSD_STRING) {
+			else if (p == fac.getDataTypePredicateString()) {
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					if (value.toString().length() == 0) {
@@ -208,7 +213,7 @@ public class ExpressionEvaluator {
 					return expr;
 				}
 			}
-			else if (p == OBDAVocabulary.RDFS_LITERAL) {
+			else if (p == fac.getDataTypePredicateLiteral()) {
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					if (value.toString().length() == 0) {
@@ -499,26 +504,26 @@ public class ExpressionEvaluator {
 			switch(type) {
 				case OBJECT:
 				case STRING:
-					return OBDAVocabulary.XSD_STRING;
+					return fac.getDataTypePredicateString(); // .XSD_STRING;
 				case LITERAL:
 				case LITERAL_LANG:
-					return OBDAVocabulary.RDFS_LITERAL;
+					return fac.getDataTypePredicateLiteral(); // .RDFS_LITERAL;
 				case INTEGER:
-					return OBDAVocabulary.XSD_INTEGER;
+					return fac.getDataTypePredicateInteger(); // OBDAVocabulary.XSD_INTEGER;
                 case NEGATIVE_INTEGER:
-                    return OBDAVocabulary.XSD_NEGATIVE_INTEGER;
-                case NON_NEGATIVE_INTEGER:
-                    return OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER;
-                case POSITIVE_INTEGER:
-                    return OBDAVocabulary.XSD_POSITIVE_INTEGER;
-                case NON_POSITIVE_INTEGER:
-                    return OBDAVocabulary.XSD_NON_POSITIVE_INTEGER;
+                    return fac.getDataTypePredicateNegativeInteger(); // OBDAVocabulary.XSD_NEGATIVE_INTEGER;
                 case INT:
-                    return OBDAVocabulary.XSD_INT;
+                    return fac.getDataTypePredicateInt(); // OBDAVocabulary.XSD_INT;
+                case NON_NEGATIVE_INTEGER:
+                    return fac.getDataTypePredicateNonNegativeInteger(); //.XSD_NON_NEGATIVE_INTEGER;
                 case UNSIGNED_INT:
-                    return OBDAVocabulary.XSD_UNSIGNED_INT;
+                    return fac.getDataTypePredicateUnsignedInt(); // .XSD_UNSIGNED_INT;
+                case POSITIVE_INTEGER:
+                    return fac.getDataTypePredicatePositiveInteger(); // .XSD_POSITIVE_INTEGER;
+                case NON_POSITIVE_INTEGER:
+                    return fac.getDataTypePredicateNonPositiveInteger(); // OBDAVocabulary.XSD_NON_POSITIVE_INTEGER;
                 case LONG:
-                    return OBDAVocabulary.XSD_LONG;
+                    return fac.getDataTypePredicateLong(); // OBDAVocabulary.XSD_LONG;
 				case DECIMAL:
 					return fac.getDataTypePredicateDecimal(); // OBDAVocabulary.XSD_DECIMAL;
 				case DOUBLE:
@@ -537,7 +542,7 @@ public class ExpressionEvaluator {
                     return fac.getDataTypePredicateYear(); // OBDAVocabulary.XSD_YEAR;
 				default:
 					// For other data types
-					return OBDAVocabulary.XSD_STRING;
+					return fac.getDataTypePredicateString(); // OBDAVocabulary.XSD_STRING;
 			}
 		} else {
 			throw new RuntimeException("Unknown term type");
@@ -549,17 +554,17 @@ public class ExpressionEvaluator {
 	}
 	
 	private boolean isNumeric(Predicate pred) {
-		return (pred.equals(OBDAVocabulary.XSD_INTEGER) || 
-				pred.equals(OBDAVocabulary.XSD_LONG) || 
-                pred.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER)|| 
-                pred.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER) ||
-                pred.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER) || 
-                pred.equals(OBDAVocabulary.XSD_INT) || 
-                pred.equals(OBDAVocabulary.XSD_UNSIGNED_INT) ||
+		return (pred.equals(fac.getDataTypePredicateInteger()) || 
+                pred.equals(fac.getDataTypePredicateNegativeInteger())|| 
+                pred.equals(fac.getDataTypePredicateInt()) || 
+                pred.equals(fac.getDataTypePredicateNonNegativeInteger()) || 
+                pred.equals(fac.getDataTypePredicateUnsignedInt()) ||
+                pred.equals(fac.getDataTypePredicatePositiveInteger()) ||
+                pred.equals(fac.getDataTypePredicateNonPositiveInteger()) || 
+				pred.equals(fac.getDataTypePredicateLong()) || 
 				pred.equals(fac.getDataTypePredicateDecimal()) ||
                 pred.equals(fac.getDataTypePredicateDouble()) || 
-                pred.equals(fac.getDataTypePredicateFloat())|| 
-                pred.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER));
+                pred.equals(fac.getDataTypePredicateFloat()));
 	}
 	
 	private boolean isNumeric(ValueConstant constant) {
@@ -848,8 +853,8 @@ public class ExpressionEvaluator {
 				/*
 				 * Evaluate both terms by comparing their datatypes
 				 */
-				if (pred1 == OBDAVocabulary.RDFS_LITERAL
-						&& pred2 == OBDAVocabulary.RDFS_LITERAL) {
+				if (pred1 == fac.getDataTypePredicateLiteral()
+						&& pred2 == fac.getDataTypePredicateLiteral()) {
 					/*
 					 * Special code to handle quality of Literals (plain, and
 					 * with language)

@@ -46,16 +46,16 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 		
 		builtinDatatypes = new HashSet<Predicate>();
-		builtinDatatypes.add(OBDAVocabulary.RDFS_LITERAL);
-		builtinDatatypes.add(OBDAVocabulary.XSD_STRING);
-		builtinDatatypes.add(OBDAVocabulary.XSD_INTEGER);
-		builtinDatatypes.add(OBDAVocabulary.XSD_NEGATIVE_INTEGER);
-		builtinDatatypes.add(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER);
-		builtinDatatypes.add(OBDAVocabulary.XSD_POSITIVE_INTEGER);
-		builtinDatatypes.add(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER);
-		builtinDatatypes.add(OBDAVocabulary.XSD_INT);
-		builtinDatatypes.add(OBDAVocabulary.XSD_UNSIGNED_INT);
-		builtinDatatypes.add(OBDAVocabulary.XSD_LONG);
+		builtinDatatypes.add(dfac.getDataTypePredicateLiteral()); //  .RDFS_LITERAL);
+		builtinDatatypes.add(dfac.getDataTypePredicateString()); // .XSD_STRING);
+		builtinDatatypes.add(dfac.getDataTypePredicateInteger()); //OBDAVocabulary.XSD_INTEGER);
+		builtinDatatypes.add(dfac.getDataTypePredicateNegativeInteger()); // XSD_NEGATIVE_INTEGER);
+		builtinDatatypes.add(dfac.getDataTypePredicateInt()); // OBDAVocabulary.XSD_INT);
+		builtinDatatypes.add(dfac.getDataTypePredicateNonNegativeInteger()); //OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER);
+		builtinDatatypes.add(dfac.getDataTypePredicateUnsignedInt()); // OBDAVocabulary.XSD_UNSIGNED_INT);
+		builtinDatatypes.add(dfac.getDataTypePredicatePositiveInteger()); //.XSD_POSITIVE_INTEGER);
+		builtinDatatypes.add(dfac.getDataTypePredicateNonPositiveInteger()); // OBDAVocabulary.XSD_NON_POSITIVE_INTEGER);
+		builtinDatatypes.add(dfac.getDataTypePredicateLong()); // OBDAVocabulary.XSD_LONG);
 		builtinDatatypes.add(dfac.getDataTypePredicateDecimal()); // OBDAVocabulary.XSD_DECIMAL);
 		builtinDatatypes.add(dfac.getDataTypePredicateDouble()); // OBDAVocabulary.XSD_DOUBLE);
 		builtinDatatypes.add(dfac.getDataTypePredicateFloat()); // OBDAVocabulary.XSD_FLOAT);

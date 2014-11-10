@@ -173,7 +173,7 @@ public class DirectMappingAxiom {
 		for(int i=0;i<table.getNumOfAttributes();i++){
 			Attribute att = table.getAttribute(i+1);
 			Predicate type = typeMapper.getPredicate(att.getType());
-			if (type.equals(OBDAVocabulary.RDFS_LITERAL)) {
+			if (type.equals(df.getDataTypePredicateLiteral())) {
 				Variable objV = df.getVariable(att.getName());
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
