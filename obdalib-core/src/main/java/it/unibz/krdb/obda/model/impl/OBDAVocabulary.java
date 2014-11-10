@@ -198,6 +198,7 @@ public class OBDAVocabulary {
     public static final Predicate XSD_LONG = new DataTypePredicateImpl(
             XSD_LONG_URI, COL_TYPE.LONG);
 
+    // R: stopped here
 	public static final Predicate XSD_DECIMAL = new DataTypePredicateImpl(
 			XSD_DECIMAL_URI, COL_TYPE.DECIMAL);
 
@@ -228,10 +229,10 @@ public class OBDAVocabulary {
     XSD_UNSIGNED_INT, XSD_LONG, XSD_FLOAT, XSD_DECIMAL, XSD_DOUBLE,
 			XSD_DATETIME, XSD_BOOLEAN, XSD_DATE, XSD_TIME, XSD_YEAR };
 	
-	public static final Predicate[] QUEST_NUMERICAL_DATATYPES = new Predicate[] {
-			XSD_INTEGER, XSD_NEGATIVE_INTEGER,
-            XSD_NON_NEGATIVE_INTEGER, XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER, XSD_INT,
-            XSD_UNSIGNED_INT, XSD_FLOAT, XSD_DECIMAL, XSD_DOUBLE, XSD_LONG };
+//	public static final Predicate[] QUEST_NUMERICAL_DATATYPES = new Predicate[] {
+//			XSD_INTEGER, XSD_NEGATIVE_INTEGER,
+//           XSD_NON_NEGATIVE_INTEGER, XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER, XSD_INT,
+//            XSD_UNSIGNED_INT, XSD_FLOAT, XSD_DECIMAL, XSD_DOUBLE, XSD_LONG };
 
 	/* Common namespaces and prefixes */
 

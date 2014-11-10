@@ -4,7 +4,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
@@ -20,7 +22,7 @@ import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 
 public class OntologyVocabularyImpl implements OntologyVocabulary {
 
-	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private static OntologyFactory ofac;
 	
 	// signature
 	
@@ -36,26 +38,29 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	// auxiliary symbols and built-in datatypes 
 	
-	private final static Set<Predicate> builtinDatatypes = initializeReserved();
+	private final static Set<Predicate> builtinDatatypes;
 
-	private static Set<Predicate> initializeReserved() { // static block
-		Set<Predicate> datatypes = new HashSet<Predicate>();
-		datatypes.add(OBDAVocabulary.RDFS_LITERAL);
-		datatypes.add(OBDAVocabulary.XSD_STRING);
-		datatypes.add(OBDAVocabulary.XSD_INTEGER);
-		datatypes.add(OBDAVocabulary.XSD_NEGATIVE_INTEGER);
-		datatypes.add(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER);
-		datatypes.add(OBDAVocabulary.XSD_POSITIVE_INTEGER);
-		datatypes.add(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER);
-		datatypes.add(OBDAVocabulary.XSD_INT);
-		datatypes.add(OBDAVocabulary.XSD_UNSIGNED_INT);
-		datatypes.add(OBDAVocabulary.XSD_FLOAT);
-		datatypes.add(OBDAVocabulary.XSD_LONG);
-		datatypes.add(OBDAVocabulary.XSD_DECIMAL);
-		datatypes.add(OBDAVocabulary.XSD_DOUBLE);
-		datatypes.add(OBDAVocabulary.XSD_DATETIME);
-		datatypes.add(OBDAVocabulary.XSD_BOOLEAN);
-		return datatypes;
+	static { // static block
+		ofac = OntologyFactoryImpl.getInstance();
+		
+		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+		
+		builtinDatatypes = new HashSet<Predicate>();
+		builtinDatatypes.add(OBDAVocabulary.RDFS_LITERAL);
+		builtinDatatypes.add(OBDAVocabulary.XSD_STRING);
+		builtinDatatypes.add(OBDAVocabulary.XSD_INTEGER);
+		builtinDatatypes.add(OBDAVocabulary.XSD_NEGATIVE_INTEGER);
+		builtinDatatypes.add(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER);
+		builtinDatatypes.add(OBDAVocabulary.XSD_POSITIVE_INTEGER);
+		builtinDatatypes.add(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER);
+		builtinDatatypes.add(OBDAVocabulary.XSD_INT);
+		builtinDatatypes.add(OBDAVocabulary.XSD_UNSIGNED_INT);
+		builtinDatatypes.add(OBDAVocabulary.XSD_LONG);
+		builtinDatatypes.add(dfac.getDataTypePredicateDecimal()); // OBDAVocabulary.XSD_DECIMAL);
+		builtinDatatypes.add(dfac.getDataTypePredicateDouble()); // OBDAVocabulary.XSD_DOUBLE);
+		builtinDatatypes.add(dfac.getDataTypePredicateFloat()); // OBDAVocabulary.XSD_FLOAT);
+		builtinDatatypes.add(dfac.getDataTypePredicateDateTime()); // OBDAVocabulary.XSD_DATETIME);
+		builtinDatatypes.add(dfac.getDataTypePredicateBoolean()); // OBDAVocabulary.XSD_BOOLEAN
 	}
 	
 	

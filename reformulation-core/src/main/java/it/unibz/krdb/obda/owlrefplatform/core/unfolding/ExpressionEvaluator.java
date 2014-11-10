@@ -148,7 +148,7 @@ public class ExpressionEvaluator {
 		} else if (p instanceof NumericalOperationPredicate) {
 			return evalNumericalOperation(expr);
 		} else if (p instanceof DataTypePredicate) {
-			if (p == OBDAVocabulary.XSD_BOOLEAN) {
+			if (p == fac.getDataTypePredicateBoolean()) { // OBDAVocabulary.XSD_BOOLEAN
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					String valueString = value.getValue();
@@ -164,7 +164,7 @@ public class ExpressionEvaluator {
 					return expr;
 				}
 			}
-			if (p == OBDAVocabulary.XSD_INTEGER || p == OBDAVocabulary.XSD_NEGATIVE_INTEGER || p == OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER
+			else if (p == OBDAVocabulary.XSD_INTEGER || p == OBDAVocabulary.XSD_NEGATIVE_INTEGER || p == OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER
                     || p == OBDAVocabulary.XSD_INT || p == OBDAVocabulary.XSD_NON_POSITIVE_INTEGER || p ==OBDAVocabulary.XSD_POSITIVE_INTEGER ||
                     p == OBDAVocabulary.XSD_UNSIGNED_INT || p == OBDAVocabulary.XSD_LONG) {
 
@@ -181,8 +181,7 @@ public class ExpressionEvaluator {
 					return expr;
 				}
 			}
-
-			if (p == OBDAVocabulary.XSD_DOUBLE || p == OBDAVocabulary.XSD_FLOAT || p== OBDAVocabulary.XSD_DECIMAL) {
+			else if (p == fac.getDataTypePredicateDouble() || p == fac.getDataTypePredicateFloat() || p== fac.getDataTypePredicateDecimal()) {
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					double valueD = Double.parseDouble(value.getValue());
@@ -196,7 +195,7 @@ public class ExpressionEvaluator {
 					return expr;
 				}
 			}
-			if (p == OBDAVocabulary.XSD_STRING) {
+			else if (p == OBDAVocabulary.XSD_STRING) {
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					if (value.toString().length() == 0) {
@@ -209,7 +208,7 @@ public class ExpressionEvaluator {
 					return expr;
 				}
 			}
-			if (p == OBDAVocabulary.RDFS_LITERAL) {
+			else if (p == OBDAVocabulary.RDFS_LITERAL) {
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					if (value.toString().length() == 0) {
@@ -495,6 +494,7 @@ public class ExpressionEvaluator {
 			return function.getFunctionSymbol();
 		} else if (term instanceof Constant) {
 			Constant constant = (Constant) term;
+			// TODO: get rid of the switch
 			COL_TYPE type = constant.getType();
 			switch(type) {
 				case OBJECT:
@@ -520,21 +520,21 @@ public class ExpressionEvaluator {
                 case LONG:
                     return OBDAVocabulary.XSD_LONG;
 				case DECIMAL:
-					return OBDAVocabulary.XSD_DECIMAL;
+					return fac.getDataTypePredicateDecimal(); // OBDAVocabulary.XSD_DECIMAL;
 				case DOUBLE:
-					return OBDAVocabulary.XSD_DOUBLE;
+					return fac.getDataTypePredicateDouble(); // OBDAVocabulary.XSD_DOUBLE;
                 case FLOAT:
-                    return OBDAVocabulary.XSD_FLOAT;
+                    return fac.getDataTypePredicateFloat(); // OBDAVocabulary.XSD_FLOAT;
 				case DATETIME:
-					return OBDAVocabulary.XSD_DATETIME;
-                case YEAR:
-                    return OBDAVocabulary.XSD_YEAR;
-                case DATE:
-                    return OBDAVocabulary.XSD_DATE;
-                case TIME:
-                    return OBDAVocabulary.XSD_TIME;
+					return fac.getDataTypePredicateDateTime(); // OBDAVocabulary.XSD_DATETIME;
 				case BOOLEAN:
-					return OBDAVocabulary.XSD_BOOLEAN;
+					return fac.getDataTypePredicateBoolean(); // OBDAVocabulary.XSD_BOOLEAN;
+                case DATE:
+                    return fac.getDataTypePredicateDate(); // OBDAVocabulary.XSD_DATE;
+                case TIME:
+                    return fac.getDataTypePredicateTime(); // OBDAVocabulary.XSD_TIME;
+                case YEAR:
+                    return fac.getDataTypePredicateYear(); // OBDAVocabulary.XSD_YEAR;
 				default:
 					// For other data types
 					return OBDAVocabulary.XSD_STRING;
@@ -545,14 +545,21 @@ public class ExpressionEvaluator {
 	}
 	
 	private boolean isDouble(Predicate pred) {
-		return (pred.equals(OBDAVocabulary.XSD_DOUBLE) || pred.equals(OBDAVocabulary.XSD_FLOAT));
+		return (pred.equals(fac.getDataTypePredicateDouble()) || pred.equals(fac.getDataTypePredicateFloat()));
 	}
 	
 	private boolean isNumeric(Predicate pred) {
-		return (pred.equals(OBDAVocabulary.XSD_INTEGER) || pred.equals(OBDAVocabulary.XSD_LONG) || pred.equals(OBDAVocabulary.XSD_DECIMAL) ||
-                pred.equals(OBDAVocabulary.XSD_DOUBLE) || pred.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER)|| pred.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER) ||
-                pred.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER) || pred.equals(OBDAVocabulary.XSD_INT) || pred.equals(OBDAVocabulary.XSD_UNSIGNED_INT) ||
-                pred.equals(OBDAVocabulary.XSD_FLOAT)|| pred.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER));
+		return (pred.equals(OBDAVocabulary.XSD_INTEGER) || 
+				pred.equals(OBDAVocabulary.XSD_LONG) || 
+                pred.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER)|| 
+                pred.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER) ||
+                pred.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER) || 
+                pred.equals(OBDAVocabulary.XSD_INT) || 
+                pred.equals(OBDAVocabulary.XSD_UNSIGNED_INT) ||
+				pred.equals(fac.getDataTypePredicateDecimal()) ||
+                pred.equals(fac.getDataTypePredicateDouble()) || 
+                pred.equals(fac.getDataTypePredicateFloat())|| 
+                pred.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER));
 	}
 	
 	private boolean isNumeric(ValueConstant constant) {

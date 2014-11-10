@@ -24,6 +24,7 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.io.Serializable;
@@ -105,7 +106,7 @@ public class JDBCUtility implements Serializable {
 	public String getSQLLexicalForm(Function typedrdfliteral) {
 		String sql = null;
 		Predicate type = typedrdfliteral.getFunctionSymbol();
-		if (type == OBDAVocabulary.XSD_BOOLEAN) {
+		if (type == OBDADataFactoryImpl.getInstance().getDataTypePredicateBoolean()) {
 			ValueConstant c = (ValueConstant) typedrdfliteral.getTerms().get(0);
 			sql = getSQLLexicalFormBoolean(c);
 		} else {
