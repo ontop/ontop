@@ -296,6 +296,9 @@ public class Unifier {
      *
      * ROMAN: careful -- does not appear to work correctly with AnonymousVariables
      *
+     * TODO: discuss about the order of the two terms (when it matters, when not). This seems
+     * to be very important.
+     *
      * @param term1
      * @param term2
      * @return
@@ -339,7 +342,11 @@ public class Unifier {
             P2<VariableImpl, Term> proposedTerms = getTypePropagatingSubstitution((Function) term1, term2);
             t1 = proposedTerms._1();
             t2 = proposedTerms._2();
-        } else {
+        }
+        /**
+         * TODO: explain why the two terms can be "reversed".
+         */
+        else {
             t1 = (VariableImpl)term2;
             t2 = term1;
         }
@@ -361,9 +368,11 @@ public class Unifier {
 		else if (t2 instanceof FunctionalTermImpl) {
 			FunctionalTermImpl fterm = (FunctionalTermImpl) t2;
             /**
-             * Prevents URI(URI(URI(URI(...x))) to happen.
+             * Prevents URI(x) -> URI(URI(x)) (type propagation mode) .
+             * Also prevents the unification p(x) -> x (normal mode).
              */
-			if (fterm.containsTerm(t1) && (t1 instanceof Function))
+            boolean functionalTermTypePropagationMode = propagateType && (t1 instanceof Function);
+			if (fterm.containsTerm(t1) && ((!propagateType) || functionalTermTypePropagationMode))
 				return null;
 			else
 				return new Substitution(t1, t2);
