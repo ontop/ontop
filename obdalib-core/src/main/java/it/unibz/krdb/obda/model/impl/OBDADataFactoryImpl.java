@@ -87,20 +87,28 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Deprecated
 	public PredicateImpl getPredicate(String name, int arity) {
-		if (arity == 1) {
-			return new PredicateImpl(name, arity,
-					new COL_TYPE[] { COL_TYPE.OBJECT });
-		} else {
+//		if (arity == 1) {
+//			return new PredicateImpl(name, arity, new COL_TYPE[] { COL_TYPE.OBJECT });
+//		} else {
 			return new PredicateImpl(name, arity, null);
-		}
+//		}
 	}
+	
+	@Override
+	public Predicate getPredicate(String uri, COL_TYPE[] types) {
+		return new PredicateImpl(uri, types.length, types);
+	}
+
 
 	public Predicate getObjectPropertyPredicate(String name) {
 		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 	}
 
 	public Predicate getDataPropertyPredicate(String name) {
-		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL }); 
+	}
+	public Predicate getDataPropertyPredicate(String name, COL_TYPE type) {
+		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, type }); // COL_TYPE.LITERAL
 	}
 
 	public Predicate getClassPredicate(String name) {
@@ -490,11 +498,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	
 	@Override
-	public Predicate getPredicate(String uri, int arity, COL_TYPE[] types) {
-		return new PredicateImpl(uri, arity, types);
-	}
-
-	@Override
 	public BNode getConstantBNode(String name) {
 		return new BNodeConstantImpl(name);
 	}
@@ -512,11 +515,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public Constant getConstantFalse() {
 		return OBDAVocabulary.FALSE;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateUnsupported(String uri) {
-		return getDataTypePredicateUnsupported(uri);
 	}
 
 	@Override

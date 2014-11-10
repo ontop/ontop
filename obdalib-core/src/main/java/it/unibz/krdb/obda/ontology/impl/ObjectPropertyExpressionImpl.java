@@ -58,7 +58,7 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 		this.isTop = predicate.getName().equals(owlTopObjectPropertyIRI);
 		this.isBottom = predicate.getName().equals(owlBottomObjectPropertyIRI);
 		if (isTop || isBottom) 
-			this.inverseProperty = this;			
+			this.inverseProperty = this;   // [R1] in the grammar simplification rules
 		else
 			this.inverseProperty = new ObjectPropertyExpressionImpl(p, !isInverse, this);
 		

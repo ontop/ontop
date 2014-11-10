@@ -830,8 +830,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				predicate = OBDAVocabulary.XSD_YEAR;
 			} else {
 
-				predicate = ofac.getPredicate(predicateUri, 1,
-						new COL_TYPE[] { subjectType });
+				predicate = ofac.getPredicate(predicateUri, new COL_TYPE[] { subjectType });
 
 			}
 
@@ -848,8 +847,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 			if (p instanceof URIImpl) {
 				String predicateUri = p.stringValue();
-				predicate = ofac.getPredicate(predicateUri, 2, new COL_TYPE[] {
-						subjectType, objectType });
+				predicate = ofac.getPredicate(predicateUri, new COL_TYPE[] { subjectType, objectType });
 			} else if (p == null) {
 				predicate = OBDAVocabulary.QUEST_TRIPLE_PRED;
 				terms.add(1, ofac.getVariable(pred.getName()));

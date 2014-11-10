@@ -260,7 +260,7 @@ public class TurtleParser extends Parser {
 
 			      int arity = variableSet.size();
 			      List<Term> distinguishVariables = new ArrayList<Term>(variableSet);
-			      Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
+			      Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
 			      
 			      // Create a new rule
 			      List<Function> triples = t1;
@@ -651,7 +651,7 @@ public class TurtleParser extends Parser {
 			          Predicate predicate = dfac.getClassPredicate(c.getURI());
 			          atom = dfac.getFunction(predicate, subject);
 			        } else {
-			          Predicate predicate = dfac.getPredicate(v1.toString(), 2, null); // the data type cannot be determined here!
+			          Predicate predicate = dfac.getPredicate(v1.toString(), 2); // the data type cannot be determined here!
 			          atom = dfac.getFunction(predicate, subject, object);
 			        }
 			        value.add(atom);
@@ -687,7 +687,7 @@ public class TurtleParser extends Parser {
 					          Predicate predicate = dfac.getClassPredicate(c.getURI());
 					          atom = dfac.getFunction(predicate, subject);
 					        } else {
-					          Predicate predicate = dfac.getPredicate(v2.toString(), 2, null); // the data type cannot be determined here!
+					          Predicate predicate = dfac.getPredicate(v2.toString(), 2); // the data type cannot be determined here!
 					          atom = dfac.getFunction(predicate, subject, object);
 					        }
 					        value.add(atom);

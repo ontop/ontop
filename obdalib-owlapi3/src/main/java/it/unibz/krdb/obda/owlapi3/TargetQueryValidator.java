@@ -70,18 +70,19 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 
 			String debugMsg = "The predicate: [" + p.getName().toString() + "]";
 			if (isPredicateValid) {
-				COL_TYPE colType[] = null;
+				Predicate predicate;
 				if (isClass) {
-					colType = new COL_TYPE[] { COL_TYPE.OBJECT };
+					predicate = dataFactory.getClassPredicate(p.getName());
 					debugMsg += " is a Class.";
 				} else if (isObjectProp) {
-					colType = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT };
+					predicate = dataFactory.getObjectPropertyPredicate(p.getName());
 					debugMsg += " is an Object property.";
 				} else if (isDataProp) {
-					colType = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL };
+					predicate = dataFactory.getDataPropertyPredicate(p.getName(), COL_TYPE.LITERAL);
 					debugMsg += " is a Data property.";
 				}
-				Predicate predicate = dataFactory.getPredicate(p.getName(), atom.getArity(), colType);
+				else
+					predicate = dataFactory.getPredicate(p.getName(), atom.getArity());
 				atom.setPredicate(predicate); // TODO Fix the API!
 			} else {
 				invalidPredicates.add(p.getName().toString());

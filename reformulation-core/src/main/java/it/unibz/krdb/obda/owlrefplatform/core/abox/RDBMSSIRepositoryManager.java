@@ -2693,7 +2693,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		List<Function> bodyAtoms = new LinkedList<Function>();
 
-		headPredicate = dfac.getPredicate("m", 2, new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
+		headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
 		headTerms.add(dfac.getVariable("X"));
 		headTerms.add(dfac.getVariable("Y"));
 
