@@ -124,7 +124,7 @@ public class Unifier {
 			// We have two cases, unifying 'simple' terms, and unifying function terms. 
 			if (!(term1 instanceof Function) || !(term2 instanceof Function)) {
 				
-				if (!mgu.compose(term1, term2))
+				if (!mgu.compose(term1, term2, typePropagation))
 					return null;
 				
 				changed = true;
@@ -194,11 +194,15 @@ public class Unifier {
      * @return true if the substitution exists (false if it does not)
 	 */
 	public boolean compose(Term term1, Term term2) {
-		Substitution s = getSubstitution(term1, term2);
+        return compose(term1, term2, false);
+	}
+
+    private boolean compose(Term term1, Term term2, boolean typePropagation) {
+        Substitution s = getSubstitution(term1, term2, typePropagation);
 
         boolean acceptSubstitution = putSubstitution(s);
         return acceptSubstitution;
-	}
+    }
 
     /**
      * If there is a non-neutral substitution,
@@ -356,7 +360,10 @@ public class Unifier {
 		} 
 		else if (t2 instanceof FunctionalTermImpl) {
 			FunctionalTermImpl fterm = (FunctionalTermImpl) t2;
-			if (fterm.containsTerm(t1))
+            /**
+             * Prevents URI(URI(URI(URI(...x))) to happen.
+             */
+			if (fterm.containsTerm(t1) && (t1 instanceof Function))
 				return null;
 			else
 				return new Substitution(t1, t2);
