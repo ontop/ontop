@@ -665,7 +665,7 @@ public class SQLGenerator implements SQLQueryGenerator {
         // log.debug("Before pushing equalities: \n{}", cq);
 
         // TODO: Check this!!!
-        EQNormalizer.enforceEqualities(cq);
+        // EQNormalizer.enforceEqualities(cq);
 
         // log.debug("Before folding Joins: \n{}", cq);
 
@@ -1237,6 +1237,7 @@ public class SQLGenerator implements SQLQueryGenerator {
             List<Function> atoms, QueryAliasIndex index, boolean processShared) {
         LinkedHashSet<String> equalities = new LinkedHashSet<String>();
 
+
         Set<Variable> currentLevelVariables = new LinkedHashSet<Variable>();
         if (processShared) {
             for (Function atom : atoms) {
@@ -1283,6 +1284,11 @@ public class SQLGenerator implements SQLQueryGenerator {
             }
 
         }
+
+        if(equalities.size() > 0){
+            throw new IllegalStateException("SHOULD NOT HAPPEN!");
+        }
+
         return equalities;
     }
 
