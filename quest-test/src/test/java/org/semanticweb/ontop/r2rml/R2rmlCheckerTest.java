@@ -25,12 +25,10 @@ import static org.junit.Assert.assertTrue;
 
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.mapping.MappingParser;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
@@ -44,7 +42,6 @@ import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -98,22 +95,14 @@ public class R2rmlCheckerTest {
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
 				QuestConstants.FALSE);
+        p.setCurrentValueOf(OBDAProperties.DB_NAME, "npd");
+        p.setCurrentValueOf(OBDAProperties.JDBC_URL,"jdbc:mysql://10.7.20.39/npd");
+        p.setCurrentValueOf(OBDAProperties.DB_USER, "fish");
+        p.setCurrentValueOf(OBDAProperties.DB_PASSWORD, "fish");
+        p.setCurrentValueOf(OBDAProperties.JDBC_DRIVER,"com.mysql.jdbc.Driver");
 
 		loadOBDA(p);
-
-		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
-		String username = "fish";
-		String password = "fish";
-		String driverclass = "com.mysql.jdbc.Driver";
-
-		OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-		// String sourceUrl = "http://example.org/customOBDA";
-		URI obdaURI = new File(r2rmlfile).toURI();
-		String sourceUrl = obdaURI.toString();
-		OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-				username, password, driverclass);
-
-		loadR2rml(p, dataSource);
+		loadR2rml(p);
 	}
 
 	@After
@@ -330,7 +319,7 @@ public class R2rmlCheckerTest {
 	 * @param p
 	 *            quest preferences for QuestOWL, dataSource for the model
 	 */
-	private void loadR2rml(QuestPreferences p, OBDADataSource dataSource)
+	private void loadR2rml(QuestPreferences p)
             throws IOException, InvalidMappingException, DuplicateMappingException, InvalidDataSourceException {
 		log.info("Loading r2rml file");
 
