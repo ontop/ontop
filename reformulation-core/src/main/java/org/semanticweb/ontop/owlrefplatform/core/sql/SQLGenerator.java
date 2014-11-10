@@ -1138,20 +1138,19 @@ public class SQLGenerator implements SQLQueryGenerator {
     private String getConditionsString(List<Function> atoms,
                                        QueryAliasIndex index, boolean processShared, String indent) {
 
-        LinkedHashSet<String> equalityConditions = new LinkedHashSet<String>();
-
+        //LinkedHashSet<String> equalityConditions = new LinkedHashSet<String>();
         // if (processShared)
-
         // guohui: After normalization, do we have shared variables?
-        // TODO: should we remove this ??
-        LinkedHashSet<String> conditionsSharedVariablesAndConstants = getConditionsSharedVariablesAndConstants(
-                atoms, index, processShared);
-        equalityConditions.addAll(conditionsSharedVariablesAndConstants);
+        //LinkedHashSet<String> conditionsSharedVariablesAndConstants = getConditionsSharedVariablesAndConstants(
+        //        atoms, index, processShared);
+        //equalityConditions.addAll(conditionsSharedVariablesAndConstants);
+
         LinkedHashSet<String> booleanConditions = getBooleanConditionsString(
                 atoms, index);
 
         LinkedHashSet<String> conditions = new LinkedHashSet<String>();
-        conditions.addAll(equalityConditions);
+
+        //conditions.addAll(equalityConditions);
         conditions.addAll(booleanConditions);
 
 		/*
@@ -1233,64 +1232,64 @@ public class SQLGenerator implements SQLQueryGenerator {
      * x),B(x))
      *
      */
-    private LinkedHashSet<String> getConditionsSharedVariablesAndConstants(
-            List<Function> atoms, QueryAliasIndex index, boolean processShared) {
-        LinkedHashSet<String> equalities = new LinkedHashSet<String>();
-
-
-        Set<Variable> currentLevelVariables = new LinkedHashSet<Variable>();
-        if (processShared) {
-            for (Function atom : atoms) {
-                currentLevelVariables
-                        .addAll(getVariableReferencesWithLeftJoin(atom));
-            }
-        }
-
-		/*
-		 * For each variable we collect all the columns that shold be equated
-		 * (due to repeated positions of the variable). then we form atoms of
-		 * the form "COL1 = COL2"
-		 */
-        for (Variable var : currentLevelVariables) {
-            Collection<String> references = index.getColumnReferences(var);
-            if (references.size() < 2) {
-                // No need for equality
-                continue;
-            }
-            Iterator<String> referenceIterator = references.iterator();
-            String leftColumnReference = referenceIterator.next();
-            while (referenceIterator.hasNext()) {
-                String rightColumnReference = referenceIterator.next();
-                String equality = String.format("(%s = %s)",
-                        leftColumnReference, rightColumnReference);
-                equalities.add(equality);
-                leftColumnReference = rightColumnReference;
-            }
-        }
-
-        for (Function atom : atoms) {
-            if (!atom.isDataFunction()) {
-                continue;
-            }
-            for (int idx = 0; idx < atom.getArity(); idx++) {
-                Term l = atom.getTerm(idx);
-                if (l instanceof Constant) {
-                    String value = getSQLString(l, index, false);
-                    String columnReference = index
-                            .getColumnReference(atom, idx);
-                    equalities.add(String.format("(%s = %s)", columnReference,
-                            value));
-                }
-            }
-
-        }
-
-        if(equalities.size() > 0){
-            throw new IllegalStateException("SHOULD NOT HAPPEN!");
-        }
-
-        return equalities;
-    }
+//    private LinkedHashSet<String> getConditionsSharedVariablesAndConstants(
+//            List<Function> atoms, QueryAliasIndex index, boolean processShared) {
+//        LinkedHashSet<String> equalities = new LinkedHashSet<String>();
+//
+//
+//        Set<Variable> currentLevelVariables = new LinkedHashSet<Variable>();
+//        if (processShared) {
+//            for (Function atom : atoms) {
+//                currentLevelVariables
+//                        .addAll(getVariableReferencesWithLeftJoin(atom));
+//            }
+//        }
+//
+//		/*
+//		 * For each variable we collect all the columns that shold be equated
+//		 * (due to repeated positions of the variable). then we form atoms of
+//		 * the form "COL1 = COL2"
+//		 */
+//        for (Variable var : currentLevelVariables) {
+//            Collection<String> references = index.getColumnReferences(var);
+//            if (references.size() < 2) {
+//                // No need for equality
+//                continue;
+//            }
+//            Iterator<String> referenceIterator = references.iterator();
+//            String leftColumnReference = referenceIterator.next();
+//            while (referenceIterator.hasNext()) {
+//                String rightColumnReference = referenceIterator.next();
+//                String equality = String.format("(%s = %s)",
+//                        leftColumnReference, rightColumnReference);
+//                equalities.add(equality);
+//                leftColumnReference = rightColumnReference;
+//            }
+//        }
+//
+//        for (Function atom : atoms) {
+//            if (!atom.isDataFunction()) {
+//                continue;
+//            }
+//            for (int idx = 0; idx < atom.getArity(); idx++) {
+//                Term l = atom.getTerm(idx);
+//                if (l instanceof Constant) {
+//                    String value = getSQLString(l, index, false);
+//                    String columnReference = index
+//                            .getColumnReference(atom, idx);
+//                    equalities.add(String.format("(%s = %s)", columnReference,
+//                            value));
+//                }
+//            }
+//
+//        }
+//
+//        if(equalities.size() > 0){
+//            throw new IllegalStateException("SHOULD NOT HAPPEN!");
+//        }
+//
+//        return equalities;
+//    }
 
     // return variable SQL data type
     private int getVariableDataType(Term term, QueryAliasIndex idx) {
@@ -2640,11 +2639,6 @@ public class SQLGenerator implements SQLQueryGenerator {
             return viewNames.get(atom);
         }
 
-        public String getColumnReference(Function atom, int column) {
-            String viewName = getView(atom);
-            DataDefinition def = dataDefinitions.get(atom);
-            String columnname = def.getAttributeName(column + 1);
-            return sqladapter.sqlQualifiedColumn(viewName, columnname);
-        }
+
     }
 }
