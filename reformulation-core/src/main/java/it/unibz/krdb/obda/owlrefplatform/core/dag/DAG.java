@@ -20,25 +20,26 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
-import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
+import it.unibz.krdb.obda.ontology.BinaryAxiom;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 
 @Deprecated
 public class DAG implements Serializable {
@@ -92,7 +93,7 @@ public class DAG implements Serializable {
 
 		// classes.put(thingConcept, thing);
 
-		for (BasicClassDescription concept : ontology.getVocabulary().getClasses()) {
+		for (OClass concept : ontology.getVocabulary().getClasses()) {
 			DAGNode node = new DAGNode(concept);
 
 			// if (!concept.equals(thingConcept)) {
@@ -105,21 +106,18 @@ public class DAG implements Serializable {
 		/*
 		 * For each role we add nodes for its inverse, its domain and its range
 		 */
-		Set<PropertyExpression> allroles = new HashSet<PropertyExpression>();
-		allroles.addAll(ontology.getVocabulary().getObjectProperties());
-		allroles.addAll(ontology.getVocabulary().getDataProperties());
 		
-		for (PropertyExpression role : allroles) {
+		for (ObjectPropertyExpression role : ontology.getVocabulary().getObjectProperties()) {
 			DAGNode rolenode = new DAGNode(role);
 
 			roles.put(role, rolenode);
 
-			PropertyExpression roleInv = role.getInverse();
+			ObjectPropertyExpression roleInv = role.getInverse();
 			DAGNode rolenodeinv = new DAGNode(roleInv);
 			roles.put(roleInv, rolenodeinv);
 
-			SomeValuesFrom existsRole = descFactory.createPropertySomeRestriction(role);
-			SomeValuesFrom existsRoleInv = descFactory.createPropertySomeRestriction(roleInv);
+			ObjectSomeValuesFrom existsRole = role.getDomain();
+			ObjectSomeValuesFrom existsRoleInv = roleInv.getDomain();
 			DAGNode existsNode = new DAGNode(existsRole);
 			DAGNode existsNodeInv = new DAGNode(existsRoleInv);
 			classes.put(existsRole, existsNode);
@@ -133,20 +131,58 @@ public class DAG implements Serializable {
 			// addParent(existsNode, thing);
 			// addParent(existsNodeInv, thing);
 		}
+		for (DataPropertyExpression role : ontology.getVocabulary().getDataProperties()) {
+			DAGNode rolenode = new DAGNode(role);
 
-		for (SubClassOfAxiom clsIncl : ontology.getSubClassAxioms()) {
-			BasicClassDescription parent = clsIncl.getSuper();
-			BasicClassDescription child = clsIncl.getSub();
+			roles.put(role, rolenode);
+
+			//DataPropertyExpression roleInv = role.getInverse();
+			//DAGNode rolenodeinv = new DAGNode(roleInv);
+			//roles.put(roleInv, rolenodeinv);
+
+			DataSomeValuesFrom existsRole = role.getDomain(); // descFactory.createPropertySomeRestriction(role);
+			DataPropertyRangeExpression existsRoleInv = role.getRange(); //descFactory.createDataPropertyRange(role);
+					//.createPropertySomeRestriction(roleInv);
+			DAGNode existsNode = new DAGNode(existsRole);
+			DAGNode existsNodeInv = new DAGNode(existsRoleInv);
+			classes.put(existsRole, existsNode);
+			classes.put(existsRoleInv, existsNodeInv);
+
+			allnodes.put(role, rolenode);
+			allnodes.put(existsRole, existsNode);
+			allnodes.put(existsRoleInv, existsNodeInv);
+			//allnodes.put(roleInv, rolenodeinv);
+
+			// addParent(existsNode, thing);
+			// addParent(existsNodeInv, thing);
+		}
+
+		for (BinaryAxiom<ClassExpression> clsIncl : ontology.getSubClassAxioms()) {
+			ClassExpression parent = clsIncl.getSuper();
+			ClassExpression child = clsIncl.getSub();
 
 			addClassEdge(parent, child);
 		} 
-		for (SubPropertyOfAxiom roleIncl : ontology.getSubPropertyAxioms()) {
-			PropertyExpression parent = roleIncl.getSuper();
-			PropertyExpression child = roleIncl.getSub();
+		for (BinaryAxiom<DataRangeExpression> clsIncl : ontology.getSubDataRangeAxioms()) {
+			DataRangeExpression parent = clsIncl.getSuper();
+			DataRangeExpression child = clsIncl.getSub();
+
+			addClassEdge(parent, child);
+		} 
+		for (BinaryAxiom<ObjectPropertyExpression> roleIncl : ontology.getSubObjectPropertyAxioms()) {
+			ObjectPropertyExpression parent = roleIncl.getSuper();
+			ObjectPropertyExpression child = roleIncl.getSub();
 
 			// This adds the direct edge and the inverse, e.g., R ISA S and
 			// R- ISA S-,
 			// R- ISA S and R ISA S-
+			addRoleEdge(parent, child);
+		}
+		for (BinaryAxiom<DataPropertyExpression> roleIncl : ontology.getSubDataPropertyAxioms()) {
+			DataPropertyExpression parent = roleIncl.getSuper();
+			DataPropertyExpression child = roleIncl.getSub();
+
+			// This adds the direct edge 
 			addRoleEdge(parent, child);
 		}
 		// clean();
@@ -167,7 +203,30 @@ public class DAG implements Serializable {
 		this.allnodes = allnodes;
 	}
 
-	private void addClassEdge(BasicClassDescription parent, BasicClassDescription child) {
+	private void addClassEdge(ClassExpression parent, ClassExpression child) {
+
+		DAGNode parentNode;
+		if (classes.containsKey(parent)) {
+			parentNode = classes.get(parent);
+		} else {
+			parentNode = new DAGNode(parent);
+			classes.put(parent, parentNode);
+
+			allnodes.put(parent, parentNode);
+		}
+		DAGNode childNode;
+		if (classes.containsKey(child)) {
+			childNode = classes.get(child);
+		} else {
+			childNode = new DAGNode(child);
+			classes.put(child, childNode);
+
+			allnodes.put(child, childNode);
+		}
+		addParent(childNode, parentNode);
+	}
+	
+	private void addClassEdge(DataRangeExpression parent, DataRangeExpression child) {
 
 		DAGNode parentNode;
 		if (classes.containsKey(parent)) {
@@ -190,14 +249,21 @@ public class DAG implements Serializable {
 		addParent(childNode, parentNode);
 
 	}
+	
 
-	private void addRoleEdge(PropertyExpression parent, PropertyExpression child) {
+	private void addRoleEdge(ObjectPropertyExpression parent, ObjectPropertyExpression child) {
 		addRoleEdgeSingle(parent, child);
 
 		addRoleEdgeSingle(parent.getInverse(), child.getInverse());
 	}
+	
+	private void addRoleEdge(DataPropertyExpression parent, DataPropertyExpression child) {
+		addRoleEdgeSingle(parent, child);
 
-	private void addRoleEdgeSingle(PropertyExpression parent, PropertyExpression child) {
+		//addRoleEdgeSingle(parent.getInverse(), child.getInverse());
+	}
+
+	private void addRoleEdgeSingle(ObjectPropertyExpression parent, ObjectPropertyExpression child) {
 		DAGNode parentNode = roles.get(parent);
 		if (parentNode == null) {
 			parentNode = new DAGNode(parent);
@@ -215,9 +281,34 @@ public class DAG implements Serializable {
 		}
 		addParent(childNode, parentNode);
 
-		BasicClassDescription existsParent = descFactory.createPropertySomeRestriction(parent);
+		ObjectSomeValuesFrom existsParent = parent.getDomain();
+		ObjectSomeValuesFrom existChild = child.getDomain();
 
-		BasicClassDescription existChild = descFactory.createPropertySomeRestriction(child);
+		addClassEdge(existsParent, existChild);
+		// addClassEdge(thingConcept, existsParent);
+
+	}
+	
+	private void addRoleEdgeSingle(DataPropertyExpression parent, DataPropertyExpression child) {
+		DAGNode parentNode = roles.get(parent);
+		if (parentNode == null) {
+			parentNode = new DAGNode(parent);
+			roles.put(parent, parentNode);
+
+			allnodes.put(parent, parentNode);
+		}
+
+		DAGNode childNode = roles.get(child);
+		if (childNode == null) {
+			childNode = new DAGNode(child);
+			roles.put(child, childNode);
+
+			allnodes.put(parent, parentNode);
+		}
+		addParent(childNode, parentNode);
+
+		DataSomeValuesFrom existsParent = parent.getDomain(); // descFactory.createPropertySomeRestriction(parent);
+		DataSomeValuesFrom existChild = child.getDomain(); // escFactory.createPropertySomeRestriction(child);
 
 		addClassEdge(existsParent, existChild);
 		// addClassEdge(thingConcept, existsParent);
@@ -343,7 +434,7 @@ public class DAG implements Serializable {
 	 * @param conceptDescription
 	 * @return
 	 */
-	public DAGNode getClassNode(BasicClassDescription conceptDescription) {
+	public DAGNode getClassNode(ClassExpression conceptDescription) {
 		DAGNode rv = classes.get(conceptDescription);
 		if (rv == null) {
 			rv = classes.get(equi_mappings.get(conceptDescription));
@@ -365,7 +456,14 @@ public class DAG implements Serializable {
 	 * @param conceptDescription
 	 * @return
 	 */
-	public DAGNode getRoleNode(PropertyExpression roleDescription) {
+	public DAGNode getRoleNode(ObjectPropertyExpression roleDescription) {
+		DAGNode rv = roles.get(roleDescription);
+		if (rv == null) {
+			rv = roles.get(equi_mappings.get(roleDescription));
+		}
+		return rv;
+	}
+	public DAGNode getRoleNode(DataPropertyExpression roleDescription) {
 		DAGNode rv = roles.get(roleDescription);
 		if (rv == null) {
 			rv = roles.get(equi_mappings.get(roleDescription));

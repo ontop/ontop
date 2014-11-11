@@ -22,14 +22,16 @@ package it.unibz.krdb.obda.sesame;
 
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
@@ -49,22 +51,20 @@ public class SesameStatement implements Statement {
 
 	public SesameStatement(Assertion assertion) {
 		
-		Constant subj;
-
-		if (assertion instanceof PropertyAssertion) {
+		if (assertion instanceof ObjectPropertyAssertion) {
 			//object or data property assertion
-			PropertyAssertion ba = (PropertyAssertion) assertion;
-			subj = ba.getSubject();
+			ObjectPropertyAssertion ba = (ObjectPropertyAssertion) assertion;
+			ObjectConstant subj = ba.getSubject();
 			Predicate pred = ba.getProperty().getPredicate();
-			Constant obj = ba.getValue2();
+			ObjectConstant obj = ba.getObject();
 			
 			// convert string into respective type
 			if (subj instanceof BNode)
 				subject = fact.createBNode(((BNode) subj).getName());
 			else if (subj instanceof URIConstant)
 				subject = fact.createURI(subj.getValue());
-			else if (subj instanceof ValueConstant)
-				throw new RuntimeException("Invalid ValueConstant as subject!");
+			else 
+				throw new RuntimeException("Invalid constant as subject!" + subj);
 			
 			predicate = fact.createURI(pred.getName().toString()); // URI
 			
@@ -72,14 +72,35 @@ public class SesameStatement implements Statement {
 				object = fact.createBNode(((BNode) obj).getName());
 			else if (obj instanceof URIConstant)
 				object = fact.createURI(obj.getValue());
-			else if (obj instanceof ValueConstant)
-				object = getLiteral((ValueConstant)obj);
+			else 
+				throw new RuntimeException("Invalid constant as object!" + obj);
+		} 
+		if (assertion instanceof DataPropertyAssertion) {
+			//object or data property assertion
+			DataPropertyAssertion ba = (DataPropertyAssertion) assertion;
+			ObjectConstant subj = ba.getSubject();
+			Predicate pred = ba.getProperty().getPredicate();
+			ValueConstant obj = ba.getValue();
 			
+			// convert string into respective type
+			if (subj instanceof BNode)
+				subject = fact.createBNode(((BNode) subj).getName());
+			else if (subj instanceof URIConstant)
+				subject = fact.createURI(subj.getValue());
+			else 
+				throw new RuntimeException("Invalid constant as subject!" + subj);
 			
-		} else if (assertion instanceof ClassAssertion) { 
+			predicate = fact.createURI(pred.getName().toString()); // URI
+			
+			if (obj instanceof ValueConstant)
+				object = getLiteral((ValueConstant)obj);		
+			else 
+				throw new RuntimeException("Invalid constant as object!" + obj);
+		} 
+		else if (assertion instanceof ClassAssertion) { 
 			//class assertion
 			ClassAssertion ua = (ClassAssertion) assertion;
-			subj = ua.getIndividual();
+			ObjectConstant subj = ua.getIndividual();
 			String pred = OBDAVocabulary.RDF_TYPE;
 			Predicate obj = ua.getConcept().getPredicate();
 			
@@ -88,7 +109,7 @@ public class SesameStatement implements Statement {
 				subject = fact.createBNode(((BNode) subj).getName());
 			else if (subj instanceof URIConstant)
 				subject = fact.createURI(subj.getValue());
-			else if (subj instanceof ValueConstant)
+			else
 				throw new RuntimeException("Invalid ValueConstant as subject!");
 			
 			predicate = fact.createURI(pred); // URI

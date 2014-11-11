@@ -20,10 +20,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.PropertyAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,12 +46,11 @@ public class NTripleAssertionIteratorTest extends TestCase {
 			if (ass instanceof ClassAssertion) {
 				typeCount +=1;
 			} 
-			else if (ass instanceof PropertyAssertion) {
-				PropertyAssertion ass2 = (PropertyAssertion)ass;
-				if (ass2.getValue2() instanceof ValueConstant)
-					datPropCount +=1;
-				else
-					objPropCount +=1;
+			else if (ass instanceof ObjectPropertyAssertion) {
+				objPropCount +=1;
+			}
+			else if (ass instanceof DataPropertyAssertion) {
+				datPropCount +=1;
 			}  
 		}
 		

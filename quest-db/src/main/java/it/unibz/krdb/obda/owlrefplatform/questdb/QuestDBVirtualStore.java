@@ -30,8 +30,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OBDAModelSynchronizer;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlapi3.directmapping.DirectMappingEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
@@ -44,10 +43,8 @@ import it.unibz.krdb.sql.ImplicitDBConstraints;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Properties;
 import java.util.Set;
 
-import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -70,7 +67,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-	private OWLAPI3Translator translator = new OWLAPI3Translator();
+	private OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 	
 	private boolean isinitalized = false;
 
@@ -133,7 +130,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		super(name);
 
 		//obtain the model
-		OBDAModel obdaModel = null;
+		OBDAModel obdaModel;
 		if (obdaUri == null) {
 			log.debug("No mappings where given, mappings will be automatically generated.");
 			//obtain model from direct mapping RDB2RDF method
@@ -151,22 +148,22 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		config.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
 		//obtain the ontology
-		OWLOntology owlontology = null;
 		Ontology tbox;
 		if (tboxFile != null) {
 			//read owl file
-			owlontology = getOntologyFromFile(tboxFile);
+			OWLOntology owlontology = getOntologyFromFile(tboxFile);
 			//get transformation from owlontology into ontology
 			 tbox = getOntologyFromOWLOntology(owlontology);
 
 		} else { 
 			// create empty ontology
-			owlontology = man.createOntology();// createOntology(OBDADataFactoryImpl.getIRI(name));
+			//owlontology = man.createOntology();
 			tbox = OntologyFactoryImpl.getInstance().createOntology();
 			if (obdaModel.getSources().size() == 0)
 				obdaModel.addSource(getMemOBDADataSource("MemH2"));
 		}
-		OBDAModelSynchronizer.declarePredicates(owlontology, obdaModel);
+		obdaModel.declareAll(tbox.getVocabulary());
+		// OBDAModelSynchronizer.declarePredicates(owlontology, obdaModel);
 
 		//set up Quest
 		setupQuest(tbox, obdaModel, null, config);
@@ -195,7 +192,8 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		OBDAModel obdaModel = reader.readModel(source.getSourceID());
 		//add data source to model
 		obdaModel.addSource(source);
-		OBDAModelSynchronizer.declarePredicates(tbox, obdaModel);
+		//OBDAModelSynchronizer.declarePredicates(tbox, obdaModel);
+		obdaModel.declareAll(ontology.getVocabulary());
 		//setup Quest
 		setupQuest(ontology, obdaModel, metadata, config);
 	}

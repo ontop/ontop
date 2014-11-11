@@ -20,32 +20,23 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import java.util.Set;
-
-import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
-import it.unibz.krdb.obda.ontology.DataRangeExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Datatype;
-import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
-import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
-import it.unibz.krdb.obda.ontology.PropertyAssertion;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
-import it.unibz.krdb.obda.ontology.ClassExpression;
-import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
-import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 
 
 public class OntologyFactoryImpl implements OntologyFactory {
@@ -72,44 +63,11 @@ public class OntologyFactoryImpl implements OntologyFactory {
 		return new OntologyImpl();
 	}
 	
-	@Override
-	public SubPropertyOfAxiom createSubPropertyAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including) {
-		return new SubPropertyOfAxiomImpl(included, including);
-	}
-	
-	@Override
-	public SubPropertyOfAxiom createSubPropertyAxiom(DataPropertyExpression included, DataPropertyExpression including) {
-		return new SubPropertyOfAxiomImpl(included, including);
-	}
-	
-	@Override
-	public SubPropertyOfAxiom createSubPropertyAxiom(PropertyExpression included, PropertyExpression including) {
-		return new SubPropertyOfAxiomImpl(included, including);
-	}
-
-	@Override
-	public SubClassOfAxiom createSubClassAxiom(ClassExpression concept1, BasicClassDescription concept2) {
-		return new SubClassOfAxiomImpl(concept1, concept2);
-	}
-
-	@Override
-	public SubClassOfAxiom createSubClassAxiom(DataRangeExpression concept1, DataRangeExpression concept2) {
-		return new SubClassOfAxiomImpl(concept1, concept2);
-	}
-	
-	@Override
-	public DataPropertyRangeExpression createDataPropertyRange(DataPropertyExpression role) {
-		return new DataPropertyRangeExpressionImpl(role.getInverse());
-	}
-	
-	@Override
-	public FunctionalPropertyAxiom createPropertyFunctionalAxiom(PropertyExpression role) {
-		return new FunctionalPropertyAxiomImpl(role);
-	}
-
-	
-	public PropertyAssertion createObjectPropertyAssertion(PropertyExpression role, ObjectConstant o1, ObjectConstant o2) {
-		return new PropertyAssertionImpl(role, o1, o2);
+	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression role, ObjectConstant o1, ObjectConstant o2) {
+		if (role.isInverse())
+			return new ObjectPropertyAssertionImpl(role.getInverse(), o2, o1);
+		else
+			return new ObjectPropertyAssertionImpl(role, o1, o2);			
 	}
 
 
@@ -129,38 +87,18 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	@Override
 	public DataPropertyExpression createDataProperty(String p) {
 		Predicate prop = ofac.getDataPropertyPredicate(p);
-		return new DataPropertyExpressionImpl(prop, false);
-	}
-
-	@Override
-	public PropertyExpression createProperty(String uri) {
-		Predicate prop = ofac.getPredicate(uri, 2);
-		return new ObjectPropertyExpressionImpl(prop, false);
+		return new DataPropertyExpressionImpl(prop);
 	}
 
 
 	@Override
-	public Datatype createDataType(Predicate p) {
-		return new DatatypeImpl(p);
+	public Datatype createDataType(Predicate.COL_TYPE type) {
+		return new DatatypeImpl(ofac.getTypePredicate(type));
 	}
 
 	@Override
-	public PropertyAssertion createPropertyAssertion(PropertyExpression attribute, ObjectConstant o1, Constant o2) {
-		return new PropertyAssertionImpl(attribute, o1, o2);
-	}
-
-	@Override
-	public DisjointClassesAxiom createDisjointClassesAxiom(Set<ClassExpression> classes) {
-		return new DisjointClassesAxiomImpl(classes);
-	}
-
-	@Override
-	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Set<PropertyExpression> props) {
-			return new DisjointPropertiesAxiomImpl(props);
+	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression attribute, ObjectConstant o1, ValueConstant o2) {
+		return new DataPropertyAssertionImpl(attribute, o1, o2);
 	}
 	
-	@Override
-	public SomeValuesFrom createPropertySomeRestriction(PropertyExpression role) {
-		return new PropertySomeRestrictionImpl(role);
-	}
 }

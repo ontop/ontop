@@ -20,9 +20,11 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 
 import java.util.List;
 
@@ -42,41 +44,59 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 
 public class NamedDAG  {
 	
-	private final SimpleDirectedGraph <PropertyExpression,DefaultEdge> propertyDAG;
-	private final SimpleDirectedGraph <BasicClassDescription,DefaultEdge> classDAG;
+	private final SimpleDirectedGraph <ObjectPropertyExpression,DefaultEdge> objectPropertyDAG;
+	private final SimpleDirectedGraph <DataPropertyExpression,DefaultEdge> dataPropertyDAG;
+	private final SimpleDirectedGraph <ClassExpression,DefaultEdge> classDAG;
+	private final SimpleDirectedGraph <DataRangeExpression,DefaultEdge> dataRangeDAG;
 	
 	public NamedDAG(TBoxReasoner reasoner) {			
-		propertyDAG = getNamedDAG(reasoner.getProperties());
+		objectPropertyDAG = getNamedDAG(reasoner.getObjectProperties());
+		dataPropertyDAG = getNamedDAG(reasoner.getDataProperties());
 		classDAG = getNamedDAG(reasoner.getClasses());
+		dataRangeDAG = getNamedDAG(reasoner.getDataRanges());
 	}
 	
 	@Override
 	public String toString() {
-		return propertyDAG.toString() + classDAG.toString();
+		return objectPropertyDAG.toString() + dataPropertyDAG.toString() + classDAG.toString();
 	}
 	
 	
 	
 	@Deprecated // USED ONLY IN TESTS (3 calls)
-	public SimpleDirectedGraph <PropertyExpression,DefaultEdge> getPropertyDag() {
-		return propertyDAG;
+	public SimpleDirectedGraph <ObjectPropertyExpression,DefaultEdge> getObjectPropertyDag() {
+		return objectPropertyDAG;
 	}
 	@Deprecated // USED ONLY IN TESTS (3 calls)
-	public SimpleDirectedGraph <BasicClassDescription,DefaultEdge> getClassDag() {
+	public SimpleDirectedGraph <DataPropertyExpression,DefaultEdge> getDataPropertyDag() {
+		return dataPropertyDAG;
+	}
+	@Deprecated // USED ONLY IN TESTS (3 calls)
+	public SimpleDirectedGraph <ClassExpression,DefaultEdge> getClassDag() {
 		return classDAG;
 	}
-	
-	public List<PropertyExpression> getSuccessors(PropertyExpression desc) {
-		return Graphs.successorListOf(propertyDAG, desc);		
+	@Deprecated // USED ONLY IN TESTS (3 calls)
+	public SimpleDirectedGraph <DataRangeExpression,DefaultEdge> getDataRangeDag() {
+		return dataRangeDAG;
 	}
-	public List<BasicClassDescription> getSuccessors(BasicClassDescription desc) {
+	
+	public List<ObjectPropertyExpression> getSuccessors(ObjectPropertyExpression desc) {
+		return Graphs.successorListOf(objectPropertyDAG, desc);		
+	}
+	public List<DataPropertyExpression> getSuccessors(DataPropertyExpression desc) {
+		return Graphs.successorListOf(dataPropertyDAG, desc);		
+	}
+	public List<ClassExpression> getSuccessors(ClassExpression desc) {
 		return Graphs.successorListOf(classDAG, desc);		
 	}
 	
-	public List<PropertyExpression> getPredecessors(PropertyExpression desc) {
-		return Graphs.predecessorListOf(propertyDAG, desc);		
+	public List<ObjectPropertyExpression> getPredecessors(ObjectPropertyExpression desc) {
+		return Graphs.predecessorListOf(objectPropertyDAG, desc);		
 	}
-	public List<BasicClassDescription> getPredecessors(BasicClassDescription desc) {
+	public List<DataPropertyExpression> getPredecessors(DataPropertyExpression desc) {
+		return Graphs.predecessorListOf(dataPropertyDAG, desc);		
+	}
+	public List<ClassExpression> getPredecessors(ClassExpression desc) {
 		return Graphs.predecessorListOf(classDAG, desc);		
 	}
 	
@@ -118,7 +138,8 @@ public class NamedDAG  {
 	public DirectedGraph<Description, DefaultEdge> getReversedDag() {
 		SimpleDirectedGraph <Description,DefaultEdge>  dag 
 			= new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class); 
-		Graphs.addGraph(dag, propertyDAG);
+		Graphs.addGraph(dag, objectPropertyDAG);
+		Graphs.addGraph(dag, dataPropertyDAG);
 		Graphs.addGraph(dag, classDAG);
 		DirectedGraph<Description, DefaultEdge> reversed =
 				new EdgeReversedGraph<Description, DefaultEdge>(dag); // WOULD IT NOT BE BETTER TO CACHE?

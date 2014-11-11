@@ -20,11 +20,13 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
  * #L%
  */
 
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.ArrayList;
@@ -242,23 +244,36 @@ public class DAGOperations {
 			DAGNode cycleheaddomainNode = null;
 			DAGNode cycleheadrangeNode = null;
 
-			if (cycleheadNode.getDescription() instanceof PropertyExpression) {
+			if (cycleheadNode.getDescription() instanceof ObjectPropertyExpression) {
 
-				PropertyExpression prop = (PropertyExpression) cycleheadNode.getDescription();
+				ObjectPropertyExpression prop = (ObjectPropertyExpression) cycleheadNode.getDescription();
 
-				PropertyExpression inverse = prop.getInverse();
-				SomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
-				SomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
+				ObjectPropertyExpression inverse = prop.getInverse();
+				ObjectSomeValuesFrom domain = prop.getDomain();
+				ObjectSomeValuesFrom range = inverse.getDomain();
 
 				cycleheadinverseNode = dag.getNode(inverse);
 				cycleheaddomainNode = dag.getNode(domain);
 				cycleheadrangeNode = dag.getNode(range);
 			}
+			else if (cycleheadNode.getDescription() instanceof DataPropertyExpression) {
+
+				DataPropertyExpression prop = (DataPropertyExpression) cycleheadNode.getDescription();
+
+				//DataPropertyExpression inverse = prop.getInverse();
+				DataSomeValuesFrom domain = prop.getDomain(); //fac.createPropertySomeRestriction(prop);
+				//DataSomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
+
+				//cycleheadinverseNode = dag.getNode(inverse);
+				cycleheaddomainNode = dag.getNode(domain);
+				//cycleheadrangeNode = dag.getNode(range);
+			}
 
 			/*
 			 * putting a cyclehead that is a named concept or named role
 			 */
-			if (component.size() > 1 && cycleheadNode.getDescription() instanceof SomeValuesFrom) {
+			if (component.size() > 1 && ((cycleheadNode.getDescription() instanceof ObjectSomeValuesFrom) 
+						|| (cycleheadNode.getDescription() instanceof DataSomeValuesFrom))) {
 
 				for (int i = 1; i < component.size(); i++) {
 					if (component.get(i).getDescription() instanceof OClass) {
@@ -271,21 +286,20 @@ public class DAGOperations {
 				}
 			}
 
-			if (component.size() > 0 && cycleheadNode.getDescription() instanceof PropertyExpression
-					&& ((PropertyExpression) cycleheadNode.getDescription()).isInverse()) {
+			if (component.size() > 0 && cycleheadNode.getDescription() instanceof ObjectPropertyExpression
+					&& ((ObjectPropertyExpression) cycleheadNode.getDescription()).isInverse()) {
 				for (int i = 1; i < component.size(); i++) {
-					if (component.get(i).getDescription() instanceof PropertyExpression
-							&& !((PropertyExpression) component.get(i).getDescription()).isInverse()) {
+					if (component.get(i).getDescription() instanceof ObjectPropertyExpression
+							&& !((ObjectPropertyExpression) component.get(i).getDescription()).isInverse()) {
 						DAGNode tmp = component.get(i);
 						component.set(i, cycleheadNode);
 						component.set(0, tmp);
 						cycleheadNode = tmp;
 
-						PropertyExpression prop = (PropertyExpression) cycleheadNode.getDescription();
-
-						PropertyExpression inverse = prop.getInverse();
-						SomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
-						SomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
+						ObjectPropertyExpression prop = (ObjectPropertyExpression) cycleheadNode.getDescription();
+						ObjectPropertyExpression inverse = prop.getInverse();
+						ObjectSomeValuesFrom domain = prop.getDomain();
+						ObjectSomeValuesFrom range = inverse.getDomain();
 
 						cycleheadinverseNode = dag.getNode(inverse);
 						cycleheaddomainNode = dag.getNode(domain);
@@ -295,6 +309,31 @@ public class DAGOperations {
 					}
 				}
 			}
+/*			
+			else if (component.size() > 0 && cycleheadNode.getDescription() instanceof DataPropertyExpression
+					&& ((PropertyExpression) cycleheadNode.getDescription()).isInverse()) {
+				for (int i = 1; i < component.size(); i++) {
+					if (component.get(i).getDescription() instanceof DataPropertyExpression
+							&& !((DataPropertyExpression) component.get(i).getDescription()).isInverse()) {
+						DAGNode tmp = component.get(i);
+						component.set(i, cycleheadNode);
+						component.set(0, tmp);
+						cycleheadNode = tmp;
+
+						DataPropertyExpression prop = (DataPropertyExpression) cycleheadNode.getDescription();
+						DataPropertyExpression inverse = prop.getInverse();
+						DataSomeValuesFrom domain = fac.createPropertySomeRestriction(prop);
+						DataSomeValuesFrom range = fac.createPropertySomeRestriction(inverse);
+
+						cycleheadinverseNode = dag.getNode(inverse);
+						cycleheaddomainNode = dag.getNode(domain);
+						cycleheadrangeNode = dag.getNode(range);
+
+						break;
+					}
+				}
+			}
+*/			
 			processedNodes.add(cycleheadNode);
 
 			if (cycleheadinverseNode != null) {
@@ -324,25 +363,39 @@ public class DAGOperations {
 					 * we are dealing with properties, so we need to also
 					 * collapse the inverses and existentials
 					 */
-					PropertyExpression equiprop = (PropertyExpression) equivnode.getDescription();
+					DAGNode equivinverseNode, equivDomainNode, equivRangeNode;
+					
+					if (equivnode.getDescription() instanceof ObjectPropertyExpression) {
+						ObjectPropertyExpression equiprop = (ObjectPropertyExpression) equivnode.getDescription();
 
-					DAGNode equivinverseNode = dag.getNode(equiprop.getInverse());
-					DAGNode equivDomainNode = dag.getNode(fac.createPropertySomeRestriction(equiprop));
-					PropertyExpression inv = equiprop.getInverse();
-					DAGNode equivRangeNode = dag.getNode(fac.createPropertySomeRestriction(inv));
+						equivinverseNode = dag.getNode(equiprop.getInverse());
+						equivDomainNode = dag.getNode(equiprop.getDomain());
+						ObjectPropertyExpression inv = equiprop.getInverse();
+						equivRangeNode = dag.getNode(inv.getDomain());
 
-					/*
-					 * Doing the inverses
-					 */
-					for (DAGNode parent : new LinkedList<DAGNode>(equivinverseNode.getParents())) {
-						removeParentEdge(equivinverseNode, parent);
-						addParentEdge(cycleheadinverseNode, parent);
+						/*
+						 * Doing the inverses
+						 */
+						for (DAGNode parent : new LinkedList<DAGNode>(equivinverseNode.getParents())) {
+							removeParentEdge(equivinverseNode, parent);
+							addParentEdge(cycleheadinverseNode, parent);
+						}
+
+						for (DAGNode childchild : new LinkedList<DAGNode>(equivinverseNode.getChildren())) {
+							removeParentEdge(childchild, equivinverseNode);
+							addParentEdge(childchild, cycleheadinverseNode);
+						}
 					}
+					else {
+						DataPropertyExpression equiprop = (DataPropertyExpression) equivnode.getDescription();
 
-					for (DAGNode childchild : new LinkedList<DAGNode>(equivinverseNode.getChildren())) {
-						removeParentEdge(childchild, equivinverseNode);
-						addParentEdge(childchild, cycleheadinverseNode);
-					}
+						//equivinverseNode = dag.getNode(equiprop.getInverse());
+						equivDomainNode = dag.getNode(equiprop.getDomain());
+						//DataPropertyExpression inv = equiprop.getInverse();
+						equivRangeNode = dag.getNode(equiprop.getRange());
+						//.createPropertySomeRestriction(inv)
+					}	
+					
 
 					/*
 					 * Doing the domain
@@ -388,29 +441,84 @@ public class DAGOperations {
 
 				processedNodes.add(equivnode);
 
-				if (description instanceof PropertyExpression) {
-
-					
-					
-					
+				if (description instanceof DataPropertyExpression) {
+		
 					/*
 					 * we are dealing with properties, so we need to also
 					 * collapse the inverses and existentials
 					 */
-					PropertyExpression equiprop = (PropertyExpression) equivnode.getDescription();
+					DataPropertyExpression equiprop = (DataPropertyExpression) equivnode.getDescription();
 					
-					PropertyExpression inverseequiprop = equiprop.getInverse();
-					PropertyExpression cycleheadprop =(PropertyExpression)cycleheadNode.getDescription(); 
-					PropertyExpression invesenonredundantprop = cycleheadprop.getInverse();
+					//DataPropertyExpression inverseequiprop = equiprop.getInverse();
+					DataPropertyExpression cycleheadprop =(DataPropertyExpression)cycleheadNode.getDescription(); 
+					//DataPropertyExpression invesenonredundantprop = cycleheadprop.getInverse();
+					//equi_mapp.put(inverseequiprop, invesenonredundantprop);
+					//dag.equi_mappings.put(inverseequiprop, invesenonredundantprop);
+					
+					//DAGNode equivinverseNode = dag.getNode(inverseequiprop);
+					DAGNode equivDomainNode = dag.getNode(equiprop.getDomain());
+					//DataPropertyExpression inv = equiprop.getInverse();					
+					DAGNode equivRangeNode = dag.getNode(equiprop.getRange());
+					// .createPropertySomeRestriction(inv)
+
+					if (!(/*equivinverseNode == null &&*/ equivDomainNode == null && equivRangeNode == null)) {
+						/*
+						 * This check is only necesary because of ISA DAGs in
+						 * which we removed all descriptions that are not named
+						 * classes or roles... in the future we will simplify
+						 * this.
+						 */
+
+						//processedNodes.add(equivinverseNode);
+						processedNodes.add(equivDomainNode);
+						processedNodes.add(equivRangeNode);
+
+						//dag.getRoles().remove(equivinverseNode.getDescription());
+						dag.getClasses().remove(equivDomainNode.getDescription());
+						dag.getClasses().remove(equivRangeNode.getDescription());
+						
+						//dag.allnodes.remove(equivinverseNode.getDescription());
+						//dag.classes.remove(equivinverseNode.getDescription());
+						//dag.roles.remove(equivinverseNode.getDescription());
+						
+						dag.allnodes.remove(equivDomainNode.getDescription());
+						dag.classes.remove(equivDomainNode.getDescription());
+						dag.roles.remove(equivDomainNode.getDescription());
+
+						dag.allnodes.remove(equivRangeNode.getDescription());
+						dag.classes.remove(equivRangeNode.getDescription());
+						dag.roles.remove(equivRangeNode.getDescription());
+
+						
+
+						//equi_mapp.put(equivinverseNode.getDescription(), cycleheadinverseNode.getDescription());
+						equi_mapp.put(equivDomainNode.getDescription(), cycleheaddomainNode.getDescription());
+						equi_mapp.put(equivRangeNode.getDescription(), cycleheadrangeNode.getDescription());
+
+						//cycleheadinverseNode.equivalents.add(equivinverseNode);
+						cycleheaddomainNode.equivalents.add(equivDomainNode);
+						cycleheadrangeNode.equivalents.add(equivRangeNode);
+					}
+
+				}
+				else if (description instanceof ObjectPropertyExpression) {
+		
+					/*
+					 * we are dealing with properties, so we need to also
+					 * collapse the inverses and existentials
+					 */
+					ObjectPropertyExpression equiprop = (ObjectPropertyExpression) equivnode.getDescription();
+					
+					ObjectPropertyExpression inverseequiprop = equiprop.getInverse();
+					ObjectPropertyExpression cycleheadprop =(ObjectPropertyExpression)cycleheadNode.getDescription(); 
+					ObjectPropertyExpression invesenonredundantprop = cycleheadprop.getInverse();
 					equi_mapp.put(inverseequiprop, invesenonredundantprop);
 					dag.equi_mappings.put(inverseequiprop, invesenonredundantprop);
 					
-					
-
 					DAGNode equivinverseNode = dag.getNode(inverseequiprop);
-					DAGNode equivDomainNode = dag.getNode(fac.createPropertySomeRestriction(equiprop));
-					PropertyExpression inv = equiprop.getInverse();					
-					DAGNode equivRangeNode = dag.getNode(fac.createPropertySomeRestriction(inv));
+					DAGNode equivDomainNode = dag.getNode(equiprop.getDomain());
+					ObjectPropertyExpression inv = equiprop.getInverse();					
+					DAGNode equivRangeNode = dag.getNode(inv.getDomain());
 
 					if (!(equivinverseNode == null && equivDomainNode == null && equivRangeNode == null)) {
 						/*
@@ -452,6 +560,7 @@ public class DAGOperations {
 					}
 
 				}
+
 
 			}
 		}

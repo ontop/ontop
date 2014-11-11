@@ -1,12 +1,8 @@
 package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
-import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -15,55 +11,62 @@ public class TBoxTraversal {
 	
 	public static void traverse(TBoxReasoner reasoner, TBoxTraverseListener listener) {
 		
-		for (Equivalences<PropertyExpression> nodes : reasoner.getProperties()) {
-			PropertyExpression node = nodes.getRepresentative();
+		for (Equivalences<ObjectPropertyExpression> nodes : reasoner.getObjectProperties()) {
+			ObjectPropertyExpression node = nodes.getRepresentative();
 			
-			for (Equivalences<PropertyExpression> descendants : reasoner.getProperties().getSub(nodes)) {
-				PropertyExpression descendant = descendants.getRepresentative();
-
-				//if (!descendant.equals(node))  // exclude trivial inclusions
-				if (descendant instanceof ObjectPropertyExpression)
-					listener.onInclusion((ObjectPropertyExpression)descendant, (ObjectPropertyExpression)node);
-				else
-					listener.onInclusion((DataPropertyExpression)descendant, (DataPropertyExpression)node);
+			for (Equivalences<ObjectPropertyExpression> descendants : reasoner.getObjectProperties().getSub(nodes)) {
+				ObjectPropertyExpression descendant = descendants.getRepresentative();
+				listener.onInclusion(descendant, node);
 			}
-			for (PropertyExpression equivalent : nodes) {
+			for (ObjectPropertyExpression equivalent : nodes) {
 				if (!equivalent.equals(node)) {
-					if (node instanceof ObjectPropertyExpression) {
-						listener.onInclusion((ObjectPropertyExpression)node, (ObjectPropertyExpression)equivalent);
-						listener.onInclusion((ObjectPropertyExpression)equivalent, (ObjectPropertyExpression)node);
-					}
-					else {
-						listener.onInclusion((DataPropertyExpression)node, (DataPropertyExpression)equivalent);
-						listener.onInclusion((DataPropertyExpression)equivalent, (DataPropertyExpression)node);
-					}
+					listener.onInclusion(node, equivalent);
+					listener.onInclusion(equivalent, node);
+				}
+			}
+		}
+		for (Equivalences<DataPropertyExpression> nodes : reasoner.getDataProperties()) {
+			DataPropertyExpression node = nodes.getRepresentative();
+			
+			for (Equivalences<DataPropertyExpression> descendants : reasoner.getDataProperties().getSub(nodes)) {
+				DataPropertyExpression descendant = descendants.getRepresentative();
+
+				listener.onInclusion(descendant, node);
+			}
+			for (DataPropertyExpression equivalent : nodes) {
+				if (!equivalent.equals(node)) {
+					listener.onInclusion(node, equivalent);
+					listener.onInclusion(equivalent, node);
 				}
 			}
 		}
 		
-		for (Equivalences<BasicClassDescription> nodes : reasoner.getClasses()) {
-			BasicClassDescription node = nodes.getRepresentative();
+		for (Equivalences<ClassExpression> nodes : reasoner.getClasses()) {
+			ClassExpression node = nodes.getRepresentative();
 			
-			for (Equivalences<BasicClassDescription> descendants : reasoner.getClasses().getSub(nodes)) {
-				BasicClassDescription descendant = descendants.getRepresentative();
-
-				//if (!descendant.equals(node))  // exclude trivial inclusions
-				if (descendant instanceof ClassExpression)
-					listener.onInclusion((ClassExpression)descendant, (ClassExpression)node);
-				else
-					listener.onInclusion((DataRangeExpression)descendant, (DataRangeExpression)node);
+			for (Equivalences<ClassExpression> descendants : reasoner.getClasses().getSub(nodes)) {
+				ClassExpression descendant = descendants.getRepresentative();
+				listener.onInclusion(descendant, node);
 					
 			}
-			for (BasicClassDescription equivalent : nodes) {
+			for (ClassExpression equivalent : nodes) {
 				if (!equivalent.equals(node)) {
-					if (node instanceof ClassExpression) {
-						listener.onInclusion((ClassExpression)equivalent, (ClassExpression)node);
-						listener.onInclusion((ClassExpression)node, (ClassExpression)equivalent);
-					}
-					else {
-						listener.onInclusion((DataRangeExpression)node, (DataRangeExpression)equivalent);
-						listener.onInclusion((DataRangeExpression)equivalent, (DataRangeExpression)node);
-					}
+					listener.onInclusion(equivalent, node);
+					listener.onInclusion(node, equivalent);
+				}
+			}
+		}	
+		for (Equivalences<DataRangeExpression> nodes : reasoner.getDataRanges()) {
+			DataRangeExpression node = nodes.getRepresentative();
+			
+			for (Equivalences<DataRangeExpression> descendants : reasoner.getDataRanges().getSub(nodes)) {
+				DataRangeExpression descendant = descendants.getRepresentative();
+				listener.onInclusion(descendant, node);				
+			}
+			for (DataRangeExpression equivalent : nodes) {
+				if (!equivalent.equals(node)) {
+					listener.onInclusion(node, equivalent);
+					listener.onInclusion(equivalent, node);
 				}
 			}
 		}	
