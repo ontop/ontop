@@ -37,9 +37,9 @@ public class TypeMapper {
 
 	private static final TypeMapper typeMapper = new TypeMapper();
 
-	private final HashMap<Integer, Predicate> sqlToQuest = new HashMap<Integer, Predicate>();
+	private final Map<Integer, Predicate> sqlToQuest = new HashMap<Integer, Predicate>();
 	
-	private static final Map<Predicate.COL_TYPE, Integer> datatypeMap = new HashMap<Predicate.COL_TYPE, Integer>();
+	private final Map<Predicate.COL_TYPE, Integer> datatypeMap = new HashMap<Predicate.COL_TYPE, Integer>();
 	
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 	
