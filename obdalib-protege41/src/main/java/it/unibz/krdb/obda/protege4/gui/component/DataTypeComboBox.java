@@ -47,10 +47,12 @@ public class DataTypeComboBox extends JComboBox {
 	}
 	
 	private static Predicate[] getQuestDataTypePredicates() {
-		int length = DatatypeFactoryImpl.QUEST_DATATYPE_PREDICATES.length + 1;
+		DatatypeFactoryImpl dtfac = (DatatypeFactoryImpl)OBDADataFactoryImpl.getInstance().getDatatypeFactory(); 
+		
+		int length = dtfac.QUEST_DATATYPE_PREDICATES.length + 1;
 		Predicate[] dataTypes = new Predicate[length];
 		dataTypes[0] = null;
-		System.arraycopy(DatatypeFactoryImpl.QUEST_DATATYPE_PREDICATES, 0, dataTypes, 1, DatatypeFactoryImpl.QUEST_DATATYPE_PREDICATES.length);
+		System.arraycopy(dtfac.QUEST_DATATYPE_PREDICATES, 0, dataTypes, 1, dtfac.QUEST_DATATYPE_PREDICATES.length);
 		return dataTypes;
 	}
 
