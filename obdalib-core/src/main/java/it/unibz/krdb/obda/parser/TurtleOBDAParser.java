@@ -4,6 +4,7 @@ package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -28,20 +29,8 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.antlr.runtime.BitSet;
-import org.antlr.runtime.IntStream;
-import org.antlr.runtime.MismatchedTokenException;
-import org.antlr.runtime.NoViableAltException;
-import org.antlr.runtime.Parser;
-import org.antlr.runtime.ParserRuleReturnScope;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.RecognizerSharedState;
-import org.antlr.runtime.Token;
-import org.antlr.runtime.TokenStream;
-
-
-
 import org.antlr.runtime.*;
+
 import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
@@ -169,6 +158,7 @@ public class TurtleOBDAParser extends Parser {
 
 	/** A factory to construct the predicates and terms */
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 
 	private String error = "";
@@ -1507,7 +1497,7 @@ public class TurtleOBDAParser extends Parser {
 					state._fsp--;
 
 
-					      Predicate functionSymbol = dfac.getDataTypePredicateLiteralLang();
+					      Predicate functionSymbol = dtfac.getDataTypePredicateLiteralLang();
 					      Variable var = variable22;
 					      Term lang = language23;   
 					      value = dfac.getFunction(functionSymbol, var, lang);
@@ -1537,9 +1527,9 @@ public class TurtleOBDAParser extends Parser {
 					        throw new IllegalArgumentException("resource25 should be an URI");
 					      }
 					      Predicate functionSymbol = null;
-					      Predicate.COL_TYPE type = OBDAVocabulary.getDataType(functionName);
+					      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
 					      if (type != null) {
-					    	  functionSymbol = dfac.getTypePredicate(type);
+					    	  functionSymbol = dtfac.getTypePredicate(type);
 					      } 
 					      else {
 					    	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
@@ -1884,9 +1874,9 @@ public class TurtleOBDAParser extends Parser {
 					       ValueConstant constant = stringLiteral31;
 					       Term lang = language32;
 					       if (lang != null) {
-					         value = dfac.getFunction(dfac.getDataTypePredicateLiteralLang(), constant, lang);
+					         value = dfac.getFunction(dtfac.getDataTypePredicateLiteralLang(), constant, lang);
 					       } else {
-					       	 value = dfac.getFunction(dfac.getDataTypePredicateLiteral(), constant);
+					       	 value = dfac.getFunction(dtfac.getDataTypePredicateLiteral(), constant);
 					       }
 					    
 					}
@@ -1999,9 +1989,9 @@ public class TurtleOBDAParser extends Parser {
 			      if (resource38 instanceof Function){
 				 functionName = ( (ValueConstant) ((Function)resource38).getTerm(0) ).getValue();
 			      }
-			      Predicate.COL_TYPE type = OBDAVocabulary.getDataType(functionName);
+			      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
 			      if (type != null) {
-			    	  functionSymbol = dfac.getTypePredicate(type);
+			    	  functionSymbol = dtfac.getTypePredicate(type);
 			      }
 			      else {
 			        throw new RuntimeException("Unsupported datatype: " + functionName);

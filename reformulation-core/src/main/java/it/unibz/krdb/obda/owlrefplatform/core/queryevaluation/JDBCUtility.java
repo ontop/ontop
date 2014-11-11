@@ -106,7 +106,7 @@ public class JDBCUtility implements Serializable {
 	public String getSQLLexicalForm(Function typedrdfliteral) {
 		String sql = null;
 		Predicate type = typedrdfliteral.getFunctionSymbol();
-		if (type == OBDADataFactoryImpl.getInstance().getDataTypePredicateBoolean()) {
+		if (OBDADataFactoryImpl.getInstance().getDatatypeFactory().isBoolean(type)) {
 			ValueConstant c = (ValueConstant) typedrdfliteral.getTerms().get(0);
 			sql = getSQLLexicalFormBoolean(c);
 		} else {

@@ -22,11 +22,13 @@ package it.unibz.krdb.obda.sesame;
 
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
@@ -48,6 +50,8 @@ public class SesameStatement implements Statement {
 	private Value object = null;
 	private Resource context = null;
 	private ValueFactory fact = new ValueFactoryImpl();
+	
+	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	public SesameStatement(Assertion assertion) {
 		
@@ -131,10 +135,11 @@ public class SesameStatement implements Statement {
 			return fact.createLiteral(literal.getValue(), literal.getLanguage());
 		}
 		else if (literal.getType() == COL_TYPE.OBJECT) {
-			datatype = fact.createURI(OBDAVocabulary.XSD_STRING_URI);
+			String uri = dtfac.getDataTypeURI(COL_TYPE.STRING);
+			datatype = fact.createURI(uri);
 		}	
 		else {
-			String uri = OBDAVocabulary.getDataTypeURI(literal.getType());
+			String uri = dtfac.getDataTypeURI(literal.getType());
 			datatype = fact.createURI(uri);
 		}
 		

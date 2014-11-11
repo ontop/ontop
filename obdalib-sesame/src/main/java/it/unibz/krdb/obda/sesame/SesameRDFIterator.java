@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.sesame;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
@@ -51,6 +52,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 	
 	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 	private final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	private BlockingQueue<Statement> buffer;
 	private Iterator<Statement> iterator;
@@ -207,7 +209,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		} 
 		else {
 			String uri = datatype.stringValue();
-			Predicate.COL_TYPE type = OBDAVocabulary.getDataType(uri);
+			Predicate.COL_TYPE type = dtfac.getDataType(uri);
 			if (type != null)
 				return type;
 			return Predicate.COL_TYPE.UNSUPPORTED;

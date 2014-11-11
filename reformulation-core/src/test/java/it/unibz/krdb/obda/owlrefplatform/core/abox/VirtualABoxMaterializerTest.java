@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -46,7 +47,8 @@ import junit.framework.TestCase;
 
 public class VirtualABoxMaterializerTest extends TestCase {
 
-	OBDADataFactory	fac	= OBDADataFactoryImpl.getInstance();
+	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private final DatatypeFactory dtfac	= OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -572,10 +574,10 @@ try{
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
 		
-		final Term firstNameVariable = fac.getFunction(fac.getDataTypePredicateString(), fac.getVariable("fn"));
-		final Term lastNameVariable = fac.getFunction(fac.getDataTypePredicateString(), fac.getVariable("ln"));
-		final Term ageVariable = fac.getFunction(fac.getDataTypePredicateInteger(), fac.getVariable("age"));
-		final Term schoolUriVariable = fac.getFunction(fac.getDataTypePredicateString(), fac.getVariable("schooluri"));
+		final Term firstNameVariable = fac.getFunction(dtfac.getDataTypePredicateString(), fac.getVariable("fn"));
+		final Term lastNameVariable = fac.getFunction(dtfac.getDataTypePredicateString(), fac.getVariable("ln"));
+		final Term ageVariable = fac.getFunction(dtfac.getDataTypePredicateInteger(), fac.getVariable("age"));
+		final Term schoolUriVariable = fac.getFunction(dtfac.getDataTypePredicateString(), fac.getVariable("schooluri"));
 		
 		headTerms.add(firstNameVariable);
 		headTerms.add(lastNameVariable);

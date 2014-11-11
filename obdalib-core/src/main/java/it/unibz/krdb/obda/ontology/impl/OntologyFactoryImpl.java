@@ -92,7 +92,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 	@Override
 	public Datatype createDataType(Predicate.COL_TYPE type) {
-		return new DatatypeImpl(ofac.getTypePredicate(type));
+		return new DatatypeImpl(ofac.getDatatypeFactory().getTypePredicate(type));
 	}
 
 	@Override

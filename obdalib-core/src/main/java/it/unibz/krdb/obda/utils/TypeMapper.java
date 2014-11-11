@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.utils;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
@@ -33,53 +33,53 @@ import java.util.HashMap;
  */
 public class TypeMapper {
 
-	private static TypeMapper typeMapper;
+	private static final TypeMapper typeMapper;
 
 	private final HashMap<Integer, Predicate> sqlToQuest = new HashMap<Integer, Predicate>();
 
-	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-
+	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	
 	static {
 		typeMapper = new TypeMapper();
-		typeMapper.put(Types.VARCHAR, dfac.getDataTypePredicateLiteral());
-		typeMapper.put(Types.CHAR, dfac.getDataTypePredicateLiteral());
-		typeMapper.put(Types.LONGNVARCHAR, dfac.getDataTypePredicateLiteral());
-		typeMapper.put(Types.LONGVARCHAR, dfac.getDataTypePredicateLiteral());
-		typeMapper.put(Types.NVARCHAR, dfac.getDataTypePredicateLiteral());
-		typeMapper.put(Types.NCHAR, dfac.getDataTypePredicateLiteral());
-		typeMapper.put(Types.INTEGER, dfac.getDataTypePredicateInteger());
-		typeMapper.put(Types.BIGINT, dfac.getDataTypePredicateInteger());
-		typeMapper.put(Types.SMALLINT, dfac.getDataTypePredicateInteger());
-		typeMapper.put(Types.TINYINT, dfac.getDataTypePredicateInteger());
-		typeMapper.put(Types.NUMERIC, dfac.getDataTypePredicateDecimal());
-		typeMapper.put(Types.DECIMAL, dfac.getDataTypePredicateDecimal());
-		typeMapper.put(Types.FLOAT, dfac.getDataTypePredicateDouble());
-		typeMapper.put(Types.DOUBLE, dfac.getDataTypePredicateDouble());
-		typeMapper.put(Types.REAL, dfac.getDataTypePredicateDouble());
-		typeMapper.put(Types.DATE, dfac.getDataTypePredicateDate());
-		typeMapper.put(Types.TIME, dfac.getDataTypePredicateTime());
-		typeMapper.put(Types.TIMESTAMP, dfac.getDataTypePredicateDateTime());
-		typeMapper.put(Types.BOOLEAN, dfac.getDataTypePredicateBoolean());
-		typeMapper.put(Types.BIT, dfac.getDataTypePredicateBoolean());
+		typeMapper.put(Types.VARCHAR, dtfac.getDataTypePredicateLiteral());
+		typeMapper.put(Types.CHAR, dtfac.getDataTypePredicateLiteral());
+		typeMapper.put(Types.LONGNVARCHAR, dtfac.getDataTypePredicateLiteral());
+		typeMapper.put(Types.LONGVARCHAR, dtfac.getDataTypePredicateLiteral());
+		typeMapper.put(Types.NVARCHAR, dtfac.getDataTypePredicateLiteral());
+		typeMapper.put(Types.NCHAR, dtfac.getDataTypePredicateLiteral());
+		typeMapper.put(Types.INTEGER, dtfac.getDataTypePredicateInteger());
+		typeMapper.put(Types.BIGINT, dtfac.getDataTypePredicateInteger());
+		typeMapper.put(Types.SMALLINT, dtfac.getDataTypePredicateInteger());
+		typeMapper.put(Types.TINYINT, dtfac.getDataTypePredicateInteger());
+		typeMapper.put(Types.NUMERIC, dtfac.getDataTypePredicateDecimal());
+		typeMapper.put(Types.DECIMAL, dtfac.getDataTypePredicateDecimal());
+		typeMapper.put(Types.FLOAT, dtfac.getDataTypePredicateDouble());
+		typeMapper.put(Types.DOUBLE, dtfac.getDataTypePredicateDouble());
+		typeMapper.put(Types.REAL, dtfac.getDataTypePredicateDouble());
+		typeMapper.put(Types.DATE, dtfac.getDataTypePredicateDate());
+		typeMapper.put(Types.TIME, dtfac.getDataTypePredicateTime());
+		typeMapper.put(Types.TIMESTAMP, dtfac.getDataTypePredicateDateTime());
+		typeMapper.put(Types.BOOLEAN, dtfac.getDataTypePredicateBoolean());
+		typeMapper.put(Types.BIT, dtfac.getDataTypePredicateBoolean());
 //		typeMapper.put(Types.BINARY, dfac.getDataTypePredicateBinary());
 //		typeMapper.put(Types.VARBINARY, dfac.getDataTypePredicateBinary());
 //		typeMapper.put(Types.BLOB, dfac.getDataTypePredicateBinary());
-		typeMapper.put(Types.CLOB, dfac.getDataTypePredicateLiteral());
-		typeMapper.put(Types.OTHER, dfac.getDataTypePredicateLiteral());
+		typeMapper.put(Types.CLOB, dtfac.getDataTypePredicateLiteral());
+		typeMapper.put(Types.OTHER, dtfac.getDataTypePredicateLiteral());
 	}
 
 	public static TypeMapper getInstance() {
 		return typeMapper;
 	}
 
-	public void put(int sqlType, Predicate questType) {
+	private void put(int sqlType, Predicate questType) {
 		sqlToQuest.put(sqlType, questType);
 	}
 	
 	public Predicate getPredicate(int sqlType) {
 		Predicate result = sqlToQuest.get(sqlType);
 		if (result == null) {
-			result = dfac.getDataTypePredicateLiteral();
+			result = dtfac.getDataTypePredicateLiteral();
 		}
 		return result;
 	}

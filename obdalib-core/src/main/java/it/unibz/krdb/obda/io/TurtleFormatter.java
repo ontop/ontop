@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.io;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
@@ -41,6 +42,8 @@ import java.util.List;
 @Deprecated
 public class TurtleFormatter extends CQFormatter {
 
+	private static DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	
     public TurtleFormatter(PrefixManager pm) {
         super(pm);
     }
@@ -76,7 +79,7 @@ public class TurtleFormatter extends CQFormatter {
             Function function = (Function) term;
             Predicate functionSymbol = function.getFunctionSymbol();
             if (functionSymbol instanceof DataTypePredicate) {
-                if (OBDADataFactoryImpl.isLiteralOrLiteralLang(functionSymbol)) {
+                if (dtfac.isLiteral(functionSymbol)) {
                     // For literal data type
                     final int arity = function.getArity();
                     if (arity == 1) { // without the language tag

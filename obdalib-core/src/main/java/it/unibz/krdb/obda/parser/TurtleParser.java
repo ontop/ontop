@@ -2,6 +2,7 @@
 
 package it.unibz.krdb.obda.parser;
 
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
@@ -15,6 +16,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+
 
 //import java.net.URI;
 import java.util.ArrayList;
@@ -34,8 +36,6 @@ import org.antlr.runtime.ParserRuleReturnScope;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.TokenStream;
-
-
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 
@@ -45,6 +45,7 @@ import org.openrdf.model.impl.URIImpl;
 
 
 import org.antlr.runtime.*;
+
 import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
@@ -172,6 +173,7 @@ public class TurtleParser extends Parser {
 
 	/** A factory to construct the predicates and terms */
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	private String error = "";
 
@@ -1640,7 +1642,7 @@ public class TurtleParser extends Parser {
 					state._fsp--;
 
 
-					      Predicate functionSymbol = dfac.getDataTypePredicateLiteralLang();
+					      Predicate functionSymbol = dtfac.getDataTypePredicateLiteralLang();
 					      Variable var = variable26;
 					      Term lang = language27;   
 					      value = dfac.getFunction(functionSymbol, var, lang);
@@ -1663,23 +1665,17 @@ public class TurtleParser extends Parser {
 					      Variable var = variable28;
 					      String functionName = resource29.toString();
 					      Predicate functionSymbol = null;
-					      if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-					    	functionSymbol = dfac.getDataTypePredicateLiteral();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
-					    	functionSymbol = dfac.getDataTypePredicateString();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI) || functionName.equals(OBDAVocabulary.XSD_INT_URI)) {
-					     	functionSymbol = dfac.getDataTypePredicateInteger();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_LONG_URI)) { // R: URI was missing in the name!
-					        functionSymbol = dfac.getDataTypePredicateLong();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-					    	functionSymbol = dfac.getDataTypePredicateDecimal();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-					    	functionSymbol = dfac.getDataTypePredicateDouble();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-					    	functionSymbol = dfac.getDataTypePredicateDateTime();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-					    	functionSymbol = dfac.getDataTypePredicateBoolean();
-					      } else {
+					      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+					      // R: not sute why such a transformation is needed -- there was nothing like this below
+					      if (type == COL_TYPE.INT)
+					    	  type = COL_TYPE.INTEGER;
+					      // R: these are the only types that were listed
+					      if (type == COL_TYPE.LITERAL || type == COL_TYPE.STRING || type == COL_TYPE.INTEGER ||
+					    		  type == COL_TYPE.LONG || type == COL_TYPE.DECIMAL || type == COL_TYPE.DOUBLE ||
+					    		  type == COL_TYPE.DATETIME || type == COL_TYPE.BOOLEAN) {
+					    	  functionSymbol = dtfac.getTypePredicate(type);
+					      }
+					      else {
 					        throw new RecognitionException();
 					      }
 					      value = dfac.getFunction(functionSymbol, var);
@@ -2110,9 +2106,9 @@ public class TurtleParser extends Parser {
 					       ValueConstant constant = stringLiteral36;
 					       Term lang = language37;
 					       if (lang != null) {
-					         value = dfac.getFunction(dfac.getDataTypePredicateLiteralLang(), constant, lang);
+					         value = dfac.getFunction(dtfac.getDataTypePredicateLiteralLang(), constant, lang);
 					       } else {
-					       	 value = dfac.getFunction(dfac.getDataTypePredicateLiteral(), constant);
+					       	 value = dfac.getFunction(dtfac.getDataTypePredicateLiteral(), constant);
 					       }
 					    
 					}
@@ -2221,26 +2217,20 @@ public class TurtleParser extends Parser {
 
 			      ValueConstant constant = stringLiteral42;
 			      String functionName = resource43.toString();
+			      
 			      Predicate functionSymbol = null;
-			      if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateLiteral();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateString();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
-			     	functionSymbol = dfac.getDataTypePredicateInteger();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_LONG_URI)) {
-			     	functionSymbol = dfac.getDataTypePredicateLong();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateDecimal();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateDouble();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateDateTime();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateBoolean();
-			      } else {
-			        throw new RuntimeException("Unknown datatype: " + functionName);
+			      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+			      
+			      // R: these are the only types that were listed
+			      if (type == COL_TYPE.LITERAL || type == COL_TYPE.STRING || type == COL_TYPE.INTEGER ||
+			    		  type == COL_TYPE.LONG || type == COL_TYPE.DECIMAL || type == COL_TYPE.DOUBLE ||
+			    		  type == COL_TYPE.DATETIME || type == COL_TYPE.BOOLEAN) {
+			    	  functionSymbol = dtfac.getTypePredicate(type);
 			      }
+			      else {
+				        throw new RuntimeException("Unknown datatype: " + functionName);
+			      }
+			      
 			      value = dfac.getFunction(functionSymbol, constant);
 			    
 			}

@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
  */
 
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.BNodePredicate;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
@@ -59,7 +60,10 @@ public class ExpressionEvaluator {
 
 	private UriTemplateMatcher uriTemplateMatcher;
 	
-	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	
+	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	
 	private boolean regexFlag = false;
 
 	public void setUriTemplateMatcher(UriTemplateMatcher matcher) {
@@ -126,7 +130,7 @@ public class ExpressionEvaluator {
 					if (!newterm.equals(old))
 						if (newterm == fac.getConstantFalse()) {
 							//
-							terms.set(i, fac.getFunction(fac.getDataTypePredicateBoolean(), fac.getConstantFalse()));
+							terms.set(i, fac.getFunction(dtfac.getDataTypePredicateBoolean(), fac.getConstantFalse()));
 						} else if (newterm == fac.getConstantTrue()) {
 							//remove
 							terms.remove(i);
@@ -147,7 +151,7 @@ public class ExpressionEvaluator {
 		} else if (p instanceof NumericalOperationPredicate) {
 			return evalNumericalOperation(expr);
 		} else if (p instanceof DataTypePredicate) {
-			if (p == fac.getDataTypePredicateBoolean()) { // OBDAVocabulary.XSD_BOOLEAN
+			if (dtfac.isBoolean(p)) { // OBDAVocabulary.XSD_BOOLEAN
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					String valueString = value.getValue();
@@ -163,14 +167,7 @@ public class ExpressionEvaluator {
 					return expr;
 				}
 			}
-			else if (p == fac.getDataTypePredicateInteger() || 
-					p == fac.getDataTypePredicateNegativeInteger() || 
-                    p == fac.getDataTypePredicateInt() || 
-        			p == fac.getDataTypePredicateNonNegativeInteger() ||
-                    p == fac.getDataTypePredicateUnsignedInt() || 
-                    p == fac.getDataTypePredicatePositiveInteger() ||
-                    p == fac.getDataTypePredicateNonPositiveInteger() || 
-                    p == fac.getDataTypePredicateLong()) {
+			else if (dtfac.isInteger(p)) {
 
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
@@ -185,7 +182,8 @@ public class ExpressionEvaluator {
 					return expr;
 				}
 			}
-			else if (p == fac.getDataTypePredicateDouble() || p == fac.getDataTypePredicateFloat() || p== fac.getDataTypePredicateDecimal()) {
+			else if (dtfac.isFloat(p)) {
+				
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					double valueD = Double.parseDouble(value.getValue());
@@ -199,7 +197,7 @@ public class ExpressionEvaluator {
 					return expr;
 				}
 			}
-			else if (p == fac.getDataTypePredicateString()) {
+			else if (dtfac.isString(p)) {
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					if (value.toString().length() == 0) {
@@ -212,7 +210,8 @@ public class ExpressionEvaluator {
 					return expr;
 				}
 			}
-			else if (p == fac.getDataTypePredicateLiteral()) {
+			else if (dtfac.isLiteral(p)) { // R: a bit wider than p == fac.getDataTypePredicateLiteral() 
+				                           // by taking LANG into account
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					if (value.toString().length() == 0) {
@@ -225,6 +224,7 @@ public class ExpressionEvaluator {
 					return expr;
 				}
 			}
+			// TODO (R): year, date and time are not covered?
 		}
 		if (p.getName().toString().equals("QUEST_OBJECT_PROPERTY_ASSERTION")) {
 			setRegexFlag(true);
@@ -400,24 +400,25 @@ public class ExpressionEvaluator {
 			Term parameter = function.getTerm(0);
 			if (predicate instanceof DataTypePredicate) {
 				String datatype = predicate.toString();
-				if (datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
+				if (dtfac.isLiteral(predicate)) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
 					return fac.getFunction(
-							fac.getDataTypePredicateLiteral(),
+							dtfac.getDataTypePredicateLiteral(),
 							fac.getVariable(parameter.toString()));
-				} else if (datatype.equals(OBDAVocabulary.XSD_STRING_URI)) {
+				} 
+				else if (dtfac.isString(predicate)) { // R: was datatype.equals(OBDAVocabulary.XSD_STRING_URI)) {
 					return fac.getFunction(
-							fac.getDataTypePredicateLiteral(),
+							dtfac.getDataTypePredicateLiteral(),
 							fac.getVariable(parameter.toString()));
 				} else {
 					return fac.getFunction(
-							fac.getDataTypePredicateLiteral(),
+							dtfac.getDataTypePredicateLiteral(),
 							fac.getFunction(
 									OBDAVocabulary.QUEST_CAST,
 									fac.getVariable(parameter.toString()),
-									fac.getConstantLiteral(OBDAVocabulary.RDFS_LITERAL_URI)));
+									fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.LITERAL))));
 				}
 			} else if (predicate instanceof URITemplatePredicate) {
-				return fac.getFunction(fac.getDataTypePredicateLiteral(), function.clone());
+				return fac.getFunction(dtfac.getDataTypePredicateLiteral(), function.clone());
 			} else if (predicate instanceof BNodePredicate) {
 				return fac.getConstantNULL();
 			}
@@ -450,14 +451,14 @@ public class ExpressionEvaluator {
 			return null;
 		} else if (predicate instanceof AlgebraOperatorPredicate){
 			return fac.getFunction(fac.getUriTemplatePredicate(1),
-					fac.getConstantLiteral(OBDAVocabulary.XSD_BOOLEAN_URI,
+					fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN),
 							COL_TYPE.OBJECT));
 		} else if (predicate instanceof OperationPredicate){
 			if (predicate instanceof BooleanOperationPredicate)
 			{
 				//return boolean uri
 				return fac.getFunction(fac.getUriTemplatePredicate(1),
-						fac.getConstantLiteral(OBDAVocabulary.XSD_BOOLEAN_URI,
+						fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN),
 								COL_TYPE.OBJECT));
 			}
 			else if (predicate instanceof NumericalOperationPredicate)
@@ -500,9 +501,9 @@ public class ExpressionEvaluator {
 		else if (term instanceof Constant) {
 			Constant constant = (Constant) term;
 			COL_TYPE type = constant.getType();
-			Predicate pred = fac.getTypePredicate(type);
+			Predicate pred = dtfac.getTypePredicate(type);
 			if (pred == null)
-				pred = fac.getDataTypePredicateString(); // .XSD_STRING;
+				pred = dtfac.getDataTypePredicateString(); // .XSD_STRING;
 			return pred;
 		} 
 		else {
@@ -511,29 +512,21 @@ public class ExpressionEvaluator {
 	}
 	
 	private boolean isDouble(Predicate pred) {
-		return (pred.equals(fac.getDataTypePredicateDouble()) || pred.equals(fac.getDataTypePredicateFloat()));
+		return (pred.equals(dtfac.getDataTypePredicateDouble()) || pred.equals(dtfac.getDataTypePredicateFloat()));
 	}
 	
 	private boolean isNumeric(Predicate pred) {
-		return (pred.equals(fac.getDataTypePredicateInteger()) || 
-                pred.equals(fac.getDataTypePredicateNegativeInteger())|| 
-                pred.equals(fac.getDataTypePredicateInt()) || 
-                pred.equals(fac.getDataTypePredicateNonNegativeInteger()) || 
-                pred.equals(fac.getDataTypePredicateUnsignedInt()) ||
-                pred.equals(fac.getDataTypePredicatePositiveInteger()) ||
-                pred.equals(fac.getDataTypePredicateNonPositiveInteger()) || 
-				pred.equals(fac.getDataTypePredicateLong()) || 
-				pred.equals(fac.getDataTypePredicateDecimal()) ||
-                pred.equals(fac.getDataTypePredicateDouble()) || 
-                pred.equals(fac.getDataTypePredicateFloat()));
+		return (dtfac.isInteger(pred) || dtfac.isFloat(pred));
 	}
 	
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
-		return (constantValue.equals(OBDAVocabulary.XSD_INTEGER_URI) || constantValue.equals(OBDAVocabulary.XSD_LONG_URI) || constantValue.equals(OBDAVocabulary.XSD_DECIMAL_URI) ||
-                constantValue.equals(OBDAVocabulary.XSD_DOUBLE_URI) || constantValue.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)|| constantValue.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI) ||
-                constantValue.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI) || constantValue.equals(OBDAVocabulary.XSD_INT_URI) || constantValue.equals(OBDAVocabulary.XSD_UNSIGNED_INT_URI) ||
-                constantValue.equals(OBDAVocabulary.XSD_FLOAT_URI)|| constantValue.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI));
+		Predicate.COL_TYPE type = dtfac.getDataType(constantValue);
+		if (type != null) {
+			Predicate p = dtfac.getTypePredicate(type);
+			return isNumeric(p);
+		}
+		return false;	
 	}
 
 	/*
@@ -544,7 +537,7 @@ public class ExpressionEvaluator {
 
 		// Create a default return constant: blank language with literal type.
 		Term emptyconstant = fac.getFunction(
-				fac.getDataTypePredicateLiteral(), fac.getConstantLiteral("", COL_TYPE.LITERAL));
+				dtfac.getDataTypePredicateLiteral(), fac.getConstantLiteral("", COL_TYPE.LITERAL));
 
 		if (!(innerTerm instanceof Function)) {
 			return emptyconstant;
@@ -556,8 +549,8 @@ public class ExpressionEvaluator {
 			return null;
 		}
 
-		String datatype = predicate.toString();
-		if (!(datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI))) {
+		//String datatype = predicate.toString();
+		if (!dtfac.isLiteral(predicate)) { // (datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI))
 			return emptyconstant;
 		}
 
@@ -566,10 +559,10 @@ public class ExpressionEvaluator {
 		} else { // rdfs:Literal(text, lang)
 			Term parameter = function.getTerm(1);
 			if (parameter instanceof Variable) {
-				return fac.getFunction(fac.getDataTypePredicateLiteral(),
+				return fac.getFunction(dtfac.getDataTypePredicateLiteral(),
 						parameter.clone());
 			} else if (parameter instanceof Constant) {
-				return fac.getFunction(fac.getDataTypePredicateLiteral(),
+				return fac.getFunction(dtfac.getDataTypePredicateLiteral(),
 						fac.getConstantLiteral(((Constant) parameter).getValue(),COL_TYPE.LITERAL));
 			}
 		}
@@ -814,8 +807,10 @@ public class ExpressionEvaluator {
 				/*
 				 * Evaluate both terms by comparing their datatypes
 				 */
-				if (pred1 == fac.getDataTypePredicateLiteral()
-						&& pred2 == fac.getDataTypePredicateLiteral()) {
+				if (dtfac.isLiteral(pred1) && dtfac.isLiteral(pred2)) { // R: replaced incorrect check 
+																		//  pred1 == fac.getDataTypePredicateLiteral()
+																		// && pred2 == fac.getDataTypePredicateLiteral())
+																	    // which does not work for LITERAL_LANG
 					/*
 					 * Special code to handle quality of Literals (plain, and
 					 * with language)

@@ -21,11 +21,13 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
  */
 
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.utils.TypeMapper;
 import it.unibz.krdb.sql.DBMetadata;
@@ -46,6 +48,8 @@ public class DirectMappingAxiom {
 	protected String SQLString;
 	protected String baseuri;
 	private OBDADataFactory df;
+	
+	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	public DirectMappingAxiom() {
 	}
@@ -173,7 +177,7 @@ public class DirectMappingAxiom {
 		for(int i=0;i<table.getNumOfAttributes();i++){
 			Attribute att = table.getAttribute(i+1);
 			Predicate type = typeMapper.getPredicate(att.getType());
-			if (type.equals(df.getDataTypePredicateLiteral())) {
+			if (type.equals(dtfac.getDataTypePredicateLiteral())) {
 				Variable objV = df.getVariable(att.getName());
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(

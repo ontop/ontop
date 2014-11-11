@@ -30,6 +30,8 @@ import java.util.List;
 public interface OBDADataFactory extends Serializable {
 
 	public OBDAModel getOBDAModel();
+	
+	public DatatypeFactory getDatatypeFactory();
 
 	public CQIE getCQIE(Function head, Function... body );
 	
@@ -73,48 +75,6 @@ public interface OBDADataFactory extends Serializable {
 	public Predicate getClassPredicate(String name);
 
 
-	/*
-	 * Data types
-	 */
-	public Predicate getTypePredicate(Predicate.COL_TYPE type);
-
-	public Predicate getDataTypePredicateLiteral();
-
-	public Predicate getDataTypePredicateLiteralLang();
-
-	public Predicate getDataTypePredicateString();
-
-	public Predicate getDataTypePredicateInteger();
-
-    public Predicate getDataTypePredicateNonNegativeInteger();
-
-    public Predicate getDataTypePredicateInt();
-
-    public Predicate getDataTypePredicatePositiveInteger();
-
-    public Predicate getDataTypePredicateNegativeInteger();
-
-    public Predicate getDataTypePredicateNonPositiveInteger();
-
-    public Predicate getDataTypePredicateUnsignedInt();
-
-    public Predicate getDataTypePredicateLong();
-
-	public Predicate getDataTypePredicateDecimal();
-
-	public Predicate getDataTypePredicateDouble();
-
-    public Predicate getDataTypePredicateFloat();
-
-    public Predicate getDataTypePredicateDateTime();
-
-	public Predicate getDataTypePredicateBoolean();
-
-	public Predicate getDataTypePredicateDate();
-	
-	public Predicate getDataTypePredicateTime();
-
-	public Predicate getDataTypePredicateYear();
 
 	/*
 	 * Built-in function predicates

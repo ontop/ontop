@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -43,7 +44,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	static { // static block
 		ofac = OntologyFactoryImpl.getInstance();
 		
-		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+		DatatypeFactory dfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 		
 		builtinDatatypes = new HashSet<Predicate>();
 		builtinDatatypes.add(dfac.getDataTypePredicateLiteral()); //  .RDFS_LITERAL);

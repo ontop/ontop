@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.renderer;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDAQuery;
@@ -46,6 +47,8 @@ import java.util.Map;
  */
 public class TargetQueryRenderer {
 
+	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	
 	/**
 	 * Transforms the given <code>OBDAQuery</code> into a string. The method requires
 	 * a prefix manager to shorten full IRI name.
@@ -132,7 +135,7 @@ public class TargetQueryRenderer {
 			String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
 			if (functionSymbol instanceof DataTypePredicate) {
 				// if the function symbol is a data type predicate
-				if (isLiteralDataType(functionSymbol)) {
+				if (dtfac.isLiteral(functionSymbol)) {
 					// if it is rdfs:Literal
 					int arity = function.getArity();
 					if (arity == 1) {
@@ -223,10 +226,6 @@ public class TargetQueryRenderer {
 			sb.append("\"");
 		}
 		return sb.toString();
-	}
-
-	private static boolean isLiteralDataType(Predicate predicate) {
-		return (OBDADataFactoryImpl.isLiteralOrLiteralLang(predicate));
 	}
 
 	private TargetQueryRenderer() {

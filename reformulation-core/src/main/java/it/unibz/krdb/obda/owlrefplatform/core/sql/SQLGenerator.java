@@ -27,6 +27,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.NumericalOperationPredicate;
@@ -40,8 +41,6 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.owlrefplatform.core.Quest;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
@@ -66,7 +65,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.openrdf.model.Literal;
-import org.slf4j.LoggerFactory;
 
 //import com.hp.hpl.jena.rdf.model.Literal;
 
@@ -117,7 +115,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private boolean isSI = false;
 	private SemanticIndexURIMap uriRefIds;
 	
-	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
+	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqladapter) {
 		this.metadata = metadata;
@@ -698,23 +696,37 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return equalities;
 	}
 
+	
+	// TODO: to be moved to TypeMapper
+	private static final Map<Predicate.COL_TYPE, Integer> datatypeMap;
+	
+	static {
+		datatypeMap = new HashMap<Predicate.COL_TYPE, Integer>();
+		datatypeMap.put(COL_TYPE.BOOLEAN, Types.BOOLEAN);
+		datatypeMap.put(COL_TYPE.INT, Types.INTEGER);
+		datatypeMap.put(COL_TYPE.INTEGER, Types.BIGINT);
+		datatypeMap.put(COL_TYPE.LONG, Types.BIGINT);
+		datatypeMap.put(COL_TYPE.NEGATIVE_INTEGER, Types.BIGINT);
+		datatypeMap.put(COL_TYPE.POSITIVE_INTEGER, Types.BIGINT);
+		datatypeMap.put(COL_TYPE.NON_POSITIVE_INTEGER, Types.BIGINT);
+		datatypeMap.put(COL_TYPE.UNSIGNED_INT, Types.INTEGER);
+		datatypeMap.put(COL_TYPE.FLOAT, Types.FLOAT);
+		datatypeMap.put(COL_TYPE.DOUBLE, Types.DOUBLE);
+		datatypeMap.put(COL_TYPE.STRING, Types.VARCHAR);
+		datatypeMap.put(COL_TYPE.LITERAL, Types.VARCHAR);
+	}
+	
 	// return variable SQL data type
 	private int getVariableDataType (Term term, QueryAliasIndex idx) {
 		Function f = (Function) term;
 		if (f.isDataTypeFunction()) {
 			Predicate p = f.getFunctionSymbol();
-			if (p.toString() == OBDAVocabulary.XSD_BOOLEAN_URI) return Types.BOOLEAN;
-			if (p.toString() == OBDAVocabulary.XSD_INT_URI)  return Types.INTEGER;
-			if (p.toString() == OBDAVocabulary.XSD_INTEGER_URI)  return Types.BIGINT;
-            if (p.toString() == OBDAVocabulary.XSD_LONG_URI)  return Types.BIGINT;
-            if (p.toString() == OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)  return Types.BIGINT;
-            if (p.toString() == OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)  return Types.BIGINT;
-            if (p.toString() == OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)  return Types.BIGINT;
-            if (p.toString() == OBDAVocabulary.XSD_UNSIGNED_INT_URI)  return Types.INTEGER;
-            if (p.toString() == OBDAVocabulary.XSD_FLOAT_URI)  return Types.FLOAT;
-			if (p.toString() == OBDAVocabulary.XSD_DOUBLE_URI) return Types.DOUBLE;
-			if (p.toString() == OBDAVocabulary.XSD_STRING_URI) return Types.VARCHAR;
-			if (p.toString() == OBDAVocabulary.RDFS_LITERAL_URI) return Types.VARCHAR;
+			Predicate.COL_TYPE type = dtfac.getDataType(p.toString());
+			if (type != null) {
+				Integer sqlType = datatypeMap.get(type);
+				if (sqlType != null)
+					return sqlType;
+			}
 		}
 		// Return varchar for unknown
 		return 12;
@@ -866,7 +878,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			Function ov = (Function) ht;
 			Predicate function = ov.getFunctionSymbol();
 
-			if (OBDADataFactoryImpl.isLiteralOrLiteralLang(function))
+			if (dtfac.isLiteral(function))
 				if (ov.getTerms().size() > 1) {
 				/*
 				 * Case for rdf:literal s with a language, we need to select 2
@@ -942,7 +954,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				return (String.format(typeStr, 2, signature.get(hpos)));
 			}
 			else {
-				Predicate.COL_TYPE type = OBDAVocabulary.getDataType(functionString);
+				Predicate.COL_TYPE type = dtfac.getDataType(functionString);
 				int k = typeMap.get(type);
 				return (String.format(typeStr, k, signature.get(hpos)));
 			}
@@ -1028,7 +1040,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			if (ov.getTerms().size() > 1) {
 				int size = ov.getTerms().size();
-				if (OBDADataFactoryImpl.isLiteralOrLiteralLang(pred)) {
+				if (dtfac.isLiteral(pred)) {
 					size--;
 				}
 				for (int termIndex = 1; termIndex < size; termIndex++) {
