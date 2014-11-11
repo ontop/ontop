@@ -32,6 +32,7 @@ import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.io.PrefixManager;
 
@@ -225,7 +226,7 @@ public class TargetQueryRenderer {
 	}
 
 	private static boolean isLiteralDataType(Predicate predicate) {
-		return predicate.equals(OBDAVocabulary.RDFS_LITERAL) || predicate.equals(OBDAVocabulary.RDFS_LITERAL_LANG);
+		return (OBDADataFactoryImpl.isLiteralOrLiteralLang(predicate));
 	}
 
 	private TargetQueryRenderer() {

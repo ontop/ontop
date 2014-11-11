@@ -46,9 +46,6 @@ import java.util.UUID;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
-//import com.hp.hpl.jena.iri.IRI;
-//import com.hp.hpl.jena.iri.IRIFactory;
-
 public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	private static final long serialVersionUID = 1851116693137470887L;
@@ -217,100 +214,181 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	
+	
+	
+	/* Data type predicates */
+
+	public static boolean isLiteralOrLiteralLang(Predicate pred) {
+		return (pred == RDFS_LITERAL) || (pred == RDFS_LITERAL_LANG);
+	}
+	
+	// TODO: make this one private
+	public static final Predicate RDFS_LITERAL = new DataTypePredicateImpl(
+			OBDAVocabulary.RDFS_LITERAL_URI, new COL_TYPE[] { COL_TYPE.LITERAL });
+
+	private static final Predicate RDFS_LITERAL_LANG = new DataTypePredicateImpl(
+			OBDAVocabulary.RDFS_LITERAL_URI, new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL });
+
+	private static final Predicate XSD_STRING = new DataTypePredicateImpl(
+			OBDAVocabulary.XSD_STRING_URI, COL_TYPE.STRING);
+
+	private static final Predicate XSD_INTEGER = new DataTypePredicateImpl(
+			OBDAVocabulary.XSD_INTEGER_URI, COL_TYPE.INTEGER);
+
+	private static final Predicate XSD_NEGATIVE_INTEGER = new DataTypePredicateImpl(
+    		OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI, COL_TYPE.NEGATIVE_INTEGER);
+
+	private static final Predicate XSD_INT = new DataTypePredicateImpl(
+    		OBDAVocabulary.XSD_INT_URI, COL_TYPE.INT);
+
+	private static final Predicate XSD_NON_NEGATIVE_INTEGER = new DataTypePredicateImpl(
+    		OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI, COL_TYPE.NON_NEGATIVE_INTEGER);
+
+	private static final Predicate XSD_UNSIGNED_INT = new DataTypePredicateImpl(
+    		OBDAVocabulary.XSD_UNSIGNED_INT_URI, COL_TYPE.UNSIGNED_INT);
+
+	private static final Predicate XSD_POSITIVE_INTEGER = new DataTypePredicateImpl(
+    		OBDAVocabulary.XSD_POSITIVE_INTEGER_URI, COL_TYPE.POSITIVE_INTEGER);
+
+	private static final Predicate XSD_NON_POSITIVE_INTEGER = new DataTypePredicateImpl(
+    		OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI, COL_TYPE.NON_POSITIVE_INTEGER);
+
+	private static final Predicate XSD_LONG = new DataTypePredicateImpl(
+    		OBDAVocabulary.XSD_LONG_URI, COL_TYPE.LONG);
+
+	private static final Predicate XSD_DECIMAL = new DataTypePredicateImpl(
+			OBDAVocabulary.XSD_DECIMAL_URI, COL_TYPE.DECIMAL);
+
+	private static final Predicate XSD_DOUBLE = new DataTypePredicateImpl(
+			OBDAVocabulary.XSD_DOUBLE_URI, COL_TYPE.DOUBLE);
+
+	private static final Predicate XSD_FLOAT = new DataTypePredicateImpl(
+    		OBDAVocabulary.XSD_FLOAT_URI, COL_TYPE.FLOAT);
+
+	private static final Predicate XSD_DATETIME = new DataTypePredicateImpl(
+			OBDAVocabulary.XSD_DATETIME_URI, COL_TYPE.DATETIME);
+
+	private static final Predicate XSD_BOOLEAN = new DataTypePredicateImpl(
+			OBDAVocabulary.XSD_BOOLEAN_URI, COL_TYPE.BOOLEAN);
+
+	private static final Predicate XSD_DATE = new DataTypePredicateImpl(
+			OBDAVocabulary.XSD_DATE_URI, COL_TYPE.DATE);
+
+	private static final Predicate XSD_TIME = new DataTypePredicateImpl(
+			OBDAVocabulary.XSD_TIME_URI, COL_TYPE.TIME);
+	
+	private static final Predicate XSD_YEAR = new DataTypePredicateImpl(
+			OBDAVocabulary.XSD_YEAR_URI, COL_TYPE.YEAR);
+
+	public static final Predicate[] QUEST_DATATYPE_PREDICATES = new Predicate[] {
+			RDFS_LITERAL, XSD_STRING, XSD_INTEGER, XSD_NEGATIVE_INTEGER,
+    XSD_NON_NEGATIVE_INTEGER, XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER, XSD_INT,
+    XSD_UNSIGNED_INT, XSD_LONG, XSD_FLOAT, XSD_DECIMAL, XSD_DOUBLE,
+			XSD_DATETIME, XSD_BOOLEAN, XSD_DATE, XSD_TIME, XSD_YEAR };
+	
+//	public static final Predicate[] QUEST_NUMERICAL_DATATYPES = new Predicate[] {
+//			XSD_INTEGER, XSD_NEGATIVE_INTEGER,
+//           XSD_NON_NEGATIVE_INTEGER, XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER, XSD_INT,
+//            XSD_UNSIGNED_INT, XSD_FLOAT, XSD_DECIMAL, XSD_DOUBLE, XSD_LONG };
+	
+	
 	@Override
 	public Predicate getDataTypePredicateLiteral() {
-		return OBDAVocabulary.RDFS_LITERAL;
+		return RDFS_LITERAL;
 	}
 	
 	@Override
 	public Predicate getDataTypePredicateLiteralLang() {
-		return OBDAVocabulary.RDFS_LITERAL_LANG;
+		return RDFS_LITERAL_LANG;
 	}
 
 	@Override
 	public Predicate getDataTypePredicateString() {
-		return OBDAVocabulary.XSD_STRING;
+		return XSD_STRING;
 	}
 
 	@Override
 	public Predicate getDataTypePredicateInteger() {
-		return OBDAVocabulary.XSD_INTEGER;
+		return XSD_INTEGER;
 	}
 
     @Override
     public Predicate getDataTypePredicateNonNegativeInteger() {
-        return OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER;
+        return XSD_NON_NEGATIVE_INTEGER;
     }
 
     @Override
     public Predicate getDataTypePredicateInt() {
-        return OBDAVocabulary.XSD_INT;
+        return XSD_INT;
     }
 
     @Override
     public Predicate getDataTypePredicatePositiveInteger() {
-        return OBDAVocabulary.XSD_POSITIVE_INTEGER;
+        return XSD_POSITIVE_INTEGER;
     }
 
     @Override
     public Predicate getDataTypePredicateNegativeInteger() {
-        return OBDAVocabulary.XSD_NEGATIVE_INTEGER;
+        return XSD_NEGATIVE_INTEGER;
     }
 
     @Override
     public Predicate getDataTypePredicateNonPositiveInteger() {
-        return OBDAVocabulary.XSD_NON_POSITIVE_INTEGER;
+        return XSD_NON_POSITIVE_INTEGER;
     }
 
     @Override
     public Predicate getDataTypePredicateUnsignedInt() {
-        return OBDAVocabulary.XSD_UNSIGNED_INT;
+        return XSD_UNSIGNED_INT;
     }
 
     @Override
     public Predicate getDataTypePredicateLong() {
-        return OBDAVocabulary.XSD_LONG;
+        return XSD_LONG;
     }
 
 	@Override
 	public Predicate getDataTypePredicateDecimal() {
-		return OBDAVocabulary.XSD_DECIMAL;
+		return XSD_DECIMAL;
 	}
 
 	@Override
 	public Predicate getDataTypePredicateDouble() {
-		return OBDAVocabulary.XSD_DOUBLE;
+		return XSD_DOUBLE;
 	}
 
     @Override
     public Predicate getDataTypePredicateFloat() {
-        return OBDAVocabulary.XSD_FLOAT;
+        return XSD_FLOAT;
     }
 
 	@Override
 	public Predicate getDataTypePredicateDateTime() {
-		return OBDAVocabulary.XSD_DATETIME;
+		return XSD_DATETIME;
 	}
 
 	@Override
 	public Predicate getDataTypePredicateBoolean() {
-		return OBDAVocabulary.XSD_BOOLEAN;
+		return XSD_BOOLEAN;
 	}
 
 	@Override
 	public Predicate getDataTypePredicateDate() {
-		return OBDAVocabulary.XSD_DATE;
+		return XSD_DATE;
 	}
 	
 	@Override
 	public Predicate getDataTypePredicateYear() {
-		return OBDAVocabulary.XSD_YEAR;
+		return XSD_YEAR;
 	}
 
 	@Override
 	public Predicate getDataTypePredicateTime() {
-		return OBDAVocabulary.XSD_TIME;
+		return XSD_TIME;
 	}
+	
+	
+	
 
 	@Override
 	public Predicate getUriTemplatePredicate(int arity) {
@@ -519,48 +597,48 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public Predicate getTypePredicate(Predicate.COL_TYPE type) {
 		switch (type) {
-		case LITERAL:
+		case LITERAL:          // 1
 			return getDataTypePredicateLiteral();
+		case STRING:   // 2
+			return getDataTypePredicateString();
+		case INTEGER:  // 3
+			return getDataTypePredicateInteger();
+        case NEGATIVE_INTEGER:  // 4
+            return getDataTypePredicateNegativeInteger();
+        case INT:  // 5
+            return getDataTypePredicateInt();
+        case POSITIVE_INTEGER:  // 6
+            return getDataTypePredicatePositiveInteger();
+        case NON_POSITIVE_INTEGER:  // 7
+            return getDataTypePredicateNonPositiveInteger();
+        case NON_NEGATIVE_INTEGER: // 8
+            return getDataTypePredicateNonNegativeInteger();
+        case UNSIGNED_INT:  // 9
+            return getDataTypePredicateUnsignedInt();
+        case LONG:   // 10
+            return getDataTypePredicateLong();
+		case DECIMAL: // 11
+			return getDataTypePredicateDecimal();
+        case FLOAT:  // 12
+            return getDataTypePredicateFloat();
+		case DOUBLE:  // 13
+			return getDataTypePredicateDouble();
+		case DATETIME:  // 14
+			return getDataTypePredicateDateTime();
+		case BOOLEAN:  // 15
+			return getDataTypePredicateBoolean();
+		case DATE:   // 16
+			return getDataTypePredicateDate();
+		case TIME:  // 17
+			return getDataTypePredicateTime();
+		case YEAR: // 18
+			return getDataTypePredicateYear();
 		case LITERAL_LANG: // used in ExpressionEvaluator only(?) use proper method here? 
 			return getDataTypePredicateLiteral();
-		case STRING:
-			return getDataTypePredicateString();
-		case INTEGER:
-			return getDataTypePredicateInteger();
-        case NEGATIVE_INTEGER:
-            return getDataTypePredicateNegativeInteger();
-        case INT:
-            return getDataTypePredicateInt();
-        case POSITIVE_INTEGER:
-            return getDataTypePredicatePositiveInteger();
-        case NON_POSITIVE_INTEGER:
-            return getDataTypePredicateNonPositiveInteger();
-        case NON_NEGATIVE_INTEGER:
-            return getDataTypePredicateNonNegativeInteger();
-        case UNSIGNED_INT:
-            return getDataTypePredicateUnsignedInt();
-        case LONG:
-            return getDataTypePredicateLong();
-		case DECIMAL:
-			return getDataTypePredicateDecimal();
-        case FLOAT:
-            return getDataTypePredicateFloat();
-		case DOUBLE:
-			return getDataTypePredicateDouble();
-		case DATETIME:
-			return getDataTypePredicateDateTime();
-		case BOOLEAN:
-			return getDataTypePredicateBoolean();
 		//case OBJECT:   // different uses
 		//	return getUriTemplatePredicate(1);
-		//case BNODE:    // different uses
+		//case BNODE:    // different uses			
 		//	return getBNodeTemplatePredicate(1);
-		case DATE:
-			return getDataTypePredicateDate();
-		case TIME:
-			return getDataTypePredicateTime();
-		case YEAR:
-			return getDataTypePredicateYear();
 		default:
 			return null;
 			//throw new RuntimeException("Cannot get URI for unsupported type: " + type);
