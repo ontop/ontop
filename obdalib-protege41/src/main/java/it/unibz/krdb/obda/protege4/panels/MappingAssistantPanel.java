@@ -563,7 +563,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 		// Create the head
 		int arity = distinguishVariables.size();
-		Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
+		Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
 		
 		// Create and return the conjunctive query
 		return dfac.getCQIE(head, body);

@@ -269,15 +269,15 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			Value obj = st.getObject();
 			if (obj instanceof Literal) {
 				String dataProperty = pred.stringValue();
-				ontology.getVocabulary().declareDataProperty(dataProperty);
+				ontology.getVocabulary().createDataProperty(dataProperty);
 			} 
 			else if (pred.stringValue().equals(OBDAVocabulary.RDF_TYPE)) {
 				String className = obj.stringValue();
-				ontology.getVocabulary().declareClass(className);
+				ontology.getVocabulary().createClass(className);
 			} 
 			else {
 				String objectProperty = pred.stringValue();
-				ontology.getVocabulary().declareObjectProperty(objectProperty);
+				ontology.getVocabulary().createObjectProperty(objectProperty);
 			}
 
 		/*

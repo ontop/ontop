@@ -164,8 +164,9 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	/**
 	 * Updates the mapping id.
+	 * @throws DuplicateMappingException 
 	 */
-	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid);
+	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid) throws DuplicateMappingException;
 
 	/**
 	 * Replaces the old target query with the new one given its id.

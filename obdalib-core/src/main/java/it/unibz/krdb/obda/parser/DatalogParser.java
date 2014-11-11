@@ -4,6 +4,7 @@ package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -20,18 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
-import org.antlr.runtime.BitSet;
-import org.antlr.runtime.EarlyExitException;
-import org.antlr.runtime.MismatchedSetException;
-import org.antlr.runtime.NoViableAltException;
-import org.antlr.runtime.Parser;
-import org.antlr.runtime.ParserRuleReturnScope;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.RecognizerSharedState;
-import org.antlr.runtime.TokenStream;
-
-
 import org.antlr.runtime.*;
+
 import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
@@ -133,6 +124,7 @@ public class DatalogParser extends Parser {
 
 	/** A factory to construct the predicates and terms */
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	/** Select all flag */
 	private boolean isSelectAll = false;
@@ -1474,28 +1466,18 @@ public class DatalogParser extends Parser {
 			      String functionName = function30;
 			      int arity = terms31.size();
 			    
-			      Predicate functionSymbol = null;  	
-			      if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateLiteral();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateString();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
-			     	functionSymbol = dfac.getDataTypePredicateInteger();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_LONG_URI)) {
-			     	functionSymbol = dfac.getDataTypePredicateLong();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateDecimal();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateDouble();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateDateTime();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateBoolean();
-			      } else if (functionName.equals(OBDAVocabulary.QUEST_URI)) {
-			        functionSymbol = dfac.getUriTemplatePredicate(arity);
-			      } else {
-			        functionSymbol = dfac.getPredicate(functionName, arity);
+			      Predicate functionSymbol = null;  
+			      if (functionName.equals(OBDAVocabulary.QUEST_URI)) {
+				        functionSymbol = dfac.getUriTemplatePredicate(arity);
+				  }
+			      else {
+				      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+				      if (type != null)
+				    	  functionSymbol = dtfac.getTypePredicate(type);
+				      else
+						  functionSymbol = dfac.getPredicate(functionName, arity);
 			      }
+			    	  
 			      value = dfac.getFunction(functionSymbol, terms31);
 			    }
 			}

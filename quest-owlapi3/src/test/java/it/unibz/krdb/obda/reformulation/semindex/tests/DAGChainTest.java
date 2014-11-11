@@ -24,26 +24,22 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
 
 import java.util.Set;
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.quest.dag.TestTBoxReasonerImpl_OnGraph;
+
 import junit.framework.TestCase;
 
 
 public class DAGChainTest extends TestCase {
-
-	private static final OntologyFactory	descFactory			= OntologyFactoryImpl.getInstance();
 
 	private static <T> int sizeOf(Set<Equivalences<T>> set) {
 		int size = 0;
@@ -56,12 +52,12 @@ public class DAGChainTest extends TestCase {
 	public void test_simple_isa() {
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
-		OClass ac = descFactory.createClass("a");
-		OClass bc = descFactory.createClass("b");
-		OClass cc = descFactory.createClass("c");
+		OClass ac = ontology.getVocabulary().createClass("a");
+		OClass bc = ontology.getVocabulary().createClass("b");
+		OClass cc = ontology.getVocabulary().createClass("c");
 
-		ontology.addSubClassOfAxiomWithReferencedEntities(bc, ac);
-		ontology.addSubClassOfAxiomWithReferencedEntities(cc, bc);
+		ontology.addSubClassOfAxiom(bc, ac);
+		ontology.addSubClassOfAxiom(cc, bc);
 
 		TBoxReasonerImpl reasoner0 = new TBoxReasonerImpl(ontology);
 		TBoxReasoner reasoner = TBoxReasonerImpl.getChainReasoner(reasoner0);
@@ -83,15 +79,15 @@ public class DAGChainTest extends TestCase {
 	public void test_exists_simple() {
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
-		ObjectPropertyExpression rprop = descFactory.createObjectProperty("r");
+		ObjectPropertyExpression rprop = ontology.getVocabulary().createObjectProperty("r");
 		ObjectPropertyExpression riprop = rprop.getInverse();
-		OClass ac = descFactory.createClass("a");
+		OClass ac = ontology.getVocabulary().createClass("a");
 		ObjectSomeValuesFrom er = rprop.getDomain();
 		ObjectSomeValuesFrom ier = riprop.getDomain();
-		OClass cc = descFactory.createClass("c");
+		OClass cc = ontology.getVocabulary().createClass("c");
 
-		ontology.addSubClassOfAxiomWithReferencedEntities(er, ac);
-		ontology.addSubClassOfAxiomWithReferencedEntities(cc, ier);
+		ontology.addSubClassOfAxiom(er, ac);
+		ontology.addSubClassOfAxiom(cc, ier);
 		
 		//generate Graph
 		TBoxReasonerImpl res0 = new  TBoxReasonerImpl(ontology);
@@ -131,20 +127,20 @@ public class DAGChainTest extends TestCase {
 
 		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
-		ObjectPropertyExpression rprop = descFactory.createObjectProperty("r");
+		ObjectPropertyExpression rprop = ontology.getVocabulary().createObjectProperty("r");
 		ObjectPropertyExpression riprop = rprop.getInverse();
 
-		OClass ac = descFactory.createClass("a");
+		OClass ac = ontology.getVocabulary().createClass("a");
 		ObjectSomeValuesFrom er = rprop.getDomain();
 		ObjectSomeValuesFrom ier = riprop.getDomain();
-		OClass cc = descFactory.createClass("c");
-		OClass bc = descFactory.createClass("b");
-		OClass dc = descFactory.createClass("d");
+		OClass cc = ontology.getVocabulary().createClass("c");
+		OClass bc = ontology.getVocabulary().createClass("b");
+		OClass dc = ontology.getVocabulary().createClass("d");
 
-		ontology.addSubClassOfAxiomWithReferencedEntities(er, ac);
-		ontology.addSubClassOfAxiomWithReferencedEntities(cc, ier);
-		ontology.addSubClassOfAxiomWithReferencedEntities(bc, er);
-		ontology.addSubClassOfAxiomWithReferencedEntities(ier, dc);
+		ontology.addSubClassOfAxiom(er, ac);
+		ontology.addSubClassOfAxiom(cc, ier);
+		ontology.addSubClassOfAxiom(bc, er);
+		ontology.addSubClassOfAxiom(ier, dc);
 
 		//DAGImpl dag221 = DAGBuilder.getDAG(ontology);
 		//TBoxReasonerImpl reasoner221 = new TBoxReasonerImpl(dag221);

@@ -28,13 +28,10 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
-import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 
@@ -45,6 +42,8 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
+	
+	
 	private OntologyFactoryImpl() {
 		// NO-OP to make the default constructor private
 	}
@@ -80,7 +79,7 @@ public class OntologyFactoryImpl implements OntologyFactory {
 	@Override
 	public ObjectPropertyExpression createObjectProperty(String uri) {
 		Predicate prop = ofac.getObjectPropertyPredicate(uri);
-		return new ObjectPropertyExpressionImpl(prop, false);
+		return new ObjectPropertyExpressionImpl(prop);
 	}
 
 	
@@ -93,12 +92,42 @@ public class OntologyFactoryImpl implements OntologyFactory {
 
 	@Override
 	public Datatype createDataType(Predicate.COL_TYPE type) {
-		return new DatatypeImpl(ofac.getTypePredicate(type));
+		return new DatatypeImpl(ofac.getDatatypeFactory().getTypePredicate(type));
 	}
 
 	@Override
 	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression attribute, ObjectConstant o1, ValueConstant o2) {
 		return new DataPropertyAssertionImpl(attribute, o1, o2);
+	}
+
+	@Override
+	public OClass getThing() {
+		return ClassImpl.owlThing;
+	}
+
+	@Override
+	public OClass getNothing() {
+		return ClassImpl.owlNothing;
+	}
+
+	@Override
+	public ObjectPropertyExpression getTopObjectProperty() {
+		return ObjectPropertyExpressionImpl.owlTopObjectProperty;
+	}
+
+	@Override
+	public ObjectPropertyExpression getBottomObjectProperty() {
+		return ObjectPropertyExpressionImpl.owlBottomObjectProperty;
+	}
+
+	@Override
+	public DataPropertyExpression getTopDataProperty() {
+		return DataPropertyExpressionImpl.owlTopDataProperty;
+	}
+
+	@Override
+	public DataPropertyExpression getBottomDataProperty() {
+		return DataPropertyExpressionImpl.owlBottomDataProperty;
 	}
 	
 }

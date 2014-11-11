@@ -4,7 +4,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import it.unibz.krdb.obda.model.DatatypeFactory;
+import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
@@ -20,7 +23,7 @@ import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 
 public class OntologyVocabularyImpl implements OntologyVocabulary {
 
-	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private static OntologyFactory ofac;
 	
 	// signature
 	
@@ -36,57 +39,77 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	// auxiliary symbols and built-in datatypes 
 	
-	private final static Set<Predicate> builtinDatatypes = initializeReserved();
+	private final static Set<Predicate> builtinDatatypes;
 
-	private static Set<Predicate> initializeReserved() { // static block
-		Set<Predicate> datatypes = new HashSet<Predicate>();
-		datatypes.add(OBDAVocabulary.RDFS_LITERAL);
-		datatypes.add(OBDAVocabulary.XSD_STRING);
-		datatypes.add(OBDAVocabulary.XSD_INTEGER);
-		datatypes.add(OBDAVocabulary.XSD_NEGATIVE_INTEGER);
-		datatypes.add(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER);
-		datatypes.add(OBDAVocabulary.XSD_POSITIVE_INTEGER);
-		datatypes.add(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER);
-		datatypes.add(OBDAVocabulary.XSD_INT);
-		datatypes.add(OBDAVocabulary.XSD_UNSIGNED_INT);
-		datatypes.add(OBDAVocabulary.XSD_FLOAT);
-		datatypes.add(OBDAVocabulary.XSD_LONG);
-		datatypes.add(OBDAVocabulary.XSD_DECIMAL);
-		datatypes.add(OBDAVocabulary.XSD_DOUBLE);
-		datatypes.add(OBDAVocabulary.XSD_DATETIME);
-		datatypes.add(OBDAVocabulary.XSD_BOOLEAN);
-		return datatypes;
+	static { // static block
+		ofac = OntologyFactoryImpl.getInstance();
+		
+		DatatypeFactory dfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+		
+		builtinDatatypes = new HashSet<Predicate>();
+		builtinDatatypes.add(dfac.getDataTypePredicateLiteral()); //  .RDFS_LITERAL);
+		builtinDatatypes.add(dfac.getDataTypePredicateString()); // .XSD_STRING);
+		builtinDatatypes.add(dfac.getDataTypePredicateInteger()); //OBDAVocabulary.XSD_INTEGER);
+		builtinDatatypes.add(dfac.getDataTypePredicateNegativeInteger()); // XSD_NEGATIVE_INTEGER);
+		builtinDatatypes.add(dfac.getDataTypePredicateInt()); // OBDAVocabulary.XSD_INT);
+		builtinDatatypes.add(dfac.getDataTypePredicateNonNegativeInteger()); //OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER);
+		builtinDatatypes.add(dfac.getDataTypePredicateUnsignedInt()); // OBDAVocabulary.XSD_UNSIGNED_INT);
+		builtinDatatypes.add(dfac.getDataTypePredicatePositiveInteger()); //.XSD_POSITIVE_INTEGER);
+		builtinDatatypes.add(dfac.getDataTypePredicateNonPositiveInteger()); // OBDAVocabulary.XSD_NON_POSITIVE_INTEGER);
+		builtinDatatypes.add(dfac.getDataTypePredicateLong()); // OBDAVocabulary.XSD_LONG);
+		builtinDatatypes.add(dfac.getDataTypePredicateDecimal()); // OBDAVocabulary.XSD_DECIMAL);
+		builtinDatatypes.add(dfac.getDataTypePredicateDouble()); // OBDAVocabulary.XSD_DOUBLE);
+		builtinDatatypes.add(dfac.getDataTypePredicateFloat()); // OBDAVocabulary.XSD_FLOAT);
+		builtinDatatypes.add(dfac.getDataTypePredicateDateTime()); // OBDAVocabulary.XSD_DATETIME);
+		builtinDatatypes.add(dfac.getDataTypePredicateBoolean()); // OBDAVocabulary.XSD_BOOLEAN
 	}
-	
-	public static final OClass owlThing = ofac.createClass("http://www.w3.org/2002/07/owl#Thing");
-	public static final OClass owlNothing = ofac.createClass("http://www.w3.org/2002/07/owl#Nothing");
-	public static final ObjectPropertyExpression owlTopObjectProperty = ofac.createObjectProperty("http://www.w3.org/2002/07/owl#topObjectProperty");
-	public static final ObjectPropertyExpression owlBottomObjectProperty = ofac.createObjectProperty("http://www.w3.org/2002/07/owl#bottomObjectProperty");
-	public static final DataPropertyExpression owlTopDataProperty = ofac.createDataProperty("http://www.w3.org/2002/07/owl#topDataProperty");
-	public static final DataPropertyExpression owlBottomDataProperty = ofac.createDataProperty("http://www.w3.org/2002/07/owl#bottomDataProperty");
 	
 	
 	@Override
-	public OClass declareClass(String uri) {
+	public OClass createClass(String uri) {
 		OClass cd = ofac.createClass(uri);
-		if (!cd.equals(owlThing) && !cd.equals(owlNothing))
+		if (!cd.isNothing() && !cd.isThing())
 			concepts.add(cd);
 		return cd;
 	}
 
 	@Override
-	public ObjectPropertyExpression declareObjectProperty(String uri) {
+	public OClass getClass(String uri) {
+		OClass cd = ofac.createClass(uri);
+		if (!cd.isNothing() && !cd.isThing() && !concepts.contains(cd))
+			throw new RuntimeException("Class not found: " + uri);
+		return cd;
+	}
+	
+	@Override
+	public ObjectPropertyExpression createObjectProperty(String uri) {
 		ObjectPropertyExpression rd = ofac.createObjectProperty(uri);
-		if (!rd.equals(owlTopObjectProperty) && !rd.equals(owlBottomObjectProperty))
+		if (!rd.isBottom() && !rd.isTop())
 			objectProperties.add(rd);
+		return rd;
+	}
+
+	@Override
+	public ObjectPropertyExpression getObjectProperty(String uri) {
+		ObjectPropertyExpression rd = ofac.createObjectProperty(uri);
+		if (!rd.isBottom() && !rd.isTop() && !objectProperties.contains(rd))
+			throw new RuntimeException("Object property not found: " + uri);
 		return rd;
 	}
 	
 	@Override
-	public DataPropertyExpression declareDataProperty(String uri) {
+	public DataPropertyExpression createDataProperty(String uri) {
 		DataPropertyExpression rd = ofac.createDataProperty(uri);
-		if (!rd.equals(owlTopDataProperty) && !rd.equals(owlBottomDataProperty))
+		if (!rd.isBottom() && !rd.isTop())
 			dataProperties.add(rd);
+		return rd;
+	}
+
+	@Override
+	public DataPropertyExpression getDataProperty(String uri) {
+		DataPropertyExpression rd = ofac.createDataProperty(uri);
+		if (!rd.isBottom() && !rd.isTop() && !dataProperties.contains(rd))
+			throw new RuntimeException("Data property not found: " + uri);			
 		return rd;
 	}
 
@@ -119,7 +142,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	@Override
 	public DataPropertyExpression createAuxiliaryDataProperty() {
-		DataPropertyExpression rd = ofac.createDataProperty(AUXROLEURI + auxCounter);
+		DataPropertyExpression rd = createDataProperty(AUXROLEURI + auxCounter);
 		auxCounter++ ;
 		auxDataProperties.add(rd);
 		return rd;
@@ -203,17 +226,15 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	}
 	
 	private boolean isBuiltIn(OClass cl) {
-		return cl.equals(owlThing) || cl.equals(owlNothing);
+		return cl.isNothing() || cl.isThing();
 	}
 	
 	private boolean isBuiltIn(ObjectPropertyExpression prop) {
-		return prop.equals(owlTopObjectProperty) || prop.equals(owlBottomObjectProperty) 
-						|| auxObjectProperties.contains(prop);
+		return prop.isBottom() || prop.isTop() || auxObjectProperties.contains(prop);
 	}
 
 	private boolean isBuiltIn(DataPropertyExpression prop) {
-		return prop.equals(owlTopDataProperty) || prop.equals(owlBottomDataProperty) 
-						|| auxDataProperties.contains(prop);
+		return prop.isBottom() || prop.isTop() || auxDataProperties.contains(prop);
 	}
 	
 	void checkSignature(ClassExpression desc) {

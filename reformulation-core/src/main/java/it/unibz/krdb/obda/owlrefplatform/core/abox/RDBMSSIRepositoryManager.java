@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -526,6 +527,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
+	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
@@ -2693,7 +2696,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		List<Function> bodyAtoms = new LinkedList<Function>();
 
-		headPredicate = dfac.getPredicate("m", 2, new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
+		headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
 		headTerms.add(dfac.getVariable("X"));
 		headTerms.add(dfac.getVariable("Y"));
 
@@ -2722,74 +2725,19 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			objectTerm = dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("Y"));
 
-		} else if (type2 == COL_TYPE.LITERAL) {
-
-			objectTerm = dfac.getFunction(dfac.getDataTypePredicateLiteral(), dfac.getVariable("Y"));
-
-		} else if (type2 == COL_TYPE.LITERAL_LANG) {
-
-			objectTerm = dfac.getFunction(dfac.getDataTypePredicateLiteral(), dfac.getVariable("Y"), dfac.getVariable("Z"));
-
-		} else if (type2 == COL_TYPE.BOOLEAN) {
-
-			objectTerm = dfac.getFunction(dfac.getDataTypePredicateBoolean(), dfac.getVariable("Y"));
-
-		} else if (type2 == COL_TYPE.DATETIME) {
-
-			objectTerm = dfac.getFunction(dfac.getDataTypePredicateDateTime(), dfac.getVariable("Y"));
-			bodyTerms.add(objectTerm);
-
-		} else if (type2 == COL_TYPE.DECIMAL) {
-
-			objectTerm = dfac.getFunction(dfac.getDataTypePredicateDecimal(), dfac.getVariable("Y"));
-
-		} else if (type2 == COL_TYPE.DOUBLE) {
-
-			objectTerm = dfac.getFunction(dfac.getDataTypePredicateDouble(), dfac.getVariable("Y"));
-
-		} else if (type2 == COL_TYPE.INTEGER) {
-
-			objectTerm = dfac.getFunction(dfac.getDataTypePredicateInteger(), dfac.getVariable("Y"));
-            
-        } else if (type2 == COL_TYPE.INT) {
-
-            objectTerm = dfac.getFunction(dfac.getDataTypePredicateInt(), dfac.getVariable("Y"));
-
-        } else if (type2 == COL_TYPE.UNSIGNED_INT) {
-
-            objectTerm = dfac.getFunction(dfac.getDataTypePredicateUnsignedInt(), dfac.getVariable("Y"));
-            
-        } else if (type2 == COL_TYPE.NEGATIVE_INTEGER) {
-
-            objectTerm = dfac.getFunction(dfac.getDataTypePredicateNegativeInteger(), dfac.getVariable("Y"));
-            
-        } else if (type2 == COL_TYPE.POSITIVE_INTEGER) {
-
-            objectTerm = dfac.getFunction(dfac.getDataTypePredicatePositiveInteger(), dfac.getVariable("Y"));
-            
-        } else if (type2 == COL_TYPE.NON_NEGATIVE_INTEGER) {
-
-            objectTerm = dfac.getFunction(dfac.getDataTypePredicateNonNegativeInteger(), dfac.getVariable("Y"));
-            
-        } else if (type2 == COL_TYPE.NON_POSITIVE_INTEGER) {
-
-            objectTerm = dfac.getFunction(dfac.getDataTypePredicateNonPositiveInteger(), dfac.getVariable("Y"));
-        } else if (type2 == COL_TYPE.FLOAT) {
-
-            objectTerm = dfac.getFunction(dfac.getDataTypePredicateFloat(), dfac.getVariable("Y"));
-
-		}  else if (type2 == COL_TYPE.LONG) {
-
-            objectTerm = dfac.getFunction(dfac.getDataTypePredicateLong(), dfac.getVariable("Y"));
-
-       }
-
-    else if (type2 == COL_TYPE.STRING) {
-
-			objectTerm = dfac.getFunction(dfac.getDataTypePredicateString(), dfac.getVariable("Y"));
-
-		} else {
-			throw new RuntimeException("Unsuported type: " + type2);
+		} 
+		else if (type2 == COL_TYPE.LITERAL_LANG) { 
+			objectTerm = dfac.getFunction(dtfac.getDataTypePredicateLiteral(), dfac.getVariable("Y"), dfac.getVariable("Z"));
+		} 
+		else {
+			Predicate pred = dtfac.getTypePredicate(type2);
+			
+			if (pred == null ||  // R: the three types below were not covered by the switch
+					type2 == COL_TYPE.DATE || type2 == COL_TYPE.TIME || type2 == COL_TYPE.YEAR) {
+				throw new RuntimeException("Unsuported type: " + type2);
+			}
+			
+			objectTerm = dfac.getFunction(pred, dfac.getVariable("Y"));
 		}
 		bodyTerms.add(objectTerm);
 

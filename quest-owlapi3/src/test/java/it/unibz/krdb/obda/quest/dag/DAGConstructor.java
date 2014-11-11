@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.dag;
+package it.unibz.krdb.obda.quest.dag;
 
 /*
  * #%L

@@ -35,5 +35,22 @@ package it.unibz.krdb.obda.ontology;
  */
 
 public interface ClassExpression extends Description {
-	// NO-OP
+	
+	/**
+	 * checks (syntactically, irrespective of any ontology) whether the class expression is equivalent to owl:Nothing
+	 * <p>
+	 * owl:Nothing or the domain/range of owl:BottomObjectProperty or the domain of owl:BottomDataProperty
+	 * 
+	 * @return true if the class expression is equivalent to owl:Nothing 
+	 */
+	public boolean isNothing();
+	
+	/**
+	 * checks (syntactically, irrespective of any ontology) whether the class expression is equivalent to owl:Thing
+	 * <p>
+	 * owl:Thing or the domain/range of owl:TopObjectProperty or the domain of owl:TopDataProperty
+	 * 
+	 * @return true if the class expression is equivalent to owl:Thing
+	 */
+	public boolean isThing();
 }
