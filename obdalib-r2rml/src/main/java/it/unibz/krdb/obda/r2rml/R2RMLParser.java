@@ -44,6 +44,7 @@ import java.util.Set;
 
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
+
 import eu.optique.api.mapping.ObjectMap;
 import eu.optique.api.mapping.PredicateMap;
 import eu.optique.api.mapping.PredicateObjectMap;

@@ -51,7 +51,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 	// THe time used by the execution
 	private long time;
 
-	private boolean errorShown = false;
+	private boolean queryExecError = false;
 	private QuestOWLStatement statement = null;
 	private CountDownLatch latch = null;
 	private Thread thread = null;
@@ -59,7 +59,6 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 	private boolean isCanceled = false;
 	private boolean actionStarted = false;
 	private QuestOWL reasoner;
-	
 	private Component rootView;  // Davide> DAG's hack protegeQueryTabFreezeBug
 
 	private static String QUEST_START_MESSAGE = "Quest must be started before using this feature. To proceed \n * select Quest in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
@@ -97,7 +96,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 		this.queryString = query;
 		this.actionStarted = true;
 		this.isCanceled = false;
-		this.errorShown = false;
+		this.queryExecError = false;
 		OBDAProgessMonitor monitor = null;
 		try {
 			monitor = new OBDAProgessMonitor(this.msg);
@@ -112,7 +111,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 				runAction();
 				latch.await();
 				monitor.stop();
-				if(!this.isCancelled() && !(result == null && this.isErrorShown())){
+				if(!this.isCancelled() && !this.isErrorShown()){
 					this.time = System.currentTimeMillis() - startTime;
 					handleResult(result);
 				}
@@ -126,6 +125,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 					rootView,
 					e);
 		} finally {
+			latch.countDown();
 			monitor.stop();
 		}
 	}
@@ -156,20 +156,13 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 					result = executeQuery(statement, queryString);
 					latch.countDown();
 				} catch (Exception e) {
-					if(!isCancelled()){ 
-						try {
-							Thread.sleep(150); // Davide> DAG's Hack
-						} catch (InterruptedException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-						errorShown = true;
-						latch.countDown();
+					if(!isCancelled()){
+						queryExecError = true;
 						log.error(e.getMessage(), e);
-						DialogUtils.showQuickErrorDialog(rootView, e); // Davide > DAG's HACK
+						DialogUtils.showQuickErrorDialog(rootView, e, "Error executing query");
+						latch.countDown();
 					}
-				}
-
+				}	
 			}
 		};
 		thread.start();
@@ -203,7 +196,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 				this.old_latch.countDown();
 			} catch (Exception e) {
 				this.old_latch.countDown();
-				DialogUtils.showQuickErrorDialog(rootView, e, "Error executing query.");
+				DialogUtils.showQuickErrorDialog(rootView, e, "Error cancelling query.");
 			}
 		}
 	};
@@ -227,7 +220,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 	}
 
 	public boolean isErrorShown(){
-		return this.errorShown;
+		return this.queryExecError;
 	}
 
 	public void closeConnection() throws OWLException {

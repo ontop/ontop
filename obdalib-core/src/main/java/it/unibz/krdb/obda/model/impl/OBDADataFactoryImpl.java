@@ -39,13 +39,13 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.IDGenerator;
 
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
+
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
 
 public class OBDADataFactoryImpl implements OBDADataFactory {
 

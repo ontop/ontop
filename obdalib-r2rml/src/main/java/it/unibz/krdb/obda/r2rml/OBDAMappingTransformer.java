@@ -20,49 +20,26 @@ package it.unibz.krdb.obda.r2rml;
  * #L%
  */
 
+import eu.optique.api.mapping.*;
+import eu.optique.api.mapping.TermMap.TermMapType;
 import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAQueryModifiers;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.URITemplatePredicate;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.SQLQueryImpl;
 import it.unibz.krdb.obda.utils.IDGenerator;
 import it.unibz.krdb.obda.utils.URITemplates;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import javax.xml.datatype.DatatypeFactory;
-
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.*;
 
-import eu.optique.api.mapping.LogicalTable;
-import eu.optique.api.mapping.MappingFactory;
-import eu.optique.api.mapping.ObjectMap;
-import eu.optique.api.mapping.PredicateMap;
-import eu.optique.api.mapping.PredicateObjectMap;
-import eu.optique.api.mapping.R2RMLMappingManager;
-import eu.optique.api.mapping.R2RMLMappingManagerFactory;
-import eu.optique.api.mapping.SubjectMap;
-import eu.optique.api.mapping.Template;
-import eu.optique.api.mapping.TermMap.TermMapType;
-import eu.optique.api.mapping.TriplesMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 /**
  * Transform OBDA mappings in R2rml mappings
  * @author Sarah, Mindas, Timi, Guohui, Martin
@@ -344,23 +321,23 @@ public class OBDAMappingTransformer {
 				sm.addClass(predUri);
 				
 			} else {
-				
-				PredicateMap predM = mfact.createPredicateMap(TermMapType.CONSTANT_VALUED, "predicateObjectMap"+ random_number);
+//                PredicateMap predM = null;
+				PredicateMap predM = mfact.createPredicateMap(TermMapType.CONSTANT_VALUED, predURIString);
 				ObjectMap obm = null; PredicateObjectMap pom = null;
+                Term object = null;
 				if (!predName.equals(OBDAVocabulary.QUEST_TRIPLE_STR)) {
-					predM.setConstant(predURIString);
+//					predM.setConstant(predURIString);
+                    //add object declaration to predObj node
+                    //term 0 is always the subject, we are interested in term 1
+                     object = func.getTerm(1);
 				}
 				else {
-					//add predicate template declaration
-					Template templo = mfact.createTemplate(predURIString);
-					obm = mfact.createObjectMap(templo);
-					pom = mfact.createPredicateObjectMap(predM, obm);
-					tm.addPredicateObjectMap(pom);
+
+                    //add object declaration to predObj node
+                    //term 0 is always the subject,  term 1 is the predicate, we check term 2 to have the object
+                    object = func.getTerm(2);
 				}
 
-				//add object declaration to predObj node
-				//term 0 is always the subject, we are interested in term 1
-				Term object = func.getTerm(1);
 								
  				if (object instanceof Variable){ //we create an rr:column
 					if(ontology!= null && objectProperties.contains(objectProperty)){
@@ -419,7 +396,11 @@ public class OBDAMappingTransformer {
 								if(objectPred.getArity()==2){
 									
 									Term langTerm = ((Function) object).getTerm(1);
-									obm.setLanguageTag(langTerm.toString());
+
+
+                                    if(langTerm instanceof Constant) {
+                                        obm.setLanguageTag(((Constant) langTerm).getValue());
+                                    }
 								}
 							}
 							

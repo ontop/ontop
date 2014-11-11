@@ -187,11 +187,11 @@ target		imdb:genre/{title_id} a mo:Old_Action .
 source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Western'
 
 mappingId	Movie has production Budget
-target		imdb:title/{movie_id} dbpedia:budget {budget}^^xsd:double .
+target		imdb:title/{movie_id} dbpedia:budget {budget}^^xsd:string .
 source		select movie_id, info as budget from movie_info where movie_info.info_type_id = 105
 
 mappingId	Movie gets Gross revenue
-target		imdb:title/{movie_id} dbpedia:gross {gross}^^xsd:double .
+target		imdb:title/{movie_id} dbpedia:gross {gross}^^xsd:string .
 source		select movie_id, info as gross from movie_info where movie_info.info_type_id = 107
 
 mappingId	Movie has Actor
