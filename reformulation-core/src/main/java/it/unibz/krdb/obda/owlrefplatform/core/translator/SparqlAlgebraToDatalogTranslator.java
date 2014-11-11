@@ -1067,37 +1067,37 @@ public class SparqlAlgebraToDatalogTranslator {
 		if (dataTypeURI == null) {
 			dataType = COL_TYPE.LITERAL;
 		} else {
-			if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.RDFS_LITERAL_URI)) {
+			if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.RDFS_LITERAL_URI)) {  // 1
 				dataType = COL_TYPE.LITERAL;
-			} else if (dataTypeURI
-					.equalsIgnoreCase(OBDAVocabulary.XSD_STRING_URI)) {
+			} 
+			else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_STRING_URI)) { // 2
 				dataType = COL_TYPE.STRING;
-			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INT_URI)){
+			} 
+			else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INT_URI)) { // 3
 				dataType = COL_TYPE.INT;
-            } else if (dataTypeURI
-                    .equalsIgnoreCase(OBDAVocabulary.XSD_INTEGER_URI)) {
+            } 
+			else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INTEGER_URI)) { // 4
                 dataType = COL_TYPE.INTEGER;
-            } else if (dataTypeURI
-                    .equalsIgnoreCase(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)) {
+            } 
+			else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)) { // 5
                 dataType = COL_TYPE.NEGATIVE_INTEGER;
-            } else if (dataTypeURI
-                    .equalsIgnoreCase(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)) {
+            } 
+			else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)) { // 6
                 dataType = COL_TYPE.NON_NEGATIVE_INTEGER;
-            } else if (dataTypeURI
-                    .equalsIgnoreCase(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)) {
+            } 
+			else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)) { // 7
                 dataType = COL_TYPE.POSITIVE_INTEGER;
-            } else if (dataTypeURI
-                    .equalsIgnoreCase(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)) {
+            } 
+			else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)) { // 8
                 dataType = COL_TYPE.NON_POSITIVE_INTEGER;
-            } else if (dataTypeURI
-                    .equalsIgnoreCase(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) {
+            } 
+			else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) { // 9
                 dataType = COL_TYPE.UNSIGNED_INT;
-			} else if (dataTypeURI
-                    .equalsIgnoreCase(OBDAVocabulary.XSD_LONG_URI)) {
+			} 
+			else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_LONG_URI)) { // 10
                 dataType = COL_TYPE.LONG;
             }
-            else if (dataTypeURI
-					.equalsIgnoreCase(OBDAVocabulary.XSD_DECIMAL_URI)) {
+            else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DECIMAL_URI)) { // 11
 				// special case for decimal
 				String value = node.getLabel().toString();
 				if (value.contains(".")) {
@@ -1107,28 +1107,29 @@ public class SparqlAlgebraToDatalogTranslator {
 					// Put the type as integer (decimal without fractions).
 					dataType = COL_TYPE.INTEGER;
 				}
-			} else if (dataTypeURI
-					.equalsIgnoreCase(OBDAVocabulary.XSD_FLOAT_URI)) {
-				dataType = COL_TYPE.FLOAT;
-            } else if (dataTypeURI
-                    .equalsIgnoreCase(OBDAVocabulary.XSD_DOUBLE_URI)) {
+			} 
+            else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_FLOAT_URI)) {  // 12
+				dataType = COL_TYPE.FLOAT; 
+            } 
+            else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DOUBLE_URI)) {  // 13
                 dataType = COL_TYPE.DOUBLE;
-			} else if (dataTypeURI
-					.equalsIgnoreCase(OBDAVocabulary.XSD_DATETIME_URI)) {
+			} 
+            else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DATETIME_URI)) {  // 14
 				dataType = COL_TYPE.DATETIME;
-			} else if (dataTypeURI
-					.equalsIgnoreCase(OBDAVocabulary.XSD_BOOLEAN_URI)) {
+			} 
+            else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_BOOLEAN_URI)) {  // 15
 				dataType = COL_TYPE.BOOLEAN;
-			} else if (dataTypeURI
-					.equalsIgnoreCase(OBDAVocabulary.XSD_DATE_URI)) {
+			} 
+            else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_DATE_URI)) {  // 16
 				dataType = COL_TYPE.DATE;
-			} else if (dataTypeURI
-					.equalsIgnoreCase(OBDAVocabulary.XSD_TIME_URI)) {
+			} 
+            else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_TIME_URI)) {  // 17
 				dataType = COL_TYPE.TIME;
-			} else if (dataTypeURI
-					.equalsIgnoreCase(OBDAVocabulary.XSD_YEAR_URI)) {
+			} 
+            else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_YEAR_URI)) { // 18
 				dataType = COL_TYPE.YEAR;
-			} else {
+			} 
+            else {
 				throw new RuntimeException("Unsupported datatype: "
 						+ dataTypeURI.toString());
 			}

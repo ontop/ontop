@@ -167,6 +167,7 @@ public class OBDAVocabulary {
 	public static final String XSD_YEAR_URI = "http://www.w3.org/2001/XMLSchema#gYear";
 
 	private static final Map<String, COL_TYPE> mapURItoCOLTYPE;
+	private static final Map<COL_TYPE, String> mapCOLTYPEtoURI;
 	
 	static {
 		mapURItoCOLTYPE = new HashMap<String, COL_TYPE>();
@@ -189,12 +190,36 @@ public class OBDAVocabulary {
 		mapURItoCOLTYPE.put(XSD_DATE_URI, COL_TYPE.DATE);  // 16
 		mapURItoCOLTYPE.put(XSD_TIME_URI, COL_TYPE.TIME);  // 17
 		mapURItoCOLTYPE.put(XSD_YEAR_URI, COL_TYPE.YEAR);  // 18
+
+		mapCOLTYPEtoURI = new HashMap<COL_TYPE, String>();	
+
+		mapCOLTYPEtoURI.put(COL_TYPE.LITERAL, RDFS_LITERAL_URI); // 1
+		mapCOLTYPEtoURI.put(COL_TYPE.STRING, XSD_STRING_URI);  // 2
+		mapCOLTYPEtoURI.put(COL_TYPE.INT, XSD_INT_URI);  // 3
+		mapCOLTYPEtoURI.put(COL_TYPE.POSITIVE_INTEGER, XSD_POSITIVE_INTEGER_URI); // 4
+		mapCOLTYPEtoURI.put(COL_TYPE.NEGATIVE_INTEGER, XSD_NEGATIVE_INTEGER_URI); // 5
+		mapCOLTYPEtoURI.put(COL_TYPE.NON_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER_URI); // 6
+		mapCOLTYPEtoURI.put(COL_TYPE.UNSIGNED_INT, XSD_UNSIGNED_INT_URI);   // 7
+		mapCOLTYPEtoURI.put(COL_TYPE.NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER_URI); // 8
+		mapCOLTYPEtoURI.put(COL_TYPE.INTEGER, XSD_INTEGER_URI);  // 9
+		mapCOLTYPEtoURI.put(COL_TYPE.LONG, XSD_LONG_URI);  // 10
+		mapCOLTYPEtoURI.put(COL_TYPE.DECIMAL, XSD_DECIMAL_URI);  // 11
+		mapCOLTYPEtoURI.put(COL_TYPE.FLOAT, XSD_FLOAT_URI); // 12
+		mapCOLTYPEtoURI.put(COL_TYPE.DOUBLE, XSD_DOUBLE_URI);  // 13
+		mapCOLTYPEtoURI.put(COL_TYPE.DATETIME, XSD_DATETIME_URI); // 14
+		mapCOLTYPEtoURI.put(COL_TYPE.BOOLEAN, XSD_BOOLEAN_URI);  // 15
+		mapCOLTYPEtoURI.put(COL_TYPE.DATE, XSD_DATE_URI);  // 16
+		mapCOLTYPEtoURI.put(COL_TYPE.TIME, XSD_TIME_URI);  // 17
+		mapCOLTYPEtoURI.put(COL_TYPE.YEAR, XSD_YEAR_URI);  // 18		
 	}
 	
 	public static COL_TYPE getDataType(String uri) {
 		return mapURItoCOLTYPE.get(uri);
 	}
 	
+	public static String getDataTypeURI(COL_TYPE type) {
+		return mapCOLTYPEtoURI.get(type);
+	}
 
 	/* Common namespaces and prefixes */
 
