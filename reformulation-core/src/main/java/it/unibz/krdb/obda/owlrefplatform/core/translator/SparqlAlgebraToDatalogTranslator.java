@@ -1095,48 +1095,14 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 
 
-	private Predicate getDataTypePredicate(COL_TYPE dataType)
-			throws RuntimeException {
+	private Predicate getDataTypePredicate(COL_TYPE dataType) throws RuntimeException {
         //we do not consider the case of literal because it has already been checked @see #getOntopTerm
-		switch (dataType) {
-
-		case STRING:
-			return ofac.getDataTypePredicateString();
-		case INTEGER:
-			return ofac.getDataTypePredicateInteger();
-        case NEGATIVE_INTEGER:
-            return ofac.getDataTypePredicateNegativeInteger();
-        case INT:
-            return ofac.getDataTypePredicateInt();
-        case POSITIVE_INTEGER:
-            return ofac.getDataTypePredicatePositiveInteger();
-        case NON_POSITIVE_INTEGER:
-            return ofac.getDataTypePredicateNonPositiveInteger();
-        case NON_NEGATIVE_INTEGER:
-            return ofac.getDataTypePredicateNonNegativeInteger();
-        case UNSIGNED_INT:
-            return ofac.getDataTypePredicateUnsignedInt();
-        case LONG:
-             return ofac.getDataTypePredicateLong();
-		case DECIMAL:
-			return ofac.getDataTypePredicateDecimal();
-		case DOUBLE:
-			return ofac.getDataTypePredicateDouble();
-        case FLOAT:
-            return ofac.getDataTypePredicateFloat();
-		case DATETIME:
-			return ofac.getDataTypePredicateDateTime();
-		case BOOLEAN:
-			return ofac.getDataTypePredicateBoolean();
-		case DATE:
-			return ofac.getDataTypePredicateDate();
-		case TIME:
-			return ofac.getDataTypePredicateTime();
-		case YEAR:
-			return ofac.getDataTypePredicateYear();
-		default:
+		
+		Predicate pred = ofac.getTypePredicate(dataType);
+		if (pred == null)
 			throw new RuntimeException("Unknown data type!");
-		}
+		
+		return pred;
 	}
 
 	private COL_TYPE getDataType(LiteralImpl node) {

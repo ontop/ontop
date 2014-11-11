@@ -521,7 +521,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		switch (type) {
 		case LITERAL:
 			return getDataTypePredicateLiteral();
-		case LITERAL_LANG:
+		case LITERAL_LANG: // used in ExpressionEvaluator only(?) use proper method here? 
 			return getDataTypePredicateLiteral();
 		case STRING:
 			return getDataTypePredicateString();
@@ -551,10 +551,10 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 			return getDataTypePredicateDateTime();
 		case BOOLEAN:
 			return getDataTypePredicateBoolean();
-		case OBJECT:
-			return getUriTemplatePredicate(1);
-		case BNODE:
-			return getBNodeTemplatePredicate(1);
+		//case OBJECT:   // different uses
+		//	return getUriTemplatePredicate(1);
+		//case BNODE:    // different uses
+		//	return getBNodeTemplatePredicate(1);
 		case DATE:
 			return getDataTypePredicateDate();
 		case TIME:
@@ -562,7 +562,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		case YEAR:
 			return getDataTypePredicateYear();
 		default:
-			throw new RuntimeException("Cannot get URI for unsupported type: " + type);
+			return null;
+			//throw new RuntimeException("Cannot get URI for unsupported type: " + type);
 		}
 	}
 

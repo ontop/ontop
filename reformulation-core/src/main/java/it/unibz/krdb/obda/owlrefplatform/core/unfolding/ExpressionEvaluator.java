@@ -28,7 +28,6 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.NonBooleanOperationPredicate;
 import it.unibz.krdb.obda.model.NumericalOperationPredicate;
@@ -497,54 +496,16 @@ public class ExpressionEvaluator {
 		if (term instanceof Function) {
 			Function function = (Function) term;
 			return function.getFunctionSymbol();
-		} else if (term instanceof Constant) {
+		} 
+		else if (term instanceof Constant) {
 			Constant constant = (Constant) term;
-			// TODO: get rid of the switch
 			COL_TYPE type = constant.getType();
-			switch(type) {
-				case OBJECT:
-				case STRING:
-					return fac.getDataTypePredicateString(); // .XSD_STRING;
-				case LITERAL:
-				case LITERAL_LANG:
-					return fac.getDataTypePredicateLiteral(); // .RDFS_LITERAL;
-				case INTEGER:
-					return fac.getDataTypePredicateInteger(); // OBDAVocabulary.XSD_INTEGER;
-                case NEGATIVE_INTEGER:
-                    return fac.getDataTypePredicateNegativeInteger(); // OBDAVocabulary.XSD_NEGATIVE_INTEGER;
-                case INT:
-                    return fac.getDataTypePredicateInt(); // OBDAVocabulary.XSD_INT;
-                case NON_NEGATIVE_INTEGER:
-                    return fac.getDataTypePredicateNonNegativeInteger(); //.XSD_NON_NEGATIVE_INTEGER;
-                case UNSIGNED_INT:
-                    return fac.getDataTypePredicateUnsignedInt(); // .XSD_UNSIGNED_INT;
-                case POSITIVE_INTEGER:
-                    return fac.getDataTypePredicatePositiveInteger(); // .XSD_POSITIVE_INTEGER;
-                case NON_POSITIVE_INTEGER:
-                    return fac.getDataTypePredicateNonPositiveInteger(); // OBDAVocabulary.XSD_NON_POSITIVE_INTEGER;
-                case LONG:
-                    return fac.getDataTypePredicateLong(); // OBDAVocabulary.XSD_LONG;
-				case DECIMAL:
-					return fac.getDataTypePredicateDecimal(); // OBDAVocabulary.XSD_DECIMAL;
-				case DOUBLE:
-					return fac.getDataTypePredicateDouble(); // OBDAVocabulary.XSD_DOUBLE;
-                case FLOAT:
-                    return fac.getDataTypePredicateFloat(); // OBDAVocabulary.XSD_FLOAT;
-				case DATETIME:
-					return fac.getDataTypePredicateDateTime(); // OBDAVocabulary.XSD_DATETIME;
-				case BOOLEAN:
-					return fac.getDataTypePredicateBoolean(); // OBDAVocabulary.XSD_BOOLEAN;
-                case DATE:
-                    return fac.getDataTypePredicateDate(); // OBDAVocabulary.XSD_DATE;
-                case TIME:
-                    return fac.getDataTypePredicateTime(); // OBDAVocabulary.XSD_TIME;
-                case YEAR:
-                    return fac.getDataTypePredicateYear(); // OBDAVocabulary.XSD_YEAR;
-				default:
-					// For other data types
-					return fac.getDataTypePredicateString(); // OBDAVocabulary.XSD_STRING;
-			}
-		} else {
+			Predicate pred = fac.getTypePredicate(type);
+			if (pred == null)
+				pred = fac.getDataTypePredicateString(); // .XSD_STRING;
+			return pred;
+		} 
+		else {
 			throw new RuntimeException("Unknown term type");
 		}
 	}
