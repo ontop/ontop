@@ -893,6 +893,31 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return (String.format(langStr, "NULL", signature.get(hpos)));
 
 	}
+	
+	private static final Map<Predicate.COL_TYPE, Integer> typeMap;
+	
+	static {
+		typeMap = new HashMap<Predicate.COL_TYPE, Integer>();
+
+		typeMap.put(COL_TYPE.BOOLEAN, 9);
+		typeMap.put(COL_TYPE.DATETIME, 8);
+		typeMap.put(COL_TYPE.DATE,  10);
+		typeMap.put(COL_TYPE.TIME, 11); 
+		typeMap.put(COL_TYPE.YEAR, 12);
+		typeMap.put(COL_TYPE.DECIMAL, 5);
+		typeMap.put(COL_TYPE.DOUBLE, 6); 
+		typeMap.put(COL_TYPE.INTEGER, 4); 
+		typeMap.put(COL_TYPE.NEGATIVE_INTEGER, 15); 
+		typeMap.put(COL_TYPE.FLOAT, 14); 
+		typeMap.put(COL_TYPE.NON_NEGATIVE_INTEGER, 16);
+		typeMap.put(COL_TYPE.POSITIVE_INTEGER, 17); 
+		typeMap.put(COL_TYPE.NON_POSITIVE_INTEGER, 18);
+		typeMap.put(COL_TYPE.INT, 19); 
+		typeMap.put(COL_TYPE.UNSIGNED_INT, 20); 
+		typeMap.put(COL_TYPE.LONG, 13); 
+		typeMap.put(COL_TYPE.STRING, 7); 
+		typeMap.put(COL_TYPE.LITERAL, 3);
+	}
 
 	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
 
@@ -910,46 +935,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * NOTE NULL is IDENTIFIER 0 in QuestResultSet do not USE for any 
 			 * type
 			 */
-			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-				return (String.format(typeStr, 9, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-				return (String.format(typeStr, 8, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DATE_URI)) {
-				return (String.format(typeStr, 10, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_TIME_URI)) {
-				return (String.format(typeStr, 11, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_YEAR_URI)) {
-				return (String.format(typeStr, 12, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-				return (String.format(typeStr, 5, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-				return (String.format(typeStr, 6, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
-				return (String.format(typeStr, 4, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)) {
-                return (String.format(typeStr, 15, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_FLOAT_URI)) {
-                return (String.format(typeStr, 14, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)) {
-                return (String.format(typeStr, 16, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)) {
-                return (String.format(typeStr, 17, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)) {
-                return (String.format(typeStr, 18, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_INT_URI)) {
-                return (String.format(typeStr, 19, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) {
-                return (String.format(typeStr, 20, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_LONG_URI)) {
-                return (String.format(typeStr, 13, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_STRING_URI)) {
-				return (String.format(typeStr, 7, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-				return (String.format(typeStr, 3, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
+			
+			if (functionString.equals(OBDAVocabulary.QUEST_URI)) { 
 				return (String.format(typeStr, 1, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
+			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) { 
 				return (String.format(typeStr, 2, signature.get(hpos)));
+			}
+			else {
+				Predicate.COL_TYPE type = OBDAVocabulary.getDataType(functionString);
+				int k = typeMap.get(type);
+				return (String.format(typeStr, k, signature.get(hpos)));
 			}
 		} else if (ht instanceof URIConstant) {
 			return (String.format(typeStr, 1, signature.get(hpos)));
