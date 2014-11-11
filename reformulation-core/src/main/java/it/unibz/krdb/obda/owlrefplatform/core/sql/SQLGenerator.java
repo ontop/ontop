@@ -48,6 +48,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapt
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
+import it.unibz.krdb.obda.utils.TypeMapper;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.TableDefinition;
@@ -697,39 +698,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	
-	// TODO: to be moved to TypeMapper
-	private static final Map<Predicate.COL_TYPE, Integer> datatypeMap;
-	
-	static {
-		datatypeMap = new HashMap<Predicate.COL_TYPE, Integer>();
-		datatypeMap.put(COL_TYPE.BOOLEAN, Types.BOOLEAN);
-		datatypeMap.put(COL_TYPE.INT, Types.INTEGER);
-		datatypeMap.put(COL_TYPE.INTEGER, Types.BIGINT);
-		datatypeMap.put(COL_TYPE.LONG, Types.BIGINT);
-		datatypeMap.put(COL_TYPE.NEGATIVE_INTEGER, Types.BIGINT);
-		datatypeMap.put(COL_TYPE.POSITIVE_INTEGER, Types.BIGINT);
-		datatypeMap.put(COL_TYPE.NON_POSITIVE_INTEGER, Types.BIGINT);
-		datatypeMap.put(COL_TYPE.UNSIGNED_INT, Types.INTEGER);
-		datatypeMap.put(COL_TYPE.FLOAT, Types.FLOAT);
-		datatypeMap.put(COL_TYPE.DOUBLE, Types.DOUBLE);
-		datatypeMap.put(COL_TYPE.STRING, Types.VARCHAR);
-		datatypeMap.put(COL_TYPE.LITERAL, Types.VARCHAR);
-	}
-	
 	// return variable SQL data type
 	private int getVariableDataType (Term term, QueryAliasIndex idx) {
 		Function f = (Function) term;
 		if (f.isDataTypeFunction()) {
 			Predicate p = f.getFunctionSymbol();
-			Predicate.COL_TYPE type = dtfac.getDataType(p.toString());
-			if (type != null) {
-				Integer sqlType = datatypeMap.get(type);
-				if (sqlType != null)
-					return sqlType;
-			}
+			return TypeMapper.getInstance().getSQLType(p);
 		}
 		// Return varchar for unknown
-		return 12;
+		return Types.VARCHAR;
 	}
 
 	private String getWHERE(CQIE query, QueryAliasIndex index) {
