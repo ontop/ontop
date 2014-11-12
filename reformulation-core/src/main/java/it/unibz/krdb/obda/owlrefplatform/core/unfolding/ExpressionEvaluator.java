@@ -512,7 +512,7 @@ public class ExpressionEvaluator {
 	}
 	
 	private boolean isDouble(Predicate pred) {
-		return (pred.equals(dtfac.getTypePredicate(COL_TYPE.FLOAT)) || pred.equals(dtfac.getTypePredicate(COL_TYPE.FLOAT)));
+		return (pred.equals(dtfac.getTypePredicate(COL_TYPE.DOUBLE)) || pred.equals(dtfac.getTypePredicate(COL_TYPE.FLOAT)));
 	}
 	
 	private boolean isNumeric(Predicate pred) {
