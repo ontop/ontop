@@ -10,7 +10,7 @@ public interface DatatypeFactory {
 	public String getDataTypeURI(COL_TYPE type);
 
 	
-	public Predicate getTypePredicate(Predicate.COL_TYPE type);
+	public Predicate getTypePredicate(COL_TYPE type);
 	
 		
 	public boolean isBoolean(Predicate p);
@@ -27,39 +27,5 @@ public interface DatatypeFactory {
 	public Predicate getDataTypePredicateLiteral();
 
 	public Predicate getDataTypePredicateLiteralLang();
-
-	public Predicate getDataTypePredicateString();
-
-	public Predicate getDataTypePredicateInteger();
-
-    public Predicate getDataTypePredicateNonNegativeInteger();
-
-    public Predicate getDataTypePredicateInt();
-
-    public Predicate getDataTypePredicatePositiveInteger();
-
-    public Predicate getDataTypePredicateNegativeInteger();
-
-    public Predicate getDataTypePredicateNonPositiveInteger();
-
-    public Predicate getDataTypePredicateUnsignedInt();
-
-    public Predicate getDataTypePredicateLong();
-
-	public Predicate getDataTypePredicateDecimal();
-
-	public Predicate getDataTypePredicateDouble();
-
-    public Predicate getDataTypePredicateFloat();
-
-    public Predicate getDataTypePredicateDateTime();
-
-	public Predicate getDataTypePredicateBoolean();
-
-	public Predicate getDataTypePredicateDate();
-	
-	public Predicate getDataTypePredicateTime();
-
-	public Predicate getDataTypePredicateYear();
 
 }

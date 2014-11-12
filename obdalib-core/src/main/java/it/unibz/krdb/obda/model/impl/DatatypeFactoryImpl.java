@@ -156,39 +156,39 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		case LITERAL:          // 1
 			return getDataTypePredicateLiteral();
 		case STRING:   // 2
-			return getDataTypePredicateString();
+			return XSD_STRING;
 		case INTEGER:  // 3
-			return getDataTypePredicateInteger();
+			return XSD_INTEGER;
         case NEGATIVE_INTEGER:  // 4
-            return getDataTypePredicateNegativeInteger();
+            return XSD_NEGATIVE_INTEGER;
         case INT:  // 5
-            return getDataTypePredicateInt();
+            return XSD_INT;
         case POSITIVE_INTEGER:  // 6
-            return getDataTypePredicatePositiveInteger();
+            return XSD_POSITIVE_INTEGER;
         case NON_POSITIVE_INTEGER:  // 7
-            return getDataTypePredicateNonPositiveInteger();
+            return XSD_NON_POSITIVE_INTEGER;
         case NON_NEGATIVE_INTEGER: // 8
-            return getDataTypePredicateNonNegativeInteger();
+            return XSD_NON_NEGATIVE_INTEGER;
         case UNSIGNED_INT:  // 9
-            return getDataTypePredicateUnsignedInt();
+            return XSD_UNSIGNED_INT;
         case LONG:   // 10
-            return getDataTypePredicateLong();
+            return XSD_LONG;
 		case DECIMAL: // 11
-			return getDataTypePredicateDecimal();
+			return XSD_DECIMAL;
         case FLOAT:  // 12
-            return getDataTypePredicateFloat();
+            return XSD_FLOAT;
 		case DOUBLE:  // 13
-			return getDataTypePredicateDouble();
+			return XSD_DOUBLE;
 		case DATETIME:  // 14
-			return getDataTypePredicateDateTime();
+			return XSD_DATETIME;
 		case BOOLEAN:  // 15
-			return getDataTypePredicateBoolean();
+			return XSD_BOOLEAN;
 		case DATE:   // 16
-			return getDataTypePredicateDate();
+			return XSD_DATE;
 		case TIME:  // 17
-			return getDataTypePredicateTime();
+			return XSD_TIME;
 		case YEAR: // 18
-			return getDataTypePredicateYear();
+			return XSD_YEAR;
 		case LITERAL_LANG: // used in ExpressionEvaluator only(?) use proper method here? 
 			return getDataTypePredicateLiteral();
 		//case OBJECT:   // different uses
@@ -213,90 +213,5 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		return RDFS_LITERAL_LANG;
 	}
 
-	@Override
-	public Predicate getDataTypePredicateString() {
-		return XSD_STRING;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateInteger() {
-		return XSD_INTEGER;
-	}
-
-    @Override
-    public Predicate getDataTypePredicateNonNegativeInteger() {
-        return XSD_NON_NEGATIVE_INTEGER;
-    }
-
-    @Override
-    public Predicate getDataTypePredicateInt() {
-        return XSD_INT;
-    }
-
-    @Override
-    public Predicate getDataTypePredicatePositiveInteger() {
-        return XSD_POSITIVE_INTEGER;
-    }
-
-    @Override
-    public Predicate getDataTypePredicateNegativeInteger() {
-        return XSD_NEGATIVE_INTEGER;
-    }
-
-    @Override
-    public Predicate getDataTypePredicateNonPositiveInteger() {
-        return XSD_NON_POSITIVE_INTEGER;
-    }
-
-    @Override
-    public Predicate getDataTypePredicateUnsignedInt() {
-        return XSD_UNSIGNED_INT;
-    }
-
-    @Override
-    public Predicate getDataTypePredicateLong() {
-        return XSD_LONG;
-    }
-
-	@Override
-	public Predicate getDataTypePredicateDecimal() {
-		return XSD_DECIMAL;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateDouble() {
-		return XSD_DOUBLE;
-	}
-
-    @Override
-    public Predicate getDataTypePredicateFloat() {
-        return XSD_FLOAT;
-    }
-
-	@Override
-	public Predicate getDataTypePredicateDateTime() {
-		return XSD_DATETIME;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateBoolean() {
-		return XSD_BOOLEAN;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateDate() {
-		return XSD_DATE;
-	}
-	
-	@Override
-	public Predicate getDataTypePredicateYear() {
-		return XSD_YEAR;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateTime() {
-		return XSD_TIME;
-	}
-	
 	
 }

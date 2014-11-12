@@ -130,7 +130,7 @@ public class ExpressionEvaluator {
 					if (!newterm.equals(old))
 						if (newterm == fac.getConstantFalse()) {
 							//
-							terms.set(i, fac.getFunction(dtfac.getDataTypePredicateBoolean(), fac.getConstantFalse()));
+							terms.set(i, fac.getFunction(dtfac.getTypePredicate(COL_TYPE.BOOLEAN), fac.getConstantFalse()));
 						} else if (newterm == fac.getConstantTrue()) {
 							//remove
 							terms.remove(i);
@@ -503,7 +503,7 @@ public class ExpressionEvaluator {
 			COL_TYPE type = constant.getType();
 			Predicate pred = dtfac.getTypePredicate(type);
 			if (pred == null)
-				pred = dtfac.getDataTypePredicateString(); // .XSD_STRING;
+				pred = dtfac.getTypePredicate(COL_TYPE.STRING); // .XSD_STRING;
 			return pred;
 		} 
 		else {
@@ -512,7 +512,7 @@ public class ExpressionEvaluator {
 	}
 	
 	private boolean isDouble(Predicate pred) {
-		return (pred.equals(dtfac.getDataTypePredicateDouble()) || pred.equals(dtfac.getDataTypePredicateFloat()));
+		return (pred.equals(dtfac.getTypePredicate(COL_TYPE.FLOAT)) || pred.equals(dtfac.getTypePredicate(COL_TYPE.FLOAT)));
 	}
 	
 	private boolean isNumeric(Predicate pred) {
