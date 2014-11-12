@@ -4,6 +4,7 @@ package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -28,20 +29,8 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.antlr.runtime.BitSet;
-import org.antlr.runtime.IntStream;
-import org.antlr.runtime.MismatchedTokenException;
-import org.antlr.runtime.NoViableAltException;
-import org.antlr.runtime.Parser;
-import org.antlr.runtime.ParserRuleReturnScope;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.RecognizerSharedState;
-import org.antlr.runtime.Token;
-import org.antlr.runtime.TokenStream;
-
-
-
 import org.antlr.runtime.*;
+
 import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
@@ -169,6 +158,7 @@ public class TurtleOBDAParser extends Parser {
 
 	/** A factory to construct the predicates and terms */
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 
 	private String error = "";
@@ -1507,7 +1497,7 @@ public class TurtleOBDAParser extends Parser {
 					state._fsp--;
 
 
-					      Predicate functionSymbol = dfac.getDataTypePredicateLiteralLang();
+					      Predicate functionSymbol = dtfac.getDataTypePredicateLiteralLang();
 					      Variable var = variable22;
 					      Term lang = language23;   
 					      value = dfac.getFunction(functionSymbol, var, lang);
@@ -1537,44 +1527,12 @@ public class TurtleOBDAParser extends Parser {
 					        throw new IllegalArgumentException("resource25 should be an URI");
 					      }
 					      Predicate functionSymbol = null;
-					      if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateLiteral();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateString();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateInteger();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_INT_URI)) {
-					      	  functionSymbol = dfac.getDataTypePredicateInt(); 
-					      } else if  (functionName.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)){
-					     	functionSymbol = dfac.getDataTypePredicatePositiveInteger(); 
-					      } else if (functionName.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)){
-					     	functionSymbol = dfac.getDataTypePredicateNegativeInteger();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)){
-					     	 functionSymbol = dfac.getDataTypePredicateNonNegativeInteger();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)){
-					    	 functionSymbol = dfac.getDataTypePredicateNonPositiveInteger();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) {
-					         functionSymbol = dfac.getDataTypePredicateUnsignedInt();             
-					      } else if (functionName.equals(OBDAVocabulary.XSD_LONG_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateLong();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateDecimal();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateDouble();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_FLOAT_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateFloat();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateDateTime();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateBoolean();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_DATE_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateDate();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_TIME_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateTime();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_YEAR_URI)) {
-					          functionSymbol = dfac.getDataTypePredicateYear();
-					      } else {
-						  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
+					      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+					      if (type != null) {
+					    	  functionSymbol = dtfac.getTypePredicate(type);
+					      } 
+					      else {
+					    	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
 					      }
 					      value = dfac.getFunction(functionSymbol, var);
 					     
@@ -1916,9 +1874,9 @@ public class TurtleOBDAParser extends Parser {
 					       ValueConstant constant = stringLiteral31;
 					       Term lang = language32;
 					       if (lang != null) {
-					         value = dfac.getFunction(dfac.getDataTypePredicateLiteralLang(), constant, lang);
+					         value = dfac.getFunction(dtfac.getDataTypePredicateLiteralLang(), constant, lang);
 					       } else {
-					       	 value = dfac.getFunction(dfac.getDataTypePredicateLiteral(), constant);
+					       	 value = dfac.getFunction(dtfac.getDataTypePredicateLiteral(), constant);
 					       }
 					    
 					}
@@ -2031,43 +1989,11 @@ public class TurtleOBDAParser extends Parser {
 			      if (resource38 instanceof Function){
 				 functionName = ( (ValueConstant) ((Function)resource38).getTerm(0) ).getValue();
 			      }
-			      if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateLiteral();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateString();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
-			     	functionSymbol = dfac.getDataTypePredicateInteger();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_INT_URI)) {
-			      	  functionSymbol = dfac.getDataTypePredicateInt(); 
-			      } else if  (functionName.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)){
-			     	functionSymbol = dfac.getDataTypePredicatePositiveInteger(); 
-			      } else if (functionName.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)){
-			     	functionSymbol = dfac.getDataTypePredicateNegativeInteger();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)){
-			     	 functionSymbol = dfac.getDataTypePredicateNonNegativeInteger();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)){
-			    	 functionSymbol = dfac.getDataTypePredicateNonPositiveInteger();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) {
-			         functionSymbol = dfac.getDataTypePredicateUnsignedInt();  
-			      } else if (functionName.equals(OBDAVocabulary.XSD_LONG_URI)) {
-			     	functionSymbol = dfac.getDataTypePredicateLong();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateDecimal();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateDouble();
-				} else if (functionName.equals(OBDAVocabulary.XSD_FLOAT_URI)) {
-			          functionSymbol = dfac.getDataTypePredicateFloat();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateDateTime();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateBoolean();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_DATE_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateDate();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_TIME_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateTime();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_YEAR_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateYear();
-			      } else {
+			      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+			      if (type != null) {
+			    	  functionSymbol = dtfac.getTypePredicate(type);
+			      }
+			      else {
 			        throw new RuntimeException("Unsupported datatype: " + functionName);
 			      }
 			      value = dfac.getFunction(functionSymbol, constant);

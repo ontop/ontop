@@ -59,9 +59,6 @@ public class TreeWitnessGenerator {
 		this.filler = filler;
 	}
 
-	// TODO: replace by OntologyVocabulary
-	public static final OClass owlThing = ontFactory.createClass("http://www.w3.org/TR/2004/REC-owl-semantics-20040210/#owl_Thing");	
-	
 	// tree witness generators of the ontology (i.e., positive occurrences of \exists R.B)
 
 	public static Collection<TreeWitnessGenerator> getTreeWitnessGenerators(TBoxReasoner reasoner) {
@@ -78,7 +75,7 @@ public class TreeWitnessGenerator {
 					ObjectSomeValuesFrom some = (ObjectSomeValuesFrom)concept;
 					TreeWitnessGenerator twg = gens.get(some);
 					if (twg == null) {
-						twg = new TreeWitnessGenerator(reasoner, some.getProperty(), owlThing);			
+						twg = new TreeWitnessGenerator(reasoner, some.getProperty(), ontFactory.getThing());			
 						gens.put(concept, twg);
 					}
 					for (Equivalences<ClassExpression> subClassSet : subClasses) {

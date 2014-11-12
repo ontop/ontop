@@ -31,13 +31,31 @@ public interface OntologyFactory {
 	
 	public OClass createClass(String uri);
 
+	public OClass getThing();
+
+	public OClass getNothing();
+	
+	
+	
 	public Datatype createDataType(Predicate.COL_TYPE type);
+	
+	
 	
 	public ObjectPropertyExpression createObjectProperty(String uri);
 	
+	public ObjectPropertyExpression getTopObjectProperty();
+	
+	public ObjectPropertyExpression getBottomObjectProperty();
+
+	
+	
 	public DataPropertyExpression createDataProperty(String uri);
 
-
+	public DataPropertyExpression getTopDataProperty();
+	
+	public DataPropertyExpression getBottomDataProperty();
+	
+	
 	/**
 	 * creates an object property assertion 
 	 * (ensures that the property is not inverse by swapping arguments if necessary)

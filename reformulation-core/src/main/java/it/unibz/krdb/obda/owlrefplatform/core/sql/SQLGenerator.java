@@ -20,11 +20,27 @@ package it.unibz.krdb.obda.owlrefplatform.core.sql;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
+import it.unibz.krdb.obda.model.BNode;
+import it.unibz.krdb.obda.model.BooleanOperationPredicate;
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.DataTypePredicate;
+import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.DatatypeFactory;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.NumericalOperationPredicate;
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.URITemplatePredicate;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.XSDDatatypeCodes;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
@@ -32,22 +48,31 @@ import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapt
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
+import it.unibz.krdb.obda.utils.TypeMapper;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
-import org.openrdf.model.Literal;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Types;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.openrdf.model.Literal;
+import org.slf4j.LoggerFactory;
 
 //import com.hp.hpl.jena.rdf.model.Literal;
 
 public class SQLGenerator implements SQLQueryGenerator {
 
-    private static final long serialVersionUID = 7477161929752147045L;
+	private static final long serialVersionUID = 7477161929752147045L;
 
 	/**
 	 * Operator symbols
@@ -92,7 +117,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private boolean isSI = false;
 	private SemanticIndexURIMap uriRefIds;
 	
-	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
+	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqladapter) {
 		this.metadata = metadata;
@@ -673,26 +698,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return equalities;
 	}
 
+	
 	// return variable SQL data type
 	private int getVariableDataType (Term term, QueryAliasIndex idx) {
 		Function f = (Function) term;
 		if (f.isDataTypeFunction()) {
 			Predicate p = f.getFunctionSymbol();
-			if (p.toString() == OBDAVocabulary.XSD_BOOLEAN_URI) return Types.BOOLEAN;
-			if (p.toString() == OBDAVocabulary.XSD_INT_URI)  return Types.INTEGER;
-			if (p.toString() == OBDAVocabulary.XSD_INTEGER_URI)  return Types.BIGINT;
-            if (p.toString() == OBDAVocabulary.XSD_LONG_URI)  return Types.BIGINT;
-            if (p.toString() == OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)  return Types.BIGINT;
-            if (p.toString() == OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)  return Types.BIGINT;
-            if (p.toString() == OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)  return Types.BIGINT;
-            if (p.toString() == OBDAVocabulary.XSD_UNSIGNED_INT_URI)  return Types.INTEGER;
-            if (p.toString() == OBDAVocabulary.XSD_FLOAT_URI)  return Types.FLOAT;
-			if (p.toString() == OBDAVocabulary.XSD_DOUBLE_URI) return Types.DOUBLE;
-			if (p.toString() == OBDAVocabulary.XSD_STRING_URI) return Types.VARCHAR;
-			if (p.toString() == OBDAVocabulary.RDFS_LITERAL_URI) return Types.VARCHAR;
+			return TypeMapper.getInstance().getSQLType(p);
 		}
 		// Return varchar for unknown
-		return 12;
+		return Types.VARCHAR;
 	}
 
 	private String getWHERE(CQIE query, QueryAliasIndex index) {
@@ -841,7 +856,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			Function ov = (Function) ht;
 			Predicate function = ov.getFunctionSymbol();
 
-			if (function == OBDAVocabulary.RDFS_LITERAL || function == OBDAVocabulary.RDFS_LITERAL_LANG)
+			if (dtfac.isLiteral(function))
 				if (ov.getTerms().size() > 1) {
 				/*
 				 * Case for rdf:literal s with a language, we need to select 2
@@ -868,6 +883,31 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return (String.format(langStr, "NULL", signature.get(hpos)));
 
 	}
+	
+	private static final Map<Predicate.COL_TYPE, Integer> typeMap;
+	
+	static {
+		typeMap = new HashMap<Predicate.COL_TYPE, Integer>();
+
+		typeMap.put(COL_TYPE.BOOLEAN, 9);
+		typeMap.put(COL_TYPE.DATETIME, 8);
+		typeMap.put(COL_TYPE.DATE,  10);
+		typeMap.put(COL_TYPE.TIME, 11); 
+		typeMap.put(COL_TYPE.YEAR, 12);
+		typeMap.put(COL_TYPE.DECIMAL, 5);
+		typeMap.put(COL_TYPE.DOUBLE, 6); 
+		typeMap.put(COL_TYPE.INTEGER, 4); 
+		typeMap.put(COL_TYPE.NEGATIVE_INTEGER, 15); 
+		typeMap.put(COL_TYPE.FLOAT, 14); 
+		typeMap.put(COL_TYPE.NON_NEGATIVE_INTEGER, 16);
+		typeMap.put(COL_TYPE.POSITIVE_INTEGER, 17); 
+		typeMap.put(COL_TYPE.NON_POSITIVE_INTEGER, 18);
+		typeMap.put(COL_TYPE.INT, 19); 
+		typeMap.put(COL_TYPE.UNSIGNED_INT, 20); 
+		typeMap.put(COL_TYPE.LONG, 13); 
+		typeMap.put(COL_TYPE.STRING, 7); 
+		typeMap.put(COL_TYPE.LITERAL, 3);
+	}
 
 	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
 
@@ -885,51 +925,21 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * NOTE NULL is IDENTIFIER 0 in QuestResultSet do not USE for any 
 			 * type
 			 */
-			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-				return (String.format(typeStr, XSDDatatypeCodes.XSD_BOOLEAN_URI_CODE, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-				return (String.format(typeStr, XSDDatatypeCodes.XSD_DATETIME_URI_CODE, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DATE_URI)) {
-				return (String.format(typeStr, XSDDatatypeCodes.XSD_DATE_URI_CODE, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_TIME_URI)) {
-				return (String.format(typeStr, XSDDatatypeCodes.XSD_TIME_URI_CODE, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_YEAR_URI)) {
-				return (String.format(typeStr, XSDDatatypeCodes.XSD_YEAR_URI_CODE, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-				return (String.format(typeStr, XSDDatatypeCodes.XSD_DECIMAL_URI_CODE, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-				return (String.format(typeStr, XSDDatatypeCodes.XSD_DOUBLE_URI_CODE, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
-				return (String.format(typeStr, XSDDatatypeCodes.XSD_INTEGER_URI_CODE, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)) {
-                return (String.format(typeStr, XSDDatatypeCodes.XSD_NEGATIVE_INTEGER_URI_CODE, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_FLOAT_URI)) {
-                return (String.format(typeStr, XSDDatatypeCodes.XSD_FLOAT_URI_CODE, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)) {
-                return (String.format(typeStr, XSDDatatypeCodes.XSD_NON_NEGATIVE_INTEGER_URI_CODE, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)) {
-                return (String.format(typeStr, XSDDatatypeCodes.XSD_POSITIVE_INTEGER_URI_CODE, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)) {
-                return (String.format(typeStr, XSDDatatypeCodes.XSD_NON_POSITIVE_INTEGER_URI_CODE, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_INT_URI)) {
-                return (String.format(typeStr, XSDDatatypeCodes.XSD_INT_URI_CODE, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) {
-                return (String.format(typeStr, XSDDatatypeCodes.XSD_UNSIGNED_INT_URI_CODE, signature.get(hpos)));
-            } else if (functionString.equals(OBDAVocabulary.XSD_LONG_URI)) {
-                return (String.format(typeStr, XSDDatatypeCodes.XSD_LONG_URI_CODE, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_STRING_URI)) {
-				return (String.format(typeStr, XSDDatatypeCodes.XSD_STRING_URI_CODE, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-				return (String.format(typeStr, XSDDatatypeCodes.RDFS_LITERAL_URI_CODE, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
-				return (String.format(typeStr, XSDDatatypeCodes.QUEST_URI_CODE, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
-				return (String.format(typeStr, XSDDatatypeCodes.QUEST_BNODE_CODE, signature.get(hpos)));
+			
+			if (functionString.equals(OBDAVocabulary.QUEST_URI)) { 
+				return (String.format(typeStr, 1, signature.get(hpos)));
+			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) { 
+				return (String.format(typeStr, 2, signature.get(hpos)));
+			}
+			else {
+				Predicate.COL_TYPE type = dtfac.getDataType(functionString);
+				int k = typeMap.get(type);
+				return (String.format(typeStr, k, signature.get(hpos)));
 			}
 		} else if (ht instanceof URIConstant) {
-			return (String.format(typeStr, XSDDatatypeCodes.QUEST_URI_CODE, signature.get(hpos)));
+			return (String.format(typeStr, 1, signature.get(hpos)));
 		} else if (ht == OBDAVocabulary.NULL) {
-			return (String.format(typeStr, XSDDatatypeCodes.NULL_CODE, signature.get(hpos)));
+			return (String.format(typeStr, 0, signature.get(hpos)));
 		}
 		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
 
@@ -1008,7 +1018,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			if (ov.getTerms().size() > 1) {
 				int size = ov.getTerms().size();
-				if (pred == OBDAVocabulary.RDFS_LITERAL || pred == OBDAVocabulary.RDFS_LITERAL_LANG) {
+				if (dtfac.isLiteral(pred)) {
 					size--;
 				}
 				for (int termIndex = 1; termIndex < size; termIndex++) {

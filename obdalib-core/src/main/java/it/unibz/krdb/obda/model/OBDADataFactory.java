@@ -30,6 +30,8 @@ import java.util.List;
 public interface OBDADataFactory extends Serializable {
 
 	public OBDAModel getOBDAModel();
+	
+	public DatatypeFactory getDatatypeFactory();
 
 	public CQIE getCQIE(Function head, Function... body );
 	
@@ -56,53 +58,23 @@ public interface OBDADataFactory extends Serializable {
 	@Deprecated
 	public Predicate getPredicate(String uri, int arity);
 
-
-	public Predicate getPredicate(String uri, int arity, COL_TYPE[] types);
+	public Predicate getPredicate(String uri, COL_TYPE[] types);
 
 	public Predicate getObjectPropertyPredicate(String name);
 
-	public Predicate getDataPropertyPredicate(String name);
+	public Predicate getDataPropertyPredicate(String name, COL_TYPE type);
 
+	/**
+	 * with default type COL_TYPE.LITERAL
+	 * @param name
+	 * @return
+	 */
+	
+	public Predicate getDataPropertyPredicate(String name);
+	
 	public Predicate getClassPredicate(String name);
 
 
-	/*
-	 * Data types
-	 */
-
-	public Predicate getDataTypePredicateUnsupported(String uri);
-
-	public Predicate getDataTypePredicateLiteral();
-
-	public Predicate getDataTypePredicateLiteralLang();
-
-	public Predicate getDataTypePredicateString();
-
-	public Predicate getDataTypePredicateInteger();
-
-    public Predicate getDataTypePredicateNonNegativeInteger();
-
-    public Predicate getDataTypePredicateInt();
-
-    public Predicate getDataTypePredicatePositiveInteger();
-
-    public Predicate getDataTypePredicateNegativeInteger();
-
-    public Predicate getDataTypePredicateNonPositiveInteger();
-
-    public Predicate getDataTypePredicateUnsignedInt();
-
-    public Predicate getDataTypePredicateLong();
-
-	public Predicate getDataTypePredicateDecimal();
-
-	public Predicate getDataTypePredicateDouble();
-
-    public Predicate getDataTypePredicateFloat();
-
-    public Predicate getDataTypePredicateDateTime();
-
-	public Predicate getDataTypePredicateBoolean();
 
 	/*
 	 * Built-in function predicates
@@ -306,19 +278,10 @@ public interface OBDADataFactory extends Serializable {
 
 	public OBDASQLQuery getSQLQuery(String query);
 
-	public Predicate getTypePredicate(Predicate.COL_TYPE type);
 
 	Predicate getJoinPredicate();
 
 	Predicate getLeftJoinPredicate();
 
-	/**
-	 * @return
-	 */
-	public Predicate getDataTypePredicateDate();
-	
-	public Predicate getDataTypePredicateTime();
-
-	public Predicate getDataTypePredicateYear();
 	
 }

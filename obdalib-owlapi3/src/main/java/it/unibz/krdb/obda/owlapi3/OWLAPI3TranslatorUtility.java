@@ -21,9 +21,7 @@ package it.unibz.krdb.obda.owlapi3;
  */
 
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -113,7 +111,9 @@ public class OWLAPI3TranslatorUtility {
 
 		// process all axioms
 		
-		for (OWLAxiom axiom : owl.getAxioms()) 
+		for (OWLAxiom axiom : owl.getAxioms()) {
+			//System.out.println(axiom);
 			axiom.accept(translator);
+		}
 	}
 }

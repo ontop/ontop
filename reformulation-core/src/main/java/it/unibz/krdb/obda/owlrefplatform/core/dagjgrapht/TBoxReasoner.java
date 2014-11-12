@@ -74,9 +74,9 @@ public interface TBoxReasoner {
 	 *         the representative of the equivalence class otherwise  
 	 */
 
-	public OClass getClassRepresentative(Predicate p);
+	public OClass getClassRepresentative(OClass p);
 	
-	public ObjectPropertyExpression getObjectPropertyRepresentative(Predicate p);
+	public ObjectPropertyExpression getObjectPropertyRepresentative(ObjectPropertyExpression p);
 	
-	public DataPropertyExpression getDataPropertyRepresentative(Predicate p);
+	public DataPropertyExpression getDataPropertyRepresentative(DataPropertyExpression p);
 }

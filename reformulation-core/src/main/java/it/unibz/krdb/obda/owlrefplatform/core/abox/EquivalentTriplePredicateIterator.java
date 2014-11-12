@@ -69,8 +69,7 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 	private Assertion getNormal(Assertion assertion) {
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
-			Predicate concept = ca.getConcept().getPredicate();
-			OClass description = reasoner.getClassRepresentative(concept);
+			OClass description = reasoner.getClassRepresentative(ca.getConcept());
 			
 			if (description != null) {
 				ObjectConstant object = ca.getIndividual();
@@ -79,8 +78,7 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 		} 
 		else if (assertion instanceof ObjectPropertyAssertion) {
 			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
-			Predicate role = opa.getProperty().getPredicate();
-			ObjectPropertyExpression property = reasoner.getObjectPropertyRepresentative(role);
+			ObjectPropertyExpression property = reasoner.getObjectPropertyRepresentative(opa.getProperty());
 			
 			if (property != null) {
 				ObjectConstant object1 = opa.getSubject();
@@ -90,8 +88,7 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 		} 
 		else if (assertion instanceof DataPropertyAssertion) {
 			DataPropertyAssertion opa = (DataPropertyAssertion) assertion;
-			Predicate role = opa.getProperty().getPredicate();
-			DataPropertyExpression property = reasoner.getDataPropertyRepresentative(role);
+			DataPropertyExpression property = reasoner.getDataPropertyRepresentative(opa.getProperty());
 			
 			if (property != null) {
 				ObjectConstant object1 = opa.getSubject();

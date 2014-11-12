@@ -237,7 +237,7 @@ public class MappingDataTypeRepair {
                 || databaseDriver != null && databaseDriver.contains("IBM")){
 
 
-            if(dataType.equals(OBDAVocabulary.XSD_BOOLEAN)){
+            if (fac.getDatatypeFactory().isBoolean(dataType)) {
 
                 log.warn("Boolean dataType do not exist in DB2 database, the value in the database metadata is used instead.");
                 return true;

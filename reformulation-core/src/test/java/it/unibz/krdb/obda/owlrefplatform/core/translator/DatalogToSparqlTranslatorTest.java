@@ -696,20 +696,20 @@ public class DatalogToSparqlTranslatorTest {
 	private static Predicate predHasAdvancedCourse;
 	
 	static {
-		predStudent = dataFactory.getPredicate("http://example.org/Student", 1, new COL_TYPE[] { COL_TYPE.OBJECT });
-		predBachelorStudent = dataFactory.getPredicate("http://example.org/BachelorStudent", 1, new COL_TYPE[] { COL_TYPE.OBJECT });
-		predMasterStudent = dataFactory.getPredicate("http://example.org/MasterStudent", 1, new COL_TYPE[] { COL_TYPE.OBJECT });
-		predDoctoralStudent = dataFactory.getPredicate("http://example.org/DoctoralStudent", 1, new COL_TYPE[] { COL_TYPE.OBJECT });
+		predStudent = dataFactory.getClassPredicate("http://example.org/Student");
+		predBachelorStudent = dataFactory.getClassPredicate("http://example.org/BachelorStudent");
+		predMasterStudent = dataFactory.getClassPredicate("http://example.org/MasterStudent");
+		predDoctoralStudent = dataFactory.getClassPredicate("http://example.org/DoctoralStudent");
 		
-		predFirstName = dataFactory.getPredicate("http://example.org/firstName", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.STRING });
-		predLastName = dataFactory.getPredicate("http://example.org/lastName", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.STRING });
-		predAge = dataFactory.getPredicate("http://example.org/age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.INTEGER });
-		predGrade = dataFactory.getPredicate("http://example.org/grade", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.DECIMAL });
-		predEnrollmentDate = dataFactory.getPredicate("http://example.org/enrollmentDate", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.DATETIME });
+		predFirstName = dataFactory.getDataPropertyPredicate("http://example.org/firstName", COL_TYPE.STRING);
+		predLastName = dataFactory.getDataPropertyPredicate("http://example.org/lastName", COL_TYPE.STRING);
+		predAge = dataFactory.getDataPropertyPredicate("http://example.org/age", COL_TYPE.INTEGER);
+		predGrade = dataFactory.getDataPropertyPredicate("http://example.org/grade", COL_TYPE.DECIMAL);
+		predEnrollmentDate = dataFactory.getDataPropertyPredicate("http://example.org/enrollmentDate", COL_TYPE.DATETIME);
 		
-		predHasCourse = dataFactory.getPredicate("http://example.org/hasCourse", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		predHasElementaryCourse = dataFactory.getPredicate("http://example.org/hasElementaryCourse", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		predHasAdvancedCourse = dataFactory.getPredicate("http://example.org/hasAdvancedCourse", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		predHasCourse = dataFactory.getObjectPropertyPredicate("http://example.org/hasCourse");
+		predHasElementaryCourse = dataFactory.getObjectPropertyPredicate("http://example.org/hasElementaryCourse");
+		predHasAdvancedCourse = dataFactory.getObjectPropertyPredicate("http://example.org/hasAdvancedCourse");
 	}
 	
 	private static Variable x;

@@ -77,7 +77,7 @@
 
     <owl:ObjectProperty rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#PC"/>
     
-
+ 
 
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -110,6 +110,44 @@
             </owl:Restriction>
         </owl:members>
     </rdf:Description>
+
+   <owl:ObjectProperty rdf:about="http://www.semanticweb.org/roman/ontologies/2014/10/untitled-ontology-125#RRA">
+        <rdfs:subPropertyOf>
+            <rdf:Description>
+                <owl:inverseOf rdf:resource="&owl;topObjectProperty"/>
+            </rdf:Description>
+        </rdfs:subPropertyOf>
+    </owl:ObjectProperty>
+
+   <rdf:Description>
+        <owl:inverseOf rdf:resource="&owl;bottomObjectProperty"/>
+        <rdfs:subPropertyOf>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="http://www.semanticweb.org/roman/ontologies/2014/10/untitled-ontology-125#RRB"/>
+            </owl:ObjectProperty>
+        </rdfs:subPropertyOf>
+   </rdf:Description>
+
+       	<owl:Restriction>
+          	<owl:onProperty rdf:resource="&owl;bottomDataProperty" />
+        	<owl:someValuesFrom rdf:resource="&rdfs;Literal"/>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#C" />
+        </rdfs:subClassOf>
+        </owl:Restriction>
+
+        <owl:Class rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#B" >
+        <rdfs:subClassOf>
+       	<owl:Restriction>
+          	<owl:onProperty> 
+   				<rdf:Description>
+        			<owl:inverseOf rdf:resource="&owl;topObjectProperty"/>
+   				</rdf:Description>
+            </owl:onProperty> 
+        	<owl:someValuesFrom rdf:resource="&owl;Thing"/>
+        </owl:Restriction>
+        </rdfs:subClassOf>
+        </owl:Class>
 
 </rdf:RDF>
 

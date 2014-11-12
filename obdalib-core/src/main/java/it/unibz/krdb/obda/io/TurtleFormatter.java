@@ -22,11 +22,13 @@ package it.unibz.krdb.obda.io;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DataTypePredicate;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.TermUtil;
 
@@ -40,6 +42,8 @@ import java.util.List;
 @Deprecated
 public class TurtleFormatter extends CQFormatter {
 
+	private static DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	
     public TurtleFormatter(PrefixManager pm) {
         super(pm);
     }
@@ -75,7 +79,7 @@ public class TurtleFormatter extends CQFormatter {
             Function function = (Function) term;
             Predicate functionSymbol = function.getFunctionSymbol();
             if (functionSymbol instanceof DataTypePredicate) {
-                if (isLiteralDataType(functionSymbol)) {
+                if (dtfac.isLiteral(functionSymbol)) {
                     // For literal data type
                     final int arity = function.getArity();
                     if (arity == 1) { // without the language tag
@@ -122,12 +126,6 @@ public class TurtleFormatter extends CQFormatter {
         return atom.getArity() == 1 ? true : false;
     }
 
-    /**
-     * Checks if the datatype is literal or not.
-     */
-    private boolean isLiteralDataType(Predicate predicate) {
-        return predicate.equals(OBDAVocabulary.RDFS_LITERAL);
-    }
 
     /**
      * Prints the short form of the predicate (by omitting the complete URI and
