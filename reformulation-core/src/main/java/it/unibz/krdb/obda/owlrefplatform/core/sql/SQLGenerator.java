@@ -20,27 +20,12 @@ package it.unibz.krdb.obda.owlrefplatform.core.sql;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
-import it.unibz.krdb.obda.model.BNode;
-import it.unibz.krdb.obda.model.BooleanOperationPredicate;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.DatatypeFactory;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.NumericalOperationPredicate;
-import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.URITemplatePredicate;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.model.impl.QuestTypeMapper;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
@@ -48,25 +33,16 @@ import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapt
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
-import it.unibz.krdb.obda.utils.TypeMapper;
+import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
+import org.openrdf.model.Literal;
 
 import java.sql.Types;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.openrdf.model.Literal;
-import org.slf4j.LoggerFactory;
+import java.util.*;
 
 //import com.hp.hpl.jena.rdf.model.Literal;
 
@@ -704,7 +680,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Function f = (Function) term;
 		if (f.isDataTypeFunction()) {
 			Predicate p = f.getFunctionSymbol();
-			return TypeMapper.getInstance().getSQLType(p);
+			return JdbcTypeMapper.getInstance().getSQLType(p);
 		}
 		// Return varchar for unknown
 		return Types.VARCHAR;
@@ -883,31 +859,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return (String.format(langStr, "NULL", signature.get(hpos)));
 
 	}
-	
-	private static final Map<Predicate.COL_TYPE, Integer> typeMap;
-	
-	static {
-		typeMap = new HashMap<Predicate.COL_TYPE, Integer>();
 
-		typeMap.put(COL_TYPE.BOOLEAN, 9);
-		typeMap.put(COL_TYPE.DATETIME, 8);
-		typeMap.put(COL_TYPE.DATE,  10);
-		typeMap.put(COL_TYPE.TIME, 11); 
-		typeMap.put(COL_TYPE.YEAR, 12);
-		typeMap.put(COL_TYPE.DECIMAL, 5);
-		typeMap.put(COL_TYPE.DOUBLE, 6); 
-		typeMap.put(COL_TYPE.INTEGER, 4); 
-		typeMap.put(COL_TYPE.NEGATIVE_INTEGER, 15); 
-		typeMap.put(COL_TYPE.FLOAT, 14); 
-		typeMap.put(COL_TYPE.NON_NEGATIVE_INTEGER, 16);
-		typeMap.put(COL_TYPE.POSITIVE_INTEGER, 17); 
-		typeMap.put(COL_TYPE.NON_POSITIVE_INTEGER, 18);
-		typeMap.put(COL_TYPE.INT, 19); 
-		typeMap.put(COL_TYPE.UNSIGNED_INT, 20); 
-		typeMap.put(COL_TYPE.LONG, 13); 
-		typeMap.put(COL_TYPE.STRING, 7); 
-		typeMap.put(COL_TYPE.LITERAL, 3);
-	}
 
 	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
 
@@ -926,20 +878,24 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * type
 			 */
 			
-			if (functionString.equals(OBDAVocabulary.QUEST_URI)) { 
-				return (String.format(typeStr, 1, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) { 
-				return (String.format(typeStr, 2, signature.get(hpos)));
+			if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
+                int k = QuestTypeMapper.getInstance().getQuestCode(COL_TYPE.OBJECT);
+				return (String.format(typeStr, k, signature.get(hpos)));
+			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
+                int k = QuestTypeMapper.getInstance().getQuestCode(COL_TYPE.BNODE);
+				return (String.format(typeStr, k, signature.get(hpos)));
 			}
 			else {
 				Predicate.COL_TYPE type = dtfac.getDataType(functionString);
-				int k = typeMap.get(type);
+				int k = QuestTypeMapper.getInstance().getQuestCode(type);
 				return (String.format(typeStr, k, signature.get(hpos)));
 			}
 		} else if (ht instanceof URIConstant) {
-			return (String.format(typeStr, 1, signature.get(hpos)));
+            int k = QuestTypeMapper.getInstance().getQuestCode(COL_TYPE.OBJECT);
+			return (String.format(typeStr, k, signature.get(hpos)));
 		} else if (ht == OBDAVocabulary.NULL) {
-			return (String.format(typeStr, 0, signature.get(hpos)));
+            int k = QuestTypeMapper.getInstance().getQuestCode(COL_TYPE.NULL);
+			return (String.format(typeStr, k, signature.get(hpos)));
 		}
 		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
 

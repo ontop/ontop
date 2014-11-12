@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.XSDDatatypeCodes;
+import it.unibz.krdb.obda.model.impl.QuestTypeMapper;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 
@@ -150,7 +150,7 @@ public class QuestResultset implements TupleResultSet {
 			realValue = set.getString(column);
 			COL_TYPE type = getQuestType( set.getInt(column - 2));
 
-			if (type == null || realValue == null) {
+			if (type == COL_TYPE.NULL || realValue == null) {
 				return null;
 			} else {
 				if (type == COL_TYPE.OBJECT) {
@@ -329,59 +329,22 @@ public class QuestResultset implements TupleResultSet {
 	}
 
     /**
-     * Numbers sqltype are defined @see #getTypeColumnForSELECT SQLGenerator
+     * Numbers codetype are defined see also  #getTypeColumnForSELECT SQLGenerator
      */
 
-	private COL_TYPE getQuestType(int sqltype) {
-        switch(sqltype) {
-            case XSDDatatypeCodes.QUEST_URI_CODE:
-                return COL_TYPE.OBJECT;
-            case XSDDatatypeCodes.QUEST_BNODE_CODE:
-                return COL_TYPE.BNODE;
-            case XSDDatatypeCodes.RDFS_LITERAL_URI_CODE:
-                return COL_TYPE.LITERAL;
-            case XSDDatatypeCodes.XSD_INTEGER_URI_CODE:
-                return COL_TYPE.INTEGER;
-            case XSDDatatypeCodes.XSD_DECIMAL_URI_CODE:
-                return COL_TYPE.DECIMAL;
-            case XSDDatatypeCodes.XSD_DOUBLE_URI_CODE:
-                return COL_TYPE.DOUBLE;
-            case XSDDatatypeCodes.XSD_STRING_URI_CODE:
-                return COL_TYPE.STRING;
-            case XSDDatatypeCodes.XSD_DATETIME_URI_CODE:
-                return COL_TYPE.DATETIME;
-            case XSDDatatypeCodes.XSD_BOOLEAN_URI_CODE:
-                return COL_TYPE.BOOLEAN;
-            case XSDDatatypeCodes.XSD_DATE_URI_CODE:
-                return COL_TYPE.DATE;
-            case XSDDatatypeCodes.XSD_TIME_URI_CODE:
-                return COL_TYPE.TIME;
-            case XSDDatatypeCodes.XSD_YEAR_URI_CODE:
-                return COL_TYPE.YEAR;
-            case XSDDatatypeCodes.XSD_LONG_URI_CODE:
-                return COL_TYPE.LONG;
-            case XSDDatatypeCodes.XSD_FLOAT_URI_CODE:
-                return COL_TYPE.FLOAT;
-            case XSDDatatypeCodes.XSD_NEGATIVE_INTEGER_URI_CODE:
-                return COL_TYPE.NEGATIVE_INTEGER;
-            case XSDDatatypeCodes.XSD_NON_NEGATIVE_INTEGER_URI_CODE:
-                return COL_TYPE.NON_NEGATIVE_INTEGER;
-            case XSDDatatypeCodes.XSD_POSITIVE_INTEGER_URI_CODE:
-                return COL_TYPE.POSITIVE_INTEGER;
-            case XSDDatatypeCodes.XSD_NON_POSITIVE_INTEGER_URI_CODE:
-                return COL_TYPE.NON_POSITIVE_INTEGER;
-            case XSDDatatypeCodes.XSD_INT_URI_CODE:
-                return COL_TYPE.INT;
-            case XSDDatatypeCodes.XSD_UNSIGNED_INT_URI_CODE:
-                return COL_TYPE.UNSIGNED_INT;
-            case XSDDatatypeCodes.NULL_CODE:
-                return null;
-            default:
-                throw new RuntimeException("COLTYPE unknown: " + sqltype);
+	private COL_TYPE getQuestType(int typeCode) {
 
+
+        COL_TYPE questType = QuestTypeMapper.getInstance().getQuestType(typeCode);
+
+        if(questType!=null){
+
+            return questType;
         }
 
-	}
+        throw new RuntimeException("COLTYPE unknown: " + typeCode);
+
+        }
 
 	// @Override
 	// public URI getURI(String name) throws OBDAException {
