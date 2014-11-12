@@ -22,11 +22,13 @@ package it.unibz.krdb.obda.sesame;
 
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
@@ -48,6 +50,8 @@ public class SesameStatement implements Statement {
 	private Value object = null;
 	private Resource context = null;
 	private ValueFactory fact = new ValueFactoryImpl();
+	
+	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	public SesameStatement(Assertion assertion) {
 		
@@ -122,67 +126,23 @@ public class SesameStatement implements Statement {
 	public Literal getLiteral(ValueConstant literal)
 	{
 		URI datatype = null;
-		if (literal.getType() == COL_TYPE.BOOLEAN)
-			datatype = fact
-					.createURI(OBDAVocabulary.XSD_BOOLEAN_URI);
-		else if (literal.getType() == COL_TYPE.DATETIME)
-			datatype = fact
-					.createURI(OBDAVocabulary.XSD_DATETIME_URI);
-        else if (literal.getType() == COL_TYPE.DATE)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_DATE_URI);
-        else if (literal.getType() == COL_TYPE.TIME)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_TIME_URI);
-        else if (literal.getType() == COL_TYPE.YEAR)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_YEAR_URI);
-		else if (literal.getType() == COL_TYPE.DECIMAL)
-			datatype = fact
-					.createURI(OBDAVocabulary.XSD_DECIMAL_URI);
-		else if (literal.getType() == COL_TYPE.DOUBLE)
-			datatype = fact
-					.createURI(OBDAVocabulary.XSD_DOUBLE_URI);
-        else if (literal.getType() == COL_TYPE.FLOAT)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_FLOAT_URI);
-		else if (literal.getType() == COL_TYPE.INTEGER)
-			datatype = fact
-					.createURI(OBDAVocabulary.XSD_INTEGER_URI);
-        else if (literal.getType() == COL_TYPE.NON_NEGATIVE_INTEGER)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI);
-        else if (literal.getType() == COL_TYPE.POSITIVE_INTEGER)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI);
-        else if (literal.getType() == COL_TYPE.POSITIVE_INTEGER)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI);
-        else if (literal.getType() == COL_TYPE.NON_POSITIVE_INTEGER)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI);
-        else if (literal.getType() == COL_TYPE.UNSIGNED_INT)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_UNSIGNED_INT_URI);
-        else if (literal.getType() == COL_TYPE.INT)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_INT_URI);
-        else if (literal.getType() == COL_TYPE.LONG)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_LONG_URI);
-		else if (literal.getType() == COL_TYPE.LITERAL)
+		
+		if (literal.getType() == COL_TYPE.LITERAL) {
+			datatype = null;                                       // special 17
+		}
+		else if (literal.getType() == COL_TYPE.LITERAL_LANG) {
 			datatype = null;
-		else if (literal.getType() == COL_TYPE.LITERAL_LANG)
-			{
-				datatype = null;
-				return fact.createLiteral(literal.getValue(), literal.getLanguage());
-			}
-		else if (literal.getType() == COL_TYPE.OBJECT)
-			datatype = fact
-					.createURI(OBDAVocabulary.XSD_STRING_URI);
-		else if (literal.getType() == COL_TYPE.STRING)
-			datatype = fact
-					.createURI(OBDAVocabulary.XSD_STRING_URI);
+			return fact.createLiteral(literal.getValue(), literal.getLanguage());
+		}
+		else if (literal.getType() == COL_TYPE.OBJECT) {
+			String uri = dtfac.getDataTypeURI(COL_TYPE.STRING);
+			datatype = fact.createURI(uri);
+		}	
+		else {
+			String uri = dtfac.getDataTypeURI(literal.getType());
+			datatype = fact.createURI(uri);
+		}
+		
 		Literal value = fact.createLiteral(literal.getValue(), datatype);
 		return value;
 	}

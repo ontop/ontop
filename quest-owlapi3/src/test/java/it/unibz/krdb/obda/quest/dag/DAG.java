@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.core.dag;
+package it.unibz.krdb.obda.quest.dag;
 
 /*
  * #%L
@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 
 import java.io.Serializable;
 import java.util.Collection;

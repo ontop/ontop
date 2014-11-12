@@ -24,28 +24,44 @@ package it.unibz.krdb.obda.r2rml;
  * @author timea bagosi
  * The R2RML parser class that breaks down the responsibility of parsing by case
  */
-
-import eu.optique.api.mapping.*;
-import eu.optique.api.mapping.TermMap.TermMapType;
-import eu.optique.api.mapping.impl.InvalidR2RMLMappingException;
-import eu.optique.api.mapping.impl.SubjectMapImpl;
-import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.DataTypePredicate;
+import it.unibz.krdb.obda.model.DatatypeFactory;
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.DataTypePredicateImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.r2rml.R2RMLVocabulary;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
 
-import java.util.*;
+import eu.optique.api.mapping.ObjectMap;
+import eu.optique.api.mapping.PredicateMap;
+import eu.optique.api.mapping.PredicateObjectMap;
+import eu.optique.api.mapping.R2RMLMappingManager;
+import eu.optique.api.mapping.R2RMLMappingManagerFactory;
+import eu.optique.api.mapping.SubjectMap;
+import eu.optique.api.mapping.Template;
+import eu.optique.api.mapping.TermMap.TermMapType;
+import eu.optique.api.mapping.TriplesMap;
+import eu.optique.api.mapping.impl.InvalidR2RMLMappingException;
+import eu.optique.api.mapping.impl.SubjectMapImpl;
 
 
 public class R2RMLParser {
 
-	private ValueFactory fact;
-	private OBDADataFactory fac;
+	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	List<Predicate> classPredicates; 
 	List<Resource> joinPredObjNodes; 
@@ -62,8 +78,6 @@ public class R2RMLParser {
 		mapManager = R2RMLMappingManagerFactory.getSesameMappingManager();
 		classPredicates = new ArrayList<Predicate>();
 		joinPredObjNodes = new ArrayList<Resource>();
-		fact = new ValueFactoryImpl();
-		fac = OBDADataFactoryImpl.getInstance();
 	}
 
 	/**
@@ -290,7 +304,7 @@ public class R2RMLParser {
 				pred = fac.getUriTemplatePredicate(1);
 			} else {
 
-				pred = OBDAVocabulary.RDFS_LITERAL;
+				pred = dtfac.getDataTypePredicateLiteral(); // .RDFS_LITERAL;
 			}
 
 			// if the literal has a language property or a datatype property we
@@ -353,8 +367,8 @@ public class R2RMLParser {
 		//we check if it is a literal with language tag
 		
 		if (lan != null) {
-            Term lang = fac.getConstantLiteral(lan.toLowerCase());
-			Predicate literal = OBDAVocabulary.RDFS_LITERAL_LANG;
+			Term lang = fac.getConstantLiteral(lan.toLowerCase());
+			Predicate literal = dtfac.getDataTypePredicateLiteralLang();
 			Term langAtom = fac.getFunction(literal, objectAtom, lang);
 			objectAtom = langAtom;
 		}
@@ -378,7 +392,7 @@ public class R2RMLParser {
 		else
 		{	//literal
 			Constant constt = fac.getConstantLiteral(objectString);
-			Predicate pred = fac.getDataTypePredicateLiteral();
+			Predicate pred = dtfac.getDataTypePredicateLiteral();
 			return fac.getFunction(pred, constt);
 
 		}
@@ -520,7 +534,7 @@ public class R2RMLParser {
 			// simple LITERAL 
 		case 3:
 			uriTemplate = terms.remove(0);
-			pred = OBDAVocabulary.RDFS_LITERAL; 
+			pred = dtfac.getDataTypePredicateLiteral(); // OBDAVocabulary.RDFS_LITERAL; 
 			break;
 		}
 

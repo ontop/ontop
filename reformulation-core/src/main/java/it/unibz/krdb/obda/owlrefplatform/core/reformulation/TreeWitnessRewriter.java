@@ -92,7 +92,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 */
 	
 	private static Function getHeadAtom(String base, String suffix, List<Term> arguments) {
-		Predicate predicate = fac.getPredicate(base + suffix, arguments.size(), null);
+		Predicate predicate = fac.getPredicate(base + suffix, arguments.size());
 		return fac.getFunction(predicate, arguments);
 	}
 	

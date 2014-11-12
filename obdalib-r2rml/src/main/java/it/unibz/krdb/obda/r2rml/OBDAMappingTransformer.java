@@ -386,7 +386,7 @@ public class OBDAMappingTransformer {
 							
 							
 							//check if it is not a plain literal
-							if(!objectPred.equals(OBDAVocabulary.RDFS_LITERAL)){
+							if(!objectPred.getName().equals(OBDAVocabulary.RDFS_LITERAL_URI)){
 								
 								//set the datatype for the typed literal								
 								obm.setDatatype(vf.createURI(objectPred.getName()));

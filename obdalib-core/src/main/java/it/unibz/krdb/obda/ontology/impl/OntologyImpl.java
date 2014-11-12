@@ -28,6 +28,7 @@ import it.unibz.krdb.obda.ontology.NaryAxiom;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
@@ -35,7 +36,6 @@ import it.unibz.krdb.obda.ontology.BinaryAxiom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -44,6 +44,8 @@ public class OntologyImpl implements Ontology {
 	private static final long serialVersionUID = 758424053258299151L;
 	
 	private final OntologyVocabularyImpl vocabulary = new OntologyVocabularyImpl();
+	
+	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
 	// axioms and assertions
 
@@ -91,7 +93,7 @@ public class OntologyImpl implements Ontology {
 	public void addSubClassOfAxiomWithReferencedEntities(ClassExpression concept1, ClassExpression concept2) {	
 		vocabulary.addReferencedEntries(concept1);
 		vocabulary.addReferencedEntries(concept2);
-		if (!concept1.equals(OntologyVocabularyImpl.owlNothing) && !concept2.equals(OntologyVocabularyImpl.owlThing)) {
+		if (!concept1.isNothing() && !concept2.isThing()) {
 			BinaryAxiom<ClassExpression> assertion = new BinaryAxiomImpl<ClassExpression>(concept1, concept2);
 			subClassAxioms.add(assertion);
 		}
@@ -109,7 +111,7 @@ public class OntologyImpl implements Ontology {
 	public void addSubPropertyOfAxiomWithReferencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including) {
 		vocabulary.addReferencedEntries(included);
 		vocabulary.addReferencedEntries(including);
-		if (!included.equals(OntologyVocabularyImpl.owlBottomObjectProperty) && !including.equals(OntologyVocabularyImpl.owlTopObjectProperty)) {
+		if (!included.isBottom() && !including.isTop()) {
 			BinaryAxiom<ObjectPropertyExpression> assertion = new BinaryAxiomImpl<ObjectPropertyExpression>(included, including);
 			subObjectPropertyAxioms.add(assertion);
 		}
@@ -119,7 +121,7 @@ public class OntologyImpl implements Ontology {
 	public void addSubPropertyOfAxiomWithReferencedEntities(DataPropertyExpression included, DataPropertyExpression including) {
 		vocabulary.addReferencedEntries(included);
 		vocabulary.addReferencedEntries(including);
-		if (!included.equals(OntologyVocabularyImpl.owlBottomDataProperty) && !including.equals(OntologyVocabularyImpl.owlTopDataProperty)) {
+		if (!included.isBottom() && !including.isTop()) {
 			BinaryAxiom<DataPropertyExpression> assertion = new BinaryAxiomImpl<DataPropertyExpression>(included, including);
 			subDataPropertyAxioms.add(assertion);
 		}
@@ -129,7 +131,7 @@ public class OntologyImpl implements Ontology {
 	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2) {
 		vocabulary.checkSignature(concept1);
 		vocabulary.checkSignature(concept2);
-		if (!concept1.equals(OntologyVocabularyImpl.owlNothing) && !concept2.equals(OntologyVocabularyImpl.owlThing)) {
+		if (!concept1.isNothing() && !concept2.isThing()) {
 			BinaryAxiom<ClassExpression> ax = new BinaryAxiomImpl<ClassExpression>(concept1, concept2);
 			subClassAxioms.add(ax);
 		}
@@ -147,7 +149,7 @@ public class OntologyImpl implements Ontology {
 	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including) {
 		vocabulary.checkSignature(included);
 		vocabulary.checkSignature(including);
-		if (!included.equals(OntologyVocabularyImpl.owlBottomObjectProperty) && !including.equals(OntologyVocabularyImpl.owlTopObjectProperty)) {
+		if (!included.isBottom() && !including.isTop()) {
 			BinaryAxiom<ObjectPropertyExpression> ax = new BinaryAxiomImpl<ObjectPropertyExpression>(included, including);
 			subObjectPropertyAxioms.add(ax);
 		}
@@ -157,7 +159,7 @@ public class OntologyImpl implements Ontology {
 	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including) {
 		vocabulary.checkSignature(included);
 		vocabulary.checkSignature(including);
-		if (!included.equals(OntologyVocabularyImpl.owlBottomDataProperty) && !including.equals(OntologyVocabularyImpl.owlTopDataProperty)) {
+		if (!included.isBottom() && !including.isTop()) {
 			BinaryAxiom<DataPropertyExpression> ax = new BinaryAxiomImpl<DataPropertyExpression>(included, including);
 			subDataPropertyAxioms.add(ax);
 		}

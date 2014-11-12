@@ -118,4 +118,12 @@ public class OWL2QLComplianceTest {
 		assertEquals(1, onto.getDisjointObjectPropertiesAxioms().size());
 	}
 
+	@Test
+	public void testTopBottomInverse() throws Exception {
+		System.out.println(onto.getSubObjectPropertyAxioms()); 
+		assertEquals(0, onto.getSubObjectPropertyAxioms().size()); 
+		System.out.println(onto.getSubClassAxioms()); 
+		assertEquals(0, onto.getSubClassAxioms().size()); 
+	}
+
 }

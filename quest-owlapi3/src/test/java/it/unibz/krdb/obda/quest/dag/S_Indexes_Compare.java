@@ -30,10 +30,6 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGConstructor;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGNode;
-import it.unibz.krdb.obda.owlrefplatform.core.dag.DAGOperations;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
@@ -42,6 +38,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.File;
 import java.util.ArrayList;
+
 import junit.framework.TestCase;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;

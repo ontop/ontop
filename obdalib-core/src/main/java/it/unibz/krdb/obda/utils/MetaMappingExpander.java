@@ -438,10 +438,10 @@ public class MetaMappingExpander {
 		Function result = null;
 		Predicate p; 
 		if(arity == 1){
-			p = dfac.getPredicate(predName, arity, new COL_TYPE[]{COL_TYPE.OBJECT});
+			p = dfac.getClassPredicate(predName);
 			result = dfac.getFunction(p, atom.getTerm(0));
 		} else if (arity == 2){
-			p = dfac.getPredicate(predName, arity, new COL_TYPE[]{COL_TYPE.OBJECT, COL_TYPE.OBJECT});
+			p = dfac.getObjectPropertyPredicate(predName);
 			result = dfac.getFunction(p, atom.getTerm(0), atom.getTerm(2));
 		}
 		return result;
