@@ -44,23 +44,13 @@ public interface SQLQueryGenerator extends Serializable {
 	 * @param query
 	 *            the datalog program
 	 * @return the souce query
-	 * @throws Exception
+	 * @throws OBDAException
 	 */
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException;
-	/**
-	 * Updates the current view manager with the new given parameters
-	 * 
-	 * @param man
-	 *            the new prefix manager
-	 * @param onto
-	 *            the new dlliter ontology
-	 * @param uris
-	 *            the set of URIs of the ontologies integrated into the dlliter
-	 *            ontology
-	 */
+
 
     public SQLQueryGenerator cloneGenerator();
     
-    //TODO: added in version1. Check its relevance.
+    //in version2, it is replaced by another constructor
     //void setUriMap(SemanticIndexURIMap uriRefIds);
 }

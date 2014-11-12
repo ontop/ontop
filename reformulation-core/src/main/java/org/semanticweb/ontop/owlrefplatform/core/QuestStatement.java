@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import com.google.common.collect.ArrayListMultimap;
+import org.h2.tools.Server;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
@@ -246,6 +247,9 @@ public class QuestStatement implements OBDAStatement {
 						executingSQL = true;
 						ResultSet set = null;
 						// try {
+
+						// FOR debugging H2 in-memory database
+						// org.h2.tools.Server.startWebServer(conn.conn);
 
 						set = sqlstatement.executeQuery(sql);
 					

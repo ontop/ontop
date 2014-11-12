@@ -106,7 +106,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private QueryRewriter rewriter;
 
 	/* The active SQL generator */
-	private SQLQueryGenerator dataSourceQueryGenerator;
+	private SQLQueryGenerator datasourceQueryGenerator;
 
 	/* The active query evaluation engine */
 	//private EvaluationEngine evaluationEngine;
@@ -298,7 +298,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
      * Clones the SQL generator.
      */
     public SQLQueryGenerator cloneDataSourceQueryGenerator() {
-        return dataSourceQueryGenerator.cloneGenerator();
+        return datasourceQueryGenerator.cloneGenerator();
     }
 	
 	protected Map<String, String> getSQLCache() {
@@ -715,21 +715,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(parameter);
 			JDBCUtility jdbcutil = new JDBCUtility(parameter);
 
-			if (isSemanticIdx) {
-                /*
-                 * We do not clone metadata here but because it will be updated during
-                 * the repository setup.
-                 *
-                 * However, please note that SQL Generator will never be used directly
-                 * but cloned for each QuestStatement.
-                 * When cloned, metadata is also cloned, so it should be "safe".
-                 */
-                dataSourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,	sqladapter, sqlGenerateReplace,
-                        true, dataRepository.getUriMap());
+			if (isSemIdx()) {
+				datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,
+						sqladapter, sqlGenerateReplace, dataRepository.getUriMap());
+			} else {
+				datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,
+						sqladapter, sqlGenerateReplace);
 			}
-            else {
-                dataSourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,	sqladapter, sqlGenerateReplace);
-            }
+
 
 			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
 

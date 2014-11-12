@@ -185,9 +185,9 @@ public class SQLGenerator implements SQLQueryGenerator {
     }
 
     public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace,
-                        boolean isSI,  SemanticIndexURIMap uriRefIds) {
+                        /*boolean isSI, */ SemanticIndexURIMap uriRefIds) {
         this(metadata, jdbcutil, sqladapter, sqlGenerateReplace);
-        this.isSI = isSI;
+        this.isSI = (uriRefIds != null);
         this.uriRefIds = uriRefIds;
     }
 
@@ -199,7 +199,7 @@ public class SQLGenerator implements SQLQueryGenerator {
      */
     public SQLQueryGenerator cloneGenerator() {
         return new SQLGenerator(metadata.clone(), jdbcutil, sqladapter, generatingREPLACE,
-                isSI, uriRefIds);
+                uriRefIds);
     }
 
     private ImmutableTable<Predicate, Predicate, Predicate> buildPredicateUnifyTable() {
