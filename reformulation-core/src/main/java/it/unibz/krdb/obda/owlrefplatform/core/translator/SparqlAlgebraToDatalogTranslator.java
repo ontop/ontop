@@ -1166,6 +1166,9 @@ public class SparqlAlgebraToDatalogTranslator {
 				case FLOAT:
 					constantString = lit.floatValue() + "";
 					break;
+				case DOUBLE:
+					constantString = lit.doubleValue() + "";
+					break;
 				case INT:
 				case UNSIGNED_INT:
 					constantString = lit.intValue() + "";
@@ -1184,7 +1187,7 @@ public class SparqlAlgebraToDatalogTranslator {
 					constantString = lit.stringValue() + "";
 					break;
 				default:
-					throw new RuntimeException("Undefiend datatype");
+					throw new RuntimeException("Undefiend datatype: " + tp);
 			}
 			ValueConstant constant = ofac.getConstantLiteral(constantString, tp);
 			constantFunction = ofac.getFunction(dtfac.getTypePredicate(tp), constant);	
