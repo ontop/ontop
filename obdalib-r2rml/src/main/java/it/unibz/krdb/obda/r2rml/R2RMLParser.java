@@ -24,44 +24,22 @@ package it.unibz.krdb.obda.r2rml;
  * @author timea bagosi
  * The R2RML parser class that breaks down the responsibility of parsing by case
  */
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
+
+import eu.optique.api.mapping.*;
+import eu.optique.api.mapping.TermMap.TermMapType;
+import eu.optique.api.mapping.impl.InvalidR2RMLMappingException;
+import eu.optique.api.mapping.impl.SubjectMapImpl;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.DataTypePredicateImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.r2rml.R2RMLVocabulary;
-
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.openrdf.model.BNode;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
-import eu.optique.api.mapping.ObjectMap;
-import eu.optique.api.mapping.PredicateMap;
-import eu.optique.api.mapping.PredicateObjectMap;
-import eu.optique.api.mapping.R2RMLMappingManager;
-import eu.optique.api.mapping.R2RMLMappingManagerFactory;
-import eu.optique.api.mapping.SubjectMap;
-import eu.optique.api.mapping.Template;
-import eu.optique.api.mapping.TermMap.TermMapType;
-import eu.optique.api.mapping.TriplesMap;
-import eu.optique.api.mapping.impl.InvalidR2RMLMappingException;
-import eu.optique.api.mapping.impl.SubjectMapImpl;
+import java.util.*;
 
 
 public class R2RMLParser {
@@ -375,7 +353,7 @@ public class R2RMLParser {
 		//we check if it is a literal with language tag
 		
 		if (lan != null) {
-			Term lang = fac.getConstantLiteral(lan.toLowerCase());
+            Term lang = fac.getConstantLiteral(lan.toLowerCase());
 			Predicate literal = OBDAVocabulary.RDFS_LITERAL_LANG;
 			Term langAtom = fac.getFunction(literal, objectAtom, lang);
 			objectAtom = langAtom;

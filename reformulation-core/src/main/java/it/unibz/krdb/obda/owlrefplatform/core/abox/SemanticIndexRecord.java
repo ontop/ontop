@@ -22,8 +22,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 
 /***
  * A record to keep track of which tables in the semantic index tables have rows
@@ -139,16 +140,24 @@ public class SemanticIndexRecord {
 			}
 
 		} else {
-			PropertyAssertion ba = (PropertyAssertion) assertion;
-			COL_TYPE atype1 = ba.getSubject().getType();
-
+			COL_TYPE atype1, atype2;
+			if (assertion instanceof ObjectPropertyAssertion) {
+				ObjectPropertyAssertion ba = (ObjectPropertyAssertion) assertion;
+				atype1 = ba.getSubject().getType();
+				atype2 = ba.getObject().getType();		
+			}
+			else {
+				DataPropertyAssertion ba = (DataPropertyAssertion) assertion;
+				atype1 = ba.getSubject().getType();
+				atype2 = ba.getValue().getType();						
+			}
+				
 			if (atype1 == COL_TYPE.BNODE) {
 				t1 = OBJType.BNode;
 			} else {
 				t1 = OBJType.URI;
 			}
 
-			COL_TYPE atype2 = ba.getValue2().getType();
 			switch (atype2) {
 			case OBJECT:
 				t2 = OBJType.URI;

@@ -9,7 +9,7 @@ package it.unibz.krdb.sql;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
@@ -53,7 +53,7 @@ public class TestSesameImplicitDBConstraints {
 	static String uc_create = "src/test/resources/userconstraints/create.sql";
 
 	private Connection sqlConnection;
-	private OWLAPI3Translator translator = new OWLAPI3Translator();
+	private OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 	private QuestDBStatement qst = null;
 
 	/*

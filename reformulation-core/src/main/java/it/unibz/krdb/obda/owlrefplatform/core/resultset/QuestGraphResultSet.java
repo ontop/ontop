@@ -20,24 +20,25 @@ package it.unibz.krdb.obda.owlrefplatform.core.resultset;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.impl.BNodeConstantImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
 
@@ -141,7 +142,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 		
 		for (int i = 0; i < size / 3; i++) {
 			
-			Constant subjectConstant = getConstant(peList.getElements().get(i*3), result);
+			ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i*3), result);
 			Constant predicateConstant = getConstant(peList.getElements().get(i*3+1), result);
 			Constant objectConstant = getConstant(peList.getElements().get(i*3+2), result);
 
@@ -149,29 +150,28 @@ public class QuestGraphResultSet implements GraphResultSet {
 			String predicateName = predicateConstant.getValue();
 			if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
 				OClass concept = ofac.createClass(objectConstant.getValue());
-				ClassAssertion ca = ofac.createClassAssertion(concept,
-						(ObjectConstant) subjectConstant);
+				ClassAssertion ca = ofac.createClassAssertion(concept, subjectConstant);
 				tripleAssertions.add(ca);
-			} else {
+			} 
+			else {
 				if (objectConstant instanceof URIConstant) {
-					PropertyExpression prop = ofac.createObjectProperty(predicateName);
-					PropertyAssertion op = ofac
-							.createPropertyAssertion(prop,
-									(ObjectConstant) subjectConstant,
+					ObjectPropertyExpression prop = ofac.createObjectProperty(predicateName);
+					ObjectPropertyAssertion op = ofac
+							.createObjectPropertyAssertion(prop, subjectConstant,
 									(ObjectConstant) objectConstant);
 					tripleAssertions.add(op);
-				} else if (objectConstant instanceof BNodeConstantImpl) {
-					PropertyExpression prop = ofac.createObjectProperty(predicateName);
-					PropertyAssertion op = ofac
-							.createPropertyAssertion(prop,
-									(ObjectConstant) subjectConstant,
+				} 
+				else if (objectConstant instanceof BNode) {
+					ObjectPropertyExpression prop = ofac.createObjectProperty(predicateName);
+					ObjectPropertyAssertion op = ofac
+							.createObjectPropertyAssertion(prop, subjectConstant,
 									(ObjectConstant) objectConstant);
 					tripleAssertions.add(op);
-				} else {
-					PropertyExpression prop = ofac.createDataProperty(predicateName);
-					PropertyAssertion dp = ofac
-							.createPropertyAssertion(prop,
-									(ObjectConstant) subjectConstant,
+				} 
+				else {
+					DataPropertyExpression prop = ofac.createDataProperty(predicateName);
+					DataPropertyAssertion dp = ofac
+							.createDataPropertyAssertion(prop, subjectConstant,
 									(ValueConstant) objectConstant);
 					tripleAssertions.add(dp);
 				}

@@ -533,7 +533,7 @@
     <owl:DatatypeProperty rdf:about="&dbpedia;budget">
         <rdfs:label xml:lang="el">προϋπολογισμός ($)</rdfs:label>
         <rdfs:label xml:lang="en">budget ($)</rdfs:label>
-        <rdfs:range rdf:resource="&xsd;double"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 
@@ -543,7 +543,7 @@
     <owl:DatatypeProperty rdf:about="&dbpedia;gross">
         <rdfs:label xml:lang="el">ακαθάριστα ($)</rdfs:label>
         <rdfs:label xml:lang="en">gross ($)</rdfs:label>
-        <rdfs:range rdf:resource="&xsd;double"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
 

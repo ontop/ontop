@@ -23,44 +23,43 @@ package it.unibz.krdb.obda.ontology.impl;
 import java.util.Collections;
 import java.util.Set;
 
-import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.NaryAxiom;
 
-public class DisjointPropertiesAxiomImpl implements DisjointPropertiesAxiom {
+public class NaryAxiomImpl<T> implements NaryAxiom<T> {
 
-	private static final long serialVersionUID = 4456694617300452114L;
+	private static final long serialVersionUID = 4576840836473365808L;
 	
-	private final Set<PropertyExpression> props;
+	private final Set<T> components;
 	
-	DisjointPropertiesAxiomImpl(Set<PropertyExpression> props) {
-		if (props.size() < 2)
-			throw new IllegalArgumentException("At least 2 properties are expeccted in DisjointClassAxiom");
-		
-		this.props = props;
+	NaryAxiomImpl(Set<T> components) {
+		if (components.size() < 2)
+			throw new IllegalArgumentException("At least 2 componets are expeccted in NaryAxiom");
+
+		this.components = components;
 	}
 	
 	@Override
-	public Set<PropertyExpression> getProperties() {
-		return Collections.unmodifiableSet(props);
+	public Set<T> getComponents() {
+		return Collections.unmodifiableSet(components);
 	}
+
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof DisjointPropertiesAxiomImpl) {
-			DisjointPropertiesAxiomImpl other = (DisjointPropertiesAxiomImpl)obj;
-			return props.equals(other.props);
+		if (obj instanceof NaryAxiomImpl<?>) {
+			NaryAxiomImpl<T> other = (NaryAxiomImpl<T>)obj;
+			return components.equals(other.components);
 		}
 		return false;
 	}
 	
 	@Override
 	public int hashCode() {
-		return props.hashCode();
+		return components.hashCode();
 	}
 	
 	@Override
 	public String toString() {
-		return "disjoint(" + props + ")";
+		return "disjoint(" + components + ")";
 	}
-
 }

@@ -23,7 +23,8 @@ package it.unibz.krdb.obda.protege4.gui.component;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.protege4.gui.IconLoader;
 import it.unibz.krdb.obda.protege4.gui.MapItem;
 import it.unibz.krdb.obda.protege4.gui.PredicateItem;
@@ -159,10 +160,10 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
         pnlAddProperty.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 3, 0));
         pnlAddProperty.setLayout(new java.awt.BorderLayout(3, 0));
         Vector<Object> v = new Vector<Object>();
-        for (PropertyExpression dp : obdaModel.getDeclaredDataProperties()) {
+        for (DataPropertyExpression dp : obdaModel.getDeclaredDataProperties()) {
             v.addElement(new PredicateItem(dp.getPredicate(), prefixManager));
         }
-        for (PropertyExpression op : obdaModel.getDeclaredObjectProperties()) {
+        for (ObjectPropertyExpression op : obdaModel.getDeclaredObjectProperties()) {
             v.addElement(new PredicateItem(op.getPredicate(), prefixManager));
         }
         cboPropertyAutoSuggest = new AutoSuggestComboBox(v);

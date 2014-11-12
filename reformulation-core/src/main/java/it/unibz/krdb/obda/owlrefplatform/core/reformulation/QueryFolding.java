@@ -22,8 +22,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.reformulation;
 
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Intersection;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryConnectedComponent.Loop;
@@ -42,9 +42,9 @@ import org.slf4j.LoggerFactory;
 public class QueryFolding {
 	private final QueryConnectedComponentCache cache;
 	
-	private Intersection<PropertyExpression> properties; 
+	private Intersection<ObjectPropertyExpression> properties; 
 	private Set<Loop> roots; 
-	private Intersection<BasicClassDescription> internalRootConcepts;
+	private Intersection<ClassExpression> internalRootConcepts;
 	private Set<Term> internalRoots;
 	private Set<Term> internalDomain;
 	private List<TreeWitness> interior;
@@ -73,9 +73,9 @@ public class QueryFolding {
 	public QueryFolding(QueryFolding qf) {
 		this.cache = qf.cache;
 
-		properties = new Intersection<PropertyExpression>(qf.properties); 
+		properties = new Intersection<ObjectPropertyExpression>(qf.properties); 
 		roots = new HashSet<Loop>(qf.roots); 
-		internalRootConcepts = new Intersection<BasicClassDescription>(qf.internalRootConcepts); 
+		internalRootConcepts = new Intersection<ClassExpression>(qf.internalRootConcepts); 
 		internalRoots = new HashSet<Term>(qf.internalRoots);
 		internalDomain = new HashSet<Term>(qf.internalDomain);
 		interior = new LinkedList<TreeWitness>(qf.interior);
@@ -124,7 +124,7 @@ public class QueryFolding {
 	public void newQueryFolding(TreeWitness tw) {
 		properties.setToTop(); 
 		roots.clear(); 
-		internalRootConcepts = new Intersection<BasicClassDescription>(tw.getRootConcepts()); 
+		internalRootConcepts = new Intersection<ClassExpression>(tw.getRootConcepts()); 
 		internalRoots = new HashSet<Term>(tw.getRoots());
 		internalDomain = new HashSet<Term>(tw.getDomain());
 		interior = new LinkedList<TreeWitness>();
@@ -134,7 +134,7 @@ public class QueryFolding {
 	}
 
 	
-	public Intersection<PropertyExpression> getProperties() {
+	public Intersection<ObjectPropertyExpression> getProperties() {
 		return properties;
 	}
 	
@@ -154,7 +154,7 @@ public class QueryFolding {
 		return internalRoots.contains(t0.getTerm()) && !internalDomain.contains(t1.getTerm()); // && !roots.contains(t1);
 	}
 	
-	public Intersection<BasicClassDescription> getInternalRootConcepts() {
+	public Intersection<ClassExpression> getInternalRootConcepts() {
 		return internalRootConcepts;
 	}
 	
@@ -180,7 +180,7 @@ public class QueryFolding {
 		log.debug("  PROPERTIES {}", properties);
 		log.debug("  ENDTYPE {}", internalRootConcepts);
 
-		Intersection<BasicClassDescription> rootType = cache.getTopClass();
+		Intersection<ClassExpression> rootType = cache.getTopClass();
 
 		Set<Function> rootAtoms = new HashSet<Function>();
 		for (Loop root : roots) {

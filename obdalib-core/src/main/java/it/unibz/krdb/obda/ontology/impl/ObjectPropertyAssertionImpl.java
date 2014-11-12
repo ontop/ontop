@@ -1,5 +1,9 @@
 package it.unibz.krdb.obda.ontology.impl;
 
+import it.unibz.krdb.obda.model.ObjectConstant;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+
 /*
  * #%L
  * ontop-obdalib-core
@@ -19,21 +23,15 @@ package it.unibz.krdb.obda.ontology.impl;
  * limitations under the License.
  * #L%
  */
-
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.ontology.PropertyAssertion;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-
-public class PropertyAssertionImpl implements PropertyAssertion {
+public class ObjectPropertyAssertionImpl implements ObjectPropertyAssertion {
 
 	private static final long serialVersionUID = -8834975903851540150L;
 	
-	private final PropertyExpression prop;
-	private final Constant o2;
+	private final ObjectPropertyExpression prop;
+	private final ObjectConstant o2;
 	private final ObjectConstant o1;
 
-	PropertyAssertionImpl(PropertyExpression prop, ObjectConstant o1, Constant o2) {
+	ObjectPropertyAssertionImpl(ObjectPropertyExpression prop, ObjectConstant o1, ObjectConstant o2) {
 		this.prop = prop;
 		this.o1 = o1;
 		this.o2 = o2;
@@ -45,19 +43,19 @@ public class PropertyAssertionImpl implements PropertyAssertion {
 	}
 
 	@Override
-	public Constant getValue2() {
+	public ObjectConstant getObject() {
 		return o2;
 	}
 
 	@Override
-	public PropertyExpression getProperty() {
+	public ObjectPropertyExpression getProperty() {
 		return prop;
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof PropertyAssertionImpl) {
-			PropertyAssertionImpl other = (PropertyAssertionImpl)obj;
+		if (obj instanceof ObjectPropertyAssertionImpl) {
+			ObjectPropertyAssertionImpl other = (ObjectPropertyAssertionImpl)obj;
 			return prop.equals(other.prop) && o1.equals(other.o1)  && o2.equals(other.o2);
 		}
 		return false;

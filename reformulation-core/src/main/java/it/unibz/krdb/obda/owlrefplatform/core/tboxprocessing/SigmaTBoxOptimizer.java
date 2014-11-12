@@ -20,19 +20,14 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
-import it.unibz.krdb.obda.ontology.Datatype;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.ClassExpression;
-import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
-import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -133,14 +128,15 @@ public class SigmaTBoxOptimizer {
 	
 	
 	
-	private boolean check_redundant_role(PropertyExpression parent, PropertyExpression child) {
+	private boolean check_redundant_role(ObjectPropertyExpression parent, ObjectPropertyExpression child) {
 
 		if (check_directly_redundant_role(parent, child))
 			return true;
 		else {
 //			log.debug("Not directly redundant role {} {}", parent, child);
-			for (Equivalences<PropertyExpression> children_prime : isa.getProperties().getDirectSub(isa.getProperties().getVertex(parent))) {
-				PropertyExpression child_prime = children_prime.getRepresentative();
+			for (Equivalences<ObjectPropertyExpression> children_prime : 
+							isa.getObjectProperties().getDirectSub(isa.getObjectProperties().getVertex(parent))) {
+				ObjectPropertyExpression child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
 						check_directly_redundant_role(child_prime, child) && 
@@ -154,21 +150,53 @@ public class SigmaTBoxOptimizer {
 		return false;
 	}
 
-	private boolean check_directly_redundant_role(PropertyExpression parent, PropertyExpression child) {
+	private boolean check_redundant_role(DataPropertyExpression parent, DataPropertyExpression child) {
 
-		SomeValuesFrom existParentDesc = fac.createPropertySomeRestriction(parent);
-		SomeValuesFrom existChildDesc = fac.createPropertySomeRestriction(child);
+		if (check_directly_redundant_role(parent, child))
+			return true;
+		else {
+//			log.debug("Not directly redundant role {} {}", parent, child);
+			for (Equivalences<DataPropertyExpression> children_prime : 
+							isa.getDataProperties().getDirectSub(isa.getDataProperties().getVertex(parent))) {
+				DataPropertyExpression child_prime = children_prime.getRepresentative();
+
+				if (!child_prime.equals(child) && 
+						check_directly_redundant_role(child_prime, child) && 
+						!check_redundant(child_prime, parent)) {
+					return true;
+				}
+			}
+		}
+//		log.debug("Not redundant role {} {}", parent, child);
+
+		return false;
+	}
+	
+	private boolean check_directly_redundant_role(ObjectPropertyExpression parent, ObjectPropertyExpression child) {
+
+		ObjectSomeValuesFrom existParentDesc = parent.getDomain();
+		ObjectSomeValuesFrom existChildDesc = child.getDomain();
 
 		return check_directly_redundant(parent, child) && 
 				check_directly_redundant(existParentDesc, existChildDesc);
 	}
 
-	private boolean check_redundant(PropertyExpression parent, PropertyExpression child) {
+	private boolean check_directly_redundant_role(DataPropertyExpression parent, DataPropertyExpression child) {
+
+		DataSomeValuesFrom existParentDesc = parent.getDomain();
+		DataSomeValuesFrom existChildDesc = child.getDomain();
+
+		return check_directly_redundant(parent, child) && 
+				check_directly_redundant(existParentDesc, existChildDesc);
+	}
+	
+	private boolean check_redundant(ObjectPropertyExpression parent, ObjectPropertyExpression child) {
 		if (check_directly_redundant(parent, child))
 			return true;
 		else {
-			for (Equivalences<PropertyExpression> children_prime : isa.getProperties().getDirectSub(isa.getProperties().getVertex(parent))) {
-				PropertyExpression child_prime = children_prime.getRepresentative();
+			for (Equivalences<ObjectPropertyExpression> children_prime : 
+						isa.getObjectProperties().getDirectSub(isa.getObjectProperties().getVertex(parent))) {
+				ObjectPropertyExpression child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
 						check_directly_redundant(child_prime, child) && 
@@ -180,12 +208,13 @@ public class SigmaTBoxOptimizer {
 		return false;
 	}
 
-	private boolean check_redundant(BasicClassDescription parent, BasicClassDescription child) {
+	private boolean check_redundant(DataPropertyExpression parent, DataPropertyExpression child) {
 		if (check_directly_redundant(parent, child))
 			return true;
 		else {
-			for (Equivalences<BasicClassDescription> children_prime : isa.getClasses().getDirectSub(isa.getClasses().getVertex(parent))) {
-				BasicClassDescription child_prime = children_prime.getRepresentative();
+			for (Equivalences<DataPropertyExpression> children_prime : 
+							isa.getDataProperties().getDirectSub(isa.getDataProperties().getVertex(parent))) {
+				DataPropertyExpression child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
 						check_directly_redundant(child_prime, child) && 
@@ -197,57 +226,148 @@ public class SigmaTBoxOptimizer {
 		return false;
 	}
 	
-	private boolean check_directly_redundant(PropertyExpression parent, PropertyExpression child) {
+	
+	private boolean check_redundant(ClassExpression parent, ClassExpression child) {
+		if (check_directly_redundant(parent, child))
+			return true;
+		else {
+			for (Equivalences<ClassExpression> children_prime : isa.getClasses().getDirectSub(isa.getClasses().getVertex(parent))) {
+				ClassExpression child_prime = children_prime.getRepresentative();
+
+				if (!child_prime.equals(child) && 
+						check_directly_redundant(child_prime, child) && 
+						!check_redundant(child_prime, parent)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private boolean check_redundant(DataRangeExpression parent, DataRangeExpression child) {
+		if (check_directly_redundant(parent, child))
+			return true;
+		else {
+			for (Equivalences<DataRangeExpression> children_prime : isa.getDataRanges().getDirectSub(isa.getDataRanges().getVertex(parent))) {
+				DataRangeExpression child_prime = children_prime.getRepresentative();
+
+				if (!child_prime.equals(child) && 
+						check_directly_redundant(child_prime, child) && 
+						!check_redundant(child_prime, parent)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private boolean check_directly_redundant(ObjectPropertyExpression parent, ObjectPropertyExpression child) {
 		
-		Equivalences<PropertyExpression> sp = sigmaChain.getProperties().getVertex(parent);
-		Equivalences<PropertyExpression> sc = sigmaChain.getProperties().getVertex(child);
+		Equivalences<ObjectPropertyExpression> sp = sigmaChain.getObjectProperties().getVertex(parent);
+		Equivalences<ObjectPropertyExpression> sc = sigmaChain.getObjectProperties().getVertex(child);
 		
 		// if one of them is not in the respective DAG
 		if (sp == null || sc == null) 
 			return false;
 
-		Set<Equivalences<PropertyExpression>> spChildren =  sigmaChain.getProperties().getDirectSub(sp);
+		Set<Equivalences<ObjectPropertyExpression>> spChildren =  sigmaChain.getObjectProperties().getDirectSub(sp);
 		
 		if (!spChildren.contains(sc))
 			return false;
 		
 		
 		
-		Equivalences<PropertyExpression> tc = isaChain.getProperties().getVertex(child);
+		Equivalences<ObjectPropertyExpression> tc = isaChain.getObjectProperties().getVertex(child);
 		// if one of them is not in the respective DAG
 		if (tc == null) 
 			return false;
 		
-		Set<Equivalences<PropertyExpression>> scChildren = sigmaChain.getProperties().getSub(sc);
-		Set<Equivalences<PropertyExpression>> tcChildren = isaChain.getProperties().getSub(tc);
+		Set<Equivalences<ObjectPropertyExpression>> scChildren = sigmaChain.getObjectProperties().getSub(sc);
+		Set<Equivalences<ObjectPropertyExpression>> tcChildren = isaChain.getObjectProperties().getSub(tc);
+
+		return scChildren.containsAll(tcChildren);
+	}
+
+	
+	private boolean check_directly_redundant(DataPropertyExpression parent, DataPropertyExpression child) {
+		
+		Equivalences<DataPropertyExpression> sp = sigmaChain.getDataProperties().getVertex(parent);
+		Equivalences<DataPropertyExpression> sc = sigmaChain.getDataProperties().getVertex(child);
+		
+		// if one of them is not in the respective DAG
+		if (sp == null || sc == null) 
+			return false;
+
+		Set<Equivalences<DataPropertyExpression>> spChildren =  sigmaChain.getDataProperties().getDirectSub(sp);
+		
+		if (!spChildren.contains(sc))
+			return false;
+		
+		
+		
+		Equivalences<DataPropertyExpression> tc = isaChain.getDataProperties().getVertex(child);
+		// if one of them is not in the respective DAG
+		if (tc == null) 
+			return false;
+		
+		Set<Equivalences<DataPropertyExpression>> scChildren = sigmaChain.getDataProperties().getSub(sc);
+		Set<Equivalences<DataPropertyExpression>> tcChildren = isaChain.getDataProperties().getSub(tc);
 
 		return scChildren.containsAll(tcChildren);
 	}
 	
-	private boolean check_directly_redundant(BasicClassDescription parent, BasicClassDescription child) {
+	private boolean check_directly_redundant(ClassExpression parent, ClassExpression child) {
 		
-		Equivalences<BasicClassDescription> sp = sigmaChain.getClasses().getVertex(parent);
-		Equivalences<BasicClassDescription> sc = sigmaChain.getClasses().getVertex(child);
+		Equivalences<ClassExpression> sp = sigmaChain.getClasses().getVertex(parent);
+		Equivalences<ClassExpression> sc = sigmaChain.getClasses().getVertex(child);
 		
 		// if one of them is not in the respective DAG
 		if (sp == null || sc == null) 
 			return false;
 
-		Set<Equivalences<BasicClassDescription>> spChildren =  sigmaChain.getClasses().getDirectSub(sp);
+		Set<Equivalences<ClassExpression>> spChildren =  sigmaChain.getClasses().getDirectSub(sp);
 		
 		if (!spChildren.contains(sc))
 			return false;
 		
 		
 		
-		Equivalences<BasicClassDescription> tc = isaChain.getClasses().getVertex(child);
+		Equivalences<ClassExpression> tc = isaChain.getClasses().getVertex(child);
 		// if one of them is not in the respective DAG
 		if (tc == null) 
 			return false;
 		
-		Set<Equivalences<BasicClassDescription>> scChildren = sigmaChain.getClasses().getSub(sc);
-		Set<Equivalences<BasicClassDescription>> tcChildren = isaChain.getClasses().getSub(tc);
+		Set<Equivalences<ClassExpression>> scChildren = sigmaChain.getClasses().getSub(sc);
+		Set<Equivalences<ClassExpression>> tcChildren = isaChain.getClasses().getSub(tc);
 
 		return scChildren.containsAll(tcChildren);
 	}
+	
+	private boolean check_directly_redundant(DataRangeExpression parent, DataRangeExpression child) {
+		
+		Equivalences<DataRangeExpression> sp = sigmaChain.getDataRanges().getVertex(parent);
+		Equivalences<DataRangeExpression> sc = sigmaChain.getDataRanges().getVertex(child);
+		
+		// if one of them is not in the respective DAG
+		if (sp == null || sc == null) 
+			return false;
+
+		Set<Equivalences<DataRangeExpression>> spChildren =  sigmaChain.getDataRanges().getDirectSub(sp);
+		
+		if (!spChildren.contains(sc))
+			return false;
+		
+		
+		
+		Equivalences<DataRangeExpression> tc = isaChain.getDataRanges().getVertex(child);
+		// if one of them is not in the respective DAG
+		if (tc == null) 
+			return false;
+		
+		Set<Equivalences<DataRangeExpression>> scChildren = sigmaChain.getDataRanges().getSub(sc);
+		Set<Equivalences<DataRangeExpression>> tcChildren = isaChain.getDataRanges().getSub(tc);
+
+		return scChildren.containsAll(tcChildren);
+	}
+	
 }

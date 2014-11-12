@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.ontology;
  */
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
 public interface Ontology extends Cloneable, Serializable {
@@ -36,20 +37,29 @@ public interface Ontology extends Cloneable, Serializable {
 	
 	
 	
-	public void add(SubClassOfAxiom assertion);
+	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2);
 
-	public void add(SubPropertyOfAxiom assertion);
+	public void addSubClassOfAxiom(DataRangeExpression concept1, DataRangeExpression concept2);
+	
+	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including);
 
-	public void add(DisjointClassesAxiom assertion);
+	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including);
 
-	public void add(DisjointPropertiesAxiom assertion);
+	public void addDisjointClassesAxiom(Set<ClassExpression> classes);
 
-	public void add(FunctionalPropertyAxiom assertion);
+	public void addDisjointObjectPropertiesAxiom(Set<ObjectPropertyExpression> properties);
+	
+	public void addDisjointDataPropertiesAxiom(Set<DataPropertyExpression> properties);
 
-	public void add(ClassAssertion assertion);
+	public void addFunctionalObjectPropertyAxiom(ObjectPropertyExpression prop);
 
-	public void add(PropertyAssertion assertion);
+	public void addFunctionalDataPropertyAxiom(DataPropertyExpression prop);
+	
+	public void addClassAssertion(ClassAssertion assertion);
 
+	public void addObjectPropertyAssertion(ObjectPropertyAssertion assertion);
+
+	public void addDataPropertyAssertion(DataPropertyAssertion assertion);
 
 	
 	
@@ -59,17 +69,28 @@ public interface Ontology extends Cloneable, Serializable {
 	public OntologyVocabulary getVocabulary();
 	
 	
-	public Set<SubClassOfAxiom> getSubClassAxioms();
+	public List<BinaryAxiom<ClassExpression>> getSubClassAxioms();
 
-	public Set<SubPropertyOfAxiom> getSubPropertyAxioms();
+	public List<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms();
 	
-	public Set<DisjointClassesAxiom> getDisjointClassesAxioms();
-	
-	public Set<DisjointPropertiesAxiom> getDisjointPropertiesAxioms();
-	
-	public Set<FunctionalPropertyAxiom> getFunctionalPropertyAxioms();
-	
-	public Set<ClassAssertion> getClassAssertions();
+	public List<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms();
 
-	public Set<PropertyAssertion> getPropertyAssertions();
+	public List<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms();
+	
+	public List<NaryAxiom<ClassExpression>> getDisjointClassesAxioms();
+	
+	public List<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms();
+
+	public List<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms();
+
+	public Set<ObjectPropertyExpression> getFunctionalObjectProperties();
+
+	public Set<DataPropertyExpression> getFunctionalDataProperties();
+	
+	public List<ClassAssertion> getClassAssertions();
+
+	public List<ObjectPropertyAssertion> getObjectPropertyAssertions();
+	
+	public List<DataPropertyAssertion> getDataPropertyAssertions();
+
 }

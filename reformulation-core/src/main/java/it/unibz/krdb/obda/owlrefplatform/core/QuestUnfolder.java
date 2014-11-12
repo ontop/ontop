@@ -24,14 +24,13 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.PropertyAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactRuleConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
@@ -198,15 +197,38 @@ public class QuestUnfolder {
 	/***
 	 * Adding ontology assertions (ABox) as rules (facts, head with no body).
 	 */
-	public <T extends Assertion>  void addABoxAssertionsAsFacts(Iterable<T> assertions) {
+	public void addClassAssertionsAsFacts(Iterable<ClassAssertion> assertions) {
 		
 		int count = 0;
-		for (T a : assertions) {
-			CQIE fact;
-			if (a instanceof ClassAssertion)
-				fact = ABoxToFactRuleConverter.getRule((ClassAssertion)a);
-			else
-				fact = ABoxToFactRuleConverter.getRule((PropertyAssertion)a);
+		for (ClassAssertion a : assertions) {
+			CQIE fact = ABoxToFactRuleConverter.getRule(a);
+				
+			if (fact != null) {
+				unfoldingProgram.add(fact);
+				count++;
+			}
+		}
+		log.debug("Appended {} ABox assertions as fact rules", count);		
+	}		
+	public void addObjectPropertyAssertionsAsFacts(Iterable<ObjectPropertyAssertion> assertions) {
+		
+		int count = 0;
+		for (ObjectPropertyAssertion a : assertions) {
+			CQIE fact = ABoxToFactRuleConverter.getRule(a);
+				
+			if (fact != null) {
+				unfoldingProgram.add(fact);
+				count++;
+			}
+		}
+		log.debug("Appended {} ABox assertions as fact rules", count);		
+	}		
+	public void addDataPropertyAssertionsAsFacts(Iterable<DataPropertyAssertion> assertions) {
+		
+		int count = 0;
+		for (DataPropertyAssertion a : assertions) {
+			CQIE fact = ABoxToFactRuleConverter.getRule(a);
+				
 			if (fact != null) {
 				unfoldingProgram.add(fact);
 				count++;

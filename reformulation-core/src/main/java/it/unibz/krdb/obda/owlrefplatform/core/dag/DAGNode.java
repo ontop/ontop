@@ -21,11 +21,14 @@ package it.unibz.krdb.obda.owlrefplatform.core.dag;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -86,17 +89,30 @@ public class DAGNode implements Serializable {
 			return;
 		StringBuilder bf = new StringBuilder();
 		bf.append("DAGNode{");
-		if (description instanceof SomeValuesFrom) {
+		
+		if (description instanceof ObjectSomeValuesFrom) {
 			bf.append("E");
-			Predicate p = ((SomeValuesFrom) description).getProperty().getPredicate();
+			ObjectSomeValuesFrom prop = (ObjectSomeValuesFrom)description;
+			Predicate p =prop.getProperty().getPredicate();
 			String fragment = p.getName().toString();//.getFragment();
 			if (fragment != null)
 				bf.append(fragment);
 			else
 				bf.append(p.getName());
-			if (((SomeValuesFrom) description).getProperty().isInverse())
+			if (prop.getProperty().isInverse())
 				bf.append("^-");
-		} else if (description instanceof OClass) {
+		} 
+		else if (description instanceof DataSomeValuesFrom) {
+			bf.append("E");
+			DataSomeValuesFrom prop = (DataSomeValuesFrom)description;
+			Predicate p =prop.getProperty().getPredicate();
+			String fragment = p.getName().toString();//.getFragment();
+			if (fragment != null)
+				bf.append(fragment);
+			else
+				bf.append(p.getName());
+		} 
+		else if (description instanceof OClass) {
 			
 			Predicate p = ((OClass) description).getPredicate();
 			String fragment = p.getName().toString();//.getFragment();
@@ -105,25 +121,44 @@ public class DAGNode implements Serializable {
 			else
 				bf.append(p.getName());
 			
-		} else if (description instanceof PropertyExpression) {
+		} 
+		else if (description instanceof ObjectPropertyExpression) {
 			
-			Predicate p = ((PropertyExpression) description).getPredicate();
+			Predicate p = ((ObjectPropertyExpression) description).getPredicate();
 			String fragment = p.getName().toString();//.getFragment();
 			if (fragment != null)
 				bf.append(fragment);
 			else
 				bf.append(p.getName());
 			
-			if (((PropertyExpression) description).isInverse()) {
+			if (((ObjectPropertyExpression) description).isInverse()) {
 				bf.append("^-");
 			}
-			
-		} else if (description instanceof Datatype) {
+		} 
+		else if (description instanceof DataPropertyExpression) {			
+			Predicate p = ((ObjectPropertyExpression) description).getPredicate();
+			String fragment = p.getName().toString();//.getFragment();
+			if (fragment != null)
+				bf.append(fragment);
+			else
+				bf.append(p.getName());
+		} 
+		else if (description instanceof DataPropertyRangeExpression) {
+			Predicate p = ((DataPropertyRangeExpression) description).getProperty().getPredicate();
+			String fragment = p.getName().toString();//.getFragment();
+			if (fragment != null)
+				bf.append(fragment);
+			else
+				bf.append(p.getName());			
+			bf.append("^-");
+		}
+		else if (description instanceof Datatype) {
 		
 			Datatype datatype = (Datatype) description;
 			bf.append(datatype.toString());
 			
-		} else {
+		} 
+		else {
 			throw new IllegalArgumentException("Invalid description for a node. Description: " + description);
 		}
 

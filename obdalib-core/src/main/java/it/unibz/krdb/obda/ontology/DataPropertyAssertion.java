@@ -21,18 +21,20 @@ package it.unibz.krdb.obda.ontology;
  */
 
 /**
- * Represents ObjectPropertyExpression and DataPropeprtyExpression 
- *                (OWL 2 Specification)
+ * Represents DataPropertyAssertion from OWL 2 QL Specification
+ * 
+ * DataPropertyAssertion := 'DataPropertyAssertion' '(' axiomAnnotations DataPropertyExpression Individual Literal ')'
  * 
  */
 
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.ObjectConstant;
+import it.unibz.krdb.obda.model.ValueConstant;
 
-public interface PropertyExpression extends Description {
+public interface DataPropertyAssertion extends Assertion {
 
-	public boolean isInverse();
-
-	public Predicate getPredicate();
+	public DataPropertyExpression getProperty();
 	
-	public PropertyExpression getInverse();
+	public ObjectConstant getSubject();
+	
+	public ValueConstant getValue();	
 }

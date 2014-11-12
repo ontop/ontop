@@ -21,8 +21,9 @@ package it.unibz.krdb.obda.quest.dag;
  */
 
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -107,26 +108,26 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 			TestTBoxReasonerImpl_OnNamedDAG namedDag2 = new TestTBoxReasonerImpl_OnNamedDAG(reasoner);
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", reasoner.getClassGraph());
-			log.info("First graph {}", reasoner.getPropertyGraph());
+			log.info("First graph {}", reasoner.getObjectPropertyGraph());
 			log.info("Second dag {}", namedDag2);
 			TestTBoxReasonerImpl_Named dag2 = new TestTBoxReasonerImpl_Named(reasoner);
 
 			assertTrue(testDescendants(dag2.getClasses(), namedDag2.getClasses()));
-			assertTrue(testDescendants(dag2.getProperties(), namedDag2.getProperties()));
+			assertTrue(testDescendants(dag2.getObjectProperties(), namedDag2.getObjectProperties()));
 			assertTrue(testDescendants(namedDag2.getClasses(), dag2.getClasses()));
-			assertTrue(testDescendants(namedDag2.getProperties(), dag2.getProperties()));
+			assertTrue(testDescendants(namedDag2.getObjectProperties(), dag2.getObjectProperties()));
 			assertTrue(testChildren(dag2.getClasses(), namedDag2.getClasses()));
-			assertTrue(testChildren(dag2.getProperties(), namedDag2.getProperties()));
+			assertTrue(testChildren(dag2.getObjectProperties(), namedDag2.getObjectProperties()));
 			assertTrue(testChildren(namedDag2.getClasses(), dag2.getClasses()));
-			assertTrue(testChildren(namedDag2.getProperties(), dag2.getProperties()));
+			assertTrue(testChildren(namedDag2.getObjectProperties(), dag2.getObjectProperties()));
 			assertTrue(testAncestors(dag2.getClasses(), namedDag2.getClasses()));
-			assertTrue(testAncestors(dag2.getProperties(), namedDag2.getProperties()));
+			assertTrue(testAncestors(dag2.getObjectProperties(), namedDag2.getObjectProperties()));
 			assertTrue(testAncestors(namedDag2.getClasses(), dag2.getClasses()));
-			assertTrue(testAncestors(namedDag2.getProperties(), dag2.getProperties()));
+			assertTrue(testAncestors(namedDag2.getObjectProperties(), dag2.getObjectProperties()));
 			assertTrue(testParents(dag2.getClasses(), namedDag2.getClasses()));
-			assertTrue(testParents(dag2.getProperties(), namedDag2.getProperties()));
+			assertTrue(testParents(dag2.getObjectProperties(), namedDag2.getObjectProperties()));
 			assertTrue(testParents(namedDag2.getClasses(), dag2.getClasses()));
-			assertTrue(testParents(namedDag2.getProperties(), dag2.getProperties()));
+			assertTrue(testParents(namedDag2.getObjectProperties(), dag2.getObjectProperties()));
 //			assertTrue(checkVertexReduction(graph1, namedDag2, true));
 			//check only if the number of edges is smaller
 			//assertTrue(checkEdgeReduction(graph1, namedDag2, true)); COMMENTED OUT BY ROMAN
@@ -507,14 +508,19 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 			}
 */			
 	private boolean checkforNamedVertexesOnly(TestTBoxReasonerImpl_OnNamedDAG dag, TBoxReasoner reasoner){
-		for(Equivalences<PropertyExpression> node: dag.getProperties()) {
-			PropertyExpression vertex = node.getRepresentative();
-			if(!reasoner.getProperties().getVertex(vertex).isIndexed())
+		for (Equivalences<ObjectPropertyExpression> node: dag.getObjectProperties()) {
+			ObjectPropertyExpression vertex = node.getRepresentative();
+			if (!reasoner.getObjectProperties().getVertex(vertex).isIndexed())
 				return false;
 		}
-		for(Equivalences<BasicClassDescription> node: dag.getClasses()) {
-			BasicClassDescription vertex = node.getRepresentative();
-			if(!reasoner.getClasses().getVertex(vertex).isIndexed())
+		for (Equivalences<DataPropertyExpression> node: dag.getDataProperties()) {
+			DataPropertyExpression vertex = node.getRepresentative();
+			if(!reasoner.getDataProperties().getVertex(vertex).isIndexed())
+				return false;
+		}
+		for (Equivalences<ClassExpression> node: dag.getClasses()) {
+			ClassExpression vertex = node.getRepresentative();
+			if (!reasoner.getClasses().getVertex(vertex).isIndexed())
 				return false;
 		}
 		return true;
