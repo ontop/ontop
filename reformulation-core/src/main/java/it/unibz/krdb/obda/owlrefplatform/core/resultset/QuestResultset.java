@@ -20,29 +20,19 @@ package it.unibz.krdb.obda.owlrefplatform.core.resultset;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAStatement;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
+import it.unibz.krdb.obda.model.impl.QuestTypeMapper;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 
 import java.net.URISyntaxException;
-import java.sql.Date;
+import java.sql.*;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.text.*;
+import java.util.HashMap;
+import java.util.List;
 
 public class QuestResultset implements TupleResultSet {
 
@@ -160,7 +150,7 @@ public class QuestResultset implements TupleResultSet {
 			realValue = set.getString(column);
 			COL_TYPE type = getQuestType( set.getInt(column - 2));
 
-			if (type == null || realValue == null) {
+			if (type == COL_TYPE.NULL || realValue == null) {
 				return null;
 			} else {
 				if (type == COL_TYPE.OBJECT) {
@@ -339,59 +329,22 @@ public class QuestResultset implements TupleResultSet {
 	}
 
     /**
-     * Numbers sqltype are defined @see #getTypeColumnForSELECT SQLGenerator
+     * Numbers codetype are defined see also  #getTypeColumnForSELECT SQLGenerator
      */
 
-	private COL_TYPE getQuestType(int sqltype) {
-        switch(sqltype) {
-            case 1:
-                return COL_TYPE.OBJECT;
-            case 2:
-                return COL_TYPE.BNODE;
-            case 3:
-                return COL_TYPE.LITERAL;
-            case 4:
-                return COL_TYPE.INTEGER;
-            case 5:
-                return COL_TYPE.DECIMAL;
-            case 6:
-                return COL_TYPE.DOUBLE;
-            case 7:
-                return COL_TYPE.STRING;
-            case 8:
-                return COL_TYPE.DATETIME;
-            case 9:
-                return COL_TYPE.BOOLEAN;
-            case 10:
-                return COL_TYPE.DATE;
-            case 11:
-                return COL_TYPE.TIME;
-            case 12:
-                return COL_TYPE.YEAR;
-            case 13:
-                return COL_TYPE.LONG;
-            case 14:
-                return COL_TYPE.FLOAT;
-            case 15:
-                return COL_TYPE.NEGATIVE_INTEGER;
-            case 16:
-                return COL_TYPE.NON_NEGATIVE_INTEGER;
-            case 17:
-                return COL_TYPE.POSITIVE_INTEGER;
-            case 18:
-                return COL_TYPE.NON_POSITIVE_INTEGER;
-            case 19:
-                return COL_TYPE.INT;
-            case 20:
-                return COL_TYPE.UNSIGNED_INT;
-            case 0:
-                return null;
-            default:
-                throw new RuntimeException("COLTYPE unknown: " + sqltype);
+	private COL_TYPE getQuestType(int typeCode) {
 
+
+        COL_TYPE questType = QuestTypeMapper.getInstance().getQuestType(typeCode);
+
+        if(questType!=null){
+
+            return questType;
         }
 
-	}
+        throw new RuntimeException("COLTYPE unknown: " + typeCode);
+
+        }
 
 	// @Override
 	// public URI getURI(String name) throws OBDAException {

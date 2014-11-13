@@ -33,9 +33,9 @@ import java.util.Map;
  * This class maps SQL datatypes to XML datatypes.
  * Details look at this link: https://docs.google.com/spreadsheet/ccc?key=0AoDXwrYLJ2lvdFAtRXBPcUs2UjMtY08tZ3NYTEp5dVE&usp=sharing
  */
-public class TypeMapper {
+public class JdbcTypeMapper {
 
-	private static final TypeMapper typeMapper = new TypeMapper();
+	private static final JdbcTypeMapper typeMapper = new JdbcTypeMapper();
 
 	private final Map<Integer, Predicate> sqlToQuest = new HashMap<Integer, Predicate>();
 	
@@ -44,7 +44,7 @@ public class TypeMapper {
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 	
 
-	private TypeMapper() {
+	private JdbcTypeMapper() {
 		sqlToQuest.put(Types.VARCHAR, dtfac.getDataTypePredicateLiteral());
 		sqlToQuest.put(Types.CHAR, dtfac.getDataTypePredicateLiteral());
 		sqlToQuest.put(Types.LONGNVARCHAR, dtfac.getDataTypePredicateLiteral());
@@ -85,7 +85,7 @@ public class TypeMapper {
 		datatypeMap.put(COL_TYPE.LITERAL, Types.VARCHAR);	
 	}
 	
-	public static TypeMapper getInstance() {
+	public static JdbcTypeMapper getInstance() {
 		return typeMapper;
 	}
 
