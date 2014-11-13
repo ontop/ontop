@@ -58,10 +58,15 @@ interface ParamConst{
 	public static final String POSTGRESStrView = "src/main/resources/example/postgres-Views-joins-str.obda";
 	public static final String POSTGRESIntView = "src/main/resources/example/postgres-Views-joins-int.obda";
 
-	public static final String DB2 = "src/main/resources/example/ontowis-5joins-int-db2.obda";
-	public static final String MYSQL_VIEW = "src/main/resources/example/ontowis-5joins-int-view.obda";
-	public static final String MYSQL = "src/main/resources/example/ontowis-5joins-int.obda";
-	public static final String DB2_VIEW = "src/main/resources/example/ontowis-5joins-int-view-db2.obda";
+	public static final String MYSQLInt = "src/main/resources/example/mysql-NoViews-joins-int.obda";
+	public static final String MYSQLStr = "src/main/resources/example/mysql-NoViews-joins-str.obda";
+	public static final String MYSQLStrView = "src/main/resources/example/mysql-Views-joins-str.obda";
+	public static final String MYSQLIntView = "src/main/resources/example/mysql-Views-joins-int.obda";
+	
+//	public static final String DB2 = "src/main/resources/example/ontowis-5joins-int-db2.obda";
+//	public static final String MYSQL_VIEW = "src/main/resources/example/ontowis-5joins-int-view.obda";
+//	public static final String MYSQL = "src/main/resources/example/ontowis-5joins-int.obda";
+//	public static final String DB2_VIEW = "src/main/resources/example/ontowis-5joins-int-view-db2.obda";
 }
 public class QuestOWLExample_OntowisTests {
 	
@@ -113,7 +118,7 @@ public class QuestOWLExample_OntowisTests {
 		queriesOneSPARQL[4]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 100000)  } ";
 		queriesOneSPARQL[5]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 500000)  } ";
 
-
+		//2 SQL JOIN
 		queriesOneSPARQL[6]=	"PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :2Tab1 . ?x :Tab3unique2Tab3 ?y . Filter( ?y < 1000)  }  ";
 		queriesOneSPARQL[7]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  Filter( ?y1 < 10000)  } ";
 		queriesOneSPARQL[8]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  Filter( ?y1 < 20000)  } ";
@@ -121,7 +126,7 @@ public class QuestOWLExample_OntowisTests {
 		queriesOneSPARQL[10]="PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  Filter( ?y1 < 100000)  } ";
 		queriesOneSPARQL[11]="PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  Filter( ?y1 < 500000)  } ";
 
-
+		//3 SQL JOIN
 		queriesOneSPARQL[12]="PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :3Tab1 . ?x :Tab4unique2Tab4 ?y . Filter( ?y < 1000)  } "; 
 		queriesOneSPARQL[13]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  Filter( ?y2 < 10000)  }"; 
 		queriesOneSPARQL[14]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  Filter( ?y2 < 20000)  } ";
@@ -155,7 +160,7 @@ public class QuestOWLExample_OntowisTests {
 		queriesTwoSPARQL[4]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString2j ?y2 .  Filter( ?y0 < 100000)  } ";
 		queriesTwoSPARQL[5]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.   ?x :hasString2j ?y2 .  Filter( ?y0 < 500000)  } ";
 
-
+		//2 SQL JOIN
 		queriesTwoSPARQL[6]=	"PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :2Tab1 . ?x :Tab3unique2Tab3 ?y .  ?x :hasString3j ?y2 .  Filter( ?y < 1000)  }  ";
 		queriesTwoSPARQL[7]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 .  Filter( ?y1 < 10000)  } ";
 		queriesTwoSPARQL[8]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 .  Filter( ?y1 < 20000)  } ";
@@ -163,7 +168,7 @@ public class QuestOWLExample_OntowisTests {
 		queriesTwoSPARQL[10]=   "PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 .  Filter( ?y1 < 100000)  } ";
 		queriesTwoSPARQL[11]=   "PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 .  Filter( ?y1 < 500000)  } ";
 
-
+		//3 SQL JOIN
 		queriesTwoSPARQL[12]="PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :3Tab1 . ?x :Tab4unique2Tab4 ?y .  ?x :hasString4j ?y2 .  Filter( ?y < 1000)  } "; 
 		queriesTwoSPARQL[13]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  ?x :hasString4j ?y2 .  Filter( ?y2 < 10000)  }"; 
 		queriesTwoSPARQL[14]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  ?x :hasString4j ?y2 .  Filter( ?y2 < 20000)  } ";
@@ -456,10 +461,10 @@ public class QuestOWLExample_OntowisTests {
 			break;
 		}
 		
-		case "--MYSQL":{
-			obdaFile = ParamConst.MYSQL;
-			break;
-		}
+//		case "--MYSQL":{
+//			obdaFile = ParamConst.MYSQL;
+//			break;
+//		}
 		case "--POSTGRESInt":{
 			obdaFile = ParamConst.POSTGRESInt;
 			break;
@@ -477,17 +482,34 @@ public class QuestOWLExample_OntowisTests {
 			obdaFile = ParamConst.POSTGRESStrView;
 			break;
 		}
-		case "--DB2" :{
-			obdaFile = ParamConst.DB2;
+		case "--MYSQLInt":{
+			obdaFile = ParamConst.MYSQLInt;
 			break;
 		}
-		case "--MYSQL-VIEW":{
-			obdaFile = ParamConst.MYSQL_VIEW;
+		
+		case "--MYSQLStr":{
+			obdaFile = ParamConst.MYSQLStr;
 			break;
 		}
-		case "--DB2-VIEW":{
-			obdaFile = ParamConst.DB2_VIEW;
+		case "--MYSQLIntView":{
+			obdaFile = ParamConst.MYSQLIntView;
+			break;
 		}
+		case "--MYSQLStrView":{
+			obdaFile = ParamConst.MYSQLStrView;
+			break;
+		}
+//		case "--DB2" :{
+//			obdaFile = ParamConst.DB2;
+//			break;
+//		}
+//		case "--MYSQL-VIEW":{
+//			obdaFile = ParamConst.MYSQL_VIEW;
+//			break;
+//		}
+//		case "--DB2-VIEW":{
+//			obdaFile = ParamConst.DB2_VIEW;
+//		}
 		}	
 		try {
 			System.out.println(obdaFile);
