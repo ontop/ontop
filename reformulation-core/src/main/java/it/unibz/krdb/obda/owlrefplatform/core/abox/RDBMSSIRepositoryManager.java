@@ -2721,13 +2721,14 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			objectTerm = dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("Y"));
 
-		} else if (type2 == COL_TYPE.OBJECT) {
+		} 
+		else if (type2 == COL_TYPE.OBJECT) {
 
 			objectTerm = dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("Y"));
 
 		} 
 		else if (type2 == COL_TYPE.LITERAL_LANG) { 
-			objectTerm = dfac.getFunction(dtfac.getDataTypePredicateLiteral(), dfac.getVariable("Y"), dfac.getVariable("Z"));
+			objectTerm = dfac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG), dfac.getVariable("Y"), dfac.getVariable("Z"));
 		} 
 		else {
 			Predicate pred = dtfac.getTypePredicate(type2);

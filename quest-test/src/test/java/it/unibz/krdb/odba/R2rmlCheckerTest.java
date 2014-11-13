@@ -160,7 +160,7 @@ public class R2rmlCheckerTest {
 
             // We need to make sure we make no mappings for Auxiliary roles
             // introduced by the Ontology translation process.
-            if (!OntologyVocabularyImpl.isAuxiliaryProperty(prop)) {
+            //if (!OntologyVocabularyImpl.isAuxiliaryProperty(prop)) {
                 Predicate role = prop.getPredicate();
 
                 log.debug("description " + role);
@@ -170,7 +170,7 @@ public class R2rmlCheckerTest {
                         reasonerR2rml.getConnection());
 
                 assertEquals(roleOBDA, roleR2rml);
-            }
+            //}
         }
 
         log.debug("Comparing data properties");
@@ -178,7 +178,7 @@ public class R2rmlCheckerTest {
 
             // We need to make sure we make no mappings for Auxiliary roles
             // introduced by the Ontology translation process.
-            if (!OntologyVocabularyImpl.isAuxiliaryProperty(prop)) {
+            //if (!OntologyVocabularyImpl.isAuxiliaryProperty(prop)) {
                 Predicate role = prop.getPredicate();
 
 
@@ -189,7 +189,7 @@ public class R2rmlCheckerTest {
                         reasonerR2rml.getConnection());
 
                 assertEquals(roleOBDA, roleR2rml);
-            }
+            //}
         }
 	}
 

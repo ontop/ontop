@@ -48,7 +48,7 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 		DatatypeFactory dfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 		
 		builtinDatatypes = new HashSet<Predicate>();
-		builtinDatatypes.add(dfac.getDataTypePredicateLiteral()); //  .RDFS_LITERAL);
+		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.LITERAL)); //  .RDFS_LITERAL);
 		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.STRING)); // .XSD_STRING);
 		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.INTEGER)); //OBDAVocabulary.XSD_INTEGER);
 		builtinDatatypes.add(dfac.getTypePredicate(COL_TYPE.NEGATIVE_INTEGER)); // XSD_NEGATIVE_INTEGER);
@@ -207,13 +207,20 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	boolean addReferencedEntries(ObjectPropertyExpression prop) {
 		if (prop.isInverse()) {
 			if (!isBuiltIn(prop.getInverse())) {
-				objectProperties.add(prop.getInverse());
+				ObjectPropertyExpression p = prop.getInverse();
+				if (isAuxiliaryProperty(p))
+					auxObjectProperties.add(p);
+				else
+					objectProperties.add(p);
 				return true;
 			}
 		}
 		else {
 			if (!isBuiltIn(prop)) {
-				objectProperties.add(prop);
+				if (isAuxiliaryProperty(prop))
+					auxObjectProperties.add(prop);
+				else
+					objectProperties.add(prop);
 				return true;
 			}			
 		}
@@ -222,7 +229,10 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	boolean addReferencedEntries(DataPropertyExpression prop) {
 		if (!isBuiltIn(prop)) {
-			dataProperties.add(prop);
+			if (isAuxiliaryProperty(prop))
+				auxDataProperties.add(prop);
+			else
+				dataProperties.add(prop);
 			return true;
 		}
 		return false;

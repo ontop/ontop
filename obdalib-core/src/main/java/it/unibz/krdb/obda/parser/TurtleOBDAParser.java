@@ -1497,7 +1497,7 @@ public class TurtleOBDAParser extends Parser {
 					state._fsp--;
 
 
-					      Predicate functionSymbol = dtfac.getDataTypePredicateLiteralLang();
+					      Predicate functionSymbol = dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG);
 					      Variable var = variable22;
 					      Term lang = language23;   
 					      value = dfac.getFunction(functionSymbol, var, lang);
@@ -1874,9 +1874,9 @@ public class TurtleOBDAParser extends Parser {
 					       ValueConstant constant = stringLiteral31;
 					       Term lang = language32;
 					       if (lang != null) {
-					         value = dfac.getFunction(dtfac.getDataTypePredicateLiteralLang(), constant, lang);
+					         value = dfac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG), constant, lang);
 					       } else {
-					       	 value = dfac.getFunction(dtfac.getDataTypePredicateLiteral(), constant);
+					       	 value = dfac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL), constant);
 					       }
 					    
 					}

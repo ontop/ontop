@@ -399,27 +399,29 @@ public class ExpressionEvaluator {
 			Predicate predicate = function.getFunctionSymbol();
 			Term parameter = function.getTerm(0);
 			if (predicate instanceof DataTypePredicate) {
-				String datatype = predicate.toString();
 				if (dtfac.isLiteral(predicate)) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
 					return fac.getFunction(
-							dtfac.getDataTypePredicateLiteral(),
+							dtfac.getTypePredicate(COL_TYPE.LITERAL),
 							fac.getVariable(parameter.toString()));
 				} 
 				else if (dtfac.isString(predicate)) { // R: was datatype.equals(OBDAVocabulary.XSD_STRING_URI)) {
 					return fac.getFunction(
-							dtfac.getDataTypePredicateLiteral(),
+							dtfac.getTypePredicate(COL_TYPE.LITERAL),
 							fac.getVariable(parameter.toString()));
-				} else {
+				} 
+				else {
 					return fac.getFunction(
-							dtfac.getDataTypePredicateLiteral(),
+							dtfac.getTypePredicate(COL_TYPE.LITERAL),
 							fac.getFunction(
 									OBDAVocabulary.QUEST_CAST,
 									fac.getVariable(parameter.toString()),
 									fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.LITERAL))));
 				}
-			} else if (predicate instanceof URITemplatePredicate) {
-				return fac.getFunction(dtfac.getDataTypePredicateLiteral(), function.clone());
-			} else if (predicate instanceof BNodePredicate) {
+			} 
+			else if (predicate instanceof URITemplatePredicate) {
+				return fac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL), function.clone());
+			} 
+			else if (predicate instanceof BNodePredicate) {
 				return fac.getConstantNULL();
 			}
 		}
@@ -537,7 +539,7 @@ public class ExpressionEvaluator {
 
 		// Create a default return constant: blank language with literal type.
 		Term emptyconstant = fac.getFunction(
-				dtfac.getDataTypePredicateLiteral(), fac.getConstantLiteral("", COL_TYPE.LITERAL));
+				dtfac.getTypePredicate(COL_TYPE.LITERAL), fac.getConstantLiteral("", COL_TYPE.LITERAL));
 
 		if (!(innerTerm instanceof Function)) {
 			return emptyconstant;
@@ -556,13 +558,15 @@ public class ExpressionEvaluator {
 
 		if (function.getTerms().size() != 2) {
 			return emptyconstant;
-		} else { // rdfs:Literal(text, lang)
+		} 
+		else { // rdfs:Literal(text, lang)
 			Term parameter = function.getTerm(1);
 			if (parameter instanceof Variable) {
-				return fac.getFunction(dtfac.getDataTypePredicateLiteral(),
+				return fac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL),
 						parameter.clone());
-			} else if (parameter instanceof Constant) {
-				return fac.getFunction(dtfac.getDataTypePredicateLiteral(),
+			} 
+			else if (parameter instanceof Constant) {
+				return fac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL),
 						fac.getConstantLiteral(((Constant) parameter).getValue(),COL_TYPE.LITERAL));
 			}
 		}

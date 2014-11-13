@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
  */
 
 import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 import it.unibz.krdb.sql.DBMetadata;
@@ -166,7 +167,8 @@ public class DirectMappingAxiom {
 		for(int i=0;i<table.getNumOfAttributes();i++){
 			Attribute att = table.getAttribute(i+1);
 			Predicate type = typeMapper.getPredicate(att.getType());
-			if (type.equals(dtfac.getDataTypePredicateLiteral())) {
+			// TODO: replace by isLiteral?
+			if (type.equals(dtfac.getTypePredicate(COL_TYPE.LITERAL))) {
 				Variable objV = df.getVariable(att.getName());
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(

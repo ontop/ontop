@@ -842,27 +842,26 @@ public class SparqlAlgebraToDatalogTranslator {
 				// tag!
 				String lang = object.getLanguage();
 				if (lang != null) lang = lang.toLowerCase();
-				Predicate functionSymbol = dtfac.getDataTypePredicateLiteral();
 				Constant languageConstant = null;
 				if (lang != null && !lang.equals("")) {
-					languageConstant = ofac.getConstantLiteral(lang,
-							COL_TYPE.LITERAL);
-					dataTypeFunction = ofac.getFunction(
-							functionSymbol, constant, languageConstant);
-					result = dataTypeFunction;
-				} else {
-					dataTypeFunction = ofac.getFunction(
-							functionSymbol, constant);
-					result = dataTypeFunction;
+					Predicate functionSymbol = dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG);
+					languageConstant = ofac.getConstantLiteral(lang, COL_TYPE.LITERAL);
+					result = ofac.getFunction(functionSymbol, constant, languageConstant);
+				} 
+				else {
+					Predicate functionSymbol = dtfac.getTypePredicate(COL_TYPE.LITERAL);
+					result =  ofac.getFunction(functionSymbol, constant);
 				}
-			} else {
+			} 
+			else {
 				// For other supported data-types
 				Predicate functionSymbol = getDataTypePredicate(objectType);
 				dataTypeFunction = ofac.getFunction(functionSymbol,
 						constant);
 				result= dataTypeFunction;
 			}
-		} else if (s instanceof URIImpl) {
+		} 
+		else if (s instanceof URIImpl) {
 			URIImpl subject = (URIImpl) s;
 			COL_TYPE subjectType = COL_TYPE.OBJECT;
 			
@@ -1139,7 +1138,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			LiteralImpl lit = (LiteralImpl)v;
 			URI type = lit.getDatatype();
 			if (type == null) {
-				return ofac.getFunction(dtfac.getDataTypePredicateLiteral(), ofac.getConstantLiteral(
+				return ofac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL), ofac.getConstantLiteral(
 						v.stringValue(), COL_TYPE.LITERAL));
 			}
 			COL_TYPE tp = dtfac.getDataType(type.toString());
