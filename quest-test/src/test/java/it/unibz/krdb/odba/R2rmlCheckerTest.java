@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -157,30 +158,41 @@ public class R2rmlCheckerTest {
 		}
 
 		log.debug("Comparing object properties");
-		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
-			Predicate role = prop.getPredicate();
-			
-			log.debug("description " + role);
-			int roleOBDA = runSPARQLRolesQuery("<" + role.getName() + ">",
-					reasonerOBDA.getConnection());
-			int roleR2rml = runSPARQLRolesQuery("<" + role.getName() + ">",
-					reasonerR2rml.getConnection());
+        for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
 
-			assertEquals(roleOBDA, roleR2rml);			
-		}
+            // We need to make sure we make no mappings for Auxiliary roles
+            // introduced by the Ontology translation process.
+            if (!OntologyVocabularyImpl.isAuxiliaryProperty(prop)) {
+                Predicate role = prop.getPredicate();
 
-		log.debug("Comparing data properties");
-		for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
-			Predicate role = prop.getPredicate();
-			
-			log.debug("description " + role);
-			int roleOBDA = runSPARQLRolesQuery("<" + role.getName() + ">",
-					reasonerOBDA.getConnection());
-			int roleR2rml = runSPARQLRolesQuery("<" + role.getName() + ">",
-					reasonerR2rml.getConnection());
+                log.debug("description " + role);
+                int roleOBDA = runSPARQLRolesQuery("<" + role.getName() + ">",
+                        reasonerOBDA.getConnection());
+                int roleR2rml = runSPARQLRolesQuery("<" + role.getName() + ">",
+                        reasonerR2rml.getConnection());
 
-			assertEquals(roleOBDA, roleR2rml);			
-		}
+                assertEquals(roleOBDA, roleR2rml);
+            }
+        }
+
+        log.debug("Comparing data properties");
+        for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
+
+            // We need to make sure we make no mappings for Auxiliary roles
+            // introduced by the Ontology translation process.
+            if (!OntologyVocabularyImpl.isAuxiliaryProperty(prop)) {
+                Predicate role = prop.getPredicate();
+
+
+                log.debug("description " + role);
+                int roleOBDA = runSPARQLRolesQuery("<" + role.getName() + ">",
+                        reasonerOBDA.getConnection());
+                int roleR2rml = runSPARQLRolesQuery("<" + role.getName() + ">",
+                        reasonerR2rml.getConnection());
+
+                assertEquals(roleOBDA, roleR2rml);
+            }
+        }
 	}
 
 	/**
@@ -261,15 +273,15 @@ public class R2rmlCheckerTest {
 	 *
 	 * @throws Exception
 	 */
-//	@Test
+	@Test
 	public void testOneRole() throws Exception {
 
 		// Now we are ready for querying
 		log.debug("Comparing roles");
 
-			int roleOBDA = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>",
+			int roleOBDA = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#utmEW>",
 					reasonerOBDA.getConnection());
-			int roleR2rml = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>",
+			int roleR2rml = runSPARQLRolesQuery("<http://sws.ifi.uio.no/vocab/npd-v2#utmEW>",
 					reasonerR2rml.getConnection());
 
 			assertEquals(roleOBDA, roleR2rml);
