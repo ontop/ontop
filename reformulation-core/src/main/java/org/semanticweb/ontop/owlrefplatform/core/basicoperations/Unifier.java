@@ -366,10 +366,6 @@ public class Unifier {
 			return new Substitution(t1, t2);
 		} 
 		else if (t2 instanceof FunctionalTermImpl) {
-            /**
-             * Reduces URI(URI(URI(x))) to URI(x)
-             */
-            t2 = reduceExcessiveTypeNesting((FunctionalTermImpl) t2);
             FunctionalTermImpl fTerm = (FunctionalTermImpl) t2;
 
             /**
@@ -385,28 +381,6 @@ public class Unifier {
 		// this should never happen 
 		throw new RuntimeException("Unsupported unification case: " + term1 + " " + term2);
 	}
-
-    /**
-     * Reduces excessive type nesting.
-     *
-     * For instance, reduces URI(URI(URI(x))) to URI(x).
-     */
-    private static FunctionalTermImpl reduceExcessiveTypeNesting(FunctionalTermImpl functionalTerm) {
-        FunctionalTermImpl typedTerm = functionalTerm;
-
-        Term currentSubTerm = typedTerm;
-        do {
-            typedTerm = (FunctionalTermImpl) currentSubTerm;
-            currentSubTerm = typedTerm.getTerm(0);
-            /**
-             * Goes deeper if the child term is composite and has the same
-             * function symbol.
-             */
-        } while(currentSubTerm instanceof FunctionalTermImpl
-                && ((FunctionalTermImpl) currentSubTerm).getFunctionSymbol().equals(typedTerm.getFunctionSymbol()));
-
-        return typedTerm;
-    }
 
     /**
      * TODO: explain
