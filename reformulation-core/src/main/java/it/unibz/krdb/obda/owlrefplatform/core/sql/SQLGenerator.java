@@ -680,7 +680,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Function f = (Function) term;
 		if (f.isDataTypeFunction()) {
 			Predicate p = f.getFunctionSymbol();
-			return JdbcTypeMapper.getInstance().getSQLType(p);
+			return dtfac.getJdbcTypeMapper().getSQLType(p);
 		}
 		// Return varchar for unknown
 		return Types.VARCHAR;
@@ -879,22 +879,25 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			
 			if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
-                int k = QuestTypeMapper.getInstance().getQuestCode(COL_TYPE.OBJECT);
+                int k = dtfac.getQuestTypeMapper().getQuestCode(COL_TYPE.OBJECT);
 				return (String.format(typeStr, k, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
-                int k = QuestTypeMapper.getInstance().getQuestCode(COL_TYPE.BNODE);
+			} 
+			else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
+                int k = dtfac.getQuestTypeMapper().getQuestCode(COL_TYPE.BNODE);
 				return (String.format(typeStr, k, signature.get(hpos)));
 			}
 			else {
 				Predicate.COL_TYPE type = dtfac.getDataType(functionString);
-				int k = QuestTypeMapper.getInstance().getQuestCode(type);
+				int k = dtfac.getQuestTypeMapper().getQuestCode(type);
 				return (String.format(typeStr, k, signature.get(hpos)));
 			}
-		} else if (ht instanceof URIConstant) {
-            int k = QuestTypeMapper.getInstance().getQuestCode(COL_TYPE.OBJECT);
+		} 
+		else if (ht instanceof URIConstant) {
+            int k = dtfac.getQuestTypeMapper().getQuestCode(COL_TYPE.OBJECT);
 			return (String.format(typeStr, k, signature.get(hpos)));
-		} else if (ht == OBDAVocabulary.NULL) {
-            int k = QuestTypeMapper.getInstance().getQuestCode(COL_TYPE.NULL);
+		} 
+		else if (ht == OBDAVocabulary.NULL) {
+            int k = dtfac.getQuestTypeMapper().getQuestCode(COL_TYPE.NULL);
 			return (String.format(typeStr, k, signature.get(hpos)));
 		}
 		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());

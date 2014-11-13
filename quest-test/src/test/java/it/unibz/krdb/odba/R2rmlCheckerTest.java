@@ -89,9 +89,7 @@ public class R2rmlCheckerTest {
 		ontology = manager
 				.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-
-		onto = translator.translate(ontology);
+		onto = OWLAPI3TranslatorUtility.translate(ontology);
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);

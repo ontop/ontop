@@ -1,6 +1,8 @@
 package it.unibz.krdb.obda.model;
 
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.QuestTypeMapper;
+import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 
 public interface DatatypeFactory {
 
@@ -27,5 +29,9 @@ public interface DatatypeFactory {
 	public Predicate getDataTypePredicateLiteral();
 
 	public Predicate getDataTypePredicateLiteralLang();
+
+	public QuestTypeMapper getQuestTypeMapper();
+
+	public JdbcTypeMapper getJdbcTypeMapper();
 
 }

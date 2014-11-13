@@ -9,6 +9,7 @@ import org.openrdf.model.vocabulary.XMLSchema;
 import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 
 public class DatatypeFactoryImpl implements DatatypeFactory {
 
@@ -54,11 +55,10 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	private final Predicate XSD_TIME = new DataTypePredicateImpl(XSD_TIME_URI, COL_TYPE.TIME);
 	private final Predicate XSD_YEAR = new DataTypePredicateImpl(XSD_YEAR_URI, COL_TYPE.YEAR);
 	
-	private final Map<String, COL_TYPE> mapURItoCOLTYPE;
-	private final Map<COL_TYPE, String> mapCOLTYPEtoURI;
+	private final Map<String, COL_TYPE> mapURItoCOLTYPE = new HashMap<String, COL_TYPE>();
+	private final Map<COL_TYPE, String> mapCOLTYPEtoURI = new HashMap<COL_TYPE, String>();
 	
 	DatatypeFactoryImpl() {
-		mapURItoCOLTYPE = new HashMap<String, COL_TYPE>();
 		
 		mapURItoCOLTYPE.put(RDFS_LITERAL_URI, COL_TYPE.LITERAL); // 1
 		mapURItoCOLTYPE.put(XSD_STRING_URI, COL_TYPE.STRING);  // 2
@@ -79,8 +79,6 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		mapURItoCOLTYPE.put(XSD_TIME_URI, COL_TYPE.TIME);  // 17
 		mapURItoCOLTYPE.put(XSD_YEAR_URI, COL_TYPE.YEAR);  // 18
 
-		mapCOLTYPEtoURI = new HashMap<COL_TYPE, String>();	
-
 		mapCOLTYPEtoURI.put(COL_TYPE.LITERAL, RDFS_LITERAL_URI); // 1
 		mapCOLTYPEtoURI.put(COL_TYPE.STRING, XSD_STRING_URI);  // 2
 		mapCOLTYPEtoURI.put(COL_TYPE.INT, XSD_INT_URI);  // 3
@@ -100,6 +98,22 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		mapCOLTYPEtoURI.put(COL_TYPE.TIME, XSD_TIME_URI);  // 17
 		mapCOLTYPEtoURI.put(COL_TYPE.YEAR, XSD_YEAR_URI);  // 18		
 	}
+	
+	private final QuestTypeMapper questTypeMapper = new QuestTypeMapper();
+	private JdbcTypeMapper jdbcTypeMapper = null; // cannot initalise now as it uses DatatypeFactory methods
+	
+	@Override
+	public QuestTypeMapper getQuestTypeMapper() {
+		return questTypeMapper;
+	}
+	
+	@Override 
+	public JdbcTypeMapper getJdbcTypeMapper() {
+		if (jdbcTypeMapper == null)
+			jdbcTypeMapper = new JdbcTypeMapper(this);
+		return jdbcTypeMapper;
+	}
+	
 	
 	@Override
 	public COL_TYPE getDataType(String uri) {

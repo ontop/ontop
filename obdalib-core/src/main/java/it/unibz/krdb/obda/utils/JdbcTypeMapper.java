@@ -23,7 +23,6 @@ package it.unibz.krdb.obda.utils;
 import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 import java.sql.Types;
 import java.util.HashMap;
@@ -35,16 +34,14 @@ import java.util.Map;
  */
 public class JdbcTypeMapper {
 
-	private static final JdbcTypeMapper typeMapper = new JdbcTypeMapper();
-
-	private final Map<Integer, Predicate> sqlToQuest = new HashMap<Integer, Predicate>();
-	
+	private final Map<Integer, Predicate> sqlToQuest = new HashMap<Integer, Predicate>();	
 	private final Map<Predicate.COL_TYPE, Integer> datatypeMap = new HashMap<Predicate.COL_TYPE, Integer>();
 	
-	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
-	
+	private final DatatypeFactory dtfac;
 
-	private JdbcTypeMapper() {
+	public JdbcTypeMapper(DatatypeFactory dtfac) {
+		this.dtfac = dtfac;
+		
 		sqlToQuest.put(Types.VARCHAR, dtfac.getDataTypePredicateLiteral());
 		sqlToQuest.put(Types.CHAR, dtfac.getDataTypePredicateLiteral());
 		sqlToQuest.put(Types.LONGNVARCHAR, dtfac.getDataTypePredicateLiteral());
@@ -85,10 +82,6 @@ public class JdbcTypeMapper {
 		datatypeMap.put(COL_TYPE.LITERAL, Types.VARCHAR);	
 	}
 	
-	public static JdbcTypeMapper getInstance() {
-		return typeMapper;
-	}
-
 	public Predicate getPredicate(int sqlType) {
 		Predicate result = sqlToQuest.get(sqlType);
 		if (result == null) {

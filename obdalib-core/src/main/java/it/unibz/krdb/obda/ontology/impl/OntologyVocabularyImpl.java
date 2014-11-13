@@ -161,9 +161,11 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	
 	// TODO: remove static
 	
+	@Deprecated
 	public static boolean isAuxiliaryProperty(ObjectPropertyExpression role) {
 		return role.getPredicate().getName().toString().startsWith(AUXROLEURI);	
 	}
+	@Deprecated
 	public static boolean isAuxiliaryProperty(DataPropertyExpression role) {
 		return role.getPredicate().getName().toString().startsWith(AUXROLEURI);	
 	}

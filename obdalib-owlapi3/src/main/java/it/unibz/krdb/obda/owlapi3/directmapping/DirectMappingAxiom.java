@@ -162,7 +162,7 @@ public class DirectMappingAxiom {
 		
 		
 		//DataType Atoms
-		JdbcTypeMapper typeMapper = JdbcTypeMapper.getInstance();
+		JdbcTypeMapper typeMapper = dtfac.getJdbcTypeMapper();
 		for(int i=0;i<table.getNumOfAttributes();i++){
 			Attribute att = table.getAttribute(i+1);
 			Predicate type = typeMapper.getPredicate(att.getType());
