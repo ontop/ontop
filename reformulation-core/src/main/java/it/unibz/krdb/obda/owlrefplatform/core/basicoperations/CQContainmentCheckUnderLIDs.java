@@ -62,14 +62,14 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 			derivedAtoms.add(fact);
 			for (CQIE rule : dependencies.getRules(fact.getFunctionSymbol())) {
 				Function ruleBody = rule.getBody().get(0);
-				Unifier theta = Unifier.getMGU(ruleBody, fact);
+				Substitution theta = UnifierUtilities.getMGU(ruleBody, fact);
 				// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule
 				if (theta != null && !theta.isEmpty()) {
 					Function ruleHead = rule.getHead();
 					Function newFact = (Function)ruleHead.clone();
 					// unify to get fact is needed because the dependencies are not necessarily full
 					// (in other words, they may contain existentials in the head)
-					UnifierUtilities.applyUnifierToGetFact(newFact, theta);
+					SubstitutionUtilities.applySubstitutionToGetFact(newFact, theta);
 					derivedAtoms.add(newFact);
 				}
 			}
@@ -181,7 +181,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 			
 			// ROMAN: fix for facts
 			if (bodysize == 0) {
-				if (Unifier.getMGU(head, query.getHead()) == null) 
+				if (UnifierUtilities.getMGU(head, query.getHead()) == null)
 					return true;
 				return false;
 			}
@@ -213,17 +213,17 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 				boolean choiceMade = false;
 				CQIE newquery = null;
 				while (!factChoices.isEmpty()) {
-					Unifier mgu = Unifier.getMGU(currentAtom, factChoices.pop());
+					Substitution mgu = UnifierUtilities.getMGU(currentAtom, factChoices.pop());
 					if (mgu == null) {
 						// No way to use the current fact 
 						continue;
 					}
 					
-					newquery = UnifierUtilities.applyUnifier(currentQuery, mgu);
+					newquery = SubstitutionUtilities.applySubstitution(currentQuery, mgu);
 					
 					// stopping early if we have chosen an MGU that has no
 					// possibility of being successful because of the head.				
-					if (Unifier.getMGU(head, newquery.getHead()) == null) {					
+					if (UnifierUtilities.getMGU(head, newquery.getHead()) == null) {
 						// there is no chance to unify the two heads, hence this
 						// fact is not good.
 						continue;

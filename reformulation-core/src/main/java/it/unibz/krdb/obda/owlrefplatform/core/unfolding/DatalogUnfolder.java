@@ -33,11 +33,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
 import java.util.ArrayList;
@@ -458,7 +454,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// if (mgu == null)
 	// throw new RuntimeException(
 	// "Unexcpected case found while performing JOIN elimination. Contact the authors for debugging.");
-	// pev = Unifier.applyUnifier(pev, mgu);
+	// pev = Unifier.applySubstitution(pev, mgu);
 	// newbody = pev.getBody();
 	// newbody.remove(newatomidx);
 	// newatomidx -= 1;
@@ -526,7 +522,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// // throw new RuntimeException(
 	// //
 	// "Unexcpected case found while performing JOIN elimination. Contact the authors for debugging.");
-	// // pev = Unifier.applyUnifier(pev, mgu);
+	// // pev = Unifier.applySubstitution(pev, mgu);
 	// // newbody = pev.getBody();
 	// // newbody.remove(newatomidx);
 	// // newatomidx -= 1;
@@ -579,7 +575,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// // }
 	// // }
 	// // if (redundant) {
-	// // pev = Unifier.applyUnifier(pev, mgu);
+	// // pev = Unifier.applySubstitution(pev, mgu);
 	// // newbody = pev.getBody();
 	// // newbody.remove(newatomidx);
 	// // newatomidx -= 1;
@@ -823,7 +819,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// if (mgu == null)
 	// throw new RuntimeException(
 	// "Unexcpected case found while performing JOIN elimination. Contact the authors for debugging.");
-	// pev = Unifier.applyUnifier(pev, mgu);
+	// pev = Unifier.applySubstitution(pev, mgu);
 	// newbody = pev.getBody();
 	// newbody.remove(newatomidx);
 	// newatomidx -= 1;
@@ -891,7 +887,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// // throw new RuntimeException(
 	// //
 	// "Unexcpected case found while performing JOIN elimination. Contact the authors for debugging.");
-	// // pev = Unifier.applyUnifier(pev, mgu);
+	// // pev = Unifier.applySubstitution(pev, mgu);
 	// // newbody = pev.getBody();
 	// // newbody.remove(newatomidx);
 	// // newatomidx -= 1;
@@ -944,7 +940,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	// // }
 	// // }
 	// // if (redundant) {
-	// // pev = Unifier.applyUnifier(pev, mgu);
+	// // pev = Unifier.applySubstitution(pev, mgu);
 	// // newbody = pev.getBody();
 	// // newbody.remove(newatomidx);
 	// // newatomidx -= 1;
@@ -1462,7 +1458,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			/* getting a rule with unique variables */
 			CQIE freshRule = getFreshRule(candidateRule, resolutionCount[0]);
 
-			Unifier mgu = Unifier.getMGU(freshRule.getHead(), focusAtom);
+			Substitution mgu = UnifierUtilities.getMGU(freshRule.getHead(), focusAtom);
 
 			if (mgu == null) {
 				/* Failed attempt */
@@ -1500,7 +1496,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			innerAtoms.remove((int) termidx.peek());
 			innerAtoms.addAll((int) termidx.peek(), freshRule.getBody());
 
-			UnifierUtilities.applyUnifier(partialEvalution, mgu, false);
+			SubstitutionUtilities.applySubstitution(partialEvalution, mgu, false);
 
 			/***
 			 * DONE WITH BASIC RESOLUTION STEP
@@ -1594,11 +1590,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		//freshRule.updateBody(newbody);
 		replaceInnerLJ(freshRule, newbody, termidx1);
 		
-		Unifier unifier = UnifierUtilities.getNullifier(variablesArg2);
+		Substitution unifier = SubstitutionUtilities.getNullifier(variablesArg2);
 
 		// Now I need to add the null to the variables of the second
 		// LJ data argument
-		freshRule = UnifierUtilities.applyUnifier(freshRule, unifier, false);
+		freshRule = SubstitutionUtilities.applySubstitution(freshRule, unifier, false);
 		return freshRule;
 	}
 	
@@ -1700,7 +1696,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			 */
 			Function replacement = null;
 
-			Unifier mgu1 = null;
+			Substitution mgu1 = null;
 			for (int idx2 = 0; idx2 < termidx.peek(); idx2++) {
 				Function tempatom = (Function) innerAtoms.get(idx2);
 
@@ -1721,7 +1717,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 				if (redundant) {
 					/* found a candidate replacement atom */
-					mgu1 = Unifier.getMGU(newatom, tempatom);
+					mgu1 = UnifierUtilities.getMGU(newatom, tempatom);
 					if (mgu1 != null) {
 						replacement = tempatom;
 						break;
@@ -1740,7 +1736,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				continue;
 			}
 
-			UnifierUtilities.applyUnifier(partialEvalution, mgu1, false);
+			SubstitutionUtilities.applySubstitution(partialEvalution, mgu1, false);
 			innerAtoms.remove(newatomidx);
 			newatomidx -= 1;
 			newatomcount -= 1;
