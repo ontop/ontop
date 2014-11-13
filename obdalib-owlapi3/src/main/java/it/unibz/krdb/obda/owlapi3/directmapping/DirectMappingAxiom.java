@@ -163,19 +163,18 @@ public class DirectMappingAxiom {
 		
 		
 		//DataType Atoms
-		JdbcTypeMapper typeMapper = dtfac.getJdbcTypeMapper();
+		JdbcTypeMapper typeMapper = df.getJdbcTypeMapper();
 		for(int i=0;i<table.getNumOfAttributes();i++){
 			Attribute att = table.getAttribute(i+1);
-			Predicate type = typeMapper.getPredicate(att.getType());
-			// TODO: replace by isLiteral?
-			if (type.equals(dtfac.getTypePredicate(COL_TYPE.LITERAL))) {
+			Predicate.COL_TYPE type = typeMapper.getPredicate(att.getType());
+			if (type == COL_TYPE.LITERAL) {
 				Variable objV = df.getVariable(att.getName());
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, objV));
-			} else {
-				Function obj = df.getFunction(type,
-						df.getVariable(att.getName()));
+			} 
+			else {
+				Function obj = df.getFunction(dtfac.getTypePredicate(type), df.getVariable(att.getName()));
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, obj));

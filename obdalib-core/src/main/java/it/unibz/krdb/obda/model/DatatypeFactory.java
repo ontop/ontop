@@ -28,15 +28,6 @@ public interface DatatypeFactory {
 	public boolean isString(Predicate p);
 
 	
-//	public Predicate getDataTypePredicateLiteral();
-
-	
-	
-	public QuestTypeMapper getQuestTypeMapper();
-
-	public JdbcTypeMapper getJdbcTypeMapper();
-
-	
 	
 	public List<Predicate> getDatatypePredicates();
 

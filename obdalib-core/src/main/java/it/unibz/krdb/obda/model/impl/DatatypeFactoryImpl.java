@@ -71,20 +71,6 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		return predicate;
 	}
 	
-	private final QuestTypeMapper questTypeMapper = new QuestTypeMapper();
-	private final JdbcTypeMapper jdbcTypeMapper =  new JdbcTypeMapper(this); 
-	
-	@Override
-	public QuestTypeMapper getQuestTypeMapper() {
-		return questTypeMapper;
-	}
-	
-	@Override 
-	public JdbcTypeMapper getJdbcTypeMapper() {
-		return jdbcTypeMapper;
-	}
-	
-	
 	@Override
 	public COL_TYPE getDataType(String uri) {
 		return mapURItoCOLTYPE.get(uri);

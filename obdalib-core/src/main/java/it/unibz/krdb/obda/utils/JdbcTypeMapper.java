@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.utils;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
@@ -37,11 +36,7 @@ public class JdbcTypeMapper {
 	private final Map<Integer, Predicate.COL_TYPE> sqlToQuest = new HashMap<Integer, Predicate.COL_TYPE>();	
 	private final Map<Predicate.COL_TYPE, Integer> datatypeMap = new HashMap<Predicate.COL_TYPE, Integer>();
 	
-	private final DatatypeFactory dtfac;
-
-	public JdbcTypeMapper(DatatypeFactory dtfac) {
-		this.dtfac = dtfac;
-		
+	public JdbcTypeMapper() {
 		sqlToQuest.put(Types.VARCHAR, COL_TYPE.LITERAL);
 		sqlToQuest.put(Types.CHAR, COL_TYPE.LITERAL);
 		sqlToQuest.put(Types.LONGNVARCHAR, COL_TYPE.LITERAL);
@@ -82,16 +77,15 @@ public class JdbcTypeMapper {
 		datatypeMap.put(COL_TYPE.LITERAL, Types.VARCHAR);	
 	}
 	
-	public Predicate getPredicate(int sqlType) {
+	public Predicate.COL_TYPE getPredicate(int sqlType) {
 		Predicate.COL_TYPE type = sqlToQuest.get(sqlType);
 		if (type == null) 
 			type = COL_TYPE.LITERAL; 
 		
-		return dtfac.getTypePredicate(type);
+		return type;
 	}
 	
-	public int getSQLType(Predicate p) {
-		Predicate.COL_TYPE type = dtfac.getDataType(p.toString());
+	public int getSQLType(Predicate.COL_TYPE type) {
 		if (type != null) {
 			Integer sqlType = datatypeMap.get(type);
 			if (sqlType != null)

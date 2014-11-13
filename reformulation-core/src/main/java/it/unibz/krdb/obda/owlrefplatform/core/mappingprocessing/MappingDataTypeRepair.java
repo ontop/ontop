@@ -257,7 +257,8 @@ public class MappingDataTypeRepair {
 
 		Attribute attribute = tableMetadata.getAttribute(pos);
 
-		return fac.getDatatypeFactory().getJdbcTypeMapper().getPredicate(attribute.getType());
+		Predicate.COL_TYPE type =  fac.getJdbcTypeMapper().getPredicate(attribute.getType());
+		return fac.getDatatypeFactory().getTypePredicate(type);
 	}
 
 	private Map<String, List<Object[]>> createIndex(CQIE rule) {

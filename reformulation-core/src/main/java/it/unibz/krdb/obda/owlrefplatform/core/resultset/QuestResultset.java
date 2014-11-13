@@ -334,7 +334,7 @@ public class QuestResultset implements TupleResultSet {
 
 	private COL_TYPE getQuestType(int typeCode) {
 
-        COL_TYPE questType = fac.getDatatypeFactory().getQuestTypeMapper().getQuestType(typeCode);
+        COL_TYPE questType = fac.getQuestTypeMapper().getQuestType(typeCode);
 
         if (questType == null)
         	throw new RuntimeException("typeCode unknown: " + typeCode);
