@@ -1,10 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Multimap;
-import fj.P;
-import fj.P2;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.*;
 
@@ -18,7 +14,6 @@ import java.util.Set;
 public class Unifier {
 
 	private final Map<VariableImpl, Term> map;
-    private static OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
 
     /**
      * Default and normal constructor.
@@ -75,26 +70,6 @@ public class Unifier {
      * @return
      */
     public static Unifier getMGU(Function first, Function second) {
-        Multimap<Predicate, Integer> emptyMulti= ArrayListMultimap.create();
-        Unifier unifier = getMGU(first, second, false, emptyMulti);
-        return unifier;
-    }
-
-    /**
-     * TODO: explain
-     * @param first
-     * @param second
-     * @param multiTypedPredicateIndex
-     * @return
-     */
-    public static Unifier getTypePropagatingMGU(Function first, Function second,
-                                              Multimap<Predicate, Integer> multiTypedPredicateIndex) {
-        Unifier unifier = getMGU(first, second, true, multiTypedPredicateIndex);
-        return unifier;
-    }
-
-    private static Unifier getMGU(Function first, Function second, boolean typePropagation,
-                                 Multimap<Predicate,Integer> multiTypedPredicateIndex) {
 
 		// Basic case: if predicates are different or their arity is different,
 		// then no unifier
@@ -124,7 +99,7 @@ public class Unifier {
 			// We have two cases, unifying 'simple' terms, and unifying function terms. 
 			if (!(term1 instanceof Function) || !(term2 instanceof Function)) {
 				
-				if (!mgu.compose(term1, term2, typePropagation))
+				if (!mgu.compose(term1, term2))
 					return null;
 				
 				changed = true;
@@ -144,22 +119,8 @@ public class Unifier {
 
 				int innerarity = fterm1.getTerms().size();
 				for (int innertermidx = 0; innertermidx < innerarity; innertermidx++) {
-
-                    /**
-                     * Normal composition
-                     */
-                    if(!typePropagation) {
-                        if (!mgu.compose(fterm1.getTerm(innertermidx), fterm2.getTerm(innertermidx)))
-                            return null;
-                    }
-                    /**
-                     * Specific case: composition with type propagation.
-                     */
-                    else {
-                        if (!mgu.composeAndPropagateType(fterm1, fterm2.getTerm(innertermidx), innertermidx,
-                                multiTypedPredicateIndex))
-                            return null;
-                    }
+                    if (!mgu.compose(fterm1.getTerm(innertermidx), fterm2.getTerm(innertermidx)))
+                        return null;
 					
 					changed = true;
 					
@@ -194,11 +155,7 @@ public class Unifier {
      * @return true if the substitution exists (false if it does not)
 	 */
 	public boolean compose(Term term1, Term term2) {
-        return compose(term1, term2, false);
-	}
-
-    private boolean compose(Term term1, Term term2, boolean typePropagation) {
-        Substitution s = getSubstitution(term1, term2, typePropagation);
+        Substitution s = getSubstitution(term1, term2);
 
         boolean acceptSubstitution = putSubstitution(s);
         return acceptSubstitution;
@@ -211,7 +168,7 @@ public class Unifier {
      * Otherwise, does nothing and returns false;
      *
      */
-    private boolean putSubstitution(Substitution s) {
+    protected boolean putSubstitution(Substitution s) {
         if (s == null)
             return false;
 
@@ -257,40 +214,6 @@ public class Unifier {
     }
 
 
-    /**
-     * SIDE-EFFECT method. Not just a simple test.
-     *
-     * Use case: handle aggregates.
-     * TODO: explain further.
-     *
-     */
-    private boolean composeAndPropagateType(Function atom1, Term term2, int termIndex, Multimap<Predicate, Integer> multiTypedPredicateIndex) {
-        Predicate functionSymbol1 = atom1.getFunctionSymbol();
-        Term term1 = atom1.getTerm(termIndex);
-
-        Substitution s;
-        if (multiTypedPredicateIndex.containsKey(functionSymbol1) ){ // it is a problematic predicate regarding templates
-            if (multiTypedPredicateIndex.get(functionSymbol1).contains(termIndex)){ //the term is the problematic one
-                s = new NeutralSubstitution();
-            } else{
-                s = getSubstitution(term1, term2, true);
-            }
-        }
-        else{
-            s = getSubstitution(term1, term2, true);
-        }
-
-        boolean acceptSubstitution = putSubstitution(s);
-        return acceptSubstitution;
-    }
-
-    /**
-     * Normal case.
-     */
-    private static Substitution getSubstitution(Term term1, Term term2) {
-        return getSubstitution(term1, term2, false);
-    }
-
     /***
      * Computes the substitution that makes two terms equal.
      *
@@ -303,7 +226,7 @@ public class Unifier {
      * @param term2
      * @return
      */
-	private static Substitution getSubstitution(Term term1, Term term2, boolean propagateType) {
+	private static Substitution getSubstitution(Term term1, Term term2) {
 
 		if (!(term1 instanceof VariableImpl) && !(term2 instanceof VariableImpl)) {
 			
@@ -335,13 +258,6 @@ public class Unifier {
         if (term1 instanceof VariableImpl) {
             t1 = (VariableImpl)term1;
             t2 = term2;
-            /**
-             * Type propagation special case.
-             */
-        } else if (propagateType && (term1 instanceof Function)) {
-            P2<VariableImpl, Term> proposedTerms = getTypePropagatingSubstitution((Function) term1, term2);
-            t1 = proposedTerms._1();
-            t2 = proposedTerms._2();
         }
         /**
          * TODO: explain why the two terms can be "reversed".
@@ -369,11 +285,9 @@ public class Unifier {
             FunctionalTermImpl fTerm = (FunctionalTermImpl) t2;
 
             /**
-             * Only in the normal mode
-             *
              * Prevents unifications like p(x) -> x.
              */
-            if (fTerm.containsTerm(t1) && (!propagateType))
+            if (fTerm.containsTerm(t1))
 				return null;
 			else
 				return new Substitution(t1, t2);
@@ -381,69 +295,6 @@ public class Unifier {
 		// this should never happen 
 		throw new RuntimeException("Unsupported unification case: " + term1 + " " + term2);
 	}
-
-    /**
-     * TODO: explain
-     */
-    private static P2<VariableImpl, Term> getTypePropagatingSubstitution(Function functionalTerm1, Term term2) {
-        Predicate functionSymbol1 = functionalTerm1.getFunctionSymbol();
-
-        /**
-         * Term1 is an aggregate --> looks inside its first sub-term.
-         */
-        if (functionSymbol1.isAggregationPredicate()) {
-            Term subTerm = functionalTerm1.getTerm(0);
-
-            /**
-             * If its first sub-term is functional, it may be a data type.
-             */
-            if (subTerm instanceof Function) {
-                Predicate subTermSymbol = ((Function) subTerm).getFunctionSymbol();
-
-                /**
-                 * If is a type, applies this type to the second term.
-                 */
-                if (subTermSymbol.isDataTypePredicate()) {
-                    Term typedTerm2 = dataFactory.getFunction(subTermSymbol, term2);
-                    return P.p((VariableImpl)term2, typedTerm2);
-                }
-            }
-
-            /**
-             * Term 1 is a data type.
-             *
-             * Then, we have to look if there is an aggregate inside.
-             */
-        } else if (functionSymbol1.isDataTypePredicate()) {
-            Predicate type = functionSymbol1;
-            Term subTerm = functionalTerm1.getTerm(0);
-
-            //case where the aggregate is inside type, Count for instance
-            /**
-             * The sub-term is functional ...
-             */
-            if (subTerm instanceof Function) {
-                functionSymbol1 = ((Function) subTerm).getFunctionSymbol();
-
-                /**
-                 *  ... and is an aggregate
-                 */
-                if (functionSymbol1.isAggregationPredicate()) {
-                    Term subSubTerm = ((Function) subTerm).getTerm(0);
-
-                    if (subSubTerm instanceof Function) {
-                        Term typedTerm2 = dataFactory.getFunction(type, term2);
-                        return P.p((VariableImpl)term2, typedTerm2);
-                    }
-
-                }
-            }
-        }
-        /**
-         * If term1 is a variable, at least term2 is.
-         */
-        return P.p((VariableImpl)term2, (Term)functionalTerm1);
-    }
 
 	@Override
 	public String toString() {

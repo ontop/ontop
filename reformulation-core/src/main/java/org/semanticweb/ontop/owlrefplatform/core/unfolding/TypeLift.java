@@ -13,6 +13,7 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypePropagatingSubstitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions.*;
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypePropagatingSubstitution.forceVariableReuse;
 
 /**
  * Type lifting consists in:
@@ -314,8 +316,8 @@ public class TypeLift {
          *
          */
         final List<CQIE> parentRules = parentZipper.getLabel()._2();
-        final Unifier proposedSubstitutionFct = aggregateChildrenProposalsAndRules(Option.<Unifier>none(), parentRules,
-                childProposalIndex);
+        final Unifier proposedSubstitutionFct = aggregateChildrenProposalsAndRules(
+                Option.<Unifier>none(), parentRules, childProposalIndex);
 
         Function newProposal = (Function) parentRules.head().getHead().clone();
         // Side-effect!
@@ -335,8 +337,8 @@ public class TypeLift {
      * May raises a MultiTypedException.
      *
      */
-    private static Unifier aggregateChildrenProposalsAndRules(Option<Unifier> optionalSubstitutionFct, List<CQIE> remainingRules,
-                                                               HashMap<Predicate, Function> childProposalIndex)
+    private static Unifier aggregateChildrenProposalsAndRules(Option<Unifier> optionalSubstitutionFct,
+                                                              List<CQIE> remainingRules, HashMap<Predicate, Function> childProposalIndex)
             throws MultiTypeException {
         /**
          * Stop condition (no more rule to consider).
@@ -356,7 +358,8 @@ public class TypeLift {
          * May throw a MultipleTypeException.
          */
         CQIE rule = remainingRules.head();
-        Unifier proposedSubstitutionFct = aggregateRuleAndProposals(optionalSubstitutionFct, extractBodyAtoms(rule), childProposalIndex);
+        Unifier proposedSubstitutionFct = aggregateRuleAndProposals(optionalSubstitutionFct, extractBodyAtoms(rule),
+                childProposalIndex);
 
         /**
          * Tail recursion.
@@ -373,8 +376,9 @@ public class TypeLift {
      * If some problems with a substitution function occur, throws a MultiTypeException.
      *
      */
-    private static Unifier aggregateRuleAndProposals(final Option<Unifier> optionalSubstitutionFunction, final List<Function> remainingBodyAtoms,
-                                                     final HashMap<Predicate, Function> childProposalIndex) throws MultiTypeException {
+    private static Unifier aggregateRuleAndProposals(final Option<Unifier> optionalSubstitutionFunction,
+                                                                         final List<Function> remainingBodyAtoms,
+                                                                         final HashMap<Predicate, Function> childProposalIndex) throws MultiTypeException {
         /**
          * Stop condition (no further body atom).
          */
@@ -399,7 +403,8 @@ public class TypeLift {
          */
         if (optionalChildProposal.isSome()) {
             try {
-                Unifier proposedSubstitutionFunction = computeTypePropagatingSubstitution(bodyAtom, optionalChildProposal.some());
+                Unifier proposedSubstitutionFunction = computeTypePropagatingSubstitution(
+                        bodyAtom, optionalChildProposal.some());
 
                 if (optionalSubstitutionFunction.isNone()) {
                     newOptionalSubstitutionFct = Option.some(proposedSubstitutionFunction);
@@ -459,15 +464,15 @@ public class TypeLift {
      * If such a substitution function does not exist, throws a SubstitutionException.
      *
      */
-    private static Unifier computeTypePropagatingSubstitution(Function localAtom, Function proposedAtom)
+    private static TypePropagatingSubstitution computeTypePropagatingSubstitution(Function localAtom, Function proposedAtom)
             throws SubstitutionException {
         /**
          * Type propagating substitution function between the proposedAtom and the localAtom.
          *
          * TODO: make the latter function throw the exception.
          */
-        Unifier typePropagatingSubstitutionFunction = Unifier.getTypePropagatingMGU(proposedAtom, localAtom,
-                ImmutableMultimap.<Predicate,Integer>of());
+        TypePropagatingSubstitution typePropagatingSubstitutionFunction = TypePropagatingSubstitution.getTypePropagatingSubstitution(
+                proposedAtom, localAtom, ImmutableMultimap.<Predicate, Integer>of());
 
         /**
          * Impossible to unify the multiple types proposed for this predicate.
@@ -482,7 +487,7 @@ public class TypeLift {
          * Here, we are just interested in the types but we do not want to change the variable names.
          * Thus, we force variable reuse.
          */
-        Unifier renamedSubstitutions = forceVariableReuse(typePropagatingSubstitutionFunction);
+        TypePropagatingSubstitution renamedSubstitutions = forceVariableReuse(typePropagatingSubstitutionFunction);
 
         return renamedSubstitutions;
     }
@@ -910,78 +915,6 @@ public class TypeLift {
         }));
 
     }
-
-    /**
-     * Derives a new substitution function that makes sure the replacing term use the replaced variable
-     * when this term is functional.
-     *
-     * Functional terms with 0 or more than 1 variable are not added to the new substitution function.
-     *
-     * Returns the new substitution function.
-     */
-    private static Unifier forceVariableReuse(Unifier initialSubstitutionFct) {
-        Stream<P2<VariableImpl, Term>> unifierEntries = Stream.iterableStream(TreeMap.fromMutableMap(Ord.<VariableImpl>hashOrd(),
-                initialSubstitutionFct.toMap()));
-
-        Stream<P2<VariableImpl, Term>> newUnifierEntries = unifierEntries.filter(
-                /**
-                 * Filters (removes) functional terms with 0 or more than 1 variable
-                 */
-                new F<P2<VariableImpl, Term>, Boolean>() {
-            @Override
-            public Boolean f(P2<VariableImpl, Term> entry) {
-                Term term = entry._2();
-                if (term instanceof Function) {
-                    if (term.getReferencedVariables().size() != 1)
-                        return false;
-                }
-                return true;
-            }
-        }).map(
-                /**
-                 * Transforms the unary functional terms so that they reuse
-                 * the same variable.
-                 *
-                 * Others remain the same.
-                 */
-                new F<P2<VariableImpl, Term>, P2<VariableImpl, Term>>() {
-            @Override
-            public P2<VariableImpl, Term> f(P2<VariableImpl, Term> entry) {
-                VariableImpl variableToKeep = entry._1();
-                Term term = entry._2();
-
-                /**
-                 * Transformation only concerns some functional terms.
-                 */
-                if (term instanceof Function) {
-                    VariableImpl variableToChange = (VariableImpl) term.getReferencedVariables().iterator().next();
-
-                    /**
-                     * When the two variables are not the same,
-                     * makes a unification to update the functional term.
-                     */
-                    if (!variableToChange.equals(variableToKeep)) {
-                        Unifier miniSubstitutionFct = new Unifier(ImmutableMap.of(variableToChange, (Term) variableToKeep));
-
-                        Function translatedFunctionalTerm = (Function) term.clone();
-                        //Side-effect update
-                        UnifierUtilities.applyUnifier(translatedFunctionalTerm, miniSubstitutionFct);
-
-                        return P.p(variableToKeep, (Term) translatedFunctionalTerm);
-                    }
-                }
-                /**
-                 * No transformation.
-                 */
-                return entry;
-            }
-        });
-
-        Unifier newSubstitutionFct = new Unifier(HashMap.from(newUnifierEntries).toMap());
-        return newSubstitutionFct;
-    }
-    
-
 
     /**
      * Removes the type for a given term.
