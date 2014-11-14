@@ -25,25 +25,11 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.RelationJSQL;
-
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.*;
+import java.util.*;
 
 public class JDBCConnectionManager {
 
@@ -389,7 +375,7 @@ public class JDBCConnectionManager {
 					/**
 					 * Print JDBC metadata returned by the driver, enabled in debug mode
 					 */
-					displayColumnNames(md, conn, rsColumns, tableSchema, tblName);
+//					displayColumnNames(md, conn, rsColumns, tableSchema, tblName);
 					
 					
 					final String columnName = rsColumns.getString("COLUMN_NAME");
