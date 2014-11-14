@@ -1497,10 +1497,9 @@ public class TurtleOBDAParser extends Parser {
 					state._fsp--;
 
 
-					      Predicate functionSymbol = dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG);
 					      Variable var = variable22;
 					      Term lang = language23;   
-					      value = dfac.getFunction(functionSymbol, var, lang);
+					      value = dfac.getTypedTerm(var, lang);
 					    
 					}
 					break;
@@ -1526,15 +1525,11 @@ public class TurtleOBDAParser extends Parser {
 					      } else {
 					        throw new IllegalArgumentException("resource25 should be an URI");
 					      }
-					      Predicate functionSymbol = null;
 					      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
-					      if (type != null) {
-					    	  functionSymbol = dtfac.getTypePredicate(type);
-					      } 
-					      else {
+					      if (type == null)  
 					    	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
-					      }
-					      value = dfac.getFunction(functionSymbol, var);
+					     
+					      value = dfac.getTypedTerm(var, type);
 					     
 					}
 					break;
@@ -1874,9 +1869,9 @@ public class TurtleOBDAParser extends Parser {
 					       ValueConstant constant = stringLiteral31;
 					       Term lang = language32;
 					       if (lang != null) {
-					         value = dfac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG), constant, lang);
+					         value = dfac.getTypedTerm(constant, lang);
 					       } else {
-					       	 value = dfac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL), constant);
+					       	 value = dfac.getTypedTerm(constant, COL_TYPE.LITERAL);
 					       }
 					    
 					}
@@ -1990,13 +1985,10 @@ public class TurtleOBDAParser extends Parser {
 				 functionName = ( (ValueConstant) ((Function)resource38).getTerm(0) ).getValue();
 			      }
 			      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
-			      if (type != null) {
-			    	  functionSymbol = dtfac.getTypePredicate(type);
-			      }
-			      else {
+			      if (type == null)  {
 			        throw new RuntimeException("Unsupported datatype: " + functionName);
 			      }
-			      value = dfac.getFunction(functionSymbol, constant);
+			      value = dfac.getTypedTerm(constant, type);
 			    
 			}
 

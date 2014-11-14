@@ -839,20 +839,15 @@ public class SparqlAlgebraToDatalogTranslator {
 				if (lang != null) lang = lang.toLowerCase();
 				Constant languageConstant = null;
 				if (lang != null && !lang.equals("")) {
-					Predicate functionSymbol = dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG);
-					languageConstant = ofac.getConstantLiteral(lang, COL_TYPE.LITERAL);
-					result = ofac.getFunction(functionSymbol, constant, languageConstant);
+					result = ofac.getTypedTerm(constant, lang);
 				} 
 				else {
-					Predicate functionSymbol = dtfac.getTypePredicate(COL_TYPE.LITERAL);
-					result =  ofac.getFunction(functionSymbol, constant);
+					result =  ofac.getTypedTerm(constant, COL_TYPE.LITERAL);
 				}
 			} 
 			else {
 				// For other supported data-types
-				Predicate functionSymbol = getDataTypePredicate(objectType);
-				dataTypeFunction = ofac.getFunction(functionSymbol,
-						constant);
+				dataTypeFunction = ofac.getTypedTerm(constant, objectType);
 				result= dataTypeFunction;
 			}
 		} 
@@ -1042,16 +1037,6 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 
 
-	private Predicate getDataTypePredicate(COL_TYPE dataType) throws RuntimeException {
-        //we do not consider the case of literal because it has already been checked @see #getOntopTerm
-		
-		Predicate pred = dtfac.getTypePredicate(dataType);
-		if (pred == null)
-			throw new RuntimeException("Unknown data type!");
-		
-		return pred;
-	}
-
 	private COL_TYPE getDataType(LiteralImpl node) {
 
 		URI typeURI = node.getDatatype();
@@ -1133,8 +1118,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			LiteralImpl lit = (LiteralImpl)v;
 			URI type = lit.getDatatype();
 			if (type == null) {
-				return ofac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL), ofac.getConstantLiteral(
-						v.stringValue(), COL_TYPE.LITERAL));
+				return ofac.getTypedTerm(ofac.getConstantLiteral(v.stringValue(), COL_TYPE.LITERAL), COL_TYPE.LITERAL);
 			}
 			COL_TYPE tp = dtfac.getDataType(type.toString());
 			if (tp == null) {
@@ -1184,7 +1168,7 @@ public class SparqlAlgebraToDatalogTranslator {
 					throw new RuntimeException("Undefiend datatype: " + tp);
 			}
 			ValueConstant constant = ofac.getConstantLiteral(constantString, tp);
-			constantFunction = ofac.getFunction(dtfac.getTypePredicate(tp), constant);	
+			constantFunction = ofac.getTypedTerm(constant, tp);	
 		} 
 		else if (v instanceof URIImpl) {
             constantFunction = uriTemplateMatcher.generateURIFunction(v.stringValue());

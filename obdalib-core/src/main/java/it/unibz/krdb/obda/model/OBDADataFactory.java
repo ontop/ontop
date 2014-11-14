@@ -229,6 +229,7 @@ public interface OBDADataFactory extends Serializable {
 	 */
 	public ValueConstant getConstantLiteral(String value, Predicate.COL_TYPE type);
 
+
 	/**
 	 * Construct a {@link ValueConstant} object with a language tag.
 	 * <p>
@@ -246,6 +247,10 @@ public interface OBDADataFactory extends Serializable {
 	 */
 	public ValueConstant getConstantLiteral(String value, String language);
 
+	public Function getTypedTerm(Term value, String language);
+	public Function getTypedTerm(Term value, Term language);
+	public Function getTypedTerm(Term value, Predicate.COL_TYPE type);
+	
 	/**
 	 * Construct a {@link ValueConstant} object with a system-assigned name
 	 * that is automatically generated.

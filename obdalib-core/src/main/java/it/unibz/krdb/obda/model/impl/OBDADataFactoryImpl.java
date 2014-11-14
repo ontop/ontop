@@ -150,8 +150,30 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public Function getTypedTerm(Term value, COL_TYPE type) {
+		Predicate pred = getDatatypeFactory().getTypePredicate(type);
+		if (pred == null)
+			throw new RuntimeException("Unknown data type!");
+		
+		return getFunction(pred, value);
+	}
+	
+	@Override
 	public ValueConstant getConstantLiteral(String value, String language) {
 		return new ValueConstantImpl(value, language.toLowerCase(), COL_TYPE.LITERAL_LANG);
+	}
+
+	@Override
+	public Function getTypedTerm(Term value, Term language) {
+		Predicate pred = getDatatypeFactory().getTypePredicate(COL_TYPE.LITERAL_LANG);
+		return getFunction(pred, value, language);
+	}
+
+	@Override
+	public Function getTypedTerm(Term value, String language) {
+		Term lang = getConstantLiteral(language.toLowerCase(), COL_TYPE.LITERAL);		
+		Predicate pred = getDatatypeFactory().getTypePredicate(COL_TYPE.LITERAL_LANG);
+		return getFunction(pred, value, lang);
 	}
 	
 	@Override

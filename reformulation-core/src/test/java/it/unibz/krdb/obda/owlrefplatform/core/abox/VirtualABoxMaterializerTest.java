@@ -574,10 +574,10 @@ try{
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
 		
-		final Term firstNameVariable = fac.getFunction(dtfac.getTypePredicate(COL_TYPE.STRING), fac.getVariable("fn"));
-		final Term lastNameVariable = fac.getFunction(dtfac.getTypePredicate(COL_TYPE.STRING), fac.getVariable("ln"));
-		final Term ageVariable = fac.getFunction(dtfac.getTypePredicate(COL_TYPE.INTEGER), fac.getVariable("age"));
-		final Term schoolUriVariable = fac.getFunction(dtfac.getTypePredicate(COL_TYPE.STRING), fac.getVariable("schooluri"));
+		final Term firstNameVariable = fac.getTypedTerm(fac.getVariable("fn"), COL_TYPE.STRING);
+		final Term lastNameVariable = fac.getTypedTerm(fac.getVariable("ln"), COL_TYPE.STRING);
+		final Term ageVariable = fac.getTypedTerm(fac.getVariable("age"), COL_TYPE.INTEGER);
+		final Term schoolUriVariable = fac.getTypedTerm(fac.getVariable("schooluri"), COL_TYPE.STRING);
 		
 		headTerms.add(firstNameVariable);
 		headTerms.add(lastNameVariable);

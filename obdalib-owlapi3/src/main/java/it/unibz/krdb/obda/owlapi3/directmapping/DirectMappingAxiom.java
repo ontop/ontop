@@ -174,7 +174,7 @@ public class DirectMappingAxiom {
 								table.getName(), att.getName())), sub, objV));
 			} 
 			else {
-				Function obj = df.getFunction(dtfac.getTypePredicate(type), df.getVariable(att.getName()));
+				Function obj = df.getTypedTerm(df.getVariable(att.getName()), type);
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, obj));

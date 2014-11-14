@@ -127,7 +127,7 @@ public class ExpressionEvaluator {
 					if (!newterm.equals(old))
 						if (newterm == fac.getConstantFalse()) {
 							//
-							terms.set(i, fac.getFunction(dtfac.getTypePredicate(COL_TYPE.BOOLEAN), fac.getConstantFalse()));
+							terms.set(i, fac.getTypedTerm(fac.getConstantFalse(), COL_TYPE.BOOLEAN));
 						} else if (newterm == fac.getConstantTrue()) {
 							//remove
 							terms.remove(i);
@@ -397,26 +397,23 @@ public class ExpressionEvaluator {
 			Term parameter = function.getTerm(0);
 			if (predicate instanceof DataTypePredicate) {
 				if (dtfac.isLiteral(predicate)) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
-					return fac.getFunction(
-							dtfac.getTypePredicate(COL_TYPE.LITERAL),
-							fac.getVariable(parameter.toString()));
+					return fac.getTypedTerm(
+							fac.getVariable(parameter.toString()), COL_TYPE.LITERAL);
 				} 
 				else if (dtfac.isString(predicate)) { // R: was datatype.equals(OBDAVocabulary.XSD_STRING_URI)) {
-					return fac.getFunction(
-							dtfac.getTypePredicate(COL_TYPE.LITERAL),
-							fac.getVariable(parameter.toString()));
+					return fac.getTypedTerm(
+							fac.getVariable(parameter.toString()), COL_TYPE.LITERAL);
 				} 
 				else {
-					return fac.getFunction(
-							dtfac.getTypePredicate(COL_TYPE.LITERAL),
+					return fac.getTypedTerm(
 							fac.getFunction(
 									OBDAVocabulary.QUEST_CAST,
 									fac.getVariable(parameter.toString()),
-									fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.LITERAL))));
+									fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.LITERAL))), COL_TYPE.LITERAL);
 				}
 			} 
 			else if (predicate instanceof URITemplatePredicate) {
-				return fac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL), function.clone());
+				return fac.getTypedTerm(function.clone(), COL_TYPE.LITERAL);
 			} 
 			else if (predicate instanceof BNodePredicate) {
 				return fac.getConstantNULL();
@@ -535,8 +532,7 @@ public class ExpressionEvaluator {
 		Term innerTerm = term.getTerm(0);
 
 		// Create a default return constant: blank language with literal type.
-		Term emptyconstant = fac.getFunction(
-				dtfac.getTypePredicate(COL_TYPE.LITERAL), fac.getConstantLiteral("", COL_TYPE.LITERAL));
+		Term emptyconstant = fac.getTypedTerm(fac.getConstantLiteral("", COL_TYPE.LITERAL), COL_TYPE.LITERAL);
 
 		if (!(innerTerm instanceof Function)) {
 			return emptyconstant;
@@ -559,12 +555,11 @@ public class ExpressionEvaluator {
 		else { // rdfs:Literal(text, lang)
 			Term parameter = function.getTerm(1);
 			if (parameter instanceof Variable) {
-				return fac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL),
-						parameter.clone());
+				return fac.getTypedTerm(parameter.clone(), COL_TYPE.LITERAL);
 			} 
 			else if (parameter instanceof Constant) {
-				return fac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL),
-						fac.getConstantLiteral(((Constant) parameter).getValue(),COL_TYPE.LITERAL));
+				return fac.getTypedTerm(
+						fac.getConstantLiteral(((Constant) parameter).getValue(),COL_TYPE.LITERAL), COL_TYPE.LITERAL);
 			}
 		}
 		return term;

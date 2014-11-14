@@ -1642,10 +1642,9 @@ public class TurtleParser extends Parser {
 					state._fsp--;
 
 
-					      Predicate functionSymbol = dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG);
 					      Variable var = variable26;
 					      Term lang = language27;   
-					      value = dfac.getFunction(functionSymbol, var, lang);
+					      value = dfac.getTypedTerm(var, lang);
 					    
 					}
 					break;
@@ -1673,12 +1672,12 @@ public class TurtleParser extends Parser {
 					      if (type == COL_TYPE.LITERAL || type == COL_TYPE.STRING || type == COL_TYPE.INTEGER ||
 					    		  type == COL_TYPE.LONG || type == COL_TYPE.DECIMAL || type == COL_TYPE.DOUBLE ||
 					    		  type == COL_TYPE.DATETIME || type == COL_TYPE.BOOLEAN) {
-					    	  functionSymbol = dtfac.getTypePredicate(type);
+					    	  value = dfac.getTypedTerm(var, type);
 					      }
 					      else {
 					        throw new RecognitionException();
 					      }
-					      value = dfac.getFunction(functionSymbol, var);
+					      
 					    
 					}
 					break;
@@ -2106,9 +2105,9 @@ public class TurtleParser extends Parser {
 					       ValueConstant constant = stringLiteral36;
 					       Term lang = language37;
 					       if (lang != null) {
-					         value = dfac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG), constant, lang);
+					         value = dfac.getTypedTerm(constant, lang);
 					       } else {
-					       	 value = dfac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL), constant);
+					       	 value = dfac.getTypedTerm(constant, COL_TYPE.LITERAL);
 					       }
 					    
 					}
@@ -2218,20 +2217,19 @@ public class TurtleParser extends Parser {
 			      ValueConstant constant = stringLiteral42;
 			      String functionName = resource43.toString();
 			      
-			      Predicate functionSymbol = null;
 			      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
 			      
 			      // R: these are the only types that were listed
 			      if (type == COL_TYPE.LITERAL || type == COL_TYPE.STRING || type == COL_TYPE.INTEGER ||
 			    		  type == COL_TYPE.LONG || type == COL_TYPE.DECIMAL || type == COL_TYPE.DOUBLE ||
 			    		  type == COL_TYPE.DATETIME || type == COL_TYPE.BOOLEAN) {
-			    	  functionSymbol = dtfac.getTypePredicate(type);
+			    	  value = dfac.getTypedTerm(constant, type);
 			      }
 			      else {
 				        throw new RuntimeException("Unknown datatype: " + functionName);
 			      }
 			      
-			      value = dfac.getFunction(functionSymbol, constant);
+			      
 			    
 			}
 

@@ -2728,17 +2728,15 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		} 
 		else if (type2 == COL_TYPE.LITERAL_LANG) { 
-			objectTerm = dfac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG), dfac.getVariable("Y"), dfac.getVariable("Z"));
+			objectTerm = dfac.getTypedTerm(dfac.getVariable("Y"), dfac.getVariable("Z"));
 		} 
 		else {
-			Predicate pred = dtfac.getTypePredicate(type2);
-			
-			if (pred == null ||  // R: the three types below were not covered by the switch
-					type2 == COL_TYPE.DATE || type2 == COL_TYPE.TIME || type2 == COL_TYPE.YEAR) {
+			if (type2 == COL_TYPE.DATE || type2 == COL_TYPE.TIME || type2 == COL_TYPE.YEAR) {
+				// R: the three types below were not covered by the switch
 				throw new RuntimeException("Unsuported type: " + type2);
 			}
 			
-			objectTerm = dfac.getFunction(pred, dfac.getVariable("Y"));
+			objectTerm = dfac.getTypedTerm(dfac.getVariable("Y"), type2);
 		}
 		bodyTerms.add(objectTerm);
 

@@ -367,9 +367,7 @@ public class R2RMLParser {
 		//we check if it is a literal with language tag
 		
 		if (lan != null) {
-			Term lang = fac.getConstantLiteral(lan.toLowerCase());
-			Predicate literal = dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG);
-			Term langAtom = fac.getFunction(literal, objectAtom, lang);
+			Term langAtom = fac.getTypedTerm(objectAtom, lan);
 			objectAtom = langAtom;
 		}
 		
@@ -392,8 +390,7 @@ public class R2RMLParser {
 		else
 		{	//literal
 			Constant constt = fac.getConstantLiteral(objectString);
-			Predicate pred = dtfac.getTypePredicate(COL_TYPE.LITERAL);
-			return fac.getFunction(pred, constt);
+			return fac.getTypedTerm(constt, COL_TYPE.LITERAL);
 
 		}
 	}
