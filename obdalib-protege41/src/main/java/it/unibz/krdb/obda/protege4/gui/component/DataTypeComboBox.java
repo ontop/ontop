@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.protege4.gui.component;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.DatatypeFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -28,6 +29,7 @@ import it.unibz.krdb.obda.protege4.gui.IconLoader;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.util.List;
 
 import javax.swing.JComboBox;
 import javax.swing.JList;
@@ -47,12 +49,14 @@ public class DataTypeComboBox extends JComboBox {
 	}
 	
 	private static Predicate[] getQuestDataTypePredicates() {
-		DatatypeFactoryImpl dtfac = (DatatypeFactoryImpl)OBDADataFactoryImpl.getInstance().getDatatypeFactory(); 
+		DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory(); 
 		
-		int length = dtfac.QUEST_DATATYPE_PREDICATES.length + 1;
+		List<Predicate> prediacteList = dtfac.getDatatypePredicates();
+		
+		int length = prediacteList.size() + 1;
 		Predicate[] dataTypes = new Predicate[length];
 		dataTypes[0] = null;
-		System.arraycopy(dtfac.QUEST_DATATYPE_PREDICATES, 0, dataTypes, 1, dtfac.QUEST_DATATYPE_PREDICATES.length);
+		System.arraycopy(prediacteList.toArray(), 0, dataTypes, 1, prediacteList.size());
 		return dataTypes;
 	}
 

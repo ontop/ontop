@@ -39,6 +39,7 @@ import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
+
 import org.openrdf.model.Literal;
 
 import java.sql.Types;
@@ -93,6 +94,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private boolean isSI = false;
 	private SemanticIndexURIMap uriRefIds;
 	
+	private final QuestTypeMapper questTypeMapper = OBDADataFactoryImpl.getInstance().getQuestTypeMapper();
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqladapter) {
@@ -680,7 +682,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Function f = (Function) term;
 		if (f.isDataTypeFunction()) {
 			Predicate p = f.getFunctionSymbol();
-			return JdbcTypeMapper.getInstance().getSQLType(p);
+			Predicate.COL_TYPE type = dtfac.getDataType(p.toString());			
+			return OBDADataFactoryImpl.getInstance().getJdbcTypeMapper().getSQLType(type);
 		}
 		// Return varchar for unknown
 		return Types.VARCHAR;
@@ -824,9 +827,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return String.format(mainTemplate, mainColumn, sqladapter.sqlQuote(signature.get(hpos)));
 	}
 
+	
+	private static final String langStrForSELECT = "%s AS \"%sLang\"";
+	
 	private String getLangColumnForSELECT(Term ht, List<String> signature, int hpos, QueryAliasIndex index) {
 
-		String langStr = "%s AS \"%sLang\"";
 
 		if (ht instanceof Function) {
 			Function ov = (Function) ht;
@@ -853,17 +858,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					lang = getSQLString(langTerm, index, false);
 				}
-				return (String.format(langStr, lang, signature.get(hpos)));
+				return (String.format(langStrForSELECT, lang, signature.get(hpos)));
 			}
 		}
-		return (String.format(langStr, "NULL", signature.get(hpos)));
+		return (String.format(langStrForSELECT, "NULL", signature.get(hpos)));
 
 	}
 
+	private static final String typeStrForSELECT = "%s AS \"%sQuestType\"";
+	
 
 	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
-
-		String typeStr = "%s AS \"%sQuestType\"";
+		int code;
 
 		if (ht instanceof Function) {
 			Function ov = (Function) ht;
@@ -879,26 +885,26 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			
 			if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
-                int k = QuestTypeMapper.getInstance().getQuestCode(COL_TYPE.OBJECT);
-				return (String.format(typeStr, k, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
-                int k = QuestTypeMapper.getInstance().getQuestCode(COL_TYPE.BNODE);
-				return (String.format(typeStr, k, signature.get(hpos)));
+                code = questTypeMapper.getQuestCode(COL_TYPE.OBJECT);
+			} 
+			else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
+                code = questTypeMapper.getQuestCode(COL_TYPE.BNODE);
 			}
 			else {
 				Predicate.COL_TYPE type = dtfac.getDataType(functionString);
-				int k = QuestTypeMapper.getInstance().getQuestCode(type);
-				return (String.format(typeStr, k, signature.get(hpos)));
+				code = questTypeMapper.getQuestCode(type);
 			}
-		} else if (ht instanceof URIConstant) {
-            int k = QuestTypeMapper.getInstance().getQuestCode(COL_TYPE.OBJECT);
-			return (String.format(typeStr, k, signature.get(hpos)));
-		} else if (ht == OBDAVocabulary.NULL) {
-            int k = QuestTypeMapper.getInstance().getQuestCode(COL_TYPE.NULL);
-			return (String.format(typeStr, k, signature.get(hpos)));
+		} 
+		else if (ht instanceof URIConstant) {
+            code = questTypeMapper.getQuestCode(COL_TYPE.OBJECT);
+		} 
+		else if (ht == OBDAVocabulary.NULL) {
+            code = questTypeMapper.getQuestCode(COL_TYPE.NULL);
 		}
-		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
-
+		else
+			throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
+		
+		return String.format(typeStrForSELECT, code, signature.get(hpos));
 	}
 
 	public String getSQLStringForTemplateFunction(Function ov, QueryAliasIndex index) {
