@@ -7,9 +7,7 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 import java.util.Map;
 
 /**
- * Temporary class (before refactoring of Unifier and Substitution).
- *
- * TODO: rename it Substitution (complies to the unification theory. Is a function).
+ * TODO: remove this class after merging with version1. --> Provided by SubstitutionUtilities
  */
 public class Substitutions {
 

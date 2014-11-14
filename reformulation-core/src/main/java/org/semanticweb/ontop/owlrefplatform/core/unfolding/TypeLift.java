@@ -1,18 +1,15 @@
 package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import fj.*;
 import fj.data.*;
 import fj.data.HashMap;
 import fj.data.List;
-import fj.data.TreeMap;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypePropagatingSubstitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
@@ -471,7 +468,7 @@ public class TypeLift {
          *
          * TODO: make the latter function throw the exception.
          */
-        TypePropagatingSubstitution typePropagatingSubstitutionFunction = TypePropagatingSubstitution.getTypePropagatingSubstitution(
+        TypePropagatingSubstitution typePropagatingSubstitutionFunction = TypePropagatingSubstitution.createTypePropagatingSubstitution(
                 proposedAtom, localAtom, ImmutableMultimap.<Predicate, Integer>of());
 
         /**

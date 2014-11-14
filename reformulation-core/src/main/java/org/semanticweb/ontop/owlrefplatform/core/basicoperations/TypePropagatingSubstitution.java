@@ -18,18 +18,24 @@ import org.semanticweb.ontop.model.impl.*;
 import java.util.Map;
 
 /**
- * TODO: explain
+ * Type propagation utilities and inner methods.
  *
- * TODO: inherit from SubstitutionFunction, not from Unifier.
+ * This class needs to be refactored:
+ *   - Simplified (simpler than unification)
+ *   - Find good names and good explanations.
  *
- * TODO: this is very dirty. Simplify.
+ * TODO: could we move its static methods to TypePropagationUtilities?
+ *
+ * TODO: try to apply the same pattern (substitution union) that inside TypeLift. This might finally become clear.
+ *
+ * TODO: inherit from Substitution, not from Unifier (after merge with version 1).
  */
 public class TypePropagatingSubstitution extends Unifier {
 
     /**
      * Default and normal constructor.
      */
-    public TypePropagatingSubstitution() {
+    private TypePropagatingSubstitution() {
         super();
     }
 
@@ -38,7 +44,7 @@ public class TypePropagatingSubstitution extends Unifier {
      *
      * Tip: make it immutable if you can.
      */
-    public TypePropagatingSubstitution(Map<VariableImpl, Term> substitutions) {
+    private TypePropagatingSubstitution(Map<VariableImpl, Term> substitutions) {
         super(substitutions);
     }
 
@@ -46,56 +52,67 @@ public class TypePropagatingSubstitution extends Unifier {
     private static OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
 
     /**
-     * TODO: explain
-     * @param first
-     * @param second
-     * @param multiTypedPredicateIndex
-     * @return
+     * TODO: understand, simplify and explain
+     *
+     * By contrast with unification, atom order matters.
+     *
+     * TODO: return a generic Substitution (need merging with v1)
      */
-    public static TypePropagatingSubstitution getTypePropagatingSubstitution(Function first, Function second,
-                                                                             Multimap<Predicate, Integer> multiTypedPredicateIndex) {
+    public static TypePropagatingSubstitution createTypePropagatingSubstitution(Function firstAtom, Function secondAtom,
+                                                                 Multimap<Predicate, Integer> multiTypedPredicateIndex) {
 
-        // Basic case: if predicates are different or their arity is different,
-        // then no unifier
-        if ((first.getArity() != second.getArity()
-                || !first.getFunctionSymbol().equals(second.getFunctionSymbol()))) {
+        /**
+         * Basic condition: if predicates are different or their arity is different,
+         * then no type propagation
+         */
+
+        if ((firstAtom.getArity() != secondAtom.getArity()
+                || !firstAtom.getFunctionSymbol().equals(secondAtom.getFunctionSymbol()))) {
             return null;
         }
 
-        Function firstAtom = (Function) first.clone();
-        Function secondAtom = (Function) second.clone();
+        Function clonedFirstAtom = (Function) firstAtom.clone();
+        Function clonedSecondAtom = (Function) secondAtom.clone();
 
-        int arity = first.getArity();
-        TypePropagatingSubstitution mgu = new TypePropagatingSubstitution();
+        int arity = firstAtom.getArity();
+        // Mutable object
+        TypePropagatingSubstitution substitution = new TypePropagatingSubstitution();
 
-        // Computing the disagreement set
+        /**
+         * Computing the disagreement set
+         */
         for (int termidx = 0; termidx < arity; termidx++) {
 
             // Checking if there are already substitutions calculated for the
             // current terms. If there are any, then we have to take the
             // substituted terms instead of the original ones.
+            // ??????
 
-            Term term1 = firstAtom.getTerm(termidx);
-            Term term2 = secondAtom.getTerm(termidx);
+            Term term1 = clonedFirstAtom.getTerm(termidx);
+            Term term2 = clonedSecondAtom.getTerm(termidx);
 
             boolean changed = false;
 
-            // We have two cases, unifying 'simple' terms, and unifying function terms.
+            /**
+             * We have two cases, unifying 'simple' terms, and unifying function terms.
+             */
             if (!(term1 instanceof Function) || !(term2 instanceof Function)) {
 
-                if (!mgu.composeForTypePropagation(term1, term2))
+                if (!substitution.composeForTypePropagation(term1, term2))
                     return null;
 
                 changed = true;
             }
+            /**
+             * If both of them are function terms then we need to do some check in the inner terms
+             */
             else {
-
-                // if both of them are function terms then we need to do some
-                // check in the inner terms
-
                 Function fterm1 = (Function) term1;
                 Function fterm2 = (Function) term2;
 
+                /**
+                 * TODO: factorize it. Redundant with the first line of this method.
+                 */
                 if ((fterm1.getTerms().size() != fterm2.getTerms().size()) ||
                         !fterm1.getFunctionSymbol().equals(fterm2.getFunctionSymbol())) {
                     return null;
@@ -103,31 +120,37 @@ public class TypePropagatingSubstitution extends Unifier {
 
                 int innerarity = fterm1.getTerms().size();
                 for (int innertermidx = 0; innertermidx < innerarity; innertermidx++) {
-                    if (!mgu.composeAndPropagateType(fterm1, fterm2.getTerm(innertermidx), innertermidx,
+                    if (!substitution.composeAndPropagateType(fterm1, fterm2.getTerm(innertermidx), innertermidx,
                             multiTypedPredicateIndex))
                         return null;
 
                     changed = true;
 
-                    // Applying the newly computed substitution to the 'replacement' of
-                    // the existing substitutions
-                    UnifierUtilities.applyUnifier(fterm1, mgu, innertermidx + 1);
-                    UnifierUtilities.applyUnifier(fterm2, mgu, innertermidx + 1);
+                    /**
+                     * Applying the newly computed substitution to the 'replacement' of
+                     * the existing substitutions
+                     */
+                    UnifierUtilities.applyUnifier(fterm1, substitution, innertermidx + 1);
+                    UnifierUtilities.applyUnifier(fterm2, substitution, innertermidx + 1);
                 }
             }
             if (changed) {
 
                 // Applying the newly computed substitution to the 'replacement' of
                 // the existing substitutions
-                UnifierUtilities.applyUnifier(firstAtom, mgu, termidx + 1);
-                UnifierUtilities.applyUnifier(secondAtom, mgu, termidx + 1);
+                UnifierUtilities.applyUnifier(clonedFirstAtom, substitution, termidx + 1);
+                UnifierUtilities.applyUnifier(clonedSecondAtom, substitution, termidx + 1);
             }
         }
-        return mgu;
+        return substitution;
     }
 
+    /**
+     * Apparently not a composition
+     * TODO: rename it and clarify the connection with substitution union.
+     */
     private boolean composeForTypePropagation(Term term1, Term term2) {
-        Substitution s = getSubstitution(term1, term2);
+        Substitution s = createTypePropagatingSubstitution(term1, term2);
 
         boolean acceptSubstitution = putSubstitution(s);
         return acceptSubstitution;
@@ -139,6 +162,8 @@ public class TypePropagatingSubstitution extends Unifier {
      * Use case: handle aggregates.
      * TODO: explain further.
      *
+     * TODO: rename it because it is apparently not a valid composition.
+     *
      */
     private boolean composeAndPropagateType(Function atom1, Term term2, int termIndex, Multimap<Predicate, Integer> multiTypedPredicateIndex) {
         Predicate functionSymbol1 = atom1.getFunctionSymbol();
@@ -149,11 +174,11 @@ public class TypePropagatingSubstitution extends Unifier {
             if (multiTypedPredicateIndex.get(functionSymbol1).contains(termIndex)){ //the term is the problematic one
                 s = new NeutralSubstitution();
             } else{
-                s = getSubstitution(term1, term2);
+                s = createTypePropagatingSubstitution(term1, term2);
             }
         }
         else{
-            s = getSubstitution(term1, term2);
+            s = createTypePropagatingSubstitution(term1, term2);
         }
 
         boolean acceptSubstitution = putSubstitution(s);
@@ -161,18 +186,12 @@ public class TypePropagatingSubstitution extends Unifier {
     }
 
     /***
-     * Computes the substitution that makes two terms equal.
+     * Inspired by Substitution.createUnifier (version 1).
      *
-     * ROMAN: careful -- does not appear to work correctly with AnonymousVariables
+     * TODO: explain why the order of terms is important.
      *
-     * TODO: discuss about the order of the two terms (when it matters, when not). This seems
-     * to be very important.
-     *
-     * @param term1
-     * @param term2
-     * @return
      */
-    private static Substitution getSubstitution(Term term1, Term term2) {
+    private static Substitution createTypePropagatingSubstitution(Term term1, Term term2) {
 
         if (!(term1 instanceof VariableImpl) && !(term2 instanceof VariableImpl)) {
 
@@ -204,16 +223,21 @@ public class TypePropagatingSubstitution extends Unifier {
         if (term1 instanceof VariableImpl) {
             t1 = (VariableImpl)term1;
             t2 = term2;
-            /**
-             * Type propagation special case.
-             */
+        /**
+         * NB: this condition differs from unification.
+         */
         } else if (term1 instanceof Function) {
             P2<VariableImpl, Term> proposedTerms = getTypePropagatingSubstitution((Function) term1, term2);
             t1 = proposedTerms._1();
             t2 = proposedTerms._2();
         }
         /**
-         * TODO: explain why the two terms can be "reversed".
+         * A substitution takes variables as input and returns terms.
+         *
+         * Thus, we should make sure the first term is variable.
+         *
+         * TODO: further explain why it is ok with type propagation (where order matters
+         * in some places).
          */
         else {
             t1 = (VariableImpl)term2;
@@ -242,7 +266,7 @@ public class TypePropagatingSubstitution extends Unifier {
     }
 
     /**
-     * TODO: explain
+     * TODO: explain and rename.
      */
     private static P2<VariableImpl, Term> getTypePropagatingSubstitution(Function functionalTerm1, Term term2) {
         Predicate functionSymbol1 = functionalTerm1.getFunctionSymbol();
@@ -299,7 +323,7 @@ public class TypePropagatingSubstitution extends Unifier {
             }
         }
         /**
-         * If term1 is a variable, at least term2 is.
+         * If term1 is a variable, at least term2 is a term.
          */
         return P.p((VariableImpl)term2, (Term)functionalTerm1);
     }
@@ -311,6 +335,10 @@ public class TypePropagatingSubstitution extends Unifier {
      * Functional terms with 0 or more than 1 variable are not added to the new substitution function.
      *
      * Returns the new substitution function.
+     *
+     * TODO: use the Substitution type in the prototype (input and output).
+     *
+     * TODO: move it to TypePropagationUtilities
      */
     public static TypePropagatingSubstitution forceVariableReuse(TypePropagatingSubstitution initialSubstitutionFct) {
         Stream<P2<VariableImpl, Term>> unifierEntries = Stream.iterableStream(TreeMap.fromMutableMap(Ord.<VariableImpl>hashOrd(),
