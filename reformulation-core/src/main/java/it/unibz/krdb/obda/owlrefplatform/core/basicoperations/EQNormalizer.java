@@ -27,13 +27,13 @@ public class EQNormalizer {
 	public static void enforceEqualities(CQIE result) {
 
 		List<Function> body = result.getBody();
-		Unifier mgu = new Unifier();
+		Substitution mgu = new SubstitutionImpl();
 
 		// collecting all equalities as substitutions 
 
 		for (int i = 0; i < body.size(); i++) {
 			Function atom = body.get(i);
-			UnifierUtilities.applyUnifier(atom, mgu);
+			SubstitutionUtilities.applySubstitution(atom, mgu);
 
             if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
                 if (!mgu.compose(atom.getTerm(0), atom.getTerm(1))) 
@@ -60,18 +60,18 @@ public class EQNormalizer {
             }
         }
 
-		UnifierUtilities.applyUnifier(result, mgu, false);
+		SubstitutionUtilities.applySubstitution(result, mgu, false);
 	}
 
     /**
      * We search for equalities in conjunctions. This recursive methods explore AND functions 
      * and removes EQ functions, substituting the values using the class
-     * {@link Unifier#compose(it.unibz.krdb.obda.model.Term, it.unibz.krdb.obda.model.Term)}
+     * {@link it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution#compose(it.unibz.krdb.obda.model.Term, it.unibz.krdb.obda.model.Term)}
      * 
      * @param atom the atom that can contain equalities
      * @param mgu mapping between a variable and a term
      */
-    private static void nestedEQSubstitutions(Function atom, Unifier mgu) {
+    private static void nestedEQSubstitutions(Function atom, Substitution mgu) {
     	
         List<Term> terms = atom.getTerms();
         for (int i = 0; i < terms.size(); i++) {
@@ -79,7 +79,7 @@ public class EQNormalizer {
 
             if (t instanceof Function) {
                 Function t2 = (Function) t;
-                UnifierUtilities.applyUnifier(t2, mgu);
+                SubstitutionUtilities.applySubstitution(t2, mgu);
 
                 //in case of equalities do the substitution and remove the term
                 if (t2.getFunctionSymbol() == OBDAVocabulary.EQ) {

@@ -242,7 +242,7 @@ public class DatalogNormalizer {
 	 * @param substitutions
 	 */
 	public static void pullOutEqualities(CQIE query) {
-		Unifier substitutions = new Unifier();
+		Substitution substitutions = new SubstitutionImpl();
 		int[] newVarCounter = { 1 };
 
 		Set<Function> booleanAtoms = new HashSet<Function>();
@@ -257,7 +257,7 @@ public class DatalogNormalizer {
 		 * query.
 		 */
 
-		UnifierUtilities.applyUnifier(query, substitutions, false);
+		SubstitutionUtilities.applySubstitution(query, substitutions, false);
 
 	}
 
@@ -342,7 +342,7 @@ public class DatalogNormalizer {
 	 * @param currentTerms
 	 * @param substitutions
 	 */
-	private static void pullOutEqualities(List currentTerms, Unifier substitutions, List<Function> eqList,
+	private static void pullOutEqualities(List currentTerms, Substitution substitutions, List<Function> eqList,
 			int[] newVarCounter, boolean isLeftJoin) {
 
 		for (int i = 0; i < currentTerms.size(); i++) {
