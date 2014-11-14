@@ -88,13 +88,13 @@ public class SubstitutionImpl implements Substitution {
     }
 
     /***
-     * Creates a singleton substitution out of term1 and term2.
+     * Creates a unifier (singleton substitution) out of term1 and term2.
      *
-     * Then, composes the current substitution with the latter.
+     * Then, composes the current substitution with this unifier.
      * (remind that composition is not commutative).
      *
      *
-     * Note that the unifier will be modified in this process.
+     * Note that this Substitution object will be modified in this process.
      *
      * The operation is as follows
      *
@@ -107,7 +107,7 @@ public class SubstitutionImpl implements Substitution {
     @Override
     public boolean compose(Term term1, Term term2) {
 
-        Substitution s = createSubstitution(term1, term2);
+        Substitution s = createUnifier(term1, term2);
 
         // Rejected substitution (conflicts)
         if (s == null)
@@ -160,7 +160,7 @@ public class SubstitutionImpl implements Substitution {
     }
 
     /***
-     * Computes the substitution that makes two terms equal.
+     * Computes the unifier that makes two terms equal.
      *
      * ROMAN: careful -- does not appear to work correctly with AnonymousVariables
      *
@@ -168,7 +168,7 @@ public class SubstitutionImpl implements Substitution {
      * @param term2
      * @return
      */
-    private static Substitution createSubstitution(Term term1, Term term2) {
+    private static Substitution createUnifier(Term term1, Term term2) {
 
         if (!(term1 instanceof VariableImpl) && !(term2 instanceof VariableImpl)) {
 
