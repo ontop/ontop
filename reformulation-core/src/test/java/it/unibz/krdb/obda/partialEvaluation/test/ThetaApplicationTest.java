@@ -30,9 +30,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -103,17 +101,18 @@ public class ThetaApplicationTest extends TestCase {
 
 		CQIE query = predFactory.getCQIE(h, body);
 
-		Substitution s1 = new Substitution(t7, t6);
-		Substitution s2 = new Substitution(t8, t9);
-		Substitution s3 = new Substitution(t11, otx);
+        SingletonSubstitution s1 = new SingletonSubstitution(t7, t6);
+        SingletonSubstitution s2 = new SingletonSubstitution(t8, t9);
+        SingletonSubstitution s3 = new SingletonSubstitution(t11, otx);
 
-		Unifier mgu = new Unifier();
-		mgu.put((VariableImpl) s1.getVariable(), s1.getTerm());
-		mgu.put((VariableImpl) s2.getVariable(), s2.getTerm());
-		mgu.put((VariableImpl) s3.getVariable(), s3.getTerm());
+        Map<VariableImpl, Term> entries = new HashMap<>();
+		entries.put(s1.getVariable(), s1.getTerm());
+		entries.put(s2.getVariable(), s2.getTerm());
+		entries.put(s3.getVariable(), s3.getTerm());
+        Substitution mgu = new SubstitutionImpl(entries);
 
 		UnifierUtilities unifier = new UnifierUtilities();
-		CQIE newquery = unifier.applyUnifier(query, mgu);
+		CQIE newquery = SubstitutionUtilities.applySubstitution(query, mgu);
 
 		List<Function> newbody = newquery.getBody();
 		assertEquals(1, newbody.size());
