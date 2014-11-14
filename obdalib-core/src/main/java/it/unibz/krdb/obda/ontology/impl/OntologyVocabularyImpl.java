@@ -85,8 +85,12 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	@Override
 	public ObjectPropertyExpression createObjectProperty(String uri) {
 		ObjectPropertyExpression rd = ofac.createObjectProperty(uri);
-		if (!rd.isBottom() && !rd.isTop())
-			objectProperties.add(rd);
+		if (!rd.isBottom() && !rd.isTop()) {
+			if (isAuxiliaryProperty(rd))
+				auxObjectProperties.add(rd);
+			else
+				objectProperties.add(rd);
+		}
 		return rd;
 	}
 
@@ -101,8 +105,12 @@ public class OntologyVocabularyImpl implements OntologyVocabulary {
 	@Override
 	public DataPropertyExpression createDataProperty(String uri) {
 		DataPropertyExpression rd = ofac.createDataProperty(uri);
-		if (!rd.isBottom() && !rd.isTop())
-			dataProperties.add(rd);
+		if (!rd.isBottom() && !rd.isTop()) {
+			if (isAuxiliaryProperty(rd))
+				auxDataProperties.add(rd);
+			else
+				dataProperties.add(rd);
+		}
 		return rd;
 	}
 

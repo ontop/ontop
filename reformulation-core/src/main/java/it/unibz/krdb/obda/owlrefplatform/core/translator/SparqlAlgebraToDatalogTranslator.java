@@ -34,20 +34,17 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -57,8 +54,6 @@ import org.openrdf.model.datatypes.XMLDatatypeUtil;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.And;
 import org.openrdf.query.algebra.BinaryTupleOperator;
@@ -395,10 +390,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		nullVars.removeAll(atom1VarsSet); // the remaining variables do not
 											// appear in the body assigning
 											// null;
-		Unifier nullifier = UnifierUtilities.getNullifier(nullVars);
+		Substitution nullifier = SubstitutionUtilities.getNullifier(nullVars);
 		// making the rule
 		CQIE newrule1 = ofac.getCQIE(head, leftAtom);
-		pr.appendRule(UnifierUtilities.applyUnifier(newrule1, nullifier));
+		pr.appendRule(SubstitutionUtilities.applySubstitution(newrule1, nullifier));
 
 		// finding out null
 		nullVars = new HashSet<Variable>();
@@ -406,10 +401,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		nullVars.removeAll(atom2VarsSet); // the remaining variables do not
 											// appear in the body assigning
 											// null;
-		nullifier = UnifierUtilities.getNullifier(nullVars);
+		nullifier = SubstitutionUtilities.getNullifier(nullVars);
 		// making the rule
 		CQIE newrule2 = ofac.getCQIE(head, rightAtom);
-		pr.appendRule(UnifierUtilities.applyUnifier(newrule2, nullifier));
+		pr.appendRule(SubstitutionUtilities.applySubstitution(newrule2, nullifier));
 
 		/*
 		 * Translating the rest
