@@ -39,14 +39,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -54,45 +47,12 @@ import org.openrdf.model.datatypes.XMLDatatypeUtil;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.query.Binding;
+import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.And;
-import org.openrdf.query.algebra.BinaryTupleOperator;
-import org.openrdf.query.algebra.BinaryValueOperator;
-import org.openrdf.query.algebra.Bound;
-import org.openrdf.query.algebra.Compare;
+import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.Compare.CompareOp;
-import org.openrdf.query.algebra.Datatype;
-import org.openrdf.query.algebra.Distinct;
-import org.openrdf.query.algebra.Extension;
-import org.openrdf.query.algebra.ExtensionElem;
-import org.openrdf.query.algebra.Filter;
-import org.openrdf.query.algebra.IsBNode;
-import org.openrdf.query.algebra.IsLiteral;
-import org.openrdf.query.algebra.IsURI;
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.Lang;
-import org.openrdf.query.algebra.LangMatches;
-import org.openrdf.query.algebra.LeftJoin;
-import org.openrdf.query.algebra.MathExpr;
 import org.openrdf.query.algebra.MathExpr.MathOp;
-import org.openrdf.query.algebra.Not;
-import org.openrdf.query.algebra.Or;
-import org.openrdf.query.algebra.Order;
-import org.openrdf.query.algebra.OrderElem;
-import org.openrdf.query.algebra.Projection;
-import org.openrdf.query.algebra.ProjectionElem;
-import org.openrdf.query.algebra.Reduced;
-import org.openrdf.query.algebra.Regex;
-import org.openrdf.query.algebra.SameTerm;
-import org.openrdf.query.algebra.Slice;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.Str;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.UnaryTupleOperator;
-import org.openrdf.query.algebra.UnaryValueOperator;
-import org.openrdf.query.algebra.Union;
-import org.openrdf.query.algebra.ValueExpr;
-import org.openrdf.query.algebra.Var;
 import org.openrdf.query.parser.ParsedGraphQuery;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
@@ -232,7 +192,11 @@ public class SparqlAlgebraToDatalogTranslator {
 		} else if (te instanceof Extension) { 
 			Extension extend = (Extension) te;
 			translate(vars, extend, pr, i, varcount);
-			
+
+		} else if (te instanceof BindingSetAssignment) {
+			BindingSetAssignment bindingSetAssignment = (BindingSetAssignment) te;
+			translate(vars, bindingSetAssignment, pr, i, varcount);
+
 		} else {
 			try {
 				throw new QueryEvaluationException("Operation not supported: "
@@ -430,58 +394,28 @@ public class SparqlAlgebraToDatalogTranslator {
 		TupleExpr right = join.getRightArg();
 
 		/* Preparing the two atoms */
+		Function leftAtom = createJoinAtom(left, 2*i);
+		Function rightAtom = createJoinAtom(right, 2*i + 1);
 
-		Set<Variable> atom1VarsSet = getVariables(left);
-		List<Term> atom1VarsList = new LinkedList<Term>();
-		atom1VarsList.addAll(atom1VarsSet);
-		Collections.sort(atom1VarsList, comparator);
-		Predicate leftAtomPred = ofac.getPredicate("ans" + (2 * i),
-				atom1VarsList.size());
-		Function leftAtom = ofac.getFunction(leftAtomPred, atom1VarsList);
-
-		Set<Variable> atom2VarsSet = getVariables(right);
-		List<Term> atom2VarsList = new LinkedList<Term>();
-		atom2VarsList.addAll(atom2VarsSet);
-		Collections.sort(atom2VarsList, comparator);
-		Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i) + 1),
-				atom2VarsList.size());
-		Function rightAtom = ofac.getFunction(rightAtomPred, atom2VarsList);
-		/* The join, this is no longer necessary, we will try to avoid explicit joins
-		as much as poosible, just use comma */
+		/**
+		 * The join, this is no longer necessary, we will try to avoid explicit joins
+		 * as much as possible, just use comma
+		 */
 //		Predicate joinp = OBDAVocabulary.SPARQL_JOIN;
 //		Function joinAtom = ofac.getFunction(joinp, leftAtom, rightAtom);
-
-		/* Preparing the head of the Join rule */
-		// Collections.sort(vars, comparator);
-		List<Term> headVars = new LinkedList<Term>();
-		for (Variable var : vars) {
-			headVars.add(var);
-		}
-		Predicate answerPred = ofac.getPredicate("ans" + i, vars.size());
-		Function head = ofac.getFunction(answerPred, headVars);
 
 		/*
 		 * Adding the join to the program
 		 */
+		Function head = createAnsAtom(i, vars);
+		CQIE newRule = ofac.getCQIE(head, leftAtom, rightAtom);
+		pr.appendRule(newRule);
 
-		CQIE newrule = ofac.getCQIE(head, leftAtom, rightAtom);
-		pr.appendRule(newrule);
-
-		/*
+		/**
 		 * Translating the rest
 		 */
-		{
-			List<Variable> vars1 = new LinkedList<Variable>();
-			for (Term var : atom1VarsList)
-				vars1.add((Variable) var);
-			translate(vars1, left, pr, 2 * i, varcount);
-		}
-		{
-			List<Variable> vars2 = new LinkedList<Variable>();
-			for (Term var : atom2VarsList)
-				vars2.add((Variable) var);
-			translate(vars2, right, pr, 2 * i + 1, varcount);
-		}
+		translateAtomExpression(left, leftAtom, pr, 2 * i, varcount);
+		translateAtomExpression(right, rightAtom, pr, 2 * i + 1, varcount);
 	}
 
 	private void translate(List<Variable> vars, LeftJoin join,
@@ -589,7 +523,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		/* Continue the nested tree */
 
-		vars = new LinkedList<Variable>();
+		vars = new ArrayList<>();
 		for (Term var : bodyatomVarsList) {
 			vars.add((Variable) var);
 		}
@@ -636,31 +570,31 @@ public class SparqlAlgebraToDatalogTranslator {
 	public void translate(List<Variable> var, Filter filter, DatalogProgram pr,
 			long i, int varcount[]) {
 		ValueExpr condition = filter.getCondition();
-		List<Function> filterAtoms = new LinkedList<Function>();
-		Set<Variable> filteredVariables = new LinkedHashSet<Variable>();
+		List<Function> filterAtoms = new ArrayList<>();
+		Set<Variable> filteredVariables = new LinkedHashSet<>();
 
-			Function a = null;
-			if (condition instanceof Var) {
-				a = ofac.getFunction(OBDAVocabulary.IS_TRUE, getVariableTerm((Var) condition));
-			} else {
-				a = (Function) getBooleanTerm(condition);
-			}
-			if (a != null) {
-				Function filterAtom = ofac.getFunction(a.getFunctionSymbol(),
-						a.getTerms());
-				filterAtoms.add(filterAtom);
-				filteredVariables.addAll(filterAtom.getReferencedVariables());
-			}
+		Function a;
+		if (condition instanceof Var) {
+			a = ofac.getFunction(OBDAVocabulary.IS_TRUE, getVariableTerm((Var) condition));
+		} else {
+			a = (Function) getBooleanTerm(condition);
+		}
+		if (a != null) {
+			Function filterAtom = ofac.getFunction(a.getFunctionSymbol(),
+					a.getTerms());
+			filterAtoms.add(filterAtom);
+			filteredVariables.addAll(filterAtom.getReferencedVariables());
+		}
 
 		Predicate predicate = ofac.getPredicate("ans" + (i), var.size());
-		List<Term> vars = new LinkedList<Term>();
+		List<Term> vars = new ArrayList<>();
 		vars.addAll(var);
 		Function head = ofac.getFunction(predicate, vars);
 
 		Predicate pbody;
 		Function bodyAtom;
 
-		List<Term> innerProjection = new LinkedList<Term>();
+		List<Term> innerProjection = new ArrayList<>();
 		innerProjection.addAll(filteredVariables);
 		Collections.sort(innerProjection, comparator);
 
@@ -818,7 +752,16 @@ public class SparqlAlgebraToDatalogTranslator {
 		CQIE newrule = ofac.getCQIE(head, result);
 		pr.appendRule(newrule);
 	}
-	
+
+	/**
+	 * Does nothing here because we follow the FILTER strategy for implementing VALUES.
+	 */
+	private void translate(List<Variable> vars, BindingSetAssignment bindingSetAssignment,
+						   DatalogProgram pr, long i, int[] varcount) {
+		//Does nothing
+	}
+
+
 	private Term getOntopTerm(Var subj, Value s) {
 		Term result = null;
 		if (s == null) {
@@ -1005,16 +948,29 @@ public class SparqlAlgebraToDatalogTranslator {
 			result.addAll(getVariables(((BinaryTupleOperator) te).getLeftArg()));
 			result.addAll(getVariables(((BinaryTupleOperator) te).getRightArg()));
 		} else if (te instanceof UnaryTupleOperator) {
-				if (te instanceof Extension) {
-					result.addAll(getBindVariables(((Extension) te).getElements()));
-				}
+			if (te instanceof Extension) {
+				result.addAll(getBindVariables(((Extension) te).getElements()));
+			}
 			result.addAll(getVariables(((UnaryTupleOperator) te).getArg()));
+		}
+		else if (te instanceof BindingSetAssignment) {
+			Set<String> bindingNames = te.getBindingNames();
+			result.addAll(createVariables(bindingNames));
+
 		} else {
 			throw new RuntimeException("Operator not supported: " + te);
 		}
 		return result;
 	}
-	
+
+	private List<Variable> createVariables(Collection<String> bindingNames) {
+		List<Variable> variables = new ArrayList<>();
+		for(String bindingName : bindingNames){
+			variables.add(ofac.getVariable(bindingName));
+		}
+		return variables;
+	}
+
 	//private Variable getFreshVariable(int[] count) {
 	//	count[0] += 1;
 	//	return ofac.getVariable("VAR" + count[0]);
@@ -1338,5 +1294,125 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	public void setSemanticIndexUriRef(SemanticIndexURIMap uriRef) {
 		this.uriRef = uriRef;
+	}
+
+	private Function createAnsAtom(TupleExpr expression, long counter) {
+		/*
+		 * Sorted atom terms
+		 */
+		List<Term> atomTerms = new ArrayList<>();
+		atomTerms.addAll(getVariables(expression));
+		Collections.sort(atomTerms, comparator);
+
+		/*
+		 * Atom
+		 */
+		Predicate predicate = ofac.getPredicate("ans" + counter, atomTerms.size());
+		Function atom = ofac.getFunction(predicate, atomTerms);
+		return atom;
+	}
+
+	private Function createAnsAtom(long counter, List<Variable> variables) {
+		// Collections.sort(vars, comparator);
+		List<Term> headVars = new ArrayList<>();
+		headVars.addAll(variables);
+		Predicate answerPred = ofac.getPredicate("ans" + counter, variables.size());
+		Function atom = ofac.getFunction(answerPred, headVars);
+		return atom;
+	}
+
+	private Function createJoinAtom(TupleExpr expression, long counter) {
+		Function atom;
+		/**
+		 * VALUES --> Filter atom
+		 */
+		if(expression instanceof BindingSetAssignment){
+			atom = createFilterValuesAtom((BindingSetAssignment) expression);
+		}
+		/**
+		 * Normal atom
+		 */
+		else {
+			atom = createAnsAtom(expression, counter);
+		}
+
+		return atom;
+	}
+
+	private void translateAtomExpression(TupleExpr expression, Function atom, DatalogProgram pr, long counter,
+										 int[] varCount) {
+		List<Variable> atomTopVariables = new ArrayList<>();
+		for (Term term : atom.getTerms()) {
+			if (term instanceof  Variable)
+				atomTopVariables.add((Variable) term);
+		}
+		translate(atomTopVariables, expression, pr, counter, varCount);
+	}
+
+	/**
+	 * Creates a "FILTER" atom out of VALUES bindings.
+	 */
+	private Function createFilterValuesAtom(BindingSetAssignment expression) {
+		Map<String, Variable> variableIndex = createVariableIndex(expression.getBindingNames());
+
+		/**
+		 * Example of a composite term corresponding to a binding: AND(EQ(X,1), EQ(Y,2))
+		 */
+		List<Term> bindingCompositeTerms = new ArrayList<>();
+
+		for (BindingSet bindingSet : expression.getBindingSets()) {
+			bindingCompositeTerms.add(createBindingCompositeTerm(variableIndex, bindingSet));
+		}
+
+		switch(bindingCompositeTerms.size()) {
+			case 0:
+				// TODO: find a better exception
+				throw new RuntimeException("Unsupported SPARQL query: VALUES entry without any binding!");
+			case 1:
+				return (Function) bindingCompositeTerms.get(0);
+			default:
+				Function orAtom = ofac.getFunction(OBDAVocabulary.OR, bindingCompositeTerms);
+				return orAtom;
+		}
+	}
+
+	private Map<String, Variable> createVariableIndex(Set<String> variableNames) {
+		Map<String, Variable> variableIndex = new HashMap<>();
+		for (String varName: variableNames) {
+			variableIndex.put(varName, ofac.getVariable(varName));
+		}
+		return variableIndex;
+	}
+
+	/**
+	 * Used for VALUES bindings
+	 */
+	private Function createBindingCompositeTerm(Map<String, Variable> variableIndex, BindingSet bindingSet) {
+		List<Term> bindingEqualityTerms = new ArrayList<>();
+
+		for (Binding binding : bindingSet) {
+			Variable variable = variableIndex.get(binding.getName());
+			if (variable == null) {
+				//TODO: find a better exception
+				throw new RuntimeException("Unknown variable " + binding.getName() + " used in the VALUES clause.");
+			}
+
+			Value value = binding.getValue();
+			//TODO: simplify its prototype
+			Term valueTerm = getOntopTerm(null, value);
+			Function equalityTerm = ofac.getFunction(OBDAVocabulary.EQ, Arrays.asList(variable, valueTerm));
+			bindingEqualityTerms.add(equalityTerm);
+		}
+
+		switch(bindingEqualityTerms.size()) {
+			case 0:
+				//TODO: find a better exception
+				throw new RuntimeException("Empty binding sets are not accepted.");
+			case 1:
+				return (Function) bindingEqualityTerms.get(0);
+			default:
+				Function andAtom = ofac.getFunction(OBDAVocabulary.AND, bindingEqualityTerms);
+				return andAtom;
+		}
 	}
 }
