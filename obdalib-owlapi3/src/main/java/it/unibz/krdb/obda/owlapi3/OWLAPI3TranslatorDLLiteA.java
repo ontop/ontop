@@ -84,7 +84,7 @@ import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.SWRLRule;
-import org.semanticweb.owlapi.vocab.OWL2Datatype;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -274,7 +274,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 
 	@Override
 	public void visit(OWLDifferentIndividualsAxiom ax) {
-		log.warn("Axiom not yet supported by Quest: {}", ax.toString());
+		// NO-OP: DifferentInfividuals has no effect in OWL 2 QL and DL-Lite_A
 	}
 
 	@Override
@@ -370,11 +370,11 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 
 			if (rangeDatatype.isBuiltIn()) {
 				try {
-					Predicate.COL_TYPE columnType = getColumnType(rangeDatatype);
+					Predicate.COL_TYPE columnType = OWLTypeMapper.getType(rangeDatatype);
 					Datatype datatype = ofac.createDataType(columnType);
 					dl_onto.addSubClassOfAxiom(subclass, datatype);
 				} catch (TranslationException e) {
-					log.warn("Error in " + ax);
+					log.warn("Error in " + ax + "(" + e + ")");
 				}
 			} else {
 				log.warn("Ignoring range axiom since it refers to a non-supported datatype: " + ax);
@@ -757,7 +757,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 			// TODO: handle more complex fillers
 			// if (filler instanceof OWLDatatype);
 			OWLDatatype owlDatatype = (OWLDatatype) someexp.getFiller();
-			COL_TYPE datatype = getColumnType(owlDatatype);
+			COL_TYPE datatype = OWLTypeMapper.getType(owlDatatype);
 			Datatype filler = ofac.createDataType(datatype);
 			
 			DataPropertyExpression auxRole = dl_onto.getVocabulary().createAuxiliaryDataProperty();
@@ -795,7 +795,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		try {
 			OWLLiteral object = aux.getObject();
 			
-			Predicate.COL_TYPE type = getColumnType(object.getDatatype());
+			Predicate.COL_TYPE type = OWLTypeMapper.getType(object.getDatatype());
 			ValueConstant c2 = dfac.getConstantLiteral(object.getLiteral(), type);
 
 			DataPropertyExpression prop = getPropertyExpression(aux.getProperty());
@@ -841,62 +841,11 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	
 	
 	
-	// TODO: merge with OWLAPI3IndividualTranslator
-	
-	private static Predicate.COL_TYPE getColumnType(OWLDatatype datatype) throws TranslationException {
-		if (datatype == null) {
-			return COL_TYPE.LITERAL;
-		}
-		if (datatype.isString() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_STRING) { // xsd:string
-			return COL_TYPE.STRING;
-		} else if (datatype.isRDFPlainLiteral() || datatype.getBuiltInDatatype() == OWL2Datatype.RDF_PLAIN_LITERAL // rdf:PlainLiteral
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.RDFS_LITERAL) { // rdfs:Literal
-			return COL_TYPE.LITERAL;
-		} else if (datatype.isInteger()
-				|| datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INTEGER) {
-            return COL_TYPE.INTEGER;
-        } else if ( datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_NEGATIVE_INTEGER) {
-            return COL_TYPE.NON_NEGATIVE_INTEGER;
-        } else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_INT) { // xsd:int
-            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
-            return COL_TYPE.INT;
-        } else if  (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_POSITIVE_INTEGER){
-            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
-            return COL_TYPE.POSITIVE_INTEGER;
-        } else if  (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NEGATIVE_INTEGER) {
-            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
-            return COL_TYPE.NEGATIVE_INTEGER;
-        } else if  (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_NON_POSITIVE_INTEGER){
-            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
-            return COL_TYPE.NON_POSITIVE_INTEGER;
-        } else if  (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_UNSIGNED_INT) {
-            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
-            return COL_TYPE.UNSIGNED_INT;
-		} else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DECIMAL) { // xsd:decimal
-			return Predicate.COL_TYPE.DECIMAL;
-        } else if (datatype.isFloat() || datatype.isDouble() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DOUBLE) { // xsd:double
-            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
-			return Predicate.COL_TYPE.DOUBLE;
-        } else if (datatype.isFloat() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_FLOAT) { // xsd:float
-            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
-            return Predicate.COL_TYPE.FLOAT;
-		} else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DATE_TIME || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_DATE_TIME_STAMP ) {
-			return Predicate.COL_TYPE.DATETIME;
-        } else if (datatype.getBuiltInDatatype() == OWL2Datatype.XSD_LONG) {
-            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
-            return Predicate.COL_TYPE.LONG;
-		} else if (datatype.isBoolean() || datatype.getBuiltInDatatype() == OWL2Datatype.XSD_BOOLEAN) { // xsd:boolean
-            System.err.println(datatype.getBuiltInDatatype() + " is not in OWL2QL profile");
-			return Predicate.COL_TYPE.BOOLEAN;
-		} else {
-			throw new TranslationException("Unsupported data range: " + datatype.toString());
-		}
-	}
 
 	
-	final Set<String> objectproperties = new HashSet<String>();
-	final Set<String> dataproperties = new HashSet<String>();
-	final Set<String> punnedPredicates = new HashSet<String>();
+	private final Set<String> objectproperties = new HashSet<String>();
+	private final Set<String> dataproperties = new HashSet<String>();
+	private final Set<String> punnedPredicates = new HashSet<String>();
 	
 	@Override
 	public void declare(OWLClass entity) {
@@ -943,28 +892,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	
 	
 
-	// public Predicate getDataTypePredicate(Predicate.COL_TYPE type) {
-	// switch (type) {
-	// case LITERAL:
-	// return dfac.getDataTypePredicateLiteral();
-	// case STRING:
-	// return dfac.getDataTypePredicateString();
-	// case INTEGER:
-	// return dfac.getDataTypePredicateInteger();
-	// case DECIMAL:
-	// return dfac.getDataTypePredicateDecimal();
-	// case DOUBLE:
-	// return dfac.getDataTypePredicateDouble();
-	// case DATETIME:
-	// return dfac.getDataTypePredicateDateTime();
-	// case BOOLEAN:
-	// return dfac.getDataTypePredicateBoolean();
-	// default:
-	// return dfac.getDataTypePredicateLiteral();
-	// }
-	// }
-
-	/*		
+/*		
 	OWL2QLProfile owlprofile = new OWL2QLProfile();
 	OWLProfileReport report = owlprofile.checkOntology(owl);
 	if (!report.isInProfile()) {
