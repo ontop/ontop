@@ -2070,7 +2070,7 @@ public class SQLGenerator implements SQLQueryGenerator {
                 type = java.sql.Types.BOOLEAN;
                 break;
             case OBDAVocabulary.XSD_DATETIME_URI:
-                type = java.sql.Types.DATE;
+                type = java.sql.Types.TIMESTAMP;
                 break;
             case OBDAVocabulary.XSD_STRING_URI:
             case OBDAVocabulary.RDFS_LITERAL_URI:
