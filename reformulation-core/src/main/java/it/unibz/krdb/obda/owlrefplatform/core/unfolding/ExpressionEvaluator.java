@@ -83,11 +83,11 @@ public class ExpressionEvaluator {
 		for (int atomidx = 0; atomidx < q.getBody().size(); atomidx++) {
 			Function atom = q.getBody().get(atomidx);
 			Term newatom = eval(atom);
-			if (newatom == fac.getConstantTrue()) {
+			if (newatom == OBDAVocabulary.TRUE) {
 				q.getBody().remove(atomidx);
 				atomidx -= 1;
 				continue;
-			} else if (newatom == fac.getConstantFalse()) {
+			} else if (newatom == OBDAVocabulary.FALSE) {
 				return true;
 			}
 			q.getBody().remove(atomidx);
@@ -125,10 +125,10 @@ public class ExpressionEvaluator {
 				if (old instanceof Function) {
 					Term newterm = eval((Function) terms.get(i));
 					if (!newterm.equals(old))
-						if (newterm == fac.getConstantFalse()) {
+						if (newterm == OBDAVocabulary.FALSE) {
 							//
-							terms.set(i, fac.getTypedTerm(fac.getConstantFalse(), COL_TYPE.BOOLEAN));
-						} else if (newterm == fac.getConstantTrue()) {
+							terms.set(i, fac.getTypedTerm(OBDAVocabulary.FALSE, COL_TYPE.BOOLEAN));
+						} else if (newterm == OBDAVocabulary.TRUE) {
 							//remove
 							terms.remove(i);
 							i--;
@@ -153,9 +153,9 @@ public class ExpressionEvaluator {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					String valueString = value.getValue();
 					if (valueString.equals("true") || valueString.equals("1")) {
-						return fac.getConstantTrue();
+						return OBDAVocabulary.TRUE;
 					} else if (valueString.equals("false") || valueString.equals("0")) {
-						return fac.getConstantFalse();
+						return OBDAVocabulary.FALSE;
 					}
 				} else if (expr.getTerm(0) instanceof Variable) {
 					return fac.getFunctionIsTrue(expr);
@@ -170,9 +170,9 @@ public class ExpressionEvaluator {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					long valueInteger = Long.parseLong(value.getValue());
 					if (valueInteger != 0) {
-						return fac.getConstantTrue();
+						return OBDAVocabulary.TRUE;
 					}
-					return fac.getConstantFalse();
+					return OBDAVocabulary.FALSE;
 				} else if (expr.getTerm(0) instanceof Variable) {
 					return fac.getFunctionIsTrue(expr);
 				} else {
@@ -185,9 +185,9 @@ public class ExpressionEvaluator {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					double valueD = Double.parseDouble(value.getValue());
 					if (valueD > 0) {
-						return fac.getConstantTrue();
+						return OBDAVocabulary.TRUE;
 					}
-					return fac.getConstantFalse();
+					return OBDAVocabulary.FALSE;
 				} else if (expr.getTerm(0) instanceof Variable) {
 					return fac.getFunctionIsTrue(expr);
 				} else {
@@ -198,9 +198,9 @@ public class ExpressionEvaluator {
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					if (value.toString().length() == 0) {
-						return fac.getConstantFalse();
+						return OBDAVocabulary.FALSE;
 					}
-					return fac.getConstantTrue();
+					return OBDAVocabulary.TRUE;
 				} else if (expr.getTerm(0) instanceof Variable) {
 					return fac.getFunctionIsTrue(expr);
 				} else {
@@ -212,9 +212,9 @@ public class ExpressionEvaluator {
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					if (value.toString().length() == 0) {
-						return fac.getConstantFalse();
+						return OBDAVocabulary.FALSE;
 					}
-					return fac.getConstantTrue();
+					return OBDAVocabulary.TRUE;
 				} else if (expr.getTerm(0) instanceof Variable) {
 					return fac.getFunctionIsTrue(expr);
 				} else {
@@ -313,7 +313,7 @@ public class ExpressionEvaluator {
 								+ term.toString());
 			}
 		} else {
-			return fac.getConstantFalse();
+			return OBDAVocabulary.FALSE;
 		}
 	}
 
@@ -326,9 +326,9 @@ public class ExpressionEvaluator {
 			Function function = (Function) innerTerm;
 			Predicate predicate = function.getFunctionSymbol();
 			if (predicate instanceof DataTypePredicate) {
-				return fac.getConstantTrue();
+				return OBDAVocabulary.TRUE;
 			} else {
-				return fac.getConstantFalse();
+				return OBDAVocabulary.FALSE;
 			}
 		} else {
 			return term;
@@ -344,9 +344,9 @@ public class ExpressionEvaluator {
 			Function function = (Function) teval;
 			Predicate predicate = function.getFunctionSymbol();
 			if (predicate instanceof BNodePredicate) {
-				return fac.getConstantTrue();
+				return OBDAVocabulary.TRUE;
 			} else {
-				return fac.getConstantFalse();
+				return OBDAVocabulary.FALSE;
 			}
 		}
 		return term;
@@ -361,9 +361,9 @@ public class ExpressionEvaluator {
 			Function function = (Function) teval;
 			Predicate predicate = function.getFunctionSymbol();
 			if (predicate instanceof URITemplatePredicate) {
-				return fac.getConstantTrue();
+				return OBDAVocabulary.TRUE;
 			} else {
-				return fac.getConstantFalse();
+				return OBDAVocabulary.FALSE;
 			}
 		}
 		return term;
@@ -378,9 +378,9 @@ public class ExpressionEvaluator {
 			Function function = (Function) teval;
 			Predicate predicate = function.getFunctionSymbol();
 			if (predicate instanceof URITemplatePredicate) {
-				return fac.getConstantTrue();
+				return OBDAVocabulary.TRUE;
 			} else {
-				return fac.getConstantFalse();
+				return OBDAVocabulary.FALSE;
 			}
 		}
 		return term;
@@ -415,7 +415,7 @@ public class ExpressionEvaluator {
 				return fac.getTypedTerm(function.clone(), COL_TYPE.LITERAL);
 			} 
 			else if (predicate instanceof BNodePredicate) {
-				return fac.getConstantNULL();
+				return OBDAVocabulary.NULL;
 			}
 		}
 		return term;
@@ -570,14 +570,14 @@ public class ExpressionEvaluator {
 		 */
 		Term teval1 = eval(term.getTerm(0));
 		if (teval1 == null) {
-			return fac.getConstantFalse();
+			return OBDAVocabulary.FALSE;
 		}
 		/*
 		 * Evaluate the second term
 		 */
 		Term innerTerm2 = term.getTerm(1);
 		if (innerTerm2 == null) {
-			return fac.getConstantFalse();
+			return OBDAVocabulary.FALSE;
 		}
 
 		/*
@@ -594,9 +594,9 @@ public class ExpressionEvaluator {
 				}
 			} else {
 				if (lang1.equals(lang2)) {
-					return fac.getConstantTrue();
+					return OBDAVocabulary.TRUE;
 				} else {
-					return fac.getConstantFalse();
+					return OBDAVocabulary.FALSE;
 				}
 			}
 		} else if (teval1 instanceof Variable && innerTerm2 instanceof Constant) {
@@ -626,9 +626,9 @@ public class ExpressionEvaluator {
 			if (isObjectConstant()) {
 				setRegexFlag(false);
 				if (functionSymbol.equals(OBDAVocabulary.SPARQL_STR)) {
-					return fac.getConstantTrue();
+					return OBDAVocabulary.TRUE;
 				} else {
-					return fac.getConstantFalse();
+					return OBDAVocabulary.FALSE;
 				}
 			}
 		}
@@ -644,15 +644,15 @@ public class ExpressionEvaluator {
 		Term result = eval(innerTerm);
 		if (result == OBDAVocabulary.NULL) {
 			if (isnull) {
-				return fac.getConstantTrue();
+				return OBDAVocabulary.TRUE;
 			} else {
-				return fac.getConstantFalse();
+				return OBDAVocabulary.FALSE;
 			}
 		} else if (result instanceof Constant) {
 			if (!isnull) {
-				return fac.getConstantTrue();
+				return OBDAVocabulary.TRUE;
 			} else {
-				return fac.getConstantFalse();
+				return OBDAVocabulary.FALSE;
 			}
 		}
 
@@ -724,7 +724,7 @@ public class ExpressionEvaluator {
 			if (!(p1 instanceof DataTypePredicate)) {
 				teval1 = eval(term.getTerm(0));
 				if (teval1 == null) {
-					return fac.getConstantFalse();
+					return OBDAVocabulary.FALSE;
 				}
 			} else {
 				teval1 = term.getTerm(0);
@@ -743,7 +743,7 @@ public class ExpressionEvaluator {
 			if (!(p2 instanceof DataTypePredicate)) {
 				teval2 = eval(term.getTerm(1));
 				if (teval2 == null) {
-					return fac.getConstantFalse();
+					return OBDAVocabulary.FALSE;
 				}
 			} else {
 				teval2 = term.getTerm(1);
@@ -763,14 +763,14 @@ public class ExpressionEvaluator {
 		} else if (eval1 instanceof Constant && eval2 instanceof Constant) {
 			if (eval1.equals(eval2)) {
 				if (eq) {
-					return fac.getConstantTrue();
+					return OBDAVocabulary.TRUE;
 				} else {
-					return fac.getConstantFalse();
+					return OBDAVocabulary.FALSE;
 				}
 			} else if (eq) {
-				return fac.getConstantFalse();
+				return OBDAVocabulary.FALSE;
 			} else {
-				return fac.getConstantTrue();
+				return OBDAVocabulary.TRUE;
 			}
 		} else if (eval1 instanceof Function) {
 			Function f1 = (Function) eval1;
@@ -808,9 +808,9 @@ public class ExpressionEvaluator {
 					if (f1.getTerms().size() != f2.getTerms().size()) {
 						// case one is with language another without
 						if (eq) {
-							return fac.getConstantFalse();
+							return OBDAVocabulary.FALSE;
 						} else {
-							return fac.getConstantTrue();
+							return OBDAVocabulary.TRUE;
 						}
 					} else if (f1.getTerms().size() == 2) {
 						// SIZE == 2
@@ -859,9 +859,9 @@ public class ExpressionEvaluator {
 					}
 				} else if (!pred1.equals(pred2)) {
 					if (eq) {
-						return fac.getConstantFalse();
+						return OBDAVocabulary.FALSE;
 					} else {
-						return fac.getConstantTrue();
+						return OBDAVocabulary.TRUE;
 					}
 				} else {
 					return term;
@@ -913,15 +913,15 @@ public class ExpressionEvaluator {
 		} else if (term2 instanceof ValueConstant) {
 			if (term1.equals(term2)) {
 				if (isEqual) {
-					return fac.getConstantTrue();
+					return OBDAVocabulary.TRUE;
 				} else {
-					return fac.getConstantFalse();
+					return OBDAVocabulary.FALSE;
 				}
 			} else {
 				if (isEqual) {
-					return fac.getConstantFalse();
+					return OBDAVocabulary.FALSE;
 				} else {
-					return fac.getConstantTrue();
+					return OBDAVocabulary.TRUE;
 				}
 			}
 		}
@@ -932,17 +932,17 @@ public class ExpressionEvaluator {
 		Substitution theta = UnifierUtilities.getMGU(uriFunction1, uriFunction2);
 		if (theta == null) {
 			if (isEqual) {
-				return fac.getConstantTrue();
+				return OBDAVocabulary.TRUE;
 			} else {
-				return fac.getConstantFalse();
+				return OBDAVocabulary.FALSE;
 			}
 		} else {
 			boolean isEmpty = theta.isEmpty();
 			if (isEmpty) {
 				if (isEqual) {
-					return fac.getConstantFalse();
+					return OBDAVocabulary.FALSE;
 				} else {
-					return fac.getConstantTrue();
+					return OBDAVocabulary.TRUE;
 				}
 			} else {
 				Function result = null;
@@ -992,18 +992,18 @@ public class ExpressionEvaluator {
 		/*
 		 * Implementing boolean logic
 		 */
-		if (eval1 == fac.getConstantTrue()) {
-			if (eval2 == fac.getConstantTrue()) {
+		if (eval1 == OBDAVocabulary.TRUE) {
+			if (eval2 == OBDAVocabulary.TRUE) {
 				if (and) {
-					return fac.getConstantTrue();
+					return OBDAVocabulary.TRUE;
 				} else {
-					return fac.getConstantFalse();
+					return OBDAVocabulary.FALSE;
 				}
-			} else if (eval2 == fac.getConstantFalse()) {
+			} else if (eval2 == OBDAVocabulary.FALSE) {
 				if (and) {
-					return fac.getConstantFalse();
+					return OBDAVocabulary.FALSE;
 				} else {
-					return fac.getConstantTrue();
+					return OBDAVocabulary.TRUE;
 				}
 			} else if (and) {
 				/* if its an and we still need to evaluate eval2 */
@@ -1013,28 +1013,28 @@ public class ExpressionEvaluator {
 				 * Its an Or, and the first was true, so it doesn't matter whats
 				 * next.
 				 */
-				return fac.getConstantTrue();
+				return OBDAVocabulary.TRUE;
 			}
 
-		} else if (eval1 == fac.getConstantFalse()) {
-			if (eval2 == fac.getConstantTrue()) {
+		} else if (eval1 == OBDAVocabulary.FALSE) {
+			if (eval2 == OBDAVocabulary.TRUE) {
 				if (and) {
-					return fac.getConstantFalse();
+					return OBDAVocabulary.FALSE;
 				} else {
-					return fac.getConstantTrue();
+					return OBDAVocabulary.TRUE;
 				}
-			} else if (eval2 == fac.getConstantFalse()) {
+			} else if (eval2 == OBDAVocabulary.FALSE) {
 				if (and) {
-					return fac.getConstantFalse();
+					return OBDAVocabulary.FALSE;
 				} else {
-					return fac.getConstantFalse();
+					return OBDAVocabulary.FALSE;
 				}
 			} else if (and) {
 				/*
 				 * Its an And, and the first was false, so it doesn't matter
 				 * whats next.
 				 */
-				return fac.getConstantFalse();
+				return OBDAVocabulary.FALSE;
 			} else {
 				return eval2;
 			}

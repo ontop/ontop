@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -279,9 +280,9 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 		
 	if (literal.isBoolean()) {
 		if (literal.parseBoolean()) 
-			terms.add(fac.getConstantTrue());
+			terms.add(OBDAVocabulary.TRUE);
 		else
-			terms.add(fac.getConstantFalse());
+			terms.add(OBDAVocabulary.FALSE);
 	}
 	else if(literal.hasLang())
 		terms.add(fac.getConstantLiteral(literal.getLiteral(), literal.getLang()));

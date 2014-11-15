@@ -391,16 +391,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 
 	@Override
-	public Predicate getJoinPredicate() {
-		return OBDAVocabulary.SPARQL_JOIN;
-	}
-	
-	@Override
-	public Predicate getLeftJoinPredicate() {
-		return OBDAVocabulary.SPARQL_LEFTJOIN;
-	}
-	
-	@Override
 	public Function getLANGMATCHESFunction(Term term1, Term term2) {
 		return getFunction(OBDAVocabulary.SPARQL_LANGMATCHES, term1, term2);
 	}
@@ -466,21 +456,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Constant getConstantNULL() {
-		return OBDAVocabulary.NULL;
-	}
-
-	@Override
-	public Constant getConstantTrue() {
-		return OBDAVocabulary.TRUE;
-	}
-
-	@Override
-	public Constant getConstantFalse() {
-		return OBDAVocabulary.FALSE;
-	}
-
-	@Override
 	public Function getFunctionIsTrue(Term term) {
 		return getFunction(OBDAVocabulary.IS_TRUE, term);
 	}
@@ -490,5 +465,9 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2);
 	}
 
+	@Override
+	public Function getSPARQLLeftJoin(Term t1, Term t2) {
+		return getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, t1, t2);
+	}
 	
 }

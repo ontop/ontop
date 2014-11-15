@@ -509,9 +509,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Function rightAtom = ofac.getFunction(rightAtomPred, atom2VarsList);
 
 		/* The join */
-		Predicate joinp = OBDAVocabulary.SPARQL_LEFTJOIN;
-
-		Function joinAtom = ofac.getFunction(joinp, leftAtom, rightAtom);
+		Function joinAtom = ofac.getSPARQLJoin(leftAtom, rightAtom);
 
 		/* adding the conditions of the filter for the LeftJoin */
 		if (filter != null) {
@@ -1067,7 +1065,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				ValueExpr flags = reg.getFlagsArg();
 				Term term1 = getBooleanTerm(arg1);
 				Term term2 = getBooleanTerm(arg2);
-				Term term3 = (flags != null) ? getBooleanTerm(flags) : ofac.getConstantNULL();
+				Term term3 = (flags != null) ? getBooleanTerm(flags) : OBDAVocabulary.NULL;
 				return ofac.getFunction(
 						OBDAVocabulary.SPARQL_REGEX, term1, term2, term3);
 			}
