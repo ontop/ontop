@@ -30,7 +30,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidato
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxTraversal;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxTraverseListener;
-import it.unibz.krdb.obda.utils.JdbcTypeMapper;
+
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.Attribute;
@@ -172,13 +172,13 @@ public class MappingDataTypeRepair {
 
                         }
                         
-                        if(isBooleanDB2(dataType.getPredicate())){
+                        if(isBooleanDB2(dataType.getPredicate())) {
 
                             Variable variable = (Variable)  normal.getTerm(1);
 
                             //No Boolean datatype in DB2 database, the value in the database is used
-                            Predicate replacement = getDataTypeFunctor(termOccurenceIndex, variable);
-                            Term newTerm = fac.getFunction(replacement, variable);
+                            Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
+                            Term newTerm = fac.getTypedTerm(variable, type); 
                             atom.setTerm(1, newTerm);
                         }
                     }
@@ -203,14 +203,16 @@ public class MappingDataTypeRepair {
                 // If the term has no data-type predicate then by default the
                 // predicate is created following the database metadata of
                 // column type.
-                Predicate replacement;
-                if (dataType == null || isBooleanDB2(dataType.getPredicate()) ){
-                	replacement = getDataTypeFunctor(termOccurenceIndex, variable);
+                Term newTerm;
+                if (dataType == null || isBooleanDB2(dataType.getPredicate())) {
+                	Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
+                	newTerm = fac.getTypedTerm(variable, type);
                 }
-                else 
-                	replacement = dataType.getPredicate();
+                else {
+                	Predicate replacement = dataType.getPredicate();
+                	newTerm = fac.getFunction(replacement, variable);
+                }
 
-				Term newTerm = fac.getFunction(replacement, variable);
 				atom.setTerm(1, newTerm);
 			}
 		}
@@ -241,8 +243,16 @@ public class MappingDataTypeRepair {
 //	private boolean isDataProperty(Predicate predicate) {
 //		return predicate.getArity() == 2 && predicate.getType(1) == Predicate.COL_TYPE.LITERAL;
 //	}
+    
+    /**
+     * returns COL_TYPE for one of the datatype ids
+     * @param termOccurenceIndex
+     * @param variable
+     * @return
+     * @throws OBDAException
+     */
 
-	private Predicate getDataTypeFunctor(Map<String, List<Object[]>> termOccurenceIndex, Variable variable) throws OBDAException {
+	private Predicate.COL_TYPE getDataType(Map<String, List<Object[]>> termOccurenceIndex, Variable variable) throws OBDAException {
 		List<Object[]> list = termOccurenceIndex.get(variable.getName());
 		if (list == null) {
 			throw new OBDAException("Unknown term in head");
@@ -258,7 +268,7 @@ public class MappingDataTypeRepair {
 		Attribute attribute = tableMetadata.getAttribute(pos);
 
 		Predicate.COL_TYPE type =  fac.getJdbcTypeMapper().getPredicate(attribute.getType());
-		return fac.getDatatypeFactory().getTypePredicate(type);
+		return type;
 	}
 
 	private Map<String, List<Object[]>> createIndex(CQIE rule) {

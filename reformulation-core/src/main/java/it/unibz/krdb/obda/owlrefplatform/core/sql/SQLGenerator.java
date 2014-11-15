@@ -870,7 +870,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (ht instanceof Function) {
 			Function ov = (Function) ht;
 			Predicate function = ov.getFunctionSymbol();
-			String functionString = function.toString();
 
 			/*
 			 * Adding the ColType column to the projection (used in the result
@@ -887,6 +886,7 @@ public class SQLGenerator implements SQLQueryGenerator {
                 code = questTypeMapper.getQuestCode(COL_TYPE.BNODE);
 			}
 			else {
+				String functionString = function.toString();
 				Predicate.COL_TYPE type = dtfac.getDataType(functionString);
 				code = questTypeMapper.getQuestCode(type);
 			}
