@@ -24,6 +24,7 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.utils.EventGeneratingArrayList;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
 import it.unibz.krdb.obda.utils.EventGeneratingList;
 import it.unibz.krdb.obda.utils.ListListener;
@@ -40,8 +41,11 @@ public class FunctionalTermImpl implements Function, ListListener {
 	private static final long serialVersionUID = 2832481815465364535L;
 	
 	private Predicate functor;
-	private EventGeneratingList<Term> terms = null;
+	private EventGeneratingList<Term> terms;
 	private int identifier = -1;
+
+	// true when the list of terms has been modified
+	private boolean rehash = true;
 
 	// null when the list of terms has been modified
 	private String string = null;
@@ -100,9 +104,10 @@ public class FunctionalTermImpl implements Function, ListListener {
 
 	@Override
 	public int hashCode() {
-		if (string == null) {
-			toString();
+		if (rehash) {
+			string = toString();
 			identifier = string.hashCode();
+			rehash = false;
 		}
 		return identifier;
 	}
@@ -153,6 +158,7 @@ public class FunctionalTermImpl implements Function, ListListener {
 		FunctionalTermImpl clone = new FunctionalTermImpl(functor, copyTerms);
 		clone.identifier = identifier;
 		clone.string = string;
+		clone.rehash = rehash;
 		return clone;
 	}
 
@@ -212,7 +218,8 @@ public class FunctionalTermImpl implements Function, ListListener {
 
 	@Override
 	public void listChanged() {
-		string = null; // will trigger rehash
+		rehash = true;
+		string = null;
 	}
 
 	@Override

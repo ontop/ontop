@@ -85,5 +85,4 @@ public class URIConstantImpl implements URIConstant {
 	public String getValue() {
 		return iristr;
 	}
-
 }

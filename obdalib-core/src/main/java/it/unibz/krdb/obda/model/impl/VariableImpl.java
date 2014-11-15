@@ -59,6 +59,9 @@ public class VariableImpl implements Variable {
 		return name;
 	}
 
+	// TODO this method seems to be tied to some semantics, if we modified it,
+	// things become slow and maybe wrong we must make sure that this is not the
+	// case
 	@Override
 	public String toString() {
 		return name;

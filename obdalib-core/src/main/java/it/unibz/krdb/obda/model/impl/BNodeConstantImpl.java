@@ -35,6 +35,7 @@ public class BNodeConstantImpl implements BNode {
 	private static final long serialVersionUID = 214867118996974157L;
 
 	private final String name;
+
 	private final int identifier;
 
 	/**
@@ -91,5 +92,4 @@ public class BNodeConstantImpl implements BNode {
 	public String getValue() {
 		return name;
 	}
-
 }

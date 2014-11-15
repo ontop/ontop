@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.model.Variable;
 import java.util.Collections;
 import java.util.Set;
 
-public class AnonymousVariable  implements Variable {
+public class AnonymousVariable implements Variable {
 
 	private static final long serialVersionUID = 6099056787768897902L;
 
