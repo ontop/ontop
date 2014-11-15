@@ -89,7 +89,7 @@ public class DatalogNormalizer {
 		/* Collecting all necessary conditions */
 		for (int i = 0; i < body.size(); i++) {
 			Function currentAtom = body.get(i);
-			if (currentAtom.getPredicate() == OBDAVocabulary.AND) {
+			if (currentAtom.getFunctionSymbol() == OBDAVocabulary.AND) {
 				body.remove(i);
 				body.addAll(getUnfolderAtomList(currentAtom));
 			}
@@ -740,7 +740,7 @@ public class DatalogNormalizer {
 	 * @return
 	 */
 	public static List<Function> getUnfolderAtomList(Function atom) {
-		if (atom.getPredicate() != OBDAVocabulary.AND) {
+		if (atom.getFunctionSymbol() != OBDAVocabulary.AND) {
 			throw new InvalidParameterException();
 		}
 		List<Term> innerFunctionalTerms = new LinkedList<Term>();

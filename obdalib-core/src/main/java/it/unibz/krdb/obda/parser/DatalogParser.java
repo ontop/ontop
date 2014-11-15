@@ -259,7 +259,7 @@ public class DatalogParser extends Parser {
 					         
 					        // Get the head atom
 					        Function head = rule.getHead();
-					        String name = head.getPredicate().getName();
+					        String name = head.getFunctionSymbol().getName();
 					        int size = variableList.size(); 
 					        
 					        // Get the predicate atom

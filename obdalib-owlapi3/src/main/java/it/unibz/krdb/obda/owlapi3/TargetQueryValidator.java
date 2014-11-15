@@ -57,7 +57,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 
 		// Get the predicates in the target query.
 		for (Function atom : targetQuery.getBody()) {
-			Predicate p = atom.getPredicate();
+			Predicate p = atom.getFunctionSymbol();
 
 			boolean isClass = isClass(p);
 			boolean isObjectProp = isObjectProperty(p);

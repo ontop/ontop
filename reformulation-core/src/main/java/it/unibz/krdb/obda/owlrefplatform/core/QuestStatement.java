@@ -475,7 +475,7 @@ public class QuestStatement implements OBDAStatement {
 	private static void removeNonAnswerQueries(DatalogProgram program) {
 		List<CQIE> toRemove = new LinkedList<CQIE>();
 		for (CQIE rule : program.getRules()) {
-			Predicate headPredicate = rule.getHead().getPredicate();
+			Predicate headPredicate = rule.getHead().getFunctionSymbol();
 			if (!headPredicate.getName().toString().equals("ans1")) {
 				toRemove.add(rule);
 			}
@@ -1025,7 +1025,7 @@ public class QuestStatement implements OBDAStatement {
 	private static int getBodySize(List<? extends Function> atoms) {
 		int counter = 0;
 		for (Function atom : atoms) {
-			Predicate predicate = atom.getPredicate();
+			Predicate predicate = atom.getFunctionSymbol();
 			if (!(predicate instanceof BuiltinPredicate)) {
 				counter++;
 			}

@@ -416,14 +416,14 @@ public class TreeWitnessSet {
 			if (properties == null) {
 				properties = new Intersection<ObjectPropertyExpression>(reasoner.getObjectProperties());
 				for (Function a : edge.getBAtoms()) {
-					if (a.getPredicate() instanceof BooleanOperationPredicateImpl) {
+					if (a.getFunctionSymbol() instanceof BooleanOperationPredicateImpl) {
 						log.debug("EDGE {} HAS PROPERTY {} NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES", edge, a);
 						properties.setToBottom();
 						break;
 					}
 					else {
 						log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
-						ObjectPropertyExpression prop = ontFactory.createObjectProperty(a.getPredicate().getName());
+						ObjectPropertyExpression prop = ontFactory.createObjectProperty(a.getFunctionSymbol().getName());
 						if (!root.equals(a.getTerm(0)))
 								prop = prop.getInverse();
 						properties.intersectWith(prop);

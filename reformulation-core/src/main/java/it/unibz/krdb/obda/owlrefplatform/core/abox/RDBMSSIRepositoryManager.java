@@ -4105,7 +4105,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static int getIndexHash(Function f) {
 		int hash = 0;
 
-		hash = f.getPredicate().hashCode() * (31 ^ f.getArity());
+		hash = f.getFunctionSymbol().hashCode() * (31 ^ f.getArity());
 		for (int i = 0; i < f.getArity(); i++) {
 			Term term = f.getTerm(i);
 			int termhash = getHash((Function) term);
@@ -4132,7 +4132,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		if (f.getReferencedVariables().isEmpty()) {
 			hash = f.hashCode();
 		} else
-			hash = (f.getPredicate().hashCode() + f.getTerms().size());
+			hash = (f.getFunctionSymbol().hashCode() + f.getTerms().size());
 		return hash;
 	}
 

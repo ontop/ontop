@@ -1781,7 +1781,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				if (!newatom.isBooleanFunction())
 					continue;
 
-				if (!newatom.getPredicate().equals(OBDAVocabulary.IS_NOT_NULL))
+				if (!newatom.getFunctionSymbol().equals(OBDAVocabulary.IS_NOT_NULL))
 					continue;
 
 				Function replacement = null;

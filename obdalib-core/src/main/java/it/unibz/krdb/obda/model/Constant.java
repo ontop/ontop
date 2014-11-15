@@ -28,6 +28,8 @@ public interface Constant extends Term {
 
 	public Predicate.COL_TYPE getType();
 
+	// TODO: eliminate getValue from this interface
+	
 	public String getValue();
 	
 }

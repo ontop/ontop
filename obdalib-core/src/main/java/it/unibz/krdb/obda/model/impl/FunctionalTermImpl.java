@@ -128,11 +128,6 @@ public class FunctionalTermImpl implements Function, ListListener {
 	}
 
 	@Override
-	public Predicate getPredicate() {
-		return getFunctionSymbol();
-	}
-
-	@Override
 	public Predicate getFunctionSymbol() {
 		return functor;
 	}
@@ -197,23 +192,6 @@ public class FunctionalTermImpl implements Function, ListListener {
 		return false;
 	}
 
-	@Override
-	public int getFirstOcurrance(Term t, int i) {
-		int size = terms.size();
-		for (int j = 0; j < size; j++) {
-			Term t2 = terms.get(j);
-			if (t2 instanceof FunctionalTermImpl) {
-				FunctionalTermImpl f = (FunctionalTermImpl) t2;
-				int newindex = f.getFirstOcurrance(t, 0);
-				if (newindex != -1)
-					return j;
-			} else {
-				if (t2.equals(t))
-					return j;
-			}
-		}
-		return -1;
-	}
 
 	@Override
 	public void listChanged() {

@@ -101,7 +101,7 @@ public class MappingVocabularyRepair {
 			List<Function> newbody = new LinkedList<Function>();
 
 			for (Function atom : body) {
-				Predicate p = atom.getPredicate();
+				Predicate p = atom.getFunctionSymbol();
 
 				Function newatom = null;
 				Predicate predicate = urimap.get(p.getName());
