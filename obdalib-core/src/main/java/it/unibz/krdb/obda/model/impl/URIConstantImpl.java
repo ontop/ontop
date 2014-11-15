@@ -82,6 +82,11 @@ public class URIConstantImpl implements URIConstant {
 	}
 
 	@Override
+	public String getName() {
+		return iristr;
+	}
+
+	@Deprecated
 	public String getValue() {
 		return iristr;
 	}

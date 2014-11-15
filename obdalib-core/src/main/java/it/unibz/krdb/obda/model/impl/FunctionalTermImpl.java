@@ -24,7 +24,6 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.utils.EventGeneratingArrayList;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
 import it.unibz.krdb.obda.utils.EventGeneratingList;
 import it.unibz.krdb.obda.utils.ListListener;

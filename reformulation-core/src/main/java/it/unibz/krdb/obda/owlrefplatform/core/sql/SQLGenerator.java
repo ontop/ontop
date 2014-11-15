@@ -922,7 +922,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			if (t instanceof BNode) {
 				c = (BNode) t;
-				literalValue = ((BNode) t).getValue();
+				literalValue = ((BNode) t).getName();
 			} else {
 				c = (ValueConstant) t;	
 				literalValue = ((ValueConstant) t).getValue();

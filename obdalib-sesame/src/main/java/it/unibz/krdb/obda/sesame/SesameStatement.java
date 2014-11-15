@@ -63,21 +63,11 @@ public class SesameStatement implements Statement {
 			ObjectConstant obj = ba.getObject();
 			
 			// convert string into respective type
-			if (subj instanceof BNode)
-				subject = fact.createBNode(((BNode) subj).getName());
-			else if (subj instanceof URIConstant)
-				subject = fact.createURI(subj.getValue());
-			else 
-				throw new RuntimeException("Invalid constant as subject!" + subj);
+			subject = getResource(subj);
 			
 			predicate = fact.createURI(pred.getName().toString()); // URI
 			
-			if (obj instanceof BNode)
-				object = fact.createBNode(((BNode) obj).getName());
-			else if (obj instanceof URIConstant)
-				object = fact.createURI(obj.getValue());
-			else 
-				throw new RuntimeException("Invalid constant as object!" + obj);
+			object = getResource(obj);
 		} 
 		if (assertion instanceof DataPropertyAssertion) {
 			//object or data property assertion
@@ -87,12 +77,7 @@ public class SesameStatement implements Statement {
 			ValueConstant obj = ba.getValue();
 			
 			// convert string into respective type
-			if (subj instanceof BNode)
-				subject = fact.createBNode(((BNode) subj).getName());
-			else if (subj instanceof URIConstant)
-				subject = fact.createURI(subj.getValue());
-			else 
-				throw new RuntimeException("Invalid constant as subject!" + subj);
+			subject = getResource(subj);
 			
 			predicate = fact.createURI(pred.getName().toString()); // URI
 			
@@ -109,18 +94,22 @@ public class SesameStatement implements Statement {
 			Predicate obj = ua.getConcept().getPredicate();
 			
 			// convert string into respective type
-			if (subj instanceof BNode)
-				subject = fact.createBNode(((BNode) subj).getName());
-			else if (subj instanceof URIConstant)
-				subject = fact.createURI(subj.getValue());
-			else
-				throw new RuntimeException("Invalid ValueConstant as subject!");
+			subject = getResource(subj);
 			
 			predicate = fact.createURI(pred); // URI
 		
 			object = fact.createURI(obj.getName().toString());
 			
 		}
+	}
+	
+	private Resource getResource(ObjectConstant obj) {
+		if (obj instanceof BNode)
+			return fact.createBNode(((BNode)obj).getName());
+		else if (obj instanceof URIConstant)
+			return fact.createURI(((URIConstant)obj).getURI());
+		else 
+			throw new RuntimeException("Invalid constant as subject!" + obj);		
 	}
 	
 	public Literal getLiteral(ValueConstant literal)

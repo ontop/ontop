@@ -28,11 +28,6 @@ public interface Constant extends Term {
 
 	public Predicate.COL_TYPE getType();
 
-	/***
-	 * Returns the literal value of this constant.
-	 * 
-	 * @return
-	 */
 	public String getValue();
-
+	
 }

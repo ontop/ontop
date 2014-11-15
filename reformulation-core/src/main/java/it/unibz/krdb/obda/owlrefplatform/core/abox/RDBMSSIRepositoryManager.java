@@ -1291,7 +1291,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			// Construct the database INSERT statements
 			ObjectConstant subject = attributeAssertion.getSubject();
 
-			String uri = subject.getValue();
+			String uri = subject.getName();
 			 uri_id = uriMap.idOfURI(uri);
 				uriidStm.setInt(1, uri_id);
 				uriidStm.setString(2, uri);
@@ -1302,7 +1302,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			int idx = cacheSI.getIndex(prop);
 
 				// Get the object property assertion
-				String uri2 = object.getValue();
+				String uri2 = object.getName();
 				boolean c2isBNode = object instanceof BNode;
 
 				if (isInverse(prop)) {
@@ -1361,7 +1361,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			// Construct the database INSERT statements
 			ObjectConstant subject = attributeAssertion.getSubject();
 
-			String uri = subject.getValue();
+			String uri = subject.getName();
 			 uri_id = uriMap.idOfURI(uri);
 				uriidStm.setInt(1, uri_id);
 				uriidStm.setString(2, uri);

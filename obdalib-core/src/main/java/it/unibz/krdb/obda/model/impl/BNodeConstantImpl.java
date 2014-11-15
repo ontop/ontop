@@ -67,6 +67,10 @@ public class BNodeConstantImpl implements BNode {
 	public String getName() {
 		return name;
 	}
+	@Override
+	public String getValue() {
+		return name;
+	}
 
 	@Override
 	public BNode clone() {
@@ -88,8 +92,4 @@ public class BNodeConstantImpl implements BNode {
 		return COL_TYPE.BNODE;
 	}
 
-	@Override
-	public String getValue() {
-		return name;
-	}
 }

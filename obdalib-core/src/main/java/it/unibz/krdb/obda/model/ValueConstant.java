@@ -32,4 +32,11 @@ public interface ValueConstant extends Constant {
 	 * @return
 	 */
 	public String getLanguage();
+	
+	/***
+	 * Returns the literal value of this constant.
+	 * 
+	 * @return
+	 */
+	public String getValue();
 }

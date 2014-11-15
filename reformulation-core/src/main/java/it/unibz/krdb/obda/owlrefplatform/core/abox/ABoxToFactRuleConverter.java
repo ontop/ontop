@@ -45,7 +45,7 @@ public class ABoxToFactRuleConverter {
 		ObjectConstant c = ca.getIndividual();
 		Predicate p = ca.getConcept().getPredicate();
 		Function head = factory.getFunction(p, 
-						factory.getUriTemplate(factory.getConstantLiteral(c.getValue())));
+						factory.getUriTemplate(factory.getConstantLiteral(c.getName())));
 		rule = factory.getCQIE(head, new LinkedList<Function>());
 		return rule;
 	}
@@ -60,8 +60,8 @@ public class ABoxToFactRuleConverter {
 		ObjectConstant o = pa.getObject();
 		Predicate p = pa.getProperty().getPredicate();
 		Function head = factory.getFunction(p, 
-						factory.getUriTemplate(factory.getConstantLiteral(s.getValue())), 
-						factory.getUriTemplate(factory.getConstantLiteral(o.getValue())));
+						factory.getUriTemplate(factory.getConstantLiteral(s.getName())), 
+						factory.getUriTemplate(factory.getConstantLiteral(o.getName())));
 		CQIE rule = factory.getCQIE(head, new LinkedList<Function>());
 		return rule;
 		

@@ -99,10 +99,10 @@ public class SesameBindingSet implements BindingSet {
 				} 
 				else {
 					if (c instanceof BNode) {           // COL_TYPE.BNODE
-						value = fact.createBNode(c.getValue());
+						value = fact.createBNode(((BNode)c).getName());
 					} 
 					else if (c instanceof URIConstant) {  // COL_TYPE.OBJECT
-						value = fact.createURI(c.getValue());
+						value = fact.createURI(((URIConstant)c).getURI());
 					} 
 					else if (c instanceof ValueConstant) {
 						ValueConstant literal = (ValueConstant)c;
@@ -110,22 +110,22 @@ public class SesameBindingSet implements BindingSet {
 						
 						if (col_type == COL_TYPE.LITERAL_LANG) {
 							// special case
-							value = fact.createLiteral(c.getValue(), literal.getLanguage());
+							value = fact.createLiteral(literal.getValue(), literal.getLanguage());
 						} 
 						else if (col_type == COL_TYPE.LITERAL) {
 							// also a special case!
-							value = fact.createLiteral(c.getValue());
+							value = fact.createLiteral(literal.getValue());
 						} 
 						else if (col_type == COL_TYPE.OBJECT) {
 							// TODO: Replace this with object datatype in the future
-							value = fact.createLiteral(c.getValue(), XMLSchema.STRING);
+							value = fact.createLiteral(literal.getValue(), XMLSchema.STRING);
 						} 
 						else {
 							URI datatype = dtfac.getDataTypeURI(col_type);
 							if (datatype == null)
 								throw new RuntimeException("Found unknown TYPE for constant: " + c + " with COL_TYPE="+ col_type + " and variable=" + bindingName);
 							
-							value = fact.createLiteral(c.getValue(), datatype);							
+							value = fact.createLiteral(literal.getValue(), datatype);							
 						}
 					}
 				}
