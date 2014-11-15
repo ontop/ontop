@@ -30,10 +30,6 @@ public class NonBooleanOperationPredicateImpl extends PredicateImpl implements N
 		super(name, 1, null);
 	}
 
-	public NonBooleanOperationPredicateImpl(String name, int arity, COL_TYPE[] types) {
-		super(name, arity, types);
-	}
-
 	@Override
 	public NonBooleanOperationPredicateImpl clone() {
 		return this;

@@ -51,7 +51,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-//import com.hp.hpl.jena.iri.IRIFactory;
 
 public class ExpressionEvaluator {
 
