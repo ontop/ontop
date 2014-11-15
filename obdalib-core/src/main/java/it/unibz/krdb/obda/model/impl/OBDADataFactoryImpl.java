@@ -427,7 +427,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getFunctionSubstract(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.SUBSTRACT, term1, term2);
+		return getFunction(OBDAVocabulary.SUBTRACT, term1, term2);
 	}
 
 	@Override

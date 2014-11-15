@@ -173,7 +173,7 @@ public class DatalogToSparqlTranslator {
 	private String getArithmeticSymbol(Predicate functionSymbol) {
 		if (functionSymbol.equals(OBDAVocabulary.ADD)) {
 			return SparqlKeyword.ADD;
-		} else if (functionSymbol.equals(OBDAVocabulary.SUBSTRACT)) {
+		} else if (functionSymbol.equals(OBDAVocabulary.SUBTRACT)) {
 			return SparqlKeyword.SUBSTRACT;
 		} else if (functionSymbol.equals(OBDAVocabulary.MULTIPLY)) {
 			return SparqlKeyword.MULTIPLY;

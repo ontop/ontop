@@ -36,29 +36,13 @@ public class OBDAVocabulary {
 
 	public static final ValueConstant FALSE = new ValueConstantImpl("f", COL_TYPE.BOOLEAN);
 
-	/* Numeric operations */
-
-	public static final String MINUS_STR = "minus";
-	
-	public static final String ADD_STR = "add";
-	
-	public static final String SUBSTRACT_STR = "substract";
-	
-	public static final String MULTIPLY_STR = "multiply";
 	
 	/* Numeric operation predicates */
 	
-	public static final Predicate MINUS = new NumericalOperationPredicateImpl(
-			MINUS_STR, 1);
-	
-	public static final Predicate ADD = new NumericalOperationPredicateImpl(
-			ADD_STR, 2);
-	
-	public static final Predicate SUBSTRACT = new NumericalOperationPredicateImpl(
-			SUBSTRACT_STR, 2);
-	
-	public static final Predicate MULTIPLY = new NumericalOperationPredicateImpl(
-			MULTIPLY_STR, 2);
+	public static final Predicate MINUS = new NumericalOperationPredicateImpl("minus", 1);
+	public static final Predicate ADD = new NumericalOperationPredicateImpl("add", 2);
+	public static final Predicate SUBTRACT = new NumericalOperationPredicateImpl("subtract", 2);
+	public static final Predicate MULTIPLY = new NumericalOperationPredicateImpl("multiply", 2);
 	
 	/* Boolean predicate URIs */
 

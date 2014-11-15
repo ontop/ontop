@@ -300,7 +300,7 @@ public class ExpressionEvaluator {
 		if (returnedDatatype != null && isNumeric((ValueConstant) returnedDatatype.getTerm(0))) {
 			Predicate pred = term.getFunctionSymbol();
 			if (pred == OBDAVocabulary.ADD
-				 || pred == OBDAVocabulary.SUBSTRACT
+				 || pred == OBDAVocabulary.SUBTRACT
 				 || pred == OBDAVocabulary.MULTIPLY) {
 				return term;
 			} else {

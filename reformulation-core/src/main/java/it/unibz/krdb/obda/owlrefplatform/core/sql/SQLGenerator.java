@@ -1345,7 +1345,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		String operator = null;
 		if (functionSymbol.equals(OBDAVocabulary.ADD)) {
 			operator = ADD_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.SUBSTRACT)) {
+		} else if (functionSymbol.equals(OBDAVocabulary.SUBTRACT)) {
 			operator = SUBSTRACT_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.MULTIPLY)) {
 			operator = MULTIPLY_OPERATOR;
