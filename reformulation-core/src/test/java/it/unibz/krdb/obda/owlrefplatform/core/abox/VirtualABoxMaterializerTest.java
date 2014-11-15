@@ -586,8 +586,7 @@ try{
 
 		Function head = fac.getFunction(q, headTerms);
 
-		Term objectTerm = fac.getFunction(fac.getUriTemplatePredicate(2),
-				fac.getConstantLiteral("http://schools.com/persons{}{}"), 
+		Term objectTerm = fac.getUriTemplate(fac.getConstantLiteral("http://schools.com/persons{}{}"),  // R: was binary -- why?
 				firstNameVariable,
 				lastNameVariable);
 

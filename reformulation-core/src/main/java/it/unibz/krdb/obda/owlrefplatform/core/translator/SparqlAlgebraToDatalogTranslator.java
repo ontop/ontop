@@ -752,8 +752,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			if (o == null) {
 				predicate = OBDAVocabulary.QUEST_TRIPLE_PRED;
 
-				Function rdfTypeConstant = ofac.getFunction(ofac
-						.getUriTemplatePredicate(1), ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
+				Function rdfTypeConstant = ofac.getUriTemplate(ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 				terms.add(rdfTypeConstant);
 				terms.add(ofac.getVariable(obj.getName()));
 			} 
@@ -859,8 +858,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				/* if in the Semantic Index mode */
 				int id = uriRef.getId(s.stringValue());
 				
-				result = ofac.getFunction(ofac.getUriTemplatePredicate(1), 
-							ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
+				result = ofac.getUriTemplate(ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
 			} else {
 				result = uriTemplateMatcher.generateURIFunction(subject_URI);
 			}

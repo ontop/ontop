@@ -2490,7 +2490,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			// Mapping head
 
 			Function head = dfac.getFunction(dfac.getPredicate("m", 1), dfac.getVariable("X"));
-			Function body1 = dfac.getFunction(classuri, dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
+			Function body1 = dfac.getFunction(classuri, dfac.getUriTemplate(dfac.getVariable("X")));
 			Function body2 = dfac.getFunction(classuri, dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X")));
 			
 			/*
@@ -2705,7 +2705,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Function subjectTerm;
 		if (type1 == COL_TYPE.OBJECT) {
 
-			subjectTerm = dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("X"));
+			subjectTerm = dfac.getUriTemplate(dfac.getVariable("X"));
 
 		} else if (type1 == COL_TYPE.BNODE) {
 
@@ -2724,7 +2724,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		} 
 		else if (type2 == COL_TYPE.OBJECT) {
 
-			objectTerm = dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("Y"));
+			objectTerm = dfac.getUriTemplate(dfac.getVariable("Y"));
 
 		} 
 		else if (type2 == COL_TYPE.LITERAL_LANG) { 

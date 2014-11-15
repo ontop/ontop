@@ -1832,7 +1832,7 @@ public class TurtleParser extends Parser {
 			      
 			      // the URI template is always on the first position in the term list
 			      terms.add(0, uriTemplate);
-			      value = dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
+			      value = dfac.getUriTemplate(terms);
 			    
 			}
 

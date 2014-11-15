@@ -270,8 +270,6 @@ public class DirectMappingAxiom {
 			tableName = percentEncode(td.getName()) + "_";
 
 		if (td.getPrimaryKeys().size() > 0) {
-			Predicate uritemple = df.getUriTemplatePredicate(td
-					.getPrimaryKeys().size() + 1);
 			List<Term> terms = new ArrayList<Term>();
 			terms.add(df.getConstantLiteral(subjectTemple(td, td.getPrimaryKeys()
 					.size())));
@@ -279,7 +277,7 @@ public class DirectMappingAxiom {
 				terms.add(df.getVariable(tableName
 						+ td.getPrimaryKeys().get(i).getName()));
 			}
-			return df.getFunction(uritemple, terms);
+			return df.getUriTemplate(terms);
 
 		} else {
 			List<Term> vars = new ArrayList<Term>();

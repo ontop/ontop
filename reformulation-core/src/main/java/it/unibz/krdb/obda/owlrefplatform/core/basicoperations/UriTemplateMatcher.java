@@ -101,15 +101,14 @@ public class UriTemplateMatcher {
 						String value = matcher.group(i + 1);
 						values.add(ofac.getConstantLiteral(value));
 					}
-					functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(values.size()), values);
+					functionURI = ofac.getUriTemplate(values);
 				}
 			} else if (baseParameter instanceof Variable) {
 				/*
 				 * This is a direct mapping to a column, uri(x)
 				 * we need to match x with the subjectURI
 				 */
-				functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), 
-						ofac.getConstantLiteral(uriString));
+				functionURI = ofac.getUriTemplate(ofac.getConstantLiteral(uriString));
 			}
 			break;
 		}
@@ -117,7 +116,7 @@ public class UriTemplateMatcher {
 			/* If we cannot match againts a tempalte, we try to match againts the most general tempalte (which will 
 			 * generate empty queires later in the query answering process
 			 */
-			functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantLiteral(uriString));
+			functionURI = ofac.getUriTemplate(ofac.getConstantLiteral(uriString));
 		}
 			
 		return functionURI;

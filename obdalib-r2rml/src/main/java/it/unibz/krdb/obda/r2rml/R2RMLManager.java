@@ -312,8 +312,7 @@ public class R2RMLManager {
 						}
 					}else{ // if object is a variable
 						Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
-						Predicate uriPred = fac.getUriTemplatePredicate(1);
-						Function rdftype = fac.getFunction(uriPred, fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
+						Function rdftype = fac.getUriTemplate(fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 						terms.add(rdftype);
 						terms.add(objectAtom);
 						body.add(fac.getFunction(newpred, terms));

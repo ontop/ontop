@@ -210,20 +210,23 @@ public class TurtleOBDAParser extends Parser {
 	      FormatString token = tokens.get(0);
 	      if (token instanceof FixedString) {
 	          ValueConstant uriTemplate = dfac.getConstantLiteral(token.toString()); // a single URI template
-	          toReturn = dfac.getFunction(dfac.getUriTemplatePredicate(1), uriTemplate);
-	      } else if (token instanceof ColumnString) {
+	          toReturn = dfac.getUriTemplate(uriTemplate);
+	      } 
+	      else if (token instanceof ColumnString) {
 	         ValueConstant uriTemplate = dfac.getConstantLiteral(PLACEHOLDER); // a single URI template
 	         Variable column = dfac.getVariable(token.toString());
 	         terms.add(0, uriTemplate);
 	         terms.add(column);
-	         toReturn = dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
+	         toReturn = dfac.getUriTemplate(terms);
 	      }
-	   } else {
+	   } 
+	   else {
 	      StringBuilder sb = new StringBuilder();
 	      for(FormatString token : tokens) {
 	         if (token instanceof FixedString) { // if part of URI template
 	            sb.append(token.toString());
-	         } else if (token instanceof ColumnString) {
+	         } 
+	         else if (token instanceof ColumnString) {
 	            sb.append(PLACEHOLDER);
 	            Variable column = dfac.getVariable(token.toString());
 	            terms.add(column);
@@ -231,7 +234,7 @@ public class TurtleOBDAParser extends Parser {
 	      }
 	      ValueConstant uriTemplate = dfac.getConstantLiteral(sb.toString()); // complete URI template
 	      terms.add(0, uriTemplate);
-	      toReturn = dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
+	      toReturn = dfac.getUriTemplate(terms);
 	   }
 	   return toReturn;
 	}
@@ -299,16 +302,18 @@ public class TurtleOBDAParser extends Parser {
 		                      ValueConstant c = ((ValueConstant) ((Function) object).getTerm(0));  // it has to be a URI constant
 		                      Predicate predicate = dfac.getClassPredicate(c.getValue());
 		                      atom = dfac.getFunction(predicate, subject);
-		                  } else {
+		                  } 
+		                  else {
 	//	                        Predicate uriPredicate = dfac.getUriTemplatePredicate(1);
 	//	                        Term uriOfPred = dfac.getFunction(uriPredicate, pred);
 		                        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred, object);                  }
-		             } else if (object instanceof  Variable){
-		                  Predicate uriPredicate = dfac.getUriTemplatePredicate(1);
-		                  Term uriOfPred = dfac.getFunction(uriPredicate, pred);
-		                  Term uriOfObject = dfac.getFunction(uriPredicate, object);
+		             } 
+		             else if (object instanceof  Variable){
+		                  Term uriOfPred = dfac.getUriTemplate(pred);
+		                  Term uriOfObject = dfac.getUriTemplate(object);
 		                  atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, uriOfPred,  uriOfObject);
-		              } else {
+		              } 
+		             else {
 		                  throw new IllegalArgumentException("parser cannot handle object " + object);  
 		              }
 		        } else if( ! QueryUtils.isGrounded(pred) ){
@@ -324,7 +329,7 @@ public class TurtleOBDAParser extends Parser {
 		             }
 		             atom = dfac.getFunction(predicate, subject, object);
 		       }
-		        return atom;
+		       return atom;
 	  }
 
 
@@ -868,9 +873,8 @@ public class TurtleOBDAParser extends Parser {
 					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:382:5: 'a'
 					{
 					match(input,77,FOLLOW_77_in_verb293); 
-					Predicate uriPredicate = dfac.getUriTemplatePredicate(1);
-					         Term constant = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE);
-						value = dfac.getFunction(uriPredicate, constant);  
+					   	Term constant = dfac.getConstantLiteral(OBDAVocabulary.RDF_TYPE);
+						value = dfac.getUriTemplate(constant);  
 					  //value = OBDAVocabulary.RDF_TYPE; 
 					  
 					}

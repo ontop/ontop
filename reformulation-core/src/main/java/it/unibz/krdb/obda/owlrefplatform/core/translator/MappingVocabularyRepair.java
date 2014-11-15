@@ -161,10 +161,10 @@ public class MappingVocabularyRepair {
 				 */
 				Term t0 = newTerms.get(0);
 				if (!(t0 instanceof Function)){
-					newTerms.set(0, dfac.getFunction(dfac.getUriTemplatePredicate(1), t0));
+					newTerms.set(0, dfac.getUriTemplate(t0));
 				}
 				if (predicate.isObjectProperty() && !(newTerms.get(1) instanceof Function)) {
-					newTerms.set(1, dfac.getFunction(dfac.getUriTemplatePredicate(1), newTerms.get(1)));
+					newTerms.set(1, dfac.getUriTemplate(newTerms.get(1)));
 				}
 				newatom = dfac.getFunction(predicate, newTerms);
 				newbody.add(newatom);
@@ -211,8 +211,6 @@ public class MappingVocabularyRepair {
 		}
 		// We have a function that is not a built-in, hence its an old-style uri
 		// template function(parm1,parm2,...)
-		Predicate uriFunction = dfac.getUriTemplatePredicate(term.getArity() + 1);
-
 		StringBuilder newTemplate = new StringBuilder();
 		newTemplate.append(predicate.getName().toString());
 		for (int i = 0; i < term.getArity(); i++) {
@@ -223,6 +221,6 @@ public class MappingVocabularyRepair {
 		newTerms.add(dfac.getConstantLiteral(newTemplate.toString()));
 		newTerms.addAll(term.getTerms());
 
-		return dfac.getFunction(uriFunction, newTerms);
+		return dfac.getUriTemplate(newTerms);
 	}
 }

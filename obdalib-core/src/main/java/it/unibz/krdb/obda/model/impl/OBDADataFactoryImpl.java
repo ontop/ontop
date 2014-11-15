@@ -263,7 +263,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 	
 
-	@Override
+	//@Override
 	public Predicate getUriTemplatePredicate(int arity) {
 		return new URITemplatePredicateImpl(arity);
 	}
@@ -272,6 +272,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public Function getUriTemplate(Term... terms) {
 		Predicate uriPred = getUriTemplatePredicate(terms.length);
+		return getFunction(uriPred, terms);		
+	}
+	
+	@Override
+	public Function getUriTemplate(List<Term> terms) {
+		Predicate uriPred = getUriTemplatePredicate(terms.size());
 		return getFunction(uriPred, terms);		
 	}
 

@@ -1468,7 +1468,7 @@ public class DatalogParser extends Parser {
 			    
 			      Predicate functionSymbol = null;  
 			      if (functionName.equals(OBDAVocabulary.QUEST_URI)) {
-				        functionSymbol = dfac.getUriTemplatePredicate(arity);
+					     value = dfac.getUriTemplate(terms31);
 				  }
 			      else {
 				      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
@@ -1476,9 +1476,10 @@ public class DatalogParser extends Parser {
 				    	  functionSymbol = dtfac.getTypePredicate(type);
 				      else
 						  functionSymbol = dfac.getPredicate(functionName, arity);
+				      
+				      value = dfac.getFunction(functionSymbol, terms31);
 			      }
 			    	  
-			      value = dfac.getFunction(functionSymbol, terms31);
 			    }
 			}
 
