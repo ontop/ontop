@@ -1104,13 +1104,16 @@ public class SparqlAlgebraToDatalogTranslator {
 		if (v instanceof LiteralImpl) {
 			LiteralImpl lit = (LiteralImpl)v;
 			URI type = lit.getDatatype();
+			COL_TYPE tp;
 			if (type == null) {
-				return ofac.getTypedTerm(ofac.getConstantLiteral(v.stringValue(), COL_TYPE.LITERAL), COL_TYPE.LITERAL);
+				tp = COL_TYPE.LITERAL;
 			}
-			COL_TYPE tp = dtfac.getDataType(type);
-			if (tp == null) {
-				return ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantLiteral(
-						type.toString(), COL_TYPE.OBJECT));
+			else {
+				tp = dtfac.getDataType(type);
+				if (tp == null) {
+					return ofac.getFunction(ofac.getUriTemplatePredicate(1), 
+							ofac.getConstantLiteral(type.toString(), COL_TYPE.OBJECT));
+				}				
 			}
 			
 			String constantString;
@@ -1160,9 +1163,8 @@ public class SparqlAlgebraToDatalogTranslator {
 		else if (v instanceof URIImpl) {
             constantFunction = uriTemplateMatcher.generateURIFunction(v.stringValue());
             if (constantFunction.getArity() == 1)
-                constantFunction = ofac.getFunction(ofac
-                        .getUriTemplatePredicate(1), ofac.getConstantLiteral(
-                        ((URIImpl) v).stringValue(), COL_TYPE.OBJECT));
+                constantFunction = ofac.getFunction(ofac.getUriTemplatePredicate(1), 
+                		ofac.getConstantLiteral(((URIImpl) v).stringValue(), COL_TYPE.OBJECT));
 		}
 		
 		return constantFunction;
