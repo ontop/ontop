@@ -1261,7 +1261,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			
 		} else {
 			String functionName = functionSymbol.toString();
-			if (functionName.equals(OBDAVocabulary.QUEST_CAST_STR)) {
+			if (functionName.equals(OBDAVocabulary.QUEST_CAST.getName())) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				String datatype = ((Constant) function.getTerm(1)).getValue();
 				int sqlDatatype = -1;

@@ -117,6 +117,6 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	
 	@Override
 	public boolean isTriple(Predicate predicate){
-		return predicate.equals(OBDAVocabulary.QUEST_TRIPLE_PRED);
+		return predicate.isTriplePredicate();
 	}
 }

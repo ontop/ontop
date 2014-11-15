@@ -301,23 +301,28 @@ public class R2RMLManager {
 							Predicate newpred = constPred.getFunctionSymbol();
 							Function newAtom = fac.getFunction(newpred, subjectAtom);
 							body.add(newAtom);
-						}else if (term0 instanceof ValueConstant) {							
+						}
+						else if (term0 instanceof ValueConstant) {							
 							ValueConstant vconst = (ValueConstant) term0;
 							String predName = vconst.getValue();
 							Predicate newpred = fac.getPredicate(predName, 1);
 							Function newAtom = fac.getFunction(newpred, subjectAtom);
 							body.add(newAtom);
-						} else {
+						} 
+						else {
 							throw new IllegalStateException();
 						}
-					}else{ // if object is a variable
+					}
+					else{ // if object is a variable
+						// TODO (ROMAN): double check -- the list terms appears to accumulate the PO pairs
 						Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
 						Function rdftype = fac.getUriTemplate(fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 						terms.add(rdftype);
 						terms.add(objectAtom);
 						body.add(fac.getFunction(newpred, terms));
 					}
-				} else {
+				} 
+				else {
 					// create predicate(subject, object) and add it to the body
 					terms.add(objectAtom);
 					Function bodyAtom = fac.getFunction(bodyPred, terms);

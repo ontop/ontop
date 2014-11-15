@@ -57,6 +57,8 @@ public interface OBDADataFactory extends Serializable {
 	 * @return a predicate object.
 	 */
 
+	public Function getTripleAtom(Term subject, Term predicate, Term object);
+	
 	@Deprecated
 	public Predicate getPredicate(String uri, int arity);
 

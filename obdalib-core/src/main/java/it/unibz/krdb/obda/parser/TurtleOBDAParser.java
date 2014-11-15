@@ -306,18 +306,18 @@ public class TurtleOBDAParser extends Parser {
 		                  else {
 	//	                        Predicate uriPredicate = dfac.getUriTemplatePredicate(1);
 	//	                        Term uriOfPred = dfac.getFunction(uriPredicate, pred);
-		                        atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred, object);                  }
+		                        atom = dfac.getTripleAtom(subject, pred, object);                  }
 		             } 
 		             else if (object instanceof  Variable){
 		                  Term uriOfPred = dfac.getUriTemplate(pred);
 		                  Term uriOfObject = dfac.getUriTemplate(object);
-		                  atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, uriOfPred,  uriOfObject);
+		                  atom = dfac.getTripleAtom(subject, uriOfPred,  uriOfObject);
 		              } 
 		             else {
 		                  throw new IllegalArgumentException("parser cannot handle object " + object);  
 		              }
 		        } else if( ! QueryUtils.isGrounded(pred) ){
-		             atom = dfac.getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, pred,  object);
+		             atom = dfac.getTripleAtom(subject, pred,  object);
 		        } else {
 		             //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
 		             Predicate predicate;

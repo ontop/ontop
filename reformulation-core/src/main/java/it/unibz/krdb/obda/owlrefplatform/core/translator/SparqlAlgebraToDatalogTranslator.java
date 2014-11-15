@@ -639,7 +639,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 			Function a = null;
 			if (condition instanceof Var) {
-				a = ofac.getFunction(OBDAVocabulary.IS_TRUE, getVariableTerm((Var) condition));
+				a = ofac.getFunctionIsTrue(getVariableTerm((Var) condition));
 			} else {
 				a = (Function) getBooleanTerm(condition);
 			}
@@ -1080,7 +1080,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			return getBooleanFunction(function, term1, term2);
 		} else if (expr instanceof Bound){
 			
-			return ofac.getFunction(OBDAVocabulary.IS_NOT_NULL, getVariableTerm(((Bound) expr).getArg()));
+			return ofac.getFunctionIsNotNull(getVariableTerm(((Bound) expr).getArg()));
 		} else {
 			throw new RuntimeException("The builtin function "
 					+ expr.toString() + " is not supported yet!");
@@ -1168,7 +1168,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		if (expr instanceof Not) {
 			ValueExpr arg = expr.getArg();
 			Term term = getBooleanTerm(arg);
-			builtInFunction = ofac.getFunction(OBDAVocabulary.NOT, term);
+			builtInFunction = ofac.getFunctionNOT(term);
 		}
 		/*
 		 * The following expressions only accept variable as the parameter

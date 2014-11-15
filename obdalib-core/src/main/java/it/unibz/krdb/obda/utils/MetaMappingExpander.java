@@ -111,7 +111,7 @@ public class MetaMappingExpander {
 			Function firstBodyAtom = body.get(0);
 			
 			Predicate pred = firstBodyAtom.getFunctionSymbol();
-			if (!pred.equals(OBDAVocabulary.QUEST_TRIPLE_PRED)){
+			if (!pred.isTriplePredicate()){
 				/**
 				 * for normal mappings, we do not need to expand it.
 				 */

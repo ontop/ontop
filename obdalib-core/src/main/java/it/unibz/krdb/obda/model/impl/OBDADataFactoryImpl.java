@@ -475,5 +475,10 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return value ? OBDAVocabulary.TRUE : OBDAVocabulary.FALSE;
 	}
 
+	@Override
+	public Function getTripleAtom(Term subject, Term predicate, Term object) {
+		return getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, predicate, object);
+	}
+
 	
 }
