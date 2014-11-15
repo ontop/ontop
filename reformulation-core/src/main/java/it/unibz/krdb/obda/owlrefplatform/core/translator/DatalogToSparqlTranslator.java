@@ -307,7 +307,7 @@ public class DatalogToSparqlTranslator {
 			printGraph((Function) expression.getTerm(0), datalog, sb, indentLevel);
 			printGraph((Function) expression.getTerm(1), datalog, sb, indentLevel);
 		} 
-		else if (joinPredicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN)) {
+		else if (joinPredicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
 			printGraph((Function) expression.getTerm(0), datalog, sb, indentLevel);
 			sb.append(indent(indentLevel));
 			sb.append(SparqlKeyword.OPTIONAL + " {\n");

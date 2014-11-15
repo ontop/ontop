@@ -1204,7 +1204,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				// for (int i = 0; i < focusLiteral.getTerms().size(); i++) {
 
 				Predicate predicate = focusLiteral.getFunctionSymbol();
-				boolean focusAtomIsLeftJoin = predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN);
+				boolean focusAtomIsLeftJoin = predicate == OBDAVocabulary.SPARQL_LEFTJOIN;
 				List<CQIE> result = new LinkedList<CQIE>();
 				result = computePartialEvaluation(focusLiteral.getTerms(), rule, resolutionCount, termidx, focusAtomIsLeftJoin);
 
@@ -1731,7 +1731,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			if (mgu1 == null)
 				throw new RuntimeException("Unexpected case found while performing JOIN elimination. Contact the authors for debugging.");
 
-			if (currentAtom.isAlgebraFunction() && currentAtom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_LEFTJOIN)) {
+			if (currentAtom.isAlgebraFunction() && (currentAtom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)) {
 				continue;
 			}
 
