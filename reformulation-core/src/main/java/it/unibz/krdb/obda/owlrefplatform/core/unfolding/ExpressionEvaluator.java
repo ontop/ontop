@@ -439,24 +439,21 @@ public class ExpressionEvaluator {
 	private Term getDatatype(Predicate predicate, Term lit)
 	{
 		if (predicate instanceof DataTypePredicate) {
-			return fac.getFunction(fac.getUriTemplatePredicate(1),
-					fac.getConstantLiteral(predicate.toString(),
-							COL_TYPE.OBJECT));
-		} else if (predicate instanceof BNodePredicate) {
+			return fac.getUriTemplateTerm(predicate.toString());
+		} 
+		else if (predicate instanceof BNodePredicate) {
 			return null;
-		} else if (predicate instanceof URITemplatePredicate) {
+		} 
+		else if (predicate instanceof URITemplatePredicate) {
 			return null;
-		} else if (predicate instanceof AlgebraOperatorPredicate){
-			return fac.getFunction(fac.getUriTemplatePredicate(1),
-					fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue(),
-							COL_TYPE.OBJECT));
-		} else if (predicate instanceof OperationPredicate){
-			if (predicate instanceof BooleanOperationPredicate)
-			{
+		} 
+		else if (predicate instanceof AlgebraOperatorPredicate){
+			return fac.getUriTemplateTerm(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue());
+		} 
+		else if (predicate instanceof OperationPredicate){
+			if (predicate instanceof BooleanOperationPredicate) {
 				//return boolean uri
-				return fac.getFunction(fac.getUriTemplatePredicate(1),
-						fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue(),
-								COL_TYPE.OBJECT));
+				return fac.getUriTemplateTerm(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue());
 			}
 			else if (predicate instanceof NumericalOperationPredicate)
 			{
@@ -468,14 +465,12 @@ public class ExpressionEvaluator {
 					Term arg2 = func.getTerm(1);
 					Predicate pred2 = getDatatypePredicate(arg2);
 					if (pred1.equals(pred2) || (isDouble(pred1) && isNumeric(pred2))) {
-						return fac.getFunction(fac.getUriTemplatePredicate(1),
-								fac.getConstantLiteral(pred1.toString(),
-										COL_TYPE.OBJECT));
-					} else if (isNumeric(pred1) && isDouble(pred2)) {
-						return fac.getFunction(fac.getUriTemplatePredicate(1), 
-								fac.getConstantLiteral(pred2.toString(),
-										COL_TYPE.OBJECT));
-					} else {
+						return fac.getUriTemplateTerm(pred1.toString());
+					} 
+					else if (isNumeric(pred1) && isDouble(pred2)) {
+						return fac.getUriTemplateTerm(pred2.toString());
+					} 
+					else {
 						return null;
 					}
 				}

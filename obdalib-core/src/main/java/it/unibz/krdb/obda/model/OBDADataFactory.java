@@ -92,6 +92,8 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getUriTemplate(Term...terms);
 
+	public Function getUriTemplateTerm(String type);
+	
 	public Predicate getBNodeTemplatePredicate(int arity);
 
 

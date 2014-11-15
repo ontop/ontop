@@ -23,7 +23,6 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;

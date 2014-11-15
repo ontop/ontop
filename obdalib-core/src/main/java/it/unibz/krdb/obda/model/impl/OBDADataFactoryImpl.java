@@ -160,7 +160,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 	@Override
 	public ValueConstant getConstantLiteral(String value, String language) {
-		return new ValueConstantImpl(value, language.toLowerCase(), COL_TYPE.LITERAL_LANG);
+		return new ValueConstantImpl(value, language.toLowerCase());
 	}
 
 	@Override
@@ -275,6 +275,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return getFunction(uriPred, terms);		
 	}
 
+	@Override
+	public Function getUriTemplateTerm(String type) {
+		return getFunction(getUriTemplatePredicate(1),
+				getConstantLiteral(type, COL_TYPE.OBJECT));
+	}
+	
 	@Override
 	public Predicate getBNodeTemplatePredicate(int arity) {
 		return new BNodePredicateImpl(arity);

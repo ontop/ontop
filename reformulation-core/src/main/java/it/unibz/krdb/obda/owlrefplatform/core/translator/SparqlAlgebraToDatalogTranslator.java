@@ -1021,13 +1021,12 @@ public class SparqlAlgebraToDatalogTranslator {
 		 * specified datatype
 		 */
 		
-		boolean valid = true;
 		if (type != null) {
-			valid = XMLDatatypeUtil.isValidValue(value, type);
+			boolean valid = XMLDatatypeUtil.isValidValue(value, type);
+			if (!valid)
+				throw new RuntimeException(
+						"Invalid lexical form for datatype. Found: " + value);
 		}
-		if (!valid)
-			throw new RuntimeException(
-					"Invalid lexical form for datatype. Found: " + value);
 		return constant;
 
 	}
@@ -1111,8 +1110,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			else {
 				tp = dtfac.getDataType(type);
 				if (tp == null) {
-					return ofac.getFunction(ofac.getUriTemplatePredicate(1), 
-							ofac.getConstantLiteral(type.toString(), COL_TYPE.OBJECT));
+					return ofac.getUriTemplateTerm(type.stringValue());
 				}				
 			}
 			
@@ -1163,8 +1161,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		else if (v instanceof URIImpl) {
             constantFunction = uriTemplateMatcher.generateURIFunction(v.stringValue());
             if (constantFunction.getArity() == 1)
-                constantFunction = ofac.getFunction(ofac.getUriTemplatePredicate(1), 
-                		ofac.getConstantLiteral(((URIImpl) v).stringValue(), COL_TYPE.OBJECT));
+                constantFunction = ofac.getUriTemplateTerm(((URIImpl) v).stringValue());
 		}
 		
 		return constantFunction;

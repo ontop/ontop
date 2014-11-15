@@ -23,7 +23,9 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -37,7 +39,7 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 
 	private final Predicate.COL_TYPE type;
 	
-	private int hashcode = -1;
+	private final String string;
 
 	/**
 	 * The default constructor.
@@ -48,14 +50,17 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 	 *            the constant type.
 	 */
 	protected ValueConstantImpl(String value, Predicate.COL_TYPE type) {
-		this(value, null, type);
+		this.value = value;
+		this.language = null;
+		this.type = type;
+		this.string = TermUtil.toString(this);
 	}
 
-	protected ValueConstantImpl(String value, String language, Predicate.COL_TYPE type) {
+	protected ValueConstantImpl(String value, String language) {
 		this.value = value;
 		this.language = language;
-		this.type = type;
-		this.hashcode = toString().hashCode();
+		this.type = COL_TYPE.LITERAL_LANG;
+		this.string = TermUtil.toString(this);
 	}
 
 	@Override
@@ -69,7 +74,7 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 
 	@Override
 	public int hashCode() {		
-		return hashcode;
+		return string.hashCode();
 	}
 
 	@Override
@@ -94,17 +99,11 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 
 	@Override
 	public String toString() {
-		return TermUtil.toString(this);
+		return string;
 	}
 
 	@Override
 	public Set<Variable> getReferencedVariables() {
-		return new LinkedHashSet<Variable>();
+		return Collections.emptySet();
 	}
-/*
-	@Override
-	public Map<Variable, Integer> getVariableCount() {
-		return new HashMap<Variable, Integer>();
-	}
-*/
 }
