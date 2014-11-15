@@ -509,7 +509,9 @@ public class SparqlAlgebraToDatalogTranslator {
 		Function rightAtom = ofac.getFunction(rightAtomPred, atom2VarsList);
 
 		/* The join */
-		Function joinAtom = ofac.getSPARQLJoin(leftAtom, rightAtom);
+		Predicate joinp = OBDAVocabulary.SPARQL_LEFTJOIN;
+
+		Function joinAtom = ofac.getFunction(joinp, leftAtom, rightAtom);
 
 		/* adding the conditions of the filter for the LeftJoin */
 		if (filter != null) {

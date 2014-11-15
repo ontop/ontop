@@ -201,7 +201,8 @@ public interface OBDADataFactory extends Serializable {
 	
 	public BNode getConstantBNode(String name);
 
-
+	public ValueConstant getBooleanConstant(boolean value);
+	
 	/**
 	 * Construct a {@link ValueConstant} object.
 	 * 
@@ -294,9 +295,9 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getSPARQLJoin(Term t1, Term t2);
 
-	public Function getSPARQLLeftJoin(Term t1, Term t2);
+	Predicate getJoinPredicate();
 
-	//Predicate getLeftJoinPredicate();
+	Predicate getLeftJoinPredicate();
 
 	
 }

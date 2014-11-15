@@ -143,10 +143,8 @@ public class DatalogNormalizer {
 			Function currentAtom = (Function) body.get(i);
 			if (!currentAtom.isAlgebraFunction())
 				continue;
-			
 			if (currentAtom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
 				unfoldJoinTrees(currentAtom.getTerms(), false);
-			
 			if (currentAtom.getFunctionSymbol() == OBDAVocabulary.SPARQL_JOIN) {
 				unfoldJoinTrees(currentAtom.getTerms(), true);
 				int dataAtoms = countDataItems(currentAtom.getTerms());
@@ -188,7 +186,6 @@ public class DatalogNormalizer {
 				dataAtoms.add(atom);
 				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)
 					foldJoinTrees(atom.getTerms(), false);
-				
 				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_JOIN)
 					foldJoinTrees(atom.getTerms(), true);
 			}

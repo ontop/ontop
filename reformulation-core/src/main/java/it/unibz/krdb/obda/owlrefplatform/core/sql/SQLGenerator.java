@@ -506,8 +506,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			if (predicate == OBDAVocabulary.SPARQL_JOIN) {
 				return getTableDefinitions(innerTerms, index, false, false, indent + INDENT);
-			} 
-			else if (predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
+			} else if (predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
 				return getTableDefinitions(innerTerms, index, false, true, indent + INDENT);
 			}
 		}
@@ -1274,8 +1273,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					return sqladapter.sqlCast(columnName, sqlDatatype);
 				}
-			} 
-			else if (functionName.equals(OBDAVocabulary.SPARQL_STR.getName())) {
+			} else if (functionName.equals(OBDAVocabulary.SPARQL_STR_URI)) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				if (isStringColType(function, index)) {
 					return columnName;

@@ -169,13 +169,12 @@ public class ExpressionEvaluator {
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					long valueInteger = Long.parseLong(value.getValue());
-					if (valueInteger != 0) {
-						return OBDAVocabulary.TRUE;
-					}
-					return OBDAVocabulary.FALSE;
-				} else if (expr.getTerm(0) instanceof Variable) {
+					return fac.getBooleanConstant(valueInteger != 0);
+				} 
+				else if (expr.getTerm(0) instanceof Variable) {
 					return fac.getFunctionIsTrue(expr);
-				} else {
+				} 
+				else {
 					return expr;
 				}
 			}
@@ -184,26 +183,24 @@ public class ExpressionEvaluator {
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
 					double valueD = Double.parseDouble(value.getValue());
-					if (valueD > 0) {
-						return OBDAVocabulary.TRUE;
-					}
-					return OBDAVocabulary.FALSE;
-				} else if (expr.getTerm(0) instanceof Variable) {
+					return fac.getBooleanConstant(valueD > 0); 
+				} 
+				else if (expr.getTerm(0) instanceof Variable) {
 					return fac.getFunctionIsTrue(expr);
-				} else {
+				} 
+				else {
 					return expr;
 				}
 			}
 			else if (dtfac.isString(p)) {
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
-					if (value.toString().length() == 0) {
-						return OBDAVocabulary.FALSE;
-					}
-					return OBDAVocabulary.TRUE;
-				} else if (expr.getTerm(0) instanceof Variable) {
+					return fac.getBooleanConstant(value.toString().length() != 0);
+				} 
+				else if (expr.getTerm(0) instanceof Variable) {
 					return fac.getFunctionIsTrue(expr);
-				} else {
+				} 
+				else {
 					return expr;
 				}
 			}
@@ -211,13 +208,12 @@ public class ExpressionEvaluator {
 				                           // by taking LANG into account
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
-					if (value.toString().length() == 0) {
-						return OBDAVocabulary.FALSE;
-					}
-					return OBDAVocabulary.TRUE;
-				} else if (expr.getTerm(0) instanceof Variable) {
+					return fac.getBooleanConstant(value.toString().length() != 0);
+				} 
+				else if (expr.getTerm(0) instanceof Variable) {
 					return fac.getFunctionIsTrue(expr);
-				} else {
+				} 
+				else {
 					return expr;
 				}
 			}
@@ -325,12 +321,9 @@ public class ExpressionEvaluator {
 		if (innerTerm instanceof Function) {
 			Function function = (Function) innerTerm;
 			Predicate predicate = function.getFunctionSymbol();
-			if (predicate instanceof DataTypePredicate) {
-				return OBDAVocabulary.TRUE;
-			} else {
-				return OBDAVocabulary.FALSE;
-			}
-		} else {
+			return fac.getBooleanConstant(predicate instanceof DataTypePredicate);
+		} 
+		else {
 			return term;
 		}
 	}
@@ -343,11 +336,7 @@ public class ExpressionEvaluator {
 		if (teval instanceof Function) {
 			Function function = (Function) teval;
 			Predicate predicate = function.getFunctionSymbol();
-			if (predicate instanceof BNodePredicate) {
-				return OBDAVocabulary.TRUE;
-			} else {
-				return OBDAVocabulary.FALSE;
-			}
+			return fac.getBooleanConstant(predicate instanceof BNodePredicate);
 		}
 		return term;
 	}
@@ -360,11 +349,7 @@ public class ExpressionEvaluator {
 		if (teval instanceof Function) {
 			Function function = (Function) teval;
 			Predicate predicate = function.getFunctionSymbol();
-			if (predicate instanceof URITemplatePredicate) {
-				return OBDAVocabulary.TRUE;
-			} else {
-				return OBDAVocabulary.FALSE;
-			}
+			return fac.getBooleanConstant(predicate instanceof URITemplatePredicate);
 		}
 		return term;
 	}
@@ -377,11 +362,7 @@ public class ExpressionEvaluator {
 		if (teval instanceof Function) {
 			Function function = (Function) teval;
 			Predicate predicate = function.getFunctionSymbol();
-			if (predicate instanceof URITemplatePredicate) {
-				return OBDAVocabulary.TRUE;
-			} else {
-				return OBDAVocabulary.FALSE;
-			}
+			return fac.getBooleanConstant(predicate instanceof URITemplatePredicate);
 		}
 		return term;
 	}
@@ -587,19 +568,16 @@ public class ExpressionEvaluator {
 			String lang1 = ((Constant) teval1).getValue();
 			String lang2 = ((Constant) innerTerm2).getValue();	
 			if (lang2.equals(SELECT_ALL)) {
-				if (lang1.isEmpty()) {
-					return fac.getFunctionIsNull(teval1);
-				} else {
+				if (lang1.isEmpty()) 
+					return fac.getFunctionIsNull(teval1); 
+				else 
 					return fac.getFunctionIsNotNull(teval1);
-				}
-			} else {
-				if (lang1.equals(lang2)) {
-					return OBDAVocabulary.TRUE;
-				} else {
-					return OBDAVocabulary.FALSE;
-				}
+			} 
+			else {
+				return fac.getBooleanConstant(lang1.equals(lang2));
 			}
-		} else if (teval1 instanceof Variable && innerTerm2 instanceof Constant) {
+		} 
+		else if (teval1 instanceof Variable && innerTerm2 instanceof Constant) {
 			Variable var = (Variable) teval1;
 			Constant lang = (Constant) innerTerm2;
 			if (lang.getValue().equals(SELECT_ALL)) {
@@ -608,12 +586,14 @@ public class ExpressionEvaluator {
 			} else {
 				return fac.getFunctionEQ(var, lang);
 			}
-		} else if (teval1 instanceof Function && innerTerm2 instanceof Function) {
+		} 
+		else if (teval1 instanceof Function && innerTerm2 instanceof Function) {
 			Function f1 = (Function) teval1;
 			Function f2 = (Function) innerTerm2;
 			return evalLangMatches(fac.getLANGMATCHESFunction(f1.getTerm(0), 
 					f2.getTerm(0)));
-		} else {
+		} 
+		else {
 			return term;
 		}
 	}
@@ -625,11 +605,7 @@ public class ExpressionEvaluator {
 			Predicate functionSymbol = f.getFunctionSymbol();
 			if (isObjectConstant()) {
 				setRegexFlag(false);
-				if (functionSymbol.equals(OBDAVocabulary.SPARQL_STR)) {
-					return OBDAVocabulary.TRUE;
-				} else {
-					return OBDAVocabulary.FALSE;
-				}
+				return fac.getBooleanConstant(functionSymbol.equals(OBDAVocabulary.SPARQL_STR));
 			}
 		}
 		return term;
@@ -643,22 +619,15 @@ public class ExpressionEvaluator {
 		}
 		Term result = eval(innerTerm);
 		if (result == OBDAVocabulary.NULL) {
-			if (isnull) {
-				return OBDAVocabulary.TRUE;
-			} else {
-				return OBDAVocabulary.FALSE;
-			}
-		} else if (result instanceof Constant) {
-			if (!isnull) {
-				return OBDAVocabulary.TRUE;
-			} else {
-				return OBDAVocabulary.FALSE;
-			}
+			return fac.getBooleanConstant(isnull);
+		} 
+		else if (result instanceof Constant) {
+			return fac.getBooleanConstant(!isnull);
 		}
 
 		// TODO improve evaluation of is (not) null
 		/*
-		 * This can be inproved by evaluating some of the function, e.g,. URI
+		 * This can be improved by evaluating some of the function, e.g,. URI
 		 * and Bnodes never return null
 		 */
 		if (isnull) {
@@ -760,19 +729,15 @@ public class ExpressionEvaluator {
 
 		if (eval1 instanceof Variable || eval2 instanceof Variable) {
 			// no - op
-		} else if (eval1 instanceof Constant && eval2 instanceof Constant) {
-			if (eval1.equals(eval2)) {
-				if (eq) {
-					return OBDAVocabulary.TRUE;
-				} else {
-					return OBDAVocabulary.FALSE;
-				}
-			} else if (eq) {
-				return OBDAVocabulary.FALSE;
-			} else {
-				return OBDAVocabulary.TRUE;
-			}
-		} else if (eval1 instanceof Function) {
+		} 
+		else if (eval1 instanceof Constant && eval2 instanceof Constant) {
+			if (eval1.equals(eval2)) 
+				return fac.getBooleanConstant(eq);
+			else 
+				return fac.getBooleanConstant(!eq);
+			
+		} 
+		else if (eval1 instanceof Function) {
 			Function f1 = (Function) eval1;
 			Predicate pred1 = f1.getFunctionSymbol();
 			
@@ -780,7 +745,8 @@ public class ExpressionEvaluator {
 				if (pred1.getType(0) == COL_TYPE.UNSUPPORTED) {
 					throw new RuntimeException("Unsupported type: " + pred1);
 				}
-			} else if (pred1 instanceof NumericalOperationPredicate) {
+			} 
+			else if (pred1 instanceof NumericalOperationPredicate) {
 				return term;
 			}
 			
@@ -807,12 +773,9 @@ public class ExpressionEvaluator {
 					 */
 					if (f1.getTerms().size() != f2.getTerms().size()) {
 						// case one is with language another without
-						if (eq) {
-							return OBDAVocabulary.FALSE;
-						} else {
-							return OBDAVocabulary.TRUE;
-						}
-					} else if (f1.getTerms().size() == 2) {
+						return fac.getBooleanConstant(!eq);
+					} 
+					else if (f1.getTerms().size() == 2) {
 						// SIZE == 2
 						// these are literals with languages, we need to
 						// return the evaluation of the values and the
@@ -857,13 +820,11 @@ public class ExpressionEvaluator {
 							return evalEqNeq(neweq, false);
 						}
 					}
-				} else if (!pred1.equals(pred2)) {
-					if (eq) {
-						return OBDAVocabulary.FALSE;
-					} else {
-						return OBDAVocabulary.TRUE;
-					}
-				} else {
+				} 
+				else if (!pred1.equals(pred2)) {
+					return fac.getBooleanConstant(!eq);
+				} 
+				else {
 					return term;
 				}
 			}
@@ -911,19 +872,10 @@ public class ExpressionEvaluator {
 				return fac.getFunctionNEQ(term2, term1);
 			}
 		} else if (term2 instanceof ValueConstant) {
-			if (term1.equals(term2)) {
-				if (isEqual) {
-					return OBDAVocabulary.TRUE;
-				} else {
-					return OBDAVocabulary.FALSE;
-				}
-			} else {
-				if (isEqual) {
-					return OBDAVocabulary.FALSE;
-				} else {
-					return OBDAVocabulary.TRUE;
-				}
-			}
+			if (term1.equals(term2)) 
+				return fac.getBooleanConstant(isEqual);
+			else 
+				return fac.getBooleanConstant(!isEqual);
 		}
 		return null;
 	}
@@ -931,20 +883,14 @@ public class ExpressionEvaluator {
 	private Term evalUriFunctionsWithMultipleTerms(Function uriFunction1, Function uriFunction2, boolean isEqual) {
 		Substitution theta = UnifierUtilities.getMGU(uriFunction1, uriFunction2);
 		if (theta == null) {
-			if (isEqual) {
-				return OBDAVocabulary.TRUE;
-			} else {
-				return OBDAVocabulary.FALSE;
-			}
-		} else {
+			return fac.getBooleanConstant(isEqual);
+		} 
+		else {
 			boolean isEmpty = theta.isEmpty();
 			if (isEmpty) {
-				if (isEqual) {
-					return OBDAVocabulary.FALSE;
-				} else {
-					return OBDAVocabulary.TRUE;
-				}
-			} else {
+				return fac.getBooleanConstant(!isEqual);
+			} 
+			else {
 				Function result = null;
 				List<Function> temp = new ArrayList<Function>();
 				Set<VariableImpl> keys = theta.keySet();
@@ -994,18 +940,12 @@ public class ExpressionEvaluator {
 		 */
 		if (eval1 == OBDAVocabulary.TRUE) {
 			if (eval2 == OBDAVocabulary.TRUE) {
-				if (and) {
-					return OBDAVocabulary.TRUE;
-				} else {
-					return OBDAVocabulary.FALSE;
-				}
-			} else if (eval2 == OBDAVocabulary.FALSE) {
-				if (and) {
-					return OBDAVocabulary.FALSE;
-				} else {
-					return OBDAVocabulary.TRUE;
-				}
-			} else if (and) {
+				return fac.getBooleanConstant(and);
+			} 
+			else if (eval2 == OBDAVocabulary.FALSE) {
+				return fac.getBooleanConstant(!and);
+			} 
+			else if (and) {
 				/* if its an and we still need to evaluate eval2 */
 				return eval2;
 			} else {
@@ -1018,17 +958,15 @@ public class ExpressionEvaluator {
 
 		} else if (eval1 == OBDAVocabulary.FALSE) {
 			if (eval2 == OBDAVocabulary.TRUE) {
-				if (and) {
+				return fac.getBooleanConstant(!and);
+			} 
+			else if (eval2 == OBDAVocabulary.FALSE) {
+				// TODO: check whether the two FALSE were INTENDED
+				//if (and) {
 					return OBDAVocabulary.FALSE;
-				} else {
-					return OBDAVocabulary.TRUE;
-				}
-			} else if (eval2 == OBDAVocabulary.FALSE) {
-				if (and) {
-					return OBDAVocabulary.FALSE;
-				} else {
-					return OBDAVocabulary.FALSE;
-				}
+				//} else {
+				//	return OBDAVocabulary.FALSE;
+				//}
 			} else if (and) {
 				/*
 				 * Its an And, and the first was false, so it doesn't matter
