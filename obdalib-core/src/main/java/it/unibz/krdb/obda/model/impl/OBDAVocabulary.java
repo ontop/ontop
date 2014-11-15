@@ -95,24 +95,14 @@ public class OBDAVocabulary {
 	
 	public static final String QUEST_QUERY = "ans1";
 
-	/* SPARQL Algebra vocabulary */
-
-	public static final String SPARQL_JOIN_URI = "Join";
-
-	public static final String SPARQL_LEFTJOIN_URI = "LeftJoin";
-
-	
-	/* SPARQL Algebra predicate */
-
-	public static final Predicate SPARQL_JOIN = new AlgebraOperatorPredicateImpl(
-			SPARQL_JOIN_URI, COL_TYPE.STRING);
-
-	public static final Predicate SPARQL_LEFTJOIN = new AlgebraOperatorPredicateImpl(
-			SPARQL_LEFTJOIN_URI, COL_TYPE.STRING);
 
 	
 	
-	
+	/* SPARQL algebra operations */
+
+	public static final Predicate SPARQL_JOIN = new AlgebraOperatorPredicateImpl("Join");
+	public static final Predicate SPARQL_LEFTJOIN = new AlgebraOperatorPredicateImpl("LeftJoin");
+
 
 	/* SPARQL built-in functions */
 	
