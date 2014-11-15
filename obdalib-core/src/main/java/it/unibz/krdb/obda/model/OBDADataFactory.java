@@ -134,6 +134,8 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getFunctionOR(Term term1, Term term2);
 
+	public Function getFunctionIsTrue(Term term);
+	
 	public Function getFunctionIsNull(Term term);
 
 	public Function getFunctionIsNotNull(Term term);
@@ -294,6 +296,8 @@ public interface OBDADataFactory extends Serializable {
 
 	public OBDASQLQuery getSQLQuery(String query);
 
+	
+	public Function getSPARQLJoin(Term t1, Term t2);
 
 	Predicate getJoinPredicate();
 

@@ -480,5 +480,15 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return OBDAVocabulary.FALSE;
 	}
 
+	@Override
+	public Function getFunctionIsTrue(Term term) {
+		return getFunction(OBDAVocabulary.IS_TRUE, term);
+	}
+
+	@Override
+	public Function getSPARQLJoin(Term t1, Term t2) {
+		return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2);
+	}
+
 	
 }

@@ -1472,12 +1472,12 @@ public class DatalogParser extends Parser {
 			      else {
 				      Predicate functionSymbol;  
 				      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
-				      if (type != null)
-				    	  functionSymbol = dtfac.getTypePredicate(type);
-				      else
+				      if (type != null) 
+				    	  value = dfac.getTypedTerm(terms31.get(0), type);
+				      else {
 						  functionSymbol = dfac.getPredicate(functionName, arity);
-				      
-				      value = dfac.getFunction(functionSymbol, terms31);
+					      value = dfac.getFunction(functionSymbol, terms31);
+				      }
 			      }
 			    	  
 			    }

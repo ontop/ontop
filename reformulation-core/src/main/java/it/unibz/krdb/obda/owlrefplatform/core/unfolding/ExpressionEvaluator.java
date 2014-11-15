@@ -158,7 +158,7 @@ public class ExpressionEvaluator {
 						return fac.getConstantFalse();
 					}
 				} else if (expr.getTerm(0) instanceof Variable) {
-					return fac.getFunction(OBDAVocabulary.IS_TRUE, expr);
+					return fac.getFunctionIsTrue(expr);
 				} 
 				else {
 					return expr;
@@ -174,7 +174,7 @@ public class ExpressionEvaluator {
 					}
 					return fac.getConstantFalse();
 				} else if (expr.getTerm(0) instanceof Variable) {
-					return fac.getFunction(OBDAVocabulary.IS_TRUE, expr);
+					return fac.getFunctionIsTrue(expr);
 				} else {
 					return expr;
 				}
@@ -189,7 +189,7 @@ public class ExpressionEvaluator {
 					}
 					return fac.getConstantFalse();
 				} else if (expr.getTerm(0) instanceof Variable) {
-					return fac.getFunction(OBDAVocabulary.IS_TRUE, expr);
+					return fac.getFunctionIsTrue(expr);
 				} else {
 					return expr;
 				}
@@ -202,7 +202,7 @@ public class ExpressionEvaluator {
 					}
 					return fac.getConstantTrue();
 				} else if (expr.getTerm(0) instanceof Variable) {
-					return fac.getFunction(OBDAVocabulary.IS_TRUE, expr);
+					return fac.getFunctionIsTrue(expr);
 				} else {
 					return expr;
 				}
@@ -216,7 +216,7 @@ public class ExpressionEvaluator {
 					}
 					return fac.getConstantTrue();
 				} else if (expr.getTerm(0) instanceof Variable) {
-					return fac.getFunction(OBDAVocabulary.IS_TRUE, expr);
+					return fac.getFunctionIsTrue(expr);
 				} else {
 					return expr;
 				}
@@ -406,9 +406,7 @@ public class ExpressionEvaluator {
 				} 
 				else {
 					return fac.getTypedTerm(
-							fac.getFunction(
-									OBDAVocabulary.QUEST_CAST,
-									fac.getVariable(parameter.toString()),
+							fac.getFunctionCast(fac.getVariable(parameter.toString()),
 									fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.LITERAL).stringValue())), 
 										COL_TYPE.LITERAL);
 				}

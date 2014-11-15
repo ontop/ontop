@@ -150,13 +150,13 @@ public class MappingDataTypeRepair {
 
 			if (term instanceof Function) {
 				Function function = (Function) term;
+				Predicate functionSymbol = function.getFunctionSymbol();
 
-				if (function.getFunctionSymbol() instanceof URITemplatePredicate || function.getFunctionSymbol() instanceof BNodePredicate) {
+				if (functionSymbol instanceof URITemplatePredicate || functionSymbol instanceof BNodePredicate) {
 					// NO-OP for object properties
 					continue;
 				}
 
-				Predicate functionSymbol = function.getFunctionSymbol();
 				if (functionSymbol.isDataTypePredicate()) {
 
                     Function normal = qvv.getNormal(atom);
@@ -182,10 +182,9 @@ public class MappingDataTypeRepair {
                             atom.setTerm(1, newTerm);
                         }
                     }
-
-				} else {
-					throw new OBDAException("Unknown data type predicate: "
-							+ functionSymbol.getName());
+				} 
+				else {
+					throw new OBDAException("Unknown data type predicate: " + functionSymbol.getName());
 				}
 
 			} else if (term instanceof Variable) {

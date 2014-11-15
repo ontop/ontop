@@ -202,7 +202,7 @@ public class DatalogNormalizer {
 		 * generated. It always merges from the left to the right.
 		 */
 		while (dataAtoms.size() > 2) {
-			Function joinAtom = fac.getFunction(OBDAVocabulary.SPARQL_JOIN, dataAtoms.remove(0), dataAtoms.remove(0));
+			Function joinAtom = fac.getSPARQLJoin(dataAtoms.remove(0), dataAtoms.remove(0));
 			joinAtom.getTerms().addAll(booleanAtoms);
 			booleanAtoms.clear();
 
