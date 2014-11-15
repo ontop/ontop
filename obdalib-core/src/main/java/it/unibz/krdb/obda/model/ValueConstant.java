@@ -24,5 +24,12 @@ package it.unibz.krdb.obda.model;
  * Provides an interface for storing the value constant.
  */
 public interface ValueConstant extends Constant {
-	// NO-OP
+
+	/***
+	 * Returns the language of this Literal constant, or null if its not a
+	 * literal with language.
+	 * 
+	 * @return
+	 */
+	public String getLanguage();
 }

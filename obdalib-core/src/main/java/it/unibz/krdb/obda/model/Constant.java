@@ -27,7 +27,7 @@ package it.unibz.krdb.obda.model;
 public interface Constant extends Term {
 
 	public Predicate.COL_TYPE getType();
-
+	
 	/***
 	 * Returns the literal value of this constant.
 	 * 
@@ -35,11 +35,4 @@ public interface Constant extends Term {
 	 */
 	public String getValue();
 
-	/***
-	 * Returns the language of this Literal constant, or null if its not a
-	 * literal with language.
-	 * 
-	 * @return
-	 */
-	public String getLanguage();
 }

@@ -30,7 +30,7 @@ import java.util.Set;
 /**
  * Provides a storage to put the URI constant.
  */
-public class URIConstantImpl extends AbstractLiteral implements URIConstant {
+public class URIConstantImpl implements URIConstant {
 
 	private static final long serialVersionUID = -1263974895010238519L;
 	
@@ -86,8 +86,4 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 		return iristr;
 	}
 
-	@Override
-	public String getLanguage() {
-		return null;
-	}
 }

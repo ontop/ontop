@@ -25,20 +25,16 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Variable;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
  * Implementation for BNodes.
  */
-public class BNodeConstantImpl extends AbstractLiteral implements BNode {
+public class BNodeConstantImpl implements BNode {
 
 	private static final long serialVersionUID = 214867118996974157L;
 
 	private final String name;
-
 	private final int identifier;
 
 	/**
@@ -96,8 +92,4 @@ public class BNodeConstantImpl extends AbstractLiteral implements BNode {
 		return name;
 	}
 
-	@Override
-	public String getLanguage() {
-		return null;
-	}
 }

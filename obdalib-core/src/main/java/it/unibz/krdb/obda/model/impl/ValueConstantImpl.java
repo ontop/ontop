@@ -26,10 +26,9 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class ValueConstantImpl extends AbstractLiteral implements ValueConstant {
+public class ValueConstantImpl implements ValueConstant {
 
 	private static final long serialVersionUID = 8031338451909170400L;
 

@@ -24,7 +24,6 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.utils.EventGeneratingArrayList;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
 import it.unibz.krdb.obda.utils.EventGeneratingList;
 import it.unibz.krdb.obda.utils.ListListener;
@@ -36,21 +35,16 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-public class FunctionalTermImpl extends AbstractLiteral implements Function, ListListener {
+public class FunctionalTermImpl implements Function, ListListener {
 
 	private static final long serialVersionUID = 2832481815465364535L;
 	
-	protected Predicate functor = null;
-	protected EventGeneratingList<Term> terms = null;
-	protected int identifier = -1;
-
-	// true when the list of terms has been modified
-	protected boolean rehash = true;
+	private Predicate functor;
+	private EventGeneratingList<Term> terms = null;
+	private int identifier = -1;
 
 	// null when the list of terms has been modified
-	protected String string = null;
-
-	protected Function asAtom = null;
+	private String string = null;
 
 	/**
 	 * The default constructor.
@@ -100,16 +94,15 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 		if (obj == null || !(obj instanceof FunctionalTermImpl)) {
 			return false;
 		}
-		FunctionalTermImpl functor2 = (FunctionalTermImpl) obj;
-		return this.hashCode() == functor2.hashCode();
+		FunctionalTermImpl other = (FunctionalTermImpl) obj;
+		return this.hashCode() == other.hashCode();
 	}
 
 	@Override
 	public int hashCode() {
-		if (rehash) {
-			string = toString();
+		if (string == null) {
+			toString();
 			identifier = string.hashCode();
-			rehash = false;
 		}
 		return identifier;
 	}
@@ -152,7 +145,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 
 	@Override
 	public FunctionalTermImpl clone() {
-		ArrayList<Term> copyTerms = new ArrayList<Term>(terms.size()+10);
+		ArrayList<Term> copyTerms = new ArrayList<Term>(terms.size());
 		
 		for (Term term: terms) {
 			copyTerms.add(term.clone());
@@ -160,7 +153,6 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 		FunctionalTermImpl clone = new FunctionalTermImpl(functor, copyTerms);
 		clone.identifier = identifier;
 		clone.string = string;
-		clone.rehash = rehash;
 		return clone;
 	}
 
@@ -220,8 +212,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 
 	@Override
 	public void listChanged() {
-		rehash = true;
-		string = null;
+		string = null; // will trigger rehash
 	}
 
 	@Override
