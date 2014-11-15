@@ -34,11 +34,8 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 	private static final long serialVersionUID = 8031338451909170400L;
 
 	private final String value;
-
 	private final String language;
-
 	private final Predicate.COL_TYPE type;
-	
 	private final String string;
 
 	/**
@@ -53,16 +50,49 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 		this.value = value;
 		this.language = null;
 		this.type = type;
-		this.string = TermUtil.toString(this);
+		this.string = getStringRepresentation();
 	}
 
 	protected ValueConstantImpl(String value, String language) {
 		this.value = value;
 		this.language = language;
 		this.type = COL_TYPE.LITERAL_LANG;
-		this.string = TermUtil.toString(this);
+		this.string = getStringRepresentation();
+	}
+	
+	private final String getStringRepresentation() {
+		StringBuilder sb = new StringBuilder();
+		
+		switch (type) {
+			case STRING:
+            case DATE:
+            case TIME:
+            case YEAR:
+			case DATETIME: 
+				sb.append("\"").append(value).append("\""); 
+				break;
+			case INTEGER:
+            case LONG:
+			case DECIMAL:
+			case DOUBLE:
+			case BOOLEAN: 
+				sb.append(value); 
+				break;
+			case LITERAL:
+			case LITERAL_LANG:
+				sb.append("\"").append(value);
+				if (language != null && !language.isEmpty()) {
+					sb.append("@").append(language);
+				}
+				sb.append("\""); 
+				break;
+			default:
+				sb.append(value);
+		}
+		return sb.toString();	
 	}
 
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof ValueConstantImpl)) {

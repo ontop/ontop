@@ -24,6 +24,7 @@ import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Variable;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -77,19 +78,14 @@ public class BNodeConstantImpl extends AbstractLiteral implements BNode {
 
 	@Override
 	public String toString() {
-		return TermUtil.toString(this);
+		return name;
 	}
 
 	@Override
 	public Set<Variable> getReferencedVariables() {
-		return new LinkedHashSet<Variable>();
+		return Collections.emptySet();
 	}
-/*
-	@Override
-	public Map<Variable, Integer> getVariableCount() {
-		return new HashMap<Variable, Integer>();
-	}
-*/
+
 	@Override
 	public COL_TYPE getType() {
 		return COL_TYPE.BNODE;

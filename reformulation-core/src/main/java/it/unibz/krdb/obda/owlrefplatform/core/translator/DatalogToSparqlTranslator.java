@@ -34,7 +34,6 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.TermUtil;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.DatalogToSparqlTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlKeyword;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.UnknownArithmeticSymbolException;
@@ -106,13 +105,16 @@ public class DatalogToSparqlTranslator {
 
 	protected String toSparql(Term term) {
 		if (term instanceof Variable) {
-			return "?" + TermUtil.toString(term);
-		} else if (term instanceof URIConstant) {
-			return shortenName(TermUtil.toString(term));
-		} else if (term instanceof Function) {
+			return "?" + term;
+		} 
+		else if (term instanceof URIConstant) {
+			return shortenName(term.toString());
+		} 
+		else if (term instanceof Function) {
 			return toSparql((Function) term);
 		}
-		return TermUtil.toString(term); // for the other types of term
+		else
+			return term.toString(); // for the other types of term
 	}
 
 	// TODO: The current OBDA model should be refactored. The current API design prevents 

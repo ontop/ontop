@@ -33,10 +33,8 @@ import java.util.Set;
 public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 
 	private static final long serialVersionUID = -1263974895010238519L;
-
-
+	
 	private final int identifier;
-
 	private final String iristr;
 
 	protected URIConstantImpl(String iri) {
@@ -60,7 +58,7 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 
 	@Override
 	public String getURI() {
-		return this.iristr;
+		return iristr;
 	}
 
 	@Override
@@ -70,7 +68,7 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 
 	@Override
 	public String toString() {
-		return TermUtil.toString(this);
+		return "<" + iristr + ">";
 	}
 
 	@Override

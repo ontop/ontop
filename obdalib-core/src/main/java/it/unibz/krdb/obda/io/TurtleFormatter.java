@@ -29,8 +29,6 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.TermUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,20 +82,20 @@ public class TurtleFormatter extends CQFormatter {
                     final int arity = function.getArity();
                     if (arity == 1) { // without the language tag
                         Term var = function.getTerms().get(0);
-                        return String.format("%s^^%s", TermUtil.toString(var), getAbbreviatedName(functionSymbol.toString(), false));
+                        return String.format("%s^^%s", var.toString(), getAbbreviatedName(functionSymbol.toString(), false));
                     } else if (arity == 2) { // with the language tag
                         Term var = function.getTerms().get(0);
                         Term lang = function.getTerms().get(1);
-                        return String.format("%s@%s", TermUtil.toString(var), lang.toString());
+                        return String.format("%s@%s", var.toString(), lang.toString());
                     }
                 } else {
                     // For the other data types
                     Term var = function.getTerms().get(0);
-                    return String.format("%s^^%s", TermUtil.toString(var), getAbbreviatedName(functionSymbol.toString(), false));
+                    return String.format("%s^^%s", var.toString(), getAbbreviatedName(functionSymbol.toString(), false));
                 }
             } else if (functionSymbol instanceof URITemplatePredicate) {
                 Term uriTemplateConstant = function.getTerms().get(0);
-                String uriTemplate = getAbbreviatedName(TermUtil.toString(uriTemplateConstant), true);
+                String uriTemplate = getAbbreviatedName(uriTemplateConstant.toString(), true);
                 //remove quotes at the beginning and at the end if present
                 
                 StringBuilder template = new StringBuilder(uriTemplate.replaceAll("^\"|\"$", ""));
@@ -106,7 +104,7 @@ public class TurtleFormatter extends CQFormatter {
                 for (Term uriTemplateArg : function.getTerms()) {
                     if (uriTemplateArg instanceof Variable) {
                         int insertIndex = template.indexOf("{", startIndex);
-                        String termString =TermUtil.toString(uriTemplateArg);
+                        String termString = uriTemplateArg.toString();
                         template.insert(insertIndex + 1, termString );
                         startIndex = insertIndex + termString.length() + 1; // update the start index to find the next '{}' placeholder
                     }
@@ -116,7 +114,7 @@ public class TurtleFormatter extends CQFormatter {
             }
         }
         // Use the default writing
-        return TermUtil.toString(term);
+        return term.toString();
     }
 
     /**

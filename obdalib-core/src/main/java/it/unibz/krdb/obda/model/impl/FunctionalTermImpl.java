@@ -31,16 +31,14 @@ import it.unibz.krdb.obda.utils.ListListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class FunctionalTermImpl extends AbstractLiteral implements Function, ListListener {
 
-	protected static final long serialVersionUID = 2832481815465364535L;
+	private static final long serialVersionUID = 2832481815465364535L;
 	
 	protected Predicate functor = null;
 	protected EventGeneratingList<Term> terms = null;
@@ -168,8 +166,21 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 
 	@Override
 	public String toString() {
-		if (string == null)
-			string = TermUtil.toString(this);
+		if (string == null) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(functor.toString());
+			sb.append("(");
+			boolean separator = false;
+			for (Term innerTerm : terms) {
+				if (separator) {
+					sb.append(",");
+				}
+				sb.append(innerTerm.toString());
+				separator = true;
+			}
+			sb.append(")");
+			string = sb.toString();
+		}
 		return string;
 	}
 
@@ -222,24 +233,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 		}
 		return vars;
 	}
-/*
-	@Override
-	public Map<Variable, Integer> getVariableCount() {
-		Map<Variable, Integer> currentcount = new HashMap<Variable, Integer>();
-		for (Term t : terms) {
-			Map<Variable, Integer> atomCount = t.getVariableCount();
-			for (Variable var : atomCount.keySet()) {
-				Integer count = currentcount.get(var);
-				if (count != null) {
-					currentcount.put(var, count + atomCount.get(var));
-				} else {
-					currentcount.put(var, new Integer(atomCount.get(var)));
-				}
-			}
-		}
-		return currentcount;
-	}
-*/
+
 	@Override
 	public Term getTerm(int index) {
 		return terms.get(index);
