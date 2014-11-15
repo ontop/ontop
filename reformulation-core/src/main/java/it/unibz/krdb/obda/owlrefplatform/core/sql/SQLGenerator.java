@@ -1287,11 +1287,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * The atom must be of the form uri("...", x, y)
 		 */
 		// String functionName = function.getFunctionSymbol().toString();
-		if ((function instanceof URITemplatePredicate) || (function instanceof BNodePredicate)) {
+		if ((functionSymbol instanceof URITemplatePredicate) || (functionSymbol instanceof BNodePredicate)) {
 			return getSQLStringForTemplateFunction(function, index);
 		} 
 		else {
-			throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
+			throw new RuntimeException("Unexpected function in the query: " + function);
 		}
 	}
 

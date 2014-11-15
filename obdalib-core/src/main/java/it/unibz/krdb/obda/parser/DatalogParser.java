@@ -1466,11 +1466,11 @@ public class DatalogParser extends Parser {
 			      String functionName = function30;
 			      int arity = terms31.size();
 			    
-			      Predicate functionSymbol = null;  
 			      if (functionName.equals(OBDAVocabulary.QUEST_URI)) {
 					     value = dfac.getUriTemplate(terms31);
 				  }
 			      else {
+				      Predicate functionSymbol;  
 				      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
 				      if (type != null)
 				    	  functionSymbol = dtfac.getTypePredicate(type);

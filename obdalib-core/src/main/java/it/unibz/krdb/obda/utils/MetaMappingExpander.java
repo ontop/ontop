@@ -31,6 +31,7 @@ import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -234,7 +235,7 @@ public class MetaMappingExpander {
 			if (func.getArity() != 1){
 				result =false;
 			} else {
-				result  = result && func.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI);
+				result  = result && (func.getFunctionSymbol() instanceof URITemplatePredicate);
 				result  = result && (func.getTerm(0) instanceof ValueConstant) &&
 						((ValueConstant) func.getTerm(0)).getValue(). equals(OBDAVocabulary.RDF_TYPE);
 			}

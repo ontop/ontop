@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -137,8 +138,8 @@ public class MappingVocabularyRepair {
 								Function ft1 = (Function) t1;
 								Function ft2 = (Function) t2;
 
-								boolean t1uri = ft1.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI);
-								boolean t2uri = ft2.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI);
+								boolean t1uri = (ft1.getFunctionSymbol() instanceof URITemplatePredicate);  
+								boolean t2uri = (ft2.getFunctionSymbol() instanceof URITemplatePredicate);
 
 								if (t1uri && t2uri){
 									predicate= dfac.getObjectPropertyPredicate(p.getName());
@@ -205,7 +206,7 @@ public class MappingVocabularyRepair {
 			// no fix nexessary
 			return term;
 		}
-		if (predicate.getName().toString().equals(OBDAVocabulary.QUEST_URI)) {
+		if (predicate instanceof URITemplatePredicate) {
 			// no fix necessary
 			return term;
 		}
