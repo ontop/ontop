@@ -22,14 +22,14 @@ package sesameWrapper;
 
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestResultset;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,9 +49,10 @@ public class SesameBindingSet implements BindingSet {
 	private static final long serialVersionUID = -8455466574395305166L;
 	private QuestResultset set = null;
 	private int count = 0;
-	private ValueFactory fact = new ValueFactoryImpl();
-	private Set<String> bindingnames;
+	private final ValueFactory fact = new ValueFactoryImpl();
+	private final Set<String> bindingnames;
 //	private List<String> signature;
+	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	public SesameBindingSet(TupleResultSet set, Set<String> bindingnames) {
 		this.bindingnames = bindingnames;
@@ -95,81 +96,44 @@ public class SesameBindingSet implements BindingSet {
 				Constant c = set.getConstant(bindingName);
 				if (c == null) {
 					return null;
-				} else {
+				} 
+				else {
 					if (c instanceof BNode) {
 						value = fact.createBNode(c.getValue());
-					} else if (c instanceof URIConstant) {
+					} 
+					else if (c instanceof URIConstant) {
 						value = fact.createURI(c.getValue());
-					} else if (c instanceof ValueConstant) {
+					} 
+					else if (c instanceof ValueConstant) {
 						ValueConstant literal = (ValueConstant)c;
 						COL_TYPE col_type = literal.getType();
-						if (col_type == COL_TYPE.BOOLEAN) {
-							URI datatype = XMLSchema.BOOLEAN;
-							value = fact.createLiteral(c.getValue(), datatype);
-						} else if (col_type == COL_TYPE.DATETIME) {
-							URI datatype = XMLSchema.DATETIME;
-							value = fact.createLiteral(c.getValue(), datatype);
-						} else if (col_type == COL_TYPE.DECIMAL) {
-							URI datatype = XMLSchema.DECIMAL;
-							value = fact.createLiteral(c.getValue(), datatype);
-						} else if (col_type == COL_TYPE.DOUBLE) {
-							URI datatype = XMLSchema.DOUBLE;
-							value = fact.createLiteral(c.getValue(), datatype);
-                        } else if (col_type == COL_TYPE.FLOAT) {
-                            URI datatype = XMLSchema.FLOAT;
-                            value = fact.createLiteral(c.getValue(), datatype);
-						} else if (col_type == COL_TYPE.INTEGER) {
-                            URI datatype = XMLSchema.INTEGER;
-                            value = fact.createLiteral(c.getValue(), datatype);
-                        } else if (col_type == COL_TYPE.NON_NEGATIVE_INTEGER) {
-                            URI datatype = XMLSchema.NON_NEGATIVE_INTEGER;
-                            value = fact.createLiteral(c.getValue(), datatype);
-                        } else if (col_type == COL_TYPE.POSITIVE_INTEGER){
-                            URI datatype = XMLSchema.NEGATIVE_INTEGER;
-                            value = fact.createLiteral(c.getValue(), datatype);
-                        } else if (col_type == COL_TYPE.POSITIVE_INTEGER){
-                            URI datatype = XMLSchema.POSITIVE_INTEGER;
-                            value = fact.createLiteral(c.getValue(), datatype);
-                        } else if (col_type == COL_TYPE.NON_POSITIVE_INTEGER) {
-                            URI datatype = XMLSchema.NON_POSITIVE_INTEGER;
-                            value = fact.createLiteral(c.getValue(), datatype);
-                        } else if (col_type == COL_TYPE.UNSIGNED_INT) {
-                            URI datatype = XMLSchema.UNSIGNED_INT;
-                            value = fact.createLiteral(c.getValue(), datatype);
-                        } else if (col_type == COL_TYPE.INT) {
-                            URI datatype = XMLSchema.INT;
-                            value = fact.createLiteral(c.getValue(), datatype);
-						} else if (col_type == COL_TYPE.LONG) {
-                            URI datatype = XMLSchema.LONG;
-                            value = fact.createLiteral(c.getValue(), datatype);
-                        }else if (col_type == COL_TYPE.LITERAL) {
-							value = fact.createLiteral(c.getValue());
-						} else if (col_type == COL_TYPE.LITERAL_LANG) {
+						
+						if (col_type == COL_TYPE.LITERAL_LANG) {
+							// special case
 							value = fact.createLiteral(c.getValue(), literal.getLanguage());
-						} else if (col_type == COL_TYPE.OBJECT) {
+						} 
+						else if (col_type == COL_TYPE.LITERAL) {
+							// also a special case!
+							value = fact.createLiteral(c.getValue());
+						} 
+						else if (col_type == COL_TYPE.OBJECT) {
 							// TODO: Replace this with object datatype in the future
-							URI datatype = XMLSchema.STRING;
-							value = fact.createLiteral(c.getValue(), datatype);
-						} else if (col_type == COL_TYPE.STRING) {
-							URI datatype = XMLSchema.STRING;
-							value = fact.createLiteral(c.getValue(), datatype);
-						} else if (col_type == COL_TYPE.DATE) {
-							URI datatype = XMLSchema.DATE;
-							value = fact.createLiteral(c.getValue(), datatype);
-						} else if (col_type == COL_TYPE.TIME) {
-							URI datatype = XMLSchema.TIME;
-							value = fact.createLiteral(c.getValue(), datatype);
-						} else if (col_type == COL_TYPE.YEAR) {
-							URI datatype = XMLSchema.GYEAR;
-							value = fact.createLiteral(c.getValue(), datatype);
-						} else {
-							throw new RuntimeException("Found unknown TYPE for constant: " + c + " with COL_TYPE="+ col_type + " and variable=" + bindingName);
+							value = fact.createLiteral(c.getValue(), XMLSchema.STRING);
+						} 
+						else {
+							String uri = dtfac.getDataTypeURI(col_type);
+							if (uri == null)
+								throw new RuntimeException("Found unknown TYPE for constant: " + c + " with COL_TYPE="+ col_type + " and variable=" + bindingName);
+							
+							URI datatype = fact.createURI(uri);
+							value = fact.createLiteral(c.getValue(), datatype);							
 						}
 					}
 				}
 			}
 			return new BindingImpl(bindingName, value);
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 //		return null;
