@@ -24,9 +24,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -77,14 +75,8 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 
 	@Override
 	public Set<Variable> getReferencedVariables() {
-		return new LinkedHashSet<Variable>();
+		return Collections.emptySet();
 	}
-/*
-	@Override
-	public Map<Variable, Integer> getVariableCount() {
-		return new HashMap<Variable, Integer>();
-	}
-*/
 
 	@Override
 	public COL_TYPE getType() {

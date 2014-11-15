@@ -1108,7 +1108,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			else {
 				tp = dtfac.getDataType(type);
 				if (tp == null) {
-					return ofac.getUriTemplateTerm(type.stringValue());
+					return ofac.getUriTemplateForDatatype(type.stringValue());
 				}				
 			}
 			
@@ -1159,7 +1159,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		else if (v instanceof URIImpl) {
             constantFunction = uriTemplateMatcher.generateURIFunction(v.stringValue());
             if (constantFunction.getArity() == 1)
-                constantFunction = ofac.getUriTemplateTerm(((URIImpl) v).stringValue());
+                constantFunction = ofac.getUriTemplateForDatatype(((URIImpl) v).stringValue());
 		}
 		
 		return constantFunction;

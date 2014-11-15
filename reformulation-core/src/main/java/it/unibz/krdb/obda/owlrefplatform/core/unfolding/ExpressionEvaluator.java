@@ -439,7 +439,7 @@ public class ExpressionEvaluator {
 	private Term getDatatype(Predicate predicate, Term lit)
 	{
 		if (predicate instanceof DataTypePredicate) {
-			return fac.getUriTemplateTerm(predicate.toString());
+			return fac.getUriTemplateForDatatype(predicate.toString());
 		} 
 		else if (predicate instanceof BNodePredicate) {
 			return null;
@@ -448,12 +448,12 @@ public class ExpressionEvaluator {
 			return null;
 		} 
 		else if (predicate instanceof AlgebraOperatorPredicate){
-			return fac.getUriTemplateTerm(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue());
+			return fac.getUriTemplateForDatatype(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue());
 		} 
 		else if (predicate instanceof OperationPredicate){
 			if (predicate instanceof BooleanOperationPredicate) {
 				//return boolean uri
-				return fac.getUriTemplateTerm(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue());
+				return fac.getUriTemplateForDatatype(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue());
 			}
 			else if (predicate instanceof NumericalOperationPredicate)
 			{
@@ -465,10 +465,10 @@ public class ExpressionEvaluator {
 					Term arg2 = func.getTerm(1);
 					Predicate pred2 = getDatatypePredicate(arg2);
 					if (pred1.equals(pred2) || (isDouble(pred1) && isNumeric(pred2))) {
-						return fac.getUriTemplateTerm(pred1.toString());
+						return fac.getUriTemplateForDatatype(pred1.toString());
 					} 
 					else if (isNumeric(pred1) && isDouble(pred2)) {
-						return fac.getUriTemplateTerm(pred2.toString());
+						return fac.getUriTemplateForDatatype(pred2.toString());
 					} 
 					else {
 						return null;

@@ -277,7 +277,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getUriTemplateTerm(String type) {
+	public Function getUriTemplateForDatatype(String type) {
 		return getFunction(new URITemplatePredicateImpl(1), getConstantLiteral(type, COL_TYPE.OBJECT));
 	}
 	

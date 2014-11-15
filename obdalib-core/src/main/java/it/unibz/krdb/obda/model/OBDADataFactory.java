@@ -88,14 +88,11 @@ public interface OBDADataFactory extends Serializable {
 	 * Built-in function predicates
 	 */
 
-	@Deprecated // (used only in R2RMLParser 3 times)
-//	public Predicate getUriTemplatePredicate(int arity);
-	
 	public Function getUriTemplate(Term...terms);
 
 	public Function getUriTemplate(List<Term> terms);
 	
-	public Function getUriTemplateTerm(String type);
+	public Function getUriTemplateForDatatype(String type);
 	
 
 	public Function getBNodeTemplate(List<Term> terms);

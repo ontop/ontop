@@ -20,9 +20,6 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
-import java.util.HashMap;
-import java.util.Map;
-
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -158,9 +155,6 @@ public class OBDAVocabulary {
 
 	// The name of the function that creates URI's in Quest
 	public static final String QUEST_URI = "URI";
-
-	// The name of the function that creates URI's in Quest
-	public static final String QUEST_BNODE = "BNODE";
 
 	public static final String QUEST_TRIPLE_STR = "triple";
 

@@ -793,21 +793,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 				mainColumn = termStr;
 
-			} else if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
-				/***
-				 * New template based URI building functions
-				 */
-
+			} 
+			else if (function instanceof URITemplatePredicate) {
+				// New template based URI building functions
+				mainColumn = getSQLStringForTemplateFunction(ov, index);
+			} 
+			else if (function instanceof BNodePredicate) {
+				// New template based BNODE building functions
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
 
-			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
-				/***
-				 * New template based BNODE building functions
-				 */
-
-				mainColumn = getSQLStringForTemplateFunction(ov, index);
-
-			} else {
+			} 
+			else {
 				throw new IllegalArgumentException(
 						"Error generating SQL query. Found an invalid function during translation: "
 								+ ov.toString());
@@ -884,10 +880,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * type
 			 */
 			
-			if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
+			if (function instanceof URITemplatePredicate) {
                 code = questTypeMapper.getQuestCode(COL_TYPE.OBJECT);
 			} 
-			else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
+			else if (function instanceof BNodePredicate) {
                 code = questTypeMapper.getQuestCode(COL_TYPE.BNODE);
 			}
 			else {
@@ -898,7 +894,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		else if (ht instanceof URIConstant) {
             code = questTypeMapper.getQuestCode(COL_TYPE.OBJECT);
 		} 
-		else if (ht == OBDAVocabulary.NULL) {
+		else if (ht == OBDAVocabulary.NULL) {  // instance of ValueConstant
             code = questTypeMapper.getQuestCode(COL_TYPE.NULL);
 		}
 		else
@@ -1290,10 +1286,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 		/*
 		 * The atom must be of the form uri("...", x, y)
 		 */
-		String functionName = function.getFunctionSymbol().toString();
-		if (functionName.equals(OBDAVocabulary.QUEST_URI) || functionName.equals(OBDAVocabulary.QUEST_BNODE)) {
+		// String functionName = function.getFunctionSymbol().toString();
+		if ((function instanceof URITemplatePredicate) || (function instanceof BNodePredicate)) {
 			return getSQLStringForTemplateFunction(function, index);
-		} else {
+		} 
+		else {
 			throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
 		}
 	}

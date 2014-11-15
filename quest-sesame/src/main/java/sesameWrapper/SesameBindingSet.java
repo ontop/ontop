@@ -98,10 +98,10 @@ public class SesameBindingSet implements BindingSet {
 					return null;
 				} 
 				else {
-					if (c instanceof BNode) {
+					if (c instanceof BNode) {           // COL_TYPE.BNODE
 						value = fact.createBNode(c.getValue());
 					} 
-					else if (c instanceof URIConstant) {
+					else if (c instanceof URIConstant) {  // COL_TYPE.OBJECT
 						value = fact.createURI(c.getValue());
 					} 
 					else if (c instanceof ValueConstant) {
