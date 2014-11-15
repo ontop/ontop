@@ -391,11 +391,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 
 	@Override
-	public Predicate getJoinPredicate() {
-		return OBDAVocabulary.SPARQL_JOIN;
-	}
-	
-	@Override
 	public Predicate getLeftJoinPredicate() {
 		return OBDAVocabulary.SPARQL_LEFTJOIN;
 	}

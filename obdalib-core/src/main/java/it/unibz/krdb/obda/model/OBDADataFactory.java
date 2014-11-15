@@ -295,9 +295,5 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getSPARQLJoin(Term t1, Term t2);
 
-	Predicate getJoinPredicate();
-
-	Predicate getLeftJoinPredicate();
-
-	
+	Predicate getLeftJoinPredicate();	
 }

@@ -303,10 +303,11 @@ public class DatalogToSparqlTranslator {
 
 	private void printJoinExpression(Function expression, DatalogProgram datalog, StringBuilder sb, int indentLevel) {
 		Predicate joinPredicate = expression.getFunctionSymbol();
-		if (joinPredicate.equals(OBDAVocabulary.SPARQL_JOIN)) {
+		if (joinPredicate == OBDAVocabulary.SPARQL_JOIN) {
 			printGraph((Function) expression.getTerm(0), datalog, sb, indentLevel);
 			printGraph((Function) expression.getTerm(1), datalog, sb, indentLevel);
-		} else if (joinPredicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN)) {
+		} 
+		else if (joinPredicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN)) {
 			printGraph((Function) expression.getTerm(0), datalog, sb, indentLevel);
 			sb.append(indent(indentLevel));
 			sb.append(SparqlKeyword.OPTIONAL + " {\n");
