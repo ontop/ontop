@@ -1663,7 +1663,6 @@ public class TurtleParser extends Parser {
 
 					      Variable var = variable28;
 					      String functionName = resource29.toString();
-					      Predicate functionSymbol = null;
 					      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
 					      // R: not sute why such a transformation is needed -- there was nothing like this below
 					      if (type == COL_TYPE.INT)

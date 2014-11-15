@@ -409,7 +409,8 @@ public class ExpressionEvaluator {
 							fac.getFunction(
 									OBDAVocabulary.QUEST_CAST,
 									fac.getVariable(parameter.toString()),
-									fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.LITERAL))), COL_TYPE.LITERAL);
+									fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.LITERAL).stringValue())), 
+										COL_TYPE.LITERAL);
 				}
 			} 
 			else if (predicate instanceof URITemplatePredicate) {
@@ -447,14 +448,14 @@ public class ExpressionEvaluator {
 			return null;
 		} else if (predicate instanceof AlgebraOperatorPredicate){
 			return fac.getFunction(fac.getUriTemplatePredicate(1),
-					fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN),
+					fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue(),
 							COL_TYPE.OBJECT));
 		} else if (predicate instanceof OperationPredicate){
 			if (predicate instanceof BooleanOperationPredicate)
 			{
 				//return boolean uri
 				return fac.getFunction(fac.getUriTemplatePredicate(1),
-						fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN),
+						fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue(),
 								COL_TYPE.OBJECT));
 			}
 			else if (predicate instanceof NumericalOperationPredicate)

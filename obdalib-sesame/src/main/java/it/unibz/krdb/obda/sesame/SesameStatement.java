@@ -125,26 +125,23 @@ public class SesameStatement implements Statement {
 	
 	public Literal getLiteral(ValueConstant literal)
 	{
-		URI datatype = null;
-		
-		if (literal.getType() == COL_TYPE.LITERAL) {
-			datatype = null;                                       // special 17
+		if (literal.getType() == COL_TYPE.LITERAL) {                                        // special 17
+			Literal value = fact.createLiteral(literal.getValue(), (URI)null);
+			return value;
 		}
 		else if (literal.getType() == COL_TYPE.LITERAL_LANG) {
-			datatype = null;
-			return fact.createLiteral(literal.getValue(), literal.getLanguage());
+			Literal value = fact.createLiteral(literal.getValue(), literal.getLanguage());
+			return value;
 		}
 		else if (literal.getType() == COL_TYPE.OBJECT) {
-			String uri = dtfac.getDataTypeURI(COL_TYPE.STRING);
-			datatype = fact.createURI(uri);
+			Literal value = fact.createLiteral(literal.getValue(), dtfac.getDataTypeURI(COL_TYPE.STRING));
+			return value;
 		}	
 		else {
-			String uri = dtfac.getDataTypeURI(literal.getType());
-			datatype = fact.createURI(uri);
+			URI datatype = dtfac.getDataTypeURI(literal.getType());
+			Literal value = fact.createLiteral(literal.getValue(), datatype);
+			return value;
 		}
-		
-		Literal value = fact.createLiteral(literal.getValue(), datatype);
-		return value;
 	}
 
 	public Resource getSubject() {

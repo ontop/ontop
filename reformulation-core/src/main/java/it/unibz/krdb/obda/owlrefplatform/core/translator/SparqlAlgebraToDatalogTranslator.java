@@ -733,9 +733,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		LinkedList<Function> result = new LinkedList<Function>();
 
 		// Instantiate the subject and object URI
-		String subjectUri = null;
-		String objectUri = null;
-		String propertyUri = null;
+		URI objectUri = null;
 
 		// Instantiate the subject and object data type
 		COL_TYPE subjectType = null;
@@ -749,37 +747,34 @@ public class SparqlAlgebraToDatalogTranslator {
 			// Subject node
 			
 			terms.add(getOntopTerm(subj, s));
-			
 
 			// Object node
 			if (o == null) {
-
 				predicate = OBDAVocabulary.QUEST_TRIPLE_PRED;
 
 				Function rdfTypeConstant = ofac.getFunction(ofac
 						.getUriTemplatePredicate(1), ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 				terms.add(rdfTypeConstant);
 				terms.add(ofac.getVariable(obj.getName()));
-
-			} else if (o instanceof LiteralImpl) {
+			} 
+			else if (o instanceof LiteralImpl) {
 				throw new RuntimeException("Unsupported query syntax");
-			} else if (o instanceof URIImpl) {
-				URIImpl object = (URIImpl) o;
-				objectUri = object.stringValue();
+			} 
+			else if (o instanceof URIImpl) {
+				objectUri = (URI)o; 
 			}
 
 			// Construct the predicate
-			String predicateUri = objectUri;
-			if (predicateUri == null) {
+			if (objectUri == null) {
 				// NO OP, already assigned
 			} 
 			else {
-				Predicate.COL_TYPE type = dtfac.getDataType(predicateUri);
+				Predicate.COL_TYPE type = dtfac.getDataType(objectUri);
 				if (type != null) {
 					predicate = dtfac.getTypePredicate(type);
 				}
 	            else {
-					predicate = ofac.getPredicate(predicateUri, new COL_TYPE[] { subjectType });
+					predicate = ofac.getPredicate(objectUri.stringValue(), new COL_TYPE[] { subjectType });
 				}
 			}
 		} 
@@ -797,7 +792,8 @@ public class SparqlAlgebraToDatalogTranslator {
 			if (p instanceof URIImpl) {
 				String predicateUri = p.stringValue();
 				predicate = ofac.getPredicate(predicateUri, new COL_TYPE[] { subjectType, objectType });
-			} else if (p == null) {
+			} 
+			else if (p == null) {
 				predicate = OBDAVocabulary.QUEST_TRIPLE_PRED;
 				terms.add(1, ofac.getVariable(pred.getName()));
 			}
@@ -1044,27 +1040,18 @@ public class SparqlAlgebraToDatalogTranslator {
 		if (typeURI == null) 
 			return COL_TYPE.LITERAL;
 		
-		final String dataTypeURI = typeURI.stringValue();
-		COL_TYPE dataType = null;
-
-		if (dataTypeURI == null) {
-			dataType = COL_TYPE.LITERAL;
-		} else {
-			dataType = dtfac.getDataType(dataTypeURI);
-
-            if (dataType == null) {
-				throw new RuntimeException("Unsupported datatype: " + dataTypeURI.toString());
+		COL_TYPE dataType = dtfac.getDataType(typeURI);
+        if (dataType == null) 
+			throw new RuntimeException("Unsupported datatype: " + typeURI.stringValue());
+		
+        if (dataType == COL_TYPE.DECIMAL) { 
+			// special case for decimal
+			String value = node.getLabel().toString();
+			if (!value.contains(".")) {
+				// Put the type as integer (decimal without fractions).
+				dataType = COL_TYPE.INTEGER;
 			}
-			
-            if (dataType == COL_TYPE.DECIMAL) { 
-				// special case for decimal
-				String value = node.getLabel().toString();
-				if (!value.contains(".")) {
-					// Put the type as integer (decimal without fractions).
-					dataType = COL_TYPE.INTEGER;
-				}
-			} 
-		}
+		} 
 		return dataType;
 	}
 
@@ -1120,7 +1107,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			if (type == null) {
 				return ofac.getTypedTerm(ofac.getConstantLiteral(v.stringValue(), COL_TYPE.LITERAL), COL_TYPE.LITERAL);
 			}
-			COL_TYPE tp = dtfac.getDataType(type.toString());
+			COL_TYPE tp = dtfac.getDataType(type);
 			if (tp == null) {
 				return ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantLiteral(
 						type.toString(), COL_TYPE.OBJECT));

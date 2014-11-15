@@ -121,11 +121,10 @@ public class SesameBindingSet implements BindingSet {
 							value = fact.createLiteral(c.getValue(), XMLSchema.STRING);
 						} 
 						else {
-							String uri = dtfac.getDataTypeURI(col_type);
-							if (uri == null)
+							URI datatype = dtfac.getDataTypeURI(col_type);
+							if (datatype == null)
 								throw new RuntimeException("Found unknown TYPE for constant: " + c + " with COL_TYPE="+ col_type + " and variable=" + bindingName);
 							
-							URI datatype = fact.createURI(uri);
 							value = fact.createLiteral(c.getValue(), datatype);							
 						}
 					}
