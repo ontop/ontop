@@ -285,8 +285,7 @@ public class DirectMappingAxiom {
 				vars.add(df.getVariable(tableName + td.getAttributeName(i + 1)));
 			}
 
-			Predicate bNode = df.getBNodeTemplatePredicate(1);
-			return df.getFunction(bNode, vars);
+			return df.getBNodeTemplate(vars);
 		}
 	}
 

@@ -263,33 +263,34 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 	
 
-	//@Override
-	public Predicate getUriTemplatePredicate(int arity) {
-		return new URITemplatePredicateImpl(arity);
-	}
-	
 	
 	@Override
 	public Function getUriTemplate(Term... terms) {
-		Predicate uriPred = getUriTemplatePredicate(terms.length);
+		Predicate uriPred = new URITemplatePredicateImpl(terms.length);
 		return getFunction(uriPred, terms);		
 	}
 	
 	@Override
 	public Function getUriTemplate(List<Term> terms) {
-		Predicate uriPred = getUriTemplatePredicate(terms.size());
+		Predicate uriPred = new URITemplatePredicateImpl(terms.size());
 		return getFunction(uriPred, terms);		
 	}
 
 	@Override
 	public Function getUriTemplateTerm(String type) {
-		return getFunction(getUriTemplatePredicate(1),
-				getConstantLiteral(type, COL_TYPE.OBJECT));
+		return getFunction(new URITemplatePredicateImpl(1), getConstantLiteral(type, COL_TYPE.OBJECT));
 	}
 	
 	@Override
-	public Predicate getBNodeTemplatePredicate(int arity) {
-		return new BNodePredicateImpl(arity);
+	public Function getBNodeTemplate(Term... terms) {
+		Predicate pred = new BNodePredicateImpl(terms.length);
+		return getFunction(pred, terms);
+	}
+	
+	@Override
+	public Function getBNodeTemplate(List<Term> terms) {
+		Predicate pred = new BNodePredicateImpl(terms.size());
+		return getFunction(pred, terms);
 	}
 
 	@Override

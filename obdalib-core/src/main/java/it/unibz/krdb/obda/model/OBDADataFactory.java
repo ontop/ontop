@@ -89,7 +89,7 @@ public interface OBDADataFactory extends Serializable {
 	 */
 
 	@Deprecated // (used only in R2RMLParser 3 times)
-	public Predicate getUriTemplatePredicate(int arity);
+//	public Predicate getUriTemplatePredicate(int arity);
 	
 	public Function getUriTemplate(Term...terms);
 
@@ -97,9 +97,10 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getUriTemplateTerm(String type);
 	
-	public Predicate getBNodeTemplatePredicate(int arity);
 
+	public Function getBNodeTemplate(List<Term> terms);
 
+	public Function getBNodeTemplate(Term... terms);
 	
 	/**
 	 * Construct a {@link Function} object. A function expression consists of

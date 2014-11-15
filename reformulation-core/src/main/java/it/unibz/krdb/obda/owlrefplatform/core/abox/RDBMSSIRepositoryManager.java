@@ -2491,7 +2491,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			Function head = dfac.getFunction(dfac.getPredicate("m", 1), dfac.getVariable("X"));
 			Function body1 = dfac.getFunction(classuri, dfac.getUriTemplate(dfac.getVariable("X")));
-			Function body2 = dfac.getFunction(classuri, dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X")));
+			Function body2 = dfac.getFunction(classuri, dfac.getBNodeTemplate(dfac.getVariable("X")));
 			
 			/*
 			 * This target query is shared by all mappings for this class
@@ -2709,7 +2709,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		} else if (type1 == COL_TYPE.BNODE) {
 
-			subjectTerm = dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X"));
+			subjectTerm = dfac.getBNodeTemplate(dfac.getVariable("X"));
 
 		} else {
 			throw new RuntimeException("Unsupported object type: " + type1);
@@ -2719,7 +2719,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Function objectTerm;
 		if (type2 == COL_TYPE.BNODE) {
 
-			objectTerm = dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("Y"));
+			objectTerm = dfac.getBNodeTemplate(dfac.getVariable("Y"));
 
 		} 
 		else if (type2 == COL_TYPE.OBJECT) {
