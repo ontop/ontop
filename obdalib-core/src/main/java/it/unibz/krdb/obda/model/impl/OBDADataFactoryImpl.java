@@ -20,32 +20,16 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.BNode;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.IDGenerator;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
 
 //import com.hp.hpl.jena.iri.IRI;
 //import com.hp.hpl.jena.iri.IRIFactory;
@@ -130,6 +114,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 	@Override
 	public ValueConstant getConstantFreshLiteral() {
+		// TODO: a bit more elaborate name is needed to avoid conflicts
 		return new ValueConstantImpl("f" + (counter++), COL_TYPE.LITERAL);
 	}
 
@@ -229,6 +214,41 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return OBDAVocabulary.XSD_INTEGER;
 	}
 
+    @Override
+    public Predicate getDataTypePredicateNonNegativeInteger() {
+        return OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER;
+    }
+
+    @Override
+    public Predicate getDataTypePredicateInt() {
+        return OBDAVocabulary.XSD_INT;
+    }
+
+    @Override
+    public Predicate getDataTypePredicatePositiveInteger() {
+        return OBDAVocabulary.XSD_POSITIVE_INTEGER;
+    }
+
+    @Override
+    public Predicate getDataTypePredicateNegativeInteger() {
+        return OBDAVocabulary.XSD_NEGATIVE_INTEGER;
+    }
+
+    @Override
+    public Predicate getDataTypePredicateNonPositiveInteger() {
+        return OBDAVocabulary.XSD_NON_POSITIVE_INTEGER;
+    }
+
+    @Override
+    public Predicate getDataTypePredicateUnsignedInt() {
+        return OBDAVocabulary.XSD_UNSIGNED_INT;
+    }
+
+    @Override
+    public Predicate getDataTypePredicateLong() {
+        return OBDAVocabulary.XSD_LONG;
+    }
+
 	@Override
 	public Predicate getDataTypePredicateDecimal() {
 		return OBDAVocabulary.XSD_DECIMAL;
@@ -238,6 +258,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Predicate getDataTypePredicateDouble() {
 		return OBDAVocabulary.XSD_DOUBLE;
 	}
+
+    @Override
+    public Predicate getDataTypePredicateFloat() {
+        return OBDAVocabulary.XSD_FLOAT;
+    }
 
 	@Override
 	public Predicate getDataTypePredicateDateTime() {
@@ -484,13 +509,29 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		case LITERAL:
 			return getDataTypePredicateLiteral();
 		case LITERAL_LANG:
-			return getDataTypePredicateLiteral();
+			return getDataTypePredicateLiteralLang();
 		case STRING:
 			return getDataTypePredicateString();
 		case INTEGER:
 			return getDataTypePredicateInteger();
+        case NEGATIVE_INTEGER:
+            return getDataTypePredicateNegativeInteger();
+        case INT:
+            return getDataTypePredicateInt();
+        case POSITIVE_INTEGER:
+            return getDataTypePredicatePositiveInteger();
+        case NON_POSITIVE_INTEGER:
+            return getDataTypePredicateNonPositiveInteger();
+        case NON_NEGATIVE_INTEGER:
+            return getDataTypePredicateNonNegativeInteger();
+        case UNSIGNED_INT:
+            return getDataTypePredicateUnsignedInt();
+        case LONG:
+            return getDataTypePredicateLong();
 		case DECIMAL:
 			return getDataTypePredicateDecimal();
+        case FLOAT:
+            return getDataTypePredicateFloat();
 		case DOUBLE:
 			return getDataTypePredicateDouble();
 		case DATETIME:

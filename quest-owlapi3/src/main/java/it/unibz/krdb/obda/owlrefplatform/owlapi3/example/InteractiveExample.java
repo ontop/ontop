@@ -1,6 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.owlapi3.example;
 
-import it.unibz.krdb.config.tmappings.parser.TMappingsConfParser;
+//import it.unibz.krdb.config.tmappings.parser.TMappingsConfParser;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -70,11 +70,11 @@ public class InteractiveExample {
 		factory.setOBDAController(obdaModel);
 		factory.setPreferenceHolder(preference);
 		
-		/*
-		 * T-Mappings Handling!!
-		 */
-		TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
-		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
+//		/*
+//		 * T-Mappings Handling!!
+//		 */
+//		TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
+//		factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 		
 		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 

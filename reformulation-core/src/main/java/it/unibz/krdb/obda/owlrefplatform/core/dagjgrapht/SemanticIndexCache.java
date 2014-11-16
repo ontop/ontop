@@ -1,12 +1,13 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.ontology.impl.PropertyImpl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -67,8 +68,23 @@ public class SemanticIndexCache {
 				classIntervals.put(iri, intervals);
 
 			} 
-			else if (description instanceof PropertyImpl) {
-				PropertyImpl cdesc = (PropertyImpl) description;
+			else if (description instanceof ObjectPropertyExpression) {
+				ObjectPropertyExpression cdesc = (ObjectPropertyExpression) description;
+
+				if (cdesc.isInverse()) {
+					/* Inverses don't get indexes or intervals */
+					continue;
+				}
+
+				int idx = engine.getIndex(cdesc);
+				List<Interval> intervals = engine.getIntervals(cdesc);
+
+				String iri = cdesc.getPredicate().getName();
+				roleIndexes.put(iri, idx);
+				roleIntervals.put(iri, intervals);
+			} 
+			else if (description instanceof DataPropertyExpression) {
+				DataPropertyExpression cdesc = (DataPropertyExpression) description;
 
 				if (cdesc.isInverse()) {
 					/* Inverses don't get indexes or intervals */
@@ -121,8 +137,8 @@ public class SemanticIndexCache {
 			if (index == null) {
 				/* direct name is not indexed, maybe there is an equivalent, we need to test
 				 * with object properties and data properties */
-				Property c = ofac.createObjectProperty(name);
-				Property equivalent = reasonerDag.getProperties().getVertex(c).getRepresentative();
+				PropertyExpression c = ofac.createObjectProperty(name);
+				PropertyExpression equivalent = reasonerDag.getProperties().getVertex(c).getRepresentative();
 				
 				Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
 				

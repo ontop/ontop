@@ -2,7 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -77,8 +77,8 @@ public class SemanticIndexBuilder  {
 		 * */
 		private void mergeRangeNode(Description d) {
 
-			if (d instanceof Property) {
-				for (Description ch : namedDAG.getPredecessors((Property)d)) { 
+			if (d instanceof PropertyExpression) {
+				for (Description ch : namedDAG.getPredecessors((PropertyExpression)d)) { 
 					if (!ch.equals(d)) { // Roman: was !=
 						mergeRangeNode(ch);
 
@@ -153,8 +153,8 @@ public class SemanticIndexBuilder  {
 	public List<Interval> getIntervals(Description d) {
 
 		Description node;
-		if (d instanceof Property)
-			node = reasoner.getProperties().getVertex((Property)d).getRepresentative();
+		if (d instanceof PropertyExpression)
+			node = reasoner.getProperties().getVertex((PropertyExpression)d).getRepresentative();
 		else
 			node = reasoner.getClasses().getVertex((BasicClassDescription)d).getRepresentative();
 		
