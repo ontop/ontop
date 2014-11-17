@@ -77,6 +77,9 @@
 
     <owl:ObjectProperty rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#PC"/>
     
+    <!-- http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#PC -->
+
+    <owl:DataProperty rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#DP"/>
  
 
     <!-- 
