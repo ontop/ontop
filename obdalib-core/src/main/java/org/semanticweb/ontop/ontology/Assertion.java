@@ -27,7 +27,4 @@ import org.semanticweb.ontop.model.Predicate;
  */
 public interface Assertion extends Axiom {
 
-	public int getArity();
-	
-	public Predicate getPredicate();
 }

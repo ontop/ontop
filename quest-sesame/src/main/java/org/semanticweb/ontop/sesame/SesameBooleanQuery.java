@@ -20,7 +20,9 @@ package org.semanticweb.ontop.sesame;
  * #L%
  */
 
-import java.sql.SQLException;
+import org.openrdf.query.BooleanQuery;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
 
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;

@@ -42,6 +42,7 @@ import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.Quest;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
+import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 
 public class QuestResultset implements TupleResultSet {
 
@@ -49,7 +50,7 @@ public class QuestResultset implements TupleResultSet {
 	private ResultSet set = null;
 	QuestStatement st;
 	private List<String> signature;
-	DecimalFormat formatter = new DecimalFormat("0.0###E0");
+	private DecimalFormat formatter = new DecimalFormat("0.0###E0");
 
 	private HashMap<String, Integer> columnMap;
 
@@ -59,7 +60,8 @@ public class QuestResultset implements TupleResultSet {
 	private int bnodeCounter = 0;
 
 	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	private Map<Integer, String> uriMap;
+	private SemanticIndexURIMap uriMap;
+	
 	private String vendor;
 	private boolean isOracle;
     private boolean isMsSQL;
@@ -81,7 +83,10 @@ public class QuestResultset implements TupleResultSet {
 		this.st = st;
         Quest questInstance = st.getQuestInstance();
 		this.isSemIndex = questInstance.isSemIdx();
-		this.uriMap = questInstance.getUriMap();
+		if (isSemIndex) 
+			uriMap = questInstance.getSemanticIndexRepository().getUriMap();
+		else
+			uriMap = null;
 		this.signature = signature;
 		
 		columnMap = new HashMap<>(signature.size() * 2);
@@ -179,7 +184,7 @@ public class QuestResultset implements TupleResultSet {
 					if (isSemIndex) {
 						try {
 							Integer id = Integer.parseInt(realValue);
-							realValue = this.uriMap.get(id);
+							realValue = uriMap.getURI(id);
 						} catch (NumberFormatException e) {
 							/*
 							 * If its not a number, then it has to be a URI, so
@@ -355,36 +360,59 @@ public class QuestResultset implements TupleResultSet {
 		return constant;
 	}
 
+    /**
+     * Numbers sqltype are defined @see #getTypeColumnForSELECT SQLGenerator
+     */
+
 	private COL_TYPE getQuestType(int sqltype) {
-		if (sqltype == 1) {
-			return COL_TYPE.OBJECT;
-		} else if (sqltype == 2) {
-			return COL_TYPE.BNODE;
-		} else if (sqltype == 3) {
-			return COL_TYPE.LITERAL;
-		} else if (sqltype == 4) {
-			return COL_TYPE.INTEGER;
-		} else if (sqltype == 5) {
-			return COL_TYPE.DECIMAL;
-		} else if (sqltype == 6) {
-			return COL_TYPE.DOUBLE;
-		} else if (sqltype == 7) {
-			return COL_TYPE.STRING;
-		} else if (sqltype == 8) {
-			return COL_TYPE.DATETIME;
-		} else if (sqltype == 9) {
-			return COL_TYPE.BOOLEAN;
-		} else if (sqltype == 10) {
-			return COL_TYPE.DATE;
-		} else if (sqltype == 11) {
-			return COL_TYPE.TIME;
-		} else if (sqltype == 12) {
-			return COL_TYPE.YEAR;
-		} else if (sqltype == 0) {
-			return null;
-		} else {
-			throw new RuntimeException("COLTYPE unknown: " + sqltype);
-		}
+        switch(sqltype) {
+            case 1:
+                return COL_TYPE.OBJECT;
+            case 2:
+                return COL_TYPE.BNODE;
+            case 3:
+                return COL_TYPE.LITERAL;
+            case 4:
+                return COL_TYPE.INTEGER;
+            case 5:
+                return COL_TYPE.DECIMAL;
+            case 6:
+                return COL_TYPE.DOUBLE;
+            case 7:
+                return COL_TYPE.STRING;
+            case 8:
+                return COL_TYPE.DATETIME;
+            case 9:
+                return COL_TYPE.BOOLEAN;
+            case 10:
+                return COL_TYPE.DATE;
+            case 11:
+                return COL_TYPE.TIME;
+            case 12:
+                return COL_TYPE.YEAR;
+            case 13:
+                return COL_TYPE.LONG;
+            case 14:
+                return COL_TYPE.FLOAT;
+            case 15:
+                return COL_TYPE.NEGATIVE_INTEGER;
+            case 16:
+                return COL_TYPE.NON_NEGATIVE_INTEGER;
+            case 17:
+                return COL_TYPE.POSITIVE_INTEGER;
+            case 18:
+                return COL_TYPE.NON_POSITIVE_INTEGER;
+            case 19:
+                return COL_TYPE.INT;
+            case 20:
+                return COL_TYPE.UNSIGNED_INT;
+            case 0:
+                return null;
+            default:
+                throw new RuntimeException("COLTYPE unknown: " + sqltype);
+
+        }
+
 	}
 
 	// @Override

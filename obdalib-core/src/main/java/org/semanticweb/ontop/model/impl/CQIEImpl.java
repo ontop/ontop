@@ -22,11 +22,9 @@ package org.semanticweb.ontop.model.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.ontop.model.CQIE;
@@ -236,33 +234,6 @@ public class CQIEImpl implements CQIE, ListListener {
 				for (Variable v : t.getReferencedVariables())
 					vars.add(v);
 			}
-		return vars;
-	}
-
-	@Override
-	public Map<Variable, Integer> getVariableCount() {
-		Map<Variable, Integer> vars = new HashMap<Variable, Integer>();
-		for (Function atom : body) {
-			Map<Variable, Integer> atomCount = atom.getVariableCount();
-			for (Variable var : atomCount.keySet()) {
-				Integer count = vars.get(var);
-				if (count != null) {
-					vars.put(var, count + atomCount.get(var));
-				} else {
-					vars.put(var, new Integer(atomCount.get(var)));
-				}
-			}
-		}
-
-		Map<Variable, Integer> atomCount = head.getVariableCount();
-		for (Variable var : atomCount.keySet()) {
-			Integer count = vars.get(var);
-			if (count != null) {
-				vars.put(var, count + atomCount.get(var));
-			} else {
-				vars.put(var, new Integer(atomCount.get(var)));
-			}
-		}
 		return vars;
 	}
 

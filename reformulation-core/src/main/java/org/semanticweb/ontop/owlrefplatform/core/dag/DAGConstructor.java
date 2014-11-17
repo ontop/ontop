@@ -25,113 +25,18 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.ontology.Axiom;
-import org.semanticweb.ontop.ontology.ClassDescription;
-import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.ontology.PropertySomeRestriction;
+import org.semanticweb.ontop.ontology.*;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
-import org.semanticweb.ontop.ontology.impl.OntologyImpl;
-import org.semanticweb.ontop.ontology.impl.SubClassAxiomImpl;
-
-
+import org.semanticweb.ontop.ontology.impl.OntologyVocabularyImpl;
 
 
 @Deprecated
 public class DAGConstructor {
 
-	private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-	private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+	private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
 	public static DAG getISADAG(Ontology ontology) {
 		return new DAG(ontology);
-	}
-
-	public static DAG getSigma(Ontology ontology) {
-
-		Ontology sigma = descFactory.createOntology("");
-		sigma.addConcepts(ontology.getConcepts());
-		sigma.addRoles(ontology.getRoles());
-		for (Axiom assertion : ontology.getAssertions()) {
-
-			if (assertion instanceof SubClassAxiomImpl) {
-				SubClassAxiomImpl inclusion = (SubClassAxiomImpl) assertion;
-				Description parent = inclusion.getSuper();
-				Description child = inclusion.getSub();
-				if (parent instanceof PropertySomeRestriction) {
-					continue;
-				}
-			}
-
-			sigma.addAssertion(assertion);
-		}
-
-		sigma.saturate();
-		return getISADAG(sigma);
-	}
-
-	/***
-	 * DONT USE, BUGGY
-	 * 
-	 * @param ontology
-	 * @return
-	 */
-	@Deprecated
-	public static Ontology getSigmaOntology(Ontology ontology) {
-
-		Ontology sigma = descFactory.createOntology("sigma");
-		sigma.addConcepts(ontology.getConcepts());
-		sigma.addRoles(ontology.getRoles());
-
-		for (Axiom assertion : ontology.getAssertions()) {
-			if (assertion instanceof SubClassAxiomImpl) {
-				SubClassAxiomImpl inclusion = (SubClassAxiomImpl) assertion;
-				Description parent = inclusion.getSuper();
-				Description child = inclusion.getSub();
-				if (parent instanceof PropertySomeRestriction) {
-					continue;
-				}
-			}
-			sigma.addAssertion(assertion);
-		}
-
-		return sigma;
-	}
-
-	public static Ontology getSigmaOntology(DAG dag) {
-
-		Ontology sigma = descFactory.createOntology("sigma");
-
-		DAGEdgeIterator edgeiterator = new DAGEdgeIterator(dag);
-		OntologyFactory fac = OntologyFactoryImpl.getInstance();
-
-		while (edgeiterator.hasNext()) {
-			Edge edge = edgeiterator.next();
-			if (edge.getLeft().getDescription() instanceof ClassDescription) {
-				ClassDescription sub = (ClassDescription) edge.getLeft().getDescription();
-				ClassDescription superp = (ClassDescription) edge.getRight().getDescription();
-				if (superp instanceof PropertySomeRestriction)
-					continue;
-
-				Axiom ax = fac.createSubClassAxiom(sub, superp);
-				sigma.addEntities(ax.getReferencedEntities());
-				sigma.addAssertion(ax);
-			} else {
-				Property sub = (Property) edge.getLeft().getDescription();
-				Property superp = (Property) edge.getRight().getDescription();
-
-				Axiom ax = fac.createSubPropertyAxiom(sub, superp);
-				sigma.addEntities(ax.getReferencedEntities());
-
-				sigma.addAssertion(ax);
-			}
-		}
-
-		return sigma;
 	}
 
 	public static DAG filterPureISA(DAG dag) {
@@ -142,7 +47,7 @@ public class DAGConstructor {
 
 		for (DAGNode node : dag.getClasses()) {
 
-			if (node.getDescription() instanceof PropertySomeRestriction) {
+			if (node.getDescription() instanceof SomeValuesFrom) {
 				continue;
 			}
 
@@ -157,7 +62,7 @@ public class DAGConstructor {
 			}
 
 			for (DAGNode child : node.getChildren()) {
-				if (child.getDescription() instanceof PropertySomeRestriction) {
+				if (child.getDescription() instanceof SomeValuesFrom) {
 					continue;
 				}
 				DAGNode newChild = classes.get(child.getDescription());
@@ -176,14 +81,14 @@ public class DAGConstructor {
 		}
 
 		for (DAGNode node : dag.getRoles()) {
-			Property nodeDesc = (Property) node.getDescription();
+			PropertyExpression nodeDesc = (PropertyExpression) node.getDescription();
 
-			if (nodeDesc.getPredicate().getName().toString().startsWith(OntologyImpl.AUXROLEURI)) {
+			if (OntologyVocabularyImpl.isAuxiliaryProperty(nodeDesc)) {
 				continue;
 			}
 
 			if (nodeDesc.isInverse()) {
-				Property posNode = descFactory.createProperty(nodeDesc.getPredicate(), false);
+				PropertyExpression posNode = nodeDesc.getInverse();
 				DAGNode newNode = roles.get(posNode);
 				if (newNode == null) {
 					newNode = new DAGNode(posNode);
@@ -202,12 +107,12 @@ public class DAGConstructor {
 				allnodes.put(nodeDesc, newNode);
 			}
 			for (DAGNode child : node.getChildren()) {
-				Property childDesc = (Property) child.getDescription();
-				if (childDesc.getPredicate().getName().toString().startsWith(OntologyImpl.AUXROLEURI)) {
+				PropertyExpression childDesc = (PropertyExpression) child.getDescription();
+				if (OntologyVocabularyImpl.isAuxiliaryProperty(childDesc)) {
 					continue;
 				}
 				if (childDesc.isInverse()) {
-					Property posChild = descFactory.createProperty(childDesc.getPredicate(), false);
+					PropertyExpression posChild = childDesc.getInverse();
 					DAGNode newChild = roles.get(posChild);
 					if (newChild == null) {
 						newChild = new DAGNode(posChild);

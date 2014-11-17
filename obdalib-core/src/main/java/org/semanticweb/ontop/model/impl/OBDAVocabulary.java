@@ -143,7 +143,19 @@ public class OBDAVocabulary {
 
 	public static final String OWL_REAL_URI = "http://www.w3.org/2002/07/owl#real";
 
-	public static final String XSD_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#integer";
+    public static final String XSD_POSITIVE_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#positiveInteger";
+
+    public static final String XSD_NEGATIVE_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#negativeInteger";
+
+    public static final String XSD_NON_POSITIVE_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#nonPositiveInteger";
+
+    public static final String XSD_UNSIGNED_INT_URI = "http://www.w3.org/2001/XMLSchema#unsignedInt";
+
+    public static final String XSD_NON_NEGATIVE_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#nonNegativeInteger";
+
+    public static final String XSD_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#integer";
+
+    public static final String XSD_LONG_URI = "http://www.w3.org/2001/XMLSchema#long";
 
 	public static final String XSD_DECIMAL_URI = "http://www.w3.org/2001/XMLSchema#decimal";
 
@@ -178,11 +190,35 @@ public class OBDAVocabulary {
 	public static final Predicate OWL_REAL = new DataTypePredicateImpl(
 			OWL_REAL_URI, COL_TYPE.REAL);
 	
+    public static final Predicate XSD_NEGATIVE_INTEGER = new DataTypePredicateImpl(
+            XSD_NEGATIVE_INTEGER_URI, COL_TYPE.NEGATIVE_INTEGER);
+
+    public static final Predicate XSD_INT = new DataTypePredicateImpl(
+            XSD_INT_URI, COL_TYPE.INT);
+
+    public static final Predicate XSD_NON_NEGATIVE_INTEGER = new DataTypePredicateImpl(
+            XSD_NON_NEGATIVE_INTEGER_URI, COL_TYPE.NON_NEGATIVE_INTEGER);
+
+    public static final Predicate XSD_UNSIGNED_INT = new DataTypePredicateImpl(
+            XSD_UNSIGNED_INT_URI, COL_TYPE.UNSIGNED_INT);
+
+    public static final Predicate XSD_POSITIVE_INTEGER = new DataTypePredicateImpl(
+            XSD_POSITIVE_INTEGER_URI, COL_TYPE.POSITIVE_INTEGER);
+
+    public static final Predicate XSD_NON_POSITIVE_INTEGER = new DataTypePredicateImpl(
+            XSD_NON_POSITIVE_INTEGER_URI, COL_TYPE.NON_POSITIVE_INTEGER);
+
+    public static final Predicate XSD_LONG = new DataTypePredicateImpl(
+            XSD_LONG_URI, COL_TYPE.LONG);
+
 	public static final Predicate XSD_DECIMAL = new DataTypePredicateImpl(
 			XSD_DECIMAL_URI, COL_TYPE.DECIMAL);
 
 	public static final Predicate XSD_DOUBLE = new DataTypePredicateImpl(
 			XSD_DOUBLE_URI, COL_TYPE.DOUBLE);
+
+    public static final Predicate XSD_FLOAT = new DataTypePredicateImpl(
+            XSD_FLOAT_URI, COL_TYPE.FLOAT);
 
 	public static final Predicate XSD_DATETIME = new DataTypePredicateImpl(
 			XSD_DATETIME_URI, COL_TYPE.DATETIME);
@@ -200,11 +236,15 @@ public class OBDAVocabulary {
 			XSD_YEAR_URI, COL_TYPE.YEAR);
 
 	public static final Predicate[] QUEST_DATATYPE_PREDICATES = new Predicate[] {
-			RDFS_LITERAL, XSD_STRING, XSD_INTEGER, XSD_DECIMAL, XSD_DOUBLE,
+			RDFS_LITERAL, XSD_STRING, XSD_INTEGER, XSD_NEGATIVE_INTEGER,
+    XSD_NON_NEGATIVE_INTEGER, XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER, XSD_INT,
+    XSD_UNSIGNED_INT, XSD_LONG, XSD_FLOAT, XSD_DECIMAL, XSD_DOUBLE,
 			XSD_DATETIME, XSD_BOOLEAN, XSD_DATE, XSD_TIME, XSD_YEAR };
 	
 	public static final Predicate[] QUEST_NUMERICAL_DATATYPES = new Predicate[] {
-			XSD_INTEGER, XSD_DECIMAL, XSD_DOUBLE };
+			XSD_INTEGER, XSD_NEGATIVE_INTEGER,
+            XSD_NON_NEGATIVE_INTEGER, XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER, XSD_INT,
+            XSD_UNSIGNED_INT, XSD_FLOAT, XSD_DECIMAL, XSD_DOUBLE, XSD_LONG };
 
 	/* Common namespaces and prefixes */
 

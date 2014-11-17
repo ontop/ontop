@@ -28,6 +28,7 @@ import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
 
 
@@ -113,7 +114,7 @@ public class AutomaticMGUTestDataGenerator {
 			if (string.equals(""))
 				continue;
 			String[] elements = string.split("/");
-			Substitution s = new Substitution(getTerm(elements[0]), getTerm(elements[1]));
+			Substitution s = new Substitution((VariableImpl)getTerm(elements[0]), getTerm(elements[1]));
 			mgu.add(s);
 		}
 		return mgu;

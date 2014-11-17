@@ -37,18 +37,13 @@ import org.semanticweb.ontop.model.GraphResultSet;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.ObjectConstant;
-import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.TupleResultSet;
 import org.semanticweb.ontop.model.URIConstant;
 import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.model.impl.BNodeConstantImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.ontology.Assertion;
-import org.semanticweb.ontop.ontology.ClassAssertion;
-import org.semanticweb.ontop.ontology.DataPropertyAssertion;
-import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
-import org.semanticweb.ontop.ontology.OntologyFactory;
+import org.semanticweb.ontop.ontology.*;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 
@@ -146,33 +141,29 @@ public class QuestGraphResultSet implements GraphResultSet {
 			// Determines the type of assertion
 			String predicateName = predicateConstant.getValue();
 			if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
-				Predicate concept = dfac.getClassPredicate(objectConstant
-						.getValue());
+				OClass concept = ofac.createClass(objectConstant.getValue());
 				ClassAssertion ca = ofac.createClassAssertion(concept,
 						(ObjectConstant) subjectConstant);
 				tripleAssertions.add(ca);
 			} else {
 				if (objectConstant instanceof URIConstant) {
-					Predicate role = dfac
-							.getObjectPropertyPredicate(predicateName);
-					ObjectPropertyAssertion op = ofac
-							.createObjectPropertyAssertion(role,
+					PropertyExpression prop = ofac.createObjectProperty(predicateName);
+					PropertyAssertion op = ofac
+							.createPropertyAssertion(prop,
 									(ObjectConstant) subjectConstant,
 									(ObjectConstant) objectConstant);
 					tripleAssertions.add(op);
 				} else if (objectConstant instanceof BNodeConstantImpl) {
-					Predicate role = dfac
-							.getObjectPropertyPredicate(predicateName);
-					ObjectPropertyAssertion op = ofac
-							.createObjectPropertyAssertion(role,
+					PropertyExpression prop = ofac.createObjectProperty(predicateName);
+					PropertyAssertion op = ofac
+							.createPropertyAssertion(prop,
 									(ObjectConstant) subjectConstant,
 									(ObjectConstant) objectConstant);
 					tripleAssertions.add(op);
 				} else {
-					Predicate attribute = dfac
-							.getDataPropertyPredicate(predicateName);
-					DataPropertyAssertion dp = ofac
-							.createDataPropertyAssertion(attribute,
+					PropertyExpression prop = ofac.createDataProperty(predicateName);
+					PropertyAssertion dp = ofac
+							.createPropertyAssertion(prop,
 									(ObjectConstant) subjectConstant,
 									(ValueConstant) objectConstant);
 					tripleAssertions.add(dp);

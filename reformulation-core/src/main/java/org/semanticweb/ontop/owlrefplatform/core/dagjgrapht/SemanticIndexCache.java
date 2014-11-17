@@ -6,12 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.Property;
+import org.semanticweb.ontop.ontology.*;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
-import org.semanticweb.ontop.ontology.impl.PropertyImpl;
 
 public class SemanticIndexCache {
 
@@ -67,8 +63,23 @@ public class SemanticIndexCache {
 				classIntervals.put(iri, intervals);
 
 			} 
-			else if (description instanceof PropertyImpl) {
-				PropertyImpl cdesc = (PropertyImpl) description;
+			else if (description instanceof ObjectPropertyExpression) {
+				ObjectPropertyExpression cdesc = (ObjectPropertyExpression) description;
+
+				if (cdesc.isInverse()) {
+					/* Inverses don't get indexes or intervals */
+					continue;
+				}
+
+				int idx = engine.getIndex(cdesc);
+				List<Interval> intervals = engine.getIntervals(cdesc);
+
+				String iri = cdesc.getPredicate().getName();
+				roleIndexes.put(iri, idx);
+				roleIntervals.put(iri, intervals);
+			} 
+			else if (description instanceof DataPropertyExpression) {
+				DataPropertyExpression cdesc = (DataPropertyExpression) description;
 
 				if (cdesc.isInverse()) {
 					/* Inverses don't get indexes or intervals */
@@ -121,8 +132,8 @@ public class SemanticIndexCache {
 			if (index == null) {
 				/* direct name is not indexed, maybe there is an equivalent, we need to test
 				 * with object properties and data properties */
-				Property c = ofac.createObjectProperty(name);
-				Property equivalent = reasonerDag.getProperties().getVertex(c).getRepresentative();
+				PropertyExpression c = ofac.createObjectProperty(name);
+				PropertyExpression equivalent = reasonerDag.getProperties().getVertex(c).getRepresentative();
 				
 				Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
 				

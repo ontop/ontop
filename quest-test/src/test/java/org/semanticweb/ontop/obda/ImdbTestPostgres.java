@@ -5,36 +5,34 @@ package org.semanticweb.ontop.obda;
  * Created by Sarah on 30/07/14.
  */
 
-        import org.semanticweb.ontop.io.ModelIOManager;
-        import org.semanticweb.ontop.io.QueryIOManager;
-        import org.semanticweb.ontop.model.OBDADataFactory;
-        import org.semanticweb.ontop.model.OBDAModel;
-        import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-        import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-        import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
-        import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-        import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-        import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-        import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.io.QueryIOManager;
+import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 
-        import java.io.File;
-        import java.sql.Connection;
-        import java.util.Properties;
+import java.io.File;
+import java.util.Properties;
 
-        import org.semanticweb.ontop.querymanager.QueryController;
-        import org.semanticweb.ontop.querymanager.QueryControllerGroup;
-        import org.semanticweb.ontop.querymanager.QueryControllerQuery;
-        import org.junit.Before;
-        import org.junit.Test;
-        import org.semanticweb.owlapi.apibinding.OWLManager;
-        import org.semanticweb.owlapi.model.OWLOntology;
-        import org.semanticweb.owlapi.model.OWLOntologyManager;
-        import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-        import org.slf4j.Logger;
-        import org.slf4j.LoggerFactory;
+import org.semanticweb.ontop.querymanager.QueryController;
+import org.semanticweb.ontop.querymanager.QueryControllerGroup;
+import org.semanticweb.ontop.querymanager.QueryControllerQuery;
+import org.junit.Before;
+import org.junit.Test;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-        import static org.junit.Assert.assertEquals;
-        import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class ImdbTestPostgres {
     private OBDADataFactory fac;
@@ -148,10 +146,10 @@ public class ImdbTestPostgres {
                 "   $y :hasCompanyLocation [ a mo:Eastern_Asia ] .\n" +
                 "}\n";
 
-        runTestQuery(p, query);
+        assertEquals(15175, runTestQuery(p, query2));
     }
 
-    private void runTestQuery(Properties p, String query) throws Exception {
+    private int runTestQuery(Properties p, String query) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
@@ -185,8 +183,25 @@ public class ImdbTestPostgres {
 
                 log.debug("Elapsed time: {} ms", time);
 
+        return count;
 
 
+
+    }
+
+    @Test
+    public void testIndividuals() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+
+        String query = "PREFIX mo: <http://www.movieontology.org/2009/10/01/movieontology.owl#>\n" +
+                "SELECT DISTINCT $z \n" +
+                "WHERE { \n" +
+                "   $z a mo:Love .\n" +
+                "}\n";
+
+
+        assertEquals(29405, runTestQuery(p, query));
     }
 }
 

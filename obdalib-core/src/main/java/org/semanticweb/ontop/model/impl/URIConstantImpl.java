@@ -79,12 +79,12 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 	public Set<Variable> getReferencedVariables() {
 		return new LinkedHashSet<Variable>();
 	}
-
+/*
 	@Override
 	public Map<Variable, Integer> getVariableCount() {
 		return new HashMap<Variable, Integer>();
 	}
-
+*/
 
 	@Override
 	public COL_TYPE getType() {

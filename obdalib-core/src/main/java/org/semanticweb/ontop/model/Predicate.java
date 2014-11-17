@@ -49,7 +49,15 @@ public interface Predicate extends Cloneable, Serializable {
         UNSUPPORTED,
         DATE, 
         TIME,
-        YEAR
+        YEAR,
+        INT, 
+        NON_NEGATIVE_INTEGER, 
+        POSITIVE_INTEGER, 
+        NEGATIVE_INTEGER, 
+        NON_POSITIVE_INTEGER,
+        UNSIGNED_INT, 
+        FLOAT,  
+        LONG
 	};
 
 	/**

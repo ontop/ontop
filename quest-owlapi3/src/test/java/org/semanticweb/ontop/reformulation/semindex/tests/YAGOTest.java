@@ -29,12 +29,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.ontology.ClassDescription;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.Property;
+import org.semanticweb.ontop.ontology.*;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dag.DAG;
 import org.slf4j.Logger;
@@ -48,7 +44,7 @@ public class YAGOTest {
     private static final Logger log = LoggerFactory.getLogger(YAGOTest.class);
 
     private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+    private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
    
 
     public static void main(String[] args) throws IOException, URISyntaxException {
@@ -67,9 +63,8 @@ public class YAGOTest {
         Pattern pattern = Pattern.compile("<(.+?)>\\s(.+?)\\s[<\"](.+?)[>\"]\\s\\.");
         Matcher matcher;
 
-        Ontology onto = OntologyFactoryImpl.getInstance().createOntology("");
+        Ontology onto = descFactory.createOntology();
 
-        long tbox_count = 0;
         while ((line = triples.readLine()) != null) {
             if (line.startsWith("@")) {
                 log.debug(line);
@@ -85,42 +80,31 @@ public class YAGOTest {
                 object = matcher.group(3);
 
                 if ("rdfs:range".equals(predicate)) {
-                    tbox_count++;
-                    Predicate ps = predicateFactory.getPredicate(subject, 2);
-                    Predicate po = predicateFactory.getPredicate(object, 1);
-                    ClassDescription rs = descFactory.getPropertySomeRestriction(ps, true);
-                    ClassDescription co = descFactory.createClass(po);
-                    onto.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(rs, co));
+                    PropertyExpression psprop = descFactory.createProperty(subject).getInverse();
+                    SomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
+                    OClass co = descFactory.createClass(object);
+                    onto.add(descFactory.createSubClassAxiom(rs, co));
                 } 
                 else if ("rdfs:domain".equals(predicate)) {
-                    tbox_count++;
-                    Predicate ps = predicateFactory.getPredicate(subject, 2);
-                    Predicate po = predicateFactory.getPredicate(object, 1);
-                    ClassDescription rs = descFactory.getPropertySomeRestriction(ps, false);
-                    ClassDescription co = descFactory.createClass(po);
-                    onto.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(rs, co));
+                    PropertyExpression psprop = descFactory.createProperty(subject);
+                    SomeValuesFrom rs = descFactory.createPropertySomeRestriction(psprop);
+                    OClass co = descFactory.createClass(object);
+                    onto.add(descFactory.createSubClassAxiom(rs, co));
                 } 
                 else if ("rdf:type".equals(predicate)) {
                     // a rdf:type A |= A(a)
-                    Predicate po = predicateFactory.getPredicate(object, 1);
-                    ClassDescription co = descFactory.createClass(po);
-                    onto.addConcept(po);
+                    String co = object;
+                    onto.getVocabulary().declareClass(co);
                 }
                 else if ("rdfs:subClassOf".equals(predicate)) {
-                    tbox_count++;
-                    Predicate ps = predicateFactory.getPredicate(subject, 1);
-                    Predicate po = predicateFactory.getPredicate(object, 1);
-                    ClassDescription cs = descFactory.createClass(ps);
-                    ClassDescription co = descFactory.createClass(po);
-                    onto.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cs, co));
+                    OClass cs = descFactory.createClass(subject);
+                    OClass co = descFactory.createClass(object);
+                    onto.add(descFactory.createSubClassAxiom(cs, co));
                 } 
                 else if ("rdfs:subPropertyOf".equals(predicate)) {
-                    tbox_count++;
-                    Predicate ps = predicateFactory.getPredicate(subject, 1);
-                    Predicate po = predicateFactory.getPredicate(object, 1);
-                    Property rs = descFactory.createProperty(ps);
-                    Property ro = descFactory.createProperty(po);
-                    onto.addAssertion(OntologyFactoryImpl.getInstance().createSubPropertyAxiom(rs, ro));
+                    PropertyExpression rs = descFactory.createProperty(subject);
+                    PropertyExpression ro = descFactory.createProperty(object);
+                    onto.add(descFactory.createSubPropertyAxiom(rs, ro));
                 } else {
 //                    log.debug(predicate);
                 }
@@ -128,6 +112,7 @@ public class YAGOTest {
                 log.debug("Not matched line {}", line);
             }
         }
+        triples.close();
         return onto;
     }
 }

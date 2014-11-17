@@ -80,11 +80,27 @@ public interface OBDADataFactory extends Serializable {
 
 	public Predicate getDataTypePredicateInteger();
 
+    public Predicate getDataTypePredicateNonNegativeInteger();
+
+    public Predicate getDataTypePredicateInt();
+
+    public Predicate getDataTypePredicatePositiveInteger();
+
+    public Predicate getDataTypePredicateNegativeInteger();
+
+    public Predicate getDataTypePredicateNonPositiveInteger();
+
+    public Predicate getDataTypePredicateUnsignedInt();
+
+    public Predicate getDataTypePredicateLong();
+
 	public Predicate getDataTypePredicateDecimal();
 
 	public Predicate getDataTypePredicateDouble();
 
-	public Predicate getDataTypePredicateDateTime();
+    public Predicate getDataTypePredicateFloat();
+
+    public Predicate getDataTypePredicateDateTime();
 
 	public Predicate getDataTypePredicateBoolean();
 

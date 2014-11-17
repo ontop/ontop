@@ -21,13 +21,11 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
  */
 
 import java.util.*;
-import java.util.Map.Entry;
 
 import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
 import org.semanticweb.ontop.model.BooleanOperationPredicate;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DataTypePredicate;
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -39,9 +37,7 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.QueryAnonymizer;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.*;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
 import org.semanticweb.ontop.utils.QueryUtils;
@@ -70,8 +66,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	private static final Logger log = LoggerFactory.getLogger(DatalogUnfolder.class);
     private static final OBDADataFactory termFactory = OBDADataFactoryImpl.getInstance();
 
-    private static final List<CQIE> emptyList = ImmutableList.of();
-
 
     private final Map<Predicate, List<Integer>> primaryKeys;
 	private final Map<Predicate, List<CQIE>> mappings;
@@ -87,11 +81,21 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 */
 	private final List<Predicate> extensionalPredicates;
 
+    @Deprecated
 	public DatalogUnfolder(DatalogProgram unfoldingProgram) {
         this(unfoldingProgram, new HashMap<Predicate, List<Integer>>());
 	}
 
+    @Deprecated
 	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys) {
+        this(unfoldingProgram.getRules(), primaryKeys);
+    }
+
+    /**
+     *  This constructor is used twice: for the mapping rules and for the query rules.
+     *
+     */
+    public DatalogUnfolder(List<CQIE> rules, Map<Predicate, List<Integer>> primaryKeys) {
 		/**
 		 * Creating a local index for the rules according to their predicate
 		 */
@@ -99,21 +103,20 @@ public class DatalogUnfolder implements UnfoldingMechanism {
         Map<Predicate, List<CQIE>> ruleIndex = new LinkedHashMap<>();
         Set<Predicate> leafPredicates = new HashSet<>();
 
-		//TODO: this should not be mappings when working with the query!!
-		for (CQIE mappingRule : unfoldingProgram.getRules()) {
-			Function head = mappingRule.getHead();
+		for (CQIE rule : rules) {
+			Function head = rule.getHead();
 
-			List<CQIE> rules = ruleIndex.get(head.getFunctionSymbol());
-			if (rules == null) {
-				rules = new LinkedList<CQIE>();
-				ruleIndex.put(head.getFunctionSymbol(), rules);
+			List<CQIE> predicateRules = ruleIndex.get(head.getFunctionSymbol());
+			if (predicateRules == null) {
+				predicateRules = new LinkedList<CQIE>();
+				ruleIndex.put(head.getFunctionSymbol(), predicateRules);
 			}
-			rules.add(mappingRule);
+			predicateRules.add(rule);
 
 			/*
 			 * Collecting the leafPredicates that appear in the body of rules.
 			 */
-			for (Function atom : mappingRule.getBody()) {
+			for (Function atom : rule.getBody()) {
 				leafPredicates.addAll(getPredicates(atom));
 			}
 		}
@@ -131,23 +134,62 @@ public class DatalogUnfolder implements UnfoldingMechanism {
         this.mappings = Collections.unmodifiableMap(ruleIndex);
         this.extensionalPredicates = Collections.unmodifiableList(new ArrayList<>(leafPredicates));
 	}
-	
-	/**
-	 * Since we need the mappings here to treat correctly the unfolding of the leftjoin even when we unfold with respect to the program alone
-	 */
-/*	public DatalogUnfolder(DatalogProgram unfoldingProgram,
-			HashMap<Predicate, List<Integer>> hashMap,
-			Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings2) {
-		// TODO Auto-generated constructor stub
-		
-		this(unfoldingProgram, new HashMap<Predicate, List<Integer>>());
-		
-	}*/
 
 	@Override
 	/***
 	 * Generates a partial evaluation of the rules in <b>inputquery</b> with respect to the
 	 * with respect to the program given when this unfolder was initialized.
+     *
+     * Given a query q, this method will try
+     * to flatten the query as much as possible by applying resolution steps
+     * exhaustively to every atom in the query against the rules in
+     * 'unfoldingProgram'. This will is exactly to computing a partial
+     * evaluation of q w.r.t. unfolding program, that is, an specialized version
+     * of q w.r.t. to unfolding program that requires less steps to execute.
+     * <p>
+     * This is used to translate ontological queries to database queries in the
+     * when the unfolding program is a set of mappings, and also to flatten the
+     * Datalog queries that are produced by the
+     * {@link SparqlAlgebraToDatalogTranslator} and in some other places.
+     *
+     * <p>
+     * Example: matching rule the unfolding program.
+     * <p>
+     * Unfolding Program<br>
+     * <br>
+     * A(x) :- table1(x,y)<br>
+     * A(x) :- table2(x,z)<br>
+     * B(x) :- table3(x,z)<br>
+     * <br>
+     * Query<br>
+     * <br>
+     * Q(x) :- A(x),B(x)<br>
+     * <br>
+     * Initially produces: <br>
+     * Q(x1) :- table1(x1,y1),B(x1)<br>
+     * Q(x1) :- table2(x1,z1),B(x1)<br>
+     * Q(x1) :- table1(x1,y1),table3(x1,z2)<br>
+     * Q(x1) :- table2(x1,z1),table3(x1,z2)<br>
+     *
+     * But the final result is<br>
+     * Q(x1) :- table1(x1,y1),table3(x1,z2)<br>
+     * Q(x1) :- table2(x1,z1),table3(x1,z2)<br>
+     *
+     *
+     * <p>
+     * The strategy of this unfolding is simple, we cycle through all the
+     * queries and attempt to resolve atom 0 in the body against the rules in
+     * unfolding program. The resolution engine will generate 1 or more CQs as
+     * result. The original atom is removed, and the results are appended to the
+     * end of each query (hence its always safe to unfold atom 0). The new
+     * queries are kept for a next cycle. We stop when no new queries are
+     * produced.
+     * <p>
+     * The right side of left joins will never be touched.
+     * <p>
+     * Currently the method also is aware of functional dependencies (Primary
+     * keys) and will produce queries in which redundant joins w.r.t. to these
+     * are avoided.
      *
      * multiplePredIdx is needed because the rewriter might generate query bodies like this
      * B(x,_), R(x,_), underscores represent unique anonymous variables.
@@ -161,114 +203,48 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 */
 	public DatalogProgram unfold(DatalogProgram inputquery, String targetPredicate, String strategy, boolean includeMappings,
                                  Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex) {
-		
-		inputquery = QueryAnonymizer.deAnonymize(inputquery);
 
-		DatalogProgram partialEvaluation = flattenUCQ(inputquery, targetPredicate, strategy,  includeMappings,
-                multiTypedFunctionSymbolIndex);
+        /**
+         * Anonymization
+         */
+        List<CQIE> workingSet = new LinkedList<CQIE>();
+        for (CQIE query : inputquery.getRules())
+            workingSet.add(QueryAnonymizer.deAnonymize(query));
 
-        //TODO: remove this noise
+        /**
+         * Equalities
+         */
+        for (CQIE query : workingSet)
+            EQNormalizer.enforceEqualities(query);
+
+        /**
+         * Partial evaluation
+         */
+        if (includeMappings){
+            computePartialEvaluationWRTMappings(workingSet, multiTypedFunctionSymbolIndex);
+        } else{
+            if (QuestConstants.BUP.equals(strategy)){
+                computePartialEvaluationBUP(workingSet,includeMappings, multiTypedFunctionSymbolIndex);
+            }else if (QuestConstants.TDOWN.equals(strategy)){
+                computePartialEvaluationTDown(workingSet,includeMappings, multiTypedFunctionSymbolIndex);
+            }
+        }
+
+        /**
+         * We need to enforce equality again, because at this point it is
+         *  possible that there is still some EQ(...) in the Program resultdp
+         *
+         */
+        for (CQIE query : workingSet)
+            EQNormalizer.enforceEqualities(query);
+
+        //TODO: reduce this noise
 		DatalogProgram dp = termFactory.getDatalogProgram();
 		QueryUtils.copyQueryModifiers(inputquery, dp);
-		dp.appendRule(partialEvaluation.getRules());
+		dp.appendRule(workingSet);
 
 		return dp;
 	}
-	
-	/***
-	 * Given a query q, this method will try
-	 * to flatten the query as much as possible by applying resolution steps
-	 * exaustively to every atom in the query against the rules in
-	 * 'unfoldingProgram'. This will is exactly to computing a partial
-	 * evaluation of q w.r.t. unfolding program, that is, an specialized verion
-	 * of q w.r.t. to unfolding program that requires less steps to execute.
-	 * <p>
-	 * This is used to translate ontological queries to database queries in the
-	 * when the unfolding program is a set of mapppings, and also to flatten the
-	 * Datalog queries that are produced by the
-	 * {@link SparqlAlgebraToDatalogTranslator} and in some other palces.
-	 * 
-	 * <p>
-	 * Example: matching rule the unfolding program.
-	 * <p>
-	 * Unfolding Program<br>
-	 * <br>
-	 * A(x) :- table1(x,y)<br>
-	 * A(x) :- table2(x,z)<br>
-	 * B(x) :- table3(x,z)<br>
-	 * <br>
-	 * Query<br>
-	 * <br>
-	 * Q(x) :- A(x),B(x)<br>
-	 * <br>
-	 * Initially produces: <br>
-	 * Q(x1) :- table1(x1,y1),B(x1)<br>
-	 * Q(x1) :- table2(x1,z1),B(x1)<br>
-	 * Q(x1) :- table1(x1,y1),table3(x1,z2)<br>
-	 * Q(x1) :- table2(x1,z1),table3(x1,z2)<br>
-	 * 
-	 * But the final result is<br>
-	 * Q(x1) :- table1(x1,y1),table3(x1,z2)<br>
-	 * Q(x1) :- table2(x1,z1),table3(x1,z2)<br>
-	 * 
-	 * 
-	 * <p>
-	 * The strategy of this unfolding is simple, we cycle through all the
-	 * queries and attempt to resolve atom 0 in the body against the rules in
-	 * unfolding program. The resolution engine will generate 1 or more CQs as
-	 * result. The original atom is removed, and the results are appended to the
-	 * end of each query (hence its always safe to unfold atom 0). The new
-	 * queries are kept for a next cycle. We stop when no new queries are
-	 * produced.
-	 * <p>
-	 * The right side of left joins will never be touched.
-	 * <p>
-	 * Currently the method also is aware of functional dependencies (Primary
-	 * keys) and will produce queries in which redundant joins w.r.t. to these
-	 * are avoided.
-	 * 
-	 * @param inputquery
-	 * @param includeMappings 
-	 * @return
-	 */
-	private DatalogProgram flattenUCQ(DatalogProgram inputquery, String targetPredicate, String strategy,
-                                      boolean includeMappings, Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
-
-		List<CQIE> workingSet = new LinkedList<CQIE>();
-		workingSet.addAll(inputquery.getRules());
-
-
-	
-
-		if (includeMappings){
-			computePartialEvaluationWRTMappings(workingSet, multiTypedFunctionSymbolIndex);
-		} else{
-			if (QuestConstants.BUP.equals(strategy)){
-				computePartialEvaluationBUP(workingSet,includeMappings, multiTypedFunctionSymbolIndex);
-			}else if (QuestConstants.TDOWN.equals(strategy)){
-				computePartialEvaluationTDown(workingSet,includeMappings, multiTypedFunctionSymbolIndex);
-			}
-		}
-
-        //TODO: Why such a complex structure?
-		LinkedHashSet<CQIE> result = new LinkedHashSet<CQIE>();
-		for (CQIE query : workingSet) {
-			result.add(query);
-		}
-		
-		
-		DatalogProgram resultdp = termFactory.getDatalogProgram(result);
-		
-		/**
-		 * We need to enforce equality again, because at this point it is 
-		 *  possible that there is still some EQ(...) in the Program resultdp
-		 * 
-		 */
-		DatalogNormalizer.enforceEqualities(resultdp, false);
-		
-		return resultdp;
-	}
-
 	
 	/***
 	 * This method assumes that the inner term (termidx) of term is a data atom,
@@ -1058,7 +1034,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 		/***
 		 * Applies a resolution step over a non-boolean/non-algebra atom (i.e. data
 		 * atoms). The resolution step will try to match the <strong>focused atom
-		 * a</strong> in the input <strong>rule r</strong> againts the rules in
+		 * a</strong> in the input <strong>rule r</strong> against the rules in
 		 * {@link #unfoldingProgram}.
 		 * <p>
 		 * For each <strong>rule s</strong>, if the <strong>head h</strong> of s is
@@ -1119,7 +1095,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				// has no resolvent rule, and marks the end points to compute
 				// partial evaluations
 
-				return emptyList;
+                // Empty list
+				return ImmutableList.of();
 			}
 			
 			Collection<CQIE> rulesDefiningTheAtom = new LinkedList<CQIE>();
@@ -1129,7 +1106,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				
 				if (ruleIndex.containsKey(pred) && !pred.equals(resolvPred)) {
 					//Since it is not resolvPred, we are are not going to resolve it
-					return emptyList;
+					return ImmutableList.of();
 				} else if (pred.equals(resolvPred)) {
 					// I am doing bottom up here
 					rulesDefiningTheAtom = ruleIndex.get(pred);
@@ -1140,7 +1117,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 					rulesDefiningTheAtom = mappings.get(pred);
 				
 			} else if (!pred.equals(resolvPred)){
-				return emptyList;
+                // Empty list
+				return ImmutableList.of();
 			}
 			
 			
@@ -1195,7 +1173,8 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				// than one rull, we
 				// must reutrn an empty result i ndicating its already a partial
 				// evaluation.
-				result = emptyList;
+                // Empty list
+				result = ImmutableList.of();
 			} else if (result.size() == 0) {
 				if (!isSecondAtomInLeftJoin)
 					return null;
@@ -1591,7 +1570,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			/* getting a rule with unique variables */
 			CQIE freshRule = getFreshRule(candidateRule, resolutionCount[0]);
 
-			Map<Variable, Term> mgu = Unifier.getMGU(freshRule.getHead(), focusAtom);
+			Unifier mgu = Unifier.getMGU(freshRule.getHead(), focusAtom);
 
 			if (mgu == null) {
 				/* Failed attempt */
@@ -1635,7 +1614,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			
 			innerAtoms.addAll((int) termidx.peek(), freshRule.getBody());
 			
-			Unifier.applyUnifier(partialEvalution, mgu, false);
+			UnifierUtilities.applyUnifier(partialEvalution, mgu, false);
 
 			/***
 			 * DONE WITH BASIC RESOLUTION STEP
@@ -1846,14 +1825,12 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 
 		//freshRule.updateBody(newbody);
 		replaceInnerLJ(freshRule, newbody, termidx1);
-		HashMap<Variable, Term> unifier = new HashMap<Variable, Term>();
 
-		for (Variable var : variablesArg2) {
-			unifier.put(var, OBDAVocabulary.NULL);
-		}
-		// Now I need to add the null to the variables of the second
-		// LJ data argument
-		freshRule = Unifier.applyUnifier(freshRule, unifier, false);
+        Unifier unifier = UnifierUtilities.getNullifier(variablesArg2);
+
+        // Now I need to add the null to the variables of the second
+        // LJ data argument
+        freshRule = UnifierUtilities.applyUnifier(freshRule, unifier, false);
 		return freshRule;
 	}
 	
@@ -1953,7 +1930,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 			 */
 			Function replacement = null;
 
-			Map<Variable, Term> mgu1 = null;
+			Unifier mgu1 = null;
 			for (int idx2 = 0; idx2 < termidx.peek(); idx2++) {
 				Function tempatom = (Function) innerAtoms.get(idx2);
 
@@ -1993,7 +1970,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 				continue;
 			}
 
-			Unifier.applyUnifier(partialEvalution, mgu1, false);
+			UnifierUtilities.applyUnifier(partialEvalution, mgu1, false);
 			innerAtoms.remove(newatomidx);
 			newatomidx -= 1;
 			newatomcount -= 1;
@@ -2109,7 +2086,7 @@ private boolean detectAggregateinSingleRule( CQIE rule) {
 	/**
 	 * This method returns the predicates that define two different templates
 	 */
-	public Multimap<Predicate,Integer> processMultipleTemplatePredicates(DatalogProgram mappings) {
+	public Multimap<Predicate,Integer> processMultipleTemplatePredicates(List<CQIE> mappings) {
 
         Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex = ArrayListMultimap.create();
 		

@@ -41,6 +41,11 @@ import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.OntologyFactory;
+import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.parser.TurtleOBDASyntaxParser;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -53,6 +58,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 public class ModelIOManagerUsingOwlTest extends TestCase {
 
     private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+    private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
     private OBDAModel model;
 
@@ -101,15 +107,15 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         
         // Setup the entity declarations
         for (OWLClass c : schoolOntology.getClassesInSignature()) {
-            Predicate pred = dfac.getClassPredicate(c.getIRI().toString());
+            OClass pred = ofac.createClass(c.getIRI().toString());
             model.declareClass(pred);
         }
         for (OWLObjectProperty r : schoolOntology.getObjectPropertiesInSignature()) {
-            Predicate pred = dfac.getObjectPropertyPredicate(r.getIRI().toString());
+        	ObjectPropertyExpression pred = ofac.createObjectProperty(r.getIRI().toString());
             model.declareObjectProperty(pred);
         }
         for (OWLDataProperty p : schoolOntology.getDataPropertiesInSignature()) {
-            Predicate pred = dfac.getDataPropertyPredicate(p.getIRI().toString());
+        	DataPropertyExpression pred = ofac.createDataProperty(p.getIRI().toString());
             model.declareDataProperty(pred);
         }
     }

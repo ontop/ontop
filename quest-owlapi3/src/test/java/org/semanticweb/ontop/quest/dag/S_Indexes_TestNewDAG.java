@@ -27,14 +27,10 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.jgrapht.Graphs;
 import org.semanticweb.ontop.ontology.BasicClassDescription;
 import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.NamedDAG;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import org.semanticweb.ontop.ontology.PropertyExpression;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +95,7 @@ public void testIndexes() throws Exception{
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		TBoxReasonerImpl dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+		TBoxReasoner dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
 
 
 		//add input named graph
@@ -124,8 +120,8 @@ private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG){
 	for(Description vertex: engine.getIndexed() /*.getNamedDAG().vertexSet()*/){
 		int index= engine.getIndex(vertex);
 		log.info("vertex {} index {}", vertex, index);
-		if (vertex instanceof Property) {
-			for(Description parent: namedDAG.getSuccessors((Property)vertex)){
+		if (vertex instanceof PropertyExpression) {
+			for(Description parent: namedDAG.getSuccessors((PropertyExpression)vertex)){
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
 				if(!result)
 					break;

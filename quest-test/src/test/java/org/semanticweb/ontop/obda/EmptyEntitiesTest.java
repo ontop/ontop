@@ -25,9 +25,7 @@ import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.Property;
+import org.semanticweb.ontop.ontology.*;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -40,14 +38,8 @@ import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -91,7 +83,7 @@ public class EmptyEntitiesTest {
 	private List<String> emptyConcepts = new ArrayList<String>();
 	private List<String> emptyRoles = new ArrayList<String>();
 	private Set<BasicClassDescription> emptyBasicConcepts = new HashSet<BasicClassDescription>();
-	private Set<Property> emptyProperties = new HashSet<Property>();
+	private Set<PropertyExpression> emptyProperties = new HashSet<PropertyExpression>();
 
 	private QuestOWL reasoner;
 	private Ontology onto;
@@ -234,8 +226,8 @@ public class EmptyEntitiesTest {
 	@Test
 	public void testEmptyConcepts() throws Exception {
 		int c = 0; // number of empty concepts
-		for (Predicate concept : onto.getConcepts()) {
-
+		for (OClass cl : onto.getVocabulary().getClasses()) {
+			Predicate concept = cl.getPredicate();
 			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
 				emptyConcepts.add(concept.getName());
 				c++;
@@ -253,7 +245,8 @@ public class EmptyEntitiesTest {
 	@Test
 	public void testEmptyRoles() throws Exception {
 		int r = 0; // number of empty roles
-		for (Predicate role : onto.getRoles()) {
+		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
+			Predicate role = prop.getPredicate();
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
 				emptyRoles.add(role.getName());
 				r++;
@@ -261,6 +254,15 @@ public class EmptyEntitiesTest {
 		}
 		log.info(r + " Empty role/s: " + emptyRoles);
 
+		r = 0; // number of empty roles
+		for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
+			Predicate role = prop.getPredicate();
+			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
+				emptyRoles.add(role.getName());
+				r++;
+			}
+		}
+		log.info(r + " Empty role/s: " + emptyRoles);
 	}
 
 	/**
@@ -272,7 +274,8 @@ public class EmptyEntitiesTest {
 	public void testEmpties() throws Exception {
 
 		int c = 0; // number of empty concepts
-		for (Predicate concept : onto.getConcepts()) {
+		for (OClass cl : onto.getVocabulary().getClasses()) {
+			Predicate concept = cl.getPredicate();
 			if (!runSPARQLConceptsQuery("<" + concept.getName() + ">")) {
 				emptyConcepts.add(concept.getName());
 				c++;
@@ -281,7 +284,8 @@ public class EmptyEntitiesTest {
 		log.info(c + " Empty concept/s: " + emptyConcepts);
 
 		int r = 0; // number of empty roles
-		for (Predicate role : onto.getRoles()) {
+		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
+			Predicate role = prop.getPredicate();
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
 				emptyRoles.add(role.getName());
 				r++;
@@ -289,6 +293,15 @@ public class EmptyEntitiesTest {
 		}
 		log.info(r + " Empty role/s: " + emptyRoles);
 
+		r = 0; // number of empty roles
+		for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
+			Predicate role = prop.getPredicate();
+			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
+				emptyRoles.add(role.getName());
+				r++;
+			}
+		}
+		log.info(r + " Empty role/s: " + emptyRoles);
 	}
 
 	/**
@@ -306,7 +319,7 @@ public class EmptyEntitiesTest {
 		int c = 0; // number of empty concepts
 		for (Equivalences<BasicClassDescription> concept : tboxreasoner.getClasses()) {
 			BasicClassDescription representative = concept.getRepresentative();
-			if ((!representative.getPredicate().isDataTypePredicate()) && !runSPARQLConceptsQuery("<" + concept.getRepresentative().toString() + ">")) {
+			if ((!(representative instanceof Datatype)) && !runSPARQLConceptsQuery("<" + concept.getRepresentative().toString() + ">")) {
 				emptyBasicConcepts.addAll(concept.getMembers());
 				c += concept.size();
 			}
@@ -314,7 +327,7 @@ public class EmptyEntitiesTest {
 		log.info(c + " Empty concept/s: " + emptyConcepts);
 
 		int r = 0; // number of empty roles
-		for (Equivalences<Property> properties : tboxreasoner.getProperties()) {
+		for (Equivalences<PropertyExpression> properties : tboxreasoner.getProperties()) {
 			if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
 				emptyProperties.addAll(properties.getMembers());
 				r += properties.size();

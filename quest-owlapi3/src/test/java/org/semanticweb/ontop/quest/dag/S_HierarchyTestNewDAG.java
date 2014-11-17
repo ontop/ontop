@@ -27,9 +27,10 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.Property;
+import org.semanticweb.ontop.ontology.PropertyExpression;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,12 +79,12 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxReasonerImpl reasoner = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+			TBoxReasoner reasoner = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
 			//		DAGImpl dag2= InputOWL.createDAG(fileOutput);
 
 			//transform in a named graph
-            TestTBoxReasonerImpl_OnNamedDAG dag2 = new TestTBoxReasonerImpl_OnNamedDAG(reasoner);
-            TestTBoxReasonerImpl_Named dag1 = new TestTBoxReasonerImpl_Named(reasoner);
+			TestTBoxReasonerImpl_OnNamedDAG dag2= new TestTBoxReasonerImpl_OnNamedDAG(reasoner);
+			TestTBoxReasonerImpl_Named dag1 = new TestTBoxReasonerImpl_Named(reasoner);
 			log.debug("Input number {}", i+1 );
 			log.info("First dag {}", dag1);
 			log.info("Second dag {}", dag2);
@@ -126,9 +127,9 @@ public class S_HierarchyTestNewDAG extends TestCase {
 	}
 	
 
-	private boolean checkforNamedVertexesOnly(TestTBoxReasonerImpl_OnNamedDAG dag, TBoxReasonerImpl reasoner){
-		for(Equivalences<Property> node: dag.getProperties()) {
-			Property vertex = node.getRepresentative();
+	private boolean checkforNamedVertexesOnly(TestTBoxReasonerImpl_OnNamedDAG dag, TBoxReasoner reasoner){
+		for(Equivalences<PropertyExpression> node: dag.getProperties()) {
+			PropertyExpression vertex = node.getRepresentative();
 			if(!reasoner.getProperties().getVertex(vertex).isIndexed())
 				return false;
 		}

@@ -92,7 +92,9 @@ import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import org.slf4j.LoggerFactory;
 
@@ -108,14 +110,14 @@ import org.slf4j.LoggerFactory;
  */
 public class SparqlAlgebraToDatalogTranslator {
 
-    private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+	
+	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
 	private final TermComparator comparator = new TermComparator();
 
 	private UriTemplateMatcher uriTemplateMatcher;
 
-	private Map<String, Integer> uriRef = null;
-	private boolean isSI = false;
+	private SemanticIndexURIMap uriRef = null;  // used only in the Semantic Index mode
 	
 	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher) {
 		uriTemplateMatcher = templateMatcher;
@@ -148,7 +150,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	/**
 	 * Translate a given SPARQL query object to datalog program.
 	 * 
-	 * @param query
+	 *
 	 *            The Query object.
 	 * @return Datalog program that represents the construction of the SPARQL
 	 *         query.
@@ -414,13 +416,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		nullVars.removeAll(atom1VarsSet); // the remaining variables do not
 											// appear in the body assigning
 											// null;
-		Map<Variable, Term> nullifier = new HashMap<Variable, Term>();
-		for (Variable var : nullVars) {
-			nullifier.put(var, OBDAVocabulary.NULL);
-		}
+		Unifier nullifier = UnifierUtilities.getNullifier(nullVars);
 		// making the rule
 		CQIE newrule1 = ofac.getCQIE(head, leftAtom);
-		pr.appendRule(Unifier.applyUnifier(newrule1, nullifier));
+		pr.appendRule(UnifierUtilities.applyUnifier(newrule1, nullifier));
 
 		// finding out null
 		nullVars = new HashSet<Variable>();
@@ -428,13 +427,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		nullVars.removeAll(atom2VarsSet); // the remaining variables do not
 											// appear in the body assigning
 											// null;
-		nullifier = new HashMap<Variable, Term>();
-		for (Variable var : nullVars) {
-			nullifier.put(var, OBDAVocabulary.NULL);
-		}
+		nullifier = UnifierUtilities.getNullifier(nullVars);
 		// making the rule
 		CQIE newrule2 = ofac.getCQIE(head, rightAtom);
-		pr.appendRule(Unifier.applyUnifier(newrule2, nullifier));
+		pr.appendRule(UnifierUtilities.applyUnifier(newrule2, nullifier));
 
 		/*
 		 * Translating the rest
@@ -875,7 +871,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		if (p instanceof URIImpl && p.toString().equals(RDF.TYPE.stringValue())) {
 			// Subject node
 			
-			terms.add(getOntopTerm(subj, s, isSI));
+			terms.add(getOntopTerm(subj, s));
 			
 
 			// Object node
@@ -916,14 +912,32 @@ public class SparqlAlgebraToDatalogTranslator {
 				predicate = OBDAVocabulary.XSD_DOUBLE;
 			} else if (predicateUri.equals(
 					OBDAVocabulary.XSD_FLOAT_URI)) {
-				predicate = OBDAVocabulary.XSD_DOUBLE;
+				predicate = OBDAVocabulary.XSD_FLOAT;
+            } else if (predicateUri.equals(
+                    OBDAVocabulary.XSD_NEGATIVE_INTEGER)) {
+                predicate = OBDAVocabulary.XSD_NEGATIVE_INTEGER;
+            } else if (predicateUri.equals(
+                    OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER)) {
+                predicate = OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER;
+            } else if (predicateUri.equals(
+                    OBDAVocabulary.XSD_POSITIVE_INTEGER)) {
+                predicate = OBDAVocabulary.XSD_POSITIVE_INTEGER;
+            } else if (predicateUri.equals(
+                    OBDAVocabulary.XSD_NON_POSITIVE_INTEGER)) {
+                predicate = OBDAVocabulary.XSD_NON_POSITIVE_INTEGER;
+            } else if (predicateUri.equals(
+                    OBDAVocabulary.XSD_UNSIGNED_INT)) {
+                predicate = OBDAVocabulary.XSD_UNSIGNED_INT;
 			} else if (predicateUri.equals(
 					OBDAVocabulary.XSD_INT_URI)) {
-				predicate = OBDAVocabulary.XSD_INTEGER;
+				predicate = OBDAVocabulary.XSD_INT;
 			} else if (predicateUri.equals(
 					OBDAVocabulary.XSD_INTEGER_URI)) {
 				predicate = OBDAVocabulary.XSD_INTEGER;
 			} else if (predicateUri.equals(
+                OBDAVocabulary.XSD_LONG_URI)) {
+                predicate = OBDAVocabulary.XSD_LONG;
+            } else if (predicateUri.equals(
 					OBDAVocabulary.XSD_STRING_URI)) {
 				predicate = OBDAVocabulary.XSD_STRING;
 			} else if (predicateUri.equals(
@@ -947,10 +961,9 @@ public class SparqlAlgebraToDatalogTranslator {
 			 * The predicate is NOT rdf:type
 			 */
 
-			
-			terms.add(getOntopTerm(subj, s, isSI));
+			terms.add(getOntopTerm(subj, s));
 
-			terms.add(getOntopTerm(obj,o,isSI));
+			terms.add(getOntopTerm(obj,o));
 			
 			// Construct the predicate
 
@@ -980,7 +993,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		pr.appendRule(newrule);
 	}
 	
-	private Term getOntopTerm(Var subj, Value s, boolean isSI) {
+	private Term getOntopTerm(Var subj, Value s) {
 		Term result = null;
 		if (s == null) {
 			result = ofac.getVariable(subj.getName());
@@ -1027,13 +1040,14 @@ public class SparqlAlgebraToDatalogTranslator {
 			subject_URI = decodeURIEscapeCodes(subject_URI);
 			
 
-			if (isSI) {
-				int id = indexOfRef(s.stringValue());
-				Function functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
-				result = functionURI;
+			if (uriRef != null) {
+				/* if in the Semantic Index mode */
+				int id = uriRef.getId(s.stringValue());
+				
+				result = ofac.getFunction(ofac.getUriTemplatePredicate(1), 
+							ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
 			} else {
-				Function functionURI = uriTemplateMatcher.generateURIFunction(subject_URI);
-				result = functionURI;
+				result = uriTemplateMatcher.generateURIFunction(subject_URI);
 			}
 		}
 		
@@ -1043,7 +1057,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	/***
 	 * Given a string representing a URI, this method will return a new String in which all percent encoded characters (e.g., %20) will
 	 * be restored to their original characters (e.g., ' '). This is necessary to transform some URIs into the original dtabase values.
-	 * @param uriStr
+	 * @param encodedURI
 	 * @return
 	 */
 	private String decodeURIEscapeCodes(String encodedURI) {
@@ -1126,15 +1140,8 @@ public class SparqlAlgebraToDatalogTranslator {
 		return strBuilder.toString();
 
 	}
-
-	private int indexOfRef(String uri) {
-		Integer index =  this.uriRef.get(uri);
-		if (index != null)
-			return index;
-		return -2;
-	}
 	
-	private class TermComparator implements Comparator<Term> {
+	private static class TermComparator implements Comparator<Term> {
 
 		@Override
 		public int compare(Term arg0, Term arg1) {
@@ -1192,10 +1199,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		return result;
 	}
 	
-	private Variable getFreshVariable(int[] count) {
-		count[0] += 1;
-		return ofac.getVariable("VAR" + count[0]);
-	}
+	//private Variable getFreshVariable(int[] count) {
+	//	count[0] += 1;
+	//	return ofac.getVariable("VAR" + count[0]);
+	//}
 
 	public ValueConstant getConstant(LiteralImpl literal) {
 		URI type = literal.getDatatype();
@@ -1219,17 +1226,36 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	}
 
+
 	private Predicate getDataTypePredicate(COL_TYPE dataType)
 			throws RuntimeException {
+        //we do not consider the case of literal because it has already been checked @see #getOntopTerm
 		switch (dataType) {
+
 		case STRING:
 			return ofac.getDataTypePredicateString();
 		case INTEGER:
 			return ofac.getDataTypePredicateInteger();
+        case NEGATIVE_INTEGER:
+            return ofac.getDataTypePredicateNegativeInteger();
+        case INT:
+            return ofac.getDataTypePredicateInt();
+        case POSITIVE_INTEGER:
+            return ofac.getDataTypePredicatePositiveInteger();
+        case NON_POSITIVE_INTEGER:
+            return ofac.getDataTypePredicateNonPositiveInteger();
+        case NON_NEGATIVE_INTEGER:
+            return ofac.getDataTypePredicateNonNegativeInteger();
+        case UNSIGNED_INT:
+            return ofac.getDataTypePredicateUnsignedInt();
+        case LONG:
+             return ofac.getDataTypePredicateLong();
 		case DECIMAL:
 			return ofac.getDataTypePredicateDecimal();
 		case DOUBLE:
 			return ofac.getDataTypePredicateDouble();
+        case FLOAT:
+            return ofac.getDataTypePredicateFloat();
 		case DATETIME:
 			return ofac.getDataTypePredicateDateTime();
 		case BOOLEAN:
@@ -1261,11 +1287,31 @@ public class SparqlAlgebraToDatalogTranslator {
 			} else if (dataTypeURI
 					.equalsIgnoreCase(OBDAVocabulary.XSD_STRING_URI)) {
 				dataType = COL_TYPE.STRING;
-			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INT_URI)
-					|| dataTypeURI
-							.equalsIgnoreCase(OBDAVocabulary.XSD_INTEGER_URI)) {
-				dataType = COL_TYPE.INTEGER;
+			} else if (dataTypeURI.equalsIgnoreCase(OBDAVocabulary.XSD_INT_URI)){
+				dataType = COL_TYPE.INT;
+            } else if (dataTypeURI
+                    .equalsIgnoreCase(OBDAVocabulary.XSD_INTEGER_URI)) {
+                dataType = COL_TYPE.INTEGER;
+            } else if (dataTypeURI
+                    .equalsIgnoreCase(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI)) {
+                dataType = COL_TYPE.NEGATIVE_INTEGER;
+            } else if (dataTypeURI
+                    .equalsIgnoreCase(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI)) {
+                dataType = COL_TYPE.NON_NEGATIVE_INTEGER;
+            } else if (dataTypeURI
+                    .equalsIgnoreCase(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI)) {
+                dataType = COL_TYPE.POSITIVE_INTEGER;
+            } else if (dataTypeURI
+                    .equalsIgnoreCase(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI)) {
+                dataType = COL_TYPE.NON_POSITIVE_INTEGER;
+            } else if (dataTypeURI
+                    .equalsIgnoreCase(OBDAVocabulary.XSD_UNSIGNED_INT_URI)) {
+                dataType = COL_TYPE.UNSIGNED_INT;
 			} else if (dataTypeURI
+                    .equalsIgnoreCase(OBDAVocabulary.XSD_LONG_URI)) {
+                dataType = COL_TYPE.LONG;
+            }
+            else if (dataTypeURI
 					.equalsIgnoreCase(OBDAVocabulary.XSD_DECIMAL_URI)) {
 				// special case for decimal
 				String value = node.getLabel().toString();
@@ -1277,10 +1323,11 @@ public class SparqlAlgebraToDatalogTranslator {
 					dataType = COL_TYPE.INTEGER;
 				}
 			} else if (dataTypeURI
-					.equalsIgnoreCase(OBDAVocabulary.XSD_FLOAT_URI)
-					|| dataTypeURI
-							.equalsIgnoreCase(OBDAVocabulary.XSD_DOUBLE_URI)) {
-				dataType = COL_TYPE.DOUBLE;
+					.equalsIgnoreCase(OBDAVocabulary.XSD_FLOAT_URI)) {
+				dataType = COL_TYPE.FLOAT;
+            } else if (dataTypeURI
+                    .equalsIgnoreCase(OBDAVocabulary.XSD_DOUBLE_URI)) {
+                dataType = COL_TYPE.DOUBLE;
 			} else if (dataTypeURI
 					.equalsIgnoreCase(OBDAVocabulary.XSD_DATETIME_URI)) {
 				dataType = COL_TYPE.DATETIME;
@@ -1341,12 +1388,12 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 	}
 	
-	private Function getVariableTermIntoBoolFunction(Var expr) {
-		return ofac.getFunction(OBDAVocabulary.IS_TRUE, getVariableTerm(expr));
-	}
+	//private Function getVariableTermIntoBoolFunction(Var expr) {
+	//	return ofac.getFunction(OBDAVocabulary.IS_TRUE, getVariableTerm(expr));
+	//}
 	
 	private Term getVariableTerm(Var expr) {
-		return getOntopTerm(expr, expr.getValue(), isSI);
+		return getOntopTerm(expr, expr.getValue());
 		
 	}
 
@@ -1359,26 +1406,62 @@ public class SparqlAlgebraToDatalogTranslator {
 			URI type = lit.getDatatype();
 			if (type == null) {
 				return ofac.getFunction(ofac
-						.getDataTypePredicateString(), ofac.getConstantLiteral(
-						v.stringValue(), COL_TYPE.STRING));
+						.getDataTypePredicateLiteral(), ofac.getConstantLiteral(
+						v.stringValue(), COL_TYPE.LITERAL));
 			}
 			if ( (type == XMLSchema.INTEGER) || type.equals(XMLSchema.INTEGER)) constantFunction = ofac.getFunction(ofac
 					.getDataTypePredicateInteger(), ofac.getConstantLiteral(
-							lit.intValue() + "", COL_TYPE.INTEGER));
+							lit.integerValue() + "", COL_TYPE.INTEGER));
+            else if ( (type == XMLSchema.LONG) || type.equals(XMLSchema.LONG)) constantFunction = ofac.getFunction(ofac
+                    .getDataTypePredicateLong(), ofac.getConstantLiteral(
+                    lit.longValue() + "", COL_TYPE.LONG));
 			else if ((type == XMLSchema.DECIMAL)  || type.equals(XMLSchema.DECIMAL)) constantFunction = ofac.getFunction(ofac
 					.getDataTypePredicateDecimal(), ofac.getConstantLiteral(
 							lit.decimalValue() + "", COL_TYPE.DECIMAL));
+            else if ((type == XMLSchema.DECIMAL)  || type.equals(XMLSchema.DECIMAL)) constantFunction = ofac.getFunction(ofac
+                    .getDataTypePredicateDecimal(), ofac.getConstantLiteral(
+                    lit.decimalValue() + "", COL_TYPE.DECIMAL));
 			else if ((type == XMLSchema.DOUBLE) || type.equals(XMLSchema.DOUBLE)) constantFunction = ofac.getFunction(ofac
 					.getDataTypePredicateDouble(), ofac.getConstantLiteral(
 							lit.doubleValue() + "", COL_TYPE.DOUBLE));
+            else if ((type == XMLSchema.FLOAT) || type.equals(XMLSchema.FLOAT)) constantFunction = ofac.getFunction(ofac
+                    .getDataTypePredicateFloat(), ofac.getConstantLiteral(
+                    lit.floatValue() + "", COL_TYPE.FLOAT));
+            else if ((type == XMLSchema.NEGATIVE_INTEGER) || type.equals(XMLSchema.NEGATIVE_INTEGER)) constantFunction = ofac.getFunction(ofac
+                    .getDataTypePredicateNegativeInteger(), ofac.getConstantLiteral(
+                    lit.integerValue() + "", COL_TYPE.NEGATIVE_INTEGER));
+            else if ((type == XMLSchema.NON_POSITIVE_INTEGER) || type.equals(XMLSchema.NON_POSITIVE_INTEGER)) constantFunction = ofac.getFunction(ofac
+                    .getDataTypePredicateNonPositiveInteger(), ofac.getConstantLiteral(
+                    lit.integerValue() + "", COL_TYPE.NON_POSITIVE_INTEGER));
+            else if ((type == XMLSchema.INT) || type.equals(XMLSchema.INT)) constantFunction = ofac.getFunction(ofac
+                    .getDataTypePredicateInt(), ofac.getConstantLiteral(
+                    lit.intValue() + "", COL_TYPE.INT));
+            else if ((type == XMLSchema.NON_NEGATIVE_INTEGER) || type.equals(XMLSchema.NON_NEGATIVE_INTEGER)) constantFunction = ofac.getFunction(ofac
+                    .getDataTypePredicateNonNegativeInteger(), ofac.getConstantLiteral(
+                    lit.integerValue() + "", COL_TYPE.NON_NEGATIVE_INTEGER));
+            else if ((type == XMLSchema.POSITIVE_INTEGER) || type.equals(XMLSchema.POSITIVE_INTEGER)) constantFunction = ofac.getFunction(ofac
+                    .getDataTypePredicatePositiveInteger(), ofac.getConstantLiteral(
+                    lit.integerValue() + "", COL_TYPE.POSITIVE_INTEGER));
+            else if ((type == XMLSchema.UNSIGNED_INT) || type.equals(XMLSchema.UNSIGNED_INT)) constantFunction = ofac.getFunction(ofac
+                    .getDataTypePredicateUnsignedInt(), ofac.getConstantLiteral(
+                    lit.intValue() + "", COL_TYPE.UNSIGNED_INT));
 			else if ((type == XMLSchema.DATETIME) || type.equals(XMLSchema.DATETIME)) 
 				constantFunction = ofac.getFunction(ofac.getDataTypePredicateDateTime(), ofac.getConstantLiteral(
 						lit.calendarValue() + "", COL_TYPE.DATETIME));
+            else if ((type == XMLSchema.GYEAR) || type.equals(XMLSchema.GYEAR))
+                constantFunction = ofac.getFunction(ofac.getDataTypePredicateYear(), ofac.getConstantLiteral(
+                        lit.calendarValue() + "", COL_TYPE.YEAR));
+            else if ((type == XMLSchema.DATE) || type.equals(XMLSchema.DATE))
+                constantFunction = ofac.getFunction(ofac.getDataTypePredicateDate(), ofac.getConstantLiteral(
+                        lit.calendarValue() + "", COL_TYPE.DATE));
+            else if ((type == XMLSchema.TIME) || type.equals(XMLSchema.TIME))
+                constantFunction = ofac.getFunction(ofac.getDataTypePredicateTime(), ofac.getConstantLiteral(
+                        lit.calendarValue() + "", COL_TYPE.TIME));
 			else if ((type == XMLSchema.BOOLEAN) || type.equals(XMLSchema.BOOLEAN)) constantFunction = ofac.getFunction(ofac
 					.getDataTypePredicateBoolean(), ofac.getConstantLiteral(
 							lit.booleanValue() + "", COL_TYPE.BOOLEAN));
 			else if ((type == XMLSchema.STRING) || type.equals(XMLSchema.STRING)) constantFunction = ofac.getFunction(ofac
-					.getDataTypePredicateBoolean(), ofac.getConstantLiteral(
+					.getDataTypePredicateString(), ofac.getConstantLiteral(
 							lit.stringValue() + "", COL_TYPE.STRING));
 			else if ((type == RDFS.LITERAL) || type.equals(RDFS.LITERAL)) constantFunction = ofac.getFunction(ofac
 					.getDataTypePredicateLiteral(), ofac.getConstantLiteral(
@@ -1390,13 +1473,15 @@ public class SparqlAlgebraToDatalogTranslator {
 							type.toString(), COL_TYPE.OBJECT));
 			}
 		} else if (v instanceof URIImpl) {
-			constantFunction = uriTemplateMatcher.generateURIFunction(v.stringValue());
-			if (constantFunction.getArity() == 1)
-				constantFunction = ofac.getFunction(ofac
-						.getUriTemplatePredicate(1), ofac.getConstantLiteral(
-								((URIImpl)v).stringValue(), COL_TYPE.OBJECT));
+
+                constantFunction = uriTemplateMatcher.generateURIFunction(v.stringValue());
+                if (constantFunction.getArity() == 1)
+                    constantFunction = ofac.getFunction(ofac
+                            .getUriTemplatePredicate(1), ofac.getConstantLiteral(
+                            ((URIImpl) v).stringValue(), COL_TYPE.OBJECT));
+
 			
-		} 
+		}
 		
 		return constantFunction;
 	}
@@ -1566,15 +1651,7 @@ public class SparqlAlgebraToDatalogTranslator {
 //		}
 //	}
 
-//	public boolean isBoolean(Query q) {
-//		return q.isAskType();
-//	}
-
-	public void setUriRef(Map<String,Integer> uriR) {
-		this.uriRef = uriR;
-	}
-	
-	public void setSI() {
-		isSI = true;
+	public void setSemanticIndexUriRef(SemanticIndexURIMap uriRef) {
+		this.uriRef = uriRef;
 	}
 }

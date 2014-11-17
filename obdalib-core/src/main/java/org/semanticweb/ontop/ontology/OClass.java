@@ -24,8 +24,11 @@ import org.semanticweb.ontop.model.Predicate;
 
 /***
  * A named class.
+ * 
+ * Represents Class from OWL 2 Specification
+ * 
  */
-public interface OClass extends BasicClassDescription {
+public interface OClass extends ClassExpression {
 	
 	public Predicate getPredicate();
 }

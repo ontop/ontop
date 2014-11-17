@@ -41,8 +41,8 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
  */
 public class UriTemplateMatcher {
 
-	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-
+	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+    
 	private final Map<Pattern, Function> matchers;
 
     public UriTemplateMatcher(Map<Pattern, Function> matchers) {

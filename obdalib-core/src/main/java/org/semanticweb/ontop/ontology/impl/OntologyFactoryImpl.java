@@ -24,180 +24,123 @@ import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.ObjectConstant;
 import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.ontology.Assertion;
-import org.semanticweb.ontop.ontology.ClassAssertion;
-import org.semanticweb.ontop.ontology.ClassDescription;
-import org.semanticweb.ontop.ontology.DataPropertyAssertion;
-import org.semanticweb.ontop.ontology.DataType;
-import org.semanticweb.ontop.ontology.DisjointClassAxiom;
-import org.semanticweb.ontop.ontology.DisjointDataPropertyAxiom;
-import org.semanticweb.ontop.ontology.DisjointObjectPropertyAxiom;
-import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.ontology.PropertyFunctionalAxiom;
-import org.semanticweb.ontop.ontology.PropertySomeClassRestriction;
-import org.semanticweb.ontop.ontology.PropertySomeDataTypeRestriction;
-import org.semanticweb.ontop.ontology.PropertySomeRestriction;
-import org.semanticweb.ontop.ontology.SubDescriptionAxiom;
+import org.semanticweb.ontop.ontology.*;;import java.util.Set;
 
 
 public class OntologyFactoryImpl implements OntologyFactory {
 
-	private static OntologyFactoryImpl instance = new OntologyFactoryImpl();
+	private static final OntologyFactoryImpl instance = new OntologyFactoryImpl();
 
-	private OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
+	private OntologyFactoryImpl() {
+		// NO-OP to make the default constructor private
+	}
+	
 	public static OntologyFactory getInstance() {
 		return instance;
 	}
 
 	@Override
-	public ClassAssertion createClassAssertion(Predicate concept, ObjectConstant object) {
+	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant object) {
 		return new ClassAssertionImpl(concept, object);
 	}
 
 	@Override
-	public Ontology createOntology(String uri) {
-		return new OntologyImpl(uri);
-	}
-
-	@Override
 	public Ontology createOntology() {
-		return new OntologyImpl(null);
+		return new OntologyImpl();
 	}
 	
 	@Override
-	public SubDescriptionAxiom createSubPropertyAxiom(Property included, Property including) {
-		return new SubPropertyAxiomImpl(included, including);
+	public SubPropertyOfAxiom createSubPropertyAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including) {
+		return new SubPropertyOfAxiomImpl(included, including);
+	}
+	
+	@Override
+	public SubPropertyOfAxiom createSubPropertyAxiom(DataPropertyExpression included, DataPropertyExpression including) {
+		return new SubPropertyOfAxiomImpl(included, including);
+	}
+	
+	@Override
+	public SubPropertyOfAxiom createSubPropertyAxiom(PropertyExpression included, PropertyExpression including) {
+		return new SubPropertyOfAxiomImpl(included, including);
 	}
 
 	@Override
-	public SubDescriptionAxiom createSubClassAxiom(ClassDescription concept1, ClassDescription concept2) {
-		return new SubClassAxiomImpl(concept1, concept2);
+	public SubClassOfAxiom createSubClassAxiom(ClassExpression concept1, BasicClassDescription concept2) {
+		return new SubClassOfAxiomImpl(concept1, concept2);
 	}
 
 	@Override
-	public PropertySomeRestriction createPropertySomeRestriction(Predicate p, boolean isInverse) {
-		return new PropertySomeRestrictionImpl(p, isInverse);
+	public SubClassOfAxiom createSubClassAxiom(DataRangeExpression concept1, DataRangeExpression concept2) {
+		return new SubClassOfAxiomImpl(concept1, concept2);
 	}
-
+	
 	@Override
-	public PropertyFunctionalAxiom createPropertyFunctionalAxiom(Property role) {
-		return new PropertyFunctionalAxiomImpl(role);
+	public DataPropertyRangeExpression createDataPropertyRange(DataPropertyExpression role) {
+		return new DataPropertyRangeExpressionImpl(role.getInverse());
 	}
-
+	
 	@Override
-	public ObjectPropertyAssertion createObjectPropertyAssertion(Predicate role, ObjectConstant o1, ObjectConstant o2) {
-		return new ObjectPropertyAssertionImpl(role, o1, o2);
+	public FunctionalPropertyAxiom createPropertyFunctionalAxiom(PropertyExpression role) {
+		return new FunctionalPropertyAxiomImpl(role);
 	}
 
-	@Override
-	public DataPropertyAssertion createDataPropertyAssertion(Predicate attribute, ObjectConstant o1, ValueConstant o2) {
-		return new DataPropertyAssertionImpl(attribute, o1, o2);
+	
+	public PropertyAssertion createObjectPropertyAssertion(PropertyExpression role, ObjectConstant o1, ObjectConstant o2) {
+		return new PropertyAssertionImpl(role, o1, o2);
 	}
 
-	public PropertySomeRestriction getPropertySomeRestriction(Predicate p, boolean inverse) {
-		if (p.getArity() != 2) {
-			throw new IllegalArgumentException("Roles must have arity = 2");
-		}
-		return new PropertySomeRestrictionImpl(p, inverse);
-	}
-
-	public PropertySomeClassRestriction createPropertySomeClassRestriction(Predicate p, boolean isInverse, OClass filler) {
-		if (p.getArity() != 2) {
-			throw new IllegalArgumentException("Roles must have arity = 2");
-		}
-		if (filler == null) {
-			throw new IllegalArgumentException("Must provide an atomic concept as a filler");
-		}
-		return new PropertySomeClassRestrictionImpl(p, isInverse, filler);
-	}
-
-	@Override
-	public PropertySomeDataTypeRestriction createPropertySomeDataTypeRestriction(Predicate p, boolean isInverse, DataType filler) {
-		if (p.getArity() != 2) {
-			throw new IllegalArgumentException("Roles must have arity = 2");
-		}
-		if (filler == null) {
-			throw new IllegalArgumentException("Must provide a data type object as the filler");
-		}
-		return new PropertySomeDataTypeRestrictionImpl(p, isInverse, filler);
-	}
-
-	public OClass createClass(Predicate p) {
-		if (p.getArity() != 1) {
-			throw new IllegalArgumentException("Concepts must have arity = 1");
-		}
-		return new ClassImpl(p);
-	}
-
-	public Property createProperty(Predicate p, boolean inverse) {
-		return new PropertyImpl(p, inverse);
-	}
-
-	public Property createProperty(Predicate p) {
-		return new PropertyImpl(p, false);
-	}
 
 	@Override
 	public OClass createClass(String c) {
 		Predicate classp = ofac.getClassPredicate(c);
-		return createClass(classp);
+		return new ClassImpl(classp);
 	}
 
 	@Override
-	public Property createObjectProperty(String uri, boolean inverse) {
+	public ObjectPropertyExpression createObjectProperty(String uri) {
 		Predicate prop = ofac.getObjectPropertyPredicate(uri);
-		return createProperty(prop, inverse);
+		return new ObjectPropertyExpressionImpl(prop, false);
 	}
 
+	
 	@Override
-	public Property createObjectProperty(String uri) {
-		Predicate prop = ofac.getObjectPropertyPredicate(uri);
-		return createProperty(prop);
-	}
-
-	@Override
-	public Property createDataProperty(String p) {
+	public DataPropertyExpression createDataProperty(String p) {
 		Predicate prop = ofac.getDataPropertyPredicate(p);
-		return createProperty(prop);
-	}
-
-
-
-	@Override
-	public DataType createDataType(Predicate p) {
-		return new DataTypeImpl(p);
+		return new DataPropertyExpressionImpl(prop, false);
 	}
 
 	@Override
-	public Assertion createPropertyAssertion(Predicate attribute, ObjectConstant o1, Constant o2) {
-		if (o2 instanceof ObjectConstant) {
-			return createObjectPropertyAssertion(attribute, o1, (ObjectConstant) o2);
-		}
-		return createDataPropertyAssertion(attribute, o1, (ValueConstant) o2);
+	public PropertyExpression createProperty(String uri) {
+		Predicate prop = ofac.getPredicate(uri, 2);
+		return new ObjectPropertyExpressionImpl(prop, false);
+	}
+
+
+	@Override
+	public Datatype createDataType(Predicate p) {
+		return new DatatypeImpl(p);
 	}
 
 	@Override
-	public DisjointClassAxiom createDisjointClassAxiom(OClass c1, OClass c2) {
-		return new DisjointClassAxiomImpl(c1, c2);
+	public PropertyAssertion createPropertyAssertion(PropertyExpression attribute, ObjectConstant o1, Constant o2) {
+		return new PropertyAssertionImpl(attribute, o1, o2);
 	}
 
 	@Override
-	public DisjointDataPropertyAxiom createDisjointDataPropertyAxiom(
-			Predicate p1, Predicate p2) {
-			return new DisjointDataPropertyAxiomImpl(p1, p2);
+	public DisjointClassesAxiom createDisjointClassesAxiom(Set<ClassExpression> classes) {
+		return new DisjointClassesAxiomImpl(classes);
+	}
+
+	@Override
+	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Set<PropertyExpression> props) {
+			return new DisjointPropertiesAxiomImpl(props);
 	}
 	
 	@Override
-	public DisjointObjectPropertyAxiom createDisjointObjectPropertyAxiom(
-			Predicate p1, Predicate p2) {
-			return new DisjointObjectPropertyAxiomImpl(p1, p2);
+	public SomeValuesFrom createPropertySomeRestriction(PropertyExpression role) {
+		return new PropertySomeRestrictionImpl(role);
 	}
-
 }

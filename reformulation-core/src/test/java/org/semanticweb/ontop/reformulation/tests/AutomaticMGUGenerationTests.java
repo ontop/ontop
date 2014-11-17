@@ -25,15 +25,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import junit.framework.TestCase;
 
 import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AutomaticMGUGenerationTests extends TestCase {
 
-	private Unifier					unifier		= null;
+	private UnifierUtilities unifier		= null;
 	private AutomaticMGUTestDataGenerator	generator	= null;
 	private Logger						log			= LoggerFactory.getLogger(AutomaticMGUGenerationTests.class);
 
@@ -57,7 +56,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 		 * Predicate class instead of FunctionSymbol class
 		 */
 
-		unifier = new Unifier();
+		unifier = new UnifierUtilities();
 		generator = new AutomaticMGUTestDataGenerator();
 
 	}
@@ -90,20 +89,19 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			List<Function> atoms = generator.getAtoms(atomsstr);
 			List<Substitution> expectedmgu = generator.getMGU(mgustr);
 
-			Unifier unifier = new Unifier();
 			List<Substitution> computedmgu = new LinkedList<Substitution>();
 			Exception expectedException = null;
 
-			Map<Variable, Term> mgu = unifier.getMGU(atoms.get(0), atoms.get(1));
+			Unifier mgu = Unifier.getMGU(atoms.get(0), atoms.get(1));
 			if (mgu == null) {
 				computedmgu = null;
 			} else {
-				for (Term var : mgu.keySet()) {
+				for (VariableImpl var : mgu.keySet()) {
 					computedmgu.add(new Substitution(var, mgu.get(var)));
 				}
 			}
 
-			log.debug("Computed MGU: {}", computedmgu);
+			log.debug("Expected MGU: {}", expectedmgu);
 
 			if (expectedmgu == null) {
 				assertTrue(computedmgu == null);

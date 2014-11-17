@@ -37,7 +37,7 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 //		SqlDatatypes.put(Types.DOUBLE, "DECIMAL"); // it fails aggregate test with double
 		SqlDatatypes.put(Types.CHAR, "CHAR");
 		SqlDatatypes.put(Types.VARCHAR, "CHAR(8000) CHARACTER SET utf8");  // for korean, chinese, etc characters we need to use utf8
-		SqlDatatypes.put(Types.DATE, "DATETIME");
+		SqlDatatypes.put(Types.DATE, "DATE");
 		SqlDatatypes.put(Types.TIME, "TIME");
 		SqlDatatypes.put(Types.TIMESTAMP, "DATETIME");
 		SqlDatatypes.put(Types.BOOLEAN, "BOOLEAN");

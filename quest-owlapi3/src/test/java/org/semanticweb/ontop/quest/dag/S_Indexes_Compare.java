@@ -24,26 +24,17 @@ package org.semanticweb.ontop.quest.dag;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.jgrapht.Graphs;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.Property;
+import org.semanticweb.ontop.ontology.*;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.ontop.owlrefplatform.core.dag.DAG;
 import org.semanticweb.ontop.owlrefplatform.core.dag.DAGConstructor;
 import org.semanticweb.ontop.owlrefplatform.core.dag.DAGNode;
 import org.semanticweb.ontop.owlrefplatform.core.dag.DAGOperations;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.NamedDAG;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -72,7 +63,7 @@ public void testIndexes() throws Exception{
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		TBoxReasonerImpl dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+		TBoxReasoner dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
 
 
 		//add input named graph
@@ -117,7 +108,7 @@ private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 	for(DAGNode d: d1.getRoles()){
 		System.out.println(d );
 		for(DAGNode dd: d.getEquivalents()){
-		System.out.println(d1.getRoleNode(((Property)dd.getDescription())));
+		System.out.println(d1.getRoleNode(((PropertyExpression) dd.getDescription())));
 		;
 		}
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -139,8 +130,8 @@ private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG) {
 	for(Description vertex: engine.getIndexed()) { // .getNamedDAG().vertexSet()
 		int index= engine.getIndex(vertex);
 		log.info("vertex {} index {}", vertex, index);
-		if (vertex instanceof Property) {
-			for(Description parent: namedDAG.getSuccessors((Property)vertex)){
+		if (vertex instanceof PropertyExpression) {
+			for(Description parent: namedDAG.getSuccessors((PropertyExpression)vertex)){
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
 				if(result)
 					break;

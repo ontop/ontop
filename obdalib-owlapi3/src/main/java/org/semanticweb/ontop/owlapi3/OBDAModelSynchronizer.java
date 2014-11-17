@@ -23,6 +23,8 @@ package org.semanticweb.ontop.owlapi3;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.ontology.OntologyFactory;
+import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
@@ -41,18 +43,19 @@ public class OBDAModelSynchronizer {
 	 */
 	public static int declarePredicates(OWLOntology ontology, OBDAModel model) {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 		int declarations = 0;
 		for (OWLClass c : ontology.getClassesInSignature()) {
-			model.declareClass(fac.getClassPredicate(c.getIRI().toString()));
+			model.declareClass(ofac.createClass(c.getIRI().toString()));
 			declarations += 1;
 		}
 		for (OWLDataProperty c : ontology.getDataPropertiesInSignature()) {
-			model.declareDataProperty(fac.getDataPropertyPredicate(c.getIRI().toString()));
+			model.declareDataProperty(ofac.createDataProperty(c.getIRI().toString()));
 			declarations += 1;
 		}
 		for (OWLObjectProperty c : ontology.getObjectPropertiesInSignature()) {
-			model.declareObjectProperty(fac.getObjectPropertyPredicate(c.getIRI().toString()));
+			model.declareObjectProperty(ofac.createObjectProperty(c.getIRI().toString()));
 			declarations += 1;
 		}
 

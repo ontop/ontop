@@ -38,7 +38,7 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 		SqlDatatypes.put(Types.VARCHAR, "VARCHAR(100)");  // for korean, chinese, etc characters we need to use utf8
 		SqlDatatypes.put(Types.DATE, "TIMESTAMP");
 		SqlDatatypes.put(Types.TIME, "TIME");
-		SqlDatatypes.put(Types.TIMESTAMP, "DATETIME");
+		SqlDatatypes.put(Types.TIMESTAMP, "TIMESTAMP");
 		SqlDatatypes.put(Types.BOOLEAN, "BOOLEAN");
 	}
 	@Override

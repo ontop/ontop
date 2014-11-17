@@ -65,9 +65,6 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 		if (obj == null || !(obj instanceof ValueConstantImpl)) {
 			return false;
 		}
-		if (this == OBDAVocabulary.NULL) {
-			return false;
-		}
 		ValueConstantImpl value2 = (ValueConstantImpl) obj;
 		return this.hashCode() == value2.hashCode();
 	}
@@ -106,10 +103,10 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 	public Set<Variable> getReferencedVariables() {
 		return new LinkedHashSet<Variable>();
 	}
-
+/*
 	@Override
 	public Map<Variable, Integer> getVariableCount() {
 		return new HashMap<Variable, Integer>();
 	}
-
+*/
 }

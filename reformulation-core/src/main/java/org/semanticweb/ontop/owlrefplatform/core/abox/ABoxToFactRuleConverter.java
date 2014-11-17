@@ -20,48 +20,43 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
-import java.util.Iterator;
 import java.util.LinkedList;
+
 import org.openrdf.model.vocabulary.XMLSchema;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.ObjectConstant;
-import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.ClassAssertion;
-import org.semanticweb.ontop.ontology.DataPropertyAssertion;
-
-import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.semanticweb.ontop.ontology.PropertyAssertion;
 
 public class ABoxToFactRuleConverter {
 	private static final OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
 
-	public static CQIE getRule(Assertion assertion) {
+	public static CQIE getRule(ClassAssertion ca) {
 		CQIE rule = null;
-		if (assertion instanceof ClassAssertion) {
-			ClassAssertion ca = (ClassAssertion) assertion;
-			ObjectConstant c = ca.getObject();
-			Predicate p = ca.getConcept();
-			Predicate urifuction = factory.getUriTemplatePredicate(1);
-			Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(c.getValue())));
-			rule = factory.getCQIE(head, new LinkedList<Function>());
-			// head = factory.getFunctionalTerm(p, c);
-		} else if (assertion instanceof ObjectPropertyAssertion) {
-			ObjectPropertyAssertion ca = (ObjectPropertyAssertion) assertion;
-			ObjectConstant s = ca.getFirstObject();
-			ObjectConstant o = ca.getSecondObject();
-			Predicate p = ca.getPredicate();
-			Predicate urifuction = factory.getUriTemplatePredicate(1);
-			Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(s.getValue())), factory.getFunction(urifuction, factory.getConstantLiteral(o.getValue())));
-			rule = factory.getCQIE(head, new LinkedList<Function>());
-		} else if (assertion instanceof DataPropertyAssertion) {
+		ObjectConstant c = ca.getIndividual();
+		Predicate p = ca.getConcept().getPredicate();
+		Predicate urifuction = factory.getUriTemplatePredicate(1);
+		Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(c.getValue())));
+		rule = factory.getCQIE(head, new LinkedList<Function>());
+		return rule;
+	}
+
+	public static CQIE getRule(PropertyAssertion pa) {
+		if (pa.getValue2() instanceof ValueConstant) {
+			// WE IGNORE DATA PROPERTY ASSERTIONS UNTIL THE NEXT RELEASE
+			return null;
+		}
+		ObjectConstant s = pa.getSubject();
+		ObjectConstant o = (ObjectConstant) pa.getValue2();
+		Predicate p = pa.getProperty().getPredicate();
+		Predicate urifuction = factory.getUriTemplatePredicate(1);
+		Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(s.getValue())), factory.getFunction(urifuction, factory.getConstantLiteral(o.getValue())));
+		CQIE rule = factory.getCQIE(head, new LinkedList<Function>());
+		return rule;
+		
+//		else if (assertion instanceof DataPropertyAssertion) {
 			/* 
 			 * We ignore these for the moment until next release.
 			 */
@@ -74,23 +69,31 @@ public class ABoxToFactRuleConverter {
 //			Predicate urifuction = factory.getUriTemplatePredicate(1);
 //			head = factory.getFunction(p, factory.getFunction(urifuction, s), factory.getFunction(factory.getPredicate(typeURI,1), o));
 //			rule = factory.getCQIE(head, new LinkedList<Function>());
-		} 	
-		return rule;
+//		} 	
 	}
 	
+    @Deprecated
 	public static String getURIType(COL_TYPE e) {
 		String result = "";
 		if (e == COL_TYPE.BOOLEAN) {
 			result = XMLSchema.BOOLEAN.toString();
 		} else if (e == COL_TYPE.DATETIME) {
 			result = XMLSchema.DATETIME.toString();
-		} else if (e == COL_TYPE.DECIMAL) {
+		} else if (e == COL_TYPE.TIME) {
+            result = XMLSchema.TIME.toString();
+        } else if (e == COL_TYPE.DATE) {
+            result = XMLSchema.DATE.toString();
+        } else if (e == COL_TYPE.YEAR) {
+            result = XMLSchema.GYEAR.toString();
+        } else if (e == COL_TYPE.DECIMAL) {
 			result = XMLSchema.DECIMAL.toString();
 		} else if (e == COL_TYPE.DOUBLE) {
 			result = XMLSchema.DOUBLE.toString();
 		} else if (e == COL_TYPE.INTEGER) {
 			result = XMLSchema.INTEGER.toString();
-		} else if (e == COL_TYPE.LITERAL) {
+		} else if (e == COL_TYPE.LONG) {
+            result = XMLSchema.LONG.toString();
+        } else if (e == COL_TYPE.LITERAL) {
 			result = OBDAVocabulary.RDFS_LITERAL_URI;
 		} else if (e == COL_TYPE.LITERAL_LANG) {
 			result = OBDAVocabulary.RDFS_LITERAL_URI;

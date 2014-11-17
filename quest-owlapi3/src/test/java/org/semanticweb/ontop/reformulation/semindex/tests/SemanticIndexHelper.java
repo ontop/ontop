@@ -47,6 +47,7 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Description;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.OntologyFactory;
+import org.semanticweb.ontop.ontology.PropertyExpression;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
@@ -182,15 +183,21 @@ public class SemanticIndexHelper {
                     inverse = true;
                 }
 
-                p = predicateFactory.getPredicate(uri, arity);
-
                 if (type.equals("classes")) {
-                    if (exists)
-                        description = descFactory.getPropertySomeRestriction(p, inverse);
+                    if (exists) {
+                    	PropertyExpression prop = descFactory.createProperty(uri);
+                    	if (inverse)
+                    		prop = prop.getInverse();
+                        description = descFactory.createPropertySomeRestriction(prop);
+                    }
                     else
-                        description = descFactory.createClass(p);
+                        description = descFactory.createClass(uri);
                 } else {
-                    description = descFactory.createProperty(p, inverse);
+                	PropertyExpression prop = descFactory.createProperty(uri);
+                    if (inverse)
+                    	description = prop.getInverse();
+                    else
+                    	description = prop;
                 }
 
 

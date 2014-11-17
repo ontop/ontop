@@ -26,12 +26,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.ClassDescription;
 import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.Property;
+import org.semanticweb.ontop.ontology.PropertyExpression;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import junit.framework.TestCase;
 
@@ -49,9 +47,9 @@ public class DAGTest extends TestCase {
 				classes.add(c);
 		}
 		
-		Set<Property> roles= new HashSet<Property>();
-		for(Equivalences<Property> node : reasoner.getProperties()) {
-			for(Property r: node)
+		Set<PropertyExpression> roles= new HashSet<PropertyExpression>();
+		for(Equivalences<PropertyExpression> node : reasoner.getProperties()) {
+			for(PropertyExpression r: node)
 				roles.add(r);
 		}
 		

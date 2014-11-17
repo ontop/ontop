@@ -26,11 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.ontology.DataType;
-import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.ontology.PropertySomeRestriction;
+import org.semanticweb.ontop.ontology.*;
 
 /**
  * @author Sergejs Pugacs
@@ -56,13 +52,13 @@ public class DAGNode implements Serializable {
 	
 	public Set<DAGNode> equivalents = new LinkedHashSet<DAGNode>();
 
-	String string = "";
+	private String string = "";
 
-	int hashcode = 0;
+	private int hashcode = 0;
 
-	boolean hashNeedsUpdate = true;
+	private boolean hashNeedsUpdate = true;
 
-	boolean stringNeedsUpdate = true;
+	private boolean stringNeedsUpdate = true;
 
 	public DAGNode(Description description) {
 		this.description = description;
@@ -86,15 +82,15 @@ public class DAGNode implements Serializable {
 			return;
 		StringBuilder bf = new StringBuilder();
 		bf.append("DAGNode{");
-		if (description instanceof PropertySomeRestriction) {
+		if (description instanceof SomeValuesFrom) {
 			bf.append("E");
-			Predicate p = ((PropertySomeRestriction) description).getPredicate();
+			Predicate p = ((SomeValuesFrom) description).getProperty().getPredicate();
 			String fragment = p.getName().toString();//.getFragment();
 			if (fragment != null)
 				bf.append(fragment);
 			else
 				bf.append(p.getName());
-			if (((PropertySomeRestriction) description).isInverse())
+			if (((SomeValuesFrom) description).getProperty().isInverse())
 				bf.append("^-");
 		} else if (description instanceof OClass) {
 			
@@ -105,22 +101,22 @@ public class DAGNode implements Serializable {
 			else
 				bf.append(p.getName());
 			
-		} else if (description instanceof Property) {
+		} else if (description instanceof PropertyExpression) {
 			
-			Predicate p = ((Property) description).getPredicate();
+			Predicate p = ((PropertyExpression) description).getPredicate();
 			String fragment = p.getName().toString();//.getFragment();
 			if (fragment != null)
 				bf.append(fragment);
 			else
 				bf.append(p.getName());
 			
-			if (((Property) description).isInverse()) {
+			if (((PropertyExpression) description).isInverse()) {
 				bf.append("^-");
 			}
 			
-		} else if (description instanceof DataType) {
+		} else if (description instanceof Datatype) {
 		
-			DataType datatype = (DataType) description;
+			Datatype datatype = (Datatype) description;
 			bf.append(datatype.toString());
 			
 		} else {
@@ -185,7 +181,6 @@ public class DAGNode implements Serializable {
 
 	public SemanticIndexRange getRange() {
 		return this.range;
-
 	}
 
 	public Set<DAGNode> getChildren() {
@@ -196,32 +191,12 @@ public class DAGNode implements Serializable {
 		return equivalents;
 	}
 
-	public void setAncestors(Set<DAGNode> ancestors) {
-		this.ancestors = ancestors;
-	}
-	
 	public Set<DAGNode> getAncestors() {
 		return ancestors;
 	}
 	
-	public void setDescendants(Set<DAGNode> descendants) {
-		this.descendants = descendants;
-	}
-
 	public Set<DAGNode> getDescendants() {
 		return descendants;
-	}
-
-	public void setChildren(Set<DAGNode> children) {
-		this.children = children;
-		hashNeedsUpdate = true;
-		stringNeedsUpdate = true;
-	}
-
-	public void setParents(Set<DAGNode> parents) {
-		this.parents = parents;
-		hashNeedsUpdate = true;
-		stringNeedsUpdate = true;
 	}
 
 	public Description getDescription() {
