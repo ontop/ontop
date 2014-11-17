@@ -30,21 +30,25 @@ public class OWLTypeMapper {
 		registerType(OWL2Datatype.XSD_NON_POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER); // 9
 		registerType(OWL2Datatype.XSD_UNSIGNED_INT, COL_TYPE.UNSIGNED_INT); // 10
 		registerType(OWL2Datatype.XSD_DOUBLE, COL_TYPE.DOUBLE); // 11
-		registerType(OWL2Datatype.XSD_FLOAT, COL_TYPE.DOUBLE); // 12 // TEMPORARY!!
+		// registerType(OWL2Datatype.XSD_FLOAT, COL_TYPE.DOUBLE); // 12 // TEMPORARY!!
 		registerType(OWL2Datatype.XSD_LONG, COL_TYPE.LONG); // 13 
 		registerType(OWL2Datatype.XSD_BOOLEAN, COL_TYPE.BOOLEAN); // 14
 	
 		
 		// irregularities
-		
+
+		OWLtoCOLTYPE.put(OWL2Datatype.XSD_FLOAT, COL_TYPE.DOUBLE); // 12 // TEMPORARY!!
+
 		OWLtoCOLTYPE.put(OWL2Datatype.RDF_PLAIN_LITERAL, COL_TYPE.LITERAL);
 		OWLtoCOLTYPE.put(OWL2Datatype.RDFS_LITERAL, COL_TYPE.LITERAL);		
 		OWLtoCOLTYPE.put(OWL2Datatype.XSD_DATE_TIME_STAMP, COL_TYPE.DATETIME);
-		
+
 		COLTYPEtoOWL.put(COL_TYPE.LITERAL, OWL2Datatype.RDF_PLAIN_LITERAL);
 		COLTYPEtoOWL.put(COL_TYPE.DATE, OWL2Datatype.RDF_PLAIN_LITERAL);  // not XSD_DATE;
 		COLTYPEtoOWL.put(COL_TYPE.TIME, OWL2Datatype.RDF_PLAIN_LITERAL);
 		COLTYPEtoOWL.put(COL_TYPE.YEAR, OWL2Datatype.RDF_PLAIN_LITERAL);
+
+
 	}
 	
 	private static void registerType(OWL2Datatype owlType, Predicate.COL_TYPE type) {
