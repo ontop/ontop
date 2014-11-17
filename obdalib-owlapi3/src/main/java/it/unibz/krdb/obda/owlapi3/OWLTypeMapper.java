@@ -30,7 +30,7 @@ public class OWLTypeMapper {
 		registerType(OWL2Datatype.XSD_NON_POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER); // 9
 		registerType(OWL2Datatype.XSD_UNSIGNED_INT, COL_TYPE.UNSIGNED_INT); // 10
 		registerType(OWL2Datatype.XSD_DOUBLE, COL_TYPE.DOUBLE); // 11
-		registerType(OWL2Datatype.XSD_FLOAT, COL_TYPE.FLOAT); // 12
+		registerType(OWL2Datatype.XSD_FLOAT, COL_TYPE.DOUBLE); // 12 // TEMPORARY!!
 		registerType(OWL2Datatype.XSD_LONG, COL_TYPE.LONG); // 13 
 		registerType(OWL2Datatype.XSD_BOOLEAN, COL_TYPE.BOOLEAN); // 14
 	
