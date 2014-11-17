@@ -21,6 +21,8 @@ package it.unibz.krdb.obda.model;
  */
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
 * The Predicate class currently represents (1) first-order predicts, (2) function symbols, and
@@ -29,32 +31,61 @@ import java.io.Serializable;
  */
 public interface Predicate extends Cloneable, Serializable {
 
-	public enum COL_TYPE {
-		OBJECT,
-		BNODE,
-		LITERAL,
-		LITERAL_LANG,
-		INTEGER,
-		INT,
-		NON_NEGATIVE_INTEGER,
-		POSITIVE_INTEGER,
-		NEGATIVE_INTEGER,
-		NON_POSITIVE_INTEGER,
-		UNSIGNED_INT,
-		DECIMAL,
-		DOUBLE,
-		FLOAT,
-		STRING,
-		DATETIME,
-		BOOLEAN,
-		UNSUPPORTED,
-		DATE,
-		TIME,
-		YEAR,
-		LONG,
-		NULL ;
-    };
+	public static enum COL_TYPE {
+		
+		UNSUPPORTED (-1), // created only in SesameRDFIterator, ignored by SI and exceptions in all other cases
+		NULL (0),
+		OBJECT (1),
+		BNODE (2),
+		LITERAL (3),
+		LITERAL_LANG (-3), // not to be mapped from code
+		INTEGER (4),
+		DECIMAL (5),
+		DOUBLE (6),
+		STRING (7),
+		DATETIME (8),
+		BOOLEAN (9),
+		DATE (10),
+		TIME (11),
+		YEAR (12),
+		LONG (13),
+		FLOAT (14),
+		NEGATIVE_INTEGER (15),
+		NON_NEGATIVE_INTEGER (16),
+		POSITIVE_INTEGER (17),
+		NON_POSITIVE_INTEGER (18),
+		INT (19),
+		UNSIGNED_INT (20);
+		
+		private static final Map<Integer, Predicate.COL_TYPE> codeToTypeMap = new HashMap<Integer, Predicate.COL_TYPE>();
+		
+		static {
+			for (COL_TYPE type : COL_TYPE.values()) {
+				// ignore UNSUPPORTED and LITERAL_LANG
+				if (type.code >= 0)
+					codeToTypeMap.put(type.code, type);
+			}
+		}
+		
+		private final int code;
+		
+		// private constructor
+		private COL_TYPE(int code) {
+			this.code = code;
+		}
+		
+		public int getQuestCode() {
+			return code;
+		}
+		
+		public static COL_TYPE getQuestType(int code) {
+			return codeToTypeMap.get(code);
+		}
+  };
 
+  
+  
+    
 	/**
 	 * Get the name of the predicate. In practice, the predicate name is
 	 * constructed as a URI to indicate a unique resource.

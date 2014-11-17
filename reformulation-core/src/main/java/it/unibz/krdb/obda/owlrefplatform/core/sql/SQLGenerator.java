@@ -25,7 +25,6 @@ import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.QuestTypeMapper;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
@@ -90,7 +89,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private boolean isSI = false;
 	private SemanticIndexURIMap uriRefIds;
 	
-	private final QuestTypeMapper questTypeMapper = OBDADataFactoryImpl.getInstance().getQuestTypeMapper();
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter) {
@@ -859,7 +857,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	
 
 	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
-		int code;
+		COL_TYPE type;
 
 		if (ht instanceof Function) {
 			Function ov = (Function) ht;
@@ -874,26 +872,26 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			
 			if (function instanceof URITemplatePredicate) {
-                code = questTypeMapper.getQuestCode(COL_TYPE.OBJECT);
+                type = COL_TYPE.OBJECT;
 			} 
 			else if (function instanceof BNodePredicate) {
-                code = questTypeMapper.getQuestCode(COL_TYPE.BNODE);
+                type = COL_TYPE.BNODE;
 			}
 			else {
 				String functionString = function.toString();
-				Predicate.COL_TYPE type = dtfac.getDataType(functionString);
-				code = questTypeMapper.getQuestCode(type);
+				type = dtfac.getDataType(functionString);
 			}
 		} 
 		else if (ht instanceof URIConstant) {
-            code = questTypeMapper.getQuestCode(COL_TYPE.OBJECT);
+            type = COL_TYPE.OBJECT;
 		} 
-		else if (ht == OBDAVocabulary.NULL) {  // instance of ValueConstant
-            code = questTypeMapper.getQuestCode(COL_TYPE.NULL);
+		else if (ht == OBDAVocabulary.NULL) {  // NULL is an instance of ValueConstant
+            type = COL_TYPE.NULL;
 		}
 		else
 			throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
 		
+		int code = type.getQuestCode();
 		return String.format(typeStrForSELECT, code, signature.get(hpos));
 	}
 

@@ -2750,14 +2750,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		StringBuilder sql = new StringBuilder();
 		switch (type2) {
 		case OBJECT:
-			sql.append(select_mapping_role);
-			break;
 		case BNODE:
 			sql.append(select_mapping_role);
 			break;
 		case LITERAL:
-			sql.append(select_mapping_attribute_literal);
-			break;
 		case LITERAL_LANG:
 			sql.append(select_mapping_attribute_literal);
 			break;
