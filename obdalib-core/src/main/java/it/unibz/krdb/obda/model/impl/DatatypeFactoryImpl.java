@@ -37,24 +37,24 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	private final List<Predicate> predicateList = new LinkedList<Predicate>();
 	
 	DatatypeFactoryImpl() {
-		RDFS_LITERAL = registerType(RDFS.LITERAL, COL_TYPE.LITERAL); // "http://www.w3.org/2000/01/rdf-schema#Literal"
-		XSD_STRING = registerType(XMLSchema.STRING, COL_TYPE.STRING);  // "http://www.w3.org/2001/XMLSchema#string"
-		XSD_INT = registerType(XMLSchema.INT, COL_TYPE.INT);  // "http://www.w3.org/2001/XMLSchema#int"
-		XSD_POSITIVE_INTEGER = registerType(XMLSchema.POSITIVE_INTEGER, COL_TYPE.POSITIVE_INTEGER); // "http://www.w3.org/2001/XMLSchema#positiveInteger"
-		XSD_NEGATIVE_INTEGER = registerType(XMLSchema.NEGATIVE_INTEGER, COL_TYPE.NEGATIVE_INTEGER); // "http://www.w3.org/2001/XMLSchema#negativeInteger";
-		XSD_NON_POSITIVE_INTEGER = registerType(XMLSchema.NON_POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER); // "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
-		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, COL_TYPE.UNSIGNED_INT);   // "http://www.w3.org/2001/XMLSchema#unsignedInt"
-		XSD_NON_NEGATIVE_INTEGER = registerType(XMLSchema.NON_NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER); //  "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
-		XSD_INTEGER = registerType(XMLSchema.INTEGER, COL_TYPE.INTEGER);  // "http://www.w3.org/2001/XMLSchema#integer";
-		XSD_LONG = registerType(XMLSchema.LONG, COL_TYPE.LONG);  // "http://www.w3.org/2001/XMLSchema#long"
-		XSD_DECIMAL = registerType(XMLSchema.DECIMAL, COL_TYPE.DECIMAL);  // "http://www.w3.org/2001/XMLSchema#decimal"
-		XSD_FLOAT = registerType(XMLSchema.FLOAT, COL_TYPE.FLOAT); // "http://www.w3.org/2001/XMLSchema#float"
-		XSD_DOUBLE = registerType(XMLSchema.DOUBLE, COL_TYPE.DOUBLE);  // "http://www.w3.org/2001/XMLSchema#double"
-		XSD_DATETIME = registerType(XMLSchema.DATETIME, COL_TYPE.DATETIME); // "http://www.w3.org/2001/XMLSchema#dateTime"
-		XSD_BOOLEAN = registerType(XMLSchema.BOOLEAN, COL_TYPE.BOOLEAN);  //  "http://www.w3.org/2001/XMLSchema#boolean"
-		XSD_DATE = registerType(XMLSchema.DATE, COL_TYPE.DATE);  // "http://www.w3.org/2001/XMLSchema#date";
-		XSD_TIME = registerType(XMLSchema.TIME, COL_TYPE.TIME);  // "http://www.w3.org/2001/XMLSchema#time";
-		XSD_YEAR = registerType(XMLSchema.GYEAR, COL_TYPE.YEAR);  // "http://www.w3.org/2001/XMLSchema#gYear";
+		RDFS_LITERAL = registerType(RDFS.LITERAL, COL_TYPE.LITERAL); // 3 "http://www.w3.org/2000/01/rdf-schema#Literal"
+		XSD_INTEGER = registerType(XMLSchema.INTEGER, COL_TYPE.INTEGER);  //  4 "http://www.w3.org/2001/XMLSchema#integer";
+		XSD_DECIMAL = registerType(XMLSchema.DECIMAL, COL_TYPE.DECIMAL);  // 5 "http://www.w3.org/2001/XMLSchema#decimal"
+		XSD_DOUBLE = registerType(XMLSchema.DOUBLE, COL_TYPE.DOUBLE);  // 6 "http://www.w3.org/2001/XMLSchema#double"
+		XSD_STRING = registerType(XMLSchema.STRING, COL_TYPE.STRING);  // 7 "http://www.w3.org/2001/XMLSchema#string"
+		XSD_DATETIME = registerType(XMLSchema.DATETIME, COL_TYPE.DATETIME); // 8 "http://www.w3.org/2001/XMLSchema#dateTime"
+		XSD_BOOLEAN = registerType(XMLSchema.BOOLEAN, COL_TYPE.BOOLEAN);  // 9 "http://www.w3.org/2001/XMLSchema#boolean"
+		XSD_DATE = registerType(XMLSchema.DATE, COL_TYPE.DATE);  // 10 "http://www.w3.org/2001/XMLSchema#date";
+		XSD_TIME = registerType(XMLSchema.TIME, COL_TYPE.TIME);  // 11 "http://www.w3.org/2001/XMLSchema#time";
+		XSD_YEAR = registerType(XMLSchema.GYEAR, COL_TYPE.YEAR);  // 12 "http://www.w3.org/2001/XMLSchema#gYear";
+		XSD_LONG = registerType(XMLSchema.LONG, COL_TYPE.LONG);  // 13 "http://www.w3.org/2001/XMLSchema#long"
+		XSD_FLOAT = registerType(XMLSchema.FLOAT, COL_TYPE.FLOAT); // 14 "http://www.w3.org/2001/XMLSchema#float"
+		XSD_NEGATIVE_INTEGER = registerType(XMLSchema.NEGATIVE_INTEGER, COL_TYPE.NEGATIVE_INTEGER); // 15 "http://www.w3.org/2001/XMLSchema#negativeInteger";
+		XSD_NON_NEGATIVE_INTEGER = registerType(XMLSchema.NON_NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER); // 16 "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
+		XSD_POSITIVE_INTEGER = registerType(XMLSchema.POSITIVE_INTEGER, COL_TYPE.POSITIVE_INTEGER); // 17 "http://www.w3.org/2001/XMLSchema#positiveInteger"
+		XSD_NON_POSITIVE_INTEGER = registerType(XMLSchema.NON_POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
+		XSD_INT = registerType(XMLSchema.INT, COL_TYPE.INT);  // 19 "http://www.w3.org/2001/XMLSchema#int"
+		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, COL_TYPE.UNSIGNED_INT);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
 		
 		// special case
 		// used in ExpressionEvaluator only(?) use proper method there? 

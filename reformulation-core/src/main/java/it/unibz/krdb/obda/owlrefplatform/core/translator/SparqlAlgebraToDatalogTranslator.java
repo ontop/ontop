@@ -129,10 +129,12 @@ public class SparqlAlgebraToDatalogTranslator {
 		uriTemplateMatcher = templateMatcher;
 	}
 	
+	public void setSemanticIndexUriRef(SemanticIndexURIMap uriRef) {
+		this.uriRef = uriRef;
+	}
 	
 
-	protected static org.slf4j.Logger log = LoggerFactory
-			.getLogger(SparqlAlgebraToDatalogTranslator.class);
+	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
 
 	public DatalogProgram translate(ParsedQuery pq, List<String> signature) {
 		TupleExpr te = pq.getTupleExpr();
@@ -829,10 +831,8 @@ public class SparqlAlgebraToDatalogTranslator {
 				// If the object has type LITERAL, check any language
 				// tag!
 				String lang = object.getLanguage();
-				if (lang != null) lang = lang.toLowerCase();
-				Constant languageConstant = null;
 				if (lang != null && !lang.equals("")) {
-					result = ofac.getTypedTerm(constant, lang);
+					result = ofac.getTypedTerm(constant, lang.toLowerCase());
 				} 
 				else {
 					result =  ofac.getTypedTerm(constant, COL_TYPE.LITERAL);
@@ -1301,7 +1301,4 @@ public class SparqlAlgebraToDatalogTranslator {
 //		}
 //	}
 
-	public void setSemanticIndexUriRef(SemanticIndexURIMap uriRef) {
-		this.uriRef = uriRef;
-	}
 }

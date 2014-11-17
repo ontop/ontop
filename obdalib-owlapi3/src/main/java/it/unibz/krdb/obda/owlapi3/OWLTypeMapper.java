@@ -56,6 +56,7 @@ public class OWLTypeMapper {
 		COLTYPEtoOWL.put(type, owlType);  	
 	}
 	
+	// OWLAPI3TranslatorDLLiteA only
 	public static Predicate.COL_TYPE getType(OWLDatatype datatype) throws TranslationException {
 		if (datatype == null) 
 			return COL_TYPE.LITERAL;
@@ -66,6 +67,7 @@ public class OWLTypeMapper {
 		return type;
 	}
 	
+	// OWLAPI3IndividualTranslator only
 	public static OWL2Datatype getOWLType(COL_TYPE type) {
 		return COLTYPEtoOWL.get(type);
 	}	

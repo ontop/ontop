@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -62,7 +61,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -99,51 +97,51 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 /**
  * Metadata tables 
  */
-	public final static String index_table = "IDX";
+	private final static String index_table = "IDX";
 
-	public final static String interval_table = "IDXINTERVAL";
+	private final static String interval_table = "IDXINTERVAL";
 
-	public final static String emptyness_index_table = "NONEMPTYNESSINDEX";
+	private final static String emptyness_index_table = "NONEMPTYNESSINDEX";
 	
-	public final static String uri_id_table = "URIID";
+	private final static String uri_id_table = "URIID";
 
 /**
  *  Data tables
  */
 	
-	public static final String class_table = "QUEST_CLASS_ASSERTION";
+	private static final String class_table = "QUEST_CLASS_ASSERTION";
 
-	public static final String role_table = "QUEST_OBJECT_PROPERTY_ASSERTION";
+	private static final String role_table = "QUEST_OBJECT_PROPERTY_ASSERTION";
 	
-	public static final String attribute_table_literal = "QUEST_DATA_PROPERTY_LITERAL_ASSERTION";
+	private static final String attribute_table_literal = "QUEST_DATA_PROPERTY_LITERAL_ASSERTION";
 
-	public static final String attribute_table_string = "QUEST_DATA_PROPERTY_STRING_ASSERTION";
+	private static final String attribute_table_string = "QUEST_DATA_PROPERTY_STRING_ASSERTION";
 
-	public static final String attribute_table_integer = "QUEST_DATA_PROPERTY_INTEGER_ASSERTION";
+	private static final String attribute_table_integer = "QUEST_DATA_PROPERTY_INTEGER_ASSERTION";
 
-    public static final String attribute_table_int = "QUEST_DATA_PROPERTY_INT_ASSERTION";
+	private static final String attribute_table_int = "QUEST_DATA_PROPERTY_INT_ASSERTION";
 
-    public static final String attribute_table_unsigned_int = "QUEST_DATA_PROPERTY_UNSIGNED_INT_ASSERTION";
+    private static final String attribute_table_unsigned_int = "QUEST_DATA_PROPERTY_UNSIGNED_INT_ASSERTION";
 
-    public static final String attribute_table_negative_integer = "QUEST_DATA_PROPERTY_NEGATIVE_INTEGER_ASSERTION";
+    private static final String attribute_table_negative_integer = "QUEST_DATA_PROPERTY_NEGATIVE_INTEGER_ASSERTION";
 
-    public static final String attribute_table_non_negative_integer = "QUEST_DATA_PROPERTY_NON_NEGATIVE_INTEGER_ASSERTION";
+    private static final String attribute_table_non_negative_integer = "QUEST_DATA_PROPERTY_NON_NEGATIVE_INTEGER_ASSERTION";
 
-    public static final String attribute_table_positive_integer = "QUEST_DATA_PROPERTY_POSITIVE_INTEGER_ASSERTION";
+    private static final String attribute_table_positive_integer = "QUEST_DATA_PROPERTY_POSITIVE_INTEGER_ASSERTION";
 
-    public static final String attribute_table_non_positive_integer = "QUEST_DATA_PROPERTY_NON_POSITIVE_INTEGER_ASSERTION";
+    private static final String attribute_table_non_positive_integer = "QUEST_DATA_PROPERTY_NON_POSITIVE_INTEGER_ASSERTION";
 
-    public static final String attribute_table_long = "QUEST_DATA_PROPERTY_LONG_ASSERTION";
+    private static final String attribute_table_long = "QUEST_DATA_PROPERTY_LONG_ASSERTION";
 
-	public static final String attribute_table_decimal = "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION";
+    private static final String attribute_table_decimal = "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION";
 
-    public static final String attribute_table_float = "QUEST_DATA_PROPERTY_FLOAT_ASSERTION";
+	private static final String attribute_table_float = "QUEST_DATA_PROPERTY_FLOAT_ASSERTION";
 
-	public static final String attribute_table_double = "QUEST_DATA_PROPERTY_DOUBLE_ASSERTION";
+    private static final String attribute_table_double = "QUEST_DATA_PROPERTY_DOUBLE_ASSERTION";
 
-	public static final String attribute_table_datetime = "QUEST_DATA_PROPERTY_DATETIME_ASSERTION";
+	private static final String attribute_table_datetime = "QUEST_DATA_PROPERTY_DATETIME_ASSERTION";
 
-	public static final String attribute_table_boolean = "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION";
+	private static final String attribute_table_boolean = "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION";
 	
 /**
  *  CREATE metadata tables
@@ -182,56 +180,56 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
  *  CREATE data tables
  */
 	
-	public static final String class_table_create = "CREATE TABLE " + class_table + " ( " + "\"URI\" INTEGER NOT NULL, "
+	private static final String class_table_create = "CREATE TABLE " + class_table + " ( " + "\"URI\" INTEGER NOT NULL, "
 			+ "\"IDX\"  SMALLINT NOT NULL, " + " ISBNODE BOOLEAN NOT NULL DEFAULT FALSE " + ")";
 
-	public static final String role_table_create = "CREATE TABLE " + role_table + " ( " + "\"URI1\" INTEGER NOT NULL, "
+	private static final String role_table_create = "CREATE TABLE " + role_table + " ( " + "\"URI1\" INTEGER NOT NULL, "
 			+ "\"URI2\" INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL, " + "ISBNODE BOOLEAN NOT NULL DEFAULT FALSE, "
 			+ "ISBNODE2 BOOLEAN NOT NULL DEFAULT FALSE)";
 
-	public static final String attribute_table_literal_create = "CREATE TABLE " + attribute_table_literal + " ( "
+	private static final String attribute_table_literal_create = "CREATE TABLE " + attribute_table_literal + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL VARCHAR(1000) NOT NULL, " + "LANG VARCHAR(20), " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	public static final String attribute_table_string_create = "CREATE TABLE " + attribute_table_string + " ( "
+	private static final String attribute_table_string_create = "CREATE TABLE " + attribute_table_string + " ( "
 			+ "\"URI\" INTEGER  NOT NULL, " + "VAL VARCHAR(1000), " + "\"IDX\"  SMALLINT  NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	public static final String attribute_table_integer_create = "CREATE TABLE " + attribute_table_integer + " ( "
+	private static final String attribute_table_integer_create = "CREATE TABLE " + attribute_table_integer + " ( "
 			+ "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    public static final String attribute_table_int_create = "CREATE TABLE " + attribute_table_int + " ( "
+	private static final String attribute_table_int_create = "CREATE TABLE " + attribute_table_int + " ( "
             + "\"URI\" INTEGER  NOT NULL, " + "VAL INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    public static final String attribute_table_negative_integer_create = "CREATE TABLE " + attribute_table_negative_integer + " ( "
+    private static final String attribute_table_negative_integer_create = "CREATE TABLE " + attribute_table_negative_integer + " ( "
             + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    public static final String attribute_table_positive_integer_create = "CREATE TABLE " + attribute_table_positive_integer + " ( "
+    private static final String attribute_table_positive_integer_create = "CREATE TABLE " + attribute_table_positive_integer + " ( "
             + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    public static final String attribute_table_unsigned_int_create = "CREATE TABLE " + attribute_table_unsigned_int + " ( "
+    private static final String attribute_table_unsigned_int_create = "CREATE TABLE " + attribute_table_unsigned_int + " ( "
             + "\"URI\" INTEGER  NOT NULL, " + "VAL INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    public static final String attribute_table_non_positive_integer_create = "CREATE TABLE " + attribute_table_non_positive_integer + " ( "
+    private static final String attribute_table_non_positive_integer_create = "CREATE TABLE " + attribute_table_non_positive_integer + " ( "
             + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    public static final String attribute_table_non_negative_integer_create = "CREATE TABLE " + attribute_table_non_negative_integer + " ( "
+    private static final String attribute_table_non_negative_integer_create = "CREATE TABLE " + attribute_table_non_negative_integer + " ( "
             + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    public static final String attribute_table_long_create = "CREATE TABLE " + attribute_table_long + " ( "
+    private static final String attribute_table_long_create = "CREATE TABLE " + attribute_table_long + " ( "
             + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	public static final String attribute_table_decimal_create = "CREATE TABLE " + attribute_table_decimal + " ( "
+    private static final String attribute_table_decimal_create = "CREATE TABLE " + attribute_table_decimal + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL DECIMAL NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	public static final String attribute_table_double_create = "CREATE TABLE " + attribute_table_double + " ( "
+	private static final String attribute_table_double_create = "CREATE TABLE " + attribute_table_double + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL DOUBLE PRECISION NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    public static final String attribute_table_float_create = "CREATE TABLE " + attribute_table_float + " ( "
+	private static final String attribute_table_float_create = "CREATE TABLE " + attribute_table_float + " ( "
             + "\"URI\" INTEGER NOT NULL, " + "VAL DOUBLE PRECISION NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	public static final String attribute_table_datetime_create = "CREATE TABLE " + attribute_table_datetime + " ( "
+    private static final String attribute_table_datetime_create = "CREATE TABLE " + attribute_table_datetime + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL TIMESTAMP NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	public static final String attribute_table_boolean_create = "CREATE TABLE " + attribute_table_boolean + " ( "
+	private static final String attribute_table_boolean_create = "CREATE TABLE " + attribute_table_boolean + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL BOOLEAN NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 
@@ -239,252 +237,252 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
  *  DROP data tables	
  */
 	
-	public static final String class_table_drop = "DROP TABLE " + class_table;
-	public static final String role_table_drop = "DROP TABLE " + role_table;
+	private static final String class_table_drop = "DROP TABLE " + class_table;
+	private static final String role_table_drop = "DROP TABLE " + role_table;
 
-	public static final String attribute_table_literal_drop = "DROP TABLE " + attribute_table_literal;
-	public static final String attribute_table_string_drop = "DROP TABLE " + attribute_table_string;
-	public static final String attribute_table_integer_drop = "DROP TABLE " + attribute_table_integer;
-    public static final String attribute_table_int_drop = "DROP TABLE " + attribute_table_int;
-    public static final String attribute_table_negative_integer_drop = "DROP TABLE " + attribute_table_negative_integer;
-    public static final String attribute_table_non_negative_integer_drop = "DROP TABLE " + attribute_table_non_negative_integer;
-    public static final String attribute_table_positive_integer_drop = "DROP TABLE " + attribute_table_positive_integer;
-    public static final String attribute_table_non_positive_integer_drop = "DROP TABLE " + attribute_table_non_positive_integer;
-    public static final String attribute_table_unsigned_int_drop = "DROP TABLE " + attribute_table_unsigned_int;
-    public static final String attribute_table_float_drop = "DROP TABLE " + attribute_table_float;
-    public static final String attribute_table_long_drop = "DROP TABLE " + attribute_table_long;
-	public static final String attribute_table_decimal_drop = "DROP TABLE " + attribute_table_decimal;
-	public static final String attribute_table_double_drop = "DROP TABLE " + attribute_table_double;
-	public static final String attribute_table_datetime_drop = "DROP TABLE " + attribute_table_datetime;
-	public static final String attribute_table_boolean_drop = "DROP TABLE " + attribute_table_boolean;
+	private static final String attribute_table_literal_drop = "DROP TABLE " + attribute_table_literal;
+	private static final String attribute_table_string_drop = "DROP TABLE " + attribute_table_string;
+	private static final String attribute_table_integer_drop = "DROP TABLE " + attribute_table_integer;
+	private static final String attribute_table_int_drop = "DROP TABLE " + attribute_table_int;
+    private static final String attribute_table_negative_integer_drop = "DROP TABLE " + attribute_table_negative_integer;
+    private static final String attribute_table_non_negative_integer_drop = "DROP TABLE " + attribute_table_non_negative_integer;
+    private static final String attribute_table_positive_integer_drop = "DROP TABLE " + attribute_table_positive_integer;
+    private static final String attribute_table_non_positive_integer_drop = "DROP TABLE " + attribute_table_non_positive_integer;
+    private static final String attribute_table_unsigned_int_drop = "DROP TABLE " + attribute_table_unsigned_int;
+    private static final String attribute_table_float_drop = "DROP TABLE " + attribute_table_float;
+    private static final String attribute_table_long_drop = "DROP TABLE " + attribute_table_long;
+    private static final String attribute_table_decimal_drop = "DROP TABLE " + attribute_table_decimal;
+	private static final String attribute_table_double_drop = "DROP TABLE " + attribute_table_double;
+	private static final String attribute_table_datetime_drop = "DROP TABLE " + attribute_table_datetime;
+	private static final String attribute_table_boolean_drop = "DROP TABLE " + attribute_table_boolean;
 
 /**
  *  INSERT data 	
  */
 	
-	public static final String class_insert = "INSERT INTO " + class_table + " (URI, IDX, ISBNODE) VALUES (?, ?, ?)";
-	public static final String role_insert = "INSERT INTO " + role_table + " (URI1, URI2, IDX, ISBNODE, ISBNODE2) VALUES (?, ?, ?, ?, ?)";
+	private static final String class_insert = "INSERT INTO " + class_table + " (URI, IDX, ISBNODE) VALUES (?, ?, ?)";
+	private static final String role_insert = "INSERT INTO " + role_table + " (URI1, URI2, IDX, ISBNODE, ISBNODE2) VALUES (?, ?, ?, ?, ?)";
 
-	public static final String attribute_table_literal_insert = "INSERT INTO " + attribute_table_literal
+	private static final String attribute_table_literal_insert = "INSERT INTO " + attribute_table_literal
 			+ " (URI, VAL, LANG, IDX, ISBNODE) VALUES (?, ?, ?, ?, ?)";
-	public static final String attribute_table_string_insert = "INSERT INTO " + attribute_table_string
+	private static final String attribute_table_string_insert = "INSERT INTO " + attribute_table_string
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-	public static final String attribute_table_integer_insert = "INSERT INTO " + attribute_table_integer
+	private static final String attribute_table_integer_insert = "INSERT INTO " + attribute_table_integer
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    public static final String attribute_table_int_insert = "INSERT INTO " + attribute_table_int
+	private static final String attribute_table_int_insert = "INSERT INTO " + attribute_table_int
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    public static final String attribute_table_unsigned_int_insert = "INSERT INTO " + attribute_table_unsigned_int
+    private static final String attribute_table_unsigned_int_insert = "INSERT INTO " + attribute_table_unsigned_int
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    public static final String attribute_table_negative_integer_insert = "INSERT INTO " + attribute_table_negative_integer
+    private static final String attribute_table_negative_integer_insert = "INSERT INTO " + attribute_table_negative_integer
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    public static final String attribute_table_positive_integer_insert = "INSERT INTO " + attribute_table_positive_integer
+    private static final String attribute_table_positive_integer_insert = "INSERT INTO " + attribute_table_positive_integer
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    public static final String attribute_table_non_negative_integer_insert = "INSERT INTO " + attribute_table_non_negative_integer
+    private static final String attribute_table_non_negative_integer_insert = "INSERT INTO " + attribute_table_non_negative_integer
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    public static final String attribute_table_non_positive_integer_insert = "INSERT INTO " + attribute_table_non_positive_integer
+    private static final String attribute_table_non_positive_integer_insert = "INSERT INTO " + attribute_table_non_positive_integer
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    public static final String attribute_table_float_insert = "INSERT INTO " + attribute_table_float
+    private static final String attribute_table_float_insert = "INSERT INTO " + attribute_table_float
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    public static final String attribute_table_long_insert = "INSERT INTO " + attribute_table_long
+    private static final String attribute_table_long_insert = "INSERT INTO " + attribute_table_long
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-	public static final String attribute_table_decimal_insert = "INSERT INTO " + attribute_table_decimal
+    private static final String attribute_table_decimal_insert = "INSERT INTO " + attribute_table_decimal
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-	public static final String attribute_table_double_insert = "INSERT INTO " + attribute_table_double
+	private static final String attribute_table_double_insert = "INSERT INTO " + attribute_table_double
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-	public static final String attribute_table_datetime_insert = "INSERT INTO " + attribute_table_datetime
+	private static final String attribute_table_datetime_insert = "INSERT INTO " + attribute_table_datetime
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-	public static final String attribute_table_boolean_insert = "INSERT INTO " + attribute_table_boolean
+	private static final String attribute_table_boolean_insert = "INSERT INTO " + attribute_table_boolean
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
 
 /**
  *  Indexes
  */
 	
-	public static final String indexclass_composite = "CREATE INDEX idxclassfull ON " + class_table + " (URI, IDX, ISBNODE)";
-	public static final String indexrole_composite1 = "CREATE INDEX idxrolefull1 ON " + role_table + " (URI1, URI2, IDX, ISBNODE, ISBNODE2)";
-	public static final String indexrole_composite2 = "CREATE INDEX idxrolefull2 ON " + role_table + " (URI2, URI1, IDX, ISBNODE2, ISBNODE)";
+	private static final String indexclass_composite = "CREATE INDEX idxclassfull ON " + class_table + " (URI, IDX, ISBNODE)";
+	private static final String indexrole_composite1 = "CREATE INDEX idxrolefull1 ON " + role_table + " (URI1, URI2, IDX, ISBNODE, ISBNODE2)";
+	private static final String indexrole_composite2 = "CREATE INDEX idxrolefull2 ON " + role_table + " (URI2, URI1, IDX, ISBNODE2, ISBNODE)";
 
 
-	public static final String indexclass1 = "CREATE INDEX idxclass1 ON " + class_table + " (URI)";
-	public static final String indexclass2 = "CREATE INDEX idxclass2 ON " + class_table + " (IDX)";
-	public static final String indexclassfull2 = "CREATE INDEX idxclassfull2 ON " + class_table + " (URI, IDX)";
+	private static final String indexclass1 = "CREATE INDEX idxclass1 ON " + class_table + " (URI)";
+	private static final String indexclass2 = "CREATE INDEX idxclass2 ON " + class_table + " (IDX)";
+	private static final String indexclassfull2 = "CREATE INDEX idxclassfull2 ON " + class_table + " (URI, IDX)";
 
-	public static final String indexrole1 = "CREATE INDEX idxrole1 ON " + role_table + " (URI1)";
-	public static final String indexrole2 = "CREATE INDEX idxrole2 ON " + role_table + " (IDX)";
-	public static final String indexrole3 = "CREATE INDEX idxrole3 ON " + role_table + " (URI2)";
-	public static final String indexrolefull22 = "CREATE INDEX idxrolefull22 ON " + role_table + " (URI1, URI2, IDX)";
+	private static final String indexrole1 = "CREATE INDEX idxrole1 ON " + role_table + " (URI1)";
+	private static final String indexrole2 = "CREATE INDEX idxrole2 ON " + role_table + " (IDX)";
+	private static final String indexrole3 = "CREATE INDEX idxrole3 ON " + role_table + " (URI2)";
+	private static final String indexrolefull22 = "CREATE INDEX idxrolefull22 ON " + role_table + " (URI1, URI2, IDX)";
 
-	public static final String attribute_literal_index = "IDX_LITERAL_ATTRIBUTE";
-	public static final String attribute_string_index = "IDX_STRING_ATTRIBUTE";
-	public static final String attribute_integer_index = "IDX_INTEGER_ATTRIBUTE";
-    public static final String attribute_int_index = "XSD_INT_ATTRIBUTE";
-    public static final String attribute_unsigned_int_index = "XSD_UNSIGNED_INT_ATTRIBUTE";
-    public static final String attribute_negative_integer_index = "XSD_NEGATIVE_INTEGER_ATTRIBUTE";
-    public static final String attribute_non_negative_integer_index = "XSD_NON_NEGATIVE_INTEGER_ATTRIBUTE";
-    public static final String attribute_positive_integer_index = "XSD_POSITIVE_INTEGER_ATTRIBUTE";
-    public static final String attribute_non_positive_integer_index = "XSD_NON_POSITIVE_INTEGER_ATTRIBUTE";
-    public static final String attribute_float_index = "XSD_FLOAT_ATTRIBUTE";
-    public static final String attribute_long_index = "IDX_LONG_ATTRIBUTE";
-	public static final String attribute_decimal_index = "IDX_DECIMAL_ATTRIBUTE";
-	public static final String attribute_double_index = "IDX_DOUBLE_ATTRIBUTE";
-	public static final String attribute_datetime_index = "IDX_DATETIME_ATTRIBUTE";
-	public static final String attribute_boolean_index = "IDX_BOOLEAN_ATTRIBUTE";
+	private static final String attribute_literal_index = "IDX_LITERAL_ATTRIBUTE";
+	private static final String attribute_string_index = "IDX_STRING_ATTRIBUTE";
+	private static final String attribute_integer_index = "IDX_INTEGER_ATTRIBUTE";
+	private static final String attribute_int_index = "XSD_INT_ATTRIBUTE";
+    private static final String attribute_unsigned_int_index = "XSD_UNSIGNED_INT_ATTRIBUTE";
+    private static final String attribute_negative_integer_index = "XSD_NEGATIVE_INTEGER_ATTRIBUTE";
+    private static final String attribute_non_negative_integer_index = "XSD_NON_NEGATIVE_INTEGER_ATTRIBUTE";
+    private static final String attribute_positive_integer_index = "XSD_POSITIVE_INTEGER_ATTRIBUTE";
+    private static final String attribute_non_positive_integer_index = "XSD_NON_POSITIVE_INTEGER_ATTRIBUTE";
+    private static final String attribute_float_index = "XSD_FLOAT_ATTRIBUTE";
+    private static final String attribute_long_index = "IDX_LONG_ATTRIBUTE";
+    private static final String attribute_decimal_index = "IDX_DECIMAL_ATTRIBUTE";
+	private static final String attribute_double_index = "IDX_DOUBLE_ATTRIBUTE";
+	private static final String attribute_datetime_index = "IDX_DATETIME_ATTRIBUTE";
+	private static final String attribute_boolean_index = "IDX_BOOLEAN_ATTRIBUTE";
 
-	public static final String indexattribute_literal1 = "CREATE INDEX " + attribute_literal_index + "1" + " ON " + attribute_table_literal
+	private static final String indexattribute_literal1 = "CREATE INDEX " + attribute_literal_index + "1" + " ON " + attribute_table_literal
 			+ " (URI)";
-	public static final String indexattribute_string1 = "CREATE INDEX " + attribute_string_index + "1" + " ON " + attribute_table_string
+	private static final String indexattribute_string1 = "CREATE INDEX " + attribute_string_index + "1" + " ON " + attribute_table_string
 			+ " (URI)";
-	public static final String indexattribute_integer1 = "CREATE INDEX " + attribute_integer_index + "1" + " ON " + attribute_table_integer
+	private static final String indexattribute_integer1 = "CREATE INDEX " + attribute_integer_index + "1" + " ON " + attribute_table_integer
 			+ " (URI)";
-    public static final String indexattribute_int1 = "CREATE INDEX " + attribute_int_index + "1" + " ON " + attribute_table_int
+	private static final String indexattribute_int1 = "CREATE INDEX " + attribute_int_index + "1" + " ON " + attribute_table_int
             + " (URI)";
-    public static final String indexattribute_unsigned_int1 = "CREATE INDEX " + attribute_unsigned_int_index + "1" + " ON " + attribute_table_unsigned_int
+    private static final String indexattribute_unsigned_int1 = "CREATE INDEX " + attribute_unsigned_int_index + "1" + " ON " + attribute_table_unsigned_int
             + " (URI)";
-    public static final String indexattribute_negative_integer1 = "CREATE INDEX " + attribute_negative_integer_index + "1" + " ON " + attribute_table_negative_integer
+    private static final String indexattribute_negative_integer1 = "CREATE INDEX " + attribute_negative_integer_index + "1" + " ON " + attribute_table_negative_integer
             + " (URI)";
-    public static final String indexattribute_non_negative_integer1 = "CREATE INDEX " + attribute_non_negative_integer_index + "1" + " ON " + attribute_table_non_negative_integer
+    private static final String indexattribute_non_negative_integer1 = "CREATE INDEX " + attribute_non_negative_integer_index + "1" + " ON " + attribute_table_non_negative_integer
             + " (URI)";
-    public static final String indexattribute_positive_integer1 = "CREATE INDEX " + attribute_positive_integer_index + "1" + " ON " + attribute_table_positive_integer
+    private static final String indexattribute_positive_integer1 = "CREATE INDEX " + attribute_positive_integer_index + "1" + " ON " + attribute_table_positive_integer
             + " (URI)";
-    public static final String indexattribute_non_positive_integer1 = "CREATE INDEX " + attribute_non_positive_integer_index + "1" + " ON " + attribute_table_non_positive_integer
+    private static final String indexattribute_non_positive_integer1 = "CREATE INDEX " + attribute_non_positive_integer_index + "1" + " ON " + attribute_table_non_positive_integer
             + " (URI)";
-    public static final String indexattribute_float1 = "CREATE INDEX " + attribute_float_index + "1" + " ON " + attribute_table_float
+    private static final String indexattribute_float1 = "CREATE INDEX " + attribute_float_index + "1" + " ON " + attribute_table_float
             + " (URI)";
-    public static final String indexattribute_long1 = "CREATE INDEX " + attribute_long_index + "1" + " ON " + attribute_table_long
+    private static final String indexattribute_long1 = "CREATE INDEX " + attribute_long_index + "1" + " ON " + attribute_table_long
             + " (URI)";
-	public static final String indexattribute_decimal1 = "CREATE INDEX " + attribute_decimal_index + "1" + " ON " + attribute_table_decimal
+    private static final String indexattribute_decimal1 = "CREATE INDEX " + attribute_decimal_index + "1" + " ON " + attribute_table_decimal
 			+ " (URI)";
-	public static final String indexattribute_double1 = "CREATE INDEX " + attribute_double_index + "1" + " ON " + attribute_table_double
+	private static final String indexattribute_double1 = "CREATE INDEX " + attribute_double_index + "1" + " ON " + attribute_table_double
 			+ " (URI)";
-	public static final String indexattribute_datetime1 = "CREATE INDEX " + attribute_datetime_index + "1" + " ON "
+	private static final String indexattribute_datetime1 = "CREATE INDEX " + attribute_datetime_index + "1" + " ON "
 			+ attribute_table_datetime + " (URI)";
-	public static final String indexattribute_boolean1 = "CREATE INDEX " + attribute_boolean_index + "1" + " ON " + attribute_table_boolean
+	private static final String indexattribute_boolean1 = "CREATE INDEX " + attribute_boolean_index + "1" + " ON " + attribute_table_boolean
 			+ " (URI)";
 
-	public static final String indexattribute_literal2 = "CREATE INDEX " + attribute_literal_index + "2" + " ON " + attribute_table_literal
+	private static final String indexattribute_literal2 = "CREATE INDEX " + attribute_literal_index + "2" + " ON " + attribute_table_literal
 			+ " (IDX)";
-	public static final String indexattribute_string2 = "CREATE INDEX " + attribute_string_index + "2" + " ON " + attribute_table_string
+	private static final String indexattribute_string2 = "CREATE INDEX " + attribute_string_index + "2" + " ON " + attribute_table_string
 			+ " (IDX)";
-	public static final String indexattribute_integer2 = "CREATE INDEX " + attribute_integer_index + "2" + " ON " + attribute_table_integer
+	private static final String indexattribute_integer2 = "CREATE INDEX " + attribute_integer_index + "2" + " ON " + attribute_table_integer
 			+ " (IDX)";
-    public static final String indexattribute_int2 = "CREATE INDEX " + attribute_int_index + "2" + " ON " + attribute_table_int
+	private static final String indexattribute_int2 = "CREATE INDEX " + attribute_int_index + "2" + " ON " + attribute_table_int
             + " (URI)";
-    public static final String indexattribute_unsigned_int2 = "CREATE INDEX " + attribute_unsigned_int_index + "2" + " ON " + attribute_table_unsigned_int
+    private static final String indexattribute_unsigned_int2 = "CREATE INDEX " + attribute_unsigned_int_index + "2" + " ON " + attribute_table_unsigned_int
             + " (URI)";
-    public static final String indexattribute_negative_integer2 = "CREATE INDEX " + attribute_negative_integer_index + "2" + " ON " + attribute_table_negative_integer
+    private static final String indexattribute_negative_integer2 = "CREATE INDEX " + attribute_negative_integer_index + "2" + " ON " + attribute_table_negative_integer
             + " (URI)";
-    public static final String indexattribute_non_negative_integer2 = "CREATE INDEX " + attribute_non_negative_integer_index + "2" + " ON " + attribute_table_non_negative_integer
+    private static final String indexattribute_non_negative_integer2 = "CREATE INDEX " + attribute_non_negative_integer_index + "2" + " ON " + attribute_table_non_negative_integer
             + " (URI)";
-    public static final String indexattribute_positive_integer2 = "CREATE INDEX " + attribute_positive_integer_index + "2" + " ON " + attribute_table_positive_integer
+    private static final String indexattribute_positive_integer2 = "CREATE INDEX " + attribute_positive_integer_index + "2" + " ON " + attribute_table_positive_integer
             + " (URI)";
-    public static final String indexattribute_non_positive_integer2 = "CREATE INDEX " + attribute_non_positive_integer_index + "2" + " ON " + attribute_table_non_positive_integer
+    private static final String indexattribute_non_positive_integer2 = "CREATE INDEX " + attribute_non_positive_integer_index + "2" + " ON " + attribute_table_non_positive_integer
             + " (URI)";
-    public static final String indexattribute_float2 = "CREATE INDEX " + attribute_float_index + "2" + " ON " + attribute_table_float
+    private static final String indexattribute_float2 = "CREATE INDEX " + attribute_float_index + "2" + " ON " + attribute_table_float
             + " (URI)";
-    public static final String indexattribute_long2 = "CREATE INDEX " + attribute_long_index + "2" + " ON " + attribute_table_long
+    private static final String indexattribute_long2 = "CREATE INDEX " + attribute_long_index + "2" + " ON " + attribute_table_long
             + " (IDX)";
-	public static final String indexattribute_decimal2 = "CREATE INDEX " + attribute_decimal_index + "2" + " ON " + attribute_table_decimal
+    private static final String indexattribute_decimal2 = "CREATE INDEX " + attribute_decimal_index + "2" + " ON " + attribute_table_decimal
 			+ " (IDX)";
-	public static final String indexattribute_double2 = "CREATE INDEX " + attribute_double_index + "2" + " ON " + attribute_table_double
+	private static final String indexattribute_double2 = "CREATE INDEX " + attribute_double_index + "2" + " ON " + attribute_table_double
 			+ " (IDX)";
-	public static final String indexattribute_datetime2 = "CREATE INDEX " + attribute_datetime_index + "2" + " ON "
+	private static final String indexattribute_datetime2 = "CREATE INDEX " + attribute_datetime_index + "2" + " ON "
 			+ attribute_table_datetime + " (IDX)";
-	public static final String indexattribute_boolean2 = "CREATE INDEX " + attribute_boolean_index + "2" + " ON " + attribute_table_boolean
+	private static final String indexattribute_boolean2 = "CREATE INDEX " + attribute_boolean_index + "2" + " ON " + attribute_table_boolean
 			+ " (IDX)";
 
-	public static final String indexattribute_literal3 = "CREATE INDEX " + attribute_literal_index + "3" + " ON " + attribute_table_literal
+	private static final String indexattribute_literal3 = "CREATE INDEX " + attribute_literal_index + "3" + " ON " + attribute_table_literal
 			+ " (VAL)";
-	public static final String indexattribute_string3 = "CREATE INDEX " + attribute_string_index + "3" + " ON " + attribute_table_string
+	private static final String indexattribute_string3 = "CREATE INDEX " + attribute_string_index + "3" + " ON " + attribute_table_string
 			+ " (VAL)";
-	public static final String indexattribute_integer3 = "CREATE INDEX " + attribute_integer_index + "3" + " ON " + attribute_table_integer
+	private static final String indexattribute_integer3 = "CREATE INDEX " + attribute_integer_index + "3" + " ON " + attribute_table_integer
 			+ " (VAL)";
-    public static final String indexattribute_int3 = "CREATE INDEX " + attribute_int_index + "3" + " ON " + attribute_table_int
+	private static final String indexattribute_int3 = "CREATE INDEX " + attribute_int_index + "3" + " ON " + attribute_table_int
             + " (URI)";
-    public static final String indexattribute_unsigned_int3 = "CREATE INDEX " + attribute_unsigned_int_index + "3" + " ON " + attribute_table_unsigned_int
+    private static final String indexattribute_unsigned_int3 = "CREATE INDEX " + attribute_unsigned_int_index + "3" + " ON " + attribute_table_unsigned_int
             + " (URI)";
-    public static final String indexattribute_negative_integer3 = "CREATE INDEX " + attribute_negative_integer_index + "3" + " ON " + attribute_table_negative_integer
+    private static final String indexattribute_negative_integer3 = "CREATE INDEX " + attribute_negative_integer_index + "3" + " ON " + attribute_table_negative_integer
             + " (URI)";
-    public static final String indexattribute_non_negative_integer3 = "CREATE INDEX " + attribute_non_negative_integer_index + "3" + " ON " + attribute_table_non_negative_integer
+    private static final String indexattribute_non_negative_integer3 = "CREATE INDEX " + attribute_non_negative_integer_index + "3" + " ON " + attribute_table_non_negative_integer
             + " (URI)";
-    public static final String indexattribute_positive_integer3 = "CREATE INDEX " + attribute_positive_integer_index + "3" + " ON " + attribute_table_positive_integer
+    private static final String indexattribute_positive_integer3 = "CREATE INDEX " + attribute_positive_integer_index + "3" + " ON " + attribute_table_positive_integer
             + " (URI)";
-    public static final String indexattribute_non_positive_integer3 = "CREATE INDEX " + attribute_non_positive_integer_index + "3" + " ON " + attribute_table_non_positive_integer
+    private static final String indexattribute_non_positive_integer3 = "CREATE INDEX " + attribute_non_positive_integer_index + "3" + " ON " + attribute_table_non_positive_integer
             + " (URI)";
-    public static final String indexattribute_float3 = "CREATE INDEX " + attribute_float_index + "3" + " ON " + attribute_table_float
+    private static final String indexattribute_float3 = "CREATE INDEX " + attribute_float_index + "3" + " ON " + attribute_table_float
             + " (URI)";
-    public static final String indexattribute_long3 = "CREATE INDEX " + attribute_long_index + "3" + " ON " + attribute_table_long
+    private static final String indexattribute_long3 = "CREATE INDEX " + attribute_long_index + "3" + " ON " + attribute_table_long
             + " (VAL)";
-	public static final String indexattribute_decimal3 = "CREATE INDEX " + attribute_decimal_index + "3" + " ON " + attribute_table_decimal
+    private static final String indexattribute_decimal3 = "CREATE INDEX " + attribute_decimal_index + "3" + " ON " + attribute_table_decimal
 			+ " (VAL)";
-	public static final String indexattribute_double3 = "CREATE INDEX " + attribute_double_index + "3" + " ON " + attribute_table_double
+	private static final String indexattribute_double3 = "CREATE INDEX " + attribute_double_index + "3" + " ON " + attribute_table_double
 			+ " (VAL)";
-	public static final String indexattribute_datetime3 = "CREATE INDEX " + attribute_datetime_index + "3" + " ON "
+	private static final String indexattribute_datetime3 = "CREATE INDEX " + attribute_datetime_index + "3" + " ON "
 			+ attribute_table_datetime + " (VAL)";
-	public static final String indexattribute_boolean3 = "CREATE INDEX " + attribute_boolean_index + "3" + " ON " + attribute_table_boolean
+	private static final String indexattribute_boolean3 = "CREATE INDEX " + attribute_boolean_index + "3" + " ON " + attribute_table_boolean
 			+ " (VAL)";
 
 /**
  *  DROP indexes	
  */
 	
-	public static final String dropindexclass1 = "DROP INDEX \"idxclass1\"";
-	public static final String dropindexclass2 = "DROP INDEX \"idxclass2\"";
+	private static final String dropindexclass1 = "DROP INDEX \"idxclass1\"";
+	private static final String dropindexclass2 = "DROP INDEX \"idxclass2\"";
 
-	public static final String dropindexrole1 = "DROP INDEX \"idxrole1\"";
-	public static final String dropindexrole2 = "DROP INDEX \"idxrole2\"";
-	public static final String dropindexrole3 = "DROP INDEX \"idxrole3\"";
+	private static final String dropindexrole1 = "DROP INDEX \"idxrole1\"";
+	private static final String dropindexrole2 = "DROP INDEX \"idxrole2\"";
+	private static final String dropindexrole3 = "DROP INDEX \"idxrole3\"";
 
-	public static final String dropindexattribute_literal1 = "DROP INDEX " + attribute_literal_index + "1";
-	public static final String dropindexattribute_string1 = "DROP INDEX " + attribute_string_index + "1";
-	public static final String dropindexattribute_integer1 = "DROP INDEX " + attribute_integer_index + "1";
-    public static final String dropindexattribute_int1 = "DROP INDEX " + attribute_int_index + "1";
-    public static final String dropindexattribute_negative_integer1 = "DROP INDEX " + attribute_negative_integer_index + "1";
-    public static final String dropindexattribute_positive_integer1 = "DROP INDEX " + attribute_positive_integer_index + "1";
-    public static final String dropindexattribute_non_positive_integer1 = "DROP INDEX " + attribute_positive_integer_index + "1";
-    public static final String dropindexattribute_non_negative_integer1 = "DROP INDEX " + attribute_non_negative_integer_index + "1";
-    public static final String dropindexattribute_unsigned_int1 = "DROP INDEX " + attribute_unsigned_int_index + "1";
-    public static final String dropindexattribute_float1 = "DROP INDEX " + attribute_float_index + "1";
-    public static final String dropindexattribute_long1 = "DROP INDEX " + attribute_long_index + "1";
-	public static final String dropindexattribute_decimal1 = "DROP INDEX " + attribute_decimal_index + "1";
-	public static final String dropindexattribute_double1 = "DROP INDEX " + attribute_double_index + "1";
-	public static final String dropindexattribute_datetime1 = "DROP INDEX " + attribute_datetime_index + "1";
-	public static final String dropindexattribute_boolean1 = "DROP INDEX " + attribute_boolean_index + "1";
+	private static final String dropindexattribute_literal1 = "DROP INDEX " + attribute_literal_index + "1";
+	private static final String dropindexattribute_string1 = "DROP INDEX " + attribute_string_index + "1";
+	private static final String dropindexattribute_integer1 = "DROP INDEX " + attribute_integer_index + "1";
+	private static final String dropindexattribute_int1 = "DROP INDEX " + attribute_int_index + "1";
+    private static final String dropindexattribute_negative_integer1 = "DROP INDEX " + attribute_negative_integer_index + "1";
+    private static final String dropindexattribute_positive_integer1 = "DROP INDEX " + attribute_positive_integer_index + "1";
+    private static final String dropindexattribute_non_positive_integer1 = "DROP INDEX " + attribute_positive_integer_index + "1";
+    private static final String dropindexattribute_non_negative_integer1 = "DROP INDEX " + attribute_non_negative_integer_index + "1";
+    private static final String dropindexattribute_unsigned_int1 = "DROP INDEX " + attribute_unsigned_int_index + "1";
+    private static final String dropindexattribute_float1 = "DROP INDEX " + attribute_float_index + "1";
+    private static final String dropindexattribute_long1 = "DROP INDEX " + attribute_long_index + "1";
+    private static final String dropindexattribute_decimal1 = "DROP INDEX " + attribute_decimal_index + "1";
+	private static final String dropindexattribute_double1 = "DROP INDEX " + attribute_double_index + "1";
+	private static final String dropindexattribute_datetime1 = "DROP INDEX " + attribute_datetime_index + "1";
+	private static final String dropindexattribute_boolean1 = "DROP INDEX " + attribute_boolean_index + "1";
 
-	public static final String dropindexattribute_literal2 = "DROP INDEX " + attribute_literal_index + "2";
-	public static final String dropindexattribute_string2 = "DROP INDEX " + attribute_string_index + "2";
-	public static final String dropindexattribute_integer2 = "DROP INDEX " + attribute_integer_index + "2";
-    public static final String dropindexattribute_int2 = "DROP INDEX " + attribute_int_index + "2";
-    public static final String dropindexattribute_negative_integer2 = "DROP INDEX " + attribute_negative_integer_index + "2";
-    public static final String dropindexattribute_positive_integer2 = "DROP INDEX " + attribute_positive_integer_index + "2";
-    public static final String dropindexattribute_non_positive_integer2 = "DROP INDEX " + attribute_positive_integer_index + "2";
-    public static final String dropindexattribute_non_negative_integer2 = "DROP INDEX " + attribute_non_negative_integer_index + "2";
-    public static final String dropindexattribute_unsigned_int2 = "DROP INDEX " + attribute_unsigned_int_index + "2";
-    public static final String dropindexattribute_float2 = "DROP INDEX " + attribute_float_index + "2";
-    public static final String dropindexattribute_long2 = "DROP INDEX " + attribute_long_index + "2";
-	public static final String dropindexattribute_decimal2 = "DROP INDEX " + attribute_decimal_index + "2";
-	public static final String dropindexattribute_double2 = "DROP INDEX " + attribute_double_index + "2";
-	public static final String dropindexattribute_datetime2 = "DROP INDEX " + attribute_datetime_index + "2";
-	public static final String dropindexattribute_boolean2 = "DROP INDEX " + attribute_boolean_index + "2";
+	private static final String dropindexattribute_literal2 = "DROP INDEX " + attribute_literal_index + "2";
+	private static final String dropindexattribute_string2 = "DROP INDEX " + attribute_string_index + "2";
+	private static final String dropindexattribute_integer2 = "DROP INDEX " + attribute_integer_index + "2";
+	private static final String dropindexattribute_int2 = "DROP INDEX " + attribute_int_index + "2";
+    private static final String dropindexattribute_negative_integer2 = "DROP INDEX " + attribute_negative_integer_index + "2";
+    private static final String dropindexattribute_positive_integer2 = "DROP INDEX " + attribute_positive_integer_index + "2";
+    private static final String dropindexattribute_non_positive_integer2 = "DROP INDEX " + attribute_positive_integer_index + "2";
+    private static final String dropindexattribute_non_negative_integer2 = "DROP INDEX " + attribute_non_negative_integer_index + "2";
+    private static final String dropindexattribute_unsigned_int2 = "DROP INDEX " + attribute_unsigned_int_index + "2";
+    private static final String dropindexattribute_float2 = "DROP INDEX " + attribute_float_index + "2";
+    private static final String dropindexattribute_long2 = "DROP INDEX " + attribute_long_index + "2";
+    private static final String dropindexattribute_decimal2 = "DROP INDEX " + attribute_decimal_index + "2";
+	private static final String dropindexattribute_double2 = "DROP INDEX " + attribute_double_index + "2";
+	private static final String dropindexattribute_datetime2 = "DROP INDEX " + attribute_datetime_index + "2";
+	private static final String dropindexattribute_boolean2 = "DROP INDEX " + attribute_boolean_index + "2";
 
-	public static final String dropindexattribute_literal3 = "DROP INDEX " + attribute_literal_index + "3";
-	public static final String dropindexattribute_string3 = "DROP INDEX " + attribute_string_index + "3";
-	public static final String dropindexattribute_integer3 = "DROP INDEX " + attribute_integer_index + "3";
-    public static final String dropindexattribute_int3 = "DROP INDEX " + attribute_int_index + "3";
-    public static final String dropindexattribute_negative_integer3 = "DROP INDEX " + attribute_negative_integer_index + "3";
-    public static final String dropindexattribute_positive_integer3 = "DROP INDEX " + attribute_positive_integer_index + "3";
-    public static final String dropindexattribute_non_positive_integer3 = "DROP INDEX " + attribute_positive_integer_index + "3";
-    public static final String dropindexattribute_non_negative_integer3 = "DROP INDEX " + attribute_non_negative_integer_index + "3";
-    public static final String dropindexattribute_unsigned_int3 = "DROP INDEX " + attribute_unsigned_int_index + "3";
-    public static final String dropindexattribute_float3 = "DROP INDEX " + attribute_float_index + "3";
-    public static final String dropindexattribute_long3 = "DROP INDEX " + attribute_long_index + "3";
-	public static final String dropindexattribute_decimal3 = "DROP INDEX " + attribute_decimal_index + "3";
-	public static final String dropindexattribute_double3 = "DROP INDEX " + attribute_double_index + "3";
-	public static final String dropindexattribute_datetime3 = "DROP INDEX " + attribute_datetime_index + "3";
-	public static final String dropindexattribute_boolean3 = "DROP INDEX " + attribute_boolean_index + "3";
+	private static final String dropindexattribute_literal3 = "DROP INDEX " + attribute_literal_index + "3";
+	private static final String dropindexattribute_string3 = "DROP INDEX " + attribute_string_index + "3";
+	private static final String dropindexattribute_integer3 = "DROP INDEX " + attribute_integer_index + "3";
+	private static final String dropindexattribute_int3 = "DROP INDEX " + attribute_int_index + "3";
+    private static final String dropindexattribute_negative_integer3 = "DROP INDEX " + attribute_negative_integer_index + "3";
+    private static final String dropindexattribute_positive_integer3 = "DROP INDEX " + attribute_positive_integer_index + "3";
+    private static final String dropindexattribute_non_positive_integer3 = "DROP INDEX " + attribute_positive_integer_index + "3";
+    private static final String dropindexattribute_non_negative_integer3 = "DROP INDEX " + attribute_non_negative_integer_index + "3";
+    private static final String dropindexattribute_unsigned_int3 = "DROP INDEX " + attribute_unsigned_int_index + "3";
+    private static final String dropindexattribute_float3 = "DROP INDEX " + attribute_float_index + "3";
+    private static final String dropindexattribute_long3 = "DROP INDEX " + attribute_long_index + "3";
+    private static final String dropindexattribute_decimal3 = "DROP INDEX " + attribute_decimal_index + "3";
+	private static final String dropindexattribute_double3 = "DROP INDEX " + attribute_double_index + "3";
+	private static final String dropindexattribute_datetime3 = "DROP INDEX " + attribute_datetime_index + "3";
+	private static final String dropindexattribute_boolean3 = "DROP INDEX " + attribute_boolean_index + "3";
 
-	public static final String analyze = "ANALYZE";
+	private static final String analyze = "ANALYZE";
 
-	public static final String select_mapping_class = "SELECT \"URI\" as X FROM " + class_table;
+	private static final String select_mapping_class = "SELECT \"URI\" as X FROM " + class_table;
 
 //	public static final String select_mapping_class_role_left = "SELECT \"URI1\" as X FROM " + role_table;
 //
@@ -499,36 +497,35 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 //	public static final String select_mapping_class_attribute_datetime_left = "SELECT \"URI\" as X FROM " + attribute_table_datetime;
 //	public static final String select_mapping_class_attribute_boolean_left = "SELECT \"URI\" as X FROM " + attribute_table_boolean;
 
-	public static final String select_mapping_role = "SELECT \"URI1\" as X, \"URI2\" as Y FROM " + role_table;
+	private static final String select_mapping_role = "SELECT \"URI1\" as X, \"URI2\" as Y FROM " + role_table;
 
 //	public static final String select_mapping_role_inverse = "SELECT \"URI2\" as X, \"URI1\" as Y FROM " + role_table;
 
-	public static final String select_mapping_attribute_literal = "SELECT \"URI\" as X, VAL as Y, LANG as Z FROM "
+	private static final String select_mapping_attribute_literal = "SELECT \"URI\" as X, VAL as Y, LANG as Z FROM "
 			+ attribute_table_literal;
 
-	public static final String select_mapping_attribute_string = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_string;
-	public static final String select_mapping_attribute_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_integer;
-    public static final String select_mapping_attribute_int = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_int;
-    public static final String select_mapping_attribute_unsigned_int = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_unsigned_int;
-    public static final String select_mapping_attribute_positive_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_positive_integer;
-    public static final String select_mapping_attribute_non_positive_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_non_positive_integer;
-    public static final String select_mapping_attribute_negative_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_negative_integer;
-    public static final String select_mapping_attribute_non_negative_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_non_negative_integer;
-    public static final String select_mapping_attribute_float = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_float;
-    public static final String select_mapping_attribute_long = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_long;
-	public static final String select_mapping_attribute_decimal = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_decimal;
-	public static final String select_mapping_attribute_double = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_double;
-	public static final String select_mapping_attribute_datetime = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_datetime;
-	public static final String select_mapping_attribute_boolean = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_boolean;
+	private static final String select_mapping_attribute_string = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_string;
+	private static final String select_mapping_attribute_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_integer;
+	private static final String select_mapping_attribute_int = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_int;
+    private static final String select_mapping_attribute_unsigned_int = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_unsigned_int;
+    private static final String select_mapping_attribute_positive_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_positive_integer;
+    private static final String select_mapping_attribute_non_positive_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_non_positive_integer;
+    private static final String select_mapping_attribute_negative_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_negative_integer;
+    private static final String select_mapping_attribute_non_negative_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_non_negative_integer;
+    private static final String select_mapping_attribute_float = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_float;
+    private static final String select_mapping_attribute_long = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_long;
+    private static final String select_mapping_attribute_decimal = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_decimal;
+	private static final String select_mapping_attribute_double = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_double;
+	private static final String select_mapping_attribute_datetime = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_datetime;
+	private static final String select_mapping_attribute_boolean = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_boolean;
 
-	public static final String whereSingleCondition = "IDX = %d";
+	private static final String whereSingleCondition = "IDX = %d";
 
-	public static final String whereIntervalCondition = "IDX >= %d AND IDX <= %d";
+	private static final String whereIntervalCondition = "IDX >= %d AND IDX <= %d";
+	
 
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
-	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
-	
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
@@ -543,13 +540,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private final HashSet<SemanticIndexRecord> nonEmptyEntityRecord = new HashSet<SemanticIndexRecord>();
 
-	private List<RepositoryChangedListener> changeList;
+	private final List<RepositoryChangedListener> changeList;
 
-	public RDBMSSIRepositoryManager(/*Set<Predicate> vocabulary*/) {
-
-		//if (vocabulary != null) {
-		//	setVocabulary(vocabulary);
-		//}
+	public RDBMSSIRepositoryManager() {
 
 		changeList = new LinkedList<RepositoryChangedListener>();
 	}
@@ -3564,13 +3557,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		return bf.toString();
 	}
 
-	private String getQuotedString(URI str) {
-		StringBuilder bf = new StringBuilder();
-		bf.append("'");
-		bf.append(str.toString());
-		bf.append("'");
-		return bf.toString();
-	}
 
 	@Override
 	public void dropIndexes(Connection conn) throws SQLException {
@@ -4092,44 +4078,5 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		return uriMap;
 	}
 	
-	/***
-	 * A hashing for indexing functions. Implemented using String hashing code.
-	 * 
-	 * @param f
-	 * @return
-	 */
-	public static int getIndexHash(Function f) {
-		int hash = 0;
-
-		hash = f.getFunctionSymbol().hashCode() * (31 ^ f.getArity());
-		for (int i = 0; i < f.getArity(); i++) {
-			Term term = f.getTerm(i);
-			int termhash = getHash((Function) term);
-			hash += termhash * (31 ^ (f.getArity() - (i + 1)));
-		}
-
-		/*
-		 * Compensating in the hash for the arity of the function. We asume
-		 * functions of arity 3 (triple) other functions need to be padded,
-		 * hence the xtra sums.
-		 */
-		if (f.getArity() == 1) {
-			hash += 31 ^ 1;
-			hash += 31 ^ 0;
-		} else if (f.getArity() == 2) {
-			hash += 31 ^ 0;
-		}
-
-		return hash;
-	}
-
-	private static int getHash(Function f) {
-		int hash;
-		if (f.getReferencedVariables().isEmpty()) {
-			hash = f.hashCode();
-		} else
-			hash = (f.getFunctionSymbol().hashCode() + f.getTerms().size());
-		return hash;
-	}
 
 }
