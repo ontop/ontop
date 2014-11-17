@@ -47,18 +47,19 @@ public interface OBDADataFactory extends Serializable {
 
 	public DatalogProgram getDatalogProgram(Collection<CQIE> rules);
 
+
+
+	public Function getTripleAtom(Term subject, Term predicate, Term object);
+
 	/**
 	 * Construct a {@link Predicate} object.
-	 * 
-	 * @param name
+	 *
+	 * @param uri
 	 *            the name of the predicate (defined as a URI).
 	 * @param arity
 	 *            the number of elements inside the predicate.
 	 * @return a predicate object.
 	 */
-
-	public Function getTripleAtom(Term subject, Term predicate, Term object);
-	
 	@Deprecated
 	public Predicate getPredicate(String uri, int arity);
 
