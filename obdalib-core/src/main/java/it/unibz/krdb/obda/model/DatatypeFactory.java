@@ -1,6 +1,10 @@
 package it.unibz.krdb.obda.model;
 
+import java.util.List;
+
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.QuestTypeMapper;
+import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 
 public interface DatatypeFactory {
 
@@ -24,8 +28,7 @@ public interface DatatypeFactory {
 	public boolean isString(Predicate p);
 
 	
-	public Predicate getDataTypePredicateLiteral();
-
-	public Predicate getDataTypePredicateLiteralLang();
+	
+	public List<Predicate> getDatatypePredicates();
 
 }

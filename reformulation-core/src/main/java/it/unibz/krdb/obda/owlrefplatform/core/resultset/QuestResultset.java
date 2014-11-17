@@ -334,17 +334,13 @@ public class QuestResultset implements TupleResultSet {
 
 	private COL_TYPE getQuestType(int typeCode) {
 
+        COL_TYPE questType = fac.getQuestTypeMapper().getQuestType(typeCode);
 
-        COL_TYPE questType = QuestTypeMapper.getInstance().getQuestType(typeCode);
-
-        if(questType!=null){
-
-            return questType;
-        }
-
-        throw new RuntimeException("COLTYPE unknown: " + typeCode);
-
-        }
+        if (questType == null)
+        	throw new RuntimeException("typeCode unknown: " + typeCode);
+        
+        return questType;
+	}
 
 	// @Override
 	// public URI getURI(String name) throws OBDAException {

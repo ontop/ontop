@@ -89,9 +89,7 @@ public class R2rmlCheckerTest {
 		ontology = manager
 				.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-
-		onto = translator.translate(ontology);
+		onto = OWLAPI3TranslatorUtility.translate(ontology);
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -162,7 +160,7 @@ public class R2rmlCheckerTest {
 
             // We need to make sure we make no mappings for Auxiliary roles
             // introduced by the Ontology translation process.
-            if (!OntologyVocabularyImpl.isAuxiliaryProperty(prop)) {
+            //if (!OntologyVocabularyImpl.isAuxiliaryProperty(prop)) {
                 Predicate role = prop.getPredicate();
 
                 log.debug("description " + role);
@@ -172,7 +170,7 @@ public class R2rmlCheckerTest {
                         reasonerR2rml.getConnection());
 
                 assertEquals(roleOBDA, roleR2rml);
-            }
+            //}
         }
 
         log.debug("Comparing data properties");
@@ -180,7 +178,7 @@ public class R2rmlCheckerTest {
 
             // We need to make sure we make no mappings for Auxiliary roles
             // introduced by the Ontology translation process.
-            if (!OntologyVocabularyImpl.isAuxiliaryProperty(prop)) {
+            //if (!OntologyVocabularyImpl.isAuxiliaryProperty(prop)) {
                 Predicate role = prop.getPredicate();
 
 
@@ -191,7 +189,7 @@ public class R2rmlCheckerTest {
                         reasonerR2rml.getConnection());
 
                 assertEquals(roleOBDA, roleR2rml);
-            }
+            //}
         }
 	}
 

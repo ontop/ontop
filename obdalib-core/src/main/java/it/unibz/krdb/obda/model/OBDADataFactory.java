@@ -21,6 +21,8 @@ package it.unibz.krdb.obda.model;
  */
 
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.QuestTypeMapper;
+import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -75,6 +77,12 @@ public interface OBDADataFactory extends Serializable {
 	public Predicate getClassPredicate(String name);
 
 
+	
+	public QuestTypeMapper getQuestTypeMapper();
+
+	public JdbcTypeMapper getJdbcTypeMapper();
+
+	
 
 	/*
 	 * Built-in function predicates

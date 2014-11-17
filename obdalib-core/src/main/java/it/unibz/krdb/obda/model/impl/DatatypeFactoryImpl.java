@@ -1,6 +1,9 @@
 package it.unibz.krdb.obda.model.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.openrdf.model.vocabulary.RDFS;
@@ -9,96 +12,63 @@ import org.openrdf.model.vocabulary.XMLSchema;
 import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 
 public class DatatypeFactoryImpl implements DatatypeFactory {
 
 	
-	/* Data type predicate URIs */
-
-	private final String RDFS_LITERAL_URI = RDFS.LITERAL.toString(); // "http://www.w3.org/2000/01/rdf-schema#Literal";
-	private final String XSD_STRING_URI = XMLSchema.STRING.toString(); // "http://www.w3.org/2001/XMLSchema#string";
-	private final String XSD_INT_URI = XMLSchema.INT.toString(); // "http://www.w3.org/2001/XMLSchema#int";
-	private final String XSD_POSITIVE_INTEGER_URI = XMLSchema.POSITIVE_INTEGER.toString(); // "http://www.w3.org/2001/XMLSchema#positiveInteger";
-    private final String XSD_NEGATIVE_INTEGER_URI = XMLSchema.NEGATIVE_INTEGER.toString(); // "http://www.w3.org/2001/XMLSchema#negativeInteger";
-    private final String XSD_NON_POSITIVE_INTEGER_URI = XMLSchema.NON_POSITIVE_INTEGER.toString();  //"http://www.w3.org/2001/XMLSchema#nonPositiveInteger";
-    private final String XSD_UNSIGNED_INT_URI = XMLSchema.UNSIGNED_INT.toString(); //"http://www.w3.org/2001/XMLSchema#unsignedInt";
-    private final String XSD_NON_NEGATIVE_INTEGER_URI =  XMLSchema.NON_NEGATIVE_INTEGER.toString(); // "http://www.w3.org/2001/XMLSchema#nonNegativeInteger";
-    private final String XSD_INTEGER_URI = XMLSchema.INTEGER.toString(); // "http://www.w3.org/2001/XMLSchema#integer";
-    private final String XSD_LONG_URI = XMLSchema.LONG.toString(); // "http://www.w3.org/2001/XMLSchema#long";
-    private final String XSD_DECIMAL_URI = XMLSchema.DECIMAL.toString(); // "http://www.w3.org/2001/XMLSchema#decimal";
-	private final String XSD_FLOAT_URI = XMLSchema.FLOAT.toString(); //"http://www.w3.org/2001/XMLSchema#float";
-	private final String XSD_DOUBLE_URI = XMLSchema.DOUBLE.toString(); //"http://www.w3.org/2001/XMLSchema#double";
-	private final String XSD_DATETIME_URI = XMLSchema.DATETIME.toString();  //"http://www.w3.org/2001/XMLSchema#dateTime";
-	private final String XSD_BOOLEAN_URI = XMLSchema.BOOLEAN.toString(); // "http://www.w3.org/2001/XMLSchema#boolean";
-	private final String XSD_DATE_URI = XMLSchema.DATE.toString(); // "http://www.w3.org/2001/XMLSchema#date";
-	private final String XSD_TIME_URI = XMLSchema.TIME.toString(); // "http://www.w3.org/2001/XMLSchema#time";
-	private final String XSD_YEAR_URI = XMLSchema.GYEAR.toString(); // "http://www.w3.org/2001/XMLSchema#gYear";
-
-	private final Predicate RDFS_LITERAL = new DataTypePredicateImpl(RDFS_LITERAL_URI, new COL_TYPE[] { COL_TYPE.LITERAL });
-	private final Predicate RDFS_LITERAL_LANG = new DataTypePredicateImpl(RDFS_LITERAL_URI, new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL });
-	private final Predicate XSD_STRING = new DataTypePredicateImpl(XSD_STRING_URI, COL_TYPE.STRING);
-	private final Predicate XSD_INTEGER = new DataTypePredicateImpl(XSD_INTEGER_URI, COL_TYPE.INTEGER);
-	private final Predicate XSD_NEGATIVE_INTEGER = new DataTypePredicateImpl(XSD_NEGATIVE_INTEGER_URI, COL_TYPE.NEGATIVE_INTEGER);
-	private final Predicate XSD_INT = new DataTypePredicateImpl(XSD_INT_URI, COL_TYPE.INT);
-	private final Predicate XSD_NON_NEGATIVE_INTEGER = new DataTypePredicateImpl(XSD_NON_NEGATIVE_INTEGER_URI, COL_TYPE.NON_NEGATIVE_INTEGER);
-	private final Predicate XSD_UNSIGNED_INT = new DataTypePredicateImpl(XSD_UNSIGNED_INT_URI, COL_TYPE.UNSIGNED_INT);
-	private final Predicate XSD_POSITIVE_INTEGER = new DataTypePredicateImpl(XSD_POSITIVE_INTEGER_URI, COL_TYPE.POSITIVE_INTEGER);
-	private final Predicate XSD_NON_POSITIVE_INTEGER = new DataTypePredicateImpl(XSD_NON_POSITIVE_INTEGER_URI, COL_TYPE.NON_POSITIVE_INTEGER);
-	private final Predicate XSD_LONG = new DataTypePredicateImpl(XSD_LONG_URI, COL_TYPE.LONG);
-	private final Predicate XSD_DECIMAL = new DataTypePredicateImpl(XSD_DECIMAL_URI, COL_TYPE.DECIMAL);
-	private final Predicate XSD_DOUBLE = new DataTypePredicateImpl(XSD_DOUBLE_URI, COL_TYPE.DOUBLE);
-	private final Predicate XSD_FLOAT = new DataTypePredicateImpl(XSD_FLOAT_URI, COL_TYPE.FLOAT);
-	private final Predicate XSD_DATETIME = new DataTypePredicateImpl(XSD_DATETIME_URI, COL_TYPE.DATETIME);
-	private final Predicate XSD_BOOLEAN = new DataTypePredicateImpl(XSD_BOOLEAN_URI, COL_TYPE.BOOLEAN);
-	private final Predicate XSD_DATE = new DataTypePredicateImpl(XSD_DATE_URI, COL_TYPE.DATE);
-	private final Predicate XSD_TIME = new DataTypePredicateImpl(XSD_TIME_URI, COL_TYPE.TIME);
-	private final Predicate XSD_YEAR = new DataTypePredicateImpl(XSD_YEAR_URI, COL_TYPE.YEAR);
+	// special case of literals with the specified language 
+	private final DataTypePredicateImpl RDFS_LITERAL_LANG = new DataTypePredicateImpl(RDFS.LITERAL.toString(), 
+									new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL });
 	
-	private final Map<String, COL_TYPE> mapURItoCOLTYPE;
-	private final Map<COL_TYPE, String> mapCOLTYPEtoURI;
+	private final DataTypePredicateImpl RDFS_LITERAL, XSD_STRING;
+	private final DataTypePredicateImpl XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
+	private final DataTypePredicateImpl XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER;
+	private final DataTypePredicateImpl XSD_INT, XSD_UNSIGNED_INT, XSD_LONG;
+	private final DataTypePredicateImpl XSD_DECIMAL;
+	private final DataTypePredicateImpl XSD_DOUBLE, XSD_FLOAT;
+	private final DataTypePredicateImpl XSD_DATETIME;
+	private final DataTypePredicateImpl XSD_BOOLEAN;
+	private final DataTypePredicateImpl XSD_DATE, XSD_TIME, XSD_YEAR;
+	
+	private final Map<String, COL_TYPE> mapURItoCOLTYPE = new HashMap<String, COL_TYPE>();
+	private final Map<COL_TYPE, String> mapCOLTYPEtoURI = new HashMap<COL_TYPE, String>();
+	private final Map<COL_TYPE, DataTypePredicateImpl> mapCOLTYPEtoPredicate = new HashMap<COL_TYPE, DataTypePredicateImpl>();
+	private final List<Predicate> predicateList = new LinkedList<Predicate>();
 	
 	DatatypeFactoryImpl() {
-		mapURItoCOLTYPE = new HashMap<String, COL_TYPE>();
+		RDFS_LITERAL = registerType(RDFS.LITERAL, COL_TYPE.LITERAL); // "http://www.w3.org/2000/01/rdf-schema#Literal"
+		XSD_STRING = registerType(XMLSchema.STRING, COL_TYPE.STRING);  // "http://www.w3.org/2001/XMLSchema#string"
+		XSD_INT = registerType(XMLSchema.INT, COL_TYPE.INT);  // "http://www.w3.org/2001/XMLSchema#int"
+		XSD_POSITIVE_INTEGER = registerType(XMLSchema.POSITIVE_INTEGER, COL_TYPE.POSITIVE_INTEGER); // "http://www.w3.org/2001/XMLSchema#positiveInteger"
+		XSD_NEGATIVE_INTEGER = registerType(XMLSchema.NEGATIVE_INTEGER, COL_TYPE.NEGATIVE_INTEGER); // "http://www.w3.org/2001/XMLSchema#negativeInteger";
+		XSD_NON_POSITIVE_INTEGER = registerType(XMLSchema.NON_POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER); // "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
+		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, COL_TYPE.UNSIGNED_INT);   // "http://www.w3.org/2001/XMLSchema#unsignedInt"
+		XSD_NON_NEGATIVE_INTEGER = registerType(XMLSchema.NON_NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER); //  "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
+		XSD_INTEGER = registerType(XMLSchema.INTEGER, COL_TYPE.INTEGER);  // "http://www.w3.org/2001/XMLSchema#integer";
+		XSD_LONG = registerType(XMLSchema.LONG, COL_TYPE.LONG);  // "http://www.w3.org/2001/XMLSchema#long"
+		XSD_DECIMAL = registerType(XMLSchema.DECIMAL, COL_TYPE.DECIMAL);  // "http://www.w3.org/2001/XMLSchema#decimal"
+		XSD_FLOAT = registerType(XMLSchema.FLOAT, COL_TYPE.FLOAT); // "http://www.w3.org/2001/XMLSchema#float"
+		XSD_DOUBLE = registerType(XMLSchema.DOUBLE, COL_TYPE.DOUBLE);  // "http://www.w3.org/2001/XMLSchema#double"
+		XSD_DATETIME = registerType(XMLSchema.DATETIME, COL_TYPE.DATETIME); // "http://www.w3.org/2001/XMLSchema#dateTime"
+		XSD_BOOLEAN = registerType(XMLSchema.BOOLEAN, COL_TYPE.BOOLEAN);  //  "http://www.w3.org/2001/XMLSchema#boolean"
+		XSD_DATE = registerType(XMLSchema.DATE, COL_TYPE.DATE);  // "http://www.w3.org/2001/XMLSchema#date";
+		XSD_TIME = registerType(XMLSchema.TIME, COL_TYPE.TIME);  // "http://www.w3.org/2001/XMLSchema#time";
+		XSD_YEAR = registerType(XMLSchema.GYEAR, COL_TYPE.YEAR);  // "http://www.w3.org/2001/XMLSchema#gYear";
 		
-		mapURItoCOLTYPE.put(RDFS_LITERAL_URI, COL_TYPE.LITERAL); // 1
-		mapURItoCOLTYPE.put(XSD_STRING_URI, COL_TYPE.STRING);  // 2
-		mapURItoCOLTYPE.put(XSD_INT_URI, COL_TYPE.INT);  // 3
-		mapURItoCOLTYPE.put(XSD_POSITIVE_INTEGER_URI, COL_TYPE.POSITIVE_INTEGER); // 4
-		mapURItoCOLTYPE.put(XSD_NEGATIVE_INTEGER_URI, COL_TYPE.NEGATIVE_INTEGER); // 5
-		mapURItoCOLTYPE.put(XSD_NON_POSITIVE_INTEGER_URI, COL_TYPE.NON_POSITIVE_INTEGER); // 6
-		mapURItoCOLTYPE.put(XSD_UNSIGNED_INT_URI, COL_TYPE.UNSIGNED_INT);   // 7
-		mapURItoCOLTYPE.put(XSD_NON_NEGATIVE_INTEGER_URI, COL_TYPE.NON_NEGATIVE_INTEGER); // 8
-		mapURItoCOLTYPE.put(XSD_INTEGER_URI, COL_TYPE.INTEGER);  // 9
-		mapURItoCOLTYPE.put(XSD_LONG_URI, COL_TYPE.LONG);  // 10
-		mapURItoCOLTYPE.put(XSD_DECIMAL_URI, COL_TYPE.DECIMAL);  // 11
-		mapURItoCOLTYPE.put(XSD_FLOAT_URI, COL_TYPE.FLOAT); // 12
-		mapURItoCOLTYPE.put(XSD_DOUBLE_URI, COL_TYPE.DOUBLE);  // 13
-		mapURItoCOLTYPE.put(XSD_DATETIME_URI, COL_TYPE.DATETIME); // 14
-		mapURItoCOLTYPE.put(XSD_BOOLEAN_URI, COL_TYPE.BOOLEAN);  // 15
-		mapURItoCOLTYPE.put(XSD_DATE_URI, COL_TYPE.DATE);  // 16
-		mapURItoCOLTYPE.put(XSD_TIME_URI, COL_TYPE.TIME);  // 17
-		mapURItoCOLTYPE.put(XSD_YEAR_URI, COL_TYPE.YEAR);  // 18
-
-		mapCOLTYPEtoURI = new HashMap<COL_TYPE, String>();	
-
-		mapCOLTYPEtoURI.put(COL_TYPE.LITERAL, RDFS_LITERAL_URI); // 1
-		mapCOLTYPEtoURI.put(COL_TYPE.STRING, XSD_STRING_URI);  // 2
-		mapCOLTYPEtoURI.put(COL_TYPE.INT, XSD_INT_URI);  // 3
-		mapCOLTYPEtoURI.put(COL_TYPE.POSITIVE_INTEGER, XSD_POSITIVE_INTEGER_URI); // 4
-		mapCOLTYPEtoURI.put(COL_TYPE.NEGATIVE_INTEGER, XSD_NEGATIVE_INTEGER_URI); // 5
-		mapCOLTYPEtoURI.put(COL_TYPE.NON_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER_URI); // 6
-		mapCOLTYPEtoURI.put(COL_TYPE.UNSIGNED_INT, XSD_UNSIGNED_INT_URI);   // 7
-		mapCOLTYPEtoURI.put(COL_TYPE.NON_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER_URI); // 8
-		mapCOLTYPEtoURI.put(COL_TYPE.INTEGER, XSD_INTEGER_URI);  // 9
-		mapCOLTYPEtoURI.put(COL_TYPE.LONG, XSD_LONG_URI);  // 10
-		mapCOLTYPEtoURI.put(COL_TYPE.DECIMAL, XSD_DECIMAL_URI);  // 11
-		mapCOLTYPEtoURI.put(COL_TYPE.FLOAT, XSD_FLOAT_URI); // 12
-		mapCOLTYPEtoURI.put(COL_TYPE.DOUBLE, XSD_DOUBLE_URI);  // 13
-		mapCOLTYPEtoURI.put(COL_TYPE.DATETIME, XSD_DATETIME_URI); // 14
-		mapCOLTYPEtoURI.put(COL_TYPE.BOOLEAN, XSD_BOOLEAN_URI);  // 15
-		mapCOLTYPEtoURI.put(COL_TYPE.DATE, XSD_DATE_URI);  // 16
-		mapCOLTYPEtoURI.put(COL_TYPE.TIME, XSD_TIME_URI);  // 17
-		mapCOLTYPEtoURI.put(COL_TYPE.YEAR, XSD_YEAR_URI);  // 18		
+		// special case
+		// used in ExpressionEvaluator only(?) use proper method there? 
+		mapCOLTYPEtoPredicate.put(COL_TYPE.LITERAL_LANG, RDFS_LITERAL_LANG);
+	}
+	
+	private final DataTypePredicateImpl registerType(org.openrdf.model.URI uri, COL_TYPE type) {
+		String sURI = uri.toString();
+		mapURItoCOLTYPE.put(sURI, type);  
+		mapCOLTYPEtoURI.put(type, sURI); 
+		DataTypePredicateImpl predicate = new DataTypePredicateImpl(sURI, type);
+		mapCOLTYPEtoPredicate.put(type, predicate);
+		predicateList.add(predicate);
+		return predicate;
 	}
 	
 	@Override
@@ -136,13 +106,17 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	public boolean isString(Predicate p) {
 		return p == XSD_STRING;
 	}
+
+	@Override
+	public List<Predicate> getDatatypePredicates() {
+		return Collections.unmodifiableList(predicateList);
+	}
 	
-	
-	public final Predicate[] QUEST_DATATYPE_PREDICATES = new Predicate[] {
-			RDFS_LITERAL, XSD_STRING, XSD_INTEGER, XSD_NEGATIVE_INTEGER,
-    XSD_NON_NEGATIVE_INTEGER, XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER, XSD_INT,
-    XSD_UNSIGNED_INT, XSD_LONG, XSD_FLOAT, XSD_DECIMAL, XSD_DOUBLE,
-			XSD_DATETIME, XSD_BOOLEAN, XSD_DATE, XSD_TIME, XSD_YEAR };
+//	public final Predicate[] QUEST_DATATYPE_PREDICATES = new Predicate[] {
+//			RDFS_LITERAL, XSD_STRING, XSD_INTEGER, XSD_NEGATIVE_INTEGER,
+ //   XSD_NON_NEGATIVE_INTEGER, XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER, XSD_INT,
+//    XSD_UNSIGNED_INT, XSD_LONG, XSD_FLOAT, XSD_DECIMAL, XSD_DOUBLE,
+//			XSD_DATETIME, XSD_BOOLEAN, XSD_DATE, XSD_TIME, XSD_YEAR };
 	
 //	public static final Predicate[] QUEST_NUMERICAL_DATATYPES = new Predicate[] {
 //			XSD_INTEGER, XSD_NEGATIVE_INTEGER,
@@ -152,66 +126,14 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	
 	@Override
 	public Predicate getTypePredicate(Predicate.COL_TYPE type) {
-		switch (type) {
-		case LITERAL:          // 1
-			return getDataTypePredicateLiteral();
-		case STRING:   // 2
-			return XSD_STRING;
-		case INTEGER:  // 3
-			return XSD_INTEGER;
-        case NEGATIVE_INTEGER:  // 4
-            return XSD_NEGATIVE_INTEGER;
-        case INT:  // 5
-            return XSD_INT;
-        case POSITIVE_INTEGER:  // 6
-            return XSD_POSITIVE_INTEGER;
-        case NON_POSITIVE_INTEGER:  // 7
-            return XSD_NON_POSITIVE_INTEGER;
-        case NON_NEGATIVE_INTEGER: // 8
-            return XSD_NON_NEGATIVE_INTEGER;
-        case UNSIGNED_INT:  // 9
-            return XSD_UNSIGNED_INT;
-        case LONG:   // 10
-            return XSD_LONG;
-		case DECIMAL: // 11
-			return XSD_DECIMAL;
-        case FLOAT:  // 12
-            return XSD_FLOAT;
-		case DOUBLE:  // 13
-			return XSD_DOUBLE;
-		case DATETIME:  // 14
-			return XSD_DATETIME;
-		case BOOLEAN:  // 15
-			return XSD_BOOLEAN;
-		case DATE:   // 16
-			return XSD_DATE;
-		case TIME:  // 17
-			return XSD_TIME;
-		case YEAR: // 18
-			return XSD_YEAR;
-		case LITERAL_LANG: // used in ExpressionEvaluator only(?) use proper method here? 
-			return getDataTypePredicateLiteral();
+		return mapCOLTYPEtoPredicate.get(type);
+		
 		//case OBJECT:   // different uses
 		//	return getUriTemplatePredicate(1);
 		//case BNODE:    // different uses			
 		//	return getBNodeTemplatePredicate(1);
-		default:
-			return null;
-			//throw new RuntimeException("Cannot get URI for unsupported type: " + type);
-		}
 	}
 
 	
-	
-	@Override
-	public Predicate getDataTypePredicateLiteral() {
-		return RDFS_LITERAL;
-	}
-	
-	@Override
-	public Predicate getDataTypePredicateLiteralLang() {
-		return RDFS_LITERAL_LANG;
-	}
-
-	
+		
 }

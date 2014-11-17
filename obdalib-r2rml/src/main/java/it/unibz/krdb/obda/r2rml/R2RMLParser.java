@@ -304,7 +304,7 @@ public class R2RMLParser {
 				pred = fac.getUriTemplatePredicate(1);
 			} else {
 
-				pred = dtfac.getDataTypePredicateLiteral(); // .RDFS_LITERAL;
+				pred = dtfac.getTypePredicate(COL_TYPE.LITERAL); // .RDFS_LITERAL;
 			}
 
 			// if the literal has a language property or a datatype property we
@@ -368,7 +368,7 @@ public class R2RMLParser {
 		
 		if (lan != null) {
 			Term lang = fac.getConstantLiteral(lan.toLowerCase());
-			Predicate literal = dtfac.getDataTypePredicateLiteralLang();
+			Predicate literal = dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG);
 			Term langAtom = fac.getFunction(literal, objectAtom, lang);
 			objectAtom = langAtom;
 		}
@@ -392,7 +392,7 @@ public class R2RMLParser {
 		else
 		{	//literal
 			Constant constt = fac.getConstantLiteral(objectString);
-			Predicate pred = dtfac.getDataTypePredicateLiteral();
+			Predicate pred = dtfac.getTypePredicate(COL_TYPE.LITERAL);
 			return fac.getFunction(pred, constt);
 
 		}
@@ -534,7 +534,7 @@ public class R2RMLParser {
 			// simple LITERAL 
 		case 3:
 			uriTemplate = terms.remove(0);
-			pred = dtfac.getDataTypePredicateLiteral(); // OBDAVocabulary.RDFS_LITERAL; 
+			pred = dtfac.getTypePredicate(COL_TYPE.LITERAL); // OBDAVocabulary.RDFS_LITERAL; 
 			break;
 		}
 

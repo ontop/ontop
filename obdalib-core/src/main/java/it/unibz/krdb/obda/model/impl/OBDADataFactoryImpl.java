@@ -38,6 +38,7 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.IDGenerator;
+import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -53,7 +54,10 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 	private static OBDADataFactory instance = null;
 	private static ValueFactory irifactory = null;
-	private static DatatypeFactoryImpl datatypes = null;
+	private DatatypeFactoryImpl datatypes = null;
+	private final QuestTypeMapper questTypeMapper = new QuestTypeMapper();
+	private final JdbcTypeMapper jdbcTypeMapper =  new JdbcTypeMapper(); 
+	
 
 	private static int counter = 0;
 	
@@ -83,12 +87,18 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return datatypes;
 	}
 
+	@Override
+	public QuestTypeMapper getQuestTypeMapper() {
+		return questTypeMapper;
+	}
 	
-
-	public static org.openrdf.model.URI getIRI(String s){
-		return getIRIFactory().createURI(s);
-				}
+	@Override 
+	public JdbcTypeMapper getJdbcTypeMapper() {
+		return jdbcTypeMapper;
+	}
 	
+	
+		
 	public OBDAModel getOBDAModel() {
 		return new OBDAModelImpl();
 	}
