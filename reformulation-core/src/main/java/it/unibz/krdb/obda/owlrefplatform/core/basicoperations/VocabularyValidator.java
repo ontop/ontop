@@ -188,7 +188,6 @@ public class VocabularyValidator {
 	 * The same is done for classes.
 	 * 
 	 * @param originalMappings
-	 * @param equivalencesMap
 	 * @return
 	 */
 	public Collection<OBDAMappingAxiom> replaceEquivalences(Collection<OBDAMappingAxiom> originalMappings) {
@@ -199,7 +198,7 @@ public class VocabularyValidator {
 			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
 			
 			CQIE newTargetQuery = replaceEquivalences(targetQuery, false);
-			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(),((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
+			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), mapping.getSourceQuery().toString(), newTargetQuery));
 
 		}
 		return result;

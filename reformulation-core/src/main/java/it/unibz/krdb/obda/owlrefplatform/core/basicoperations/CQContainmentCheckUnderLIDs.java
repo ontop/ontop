@@ -31,16 +31,16 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	/***
 	 * Constructs a CQC utility using the given query. If Sigma is not null and
 	 * not empty, then it will also be used to verify containment w.r.t.\ Sigma.
-	 * 
-	 * @param query
-	 *            A conjunctive query
-	 * @param sigma
-	 *            A set of ABox dependencies
+	 *
 	 */
 	public CQContainmentCheckUnderLIDs() {
 		sigma = null;
 	}
-	
+
+	/**
+	 * *@param sigma
+	 * A set of ABox dependencies
+	 */
 	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies sigma) {
 		this.sigma = sigma;
 	}
@@ -52,7 +52,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	 * 
 	 * IMPORTANT: each rule is applied once to each atom
 	 * 
-	 * @param rules
+	 * @param atoms
 	 * @return
 	 */
 	private static Set<Function> chaseAtoms(Collection<Function> atoms, LinearInclusionDependencies dependencies) {
@@ -92,7 +92,6 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		 * 
 		 * This new query can be used for query containment checking.
 		 * 
-		 * @param q
 		 */
 		
 		public FreezeCQ(Function head, Collection<Function> body) { 

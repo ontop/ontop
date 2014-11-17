@@ -34,10 +34,6 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.DatalogToSparqlTranslator;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlKeyword;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.UnknownArithmeticSymbolException;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.UnknownBooleanSymbolException;
 
 import java.util.List;
 
@@ -176,7 +172,7 @@ public class DatalogToSparqlTranslator {
 		if (functionSymbol.equals(OBDAVocabulary.ADD)) {
 			return SparqlKeyword.ADD;
 		} else if (functionSymbol.equals(OBDAVocabulary.SUBTRACT)) {
-			return SparqlKeyword.SUBSTRACT;
+			return SparqlKeyword.SUBTRACT;
 		} else if (functionSymbol.equals(OBDAVocabulary.MULTIPLY)) {
 			return SparqlKeyword.MULTIPLY;
 		}

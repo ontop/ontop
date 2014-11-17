@@ -22,20 +22,37 @@ package it.unibz.krdb.obda.model;
 
 import java.io.Serializable;
 
-//import com.hp.hpl.jena.iri.IRI;
-
 /**
- * A predicate is a property that the elements of the set have in common.
- * <p>
- * The notation {@code P(x)} is used to denote a sentence or statement {@code P}
- * concerning the variable object {@code x}. Also, the set defined by
- * {@code P(x)} written <code>{x|P(x)</code> is just a collection of all the
- * objects for which {@code P} is true.
+* The Predicate class currently represents (1) first-order predicts, (2) function symbols, and
+ * (3) logical operators (e.g. join, left join)
+ *
  */
 public interface Predicate extends Cloneable, Serializable {
 
 	public enum COL_TYPE {
-		OBJECT, BNODE, LITERAL, LITERAL_LANG, INTEGER, INT, NON_NEGATIVE_INTEGER, POSITIVE_INTEGER, NEGATIVE_INTEGER, NON_POSITIVE_INTEGER,UNSIGNED_INT, DECIMAL, DOUBLE, FLOAT, STRING, DATETIME, BOOLEAN, UNSUPPORTED, DATE, TIME, YEAR,  LONG, NULL ;
+		OBJECT,
+		BNODE,
+		LITERAL,
+		LITERAL_LANG,
+		INTEGER,
+		INT,
+		NON_NEGATIVE_INTEGER,
+		POSITIVE_INTEGER,
+		NEGATIVE_INTEGER,
+		NON_POSITIVE_INTEGER,
+		UNSIGNED_INT,
+		DECIMAL,
+		DOUBLE,
+		FLOAT,
+		STRING,
+		DATETIME,
+		BOOLEAN,
+		UNSUPPORTED,
+		DATE,
+		TIME,
+		YEAR,
+		LONG,
+		NULL ;
     };
 
 	/**

@@ -67,7 +67,7 @@ public class UriTemplateMatcher {
 	public Function generateURIFunction(String uriString) {
 		Function functionURI = null;
 
-		List<Pattern> patternsMatched = new LinkedList<Pattern>();
+		List<Pattern> patternsMatched = new LinkedList<>();
 		for (Pattern pattern : uriTemplateMatcher.keySet()) {
 
 			Matcher matcher = pattern.matcher(uriString);
@@ -113,8 +113,8 @@ public class UriTemplateMatcher {
 			break;
 		}
 		if (functionURI == null) {
-			/* If we cannot match againts a tempalte, we try to match againts the most general tempalte (which will 
-			 * generate empty queires later in the query answering process
+			/* If we cannot match against a template, we try to match against the most general template (which will
+			 * generate empty quires later in the query answering process
 			 */
 			functionURI = ofac.getUriTemplate(ofac.getConstantLiteral(uriString));
 		}

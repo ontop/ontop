@@ -24,8 +24,6 @@ import it.unibz.krdb.obda.ontology.Assertion;
 
 import java.util.List;
 
-//import com.hp.hpl.jena.sparql.syntax.Template;
-
 public interface GraphResultSet extends ResultSet {
 
 	public boolean hasNext() throws OBDAException;

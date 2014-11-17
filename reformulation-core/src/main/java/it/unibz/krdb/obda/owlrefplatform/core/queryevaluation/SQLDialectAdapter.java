@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 
 import java.util.List;
@@ -64,4 +65,15 @@ public interface SQLDialectAdapter {
 	public String sqlCast(String value, int type);
 	
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode);
+	
+	public String getDummyTable();
+	
+
+	public String getSQLLexicalFormString(String constant);
+	
+	public String getSQLLexicalFormBoolean(boolean value);
+	
+	public String getSQLLexicalFormDatetime(String value);
+	
+	
 }

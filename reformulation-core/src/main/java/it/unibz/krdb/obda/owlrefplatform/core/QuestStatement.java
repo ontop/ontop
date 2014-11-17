@@ -166,6 +166,7 @@ public class QuestStatement implements OBDAStatement {
 			// this.query = QueryFactory.create(strquery);
 		}
 
+		// TODO: repace the magic number by an enum
 		public void setQueryType(int type) {
 			switch (type) {// encoding of query type to from numbers
 			case 1:
