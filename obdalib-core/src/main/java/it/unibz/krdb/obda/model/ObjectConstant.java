@@ -21,5 +21,11 @@ package it.unibz.krdb.obda.model;
  */
 
 public interface ObjectConstant extends Constant {
-	// NO-OP
+	
+	/**
+	 * surrogate for getURI() for URIConstant and getName() for BNode
+	 * @return
+	 */
+	
+	public String getName();
 }

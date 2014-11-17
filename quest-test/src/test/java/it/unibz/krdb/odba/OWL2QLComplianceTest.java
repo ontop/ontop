@@ -31,7 +31,10 @@ import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
 
@@ -61,8 +64,10 @@ public class OWL2QLComplianceTest {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/owl2ql/simple.owl";
-	final String obdafile = "src/test/resources/owl2ql/simple.obda";
+	//final String owlfile = "src/test/resources/owl2ql/simple.owl";
+//	final String obdafile = "src/test/resources/owl2ql/simple.obda";
+	final String obdafile = "src/test/resources/owl2ql/stockexchange-mssql.obda";
+	final String owlfile = "src/main/resources/testcases-scenarios/virtual-mode/stockexchange/datatypes/stockexchange.owl";
 	
 	private QuestOWL reasoner;
 	private Ontology onto;
@@ -95,6 +100,20 @@ public class OWL2QLComplianceTest {
 		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 
 		onto = translator.translate(ontology);
+	
+		QuestOWLConnection conn = reasoner.getConnection();
+		
+		QuestOWLStatement st = conn.createStatement();
+
+		String q = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>" +
+				    "SELECT DISTINCT $x $name  WHERE { " +
+				    "$x a :Company; :companyName $name; :netWorth \"+1.2345678e+03\"^^xsd:float }"; // ?z. Filter( ?z < \"+1.2345678e+03\"^^xsd:double) ; :netWorth +1.2345678e+03
+		
+//		String q ="PREFIX :	<http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123/>" +
+//		          "PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>" +
+//				  "select  ?x   ?y   where { ?x :DP ?y . Filter( ?y < \"+1.2345678e+03\"^^xsd:double)  } ";
+		
+		QuestOWLResultSet rs = st.executeTuple(q);
 	}
 
 	@After

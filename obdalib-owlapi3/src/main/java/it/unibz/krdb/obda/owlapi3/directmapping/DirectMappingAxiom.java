@@ -174,7 +174,7 @@ public class DirectMappingAxiom {
 								table.getName(), att.getName())), sub, objV));
 			} 
 			else {
-				Function obj = df.getFunction(dtfac.getTypePredicate(type), df.getVariable(att.getName()));
+				Function obj = df.getTypedTerm(df.getVariable(att.getName()), type);
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, obj));
@@ -270,8 +270,6 @@ public class DirectMappingAxiom {
 			tableName = percentEncode(td.getName()) + "_";
 
 		if (td.getPrimaryKeys().size() > 0) {
-			Predicate uritemple = df.getUriTemplatePredicate(td
-					.getPrimaryKeys().size() + 1);
 			List<Term> terms = new ArrayList<Term>();
 			terms.add(df.getConstantLiteral(subjectTemple(td, td.getPrimaryKeys()
 					.size())));
@@ -279,7 +277,7 @@ public class DirectMappingAxiom {
 				terms.add(df.getVariable(tableName
 						+ td.getPrimaryKeys().get(i).getName()));
 			}
-			return df.getFunction(uritemple, terms);
+			return df.getUriTemplate(terms);
 
 		} else {
 			List<Term> vars = new ArrayList<Term>();
@@ -287,8 +285,7 @@ public class DirectMappingAxiom {
 				vars.add(df.getVariable(tableName + td.getAttributeName(i + 1)));
 			}
 
-			Predicate bNode = df.getBNodeTemplatePredicate(1);
-			return df.getFunction(bNode, vars);
+			return df.getBNodeTemplate(vars);
 		}
 	}
 

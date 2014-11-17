@@ -141,7 +141,7 @@ public class VocabularyValidator {
 	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
 	public Function getNormal(Function atom) {
-		Predicate p = atom.getPredicate();
+		Predicate p = atom.getFunctionSymbol();
 		
 		if (p.getArity() == 1) {
 			OClass c = ofac.createClass(p.getName());

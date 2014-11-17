@@ -6,13 +6,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
 
 import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 
 public class DatatypeFactoryImpl implements DatatypeFactory {
 
@@ -32,7 +32,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	private final DataTypePredicateImpl XSD_DATE, XSD_TIME, XSD_YEAR;
 	
 	private final Map<String, COL_TYPE> mapURItoCOLTYPE = new HashMap<String, COL_TYPE>();
-	private final Map<COL_TYPE, String> mapCOLTYPEtoURI = new HashMap<COL_TYPE, String>();
+	private final Map<COL_TYPE, URI> mapCOLTYPEtoURI = new HashMap<COL_TYPE, URI>();
 	private final Map<COL_TYPE, DataTypePredicateImpl> mapCOLTYPEtoPredicate = new HashMap<COL_TYPE, DataTypePredicateImpl>();
 	private final List<Predicate> predicateList = new LinkedList<Predicate>();
 	
@@ -64,7 +64,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	private final DataTypePredicateImpl registerType(org.openrdf.model.URI uri, COL_TYPE type) {
 		String sURI = uri.toString();
 		mapURItoCOLTYPE.put(sURI, type);  
-		mapCOLTYPEtoURI.put(type, sURI); 
+		mapCOLTYPEtoURI.put(type, uri); 
 		DataTypePredicateImpl predicate = new DataTypePredicateImpl(sURI, type);
 		mapCOLTYPEtoPredicate.put(type, predicate);
 		predicateList.add(predicate);
@@ -77,7 +77,12 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	}
 	
 	@Override
-	public String getDataTypeURI(COL_TYPE type) {
+	public COL_TYPE getDataType(URI uri) {
+		return mapURItoCOLTYPE.get(uri.stringValue());
+	}
+	
+	@Override
+	public URI getDataTypeURI(COL_TYPE type) {
 		return mapCOLTYPEtoURI.get(type);
 	}
 	

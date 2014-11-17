@@ -204,7 +204,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 					// we have never reached this atom, setting up the initial list
 					// of choices from the original fact list.				 
 					factChoices = new Stack<Function>();
-					factChoices.addAll(factMap.get(currentAtom.getPredicate()));
+					factChoices.addAll(factMap.get(currentAtom.getFunctionSymbol()));
 					choicesMap.add(currentAtomIdx, factChoices);
 				}
 				else
@@ -238,7 +238,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 					
 					// reseting choices state and backtracking and resetting the set
 					// of choices for the current position
-					factChoices.addAll(factMap.get(currentAtom.getPredicate()));
+					factChoices.addAll(factMap.get(currentAtom.getFunctionSymbol()));
 					currentAtomIdx--;
 					currentQuery = queryStack.pop();
 				} 

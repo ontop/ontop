@@ -29,6 +29,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.SQLQueryImpl;
 import it.unibz.krdb.obda.utils.IDGenerator;
 import it.unibz.krdb.obda.utils.URITemplates;
+
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
@@ -137,26 +138,24 @@ public class OBDAMappingTransformer {
 			String predName = pred.getName();
 			URI predUri = null; String predURIString ="";
 			
-			if (pred.equals(OBDAVocabulary.QUEST_TRIPLE_PRED))
-			{
+			if (pred.isTriplePredicate()) {
 				//triple
 				Function predf = (Function)func.getTerm(1);
-				if (predf.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI))
-				{
+				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
 					if (predf.getTerms().size() == 1) //fixed string
 					{
 						pred = OBDADataFactoryImpl.getInstance().getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
 						predUri = vf.createURI(pred.getName());
 					}
-					else
-					{
+				    else {
 						//custom predicate
 						predURIString = URITemplates.getUriTemplateString(predf, prefixmng);
 						predUri = vf.createURI(predURIString);
 					}
 				}
 				
-			} else {
+			} 
+			else {
 				predUri = vf.createURI(predName);
 			}
 			predURIString = predUri.stringValue();
@@ -179,7 +178,7 @@ public class OBDAMappingTransformer {
 				Statement triple_main_predicate = vf.createStatement(mainNode, R2RMLVocabulary.predicateObjectMap, predObjNode);
 				statements.add(triple_main_predicate);
 				
-				if (!predName.equals(OBDAVocabulary.QUEST_TRIPLE_STR)) {
+				if (!pred.isTriplePredicate()) {
 					//add predicate declaration to predObj node
 					Statement triple_predicateObject_predicate_uri = vf.createStatement(predObjNode, R2RMLVocabulary.predicate, predUri);
 					statements.add(triple_predicateObject_predicate_uri);
@@ -286,26 +285,22 @@ public class OBDAMappingTransformer {
 			String predName = pred.getName();
 			URI predUri = null; String predURIString ="";
 			
-			if (pred.equals(OBDAVocabulary.QUEST_TRIPLE_PRED))
-			{
+			if (pred.isTriplePredicate()) {
 				//triple
 				Function predf = (Function)func.getTerm(1);
-				if (predf.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI))
-				{
-					if (predf.getTerms().size() == 1) //fixed string
-					{
+				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
+					if (predf.getTerms().size() == 1) { //fixed string 
 						pred = OBDADataFactoryImpl.getInstance().getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
 						predUri = vf.createURI(pred.getName());
 					}
-					else
-					{
+					else {
 						//custom predicate
 						predURIString = URITemplates.getUriTemplateString(predf, prefixmng);
 						predUri = vf.createURI(predURIString);
 					}
-				}
-				
-			} else {
+				}	
+			} 
+			else {
 				predUri = vf.createURI(predName);
 			}
 			predURIString = predUri.stringValue();
@@ -325,7 +320,7 @@ public class OBDAMappingTransformer {
 				PredicateMap predM = mfact.createPredicateMap(TermMapType.CONSTANT_VALUED, predURIString);
 				ObjectMap obm = null; PredicateObjectMap pom = null;
                 Term object = null;
-				if (!predName.equals(OBDAVocabulary.QUEST_TRIPLE_STR)) {
+				if (!pred.isTriplePredicate()) {
 //					predM.setConstant(predURIString);
                     //add object declaration to predObj node
                     //term 0 is always the subject, we are interested in term 1

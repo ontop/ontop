@@ -793,21 +793,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 				mainColumn = termStr;
 
-			} else if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
-				/***
-				 * New template based URI building functions
-				 */
-
+			} 
+			else if (function instanceof URITemplatePredicate) {
+				// New template based URI building functions
+				mainColumn = getSQLStringForTemplateFunction(ov, index);
+			} 
+			else if (function instanceof BNodePredicate) {
+				// New template based BNODE building functions
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
 
-			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
-				/***
-				 * New template based BNODE building functions
-				 */
-
-				mainColumn = getSQLStringForTemplateFunction(ov, index);
-
-			} else {
+			} 
+			else {
 				throw new IllegalArgumentException(
 						"Error generating SQL query. Found an invalid function during translation: "
 								+ ov.toString());
@@ -874,7 +870,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (ht instanceof Function) {
 			Function ov = (Function) ht;
 			Predicate function = ov.getFunctionSymbol();
-			String functionString = function.toString();
 
 			/*
 			 * Adding the ColType column to the projection (used in the result
@@ -884,13 +879,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * type
 			 */
 			
-			if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
+			if (function instanceof URITemplatePredicate) {
                 code = questTypeMapper.getQuestCode(COL_TYPE.OBJECT);
 			} 
-			else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
+			else if (function instanceof BNodePredicate) {
                 code = questTypeMapper.getQuestCode(COL_TYPE.BNODE);
 			}
 			else {
+				String functionString = function.toString();
 				Predicate.COL_TYPE type = dtfac.getDataType(functionString);
 				code = questTypeMapper.getQuestCode(type);
 			}
@@ -898,7 +894,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		else if (ht instanceof URIConstant) {
             code = questTypeMapper.getQuestCode(COL_TYPE.OBJECT);
 		} 
-		else if (ht == OBDAVocabulary.NULL) {
+		else if (ht == OBDAVocabulary.NULL) {  // instance of ValueConstant
             code = questTypeMapper.getQuestCode(COL_TYPE.NULL);
 		}
 		else
@@ -926,7 +922,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			if (t instanceof BNode) {
 				c = (BNode) t;
-				literalValue = ((BNode) t).getValue();
+				literalValue = ((BNode) t).getName();
 			} else {
 				c = (ValueConstant) t;	
 				literalValue = ((ValueConstant) t).getValue();
@@ -1265,7 +1261,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			
 		} else {
 			String functionName = functionSymbol.toString();
-			if (functionName.equals(OBDAVocabulary.QUEST_CAST_STR)) {
+			if (functionName.equals(OBDAVocabulary.QUEST_CAST.getName())) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				String datatype = ((Constant) function.getTerm(1)).getValue();
 				int sqlDatatype = -1;
@@ -1277,7 +1273,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					return sqladapter.sqlCast(columnName, sqlDatatype);
 				}
-			} else if (functionName.equals(OBDAVocabulary.SPARQL_STR_URI)) {
+			} else if (functionName.equals(OBDAVocabulary.SPARQL_STR.getName())) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				if (isStringColType(function, index)) {
 					return columnName;
@@ -1290,11 +1286,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 		/*
 		 * The atom must be of the form uri("...", x, y)
 		 */
-		String functionName = function.getFunctionSymbol().toString();
-		if (functionName.equals(OBDAVocabulary.QUEST_URI) || functionName.equals(OBDAVocabulary.QUEST_BNODE)) {
+		// String functionName = function.getFunctionSymbol().toString();
+		if ((functionSymbol instanceof URITemplatePredicate) || (functionSymbol instanceof BNodePredicate)) {
 			return getSQLStringForTemplateFunction(function, index);
-		} else {
-			throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
+		} 
+		else {
+			throw new RuntimeException("Unexpected function in the query: " + function);
 		}
 	}
 
@@ -1348,7 +1345,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		String operator = null;
 		if (functionSymbol.equals(OBDAVocabulary.ADD)) {
 			operator = ADD_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.SUBSTRACT)) {
+		} else if (functionSymbol.equals(OBDAVocabulary.SUBTRACT)) {
 			operator = SUBSTRACT_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.MULTIPLY)) {
 			operator = MULTIPLY_OPERATOR;

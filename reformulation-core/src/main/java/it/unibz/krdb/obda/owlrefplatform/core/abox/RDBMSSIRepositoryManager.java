@@ -1291,7 +1291,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			// Construct the database INSERT statements
 			ObjectConstant subject = attributeAssertion.getSubject();
 
-			String uri = subject.getValue();
+			String uri = subject.getName();
 			 uri_id = uriMap.idOfURI(uri);
 				uriidStm.setInt(1, uri_id);
 				uriidStm.setString(2, uri);
@@ -1302,7 +1302,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			int idx = cacheSI.getIndex(prop);
 
 				// Get the object property assertion
-				String uri2 = object.getValue();
+				String uri2 = object.getName();
 				boolean c2isBNode = object instanceof BNode;
 
 				if (isInverse(prop)) {
@@ -1361,7 +1361,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			// Construct the database INSERT statements
 			ObjectConstant subject = attributeAssertion.getSubject();
 
-			String uri = subject.getValue();
+			String uri = subject.getName();
 			 uri_id = uriMap.idOfURI(uri);
 				uriidStm.setInt(1, uri_id);
 				uriidStm.setString(2, uri);
@@ -2490,8 +2490,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			// Mapping head
 
 			Function head = dfac.getFunction(dfac.getPredicate("m", 1), dfac.getVariable("X"));
-			Function body1 = dfac.getFunction(classuri, dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("X")));
-			Function body2 = dfac.getFunction(classuri, dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X")));
+			Function body1 = dfac.getFunction(classuri, dfac.getUriTemplate(dfac.getVariable("X")));
+			Function body2 = dfac.getFunction(classuri, dfac.getBNodeTemplate(dfac.getVariable("X")));
 			
 			/*
 			 * This target query is shared by all mappings for this class
@@ -2705,11 +2705,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Function subjectTerm;
 		if (type1 == COL_TYPE.OBJECT) {
 
-			subjectTerm = dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("X"));
+			subjectTerm = dfac.getUriTemplate(dfac.getVariable("X"));
 
 		} else if (type1 == COL_TYPE.BNODE) {
 
-			subjectTerm = dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("X"));
+			subjectTerm = dfac.getBNodeTemplate(dfac.getVariable("X"));
 
 		} else {
 			throw new RuntimeException("Unsupported object type: " + type1);
@@ -2719,26 +2719,24 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Function objectTerm;
 		if (type2 == COL_TYPE.BNODE) {
 
-			objectTerm = dfac.getFunction(dfac.getBNodeTemplatePredicate(1), dfac.getVariable("Y"));
+			objectTerm = dfac.getBNodeTemplate(dfac.getVariable("Y"));
 
 		} 
 		else if (type2 == COL_TYPE.OBJECT) {
 
-			objectTerm = dfac.getFunction(dfac.getUriTemplatePredicate(1), dfac.getVariable("Y"));
+			objectTerm = dfac.getUriTemplate(dfac.getVariable("Y"));
 
 		} 
 		else if (type2 == COL_TYPE.LITERAL_LANG) { 
-			objectTerm = dfac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG), dfac.getVariable("Y"), dfac.getVariable("Z"));
+			objectTerm = dfac.getTypedTerm(dfac.getVariable("Y"), dfac.getVariable("Z"));
 		} 
 		else {
-			Predicate pred = dtfac.getTypePredicate(type2);
-			
-			if (pred == null ||  // R: the three types below were not covered by the switch
-					type2 == COL_TYPE.DATE || type2 == COL_TYPE.TIME || type2 == COL_TYPE.YEAR) {
+			if (type2 == COL_TYPE.DATE || type2 == COL_TYPE.TIME || type2 == COL_TYPE.YEAR) {
+				// R: the three types below were not covered by the switch
 				throw new RuntimeException("Unsuported type: " + type2);
 			}
 			
-			objectTerm = dfac.getFunction(pred, dfac.getVariable("Y"));
+			objectTerm = dfac.getTypedTerm(dfac.getVariable("Y"), type2);
 		}
 		bodyTerms.add(objectTerm);
 
@@ -4107,7 +4105,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public static int getIndexHash(Function f) {
 		int hash = 0;
 
-		hash = f.getPredicate().hashCode() * (31 ^ f.getArity());
+		hash = f.getFunctionSymbol().hashCode() * (31 ^ f.getArity());
 		for (int i = 0; i < f.getArity(); i++) {
 			Term term = f.getTerm(i);
 			int termhash = getHash((Function) term);
@@ -4134,7 +4132,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		if (f.getReferencedVariables().isEmpty()) {
 			hash = f.hashCode();
 		} else
-			hash = (f.getPredicate().hashCode() + f.getTerms().size());
+			hash = (f.getFunctionSymbol().hashCode() + f.getTerms().size());
 		return hash;
 	}
 

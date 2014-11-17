@@ -215,7 +215,7 @@ public class TMappingProcessor {
 		int freshVarCount = 0;
 		List<Function> newBody = new LinkedList<Function>();
 		for (Function currentAtom : currentMapping.getBody()) {
-			if (!(currentAtom.getPredicate() instanceof BuiltinPredicate)) {
+			if (!(currentAtom.getFunctionSymbol() instanceof BuiltinPredicate)) {
 				Function clone = (Function)currentAtom.clone();
 				for (int i = 0; i < clone.getTerms().size(); i++) {
 					Term term = clone.getTerm(i);

@@ -328,7 +328,7 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x, a);
 		Function ans3 = createRule(ANS3, x, b);
-		Function join = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans2, ans3);
+		Function join = dataFactory.getSPARQLJoin(ans2, ans3);
 		
 		/**
 		 * ans1(x,a,b) :- Join(ans2(x,a), ans3(x,b))
@@ -353,8 +353,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, b, c);
 		Function ans4 = createRule(ANS4, x, b);
 		Function ans5 = createRule(ANS5, x, c);
-		Function join1 = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans2, ans3);
-		Function join2 = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans4, ans5);
+		Function join1 = dataFactory.getSPARQLJoin(ans2, ans3);
+		Function join2 = dataFactory.getSPARQLJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- Join(ans2(x,a), ans3(x,b,c))
@@ -381,7 +381,7 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x, a);
 		Function ans3 = createRule(ANS3, x, b);
-		Function leftJoin = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans2, ans3);
+		Function leftJoin = dataFactory.getSPARQLLeftJoin(ans2, ans3);
 		
 		/**
 		 * ans1(x,a,b) :- LeftJoin(ans2(x,a), ans3(x,b))
@@ -406,8 +406,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, b, c);
 		Function ans4 = createRule(ANS4, x, b);
 		Function ans5 = createRule(ANS5, x, c);
-		Function join1 = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans2, ans3);
-		Function join2 = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans4, ans5);
+		Function join1 = dataFactory.getSPARQLLeftJoin(ans2, ans3);
+		Function join2 = dataFactory.getSPARQLLeftJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- LeftJoin(ans2(x,a), ans3(x,b,c))
@@ -436,8 +436,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, b, c);
 		Function ans4 = createRule(ANS4, x, b);
 		Function ans5 = createRule(ANS5, x, c);
-		Function join1 = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans2, ans3);
-		Function join2 = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans4, ans5);
+		Function join1 = dataFactory.getSPARQLLeftJoin(ans2, ans3);
+		Function join2 = dataFactory.getSPARQLJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- LeftJoin(ans2(x,a), ans3(x,b,c))
@@ -464,7 +464,7 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x);
 		Function ans2 = createRule(ANS2, x);
 		Function ans3 = createRule(ANS3, x, d);
-		Function join = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans2, ans3);
+		Function join = dataFactory.getSPARQLJoin(ans2, ans3);
 		
 		/**
 		 * ans1(x) :- Join(ans2(x), ans3(x,d))
@@ -493,8 +493,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, a, b);
 		Function ans4 = createRule(ANS4, x, a);
 		Function ans5 = createRule(ANS5, x, b);
-		Function join1 = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans2, ans3);
-		Function join2 = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans4, ans5);
+		Function join1 = dataFactory.getSPARQLJoin(ans2, ans3);
+		Function join2 = dataFactory.getSPARQLJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- Join(ans2(x), ans3(x,a,b))
@@ -525,7 +525,7 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x);
 		Function ans2 = createRule(ANS2, x);
 		Function ans3 = createRule(ANS3, x, d);
-		Function join = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans2, ans3);
+		Function join = dataFactory.getSPARQLLeftJoin(ans2, ans3);
 		
 		/**
 		 * ans1(x) :- LeftJoin(ans2(x), ans3(x,d))
@@ -554,8 +554,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, a, b);
 		Function ans4 = createRule(ANS4, x, a);
 		Function ans5 = createRule(ANS5, x, b);
-		Function join1 = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans2, ans3);
-		Function join2 = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans4, ans5);
+		Function join1 = dataFactory.getSPARQLLeftJoin(ans2, ans3);
+		Function join2 = dataFactory.getSPARQLLeftJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- LeftJoin(ans2(x), ans3(x,a,b))
@@ -588,8 +588,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, a, b);
 		Function ans4 = createRule(ANS4, x, a);
 		Function ans5 = createRule(ANS5, x, b);
-		Function join1 = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans2, ans3);
-		Function join2 = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans4, ans5);
+		Function join1 = dataFactory.getSPARQLJoin(ans2, ans3);
+		Function join2 = dataFactory.getSPARQLLeftJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- Join(ans2(x), ans3(x,a,b))

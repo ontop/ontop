@@ -20,6 +20,7 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -259,7 +260,7 @@ public class QuestUnfolder {
 					continue;
 				}
 				Function fun = (Function) term;
-				if (!(fun.getFunctionSymbol().toString().equals(OBDAVocabulary.QUEST_URI))) {
+				if (!(fun.getFunctionSymbol() instanceof URITemplatePredicate)) {
 					continue;
 				}
 				/*
@@ -277,7 +278,7 @@ public class QuestUnfolder {
 					if (templateStrings.contains("(.+)")) {
 						continue;
 					}
-					Function templateFunction = fac.getFunction(fac.getUriTemplatePredicate(1), fac.getVariable("x"));
+					Function templateFunction = fac.getUriTemplate(fac.getVariable("x"));
 					Pattern matcher = Pattern.compile("(.+)");
 					uriTemplateMatcher.put(matcher, templateFunction);
 					templateStrings.add("(.+)");
@@ -330,12 +331,11 @@ public class QuestUnfolder {
 				 * uri(Class))
 				 */
 				terms.add(currenthead.getTerm(0));
-				Function rdfTypeConstant = fac.getFunction(fac.getUriTemplatePredicate(1),
-						fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
+				Function rdfTypeConstant = fac.getUriTemplate(fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 				terms.add(rdfTypeConstant);
 
 				String classname = currenthead.getFunctionSymbol().getName();
-				terms.add(fac.getFunction(fac.getUriTemplatePredicate(1), fac.getConstantLiteral(classname)));
+				terms.add(fac.getUriTemplate(fac.getConstantLiteral(classname)));
 				newhead = fac.getFunction(pred, terms);
 
 			} else if (currenthead.getArity() == 2) {
@@ -346,7 +346,7 @@ public class QuestUnfolder {
 				terms.add(currenthead.getTerm(0));
 
 				String propname = currenthead.getFunctionSymbol().getName();
-				Function propconstant = fac.getFunction(fac.getUriTemplatePredicate(1), fac.getConstantLiteral(propname));
+				Function propconstant = fac.getUriTemplate(fac.getConstantLiteral(propname));
 				terms.add(propconstant);
 				terms.add(currenthead.getTerm(1));
 				newhead = fac.getFunction(pred, terms);
