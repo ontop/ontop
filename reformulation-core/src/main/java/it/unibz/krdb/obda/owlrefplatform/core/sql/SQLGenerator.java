@@ -43,7 +43,6 @@ import org.openrdf.model.Literal;
 import java.sql.Types;
 import java.util.*;
 
-//import com.hp.hpl.jena.rdf.model.Literal;
 
 public class SQLGenerator implements SQLQueryGenerator {
 
@@ -321,7 +320,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String rightOp = getSQLString(right, index, true);
 				return String.format("(" + expressionFormat + ")", leftOp, rightOp);
 			} else if (atom.isArithmeticFunction()) {
-				// For numerical operators, e.g., MUTLIPLY, SUBSTRACT, ADDITION
+				// For numerical operators, e.g., MUTLIPLY, SUBTRACT, ADDITION
 				String expressionFormat = getNumericalOperatorString(functionSymbol);
 				Term left = atom.getTerm(0);
 				Term right = atom.getTerm(1);

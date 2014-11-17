@@ -76,10 +76,10 @@ public class MappingVocabularyRepair {
 
 	/***
 	 * Makes sure that the mappings given are correctly typed w.r.t. the given
-	 * vocabualry.
+	 * vocabulary.
 	 * 
 	 * @param originalMappings
-	 * @param equivalencesMap
+	 * @param vocabulary
 	 * @return
 	 */
 	public Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, OntologyVocabulary vocabulary) {

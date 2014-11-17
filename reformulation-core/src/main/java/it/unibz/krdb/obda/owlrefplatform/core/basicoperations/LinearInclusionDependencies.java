@@ -43,7 +43,6 @@ public class LinearInclusionDependencies {
 	 * @param head: atom
 	 * @param body: atom
 	 */
-	
 	public void addRule(Function head, Function body) {
         CQIE rule = ofac.getCQIE(head, body);
 		//rule = DatalogUnfolder.getFreshRule(rule, 4022013); // Random suffix number
