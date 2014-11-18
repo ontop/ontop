@@ -100,10 +100,27 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 //		return name;
 	}
 
+	/**
+	 * There is no standard for this part.
+	 *
+	 * Arbitrary default implementation proposed
+	 * (may not work with many DB engines).
+	 */
 	@Override
 	public String sqlSlice(long limit, long offset) {
-		// TODO Auto-generated method stub
-		return null;
+		if ((limit < 0) && (offset < 0)) {
+			return "";
+		}
+		else if ((limit >= 0) && (offset >= 0)) {
+			return String.format("LIMIT %d, %d", offset, limit);
+		}
+		else if (offset < 0) {
+			return String.format("LIMIT %d", limit);
+		}
+		// Else -> (limit < 0)
+		else {
+			return String.format("OFFSET %d", offset);
+		}
 	}
 
 	@Override
@@ -171,9 +188,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	 * will also normalize the use of Z to the timezome +00:00 and last, if the
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
-	 * 
-	 * @param rdfliteral
-	 * @return
+	 *
 	 */
 	public String getSQLLexicalFormDatetime(String v) {
 		// TODO: check whether this implementation inherited from JDBCUtility is correct
