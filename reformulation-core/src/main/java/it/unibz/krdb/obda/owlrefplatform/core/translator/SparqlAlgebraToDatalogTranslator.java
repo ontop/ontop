@@ -88,11 +88,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	public void setTemplateMatcher(UriTemplateMatcher templateMatcher) {
 		uriTemplateMatcher = templateMatcher;
 	}
-	
-	public void setSemanticIndexUriRef(SemanticIndexURIMap uriRef) {
-		this.uriRef = uriRef;
-	}
-	
+
 
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
 
