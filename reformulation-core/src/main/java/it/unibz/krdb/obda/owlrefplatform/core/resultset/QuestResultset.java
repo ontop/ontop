@@ -23,7 +23,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.resultset;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.QuestTypeMapper;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 
@@ -40,21 +39,21 @@ public class QuestResultset implements TupleResultSet {
 	private ResultSet set = null;
 	QuestStatement st;
 	private List<String> signature;
-	private DecimalFormat formatter = new DecimalFormat("0.0###E0");
+	private final DecimalFormat formatter = new DecimalFormat("0.0###E0");
 
-	private HashMap<String, Integer> columnMap;
+	private final HashMap<String, Integer> columnMap;
 
-	private HashMap<String, String> bnodeMap;
+	private final HashMap<String, String> bnodeMap;
 
 	// private LinkedHashSet<String> uriRef = new LinkedHashSet<String>();
 	private int bnodeCounter = 0;
 
-	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	private SemanticIndexURIMap uriMap;
+	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private final SemanticIndexURIMap uriMap;
 	
-	private String vendor;
-	private boolean isOracle;
-    private boolean isMsSQL;
+	private final String vendor;
+	private final boolean isOracle;
+    private final boolean isMsSQL;
 
 	/***
 	 * Constructs an OBDA statement from an SQL statement, a signature described
@@ -338,7 +337,7 @@ public class QuestResultset implements TupleResultSet {
 
 	private COL_TYPE getQuestType(int typeCode) {
 
-        COL_TYPE questType = fac.getQuestTypeMapper().getQuestType(typeCode);
+        COL_TYPE questType = COL_TYPE.getQuestType(typeCode);
 
         if (questType == null)
         	throw new RuntimeException("typeCode unknown: " + typeCode);

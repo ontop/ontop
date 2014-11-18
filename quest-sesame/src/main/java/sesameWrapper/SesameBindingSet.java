@@ -20,26 +20,19 @@ package sesameWrapper;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatatypeFactory;
+import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.TupleResultSet;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestResultset;
+import it.unibz.krdb.obda.sesame.SesameHelper;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.impl.BindingImpl;
@@ -49,11 +42,11 @@ public class SesameBindingSet implements BindingSet {
 	private static final long serialVersionUID = -8455466574395305166L;
 	private QuestResultset set = null;
 	private int count = 0;
-	private final ValueFactory fact = new ValueFactoryImpl();
 	private final Set<String> bindingnames;
 //	private List<String> signature;
-	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
+	private final SesameHelper helper = new SesameHelper();
+	
 	public SesameBindingSet(TupleResultSet set, Set<String> bindingnames) {
 		this.bindingnames = bindingnames;
 //		this.signature = signature;
@@ -62,12 +55,13 @@ public class SesameBindingSet implements BindingSet {
 		
 	}
 
+	@Override
 	public Binding getBinding(String bindingName) {
 		// return the Binding with bindingName
 		return createBinding(bindingName);
 	}
 
-	
+	@Override	
 	public Set<String> getBindingNames() {
 		return bindingnames;
 //		try {
@@ -84,6 +78,7 @@ public class SesameBindingSet implements BindingSet {
 //		return null;
 	}
 
+	@Override
 	public Value getValue(String bindingName) {
 		return createBinding(bindingName).getValue();
 	}
@@ -98,35 +93,11 @@ public class SesameBindingSet implements BindingSet {
 					return null;
 				} 
 				else {
-					if (c instanceof BNode) {           // COL_TYPE.BNODE
-						value = fact.createBNode(((BNode)c).getName());
-					} 
-					else if (c instanceof URIConstant) {  // COL_TYPE.OBJECT
-						value = fact.createURI(((URIConstant)c).getURI());
-					} 
-					else if (c instanceof ValueConstant) {
-						ValueConstant literal = (ValueConstant)c;
-						COL_TYPE col_type = literal.getType();
-						
-						if (col_type == COL_TYPE.LITERAL_LANG) {
-							// special case
-							value = fact.createLiteral(literal.getValue(), literal.getLanguage());
-						} 
-						else if (col_type == COL_TYPE.LITERAL) {
-							// also a special case!
-							value = fact.createLiteral(literal.getValue());
-						} 
-						else if (col_type == COL_TYPE.OBJECT) {
-							// TODO: Replace this with object datatype in the future
-							value = fact.createLiteral(literal.getValue(), XMLSchema.STRING);
-						} 
-						else {
-							URI datatype = dtfac.getDataTypeURI(col_type);
-							if (datatype == null)
-								throw new RuntimeException("Found unknown TYPE for constant: " + c + " with COL_TYPE="+ col_type + " and variable=" + bindingName);
-							
-							value = fact.createLiteral(literal.getValue(), datatype);							
-						}
+					if (c instanceof ValueConstant) {
+						value = helper.getLiteral((ValueConstant)c);
+					}
+					else {
+						value = helper.getResource((ObjectConstant)c);
 					}
 				}
 			}
@@ -138,6 +109,7 @@ public class SesameBindingSet implements BindingSet {
 //		return null;
 	}
 
+	@Override
 	public boolean hasBinding(String bindingName) {
 		return bindingnames.contains(bindingName);
 //		try {
@@ -148,6 +120,7 @@ public class SesameBindingSet implements BindingSet {
 //		return false;
 	}
 
+	@Override
 	public Iterator<Binding> iterator() {
 
 		List<Binding> allBindings = new LinkedList<Binding>();
@@ -163,8 +136,8 @@ public class SesameBindingSet implements BindingSet {
 		return allBindings.iterator();
 	}
 
+	@Override
 	public int size() {
 		return count;
 	}
-
 }

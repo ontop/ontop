@@ -51,17 +51,13 @@ public class UriTemplateMatcher {
 		uriTemplateMatcher.clear();
 	}
 	
-	public UriTemplateMatcher(Map<Pattern, Function> existing) {
-		uriTemplateMatcher.putAll(existing);
-	}
-	
 	public void put(Pattern uriTemplatePattern, Function uriFunction) {
 		uriTemplateMatcher.put(uriTemplatePattern, uriFunction);
 	}
 	
 	/***
 	 * We will try to match the URI to one of our patterns, if this happens, we
-	 * have a corresponding function, and the paramters for this function. The
+	 * have a corresponding function, and the parameters for this function. The
 	 * parameters are the values for the groups of the pattern.
 	 */
 	public Function generateURIFunction(String uriString) {
