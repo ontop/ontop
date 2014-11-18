@@ -192,7 +192,7 @@ public class DAGEquivalenceTest extends TestCase {
 		assertEquals(1, interval.getStart());
 		assertEquals(3, interval.getEnd());
 
-		EquivalencesDAG<ObjectPropertyExpression> properties = dag.getObjectProperties();
+		EquivalencesDAG<ObjectPropertyExpression> properties = dag.getObjectPropertyDAG();
 		
 		ObjectPropertyExpression d = properties.getVertex(onto.getVocabulary().getObjectProperty(testURI + "A2")).getRepresentative();
 		assertTrue(d.equals(onto.getVocabulary().getObjectProperty(testURI + "A1").getInverse()));

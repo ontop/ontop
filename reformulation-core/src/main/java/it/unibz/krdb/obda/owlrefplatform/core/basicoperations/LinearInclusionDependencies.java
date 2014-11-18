@@ -59,9 +59,9 @@ public class LinearInclusionDependencies {
 	public static LinearInclusionDependencies getABoxDependencies(TBoxReasoner reasoner, boolean full) {
 		LinearInclusionDependencies dependencies = new LinearInclusionDependencies();
 		
-		for (Equivalences<ObjectPropertyExpression> propNode : reasoner.getObjectProperties()) {
+		for (Equivalences<ObjectPropertyExpression> propNode : reasoner.getObjectPropertyDAG()) {
 			// super might be more efficient
-			for (Equivalences<ObjectPropertyExpression> subpropNode : reasoner.getObjectProperties().getSub(propNode)) {
+			for (Equivalences<ObjectPropertyExpression> subpropNode : reasoner.getObjectPropertyDAG().getSub(propNode)) {
 				for (ObjectPropertyExpression subprop : subpropNode) {
 					if (subprop.isInverse())
 						continue;
@@ -78,9 +78,9 @@ public class LinearInclusionDependencies {
 				}
 			}
 		}
-		for (Equivalences<DataPropertyExpression> propNode : reasoner.getDataProperties()) {
+		for (Equivalences<DataPropertyExpression> propNode : reasoner.getDataPropertyDAG()) {
 			// super might be more efficient
-			for (Equivalences<DataPropertyExpression> subpropNode : reasoner.getDataProperties().getSub(propNode)) {
+			for (Equivalences<DataPropertyExpression> subpropNode : reasoner.getDataPropertyDAG().getSub(propNode)) {
 				for (DataPropertyExpression subprop : subpropNode) {
 					
 	                Function body = translate(subprop);
@@ -95,9 +95,9 @@ public class LinearInclusionDependencies {
 				}
 			}
 		}
-		for (Equivalences<ClassExpression> classNode : reasoner.getClasses()) {
+		for (Equivalences<ClassExpression> classNode : reasoner.getClassDAG()) {
 			// super might be more efficient
-			for (Equivalences<ClassExpression> subclassNode : reasoner.getClasses().getSub(classNode)) {
+			for (Equivalences<ClassExpression> subclassNode : reasoner.getClassDAG().getSub(classNode)) {
 				for (ClassExpression subclass : subclassNode) {
 
 	                Function body = translate(subclass, variableYname);

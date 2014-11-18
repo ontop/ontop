@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.quest.dag;
  */
 
 
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
@@ -65,9 +64,9 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 	public TestTBoxReasonerImpl_OnNamedDAG(TBoxReasoner reasoner) {
 		NamedDAG dag = new NamedDAG(reasoner);
 		
-		this.objectPropertyDAG = new EquivalencesDAGImpl<ObjectPropertyExpression>(dag.getObjectPropertyDag(), reasoner.getObjectProperties());
-		this.dataPropertyDAG = new EquivalencesDAGImpl<DataPropertyExpression>(dag.getDataPropertyDag(), reasoner.getDataProperties());
-		this.classDAG = new EquivalencesDAGImpl<ClassExpression>(dag.getClassDag(), reasoner.getClasses());		
+		this.objectPropertyDAG = new EquivalencesDAGImpl<ObjectPropertyExpression>(dag.getObjectPropertyDag(), reasoner.getObjectPropertyDAG());
+		this.dataPropertyDAG = new EquivalencesDAGImpl<DataPropertyExpression>(dag.getDataPropertyDag(), reasoner.getDataPropertyDAG());
+		this.classDAG = new EquivalencesDAGImpl<ClassExpression>(dag.getClassDag(), reasoner.getClassDAG());
 		this.dataRangeDAG = new EquivalencesDAGImpl<DataRangeExpression>(dag.getDataRangeDag(), reasoner.getDataRanges());		
 	}
 
@@ -78,7 +77,7 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<ObjectPropertyExpression> getObjectProperties() {
+	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG() {
 		return objectPropertyDAG;
 	}
 	
@@ -88,7 +87,7 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<DataPropertyExpression> getDataProperties() {
+	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG() {
 		return dataPropertyDAG;
 	}
 
@@ -99,7 +98,7 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<ClassExpression> getClasses() {
+	public EquivalencesDAG<ClassExpression> getClassDAG() {
 		return classDAG;
 	}
 

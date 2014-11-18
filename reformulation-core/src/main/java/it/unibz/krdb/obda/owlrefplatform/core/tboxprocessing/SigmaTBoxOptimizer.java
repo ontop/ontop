@@ -135,7 +135,7 @@ public class SigmaTBoxOptimizer {
 		else {
 //			log.debug("Not directly redundant role {} {}", parent, child);
 			for (Equivalences<ObjectPropertyExpression> children_prime : 
-							isa.getObjectProperties().getDirectSub(isa.getObjectProperties().getVertex(parent))) {
+							isa.getObjectPropertyDAG().getDirectSub(isa.getObjectPropertyDAG().getVertex(parent))) {
 				ObjectPropertyExpression child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
@@ -157,7 +157,7 @@ public class SigmaTBoxOptimizer {
 		else {
 //			log.debug("Not directly redundant role {} {}", parent, child);
 			for (Equivalences<DataPropertyExpression> children_prime : 
-							isa.getDataProperties().getDirectSub(isa.getDataProperties().getVertex(parent))) {
+							isa.getDataPropertyDAG().getDirectSub(isa.getDataPropertyDAG().getVertex(parent))) {
 				DataPropertyExpression child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
@@ -195,7 +195,7 @@ public class SigmaTBoxOptimizer {
 			return true;
 		else {
 			for (Equivalences<ObjectPropertyExpression> children_prime : 
-						isa.getObjectProperties().getDirectSub(isa.getObjectProperties().getVertex(parent))) {
+						isa.getObjectPropertyDAG().getDirectSub(isa.getObjectPropertyDAG().getVertex(parent))) {
 				ObjectPropertyExpression child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
@@ -213,7 +213,7 @@ public class SigmaTBoxOptimizer {
 			return true;
 		else {
 			for (Equivalences<DataPropertyExpression> children_prime : 
-							isa.getDataProperties().getDirectSub(isa.getDataProperties().getVertex(parent))) {
+							isa.getDataPropertyDAG().getDirectSub(isa.getDataPropertyDAG().getVertex(parent))) {
 				DataPropertyExpression child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
@@ -231,7 +231,7 @@ public class SigmaTBoxOptimizer {
 		if (check_directly_redundant(parent, child))
 			return true;
 		else {
-			for (Equivalences<ClassExpression> children_prime : isa.getClasses().getDirectSub(isa.getClasses().getVertex(parent))) {
+			for (Equivalences<ClassExpression> children_prime : isa.getClassDAG().getDirectSub(isa.getClassDAG().getVertex(parent))) {
 				ClassExpression child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
@@ -263,27 +263,27 @@ public class SigmaTBoxOptimizer {
 	
 	private boolean check_directly_redundant(ObjectPropertyExpression parent, ObjectPropertyExpression child) {
 		
-		Equivalences<ObjectPropertyExpression> sp = sigmaChain.getObjectProperties().getVertex(parent);
-		Equivalences<ObjectPropertyExpression> sc = sigmaChain.getObjectProperties().getVertex(child);
+		Equivalences<ObjectPropertyExpression> sp = sigmaChain.getObjectPropertyDAG().getVertex(parent);
+		Equivalences<ObjectPropertyExpression> sc = sigmaChain.getObjectPropertyDAG().getVertex(child);
 		
 		// if one of them is not in the respective DAG
 		if (sp == null || sc == null) 
 			return false;
 
-		Set<Equivalences<ObjectPropertyExpression>> spChildren =  sigmaChain.getObjectProperties().getDirectSub(sp);
+		Set<Equivalences<ObjectPropertyExpression>> spChildren =  sigmaChain.getObjectPropertyDAG().getDirectSub(sp);
 		
 		if (!spChildren.contains(sc))
 			return false;
 		
 		
 		
-		Equivalences<ObjectPropertyExpression> tc = isaChain.getObjectProperties().getVertex(child);
+		Equivalences<ObjectPropertyExpression> tc = isaChain.getObjectPropertyDAG().getVertex(child);
 		// if one of them is not in the respective DAG
 		if (tc == null) 
 			return false;
 		
-		Set<Equivalences<ObjectPropertyExpression>> scChildren = sigmaChain.getObjectProperties().getSub(sc);
-		Set<Equivalences<ObjectPropertyExpression>> tcChildren = isaChain.getObjectProperties().getSub(tc);
+		Set<Equivalences<ObjectPropertyExpression>> scChildren = sigmaChain.getObjectPropertyDAG().getSub(sc);
+		Set<Equivalences<ObjectPropertyExpression>> tcChildren = isaChain.getObjectPropertyDAG().getSub(tc);
 
 		return scChildren.containsAll(tcChildren);
 	}
@@ -291,54 +291,54 @@ public class SigmaTBoxOptimizer {
 	
 	private boolean check_directly_redundant(DataPropertyExpression parent, DataPropertyExpression child) {
 		
-		Equivalences<DataPropertyExpression> sp = sigmaChain.getDataProperties().getVertex(parent);
-		Equivalences<DataPropertyExpression> sc = sigmaChain.getDataProperties().getVertex(child);
+		Equivalences<DataPropertyExpression> sp = sigmaChain.getDataPropertyDAG().getVertex(parent);
+		Equivalences<DataPropertyExpression> sc = sigmaChain.getDataPropertyDAG().getVertex(child);
 		
 		// if one of them is not in the respective DAG
 		if (sp == null || sc == null) 
 			return false;
 
-		Set<Equivalences<DataPropertyExpression>> spChildren =  sigmaChain.getDataProperties().getDirectSub(sp);
+		Set<Equivalences<DataPropertyExpression>> spChildren =  sigmaChain.getDataPropertyDAG().getDirectSub(sp);
 		
 		if (!spChildren.contains(sc))
 			return false;
 		
 		
 		
-		Equivalences<DataPropertyExpression> tc = isaChain.getDataProperties().getVertex(child);
+		Equivalences<DataPropertyExpression> tc = isaChain.getDataPropertyDAG().getVertex(child);
 		// if one of them is not in the respective DAG
 		if (tc == null) 
 			return false;
 		
-		Set<Equivalences<DataPropertyExpression>> scChildren = sigmaChain.getDataProperties().getSub(sc);
-		Set<Equivalences<DataPropertyExpression>> tcChildren = isaChain.getDataProperties().getSub(tc);
+		Set<Equivalences<DataPropertyExpression>> scChildren = sigmaChain.getDataPropertyDAG().getSub(sc);
+		Set<Equivalences<DataPropertyExpression>> tcChildren = isaChain.getDataPropertyDAG().getSub(tc);
 
 		return scChildren.containsAll(tcChildren);
 	}
 	
 	private boolean check_directly_redundant(ClassExpression parent, ClassExpression child) {
 		
-		Equivalences<ClassExpression> sp = sigmaChain.getClasses().getVertex(parent);
-		Equivalences<ClassExpression> sc = sigmaChain.getClasses().getVertex(child);
+		Equivalences<ClassExpression> sp = sigmaChain.getClassDAG().getVertex(parent);
+		Equivalences<ClassExpression> sc = sigmaChain.getClassDAG().getVertex(child);
 		
 		// if one of them is not in the respective DAG
 		if (sp == null || sc == null) 
 			return false;
 
-		Set<Equivalences<ClassExpression>> spChildren =  sigmaChain.getClasses().getDirectSub(sp);
+		Set<Equivalences<ClassExpression>> spChildren =  sigmaChain.getClassDAG().getDirectSub(sp);
 		
 		if (!spChildren.contains(sc))
 			return false;
 		
 		
 		
-		Equivalences<ClassExpression> tc = isaChain.getClasses().getVertex(child);
+		Equivalences<ClassExpression> tc = isaChain.getClassDAG().getVertex(child);
 		// if one of them is not in the respective DAG
 		if (tc == null) 
 			return false;
 		
-		Set<Equivalences<ClassExpression>> scChildren = sigmaChain.getClasses().getSub(sc);
-		Set<Equivalences<ClassExpression>> tcChildren = isaChain.getClasses().getSub(tc);
+		Set<Equivalences<ClassExpression>> scChildren = sigmaChain.getClassDAG().getSub(sc);
+		Set<Equivalences<ClassExpression>> tcChildren = isaChain.getClassDAG().getSub(tc);
 
 		return scChildren.containsAll(tcChildren);
 	}

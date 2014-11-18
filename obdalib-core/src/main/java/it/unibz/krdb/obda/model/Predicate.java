@@ -52,7 +52,7 @@ public interface Predicate extends Cloneable, Serializable {
 		TIME,
 		YEAR,
 		LONG,
-		NULL ;
+		NULL,
     };
 
 	/**

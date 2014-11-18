@@ -888,7 +888,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				ObjectPropertyExpression propDesc = ofac.createObjectProperty(prop);
 
 				/*if (!reasonerDag.isCanonicalRepresentative(propDesc))*/ {
-					ObjectPropertyExpression desc = reasonerDag.getObjectProperties().getVertex(propDesc).getRepresentative();
+					ObjectPropertyExpression desc = reasonerDag.getObjectPropertyDAG().getVertex(propDesc).getRepresentative();
 					if (desc.isInverse()) {
 						String tmp = uri1;
 						boolean tmpIsBnode = c1isBNode;
@@ -1510,7 +1510,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private boolean isInverse(ObjectPropertyExpression property) {
 	
-		ObjectPropertyExpression desc = reasonerDag.getObjectProperties().getVertex(property).getRepresentative();
+		ObjectPropertyExpression desc = reasonerDag.getObjectPropertyDAG().getVertex(property).getRepresentative();
 		if (!property.equals(desc)) {
 			if (desc.isInverse()) 
 				return true;
@@ -2050,7 +2050,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		Set<Predicate> roleNodes = new HashSet<Predicate>();
 
-		for (Equivalences<ObjectPropertyExpression> set: reasonerDag.getObjectProperties()) {
+		for (Equivalences<ObjectPropertyExpression> set: reasonerDag.getObjectPropertyDAG()) {
 
 			ObjectPropertyExpression node = set.getRepresentative();
 			// only named roles are mapped
@@ -2065,7 +2065,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			roleNodes.add(node.getPredicate());
 		}
 		
-		for (Equivalences<DataPropertyExpression> set: reasonerDag.getDataProperties()) {
+		for (Equivalences<DataPropertyExpression> set: reasonerDag.getDataPropertyDAG()) {
 
 			DataPropertyExpression node = set.getRepresentative();
 			
@@ -2138,7 +2138,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		Set<OClass> classNodesMaps = new HashSet<OClass>();
 //		Map<Description, Set<PropertySomeRestriction>> classExistsMaps = new HashMap<Description, Set<PropertySomeRestriction>>();		
-		EquivalencesDAG<ClassExpression> classes = reasonerDag.getClasses();
+		EquivalencesDAG<ClassExpression> classes = reasonerDag.getClassDAG();
 		
 		for (Equivalences<ClassExpression> set : classes) {
 			
@@ -2159,7 +2159,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			}
 
 			// collecting Exists R children
-			for (BasicClassDescription child : reasonerDag.getClasses().getVertex(node)) 		
+			for (BasicClassDescription child : reasonerDag.getClassDAG().getVertex(node))
 				if (child instanceof PropertySomeRestrictionImpl && !child.equals(node)) 
 					existChildren.add((PropertySomeRestriction)child);
 				
