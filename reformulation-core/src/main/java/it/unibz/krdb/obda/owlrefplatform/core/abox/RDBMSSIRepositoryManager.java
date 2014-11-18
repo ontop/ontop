@@ -225,6 +225,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private static final String attribute_table_literal_insert = "INSERT INTO " + attribute_table_literal
 			+ " (URI, VAL, LANG, IDX, ISBNODE) VALUES (?, ?, ?, ?, ?)";
+	
+	
 	private static final String attribute_table_string_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.STRING)
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
 	private static final String attribute_table_integer_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.INTEGER)
@@ -263,19 +265,14 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private static final String indexrole_composite2 = "CREATE INDEX idxrolefull2 ON " + role_table + " (URI2, URI1, IDX, ISBNODE2, ISBNODE)";
 
 
-	private static final String indexclass1 = "CREATE INDEX idxclass1 ON " + class_table + " (URI)";
-	private static final String indexclass2 = "CREATE INDEX idxclass2 ON " + class_table + " (IDX)";
 	private static final String indexclassfull2 = "CREATE INDEX idxclassfull2 ON " + class_table + " (URI, IDX)";
-
-	private static final String indexrole1 = "CREATE INDEX idxrole1 ON " + role_table + " (URI1)";
-	private static final String indexrole2 = "CREATE INDEX idxrole2 ON " + role_table + " (IDX)";
-	private static final String indexrole3 = "CREATE INDEX idxrole3 ON " + role_table + " (URI2)";
 	private static final String indexrolefull22 = "CREATE INDEX idxrolefull22 ON " + role_table + " (URI1, URI2, IDX)";
+
+	private static final String attribute_index_literal = "IDX_LITERAL_ATTRIBUTE";
 
 	private static final Map<COL_TYPE, String> attribute_index = new HashMap<COL_TYPE, String>();
 	
 	static {
-		attribute_index.put(COL_TYPE.LITERAL, "IDX_LITERAL_ATTRIBUTE");
 		attribute_index.put(COL_TYPE.STRING, "IDX_STRING_ATTRIBUTE");
 		attribute_index.put(COL_TYPE.INTEGER, "IDX_INTEGER_ATTRIBUTE");
 		attribute_index.put(COL_TYPE.INT,  "XSD_INT_ATTRIBUTE");
@@ -305,8 +302,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private static final String dropindexrole2 = "DROP INDEX \"idxrole2\"";
 	private static final String dropindexrole3 = "DROP INDEX \"idxrole3\"";
 
-
-	private static final String analyze = "ANALYZE";
 
 	
 	
@@ -379,82 +374,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		return TYPE_SI;
 	}
 
-	@Override
-	public void getTablesDDL(OutputStream outstream) throws IOException {
-		log.debug("Generating DDL for ABox tables");
-
-		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outstream));
-
-		out.append(create_idx);
-		out.append(";\n");
-
-		out.append(create_interval);
-		out.append(";\n");
-
-		out.append(class_table_create);
-		out.append(";\n");
-
-		out.append(role_table_create);
-		out.append(";\n");
-
-		out.append(attribute_table_literal_create);
-		out.append(";\n");
-		out.append(attribute_table_string_create);
-		out.append(";\n");
-		out.append(attribute_table_integer_create);
-		out.append(";\n");
-        out.append(attribute_table_int_create);
-        out.append(";\n");
-        out.append(attribute_table_unsigned_int_create);
-        out.append(";\n");
-        out.append(attribute_table_negative_integer_create);
-        out.append(";\n");
-        out.append(attribute_table_non_negative_integer_create);
-        out.append(";\n");
-        out.append(attribute_table_positive_integer_create);
-        out.append(";\n");
-        out.append(attribute_table_non_positive_integer_create);
-        out.append(";\n");
-        out.append(attribute_table_float_create);
-        out.append(";\n");
-        out.append(attribute_table_long_create);
-        out.append(";\n");
-		out.append(attribute_table_decimal_create);
-		out.append(";\n");
-		out.append(attribute_table_double_create);
-		out.append(";\n");
-		out.append(attribute_table_datetime_create);
-		out.append(";\n");
-		out.append(attribute_table_boolean_create);
-		out.append(";\n");
-
-		out.flush();
-	}
-
-	@Override
-	public void getIndexDDL(OutputStream outstream) throws IOException {
-
-		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outstream));
-
-		out.append(indexclass1);
-		out.append(";\n");
-		out.append(indexclass2);
-		out.append(";\n");
-		out.append(indexrole1);
-		out.append(";\n");
-		out.append(indexrole2);
-		out.append(";\n");
-		out.append(indexrole3);
-		out.append(";\n");
-
-		for (Entry<COL_TYPE, String> entry : attribute_index.entrySet()) {
-			out.append("CREATE INDEX " + entry.getValue() + "1 ON " + entry.getValue() + " (URI);\n");		
-			out.append("CREATE INDEX " + entry.getValue() + "2 ON " + entry.getValue() + " (IDX);\n");
-			out.append("CREATE INDEX " + entry.getValue() + "3 ON " + entry.getValue() + " (VAL);\n");
-		}
-
-		out.flush();
-	}
 
 	@Override
 	public void getSQLInserts(Iterator<Assertion> data, OutputStream outstream) throws IOException {
@@ -709,11 +628,16 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 //		st.addBatch(indexrole1);
 //		st.addBatch(indexrole2);
 //		st.addBatch(indexrole3);
+		
+		st.addBatch("CREATE INDEX " + attribute_index_literal + "1 ON " + attribute_table_literal + " (URI)");		
+		st.addBatch("CREATE INDEX " + attribute_index_literal + "2 ON " + attribute_table_literal + " (IDX)");
+		st.addBatch("CREATE INDEX " + attribute_index_literal + "3 ON " + attribute_table_literal + " (VAL)");			
+		
 
 		for (Entry<COL_TYPE, String> entry : attribute_index.entrySet()) {
-			st.addBatch("CREATE INDEX " + entry.getValue() + "1 ON " + entry.getValue() + " (URI)");		
-			st.addBatch("CREATE INDEX " + entry.getValue() + "2 ON " + entry.getValue() + " (IDX)");
-			st.addBatch("CREATE INDEX " + entry.getValue() + "3 ON " + entry.getValue() + " (VAL)");
+			st.addBatch("CREATE INDEX " + entry.getValue() + "1 ON " + attribute_table.get(entry.getKey()) + " (URI)");		
+			st.addBatch("CREATE INDEX " + entry.getValue() + "2 ON " + attribute_table.get(entry.getKey()) + " (IDX)");
+			st.addBatch("CREATE INDEX " + entry.getValue() + "3 ON " + attribute_table.get(entry.getKey()) + " (VAL)");
 		}
 		
 		st.addBatch(indexclass_composite);
@@ -726,7 +650,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.executeBatch();
 		
 		log.debug("Executing ANALYZE");
-		st.addBatch(analyze);
+		st.addBatch("ANALYZE");
 		st.executeBatch();
 		
 		st.close();
@@ -2489,80 +2413,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		Statement st = conn.createStatement();
 
-		st.addBatch(analyze);
+		st.addBatch("ANALYZE");
 
 		st.executeBatch();
 		st.close();
 
 	}
 
-	@Override
-	public void getDropDDL(OutputStream out) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void getMetadataSQLInserts(OutputStream outstream) throws IOException {
-
-		// BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-				// outstream));
-
-		// String insert_query = this.insert_query.replace("?", "%s");
-
-		// for (Description node : ((DAGImpl) dag).vertexSet()) {
-			// if(!(node instanceof ClassDescription)){
-				// continue;
-			// }
-
-			// ClassDescription description = (ClassDescription) node;
-					
-
-			// /*
-			 // * we always prefer the pureISA node since it can have extra data
-			 // * (indexes)
-			 // */
-// //			Description node2 = pureIsa.getNode(description);
-// //			if (node2 != null) {
-// //				node = node2;
-// //			}
-
-			// String uri = description.toString();
-			
-
-			// for (Interval it : engine.getIntervals(node)) {
-
-				// out.append(String.format(insert_query, getQuotedString(uri),
-						// engine.getIndex(node), it.getStart(), it.getEnd(), CLASS_TYPE));
-				// out.append(";\n");
-			// }
-		// }
-
-		// for (Description node : ((DAGImpl) dag).vertexSet()) {
-			// if(!(node instanceof Property)){
-				// continue;
-			// }
-			// Property description = (Property) node;
-
-			// /*
-			 // * we always prefer the pureISA node since it can have extra data
-			 // * (indexes)
-			 // */
-			// Description node2 = pureIsa.getNode(description);
-			// if (node2 != null) {
-				// node = node2;
-			// }
-
-			// String uri = description.toString();
-
-			// for (Interval it : engine.getIntervals(node)) {
-				// out.append(String.format(insert_query, getQuotedString(uri),
-						// engine.getIndex(node), it.getStart(), it.getEnd(), ROLE_TYPE));
-				// out.append(";\n");
-			// }
-		// }
-		// out.flush();
-	}
 
 	/***
 	 * Inserts the metadata about semantic indexes and intervals into the
@@ -2703,6 +2560,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(dropindexrole2);
 		st.addBatch(dropindexrole3);
 
+		st.addBatch("DROP INDEX " + attribute_index_literal + "1");	
+		st.addBatch("DROP INDEX " + attribute_index_literal + "2");	
+		st.addBatch("DROP INDEX " + attribute_index_literal + "3");	
+		
+		
 		for (Entry<COL_TYPE, String> entry : attribute_index.entrySet()) {
 			st.addBatch("DROP INDEX " + entry.getValue() + "1");
 			st.addBatch("DROP INDEX " + entry.getValue() + "2");
