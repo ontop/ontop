@@ -25,7 +25,6 @@ import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.QuestTypeMapper;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
@@ -90,7 +89,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private boolean isSI = false;
 	private SemanticIndexURIMap uriRefIds;
 	
-	private final QuestTypeMapper questTypeMapper = OBDADataFactoryImpl.getInstance().getQuestTypeMapper();
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter) {
@@ -859,7 +857,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	
 
 	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
-		int code;
+		COL_TYPE type;
 
 		if (ht instanceof Function) {
 			Function ov = (Function) ht;
@@ -874,26 +872,26 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			
 			if (function instanceof URITemplatePredicate) {
-                code = questTypeMapper.getQuestCode(COL_TYPE.OBJECT);
+                type = COL_TYPE.OBJECT;
 			} 
 			else if (function instanceof BNodePredicate) {
-                code = questTypeMapper.getQuestCode(COL_TYPE.BNODE);
+                type = COL_TYPE.BNODE;
 			}
 			else {
 				String functionString = function.toString();
-				Predicate.COL_TYPE type = dtfac.getDataType(functionString);
-				code = questTypeMapper.getQuestCode(type);
+				type = dtfac.getDataType(functionString);
 			}
 		} 
 		else if (ht instanceof URIConstant) {
-            code = questTypeMapper.getQuestCode(COL_TYPE.OBJECT);
+            type = COL_TYPE.OBJECT;
 		} 
-		else if (ht == OBDAVocabulary.NULL) {  // instance of ValueConstant
-            code = questTypeMapper.getQuestCode(COL_TYPE.NULL);
+		else if (ht == OBDAVocabulary.NULL) {  // NULL is an instance of ValueConstant
+            type = COL_TYPE.NULL;
 		}
 		else
 			throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
 		
+		int code = type.getQuestCode();
 		return String.format(typeStrForSELECT, code, signature.get(hpos));
 	}
 
@@ -1005,7 +1003,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * The function is of the form uri(x), we need to simply return the
 			 * value of X
 			 */
-			return sqladapter.sqlCast(getSQLString(((Variable) t), index, false), Types.VARCHAR);
+			return sqladapter.sqlCast(getSQLString(t, index, false), Types.VARCHAR);
 			
 		} else if (t instanceof URIConstant) {
 			/*
@@ -1013,7 +1011,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * concrete URI, we return the string representing that URI.
 			 */
 			URIConstant uc = (URIConstant) t;
-			return sqladapter.getSQLLexicalFormString(uc.getURI().toString());
+			return sqladapter.getSQLLexicalFormString(uc.getURI());
 		}
 
 		/*
@@ -1022,7 +1020,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		throw new IllegalArgumentException("Error, cannot generate URI constructor clause for a term: " + ov.toString());
 
 	}
-	
+
+	// TODO: move to SQLAdapter
 	private String getStringConcatenation(SQLDialectAdapter adapter, String[] params) {
 		String toReturn = sqladapter.strconcat(params);
 		if (adapter instanceof DB2SQLDialectAdapter) {
@@ -1045,8 +1044,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				/*
 				 * A URI function always returns a string, thus it is a string column type.
 				 */
-				if (isSI) return false;
-				return true;
+				return !isSI;
 			} else {
 				if (isUnary(function)) {
 					/*
@@ -1108,14 +1106,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * Determines if it is a unary function.
 	 */
 	private boolean isUnary(Function fun) {
-		return (fun.getArity() == 1) ? true : false;
+		return (fun.getArity() == 1);
 	}
 
 	/**
 	 * Determines if it is a binary function.
 	 */
 	private boolean isBinary(Function fun) {
-		return (fun.getArity() == 2) ? true : false;
+		return (fun.getArity() == 2);
 	}
 
 	/**
@@ -1384,7 +1382,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	private String getNumericalOperatorString(Predicate functionSymbol) {
-		String operator = null;
+		String operator;
 		if (functionSymbol.equals(OBDAVocabulary.ADD)) {
 			operator = ADD_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.SUBTRACT)) {
@@ -1396,15 +1394,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 		return operator;
 	}
-
-    public boolean isGeneratingREPLACE() {
-        return generatingREPLACE;
-    }
-
-    public void setGeneratingREPLACE(boolean generatingREPLACE) {
-        this.generatingREPLACE = generatingREPLACE;
-    }
-
     /**
 	 * Utility class to resolve "database" atoms to view definitions ready to be
 	 * used in a FROM clause, and variables, to column references defined over
@@ -1412,10 +1401,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	public class QueryAliasIndex {
 
-		Map<Function, String> viewNames = new HashMap<Function, String>();
-		Map<Function, String> tableNames = new HashMap<Function, String>();
-		Map<Function, DataDefinition> dataDefinitions = new HashMap<Function, DataDefinition>();
-		Map<Variable, LinkedHashSet<String>> columnReferences = new HashMap<Variable, LinkedHashSet<String>>();
+		Map<Function, String> viewNames = new HashMap<>();
+		Map<Function, String> tableNames = new HashMap<>();
+		Map<Function, DataDefinition> dataDefinitions = new HashMap<>();
+		Map<Variable, LinkedHashSet<String>> columnReferences = new HashMap<>();
 
 		int dataTableCount = 0;
 		boolean isEmpty = false;
@@ -1488,7 +1477,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 				LinkedHashSet<String> references = columnReferences.get(term);
 				if (references == null) {
-					references = new LinkedHashSet<String>();
+					references = new LinkedHashSet<>();
 					columnReferences.put((Variable) term, references);
 				}
 				String columnName = def.getAttributeName(index + 1);

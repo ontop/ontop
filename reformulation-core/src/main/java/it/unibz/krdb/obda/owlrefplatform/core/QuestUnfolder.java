@@ -18,6 +18,7 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
@@ -28,7 +29,6 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactRuleConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
@@ -201,41 +201,54 @@ public class QuestUnfolder {
 	public void addClassAssertionsAsFacts(Iterable<ClassAssertion> assertions) {
 		
 		int count = 0;
-		for (ClassAssertion a : assertions) {
-			CQIE fact = ABoxToFactRuleConverter.getRule(a);
+		for (ClassAssertion ca : assertions) {
+			ObjectConstant c = ca.getIndividual();
+			Predicate p = ca.getConcept().getPredicate();
+			Function head = fac.getFunction(p, 
+							fac.getUriTemplate(fac.getConstantLiteral(c.getName())));
+			CQIE rule = fac.getCQIE(head, Collections.<Function> emptyList());
 				
-			if (fact != null) {
-				unfoldingProgram.add(fact);
-				count++;
-			}
+			unfoldingProgram.add(rule);
+			count++;
 		}
 		log.debug("Appended {} ABox assertions as fact rules", count);		
 	}		
+	
 	public void addObjectPropertyAssertionsAsFacts(Iterable<ObjectPropertyAssertion> assertions) {
 		
 		int count = 0;
-		for (ObjectPropertyAssertion a : assertions) {
-			CQIE fact = ABoxToFactRuleConverter.getRule(a);
+		for (ObjectPropertyAssertion pa : assertions) {
+			ObjectConstant s = pa.getSubject();
+			ObjectConstant o = pa.getObject();
+			Predicate p = pa.getProperty().getPredicate();
+			Function head = fac.getFunction(p, 
+							fac.getUriTemplate(fac.getConstantLiteral(s.getName())), 
+							fac.getUriTemplate(fac.getConstantLiteral(o.getName())));
+			CQIE rule = fac.getCQIE(head, Collections.<Function> emptyList());
 				
-			if (fact != null) {
-				unfoldingProgram.add(fact);
-				count++;
-			}
+			unfoldingProgram.add(rule);
+			count++;
 		}
 		log.debug("Appended {} ABox assertions as fact rules", count);		
 	}		
+	
 	public void addDataPropertyAssertionsAsFacts(Iterable<DataPropertyAssertion> assertions) {
 		
-		int count = 0;
-		for (DataPropertyAssertion a : assertions) {
-			CQIE fact = ABoxToFactRuleConverter.getRule(a);
+//		int count = 0;
+//		for (DataPropertyAssertion a : assertions) {
+			// WE IGNORE DATA PROPERTY ASSERTIONS UNTIL THE NEXT RELEASE
+//			DataPropertyAssertion ca = (DataPropertyAssertion) assertion;
+//			ObjectConstant s = ca.getObject();
+//			ValueConstant o = ca.getValue();
+//			String typeURI = getURIType(o.getType());
+//			Predicate p = ca.getPredicate();
+//			Predicate urifuction = factory.getUriTemplatePredicate(1);
+//			head = factory.getFunction(p, factory.getFunction(urifuction, s), factory.getFunction(factory.getPredicate(typeURI,1), o));
+//			rule = factory.getCQIE(head, new LinkedList<Function>());
+//		} 	
 				
-			if (fact != null) {
-				unfoldingProgram.add(fact);
-				count++;
-			}
-		}
-		log.debug("Appended {} ABox assertions as fact rules", count);		
+//		}
+//		log.debug("Appended {} ABox assertions as fact rules", count);		
 	}		
 		
 
