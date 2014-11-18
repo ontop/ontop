@@ -272,115 +272,28 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private static final String indexrole3 = "CREATE INDEX idxrole3 ON " + role_table + " (URI2)";
 	private static final String indexrolefull22 = "CREATE INDEX idxrolefull22 ON " + role_table + " (URI1, URI2, IDX)";
 
-	private static final String attribute_literal_index = "IDX_LITERAL_ATTRIBUTE";
-	private static final String attribute_string_index = "IDX_STRING_ATTRIBUTE";
-	private static final String attribute_integer_index = "IDX_INTEGER_ATTRIBUTE";
-	private static final String attribute_int_index = "XSD_INT_ATTRIBUTE";
-    private static final String attribute_unsigned_int_index = "XSD_UNSIGNED_INT_ATTRIBUTE";
-    private static final String attribute_negative_integer_index = "XSD_NEGATIVE_INTEGER_ATTRIBUTE";
-    private static final String attribute_non_negative_integer_index = "XSD_NON_NEGATIVE_INTEGER_ATTRIBUTE";
-    private static final String attribute_positive_integer_index = "XSD_POSITIVE_INTEGER_ATTRIBUTE";
-    private static final String attribute_non_positive_integer_index = "XSD_NON_POSITIVE_INTEGER_ATTRIBUTE";
-    private static final String attribute_float_index = "XSD_FLOAT_ATTRIBUTE";
-    private static final String attribute_long_index = "IDX_LONG_ATTRIBUTE";
-    private static final String attribute_decimal_index = "IDX_DECIMAL_ATTRIBUTE";
-	private static final String attribute_double_index = "IDX_DOUBLE_ATTRIBUTE";
-	private static final String attribute_datetime_index = "IDX_DATETIME_ATTRIBUTE";
-	private static final String attribute_boolean_index = "IDX_BOOLEAN_ATTRIBUTE";
+	private static final Map<COL_TYPE, String> attribute_index = new HashMap<COL_TYPE, String>();
+	
+	static {
+		attribute_index.put(COL_TYPE.LITERAL, "IDX_LITERAL_ATTRIBUTE");
+		attribute_index.put(COL_TYPE.STRING, "IDX_STRING_ATTRIBUTE");
+		attribute_index.put(COL_TYPE.INTEGER, "IDX_INTEGER_ATTRIBUTE");
+		attribute_index.put(COL_TYPE.INT,  "XSD_INT_ATTRIBUTE");
+		attribute_index.put(COL_TYPE.UNSIGNED_INT, "XSD_UNSIGNED_INT_ATTRIBUTE");
+		attribute_index.put(COL_TYPE.NEGATIVE_INTEGER, "XSD_NEGATIVE_INTEGER_ATTRIBUTE");
+		attribute_index.put(COL_TYPE.NON_NEGATIVE_INTEGER, "XSD_NON_NEGATIVE_INTEGER_ATTRIBUTE");
+		attribute_index.put(COL_TYPE.POSITIVE_INTEGER, "XSD_POSITIVE_INTEGER_ATTRIBUTE");
+		attribute_index.put(COL_TYPE.NON_POSITIVE_INTEGER, "XSD_NON_POSITIVE_INTEGER_ATTRIBUTE");
+		attribute_index.put(COL_TYPE.FLOAT, "XSD_FLOAT_ATTRIBUTE");
+		attribute_index.put(COL_TYPE.LONG, "IDX_LONG_ATTRIBUTE");
+		attribute_index.put(COL_TYPE.DECIMAL, "IDX_DECIMAL_ATTRIBUTE");
+		attribute_index.put(COL_TYPE.DOUBLE, "IDX_DOUBLE_ATTRIBUTE");
+		attribute_index.put(COL_TYPE.DATETIME, "IDX_DATETIME_ATTRIBUTE");
+		attribute_index.put(COL_TYPE.BOOLEAN, "IDX_BOOLEAN_ATTRIBUTE");
+	}
+	
 
-	private static final String indexattribute_literal1 = "CREATE INDEX " + attribute_literal_index + "1" + " ON " + attribute_table_literal
-			+ " (URI)";
-	private static final String indexattribute_string1 = "CREATE INDEX " + attribute_string_index + "1" + " ON " + attribute_table.get(COL_TYPE.STRING)
-			+ " (URI)";
-	private static final String indexattribute_integer1 = "CREATE INDEX " + attribute_integer_index + "1" + " ON " + attribute_table.get(COL_TYPE.INTEGER)
-			+ " (URI)";
-	private static final String indexattribute_int1 = "CREATE INDEX " + attribute_int_index + "1" + " ON " + attribute_table.get(COL_TYPE.INT)
-            + " (URI)";
-    private static final String indexattribute_unsigned_int1 = "CREATE INDEX " + attribute_unsigned_int_index + "1" + " ON " + attribute_table.get(COL_TYPE.UNSIGNED_INT)
-            + " (URI)";
-    private static final String indexattribute_negative_integer1 = "CREATE INDEX " + attribute_negative_integer_index + "1" + " ON " +  attribute_table.get(COL_TYPE.NEGATIVE_INTEGER)
-            + " (URI)";
-    private static final String indexattribute_non_negative_integer1 = "CREATE INDEX " + attribute_non_negative_integer_index + "1" + " ON " + attribute_table.get(COL_TYPE.NON_NEGATIVE_INTEGER)
-            + " (URI)";
-    private static final String indexattribute_positive_integer1 = "CREATE INDEX " + attribute_positive_integer_index + "1" + " ON " + attribute_table.get(COL_TYPE.POSITIVE_INTEGER)
-            + " (URI)";
-    private static final String indexattribute_non_positive_integer1 = "CREATE INDEX " + attribute_non_positive_integer_index + "1" + " ON " + attribute_table.get(COL_TYPE.NON_POSITIVE_INTEGER)
-            + " (URI)";
-    private static final String indexattribute_float1 = "CREATE INDEX " + attribute_float_index + "1" + " ON " + attribute_table.get(COL_TYPE.FLOAT)
-            + " (URI)";
-    private static final String indexattribute_long1 = "CREATE INDEX " + attribute_long_index + "1" + " ON " + attribute_table.get(COL_TYPE.LONG)
-            + " (URI)";
-    private static final String indexattribute_decimal1 = "CREATE INDEX " + attribute_decimal_index + "1" + " ON " + attribute_table.get(COL_TYPE.DECIMAL)
-			+ " (URI)";
-	private static final String indexattribute_double1 = "CREATE INDEX " + attribute_double_index + "1" + " ON " + attribute_table.get(COL_TYPE.DOUBLE)
-			+ " (URI)";
-	private static final String indexattribute_datetime1 = "CREATE INDEX " + attribute_datetime_index + "1" + " ON "
-			+ attribute_table.get(COL_TYPE.DATETIME) + " (URI)";
-	private static final String indexattribute_boolean1 = "CREATE INDEX " + attribute_boolean_index + "1" + " ON " + attribute_table.get(COL_TYPE.BOOLEAN)
-			+ " (URI)";
-
-	private static final String indexattribute_literal2 = "CREATE INDEX " + attribute_literal_index + "2" + " ON " + attribute_table_literal
-			+ " (IDX)";
-	private static final String indexattribute_string2 = "CREATE INDEX " + attribute_string_index + "2" + " ON " + attribute_table.get(COL_TYPE.STRING)
-			+ " (IDX)";
-	private static final String indexattribute_integer2 = "CREATE INDEX " + attribute_integer_index + "2" + " ON " + attribute_table.get(COL_TYPE.INTEGER)
-			+ " (IDX)";
-	private static final String indexattribute_int2 = "CREATE INDEX " + attribute_int_index + "2" + " ON " + attribute_table.get(COL_TYPE.INT)
-            + " (URI)";
-    private static final String indexattribute_unsigned_int2 = "CREATE INDEX " + attribute_unsigned_int_index + "2" + " ON " + attribute_table.get(COL_TYPE.UNSIGNED_INT)
-            + " (URI)";
-    private static final String indexattribute_negative_integer2 = "CREATE INDEX " + attribute_negative_integer_index + "2" + " ON " +  attribute_table.get(COL_TYPE.NEGATIVE_INTEGER)
-            + " (URI)";
-    private static final String indexattribute_non_negative_integer2 = "CREATE INDEX " + attribute_non_negative_integer_index + "2" + " ON " + attribute_table.get(COL_TYPE.NON_NEGATIVE_INTEGER)
-            + " (URI)";
-    private static final String indexattribute_positive_integer2 = "CREATE INDEX " + attribute_positive_integer_index + "2" + " ON " + attribute_table.get(COL_TYPE.POSITIVE_INTEGER)
-            + " (URI)";
-    private static final String indexattribute_non_positive_integer2 = "CREATE INDEX " + attribute_non_positive_integer_index + "2" + " ON " + attribute_table.get(COL_TYPE.NON_POSITIVE_INTEGER)
-            + " (URI)";
-    private static final String indexattribute_float2 = "CREATE INDEX " + attribute_float_index + "2" + " ON " + attribute_table.get(COL_TYPE.FLOAT)
-            + " (URI)";
-    private static final String indexattribute_long2 = "CREATE INDEX " + attribute_long_index + "2" + " ON " + attribute_table.get(COL_TYPE.LONG)
-            + " (IDX)";
-    private static final String indexattribute_decimal2 = "CREATE INDEX " + attribute_decimal_index + "2" + " ON " + attribute_table.get(COL_TYPE.DECIMAL)
-			+ " (IDX)";
-	private static final String indexattribute_double2 = "CREATE INDEX " + attribute_double_index + "2" + " ON " + attribute_table.get(COL_TYPE.DOUBLE)
-			+ " (IDX)";
-	private static final String indexattribute_datetime2 = "CREATE INDEX " + attribute_datetime_index + "2" + " ON "
-			+ attribute_table.get(COL_TYPE.DATETIME) + " (IDX)";
-	private static final String indexattribute_boolean2 = "CREATE INDEX " + attribute_boolean_index + "2" + " ON " + attribute_table.get(COL_TYPE.BOOLEAN)
-			+ " (IDX)";
-
-	private static final String indexattribute_literal3 = "CREATE INDEX " + attribute_literal_index + "3" + " ON " + attribute_table_literal
-			+ " (VAL)";
-	private static final String indexattribute_string3 = "CREATE INDEX " + attribute_string_index + "3" + " ON " + attribute_table.get(COL_TYPE.STRING)
-			+ " (VAL)";
-	private static final String indexattribute_integer3 = "CREATE INDEX " + attribute_integer_index + "3" + " ON " + attribute_table.get(COL_TYPE.INTEGER)
-			+ " (VAL)";
-	private static final String indexattribute_int3 = "CREATE INDEX " + attribute_int_index + "3" + " ON " + attribute_table.get(COL_TYPE.INT)
-            + " (URI)";
-    private static final String indexattribute_unsigned_int3 = "CREATE INDEX " + attribute_unsigned_int_index + "3" + " ON " + attribute_table.get(COL_TYPE.UNSIGNED_INT)
-            + " (URI)";
-    private static final String indexattribute_negative_integer3 = "CREATE INDEX " + attribute_negative_integer_index + "3" + " ON " +  attribute_table.get(COL_TYPE.NEGATIVE_INTEGER)
-            + " (URI)";
-    private static final String indexattribute_non_negative_integer3 = "CREATE INDEX " + attribute_non_negative_integer_index + "3" + " ON " + attribute_table.get(COL_TYPE.NON_NEGATIVE_INTEGER)
-            + " (URI)";
-    private static final String indexattribute_positive_integer3 = "CREATE INDEX " + attribute_positive_integer_index + "3" + " ON " + attribute_table.get(COL_TYPE.POSITIVE_INTEGER)
-            + " (URI)";
-    private static final String indexattribute_non_positive_integer3 = "CREATE INDEX " + attribute_non_positive_integer_index + "3" + " ON " + attribute_table.get(COL_TYPE.NON_POSITIVE_INTEGER)
-            + " (URI)";
-    private static final String indexattribute_float3 = "CREATE INDEX " + attribute_float_index + "3" + " ON " + attribute_table.get(COL_TYPE.FLOAT)
-            + " (URI)";
-    private static final String indexattribute_long3 = "CREATE INDEX " + attribute_long_index + "3" + " ON " + attribute_table.get(COL_TYPE.LONG)
-            + " (VAL)";
-    private static final String indexattribute_decimal3 = "CREATE INDEX " + attribute_decimal_index + "3" + " ON " + attribute_table.get(COL_TYPE.DECIMAL)
-			+ " (VAL)";
-	private static final String indexattribute_double3 = "CREATE INDEX " + attribute_double_index + "3" + " ON " + attribute_table.get(COL_TYPE.DOUBLE)
-			+ " (VAL)";
-	private static final String indexattribute_datetime3 = "CREATE INDEX " + attribute_datetime_index + "3" + " ON "
-			+ attribute_table.get(COL_TYPE.DATETIME) + " (VAL)";
-	private static final String indexattribute_boolean3 = "CREATE INDEX " + attribute_boolean_index + "3" + " ON " + attribute_table.get(COL_TYPE.BOOLEAN)
-			+ " (VAL)";
-
+	
 /**
  *  DROP indexes	
  */
@@ -392,70 +305,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private static final String dropindexrole2 = "DROP INDEX \"idxrole2\"";
 	private static final String dropindexrole3 = "DROP INDEX \"idxrole3\"";
 
-	private static final String dropindexattribute_literal1 = "DROP INDEX " + attribute_literal_index + "1";
-	private static final String dropindexattribute_string1 = "DROP INDEX " + attribute_string_index + "1";
-	private static final String dropindexattribute_integer1 = "DROP INDEX " + attribute_integer_index + "1";
-	private static final String dropindexattribute_int1 = "DROP INDEX " + attribute_int_index + "1";
-    private static final String dropindexattribute_negative_integer1 = "DROP INDEX " + attribute_negative_integer_index + "1";
-    private static final String dropindexattribute_positive_integer1 = "DROP INDEX " + attribute_positive_integer_index + "1";
-    private static final String dropindexattribute_non_positive_integer1 = "DROP INDEX " + attribute_positive_integer_index + "1";
-    private static final String dropindexattribute_non_negative_integer1 = "DROP INDEX " + attribute_non_negative_integer_index + "1";
-    private static final String dropindexattribute_unsigned_int1 = "DROP INDEX " + attribute_unsigned_int_index + "1";
-    private static final String dropindexattribute_float1 = "DROP INDEX " + attribute_float_index + "1";
-    private static final String dropindexattribute_long1 = "DROP INDEX " + attribute_long_index + "1";
-    private static final String dropindexattribute_decimal1 = "DROP INDEX " + attribute_decimal_index + "1";
-	private static final String dropindexattribute_double1 = "DROP INDEX " + attribute_double_index + "1";
-	private static final String dropindexattribute_datetime1 = "DROP INDEX " + attribute_datetime_index + "1";
-	private static final String dropindexattribute_boolean1 = "DROP INDEX " + attribute_boolean_index + "1";
-
-	private static final String dropindexattribute_literal2 = "DROP INDEX " + attribute_literal_index + "2";
-	private static final String dropindexattribute_string2 = "DROP INDEX " + attribute_string_index + "2";
-	private static final String dropindexattribute_integer2 = "DROP INDEX " + attribute_integer_index + "2";
-	private static final String dropindexattribute_int2 = "DROP INDEX " + attribute_int_index + "2";
-    private static final String dropindexattribute_negative_integer2 = "DROP INDEX " + attribute_negative_integer_index + "2";
-    private static final String dropindexattribute_positive_integer2 = "DROP INDEX " + attribute_positive_integer_index + "2";
-    private static final String dropindexattribute_non_positive_integer2 = "DROP INDEX " + attribute_positive_integer_index + "2";
-    private static final String dropindexattribute_non_negative_integer2 = "DROP INDEX " + attribute_non_negative_integer_index + "2";
-    private static final String dropindexattribute_unsigned_int2 = "DROP INDEX " + attribute_unsigned_int_index + "2";
-    private static final String dropindexattribute_float2 = "DROP INDEX " + attribute_float_index + "2";
-    private static final String dropindexattribute_long2 = "DROP INDEX " + attribute_long_index + "2";
-    private static final String dropindexattribute_decimal2 = "DROP INDEX " + attribute_decimal_index + "2";
-	private static final String dropindexattribute_double2 = "DROP INDEX " + attribute_double_index + "2";
-	private static final String dropindexattribute_datetime2 = "DROP INDEX " + attribute_datetime_index + "2";
-	private static final String dropindexattribute_boolean2 = "DROP INDEX " + attribute_boolean_index + "2";
-
-	private static final String dropindexattribute_literal3 = "DROP INDEX " + attribute_literal_index + "3";
-	private static final String dropindexattribute_string3 = "DROP INDEX " + attribute_string_index + "3";
-	private static final String dropindexattribute_integer3 = "DROP INDEX " + attribute_integer_index + "3";
-	private static final String dropindexattribute_int3 = "DROP INDEX " + attribute_int_index + "3";
-    private static final String dropindexattribute_negative_integer3 = "DROP INDEX " + attribute_negative_integer_index + "3";
-    private static final String dropindexattribute_positive_integer3 = "DROP INDEX " + attribute_positive_integer_index + "3";
-    private static final String dropindexattribute_non_positive_integer3 = "DROP INDEX " + attribute_positive_integer_index + "3";
-    private static final String dropindexattribute_non_negative_integer3 = "DROP INDEX " + attribute_non_negative_integer_index + "3";
-    private static final String dropindexattribute_unsigned_int3 = "DROP INDEX " + attribute_unsigned_int_index + "3";
-    private static final String dropindexattribute_float3 = "DROP INDEX " + attribute_float_index + "3";
-    private static final String dropindexattribute_long3 = "DROP INDEX " + attribute_long_index + "3";
-    private static final String dropindexattribute_decimal3 = "DROP INDEX " + attribute_decimal_index + "3";
-	private static final String dropindexattribute_double3 = "DROP INDEX " + attribute_double_index + "3";
-	private static final String dropindexattribute_datetime3 = "DROP INDEX " + attribute_datetime_index + "3";
-	private static final String dropindexattribute_boolean3 = "DROP INDEX " + attribute_boolean_index + "3";
 
 	private static final String analyze = "ANALYZE";
 
+	
+	
+	
 	private static final String select_mapping_class = "SELECT \"URI\" as X FROM " + class_table;
-
-//	public static final String select_mapping_class_role_left = "SELECT \"URI1\" as X FROM " + role_table;
-//
-//	public static final String select_mapping_class_role_right = "SELECT \"URI2\" as X FROM " + role_table;
-//
-//	public static final String select_mapping_class_attribute_literal_left = "SELECT \"URI\" as X FROM " + attribute_table_literal;
-//	public static final String select_mapping_class_attribute_string_left = "SELECT \"URI\" as X FROM " + attribute_table_string;
-//	public static final String select_mapping_class_attribute_integer_left = "SELECT \"URI\" as X FROM " + attribute_table_integer;
-//    public static final String select_mapping_class_attribute_long_left = "SELECT \"URI\" as X FROM " + attribute_table_long;
-//	public static final String select_mapping_class_attribute_decimal_left = "SELECT \"URI\" as X FROM " + attribute_table_decimal;
-//	public static final String select_mapping_class_attribute_double_left = "SELECT \"URI\" as X FROM " + attribute_table_double;
-//	public static final String select_mapping_class_attribute_datetime_left = "SELECT \"URI\" as X FROM " + attribute_table_datetime;
-//	public static final String select_mapping_class_attribute_boolean_left = "SELECT \"URI\" as X FROM " + attribute_table_boolean;
 
 	private static final Map<COL_TYPE, String> select_mapping_attribute = new HashMap<COL_TYPE, String>();
 	
@@ -591,98 +447,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		out.append(indexrole3);
 		out.append(";\n");
 
-		out.append(indexattribute_literal1);
-		out.append(";\n");
-		out.append(indexattribute_string1);
-		out.append(";\n");
-		out.append(indexattribute_integer1);
-		out.append(";\n");
-        out.append(indexattribute_int1);
-        out.append(";\n");
-        out.append(indexattribute_unsigned_int1);
-        out.append(";\n");
-        out.append(indexattribute_negative_integer1);
-        out.append(";\n");
-        out.append(indexattribute_non_negative_integer1);
-        out.append(";\n");
-        out.append(indexattribute_non_positive_integer1);
-        out.append(";\n");
-        out.append(indexattribute_positive_integer1);
-        out.append(";\n");
-        out.append(indexattribute_float1);
-        out.append(";\n");
-        out.append(indexattribute_long1);
-        out.append(";\n");
-		out.append(indexattribute_decimal1);
-		out.append(";\n");
-		out.append(indexattribute_double1);
-		out.append(";\n");
-		out.append(indexattribute_datetime1);
-		out.append(";\n");
-		out.append(indexattribute_boolean1);
-		out.append(";\n");
-
-		out.append(indexattribute_literal2);
-		out.append(";\n");
-		out.append(indexattribute_string2);
-		out.append(";\n");
-		out.append(indexattribute_integer2);
-		out.append(";\n");
-        out.append(indexattribute_int2);
-        out.append(";\n");
-        out.append(indexattribute_unsigned_int2);
-        out.append(";\n");
-        out.append(indexattribute_negative_integer2);
-        out.append(";\n");
-        out.append(indexattribute_non_negative_integer2);
-        out.append(";\n");
-        out.append(indexattribute_non_positive_integer2);
-        out.append(";\n");
-        out.append(indexattribute_positive_integer2);
-        out.append(";\n");
-        out.append(indexattribute_float2);
-        out.append(";\n");
-        out.append(indexattribute_long2);
-        out.append(";\n");
-		out.append(indexattribute_decimal2);
-		out.append(";\n");
-		out.append(indexattribute_double2);
-		out.append(";\n");
-		out.append(indexattribute_datetime2);
-		out.append(";\n");
-		out.append(indexattribute_boolean2);
-		out.append(";\n");
-
-		out.append(indexattribute_literal3);
-		out.append(";\n");
-		out.append(indexattribute_string3);
-		out.append(";\n");
-		out.append(indexattribute_integer3);
-		out.append(";\n");
-        out.append(indexattribute_int3);
-        out.append(";\n");
-        out.append(indexattribute_unsigned_int3);
-        out.append(";\n");
-        out.append(indexattribute_negative_integer3);
-        out.append(";\n");
-        out.append(indexattribute_non_negative_integer3);
-        out.append(";\n");
-        out.append(indexattribute_non_positive_integer3);
-        out.append(";\n");
-        out.append(indexattribute_positive_integer3);
-        out.append(";\n");
-        out.append(indexattribute_float3);
-        out.append(";\n");
-        out.append(indexattribute_long3);
-        out.append(";\n");
-		out.append(indexattribute_decimal3);
-		out.append(";\n");
-		out.append(indexattribute_double3);
-		out.append(";\n");
-		out.append(indexattribute_datetime3);
-		out.append(";\n");
-		out.append(indexattribute_boolean3);
-		out.append(";\n");
+		for (Entry<COL_TYPE, String> entry : attribute_index.entrySet()) {
+			out.append("CREATE INDEX " + entry.getValue() + "1 ON " + entry.getValue() + " (URI);\n");		
+			out.append("CREATE INDEX " + entry.getValue() + "2 ON " + entry.getValue() + " (IDX);\n");
+			out.append("CREATE INDEX " + entry.getValue() + "3 ON " + entry.getValue() + " (VAL);\n");
+		}
 
 		out.flush();
 	}
@@ -941,54 +710,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 //		st.addBatch(indexrole2);
 //		st.addBatch(indexrole3);
 
-		st.addBatch(indexattribute_literal1);
-		st.addBatch(indexattribute_string1);
-		st.addBatch(indexattribute_integer1);
-        st.addBatch(indexattribute_int1);
-        st.addBatch(indexattribute_unsigned_int1);
-        st.addBatch(indexattribute_negative_integer1);
-        st.addBatch(indexattribute_non_negative_integer1);
-        st.addBatch(indexattribute_non_positive_integer1);
-        st.addBatch(indexattribute_positive_integer1);
-        st.addBatch(indexattribute_float1);
-        st.addBatch(indexattribute_long1);
-		st.addBatch(indexattribute_decimal1);
-		st.addBatch(indexattribute_double1);
-		st.addBatch(indexattribute_datetime1);
-		st.addBatch(indexattribute_boolean1);
-
-		st.addBatch(indexattribute_literal2);
-		st.addBatch(indexattribute_string2);
-		st.addBatch(indexattribute_integer2);
-        st.addBatch(indexattribute_int2);
-        st.addBatch(indexattribute_unsigned_int2);
-        st.addBatch(indexattribute_negative_integer2);
-        st.addBatch(indexattribute_non_negative_integer2);
-        st.addBatch(indexattribute_non_positive_integer2);
-        st.addBatch(indexattribute_positive_integer2);
-        st.addBatch(indexattribute_float2);
-        st.addBatch(indexattribute_long2);
-		st.addBatch(indexattribute_decimal2);
-		st.addBatch(indexattribute_double2);
-		st.addBatch(indexattribute_datetime2);
-		st.addBatch(indexattribute_boolean2);
-
-		st.addBatch(indexattribute_literal3);
-		st.addBatch(indexattribute_string3);
-		st.addBatch(indexattribute_integer3);
-        st.addBatch(indexattribute_int3);
-        st.addBatch(indexattribute_unsigned_int3);
-        st.addBatch(indexattribute_negative_integer3);
-        st.addBatch(indexattribute_non_negative_integer3);
-        st.addBatch(indexattribute_non_positive_integer3);
-        st.addBatch(indexattribute_positive_integer3);
-        st.addBatch(indexattribute_float3);
-        st.addBatch(indexattribute_long3);
-		st.addBatch(indexattribute_decimal3);
-		st.addBatch(indexattribute_double3);
-		st.addBatch(indexattribute_datetime3);
-		st.addBatch(indexattribute_boolean3);
-
+		for (Entry<COL_TYPE, String> entry : attribute_index.entrySet()) {
+			st.addBatch("CREATE INDEX " + entry.getValue() + "1 ON " + entry.getValue() + " (URI)");		
+			st.addBatch("CREATE INDEX " + entry.getValue() + "2 ON " + entry.getValue() + " (IDX)");
+			st.addBatch("CREATE INDEX " + entry.getValue() + "3 ON " + entry.getValue() + " (VAL)");
+		}
+		
 		st.addBatch(indexclass_composite);
 		st.addBatch(indexrole_composite1);
 		st.addBatch(indexrole_composite2);
@@ -2976,54 +2703,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(dropindexrole2);
 		st.addBatch(dropindexrole3);
 
-		st.addBatch(dropindexattribute_literal1);
-		st.addBatch(dropindexattribute_string1);
-		st.addBatch(dropindexattribute_integer1);
-        st.addBatch(dropindexattribute_int1);
-        st.addBatch(dropindexattribute_unsigned_int1);
-        st.addBatch(dropindexattribute_negative_integer1);
-        st.addBatch(dropindexattribute_non_negative_integer1);
-        st.addBatch(dropindexattribute_positive_integer1);
-        st.addBatch(dropindexattribute_non_positive_integer1);
-        st.addBatch(dropindexattribute_float1);
-        st.addBatch(dropindexattribute_long1);
-		st.addBatch(dropindexattribute_decimal1);
-		st.addBatch(dropindexattribute_double1);
-		st.addBatch(dropindexattribute_datetime1);
-		st.addBatch(dropindexattribute_boolean1);
-
-		st.addBatch(dropindexattribute_literal2);
-		st.addBatch(dropindexattribute_string2);
-		st.addBatch(dropindexattribute_integer2);
-        st.addBatch(dropindexattribute_int2);
-        st.addBatch(dropindexattribute_unsigned_int2);
-        st.addBatch(dropindexattribute_negative_integer2);
-        st.addBatch(dropindexattribute_non_negative_integer2);
-        st.addBatch(dropindexattribute_positive_integer2);
-        st.addBatch(dropindexattribute_non_positive_integer2);
-        st.addBatch(dropindexattribute_float2);
-        st.addBatch(dropindexattribute_long2);
-		st.addBatch(dropindexattribute_decimal2);
-		st.addBatch(dropindexattribute_double2);
-		st.addBatch(dropindexattribute_datetime2);
-		st.addBatch(dropindexattribute_boolean2);
-
-		st.addBatch(dropindexattribute_literal3);
-		st.addBatch(dropindexattribute_string3);
-		st.addBatch(dropindexattribute_integer3);
-        st.addBatch(dropindexattribute_int3);
-        st.addBatch(dropindexattribute_unsigned_int3);
-        st.addBatch(dropindexattribute_negative_integer3);
-        st.addBatch(dropindexattribute_non_negative_integer3);
-        st.addBatch(dropindexattribute_positive_integer3);
-        st.addBatch(dropindexattribute_non_positive_integer3);
-        st.addBatch(dropindexattribute_float3);
-        st.addBatch(dropindexattribute_long3);
-		st.addBatch(dropindexattribute_decimal3);
-		st.addBatch(dropindexattribute_double3);
-		st.addBatch(dropindexattribute_datetime3);
-		st.addBatch(dropindexattribute_boolean3);
-
+		for (Entry<COL_TYPE, String> entry : attribute_index.entrySet()) {
+			st.addBatch("DROP INDEX " + entry.getValue() + "1");
+			st.addBatch("DROP INDEX " + entry.getValue() + "2");
+			st.addBatch("DROP INDEX " + entry.getValue() + "3");
+		}
+		
 		st.executeBatch();
 		st.close();
 
