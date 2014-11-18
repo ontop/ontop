@@ -1003,7 +1003,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * The function is of the form uri(x), we need to simply return the
 			 * value of X
 			 */
-			return sqladapter.sqlCast(getSQLString(((Variable) t), index, false), Types.VARCHAR);
+			return sqladapter.sqlCast(getSQLString(t, index, false), Types.VARCHAR);
 			
 		} else if (t instanceof URIConstant) {
 			/*
@@ -1011,7 +1011,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * concrete URI, we return the string representing that URI.
 			 */
 			URIConstant uc = (URIConstant) t;
-			return sqladapter.getSQLLexicalFormString(uc.getURI().toString());
+			return sqladapter.getSQLLexicalFormString(uc.getURI());
 		}
 
 		/*
@@ -1020,7 +1020,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		throw new IllegalArgumentException("Error, cannot generate URI constructor clause for a term: " + ov.toString());
 
 	}
-	
+
+	// TODO: move to SQLAdapter
 	private String getStringConcatenation(SQLDialectAdapter adapter, String[] params) {
 		String toReturn = sqladapter.strconcat(params);
 		if (adapter instanceof DB2SQLDialectAdapter) {
@@ -1043,8 +1044,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				/*
 				 * A URI function always returns a string, thus it is a string column type.
 				 */
-				if (isSI) return false;
-				return true;
+				return !isSI;
 			} else {
 				if (isUnary(function)) {
 					/*
@@ -1106,14 +1106,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * Determines if it is a unary function.
 	 */
 	private boolean isUnary(Function fun) {
-		return (fun.getArity() == 1) ? true : false;
+		return (fun.getArity() == 1);
 	}
 
 	/**
 	 * Determines if it is a binary function.
 	 */
 	private boolean isBinary(Function fun) {
-		return (fun.getArity() == 2) ? true : false;
+		return (fun.getArity() == 2);
 	}
 
 	/**
@@ -1382,7 +1382,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	private String getNumericalOperatorString(Predicate functionSymbol) {
-		String operator = null;
+		String operator;
 		if (functionSymbol.equals(OBDAVocabulary.ADD)) {
 			operator = ADD_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.SUBTRACT)) {
@@ -1394,15 +1394,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 		return operator;
 	}
-
-    public boolean isGeneratingREPLACE() {
-        return generatingREPLACE;
-    }
-
-    public void setGeneratingREPLACE(boolean generatingREPLACE) {
-        this.generatingREPLACE = generatingREPLACE;
-    }
-
     /**
 	 * Utility class to resolve "database" atoms to view definitions ready to be
 	 * used in a FROM clause, and variables, to column references defined over
@@ -1410,10 +1401,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	public class QueryAliasIndex {
 
-		Map<Function, String> viewNames = new HashMap<Function, String>();
-		Map<Function, String> tableNames = new HashMap<Function, String>();
-		Map<Function, DataDefinition> dataDefinitions = new HashMap<Function, DataDefinition>();
-		Map<Variable, LinkedHashSet<String>> columnReferences = new HashMap<Variable, LinkedHashSet<String>>();
+		Map<Function, String> viewNames = new HashMap<>();
+		Map<Function, String> tableNames = new HashMap<>();
+		Map<Function, DataDefinition> dataDefinitions = new HashMap<>();
+		Map<Variable, LinkedHashSet<String>> columnReferences = new HashMap<>();
 
 		int dataTableCount = 0;
 		boolean isEmpty = false;
@@ -1486,7 +1477,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 				LinkedHashSet<String> references = columnReferences.get(term);
 				if (references == null) {
-					references = new LinkedHashSet<String>();
+					references = new LinkedHashSet<>();
 					columnReferences.put((Variable) term, references);
 				}
 				String columnName = def.getAttributeName(index + 1);
