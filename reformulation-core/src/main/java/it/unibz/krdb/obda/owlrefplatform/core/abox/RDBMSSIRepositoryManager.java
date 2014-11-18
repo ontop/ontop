@@ -95,21 +95,17 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
 
-/**
- * Metadata tables 
- */
+	/**
+	 * Metadata tables 
+	 */
 	private final static String index_table = "IDX";
-
 	private final static String interval_table = "IDXINTERVAL";
-
 	private final static String emptyness_index_table = "NONEMPTYNESSINDEX";
-	
 	private final static String uri_id_table = "URIID";
 
-/**
- *  Data tables
- */
-	
+	/**
+	 *  Data tables
+	 */
 	private static final String class_table = "QUEST_CLASS_ASSERTION";
 	private static final String role_table = "QUEST_OBJECT_PROPERTY_ASSERTION";
 	private static final String attribute_table_literal = "QUEST_DATA_PROPERTY_LITERAL_ASSERTION";
@@ -226,35 +222,14 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private static final String attribute_table_literal_insert = "INSERT INTO " + attribute_table_literal
 			+ " (URI, VAL, LANG, IDX, ISBNODE) VALUES (?, ?, ?, ?, ?)";
 	
+	private static final Map<COL_TYPE, String> attribute_table_insert = new HashMap<COL_TYPE, String>();
 	
-	private static final String attribute_table_string_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.STRING)
-			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-	private static final String attribute_table_integer_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.INTEGER)
-			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-	private static final String attribute_table_int_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.INT)
-            + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_unsigned_int_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.UNSIGNED_INT)
-            + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_negative_integer_insert = "INSERT INTO " +  attribute_table.get(COL_TYPE.NEGATIVE_INTEGER)
-            + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_positive_integer_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.POSITIVE_INTEGER)
-            + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_non_negative_integer_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.NON_NEGATIVE_INTEGER)
-            + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_non_positive_integer_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.NON_POSITIVE_INTEGER)
-            + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_float_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.FLOAT)
-            + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_long_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.LONG)
-            + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_decimal_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.DECIMAL)
-			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-	private static final String attribute_table_double_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.DOUBLE)
-			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-	private static final String attribute_table_datetime_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.DATETIME)
-			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-	private static final String attribute_table_boolean_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.BOOLEAN)
-			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
+	static {
+		for (Entry<COL_TYPE, String> entry : attribute_table.entrySet()) 
+			attribute_table_insert.put(entry.getKey(), "INSERT INTO " + entry.getValue() 
+											+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)");
+	}
+	
 
 /**
  *  Indexes
@@ -263,7 +238,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private static final String indexclass_composite = "CREATE INDEX idxclassfull ON " + class_table + " (URI, IDX, ISBNODE)";
 	private static final String indexrole_composite1 = "CREATE INDEX idxrolefull1 ON " + role_table + " (URI1, URI2, IDX, ISBNODE, ISBNODE2)";
 	private static final String indexrole_composite2 = "CREATE INDEX idxrolefull2 ON " + role_table + " (URI2, URI1, IDX, ISBNODE2, ISBNODE)";
-
 
 	private static final String indexclassfull2 = "CREATE INDEX idxclassfull2 ON " + class_table + " (URI, IDX)";
 	private static final String indexrolefull22 = "CREATE INDEX idxrolefull22 ON " + role_table + " (URI1, URI2, IDX)";
@@ -291,16 +265,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	
 
 	
-/**
- *  DROP indexes	
- */
-	
-	private static final String dropindexclass1 = "DROP INDEX \"idxclass1\"";
-	private static final String dropindexclass2 = "DROP INDEX \"idxclass2\"";
-
-	private static final String dropindexrole1 = "DROP INDEX \"idxrole1\"";
-	private static final String dropindexrole2 = "DROP INDEX \"idxrole2\"";
-	private static final String dropindexrole3 = "DROP INDEX \"idxrole3\"";
 
 
 	
@@ -319,8 +283,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			select_mapping_attribute.put(entry.getKey(),  "SELECT \"URI\" as X, VAL as Y FROM " + entry.getValue());  			
 	}
 	
+	
 	private static final String whereSingleCondition = "IDX = %d";
-
 	private static final String whereIntervalCondition = "IDX >= %d AND IDX <= %d";
 	
 
@@ -340,11 +304,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private final HashSet<SemanticIndexRecord> nonEmptyEntityRecord = new HashSet<SemanticIndexRecord>();
 
-	private final List<RepositoryChangedListener> changeList;
+	private final List<RepositoryChangedListener> changeList = new LinkedList<RepositoryChangedListener>();
 
 	public RDBMSSIRepositoryManager() {
-
-		changeList = new LinkedList<RepositoryChangedListener>();
 	}
 
 	public void addRepositoryChangedListener(RepositoryChangedListener list) {
@@ -374,6 +336,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		return TYPE_SI;
 	}
 
+	public SemanticIndexURIMap getUriMap() {
+		return uriMap;
+	}
+	
 
 	@Override
 	public void getSQLInserts(Iterator<Assertion> data, OutputStream outstream) throws IOException {
@@ -382,22 +348,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		String role_insert_str = role_insert.replace("?", "%s");
 
-		String attribute_insert_literal_str = attribute_table_literal_insert.replace("?", "%s");
-		String attribute_insert_string_str = attribute_table_string_insert.replace("?", "%s");
-		String attribute_insert_integer_str = attribute_table_integer_insert.replace("?", "%s");
-        String attribute_insert_int_str = attribute_table_int_insert.replace("?", "%s");
-        String attribute_insert_unsigned_int_str = attribute_table_unsigned_int_insert.replace("?", "%s");
-        String attribute_insert_negative_integer_str = attribute_table_negative_integer_insert.replace("?", "%s");
-        String attribute_insert_non_negative_integer_str = attribute_table_non_negative_integer_insert.replace("?", "%s");
-        String attribute_insert_non_positive_integer_str = attribute_table_non_positive_integer_insert.replace("?", "%s");
-        String attribute_insert_positive_integer_str = attribute_table_positive_integer_insert.replace("?", "%s");
-        String attribute_insert_float_str = attribute_table_float_insert.replace("?", "%s");
-        String attribute_insert_long_str = attribute_table_long_insert.replace("?", "%s");
-		String attribute_insert_decimal_str = attribute_table_decimal_insert.replace("?", "%s");
-		String attribute_insert_double_str = attribute_table_double_insert.replace("?", "%s");
-		String attribute_insert_date_str = attribute_table_datetime_insert.replace("?", "%s");
-		String attribute_insert_boolean_str = attribute_table_boolean_insert.replace("?", "%s");
-
+		final String attribute_insert_literal_str = attribute_table_literal_insert.replace("?", "%s");
+		
+		final Map<COL_TYPE, String> attribute_insert_str = new HashMap<COL_TYPE, String>();
+		for (Entry<COL_TYPE, String> entry : attribute_table_insert.entrySet())
+			attribute_insert_str.put(entry.getKey(), entry.getValue().replace("?", "%s"));
+		
 		String cls_insert_str = class_insert.replace("?", "%s");
 
 		while (data.hasNext()) {
@@ -417,6 +373,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					uri = ((BNode) c1).getName();
 				else
 					uri = ((URIConstant) c1).getURI().toString();
+				
+				String quotedUri = getQuotedString(uri);
 
 				String lit = value.getValue();
 				String lang = value.getLanguage();
@@ -438,50 +396,50 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 				switch (attributeType) {
 				case LITERAL:
-					out.append(String.format(attribute_insert_literal_str, getQuotedString(uri), getQuotedString(lit),
+					out.append(String.format(attribute_insert_literal_str, quotedUri, getQuotedString(lit),
 							getQuotedString(lang), idx, c1isBNode));
 					break;
 				case STRING:
-					out.append(String.format(attribute_insert_string_str, getQuotedString(uri), getQuotedString(lit), idx, c1isBNode));
+					out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, getQuotedString(lit), idx, c1isBNode));
 					break;
                 case INT:
-                    out.append(String.format(attribute_insert_int_str, getQuotedString(uri), Integer.parseInt(lit), idx, c1isBNode));
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Integer.parseInt(lit), idx, c1isBNode));
                     break;
                 case UNSIGNED_INT:
-                    out.append(String.format(attribute_insert_unsigned_int_str, getQuotedString(uri), Integer.parseInt(lit), idx, c1isBNode));
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Integer.parseInt(lit), idx, c1isBNode));
                     break;
                 case NEGATIVE_INTEGER:
-                    out.append(String.format(attribute_insert_negative_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
                     break;
                 case NON_NEGATIVE_INTEGER:
-                    out.append(String.format(attribute_insert_non_negative_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
                     break;
                 case NON_POSITIVE_INTEGER:
-                    out.append(String.format(attribute_insert_non_positive_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
                     break;
                 case POSITIVE_INTEGER:
-                    out.append(String.format(attribute_insert_positive_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
                     break;
 				case INTEGER:
-					out.append(String.format(attribute_insert_integer_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
+					out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
 					break;
                 case LONG:
-                    out.append(String.format(attribute_insert_long_str, getQuotedString(uri), Long.parseLong(lit), idx, c1isBNode));
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
                     break;
 				case DECIMAL:
-					out.append(String.format(attribute_insert_decimal_str, getQuotedString(uri), parseBigDecimal(lit), idx, c1isBNode));
+					out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, parseBigDecimal(lit), idx, c1isBNode));
 					break;
 				case DOUBLE:
-					out.append(String.format(attribute_insert_double_str, getQuotedString(uri), Double.parseDouble(lit), idx, c1isBNode));
+					out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Double.parseDouble(lit), idx, c1isBNode));
 					break;
                 case FLOAT:
-                    out.append(String.format(attribute_insert_float_str, getQuotedString(uri), Float.parseFloat(lit), idx, c1isBNode));
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Float.parseFloat(lit), idx, c1isBNode));
                     break;
 				case DATETIME:
-					out.append(String.format(attribute_insert_date_str, getQuotedString(uri), parseTimestamp(lit), idx, c1isBNode));
+					out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, parseTimestamp(lit), idx, c1isBNode));
 					break;
 				case BOOLEAN:
-					out.append(String.format(attribute_insert_boolean_str, getQuotedString(uri), Boolean.parseBoolean(lit), idx,
+					out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Boolean.parseBoolean(lit), idx,
 							c1isBNode));
 					break;
 				}
@@ -709,21 +667,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		PreparedStatement classStm = conn.prepareStatement(class_insert);
 		PreparedStatement roleStm = conn.prepareStatement(role_insert);
 		PreparedStatement attributeLiteralStm = conn.prepareStatement(attribute_table_literal_insert);
-		PreparedStatement attributeStringStm = conn.prepareStatement(attribute_table_string_insert);
-		PreparedStatement attributeIntegerStm = conn.prepareStatement(attribute_table_integer_insert);
-        PreparedStatement attributeIntStm = conn.prepareStatement(attribute_table_int_insert);
-        PreparedStatement attributeUnsignedIntStm = conn.prepareStatement(attribute_table_unsigned_int_insert);
-        PreparedStatement attributeNegativeIntegerStm = conn.prepareStatement(attribute_table_negative_integer_insert);
-        PreparedStatement attributePositiveIntegerStm = conn.prepareStatement(attribute_table_positive_integer_insert);
-        PreparedStatement attributeNonNegativeIntegerStm = conn.prepareStatement(attribute_table_non_negative_integer_insert);
-        PreparedStatement attributeNonPositiveIntegerStm = conn.prepareStatement(attribute_table_non_positive_integer_insert);
-        PreparedStatement attributeFloatStm = conn.prepareStatement(attribute_table_float_insert);
-        PreparedStatement attributeLongStm = conn.prepareStatement(attribute_table_long_insert);
-		PreparedStatement attributeDecimalStm = conn.prepareStatement(attribute_table_decimal_insert);
-		PreparedStatement attributeDoubleStm = conn.prepareStatement(attribute_table_double_insert);
-		PreparedStatement attributeDateStm = conn.prepareStatement(attribute_table_datetime_insert);
-		PreparedStatement attributeBooleanStm = conn.prepareStatement(attribute_table_boolean_insert);
-
+		
+		Map<COL_TYPE, PreparedStatement> attributeStm = new HashMap<COL_TYPE, PreparedStatement>();
+		for (Entry<COL_TYPE, String> entry : attribute_table_insert.entrySet()) {
+			PreparedStatement stm = conn.prepareStatement(entry.getValue());
+			attributeStm.put(entry.getKey(), stm);
+		}
+		
 		// For counting the insertion
 		InsertionMonitor monitor = new InsertionMonitor();
 
@@ -739,10 +689,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				batchCount += 1;
 				commitCount += 1;
 
-				addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStringStm, attributeIntegerStm, attributeLongStm, 
-                        attributeIntStm, attributeUnsignedIntStm, attributeNegativeIntegerStm, attributePositiveIntegerStm, attributeNonNegativeIntegerStm,
-                        attributeNonPositiveIntegerStm,  attributeFloatStm, attributeDecimalStm,
-						attributeDoubleStm, attributeDateStm, attributeBooleanStm, monitor, ax);
+				addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, monitor, ax);
 
 				/*
 				 * Register non emptyness
@@ -777,20 +724,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				executeBatch(uriidStm);
 				executeBatch(roleStm);
 				executeBatch(attributeLiteralStm);
-				executeBatch(attributeStringStm);
-				executeBatch(attributeIntegerStm);
-                executeBatch(attributeIntStm);
-                executeBatch(attributeUnsignedIntStm);
-                executeBatch(attributeNegativeIntegerStm);
-                executeBatch(attributePositiveIntegerStm);
-                executeBatch(attributeNonNegativeIntegerStm);
-                executeBatch(attributeNonPositiveIntegerStm);
-                executeBatch(attributeFloatStm);
-                executeBatch(attributeLongStm);
-				executeBatch(attributeDecimalStm);
-				executeBatch(attributeDoubleStm);
-				executeBatch(attributeDateStm);
-				executeBatch(attributeBooleanStm);
+				for (PreparedStatement stm : attributeStm.values())
+					executeBatch(stm);
 				executeBatch(classStm);
 				batchCount = 0; // reset the counter
 			}
@@ -806,42 +741,18 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		executeBatch(uriidStm);
 		executeBatch(roleStm);
 		executeBatch(attributeLiteralStm);
-		executeBatch(attributeStringStm);
-		executeBatch(attributeIntegerStm);
-        executeBatch(attributeIntStm);
-        executeBatch(attributeUnsignedIntStm);
-        executeBatch(attributeNegativeIntegerStm);
-        executeBatch(attributePositiveIntegerStm);
-        executeBatch(attributeNonNegativeIntegerStm);
-        executeBatch(attributeNonPositiveIntegerStm);
-        executeBatch(attributeFloatStm);
-        executeBatch(attributeLongStm);
-		executeBatch(attributeDecimalStm);
-		executeBatch(attributeDoubleStm);
-		executeBatch(attributeDateStm);
-		executeBatch(attributeBooleanStm);
+		for (PreparedStatement stm : attributeStm.values())
+			executeBatch(stm);
 		executeBatch(classStm);
 
 	
 		// Close all open statements
-		closeStatement(uriidStm);
-		closeStatement(roleStm);
-		closeStatement(attributeLiteralStm);
-		closeStatement(attributeStringStm);
-		closeStatement(attributeIntegerStm);
-        closeStatement(attributeIntStm);
-        closeStatement(attributeUnsignedIntStm);
-        closeStatement(attributeNegativeIntegerStm);
-        closeStatement(attributePositiveIntegerStm);
-        closeStatement(attributeNonNegativeIntegerStm);
-        closeStatement(attributeNonPositiveIntegerStm);
-        closeStatement(attributeFloatStm);
-        closeStatement(attributeLongStm);
-		closeStatement(attributeDecimalStm);
-		closeStatement(attributeDoubleStm);
-		closeStatement(attributeDateStm);
-		closeStatement(attributeBooleanStm);
-		closeStatement(classStm);
+		uriidStm.close();
+		roleStm.close();;
+		attributeLiteralStm.close();;
+		for (PreparedStatement stm : attributeStm.values())
+			stm.close();;
+		classStm.close();
 
 		// Commit the rest of the batch insert
 		conn.commit();
@@ -863,11 +774,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement classStm, PreparedStatement roleStm, PreparedStatement attributeLiteralStm,
-			PreparedStatement attributeStringStm, PreparedStatement attributeIntegerStm, PreparedStatement attributeLongStm,
-            PreparedStatement attributeIntStm, PreparedStatement attributeUnsignedIntStm, PreparedStatement attributeNegativeIntegerStm, PreparedStatement attributePositiveIntegerStm,
-            PreparedStatement attributeNonNegativeIntegerStm,PreparedStatement attributeNonPositiveIntegerStm, 
-            PreparedStatement attributeFloatStm, PreparedStatement attributeDecimalStm,
-			PreparedStatement attributeDoubleStm, PreparedStatement attributeDateStm, PreparedStatement attributeBooleanStm,
+			Map<COL_TYPE, PreparedStatement> attributeStatement,
 			InsertionMonitor monitor, Assertion ax) throws SQLException {
 		int uri_id = 0;
 		int uri2_id = 0;
@@ -976,66 +883,66 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				// log.debug("literal");
 				break;
 			case STRING:
-				setInputStatement(attributeStringStm, uri_id, value, idx, c1isBNode);
+				setInputStatement(attributeStatement.get(attributeType), uri_id, value, idx, c1isBNode);
 				// log.debug("string");
 				break;
             case INTEGER:
                 if (value.charAt(0) == '+')
                     value = value.substring(1, value.length());
-                setInputStatement(attributeIntegerStm, uri_id, Long.parseLong(value), idx, c1isBNode);
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
                 // log.debug("Integer");
                 break;
             case INT:
                 if (value.charAt(0) == '+')
                     value = value.substring(1, value.length());
-                setInputStatement(attributeIntStm, uri_id, Integer.parseInt(value), idx, c1isBNode);
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Integer.parseInt(value), idx, c1isBNode);
                 // log.debug("Int");
                 break;
             case UNSIGNED_INT:
-                setInputStatement(attributeUnsignedIntStm, uri_id, Integer.parseInt(value), idx, c1isBNode);
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Integer.parseInt(value), idx, c1isBNode);
                 // log.debug("Int");
                 break;
             case NEGATIVE_INTEGER:
-                setInputStatement(attributeNegativeIntegerStm, uri_id, Long.parseLong(value), idx, c1isBNode);
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
                 // log.debug("Integer");
                 break;
             case POSITIVE_INTEGER:
                 if (value.charAt(0) == '+')
                     value = value.substring(1, value.length());
-                setInputStatement(attributePositiveIntegerStm, uri_id, Long.parseLong(value), idx, c1isBNode);
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
                 // log.debug("Integer");
                 break;
             case NON_NEGATIVE_INTEGER:
                 if (value.charAt(0) == '+')
                     value = value.substring(1, value.length());
-                setInputStatement(attributeNonNegativeIntegerStm, uri_id, Long.parseLong(value), idx, c1isBNode);
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
                 // log.debug("Integer");
                 break;
             case NON_POSITIVE_INTEGER:
                     value = value.substring(1, value.length());
-                setInputStatement(attributeNonPositiveIntegerStm, uri_id, Long.parseLong(value), idx, c1isBNode);
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
                 // log.debug("Integer");
                 break;
             case FLOAT:
-                setInputStatement(attributeFloatStm, uri_id, Float.parseFloat(value), idx, c1isBNode);
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Float.parseFloat(value), idx, c1isBNode);
                 // log.debug("Float");
                 break;
             case LONG:
 				if (value.charAt(0) == '+')
 					value = value.substring(1, value.length());
-				setInputStatement(attributeLongStm, uri_id, Long.parseLong(value), idx, c1isBNode);
+				setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
 				// log.debug("Long");
 				break;
 			case DECIMAL:
-				setInputStatement(attributeDecimalStm, uri_id, parseBigDecimal(value), idx, c1isBNode);
+				setInputStatement(attributeStatement.get(attributeType), uri_id, parseBigDecimal(value), idx, c1isBNode);
 				// log.debug("BigDecimal");
 				break;
 			case DOUBLE:
-				setInputStatement(attributeDoubleStm, uri_id, Double.parseDouble(value), idx, c1isBNode);
+				setInputStatement(attributeStatement.get(attributeType), uri_id, Double.parseDouble(value), idx, c1isBNode);
 				// log.debug("Double");
 				break;
 			case DATETIME:
-				setInputStatement(attributeDateStm, uri_id, parseTimestamp(value), idx, c1isBNode);
+				setInputStatement(attributeStatement.get(attributeType), uri_id, parseTimestamp(value), idx, c1isBNode);
 				// log.debug("Date");
 				break;
 			case BOOLEAN:
@@ -1043,7 +950,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 													// abbreviates the
 													// boolean value to
 													// 't' and 'f'
-				setInputStatement(attributeBooleanStm, uri_id, Boolean.parseBoolean(value), idx, c1isBNode);
+				setInputStatement(attributeStatement.get(attributeType), uri_id, Boolean.parseBoolean(value), idx, c1isBNode);
 				// log.debug("boolean");
 				break;
 			case UNSUPPORTED:
@@ -1090,9 +997,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 	}
 
-	private void closeStatement(PreparedStatement statement) throws SQLException {
-		statement.close();
-	}
 
 	private void executeBatch(PreparedStatement statement) throws SQLException {
 		statement.executeBatch();
@@ -2111,52 +2015,26 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			sql2.append(" WHERE ");
 			sql2.append(" ISBNODE = TRUE AND ");
 
-			/*
-			 * Getting the indexed node (from the pureIsa dag)
-			 */
-			//Description indexedNode = pureIsa.getNode((OClass) classNode);
-			
-
 
 			List<Interval> intervals = cacheSI.getIntervals(classuri.getName(), 1);
 			if (intervals == null) {
 				log.warn("Found URI with no mappings, the ontology might not match the respository. Ill URI: {}", classuri.getName());
 				continue;
 			}
-			if (intervals.size() > 1)
-				sql1.append("(");
-			appendIntervalString(intervals.get(0), sql1);
+			appendIntervalString(intervals, sql1);
 
-			for (int intervali = 1; intervali < intervals.size(); intervali++) {
-				sql1.append(" OR ");
-				appendIntervalString(intervals.get(intervali), sql1);
-			}
-			if (intervals.size() > 1)
-				sql1.append(")");
-
-			/* FOR BNODE */
 
 			OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sql1.toString(), targetQuery1);
 			if (!isMappingEmpty(classuri.getName(), COL_TYPE.OBJECT, COL_TYPE.OBJECT, 1))
 				currentMappings.add(basicmapping);
-			;
 
-			if (intervals.size() > 1)
-				sql2.append("(");
-			appendIntervalString(intervals.get(0), sql2);
-
-			for (int intervali = 1; intervali < intervals.size(); intervali++) {
-				sql2.append(" OR ");
-				appendIntervalString(intervals.get(intervali), sql2);
-			}
-			if (intervals.size() > 1)
-				sql2.append(")");
+			/* FOR BNODE */
+			
+			appendIntervalString(intervals, sql2);
 
 			basicmapping = dfac.getRDBMSMappingAxiom(sql2.toString(), targetQuery2);
 			if (!isMappingEmpty(classuri.getName(), COL_TYPE.BNODE, COL_TYPE.OBJECT, 1))
 				currentMappings.add(basicmapping);
-			;
-
 		}
 
 		/*
@@ -2385,26 +2263,31 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		if (intervals == null)
 			throw new OBDAException("Could not create mapping for predicate: " + predicate.getName()
 					+ ". Couldn not find semantic index intervals for the predicate.");
-		if (intervals.size() > 1)
-			sql.append("(");
-
-		appendIntervalString(intervals.get(0), sql);
-		for (int intervali = 1; intervali < intervals.size(); intervali++) {
-			sql.append(" OR ");
-			appendIntervalString(intervals.get(intervali), sql);
-		}
-		if (intervals.size() > 1)
-			sql.append(")");
+		
+		appendIntervalString(intervals, sql);
 
 		return sql.toString();
 	}
 	
 
-	private void appendIntervalString(Interval interval, StringBuilder out) {
+	private void appendIntervalString(List<Interval> intervals, StringBuilder sql) {
+		if (intervals.size() > 1)
+			sql.append("(");
+		sql.append(getIntervalString0(intervals.get(0)));
+
+		for (int intervali = 1; intervali < intervals.size(); intervali++) {
+			sql.append(" OR ");
+			sql.append(getIntervalString0(intervals.get(intervali)));
+		}
+		if (intervals.size() > 1)
+			sql.append(")");	
+	}
+	
+	private String getIntervalString0(Interval interval) {
 		if (interval.getStart() == interval.getEnd()) {
-			out.append(String.format(whereSingleCondition, interval.getStart()));
+			return String.format(whereSingleCondition, interval.getStart());
 		} else {
-			out.append(String.format(whereIntervalCondition, interval.getStart(), interval.getEnd()));
+			return String.format(whereIntervalCondition, interval.getStart(), interval.getEnd());
 		}
 	}
 
@@ -2545,6 +2428,18 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		return bf.toString();
 	}
 
+	
+	/**
+	 *  DROP indexes	
+	 */
+		
+	private static final String dropindexclass1 = "DROP INDEX \"idxclass1\"";
+	private static final String dropindexclass2 = "DROP INDEX \"idxclass2\"";
+
+	private static final String dropindexrole1 = "DROP INDEX \"idxrole1\"";
+	private static final String dropindexrole2 = "DROP INDEX \"idxrole2\"";
+	private static final String dropindexrole3 = "DROP INDEX \"idxrole3\"";
+	
 
 	@Override
 	public void dropIndexes(Connection conn) throws SQLException {
@@ -2554,8 +2449,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		st.addBatch(dropindexclass1);
 		st.addBatch(dropindexclass2);
-		// st.addBatch(dropindexclass3);
-		// st.addBatch(dropindexclass4);
+
 		st.addBatch(dropindexrole1);
 		st.addBatch(dropindexrole2);
 		st.addBatch(dropindexrole3);
@@ -3025,9 +2919,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 	}
 
-	public SemanticIndexURIMap getUriMap() {
-		return uriMap;
-	}
 	
 
 }
