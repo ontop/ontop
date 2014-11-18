@@ -1080,7 +1080,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				newInnerTerms.add(getFreshTerm(innerTerm, suffix));
 			}
 			Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
-			Function newFunctionalTerm = (Function) termFactory.getFunction(newFunctionSymbol, newInnerTerms);
+			Function newFunctionalTerm = termFactory.getFunction(newFunctionSymbol, newInnerTerms);
 			newTerm = newFunctionalTerm;
 		} else if (term instanceof Constant) {
 			newTerm = term.clone();
@@ -1204,7 +1204,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				// for (int i = 0; i < focusLiteral.getTerms().size(); i++) {
 
 				Predicate predicate = focusLiteral.getFunctionSymbol();
-				boolean focusAtomIsLeftJoin = predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN);
+				boolean focusAtomIsLeftJoin = predicate == OBDAVocabulary.SPARQL_LEFTJOIN;
 				List<CQIE> result = new LinkedList<CQIE>();
 				result = computePartialEvaluation(focusLiteral.getTerms(), rule, resolutionCount, termidx, focusAtomIsLeftJoin);
 
@@ -1405,8 +1405,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		Function foldedJoinAtom = null;
 
 		while (dataAtomsList.size() > 1) {
-			foldedJoinAtom = termFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, (Term) dataAtomsList.remove(0),
-					(Term) dataAtomsList.remove(0));
+			foldedJoinAtom = termFactory.getSPARQLJoin(dataAtomsList.remove(0), dataAtomsList.remove(0));
 			dataAtomsList.add(0, foldedJoinAtom);
 		}
 
@@ -1732,7 +1731,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			if (mgu1 == null)
 				throw new RuntimeException("Unexpected case found while performing JOIN elimination. Contact the authors for debugging.");
 
-			if (currentAtom.isAlgebraFunction() && currentAtom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_LEFTJOIN)) {
+			if (currentAtom.isAlgebraFunction() && (currentAtom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN)) {
 				continue;
 			}
 
@@ -1782,7 +1781,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				if (!newatom.isBooleanFunction())
 					continue;
 
-				if (!newatom.getPredicate().equals(OBDAVocabulary.IS_NOT_NULL))
+				if (!newatom.getFunctionSymbol().equals(OBDAVocabulary.IS_NOT_NULL))
 					continue;
 
 				Function replacement = null;

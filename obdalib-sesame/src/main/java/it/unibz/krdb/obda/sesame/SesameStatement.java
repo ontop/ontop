@@ -20,38 +20,29 @@ package it.unibz.krdb.obda.sesame;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.BNode;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 
-import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
 
 public class SesameStatement implements Statement {
     private static final long serialVersionUID = 3398547980791013746L;
+    
 	private Resource subject = null;
 	private URI predicate = null;
 	private Value object = null;
 	private Resource context = null;
-	private ValueFactory fact = new ValueFactoryImpl();
-	
-	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+
+	private SesameHelper helper = new SesameHelper();
 
 	public SesameStatement(Assertion assertion) {
 		
@@ -63,23 +54,11 @@ public class SesameStatement implements Statement {
 			ObjectConstant obj = ba.getObject();
 			
 			// convert string into respective type
-			if (subj instanceof BNode)
-				subject = fact.createBNode(((BNode) subj).getName());
-			else if (subj instanceof URIConstant)
-				subject = fact.createURI(subj.getValue());
-			else 
-				throw new RuntimeException("Invalid constant as subject!" + subj);
-			
-			predicate = fact.createURI(pred.getName().toString()); // URI
-			
-			if (obj instanceof BNode)
-				object = fact.createBNode(((BNode) obj).getName());
-			else if (obj instanceof URIConstant)
-				object = fact.createURI(obj.getValue());
-			else 
-				throw new RuntimeException("Invalid constant as object!" + obj);
+			subject = helper.getResource(subj);
+			predicate = helper.createURI(pred.getName().toString()); // URI	
+			object = helper.getResource(obj);
 		} 
-		if (assertion instanceof DataPropertyAssertion) {
+		else if (assertion instanceof DataPropertyAssertion) {
 			//object or data property assertion
 			DataPropertyAssertion ba = (DataPropertyAssertion) assertion;
 			ObjectConstant subj = ba.getSubject();
@@ -87,17 +66,11 @@ public class SesameStatement implements Statement {
 			ValueConstant obj = ba.getValue();
 			
 			// convert string into respective type
-			if (subj instanceof BNode)
-				subject = fact.createBNode(((BNode) subj).getName());
-			else if (subj instanceof URIConstant)
-				subject = fact.createURI(subj.getValue());
-			else 
-				throw new RuntimeException("Invalid constant as subject!" + subj);
-			
-			predicate = fact.createURI(pred.getName().toString()); // URI
+			subject = helper.getResource(subj);	
+			predicate = helper.createURI(pred.getName().toString()); // URI
 			
 			if (obj instanceof ValueConstant)
-				object = getLiteral((ValueConstant)obj);		
+				object = helper.getLiteral((ValueConstant)obj);		
 			else 
 				throw new RuntimeException("Invalid constant as object!" + obj);
 		} 
@@ -105,47 +78,15 @@ public class SesameStatement implements Statement {
 			//class assertion
 			ClassAssertion ua = (ClassAssertion) assertion;
 			ObjectConstant subj = ua.getIndividual();
-			String pred = OBDAVocabulary.RDF_TYPE;
 			Predicate obj = ua.getConcept().getPredicate();
 			
 			// convert string into respective type
-			if (subj instanceof BNode)
-				subject = fact.createBNode(((BNode) subj).getName());
-			else if (subj instanceof URIConstant)
-				subject = fact.createURI(subj.getValue());
-			else
-				throw new RuntimeException("Invalid ValueConstant as subject!");
-			
-			predicate = fact.createURI(pred); // URI
-		
-			object = fact.createURI(obj.getName().toString());
-			
+			subject = helper.getResource(subj);
+			predicate = helper.createURI(OBDAVocabulary.RDF_TYPE); // URI
+			object = helper.createURI(obj.getName().toString());	
 		}
 	}
 	
-	public Literal getLiteral(ValueConstant literal)
-	{
-		URI datatype = null;
-		
-		if (literal.getType() == COL_TYPE.LITERAL) {
-			datatype = null;                                       // special 17
-		}
-		else if (literal.getType() == COL_TYPE.LITERAL_LANG) {
-			datatype = null;
-			return fact.createLiteral(literal.getValue(), literal.getLanguage());
-		}
-		else if (literal.getType() == COL_TYPE.OBJECT) {
-			String uri = dtfac.getDataTypeURI(COL_TYPE.STRING);
-			datatype = fact.createURI(uri);
-		}	
-		else {
-			String uri = dtfac.getDataTypeURI(literal.getType());
-			datatype = fact.createURI(uri);
-		}
-		
-		Literal value = fact.createLiteral(literal.getValue(), datatype);
-		return value;
-	}
 
 	public Resource getSubject() {
 		return subject;
@@ -193,8 +134,7 @@ public class SesameStatement implements Statement {
     }
 
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		return "("+subject+", "+predicate+", "+object+")";
 	}
 }

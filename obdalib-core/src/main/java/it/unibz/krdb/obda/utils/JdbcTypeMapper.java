@@ -54,7 +54,7 @@ public class JdbcTypeMapper {
 		sqlToQuest.put(Types.REAL, COL_TYPE.DOUBLE);
 		sqlToQuest.put(Types.DATE, COL_TYPE.DATE);
 		sqlToQuest.put(Types.TIME, COL_TYPE.TIME);
-		sqlToQuest.put(Types.TIMESTAMP, COL_TYPE.DATETIME);
+		sqlToQuest.put(Types.TIMESTAMP, COL_TYPE.DATETIME); //GX: needs check
 		sqlToQuest.put(Types.BOOLEAN, COL_TYPE.BOOLEAN);
 		sqlToQuest.put(Types.BIT, COL_TYPE.BOOLEAN);
 //		typeMapper.put(Types.BINARY, dfac.getDataTypePredicateBinary());
@@ -75,6 +75,7 @@ public class JdbcTypeMapper {
 		datatypeMap.put(COL_TYPE.DOUBLE, Types.DOUBLE);
 		datatypeMap.put(COL_TYPE.STRING, Types.VARCHAR);
 		datatypeMap.put(COL_TYPE.LITERAL, Types.VARCHAR);	
+		// all other COL_TYPEs are mapped to Types.VARCHAR by default
 	}
 	
 	public Predicate.COL_TYPE getPredicate(int sqlType) {

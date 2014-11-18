@@ -56,7 +56,7 @@ public class QueryAnonymizer {
 		List<Function> body = q.getBody();
 		Function atom = (Function) body.get(focusatomIndex);
 		int bodysize = body.size();
-		int arity = atom.getPredicate().getArity();
+		int arity = atom.getFunctionSymbol().getArity();
 
 		for (int i = 0; i < arity; i++) {
 			Term term = atom.getTerms().get(i);
@@ -133,7 +133,7 @@ public class QueryAnonymizer {
 					vex.add(t);
 				}
 			}
-			Function newatom = fac.getFunction(atom.getPredicate().clone(), vex);
+			Function newatom = fac.getFunction(atom.getFunctionSymbol().clone(), vex);
 			newBody.add(newatom);
 		}
 		CQIE query = fac.getCQIE(q.getHead(), newBody);

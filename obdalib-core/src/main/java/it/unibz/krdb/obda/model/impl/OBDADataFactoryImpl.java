@@ -55,7 +55,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	private static OBDADataFactory instance = null;
 	private static ValueFactory irifactory = null;
 	private DatatypeFactoryImpl datatypes = null;
-	private final QuestTypeMapper questTypeMapper = new QuestTypeMapper();
 	private final JdbcTypeMapper jdbcTypeMapper =  new JdbcTypeMapper(); 
 	
 
@@ -87,10 +86,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return datatypes;
 	}
 
-	@Override
-	public QuestTypeMapper getQuestTypeMapper() {
-		return questTypeMapper;
-	}
 	
 	@Override 
 	public JdbcTypeMapper getJdbcTypeMapper() {
@@ -150,8 +145,30 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public Function getTypedTerm(Term value, COL_TYPE type) {
+		Predicate pred = getDatatypeFactory().getTypePredicate(type);
+		if (pred == null)
+			throw new RuntimeException("Unknown data type!");
+		
+		return getFunction(pred, value);
+	}
+	
+	@Override
 	public ValueConstant getConstantLiteral(String value, String language) {
-		return new ValueConstantImpl(value, language.toLowerCase(), COL_TYPE.LITERAL_LANG);
+		return new ValueConstantImpl(value, language.toLowerCase());
+	}
+
+	@Override
+	public Function getTypedTerm(Term value, Term language) {
+		Predicate pred = getDatatypeFactory().getTypePredicate(COL_TYPE.LITERAL_LANG);
+		return getFunction(pred, value, language);
+	}
+
+	@Override
+	public Function getTypedTerm(Term value, String language) {
+		Term lang = getConstantLiteral(language.toLowerCase(), COL_TYPE.LITERAL);		
+		Predicate pred = getDatatypeFactory().getTypePredicate(COL_TYPE.LITERAL_LANG);
+		return getFunction(pred, value, lang);
 	}
 	
 	@Override
@@ -241,21 +258,34 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 	
 
-	@Override
-	public Predicate getUriTemplatePredicate(int arity) {
-		return new URITemplatePredicateImpl(arity);
-	}
-	
 	
 	@Override
 	public Function getUriTemplate(Term... terms) {
-		Predicate uriPred = getUriTemplatePredicate(terms.length);
+		Predicate uriPred = new URITemplatePredicateImpl(terms.length);
+		return getFunction(uriPred, terms);		
+	}
+	
+	@Override
+	public Function getUriTemplate(List<Term> terms) {
+		Predicate uriPred = new URITemplatePredicateImpl(terms.size());
 		return getFunction(uriPred, terms);		
 	}
 
 	@Override
-	public Predicate getBNodeTemplatePredicate(int arity) {
-		return new BNodePredicateImpl(arity);
+	public Function getUriTemplateForDatatype(String type) {
+		return getFunction(new URITemplatePredicateImpl(1), getConstantLiteral(type, COL_TYPE.OBJECT));
+	}
+	
+	@Override
+	public Function getBNodeTemplate(Term... terms) {
+		Predicate pred = new BNodePredicateImpl(terms.length);
+		return getFunction(pred, terms);
+	}
+	
+	@Override
+	public Function getBNodeTemplate(List<Term> terms) {
+		Predicate pred = new BNodePredicateImpl(terms.size());
+		return getFunction(pred, terms);
 	}
 
 	@Override
@@ -356,16 +386,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 
 	@Override
-	public Predicate getJoinPredicate() {
-		return OBDAVocabulary.SPARQL_JOIN;
-	}
-	
-	@Override
-	public Predicate getLeftJoinPredicate() {
-		return OBDAVocabulary.SPARQL_LEFTJOIN;
-	}
-	
-	@Override
 	public Function getLANGMATCHESFunction(Term term1, Term term2) {
 		return getFunction(OBDAVocabulary.SPARQL_LANGMATCHES, term1, term2);
 	}
@@ -392,7 +412,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getFunctionSubstract(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.SUBSTRACT, term1, term2);
+		return getFunction(OBDAVocabulary.SUBTRACT, term1, term2);
 	}
 
 	@Override
@@ -431,18 +451,28 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Constant getConstantNULL() {
-		return OBDAVocabulary.NULL;
+	public Function getFunctionIsTrue(Term term) {
+		return getFunction(OBDAVocabulary.IS_TRUE, term);
 	}
 
 	@Override
-	public Constant getConstantTrue() {
-		return OBDAVocabulary.TRUE;
+	public Function getSPARQLJoin(Term t1, Term t2) {
+		return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2);
 	}
 
 	@Override
-	public Constant getConstantFalse() {
-		return OBDAVocabulary.FALSE;
+	public Function getSPARQLLeftJoin(Term t1, Term t2) {
+		return getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, t1, t2);
+	}
+
+	@Override
+	public ValueConstant getBooleanConstant(boolean value) {
+		return value ? OBDAVocabulary.TRUE : OBDAVocabulary.FALSE;
+	}
+
+	@Override
+	public Function getTripleAtom(Term subject, Term predicate, Term object) {
+		return getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, predicate, object);
 	}
 
 	

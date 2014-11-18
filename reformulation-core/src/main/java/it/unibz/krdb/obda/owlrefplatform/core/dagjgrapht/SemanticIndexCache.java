@@ -117,7 +117,7 @@ public class SemanticIndexCache {
 		
 		if (index == null) {
 			/* direct name is not indexed, maybe there is an equivalent */
-			OClass equivalent = (OClass)reasonerDag.getClasses().getVertex(c).getRepresentative();
+			OClass equivalent = (OClass)reasonerDag.getClassDAG().getVertex(c).getRepresentative();
 			return classIndexes.get(equivalent.getPredicate().getName());
 		}
 				
@@ -131,7 +131,7 @@ public class SemanticIndexCache {
 		if (index == null) {
 			// direct name is not indexed, maybe there is an equivalent, we need to test
 			// with object properties and data properties 
-			ObjectPropertyExpression equivalent = reasonerDag.getObjectProperties().getVertex(p).getRepresentative();
+			ObjectPropertyExpression equivalent = reasonerDag.getObjectPropertyDAG().getVertex(p).getRepresentative();
 			
 			Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
 			
@@ -153,7 +153,7 @@ public class SemanticIndexCache {
 		if (index == null) {
 			// direct name is not indexed, maybe there is an equivalent, we need to test
 			// with object properties and data properties 
-			DataPropertyExpression equivalent = reasonerDag.getDataProperties().getVertex(p).getRepresentative();
+			DataPropertyExpression equivalent = reasonerDag.getDataPropertyDAG().getVertex(p).getRepresentative();
 			
 			Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
 			

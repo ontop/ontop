@@ -31,16 +31,16 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	/***
 	 * Constructs a CQC utility using the given query. If Sigma is not null and
 	 * not empty, then it will also be used to verify containment w.r.t.\ Sigma.
-	 * 
-	 * @param query
-	 *            A conjunctive query
-	 * @param sigma
-	 *            A set of ABox dependencies
+	 *
 	 */
 	public CQContainmentCheckUnderLIDs() {
 		sigma = null;
 	}
-	
+
+	/**
+	 * *@param sigma
+	 * A set of ABox dependencies
+	 */
 	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies sigma) {
 		this.sigma = sigma;
 	}
@@ -52,7 +52,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	 * 
 	 * IMPORTANT: each rule is applied once to each atom
 	 * 
-	 * @param rules
+	 * @param atoms
 	 * @return
 	 */
 	private static Set<Function> chaseAtoms(Collection<Function> atoms, LinearInclusionDependencies dependencies) {
@@ -92,7 +92,6 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		 * 
 		 * This new query can be used for query containment checking.
 		 * 
-		 * @param q
 		 */
 		
 		public FreezeCQ(Function head, Collection<Function> body) { 
@@ -204,7 +203,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 					// we have never reached this atom, setting up the initial list
 					// of choices from the original fact list.				 
 					factChoices = new Stack<Function>();
-					factChoices.addAll(factMap.get(currentAtom.getPredicate()));
+					factChoices.addAll(factMap.get(currentAtom.getFunctionSymbol()));
 					choicesMap.add(currentAtomIdx, factChoices);
 				}
 				else
@@ -238,7 +237,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 					
 					// reseting choices state and backtracking and resetting the set
 					// of choices for the current position
-					factChoices.addAll(factMap.get(currentAtom.getPredicate()));
+					factChoices.addAll(factMap.get(currentAtom.getFunctionSymbol()));
 					currentAtomIdx--;
 					currentQuery = queryStack.pop();
 				} 

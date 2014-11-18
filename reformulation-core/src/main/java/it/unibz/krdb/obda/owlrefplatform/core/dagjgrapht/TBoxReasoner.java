@@ -20,8 +20,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
  * #L%
  */
 
-
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
@@ -41,7 +39,7 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<ObjectPropertyExpression> getObjectProperties();
+	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG();
 	
 	/**
 	 * Return the DAG of properties
@@ -49,7 +47,7 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<DataPropertyExpression> getDataProperties();
+	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG();
 
 	/**
 	 * Return the DAG of classes
@@ -57,7 +55,7 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<ClassExpression> getClasses();
+	public EquivalencesDAG<ClassExpression> getClassDAG();
 	
 	/**
 	 * Return the DAG of datatypes and data property ranges
@@ -69,8 +67,8 @@ public interface TBoxReasoner {
 	
 	/**
 	 * 
-	 * @param v: a description
-	 * @return null if v is the representative of its own class **or v is not part of the graph**
+	 * @param p: a description
+	 * @return null if p is the representative of its own class **or p is not part of the graph**
 	 *         the representative of the equivalence class otherwise  
 	 */
 

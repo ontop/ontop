@@ -2,16 +2,18 @@ package it.unibz.krdb.obda.model;
 
 import java.util.List;
 
+import org.openrdf.model.URI;
+
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.impl.QuestTypeMapper;
-import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 
 public interface DatatypeFactory {
 
-	
+	@Deprecated
 	public COL_TYPE getDataType(String uri);
 	
-	public String getDataTypeURI(COL_TYPE type);
+	public COL_TYPE getDataType(URI uri);
+	
+	public URI getDataTypeURI(COL_TYPE type);
 
 	
 	public Predicate getTypePredicate(COL_TYPE type);

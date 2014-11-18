@@ -650,7 +650,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 		ValueConstant uriTemplate = dfac.getConstantLiteral(sb.toString()); // complete URI template
 		terms.add(0, uriTemplate);
-		return dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
+		return dfac.getUriTemplate(terms);
 	}
 
 	// Column placeholder pattern

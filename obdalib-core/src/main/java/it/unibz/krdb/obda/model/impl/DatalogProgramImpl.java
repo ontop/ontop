@@ -104,11 +104,6 @@ public class DatalogProgramImpl implements DatalogProgram {
 			removeRule(rule);
 		}
 	}
-	
-	@Override
-	public void removeAllRules() {
-		rules.clear();
-	}
 
 	public boolean isUCQ() {
 		if (rules.size() > 1) {

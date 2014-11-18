@@ -21,9 +21,6 @@ package it.unibz.krdb.obda.reformulation.tests;
  */
 
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -56,7 +53,7 @@ public class SigmaTest extends TestCase {
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 		TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(TBoxReasonerToOntology.getOntology(reasoner, true));						
 
-		EquivalencesDAG<ClassExpression> classes = sigmaReasoner.getClasses();
+		EquivalencesDAG<ClassExpression> classes = sigmaReasoner.getClassDAG();
 
         assertTrue(classes.getSub(classes.getVertex(ac)).contains(classes.getVertex(er)));
 

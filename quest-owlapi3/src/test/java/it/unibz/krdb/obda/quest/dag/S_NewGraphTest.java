@@ -66,8 +66,8 @@ public class S_NewGraphTest  extends TestCase{
 		System.out.println(r);
 		
 		log.info("See information");
-		System.out.println(r.getClasses());
-		System.out.println(r.getObjectProperties());
+		System.out.println(r.getClassDAG());
+		System.out.println(r.getObjectPropertyDAG());
 		//System.out.println(r.getDAG());
 		
 //		log.info("See relations");
@@ -87,8 +87,8 @@ public class S_NewGraphTest  extends TestCase{
 		System.out.println(namedDAG);
 		
 		log.info("See information named DAG");
-		System.out.println(r.getClasses());
-		System.out.println(r.getObjectProperties());
+		System.out.println(r.getClassDAG());
+		System.out.println(r.getObjectPropertyDAG());
 		System.out.println(namedDAG);
 		
 //		log.info("See relations named DAG");

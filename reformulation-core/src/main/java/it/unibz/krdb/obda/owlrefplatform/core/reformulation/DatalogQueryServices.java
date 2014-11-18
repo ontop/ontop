@@ -60,7 +60,7 @@ public class DatalogQueryServices {
 			else
 				termscopy.add(t.clone());
 		}
-		return fac.getFunction(a.getPredicate(), termscopy);
+		return fac.getFunction(a.getFunctionSymbol(), termscopy);
 		
 	}
 	
@@ -88,7 +88,7 @@ public class DatalogQueryServices {
 			while (bodyIterator.hasNext()) {
 				Function currentAtom = bodyIterator.next(); // body.get(i);	
 
-				List<CQIE> definitions = defs.getRules(currentAtom.getPredicate());
+				List<CQIE> definitions = defs.getRules(currentAtom.getFunctionSymbol());
 				if ((definitions != null) && (definitions.size() != 0)) {
 					if ((chosenDefinitions == null) || (chosenDefinitions.size() < definitions.size())) {
 						chosenDefinitions = definitions;

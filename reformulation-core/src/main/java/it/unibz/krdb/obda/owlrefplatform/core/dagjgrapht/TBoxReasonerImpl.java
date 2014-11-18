@@ -153,7 +153,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 
 	@Override
-	public EquivalencesDAG<ClassExpression> getClasses() {
+	public EquivalencesDAG<ClassExpression> getClassDAG() {
 		return classDAG;
 	}
 
@@ -175,11 +175,11 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<ObjectPropertyExpression> getObjectProperties() {
+	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG() {
 		return objectPropertyDAG;
 	}
 	
-	public EquivalencesDAG<DataPropertyExpression> getDataProperties() {
+	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG() {
 		return dataPropertyDAG;
 	}
 	
@@ -423,7 +423,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		// create vertices for properties 
 		
-		for(Equivalences<ObjectPropertyExpression> node : reasoner.getObjectProperties()) {
+		for(Equivalences<ObjectPropertyExpression> node : reasoner.getObjectPropertyDAG()) {
 			ObjectPropertyExpression prop = node.getRepresentative();
 			ObjectPropertyExpression inverseProp = prop.getInverse();
 			
@@ -451,7 +451,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		}
 		
 		// create edges for the properties graph
-		copyEdges(reasoner.getObjectProperties(), objectPropertyEquivalences, objectProperties);
+		copyEdges(reasoner.getObjectPropertyDAG(), objectPropertyEquivalences, objectProperties);
 		EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG = new EquivalencesDAGImpl<ObjectPropertyExpression>(null, objectProperties, objectPropertyEquivalences);
 
 		
@@ -464,7 +464,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		
 		// create vertices for properties 
 		
-		for(Equivalences<DataPropertyExpression> node : reasoner.getDataProperties()) {
+		for(Equivalences<DataPropertyExpression> node : reasoner.getDataPropertyDAG()) {
 			DataPropertyExpression prop = node.getRepresentative();
 			
 			Set<DataPropertyExpression> reduced = new HashSet<DataPropertyExpression>();
@@ -488,7 +488,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		}
 		
 		// create edges for the properties graph
-		copyEdges(reasoner.getDataProperties(), dataPropertyEquivalences, dataProperties);
+		copyEdges(reasoner.getDataPropertyDAG(), dataPropertyEquivalences, dataProperties);
 		EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG = new EquivalencesDAGImpl<DataPropertyExpression>(null, dataProperties, dataPropertyEquivalences);
 		
 		
@@ -505,7 +505,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 		// create vertices for classes
 		
-		for(Equivalences<ClassExpression> node : reasoner.getClasses()) {
+		for(Equivalences<ClassExpression> node : reasoner.getClassDAG()) {
 			ClassExpression rep = node.getRepresentative();
 			Set<ClassExpression> reduced = new HashSet<ClassExpression>();
 			Equivalences<ClassExpression> reducedNode = new Equivalences<ClassExpression>(reduced, rep);
@@ -546,7 +546,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		}			
 
 		// create edges for the classes graph
-		copyEdges(reasoner.getClasses(), classEquivalences, classes);
+		copyEdges(reasoner.getClassDAG(), classEquivalences, classes);
 		EquivalencesDAGImpl<ClassExpression> classDAG = new EquivalencesDAGImpl<ClassExpression>(null, classes, classEquivalences);
 		
 		
@@ -611,7 +611,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	public static TBoxReasoner getChainReasoner(TBoxReasonerImpl tbox) {		
 		
-		EquivalencesDAG<ClassExpression> classes = tbox.getClasses();
+		EquivalencesDAG<ClassExpression> classes = tbox.getClassDAG();
 		
 		// move everything to a graph that admits cycles
 		DefaultDirectedGraph<ClassExpression,DefaultEdge> modifiedGraph = 

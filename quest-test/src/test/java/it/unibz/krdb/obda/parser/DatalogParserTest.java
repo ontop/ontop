@@ -135,7 +135,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -164,7 +164,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -180,7 +180,7 @@ public class DatalogParserTest extends TestCase {
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((Function)body.get(1)).getPredicate().getName().toString();
+		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
@@ -216,7 +216,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -245,7 +245,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -261,7 +261,7 @@ public class DatalogParserTest extends TestCase {
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((Function)body.get(1)).getPredicate().getName().toString();
+		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
@@ -297,7 +297,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -326,7 +326,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -348,7 +348,7 @@ public class DatalogParserTest extends TestCase {
 				((ValueConstantImpl)term).getValue(), "Person");
 
 		//---- Body atom #2
-		uri = ((Function)body.get(1)).getPredicate().getName().toString();
+		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/r");
 
@@ -412,7 +412,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -435,7 +435,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -463,7 +463,7 @@ public class DatalogParserTest extends TestCase {
 	    head = rules.get(1).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#r");
 
@@ -486,7 +486,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/s");
 
@@ -515,7 +515,7 @@ public class DatalogParserTest extends TestCase {
 	    head = rules.get(2).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#t");
 
@@ -538,7 +538,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/u");
 
@@ -599,7 +599,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -622,7 +622,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -730,7 +730,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -766,7 +766,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -807,10 +807,10 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
-		assertEquals(2, head.getPredicate().getArity());
+		assertEquals(2, head.getFunctionSymbol().getArity());
 
 		EXPECTED_HEAD_TERM_SIZE = 2;
 		terms = head.getTerms();
@@ -837,7 +837,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -853,7 +853,7 @@ public class DatalogParserTest extends TestCase {
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((Function)body.get(1)).getPredicate().getName().toString();
+		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
@@ -889,7 +889,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -918,7 +918,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -934,7 +934,7 @@ public class DatalogParserTest extends TestCase {
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((Function)body.get(1)).getPredicate().getName().toString();
+		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
@@ -970,7 +970,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -987,7 +987,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -1003,7 +1003,7 @@ public class DatalogParserTest extends TestCase {
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((Function)body.get(1)).getPredicate().getName().toString();
+		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 
@@ -1039,7 +1039,7 @@ public class DatalogParserTest extends TestCase {
 		Function head = rules.get(0).getHead();
 		assertNotNull("Head is null!", head);
 
-		uri = head.getPredicate().getName().toString();
+		uri = head.getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!", uri,
 				"http://www.abc.org/1999/02/22-abc-syntax-ns#p");
 
@@ -1068,7 +1068,7 @@ public class DatalogParserTest extends TestCase {
 				body.size() == EXPECTED_BODY_SIZE);
 
 		//---- Body atom #1
-		uri = ((Function)body.get(0)).getPredicate().getName().toString();
+		uri = ((Function)body.get(0)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://example.org/stuff/1.0/q");
 
@@ -1084,7 +1084,7 @@ public class DatalogParserTest extends TestCase {
 				((VariableImpl)term).getName(), "x");
 
 		//---- Body atom #2
-		uri = ((Function)body.get(1)).getPredicate().getName().toString();
+		uri = ((Function)body.get(1)).getFunctionSymbol().getName();
 		assertEquals("Mismatch predicate name!",
 				uri, "http://base.org/stuff/1.0/r");
 

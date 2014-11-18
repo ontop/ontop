@@ -375,15 +375,15 @@ public class TreeWitnessSet {
 		}
 		
 		public Intersection<ClassExpression> getTopClass() {
-			return new Intersection<ClassExpression>(reasoner.getClasses());
+			return new Intersection<ClassExpression>(reasoner.getClassDAG());
 		}
 
 		public Intersection<ObjectPropertyExpression> getTopProperty() {
-			return new Intersection<ObjectPropertyExpression>(reasoner.getObjectProperties());
+			return new Intersection<ObjectPropertyExpression>(reasoner.getObjectPropertyDAG());
 		}
 		
 		public Intersection<ClassExpression> getSubConcepts(Collection<Function> atoms) {
-			Intersection<ClassExpression> subc = new Intersection<ClassExpression>(reasoner.getClasses());
+			Intersection<ClassExpression> subc = new Intersection<ClassExpression>(reasoner.getClassDAG());
 			for (Function a : atoms) {
 				 if (a.getArity() != 1) {
 					 subc.setToBottom();   // binary predicates R(x,x) cannot be matched to the anonymous part
@@ -414,16 +414,16 @@ public class TreeWitnessSet {
 			TermOrderedPair idx = new TermOrderedPair(root, nonroot);
 			Intersection<ObjectPropertyExpression> properties = propertiesCache.get(idx);			
 			if (properties == null) {
-				properties = new Intersection<ObjectPropertyExpression>(reasoner.getObjectProperties());
+				properties = new Intersection<ObjectPropertyExpression>(reasoner.getObjectPropertyDAG());
 				for (Function a : edge.getBAtoms()) {
-					if (a.getPredicate() instanceof BooleanOperationPredicateImpl) {
+					if (a.getFunctionSymbol() instanceof BooleanOperationPredicateImpl) {
 						log.debug("EDGE {} HAS PROPERTY {} NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES", edge, a);
 						properties.setToBottom();
 						break;
 					}
 					else {
 						log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
-						ObjectPropertyExpression prop = ontFactory.createObjectProperty(a.getPredicate().getName());
+						ObjectPropertyExpression prop = ontFactory.createObjectProperty(a.getFunctionSymbol().getName());
 						if (!root.equals(a.getTerm(0)))
 								prop = prop.getInverse();
 						properties.intersectWith(prop);
