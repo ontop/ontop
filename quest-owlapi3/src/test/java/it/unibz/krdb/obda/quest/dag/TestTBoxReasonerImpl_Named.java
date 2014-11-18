@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.quest.dag;
  */
 
 
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
@@ -50,9 +49,9 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	private final EquivalencesDAG<DataRangeExpression> dataRangeDAG;
 
 	public TestTBoxReasonerImpl_Named(TBoxReasoner reasoner) {
-		this.objectPropertyDAG = new EquivalencesDAGImpl<ObjectPropertyExpression>(reasoner.getObjectProperties());
-		this.dataPropertyDAG = new EquivalencesDAGImpl<DataPropertyExpression>(reasoner.getDataProperties());
-		this.classDAG = new EquivalencesDAGImpl<ClassExpression>(reasoner.getClasses());
+		this.objectPropertyDAG = new EquivalencesDAGImpl<ObjectPropertyExpression>(reasoner.getObjectPropertyDAG());
+		this.dataPropertyDAG = new EquivalencesDAGImpl<DataPropertyExpression>(reasoner.getDataPropertyDAG());
+		this.classDAG = new EquivalencesDAGImpl<ClassExpression>(reasoner.getClassDAG());
 		this.dataRangeDAG = new EquivalencesDAGImpl<DataRangeExpression>(reasoner.getDataRanges());
 	}
 
@@ -64,7 +63,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	 */
 
 	@Override
-	public EquivalencesDAG<ObjectPropertyExpression> getObjectProperties() {
+	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG() {
 		return objectPropertyDAG;
 	}
 	/**
@@ -74,7 +73,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	 */
 
 	@Override
-	public EquivalencesDAG<DataPropertyExpression> getDataProperties() {
+	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG() {
 		return dataPropertyDAG;
 	}
 	
@@ -85,7 +84,7 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	 */
 
 	@Override
-	public EquivalencesDAG<ClassExpression> getClasses() {
+	public EquivalencesDAG<ClassExpression> getClassDAG() {
 		return classDAG;
 	}
 	

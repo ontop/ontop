@@ -61,7 +61,7 @@ public class DAGChainTest extends TestCase {
 
 		TBoxReasonerImpl reasoner0 = new TBoxReasonerImpl(ontology);
 		TBoxReasoner reasoner = TBoxReasonerImpl.getChainReasoner(reasoner0);
-		EquivalencesDAG<ClassExpression> classes = reasoner.getClasses();
+		EquivalencesDAG<ClassExpression> classes = reasoner.getClassDAG();
 		
 		Equivalences<ClassExpression> ac0 = classes.getVertex(ac);
 		Equivalences<ClassExpression> bc0 = classes.getVertex(bc);
@@ -102,7 +102,7 @@ public class DAGChainTest extends TestCase {
 		TestTBoxReasonerImpl_OnGraph reasoner = new TestTBoxReasonerImpl_OnGraph(res0);
 		reasoner.convertIntoChainDAG();
 
-		EquivalencesDAG<ClassExpression> classes = reasoner.getClasses();
+		EquivalencesDAG<ClassExpression> classes = reasoner.getClassDAG();
 
 		Equivalences<ClassExpression> ac0 = classes.getVertex(ac);
 		Equivalences<ClassExpression> cc0 = classes.getVertex(cc);
@@ -148,7 +148,7 @@ public class DAGChainTest extends TestCase {
 		TBoxReasonerImpl resoner0 = new TBoxReasonerImpl(ontology);
 		TBoxReasoner reasoner = TBoxReasonerImpl.getChainReasoner(resoner0);
 
-		EquivalencesDAG<ClassExpression> classes = reasoner.getClasses();
+		EquivalencesDAG<ClassExpression> classes = reasoner.getClassDAG();
 		
 		Equivalences<ClassExpression> ac0 = classes.getVertex(ac);
 		Equivalences<ClassExpression> bc0 = classes.getVertex(bc);

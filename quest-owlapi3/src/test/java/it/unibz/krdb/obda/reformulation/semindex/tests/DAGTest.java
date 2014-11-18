@@ -29,10 +29,8 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -45,7 +43,7 @@ public class DAGTest extends TestCase {
 		List<List<Description>> exp_idx = helper.get_results(testname);
 
 		List<Description> classes= new LinkedList<Description>();
-		for(Equivalences<ClassExpression> node : reasoner.getClasses()) {
+		for(Equivalences<ClassExpression> node : reasoner.getClassDAG()) {
 			for(ClassExpression c: node)
 				classes.add(c);
 		}
@@ -55,11 +53,11 @@ public class DAGTest extends TestCase {
 		}
 		
 		List<Description> roles= new LinkedList<Description>();
-		for (Equivalences<ObjectPropertyExpression> node : reasoner.getObjectProperties()) {
+		for (Equivalences<ObjectPropertyExpression> node : reasoner.getObjectPropertyDAG()) {
 			for (ObjectPropertyExpression r: node)
 				roles.add(r);
 		}
-		for (Equivalences<DataPropertyExpression> node : reasoner.getDataProperties()) {
+		for (Equivalences<DataPropertyExpression> node : reasoner.getDataPropertyDAG()) {
 			for (DataPropertyExpression r: node) {
 				roles.add(r);
 				roles.add(r); // ROMAN: hacky way of double-counting data properties (which have no inverses)

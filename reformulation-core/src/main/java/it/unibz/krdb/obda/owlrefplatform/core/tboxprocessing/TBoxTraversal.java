@@ -11,10 +11,10 @@ public class TBoxTraversal {
 	
 	public static void traverse(TBoxReasoner reasoner, TBoxTraverseListener listener) {
 		
-		for (Equivalences<ObjectPropertyExpression> nodes : reasoner.getObjectProperties()) {
+		for (Equivalences<ObjectPropertyExpression> nodes : reasoner.getObjectPropertyDAG()) {
 			ObjectPropertyExpression node = nodes.getRepresentative();
 			
-			for (Equivalences<ObjectPropertyExpression> descendants : reasoner.getObjectProperties().getSub(nodes)) {
+			for (Equivalences<ObjectPropertyExpression> descendants : reasoner.getObjectPropertyDAG().getSub(nodes)) {
 				ObjectPropertyExpression descendant = descendants.getRepresentative();
 				listener.onInclusion(descendant, node);
 			}
@@ -25,10 +25,10 @@ public class TBoxTraversal {
 				}
 			}
 		}
-		for (Equivalences<DataPropertyExpression> nodes : reasoner.getDataProperties()) {
+		for (Equivalences<DataPropertyExpression> nodes : reasoner.getDataPropertyDAG()) {
 			DataPropertyExpression node = nodes.getRepresentative();
 			
-			for (Equivalences<DataPropertyExpression> descendants : reasoner.getDataProperties().getSub(nodes)) {
+			for (Equivalences<DataPropertyExpression> descendants : reasoner.getDataPropertyDAG().getSub(nodes)) {
 				DataPropertyExpression descendant = descendants.getRepresentative();
 
 				listener.onInclusion(descendant, node);
@@ -41,10 +41,10 @@ public class TBoxTraversal {
 			}
 		}
 		
-		for (Equivalences<ClassExpression> nodes : reasoner.getClasses()) {
+		for (Equivalences<ClassExpression> nodes : reasoner.getClassDAG()) {
 			ClassExpression node = nodes.getRepresentative();
 			
-			for (Equivalences<ClassExpression> descendants : reasoner.getClasses().getSub(nodes)) {
+			for (Equivalences<ClassExpression> descendants : reasoner.getClassDAG().getSub(nodes)) {
 				ClassExpression descendant = descendants.getRepresentative();
 				listener.onInclusion(descendant, node);
 					
