@@ -57,7 +57,7 @@ public interface Predicate extends Cloneable, Serializable {
 		INT (19),
 		UNSIGNED_INT (20);
 		
-		private static final Map<Integer, Predicate.COL_TYPE> codeToTypeMap = new HashMap<Integer, Predicate.COL_TYPE>();
+		private static final Map<Integer, Predicate.COL_TYPE> codeToTypeMap = new HashMap<>();
 		
 		static {
 			for (COL_TYPE type : COL_TYPE.values()) {
@@ -103,7 +103,7 @@ public interface Predicate extends Cloneable, Serializable {
 
 	/***
 	 * Returns the typing of the component given by component. Types can be
-	 * "Object" or "Literal", defined by the inner enumerator PRED_TYPE
+	 * "Object" or "Literal", defined by the inner enumerator {@Code Predicate.COL_TYPE}
 	 * 
 	 * @param column
 	 */
