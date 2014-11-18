@@ -77,6 +77,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -110,38 +111,27 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
  */
 	
 	private static final String class_table = "QUEST_CLASS_ASSERTION";
-
 	private static final String role_table = "QUEST_OBJECT_PROPERTY_ASSERTION";
-	
 	private static final String attribute_table_literal = "QUEST_DATA_PROPERTY_LITERAL_ASSERTION";
-
-	private static final String attribute_table_string = "QUEST_DATA_PROPERTY_STRING_ASSERTION";
-
-	private static final String attribute_table_integer = "QUEST_DATA_PROPERTY_INTEGER_ASSERTION";
-
-	private static final String attribute_table_int = "QUEST_DATA_PROPERTY_INT_ASSERTION";
-
-    private static final String attribute_table_unsigned_int = "QUEST_DATA_PROPERTY_UNSIGNED_INT_ASSERTION";
-
-    private static final String attribute_table_negative_integer = "QUEST_DATA_PROPERTY_NEGATIVE_INTEGER_ASSERTION";
-
-    private static final String attribute_table_non_negative_integer = "QUEST_DATA_PROPERTY_NON_NEGATIVE_INTEGER_ASSERTION";
-
-    private static final String attribute_table_positive_integer = "QUEST_DATA_PROPERTY_POSITIVE_INTEGER_ASSERTION";
-
-    private static final String attribute_table_non_positive_integer = "QUEST_DATA_PROPERTY_NON_POSITIVE_INTEGER_ASSERTION";
-
-    private static final String attribute_table_long = "QUEST_DATA_PROPERTY_LONG_ASSERTION";
-
-    private static final String attribute_table_decimal = "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION";
-
-	private static final String attribute_table_float = "QUEST_DATA_PROPERTY_FLOAT_ASSERTION";
-
-    private static final String attribute_table_double = "QUEST_DATA_PROPERTY_DOUBLE_ASSERTION";
-
-	private static final String attribute_table_datetime = "QUEST_DATA_PROPERTY_DATETIME_ASSERTION";
-
-	private static final String attribute_table_boolean = "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION";
+  
+	private static final Map<COL_TYPE, String> attribute_table = new HashMap<COL_TYPE, String>();
+	
+	static {
+		attribute_table.put(COL_TYPE.STRING, "QUEST_DATA_PROPERTY_STRING_ASSERTION");    // 1
+		attribute_table.put(COL_TYPE.INTEGER, "QUEST_DATA_PROPERTY_INTEGER_ASSERTION");   // 2
+		attribute_table.put(COL_TYPE.INT, "QUEST_DATA_PROPERTY_INT_ASSERTION");   // 3
+		attribute_table.put(COL_TYPE.UNSIGNED_INT, "QUEST_DATA_PROPERTY_UNSIGNED_INT_ASSERTION");   // 4
+		attribute_table.put(COL_TYPE.NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NEGATIVE_INTEGER_ASSERTION");  // 5
+		attribute_table.put(COL_TYPE.NON_NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_NEGATIVE_INTEGER_ASSERTION"); // 6
+		attribute_table.put(COL_TYPE.POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_POSITIVE_INTEGER_ASSERTION");  // 7
+		attribute_table.put(COL_TYPE.NON_POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_POSITIVE_INTEGER_ASSERTION");  // 8
+		attribute_table.put(COL_TYPE.LONG, "QUEST_DATA_PROPERTY_LONG_ASSERTION");  // 9
+		attribute_table.put(COL_TYPE.DECIMAL, "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION"); // 10
+		attribute_table.put(COL_TYPE.FLOAT, "QUEST_DATA_PROPERTY_FLOAT_ASSERTION");  // 11
+		attribute_table.put(COL_TYPE.DOUBLE, "QUEST_DATA_PROPERTY_DOUBLE_ASSERTION"); // 12
+		attribute_table.put(COL_TYPE.DATETIME, "QUEST_DATA_PROPERTY_DATETIME_ASSERTION"); // 13
+		attribute_table.put(COL_TYPE.BOOLEAN,  "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION");  // 14
+	}
 	
 /**
  *  CREATE metadata tables
@@ -158,14 +148,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	
 	private final static String create_uri_id = "CREATE TABLE " + uri_id_table + " ( " + "ID INTEGER, " + "URI VARCHAR(400) " + ")";
 
-/**
- * DROP metadata tables 	
- */
-	
-	private final static String drop_idx = "DROP TABLE " + index_table + "";
-	private final static String drop_interval = "DROP TABLE " + interval_table + "";
-	private final static String drop_emptyness = "DROP TABLE " + emptyness_index_table + "";
-	private final static String drop_uri_id = "DROP TABLE " + uri_id_table + "";
 
 /**
  *  INSERT metadata
@@ -190,71 +172,49 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private static final String attribute_table_literal_create = "CREATE TABLE " + attribute_table_literal + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL VARCHAR(1000) NOT NULL, " + "LANG VARCHAR(20), " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_string_create = "CREATE TABLE " + attribute_table_string + " ( "
+	private static final String attribute_table_string_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.STRING) + " ( "
 			+ "\"URI\" INTEGER  NOT NULL, " + "VAL VARCHAR(1000), " + "\"IDX\"  SMALLINT  NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_integer_create = "CREATE TABLE " + attribute_table_integer + " ( "
+	private static final String attribute_table_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.INTEGER)+ " ( "
 			+ "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_int_create = "CREATE TABLE " + attribute_table_int + " ( "
+	private static final String attribute_table_int_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.INT) + " ( "
             + "\"URI\" INTEGER  NOT NULL, " + "VAL INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_negative_integer_create = "CREATE TABLE " + attribute_table_negative_integer + " ( "
+    private static final String attribute_table_negative_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.NEGATIVE_INTEGER) + " ( "
             + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_positive_integer_create = "CREATE TABLE " + attribute_table_positive_integer + " ( "
+    private static final String attribute_table_positive_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.POSITIVE_INTEGER) + " ( "
             + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_unsigned_int_create = "CREATE TABLE " + attribute_table_unsigned_int + " ( "
+    private static final String attribute_table_unsigned_int_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.UNSIGNED_INT) + " ( "
             + "\"URI\" INTEGER  NOT NULL, " + "VAL INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_non_positive_integer_create = "CREATE TABLE " + attribute_table_non_positive_integer + " ( "
+    private static final String attribute_table_non_positive_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.NON_POSITIVE_INTEGER) + " ( "
             + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_non_negative_integer_create = "CREATE TABLE " + attribute_table_non_negative_integer + " ( "
+    private static final String attribute_table_non_negative_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.NON_NEGATIVE_INTEGER) + " ( "
             + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_long_create = "CREATE TABLE " + attribute_table_long + " ( "
+    private static final String attribute_table_long_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.LONG) + " ( "
             + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_decimal_create = "CREATE TABLE " + attribute_table_decimal + " ( "
+    private static final String attribute_table_decimal_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.DECIMAL) + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL DECIMAL NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_double_create = "CREATE TABLE " + attribute_table_double + " ( "
+	private static final String attribute_table_double_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.DOUBLE) + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL DOUBLE PRECISION NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_float_create = "CREATE TABLE " + attribute_table_float + " ( "
+	private static final String attribute_table_float_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.FLOAT) + " ( "
             + "\"URI\" INTEGER NOT NULL, " + "VAL DOUBLE PRECISION NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
             + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_datetime_create = "CREATE TABLE " + attribute_table_datetime + " ( "
+    private static final String attribute_table_datetime_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.DATETIME) + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL TIMESTAMP NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_boolean_create = "CREATE TABLE " + attribute_table_boolean + " ( "
+	private static final String attribute_table_boolean_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.BOOLEAN) + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL BOOLEAN NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 
-/**
- *  DROP data tables	
- */
-	
-	private static final String class_table_drop = "DROP TABLE " + class_table;
-	private static final String role_table_drop = "DROP TABLE " + role_table;
-
-	private static final String attribute_table_literal_drop = "DROP TABLE " + attribute_table_literal;
-	private static final String attribute_table_string_drop = "DROP TABLE " + attribute_table_string;
-	private static final String attribute_table_integer_drop = "DROP TABLE " + attribute_table_integer;
-	private static final String attribute_table_int_drop = "DROP TABLE " + attribute_table_int;
-    private static final String attribute_table_negative_integer_drop = "DROP TABLE " + attribute_table_negative_integer;
-    private static final String attribute_table_non_negative_integer_drop = "DROP TABLE " + attribute_table_non_negative_integer;
-    private static final String attribute_table_positive_integer_drop = "DROP TABLE " + attribute_table_positive_integer;
-    private static final String attribute_table_non_positive_integer_drop = "DROP TABLE " + attribute_table_non_positive_integer;
-    private static final String attribute_table_unsigned_int_drop = "DROP TABLE " + attribute_table_unsigned_int;
-    private static final String attribute_table_float_drop = "DROP TABLE " + attribute_table_float;
-    private static final String attribute_table_long_drop = "DROP TABLE " + attribute_table_long;
-    private static final String attribute_table_decimal_drop = "DROP TABLE " + attribute_table_decimal;
-	private static final String attribute_table_double_drop = "DROP TABLE " + attribute_table_double;
-	private static final String attribute_table_datetime_drop = "DROP TABLE " + attribute_table_datetime;
-	private static final String attribute_table_boolean_drop = "DROP TABLE " + attribute_table_boolean;
 
 /**
  *  INSERT data 	
@@ -265,33 +225,33 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private static final String attribute_table_literal_insert = "INSERT INTO " + attribute_table_literal
 			+ " (URI, VAL, LANG, IDX, ISBNODE) VALUES (?, ?, ?, ?, ?)";
-	private static final String attribute_table_string_insert = "INSERT INTO " + attribute_table_string
+	private static final String attribute_table_string_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.STRING)
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-	private static final String attribute_table_integer_insert = "INSERT INTO " + attribute_table_integer
+	private static final String attribute_table_integer_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.INTEGER)
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-	private static final String attribute_table_int_insert = "INSERT INTO " + attribute_table_int
+	private static final String attribute_table_int_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.INT)
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_unsigned_int_insert = "INSERT INTO " + attribute_table_unsigned_int
+    private static final String attribute_table_unsigned_int_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.UNSIGNED_INT)
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_negative_integer_insert = "INSERT INTO " + attribute_table_negative_integer
+    private static final String attribute_table_negative_integer_insert = "INSERT INTO " +  attribute_table.get(COL_TYPE.NEGATIVE_INTEGER)
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_positive_integer_insert = "INSERT INTO " + attribute_table_positive_integer
+    private static final String attribute_table_positive_integer_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.POSITIVE_INTEGER)
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_non_negative_integer_insert = "INSERT INTO " + attribute_table_non_negative_integer
+    private static final String attribute_table_non_negative_integer_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.NON_NEGATIVE_INTEGER)
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_non_positive_integer_insert = "INSERT INTO " + attribute_table_non_positive_integer
+    private static final String attribute_table_non_positive_integer_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.NON_POSITIVE_INTEGER)
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_float_insert = "INSERT INTO " + attribute_table_float
+    private static final String attribute_table_float_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.FLOAT)
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_long_insert = "INSERT INTO " + attribute_table_long
+    private static final String attribute_table_long_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.LONG)
             + " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-    private static final String attribute_table_decimal_insert = "INSERT INTO " + attribute_table_decimal
+    private static final String attribute_table_decimal_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.DECIMAL)
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-	private static final String attribute_table_double_insert = "INSERT INTO " + attribute_table_double
+	private static final String attribute_table_double_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.DOUBLE)
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-	private static final String attribute_table_datetime_insert = "INSERT INTO " + attribute_table_datetime
+	private static final String attribute_table_datetime_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.DATETIME)
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
-	private static final String attribute_table_boolean_insert = "INSERT INTO " + attribute_table_boolean
+	private static final String attribute_table_boolean_insert = "INSERT INTO " + attribute_table.get(COL_TYPE.BOOLEAN)
 			+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)";
 
 /**
@@ -330,95 +290,95 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private static final String indexattribute_literal1 = "CREATE INDEX " + attribute_literal_index + "1" + " ON " + attribute_table_literal
 			+ " (URI)";
-	private static final String indexattribute_string1 = "CREATE INDEX " + attribute_string_index + "1" + " ON " + attribute_table_string
+	private static final String indexattribute_string1 = "CREATE INDEX " + attribute_string_index + "1" + " ON " + attribute_table.get(COL_TYPE.STRING)
 			+ " (URI)";
-	private static final String indexattribute_integer1 = "CREATE INDEX " + attribute_integer_index + "1" + " ON " + attribute_table_integer
+	private static final String indexattribute_integer1 = "CREATE INDEX " + attribute_integer_index + "1" + " ON " + attribute_table.get(COL_TYPE.INTEGER)
 			+ " (URI)";
-	private static final String indexattribute_int1 = "CREATE INDEX " + attribute_int_index + "1" + " ON " + attribute_table_int
+	private static final String indexattribute_int1 = "CREATE INDEX " + attribute_int_index + "1" + " ON " + attribute_table.get(COL_TYPE.INT)
             + " (URI)";
-    private static final String indexattribute_unsigned_int1 = "CREATE INDEX " + attribute_unsigned_int_index + "1" + " ON " + attribute_table_unsigned_int
+    private static final String indexattribute_unsigned_int1 = "CREATE INDEX " + attribute_unsigned_int_index + "1" + " ON " + attribute_table.get(COL_TYPE.UNSIGNED_INT)
             + " (URI)";
-    private static final String indexattribute_negative_integer1 = "CREATE INDEX " + attribute_negative_integer_index + "1" + " ON " + attribute_table_negative_integer
+    private static final String indexattribute_negative_integer1 = "CREATE INDEX " + attribute_negative_integer_index + "1" + " ON " +  attribute_table.get(COL_TYPE.NEGATIVE_INTEGER)
             + " (URI)";
-    private static final String indexattribute_non_negative_integer1 = "CREATE INDEX " + attribute_non_negative_integer_index + "1" + " ON " + attribute_table_non_negative_integer
+    private static final String indexattribute_non_negative_integer1 = "CREATE INDEX " + attribute_non_negative_integer_index + "1" + " ON " + attribute_table.get(COL_TYPE.NON_NEGATIVE_INTEGER)
             + " (URI)";
-    private static final String indexattribute_positive_integer1 = "CREATE INDEX " + attribute_positive_integer_index + "1" + " ON " + attribute_table_positive_integer
+    private static final String indexattribute_positive_integer1 = "CREATE INDEX " + attribute_positive_integer_index + "1" + " ON " + attribute_table.get(COL_TYPE.POSITIVE_INTEGER)
             + " (URI)";
-    private static final String indexattribute_non_positive_integer1 = "CREATE INDEX " + attribute_non_positive_integer_index + "1" + " ON " + attribute_table_non_positive_integer
+    private static final String indexattribute_non_positive_integer1 = "CREATE INDEX " + attribute_non_positive_integer_index + "1" + " ON " + attribute_table.get(COL_TYPE.NON_POSITIVE_INTEGER)
             + " (URI)";
-    private static final String indexattribute_float1 = "CREATE INDEX " + attribute_float_index + "1" + " ON " + attribute_table_float
+    private static final String indexattribute_float1 = "CREATE INDEX " + attribute_float_index + "1" + " ON " + attribute_table.get(COL_TYPE.FLOAT)
             + " (URI)";
-    private static final String indexattribute_long1 = "CREATE INDEX " + attribute_long_index + "1" + " ON " + attribute_table_long
+    private static final String indexattribute_long1 = "CREATE INDEX " + attribute_long_index + "1" + " ON " + attribute_table.get(COL_TYPE.LONG)
             + " (URI)";
-    private static final String indexattribute_decimal1 = "CREATE INDEX " + attribute_decimal_index + "1" + " ON " + attribute_table_decimal
+    private static final String indexattribute_decimal1 = "CREATE INDEX " + attribute_decimal_index + "1" + " ON " + attribute_table.get(COL_TYPE.DECIMAL)
 			+ " (URI)";
-	private static final String indexattribute_double1 = "CREATE INDEX " + attribute_double_index + "1" + " ON " + attribute_table_double
+	private static final String indexattribute_double1 = "CREATE INDEX " + attribute_double_index + "1" + " ON " + attribute_table.get(COL_TYPE.DOUBLE)
 			+ " (URI)";
 	private static final String indexattribute_datetime1 = "CREATE INDEX " + attribute_datetime_index + "1" + " ON "
-			+ attribute_table_datetime + " (URI)";
-	private static final String indexattribute_boolean1 = "CREATE INDEX " + attribute_boolean_index + "1" + " ON " + attribute_table_boolean
+			+ attribute_table.get(COL_TYPE.DATETIME) + " (URI)";
+	private static final String indexattribute_boolean1 = "CREATE INDEX " + attribute_boolean_index + "1" + " ON " + attribute_table.get(COL_TYPE.BOOLEAN)
 			+ " (URI)";
 
 	private static final String indexattribute_literal2 = "CREATE INDEX " + attribute_literal_index + "2" + " ON " + attribute_table_literal
 			+ " (IDX)";
-	private static final String indexattribute_string2 = "CREATE INDEX " + attribute_string_index + "2" + " ON " + attribute_table_string
+	private static final String indexattribute_string2 = "CREATE INDEX " + attribute_string_index + "2" + " ON " + attribute_table.get(COL_TYPE.STRING)
 			+ " (IDX)";
-	private static final String indexattribute_integer2 = "CREATE INDEX " + attribute_integer_index + "2" + " ON " + attribute_table_integer
+	private static final String indexattribute_integer2 = "CREATE INDEX " + attribute_integer_index + "2" + " ON " + attribute_table.get(COL_TYPE.INTEGER)
 			+ " (IDX)";
-	private static final String indexattribute_int2 = "CREATE INDEX " + attribute_int_index + "2" + " ON " + attribute_table_int
+	private static final String indexattribute_int2 = "CREATE INDEX " + attribute_int_index + "2" + " ON " + attribute_table.get(COL_TYPE.INT)
             + " (URI)";
-    private static final String indexattribute_unsigned_int2 = "CREATE INDEX " + attribute_unsigned_int_index + "2" + " ON " + attribute_table_unsigned_int
+    private static final String indexattribute_unsigned_int2 = "CREATE INDEX " + attribute_unsigned_int_index + "2" + " ON " + attribute_table.get(COL_TYPE.UNSIGNED_INT)
             + " (URI)";
-    private static final String indexattribute_negative_integer2 = "CREATE INDEX " + attribute_negative_integer_index + "2" + " ON " + attribute_table_negative_integer
+    private static final String indexattribute_negative_integer2 = "CREATE INDEX " + attribute_negative_integer_index + "2" + " ON " +  attribute_table.get(COL_TYPE.NEGATIVE_INTEGER)
             + " (URI)";
-    private static final String indexattribute_non_negative_integer2 = "CREATE INDEX " + attribute_non_negative_integer_index + "2" + " ON " + attribute_table_non_negative_integer
+    private static final String indexattribute_non_negative_integer2 = "CREATE INDEX " + attribute_non_negative_integer_index + "2" + " ON " + attribute_table.get(COL_TYPE.NON_NEGATIVE_INTEGER)
             + " (URI)";
-    private static final String indexattribute_positive_integer2 = "CREATE INDEX " + attribute_positive_integer_index + "2" + " ON " + attribute_table_positive_integer
+    private static final String indexattribute_positive_integer2 = "CREATE INDEX " + attribute_positive_integer_index + "2" + " ON " + attribute_table.get(COL_TYPE.POSITIVE_INTEGER)
             + " (URI)";
-    private static final String indexattribute_non_positive_integer2 = "CREATE INDEX " + attribute_non_positive_integer_index + "2" + " ON " + attribute_table_non_positive_integer
+    private static final String indexattribute_non_positive_integer2 = "CREATE INDEX " + attribute_non_positive_integer_index + "2" + " ON " + attribute_table.get(COL_TYPE.NON_POSITIVE_INTEGER)
             + " (URI)";
-    private static final String indexattribute_float2 = "CREATE INDEX " + attribute_float_index + "2" + " ON " + attribute_table_float
+    private static final String indexattribute_float2 = "CREATE INDEX " + attribute_float_index + "2" + " ON " + attribute_table.get(COL_TYPE.FLOAT)
             + " (URI)";
-    private static final String indexattribute_long2 = "CREATE INDEX " + attribute_long_index + "2" + " ON " + attribute_table_long
+    private static final String indexattribute_long2 = "CREATE INDEX " + attribute_long_index + "2" + " ON " + attribute_table.get(COL_TYPE.LONG)
             + " (IDX)";
-    private static final String indexattribute_decimal2 = "CREATE INDEX " + attribute_decimal_index + "2" + " ON " + attribute_table_decimal
+    private static final String indexattribute_decimal2 = "CREATE INDEX " + attribute_decimal_index + "2" + " ON " + attribute_table.get(COL_TYPE.DECIMAL)
 			+ " (IDX)";
-	private static final String indexattribute_double2 = "CREATE INDEX " + attribute_double_index + "2" + " ON " + attribute_table_double
+	private static final String indexattribute_double2 = "CREATE INDEX " + attribute_double_index + "2" + " ON " + attribute_table.get(COL_TYPE.DOUBLE)
 			+ " (IDX)";
 	private static final String indexattribute_datetime2 = "CREATE INDEX " + attribute_datetime_index + "2" + " ON "
-			+ attribute_table_datetime + " (IDX)";
-	private static final String indexattribute_boolean2 = "CREATE INDEX " + attribute_boolean_index + "2" + " ON " + attribute_table_boolean
+			+ attribute_table.get(COL_TYPE.DATETIME) + " (IDX)";
+	private static final String indexattribute_boolean2 = "CREATE INDEX " + attribute_boolean_index + "2" + " ON " + attribute_table.get(COL_TYPE.BOOLEAN)
 			+ " (IDX)";
 
 	private static final String indexattribute_literal3 = "CREATE INDEX " + attribute_literal_index + "3" + " ON " + attribute_table_literal
 			+ " (VAL)";
-	private static final String indexattribute_string3 = "CREATE INDEX " + attribute_string_index + "3" + " ON " + attribute_table_string
+	private static final String indexattribute_string3 = "CREATE INDEX " + attribute_string_index + "3" + " ON " + attribute_table.get(COL_TYPE.STRING)
 			+ " (VAL)";
-	private static final String indexattribute_integer3 = "CREATE INDEX " + attribute_integer_index + "3" + " ON " + attribute_table_integer
+	private static final String indexattribute_integer3 = "CREATE INDEX " + attribute_integer_index + "3" + " ON " + attribute_table.get(COL_TYPE.INTEGER)
 			+ " (VAL)";
-	private static final String indexattribute_int3 = "CREATE INDEX " + attribute_int_index + "3" + " ON " + attribute_table_int
+	private static final String indexattribute_int3 = "CREATE INDEX " + attribute_int_index + "3" + " ON " + attribute_table.get(COL_TYPE.INT)
             + " (URI)";
-    private static final String indexattribute_unsigned_int3 = "CREATE INDEX " + attribute_unsigned_int_index + "3" + " ON " + attribute_table_unsigned_int
+    private static final String indexattribute_unsigned_int3 = "CREATE INDEX " + attribute_unsigned_int_index + "3" + " ON " + attribute_table.get(COL_TYPE.UNSIGNED_INT)
             + " (URI)";
-    private static final String indexattribute_negative_integer3 = "CREATE INDEX " + attribute_negative_integer_index + "3" + " ON " + attribute_table_negative_integer
+    private static final String indexattribute_negative_integer3 = "CREATE INDEX " + attribute_negative_integer_index + "3" + " ON " +  attribute_table.get(COL_TYPE.NEGATIVE_INTEGER)
             + " (URI)";
-    private static final String indexattribute_non_negative_integer3 = "CREATE INDEX " + attribute_non_negative_integer_index + "3" + " ON " + attribute_table_non_negative_integer
+    private static final String indexattribute_non_negative_integer3 = "CREATE INDEX " + attribute_non_negative_integer_index + "3" + " ON " + attribute_table.get(COL_TYPE.NON_NEGATIVE_INTEGER)
             + " (URI)";
-    private static final String indexattribute_positive_integer3 = "CREATE INDEX " + attribute_positive_integer_index + "3" + " ON " + attribute_table_positive_integer
+    private static final String indexattribute_positive_integer3 = "CREATE INDEX " + attribute_positive_integer_index + "3" + " ON " + attribute_table.get(COL_TYPE.POSITIVE_INTEGER)
             + " (URI)";
-    private static final String indexattribute_non_positive_integer3 = "CREATE INDEX " + attribute_non_positive_integer_index + "3" + " ON " + attribute_table_non_positive_integer
+    private static final String indexattribute_non_positive_integer3 = "CREATE INDEX " + attribute_non_positive_integer_index + "3" + " ON " + attribute_table.get(COL_TYPE.NON_POSITIVE_INTEGER)
             + " (URI)";
-    private static final String indexattribute_float3 = "CREATE INDEX " + attribute_float_index + "3" + " ON " + attribute_table_float
+    private static final String indexattribute_float3 = "CREATE INDEX " + attribute_float_index + "3" + " ON " + attribute_table.get(COL_TYPE.FLOAT)
             + " (URI)";
-    private static final String indexattribute_long3 = "CREATE INDEX " + attribute_long_index + "3" + " ON " + attribute_table_long
+    private static final String indexattribute_long3 = "CREATE INDEX " + attribute_long_index + "3" + " ON " + attribute_table.get(COL_TYPE.LONG)
             + " (VAL)";
-    private static final String indexattribute_decimal3 = "CREATE INDEX " + attribute_decimal_index + "3" + " ON " + attribute_table_decimal
+    private static final String indexattribute_decimal3 = "CREATE INDEX " + attribute_decimal_index + "3" + " ON " + attribute_table.get(COL_TYPE.DECIMAL)
 			+ " (VAL)";
-	private static final String indexattribute_double3 = "CREATE INDEX " + attribute_double_index + "3" + " ON " + attribute_table_double
+	private static final String indexattribute_double3 = "CREATE INDEX " + attribute_double_index + "3" + " ON " + attribute_table.get(COL_TYPE.DOUBLE)
 			+ " (VAL)";
 	private static final String indexattribute_datetime3 = "CREATE INDEX " + attribute_datetime_index + "3" + " ON "
-			+ attribute_table_datetime + " (VAL)";
-	private static final String indexattribute_boolean3 = "CREATE INDEX " + attribute_boolean_index + "3" + " ON " + attribute_table_boolean
+			+ attribute_table.get(COL_TYPE.DATETIME) + " (VAL)";
+	private static final String indexattribute_boolean3 = "CREATE INDEX " + attribute_boolean_index + "3" + " ON " + attribute_table.get(COL_TYPE.BOOLEAN)
 			+ " (VAL)";
 
 /**
@@ -497,28 +457,17 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 //	public static final String select_mapping_class_attribute_datetime_left = "SELECT \"URI\" as X FROM " + attribute_table_datetime;
 //	public static final String select_mapping_class_attribute_boolean_left = "SELECT \"URI\" as X FROM " + attribute_table_boolean;
 
-	private static final String select_mapping_role = "SELECT \"URI1\" as X, \"URI2\" as Y FROM " + role_table;
-
-//	public static final String select_mapping_role_inverse = "SELECT \"URI2\" as X, \"URI1\" as Y FROM " + role_table;
-
-	private static final String select_mapping_attribute_literal = "SELECT \"URI\" as X, VAL as Y, LANG as Z FROM "
-			+ attribute_table_literal;
-
-	private static final String select_mapping_attribute_string = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_string;
-	private static final String select_mapping_attribute_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_integer;
-	private static final String select_mapping_attribute_int = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_int;
-    private static final String select_mapping_attribute_unsigned_int = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_unsigned_int;
-    private static final String select_mapping_attribute_positive_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_positive_integer;
-    private static final String select_mapping_attribute_non_positive_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_non_positive_integer;
-    private static final String select_mapping_attribute_negative_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_negative_integer;
-    private static final String select_mapping_attribute_non_negative_integer = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_non_negative_integer;
-    private static final String select_mapping_attribute_float = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_float;
-    private static final String select_mapping_attribute_long = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_long;
-    private static final String select_mapping_attribute_decimal = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_decimal;
-	private static final String select_mapping_attribute_double = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_double;
-	private static final String select_mapping_attribute_datetime = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_datetime;
-	private static final String select_mapping_attribute_boolean = "SELECT \"URI\" as X, VAL as Y FROM " + attribute_table_boolean;
-
+	private static final Map<COL_TYPE, String> select_mapping_attribute = new HashMap<COL_TYPE, String>();
+	
+	static {
+		// two special cases
+		select_mapping_attribute.put(COL_TYPE.OBJECT, "SELECT \"URI1\" as X, \"URI2\" as Y FROM " + role_table);
+		select_mapping_attribute.put(COL_TYPE.LITERAL, "SELECT \"URI\" as X, VAL as Y, LANG as Z FROM " + attribute_table_literal);
+		//
+		for (Entry<COL_TYPE, String> entry : attribute_table.entrySet()) 
+			select_mapping_attribute.put(entry.getKey(),  "SELECT \"URI\" as X, VAL as Y FROM " + entry.getValue());  			
+	}
+	
 	private static final String whereSingleCondition = "IDX = %d";
 
 	private static final String whereIntervalCondition = "IDX >= %d AND IDX <= %d";
@@ -1058,6 +1007,17 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		isIndexed = true;
 	}
 
+	
+	private final static String drop_idx = "DROP TABLE " + index_table;
+	private final static String drop_interval = "DROP TABLE " + interval_table;
+	private final static String drop_emptyness = "DROP TABLE " + emptyness_index_table;
+	private final static String drop_uri_id = "DROP TABLE " + uri_id_table;
+	
+	private static final String class_table_drop = "DROP TABLE " + class_table;
+	private static final String role_table_drop = "DROP TABLE " + role_table;
+	private static final String attribute_table_literal_drop = "DROP TABLE " + attribute_table_literal;
+		
+	
 	@Override
 	public void dropDBSchema(Connection conn) throws SQLException {
 
@@ -1069,31 +1029,18 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 		st.addBatch(class_table_drop);
 		st.addBatch(role_table_drop);
-
 		st.addBatch(attribute_table_literal_drop);
-		st.addBatch(attribute_table_string_drop);
-		st.addBatch(attribute_table_integer_drop);
-        st.addBatch(attribute_table_int_drop);
-        st.addBatch(attribute_table_unsigned_int_drop);
-        st.addBatch(attribute_table_negative_integer_drop);
-        st.addBatch(attribute_table_non_negative_integer_drop);
-        st.addBatch(attribute_table_positive_integer_drop);
-        st.addBatch(attribute_table_non_positive_integer_drop);
-        st.addBatch(attribute_table_float_drop);
-        st.addBatch(attribute_table_long_drop);
-		st.addBatch(attribute_table_decimal_drop);
-		st.addBatch(attribute_table_double_drop);
-		st.addBatch(attribute_table_datetime_drop);
-		st.addBatch(attribute_table_boolean_drop);
 		
-		st.addBatch("DROP TABLE " + uri_id_table);
+		for (Entry<COL_TYPE, String> entry : attribute_table.entrySet())
+			st.addBatch("DROP TABLE " + entry.getValue()); 
+		
+		st.addBatch(drop_uri_id);
 
 		st.executeBatch();
 		st.close();
 	}
 
-@Override
-
+	@Override
 	public int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException {
 		log.debug("Inserting data into DB");
 
@@ -2744,54 +2691,14 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		switch (type2) {
 		case OBJECT:
 		case BNODE:
-			sql.append(select_mapping_role);
+			sql.append(select_mapping_attribute.get(COL_TYPE.OBJECT));
 			break;
 		case LITERAL:
 		case LITERAL_LANG:
-			sql.append(select_mapping_attribute_literal);
+			sql.append(select_mapping_attribute.get(COL_TYPE.LITERAL));
 			break;
-		case STRING:
-			sql.append(select_mapping_attribute_string);
-			break;
-		case INTEGER:
-            sql.append(select_mapping_attribute_integer);
-            break;
-        case INT:
-            sql.append(select_mapping_attribute_int);
-            break;
-        case UNSIGNED_INT:
-            sql.append(select_mapping_attribute_unsigned_int);
-            break;
-        case NEGATIVE_INTEGER:
-            sql.append(select_mapping_attribute_negative_integer);
-            break;
-        case POSITIVE_INTEGER:
-            sql.append(select_mapping_attribute_positive_integer);
-            break;
-        case NON_NEGATIVE_INTEGER:
-            sql.append(select_mapping_attribute_non_negative_integer);
-            break;
-        case NON_POSITIVE_INTEGER:
-            sql.append(select_mapping_attribute_non_positive_integer);
-            break;
-        case FLOAT:
-            sql.append(select_mapping_attribute_float);
-            break;
-        case LONG:
-			sql.append(select_mapping_attribute_long);
-			break;
-		case DECIMAL:
-			sql.append(select_mapping_attribute_decimal);
-			break;
-		case DOUBLE:
-			sql.append(select_mapping_attribute_double);
-			break;
-		case DATETIME:
-			sql.append(select_mapping_attribute_datetime);
-			break;
-		case BOOLEAN:
-			sql.append(select_mapping_attribute_boolean);
-			break;
+		default:
+			sql.append(select_mapping_attribute.get(type2));
 		}
 
 		sql.append(" WHERE ");
@@ -2841,509 +2748,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		return sql.toString();
 	}
 	
-	// /***
-	// * Constructs the mappings for all roles (or object properties) in the DAG
-	// * node list. The string buffer stores the mapping string, if any. The
-	// * method returns true if it finds at least one role node.
-	// *
-	// * @param nodeList
-	// * The list of existential class nodes.
-	// * @param buffer
-	// * The string buffer to stores the mapping string
-	// * @return Returns true if the method finds at least one role node, or
-	// false
-	// * otherwise.
-	// */
-	// private boolean createMappingForRole(Set<DAGNode> nodeList,
-	// StringBuilder buffer) {
-	//
-	// boolean hasRoleNode = false; // A flag if there is at least one role
-	//
-	// buffer.append(select_mapping_class_role_left);
-	// buffer.append(" WHERE ");
-	// buffer.append(" ISBNODE = FALSE AND (");
-	//
-	// boolean multipleIntervals = false; // A flag to tell there are more than
-	// // one SI intervals.
-	// for (DAGNode node : nodeList) {
-	// PropertySomeRestriction property = (PropertySomeRestriction) node
-	// .getDescription();
-	// boolean isObjectProperty = property.getPredicate().getType(1) ==
-	// COL_TYPE.OBJECT;
-	// if (isObjectProperty) {
-	// if (!property.isInverse()) {
-	//
-	// Property role = ofac.createProperty(
-	// property.getPredicate(), false);
-	// DAGNode indexedNode = pureIsa.getRoleNode(role);
-	// if (indexedNode != null) {
-	// hasRoleNode = true;
-	// List<Interval> intervals = indexedNode.getRange()
-	// .getIntervals();
-	// for (int i = 0; i < intervals.size(); i++) {
-	// if (multipleIntervals) {
-	// buffer.append(" OR ");
-	// }
-	// appendIntervalString(intervals.get(i), buffer);
-	// multipleIntervals = true;
-	// }
-	// }
-	// }
-	// }
-	// }
-	// buffer.append(")");
-	// return hasRoleNode;
-	// }
-
-	// /**
-	// * Constructs the mappings for all inverse roles (or inverse object
-	// * properties) in the DAG node list. The string buffer stores the mapping
-	// * string, if any. The method returns true if it finds at least one
-	// inverse
-	// * role node.
-	// *
-	// * @param nodeList
-	// * The list of existential class nodes.
-	// * @param buffer
-	// * The string buffer to stores the mapping string
-	// * @return Returns true if the method finds at least one inverse role
-	// node,
-	// * or false otherwise.
-	// */
-	// private boolean createMappingForInverseRole(Set<DAGNode> nodeList,
-	// StringBuilder buffer) {
-	//
-	// boolean hasInverseRoleNode = false; // A flag if there is at least one
-	// // inverse role.
-	//
-	// buffer.append(select_mapping_class_role_right);
-	// buffer.append(" WHERE ");
-	// buffer.append(" ISBNODE2 = FALSE AND (");
-	//
-	// boolean multipleIntervals = false; // A flag to tell there are more than
-	// // one SI intervals.
-	// for (DAGNode node : nodeList) {
-	// PropertySomeRestriction property = (PropertySomeRestriction) node
-	// .getDescription();
-	// boolean isObjectProperty = property.getPredicate().getType(1) ==
-	// COL_TYPE.OBJECT;
-	// if (isObjectProperty) {
-	// if (property.isInverse()) {
-	// Property role = ofac.createProperty(
-	// property.getPredicate(), false);
-	// DAGNode indexedNode = pureIsa.getRoleNode(role);
-	// if (indexedNode != null) {
-	// hasInverseRoleNode = true;
-	// List<Interval> intervals = indexedNode.getRange()
-	// .getIntervals();
-	// for (int i = 0; i < intervals.size(); i++) {
-	// if (multipleIntervals) {
-	// buffer.append(" OR ");
-	// }
-	// appendIntervalString(intervals.get(i), buffer);
-	// multipleIntervals = true;
-	// }
-	// }
-	// }
-	// }
-	// }
-	// buffer.append(")");
-	//
-	// return hasInverseRoleNode;
-	// }
-
-	// /**
-	// * Constructs the mappings for all data properties with range rdfs:Literal
-	// * in the DAG node list. The string buffer stores the mapping string, if
-	// * any. The method returns true if it finds at least one of the node.
-	// *
-	// * @param nodeList
-	// * The list of existential class nodes.
-	// * @param buffer
-	// * The string buffer to stores the mapping string
-	// * @return Returns true if the method finds at least one data property
-	// node
-	// * with rdfs:Literal as the range, or false otherwise.
-	// */
-	// private boolean createMappingForLiteralDataType(Set<DAGNode> nodeList,
-	// StringBuilder buffer) {
-	//
-	// boolean hasLiteralNode = false; // A flag if there is at least one DP
-	// // with range rdfs:Literal
-	//
-	// buffer.append(select_mapping_class_attribute_literal_left);
-	// buffer.append(" WHERE ");
-	//
-	// boolean multipleIntervals = false; // A flag to tell there are more than
-	// // one SI interval.
-	// for (DAGNode node : nodeList) {
-	// Predicate property = ((PropertySomeRestriction) node
-	// .getDescription()).getPredicate();
-	// boolean isObjectProperty = (property.getType(1) == COL_TYPE.OBJECT);
-	// if (isObjectProperty) {
-	// continue;
-	// }
-	//
-	// PropertySomeRestriction existsDesc = (PropertySomeRestriction) node
-	// .getDescription();
-	// Property role = ofac.createProperty(existsDesc.getPredicate(),
-	// false);
-	// DAGNode indexedNode = pureIsa.getRoleNode(role); // Get the
-	// // indexed
-	// // node.
-	// if (indexedNode == null) {
-	// continue;
-	// }
-	// hasLiteralNode = true;
-	// List<Interval> intervals = indexedNode.getRange().getIntervals();
-	// for (int i = 0; i < intervals.size(); i++) {
-	// if (multipleIntervals) {
-	// buffer.append(" OR ");
-	// }
-	// appendIntervalString(intervals.get(i), buffer);
-	// multipleIntervals = true;
-	// }
-	// }
-	//
-	// return hasLiteralNode;
-	// }
-
-// /**
-	// * Constructs the mappings for all data properties with range xsd:string
-	// in
-	// * the DAG node list. The string buffer stores the mapping string, if any.
-	// * The method returns true if it finds at least one of the node.
-	// *
-	// * @param nodeList
-	// * The list of existential class nodes.
-	// * @param buffer
-	// * The string buffer to stores the mapping string
-	// * @return Returns true if the method finds at least one data property
-	// node
-	// * with xsd:string as the range, or false otherwise.
-	// */
-	// private boolean createMappingForStringDataType(Set<DAGNode> nodeList,
-	// StringBuilder buffer) {
-	//
-	// boolean hasStringNode = false; // A flag if there is at least one DP
-	// // with range xsd:string
-	//
-	// buffer.append(select_mapping_class_attribute_string_left);
-	// buffer.append(" WHERE ");
-	//
-	// boolean multipleIntervals = false; // A flag to tell there are more than
-	// // one SI interval.
-	// for (DAGNode node : nodeList) {
-	// Predicate property = ((PropertySomeRestriction) node
-	// .getDescription()).getPredicate();
-	// boolean isObjectProperty = (property.getType(1) == COL_TYPE.OBJECT);
-	// if (isObjectProperty) {
-	// continue;
-	// }
-	// PropertySomeRestriction existsDesc = (PropertySomeRestriction) node
-	// .getDescription();
-	// Property role = ofac.createProperty(existsDesc.getPredicate(),
-	// false);
-	// DAGNode indexedNode = pureIsa.getRoleNode(role); // Get the
-	// // indexed
-	// // node.
-	// if (indexedNode == null) {
-	// continue;
-	// }
-	// hasStringNode = true;
-	// List<Interval> intervals = indexedNode.getRange().getIntervals();
-	// for (int i = 0; i < intervals.size(); i++) {
-	// if (multipleIntervals) {
-	// buffer.append(" OR ");
-	// }
-	// appendIntervalString(intervals.get(i), buffer);
-	// multipleIntervals = true;
-	// }
-	// }
-	//
-	// return hasStringNode;
-	// }
-
-	// /**
-	// * Constructs the mappings for all data properties with range xsd:int in
-	// the
-	// * DAG node list. The string buffer stores the mapping string, if any. The
-	// * method returns true if it finds at least one of the node.
-	// *
-	// * @param nodeList
-	// * The list of existential class nodes.
-	// * @param buffer
-	// * The string buffer to stores the mapping string
-	// * @return Returns true if the method finds at least one data property
-	// node
-	// * with xsd:int as the range, or false otherwise.
-	// */
-	// private boolean createMappingForIntegerDataType(Set<DAGNode> nodeList,
-	// StringBuilder buffer) {
-	//
-	// boolean hasIntegerNode = false; // A flag if there is at least one DP
-	// // with range xsd:int
-	//
-	// buffer.append(select_mapping_class_attribute_integer_left);
-	// buffer.append(" WHERE ");
-	//
-	// boolean multipleIntervals = false; // A flag to tell there are more than
-	// // one SI interval.
-	// for (DAGNode node : nodeList) {
-	// Predicate property = ((PropertySomeRestriction) node
-	// .getDescription()).getPredicate();
-	// boolean isObjectProperty = (property.getType(1) == COL_TYPE.OBJECT);
-	// if (isObjectProperty) {
-	// continue;
-	// }
-	//
-	// PropertySomeRestriction existsDesc = (PropertySomeRestriction) node
-	// .getDescription();
-	// Property role = ofac.createProperty(existsDesc.getPredicate(),
-	// false);
-	// DAGNode indexedNode = pureIsa.getRoleNode(role); // Get the
-	// // indexed
-	// // node.
-	// if (indexedNode == null) {
-	// continue;
-	// }
-	// hasIntegerNode = true;
-	// List<Interval> intervals = indexedNode.getRange().getIntervals();
-	// for (int i = 0; i < intervals.size(); i++) {
-	// if (multipleIntervals) {
-	// buffer.append(" OR ");
-	// }
-	// appendIntervalString(intervals.get(i), buffer);
-	// multipleIntervals = true;
-	// }
-	// }
-	//
-	// return hasIntegerNode;
-	// }
-
-	// /**
-	// * Constructs the mappings for all data properties with range xsd:decimal
-	// in
-	// * the DAG node list. The string buffer stores the mapping string, if any.
-	// * The method returns true if it finds at least one of the node.
-	// *
-	// * @param nodeList
-	// * The list of existential class nodes.
-	// * @param buffer
-	// * The string buffer to stores the mapping string
-	// * @return Returns true if the method finds at least one data property
-	// node
-	// * with xsd:decimal as the range, or false otherwise.
-	// */
-	// private boolean createMappingForDecimalDataType(Set<DAGNode> nodeList,
-	// StringBuilder buffer) {
-	//
-	// boolean hasDecimalNode = false; // A flag if there is at least one DP
-	// // with range xsd:decimal
-	//
-	// buffer.append(select_mapping_class_attribute_decimal_left);
-	// buffer.append(" WHERE ");
-	//
-	// boolean multipleIntervals = false; // A flag to tell there are more than
-	// // one SI interval.
-	// for (DAGNode node : nodeList) {
-	// Predicate property = ((PropertySomeRestriction) node
-	// .getDescription()).getPredicate();
-	// boolean isObjectProperty = (property.getType(1) == COL_TYPE.OBJECT);
-	// if (isObjectProperty) {
-	// continue;
-	// }
-	//
-	// PropertySomeRestriction existsDesc = (PropertySomeRestriction) node
-	// .getDescription();
-	// Property role = ofac.createProperty(existsDesc.getPredicate(),
-	// false);
-	// DAGNode indexedNode = pureIsa.getRoleNode(role); // Get the
-	// // indexed
-	// // node.
-	// if (indexedNode == null) {
-	// continue;
-	// }
-	// hasDecimalNode = true;
-	// List<Interval> intervals = indexedNode.getRange().getIntervals();
-	// for (int i = 0; i < intervals.size(); i++) {
-	// if (multipleIntervals) {
-	// buffer.append(" OR ");
-	// }
-	// appendIntervalString(intervals.get(i), buffer);
-	// multipleIntervals = true;
-	// }
-	// }
-	//
-	// return hasDecimalNode;
-	// }
-
-	// /**
-	// * Constructs the mappings for all data properties with range xsd:double
-	// in
-	// * the DAG node list. The string buffer stores the mapping string, if any.
-	// * The method returns true if it finds at least one of the node.
-	// *
-	// * @param nodeList
-	// * The list of existential class nodes.
-	// * @param buffer
-	// * The string buffer to stores the mapping string
-	// * @return Returns true if the method finds at least one data property
-	// node
-	// * with xsd:double as the range, or false otherwise.
-	// */
-	// private boolean createMappingForDoubleDataType(Set<DAGNode> nodeList,
-	// StringBuilder buffer) {
-	//
-	// boolean hasDoubleNode = false; // A flag if there is at least one DP
-	// // with range xsd:double
-	//
-	// buffer.append(select_mapping_class_attribute_double_left);
-	// buffer.append(" WHERE ");
-	//
-	// boolean multipleIntervals = false; // A flag to tell there are more than
-	// // one SI interval.
-	// for (DAGNode node : nodeList) {
-	// Predicate property = ((PropertySomeRestriction) node
-	// .getDescription()).getPredicate();
-	// boolean isObjectProperty = (property.getType(1) == COL_TYPE.OBJECT);
-	// if (isObjectProperty) {
-	// continue;
-	// }
-	// PropertySomeRestriction existsDesc = (PropertySomeRestriction) node
-	// .getDescription();
-	// Property role = ofac.createProperty(existsDesc.getPredicate(),
-	// false);
-	// DAGNode indexedNode = pureIsa.getRoleNode(role); // Get the
-	// // indexed
-	// // node.
-	// if (indexedNode == null) {
-	// continue;
-	// }
-	// hasDoubleNode = true;
-	// List<Interval> intervals = indexedNode.getRange().getIntervals();
-	// for (int i = 0; i < intervals.size(); i++) {
-	// if (multipleIntervals) {
-	// buffer.append(" OR ");
-	// }
-	// appendIntervalString(intervals.get(i), buffer);
-	// multipleIntervals = true;
-	// }
-	// }
-	//
-	// return hasDoubleNode;
-	// }
-
-	// /**
-	// * Constructs the mappings for all data properties with range xsd:date in
-	// * the DAG node list. The string buffer stores the mapping string, if any.
-	// * The method returns true if it finds at least one of the node.
-	// *
-	// * @param nodeList
-	// * The list of existential class nodes.
-	// * @param buffer
-	// * The string buffer to stores the mapping string
-	// * @return Returns true if the method finds at least one data property
-	// node
-	// * with xsd:date as the range, or false otherwise.
-	// */
-	// private boolean createMappingForDateDataType(Set<DAGNode> nodeList,
-	// StringBuilder buffer) {
-	//
-	// boolean hasDateNode = false; // A flag if there is at least one DP with
-	// // range xsd:date
-	//
-	// buffer.append(select_mapping_class_attribute_datetime_left);
-	// buffer.append(" WHERE ");
-	//
-	// boolean multipleIntervals = false; // A flag to tell there are more than
-	// // one SI interval.
-	// for (DAGNode node : nodeList) {
-	// Predicate property = ((PropertySomeRestriction) node
-	// .getDescription()).getPredicate();
-	// boolean isObjectProperty = (property.getType(1) == COL_TYPE.OBJECT);
-	// if (isObjectProperty) {
-	// continue;
-	// }
-	// PropertySomeRestriction existsDesc = (PropertySomeRestriction) node
-	// .getDescription();
-	// Property role = ofac.createProperty(existsDesc.getPredicate(),
-	// false);
-	// DAGNode indexedNode = pureIsa.getRoleNode(role); // Get the
-	// // indexed
-	// // node.
-	// if (indexedNode == null) {
-	// continue;
-	// }
-	// hasDateNode = true;
-	// List<Interval> intervals = indexedNode.getRange().getIntervals();
-	// for (int i = 0; i < intervals.size(); i++) {
-	// if (multipleIntervals) {
-	// buffer.append(" OR ");
-	// }
-	// appendIntervalString(intervals.get(i), buffer);
-	// multipleIntervals = true;
-	// }
-	// }
-	//
-	// return hasDateNode;
-	// }
-
-	// /**
-	// * Constructs the mappings for all data properties with range xsd:boolean
-	// in
-	// * the DAG node list. The string buffer stores the mapping string, if any.
-	// * The method returns true if it finds at least one of the node.
-	// *
-	// * @param nodeList
-	// * The list of existential class nodes.
-	// * @param buffer
-	// * The string buffer to stores the mapping string
-	// * @return Returns true if the method finds at least one data property
-	// node
-	// * with xsd:boolean as the range, or false otherwise.
-	// */
-	// private boolean createMappingForBooleanDataType(Set<DAGNode> nodeList,
-	// StringBuilder buffer) {
-	//
-	// boolean hasBooleanNode = false; // A flag if there is at least one DP
-	// // with range xsd:boolean
-	//
-	// buffer.append(select_mapping_class_attribute_boolean_left);
-	// buffer.append(" WHERE ");
-	//
-	// boolean multipleIntervals = false; // A flag to tell there are more than
-	// // one SI interval.
-	// for (DAGNode node : nodeList) {
-	// Predicate property = ((PropertySomeRestriction) node
-	// .getDescription()).getPredicate();
-	// boolean isObjectProperty = (property.getType(1) == COL_TYPE.OBJECT);
-	// if (isObjectProperty) {
-	// continue;
-	// }
-	// PropertySomeRestriction existsDesc = (PropertySomeRestriction) node
-	// .getDescription();
-	// Property role = ofac.createProperty(existsDesc.getPredicate(),
-	// false);
-	// DAGNode indexedNode = pureIsa.getRoleNode(role); // Get the
-	// // indexed
-	// // node.
-	// if (indexedNode == null) {
-	// continue;
-	// }
-	// hasBooleanNode = true;
-	// List<Interval> intervals = indexedNode.getRange().getIntervals();
-	// for (int i = 0; i < intervals.size(); i++) {
-	// if (multipleIntervals) {
-	// buffer.append(" OR ");
-	// }
-	// appendIntervalString(intervals.get(i), buffer);
-	// multipleIntervals = true;
-	// }
-	// }
-	//
-	// return hasBooleanNode;
-	// }
 
 	private void appendIntervalString(Interval interval, StringBuilder out) {
 		if (interval.getStart() == interval.getEnd()) {
@@ -3639,13 +3043,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", class_table));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", role_table));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_literal));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_string));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_integer));
-            st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_long));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_decimal));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_double));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_datetime));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_boolean));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.STRING)));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.INTEGER)));
+            st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.LONG)));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.DECIMAL)));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.DOUBLE)));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.DATETIME)));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.BOOLEAN)));
 		} catch (SQLException e) {
 			exists = false;
 			log.debug(e.getMessage());
