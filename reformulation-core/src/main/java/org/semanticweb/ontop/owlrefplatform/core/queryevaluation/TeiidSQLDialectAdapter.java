@@ -34,4 +34,24 @@ public class TeiidSQLDialectAdapter extends SQL99DialectAdapter {
 		}
 		return "CAST(" + value + " AS " + strType + ")";
 	}
+
+	/**
+	 * See https://docs.jboss.org/teiid/7.7.0.Final/reference/en-US/html/sql_clauses.html#limit_clause
+	 */
+	@Override
+	public String sqlSlice(long limit, long offset) {
+		if ((limit < 0) && (offset < 0)) {
+			return "";
+		}
+		else if ((limit >= 0) && (offset >= 0)) {
+			return String.format("LIMIT %d, %d", offset, limit);
+		}
+		else if (offset < 0) {
+			return String.format("LIMIT %d", limit);
+		}
+		// Else -> (limit < 0)
+		else {
+			return String.format("OFFSET %d ROWS", offset);
+		}
+	}
 }
