@@ -168,8 +168,6 @@ public class SemanticIndexRecord {
 				table = SITable.OPROP;
 				break;
 			case LITERAL:
-				table = SITable.DPROPLite;
-				break;
 			case LITERAL_LANG:
 				table = SITable.DPROPLite;
 				break;

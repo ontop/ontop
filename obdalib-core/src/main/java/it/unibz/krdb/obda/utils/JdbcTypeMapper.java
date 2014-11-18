@@ -75,6 +75,7 @@ public class JdbcTypeMapper {
 		datatypeMap.put(COL_TYPE.DOUBLE, Types.DOUBLE);
 		datatypeMap.put(COL_TYPE.STRING, Types.VARCHAR);
 		datatypeMap.put(COL_TYPE.LITERAL, Types.VARCHAR);	
+		// all other COL_TYPEs are mapped to Types.VARCHAR by default
 	}
 	
 	public Predicate.COL_TYPE getPredicate(int sqlType) {

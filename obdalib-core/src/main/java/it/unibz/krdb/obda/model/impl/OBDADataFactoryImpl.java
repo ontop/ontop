@@ -55,7 +55,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	private static OBDADataFactory instance = null;
 	private static ValueFactory irifactory = null;
 	private DatatypeFactoryImpl datatypes = null;
-	private final QuestTypeMapper questTypeMapper = new QuestTypeMapper();
 	private final JdbcTypeMapper jdbcTypeMapper =  new JdbcTypeMapper(); 
 	
 
@@ -87,10 +86,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return datatypes;
 	}
 
-	@Override
-	public QuestTypeMapper getQuestTypeMapper() {
-		return questTypeMapper;
-	}
 	
 	@Override 
 	public JdbcTypeMapper getJdbcTypeMapper() {
