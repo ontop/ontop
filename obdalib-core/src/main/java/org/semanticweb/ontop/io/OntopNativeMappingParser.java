@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+
 import org.openrdf.model.Model;
 import org.semanticweb.ontop.exception.*;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
@@ -86,12 +87,10 @@ public class OntopNativeMappingParser implements MappingParser {
 
     @AssistedInject
     private OntopNativeMappingParser(@Assisted Reader reader, NativeQueryLanguageComponentFactory nativeQLFactory,
-                                     OBDAFactoryWithException obdaFactory)
-            throws IOException, InvalidMappingExceptionWithIndicator {
+                                     OBDAFactoryWithException obdaFactory) {
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
         this.model = null;
-
         this.reader = reader;
         this.file = null;
     }
@@ -101,21 +100,19 @@ public class OntopNativeMappingParser implements MappingParser {
      */
     @AssistedInject
     private OntopNativeMappingParser(@Assisted File file, NativeQueryLanguageComponentFactory nativeQLFactory,
-                                     OBDAFactoryWithException obdaFactory)
-            throws IOException, InvalidMappingExceptionWithIndicator {
+                                     OBDAFactoryWithException obdaFactory) {
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
         this.model = null;
         this.file = file;
-        this.reader = new FileReader(file);
+        this.reader = null;
     }
 
     /**
      * RDF graph argument is not supported. This constructor is required by the factory.
      */
     @AssistedInject
-    private OntopNativeMappingParser(@Assisted Model mappingGraph, NativeQueryLanguageComponentFactory factory)
-            throws IOException, InvalidMappingExceptionWithIndicator {
+    private OntopNativeMappingParser(@Assisted Model mappingGraph, NativeQueryLanguageComponentFactory factory) {
         throw new IllegalArgumentException("The Ontop native mapping language has no RDF serialization. Passing a RDF graph" +
                 "to the OntopNativeMappingParser is thus invalid.");
     }
@@ -154,8 +151,12 @@ public class OntopNativeMappingParser implements MappingParser {
                                   OBDAFactoryWithException obdaFactory)
             throws IOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
 
+		/**
+		 * File and reader are not supposed to be both initially defined.
+		 */
         if (file != null) {
             checkFile(file);
+            reader = new FileReader(file);
         }
 
         LineNumberReader lineNumberReader = new LineNumberReader(reader);
