@@ -59,7 +59,12 @@ public class OBDAModelImpl implements OBDAModel {
                 new HashSet<Predicate>(), new HashSet<Predicate>(), new HashSet<Predicate>());
     }
 
-    public OBDAModelImpl(Set<OBDADataSource> dataSources,
+    /**
+     * Is protected so as the OBDAFactoryWithException method just have to consider the
+     * first and unique constructor.
+     * TODO: integrate it to the factory (make it public).
+     */
+    protected OBDAModelImpl(Set<OBDADataSource> dataSources,
                          Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
                          PrefixManager prefixManager,
                          Set<Predicate> declaredClasses,
