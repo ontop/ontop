@@ -20,24 +20,6 @@ package org.semanticweb.ontop.api.io;
  * #L%
  */
 
-import org.semanticweb.ontop.exception.InvalidMappingException;
-import org.semanticweb.ontop.exception.InvalidPredicateDeclarationException;
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.io.PrefixManager;
-import org.semanticweb.ontop.io.SimplePrefixManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
-import org.semanticweb.ontop.ontology.DataPropertyExpression;
-import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
-import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
-import org.semanticweb.ontop.parser.TurtleOBDASyntaxParser;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -47,6 +29,24 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.exception.InvalidPredicateDeclarationException;
+import org.semanticweb.ontop.io.ModelIOManager;
+import org.semanticweb.ontop.io.PrefixManager;
+import org.semanticweb.ontop.io.SimplePrefixManager;
+import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDADataSource;
+import org.semanticweb.ontop.model.OBDAMappingAxiom;
+import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.OntologyFactory;
+import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
+import org.semanticweb.ontop.parser.TurtleOBDASyntaxParser;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -73,12 +73,12 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
                     ":C{id} a :Course ; :title {title} ; :hasLecturer :L{id} ; :description {description}@en-US ." },
             { "M3", "select sid, cid from enrollment",
                     ":P{sid} :hasEnrollment :C{cid} ." },
-                    
+
             { "M4", "select id, nome, cognome, eta from studenti",
                     ":P{id} a :Student ; :firstName {nome} ; :lastName {cognome} ; :age {eta}^^xsd:int ." },
             { "M5", "select id, titolo, professore, descrizione from corso",
                     ":C{id} a :Course ; :title {titolo} ; :hasLecturer :L{id} ; :description {decrizione}@it ." },
-            { "M6", "select sid, cid from registrare", 
+            { "M6", "select sid, cid from registrare",
                     ":P{sid} :hasEnrollment :C{cid} ." }
     };
 
@@ -96,26 +96,26 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         model.addSource(datasource);
 
         loadOntologyToModel(model);
-        
+
         addSampleMappings(model, datasource.getSourceID());
     }
-    
+
     private void loadOntologyToModel(OBDAModel model) throws OWLOntologyCreationException {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        File file = new File("src/test/java/it/unibz/krdb/obda/api/io/School.owl");
+        File file = new File("src/test/java/org/semanticweb/ontop/api/io/School.owl");
         OWLOntology schoolOntology = manager.loadOntologyFromOntologyDocument(file);
-        
+
         // Setup the entity declarations
         for (OWLClass c : schoolOntology.getClassesInSignature()) {
             OClass pred = ofac.createClass(c.getIRI().toString());
             model.declareClass(pred);
         }
         for (OWLObjectProperty r : schoolOntology.getObjectPropertiesInSignature()) {
-        	ObjectPropertyExpression pred = ofac.createObjectProperty(r.getIRI().toString());
+            ObjectPropertyExpression pred = ofac.createObjectProperty(r.getIRI().toString());
             model.declareObjectProperty(pred);
         }
         for (OWLDataProperty p : schoolOntology.getDataPropertiesInSignature()) {
-        	DataPropertyExpression pred = ofac.createDataProperty(p.getIRI().toString());
+            DataPropertyExpression pred = ofac.createDataProperty(p.getIRI().toString());
             model.declareDataProperty(pred);
         }
     }
@@ -157,7 +157,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
             assertTrue(e.getMessage(), (countElement(model.getMappings()) == 2));
         }
     }
-    
+
     public void testLoadWithBlankSourceQuery() {
         resetCurrentModel();
         try {
@@ -171,33 +171,33 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
             assertTrue(e.getMessage(), (countElement(model.getMappings()) == 2));
         }
     }
-    
+
     public void testLoadWithBadTargetQuery() {
         resetCurrentModel();
         try {
             loadObdaFile("src/test/resources/it/unibz/krdb/obda/api/io/SchoolBadFile8.obda");
         } catch (IOException e) {
-        	assertTrue(true);
+            assertTrue(true);
         } catch (InvalidPredicateDeclarationException e) {
             assertFalse(true);
         } catch (InvalidMappingException e) {
             assertFalse(true);
         }
     }
-    
+
     public void testLoadWithPredicateDeclarations() {
         resetCurrentModel();
         try {
             loadObdaFile("src/test/resources/it/unibz/krdb/obda/api/io/SchoolBadFile9.obda");
         } catch (IOException e) {
-        	assertTrue(true);
+            assertTrue(true);
         } catch (InvalidPredicateDeclarationException e) {
             assertFalse(true);
         } catch (InvalidMappingException e) {
             assertFalse(true);
         }
     }
-    
+
     public void testLoadWithAllMistakes() {
         resetCurrentModel();
         try {
@@ -218,7 +218,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
 
     private void saveRegularFile() throws IOException {
         ioManager = new ModelIOManager(model);
-        ioManager.save("src/test/java/it/unibz/krdb/obda/api/io/SchoolRegularFile.obda");
+        ioManager.save("src/test/java/org/semanticweb/ontop/api/io/SchoolRegularFile.obda");
     }
 
     private void saveFileWithMultipleDataSources() throws IOException {
@@ -233,7 +233,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
 
         // Save the model
         ioManager = new ModelIOManager(model);
-        ioManager.save("src/test/java/it/unibz/krdb/obda/api/io/SchoolMultipleDataSources.obda");
+        ioManager.save("src/test/java/org/semanticweb/ontop/api/io/SchoolMultipleDataSources.obda");
     }
 
     /*
@@ -242,7 +242,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
 
     private void loadRegularFile() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
         ioManager = new ModelIOManager(model);
-        ioManager.load("src/test/java/it/unibz/krdb/obda/api/io/SchoolRegularFile.obda");
+        ioManager.load("src/test/java/org/semanticweb/ontop/api/io/SchoolRegularFile.obda");
 
         // Check the content
         assertTrue(model.getPrefixManager().getPrefixMap().size() == 6);
@@ -252,7 +252,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
 
     private void loadFileWithMultipleDataSources() throws IOException, InvalidPredicateDeclarationException, InvalidMappingException {
         ioManager = new ModelIOManager(model);
-        ioManager.load("src/test/java/it/unibz/krdb/obda/api/io/SchoolMultipleDataSources.obda");
+        ioManager.load("src/test/java/org/semanticweb/ontop/api/io/SchoolMultipleDataSources.obda");
 
         // Check the content
         assertTrue(model.getPrefixManager().getPrefixMap().size() == 6);
@@ -277,7 +277,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         prefixManager.addPrefix(PrefixManager.DEFAULT_PREFIX, "http://www.semanticweb.org/ontologies/2012/5/Ontology1340973114537.owl#");
         return prefixManager;
     }
-    
+
     private OBDADataSource setupSampleDataSource() {
         // Setting up the data source
         URI sourceId = URI.create("http://www.example.org/db/dummy/");
@@ -288,7 +288,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         datasource.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, "org.postgresl.Driver");
         return datasource;
     }
-    
+
     private OBDADataSource setupAnotherSampleDataSource() {
         // Setting up the data source
         URI sourceId2 = URI.create("http://www.example.org/db/dummy2/");
@@ -299,7 +299,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         datasource2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, "org.postgresl.Driver");
         return datasource2;
     }
-    
+
     private void addSampleMappings(OBDAModel model, URI sourceId) {
         // Add some mappings
         try {
@@ -310,7 +310,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
             // NO-OP
         }
     }
-    
+
     private void addMoreSampleMappings(OBDAModel model, URI sourceId) {
         // Add some mappings
         try {
@@ -321,7 +321,7 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
             // NO-OP
         }
     }
-    
+
     private int countElement(Hashtable<URI, ArrayList<OBDAMappingAxiom>> mappings) {
         int total = 0;
         for (List<OBDAMappingAxiom> list : mappings.values()) {

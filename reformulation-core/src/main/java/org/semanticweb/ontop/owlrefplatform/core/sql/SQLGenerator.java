@@ -849,7 +849,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 					return String.format("NOT %s", column);
 				if (type == Types.VARCHAR)
 					return String.format("NOT LENGTH(%s) > 0", column);
-				return "0;";
+				//return "0;";
+				return "0"; // TODO CHECK FOR MERGE
 			}
 			if (expressionFormat.contains("IS TRUE")) {
 				// find data type of term and evaluate accordingly
@@ -863,7 +864,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 					return String.format("%s", column);
 				if (type == Types.VARCHAR)
 					return String.format("LENGTH(%s) > 0", column);
-				return "1;";
+				//return "1;";
+				return "1"; // TODO CHECK FOR MERGE
 			}
 			return String.format(expressionFormat, column);
 		} else if (isBinary(atom)) {
