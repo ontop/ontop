@@ -114,6 +114,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	private static final String typeStrForSELECT = "%s AS \"%sQuestType\"" ;
 
+	private static final int UNDEFINED_TYPE_CODE = -1;
+
 	private ImmutableTable<Predicate, Predicate, Predicate> dataTypePredicateUnifyTable;
 
 
@@ -449,7 +451,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 						Predicate unifiedType = unifyTypes(ansTypes.get(j), typePred);
 						ansTypes.set(j, unifiedType);
 
-					} else if (typePred.equals(dtfac.getTypePredicate(COL_TYPE.BNODE))){
+					//} else if (typePred.equals(dtfac.getTypePredicate(COL_TYPE.BNODE))){
+					} else if (typePred.getName().equals(OBDAVocabulary.QUEST_BNODE)){
 						ansTypes.set(j, dtfac.getTypePredicate(COL_TYPE.STRING));
 
 					}else if (  (typePred.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
@@ -1544,6 +1547,50 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	}
 
+//	/**
+//	 * Infers the type of a projected term.
+//	 *
+//	 * @param projectedTerm
+//	 * @param varName Name of the variable
+//	 * @param index Used when the term correspond to a column name
+//	 * @return A string like "5 AS ageQuestType"
+//	 */
+//	private String getTypeColumnForSELECT(Term projectedTerm, String varName,
+//										  QueryAliasIndex index) {
+//		COL_TYPE typeCode;
+//		String type;
+//
+//		if (projectedTerm instanceof Function) {
+//			type = getCompositeTermType((Function) projectedTerm);
+//			//type = String.valueOf(typeCode);
+//		}
+//		else if (projectedTerm instanceof URIConstant) {
+//			typeCode = COL_TYPE.OBJECT;
+//			type = String.valueOf(typeCode.getQuestCode());
+//
+//		}
+//		else if (projectedTerm == OBDAVocabulary.NULL) {
+//			typeCode = COL_TYPE.NULL;
+//			type = String.valueOf(typeCode.getQuestCode());
+//
+//		}
+//		else if (projectedTerm instanceof Variable) {
+//			type = getTypeFromVariable((Variable) projectedTerm, index, varName);
+//		}
+//		else {
+//			// Unusual term
+//			throw new RuntimeException("Cannot generate SELECT for term: "
+//					+ projectedTerm.toString());
+//		}
+//		//int code = type.getQuestCode();
+//
+//		if(type == null || type.equals("null")){
+//			throw new NullPointerException();
+//		}
+//
+//		return String.format(typeStrForSELECT, type, varName);
+//	}
+
 	/**
 	 * Infers the type of a projected term.
 	 *
@@ -1554,33 +1601,24 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	private String getTypeColumnForSELECT(Term projectedTerm, String varName,
 										  QueryAliasIndex index) {
-		COL_TYPE typeCode;
-		String type;
-		
+
 		if (projectedTerm instanceof Function) {
-			typeCode = getCompositeTermType((Function) projectedTerm);
-			type = String.valueOf(typeCode);
+			return getCompositeTermType((Function) projectedTerm, varName);
 		}
 		else if (projectedTerm instanceof URIConstant) {
-			typeCode = COL_TYPE.OBJECT;
-			type = String.valueOf(typeCode.getQuestCode());
-
+			return String.format(typeStrForSELECT, 1, varName);
 		}
 		else if (projectedTerm == OBDAVocabulary.NULL) {
-			typeCode = COL_TYPE.NULL;
-			type = String.valueOf(typeCode.getQuestCode());
-
+			return String.format(typeStrForSELECT, 0, varName);
 		}
 		else if (projectedTerm instanceof Variable) {
-			type = getTypeFromVariable((Variable) projectedTerm, index, varName);
+			return getTypeFromVariable((Variable) projectedTerm, index, varName);
 		}
-		else {
-			// Unusual term
-			throw new RuntimeException("Cannot generate SELECT for term: "
-					+ projectedTerm.toString());
-		}
-		//int code = type.getQuestCode();
-		return String.format(typeStrForSELECT, type, varName);
+
+		// Unusual term
+		throw new RuntimeException("Cannot generate SELECT for term: "
+				+ projectedTerm.toString());
+
 	}
 
 	/**
@@ -1595,10 +1633,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 *   Basically, it tries to infer the type by looking at function symbols.
 	 *
 	 */
-	private COL_TYPE getCompositeTermType(Function compositeTerm) {
+	// TODO: refactor
+	private String getCompositeTermType(Function compositeTerm, String varName) {
 		Predicate mainFunctionSymbol = compositeTerm.getFunctionSymbol();
 
-		COL_TYPE typeCode = COL_TYPE.UNSUPPORTED;
+		int typeCode = UNDEFINED_TYPE_CODE;
 
 		switch(mainFunctionSymbol.getName()) {
 			/**
@@ -1606,7 +1645,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			case "Count":
 				// Integer
-				return COL_TYPE.INTEGER;
+				// TODO: DO NOT use magic numbers, extract them from constants
+				return String.format(typeStrForSELECT, 4, varName);
 			case "Sum":
 			case "Avg":
 			case "Min":
@@ -1618,7 +1658,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				if (subTerm instanceof Function) {
 					Function compositeSubTerm = (Function) subTerm;
 
-					typeCode = dtfac.getDataType(compositeSubTerm.getFunctionSymbol().toString());
+					typeCode = getCodeTypeFromFunctionSymbol(compositeSubTerm.getFunctionSymbol());
 				}
 
 				/**
@@ -1627,8 +1667,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 * In such a case, we cast the aggregate to a xsd:double
 				 * (any number can be promoted to a double http://www.w3.org/TR/xpath20/#promotion) .
 				 */
-				if (typeCode == COL_TYPE.UNSUPPORTED) {
-					typeCode = COL_TYPE.DOUBLE;
+				if (typeCode == UNDEFINED_TYPE_CODE) {
+					// TODO: DO NOT use magic numbers, extract them from constants
+					typeCode = 6;
 				}
 				break;
 
@@ -1636,17 +1677,72 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * Not a (known) aggregation function symbol
 			 */
 			default:
-				typeCode = dtfac.getDataType(mainFunctionSymbol.toString());
+				typeCode = getCodeTypeFromFunctionSymbol(mainFunctionSymbol);
 
-				if (typeCode == COL_TYPE.UNSUPPORTED) {
+				if (typeCode == UNDEFINED_TYPE_CODE) {
 					throw new RuntimeException("Cannot generate the SQL query " +
 							"because of an untyped term: " + compositeTerm.toString());
 				}
 		}
 
-		return typeCode;
+		return String.format(typeStrForSELECT, typeCode, varName);
 	}
 
+	/**
+	 * Converts a function symbol into a code type (integer).
+	 *
+	 * May return an UNDEFINED_TYPE_CODE value.
+	 *
+	 * @param functionSymbol
+	 * @return
+	 */
+	private int getCodeTypeFromFunctionSymbol(Predicate functionSymbol) {
+		switch (functionSymbol.getName()) {
+
+			case OBDAVocabulary.XSD_YEAR_URI:
+				return 12;
+			case OBDAVocabulary.XSD_TIME_URI:
+				return 11;
+			case OBDAVocabulary.XSD_DATE_URI:
+				return 10;
+			case OBDAVocabulary.XSD_BOOLEAN_URI:
+				return 9;
+			case OBDAVocabulary.XSD_DATETIME_URI:
+				return 8;
+			case OBDAVocabulary.XSD_STRING_URI:
+				return 7;
+			case OBDAVocabulary.XSD_DOUBLE_URI:
+				return 6;
+			case OBDAVocabulary.XSD_DECIMAL_URI:
+				return 5;
+			case OBDAVocabulary.XSD_INTEGER_URI:
+				return 4;
+			case OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI:
+				return 15 ;
+			case OBDAVocabulary.XSD_FLOAT_URI:
+				return 14;
+			case OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI:
+				return 16;
+			case OBDAVocabulary.XSD_POSITIVE_INTEGER_URI:
+				return 17;
+			case OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI:
+				return 18;
+			case OBDAVocabulary.XSD_INT_URI:
+				return 19;
+			case OBDAVocabulary.XSD_UNSIGNED_INT_URI:
+				return 20;
+			case OBDAVocabulary.XSD_LONG_URI:
+				return 13;
+			case OBDAVocabulary.RDFS_LITERAL_URI:
+				return 3;
+			case OBDAVocabulary.QUEST_BNODE:
+				return 2;
+			case OBDAVocabulary.QUEST_URI:
+				return 1;
+			default:
+				return UNDEFINED_TYPE_CODE;
+		}
+	}
 
 	/**
 	 * Gets the type of a variable.
@@ -1703,7 +1799,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 		}
 
-		return typeCode;
+		return String.format(typeStrForSELECT, typeCode, varName);
+
+
+//		return typeCode;
 	}
 
 
@@ -1924,6 +2023,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					for (Attribute a : attr) {
 						if (a.getName().equals(col)) {
 							switch (a.getType()) {
+								//FIXME can we simply return a.getType()
 								case Types.VARCHAR:
 								case Types.CHAR:
 								case Types.LONGNVARCHAR:
@@ -1963,39 +2063,53 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return java.sql.Types.DECIMAL;
 		}
 
-		// TODO: check if all types are covered
-		return dtfac.getDataType(functionSymbol.getName()).getQuestCode();
 
-//		int type;
-//		switch (functionName) {
-//			case OBDAVocabulary.XSD_DOUBLE_URI:
-//				type = java.sql.Types.DOUBLE;
-//				break;
-//			case OBDAVocabulary.XSD_DECIMAL_URI:
-//				type = java.sql.Types.DECIMAL;
-//				break;
+//		obdaDataFactory.getJdbcTypeMapper().getSQLType()
 //
-//			case OBDAVocabulary.XSD_INT_URI:
-//				type = java.sql.Types.INTEGER;
-//				break;
-//			case OBDAVocabulary.XSD_INTEGER_URI:
-//				type = java.sql.Types.INTEGER;
-//				break;
+//		if(functionSymbol instanceof  URITemplatePredicate){
 //
-//			case OBDAVocabulary.XSD_BOOLEAN_URI:
-//				type = java.sql.Types.BOOLEAN;
-//				break;
-//			case OBDAVocabulary.XSD_DATETIME_URI:
-//				type = java.sql.Types.DATE;
-//				break;
-//			case OBDAVocabulary.XSD_STRING_URI:
-//			case OBDAVocabulary.RDFS_LITERAL_URI:
-//			default:
-//				type = java.sql.Types.VARCHAR;
-//				break;
 //		}
 //
-//		return type;
+//		// TODO: check if all types are covered
+//		COL_TYPE colType = dtfac.getDataType(functionSymbol.getName());
+//
+//		if(colType == null){
+//			throw new IllegalStateException();
+//		}
+//
+//		int questCode = colType.getQuestCode();
+//		return questCode;
+
+		int type;
+		switch (functionName) {
+			case OBDAVocabulary.XSD_DOUBLE_URI:
+				type = java.sql.Types.DOUBLE;
+				break;
+			case OBDAVocabulary.XSD_DECIMAL_URI:
+				type = java.sql.Types.DECIMAL;
+				break;
+
+			case OBDAVocabulary.XSD_INT_URI:
+				type = java.sql.Types.INTEGER;
+				break;
+			case OBDAVocabulary.XSD_INTEGER_URI:
+				type = java.sql.Types.INTEGER;
+				break;
+
+			case OBDAVocabulary.XSD_BOOLEAN_URI:
+				type = java.sql.Types.BOOLEAN;
+				break;
+			case OBDAVocabulary.XSD_DATETIME_URI:
+				type = java.sql.Types.DATE;
+				break;
+			case OBDAVocabulary.XSD_STRING_URI:
+			case OBDAVocabulary.RDFS_LITERAL_URI:
+			default:
+				type = java.sql.Types.VARCHAR;
+				break;
+		}
+
+		return type;
 	}
 
 	private boolean isStringColType(Term term, QueryAliasIndex index) {

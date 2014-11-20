@@ -95,6 +95,8 @@ public class OBDAVocabulary {
 	// The name of the function that creates URI's in Quest
 	public static final String QUEST_URI = "URI";
 
+	public static final String QUEST_BNODE = "BNODE";
+
 	public static final Predicate QUEST_TRIPLE_PRED = new PredicateImpl("triple", 3, new COL_TYPE[3]);
 
 	public static final Predicate QUEST_CAST = new PredicateImpl("cast", 2, new COL_TYPE[2]);
@@ -102,14 +104,42 @@ public class OBDAVocabulary {
 	public static final String QUEST_QUERY = "ans1";
 
 	// TODO: GX refactor
-
-
-	/* SPARQL algebra operations */
-	// TODO: remove it
 	public static final String XSD_STRING_URI = "http://www.w3.org/2001/XMLSchema#string";
 
-	public static final String SPARQL_STR_URI = "str";
+	//TODO: Remove this if it is not used!!
+	public static final String XSD_INT_URI = "http://www.w3.org/2001/XMLSchema#int";
 
+	public static final String OWL_REAL_URI = "http://www.w3.org/2002/07/owl#real";
+
+	public static final String XSD_POSITIVE_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#positiveInteger";
+
+	public static final String XSD_NEGATIVE_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#negativeInteger";
+
+	public static final String XSD_NON_POSITIVE_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#nonPositiveInteger";
+
+	public static final String XSD_UNSIGNED_INT_URI = "http://www.w3.org/2001/XMLSchema#unsignedInt";
+
+	public static final String XSD_NON_NEGATIVE_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#nonNegativeInteger";
+
+	public static final String XSD_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#integer";
+
+	public static final String XSD_LONG_URI = "http://www.w3.org/2001/XMLSchema#long";
+
+	public static final String XSD_DECIMAL_URI = "http://www.w3.org/2001/XMLSchema#decimal";
+
+	public static final String XSD_FLOAT_URI = "http://www.w3.org/2001/XMLSchema#float";
+
+	public static final String XSD_DOUBLE_URI = "http://www.w3.org/2001/XMLSchema#double";
+
+	public static final String XSD_DATETIME_URI = "http://www.w3.org/2001/XMLSchema#dateTime";
+
+	public static final String XSD_BOOLEAN_URI = "http://www.w3.org/2001/XMLSchema#boolean";
+
+	public static final String XSD_DATE_URI = "http://www.w3.org/2001/XMLSchema#date";
+
+	public static final String XSD_TIME_URI = "http://www.w3.org/2001/XMLSchema#time";
+
+	public static final String XSD_YEAR_URI = "http://www.w3.org/2001/XMLSchema#gYear";
 	public static final String SPARQL_COUNT_URI = "Count";
 
 	public static final String SPARQL_AVG_URI = "Avg";
@@ -149,4 +179,5 @@ public class OBDAVocabulary {
 	public static final BooleanOperationPredicate SPARQL_LANGMATCHES = new BooleanOperationPredicateImpl("LangMatches", 2);
 	public static final BooleanOperationPredicate SPARQL_REGEX = new BooleanOperationPredicateImpl("regex", 3);
 	public static final BooleanOperationPredicate SPARQL_LIKE = new BooleanOperationPredicateImpl("like", 2);
+
 }
