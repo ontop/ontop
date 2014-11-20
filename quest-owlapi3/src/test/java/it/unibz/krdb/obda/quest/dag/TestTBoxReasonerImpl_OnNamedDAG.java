@@ -21,8 +21,12 @@ package it.unibz.krdb.obda.quest.dag;
  */
 
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
@@ -49,8 +53,10 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 @Deprecated
 public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 
-	private EquivalencesDAG<Property> propertyDAG;
-	private EquivalencesDAG<BasicClassDescription> classDAG;
+	private final EquivalencesDAG<ObjectPropertyExpression> objectPropertyDAG;
+	private final EquivalencesDAG<DataPropertyExpression> dataPropertyDAG;
+	private final EquivalencesDAG<ClassExpression> classDAG;
+	private final EquivalencesDAG<DataRangeExpression> dataRangeDAG;
 
 	/**
 	 * Constructor using a DAG or a named DAG
@@ -59,8 +65,10 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 	public TestTBoxReasonerImpl_OnNamedDAG(TBoxReasoner reasoner) {
 		NamedDAG dag = new NamedDAG(reasoner);
 		
-		this.propertyDAG = new EquivalencesDAGImpl<Property>(dag.getPropertyDag(), reasoner.getProperties());
-		this.classDAG = new EquivalencesDAGImpl<BasicClassDescription>(dag.getClassDag(), reasoner.getClasses());		
+		this.objectPropertyDAG = new EquivalencesDAGImpl<ObjectPropertyExpression>(dag.getObjectPropertyDag(), reasoner.getObjectProperties());
+		this.dataPropertyDAG = new EquivalencesDAGImpl<DataPropertyExpression>(dag.getDataPropertyDag(), reasoner.getDataProperties());
+		this.classDAG = new EquivalencesDAGImpl<ClassExpression>(dag.getClassDag(), reasoner.getClasses());		
+		this.dataRangeDAG = new EquivalencesDAGImpl<DataRangeExpression>(dag.getDataRangeDag(), reasoner.getDataRanges());		
 	}
 
 	
@@ -70,9 +78,20 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<Property> getProperties() {
-		return propertyDAG;
+	public EquivalencesDAG<ObjectPropertyExpression> getObjectProperties() {
+		return objectPropertyDAG;
 	}
+	
+	/**
+	 * Return the DAG of properties
+	 * 
+	 * @return DAG 
+	 */
+
+	public EquivalencesDAG<DataPropertyExpression> getDataProperties() {
+		return dataPropertyDAG;
+	}
+
 
 	/**
 	 * Return the DAG of classes
@@ -80,8 +99,12 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<BasicClassDescription> getClasses() {
+	public EquivalencesDAG<ClassExpression> getClasses() {
 		return classDAG;
+	}
+
+	public EquivalencesDAG<DataRangeExpression> getDataRanges() {
+		return dataRangeDAG;
 	}
 
 	/**
@@ -208,5 +231,24 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 			// TODO Auto-generated method stub
 			return null;
 		}
+	}
+
+	@Override
+	public OClass getClassRepresentative(OClass p) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public ObjectPropertyExpression getObjectPropertyRepresentative(ObjectPropertyExpression p) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public DataPropertyExpression getDataPropertyRepresentative(DataPropertyExpression p) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

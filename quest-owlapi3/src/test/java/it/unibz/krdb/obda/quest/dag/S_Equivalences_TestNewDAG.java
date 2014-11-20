@@ -21,12 +21,12 @@ package it.unibz.krdb.obda.quest.dag;
  */
 
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.ArrayList;
@@ -107,25 +107,25 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 			
 			log.debug("Input number {}", i+1 );
 			log.info("First graph {}", reasoner.getClassGraph());
-			log.info("First graph {}", reasoner.getPropertyGraph());
+			log.info("First graph {}", reasoner.getObjectPropertyGraph());
 			log.info("Second dag {}", reasoner);
 
 			assertTrue(testDescendants(graphReasoner.getClasses(), reasoner.getClasses()));
-			assertTrue(testDescendants(graphReasoner.getProperties(), reasoner.getProperties()));
+			assertTrue(testDescendants(graphReasoner.getObjectProperties(), reasoner.getObjectProperties()));
 			assertTrue(testDescendants(reasoner.getClasses(), graphReasoner.getClasses()));
-			assertTrue(testDescendants(reasoner.getProperties(), graphReasoner.getProperties()));
+			assertTrue(testDescendants(reasoner.getObjectProperties(), graphReasoner.getObjectProperties()));
 			assertTrue(testChildren(graphReasoner.getClasses(), reasoner.getClasses()));
-			assertTrue(testChildren(graphReasoner.getProperties(), reasoner.getProperties()));
+			assertTrue(testChildren(graphReasoner.getObjectProperties(), reasoner.getObjectProperties()));
 			assertTrue(testChildren(reasoner.getClasses(), graphReasoner.getClasses()));
-			assertTrue(testChildren(reasoner.getProperties(), graphReasoner.getProperties()));
+			assertTrue(testChildren(reasoner.getObjectProperties(), graphReasoner.getObjectProperties()));
 			assertTrue(testAncestors(graphReasoner.getClasses(), reasoner.getClasses()));
-			assertTrue(testAncestors(graphReasoner.getProperties(), reasoner.getProperties()));
+			assertTrue(testAncestors(graphReasoner.getObjectProperties(), reasoner.getObjectProperties()));
 			assertTrue(testAncestors(reasoner.getClasses(), graphReasoner.getClasses()));
-			assertTrue(testAncestors(reasoner.getProperties(), graphReasoner.getProperties()));
+			assertTrue(testAncestors(reasoner.getObjectProperties(), graphReasoner.getObjectProperties()));
 			assertTrue(testParents(graphReasoner.getClasses(), reasoner.getClasses()));
-			assertTrue(testParents(graphReasoner.getProperties(), reasoner.getProperties()));
+			assertTrue(testParents(graphReasoner.getObjectProperties(), reasoner.getObjectProperties()));
 			assertTrue(testParents(reasoner.getClasses(), graphReasoner.getClasses()));
-			assertTrue(testParents(reasoner.getProperties(), graphReasoner.getProperties()));
+			assertTrue(testParents(reasoner.getObjectProperties(), graphReasoner.getObjectProperties()));
 			assertTrue(checkVertexReduction(graphReasoner, reasoner));
 			assertTrue(checkEdgeReduction(graphReasoner, reasoner));
 
@@ -221,12 +221,18 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 
 		Set<Description> set2 = new HashSet<Description>();
 		
-		for (Equivalences<Property> equivalents : d2.getProperties()) {
+		for (Equivalences<ObjectPropertyExpression> equivalents : d2.getObjectProperties()) {
 			numberEquivalents += equivalents.size()-1;
 			set2.addAll(equivalents.getMembers());	
 		}
 		
-		for (Equivalences<BasicClassDescription> equivalents : d2.getClasses()) {
+		for (Equivalences<DataPropertyExpression> equivalents : d2.getDataProperties()) {
+			numberEquivalents += equivalents.size()-1;
+			set2.addAll(equivalents.getMembers());	
+		}
+		
+		
+		for (Equivalences<ClassExpression> equivalents : d2.getClasses()) {
 			numberEquivalents += equivalents.size()-1;
 			set2.addAll(equivalents.getMembers());				
 		}
@@ -247,12 +253,12 @@ public class S_Equivalences_TestNewDAG extends TestCase{
 		//number of edges between the equivalent nodes
 		int numberEquivalents=0;
 
-		for (Equivalences<Property> equivalents : d2.getProperties())
+		for (Equivalences<ObjectPropertyExpression> equivalents : d2.getObjectProperties())
 			//two nodes have two edges, three nodes have three edges...
 			if(equivalents.size() >= 2)
 				numberEquivalents += equivalents.size();
 		
-		for (Equivalences<BasicClassDescription> equivalents : d2.getClasses())
+		for (Equivalences<ClassExpression> equivalents : d2.getClasses())
 			//two nodes have two edges, three nodes have three edges...
 			if(equivalents.size() >= 2)
 				numberEquivalents += equivalents.size();

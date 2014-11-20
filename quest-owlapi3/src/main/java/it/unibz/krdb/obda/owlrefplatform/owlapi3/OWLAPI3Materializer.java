@@ -30,8 +30,8 @@ import java.util.Iterator;
 
 public class OWLAPI3Materializer {
 
-	private Iterator<Assertion> assertions = null;
-	private QuestMaterializer materializer;
+	private final Iterator<Assertion> assertions;
+	private final QuestMaterializer materializer;
 	
 	public OWLAPI3Materializer(OBDAModel model) throws Exception {
 		 this(model, null);
@@ -50,12 +50,14 @@ public class OWLAPI3Materializer {
 		materializer.disconnect();
 	}
 	
-	public long getTriplesCount()
-	{ try {
-		return materializer.getTriplesCount();
-	} catch (Exception e) {
-		e.printStackTrace();
-	}return -1;
+	public long getTriplesCount() { 
+		try {
+			return materializer.getTriplesCount();
+		} 
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
 	}
 
 	public int getVocabularySize() {

@@ -26,25 +26,26 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.EquivalenceMap;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Iterator;
 
 public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 
 	private final Iterator<Assertion> originalIterator;
-	private final EquivalenceMap equivalenceMap;
+	private final TBoxReasoner reasoner;
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();	
 	
-	public EquivalentTriplePredicateIterator(Iterator<Assertion> iterator, EquivalenceMap equivalences) {
+	public EquivalentTriplePredicateIterator(Iterator<Assertion> iterator, TBoxReasoner reasoner) {
 		originalIterator = iterator;
-		equivalenceMap = equivalences;
+		this.reasoner = reasoner;
 	}
 	
 	@Override
@@ -68,40 +69,33 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 	private Assertion getNormal(Assertion assertion) {
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
-			Predicate concept = ca.getConcept();
-			OClass description = equivalenceMap.getClassRepresentative(concept);
+			OClass description = reasoner.getClassRepresentative(ca.getConcept());
 			
 			if (description != null) {
-				ObjectConstant object = ca.getObject();
-				return ofac.createClassAssertion(description.getPredicate(), object);
+				ObjectConstant object = ca.getIndividual();
+				return ofac.createClassAssertion(description, object);
 			}			
 		} 
 		else if (assertion instanceof ObjectPropertyAssertion) {
 			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
-			Predicate role = opa.getRole();
-			Property property = equivalenceMap.getPropertyRepresentative(role);
+			ObjectPropertyExpression property = reasoner.getObjectPropertyRepresentative(opa.getProperty());
 			
 			if (property != null) {
-				ObjectConstant object1 = opa.getFirstObject();
-				ObjectConstant object2 = opa.getSecondObject();
-				if (property.isInverse()) {
-					return ofac.createObjectPropertyAssertion(property.getPredicate(), object2, object1);
-				} else {
-					return ofac.createObjectPropertyAssertion(property.getPredicate(), object1, object2);
-				}
+				ObjectConstant object1 = opa.getSubject();
+				ObjectConstant object2 = opa.getObject();
+				return ofac.createObjectPropertyAssertion(property, object1, object2);
 			}
 		} 
 		else if (assertion instanceof DataPropertyAssertion) {
-			DataPropertyAssertion dpa = (DataPropertyAssertion) assertion;
-			Predicate attribute = dpa.getAttribute();
-			Property property = equivalenceMap.getPropertyRepresentative(attribute);
+			DataPropertyAssertion opa = (DataPropertyAssertion) assertion;
+			DataPropertyExpression property = reasoner.getDataPropertyRepresentative(opa.getProperty());
 			
 			if (property != null) {
-				ObjectConstant object = dpa.getObject();
-				ValueConstant constant = dpa.getValue();
-				return ofac.createDataPropertyAssertion(property.getPredicate(), object, constant);
+				ObjectConstant object1 = opa.getSubject();
+				ValueConstant constant = opa.getValue();
+				return ofac.createDataPropertyAssertion(property, object1, constant);					
 			}
-		}
+		} 
 		return assertion;
 	}
 }

@@ -25,10 +25,9 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
@@ -127,13 +126,14 @@ public class QuestOWLMaterializerTest extends TestCase {
 			int objAss = 0;
 			while (iterator.hasNext()) {
 				Assertion assertion = iterator.next();
-				if (assertion instanceof ClassAssertion) {
+				if (assertion instanceof ClassAssertion) 
 					classAss++;
-				} else if (assertion instanceof DataPropertyAssertion) {
-					propAss++;
-				} else if (assertion instanceof ObjectPropertyAssertion) {
+				
+				else if (assertion instanceof ObjectPropertyAssertion) 
 					objAss++;
-				}
+				
+				else // DataPropertyAssertion
+					propAss++;
 			}
 			Assert.assertEquals(3, classAss); //3 data rows for T1
 			Assert.assertEquals(21, propAss); //7 tables * 3 data rows each T2-T8
@@ -153,8 +153,10 @@ public class QuestOWLMaterializerTest extends TestCase {
 			File fo = new File("src/test/resources/test/materializer/MaterializeTest.owl");
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLOntology owl_onto = manager.loadOntologyFromOntologyDocument(fo);
-			Ontology onto =  new OWLAPI3Translator().translate(owl_onto);
-			System.out.println(onto.getAssertions());
+			Ontology onto =  OWLAPI3TranslatorUtility.translate(owl_onto);
+			System.out.println(onto.getSubClassAxioms());
+			System.out.println(onto.getSubObjectPropertyAxioms());
+			System.out.println(onto.getSubDataPropertyAxioms());
 			
 			QuestMaterializer mat = new QuestMaterializer(model, onto, prefs);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
@@ -163,13 +165,14 @@ public class QuestOWLMaterializerTest extends TestCase {
 			int objAss = 0;
 			while (iterator.hasNext()) {
 				Assertion assertion = iterator.next();
-				if (assertion instanceof ClassAssertion) {
+				if (assertion instanceof ClassAssertion) 
 					classAss++;
-				} else if (assertion instanceof DataPropertyAssertion) {
-					propAss++;
-				} else if (assertion instanceof ObjectPropertyAssertion) {
+	
+				else if (assertion instanceof ObjectPropertyAssertion) 
 					objAss++;
-				}
+				
+				else // DataPropertyAssertion
+					propAss++;
 			}
 			Assert.assertEquals(6, classAss); //3 data rows x2 for subclass prop
 			Assert.assertEquals(42, propAss); //8 tables * 3 data rows each x2 for subclass

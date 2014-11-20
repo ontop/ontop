@@ -1,27 +1,8 @@
-// $ANTLR 3.5.1 /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g 2014-10-04 10:39:14
+// $ANTLR 3.5.1 /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g 2014-10-07 15:46:29
 
 package it.unibz.krdb.obda.parser;
 
-/*
- * #%L
- * ontop-obdalib-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
@@ -35,6 +16,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+
 
 //import java.net.URI;
 import java.util.ArrayList;
@@ -54,8 +36,6 @@ import org.antlr.runtime.ParserRuleReturnScope;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.TokenStream;
-
-
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 
@@ -65,11 +45,12 @@ import org.openrdf.model.impl.URIImpl;
 
 
 import org.antlr.runtime.*;
+
 import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
 
-@SuppressWarnings({"all", "warnings", "unchecked"})
+@SuppressWarnings("all")
 public class TurtleParser extends Parser {
 	public static final String[] tokenNames = new String[] {
 		"<invalid>", "<EOR>", "<DOWN>", "<UP>", "ALPHA", "ALPHANUM", "AMPERSAND", 
@@ -192,6 +173,7 @@ public class TurtleParser extends Parser {
 
 	/** A factory to construct the predicates and terms */
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	private String error = "";
 
@@ -280,7 +262,7 @@ public class TurtleParser extends Parser {
 
 			      int arity = variableSet.size();
 			      List<Term> distinguishVariables = new ArrayList<Term>(variableSet);
-			      Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
+			      Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
 			      
 			      // Create a new rule
 			      List<Function> triples = t1;
@@ -671,7 +653,7 @@ public class TurtleParser extends Parser {
 			          Predicate predicate = dfac.getClassPredicate(c.getURI());
 			          atom = dfac.getFunction(predicate, subject);
 			        } else {
-			          Predicate predicate = dfac.getPredicate(v1.toString(), 2, null); // the data type cannot be determined here!
+			          Predicate predicate = dfac.getPredicate(v1.toString(), 2); // the data type cannot be determined here!
 			          atom = dfac.getFunction(predicate, subject, object);
 			        }
 			        value.add(atom);
@@ -707,7 +689,7 @@ public class TurtleParser extends Parser {
 					          Predicate predicate = dfac.getClassPredicate(c.getURI());
 					          atom = dfac.getFunction(predicate, subject);
 					        } else {
-					          Predicate predicate = dfac.getPredicate(v2.toString(), 2, null); // the data type cannot be determined here!
+					          Predicate predicate = dfac.getPredicate(v2.toString(), 2); // the data type cannot be determined here!
 					          atom = dfac.getFunction(predicate, subject, object);
 					        }
 					        value.add(atom);
@@ -1660,7 +1642,7 @@ public class TurtleParser extends Parser {
 					state._fsp--;
 
 
-					      Predicate functionSymbol = dfac.getDataTypePredicateLiteralLang();
+					      Predicate functionSymbol = dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG);
 					      Variable var = variable26;
 					      Term lang = language27;   
 					      value = dfac.getFunction(functionSymbol, var, lang);
@@ -1683,21 +1665,17 @@ public class TurtleParser extends Parser {
 					      Variable var = variable28;
 					      String functionName = resource29.toString();
 					      Predicate functionSymbol = null;
-					      if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-					    	functionSymbol = dfac.getDataTypePredicateLiteral();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
-					    	functionSymbol = dfac.getDataTypePredicateString();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI) || functionName.equals(OBDAVocabulary.XSD_INT_URI)) {
-					     	functionSymbol = dfac.getDataTypePredicateInteger();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-					    	functionSymbol = dfac.getDataTypePredicateDecimal();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-					    	functionSymbol = dfac.getDataTypePredicateDouble();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-					    	functionSymbol = dfac.getDataTypePredicateDateTime();
-					      } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-					    	functionSymbol = dfac.getDataTypePredicateBoolean();
-					      } else {
+					      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+					      // R: not sute why such a transformation is needed -- there was nothing like this below
+					      if (type == COL_TYPE.INT)
+					    	  type = COL_TYPE.INTEGER;
+					      // R: these are the only types that were listed
+					      if (type == COL_TYPE.LITERAL || type == COL_TYPE.STRING || type == COL_TYPE.INTEGER ||
+					    		  type == COL_TYPE.LONG || type == COL_TYPE.DECIMAL || type == COL_TYPE.DOUBLE ||
+					    		  type == COL_TYPE.DATETIME || type == COL_TYPE.BOOLEAN) {
+					    	  functionSymbol = dtfac.getTypePredicate(type);
+					      }
+					      else {
 					        throw new RecognitionException();
 					      }
 					      value = dfac.getFunction(functionSymbol, var);
@@ -1721,7 +1699,7 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "language"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:366:1: language returns [Term value] : ( languageTag | variable );
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:368:1: language returns [Term value] : ( languageTag | variable );
 	public final Term language() throws RecognitionException {
 		Term value = null;
 
@@ -1730,7 +1708,7 @@ public class TurtleParser extends Parser {
 		Variable variable31 =null;
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:367:3: ( languageTag | variable )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:369:3: ( languageTag | variable )
 			int alt14=2;
 			int LA14_0 = input.LA(1);
 			if ( (LA14_0==VARNAME) ) {
@@ -1748,7 +1726,7 @@ public class TurtleParser extends Parser {
 
 			switch (alt14) {
 				case 1 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:367:5: languageTag
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:369:5: languageTag
 					{
 					pushFollow(FOLLOW_languageTag_in_language642);
 					languageTag30=languageTag();
@@ -1760,7 +1738,7 @@ public class TurtleParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:370:5: variable
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:372:5: variable
 					{
 					pushFollow(FOLLOW_variable_in_language650);
 					variable31=variable();
@@ -1788,7 +1766,7 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "uriTemplateFunction"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:375:1: uriTemplateFunction returns [Function value] : STRING_WITH_TEMPLATE_SIGN ;
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:377:1: uriTemplateFunction returns [Function value] : STRING_WITH_TEMPLATE_SIGN ;
 	public final Function uriTemplateFunction() throws RecognitionException {
 		Function value = null;
 
@@ -1799,8 +1777,8 @@ public class TurtleParser extends Parser {
 		  List<Term> terms = new ArrayList<Term>();
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:379:3: ( STRING_WITH_TEMPLATE_SIGN )
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:379:5: STRING_WITH_TEMPLATE_SIGN
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:381:3: ( STRING_WITH_TEMPLATE_SIGN )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:381:5: STRING_WITH_TEMPLATE_SIGN
 			{
 			STRING_WITH_TEMPLATE_SIGN32=(Token)match(input,STRING_WITH_TEMPLATE_SIGN,FOLLOW_STRING_WITH_TEMPLATE_SIGN_in_uriTemplateFunction674); 
 
@@ -1875,7 +1853,7 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "terms"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:436:1: terms returns [Vector<Term> value] : t1= term ( COMMA t2= term )* ;
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:438:1: terms returns [Vector<Term> value] : t1= term ( COMMA t2= term )* ;
 	public final Vector<Term> terms() throws RecognitionException {
 		Vector<Term> value = null;
 
@@ -1887,15 +1865,15 @@ public class TurtleParser extends Parser {
 		  value = new Vector<Term>();
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:440:3: (t1= term ( COMMA t2= term )* )
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:440:5: t1= term ( COMMA t2= term )*
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:442:3: (t1= term ( COMMA t2= term )* )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:442:5: t1= term ( COMMA t2= term )*
 			{
 			pushFollow(FOLLOW_term_in_terms700);
 			t1=term();
 			state._fsp--;
 
 			 value.add(t1); 
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:440:40: ( COMMA t2= term )*
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:442:40: ( COMMA t2= term )*
 			loop15:
 			while (true) {
 				int alt15=2;
@@ -1906,7 +1884,7 @@ public class TurtleParser extends Parser {
 
 				switch (alt15) {
 				case 1 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:440:41: COMMA t2= term
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:442:41: COMMA t2= term
 					{
 					match(input,COMMA,FOLLOW_COMMA_in_terms705); 
 					pushFollow(FOLLOW_term_in_terms709);
@@ -1939,7 +1917,7 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "term"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:443:1: term returns [Term value] : ( function | variable | literal );
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:445:1: term returns [Term value] : ( function | variable | literal );
 	public final Term term() throws RecognitionException {
 		Term value = null;
 
@@ -1949,7 +1927,7 @@ public class TurtleParser extends Parser {
 		Term literal35 =null;
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:444:3: ( function | variable | literal )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:446:3: ( function | variable | literal )
 			int alt16=3;
 			switch ( input.LA(1) ) {
 			case LESS:
@@ -1987,7 +1965,7 @@ public class TurtleParser extends Parser {
 			}
 			switch (alt16) {
 				case 1 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:444:5: function
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:446:5: function
 					{
 					pushFollow(FOLLOW_function_in_term730);
 					function33=function();
@@ -1997,7 +1975,7 @@ public class TurtleParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:445:5: variable
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:447:5: variable
 					{
 					pushFollow(FOLLOW_variable_in_term738);
 					variable34=variable();
@@ -2007,7 +1985,7 @@ public class TurtleParser extends Parser {
 					}
 					break;
 				case 3 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:446:5: literal
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:448:5: literal
 					{
 					pushFollow(FOLLOW_literal_in_term746);
 					literal35=literal();
@@ -2033,7 +2011,7 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "literal"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:449:1: literal returns [Term value] : ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral );
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:451:1: literal returns [Term value] : ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral );
 	public final Term literal() throws RecognitionException {
 		Term value = null;
 
@@ -2045,7 +2023,7 @@ public class TurtleParser extends Parser {
 		ValueConstant booleanLiteral40 =null;
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:450:3: ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:452:3: ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral )
 			int alt18=4;
 			switch ( input.LA(1) ) {
 			case STRING_WITH_QUOTE_DOUBLE:
@@ -2098,13 +2076,13 @@ public class TurtleParser extends Parser {
 			}
 			switch (alt18) {
 				case 1 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:450:5: stringLiteral ( AT language )?
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:452:5: stringLiteral ( AT language )?
 					{
 					pushFollow(FOLLOW_stringLiteral_in_literal765);
 					stringLiteral36=stringLiteral();
 					state._fsp--;
 
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:450:19: ( AT language )?
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:452:19: ( AT language )?
 					int alt17=2;
 					int LA17_0 = input.LA(1);
 					if ( (LA17_0==AT) ) {
@@ -2112,7 +2090,7 @@ public class TurtleParser extends Parser {
 					}
 					switch (alt17) {
 						case 1 :
-							// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:450:20: AT language
+							// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:452:20: AT language
 							{
 							match(input,AT,FOLLOW_AT_in_literal768); 
 							pushFollow(FOLLOW_language_in_literal770);
@@ -2128,15 +2106,15 @@ public class TurtleParser extends Parser {
 					       ValueConstant constant = stringLiteral36;
 					       Term lang = language37;
 					       if (lang != null) {
-					         value = dfac.getFunction(dfac.getDataTypePredicateLiteralLang(), constant, lang);
+					         value = dfac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG), constant, lang);
 					       } else {
-					       	 value = dfac.getFunction(dfac.getDataTypePredicateLiteral(), constant);
+					       	 value = dfac.getFunction(dtfac.getTypePredicate(COL_TYPE.LITERAL), constant);
 					       }
 					    
 					}
 					break;
 				case 2 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:459:5: dataTypeString
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:461:5: dataTypeString
 					{
 					pushFollow(FOLLOW_dataTypeString_in_literal780);
 					dataTypeString38=dataTypeString();
@@ -2146,7 +2124,7 @@ public class TurtleParser extends Parser {
 					}
 					break;
 				case 3 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:460:5: numericLiteral
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:462:5: numericLiteral
 					{
 					pushFollow(FOLLOW_numericLiteral_in_literal788);
 					numericLiteral39=numericLiteral();
@@ -2156,7 +2134,7 @@ public class TurtleParser extends Parser {
 					}
 					break;
 				case 4 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:461:5: booleanLiteral
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:463:5: booleanLiteral
 					{
 					pushFollow(FOLLOW_booleanLiteral_in_literal796);
 					booleanLiteral40=booleanLiteral();
@@ -2182,7 +2160,7 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "stringLiteral"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:464:1: stringLiteral returns [ValueConstant value] : STRING_WITH_QUOTE_DOUBLE ;
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:466:1: stringLiteral returns [ValueConstant value] : STRING_WITH_QUOTE_DOUBLE ;
 	public final ValueConstant stringLiteral() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2190,8 +2168,8 @@ public class TurtleParser extends Parser {
 		Token STRING_WITH_QUOTE_DOUBLE41=null;
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:465:3: ( STRING_WITH_QUOTE_DOUBLE )
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:465:5: STRING_WITH_QUOTE_DOUBLE
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:467:3: ( STRING_WITH_QUOTE_DOUBLE )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:467:5: STRING_WITH_QUOTE_DOUBLE
 			{
 			STRING_WITH_QUOTE_DOUBLE41=(Token)match(input,STRING_WITH_QUOTE_DOUBLE,FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_stringLiteral815); 
 
@@ -2215,7 +2193,7 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "dataTypeString"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:471:1: dataTypeString returns [Term value] : stringLiteral REFERENCE resource ;
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:473:1: dataTypeString returns [Term value] : stringLiteral REFERENCE resource ;
 	public final Term dataTypeString() throws RecognitionException {
 		Term value = null;
 
@@ -2224,8 +2202,8 @@ public class TurtleParser extends Parser {
 		URI resource43 =null;
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:472:3: ( stringLiteral REFERENCE resource )
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:472:6: stringLiteral REFERENCE resource
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:474:3: ( stringLiteral REFERENCE resource )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:474:6: stringLiteral REFERENCE resource
 			{
 			pushFollow(FOLLOW_stringLiteral_in_dataTypeString835);
 			stringLiteral42=stringLiteral();
@@ -2239,24 +2217,20 @@ public class TurtleParser extends Parser {
 
 			      ValueConstant constant = stringLiteral42;
 			      String functionName = resource43.toString();
+			      
 			      Predicate functionSymbol = null;
-			      if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateLiteral();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateString();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
-			     	functionSymbol = dfac.getDataTypePredicateInteger();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateDecimal();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateDouble();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateDateTime();
-			      } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-			    	functionSymbol = dfac.getDataTypePredicateBoolean();
-			      } else {
-			        throw new RuntimeException("Unknown datatype: " + functionName);
+			      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+			      
+			      // R: these are the only types that were listed
+			      if (type == COL_TYPE.LITERAL || type == COL_TYPE.STRING || type == COL_TYPE.INTEGER ||
+			    		  type == COL_TYPE.LONG || type == COL_TYPE.DECIMAL || type == COL_TYPE.DOUBLE ||
+			    		  type == COL_TYPE.DATETIME || type == COL_TYPE.BOOLEAN) {
+			    	  functionSymbol = dtfac.getTypePredicate(type);
 			      }
+			      else {
+				        throw new RuntimeException("Unknown datatype: " + functionName);
+			      }
+			      
 			      value = dfac.getFunction(functionSymbol, constant);
 			    
 			}
@@ -2276,7 +2250,7 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "numericLiteral"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:497:1: numericLiteral returns [ValueConstant value] : ( numericUnsigned | numericPositive | numericNegative );
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:501:1: numericLiteral returns [ValueConstant value] : ( numericUnsigned | numericPositive | numericNegative );
 	public final ValueConstant numericLiteral() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2286,7 +2260,7 @@ public class TurtleParser extends Parser {
 		ValueConstant numericNegative46 =null;
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:498:3: ( numericUnsigned | numericPositive | numericNegative )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:502:3: ( numericUnsigned | numericPositive | numericNegative )
 			int alt19=3;
 			switch ( input.LA(1) ) {
 			case DECIMAL:
@@ -2317,7 +2291,7 @@ public class TurtleParser extends Parser {
 			}
 			switch (alt19) {
 				case 1 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:498:5: numericUnsigned
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:502:5: numericUnsigned
 					{
 					pushFollow(FOLLOW_numericUnsigned_in_numericLiteral858);
 					numericUnsigned44=numericUnsigned();
@@ -2327,7 +2301,7 @@ public class TurtleParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:499:5: numericPositive
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:503:5: numericPositive
 					{
 					pushFollow(FOLLOW_numericPositive_in_numericLiteral866);
 					numericPositive45=numericPositive();
@@ -2337,7 +2311,7 @@ public class TurtleParser extends Parser {
 					}
 					break;
 				case 3 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:500:5: numericNegative
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:504:5: numericNegative
 					{
 					pushFollow(FOLLOW_numericNegative_in_numericLiteral874);
 					numericNegative46=numericNegative();
@@ -2363,11 +2337,11 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "nodeID"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:503:1: nodeID : BLANK_PREFIX name ;
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:507:1: nodeID : BLANK_PREFIX name ;
 	public final void nodeID() throws RecognitionException {
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:504:3: ( BLANK_PREFIX name )
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:504:5: BLANK_PREFIX name
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:508:3: ( BLANK_PREFIX name )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:508:5: BLANK_PREFIX name
 			{
 			match(input,BLANK_PREFIX,FOLLOW_BLANK_PREFIX_in_nodeID889); 
 			pushFollow(FOLLOW_name_in_nodeID891);
@@ -2393,14 +2367,14 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "relativeURI"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:507:1: relativeURI : STRING_URI ;
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:511:1: relativeURI : STRING_URI ;
 	public final TurtleParser.relativeURI_return relativeURI() throws RecognitionException {
 		TurtleParser.relativeURI_return retval = new TurtleParser.relativeURI_return();
 		retval.start = input.LT(1);
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:508:3: ( STRING_URI )
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:508:5: STRING_URI
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:512:3: ( STRING_URI )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:512:5: STRING_URI
 			{
 			match(input,STRING_URI,FOLLOW_STRING_URI_in_relativeURI904); 
 			}
@@ -2425,14 +2399,14 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "namespace"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:511:1: namespace : NAMESPACE ;
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:515:1: namespace : NAMESPACE ;
 	public final TurtleParser.namespace_return namespace() throws RecognitionException {
 		TurtleParser.namespace_return retval = new TurtleParser.namespace_return();
 		retval.start = input.LT(1);
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:512:3: ( NAMESPACE )
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:512:5: NAMESPACE
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:516:3: ( NAMESPACE )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:516:5: NAMESPACE
 			{
 			match(input,NAMESPACE,FOLLOW_NAMESPACE_in_namespace917); 
 			}
@@ -2457,14 +2431,14 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "defaultNamespace"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:515:1: defaultNamespace : COLON ;
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:519:1: defaultNamespace : COLON ;
 	public final TurtleParser.defaultNamespace_return defaultNamespace() throws RecognitionException {
 		TurtleParser.defaultNamespace_return retval = new TurtleParser.defaultNamespace_return();
 		retval.start = input.LT(1);
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:516:3: ( COLON )
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:516:5: COLON
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:520:3: ( COLON )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:520:5: COLON
 			{
 			match(input,COLON,FOLLOW_COLON_in_defaultNamespace932); 
 			}
@@ -2489,14 +2463,14 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "name"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:519:1: name : VARNAME ;
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:523:1: name : VARNAME ;
 	public final TurtleParser.name_return name() throws RecognitionException {
 		TurtleParser.name_return retval = new TurtleParser.name_return();
 		retval.start = input.LT(1);
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:520:3: ( VARNAME )
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:520:5: VARNAME
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:524:3: ( VARNAME )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:524:5: VARNAME
 			{
 			match(input,VARNAME,FOLLOW_VARNAME_in_name945); 
 			}
@@ -2521,14 +2495,14 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "languageTag"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:523:1: languageTag : VARNAME ;
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:527:1: languageTag : VARNAME ;
 	public final TurtleParser.languageTag_return languageTag() throws RecognitionException {
 		TurtleParser.languageTag_return retval = new TurtleParser.languageTag_return();
 		retval.start = input.LT(1);
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:524:3: ( VARNAME )
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:524:5: VARNAME
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:528:3: ( VARNAME )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:528:5: VARNAME
 			{
 			match(input,VARNAME,FOLLOW_VARNAME_in_languageTag958); 
 			}
@@ -2550,7 +2524,7 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "booleanLiteral"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:527:1: booleanLiteral returns [ValueConstant value] : ( TRUE | FALSE );
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:531:1: booleanLiteral returns [ValueConstant value] : ( TRUE | FALSE );
 	public final ValueConstant booleanLiteral() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2559,7 +2533,7 @@ public class TurtleParser extends Parser {
 		Token FALSE48=null;
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:528:3: ( TRUE | FALSE )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:532:3: ( TRUE | FALSE )
 			int alt20=2;
 			int LA20_0 = input.LA(1);
 			if ( (LA20_0==TRUE) ) {
@@ -2577,14 +2551,14 @@ public class TurtleParser extends Parser {
 
 			switch (alt20) {
 				case 1 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:528:5: TRUE
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:532:5: TRUE
 					{
 					TRUE47=(Token)match(input,TRUE,FOLLOW_TRUE_in_booleanLiteral975); 
 					 value = dfac.getConstantLiteral((TRUE47!=null?TRUE47.getText():null), COL_TYPE.BOOLEAN); 
 					}
 					break;
 				case 2 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:529:5: FALSE
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:533:5: FALSE
 					{
 					FALSE48=(Token)match(input,FALSE,FOLLOW_FALSE_in_booleanLiteral984); 
 					 value = dfac.getConstantLiteral((FALSE48!=null?FALSE48.getText():null), COL_TYPE.BOOLEAN); 
@@ -2607,7 +2581,7 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "numericUnsigned"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:532:1: numericUnsigned returns [ValueConstant value] : ( INTEGER | DOUBLE | DECIMAL );
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:536:1: numericUnsigned returns [ValueConstant value] : ( INTEGER | DOUBLE | DECIMAL );
 	public final ValueConstant numericUnsigned() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2617,7 +2591,7 @@ public class TurtleParser extends Parser {
 		Token DECIMAL51=null;
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:533:3: ( INTEGER | DOUBLE | DECIMAL )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:537:3: ( INTEGER | DOUBLE | DECIMAL )
 			int alt21=3;
 			switch ( input.LA(1) ) {
 			case INTEGER:
@@ -2642,21 +2616,21 @@ public class TurtleParser extends Parser {
 			}
 			switch (alt21) {
 				case 1 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:533:5: INTEGER
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:537:5: INTEGER
 					{
 					INTEGER49=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numericUnsigned1003); 
 					 value = dfac.getConstantLiteral((INTEGER49!=null?INTEGER49.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:534:5: DOUBLE
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:538:5: DOUBLE
 					{
 					DOUBLE50=(Token)match(input,DOUBLE,FOLLOW_DOUBLE_in_numericUnsigned1011); 
 					 value = dfac.getConstantLiteral((DOUBLE50!=null?DOUBLE50.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:535:5: DECIMAL
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:539:5: DECIMAL
 					{
 					DECIMAL51=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numericUnsigned1020); 
 					 value = dfac.getConstantLiteral((DECIMAL51!=null?DECIMAL51.getText():null), COL_TYPE.DECIMAL); 
@@ -2679,7 +2653,7 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "numericPositive"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:538:1: numericPositive returns [ValueConstant value] : ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE );
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:542:1: numericPositive returns [ValueConstant value] : ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE );
 	public final ValueConstant numericPositive() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2689,7 +2663,7 @@ public class TurtleParser extends Parser {
 		Token DECIMAL_POSITIVE54=null;
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:539:3: ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:543:3: ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE )
 			int alt22=3;
 			switch ( input.LA(1) ) {
 			case INTEGER_POSITIVE:
@@ -2714,21 +2688,21 @@ public class TurtleParser extends Parser {
 			}
 			switch (alt22) {
 				case 1 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:539:5: INTEGER_POSITIVE
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:543:5: INTEGER_POSITIVE
 					{
 					INTEGER_POSITIVE52=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numericPositive1039); 
 					 value = dfac.getConstantLiteral((INTEGER_POSITIVE52!=null?INTEGER_POSITIVE52.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:540:5: DOUBLE_POSITIVE
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:544:5: DOUBLE_POSITIVE
 					{
 					DOUBLE_POSITIVE53=(Token)match(input,DOUBLE_POSITIVE,FOLLOW_DOUBLE_POSITIVE_in_numericPositive1047); 
 					 value = dfac.getConstantLiteral((DOUBLE_POSITIVE53!=null?DOUBLE_POSITIVE53.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:541:5: DECIMAL_POSITIVE
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:545:5: DECIMAL_POSITIVE
 					{
 					DECIMAL_POSITIVE54=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numericPositive1056); 
 					 value = dfac.getConstantLiteral((DECIMAL_POSITIVE54!=null?DECIMAL_POSITIVE54.getText():null), COL_TYPE.DECIMAL); 
@@ -2751,7 +2725,7 @@ public class TurtleParser extends Parser {
 
 
 	// $ANTLR start "numericNegative"
-	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:544:1: numericNegative returns [ValueConstant value] : ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE );
+	// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:548:1: numericNegative returns [ValueConstant value] : ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE );
 	public final ValueConstant numericNegative() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2761,7 +2735,7 @@ public class TurtleParser extends Parser {
 		Token DECIMAL_NEGATIVE57=null;
 
 		try {
-			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:545:3: ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE )
+			// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:549:3: ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE )
 			int alt23=3;
 			switch ( input.LA(1) ) {
 			case INTEGER_NEGATIVE:
@@ -2786,21 +2760,21 @@ public class TurtleParser extends Parser {
 			}
 			switch (alt23) {
 				case 1 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:545:5: INTEGER_NEGATIVE
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:549:5: INTEGER_NEGATIVE
 					{
 					INTEGER_NEGATIVE55=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numericNegative1075); 
 					 value = dfac.getConstantLiteral((INTEGER_NEGATIVE55!=null?INTEGER_NEGATIVE55.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:546:5: DOUBLE_NEGATIVE
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:550:5: DOUBLE_NEGATIVE
 					{
 					DOUBLE_NEGATIVE56=(Token)match(input,DOUBLE_NEGATIVE,FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1083); 
 					 value = dfac.getConstantLiteral((DOUBLE_NEGATIVE56!=null?DOUBLE_NEGATIVE56.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
-					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:547:5: DECIMAL_NEGATIVE
+					// /Users/Sarah/Projects/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/Turtle.g:551:5: DECIMAL_NEGATIVE
 					{
 					DECIMAL_NEGATIVE57=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1092); 
 					 value = dfac.getConstantLiteral((DECIMAL_NEGATIVE57!=null?DECIMAL_NEGATIVE57.getText():null), COL_TYPE.DECIMAL); 

@@ -20,25 +20,17 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.utils.TypeMapper;
+import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.Reference;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class DirectMappingAxiom {
 	protected DBMetadata metadata;
@@ -46,6 +38,8 @@ public class DirectMappingAxiom {
 	protected String SQLString;
 	protected String baseuri;
 	private OBDADataFactory df;
+	
+	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	public DirectMappingAxiom() {
 	}
@@ -169,18 +163,18 @@ public class DirectMappingAxiom {
 		
 		
 		//DataType Atoms
-		TypeMapper typeMapper = TypeMapper.getInstance();
+		JdbcTypeMapper typeMapper = df.getJdbcTypeMapper();
 		for(int i=0;i<table.getNumOfAttributes();i++){
 			Attribute att = table.getAttribute(i+1);
-			Predicate type = typeMapper.getPredicate(att.getType());
-			if (type.equals(OBDAVocabulary.RDFS_LITERAL)) {
+			Predicate.COL_TYPE type = typeMapper.getPredicate(att.getType());
+			if (type == COL_TYPE.LITERAL) {
 				Variable objV = df.getVariable(att.getName());
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, objV));
-			} else {
-				Function obj = df.getFunction(type,
-						df.getVariable(att.getName()));
+			} 
+			else {
+				Function obj = df.getFunction(dtfac.getTypePredicate(type), df.getVariable(att.getName()));
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, obj));

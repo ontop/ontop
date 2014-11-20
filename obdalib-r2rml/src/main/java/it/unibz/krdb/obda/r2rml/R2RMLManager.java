@@ -240,7 +240,7 @@ public class R2RMLManager {
 		}
 		int arity = vars.size();
 		List<Term> dvars = new ArrayList<Term>(vars);
-		Function head = fac.getFunction(fac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), dvars);
+		Function head = fac.getFunction(fac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), dvars);
 		return head;
 	}
 	

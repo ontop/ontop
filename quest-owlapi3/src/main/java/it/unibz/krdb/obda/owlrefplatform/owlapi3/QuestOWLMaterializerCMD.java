@@ -25,8 +25,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OBDAModelSynchronizer;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualIterator;
 
 import java.io.BufferedOutputStream;
@@ -79,31 +78,30 @@ public class QuestOWLMaterializerCMD {
 			}
 			writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
 			
-			OWLOntology ontology = null;
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			
-			if (owlfile != null) {
-			// Loading the OWL ontology from the file as with normal OWLReasoners
-				ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-			}
-			else {
-				ontology = manager.createOntology();
-			}
 			
 			OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 			OBDAModel obdaModel = fac.getOBDAModel();
 			ModelIOManager ioManager = new ModelIOManager(obdaModel);
 			ioManager.load(obdafile);
 
-			OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
-
+			OWLOntology ontology = null;
+			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLAPI3Materializer materializer = null;
+			
 			if (owlfile != null) {
-				Ontology onto =  new OWLAPI3Translator().translate(ontology);
+			// Loading the OWL ontology from the file as with normal OWLReasoners
+				ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+				Ontology onto =  OWLAPI3TranslatorUtility.translate(ontology);
+				obdaModel.declareAll(onto.getVocabulary());
 				materializer = new OWLAPI3Materializer(obdaModel, onto);
 			}
-			else
+			else {
+				ontology = manager.createOntology();
 				materializer = new OWLAPI3Materializer(obdaModel);
+			}
+			
+			//OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
+
 			QuestOWLIndividualIterator iterator = materializer.getIterator();
 	
 			while(iterator.hasNext()) 

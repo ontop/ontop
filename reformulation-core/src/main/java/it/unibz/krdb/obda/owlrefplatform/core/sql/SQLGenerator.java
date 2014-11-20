@@ -20,51 +20,30 @@ package it.unibz.krdb.obda.owlrefplatform.core.sql;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
-import it.unibz.krdb.obda.model.BNode;
-import it.unibz.krdb.obda.model.BooleanOperationPredicate;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.NumericalOperationPredicate;
-import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.URITemplatePredicate;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.owlrefplatform.core.Quest;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.model.impl.QuestTypeMapper;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
+import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 
-import java.sql.Types;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.openrdf.model.Literal;
-import org.slf4j.LoggerFactory;
+
+import java.sql.Types;
+import java.util.*;
 
 //import com.hp.hpl.jena.rdf.model.Literal;
 
@@ -115,7 +94,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private boolean isSI = false;
 	private SemanticIndexURIMap uriRefIds;
 	
-	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
+	private final QuestTypeMapper questTypeMapper = OBDADataFactoryImpl.getInstance().getQuestTypeMapper();
+	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqladapter) {
 		this.metadata = metadata;
@@ -208,7 +188,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 //			log.debug("Before pushing equalities: \n{}", cq);
 
-			DatalogNormalizer.enforceEqualities(cq, false);
+			EQNormalizer.enforceEqualities(cq);
 
 //			log.debug("Before folding Joins: \n{}", cq);
 
@@ -315,6 +295,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 				int type = getVariableDataType(term, index);
 				if (type == Types.INTEGER) return String.format("NOT %s > 0", column);
+                if (type == Types.BIGINT) return String.format("NOT %s > 0", column);
+                if (type == Types.FLOAT) return String.format("NOT %s > 0", column);
 				if (type == Types.DOUBLE) return String.format("NOT %s > 0", column);
 				if (type == Types.BOOLEAN) return String.format("NOT %s", column);
 				if (type == Types.VARCHAR) return String.format("NOT LENGTH(%s) > 0", column);
@@ -325,6 +307,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				//int type = 8;
 				int type = getVariableDataType(term, index);
 				if (type == Types.INTEGER) return String.format("%s > 0", column);
+                if (type == Types.BIGINT) return String.format("%s > 0", column);
+                if (type == Types.FLOAT) return String.format("%s > 0", column);
 				if (type == Types.DOUBLE) return String.format("%s > 0", column);
 				if (type == Types.BOOLEAN) return String.format("%s", column);
 				if (type == Types.VARCHAR) return String.format("LENGTH(%s) > 0", column);
@@ -692,20 +676,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return equalities;
 	}
 
+	
 	// return variable SQL data type
 	private int getVariableDataType (Term term, QueryAliasIndex idx) {
 		Function f = (Function) term;
 		if (f.isDataTypeFunction()) {
 			Predicate p = f.getFunctionSymbol();
-			if (p.toString() == OBDAVocabulary.XSD_BOOLEAN_URI) return Types.BOOLEAN;
-			if (p.toString() == OBDAVocabulary.XSD_INT_URI)  return Types.INTEGER;
-			if (p.toString() == OBDAVocabulary.XSD_INTEGER_URI)  return Types.INTEGER;
-			if (p.toString() == OBDAVocabulary.XSD_DOUBLE_URI) return Types.DOUBLE;
-			if (p.toString() == OBDAVocabulary.XSD_STRING_URI) return Types.VARCHAR;
-			if (p.toString() == OBDAVocabulary.RDFS_LITERAL_URI) return Types.VARCHAR;
+			Predicate.COL_TYPE type = dtfac.getDataType(p.toString());			
+			return OBDADataFactoryImpl.getInstance().getJdbcTypeMapper().getSQLType(type);
 		}
 		// Return varchar for unknown
-		return 12;
+		return Types.VARCHAR;
 	}
 
 	private String getWHERE(CQIE query, QueryAliasIndex index) {
@@ -846,15 +827,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return String.format(mainTemplate, mainColumn, sqladapter.sqlQuote(signature.get(hpos)));
 	}
 
+	
+	private static final String langStrForSELECT = "%s AS \"%sLang\"";
+	
 	private String getLangColumnForSELECT(Term ht, List<String> signature, int hpos, QueryAliasIndex index) {
 
-		String langStr = "%s AS \"%sLang\"";
 
 		if (ht instanceof Function) {
 			Function ov = (Function) ht;
 			Predicate function = ov.getFunctionSymbol();
 
-			if (function == OBDAVocabulary.RDFS_LITERAL || function == OBDAVocabulary.RDFS_LITERAL_LANG)
+			if (dtfac.isLiteral(function))
 				if (ov.getTerms().size() > 1) {
 				/*
 				 * Case for rdf:literal s with a language, we need to select 2
@@ -875,16 +858,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					lang = getSQLString(langTerm, index, false);
 				}
-				return (String.format(langStr, lang, signature.get(hpos)));
+				return (String.format(langStrForSELECT, lang, signature.get(hpos)));
 			}
 		}
-		return (String.format(langStr, "NULL", signature.get(hpos)));
+		return (String.format(langStrForSELECT, "NULL", signature.get(hpos)));
 
 	}
 
-	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
+	private static final String typeStrForSELECT = "%s AS \"%sQuestType\"";
+	
 
-		String typeStr = "%s AS \"%sQuestType\"";
+	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
+		int code;
 
 		if (ht instanceof Function) {
 			Function ov = (Function) ht;
@@ -898,38 +883,28 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * NOTE NULL is IDENTIFIER 0 in QuestResultSet do not USE for any 
 			 * type
 			 */
-			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-				return (String.format(typeStr, 9, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-				return (String.format(typeStr, 8, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DATE_URI)) {
-				return (String.format(typeStr, 10, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_TIME_URI)) {
-				return (String.format(typeStr, 11, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_YEAR_URI)) {
-				return (String.format(typeStr, 12, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-				return (String.format(typeStr, 5, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-				return (String.format(typeStr, 6, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
-				return (String.format(typeStr, 4, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_STRING_URI)) {
-				return (String.format(typeStr, 7, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-				return (String.format(typeStr, 3, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
-				return (String.format(typeStr, 1, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
-				return (String.format(typeStr, 2, signature.get(hpos)));
+			
+			if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
+                code = questTypeMapper.getQuestCode(COL_TYPE.OBJECT);
+			} 
+			else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
+                code = questTypeMapper.getQuestCode(COL_TYPE.BNODE);
 			}
-		} else if (ht instanceof URIConstant) {
-			return (String.format(typeStr, 1, signature.get(hpos)));
-		} else if (ht == OBDAVocabulary.NULL) {
-			return (String.format(typeStr, 0, signature.get(hpos)));
+			else {
+				Predicate.COL_TYPE type = dtfac.getDataType(functionString);
+				code = questTypeMapper.getQuestCode(type);
+			}
+		} 
+		else if (ht instanceof URIConstant) {
+            code = questTypeMapper.getQuestCode(COL_TYPE.OBJECT);
+		} 
+		else if (ht == OBDAVocabulary.NULL) {
+            code = questTypeMapper.getQuestCode(COL_TYPE.NULL);
 		}
-		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
-
+		else
+			throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
+		
+		return String.format(typeStrForSELECT, code, signature.get(hpos));
 	}
 
 	public String getSQLStringForTemplateFunction(Function ov, QueryAliasIndex index) {
@@ -1005,7 +980,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			if (ov.getTerms().size() > 1) {
 				int size = ov.getTerms().size();
-				if (pred == OBDAVocabulary.RDFS_LITERAL || pred == OBDAVocabulary.RDFS_LITERAL_LANG) {
+				if (dtfac.isLiteral(pred)) {
 					size--;
 				}
 				for (int termIndex = 1; termIndex < size; termIndex++) {
@@ -1040,7 +1015,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * The function is of the form uri(x), we need to simply return the
 			 * value of X
 			 */
-			return getSQLString(((Variable) t), index, false);
+			return sqladapter.sqlCast(getSQLString(((Variable) t), index, false), Types.VARCHAR);
 			
 		} else if (t instanceof URIConstant) {
 			/*
@@ -1228,7 +1203,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 					String column = getSQLString(term1, index, false);
 					int type = getVariableDataType(term1, index);
 					if (type == Types.INTEGER) return String.format("%s > 0", column);
+                    if (type == Types.BIGINT) return String.format("%s > 0", column);
 					if (type == Types.DOUBLE) return String.format("%s > 0", column);
+                    if (type == Types.FLOAT) return String.format("%s > 0", column);
 					if (type == Types.BOOLEAN) return String.format("%s", column);
 					if (type == Types.VARCHAR) return String.format("LENGTH(%s) > 0", column);
 					return "1";
@@ -1292,7 +1269,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				String datatype = ((Constant) function.getTerm(1)).getValue();
 				int sqlDatatype = -1;
-				if (datatype.equals(OBDAVocabulary.XSD_STRING_URI)) {
+				if (datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
 					sqlDatatype = Types.VARCHAR;
 				}
 				if (isStringColType(function, index)) {

@@ -26,38 +26,45 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.DatatypeFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 
 import java.util.LinkedList;
+
 import org.openrdf.model.vocabulary.XMLSchema;
 
 public class ABoxToFactRuleConverter {
 	private static final OBDADataFactory factory = OBDADataFactoryImpl.getInstance();
 
-	public static CQIE getRule(Assertion assertion) {
+	public static CQIE getRule(ClassAssertion ca) {
 		CQIE rule = null;
-		if (assertion instanceof ClassAssertion) {
-			ClassAssertion ca = (ClassAssertion) assertion;
-			ObjectConstant c = ca.getObject();
-			Predicate p = ca.getConcept();
-			Predicate urifuction = factory.getUriTemplatePredicate(1);
-			Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(c.getValue())));
-			rule = factory.getCQIE(head, new LinkedList<Function>());
-			// head = factory.getFunctionalTerm(p, c);
-		} else if (assertion instanceof ObjectPropertyAssertion) {
-			ObjectPropertyAssertion ca = (ObjectPropertyAssertion) assertion;
-			ObjectConstant s = ca.getFirstObject();
-			ObjectConstant o = ca.getSecondObject();
-			Predicate p = ca.getPredicate();
-			Predicate urifuction = factory.getUriTemplatePredicate(1);
-			Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(s.getValue())), factory.getFunction(urifuction, factory.getConstantLiteral(o.getValue())));
-			rule = factory.getCQIE(head, new LinkedList<Function>());
-		} else if (assertion instanceof DataPropertyAssertion) {
+		ObjectConstant c = ca.getIndividual();
+		Predicate p = ca.getConcept().getPredicate();
+		Predicate urifuction = factory.getUriTemplatePredicate(1);
+		Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(c.getValue())));
+		rule = factory.getCQIE(head, new LinkedList<Function>());
+		return rule;
+	}
+
+	public static CQIE getRule(DataPropertyAssertion da) {
+		// WE IGNORE DATA PROPERTY ASSERTIONS UNTIL THE NEXT RELEASE
+		return null;		
+	}
+	
+	public static CQIE getRule(ObjectPropertyAssertion pa) {
+		ObjectConstant s = pa.getSubject();
+		ObjectConstant o = pa.getObject();
+		Predicate p = pa.getProperty().getPredicate();
+		Predicate urifuction = factory.getUriTemplatePredicate(1);
+		Function head = factory.getFunction(p, factory.getFunction(urifuction, factory.getConstantLiteral(s.getValue())), factory.getFunction(urifuction, factory.getConstantLiteral(o.getValue())));
+		CQIE rule = factory.getCQIE(head, new LinkedList<Function>());
+		return rule;
+		
+//		else if (assertion instanceof DataPropertyAssertion) {
 			/* 
 			 * We ignore these for the moment until next release.
 			 */
@@ -70,23 +77,31 @@ public class ABoxToFactRuleConverter {
 //			Predicate urifuction = factory.getUriTemplatePredicate(1);
 //			head = factory.getFunction(p, factory.getFunction(urifuction, s), factory.getFunction(factory.getPredicate(typeURI,1), o));
 //			rule = factory.getCQIE(head, new LinkedList<Function>());
-		} 	
-		return rule;
+//		} 	
 	}
 	
+    @Deprecated
 	public static String getURIType(COL_TYPE e) {
 		String result = "";
 		if (e == COL_TYPE.BOOLEAN) {
 			result = XMLSchema.BOOLEAN.toString();
 		} else if (e == COL_TYPE.DATETIME) {
 			result = XMLSchema.DATETIME.toString();
-		} else if (e == COL_TYPE.DECIMAL) {
+		} else if (e == COL_TYPE.TIME) {
+            result = XMLSchema.TIME.toString();
+        } else if (e == COL_TYPE.DATE) {
+            result = XMLSchema.DATE.toString();
+        } else if (e == COL_TYPE.YEAR) {
+            result = XMLSchema.GYEAR.toString();
+        } else if (e == COL_TYPE.DECIMAL) {
 			result = XMLSchema.DECIMAL.toString();
 		} else if (e == COL_TYPE.DOUBLE) {
 			result = XMLSchema.DOUBLE.toString();
 		} else if (e == COL_TYPE.INTEGER) {
 			result = XMLSchema.INTEGER.toString();
-		} else if (e == COL_TYPE.LITERAL) {
+		} else if (e == COL_TYPE.LONG) {
+            result = XMLSchema.LONG.toString();
+        } else if (e == COL_TYPE.LITERAL) {
 			result = OBDAVocabulary.RDFS_LITERAL_URI;
 		} else if (e == COL_TYPE.LITERAL_LANG) {
 			result = OBDAVocabulary.RDFS_LITERAL_URI;

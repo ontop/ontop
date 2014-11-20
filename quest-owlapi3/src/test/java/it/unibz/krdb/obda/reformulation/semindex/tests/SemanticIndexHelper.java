@@ -21,29 +21,20 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
  */
 
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
-
-
-
-
-
-
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
@@ -73,21 +64,19 @@ import org.xml.sax.SAXException;
  *
  * @author Sergejs Pugac
  */
+
+// USED IN TWO TESTS ONLY
+
 public class SemanticIndexHelper {
     public final static Logger log = LoggerFactory.getLogger(SemanticIndexHelper.class);
 
-
-
     public OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-   
-    
-    public String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
+       
+    public static final String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
     
     public transient Connection conn;
 
-    private  OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    
-    private  OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
+    private final  OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
     private String owl_exists = "::__exists__::";
     private String owl_inverse_exists = "::__inverse__exists__::";
@@ -107,11 +96,9 @@ public class SemanticIndexHelper {
     public Ontology load_onto(String ontoname) throws Exception {
         String owlfile = owlloc + ontoname + ".owl";
         OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-        OWLAPI3Translator translator = new OWLAPI3Translator();
-
-        Ontology ontology = translator.translate(owlOntology);
+ 
+        Ontology ontology = OWLAPI3TranslatorUtility.translate(owlOntology);
         return ontology;
-
     }
 
     public TBoxReasoner load_dag(String ontoname) throws Exception {
@@ -187,15 +174,23 @@ public class SemanticIndexHelper {
                     inverse = true;
                 }
 
-                p = predicateFactory.getPredicate(uri, arity);
-
                 if (type.equals("classes")) {
-                    if (exists)
-                        description = descFactory.getPropertySomeRestriction(p, inverse);
+                    if (exists) {
+                    	// TODO: check whether object properties are enough
+                    	ObjectPropertyExpression prop = descFactory.createObjectProperty(uri);
+                    	if (inverse)
+                    		prop = prop.getInverse();
+                        description = prop.getDomain();
+                    }
                     else
-                        description = descFactory.createClass(p);
+                        description = descFactory.createClass(uri);
                 } else {
-                    description = descFactory.createProperty(p, inverse);
+                	// TODO: check whether object properties are enough
+                	ObjectPropertyExpression prop = descFactory.createObjectProperty(uri);
+                    if (inverse)
+                    	description = prop.getInverse();
+                    else
+                    	description = prop;
                 }
 
 

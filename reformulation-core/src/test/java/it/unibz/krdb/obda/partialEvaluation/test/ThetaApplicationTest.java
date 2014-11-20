@@ -30,8 +30,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -83,12 +82,12 @@ public class ThetaApplicationTest extends TestCase {
 		List<Function> body = new Vector<Function>();
 		body.add(atom1);
 
-		Term t7 = termFactory.getVariable("x");
+		VariableImpl t7 = (VariableImpl)termFactory.getVariable("x");
 		Term t6 = termFactory.getVariable("t");
-		Term t8 = termFactory.getVariable("z");
+		VariableImpl t8 = (VariableImpl)termFactory.getVariable("z");
 		Term t9 = termFactory.getConstantLiteral("elf");
 		Term t10 = termFactory.getVariable("x");
-		Term t11 = termFactory.getVariable("y");
+		VariableImpl t11 = (VariableImpl)termFactory.getVariable("y");
 		Term t12 = termFactory.getVariable("p");
 		List<Term> vars3 = new Vector<Term>();
 		vars3.add(t12);
@@ -102,17 +101,18 @@ public class ThetaApplicationTest extends TestCase {
 
 		CQIE query = predFactory.getCQIE(h, body);
 
-		Substitution s1 = new Substitution(t7, t6);
-		Substitution s2 = new Substitution(t8, t9);
-		Substitution s3 = new Substitution(t11, otx);
+        SingletonSubstitution s1 = new SingletonSubstitution(t7, t6);
+        SingletonSubstitution s2 = new SingletonSubstitution(t8, t9);
+        SingletonSubstitution s3 = new SingletonSubstitution(t11, otx);
 
-		Map<Variable, Term> mgu = new HashMap<Variable, Term>();
-		mgu.put((Variable) s1.getVariable(), s1.getTerm());
-		mgu.put((Variable) s2.getVariable(), s2.getTerm());
-		mgu.put((Variable) s3.getVariable(), s3.getTerm());
+        Map<VariableImpl, Term> entries = new HashMap<>();
+		entries.put(s1.getVariable(), s1.getTerm());
+		entries.put(s2.getVariable(), s2.getTerm());
+		entries.put(s3.getVariable(), s3.getTerm());
+        Substitution mgu = new SubstitutionImpl(entries);
 
-		Unifier unifier = new Unifier();
-		CQIE newquery = unifier.applyUnifier(query, mgu);
+		UnifierUtilities unifier = new UnifierUtilities();
+		CQIE newquery = SubstitutionUtilities.applySubstitution(query, mgu);
 
 		List<Function> newbody = newquery.getBody();
 		assertEquals(1, newbody.size());

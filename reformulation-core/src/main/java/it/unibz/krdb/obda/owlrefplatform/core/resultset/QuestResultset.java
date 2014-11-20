@@ -20,29 +20,19 @@ package it.unibz.krdb.obda.owlrefplatform.core.resultset;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAStatement;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
+import it.unibz.krdb.obda.model.impl.QuestTypeMapper;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 
 import java.net.URISyntaxException;
-import java.sql.Date;
+import java.sql.*;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.text.*;
+import java.util.HashMap;
+import java.util.List;
 
 public class QuestResultset implements TupleResultSet {
 
@@ -83,7 +73,7 @@ public class QuestResultset implements TupleResultSet {
 		this.st = st;
 		this.isSemIndex = st.questInstance.isSemIdx();
 		if (isSemIndex) 
-			uriMap = st.questInstance.getSamanticIndexRepository().getUriMap();
+			uriMap = st.questInstance.getSemanticIndexRepository().getUriMap();
 		else
 			uriMap = null;
 		this.signature = signature;
@@ -160,7 +150,7 @@ public class QuestResultset implements TupleResultSet {
 			realValue = set.getString(column);
 			COL_TYPE type = getQuestType( set.getInt(column - 2));
 
-			if (type == null || realValue == null) {
+			if (type == COL_TYPE.NULL || realValue == null) {
 				return null;
 			} else {
 				if (type == COL_TYPE.OBJECT) {
@@ -338,36 +328,18 @@ public class QuestResultset implements TupleResultSet {
 		return getConstant(columnIndex);
 	}
 
-	private COL_TYPE getQuestType(int sqltype) {
-		if (sqltype == 1) {
-			return COL_TYPE.OBJECT;
-		} else if (sqltype == 2) {
-			return COL_TYPE.BNODE;
-		} else if (sqltype == 3) {
-			return COL_TYPE.LITERAL;
-		} else if (sqltype == 4) {
-			return COL_TYPE.INTEGER;
-		} else if (sqltype == 5) {
-			return COL_TYPE.DECIMAL;
-		} else if (sqltype == 6) {
-			return COL_TYPE.DOUBLE;
-		} else if (sqltype == 7) {
-			return COL_TYPE.STRING;
-		} else if (sqltype == 8) {
-			return COL_TYPE.DATETIME;
-		} else if (sqltype == 9) {
-			return COL_TYPE.BOOLEAN;
-		} else if (sqltype == 10) {
-			return COL_TYPE.DATE;
-		} else if (sqltype == 11) {
-			return COL_TYPE.TIME;
-		} else if (sqltype == 12) {
-			return COL_TYPE.YEAR;
-		} else if (sqltype == 0) {
-			return null;
-		} else {
-			throw new RuntimeException("COLTYPE unknown: " + sqltype);
-		}
+    /**
+     * Numbers codetype are defined see also  #getTypeColumnForSELECT SQLGenerator
+     */
+
+	private COL_TYPE getQuestType(int typeCode) {
+
+        COL_TYPE questType = fac.getQuestTypeMapper().getQuestType(typeCode);
+
+        if (questType == null)
+        	throw new RuntimeException("typeCode unknown: " + typeCode);
+        
+        return questType;
 	}
 
 	// @Override

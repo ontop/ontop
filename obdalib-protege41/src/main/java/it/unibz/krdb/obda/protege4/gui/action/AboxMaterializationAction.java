@@ -23,8 +23,7 @@ package it.unibz.krdb.obda.protege4.gui.action;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OBDAModelSynchronizer;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
@@ -198,10 +197,10 @@ public class AboxMaterializationAction extends ProtegeAction {
 						new OutputStreamWriter(out, "UTF-8"));
 
 				OWLOntology ontology = modelManager.getActiveOntology();
-				OWLOntologyManager manager = modelManager
-						.getOWLOntologyManager();
-				OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
-				Ontology onto = new OWLAPI3Translator().translate(ontology);
+				OWLOntologyManager manager = modelManager.getOWLOntologyManager();
+				//OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
+				Ontology onto = OWLAPI3TranslatorUtility.translate(ontology);
+				obdaModel.declareAll(onto.getVocabulary());
 				
 				final long startTime = System.currentTimeMillis();
 				if (format != 3) {

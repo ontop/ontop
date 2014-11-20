@@ -151,7 +151,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 
 		factory.setPreferenceHolder(p);
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();

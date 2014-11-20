@@ -23,17 +23,12 @@ package it.unibz.krdb.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.Property;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.File;
-import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -54,7 +49,7 @@ public class R_TBoxReasonerImpl extends TestCase {
 
 	public void testIndexClasses() throws Exception {
 		String testURI = "http://it.unibz.krdb/obda/ontologies/test.owl#";
-		OWLAPI3Translator t = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(testIndexClasses));
 		Ontology onto = t.translate(owlonto);

@@ -21,8 +21,12 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
  */
 
 
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 
 
 
@@ -37,13 +41,42 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<Property> getProperties();
+	public EquivalencesDAG<ObjectPropertyExpression> getObjectProperties();
 	
+	/**
+	 * Return the DAG of properties
+	 * 
+	 * @return DAG 
+	 */
+
+	public EquivalencesDAG<DataPropertyExpression> getDataProperties();
+
 	/**
 	 * Return the DAG of classes
 	 * 
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<BasicClassDescription> getClasses();
+	public EquivalencesDAG<ClassExpression> getClasses();
+	
+	/**
+	 * Return the DAG of datatypes and data property ranges
+	 * 
+	 * @return DAG 
+	 */
+
+	public EquivalencesDAG<DataRangeExpression> getDataRanges();
+	
+	/**
+	 * 
+	 * @param v: a description
+	 * @return null if v is the representative of its own class **or v is not part of the graph**
+	 *         the representative of the equivalence class otherwise  
+	 */
+
+	public OClass getClassRepresentative(OClass p);
+	
+	public ObjectPropertyExpression getObjectPropertyRepresentative(ObjectPropertyExpression p);
+	
+	public DataPropertyExpression getDataPropertyRepresentative(DataPropertyExpression p);
 }

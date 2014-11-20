@@ -32,8 +32,13 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAModelListener;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OBDAModelValidator;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 import it.unibz.krdb.obda.querymanager.QueryController;
@@ -101,12 +106,13 @@ public class OBDAModelManager implements Disposable {
 
 	private JDBCConnectionManager connectionManager = JDBCConnectionManager.getJDBCConnectionManager();
 
-	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	private boolean applyUserConstraints = false;
 	private ImplicitDBConstraints userConstraints;
 	
-	private static Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
+	private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
 
 	/***
 	 * This is the instance responsible for listening for Protege ontology
@@ -158,7 +164,6 @@ public class OBDAModelManager implements Disposable {
 	 */
 	public class OntologyRefactoringListener implements OWLOntologyChangeListener {
 
-		OWLAPI3Translator translator = new OWLAPI3Translator();
 
 		@Override
 		public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
@@ -200,15 +205,15 @@ public class OBDAModelManager implements Disposable {
 						OBDAModel activeOBDAModel = getActiveOBDAModel();
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
-							Predicate c = dfac.getClassPredicate(oc.getIRI().toString());
+							OClass c = ofac.createClass(oc.getIRI().toString());
 							activeOBDAModel.declareClass(c);
 						} else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
-							Predicate r = dfac.getObjectPropertyPredicate(or.getIRI().toString());
+							ObjectPropertyExpression r = ofac.createObjectProperty(or.getIRI().toString());
 							activeOBDAModel.declareObjectProperty(r);
 						} else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
-							Predicate p = dfac.getDataPropertyPredicate(op.getIRI().toString());
+							DataPropertyExpression p = ofac.createDataProperty(op.getIRI().toString());
 							activeOBDAModel.declareDataProperty(p);
 						}
 					}
@@ -220,15 +225,15 @@ public class OBDAModelManager implements Disposable {
 						OBDAModel activeOBDAModel = getActiveOBDAModel();
 						if (entity instanceof OWLClass) {
 							OWLClass oc = (OWLClass) entity;
-							Predicate c = dfac.getClassPredicate(oc.getIRI().toString());
+							OClass c = ofac.createClass(oc.getIRI().toString());
 							activeOBDAModel.unDeclareClass(c);
 						} else if (entity instanceof OWLObjectProperty) {
 							OWLObjectProperty or = (OWLObjectProperty) entity;
-							Predicate r = dfac.getObjectPropertyPredicate(or.getIRI().toString());
+							ObjectPropertyExpression r = ofac.createObjectProperty(or.getIRI().toString());
 							activeOBDAModel.unDeclareObjectProperty(r);
 						} else if (entity instanceof OWLDataProperty) {
 							OWLDataProperty op = (OWLDataProperty) entity;
-							Predicate p = dfac.getDataPropertyPredicate(op.getIRI().toString());
+							DataPropertyExpression p = ofac.createDataProperty(op.getIRI().toString());
 							activeOBDAModel.unDeclareDataProperty(p);
 						}
 					}
@@ -268,19 +273,42 @@ public class OBDAModelManager implements Disposable {
 
 				// This set of changes appears to be a "renaming" operation,
 				// hence we will modify the OBDA model accordingly
-				Predicate removedPredicate = translator.getPredicate(removedEntity);
-				Predicate newPredicate = translator.getPredicate(newEntity);
+				Predicate removedPredicate = getPredicate(removedEntity);
+				Predicate newPredicate = getPredicate(newEntity);
 
 				obdamodel.renamePredicate(removedPredicate, newPredicate);
 			}
 
 			// Applying the deletions to the obda model
 			for (OWLEntity removede : removals) {
-				Predicate removedPredicate = translator.getPredicate(removede);
+				Predicate removedPredicate = getPredicate(removede);
 				obdamodel.deletePredicate(removedPredicate);
 			}
 		}
 	}
+	
+	private static Predicate getPredicate(OWLEntity entity) {
+		Predicate p = null;
+		if (entity instanceof OWLClass) {
+			/* We ignore TOP and BOTTOM (Thing and Nothing) */
+			if (((OWLClass) entity).isOWLThing() || ((OWLClass) entity).isOWLNothing()) {
+				return null;
+			}
+			String uri = entity.getIRI().toString();
+
+			p = dfac.getClassPredicate(uri);
+		} else if (entity instanceof OWLObjectProperty) {
+			String uri = entity.getIRI().toString();
+
+			p = dfac.getObjectPropertyPredicate(uri);
+		} else if (entity instanceof OWLDataProperty) {
+			String uri = entity.getIRI().toString();
+
+			p = dfac.getDataPropertyPredicate(uri);
+		}
+		return p;
+	}
+	
 
 	public void addListener(OBDAModelManagerListener listener) {
 		obdaManagerListeners.add(listener);
@@ -336,15 +364,15 @@ public class OBDAModelManager implements Disposable {
 		for (OWLOntology ontology : ontologies) {
 			// Setup the entity declarations
 			for (OWLClass c : ontology.getClassesInSignature()) {
-				Predicate pred = dfac.getClassPredicate(c.getIRI().toString());
+				OClass pred = ofac.createClass(c.getIRI().toString());
 				activeOBDAModel.declareClass(pred);
 			}
 			for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature()) {
-				Predicate pred = dfac.getObjectPropertyPredicate(r.getIRI().toString());
+				ObjectPropertyExpression pred = ofac.createObjectProperty(r.getIRI().toString());
 				activeOBDAModel.declareObjectProperty(pred);
 			}
 			for (OWLDataProperty p : ontology.getDataPropertiesInSignature()) {
-				Predicate pred = dfac.getDataPropertyPredicate(p.getIRI().toString());
+				DataPropertyExpression pred = ofac.createDataProperty(p.getIRI().toString());
 				activeOBDAModel.declareDataProperty(pred);
 			}
 		}

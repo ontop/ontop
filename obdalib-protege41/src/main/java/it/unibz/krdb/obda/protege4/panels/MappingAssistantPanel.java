@@ -36,6 +36,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
@@ -310,7 +311,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
         pnlClassSeachComboBox.setLayout(new java.awt.BorderLayout());
         Vector<Object> v = new Vector<Object>();
-        for (Predicate pred : obdaModel.getDeclaredClasses()) {
+        for (OClass c : obdaModel.getDeclaredClasses()) {
+        	Predicate pred = c.getPredicate(); 
             v.addElement(new PredicateItem(pred, prefixManager));
         }
         cboClassAutoSuggest = new AutoSuggestComboBox(v);
@@ -561,7 +563,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 		// Create the head
 		int arity = distinguishVariables.size();
-		Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
+		Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
 		
 		// Create and return the conjunctive query
 		return dfac.getCQIE(head, body);

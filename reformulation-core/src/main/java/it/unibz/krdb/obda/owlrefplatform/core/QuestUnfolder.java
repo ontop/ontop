@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,7 +11,6 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -24,11 +24,15 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactRuleConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
@@ -43,10 +47,11 @@ public class QuestUnfolder {
 	/* The active unfolding engine */
 	private UnfoldingMechanism unfolder;
 
-	private DBMetadata metadata;
+	private final DBMetadata metadata;
+	private final Mapping2DatalogConverter analyzer;
 	
 	/* As unfolding OBDAModel, but experimental */
-	private DatalogProgram unfoldingProgram;
+	private List<CQIE> unfoldingProgram;
 
 	/*
 	 * These are pattern matchers that will help transforming the URI's in
@@ -61,50 +66,17 @@ public class QuestUnfolder {
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
-	/** Davide> Exclude specific predicates from T-Mapping approach **/
-	private List<SimplePredicate> excludeFromTMappings;
-	
-	/** Davide> Whether to exclude the user-supplied predicates from the
-	 *          TMapping procedure (that is, the mapping assertions for 
-	 *          those predicates should not be extended according to the 
-	 *          TBox hierarchies
-	 */
-	private boolean applyExcludeFromTMappings = false;
-
 	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata)
 	{
-		this.metadata = metadata;
+		this.metadata = metadata;	
 		
-		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(mappings, metadata);
+		analyzer = new Mapping2DatalogConverter(metadata);
 
-		unfoldingProgram = analyzer.constructDatalogProgram();
+		unfoldingProgram = analyzer.constructDatalogProgram(mappings);
 	}
-	
-	/**
-	 * The extra parameter <b>excludeFromTMappings</b> defines a list
-	 * of predicates for which the T-Mappings procedure should be 
-	 * disabled.
-	 *  
-	 * @author Davide
-	 * @param mappings
-	 * @param metadata
-	 * @param excludeFromTMappings
-	 */
-	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata, List<SimplePredicate> excludeFromTMappings)
-	{
-		this.metadata = metadata;
 		
-		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(mappings, metadata);
-
-		unfoldingProgram = analyzer.constructDatalogProgram();
-		
-		// Davide>T-Mappings handling
-		this.excludeFromTMappings = excludeFromTMappings;
-		this.applyExcludeFromTMappings = true;
-	}
-	
 	public List<CQIE> getRules() {
-		return unfoldingProgram.getRules();
+		return unfoldingProgram;
 	}
 	
 	/**
@@ -119,7 +91,7 @@ public class QuestUnfolder {
 		// Adding "triple(x,y,z)" mappings for support of unbounded
 		// predicates and variables as class names (implemented in the
 		// sparql translator)
-		unfoldingProgram.appendRule(generateTripleMappings());
+		unfoldingProgram.addAll(generateTripleMappings());
 		
 		Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
@@ -132,28 +104,19 @@ public class QuestUnfolder {
 		
 		final long startTime = System.currentTimeMillis();
 		
-		// Davide> Here now I put another TMappingProcessor taking
-		//         also a list of Predicates as input, that represents
-		//         what needs to be excluded from the T-Mappings
-		if( applyExcludeFromTMappings )
-			unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full, excludeFromTMappings);
-		else
-			unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full);
+		unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full);
 		
-		/*
-		 * Eliminating redundancy from the unfolding program
-		 */
+		// Eliminating redundancy from the unfolding program
+		// TODO: move the foreign-key optimisation inside t-mapping generation 
+		//              -- at this point it has little effect
+		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);	
+		CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
 
-			// ROMAN: THIS HAS NO EFFECT 
-//            unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true);
-			
-			List<CQIE> foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);
-			unfoldingProgram = CQCUtilities.removeContainedQueriesSorted(unfoldingProgram, true, foreignKeyRules);
-
+		Collections.sort(unfoldingProgram, CQCUtilities.ComparatorCQIE);
+		CQCUtilities.removeContainedQueries(unfoldingProgram, foreignKeyCQC);
 
 		final long endTime = System.currentTimeMillis();
-
-		log.debug("TMapping size: {}", unfoldingProgram.getRules().size());
+		log.debug("TMapping size: {}", unfoldingProgram.size());
 		log.debug("TMapping processing time: {} ms", (endTime - startTime));
 	}
 
@@ -161,10 +124,10 @@ public class QuestUnfolder {
 	 * Adding data typing on the mapping axioms.
 	 */
 	
-	public void extendTypesWithMetadata(TBoxReasoner tBoxReasoner, EquivalenceMap equivalenceMaps) throws OBDAException {
+	public void extendTypesWithMetadata(TBoxReasoner tBoxReasoner) throws OBDAException {
 
-		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(tBoxReasoner, equivalenceMaps, metadata);
-		typeRepair.insertDataTyping(unfoldingProgram);
+		MappingDataTypeRepair typeRepair = new MappingDataTypeRepair(metadata);
+		typeRepair.insertDataTyping(unfoldingProgram, tBoxReasoner);
 	}
 
 	/***
@@ -174,7 +137,7 @@ public class QuestUnfolder {
 	
 	public void addNOTNULLToMappings() {
 
-		for (CQIE mapping : unfoldingProgram.getRules()) {
+		for (CQIE mapping : unfoldingProgram) {
 			Set<Variable> headvars = mapping.getHead().getReferencedVariables();
 			for (Variable var : headvars) {
 				Function notnull = fac.getFunctionIsNotNull(var);
@@ -191,7 +154,7 @@ public class QuestUnfolder {
 	 */
 
 	public void normalizeLanguageTagsinMappings() {
-		for (CQIE mapping : unfoldingProgram.getRules()) {
+		for (CQIE mapping : unfoldingProgram) {
 			Function head = mapping.getHead();
 			for (Term term : head.getTerms()) {
 				if (!(term instanceof Function)) {
@@ -225,34 +188,64 @@ public class QuestUnfolder {
 	 */
 
 	public void normalizeEqualities() {
-		unfoldingProgram = DatalogNormalizer.enforceEqualities(unfoldingProgram);
+		
+		for (CQIE cq: unfoldingProgram)
+			EQNormalizer.enforceEqualities(cq);
+		
 	}
 	
 	/***
 	 * Adding ontology assertions (ABox) as rules (facts, head with no body).
 	 */
-	public void addABoxAssertionsAsFacts(Iterable<Assertion> assertions) {
+	public void addClassAssertionsAsFacts(Iterable<ClassAssertion> assertions) {
 		
 		int count = 0;
-		for (Assertion a : assertions) {
+		for (ClassAssertion a : assertions) {
 			CQIE fact = ABoxToFactRuleConverter.getRule(a);
+				
 			if (fact != null) {
-				unfoldingProgram.appendRule(fact);
+				unfoldingProgram.add(fact);
 				count++;
 			}
 		}
 		log.debug("Appended {} ABox assertions as fact rules", count);		
 	}		
-	
+	public void addObjectPropertyAssertionsAsFacts(Iterable<ObjectPropertyAssertion> assertions) {
+		
+		int count = 0;
+		for (ObjectPropertyAssertion a : assertions) {
+			CQIE fact = ABoxToFactRuleConverter.getRule(a);
+				
+			if (fact != null) {
+				unfoldingProgram.add(fact);
+				count++;
+			}
+		}
+		log.debug("Appended {} ABox assertions as fact rules", count);		
+	}		
+	public void addDataPropertyAssertionsAsFacts(Iterable<DataPropertyAssertion> assertions) {
+		
+		int count = 0;
+		for (DataPropertyAssertion a : assertions) {
+			CQIE fact = ABoxToFactRuleConverter.getRule(a);
+				
+			if (fact != null) {
+				unfoldingProgram.add(fact);
+				count++;
+			}
+		}
+		log.debug("Appended {} ABox assertions as fact rules", count);		
+	}		
+		
 
 	
 	
-	public void generateURITemplateMatchers() {
+	private void generateURITemplateMatchers() {
 
 		templateStrings.clear();
 		uriTemplateMatcher.clear();
 
-		for (CQIE mapping : unfoldingProgram.getRules()) { // int i = 0; i < unfoldingProgram.getRules().size(); i++) {
+		for (CQIE mapping : unfoldingProgram) { // int i = 0; i < unfoldingProgram.getRules().size(); i++) {
 
 			// Looking for mappings with exactly 2 data atoms
 			// CQIE mapping = unfoldingProgram.getRules().get(i);
@@ -307,11 +300,9 @@ public class QuestUnfolder {
 	
 	public void updateSemanticIndexMappings(List<OBDAMappingAxiom> mappings, TBoxReasoner reformulationReasoner) throws OBDAException {
 
-		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(mappings, metadata);
+		unfoldingProgram = analyzer.constructDatalogProgram(mappings);
 
-		unfoldingProgram = analyzer.constructDatalogProgram();
-
-		applyTMappings(/*true, */reformulationReasoner, false);
+		applyTMappings(reformulationReasoner, false);
 		
 		setupUnfolder();
 
@@ -328,7 +319,7 @@ public class QuestUnfolder {
 	private List<CQIE> generateTripleMappings() {
 		List<CQIE> newmappings = new LinkedList<CQIE>();
 
-		for (CQIE mapping : unfoldingProgram.getRules()) {
+		for (CQIE mapping : unfoldingProgram) {
 			Function newhead = null;
 			Function currenthead = mapping.getHead();
 			Predicate pred = OBDAVocabulary.QUEST_TRIPLE_PRED;

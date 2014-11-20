@@ -22,8 +22,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.BinaryAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 
 /***
  * A record to keep track of which tables in the semantic index tables have rows
@@ -36,7 +37,7 @@ import it.unibz.krdb.obda.ontology.ClassAssertion;
 public class SemanticIndexRecord {
 
 	public enum SITable {
-		CLASS, OPROP, DPROPLite, DPROPStri, DPROPInte, DPROPDeci, DPROPDoub, DPROPDate, DPROPBool
+		CLASS, OPROP, DPROPLite, DPROPStri, DPROPInte, DPROPLong, DPROPDeci, DPROPDoub, DPROPDate, DPROPInt, DPROPUnsignedInt, DPROPNegInte, DPROPNonNegInte, DPROPPosInte, DPROPNonPosInte, DPROPFloat, DPROPBool
 	}
 
 	public enum OBJType {
@@ -130,7 +131,7 @@ public class SemanticIndexRecord {
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
 			table = SITable.CLASS;
-			COL_TYPE atype1 = ca.getObject().getType();
+			COL_TYPE atype1 = ca.getIndividual().getType();
 
 			if (atype1 == COL_TYPE.BNODE) {
 				t1 = OBJType.BNode;
@@ -139,16 +140,24 @@ public class SemanticIndexRecord {
 			}
 
 		} else {
-			BinaryAssertion ba = (BinaryAssertion) assertion;
-			COL_TYPE atype1 = ba.getValue1().getType();
-
+			COL_TYPE atype1, atype2;
+			if (assertion instanceof ObjectPropertyAssertion) {
+				ObjectPropertyAssertion ba = (ObjectPropertyAssertion) assertion;
+				atype1 = ba.getSubject().getType();
+				atype2 = ba.getObject().getType();		
+			}
+			else {
+				DataPropertyAssertion ba = (DataPropertyAssertion) assertion;
+				atype1 = ba.getSubject().getType();
+				atype2 = ba.getValue().getType();						
+			}
+				
 			if (atype1 == COL_TYPE.BNODE) {
 				t1 = OBJType.BNode;
 			} else {
 				t1 = OBJType.URI;
 			}
 
-			COL_TYPE atype2 = ba.getValue2().getType();
 			switch (atype2) {
 			case OBJECT:
 				t2 = OBJType.URI;
@@ -170,6 +179,30 @@ public class SemanticIndexRecord {
 			case INTEGER:
 				table = SITable.DPROPInte;
 				break;
+            case INT:
+                table = SITable.DPROPInt;
+                break;
+            case UNSIGNED_INT:
+                table = SITable.DPROPUnsignedInt;
+                break;
+            case NEGATIVE_INTEGER:
+                table = SITable.DPROPNegInte;
+                break;
+            case NON_NEGATIVE_INTEGER:
+                table = SITable.DPROPNonNegInte;
+                break;
+            case POSITIVE_INTEGER:
+                table = SITable.DPROPPosInte;
+                break;
+            case NON_POSITIVE_INTEGER:
+                table = SITable.DPROPNonPosInte;
+                break;
+            case FLOAT:
+                table = SITable.DPROPFloat;
+                break;
+            case LONG:
+                table = SITable.DPROPLong;
+                break;
 			case DECIMAL:
 				table = SITable.DPROPDeci;
 				break;

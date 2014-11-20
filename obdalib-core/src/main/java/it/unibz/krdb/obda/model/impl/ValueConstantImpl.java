@@ -24,9 +24,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 
-import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class ValueConstantImpl extends AbstractLiteral implements ValueConstant {
@@ -63,9 +61,6 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof ValueConstantImpl)) {
-			return false;
-		}
-		if (this == OBDAVocabulary.NULL) {
 			return false;
 		}
 		ValueConstantImpl value2 = (ValueConstantImpl) obj;
@@ -106,10 +101,10 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 	public Set<Variable> getReferencedVariables() {
 		return new LinkedHashSet<Variable>();
 	}
-
+/*
 	@Override
 	public Map<Variable, Integer> getVariableCount() {
 		return new HashMap<Variable, Integer>();
 	}
-
+*/
 }

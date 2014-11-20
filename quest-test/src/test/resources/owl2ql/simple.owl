@@ -1,0 +1,157 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY dcterms "http://purl.org/dc/terms/" >
+    <!ENTITY foaf "http://xmlns.com/foaf/0.1/" >
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY swrl "http://www.w3.org/2003/11/swrl#" >
+    <!ENTITY dc "http://purl.org/dc/elements/1.1/" >
+    <!ENTITY swrlb "http://www.w3.org/2003/11/swrlb#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY dctype "http://purl.org/dc/dcmitype/Image#" >
+    <!ENTITY owl2xml "http://www.w3.org/2006/12/owl2-xml#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.owl-ontologies.com/Ontology1207768242.owl#"
+     xml:base="http://www.owl-ontologies.com/Ontology1207768242.owl"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:foaf="http://xmlns.com/foaf/0.1/"
+     xmlns:dcterms="http://purl.org/dc/terms/"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:swrl="http://www.w3.org/2003/11/swrl#"
+     xmlns:dctype="http://purl.org/dc/dcmitype/Image#"
+     xmlns:owl2xml="http://www.w3.org/2006/12/owl2-xml#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:swrlb="http://www.w3.org/2003/11/swrlb#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://www.owl-ontologies.com/Ontology1207768242.owl"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+   <!-- http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#A -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#A"/>
+    
+
+
+    <!-- http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#B -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#B"/>
+    
+
+
+    <!-- http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#C -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#C"/>
+    
+
+
+    
+   <!-- http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#PA -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#PA"/>
+    
+
+
+    <!-- http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#PB -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#PB"/>
+    
+
+
+    <!-- http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#PC -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#PC"/>
+    
+ 
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointProperties"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#PA"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#PB"/>
+            <rdf:Description>
+                <owl:inverseOf rdf:resource="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#PC"/>
+            </rdf:Description>
+        </owl:members>
+    </rdf:Description>
+
+
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#A"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#B"/>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#PA"/>
+                <owl:someValuesFrom rdf:resource="&owl;Thing"/>
+            </owl:Restriction>
+        </owl:members>
+    </rdf:Description>
+
+   <owl:ObjectProperty rdf:about="http://www.semanticweb.org/roman/ontologies/2014/10/untitled-ontology-125#RRA">
+        <rdfs:subPropertyOf>
+            <rdf:Description>
+                <owl:inverseOf rdf:resource="&owl;topObjectProperty"/>
+            </rdf:Description>
+        </rdfs:subPropertyOf>
+    </owl:ObjectProperty>
+
+   <rdf:Description>
+        <owl:inverseOf rdf:resource="&owl;bottomObjectProperty"/>
+        <rdfs:subPropertyOf>
+            <owl:ObjectProperty>
+                <owl:inverseOf rdf:resource="http://www.semanticweb.org/roman/ontologies/2014/10/untitled-ontology-125#RRB"/>
+            </owl:ObjectProperty>
+        </rdfs:subPropertyOf>
+   </rdf:Description>
+
+       	<owl:Restriction>
+          	<owl:onProperty rdf:resource="&owl;bottomDataProperty" />
+        	<owl:someValuesFrom rdf:resource="&rdfs;Literal"/>
+        <rdfs:subClassOf>
+            <owl:Class rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#C" />
+        </rdfs:subClassOf>
+        </owl:Restriction>
+
+        <owl:Class rdf:about="http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123#B" >
+        <rdfs:subClassOf>
+       	<owl:Restriction>
+          	<owl:onProperty> 
+   				<rdf:Description>
+        			<owl:inverseOf rdf:resource="&owl;topObjectProperty"/>
+   				</rdf:Description>
+            </owl:onProperty> 
+        	<owl:someValuesFrom rdf:resource="&owl;Thing"/>
+        </owl:Restriction>
+        </rdfs:subClassOf>
+        </owl:Class>
+
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
+

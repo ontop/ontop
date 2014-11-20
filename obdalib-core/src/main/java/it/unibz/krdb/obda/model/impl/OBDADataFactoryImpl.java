@@ -24,6 +24,7 @@ import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -37,18 +38,15 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.IDGenerator;
-
-import java.net.URI;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
-//import com.hp.hpl.jena.iri.IRI;
-//import com.hp.hpl.jena.iri.IRIFactory;
+import java.net.URI;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 
 public class OBDADataFactoryImpl implements OBDADataFactory {
 
@@ -56,6 +54,10 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 	private static OBDADataFactory instance = null;
 	private static ValueFactory irifactory = null;
+	private DatatypeFactoryImpl datatypes = null;
+	private final QuestTypeMapper questTypeMapper = new QuestTypeMapper();
+	private final JdbcTypeMapper jdbcTypeMapper =  new JdbcTypeMapper(); 
+	
 
 	private static int counter = 0;
 	
@@ -76,31 +78,55 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		}
 		return irifactory;
 	}
-
-	public static org.openrdf.model.URI getIRI(String s){
-		return getIRIFactory().createURI(s);
-				}
 	
+	@Override
+	public DatatypeFactory getDatatypeFactory() {
+		if (datatypes == null) {
+			datatypes = new DatatypeFactoryImpl();
+		}
+		return datatypes;
+	}
+
+	@Override
+	public QuestTypeMapper getQuestTypeMapper() {
+		return questTypeMapper;
+	}
+	
+	@Override 
+	public JdbcTypeMapper getJdbcTypeMapper() {
+		return jdbcTypeMapper;
+	}
+	
+	
+		
 	public OBDAModel getOBDAModel() {
 		return new OBDAModelImpl();
 	}
 
 	@Deprecated
 	public PredicateImpl getPredicate(String name, int arity) {
-		if (arity == 1) {
-			return new PredicateImpl(name, arity,
-					new COL_TYPE[] { COL_TYPE.OBJECT });
-		} else {
+//		if (arity == 1) {
+//			return new PredicateImpl(name, arity, new COL_TYPE[] { COL_TYPE.OBJECT });
+//		} else {
 			return new PredicateImpl(name, arity, null);
-		}
+//		}
 	}
+	
+	@Override
+	public Predicate getPredicate(String uri, COL_TYPE[] types) {
+		return new PredicateImpl(uri, types.length, types);
+	}
+
 
 	public Predicate getObjectPropertyPredicate(String name) {
 		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 	}
 
 	public Predicate getDataPropertyPredicate(String name) {
-		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
+		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL }); 
+	}
+	public Predicate getDataPropertyPredicate(String name, COL_TYPE type) {
+		return new PredicateImpl(name, 2, new COL_TYPE[] { COL_TYPE.OBJECT, type }); // COL_TYPE.LITERAL
 	}
 
 	public Predicate getClassPredicate(String name) {
@@ -130,6 +156,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 	@Override
 	public ValueConstant getConstantFreshLiteral() {
+		// TODO: a bit more elaborate name is needed to avoid conflicts
 		return new ValueConstantImpl("f" + (counter++), COL_TYPE.LITERAL);
 	}
 
@@ -209,60 +236,10 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	
-	@Override
-	public Predicate getDataTypePredicateLiteral() {
-		return OBDAVocabulary.RDFS_LITERAL;
-	}
 	
-	@Override
-	public Predicate getDataTypePredicateLiteralLang() {
-		return OBDAVocabulary.RDFS_LITERAL_LANG;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateString() {
-		return OBDAVocabulary.XSD_STRING;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateInteger() {
-		return OBDAVocabulary.XSD_INTEGER;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateDecimal() {
-		return OBDAVocabulary.XSD_DECIMAL;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateDouble() {
-		return OBDAVocabulary.XSD_DOUBLE;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateDateTime() {
-		return OBDAVocabulary.XSD_DATETIME;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateBoolean() {
-		return OBDAVocabulary.XSD_BOOLEAN;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateDate() {
-		return OBDAVocabulary.XSD_DATE;
-	}
 	
-	@Override
-	public Predicate getDataTypePredicateYear() {
-		return OBDAVocabulary.XSD_YEAR;
-	}
-
-	@Override
-	public Predicate getDataTypePredicateTime() {
-		return OBDAVocabulary.XSD_TIME;
-	}
+	
+	
 
 	@Override
 	public Predicate getUriTemplatePredicate(int arity) {
@@ -449,11 +426,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	
 	@Override
-	public Predicate getPredicate(String uri, int arity, COL_TYPE[] types) {
-		return new PredicateImpl(uri, arity, types);
-	}
-
-	@Override
 	public BNode getConstantBNode(String name) {
 		return new BNodeConstantImpl(name);
 	}
@@ -472,47 +444,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Constant getConstantFalse() {
 		return OBDAVocabulary.FALSE;
 	}
-
-	@Override
-	public Predicate getDataTypePredicateUnsupported(String uri) {
-		return getDataTypePredicateUnsupported(uri);
-	}
-
-	@Override
-	public Predicate getTypePredicate(Predicate.COL_TYPE type) {
-		switch (type) {
-		case LITERAL:
-			return getDataTypePredicateLiteral();
-		case LITERAL_LANG:
-			return getDataTypePredicateLiteral();
-		case STRING:
-			return getDataTypePredicateString();
-		case INTEGER:
-			return getDataTypePredicateInteger();
-		case DECIMAL:
-			return getDataTypePredicateDecimal();
-		case DOUBLE:
-			return getDataTypePredicateDouble();
-		case DATETIME:
-			return getDataTypePredicateDateTime();
-		case BOOLEAN:
-			return getDataTypePredicateBoolean();
-		case OBJECT:
-			return getUriTemplatePredicate(1);
-		case BNODE:
-			return getBNodeTemplatePredicate(1);
-		case DATE:
-			return getDataTypePredicateDate();
-		case TIME:
-			return getDataTypePredicateTime();
-		case YEAR:
-			return getDataTypePredicateYear();
-		default:
-			throw new RuntimeException("Cannot get URI for unsupported type: " + type);
-		}
-	}
-
-	
 
 	
 }
