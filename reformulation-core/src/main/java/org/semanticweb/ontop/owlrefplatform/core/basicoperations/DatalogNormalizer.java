@@ -25,6 +25,7 @@ import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.utils.QueryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -343,7 +344,7 @@ public class DatalogNormalizer {
 	 * @param currentTerms
 	 * @param substitutions
 	 */
-	private static void pullOutEqualities(List currentTerms, Substitution substitutions, List<Function> eqList,
+	private static  List<Function> pullOutEqualities(List currentTerms, Substitution substitutions, List<Function> eqList,
 										  int[] newVarCounter, boolean isLeftJoin) {
 
 		List<Function> eqGoOutside = new ArrayList<>();
@@ -480,10 +481,10 @@ public class DatalogNormalizer {
 		}
 	}
 
-	private static void renameTerm(Map<Variable, Term> substitutions, List<Function> eqList, int[] newVarCounter, Function atom,
+	private static void renameTerm(Substitution substitutions, List<Function> eqList, int[] newVarCounter, Function atom,
 			List<Term> subterms, int j, Function subTerm, Variable var1) {
 		Predicate head = subTerm.getFunctionSymbol();
-		Variable var2 = (Variable) substitutions.get(var1);
+		Variable var2 = (Variable) substitutions.get((VariableImpl) var1);
 
 		if (var2 == null) {
 			/*
@@ -525,10 +526,10 @@ public class DatalogNormalizer {
 
 	}
 
-	private static void renameVariable(Map<Variable, Term> substitutions, List<Function> eqList, int[] newVarCounter, Function atom,
+	private static void renameVariable(Substitution substitutions, List<Function> eqList, int[] newVarCounter, Function atom,
 			List<Term> subterms, int j, Term subTerm) {
-		Variable var1 = (Variable) subTerm;
-		Variable var2 = (Variable) substitutions.get(var1);
+		VariableImpl var1 = (VariableImpl) subTerm;
+		VariableImpl var2 = (VariableImpl) substitutions.get(var1);
 
 
 		if (var2 == null) {
@@ -539,7 +540,7 @@ public class DatalogNormalizer {
 			 */
 //			int randomNum = rand.nextInt(20) + 1;
 			//+ randomNum
-			var2 = fac.getVariable(var1.getName() + "f" + newVarCounter[0] );
+			var2 = (VariableImpl) fac.getVariable(var1.getName() + "f" + newVarCounter[0] );
 
 			substitutions.put(var1, var2);
 			substitutionsTotal.put(var1, var2);
@@ -552,9 +553,13 @@ public class DatalogNormalizer {
 			 * current value, and add an equality between the substitution and
 			 * the new value.
 			 */
-			
-			while (substitutions.containsKey(var2)){
-				Variable variable = (Variable) substitutions.get(var2);
+			//FIXME: very suspicious
+//			while (substitutions.containsKey(var2)){
+//				VariableImpl variable = (VariableImpl) substitutions.get(var2);
+//				var2=variable;
+//			}
+			if (substitutions.get(var2) != null){
+				VariableImpl variable = (VariableImpl) substitutions.get(var2);
 				var2=variable;
 			}
 

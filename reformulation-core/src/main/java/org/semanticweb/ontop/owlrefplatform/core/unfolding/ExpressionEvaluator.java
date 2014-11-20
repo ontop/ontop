@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
 import org.semanticweb.ontop.model.BNodePredicate;
 import org.semanticweb.ontop.model.BooleanOperationPredicate;
@@ -50,7 +51,11 @@ import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 
 //import com.hp.hpl.jena.iri.IRIFactory;
@@ -133,21 +138,19 @@ public class ExpressionEvaluator {
 						Set<Variable> varSet=  right.getReferencedVariables();
 
 						if (!varSet.isEmpty()){ 
-							Variable var = varSet.iterator().next();
-							Map<Variable, Term> mgu = new HashMap<Variable, Term>();
-							mgu.put(var, OBDAVocabulary.NULL);
+							VariableImpl var = (VariableImpl) varSet.iterator().next();
+							Substitution mgu = new SubstitutionImpl(ImmutableMap.of(var, (Term) OBDAVocabulary.NULL));
 							SubstitutionUtilities.applySubstitution(q, mgu, false);
 						}
 					}else if (!leftOpIsNULL && rightOpIsNULL){
 
 						Set<Variable> varSet=  left.getReferencedVariables();
 
-						if (!varSet.isEmpty()){ 
-							Variable var = varSet.iterator().next();
-							Map<Variable, Term> mgu = new HashMap<Variable, Term>();   
-							mgu.put(var, OBDAVocabulary.NULL);
+						if (!varSet.isEmpty()){
+                            VariableImpl var = (VariableImpl) varSet.iterator().next();
+							Substitution mgu = new SubstitutionImpl(ImmutableMap.of(var, (Term)OBDAVocabulary.NULL));
 							q.getBody().remove(atom);
-							q=Unifier.applyUnifier(q, mgu, false);
+							q= SubstitutionUtilities.applySubstitution(q, mgu, false);
 							
 						}	 	
 					} //end else if
@@ -639,19 +642,16 @@ public class ExpressionEvaluator {
 		// Create a default return constant: blank language with literal type.
 		Term emptyconstant = fac.getTypedTerm(fac.getConstantLiteral("", COL_TYPE.LITERAL), COL_TYPE.LITERAL);
 
-		
-		if (!(innerTerm instanceof Function) && !(innerTerm instanceof Variable)) {
+		if (!(innerTerm instanceof Function)) {
 			return emptyconstant;
-		} 
-		
-		if (innerTerm instanceof Function){
+		}
+		Function function = (Function) innerTerm;
+		Predicate predicate = function.getFunctionSymbol();
 
-			Function function = (Function) innerTerm;
-			Predicate predicate = function.getFunctionSymbol();
+		if (!(predicate instanceof DataTypePredicate)) {
+			return null;
+		}
 
-			if (!(predicate instanceof DataTypePredicate)) {
-				return null;
-			}
 		//String datatype = predicate.toString();
 		if (!dtfac.isLiteral(predicate)) { // (datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI))
 			return emptyconstant;
@@ -659,35 +659,17 @@ public class ExpressionEvaluator {
 
 		if (function.getTerms().size() != 2) {
 			return emptyconstant;
-		} 
+		}
 		else { // rdfs:Literal(text, lang)
 			Term parameter = function.getTerm(1);
 			if (parameter instanceof Variable) {
 				return fac.getTypedTerm(parameter.clone(), COL_TYPE.LITERAL);
-			} 
+			}
 			else if (parameter instanceof Constant) {
 				return fac.getTypedTerm(
 						fac.getConstantLiteral(((Constant) parameter).getValue(),COL_TYPE.LITERAL), COL_TYPE.LITERAL);
 			}
-
-			if (function.getTerms().size() != 2) {
-				return emptyconstant;
-			} else {
-				Term parameter = function.getTerm(1);
-				if (parameter instanceof Variable) {
-					return fac.getFunction(fac.getDataTypePredicateString(),
-							parameter.clone());
-				} else if (parameter instanceof Constant) {
-					return fac.getFunction(fac.getDataTypePredicateString(),
-							fac.getConstantLiteral(((Constant) parameter).getValue(),COL_TYPE.STRING));
-				}
-			}
 		}
-		
-		if (innerTerm instanceof Variable){
-			return term.clone();
-		}
-		
 		return term;
 	}
 
@@ -700,8 +682,7 @@ public class ExpressionEvaluator {
 		/*
 		 * Evaluate the first term
 		 */
-		Term term2 = term.getTerm(0);
-		Term teval1 = eval(term2);
+		Term teval1 = eval(term.getTerm(0));
 		if (teval1 == null) {
 			return OBDAVocabulary.FALSE;
 		}
@@ -738,31 +719,6 @@ public class ExpressionEvaluator {
 			} else {
 				return fac.getFunctionEQ(var, lang);
 			}
-		} else if (teval1 instanceof Function && innerTerm2 instanceof Function) {
-			
-			// Tackling this case LangMatches(lang(text),http://www.w3.org/2001/XMLSchema#string("en"))
-			Predicate pred = ((Function) term2).getFunctionSymbol();
-			
-			Term inner = ((Function) innerTerm2).getTerm(0);
-
-			// Singling out the case  lang(http://www.w3.org/2000/01/rdf-schema#Literal(t2_1,t3_1))
-			Term arg = ((Function) term2).getTerm(0);
-			
-			boolean isLiteral = false;
-			if (arg instanceof Function){
-			//	if (((Function)arg).getArity()==2){
-					isLiteral=true;
-				//}
-			}
-			
-			boolean isLang = pred.equals(OBDAVocabulary.SPARQL_LANG);
-			boolean isConst =  inner instanceof Constant;
-			if (isLang && isConst && !isLiteral){
-				Constant lang = (Constant) inner;
-				return fac.getFunctionEQ(term2, lang);
-			}
-			
-			//the rest
 		} 
 		else if (teval1 instanceof Function && innerTerm2 instanceof Function) {
 			Function f1 = (Function) teval1;
@@ -774,6 +730,7 @@ public class ExpressionEvaluator {
 			return term;
 		}
 	}
+
 
 	private Term evalRegex(Function term) {
 		Term innerTerm = term.getTerm(0);

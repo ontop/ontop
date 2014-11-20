@@ -81,18 +81,15 @@ public class QuestResultset implements TupleResultSet {
 	public QuestResultset(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
 		this.set = set;
 		this.st = st;
-//		this.isSemIndex = st.questInstance.isSemIdx();
-//		if (isSemIndex) 
-//			uriMap = st.questInstance.getSemanticIndexRepository().getUriMap();
-//		else
-//			uriMap = null;
-        Quest questInstance = st.getQuestInstance();
-		this.isSemIndex = questInstance.isSemIdx();
-		this.uriMap = questInstance.getUriMap();
+		this.isSemIndex = st.getQuestInstance().isSemIdx();
+		if (isSemIndex) 
+			uriMap = st.getQuestInstance().getSemanticIndexRepository().getUriMap();
+		else
+			uriMap = null;
 		this.signature = signature;
 		
-		columnMap = new HashMap<>(signature.size() * 2);
-		bnodeMap = new HashMap<>(1000);
+		columnMap = new HashMap<String, Integer>(signature.size() * 2);
+		bnodeMap = new HashMap<String, String>(1000);
 
 		for (int j = 1; j <= signature.size(); j++) {
 			columnMap.put(signature.get(j - 1), j);
