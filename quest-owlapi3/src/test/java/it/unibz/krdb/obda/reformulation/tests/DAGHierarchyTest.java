@@ -84,7 +84,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
 
-		EquivalencesDAG<ClassExpression> classes = namedReasoner.getClasses();
+		EquivalencesDAG<ClassExpression> classes = namedReasoner.getClassDAG();
 		
 		ClassExpression A = onto.getVocabulary().getClass(ontoURI + "A");
 		ClassExpression B = onto.getVocabulary().getClass(ontoURI + "B");
@@ -172,7 +172,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
 
-		EquivalencesDAG<ClassExpression> classes = namedReasoner.getClasses();
+		EquivalencesDAG<ClassExpression> classes = namedReasoner.getClassDAG();
 		
 		ClassExpression A = onto.getVocabulary().getClass(ontoURI + "A");
 		ClassExpression B = onto.getVocabulary().getClass(ontoURI + "B");
@@ -262,7 +262,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
 
-		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.getObjectProperties();
+		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.getObjectPropertyDAG();
 		
 		ObjectPropertyExpression P = onto.getVocabulary().getObjectProperty(ontoURI + "P");
 		ObjectPropertyExpression S = onto.getVocabulary().getObjectProperty(ontoURI + "S");
@@ -348,7 +348,7 @@ public class DAGHierarchyTest extends TestCase {
 		// generate named DAG
 		TestTBoxReasonerImpl_OnNamedDAG namedReasoner = new TestTBoxReasonerImpl_OnNamedDAG(dag);
 		
-		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.getObjectProperties();
+		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.getObjectPropertyDAG();
 		
 		ObjectPropertyExpression P = onto.getVocabulary().getObjectProperty(ontoURI + "P");
 		ObjectPropertyExpression S = onto.getVocabulary().getObjectProperty(ontoURI + "S");

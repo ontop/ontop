@@ -34,7 +34,6 @@ public class SubstitutionImpl implements Substitution {
 
     private final Map<VariableImpl, Term> map;
 
-    @Deprecated
     public SubstitutionImpl() {
         this.map = new HashMap<>();
     }

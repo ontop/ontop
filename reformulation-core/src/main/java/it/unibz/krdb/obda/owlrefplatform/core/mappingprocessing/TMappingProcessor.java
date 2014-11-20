@@ -215,7 +215,7 @@ public class TMappingProcessor {
 		int freshVarCount = 0;
 		List<Function> newBody = new LinkedList<Function>();
 		for (Function currentAtom : currentMapping.getBody()) {
-			if (!(currentAtom.getPredicate() instanceof BuiltinPredicate)) {
+			if (!(currentAtom.getFunctionSymbol() instanceof BuiltinPredicate)) {
 				Function clone = (Function)currentAtom.clone();
 				for (int i = 0; i < clone.getTerms().size(); i++) {
 					Term term = clone.getTerm(i);
@@ -420,15 +420,15 @@ public class TMappingProcessor {
 		 * the TMappings specification.
 		 */
 
-		getObjectTMappings(mappingIndex, originalMappings, reasoner.getObjectProperties(), cqc, full);
-		getDataTMappings(mappingIndex, originalMappings, reasoner.getDataProperties(), cqc, full);
+		getObjectTMappings(mappingIndex, originalMappings, reasoner.getObjectPropertyDAG(), cqc, full);
+		getDataTMappings(mappingIndex, originalMappings, reasoner.getDataPropertyDAG(), cqc, full);
 
 		/*
 		 * Property t-mappings are done, we now continue with class t-mappings.
 		 * Starting with the leafs.
 		 */
 
-		for (Equivalences<ClassExpression> classSet : reasoner.getClasses()) {
+		for (Equivalences<ClassExpression> classSet : reasoner.getClassDAG()) {
 
 			if (!(classSet.getRepresentative() instanceof OClass)) 
 				continue;
@@ -439,7 +439,7 @@ public class TMappingProcessor {
 			Predicate currentPredicate = current.getPredicate();
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);
 
-			for (Equivalences<ClassExpression> descendants : reasoner.getClasses().getSub(classSet)) {
+			for (Equivalences<ClassExpression> descendants : reasoner.getClassDAG().getSub(classSet)) {
 				for (ClassExpression childDescription : descendants) {
 
 					/* adding the mappings of the children as own mappings, the new

@@ -299,28 +299,23 @@ public class R2RMLParser {
 			// } catch (IllegalArgumentException e){
 			//
 			// }
-			Predicate pred;
-			if (obj.startsWith("http://")) {
-				pred = fac.getUriTemplatePredicate(1);
-			} else {
-
-				pred = dtfac.getTypePredicate(COL_TYPE.LITERAL); // .RDFS_LITERAL;
-			}
 
 			// if the literal has a language property or a datatype property we
 			// create the function object later
-			if (lan != null || datatype != null) 
-			{
+			if (lan != null || datatype != null) {
 				objectAtom = fac.getConstantLiteral(obj);
 				
 			} 
-			else 
-			{
+			else {
 				Term newlit = fac.getConstantLiteral(obj);
-				objectAtom = fac.getFunction(pred, newlit);
-
+				
+				if (obj.startsWith("http://")) {
+					objectAtom = fac.getUriTemplate(newlit);
+				} 
+				else {
+					objectAtom = fac.getTypedTerm(newlit, COL_TYPE.LITERAL); // .RDFS_LITERAL;
+				}
 			}
-
 		}
 
 		//we check if the object map is a column (can be only literal)
@@ -367,9 +362,7 @@ public class R2RMLParser {
 		//we check if it is a literal with language tag
 		
 		if (lan != null) {
-			Term lang = fac.getConstantLiteral(lan.toLowerCase());
-			Predicate literal = dtfac.getTypePredicate(COL_TYPE.LITERAL_LANG);
-			Term langAtom = fac.getFunction(literal, objectAtom, lang);
+			Term langAtom = fac.getTypedTerm(objectAtom, lan);
 			objectAtom = langAtom;
 		}
 		
@@ -392,8 +385,7 @@ public class R2RMLParser {
 		else
 		{	//literal
 			Constant constt = fac.getConstantLiteral(objectString);
-			Predicate pred = dtfac.getTypePredicate(COL_TYPE.LITERAL);
-			return fac.getFunction(pred, constt);
+			return fac.getTypedTerm(constt, COL_TYPE.LITERAL);
 
 		}
 	}
@@ -514,34 +506,31 @@ public class R2RMLParser {
 
 
 		Term uriTemplate = null;
-		Predicate pred = null;
 		switch (type) {
 		//constant uri
 		case 0:
 			uriTemplate = fac.getConstantLiteral(string);
-			pred = fac.getUriTemplatePredicate(terms.size());
-			break;
+			terms.add(0, uriTemplate);  // the URI template is always on the first position in the term list
+			return fac.getUriTemplate(terms);
 			// URI or IRI
 		case 1:
 			uriTemplate = fac.getConstantLiteral(string);
-			pred = fac.getUriTemplatePredicate(terms.size());
-			break;
+			terms.add(0, uriTemplate);    // the URI template is always on the first position in the term list
+			return fac.getUriTemplate(terms);
 			// BNODE
 		case 2:
 			uriTemplate = fac.getConstantBNode(string);
-			pred = fac.getBNodeTemplatePredicate(terms.size());
-			break;
+			terms.add(0, uriTemplate);  			// the URI template is always on the first position in the term list
+			return fac.getBNodeTemplate(terms);
 			// simple LITERAL 
 		case 3:
 			uriTemplate = terms.remove(0);
-			pred = dtfac.getTypePredicate(COL_TYPE.LITERAL); // OBDAVocabulary.RDFS_LITERAL; 
-			break;
+			// pred = dtfac.getTypePredicate(); // OBDAVocabulary.RDFS_LITERAL; 
+			// the URI template is always on the first position in the term list
+			//terms.add(0, uriTemplate);
+			return fac.getTypedTerm(uriTemplate, COL_TYPE.LITERAL); 
 		}
-
-		// the URI template is always on the first position in the term list
-		terms.add(0, uriTemplate);
-		return fac.getFunction(pred, terms);
-
+		return null;
 	}
 
 	/**

@@ -259,7 +259,7 @@ public class DatalogParser extends Parser {
 					         
 					        // Get the head atom
 					        Function head = rule.getHead();
-					        String name = head.getPredicate().getName();
+					        String name = head.getFunctionSymbol().getName();
 					        int size = variableList.size(); 
 					        
 					        // Get the predicate atom
@@ -1466,19 +1466,20 @@ public class DatalogParser extends Parser {
 			      String functionName = function30;
 			      int arity = terms31.size();
 			    
-			      Predicate functionSymbol = null;  
 			      if (functionName.equals(OBDAVocabulary.QUEST_URI)) {
-				        functionSymbol = dfac.getUriTemplatePredicate(arity);
+					     value = dfac.getUriTemplate(terms31);
 				  }
 			      else {
+				      Predicate functionSymbol;  
 				      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
-				      if (type != null)
-				    	  functionSymbol = dtfac.getTypePredicate(type);
-				      else
+				      if (type != null) 
+				    	  value = dfac.getTypedTerm(terms31.get(0), type);
+				      else {
 						  functionSymbol = dfac.getPredicate(functionName, arity);
+					      value = dfac.getFunction(functionSymbol, terms31);
+				      }
 			      }
 			    	  
-			      value = dfac.getFunction(functionSymbol, terms31);
 			    }
 			}
 

@@ -50,9 +50,9 @@ public class NamedDAG  {
 	private final SimpleDirectedGraph <DataRangeExpression,DefaultEdge> dataRangeDAG;
 	
 	public NamedDAG(TBoxReasoner reasoner) {			
-		objectPropertyDAG = getNamedDAG(reasoner.getObjectProperties());
-		dataPropertyDAG = getNamedDAG(reasoner.getDataProperties());
-		classDAG = getNamedDAG(reasoner.getClasses());
+		objectPropertyDAG = getNamedDAG(reasoner.getObjectPropertyDAG());
+		dataPropertyDAG = getNamedDAG(reasoner.getDataPropertyDAG());
+		classDAG = getNamedDAG(reasoner.getClassDAG());
 		dataRangeDAG = getNamedDAG(reasoner.getDataRanges());
 	}
 	

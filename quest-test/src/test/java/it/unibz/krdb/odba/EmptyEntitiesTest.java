@@ -44,14 +44,8 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -326,10 +320,10 @@ public class EmptyEntitiesTest {
 	public void testEmptiesWithInverses() throws Exception {
 		TBoxReasoner tboxreasoner = new TBoxReasonerImpl(onto);
 		System.out.println();
-		System.out.println(tboxreasoner.getObjectProperties());
+		System.out.println(tboxreasoner.getObjectPropertyDAG());
 
 		int c = 0; // number of empty concepts
-		for (Equivalences<ClassExpression> concept : tboxreasoner.getClasses()) {
+		for (Equivalences<ClassExpression> concept : tboxreasoner.getClassDAG()) {
 			ClassExpression representative = concept.getRepresentative();
 			if ((!(representative instanceof Datatype)) && !runSPARQLConceptsQuery("<" + concept.getRepresentative().toString() + ">")) {
 				emptyBasicConcepts.addAll(concept.getMembers());
@@ -340,7 +334,7 @@ public class EmptyEntitiesTest {
 
 		{
 			int r = 0; // number of empty roles
-			for (Equivalences<ObjectPropertyExpression> properties : tboxreasoner.getObjectProperties()) {
+			for (Equivalences<ObjectPropertyExpression> properties : tboxreasoner.getObjectPropertyDAG()) {
 				if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
 					emptyProperties.addAll(properties.getMembers());
 					r += properties.size();
@@ -350,7 +344,7 @@ public class EmptyEntitiesTest {
 		}
 		{
 			int r = 0; // number of empty roles
-			for (Equivalences<DataPropertyExpression> properties : tboxreasoner.getDataProperties()) {
+			for (Equivalences<DataPropertyExpression> properties : tboxreasoner.getDataPropertyDAG()) {
 				if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
 					emptyProperties.addAll(properties.getMembers());
 					r += properties.size();

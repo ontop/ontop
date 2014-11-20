@@ -165,11 +165,11 @@ public class SemanticIndexBuilder  {
 
 		Description node;
 		if (d instanceof ObjectPropertyExpression)
-			node = reasoner.getObjectProperties().getVertex((ObjectPropertyExpression)d).getRepresentative();
+			node = reasoner.getObjectPropertyDAG().getVertex((ObjectPropertyExpression)d).getRepresentative();
 		else if (d instanceof DataPropertyExpression)
-			node = reasoner.getDataProperties().getVertex((DataPropertyExpression)d).getRepresentative();
+			node = reasoner.getDataPropertyDAG().getVertex((DataPropertyExpression)d).getRepresentative();
 		else
-			node = reasoner.getClasses().getVertex((ClassExpression)d).getRepresentative();
+			node = reasoner.getClassDAG().getVertex((ClassExpression)d).getRepresentative();
 		
 		SemanticIndexRange range = ranges.get(node);
 		if (range == null)

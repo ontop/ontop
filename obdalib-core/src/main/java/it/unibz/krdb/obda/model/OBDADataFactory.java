@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.model;
  */
 
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.impl.QuestTypeMapper;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 
 import java.io.Serializable;
@@ -47,16 +46,19 @@ public interface OBDADataFactory extends Serializable {
 
 	public DatalogProgram getDatalogProgram(Collection<CQIE> rules);
 
+
+
+	public Function getTripleAtom(Term subject, Term predicate, Term object);
+
 	/**
 	 * Construct a {@link Predicate} object.
-	 * 
-	 * @param name
+	 *
+	 * @param uri
 	 *            the name of the predicate (defined as a URI).
 	 * @param arity
 	 *            the number of elements inside the predicate.
 	 * @return a predicate object.
 	 */
-
 	@Deprecated
 	public Predicate getPredicate(String uri, int arity);
 
@@ -78,7 +80,6 @@ public interface OBDADataFactory extends Serializable {
 
 
 	
-	public QuestTypeMapper getQuestTypeMapper();
 
 	public JdbcTypeMapper getJdbcTypeMapper();
 
@@ -88,13 +89,16 @@ public interface OBDADataFactory extends Serializable {
 	 * Built-in function predicates
 	 */
 
-	public Predicate getUriTemplatePredicate(int arity);
-	
 	public Function getUriTemplate(Term...terms);
 
-	public Predicate getBNodeTemplatePredicate(int arity);
+	public Function getUriTemplate(List<Term> terms);
+	
+	public Function getUriTemplateForDatatype(String type);
+	
 
+	public Function getBNodeTemplate(List<Term> terms);
 
+	public Function getBNodeTemplate(Term... terms);
 	
 	/**
 	 * Construct a {@link Function} object. A function expression consists of
@@ -131,6 +135,8 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getFunctionOR(Term term1, Term term2);
 
+	public Function getFunctionIsTrue(Term term);
+	
 	public Function getFunctionIsNull(Term term);
 
 	public Function getFunctionIsNotNull(Term term);
@@ -196,12 +202,8 @@ public interface OBDADataFactory extends Serializable {
 	
 	public BNode getConstantBNode(String name);
 
-	public Constant getConstantNULL();
-
-	public Constant getConstantTrue();
-
-	public Constant getConstantFalse();
-
+	public ValueConstant getBooleanConstant(boolean value);
+	
 	/**
 	 * Construct a {@link ValueConstant} object.
 	 * 
@@ -229,6 +231,7 @@ public interface OBDADataFactory extends Serializable {
 	 */
 	public ValueConstant getConstantLiteral(String value, Predicate.COL_TYPE type);
 
+
 	/**
 	 * Construct a {@link ValueConstant} object with a language tag.
 	 * <p>
@@ -246,6 +249,10 @@ public interface OBDADataFactory extends Serializable {
 	 */
 	public ValueConstant getConstantLiteral(String value, String language);
 
+	public Function getTypedTerm(Term value, String language);
+	public Function getTypedTerm(Term value, Term language);
+	public Function getTypedTerm(Term value, Predicate.COL_TYPE type);
+	
 	/**
 	 * Construct a {@link ValueConstant} object with a system-assigned name
 	 * that is automatically generated.
@@ -286,10 +293,8 @@ public interface OBDADataFactory extends Serializable {
 
 	public OBDASQLQuery getSQLQuery(String query);
 
-
-	Predicate getJoinPredicate();
-
-	Predicate getLeftJoinPredicate();
-
 	
+	public Function getSPARQLJoin(Term t1, Term t2);
+
+	public Function getSPARQLLeftJoin(Term t1, Term t2);	
 }

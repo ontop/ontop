@@ -55,7 +55,7 @@ import org.openrdf.query.algebra.ProjectionElemList;
 import org.openrdf.query.algebra.ValueExpr;
 import org.openrdf.query.algebra.Var;
 
-//import com.hp.hpl.jena.sparql.syntax.Template;
+
 
 public class QuestGraphResultSet implements GraphResultSet {
 
@@ -63,8 +63,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 
 	private TupleResultSet tupleResultSet;
 
-//	private Template template;
-	
+
 	private SesameConstructTemplate sesameTemplate;
 
 	List <ExtensionElem> extList = null;

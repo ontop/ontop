@@ -183,38 +183,40 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 				assertion = ofac.createObjectPropertyAssertion(prop, c, c2);
 			} 
 			else if (currObject instanceof Literal) {
-				Literal l = (Literal) currObject;
-				Predicate.COL_TYPE type = getColumnType(l.getDatatype());
+				Literal l = (Literal) currObject;				
 				String lang = l.getLanguage();
 				ValueConstant c2;
 				if (lang == null) {
+					URI datatype = l.getDatatype();
+					Predicate.COL_TYPE type; 
+					
+					if (datatype == null) {
+						type = Predicate.COL_TYPE.LITERAL;
+					} 
+					else {
+						type = dtfac.getDataType(datatype);
+						if (type == null)
+							type = Predicate.COL_TYPE.UNSUPPORTED;
+					}			
+					
 					c2 = obdafac.getConstantLiteral(l.getLabel(), type);
-				} else {
+				} 
+				else {
 					c2 = obdafac.getConstantLiteral(l.getLabel(), lang);
 				}
 				DataPropertyExpression prop = ofac.createDataProperty(currentPredicate.getName());
 				assertion = ofac.createDataPropertyAssertion(prop, c, c2);			
-			} else {
+			} 
+			else {
 				throw new RuntimeException("Unsupported object found in triple: " + st.toString() + " (Required URI, BNode or Literal)");
 			}
-		} else {
+		} 
+		else {
 			throw new RuntimeException("Unsupported statement: " + st.toString());
 		}
 		return assertion;
 	}
 
-	private Predicate.COL_TYPE getColumnType(URI datatype) {
-		if (datatype == null) {
-			return Predicate.COL_TYPE.LITERAL;
-		} 
-		else {
-			String uri = datatype.stringValue();
-			Predicate.COL_TYPE type = dtfac.getDataType(uri);
-			if (type != null)
-				return type;
-			return Predicate.COL_TYPE.UNSUPPORTED;
-		}			
-	}
 
 	/**
 	 * Removes the entry at the beginning in the buffer.

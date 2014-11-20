@@ -166,6 +166,7 @@ public class QuestStatement implements OBDAStatement {
 			// this.query = QueryFactory.create(strquery);
 		}
 
+		// TODO: repace the magic number by an enum
 		public void setQueryType(int type) {
 			switch (type) {// encoding of query type to from numbers
 			case 1:
@@ -339,7 +340,7 @@ public class QuestStatement implements OBDAStatement {
 						Constant constant = res.getConstant(1);
 						if (constant instanceof URIConstant) {
 							// collect constants in list
-							constants.add(constant.getValue());
+							constants.add(((URIConstant)constant).getURI());
 						}
 					}
 				}
@@ -475,7 +476,7 @@ public class QuestStatement implements OBDAStatement {
 	private static void removeNonAnswerQueries(DatalogProgram program) {
 		List<CQIE> toRemove = new LinkedList<CQIE>();
 		for (CQIE rule : program.getRules()) {
-			Predicate headPredicate = rule.getHead().getPredicate();
+			Predicate headPredicate = rule.getHead().getFunctionSymbol();
 			if (!headPredicate.getName().toString().equals("ans1")) {
 				toRemove.add(rule);
 			}
@@ -1025,7 +1026,7 @@ public class QuestStatement implements OBDAStatement {
 	private static int getBodySize(List<? extends Function> atoms) {
 		int counter = 0;
 		for (Function atom : atoms) {
-			Predicate predicate = atom.getPredicate();
+			Predicate predicate = atom.getFunctionSymbol();
 			if (!(predicate instanceof BuiltinPredicate)) {
 				counter++;
 			}

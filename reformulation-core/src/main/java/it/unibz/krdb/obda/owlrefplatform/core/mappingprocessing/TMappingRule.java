@@ -33,7 +33,7 @@ public class TMappingRule {
 		List<Function> newbody = new LinkedList<Function>();
 		for (Function atom : body) {
 			Function clone = (Function)atom.clone();
-			if (clone.getPredicate() instanceof BuiltinPredicate) 
+			if (clone.getFunctionSymbol() instanceof BuiltinPredicate) 
 				conditions.add(clone);
 			else 
 				newbody.add(clone);			

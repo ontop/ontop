@@ -85,12 +85,12 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 	 */
 
 	@Override
-	public EquivalencesDAG<ObjectPropertyExpression> getObjectProperties() {
+	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG() {
 		return objectPropertyDAG;
 	}
 	
 	@Override
-	public EquivalencesDAG<DataPropertyExpression> getDataProperties() {
+	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG() {
 		return dataPropertyDAG;
 	}
 	
@@ -101,7 +101,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 	 */
 	
 	@Override
-	public EquivalencesDAG<ClassExpression> getClasses() {
+	public EquivalencesDAG<ClassExpression> getClassDAG() {
 		return classDAG;
 	}
 	

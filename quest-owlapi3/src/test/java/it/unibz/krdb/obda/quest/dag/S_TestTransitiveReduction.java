@@ -130,18 +130,18 @@ public class S_TestTransitiveReduction extends TestCase {
 		//number of redundant edges 
 		int numberRedundants=0;
 
-		for (Equivalences<ObjectPropertyExpression> equivalents: d2.getObjectProperties()) 
+		for (Equivalences<ObjectPropertyExpression> equivalents: d2.getObjectPropertyDAG())
 			if(equivalents.size()>=2)
 				numberEquivalents += equivalents.size();
 		
-		for (Equivalences<ClassExpression> equivalents: d2.getClasses()) 
+		for (Equivalences<ClassExpression> equivalents: d2.getClassDAG())
 			if(equivalents.size()>=2)
 				numberEquivalents += equivalents.size();
 
 
 		{
 			DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> g1 = 	reasonerd1.getObjectPropertyGraph();	
-			for (Equivalences<ObjectPropertyExpression> equivalents: reasonerd1.getObjectProperties()) {
+			for (Equivalences<ObjectPropertyExpression> equivalents: reasonerd1.getObjectPropertyDAG()) {
 				
 				log.info("equivalents {} ", equivalents);
 				
@@ -152,8 +152,8 @@ public class S_TestTransitiveReduction extends TestCase {
 				
 					
 					//descendants of the vertex
-					Set<Equivalences<ObjectPropertyExpression>> descendants = d2.getObjectProperties().getSub(equivalents);
-					Set<Equivalences<ObjectPropertyExpression>> children = d2.getObjectProperties().getDirectSub(equivalents);
+					Set<Equivalences<ObjectPropertyExpression>> descendants = d2.getObjectPropertyDAG().getSub(equivalents);
+					Set<Equivalences<ObjectPropertyExpression>> children = d2.getObjectPropertyDAG().getDirectSub(equivalents);
 
 					log.info("descendants{} ", descendants);
 					log.info("children {} ", children);
@@ -171,7 +171,7 @@ public class S_TestTransitiveReduction extends TestCase {
 		{
 			DefaultDirectedGraph<ClassExpression,DefaultEdge> g1 =	reasonerd1.getClassGraph();	
 
-			for (Equivalences<ClassExpression> equivalents : reasonerd1.getClasses()) {
+			for (Equivalences<ClassExpression> equivalents : reasonerd1.getClassDAG()) {
 				
 				log.info("equivalents {} ", equivalents);
 				
@@ -182,8 +182,8 @@ public class S_TestTransitiveReduction extends TestCase {
 				
 					
 					//descendants of the vertex
-					Set<Equivalences<ClassExpression>> descendants = d2.getClasses().getSub(equivalents);
-					Set<Equivalences<ClassExpression>> children = d2.getClasses().getDirectSub(equivalents);
+					Set<Equivalences<ClassExpression>> descendants = d2.getClassDAG().getSub(equivalents);
+					Set<Equivalences<ClassExpression>> children = d2.getClassDAG().getDirectSub(equivalents);
 
 					log.info("descendants{} ", descendants);
 					log.info("children {} ", children);
