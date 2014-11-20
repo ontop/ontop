@@ -715,11 +715,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(parameter);
 
 			if (isSemIdx()) {
-				datasourceQueryGenerator = new SQLGenerator(metadata,
-						sqladapter, sqlGenerateReplace, dataRepository.getUriMap());
+				datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, dataRepository.getUriMap());
 			} else {
-				datasourceQueryGenerator = new SQLGenerator(metadata,
-						sqladapter, sqlGenerateReplace);
+				datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace);
 			}
 
 
@@ -766,8 +764,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfolder.applyTMappings(reformulationReasoner, true);
 
 				// Adding ontology assertions (ABox) as rules (facts, head with no body).
-				unfolder.addABoxAssertionsAsFacts(inputOntology.getClassAssertions());
-				unfolder.addABoxAssertionsAsFacts(inputOntology.getPropertyAssertions());
+				unfolder.addClassAssertionsAsFacts(inputOntology.getClassAssertions());
+				unfolder.addObjectPropertyAssertionsAsFacts(inputOntology.getObjectPropertyAssertions());
+				unfolder.addDataPropertyAssertionsAsFacts(inputOntology.getDataPropertyAssertions());
 
 				// Adding data typing on the mapping axioms.
 				unfolder.extendTypesWithMetadata(reformulationReasoner);
