@@ -38,27 +38,37 @@ import com.google.common.collect.Multimap;
  * 
  * it would relate atom student(t1, t2, t3, t4) to the table student(id, name, email, type), and
  * variable t1 to "id", t2 to "name", t3 to "email" and t4 to "type".
- *
+ * 
  */
 public class QueryVariableIndex {
 
-	Map<Variable, String> variableColumnIndex = new HashMap<Variable, String>();
+	private final ImmutableMap<Variable, String> variableColumnIndex;
 
+	/**
+	 * A simple variable-column name index is created in the constructor.
+	 */
 	public QueryVariableIndex(CQIE cq, DBMetadata metadata) {
 		
-		computeColumnIndex(cq, metadata);
+		Map<Variable, String> varColumnIndex = computeColumnIndex(cq, metadata);
+		variableColumnIndex = ImmutableMap.copyOf(varColumnIndex);
 	}
 	
-	protected void computeColumnIndex(CQIE cq, DBMetadata metadata) {
+	protected Map<Variable, String> computeColumnIndex(CQIE cq, DBMetadata metadata) {
+		Map<Variable, String> varColIndex = new HashMap<>();
+		
 		List<Function> body = cq.getBody();
 		for (Function atom : body) {
-			computeColumnIndexFromAtom(atom, metadata);
+			varColIndex.putAll(computeColumnIndexFromAtom(atom, metadata));
 		}
+		
+		return varColIndex;
 	}
 
-	private void computeColumnIndexFromAtom(Function atom, DBMetadata metadata) {
+	private Map<Variable, String> computeColumnIndexFromAtom(Function atom, DBMetadata metadata) {
+		Map<Variable, String> varColIndex = new HashMap<>();
+		
 		if (!atom.isDataFunction()) {
-			return;
+			return varColIndex;
 		}
 	
 		Predicate tablePredicate = atom.getFunctionSymbol();
@@ -66,7 +76,7 @@ public class QueryVariableIndex {
 		DataDefinition def = metadata.getDefinition(tableName);
 
 		if (def == null) {
-			return;
+			return varColIndex;
 		}
 		
 		if (atom.getTerms().size() != def.getAttributes().size()) {
@@ -77,10 +87,12 @@ public class QueryVariableIndex {
 		for (Term term : atom.getTerms()) {
 			if ( term instanceof Variable ) {
 				Attribute attribute = def.getAttribute(i+1);
-				variableColumnIndex.put((Variable)term, attribute.getName());
+				varColIndex.put((Variable)term, attribute.getName());
 			}
 			i++;
 		}
+		
+		return varColIndex;
 	}
 
 	public String getColumnName(Variable var) {

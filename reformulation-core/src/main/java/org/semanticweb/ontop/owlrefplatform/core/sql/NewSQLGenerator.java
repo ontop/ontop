@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -182,7 +181,6 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	 * Formatting template
 	 */
     private static final String TYPE_STR = "%s AS \"%sQuestType\"" ;
-	static final String VIEW_NAME = "Q%sVIEW%s";
 	static final String VIEW_ANS_NAME = "Q%sView";
 
 	private static final String QUEST_TYPE = "QuestType";
@@ -399,7 +397,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		Predicate predAns1 = predicatesInBottomUp.get(size-1);
 		
 		Collection<CQIE> ansRules = ruleIndex.get(predAns1);
-		List<Predicate> headDataTypes = getHeadDataTypes(ansRules);
+		List<Predicate> headDataTypes = detectHeadDataTypes(ansRules);
 		boolean isAns1 = true;
 		
 		List<String> queryStrings = Lists.newArrayListWithCapacity(ansRules.size());
@@ -424,11 +422,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	 */
 	private QueryInfo createQueryInfo(DatalogProgram query, DatalogDependencyGraphGenerator depGraph) {
 		
-		boolean isDistinct = hasSelectDistinctStatement(query);
-		boolean isOrderBy = hasOrderByClause(query);
-		Map<Predicate, String> map = new HashMap<>();
-		QueryInfo queryInfo = new QueryInfo(isDistinct, isOrderBy, map);
-		
+		QueryInfo queryInfo = new QueryInfo(query);
 		return createAnsViews(depGraph, query, queryInfo);
 	}
 
@@ -499,7 +493,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	private QueryInfo createView(Predicate pred, Collection<CQIE> ruleList, boolean isAns1, QueryInfo queryInfo) {
 		/* Creates BODY of the view query */
 
-		List<Predicate> headDataTypes = getHeadDataTypes(ruleList);
+		List<Predicate> headDataTypes = detectHeadDataTypes(ruleList);
 		int headArity = 0;
 		
 		List<String> sqls = Lists.newArrayListWithExpectedSize(ruleList.size());
@@ -519,7 +513,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		}
 
 
-		String viewName = String.format(VIEW_ANS_NAME, pred);
+		String viewName = createAnsViewName(pred.getName());
 		String unionView = createUnionFromSQLList(sqls, false);
 
 		// Hard coded variable names
@@ -531,17 +525,20 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		}
 
 		/* Creates the View itself */
-		ViewDefinition viewU = metadata.createViewDefinition(viewName, unionView, columns);
-		QueryInfo newQueryInfo = QueryInfo.addViewDefinition(queryInfo, viewU);
-		newQueryInfo =  QueryInfo.addAnsView(newQueryInfo, pred, unionView);
+		ViewDefinition viewDefinition = metadata.createViewDefinition(viewName, unionView, columns);
+		QueryInfo newQueryInfo = QueryInfo.addAnsViewDefinition(queryInfo, viewDefinition);
 		return newQueryInfo;
+	}
+
+	public static String createAnsViewName(String tableName) {
+		return String.format(VIEW_ANS_NAME, tableName);
 	}
 
 	/**
 	 * Generates a SELECT FROM WHERE query from a conjunctive query.
 	 * 
-	 * Creates a query variable index in order to know the names of columns 
-	 * corresponding to the variables. 
+	 * Creates a query variable index in order to know the table alias of each atom and
+	 * the column references of each variable. 
 	 * 
 	 * @param cq
 	 * @param signature
@@ -552,9 +549,9 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	 */
 	private String generateQueryFromSingleRule(CQIE cq, List<String> signature,
 			boolean isAns1, List<Predicate> headDataTypes, QueryInfo queryInfo) {
-		SQLVariableIndex index = new SQLVariableIndex(cq, metadata, queryInfo, sqlAdapter);
+		SQLAliasVariableIndex index = new SQLAliasVariableIndex(cq, metadata, queryInfo, sqlAdapter);
 
-		String SELECT = generateSelectClause(signature, cq, index, isAns1, headDataTypes, queryInfo);
+		String SELECT = generateSelectClause(cq, index, isAns1, signature, headDataTypes);
 		String FROM = generateFROM(cq.getBody(), index);
 		String WHERE = generateWHERE(cq.getBody(), index);
 		String GROUP = generateGroupBy(cq.getBody(), index);
@@ -564,7 +561,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		return querystr;
 	}
 
-	private String generateGroupBy(List<Function> body, SQLVariableIndex index) {
+	private String generateGroupBy(List<Function> body, SQLAliasVariableIndex index) {
 
 		List<Variable> varsInGroupBy = Lists.newArrayList();
 		for (Function atom : body) {
@@ -589,8 +586,8 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	}
 
 	private String generateHaving(List<Function> body, QueryVariableIndex index) {
-		List <Term> conditions = new LinkedList<Term> ();
-		List <Function> condFunctions = new LinkedList<Function> ();
+		List <Term> conditions = new ArrayList<> ();
+		List <Function> condFunctions = new ArrayList<> ();
 
 		for (Function atom : body) {
 			if (atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_HAVING)) {
@@ -612,25 +609,26 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		return result.toString();
 	}
 	
-	private String generateSelectClause(List<String> signature, CQIE query,
-			SQLVariableIndex index, boolean isAns1,
-			List<Predicate> headDataTypes, QueryInfo queryInfo) {
+	private String generateSelectClause(CQIE query, SQLAliasVariableIndex index,
+			boolean isAns1, List<String> signature,
+			List<Predicate> headDataTypes) {
+		StringBuilder selectString = new StringBuilder("SELECT ");
+		if (index.isDistinct()) {
+			selectString.append("DISTINCT ");
+		}
+		
 		/*
 		 * If the head has size 0 this is a boolean query.
 		 */
 		List<Term> headterms = query.getHead().getTerms();
-		StringBuilder selectString = new StringBuilder();
-
-		selectString.append("SELECT ");
-		if (queryInfo.isDistinct()) {
-			selectString.append("DISTINCT ");
-		}
-		//Only for ASK
 		if (headterms.size() == 0) {
 			selectString.append("'true' as x");
 			return selectString.toString();
 		}
 
+		/*
+		 * We have a non-boolean query.
+		 */
 		Iterator<Term> headTermIter = headterms.iterator();
 		Iterator<Predicate> headDataTypeIter = headDataTypes.iterator();
 
@@ -639,20 +637,11 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 			Term headTerm = headTermIter.next();
 			Predicate headDataType = headDataTypeIter.next();
 			
-			/*
-			 * When isAns1 is true, we need to use the <code>signature</code>
-			 * for the varName
-			 */
-			String varName;
-			if (isAns1) {
-				varName = signature.get(headPos);
-			} else {
-				varName = "v" + headPos;
-			}
+			String varName = createVariableName(headPos, isAns1, signature);
 
-			String typeColumn = getTypeColumnForSELECT(headTerm, varName, index);
-			String mainColumn = getMainColumnForSELECT(headTerm, varName, index, headDataType);
-			String langColumn = getLangColumnForSELECT(headTerm, varName, index);
+			String typeColumn = generateTypeColumnForSELECT(headTerm, varName, index);
+			String mainColumn = generateMainColumnForSELECT(headTerm, varName, index, headDataType);
+			String langColumn = generateLangColumnForSELECT(headTerm, varName, index);
 
 			selectString.append("\n   ");
 			selectString.append(typeColumn).append(", ");
@@ -667,8 +656,19 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		return selectString.toString();
 	}
 
-    /**
+	/**
+	 * Returns the variable name. 
+	 * When isAns1 is true, we need to name it according to the signature.
+	 */
+    private String createVariableName(int headPos, boolean isAns1, List<String> signature) {
+    	if (isAns1) {
+    		return signature.get(headPos);
+		} else {
+			return "v" + headPos;
+		}	
+    }
 
+	/**
      * Infers the type of a projected term.
      *
      * @param projectedTerm
@@ -676,8 +676,8 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
      * @param index Used when the term correspond to a column name
      * @return A string like "5 AS ageQuestType"
      */
-	private String getTypeColumnForSELECT(Term projectedTerm, String varName,
-			SQLVariableIndex index) {
+	private String generateTypeColumnForSELECT(Term projectedTerm, String varName,
+			SQLAliasVariableIndex index) {
 
 		if (projectedTerm instanceof Function) {
 			return getCompositeTermType((Function) projectedTerm, varName);
@@ -763,9 +763,6 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
      * Converts a function symbol into a code type (integer).
      *
      * May return an UNDEFINED_TYPE_CODE value.
-     *
-     * @param predicate
-     * @return
      */
     private static int getCodeTypeFromFunctionSymbol(Predicate predicate) {
     	String predName = predicate.getName();
@@ -778,18 +775,9 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
      * Such variable does not hold this information, so we have to look
      * at the database metadata.
      *
-     *
-     * @param var
-     * @param index
-     * @return
      */
-    private String getTypeFromVariable(Variable var, SQLVariableIndex index, String varName) {
+    private String getTypeFromVariable(Variable var, SQLAliasVariableIndex index, String varName) {
         Collection<String> columnRefs = index.getColumnReferences(var);
-
-        if (columnRefs == null || columnRefs.size() == 0) {
-            throw new RuntimeException(
-                    "Unbound variable found in WHERE clause: " + var);
-        }
 
         /**
          * By default, we assume that the variable is a URI.
@@ -837,33 +825,23 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		return splits;
 	}
 
-	private DataDefinition findDataDefinition(String table, SQLVariableIndex index) {
+	private DataDefinition findDataDefinition(String table, SQLAliasVariableIndex index) {
 		DataDefinition definition = metadata.getDefinition(table);
 		if (definition == null) {
-			definition = index.getQueryInfo().getViewDefinition(table);
+			definition = index.getViewDefinition(table);
 		}
 		return definition;
 	}
 
-	private String findTableName(String table, SQLVariableIndex index) {
-		String tableN = table;
-		
+	private String findTableName(String table, SQLAliasVariableIndex index) {		
 		if (table.startsWith("QVIEW")) {
-			Map<Function, String> views = index.getViewNames();
-			for (Map.Entry<Function, String> pair : views.entrySet()) {
-				if (pair.getValue().equals(table)) {
-					Function function = pair.getKey();
-					tableN = function.getFunctionSymbol().toString();
-					break;
-				}
-			}
-		}
-		
-		return tableN;
+			return index.findTableName(table);
+		}		
+		return table;
 	}
 
-	private String getMainColumnForSELECT(Term headTerm, String varName, 
-			SQLVariableIndex index, Predicate typePredicate) {
+	private String generateMainColumnForSELECT(Term headTerm, String varName, 
+			SQLAliasVariableIndex index, Predicate typePredicate) {
 
 		String mainColumn = null;
 		String mainTemplate = "%s AS %s";
@@ -885,7 +863,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 			// Similar to what is done in #getConditionString()
 			if (atom.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI) ||
 				atom.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_BNODE)) {
-				mainColumn = convertTemplateToNativeString(atom, index);			
+				mainColumn = getTemplateAsString(atom, index);			
 			} 			
 			else if (atom.getFunctionSymbol() instanceof DataTypePredicate) {
 				mainColumn = getDataTypeConditionString(atom, index);
@@ -909,7 +887,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		if (mainColumn.charAt(0) != '\'' && mainColumn.charAt(0) != '(') {
 			if (typePredicate != null){
 				
-				int sqlType = getNativeType(typePredicate);				
+				int sqlType = getPredicateNativeType(typePredicate);				
 				mainColumn = sqlAdapter.sqlCast(mainColumn, sqlType);
 			}			
 		}
@@ -922,7 +900,8 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
     * Adding the ColType column to the projection (used in the result
     * set to know the type of constant)
     */
-	private String getLangColumnForSELECT(Term headTerm, String varName, QueryVariableIndex index) {
+	private String generateLangColumnForSELECT(Term headTerm, String varName,
+			QueryVariableIndex index) {
 
 		String langStr = "%s AS \"%sLang\"";
 
@@ -970,8 +949,8 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	}
 
 	
-	private String generateFROM(List<Function> atoms, SQLVariableIndex index) {
-		String tableDefinitions = getTableDefinitions(atoms, index, true, false, "");
+	private String generateFROM(List<Function> atoms, SQLAliasVariableIndex index) {
+		String tableDefinitions = generateTableDefinitionsForFROM(atoms, index, true, false, "");
 		return "\n FROM \n" + tableDefinitions;
 	}
 
@@ -997,11 +976,9 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	 *            argument will be ignored.
 	 * 
 	 * @return
-	 * 
-	 * TODO: simplify
 	 */
-	private String getTableDefinitions(List<Function> inneratoms,
-			SQLVariableIndex index, boolean isTopLevel, boolean isLeftJoin,
+	private String generateTableDefinitionsForFROM(List<Function> inneratoms,
+			SQLAliasVariableIndex index, boolean isTopLevel, boolean isLeftJoin,
 			String indent) {
 		String indent2 = indent + INDENT;
 
@@ -1011,7 +988,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		 */
 		List<String> tableDefinitions = new ArrayList<>();
 		for (Term innerAtom : inneratoms) {
-			String definition = getTableDefinition((Function) innerAtom, index, indent2);
+			String definition = generateTableDefinition((Function) innerAtom, index, indent2);
 			if (!definition.isEmpty()) {
 				tableDefinitions.add(definition);
 			}
@@ -1044,7 +1021,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	}
 	
 	String formJoinOnClauses(List<Function> inneratoms,
-			SQLVariableIndex index, boolean isLeftJoin, String indent,
+			SQLAliasVariableIndex index, boolean isLeftJoin, String indent,
 			List<String> tableDefinitions) {
 		
 		int size = tableDefinitions.size();
@@ -1092,7 +1069,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		 * all the conditions
 		 */
 		Set<String> conditions = getConditionsString(inneratoms, index);
-		String ON_CLAUSE = String.format(" ON\n%s\n " + indent, getConjunctionOfConditions(conditions));
+		String ON_CLAUSE = String.format(" ON\n%s\n " + indent, conjoinConditions(conditions));
 
 		StringBuilder joinString = new StringBuilder();
 		joinString.append(currentJoin);
@@ -1100,17 +1077,18 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		return joinString.toString();
 	}
 
-	private String getConjunctionOfConditions(Collection<String> conditions) {
+	private String conjoinConditions(Collection<String> conditions) {
 		return Joiner.on(" AND\n").join(conditions);
 	}
 
 	/**
 	 * Returns the table definition for the given atom. If the atom is a simple
 	 * table or view, then it returns the value as defined by the
-	 * QueryAliasIndex. If the atom is a Join or Left Join, it will call
+	 * SQLAliasVariableIndex. If the atom is a Join or Left Join, it will call
 	 * getTableDefinitions on the nested term list.
 	 */
-	private String getTableDefinition(Function atom, SQLVariableIndex index, String indent) {
+	private String generateTableDefinition(Function atom,
+			SQLAliasVariableIndex index, String indent) {
 		Predicate predicate = atom.getFunctionSymbol();
 		if (predicate instanceof BooleanOperationPredicate
 				|| predicate instanceof NumericalOperationPredicate
@@ -1120,28 +1098,28 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		} 
 		
 		else if (predicate instanceof AlgebraOperatorPredicate) {
-			if (predicate == OBDAVocabulary.SPARQL_GROUP) {
+			if (predicate.equals(OBDAVocabulary.SPARQL_GROUP)) {
 				return "";
 			}
 
-			List<Function> innerTerms = new LinkedList<Function>();
+			List<Function> innerTerms = new ArrayList<Function>();
 			for (Term innerTerm : atom.getTerms()) {
 				innerTerms.add((Function) innerTerm);
 			}
 			
-			if (predicate == OBDAVocabulary.SPARQL_JOIN) {
-				return getTableDefinitions(innerTerms, index, false, false, indent + INDENT);
+			if (predicate.equals(OBDAVocabulary.SPARQL_JOIN)) {
+				return generateTableDefinitionsForFROM(innerTerms, index, false, false, indent + INDENT);
 			} 
-			else if (predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
-				return getTableDefinitions(innerTerms, index, false, true, indent + INDENT);
+			else if (predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN)) {
+				return generateTableDefinitionsForFROM(innerTerms, index, false, true, indent + INDENT);
 			}
 		}
 
 		/*
 		 * This is a data atom
 		 */
-		String def = index.getViewDefinition(atom);
-		return def;
+		String definition = index.getViewDefinition(atom);
+		return definition;
 	}
 
 	private String generateWHERE(List<Function> atoms, QueryVariableIndex index) {
@@ -1150,27 +1128,10 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 			return "";
 		}
 		
-		return "\nWHERE \n" + getConjunctionOfConditions(conditions);
+		return "\nWHERE \n" + conjoinConditions(conditions);
 	}
 
-	private boolean hasOrderByClause(DatalogProgram query) {
-		boolean toReturn = false;
-		if (query.getQueryModifiers().hasModifiers()) {
-			final List<OrderCondition> conditions = query.getQueryModifiers().getSortConditions();
-			toReturn = (!conditions.isEmpty());
-		}
-		return toReturn;
-	}
-
-	private boolean hasSelectDistinctStatement(DatalogProgram query) {
-		boolean toReturn = false;
-		if (query.getQueryModifiers().hasModifiers()) {
-			toReturn = query.getQueryModifiers().isDistinct();
-		}
-		return toReturn;
-	}
-
-	private List<Predicate> getHeadDataTypes(Collection<CQIE> rules) {
+	private List<Predicate> detectHeadDataTypes(Collection<CQIE> rules) {
 		int ansArity = rules.iterator().next().getHead().getTerms().size();
 
 		List<Predicate> ansTypes = Lists.newArrayListWithCapacity(ansArity);
@@ -1183,7 +1144,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 			List<Term> terms = head.getTerms();
 			for (int j = 0; j < terms.size(); j++) {
 				Term term = terms.get(j);
-				getHeadTermDataType(term, ansTypes, j);
+				detectHeadTermDataType(term, ansTypes, j);
 			}
 		}
 		return ansTypes;
@@ -1201,7 +1162,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	 * @param ansTypes
 	 * @param j
 	 */
-    private void getHeadTermDataType(Term term, List<Predicate> ansTypes, int j) {
+    private void detectHeadTermDataType(Term term, List<Predicate> ansTypes, int j) {
     	if (term instanceof Function) {
 			Function atom = (Function) term;
 			Predicate typePred = atom.getFunctionSymbol();
@@ -1218,7 +1179,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 				ansTypes.set(j, unifiedType);
 			}
 			// Aggregate predicates different from COUNT
-			else if (typePred.isAggregationPredicate() && typePred != OBDAVocabulary.SPARQL_COUNT) {
+			else if (typePred.isAggregationPredicate() && !typePred.equals(OBDAVocabulary.SPARQL_COUNT)) {
 
 				Term agTerm = atom.getTerm(0);
 				if (agTerm instanceof Function) {
@@ -1303,7 +1264,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 			throw new RuntimeException("Invoked for non-Boolean function " + atom.getFunctionSymbol() + "!");
 		}
 
-		if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_REGEX) {
+		if (atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_REGEX)) {
 			return getRegularExpressionString(atom, index);
 		}
 		else if (atom.getArity() == 1) {
@@ -1395,7 +1356,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		String column = getNativeString(term1, index);
 
 		// find data type of term and evaluate accordingly
-		int type = getVariableDataType(term1);
+		int type = detectVariableDataType(term1);
 		if (type == Types.INTEGER)
 			return String.format("NOT %s > 0", column);
 		if (type == Types.DOUBLE)
@@ -1409,7 +1370,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 
 	private String getIsTrueString(Term term1, QueryVariableIndex index) {
 		String column = getNativeString(term1, index);
-		int type = getVariableDataType(term1);
+		int type = detectVariableDataType(term1);
 
 		// find data type of term and evaluate accordingly
 		if (type == Types.INTEGER)
@@ -1424,7 +1385,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	}
 
 	
-	private int getVariableDataType(Term term) {
+	private int detectVariableDataType(Term term) {
 
 		if (term instanceof Variable){
 			throw new RuntimeException("Cannot return the SQL type for: " + term);
@@ -1432,7 +1393,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		else if (term instanceof Function){
 			Function atom = (Function) term;
 			if (atom.isDataTypeFunction()) {
-				return getNativeType(atom.getFunctionSymbol());
+				return getPredicateNativeType(atom.getFunctionSymbol());
 			}
 		}  
 		
@@ -1441,7 +1402,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	}
 
 	//TODO: find a proper place for this method 
-	private int getNativeType(Predicate p) {
+	private int getPredicateNativeType(Predicate p) {
 		return predicateSQLTypes.containsKey(p.getName()) ? predicateSQLTypes.get(p.getName()).intValue() : defaultSQLType;
 	}
 
@@ -1450,7 +1411,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	protected String getNativeLexicalForm(URIConstant uc) {
 		if (isSemanticIndex) {
 			String uri = uc.toString();
-			int id = getUriID(uri);
+			int id = findUriID(uri);
 			return jdbcUtil.getSQLLexicalForm(String.valueOf(id));
 		}
 		
@@ -1461,7 +1422,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	protected String getNativeLexicalForm(ValueConstant ct) {
 		if (isSemanticIndex) {
 			if (ct.getType() == COL_TYPE.OBJECT || ct.getType() == COL_TYPE.LITERAL) {
-				int id = getUriID(ct.getValue());
+				int id = findUriID(ct.getValue());
 				if (id >= 0) {
 					//return jdbcutil.getSQLLexicalForm(String.valueOf(id));
 					return String.valueOf(id);
@@ -1485,7 +1446,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	 * @param uri
 	 * @return
 	 */
-	private int getUriID(String uri) {
+	private int findUriID(String uri) {
 
 		Integer id = uriRefIds.get(uri);
 		if (id != null)
@@ -1574,7 +1535,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	protected String getCastConditionString(Function atom, QueryVariableIndex index) {
 		String columnName = getNativeString(atom.getTerm(0), index);
 		
-		if (isStringColType(atom, (SQLVariableIndex) index)) {
+		if (isStringColType(atom, (SQLAliasVariableIndex) index)) {
 			return columnName;
 		} 
 		
@@ -1592,7 +1553,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	@Override
 	protected String getSTRConditionString(Function atom, QueryVariableIndex index) {
 		String columnName = getNativeString(atom.getTerm(0), index);
-		if (isStringColType(atom, (SQLVariableIndex) index)) {
+		if (isStringColType(atom, (SQLAliasVariableIndex) index)) {
 			return columnName;
 		} else {
 			return sqlAdapter.sqlCast(columnName, Types.VARCHAR);
@@ -1607,7 +1568,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	 * @param index
 	 * @return
 	 */
-	protected String convertTemplateToNativeString(Function atom, QueryVariableIndex index) {
+	protected String getTemplateAsString(Function atom, QueryVariableIndex index) {
 		/*
 		 * The first inner term determines the form of the result
 		 */
@@ -1621,7 +1582,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 			 * should be put in place of the place holders. We need to tokenize
 			 * and form the CONCAT
 			 */
-			return concatenateFromTemplate(atom, (SQLVariableIndex) index);
+			return concatenateFromTemplate(atom, (SQLAliasVariableIndex) index);
 			
 		} else if (term1 instanceof Variable) {
 			/*
@@ -1656,7 +1617,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	 * the first term is a ValueConstant or a BNode.
 	 * 
 	 */
-	private String concatenateFromTemplate(Function atom, SQLVariableIndex index) {
+	private String concatenateFromTemplate(Function atom, SQLAliasVariableIndex index) {
 		// We already know that term1 is either a BNode or a ValueConstant
 		Term term1 = atom.getTerm(0);
 		
@@ -1686,7 +1647,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		String[] params = new String[vex.size()];
 		params = vex.toArray(params);
 		
-		boolean isDistinctOrOrderBy = index.getQueryInfo().isDistinct() || index.getQueryInfo().isOrderBy();
+		boolean isDistinctOrOrderBy = index.isDistinct() || index.isOrderBy();
 		return NewSQLGenerator.getStringConcatenation(sqlAdapter, params, isDistinctOrOrderBy);
 	}
 	
@@ -1696,7 +1657,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	 * Note that if atom has only 1 element, there is nothing to concatenate.
 	 */
 	private List<String> concatenateTailOfTemplate(Function atom,
-			SQLVariableIndex index, String literalValue, String replace1,
+			SQLAliasVariableIndex index, String literalValue, String replace1,
 			String replace2) {
         String template = removeAllQuotes(literalValue);
 		String[] split = template.split("[{][}]");
@@ -1734,7 +1695,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		return vex;
 	}
 
-	private boolean isStringColType(Term term, SQLVariableIndex index) {
+	private boolean isStringColType(Term term, SQLAliasVariableIndex index) {
 		/*
 		 * term is a Function
 		 */
@@ -1754,7 +1715,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 			
 			else {
 				if (function.getTerms().size() == 1) {
-					if (predicate == OBDAVocabulary.SPARQL_COUNT) {
+					if (predicate.equals(OBDAVocabulary.SPARQL_COUNT)) {
 						return false;
 					}
 					/*

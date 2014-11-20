@@ -20,6 +20,7 @@ import org.semanticweb.ontop.sql.TableDefinition;
 import org.semanticweb.ontop.sql.ViewDefinition;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -29,24 +30,60 @@ import com.google.common.collect.Multimap;
  * An object of this class is created for a CQ with the purpose to relate 
  * atoms and their variables to tables and column names.
  * 
- * E.g., for a CQ
+ * E.g., assume a CQ
  *   
  * 		ans1(t1) :- student(t1, t2, t3, t4), EQ(t4,2)
  * 
  * and a DB table 
  * 
- * 		student(id, name, email, type)
+ * 		student(id, name, email, type).
  * 
- * it would relate atom student(t1, t2, t3, t4) to the table student(id, name, email, type), and
- * variable t1 to "id", t2 to "name", t3 to "email" and t4 to "type".
+ * 
+ * The following information would be created/stored for the atom student(t1, t2, t3, t4):
+ *   
+ *  -- the data definition is the table student(id, name, email, type),
+ *   
+ *  -- the view name (rather, alias in this case) QstudentView0 is created
+ *  
+ *  -- each variable is linked to the following column references:
+ *  
+ *      ** variable t1 to "QstudentView0"."id", 
+ *      ** variable t2 to "QstudentView0"."name", 
+ *      ** variable t3 to "QstudentView0"."email", and 
+ *      ** variable t4 to "QstudentView0"."type".
+ * 
+ * 
+ * All this information is used to obtain an SQL query of this form
+ * 
+ *       select "QstudentView0"."id" from student QstudentView0 where "QstudentView0"."type"=4;
+ *       
+ *       
+ * View names are needed for selfjoins, e.g., 
  *
+ * 		ans1(t1) :- student(t1, t2, t3, t4), student(s1, s2, s3, s4), EQ(t4,s4), NEQ(t1,s1)
+ * 
  */
-public class SQLVariableIndex extends QueryVariableIndex{
+public class SQLAliasVariableIndex extends QueryVariableIndex{
 
-	private final ImmutableMap<Function, String> viewNames; 
-	private final ImmutableMap<Function, String> tableNames;
+	static final String VIEW_NAME = "Q%sVIEW%s";
+	
+	/**
+	 * View name for each data atom (not table name) 
+	 */
+	private final ImmutableMap<Function, String> viewNames;
+	
+	/**
+	 * Table definitions from metadata and view definitions from queryInfo
+	 * for atoms (not table names) 
+	 */
 	private final ImmutableMap<Function, DataDefinition> dataDefinitions;
-	private final Multimap<Variable, String> columnReferences;
+	
+	/**
+	 * The names of columns to which variables refer, more precisely strings of the form
+	 * TableOrViewName.ColumnName.
+	 * Determined by the position of the variable in atoms.
+	 */
+	private final ImmutableMultimap<Variable, String> columnReferences;
 
 	private final SQLDialectAdapter sqlAdapter;
 	
@@ -59,38 +96,41 @@ public class SQLVariableIndex extends QueryVariableIndex{
 	private final QueryInfo queryInfo;
 	
 
-	public SQLVariableIndex(CQIE cq, DBMetadata metadata, QueryInfo queryInfo, SQLDialectAdapter sqlDialectAdapter) {
+	/**
+	 * All indexing is done in the constructor. First mutable maps and multimaps are constructed,
+	 * then their immutable versions are saved.
+	 * 
+	 * Here we take into account not only table definitions from metadata, but also view definition in queryInfo.
+	 */
+	public SQLAliasVariableIndex(CQIE cq, DBMetadata metadata, QueryInfo queryInfo, SQLDialectAdapter sqlDialectAdapter) {
 		super(cq, metadata);
 		
 		Map<Function, String> viewNames = new HashMap<Function, String>(); 
-		Map<Function, String> tableNames = new HashMap<Function, String>();
 		Map<Function, DataDefinition> dataDefinitions = new HashMap<Function, DataDefinition>();
 		Multimap<Variable, String> columnReferences = HashMultimap.create();
 
-		int[] dataTableCount = {0};
-
-		generateViews(cq.getBody(), metadata, queryInfo, viewNames, tableNames, dataDefinitions, 
-				dataTableCount, columnReferences, sqlDialectAdapter);
+		generateViews(cq.getBody(), metadata, queryInfo, viewNames, dataDefinitions, 
+				columnReferences, sqlDialectAdapter);
 
 		this.sqlAdapter = sqlDialectAdapter;
 		this.queryInfo = queryInfo;
 		
 		this.viewNames = ImmutableMap.copyOf(viewNames);
-		this.tableNames = ImmutableMap.copyOf(tableNames);
 		this.dataDefinitions = ImmutableMap.copyOf(dataDefinitions);
 		this.columnReferences = ImmutableMultimap.copyOf(columnReferences);
 	}
 
 	private static void generateViews(List<Function> atoms, DBMetadata metadata, QueryInfo queryInfo, 
-									Map<Function, String> viewNames, Map<Function, String> tableNames, 
-									Map<Function, DataDefinition> dataDefinitions, int[] dataTableCount, 
-									Multimap<Variable, String> columnReferences, SQLDialectAdapter sqlDialectAdapter) {
+									Map<Function, String> viewNames, 
+									Map<Function, DataDefinition> dataDefinitions,  
+									Multimap<Variable, String> columnReferences, 
+									SQLDialectAdapter sqlDialectAdapter) {
 		for (Function atom : atoms) {
 			/*
 			 * This will be called recursively if necessary
 			 */
-			generateViewsIndexVariables(atom, metadata, queryInfo, 
-								viewNames, tableNames, dataDefinitions, dataTableCount, columnReferences, sqlDialectAdapter);
+			generateViewsIndexVariables(atom, metadata, queryInfo, viewNames,
+					dataDefinitions, columnReferences, sqlDialectAdapter);
 		}
 	}
 
@@ -105,20 +145,12 @@ public class SQLVariableIndex extends QueryVariableIndex{
 	 * View definitions are only done for data atoms. Join/LeftJoin and
 	 * boolean atoms are not associated to view definitions.
 	 * 
-	 * @param atom
-	 * @param metadata
-	 * @param queryInfo
-	 * @param viewNames
-	 * @param tableNames
-	 * @param dataDefinitions
-	 * @param dataTableCount
-	 * @param columnReferences
-	 * @param sqlDialectAdapter
 	 */
 	private static void generateViewsIndexVariables(Function atom, DBMetadata metadata, QueryInfo queryInfo, 
-								Map<Function, String> viewNames, Map<Function, String> tableNames, 
-								Map<Function, DataDefinition> dataDefinitions, int[] dataTableCount, 
-								Multimap<Variable, String> columnReferences, SQLDialectAdapter sqlDialectAdapter) {
+								Map<Function, String> viewNames, 
+								Map<Function, DataDefinition> dataDefinitions, 
+								Multimap<Variable, String> columnReferences, 
+								SQLDialectAdapter sqlDialectAdapter) {
 		
 		if (atom.getFunctionSymbol() instanceof BooleanOperationPredicate) {
 			return;
@@ -129,51 +161,48 @@ public class SQLVariableIndex extends QueryVariableIndex{
 			for (Term subatom : terms) {
 				if (subatom instanceof Function) {
 					generateViewsIndexVariables((Function) subatom, metadata, queryInfo, 
-							viewNames, tableNames, dataDefinitions, dataTableCount, columnReferences, sqlDialectAdapter);
+							viewNames, dataDefinitions, columnReferences, sqlDialectAdapter);
 				}
 			}
 		}
 
-		Predicate tablePredicate = atom.getFunctionSymbol();
-		String tableName = tablePredicate.getName();
+		String tableName = atom.getFunctionSymbol().getName();
 		DataDefinition dataDefinition = metadata.getDefinition(tableName);
 
-		boolean isAnsPredicate = false;
 		String viewName = null;
-		
 		if (dataDefinition == null) {
-			/*
-			 * There is no definition for this atom, its not a database
-			 * predicate. We check if it is an ans predicate and it has a
-			 * view:
+			/**
+			 * There is no definition for this atom, so its not a database
+			 * predicate. We check whether it has a view definition in queryInfo:
 			 */
-			// viewName = "Q"+tableName+"View";
-			viewName = String.format(NewSQLGenerator.VIEW_ANS_NAME, tableName);
+			viewName = NewSQLGenerator.createAnsViewName(tableName);
 			dataDefinition = queryInfo.getViewDefinition(viewName);
 			if (dataDefinition == null) {
+				//TODO: throw an Exception?
 				return;
 			}
-			
-			viewNames.put(atom, viewName);
-			isAnsPredicate = true;
 		} else {
-			viewName = String.format(NewSQLGenerator.VIEW_NAME, tableName, String.valueOf(dataTableCount[0]));
-			viewNames.put(atom, viewName);
+			/**
+			 * For database predicates we give a different view name. 
+			 */
+			viewName = createViewName(tableName, String.valueOf(dataDefinitions.size()));
 		}
-		dataTableCount[0] = dataTableCount[0] + 1;
 		
-		tableNames.put(atom, dataDefinition.getName());
-
+		/**
+		 * For each atom we record the view name and 
+		 * the data definition of the view
+		 */
+		viewNames.put(atom, viewName);
 		dataDefinitions.put(atom, dataDefinition);
 
-		indexVariables(atom, isAnsPredicate, viewName, dataDefinition, columnReferences, sqlDialectAdapter);
+		indexVariables(atom, viewName, dataDefinition, columnReferences, sqlDialectAdapter);
 	}
 
 	/**
-	 * Creates column references for each variable in atom
+	 * Creates column references for each variable in atom. 
+	 * The references are of the form ViewName.ColumnName
 	 * 
 	 * @param atom
-	 * @param isAnsPredicate
 	 * @param viewName
 	 * 		the name of the view corresponding to atom
 	 * @param dataDefinition
@@ -181,32 +210,40 @@ public class SQLVariableIndex extends QueryVariableIndex{
 	 * @param columnReferences
 	 * @param sqlDialectAdapter 
 	 */
-	private static void indexVariables(final Function atom, final boolean isAnsPredicate, 
-									final String viewName, final DataDefinition dataDefinition, 
+	private static void indexVariables(final Function atom,  
+									final String viewName, 
+									final DataDefinition dataDefinition, 
 									Multimap<Variable, String> columnReferences, 
 									final SQLDialectAdapter sqlDialectAdapter) {
+
+		/**
+		 * if atom is a database predicate, then the viewName is different from 
+		 * the name of dataDefinition. Otherwise it is an ans predicate.
+		 */
+		boolean isAnsPredicate = ( viewName.equals(dataDefinition.getName()) );
+
 		String quotedViewName = sqlDialectAdapter.sqlQuote(viewName);
+
 		for (int index = 0; index < atom.getTerms().size(); index++) {
 			Term term = atom.getTerm(index);
 
 			if (term instanceof Variable) {
-				/*
-				 * the index of attributes of the definition starts from 1
-				 */
-				String columnName;
-
-				//TODO need a proper method for checking whether something is an ans predicate
+				
+				int attPos;
 				if (isAnsPredicate) {
-					// If I am here it means that it is not a database table
-					// but a view from an Ans predicate
-					int attPos = 3 * (index + 1);
-					columnName = dataDefinition.getAttributeName(attPos);
+					/**
+					 * dataDefinition is a View Definition of an ans predicate.
+					 * There 3 times more attributes in view definitions.
+					 */
+					attPos = 3 * (index + 1);
 				} else {
-					columnName = dataDefinition.getAttributeName(index + 1);
+					/**
+					 * the index of attributes of the definition starts from 1
+					 */
+					attPos = index + 1;
 				}
-
-				columnName = NewSQLGenerator.removeAllQuotes(columnName);
-
+				String columnName = NewSQLGenerator.removeAllQuotes( dataDefinition.getAttributeName(attPos) );
+				
 				String reference = sqlDialectAdapter.sqlQualifiedColumn(quotedViewName, columnName);
 				columnReferences.put((Variable) term, reference);
 			}
@@ -214,61 +251,77 @@ public class SQLVariableIndex extends QueryVariableIndex{
 	}
 
 	/***
-	 * Generates the view definition, i.e., "tablename viewname".
+	 * Returns for an atom either
+	 *  - the table alias, i.e., tableName viewName, 
+	 * or
+	 *  - the view definition and alias, i.e., "(View Definition Query) viewName".
 	 */
 	public String getViewDefinition(Function atom) {
-		DataDefinition def = dataDefinitions.get(atom);
-		String viewname = viewNames.get(atom);
-		viewname = sqlAdapter.sqlQuote(viewname);
+		DataDefinition dataDefinition = dataDefinitions.get(atom);
+		String viewName = sqlAdapter.sqlQuote(viewNames.get(atom));
 
-		if (def instanceof TableDefinition) {
-			return sqlAdapter.sqlTableName(tableNames.get(atom), viewname);
+		if (dataDefinition instanceof TableDefinition) {
+			return sqlAdapter.sqlTableName(dataDefinition.getName(), viewName);
 		}
 		
-		else if (def instanceof ViewDefinition) {
-			String viewdef = ((ViewDefinition) def).getStatement();
-			String formatView = String.format("(%s) %s", viewdef, viewname);
+		/**
+		 * We have an ans atom.
+		 */
+		String viewDefinition = ((ViewDefinition) dataDefinition).getStatement();
+		if (viewDefinition != null) {
+			String formatView = String.format("(%s) %s", viewDefinition, viewName);
 			return formatView;
 		}
 
-		// Should be an ans atom.
-		Predicate pred = atom.getFunctionSymbol();
-		String view = queryInfo.getSQLAnsViewMap().get(pred);
-		viewname = "Q" + pred + "View";
-		viewname = sqlAdapter.sqlQuote(viewname);
-
-		if (view != null) {
-			String formatView = String.format("(%s) %s", view, viewname);
-			return formatView;
-
-		}
-
-		throw new RuntimeException(
-				"Impossible to get data definition for: " + atom
-						+ ", type: " + def);
-	}
-
-	public Collection<String> getColumnReferences(Variable var) {
-		return columnReferences.get(var);
+		throw new RuntimeException("Impossible to get data definition for: "
+				+ atom + ", type: " + dataDefinition);
 	}
 
 	@Override
 	public String getColumnName(Variable var) {
-		//TODO: why??? 
-		Collection<String> posList = getColumnReferences(var);
-		if (posList == null || posList.size() == 0) {
-			throw new RuntimeException(
-					"Unbound variable found in WHERE clause: " + var);
+		Collection<String> columnRefs = getColumnReferences(var);
+		return columnRefs.iterator().next();
+	}
+
+	public Collection<String> getColumnReferences(Variable var) {
+		Collection<String> columnRefs = columnReferences.get(var);
+        if (columnRefs == null || columnRefs.size() == 0) {
+            throw new RuntimeException(
+                    "Unbound variable found in WHERE clause: " + var);
+        }
+        return columnRefs;
+	}
+
+	public static String createViewName(String tableName, String number) {
+		return String.format(VIEW_NAME, tableName, number);
+	}
+
+	/**
+	 * Returns the original table name (that is, predicate's name)
+	 * of a view that is not an ans view. 
+	 */
+	public String findTableName(String viewName) {
+		for (Map.Entry<Function, String> pair : viewNames.entrySet()) {
+			if (pair.getValue().equals(viewName)) {
+				Function function = pair.getKey();
+				return function.getFunctionSymbol().toString();
+			}
 		}
-		return posList.iterator().next();
+		return viewName;
 	}
 
-	public Map<Function, String> getViewNames() {
-		return viewNames;
+	public DataDefinition getViewDefinition(String tableName) {
+		return queryInfo.getViewDefinition(tableName);
 	}
 
-	public QueryInfo getQueryInfo() {
-		return queryInfo;
+	public boolean isDistinct() {
+		return queryInfo.isDistinct();
 	}
+
+	public boolean isOrderBy() {
+		return queryInfo.isOrderBy();
+	}
+	
+
 
 }

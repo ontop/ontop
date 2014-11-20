@@ -103,7 +103,7 @@ public abstract class AbstractQueryGenerator {
 		}
 		else if (atom.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI) ||
 				atom.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_BNODE)) {
-			return convertTemplateToNativeString(atom, index);
+			return getTemplateAsString(atom, index);
 		}
 		else {
 			// a data predicate
@@ -115,7 +115,7 @@ public abstract class AbstractQueryGenerator {
 
 	protected abstract String getSTRConditionString(Function atom, QueryVariableIndex index);
 
-	protected abstract String convertTemplateToNativeString(Function atom, QueryVariableIndex index);
+	protected abstract String getTemplateAsString(Function atom, QueryVariableIndex index);
 
 	protected abstract String getLanguageConditionString(Function atom, QueryVariableIndex index);
 
