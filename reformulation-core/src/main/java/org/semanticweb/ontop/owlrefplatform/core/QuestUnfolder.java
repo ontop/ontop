@@ -255,7 +255,7 @@ public class QuestUnfolder {
 	private void generateURITemplateMatchers() {
 
 		Set<String> templateStrings = new HashSet<>();
-		this.uriTemplateMatcher = new UriTemplateMatcher();
+		Map<Pattern, Function> matchers = new HashMap<>();
 
 		for (CQIE mapping : unfoldingProgram) { // int i = 0; i < unfoldingProgram.getRules().size(); i++) {
 
@@ -291,7 +291,7 @@ public class QuestUnfolder {
 					}
 					Function templateFunction = fac.getUriTemplate(fac.getVariable("x"));
 					Pattern matcher = Pattern.compile("(.+)");
-					uriTemplateMatcher.put(matcher, templateFunction);
+					matchers.put(matcher, templateFunction);
 					templateStrings.add("(.+)");
 				} else {
 					ValueConstant template = (ValueConstant) fun.getTerms().get(0);
@@ -302,11 +302,12 @@ public class QuestUnfolder {
 						continue;
 					}
 					Pattern matcher = Pattern.compile(templateString);
-					uriTemplateMatcher.put(matcher, fun);
+					matchers.put(matcher, fun);
 					templateStrings.add(templateString);
 				}
 			}
 		}
+		this.uriTemplateMatcher = new UriTemplateMatcher(matchers);
 	}
 
 
