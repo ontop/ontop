@@ -423,11 +423,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 */
 	private List<Predicate> getHeadDataTypes(Collection<CQIE> rules) {
-		int ansArtiy = rules.iterator().next().getHead().getTerms().size();
+		int ansArity = rules.iterator().next().getHead().getTerms().size();
 
-		List<Predicate> ansTypes = Lists.newArrayListWithCapacity(ansArtiy);
+		List<Predicate> ansTypes = Lists.newArrayListWithCapacity(ansArity);
 
-		for(int k = 0; k < ansArtiy; k++){
+		for(int k = 0; k < ansArity; k++){
 			ansTypes.add(null);
 		}
 
@@ -437,7 +437,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			for (int j = 0; j < terms.size(); j++) {
 				Term term = terms.get(j);
 				if(term instanceof BNode){
-					ansTypes.set(j, OBDAVocabulary.XSD_STRING);
+					ansTypes.set(j, dtfac.getTypePredicate(COL_TYPE.STRING));
 					// TODO: remove it
 					throw new IllegalArgumentException();
 
@@ -449,8 +449,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 						Predicate unifiedType = unifyTypes(ansTypes.get(j), typePred);
 						ansTypes.set(j, unifiedType);
 
-					} else if (typePred.getName().equals(OBDAVocabulary.QUEST_BNODE)){
-						ansTypes.set(j, OBDAVocabulary.XSD_STRING);
+					} else if (typePred.equals(dtfac.getTypePredicate(COL_TYPE.BNODE))){
+						ansTypes.set(j, dtfac.getTypePredicate(COL_TYPE.STRING));
 
 					}else if (  (typePred.getName().equals(OBDAVocabulary.SPARQL_AVG_URI))||
 							(typePred.getName().equals(OBDAVocabulary.SPARQL_SUM_URI)) ||
@@ -465,7 +465,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 							ansTypes.set(j, unifiedType);
 
 						}else{
-							Predicate unifiedType = unifyTypes(ansTypes.get(j), OBDAVocabulary.XSD_DECIMAL);
+							Predicate unifiedType = unifyTypes(ansTypes.get(j), dtfac.getTypePredicate(COL_TYPE.DECIMAL));
 							ansTypes.set(j, unifiedType);
 						}
 					} else {
@@ -474,14 +474,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 				} else if(term instanceof Variable){
 					// FIXME: properly hanldle the types by checking the metadata
-					ansTypes.set(j, OBDAVocabulary.XSD_STRING);
+					ansTypes.set(j, dtfac.getTypePredicate(COL_TYPE.STRING));
 				} else if(term instanceof ValueConstant){
 					COL_TYPE type = ((ValueConstant)term).getType();
-					Predicate typePredicate = obdaDataFactory.getTypePredicate(type);
+					Predicate typePredicate =  dtfac.getTypePredicate(type);
 					Predicate unifiedType = unifyTypes(ansTypes.get(j), typePredicate);
 					ansTypes.set(j, unifiedType);
 				} else if(term instanceof URIConstant){
-					ansTypes.set(j, OBDAVocabulary.XSD_STRING);
+					ansTypes.set(j, dtfac.getTypePredicate(COL_TYPE.STRING));
 				}
 			}
 
@@ -512,13 +512,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 		else if(type1.equals(type2)){
 			return type1;
 		} else if(dataTypePredicateUnifyTable.contains(type1, type2)){
-
-
 			return dataTypePredicateUnifyTable.get(type1, type2);
 		}else if(type2 == null){
 			throw new NullPointerException("type2 cannot be null");
 		} else {
-			return OBDAVocabulary.XSD_STRING;
+			return dtfac.getTypePredicate(COL_TYPE.STRING);
 		}
 
 	}
@@ -1422,7 +1420,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					Term term = ov.getTerms().get(0);
 					if (term instanceof ValueConstant) {
 						termStr = sqladapter.getSQLLexicalFormString(
-								(ValueConstant) term);
+								((ValueConstant) term) .getValue());
 					} else {
 						termStr = getSQLString(term, index, false);
 					}
@@ -1556,16 +1554,22 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	private String getTypeColumnForSELECT(Term projectedTerm, String varName,
 										  QueryAliasIndex index) {
-		COL_TYPE type;
-
+		COL_TYPE typeCode;
+		String type;
+		
 		if (projectedTerm instanceof Function) {
-			type = getCompositeTermType((Function) projectedTerm);
+			typeCode = getCompositeTermType((Function) projectedTerm);
+			type = String.valueOf(typeCode);
 		}
 		else if (projectedTerm instanceof URIConstant) {
-			type = COL_TYPE.OBJECT;
+			typeCode = COL_TYPE.OBJECT;
+			type = String.valueOf(typeCode.getQuestCode());
+
 		}
 		else if (projectedTerm == OBDAVocabulary.NULL) {
-			type = COL_TYPE.NULL;
+			typeCode = COL_TYPE.NULL;
+			type = String.valueOf(typeCode.getQuestCode());
+
 		}
 		else if (projectedTerm instanceof Variable) {
 			type = getTypeFromVariable((Variable) projectedTerm, index, varName);
@@ -1575,8 +1579,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			throw new RuntimeException("Cannot generate SELECT for term: "
 					+ projectedTerm.toString());
 		}
-		int code = type.getQuestCode();
-		return String.format(typeStrForSELECT, code, varName);
+		//int code = type.getQuestCode();
+		return String.format(typeStrForSELECT, type, varName);
 	}
 
 	/**
@@ -1655,7 +1659,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @param index
 	 * @return
 	 */
-	private COL_TYPE getTypeFromVariable(Variable var, QueryAliasIndex index, String varName) {
+	private String getTypeFromVariable(Variable var, QueryAliasIndex index, String varName) {
 		Collection<String> columnRefs = index.getColumnReferences(var);
 
 		if (columnRefs == null || columnRefs.size() == 0) {
@@ -1667,7 +1671,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 * By default, we assume that the variable is an IRI.
 		 *
 		 */
-		COL_TYPE typeCode = COL_TYPE.OBJECT;
+		String typeCode = String.valueOf(COL_TYPE.OBJECT.getQuestCode());
 
 		/**
 		 * For each column reference corresponding to the variable.
@@ -1694,7 +1698,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 				columnType = column + QUEST_TYPE;
 				tableColumnType = sqladapter.sqlQualifiedColumn(
 						quotedTable, columnType);
-				//TODO: to be fixed.
 				typeCode = tableColumnType ;
 				break;
 			}
@@ -1960,37 +1963,39 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return java.sql.Types.DECIMAL;
 		}
 
+		// TODO: check if all types are covered
+		return dtfac.getDataType(functionSymbol.getName()).getQuestCode();
 
-		int type;
-		switch (functionName) {
-			case OBDAVocabulary.XSD_DOUBLE_URI:
-				type = java.sql.Types.DOUBLE;
-				break;
-			case OBDAVocabulary.XSD_DECIMAL_URI:
-				type = java.sql.Types.DECIMAL;
-				break;
-
-			case OBDAVocabulary.XSD_INT_URI:
-				type = java.sql.Types.INTEGER;
-				break;
-			case OBDAVocabulary.XSD_INTEGER_URI:
-				type = java.sql.Types.INTEGER;
-				break;
-
-			case OBDAVocabulary.XSD_BOOLEAN_URI:
-				type = java.sql.Types.BOOLEAN;
-				break;
-			case OBDAVocabulary.XSD_DATETIME_URI:
-				type = java.sql.Types.DATE;
-				break;
-			case OBDAVocabulary.XSD_STRING_URI:
-			case OBDAVocabulary.RDFS_LITERAL_URI:
-			default:
-				type = java.sql.Types.VARCHAR;
-				break;
-		}
-
-		return type;
+//		int type;
+//		switch (functionName) {
+//			case OBDAVocabulary.XSD_DOUBLE_URI:
+//				type = java.sql.Types.DOUBLE;
+//				break;
+//			case OBDAVocabulary.XSD_DECIMAL_URI:
+//				type = java.sql.Types.DECIMAL;
+//				break;
+//
+//			case OBDAVocabulary.XSD_INT_URI:
+//				type = java.sql.Types.INTEGER;
+//				break;
+//			case OBDAVocabulary.XSD_INTEGER_URI:
+//				type = java.sql.Types.INTEGER;
+//				break;
+//
+//			case OBDAVocabulary.XSD_BOOLEAN_URI:
+//				type = java.sql.Types.BOOLEAN;
+//				break;
+//			case OBDAVocabulary.XSD_DATETIME_URI:
+//				type = java.sql.Types.DATE;
+//				break;
+//			case OBDAVocabulary.XSD_STRING_URI:
+//			case OBDAVocabulary.RDFS_LITERAL_URI:
+//			default:
+//				type = java.sql.Types.VARCHAR;
+//				break;
+//		}
+//
+//		return type;
 	}
 
 	private boolean isStringColType(Term term, QueryAliasIndex index) {
@@ -2110,7 +2115,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 						return String.valueOf(id);
 				}
 			}
-			return sqladapter.getSQLLexicalFormString(ct);
+			return sqladapter.getSQLLexicalFormString(ct.getValue());
 		} else if (term instanceof URIConstant) {
 			if (isSI) {
 				String uri = term.toString();
@@ -2352,7 +2357,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	private int getUriid(String uri) {
 
-		Integer id = uriRefIds.get(uri);
+		Integer id = uriRefIds.getId(uri);
 		if (id != null)
 			return id;
 		return -2;
@@ -2423,7 +2428,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		String operator;
 		if (functionSymbol.equals(OBDAVocabulary.ADD)) {
 			operator = ADD_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.SUBSTRACT)) {
+		} else if (functionSymbol.equals(OBDAVocabulary.SUBTRACT)) {
 			operator = SUBTRACT_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.MULTIPLY)) {
 			operator = MULTIPLY_OPERATOR;
