@@ -15,6 +15,9 @@ import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.*;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,10 +30,8 @@ import java.util.Map;
  * TODO: could we move its static methods to TypePropagationUtilities?
  *
  * TODO: try to apply the same pattern (substitution union) that inside TypeLift. This might finally become clear.
- *
- * TODO: inherit from Substitution, not from Unifier (after merge with version 1).
  */
-public class TypePropagatingSubstitution extends Unifier {
+public class TypePropagatingSubstitution extends SubstitutionImpl {
 
     /**
      * Default and normal constructor.
@@ -55,10 +56,8 @@ public class TypePropagatingSubstitution extends Unifier {
      * TODO: understand, simplify and explain
      *
      * By contrast with unification, atom order matters.
-     *
-     * TODO: return a generic Substitution (need merging with v1)
      */
-    public static TypePropagatingSubstitution createTypePropagatingSubstitution(Function firstAtom, Function secondAtom,
+    public static Substitution createTypePropagatingSubstitution(Function firstAtom, Function secondAtom,
                                                                  Multimap<Predicate, Integer> multiTypedPredicateIndex) {
 
         /**
@@ -130,16 +129,16 @@ public class TypePropagatingSubstitution extends Unifier {
                      * Applying the newly computed substitution to the 'replacement' of
                      * the existing substitutions
                      */
-                    UnifierUtilities.applyUnifier(fterm1, substitution, innertermidx + 1);
-                    UnifierUtilities.applyUnifier(fterm2, substitution, innertermidx + 1);
+                    SubstitutionUtilities.applySubstitution(fterm1, substitution, innertermidx + 1);
+                    SubstitutionUtilities.applySubstitution(fterm2, substitution, innertermidx + 1);
                 }
             }
             if (changed) {
 
                 // Applying the newly computed substitution to the 'replacement' of
                 // the existing substitutions
-                UnifierUtilities.applyUnifier(clonedFirstAtom, substitution, termidx + 1);
-                UnifierUtilities.applyUnifier(clonedSecondAtom, substitution, termidx + 1);
+                SubstitutionUtilities.applySubstitution(clonedFirstAtom, substitution, termidx + 1);
+                SubstitutionUtilities.applySubstitution(clonedSecondAtom, substitution, termidx + 1);
             }
         }
         return substitution;
@@ -253,13 +252,13 @@ public class TypePropagatingSubstitution extends Unifier {
             if (t1.equals(t2))   // ROMAN: no need in isEqual(t1, t2) -- both are proper variables
                 return new NeutralSubstitution();
             else
-                return new Substitution(t1, t2);
+                return new SingletonSubstitution(t1, t2);
         }
         else if ((t2 instanceof ValueConstantImpl) || (t2 instanceof URIConstantImpl)) {
-            return new Substitution(t1, t2);
+            return new SingletonSubstitution(t1, t2);
         }
         else if (t2 instanceof FunctionalTermImpl) {
-            return new Substitution(t1, t2);
+            return new SingletonSubstitution(t1, t2);
         }
         // this should never happen
         throw new RuntimeException("Unsupported unification case: " + term1 + " " + term2);
@@ -336,13 +335,11 @@ public class TypePropagatingSubstitution extends Unifier {
      *
      * Returns the new substitution function.
      *
-     * TODO: use the Substitution type in the prototype (input and output).
-     *
      * TODO: move it to TypePropagationUtilities
      */
-    public static TypePropagatingSubstitution forceVariableReuse(TypePropagatingSubstitution initialSubstitutionFct) {
+    public static Substitution forceVariableReuse(Substitution initialSubstitutionFct) {
         Stream<P2<VariableImpl, Term>> unifierEntries = Stream.iterableStream(TreeMap.fromMutableMap(Ord.<VariableImpl>hashOrd(),
-                initialSubstitutionFct.toMap()));
+                initialSubstitutionFct.getMap()));
 
         Stream<P2<VariableImpl, Term>> newUnifierEntries = unifierEntries.filter(
                 /**
@@ -382,11 +379,11 @@ public class TypePropagatingSubstitution extends Unifier {
                              * makes a unification to update the functional term.
                              */
                             if (!variableToChange.equals(variableToKeep)) {
-                                Unifier miniSubstitutionFct = new Unifier(ImmutableMap.of(variableToChange, (Term) variableToKeep));
+                                Substitution miniSubstitutionFct = new SubstitutionImpl(ImmutableMap.of(variableToChange, (Term) variableToKeep));
 
                                 Function translatedFunctionalTerm = (Function) term.clone();
                                 //Side-effect update
-                                UnifierUtilities.applyUnifier(translatedFunctionalTerm, miniSubstitutionFct);
+                                SubstitutionUtilities.applySubstitution(translatedFunctionalTerm, miniSubstitutionFct);
 
                                 return P.p(variableToKeep, (Term) translatedFunctionalTerm);
                             }
@@ -398,9 +395,79 @@ public class TypePropagatingSubstitution extends Unifier {
                     }
                 });
 
-        TypePropagatingSubstitution newSubstitutionFct = new TypePropagatingSubstitution(HashMap.from(newUnifierEntries).toMap());
+        Substitution newSubstitutionFct = new TypePropagatingSubstitution(HashMap.from(newUnifierEntries).toMap());
         return newSubstitutionFct;
     }
+
+    /**
+     * If there is a non-neutral substitution,
+     * puts its entries into the current unifier and returns true;
+     *
+     * Otherwise, does nothing and returns false;
+     *
+     * TODO: update. Do not update like this the map!!
+     *
+     */
+    protected boolean putSubstitution(Substitution s) {
+        if (s == null)
+            return false;
+
+        if (s instanceof NeutralSubstitution)
+            return true;
+
+        /**
+         * Otherwise --> is a SingletonSubstitution
+         *
+         * TODO: refactor this code!.
+         */
+
+        if (!(s instanceof  SingletonSubstitution)) {
+            throw new RuntimeException("Bug! A single substitution was excepted.");
+        }
+        SingletonSubstitution substitution = (SingletonSubstitution) s;
+
+
+        // UGLY!! TODO: refactor this!
+        Map<VariableImpl, Term> map = getMap();
+
+        List<VariableImpl> forRemoval = new ArrayList<>();
+        for (Map.Entry<VariableImpl,Term> entry : map.entrySet()) {
+            VariableImpl v = entry.getKey();
+            Term t = entry.getValue();
+            if (substitution.getVariable().equals(t)) { // ROMAN: no need in isEqual(t, s.getVariable())
+                if (v.equals(substitution.getTerm())) {  // ROMAN: no need in isEqual(v, s.getTerm())
+                    // The substitution for the current variable has become
+                    // trivial, e.g., x/x with the current composition. We
+                    // remove it to keep only a non-trivial unifier
+                    forRemoval.add(v);
+                } else
+                    map.put(v, substitution.getTerm());
+
+            }
+            else if (t instanceof FunctionalTermImpl) {
+                FunctionalTermImpl fclone = (FunctionalTermImpl)t.clone();
+                List<Term> innerTerms = fclone.getTerms();
+                boolean innerchanges = false;
+                // TODO this ways of changing inner terms in functions is not
+                // optimal, modify
+
+                for (int i = 0; i < innerTerms.size(); i++) {
+                    Term innerTerm = innerTerms.get(i);
+
+                    if (substitution.getVariable().equals(innerTerm)) { // ROMAN: no need in isEqual(innerTerm, s.getVariable())
+                        fclone.getTerms().set(i, substitution.getTerm());
+                        innerchanges = true;
+                    }
+                }
+                if (innerchanges)
+                    map.put(v, fclone);
+            }
+        }
+        map.keySet().removeAll(forRemoval);
+        map.put(substitution.getVariable(), substitution.getTerm());
+        return true;
+    }
+
 
 
 }

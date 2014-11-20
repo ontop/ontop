@@ -11,14 +11,12 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypePropagatingSubstitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-
-import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions.*;
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypePropagatingSubstitution.forceVariableReuse;
 
 /**
@@ -313,12 +311,12 @@ public class TypeLift {
          *
          */
         final List<CQIE> parentRules = parentZipper.getLabel()._2();
-        final Unifier proposedSubstitutionFct = aggregateChildrenProposalsAndRules(
-                Option.<Unifier>none(), parentRules, childProposalIndex);
+        final Substitution proposedSubstitutionFct = aggregateChildrenProposalsAndRules(
+                Option.<Substitution>none(), parentRules, childProposalIndex);
 
         Function newProposal = (Function) parentRules.head().getHead().clone();
         // Side-effect!
-        UnifierUtilities.applyUnifier(newProposal, proposedSubstitutionFct);
+        SubstitutionUtilities.applySubstitution(newProposal, proposedSubstitutionFct);
 
         return Option.some(newProposal);
     }
@@ -334,7 +332,7 @@ public class TypeLift {
      * May raises a MultiTypedException.
      *
      */
-    private static Unifier aggregateChildrenProposalsAndRules(Option<Unifier> optionalSubstitutionFct,
+    private static Substitution aggregateChildrenProposalsAndRules(Option<Substitution> optionalSubstitutionFct,
                                                               List<CQIE> remainingRules, HashMap<Predicate, Function> childProposalIndex)
             throws MultiTypeException {
         /**
@@ -355,7 +353,7 @@ public class TypeLift {
          * May throw a MultipleTypeException.
          */
         CQIE rule = remainingRules.head();
-        Unifier proposedSubstitutionFct = aggregateRuleAndProposals(optionalSubstitutionFct, extractBodyAtoms(rule),
+        Substitution proposedSubstitutionFct = aggregateRuleAndProposals(optionalSubstitutionFct, extractBodyAtoms(rule),
                 childProposalIndex);
 
         /**
@@ -373,7 +371,7 @@ public class TypeLift {
      * If some problems with a substitution function occur, throws a MultiTypeException.
      *
      */
-    private static Unifier aggregateRuleAndProposals(final Option<Unifier> optionalSubstitutionFunction,
+    private static Substitution aggregateRuleAndProposals(final Option<Substitution> optionalSubstitutionFunction,
                                                                          final List<Function> remainingBodyAtoms,
                                                                          final HashMap<Predicate, Function> childProposalIndex) throws MultiTypeException {
         /**
@@ -389,7 +387,7 @@ public class TypeLift {
         Function bodyAtom = remainingBodyAtoms.head();
         Option<Function> optionalChildProposal = childProposalIndex.get(bodyAtom.getFunctionSymbol());
 
-        Option<Unifier> newOptionalSubstitutionFct;
+        Option<Substitution> newOptionalSubstitutionFct;
 
         /**
          * If there is a child proposal corresponding to the current body atom,
@@ -400,14 +398,14 @@ public class TypeLift {
          */
         if (optionalChildProposal.isSome()) {
             try {
-                Unifier proposedSubstitutionFunction = computeTypePropagatingSubstitution(
+                Substitution proposedSubstitutionFunction = computeTypePropagatingSubstitution(
                         bodyAtom, optionalChildProposal.some());
 
                 if (optionalSubstitutionFunction.isNone()) {
                     newOptionalSubstitutionFct = Option.some(proposedSubstitutionFunction);
                 }
                 /**
-                 * We do NOT consider the composition of the substitution functions (like during unifier)
+                 * We do NOT consider the composition of the substitution functions (like during unification)
                  * BUT THEIR UNION.
                  *
                  * Why? Because we want to apply a type only once, not multiple times.
@@ -422,7 +420,7 @@ public class TypeLift {
                  *
                  */
                 else {
-                    newOptionalSubstitutionFct = Option.some(union(optionalSubstitutionFunction.some(),
+                    newOptionalSubstitutionFct = Option.some(SubstitutionUtilities.union(optionalSubstitutionFunction.some(),
                             proposedSubstitutionFunction));
                 }
             }
@@ -430,7 +428,7 @@ public class TypeLift {
              * Impossible to propagate type.
              * This happens when multiple types are proposed for this predicate.
              */
-            catch(SubstitutionException e) {
+            catch(SubstitutionUtilities.SubstitutionException e) {
                 throw new MultiTypeException();
             }
         }
@@ -461,21 +459,21 @@ public class TypeLift {
      * If such a substitution function does not exist, throws a SubstitutionException.
      *
      */
-    private static TypePropagatingSubstitution computeTypePropagatingSubstitution(Function localAtom, Function proposedAtom)
-            throws SubstitutionException {
+    private static Substitution computeTypePropagatingSubstitution(Function localAtom, Function proposedAtom)
+            throws SubstitutionUtilities.SubstitutionException {
         /**
          * Type propagating substitution function between the proposedAtom and the localAtom.
          *
          * TODO: make the latter function throw the exception.
          */
-        TypePropagatingSubstitution typePropagatingSubstitutionFunction = TypePropagatingSubstitution.createTypePropagatingSubstitution(
+        Substitution typePropagatingSubstitutionFunction = TypePropagatingSubstitution.createTypePropagatingSubstitution(
                 proposedAtom, localAtom, ImmutableMultimap.<Predicate, Integer>of());
 
         /**
          * Impossible to unify the multiple types proposed for this predicate.
          */
         if (typePropagatingSubstitutionFunction == null) {
-            throw new SubstitutionException();
+            throw new SubstitutionUtilities.SubstitutionException();
         }
 
         /**
@@ -484,7 +482,7 @@ public class TypeLift {
          * Here, we are just interested in the types but we do not want to change the variable names.
          * Thus, we force variable reuse.
          */
-        TypePropagatingSubstitution renamedSubstitutions = forceVariableReuse(typePropagatingSubstitutionFunction);
+        Substitution renamedSubstitutions = forceVariableReuse(typePropagatingSubstitutionFunction);
 
         return renamedSubstitutions;
     }
@@ -514,7 +512,7 @@ public class TypeLift {
                      * Throws a runtime exception (TypeApplicationError)
                      * that should not be expected.
                      */
-                } catch(SubstitutionException e) {
+                } catch(SubstitutionUtilities.SubstitutionException e) {
                     throw new TypeApplicationError();
                 }
             }
@@ -524,13 +522,13 @@ public class TypeLift {
     /**
      * Propagates type from a typeProposal to one head atom.
      */
-    private static Function applyTypeProposal(Function headAtom, Function typeProposal) throws SubstitutionException {
-        Unifier substitutionFunction = computeTypePropagatingSubstitution(headAtom, typeProposal);
+    private static Function applyTypeProposal(Function headAtom, Function typeProposal) throws SubstitutionUtilities.SubstitutionException {
+        Substitution substitutionFunction = computeTypePropagatingSubstitution(headAtom, typeProposal);
 
         // Mutable object
         Function newHead = (Function) headAtom.clone();
         // Limited side-effect
-        UnifierUtilities.applyUnifier(newHead, substitutionFunction);
+        SubstitutionUtilities.applySubstitution(newHead, substitutionFunction);
 
         return newHead;
     }
@@ -1033,7 +1031,7 @@ public class TypeLift {
             /**
              * Multi-type problem detected
              */
-        } catch (SubstitutionException e) {
+        } catch (SubstitutionUtilities.SubstitutionException e) {
             return true;
         }
     }
