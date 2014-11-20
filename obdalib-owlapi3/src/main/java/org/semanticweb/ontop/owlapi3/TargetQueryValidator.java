@@ -31,6 +31,8 @@ import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.ontology.OntologyFactory;
+import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 
 public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	
@@ -39,6 +41,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 
 	/** Data factory **/
 	private OBDADataFactory dataFactory = OBDADataFactoryImpl.getInstance();
+	private OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	/** List of invalid predicates */
 	private Vector<String> invalidPredicates = new Vector<String>();
@@ -54,7 +57,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 
 		// Get the predicates in the target query.
 		for (Function atom : targetQuery.getBody()) {
-			Predicate p = atom.getPredicate();
+			Predicate p = atom.getFunctionSymbol();
 
 			boolean isClass = isClass(p);
 			boolean isObjectProp = isObjectProperty(p);
@@ -67,18 +70,19 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 
 			String debugMsg = "The predicate: [" + p.getName().toString() + "]";
 			if (isPredicateValid) {
-				COL_TYPE colType[] = null;
+				Predicate predicate;
 				if (isClass) {
-					colType = new COL_TYPE[] { COL_TYPE.OBJECT };
+					predicate = dataFactory.getClassPredicate(p.getName());
 					debugMsg += " is a Class.";
 				} else if (isObjectProp) {
-					colType = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT };
+					predicate = dataFactory.getObjectPropertyPredicate(p.getName());
 					debugMsg += " is an Object property.";
 				} else if (isDataProp) {
-					colType = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL };
+					predicate = dataFactory.getDataPropertyPredicate(p.getName(), COL_TYPE.LITERAL);
 					debugMsg += " is a Data property.";
 				}
-				Predicate predicate = dataFactory.getPredicate(p.getName(), atom.getArity(), colType);
+				else
+					predicate = dataFactory.getPredicate(p.getName(), atom.getArity());
 				atom.setPredicate(predicate); // TODO Fix the API!
 			} else {
 				invalidPredicates.add(p.getName().toString());
@@ -98,21 +102,21 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 
 	@Override
 	public boolean isClass(Predicate predicate) {
-		return obdaModel.isDeclaredClass(predicate);
+		return obdaModel.isDeclaredClass(ofac.createClass(predicate.getName()));
 	}
 	
 	@Override
 	public boolean isObjectProperty(Predicate predicate) {
-		return obdaModel.isDeclaredObjectProperty(predicate);
+		return obdaModel.isDeclaredObjectProperty(ofac.createObjectProperty(predicate.getName()));
 	}
 
 	@Override
 	public boolean isDataProperty(Predicate predicate) {
-		return obdaModel.isDeclaredDataProperty(predicate);
+		return obdaModel.isDeclaredDataProperty(ofac.createDataProperty(predicate.getName()));
 	}
 	
 	@Override
 	public boolean isTriple(Predicate predicate){
-		return predicate.equals(OBDAVocabulary.QUEST_TRIPLE_PRED);
+		return predicate.isTriplePredicate();
 	}
 }

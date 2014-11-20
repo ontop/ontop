@@ -22,9 +22,9 @@ package org.semanticweb.ontop.quest.dag;
 
 
 
+
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -85,7 +85,7 @@ public void testIndexes() throws Exception{
 		
 		testIndexes(engine, engine.getNamedDAG());
 
-		OWLAPI3Translator t = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(fileInput));
 		Ontology onto = t.translate(owlonto);
@@ -117,7 +117,7 @@ private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 	for(DAGNode d: d1.getRoles()){
 		System.out.println(d );
 		for(DAGNode dd: d.getEquivalents()){
-		System.out.println(d1.getRoleNode(((Property)dd.getDescription())));
+		System.out.println(d1.getRoleNode(((ObjectPropertyExpression)dd.getDescription())));
 		;
 		}
 		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -139,17 +139,24 @@ private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG) {
 	for(Description vertex: engine.getIndexed()) { // .getNamedDAG().vertexSet()
 		int index= engine.getIndex(vertex);
 		log.info("vertex {} index {}", vertex, index);
-		if (vertex instanceof Property) {
-			for(Description parent: namedDAG.getSuccessors((Property)vertex)){
+		if (vertex instanceof ObjectPropertyExpression) {
+			for (ObjectPropertyExpression parent: namedDAG.getSuccessors((ObjectPropertyExpression)vertex)){
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
-				if(result)
+				if (result)
+					break;
+			}
+		}
+		else if (vertex instanceof DataPropertyExpression) {
+			for (DataPropertyExpression parent: namedDAG.getSuccessors((DataPropertyExpression)vertex)){
+				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
+				if (result)
 					break;
 			}
 		}
 		else {
-			for(Description parent: namedDAG.getSuccessors((BasicClassDescription)vertex)){
+			for (ClassExpression parent: namedDAG.getSuccessors((ClassExpression)vertex)){
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
-				if(result)
+				if (result)
 					break;
 			}
 			

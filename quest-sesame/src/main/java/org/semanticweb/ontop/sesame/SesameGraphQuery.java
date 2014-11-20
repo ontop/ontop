@@ -26,11 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.openrdf.model.Statement;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
 import org.openrdf.query.MalformedQueryException;
@@ -46,7 +41,7 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
 import org.semanticweb.ontop.sesame.SesameStatement;
 
 public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery {
-
+	
 	private static final long serialVersionUID = 1L;
 
 	private String baseURI;
@@ -69,6 +64,7 @@ public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery 
 			return null;
 	}
 
+        @Override
 	public GraphQueryResult evaluate() throws QueryEvaluationException {
 		GraphResultSet res = null;
 		QuestDBStatement stm = null;
@@ -110,6 +106,7 @@ public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery 
 		}
 	}
 
+        @Override
 	public void evaluate(RDFHandler handler) throws QueryEvaluationException,
 			RDFHandlerException {
 		GraphQueryResult result =  evaluate();

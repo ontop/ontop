@@ -21,6 +21,8 @@ package org.semanticweb.ontop.quest.dag;
  */
 
 
+import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import java.io.File;
 
 import org.semanticweb.ontop.ontology.Ontology;
@@ -37,7 +39,7 @@ public class S_InputOWL {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(file)));
 
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 		Ontology o = translator.translate(ontology);
 		return o;
 	}

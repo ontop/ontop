@@ -11,7 +11,6 @@ import fj.data.TreeMap;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

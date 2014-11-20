@@ -42,6 +42,7 @@ import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.Quest;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
+import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 
 public class QuestResultset implements TupleResultSet {
 
@@ -49,20 +50,21 @@ public class QuestResultset implements TupleResultSet {
 	private ResultSet set = null;
 	QuestStatement st;
 	private List<String> signature;
-	DecimalFormat formatter = new DecimalFormat("0.0###E0");
+	private final DecimalFormat formatter = new DecimalFormat("0.0###E0");
 
-	private HashMap<String, Integer> columnMap;
+	private final HashMap<String, Integer> columnMap;
 
-	private HashMap<String, String> bnodeMap;
+	private final HashMap<String, String> bnodeMap;
 
 	// private LinkedHashSet<String> uriRef = new LinkedHashSet<String>();
 	private int bnodeCounter = 0;
 
-	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	private Map<Integer, String> uriMap;
-	private String vendor;
-	private boolean isOracle;
-    private boolean isMsSQL;
+	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private final SemanticIndexURIMap uriMap;
+	
+	private final String vendor;
+	private final boolean isOracle;
+    private final boolean isMsSQL;
 
 	/***
 	 * Constructs an OBDA statement from an SQL statement, a signature described
@@ -79,6 +81,11 @@ public class QuestResultset implements TupleResultSet {
 	public QuestResultset(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
 		this.set = set;
 		this.st = st;
+//		this.isSemIndex = st.questInstance.isSemIdx();
+//		if (isSemIndex) 
+//			uriMap = st.questInstance.getSemanticIndexRepository().getUriMap();
+//		else
+//			uriMap = null;
         Quest questInstance = st.getQuestInstance();
 		this.isSemIndex = questInstance.isSemIdx();
 		this.uriMap = questInstance.getUriMap();
@@ -172,14 +179,14 @@ public class QuestResultset implements TupleResultSet {
 				
 			COL_TYPE type = getQuestType((byte) set.getInt(column - 2));
 
-			if (type == null || realValue == null) {
+			if (type == COL_TYPE.NULL || realValue == null) {
 				return null;
 			} else {
 				if (type == COL_TYPE.OBJECT) {
 					if (isSemIndex) {
 						try {
 							Integer id = Integer.parseInt(realValue);
-							realValue = this.uriMap.get(id);
+							realValue = uriMap.getURI(id);
 						} catch (NumberFormatException e) {
 							/*
 							 * If its not a number, then it has to be a URI, so
@@ -216,16 +223,16 @@ public class QuestResultset implements TupleResultSet {
 					} else if (type == COL_TYPE.BOOLEAN) {
 						boolean value = set.getBoolean(column);
 						if (value) {
-							result = fac.getConstantLiteral("true", type);
+							result = fac.getConstantLiteral("true", COL_TYPE.BOOLEAN);
 						} else {
-							result = fac.getConstantLiteral("false", type);
+							result = fac.getConstantLiteral("false", COL_TYPE.BOOLEAN);
 						}
 					} else if (type == COL_TYPE.DOUBLE) {
 						double d = set.getDouble(column);
 						// format name into correct double representation
 
 						String s = formatter.format(d);
-						result = fac.getConstantLiteral(s, type);
+						result = fac.getConstantLiteral(s, COL_TYPE.DOUBLE);
 
 					} else if (type == COL_TYPE.DATETIME) {
 
@@ -239,7 +246,7 @@ public class QuestResultset implements TupleResultSet {
 
 
                         Timestamp value = set.getTimestamp(column);
-                        result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
+                        result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
 
                     }
                     catch (Exception e){
@@ -252,7 +259,7 @@ public class QuestResultset implements TupleResultSet {
                             try {
                                 date = df.parse(value);
                                 Timestamp ts = new Timestamp(date.getTime());
-                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
+                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
 
                             } catch (ParseException pe) {
 
@@ -273,7 +280,7 @@ public class QuestResultset implements TupleResultSet {
                                 }
 
                                 Timestamp ts = new Timestamp(date.getTime());
-                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
+                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
                             }
                             else{
                                 throw new RuntimeException(e);
@@ -283,11 +290,13 @@ public class QuestResultset implements TupleResultSet {
                         }
 
 
-                    } else if (type == COL_TYPE.DATE) {
+                    } 
+					else if (type == COL_TYPE.DATE) {
 						if (!isOracle) {
 							Date value = set.getDate(column);
-							result = fac.getConstantLiteral(value.toString(), type);
-						} else {
+							result = fac.getConstantLiteral(value.toString(), COL_TYPE.DATE);
+						} 
+						else {
 							String value = set.getString(column);
 							DateFormat df = new SimpleDateFormat("dd-MMM-yy");
 							java.util.Date date;
@@ -296,13 +305,15 @@ public class QuestResultset implements TupleResultSet {
 							} catch (ParseException e) {
 								throw new RuntimeException(e);
 							}
-							result = fac.getConstantLiteral(value.toString(), type);
+							result = fac.getConstantLiteral(value.toString(), COL_TYPE.DATE);
 						}
 						
 						
-					} else if (type == COL_TYPE.TIME) {
+					} 
+                    else if (type == COL_TYPE.TIME) {
 						Time value = set.getTime(column);						
-						result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
+						result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), COL_TYPE.TIME);
+					 
 					} else if (type == COL_TYPE.INTEGER) {
 						realValue = String.valueOf(set.getInt(column));
 						result = fac.getConstantLiteral(realValue, type);
@@ -351,40 +362,21 @@ public class QuestResultset implements TupleResultSet {
 	@Override
 	public Constant getConstant(String name) throws OBDAException {
 		Integer columnIndex = columnMap.get(name);
-		Constant constant = getConstant(columnIndex);
-		return constant;
+		return getConstant(columnIndex);
 	}
 
-	private COL_TYPE getQuestType(int sqltype) {
-		if (sqltype == 1) {
-			return COL_TYPE.OBJECT;
-		} else if (sqltype == 2) {
-			return COL_TYPE.BNODE;
-		} else if (sqltype == 3) {
-			return COL_TYPE.LITERAL;
-		} else if (sqltype == 4) {
-			return COL_TYPE.INTEGER;
-		} else if (sqltype == 5) {
-			return COL_TYPE.DECIMAL;
-		} else if (sqltype == 6) {
-			return COL_TYPE.DOUBLE;
-		} else if (sqltype == 7) {
-			return COL_TYPE.STRING;
-		} else if (sqltype == 8) {
-			return COL_TYPE.DATETIME;
-		} else if (sqltype == 9) {
-			return COL_TYPE.BOOLEAN;
-		} else if (sqltype == 10) {
-			return COL_TYPE.DATE;
-		} else if (sqltype == 11) {
-			return COL_TYPE.TIME;
-		} else if (sqltype == 12) {
-			return COL_TYPE.YEAR;
-		} else if (sqltype == 0) {
-			return null;
-		} else {
-			throw new RuntimeException("COLTYPE unknown: " + sqltype);
-		}
+    /**
+     * Numbers codetype are defined see also  #getTypeColumnForSELECT SQLGenerator
+     */
+
+	private COL_TYPE getQuestType(int typeCode) {
+
+        COL_TYPE questType = COL_TYPE.getQuestType(typeCode);
+
+        if (questType == null)
+        	throw new RuntimeException("typeCode unknown: " + typeCode);
+        
+        return questType;
 	}
 
 	// @Override

@@ -20,20 +20,22 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
-import junit.framework.TestCase;
-import org.semanticweb.ontop.ontology.*;
-import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
-import org.semanticweb.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
+import org.semanticweb.ontop.ontology.Assertion;
+import org.semanticweb.ontop.ontology.ClassAssertion;
+import org.semanticweb.ontop.ontology.DataPropertyAssertion;
+import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 
+import junit.framework.TestCase;
+
 public class NTripleAssertionIteratorTest extends TestCase {
 	public void testIteratorTest() throws IOException {
 		File testFile = new File("src/test/resources/test/lubm-data.n3");
 		URI fileURI = testFile.toURI();
-		NTripleAssertionIterator iterator = new NTripleAssertionIterator(fileURI, EquivalenceMap.getEmptyEquivalenceMap());
+		NTripleAssertionIterator iterator = new NTripleAssertionIterator(fileURI);
 		
 		int typeCount = 0;
 		int objPropCount = 0;
@@ -43,11 +45,13 @@ public class NTripleAssertionIteratorTest extends TestCase {
 			Assertion ass = iterator.next();
 			if (ass instanceof ClassAssertion) {
 				typeCount +=1;
-			} else if (ass instanceof DataPropertyAssertion) {
-				datPropCount +=1;
-			} else if (ass instanceof ObjectPropertyAssertion) {
-				objPropCount +=1;
 			} 
+			else if (ass instanceof ObjectPropertyAssertion) {
+				objPropCount +=1;
+			}
+			else if (ass instanceof DataPropertyAssertion) {
+				datPropCount +=1;
+			}  
 		}
 		
 		assertEquals(2, typeCount);

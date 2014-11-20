@@ -27,51 +27,67 @@ import org.semanticweb.ontop.model.ValueConstant;
 
 public interface OntologyFactory {
 
-	public PropertySomeRestriction getPropertySomeRestriction(Predicate p, boolean inverse);
+	public Ontology createOntology();
 	
-	public OClass createClass(Predicate p);
 	
 	public OClass createClass(String uri);
 
-	public Property createProperty(Predicate p, boolean inverse);
+	public OClass getThing();
 
-	public Property createProperty(Predicate p);
+	public OClass getNothing();
 	
-	public Property createObjectProperty(String uri, boolean inverse);
 	
-	public Property createObjectProperty(String uri);
 	
-	public Property createDataProperty(String uri);
+	public Datatype createDataType(Predicate.COL_TYPE type);
 	
-	public DataType createDataType(Predicate p);
 	
-	public Ontology createOntology(String uri);
 	
-	public Ontology createOntology();
+	public ObjectPropertyExpression createObjectProperty(String uri);
+	
+	public ObjectPropertyExpression getTopObjectProperty();
+	
+	public ObjectPropertyExpression getBottomObjectProperty();
 
-	public SubDescriptionAxiom createSubPropertyAxiom(Property included, Property including);
-
-	public SubDescriptionAxiom createSubClassAxiom(ClassDescription concept1, ClassDescription concept2);
-
-	public PropertySomeRestriction createPropertySomeRestriction(Predicate p, boolean isInverse);
-
-	public PropertySomeClassRestriction createPropertySomeClassRestriction(Predicate p, boolean isInverse, OClass filler);
-
-	public PropertySomeDataTypeRestriction createPropertySomeDataTypeRestriction(Predicate p, boolean isInverse, DataType filler);
 	
-	public PropertyFunctionalAxiom createPropertyFunctionalAxiom(Property role);
 	
-	public DisjointClassAxiom createDisjointClassAxiom(OClass c1, OClass c2);
-	
-	public DisjointDataPropertyAxiom createDisjointDataPropertyAxiom(Predicate p1, Predicate p2);
-	
-	public DisjointObjectPropertyAxiom createDisjointObjectPropertyAxiom(Predicate p1, Predicate p2);
+	public DataPropertyExpression createDataProperty(String uri);
 
-	public ObjectPropertyAssertion createObjectPropertyAssertion(Predicate role, ObjectConstant o1, ObjectConstant o2);
+	public DataPropertyExpression getTopDataProperty();
+	
+	public DataPropertyExpression getBottomDataProperty();
+	
+	
+	/**
+	 * creates an object property assertion 
+	 * (ensures that the property is not inverse by swapping arguments if necessary)
+	 * 
+	 * @param prop
+	 * @param o1
+	 * @param o2
+	 * @return
+	 */
+	
+	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression prop, ObjectConstant o1, ObjectConstant o2);
 
-	public DataPropertyAssertion createDataPropertyAssertion(Predicate attribute, ObjectConstant o1, ValueConstant o2);
+	/**
+	 * creates a data property assertion 
+	 * 
+	 * @param prop
+	 * @param o1
+	 * @param o2
+	 * @return
+	 */
 	
-	public Assertion createPropertyAssertion(Predicate attribute, ObjectConstant o1, Constant o2);
+	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression prop, ObjectConstant o1, ValueConstant o2);
+
+	/**
+	 * creates a class assertion 
+	 * 
+	 * @param concept
+	 * @param o
+	 * @return
+	 */
 	
-	public ClassAssertion createClassAssertion(Predicate concept, ObjectConstant object);
+	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant o);
+
 }

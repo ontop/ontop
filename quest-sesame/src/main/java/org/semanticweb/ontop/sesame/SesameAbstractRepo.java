@@ -34,8 +34,9 @@ import org.slf4j.LoggerFactory;
 
 public abstract class SesameAbstractRepo implements
 		org.openrdf.repository.Repository {
+	private static final Logger logger = LoggerFactory.getLogger(SesameAbstractRepo.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(SesameAbstractRepo.class);
+	private RepositoryConnection repoConnection;
 	private Map<String, String> namespaces;
 	boolean isinitialized = false;
 	

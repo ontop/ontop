@@ -30,28 +30,30 @@ public class SQLAdapterFactory {
 
 	public static SQLDialectAdapter getSQLDialectAdapter(String className) {
 
-		if (className.equals("org.postgresql.Driver")) {
-			return new PostgreSQLDialectAdapter();
-		} else if (className.equals("com.mysql.jdbc.Driver")) {
-			return new Mysql2SQLDialectAdapter();
-		} else if (className.equals("org.h2.Driver")) {
-			return new H2SQLDialectAdapter();
-		} else if (className.equals("com.ibm.db2.jcc.DB2Driver")) {
-			return new DB2SQLDialectAdapter();
-		} else if (className.equals("oracle.jdbc.driver.OracleDriver") || className.equals("oracle.jdbc.OracleDriver")) {
-			return new OracleSQLDialectAdapter();
-		} else if (className.equals("org.teiid.jdbc.TeiidDriver")) {
-			return new TeiidSQLDialectAdapter();
-		} else if (className.equals("com.microsoft.sqlserver.jdbc.SQLServerDriver")) {
-			return new SQLServerSQLDialectAdapter();
-		} else if (className.equals("org.hsqldb.jdbc.JDBCDriver")) {
-			return new HSQLSQLDialectAdapter();
-		} else if (className.equals("madgik.adp.federatedjdbc.AdpDriver")){
-			return new AdpSQLDialectAdapter();
-		} else {
-			log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Ontop.");
-			log.warn("WARNING: Contact the authors for further support.");
-			return new SQL99DialectAdapter();
+		switch (className) {
+			case "org.postgresql.Driver":
+				return new PostgreSQLDialectAdapter();
+			case "com.mysql.jdbc.Driver":
+				return new Mysql2SQLDialectAdapter();
+			case "org.h2.Driver":
+				return new H2SQLDialectAdapter();
+			case "org.hsqldb.jdbc.JDBCDriver":
+				return new HSQLSQLDialectAdapter();
+			case "com.ibm.db2.jcc.DB2Driver":
+				return new DB2SQLDialectAdapter();
+			case "oracle.jdbc.driver.OracleDriver":
+			case "oracle.jdbc.OracleDriver":
+				return new OracleSQLDialectAdapter();
+			case "org.teiid.jdbc.TeiidDriver":
+				return new TeiidSQLDialectAdapter();
+			case "com.microsoft.sqlserver.jdbc.SQLServerDriver":
+				return new SQLServerSQLDialectAdapter();
+			case "madgik.adp.federatedjdbc.AdpDriver":
+				return new AdpSQLDialectAdapter();
+			default:
+				log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Ontop.");
+				log.warn("WARNING: Contact the authors for further support.");
+				return new SQL99DialectAdapter();
 		}
 
 		

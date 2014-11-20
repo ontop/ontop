@@ -88,15 +88,15 @@ public class S_HierarchyTestNewDAG extends TestCase {
 			log.info("First dag {}", dag1);
 			log.info("Second dag {}", dag2);
 			
-			assertTrue(testDescendants(dag1.getClasses(), dag2.getClasses()));
-			assertTrue(testDescendants(dag1.getProperties(), dag2.getProperties()));
-			assertTrue(testAncestors(dag1.getClasses(),dag2.getClasses()));
-			assertTrue(testAncestors(dag1.getProperties(),dag2.getProperties()));
+			assertTrue(testDescendants(dag1.getClassDAG(), dag2.getClassDAG()));
+			assertTrue(testDescendants(dag1.getObjectPropertyDAG(), dag2.getObjectPropertyDAG()));
+			assertTrue(testAncestors(dag1.getClassDAG(),dag2.getClassDAG()));
+			assertTrue(testAncestors(dag1.getObjectPropertyDAG(),dag2.getObjectPropertyDAG()));
 			assertTrue(checkforNamedVertexesOnly(dag2, reasoner));
-			assertTrue(testDescendants(dag2.getClasses(), dag1.getClasses()));
-			assertTrue(testDescendants(dag2.getProperties(), dag1.getProperties()));
-			assertTrue(testAncestors(dag2.getClasses(), dag1.getClasses()));
-			assertTrue(testAncestors(dag2.getProperties(), dag1.getProperties()));
+			assertTrue(testDescendants(dag2.getClassDAG(), dag1.getClassDAG()));
+			assertTrue(testDescendants(dag2.getObjectPropertyDAG(), dag1.getObjectPropertyDAG()));
+			assertTrue(testAncestors(dag2.getClassDAG(), dag1.getClassDAG()));
+			assertTrue(testAncestors(dag2.getObjectPropertyDAG(), dag1.getObjectPropertyDAG()));
 		}
 	}
 
@@ -126,15 +126,20 @@ public class S_HierarchyTestNewDAG extends TestCase {
 	}
 	
 
-	private boolean checkforNamedVertexesOnly(TestTBoxReasonerImpl_OnNamedDAG dag, TBoxReasonerImpl reasoner){
-		for(Equivalences<Property> node: dag.getProperties()) {
-			Property vertex = node.getRepresentative();
-			if(!reasoner.getProperties().getVertex(vertex).isIndexed())
+	private boolean checkforNamedVertexesOnly(TestTBoxReasonerImpl_OnNamedDAG dag, TBoxReasoner reasoner){
+		for (Equivalences<ObjectPropertyExpression> node: dag.getObjectPropertyDAG()) {
+			ObjectPropertyExpression vertex = node.getRepresentative();
+			if (!reasoner.getObjectPropertyDAG().getVertex(vertex).isIndexed())
 				return false;
 		}
-		for(Equivalences<BasicClassDescription> node: dag.getClasses()) {
-			BasicClassDescription vertex = node.getRepresentative();
-			if(!reasoner.getClasses().getVertex(vertex).isIndexed())
+		for (Equivalences<DataPropertyExpression> node: dag.getDataPropertyDAG()) {
+			DataPropertyExpression vertex = node.getRepresentative();
+			if (!reasoner.getDataPropertyDAG().getVertex(vertex).isIndexed())
+				return false;
+		}
+		for (Equivalences<ClassExpression> node: dag.getClassDAG()) {
+			ClassExpression vertex = node.getRepresentative();
+			if (!reasoner.getClassDAG().getVertex(vertex).isIndexed())
 				return false;
 		}
 		return true;

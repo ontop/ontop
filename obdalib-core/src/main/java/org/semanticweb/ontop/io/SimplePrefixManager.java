@@ -32,12 +32,12 @@ import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 public class SimplePrefixManager extends AbstractPrefixManager {
 
 	/**
-	 * A simple map containing for each ontology URI the correponding prefix
+	 * A simple map containing for each ontology URI the corresponding prefix
 	 */
 	private HashMap<String, String> uriToPrefixMap;
 
 	/**
-	 * A simple map containing for each prefix the correponding ontology URI
+	 * A simple map containing for each prefix the corresponding ontology URI
 	 */
 	private HashMap<String, String> prefixToURIMap;
 
@@ -45,8 +45,8 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 	 * The default constructor. It creates a new instance of the prefix manager
 	 */
 	public SimplePrefixManager() {
-		uriToPrefixMap = new HashMap<String, String>();
-		prefixToURIMap = new HashMap<String, String>();
+		uriToPrefixMap = new HashMap<>();
+		prefixToURIMap = new HashMap<>();
 		initKnownPrefixes();
 	}
 
@@ -87,8 +87,7 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 	/**
 	 * Returns the corresponding prefix for the given URI.
 	 * 
-	 * @param prefix
-	 *            the prefix name
+	 * @param uri
 	 * @return the corresponding prefix or null if the URI is not registered
 	 */
 	public String getPrefix(String uri) {

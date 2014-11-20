@@ -20,6 +20,20 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
+import org.semanticweb.ontop.model.DatatypeFactory;
+import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDADataSource;
+import org.semanticweb.ontop.model.OBDALibConstants;
+import org.semanticweb.ontop.model.OBDAMappingAxiom;
+import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.Predicate.COL_TYPE;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
+import org.semanticweb.ontop.ontology.Assertion;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.net.URI;
@@ -28,26 +42,13 @@ import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDALibConstants;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Predicate.COL_TYPE;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
-import org.semanticweb.ontop.ontology.Assertion;
-import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
-import org.semanticweb.ontop.sql.JDBCConnectionManager;
-
 import junit.framework.TestCase;
+import org.semanticweb.ontop.sql.JDBCConnectionManager;
 
 public class VirtualABoxMaterializerTest extends TestCase {
 
-	OBDADataFactory	fac	= OBDADataFactoryImpl.getInstance();
+	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private final DatatypeFactory dtfac	= OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -123,12 +124,12 @@ try{
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-		Predicate person = fac.getPredicate("Person", 1);
-		Predicate fn = fac.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate("School", 1);
+		Predicate person = fac.getClassPredicate("Person");
+		Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+		Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+		Predicate age = fac.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
+		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
+		Predicate school = fac.getClassPredicate("School");
 		body.add(fac.getFunction(person, objectTerm));
 		body.add(fac.getFunction(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getFunction(ln, objectTerm, fac.getVariable("ln")));
@@ -220,12 +221,12 @@ try{
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-		Predicate person = fac.getPredicate("Person", 1);
-		Predicate fn = fac.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate("School", 1);
+		Predicate person = fac.getClassPredicate("Person");
+		Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+		Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+		Predicate age = fac.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
+		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
+		Predicate school = fac.getClassPredicate("School");
 		body.add(fac.getFunction(person, objectTerm));
 		body.add(fac.getFunction(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getFunction(ln, objectTerm, fac.getVariable("ln")));
@@ -325,12 +326,12 @@ try{
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-		Predicate person = fac.getPredicate("Person", 1);
-		Predicate fn = fac.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate("School", 1);
+		Predicate person = fac.getClassPredicate("Person");
+		Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+		Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+		Predicate age = fac.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
+		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
+		Predicate school = fac.getClassPredicate("School");
 		body.add(fac.getFunction(person, objectTerm));
 		body.add(fac.getFunction(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getFunction(ln, objectTerm, fac.getVariable("ln")));
@@ -497,12 +498,12 @@ try{
 				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-		Predicate person = fac.getPredicate("Person", 1);
-		Predicate fn = fac.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = fac.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = fac.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = fac.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = fac.getPredicate("School", 1);
+		Predicate person = fac.getClassPredicate("Person");
+		Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+		Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+		Predicate age = fac.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
+		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
+		Predicate school = fac.getClassPredicate("School");
 		body.add(fac.getFunction(person, objectTerm));
 		body.add(fac.getFunction(fn, objectTerm, fac.getVariable("fn")));
 		body.add(fac.getFunction(ln, objectTerm, fac.getVariable("ln")));
@@ -573,10 +574,10 @@ try{
 		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
 		
-		final Term firstNameVariable = fac.getFunction(fac.getDataTypePredicateString(), fac.getVariable("fn"));
-		final Term lastNameVariable = fac.getFunction(fac.getDataTypePredicateString(), fac.getVariable("ln"));
-		final Term ageVariable = fac.getFunction(fac.getDataTypePredicateInteger(), fac.getVariable("age"));
-		final Term schoolUriVariable = fac.getFunction(fac.getDataTypePredicateString(), fac.getVariable("schooluri"));
+		final Term firstNameVariable = fac.getTypedTerm(fac.getVariable("fn"), COL_TYPE.STRING);
+		final Term lastNameVariable = fac.getTypedTerm(fac.getVariable("ln"), COL_TYPE.STRING);
+		final Term ageVariable = fac.getTypedTerm(fac.getVariable("age"), COL_TYPE.INTEGER);
+		final Term schoolUriVariable = fac.getTypedTerm(fac.getVariable("schooluri"), COL_TYPE.STRING);
 		
 		headTerms.add(firstNameVariable);
 		headTerms.add(lastNameVariable);
@@ -585,17 +586,16 @@ try{
 
 		Function head = fac.getFunction(q, headTerms);
 
-		Term objectTerm = fac.getFunction(fac.getUriTemplatePredicate(2),
-				fac.getConstantLiteral("http://schools.com/persons{}{}"), 
+		Term objectTerm = fac.getUriTemplate(fac.getConstantLiteral("http://schools.com/persons{}{}"),  // R: was binary -- why?
 				firstNameVariable,
 				lastNameVariable);
 
 //		List<Function> body = new LinkedList<Function>();
 		Predicate person = fac.getClassPredicate("Person");
-		Predicate fn = fac.getDataPropertyPredicate("firstn");
-		Predicate ln = fac.getDataPropertyPredicate("lastn");
-		Predicate age = fac.getDataPropertyPredicate("agee");
-		Predicate hasschool = fac.getDataPropertyPredicate("hasschool");
+		Predicate fn = fac.getDataPropertyPredicate("firstn", COL_TYPE.LITERAL);
+		Predicate ln = fac.getDataPropertyPredicate("lastn", COL_TYPE.LITERAL);
+		Predicate age = fac.getDataPropertyPredicate("agee", COL_TYPE.LITERAL);
+		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
 		Predicate school = fac.getClassPredicate("School");
 //		body.add(fac.getFunctionalTerm(person, objectTerm));
 //		body.add(fac.getFunctionalTerm(fn, objectTerm, fac.getVariable("fn")));

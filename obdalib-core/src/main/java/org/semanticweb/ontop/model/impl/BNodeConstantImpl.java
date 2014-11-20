@@ -23,6 +23,9 @@ package org.semanticweb.ontop.model.impl;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+
+
+import java.util.Collections;
 import java.util.Set;
 
 import org.semanticweb.ontop.model.BNode;
@@ -32,7 +35,7 @@ import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 /**
  * Implementation for BNodes.
  */
-public class BNodeConstantImpl extends AbstractLiteral implements BNode {
+public class BNodeConstantImpl implements BNode {
 
 	private static final long serialVersionUID = 214867118996974157L;
 
@@ -69,6 +72,10 @@ public class BNodeConstantImpl extends AbstractLiteral implements BNode {
 	public String getName() {
 		return name;
 	}
+	@Override
+	public String getValue() {
+		return name;
+	}
 
 	@Override
 	public BNode clone() {
@@ -77,17 +84,12 @@ public class BNodeConstantImpl extends AbstractLiteral implements BNode {
 
 	@Override
 	public String toString() {
-		return TermUtil.toString(this);
+		return name;
 	}
 
 	@Override
 	public Set<Variable> getReferencedVariables() {
-		return new LinkedHashSet<Variable>();
-	}
-
-	@Override
-	public Map<Variable, Integer> getVariableCount() {
-		return new HashMap<Variable, Integer>();
+		return Collections.emptySet();
 	}
 
 	@Override
@@ -95,13 +97,4 @@ public class BNodeConstantImpl extends AbstractLiteral implements BNode {
 		return COL_TYPE.BNODE;
 	}
 
-	@Override
-	public String getValue() {
-		return name;
-	}
-
-	@Override
-	public String getLanguage() {
-		return null;
-	}
 }

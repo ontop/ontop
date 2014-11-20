@@ -21,24 +21,19 @@ package org.semanticweb.ontop.ontology;
  */
 
 import org.semanticweb.ontop.model.ObjectConstant;
-import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.ValueConstant;
-
-/***
- * An assertion for data properties, e.g., name(mariano,"Mariano Rodriguez").
- * Corresponds to RDF triple: :mariano :name "Mariano Rodriguez".
+/**
+ * Represents DataPropertyAssertion from OWL 2 QL Specification
+ * 
+ * DataPropertyAssertion := 'DataPropertyAssertion' '(' axiomAnnotations DataPropertyExpression Individual Literal ')'
+ * 
  */
+
 public interface DataPropertyAssertion extends Assertion {
 
-	public ObjectConstant getObject();
-
-	public ValueConstant getValue();
-
-	/***
-	 * Use get predicate instead
-	 * 
-	 * @return
-	 */
-	@Deprecated
-	public Predicate getAttribute();
+	public DataPropertyExpression getProperty();
+	
+	public ObjectConstant getSubject();
+	
+	public ValueConstant getValue();	
 }

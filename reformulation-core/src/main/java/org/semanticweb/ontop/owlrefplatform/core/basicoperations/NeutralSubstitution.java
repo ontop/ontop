@@ -21,14 +21,57 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  */
 
 
-public class NeutralSubstitution extends Substitution {
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 
-	public NeutralSubstitution() {
-		super(null, null);
-	}
-	
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * TODO: explain
+ */
+public class NeutralSubstitution implements Substitution {
+
+    @Override
+    public Term get(VariableImpl var) {
+        return null;
+    }
+
+    @Override
+    public Map<VariableImpl, Term> getMap() {
+        return ImmutableMap.of();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return true;
+    }
+
+    @Override
+    public void put(VariableImpl var, Term term) {
+        throw new UnsupportedOperationException("Every SingletonSubstitution is immutable.");
+    }
+
+    @Override
+    public Set<VariableImpl> keySet() {
+        return ImmutableSet.of();
+    }
+
+    @Override
 	public String toString() {
-		return "-/-";
+		return "{-/-}";
 	}
+
+    @Override
+    public boolean compose(Substitution s) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean compose(Term term1, Term term2) {
+        throw new UnsupportedOperationException();
+    }
 
 }

@@ -34,6 +34,7 @@ import org.semanticweb.ontop.utils.Mapping2DatalogConverter;
 
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -79,8 +80,8 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
 		mappingList.add(mappingAxiom);
 		
-		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(mappingList, md);
-		DatalogProgram dp = analyzer.constructDatalogProgram();
+		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(md);
+		List<CQIE> dp = analyzer.constructDatalogProgram(mappingList);
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());

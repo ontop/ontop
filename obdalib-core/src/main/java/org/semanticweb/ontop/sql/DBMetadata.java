@@ -423,9 +423,9 @@ public class DBMetadata implements Serializable {
 	 * @param program
 	 */
 	public static Map<Predicate, List<Integer>> extractPKs(DBMetadata metadata,
-			DatalogProgram program) {
+			List<CQIE> program) {
 		Map<Predicate, List<Integer>> pkeys = new HashMap<Predicate, List<Integer>>();
-		for (CQIE mapping : program.getRules()) {
+		for (CQIE mapping : program) {
 			for (Function newatom : mapping.getBody()) {
 				Predicate newAtomPredicate = newatom.getFunctionSymbol();
 				if (newAtomPredicate instanceof BooleanOperationPredicate) {

@@ -20,6 +20,7 @@ package org.semanticweb.ontop.model;
  * #L%
  */
 
+
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
@@ -31,6 +32,10 @@ import java.util.Set;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.io.PrefixManager;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.OntologyVocabulary;
 import org.semanticweb.ontop.querymanager.QueryController;
 
 /***
@@ -160,8 +165,9 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	/**
 	 * Updates the mapping id.
+	 * @throws DuplicateMappingException 
 	 */
-	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid);
+	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid) throws DuplicateMappingException;
 
 	/**
 	 * Replaces the old target query with the new one given its id.
@@ -191,36 +197,35 @@ public interface OBDAModel extends Cloneable, Serializable {
 
 	public void reset();
 
-	public Set<Predicate> getDeclaredPredicates();
+	public Set<OClass> getDeclaredClasses();
 
-	public Set<Predicate> getDeclaredClasses();
+	public Set<ObjectPropertyExpression> getDeclaredObjectProperties();
 
-	public Set<Predicate> getDeclaredObjectProperties();
+	public Set<DataPropertyExpression> getDeclaredDataProperties();
 
-	public Set<Predicate> getDeclaredDataProperties();
+	
+	
+	
+	public boolean declareClass(OClass classname);
 
-	public boolean declarePredicate(Predicate predicate);
+	public boolean declareObjectProperty(ObjectPropertyExpression property);
 
-	public boolean declareClass(Predicate classname);
+	public boolean declareDataProperty(DataPropertyExpression property);
 
-	public boolean declareObjectProperty(Predicate property);
+	public void declareAll(OntologyVocabulary vocabulary);
+	
+	
+	public boolean unDeclareClass(OClass classname);
 
-	public boolean declareDataProperty(Predicate property);
+	public boolean unDeclareObjectProperty(ObjectPropertyExpression property);
 
-	public boolean unDeclarePredicate(Predicate predicate);
+	public boolean unDeclareDataProperty(DataPropertyExpression property);
 
-	public boolean unDeclareClass(Predicate classname);
+	
+	public boolean isDeclaredClass(OClass classname);
 
-	public boolean unDeclareObjectProperty(Predicate property);
+	public boolean isDeclaredObjectProperty(ObjectPropertyExpression property);
 
-	public boolean unDeclareDataProperty(Predicate property);
-
-	public boolean isDeclaredClass(Predicate classname);
-
-	public boolean isDeclaredObjectProperty(Predicate property);
-
-	public boolean isDeclaredDataProperty(Predicate property);
-
-	public boolean isDeclared(Predicate predicate);
+	public boolean isDeclaredDataProperty(DataPropertyExpression property);
 
 }

@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.SimplePrefixManager;
@@ -48,6 +49,10 @@ import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.OBDAModelListener;
 import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.OntologyVocabulary;
 import org.semanticweb.ontop.querymanager.QueryController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,14 +77,14 @@ public class OBDAModelImpl implements OBDAModel {
 
 	private static final Logger log = LoggerFactory.getLogger(OBDAModelImpl.class);
 
-	private final LinkedHashSet<Predicate> declaredClasses = new LinkedHashSet<Predicate>();
+	private final Set<OClass> declaredClasses = new LinkedHashSet<OClass>();
 
-	private final LinkedHashSet<Predicate> declaredObjectProperties = new LinkedHashSet<Predicate>();
+	private final Set<ObjectPropertyExpression> declaredObjectProperties = new LinkedHashSet<ObjectPropertyExpression>();
 
-	private final LinkedHashSet<Predicate> declaredDataProperties = new LinkedHashSet<Predicate>();
+	private final Set<DataPropertyExpression> declaredDataProperties = new LinkedHashSet<DataPropertyExpression>();
 
 	// All other predicates (not classes or properties)
-	private final LinkedHashSet<Predicate> declaredPredicates = new LinkedHashSet<Predicate>();
+	// private final LinkedHashSet<Predicate> declaredPredicates = new LinkedHashSet<Predicate>();
 
 	/**
 	 * The default constructor
@@ -370,15 +375,26 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid) {
+	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid) throws DuplicateMappingException {
 		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
 
+		// adds a new mapping
 		if (!containsMapping(datasource_uri, new_mappingid)) {
 			mapping.setId(new_mappingid);
 			fireMappigUpdated(datasource_uri, mapping_id, mapping);
 			return 0;
+		} 
+		// updates an existing mapping
+		else {
+			// updates the mapping without changing the mapping id
+			if (new_mappingid.equals(mapping_id)) {
+				return -1;
+			} 
+			// changes the mapping id to an existing one  
+			else {
+				throw new DuplicateMappingException(new_mappingid);
+			}
 		}
-		return -1;
 	}
 
 	@Override
@@ -490,6 +506,7 @@ public class OBDAModelImpl implements OBDAModel {
 		mappings.clear();
 	}
 
+/*	
 	@Override
 	public Set<Predicate> getDeclaredPredicates() {
 		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
@@ -499,28 +516,23 @@ public class OBDAModelImpl implements OBDAModel {
 		result.addAll(declaredPredicates);
 		return result;
 	}
+*/
 
 	@Override
-	public Set<Predicate> getDeclaredClasses() {
-		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
-		result.addAll(declaredClasses);
-		return result;
+	public Set<OClass> getDeclaredClasses() {
+		return Collections.unmodifiableSet(declaredClasses);
 	}
 
 	@Override
-	public Set<Predicate> getDeclaredObjectProperties() {
-		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
-		result.addAll(declaredObjectProperties);
-		return result;
+	public Set<ObjectPropertyExpression> getDeclaredObjectProperties() {
+		return Collections.unmodifiableSet(declaredObjectProperties);
 	}
 
 	@Override
-	public Set<Predicate> getDeclaredDataProperties() {
-		LinkedHashSet<Predicate> result = new LinkedHashSet<Predicate>();
-		result.addAll(declaredDataProperties);
-		return result;
+	public Set<DataPropertyExpression> getDeclaredDataProperties() {
+		return Collections.unmodifiableSet(declaredDataProperties);
 	}
-
+/*
 	@Override
 	public boolean declarePredicate(Predicate predicate) {
 		if (predicate.isClass()) {
@@ -533,68 +545,84 @@ public class OBDAModelImpl implements OBDAModel {
 			return declaredPredicates.add(predicate);
 		}
 	}
-
+*/
+	
 	@Override
-	public boolean declareClass(Predicate classname) {
-		if (!classname.isClass()) {
-			throw new RuntimeException("Cannot declare a non-class predicate as a class. Offending predicate: " + classname);
-		}
+	public boolean declareClass(OClass classname) {
+//		if (!classname.isClass()) {
+//			throw new RuntimeException("Cannot declare a non-class predicate as a class. Offending predicate: " + classname);
+//		}
 		return declaredClasses.add(classname);
 	}
 
 	@Override
-	public boolean declareObjectProperty(Predicate property) {
-		if (!property.isObjectProperty()) {
-			throw new RuntimeException("Cannot declare a non-object property predicate as an object property. Offending predicate: " + property);
-		}
+	public boolean declareObjectProperty(ObjectPropertyExpression property) {
+//		if (!property.getPredicate().isObjectProperty()) {
+//			throw new RuntimeException("Cannot declare a non-object property predicate as an object property. Offending predicate: " + property);
+//		}
 		return declaredObjectProperties.add(property);
 	}
 
 	@Override
-	public boolean declareDataProperty(Predicate property) {
-		if (!property.isDataProperty()) {
-			throw new RuntimeException("Cannot declare a non-data property predicate as an data property. Offending predicate: " + property);
-		}
+	public boolean declareDataProperty(DataPropertyExpression property) {
+//		if (!property.getPredicate().isDataProperty()) {
+//			throw new RuntimeException("Cannot declare a non-data property predicate as an data property. Offending predicate: " + property);
+//		}
 		return declaredDataProperties.add(property);
 	}
-
+	
+	@Override
+	public void declareAll(OntologyVocabulary vocabulary) {
+		for (OClass p : vocabulary.getClasses()) 
+			declareClass(p);
+		
+		for (ObjectPropertyExpression p : vocabulary.getObjectProperties()) 
+			declareObjectProperty(p);
+		
+		for (DataPropertyExpression p : vocabulary.getDataProperties()) 
+			declareDataProperty(p);
+	}
+	
+/*
 	@Override
 	public boolean unDeclarePredicate(Predicate predicate) {
 		return declaredPredicates.remove(predicate);
 	}
-
+*/
 	@Override
-	public boolean unDeclareClass(Predicate classname) {
+	public boolean unDeclareClass(OClass classname) {
 		return declaredClasses.remove(classname);
 	}
 
 	@Override
-	public boolean unDeclareObjectProperty(Predicate property) {
+	public boolean unDeclareObjectProperty(ObjectPropertyExpression property) {
 		return declaredObjectProperties.remove(property);
 	}
 
 	@Override
-	public boolean unDeclareDataProperty(Predicate property) {
+	public boolean unDeclareDataProperty(DataPropertyExpression property) {
 		return declaredDataProperties.remove(property);
 	}
 	
 	@Override
-	public boolean isDeclaredClass(Predicate classname) {
+	public boolean isDeclaredClass(OClass classname) {
 		return declaredClasses.contains(classname);
 	}
 
 	@Override
-	public boolean isDeclaredObjectProperty(Predicate property) {
+	public boolean isDeclaredObjectProperty(ObjectPropertyExpression property) {
 		return declaredObjectProperties.contains(property);
 	}
 
 	@Override
-	public boolean isDeclaredDataProperty(Predicate property) {
+	public boolean isDeclaredDataProperty(DataPropertyExpression property) {
 		return declaredDataProperties.contains(property);
 	}
 
+/*
 	@Override
 	public boolean isDeclared(Predicate predicate) {
 		return (isDeclaredClass(predicate) || isDeclaredObjectProperty(predicate) || isDeclaredDataProperty(predicate) || declaredPredicates.contains(predicate));
 	}
+*/	
 }

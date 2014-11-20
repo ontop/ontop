@@ -54,6 +54,8 @@ import javax.swing.table.TableColumn;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
 import org.semanticweb.ontop.protege4.gui.IconLoader;
 import org.semanticweb.ontop.protege4.gui.MapItem;
 import org.semanticweb.ontop.protege4.gui.PredicateItem;
@@ -158,11 +160,11 @@ public class PropertyMappingPanel extends javax.swing.JPanel {
         pnlAddProperty.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 3, 0));
         pnlAddProperty.setLayout(new java.awt.BorderLayout(3, 0));
         Vector<Object> v = new Vector<Object>();
-        for (Predicate dp : obdaModel.getDeclaredDataProperties()) {
-            v.addElement(new PredicateItem(dp, prefixManager));
+        for (DataPropertyExpression dp : obdaModel.getDeclaredDataProperties()) {
+            v.addElement(new PredicateItem(dp.getPredicate(), prefixManager));
         }
-        for (Predicate op : obdaModel.getDeclaredObjectProperties()) {
-            v.addElement(new PredicateItem(op, prefixManager));
+        for (ObjectPropertyExpression op : obdaModel.getDeclaredObjectProperties()) {
+            v.addElement(new PredicateItem(op.getPredicate(), prefixManager));
         }
         cboPropertyAutoSuggest = new AutoSuggestComboBox(v);
         cboPropertyAutoSuggest.setRenderer(new PropertyListCellRenderer());

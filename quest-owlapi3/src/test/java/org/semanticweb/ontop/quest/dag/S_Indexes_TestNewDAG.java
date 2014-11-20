@@ -23,8 +23,6 @@ package org.semanticweb.ontop.quest.dag;
 
 
 import java.util.ArrayList;
-import java.util.Map;
-
 import junit.framework.TestCase;
 
 import org.jgrapht.Graphs;
@@ -124,15 +122,22 @@ private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG){
 	for(Description vertex: engine.getIndexed() /*.getNamedDAG().vertexSet()*/){
 		int index= engine.getIndex(vertex);
 		log.info("vertex {} index {}", vertex, index);
-		if (vertex instanceof Property) {
-			for(Description parent: namedDAG.getSuccessors((Property)vertex)){
+		if (vertex instanceof ObjectPropertyExpression) {
+			for(ObjectPropertyExpression parent: namedDAG.getSuccessors((ObjectPropertyExpression)vertex)){
+				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
+				if(!result)
+					break;
+			}
+		}
+		else if (vertex instanceof DataPropertyExpression) {
+			for(DataPropertyExpression parent: namedDAG.getSuccessors((DataPropertyExpression)vertex)){
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
 				if(!result)
 					break;
 			}
 		}
 		else {
-			for(Description parent: namedDAG.getSuccessors((BasicClassDescription)vertex)){
+			for(ClassExpression parent: namedDAG.getSuccessors((ClassExpression)vertex)){
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
 				if(!result)
 					break;

@@ -1,17 +1,16 @@
 package org.semanticweb.ontop.owlrefplatform.core.dagjgrapht;
 
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.Description;
+import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.OntologyFactory;
+import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
-import org.semanticweb.ontop.ontology.impl.PropertyImpl;
 
 public class SemanticIndexCache {
 
@@ -67,13 +66,23 @@ public class SemanticIndexCache {
 				classIntervals.put(iri, intervals);
 
 			} 
-			else if (description instanceof PropertyImpl) {
-				PropertyImpl cdesc = (PropertyImpl) description;
+			else if (description instanceof ObjectPropertyExpression) {
+				ObjectPropertyExpression cdesc = (ObjectPropertyExpression) description;
 
 				if (cdesc.isInverse()) {
 					/* Inverses don't get indexes or intervals */
 					continue;
 				}
+
+				int idx = engine.getIndex(cdesc);
+				List<Interval> intervals = engine.getIntervals(cdesc);
+
+				String iri = cdesc.getPredicate().getName();
+				roleIndexes.put(iri, idx);
+				roleIntervals.put(iri, intervals);
+			} 
+			else if (description instanceof DataPropertyExpression) {
+				DataPropertyExpression cdesc = (DataPropertyExpression) description;
 
 				int idx = engine.getIndex(cdesc);
 				List<Interval> intervals = engine.getIntervals(cdesc);
@@ -102,51 +111,63 @@ public class SemanticIndexCache {
 		throw new RuntimeException("Could not find index for: String =  " + name + " type = " + type);
 	}
 
-	public int getIndex(Predicate predicate, int type) {
-		String name = predicate.getName();
-		if (type == CLASS_TYPE) {
-			Integer index = classIndexes.get(name);
+	public int getIndex(OClass c) {
+		String name = c.getPredicate().getName();
+		Integer index = classIndexes.get(name);
 		
-			if (index == null) {
-				/* direct name is not indexed, maybe there is an equivalent */
-				OClass c = (OClass)ofac.createClass(name);
-				OClass equivalent = (OClass)reasonerDag.getClasses().getVertex(c).getRepresentative();
-				return classIndexes.get(equivalent.getPredicate().getName());
-			}
-					
-			return index;
-		} else if (type == ROLE_TYPE) {
-			Integer index = roleIndexes.get(name);
-			
-			if (index == null) {
-				/* direct name is not indexed, maybe there is an equivalent, we need to test
-				 * with object properties and data properties */
-				Property c = ofac.createObjectProperty(name);
-				Property equivalent = reasonerDag.getProperties().getVertex(c).getRepresentative();
-				
-				Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
-				
-				if (index1 != null)
-					return index1;
-				
-				/* object property equivalent failed, we now look for data property equivalent */
-				
-				c = ofac.createDataProperty(name);
-				equivalent = reasonerDag.getProperties().getVertex(c).getRepresentative();
-				
-				index1 = roleIndexes.get(equivalent.getPredicate().getName());
-				if (index1 == null) {
-					System.out.println(name + " IN " + roleIndexes);
-				}
-				return index1;
-			}
-			
-			return index;
-				
+		if (index == null) {
+			/* direct name is not indexed, maybe there is an equivalent */
+			OClass equivalent = (OClass)reasonerDag.getClassDAG().getVertex(c).getRepresentative();
+			return classIndexes.get(equivalent.getPredicate().getName());
 		}
-		throw new RuntimeException("Could not find index for: String =  " + name + " type = " + type);
+				
+		return index;
+	}
+	
+	public int getIndex(ObjectPropertyExpression p) {
+		String name = p.getPredicate().getName();
+		Integer index = roleIndexes.get(name);
+		
+		if (index == null) {
+			// direct name is not indexed, maybe there is an equivalent, we need to test
+			// with object properties and data properties 
+			ObjectPropertyExpression equivalent = reasonerDag.getObjectPropertyDAG().getVertex(p).getRepresentative();
+			
+			Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
+			
+			if (index1 != null)
+				return index1;
+			
+			// TODO: object property equivalent failed, we now look for data property equivalent 
+			
+			System.out.println(name + " IN " + roleIndexes);
+		}
+		
+		return index;				
 	}
 
+	public int getIndex(DataPropertyExpression p) {
+		String name = p.getPredicate().getName();
+		Integer index = roleIndexes.get(name);
+		
+		if (index == null) {
+			// direct name is not indexed, maybe there is an equivalent, we need to test
+			// with object properties and data properties 
+			DataPropertyExpression equivalent = reasonerDag.getDataPropertyDAG().getVertex(p).getRepresentative();
+			
+			Integer index1 = roleIndexes.get(equivalent.getPredicate().getName());
+			
+			if (index1 != null)
+				return index1;
+			
+			// TODO: object property equivalent failed, we now look for data property equivalent 
+			
+			System.out.println(name + " IN " + roleIndexes);
+		}
+		
+		return index;				
+	}
+	
 	public void setIndex(String iri, int type, Integer idx) {
 		if (type == CLASS_TYPE) {
 			classIndexes.put(iri, idx);

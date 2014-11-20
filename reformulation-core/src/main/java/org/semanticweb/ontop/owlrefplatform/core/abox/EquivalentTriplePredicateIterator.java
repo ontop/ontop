@@ -20,6 +20,8 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
+
+
 import java.util.Iterator;
 import java.util.Map;
 
@@ -30,23 +32,25 @@ import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.ClassAssertion;
 import org.semanticweb.ontop.ontology.DataPropertyAssertion;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
 import org.semanticweb.ontop.ontology.Description;
 import org.semanticweb.ontop.ontology.OClass;
 import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
 import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.Property;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
-import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 
-	private Iterator<Assertion> originalIterator;
-	private EquivalenceMap equivalenceMap;
+	private final Iterator<Assertion> originalIterator;
+	private final TBoxReasoner reasoner;
+
+	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();	
 	
-	
-	public EquivalentTriplePredicateIterator(Iterator<Assertion> iterator, EquivalenceMap equivalences) {
+	public EquivalentTriplePredicateIterator(Iterator<Assertion> iterator, TBoxReasoner reasoner) {
 		originalIterator = iterator;
-		equivalenceMap = equivalences;
+		this.reasoner = reasoner;
 	}
 	
 	@Override
@@ -57,11 +61,46 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 	@Override
 	public Assertion next() {
 		Assertion assertion = originalIterator.next();
-		return equivalenceMap.getNormal(assertion);
+		return getNormal(assertion);
 	}
 
 	@Override
 	public void remove() {
 		originalIterator.remove();
+	}
+	
+	// used in EquivalentTriplePredicateIterator
+	
+	private Assertion getNormal(Assertion assertion) {
+		if (assertion instanceof ClassAssertion) {
+			ClassAssertion ca = (ClassAssertion) assertion;
+			OClass description = reasoner.getClassRepresentative(ca.getConcept());
+			
+			if (description != null) {
+				ObjectConstant object = ca.getIndividual();
+				return ofac.createClassAssertion(description, object);
+			}			
+		} 
+		else if (assertion instanceof ObjectPropertyAssertion) {
+			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
+			ObjectPropertyExpression property = reasoner.getObjectPropertyRepresentative(opa.getProperty());
+			
+			if (property != null) {
+				ObjectConstant object1 = opa.getSubject();
+				ObjectConstant object2 = opa.getObject();
+				return ofac.createObjectPropertyAssertion(property, object1, object2);
+			}
+		} 
+		else if (assertion instanceof DataPropertyAssertion) {
+			DataPropertyAssertion opa = (DataPropertyAssertion) assertion;
+			DataPropertyExpression property = reasoner.getDataPropertyRepresentative(opa.getProperty());
+			
+			if (property != null) {
+				ObjectConstant object1 = opa.getSubject();
+				ValueConstant constant = opa.getValue();
+				return ofac.createDataPropertyAssertion(property, object1, constant);					
+			}
+		} 
+		return assertion;
 	}
 }

@@ -25,15 +25,10 @@ import org.semanticweb.ontop.model.Predicate;
 
 public interface ObjectPropertyAssertion extends Assertion {
 
-	public ObjectConstant getFirstObject();
+	public ObjectPropertyExpression getProperty();
+	
+	public ObjectConstant getSubject();
+	
+	public ObjectConstant getObject();	
 
-	public ObjectConstant getSecondObject();
-
-	/***
-	 * Use get predicate instead
-	 * 
-	 * @return
-	 */
-	@Deprecated
-	public Predicate getRole();
 }

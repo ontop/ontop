@@ -22,8 +22,11 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
 
 import java.util.List;
 
+import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.OBDAException;
+import org.semanticweb.ontop.model.ObjectConstant;
 import org.semanticweb.ontop.model.TupleResultSet;
+import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.owlapi3.OWLAPI3IndividualTranslator;
 import org.semanticweb.ontop.owlapi3.OntopOWLException;
 import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
@@ -107,18 +110,17 @@ public class QuestOWLResultSet {
 	}
 
 	private OWLAPI3IndividualTranslator translator = new OWLAPI3IndividualTranslator();
+	
+	private OWLPropertyAssertionObject translate(Constant c) {
+		if (c instanceof ObjectConstant)
+			return translator.translate((ObjectConstant)c);
+		else
+			return translator.translate((ValueConstant)c);
+	}
 
 	public OWLPropertyAssertionObject getOWLPropertyAssertionObject(int column) throws OWLException {
 		try {
-			return translator.translate(res.getConstant(column));
-		} catch (OBDAException e) {
-			throw new OntopOWLException(e + " Column: " + column);
-		}
-	}
-
-	public OWLPropertyAssertionObject getOWLPropertyAssertionObject(String column) throws OWLException {
-		try {
-			return translator.translate(res.getConstant(column));
+			return translate(res.getConstant(column));
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e + " Column: " + column);
 		}
@@ -126,7 +128,7 @@ public class QuestOWLResultSet {
 
 	public OWLIndividual getOWLIndividual(int column) throws OWLException {
 		try {
-			return (OWLIndividual) translator.translate(res.getConstant(column));
+			return (OWLIndividual) translate(res.getConstant(column));
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}
@@ -134,7 +136,7 @@ public class QuestOWLResultSet {
 
 	public OWLIndividual getOWLIndividual(String column) throws OWLException {
 		try {
-			return (OWLIndividual) translator.translate(res.getConstant(column));
+			return (OWLIndividual) translate(res.getConstant(column));
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}
@@ -142,15 +144,7 @@ public class QuestOWLResultSet {
 
 	public OWLNamedIndividual getOWLNamedIndividual(int column) throws OWLException {
 		try {
-			return (OWLNamedIndividual) translator.translate(res.getConstant(column));
-		} catch (OBDAException e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
-	public OWLNamedIndividual getOWLNamedIndividual(String column) throws OWLException {
-		try {
-			return (OWLNamedIndividual) translator.translate(res.getConstant(column));
+			return (OWLNamedIndividual) translate(res.getConstant(column));
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}
@@ -158,23 +152,16 @@ public class QuestOWLResultSet {
 
 	public OWLAnonymousIndividual getOWLAnonymousIndividual(int column) throws OWLException {
 		try {
-			return (OWLAnonymousIndividual) translator.translate(res.getConstant(column));
+			return (OWLAnonymousIndividual) translate(res.getConstant(column));
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}
 	}
 
-	public OWLAnonymousIndividual getOWLAnonymousIndividual(String column) throws OWLException {
-		try {
-			return (OWLAnonymousIndividual) translator.translate(res.getConstant(column));
-		} catch (OBDAException e) {
-			throw new OntopOWLException(e);
-		}
-	}
 
 	public OWLLiteral getOWLLiteral(int column) throws OWLException {
 		try {
-			return (OWLLiteral) translator.translate(res.getConstant(column));
+			return (OWLLiteral) translate(res.getConstant(column));
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}
@@ -182,7 +169,7 @@ public class QuestOWLResultSet {
 
 	public OWLLiteral getOWLLiteral(String column) throws OWLException {
 		try {
-			return (OWLLiteral) translator.translate(res.getConstant(column));
+			return (OWLLiteral) translate(res.getConstant(column));
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}
@@ -190,7 +177,7 @@ public class QuestOWLResultSet {
 
 	public OWLObject getOWLObject(int column) throws OWLException {
 		try {
-			return (OWLObject) translator.translate(res.getConstant(column));
+			return (OWLObject) translate(res.getConstant(column));
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}
@@ -198,7 +185,7 @@ public class QuestOWLResultSet {
 
 	public OWLObject getOWLObject(String column) throws OWLException {
 		try {
-			return (OWLObject) translator.translate(res.getConstant(column));
+			return (OWLObject) translate(res.getConstant(column));
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}

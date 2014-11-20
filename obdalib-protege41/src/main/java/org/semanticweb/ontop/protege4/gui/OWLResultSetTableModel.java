@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
@@ -86,17 +87,33 @@ public class OWLResultSetTableModel implements TableModel {
 		fetchRowsAsync();
 	}
 
+	
+	/**
+	 * Used to show error message during message fetching, but only if
+	 * another message has not already been shown. 
+	 * 
+	 */
+	private class RowFetcherError implements Runnable{
+		private Exception e;
+		RowFetcherError(Exception e){
+			this.e = e;
+		}
+		public void run(){
+			if(!stopFetching){
+				JOptionPane.showMessageDialog(
+						null,
+						"Error when fetching results. Aborting. " + e.toString());
+			}
+		}
+	}
+	
 	private void fetchRowsAsync() throws OWLException{
 		rowFetcher = new Thread(){
 			public void run() {
 				try {
 					fetchRows(fetchSizeLimit);
 				} catch (Exception e){
-					if(!stopFetching){
-						JOptionPane.showMessageDialog(
-								null,
-								"Error when fetching results. Aborting. " + e.toString());
-					} 
+					SwingUtilities.invokeLater(new RowFetcherError(e));
 					e.printStackTrace();
 				} finally {
 					isFetching = false;
@@ -116,6 +133,25 @@ public class OWLResultSetTableModel implements TableModel {
 		return this.isFetching;
 	}
 
+
+	/**
+	 * Adds a table to the result table. 
+	 * Could interfere with AWT/swing calls, so encapsulated for passing to "invokeLater"
+	 */
+	private class RowAdder implements Runnable{
+		String[] crow;
+		RowAdder(String[] crow){
+			this.crow = crow;
+		}
+		public void run(){
+			resultsTable.add(crow);
+			updateRowCount();
+			fireModelChangedEvent();
+			
+		}
+	}
+	
+	
 	private void fetchRows(int size) throws OWLException, InterruptedException {
 		if (results == null) {
 			return;
@@ -136,9 +172,7 @@ public class OWLResultSetTableModel implements TableModel {
 				}
 			}
 			if(!stopFetching){
-				resultsTable.add(crow);
-				this.updateRowCount();
-				this.fireModelChangedEvent();
+				SwingUtilities.invokeLater(new RowAdder(crow));
 			}
 		}
 		isFetching = false;
@@ -148,7 +182,7 @@ public class OWLResultSetTableModel implements TableModel {
 		numrows++;
 
 	}
-
+	
 	/**
 	 * Fetch all the tuples returned by the result set.
 	 */

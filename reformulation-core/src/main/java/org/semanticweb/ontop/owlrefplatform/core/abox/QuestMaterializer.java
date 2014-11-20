@@ -37,6 +37,9 @@ import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.ResultSet;
 import org.semanticweb.ontop.ontology.Assertion;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
@@ -69,13 +72,13 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestMaterializer {
 
-	private OBDAModel model;
-	private Quest questInstance;
+	private final OBDAModel model;
+	private final Quest questInstance;
 	private Ontology ontology;
 	
-	private Set<Predicate> vocabulary;
+	private final Set<Predicate> vocabulary;
 
-	protected long counter = 0;
+	private long counter = 0;
 	private VirtualTripleIterator iterator;
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -115,19 +118,43 @@ public class QuestMaterializer {
 		
 		//add all class/data/object predicates to vocabulary
 		//add declared predicates in model
-		for (Predicate p: this.model.getDeclaredPredicates()) {
+		for (OClass cl : model.getDeclaredClasses()) {
+			Predicate p = cl.getPredicate();
+			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+				vocabulary.add(p);
+		}
+		for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) {
+			Predicate p = prop.getPredicate();
+			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+				vocabulary.add(p);
+		}
+		for (DataPropertyExpression prop : model.getDeclaredDataProperties()) {
+			Predicate p = prop.getPredicate();
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);
 		}
 		if (onto != null) {
 			//from ontology
-			for (Predicate p : onto.getVocabulary()) {
+			for (OClass cl : onto.getVocabulary().getClasses()) {
+				Predicate p = cl.getPredicate(); 
 				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 						&& !vocabulary.contains(p))
 					vocabulary.add(p);
 			}
-		} else
-		{
+			for (ObjectPropertyExpression role : onto.getVocabulary().getObjectProperties()) {
+				Predicate p = role.getPredicate();
+				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+						&& !vocabulary.contains(p))
+					vocabulary.add(p);
+			}
+			for (DataPropertyExpression role : onto.getVocabulary().getDataProperties()) {
+				Predicate p = role.getPredicate();
+				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+						&& !vocabulary.contains(p))
+					vocabulary.add(p);
+			}
+		} 
+		else {
 			//from mapping undeclared predicates (can happen)
 			for (URI uri : this.model.getMappings().keySet()){
 				for (OBDAMappingAxiom axiom : this.model.getMappings(uri))
@@ -148,7 +175,17 @@ public class QuestMaterializer {
 		//start a quest instance
 		if (ontology == null) {
 			ontology = ofac.createOntology();
-			ontology.addEntities(this.model.getDeclaredPredicates());
+			
+			// TODO: use Vocabulary for OBDAModel as well
+			
+			for (OClass pred : model.getDeclaredClasses()) 
+				ontology.getVocabulary().createClass(pred.getPredicate().getName());				
+			
+			for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) 
+				ontology.getVocabulary().createObjectProperty(prop.getPredicate().getName());
+
+			for (DataPropertyExpression prop : model.getDeclaredDataProperties()) 
+				ontology.getVocabulary().createDataProperty(prop.getPredicate().getName());
 		}
 		
 		
