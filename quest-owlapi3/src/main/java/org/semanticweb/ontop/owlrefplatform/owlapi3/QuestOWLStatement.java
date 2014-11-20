@@ -42,12 +42,11 @@ import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.BasicParserSettings;
 import org.semanticweb.ontop.model.GraphResultSet;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.TupleResultSet;
+import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.ClassAssertion;
 import org.semanticweb.ontop.ontology.DataPropertyAssertion;
-import org.semanticweb.ontop.ontology.Description;
 import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3IndividualTranslator;
@@ -113,6 +112,8 @@ public class QuestOWLStatement {
 		try {
 			TupleResultSet executedQuery = (TupleResultSet) st.execute(query);
 			QuestOWLResultSet questOWLResultSet = new QuestOWLResultSet(executedQuery, this);
+
+	 		
 			return questOWLResultSet;
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);

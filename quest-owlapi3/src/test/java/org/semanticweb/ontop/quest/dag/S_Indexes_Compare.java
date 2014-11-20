@@ -22,28 +22,25 @@ package org.semanticweb.ontop.quest.dag;
 
 
 
+import org.semanticweb.ontop.ontology.ClassExpression;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.Description;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.ontology.OntologyFactory;
+import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.NamedDAG;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.File;
 import java.util.ArrayList;
 
 import junit.framework.TestCase;
 
-import org.jgrapht.Graphs;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
-import org.semanticweb.ontop.owlrefplatform.core.dag.DAG;
-import org.semanticweb.ontop.owlrefplatform.core.dag.DAGConstructor;
-import org.semanticweb.ontop.owlrefplatform.core.dag.DAGNode;
-import org.semanticweb.ontop.owlrefplatform.core.dag.DAGOperations;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.NamedDAG;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -72,7 +69,7 @@ public void testIndexes() throws Exception{
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		TBoxReasonerImpl dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+		TBoxReasoner dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
 
 
 		//add input named graph

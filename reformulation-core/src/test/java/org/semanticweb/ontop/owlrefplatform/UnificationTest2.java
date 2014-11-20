@@ -29,10 +29,7 @@ import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Variable;
-import org.semanticweb.ontop.model.impl.AnonymousVariable;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 
 import junit.framework.TestCase;
 

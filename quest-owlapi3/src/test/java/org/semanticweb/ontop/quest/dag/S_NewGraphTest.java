@@ -21,15 +21,14 @@ package org.semanticweb.ontop.quest.dag;
  */
 
 
-
+import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.NamedDAG;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import java.io.File;
 
 import junit.framework.TestCase;
 
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.NamedDAG;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;

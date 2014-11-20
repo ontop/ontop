@@ -20,22 +20,19 @@ package org.semanticweb.ontop.reformulation.tests;
  * #L%
  */
 
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.impl.VariableImpl;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AutomaticMGUGenerationTests extends TestCase {
 
-	private UnifierUtilities					unifier		= null;
+	private UnifierUtilities unifier		= null;
 	private AutomaticMGUTestDataGenerator	generator	= null;
 	private Logger						log			= LoggerFactory.getLogger(AutomaticMGUGenerationTests.class);
 
@@ -66,7 +63,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 
 	/**
 	 * Test method for
-	 * {@link org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities#getMGU(org.semanticweb.ontop.model.Atom, org.semanticweb.ontop.model.Atom)}
+	 * {@link org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier#getMGU(it.unibz.krdb.obda.model.Atom, it.unibz.krdb.obda.model.Atom)}
 	 * .
 	 * 
 	 * @throws Exception
@@ -74,7 +71,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 	
 	public void testGetMGUAtomAtomBoolean() throws Exception {
 		log.debug("Testing computation of MGUs");
-		File inputFile = new File("src/test/java/it/unibz/krdb/obda/reformulation/tests/mgu-computation-test-cases.txt");
+		File inputFile = new File("src/test/java/org/semanticweb/ontop/reformulation/tests/mgu-computation-test-cases.txt");
 		BufferedReader in = new BufferedReader(new FileReader(inputFile));
 
 		String testcase = in.readLine();
@@ -90,17 +87,17 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			String atomsstr = input.split("=")[0].trim();
 			String mgustr = input.split("=")[1].trim();
 			List<Function> atoms = generator.getAtoms(atomsstr);
-			List<SingletonSubstitution> expectedmgu = generator.getMGU(mgustr);
+			List<Substitution> expectedmgu = generator.getMGU(mgustr);
 
-			List<SingletonSubstitution> computedmgu = new ArrayList<>();
+			List<Substitution> computedmgu = new LinkedList<Substitution>();
 			Exception expectedException = null;
 
-			Substitution mgu = UnifierUtilities.getMGU(atoms.get(0), atoms.get(1));
+			Unifier mgu = Unifier.getMGU(atoms.get(0), atoms.get(1));
 			if (mgu == null) {
 				computedmgu = null;
 			} else {
 				for (VariableImpl var : mgu.keySet()) {
-					computedmgu.add(new SingletonSubstitution(var, mgu.get(var)));
+					computedmgu.add(new Substitution(var, mgu.get(var)));
 				}
 			}
 

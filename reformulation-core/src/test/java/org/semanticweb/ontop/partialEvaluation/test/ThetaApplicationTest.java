@@ -20,13 +20,11 @@ package org.semanticweb.ontop.partialEvaluation.test;
  * #L%
  */
 
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import junit.framework.TestCase;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -37,17 +35,17 @@ import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
+
+import junit.framework.TestCase;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 
 
 public class ThetaApplicationTest extends TestCase {
 
 	OBDADataFactory	termFactory	= OBDADataFactoryImpl.getInstance();
-	OBDADataFactory predFactory	= OBDADataFactoryImpl.getInstance();
+	OBDADataFactory	predFactory	= OBDADataFactoryImpl.getInstance();
 
 	/*
 	 * tests the application of given thteas to a given CQIE scenario settings
@@ -105,18 +103,17 @@ public class ThetaApplicationTest extends TestCase {
 
 		CQIE query = predFactory.getCQIE(h, body);
 
-        SingletonSubstitution s1 = new SingletonSubstitution(t7, t6);
-        SingletonSubstitution s2 = new SingletonSubstitution(t8, t9);
-        SingletonSubstitution s3 = new SingletonSubstitution(t11, otx);
+		Substitution s1 = new Substitution(t7, t6);
+		Substitution s2 = new Substitution(t8, t9);
+		Substitution s3 = new Substitution(t11, otx);
 
-        Map<VariableImpl, Term> entries = new HashMap<>();
-		entries.put(s1.getVariable(), s1.getTerm());
-		entries.put(s2.getVariable(), s2.getTerm());
-		entries.put(s3.getVariable(), s3.getTerm());
-        Substitution mgu = new SubstitutionImpl(entries);
+		Unifier mgu = new Unifier();
+		mgu.put((VariableImpl) s1.getVariable(), s1.getTerm());
+		mgu.put((VariableImpl) s2.getVariable(), s2.getTerm());
+		mgu.put((VariableImpl) s3.getVariable(), s3.getTerm());
 
 		UnifierUtilities unifier = new UnifierUtilities();
-		CQIE newquery = SubstitutionUtilities.applySubstitution(query, mgu);
+		CQIE newquery = unifier.applyUnifier(query, mgu);
 
 		List<Function> newbody = newquery.getBody();
 		assertEquals(1, newbody.size());

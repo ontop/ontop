@@ -1,5 +1,8 @@
 package org.semanticweb.ontop.ontology;
 
+import org.semanticweb.ontop.model.Predicate;
+
+
 /*
  * #%L
  * ontop-obdalib-core
@@ -33,8 +36,6 @@ package org.semanticweb.ontop.ontology;
  */
 
 
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.ontology.Description;
 
 public interface DataPropertyExpression extends Description {
 

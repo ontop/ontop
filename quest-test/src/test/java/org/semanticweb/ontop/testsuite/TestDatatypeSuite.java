@@ -20,7 +20,7 @@ package org.semanticweb.ontop.testsuite;
  * #L%
  */
 
-import it.unibz.krdb.obda.quest.datatypes.MssqlDatatypeTest;
+import org.semanticweb.ontop.quest.datatypes.MssqlDatatypeTest;
 import org.semanticweb.ontop.quest.datatypes.MysqlDatatypeTest;
 import org.semanticweb.ontop.quest.datatypes.OracleDatatypeTest;
 import org.semanticweb.ontop.quest.datatypes.PgsqlDatatypeTest;

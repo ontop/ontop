@@ -28,12 +28,17 @@ import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDASQLQuery;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.DataPropertyExpression;
 import org.semanticweb.ontop.ontology.OClass;
 import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
 import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.PropertyExpression;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Collection;
@@ -124,7 +129,9 @@ public class VocabularyValidator {
 				 * Calling recursively for nested expressions
 				 */
 				if (atom.isAlgebraFunction()) {
-					replaceEquivalences(atom.getTerms());
+                    if (!atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_GROUP)){
+                        replaceEquivalences(atom.getTerms());
+                    }
 					continue;
 				}
 				

@@ -21,12 +21,10 @@ package org.semanticweb.ontop.quest.dag;
  */
 
 
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import java.io.File;
 
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;

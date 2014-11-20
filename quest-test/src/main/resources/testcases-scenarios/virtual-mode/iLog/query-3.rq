@@ -10,6 +10,10 @@ PREFIX : <http://www.semanticweb.org/ontologies/2011/10/iLogOntology.owl#>
 # per fare il MAX abbiamo usato un pattern trovato qui:
 # http://dallemang.typepad.com/my_weblog/2007/09/min-and-max-in-.html
 #
+#  [11/13/14, 15:39:05] Sarah: ITU down in a certain day (ILOG)
+#  [11/13/14, 15:39:11] Sarah: in other words: ITU that had as last event an unloading
+#  [11/13/14, 15:39:28] Sarah: to have the max we used a pattern that we found here:
+#  [11/13/14, 15:41:22] Sarah: ITU International Telecommunication Union
 
 SELECT DISTINCT ?itu
 WHERE {

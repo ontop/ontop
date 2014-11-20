@@ -161,9 +161,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace,
-						boolean isSI,  SemanticIndexURIMap uriRefIds) {
+            /*boolean isSI, */ SemanticIndexURIMap uriRefIds) {
 		this(metadata, sqladapter, sqlGenerateReplace);
-		this.isSI = isSI;
+		this.isSI = (uriRefIds != null);
 		this.uriRefIds = uriRefIds;
 	}
 
@@ -174,7 +174,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return A cloned object without any query-dependent value
 	 */
 	public SQLQueryGenerator cloneGenerator() {
-		return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE, isSI, uriRefIds);
+		return new SQLGenerator(metadata.clone(), sqladapter, generatingREPLACE, uriRefIds);
 	}
 
 	private ImmutableTable<Predicate, Predicate, Predicate> buildPredicateUnifyTable() {

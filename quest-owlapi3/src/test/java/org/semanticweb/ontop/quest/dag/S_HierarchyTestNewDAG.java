@@ -21,16 +21,19 @@ package org.semanticweb.ontop.quest.dag;
  */
 
 
+import org.semanticweb.ontop.ontology.ClassExpression;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+
 import java.util.ArrayList;
 import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,12 +81,12 @@ public class S_HierarchyTestNewDAG extends TestCase {
 		for (int i=0; i<input.size(); i++){
 			String fileInput=input.get(i);
 
-			TBoxReasonerImpl reasoner = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+			TBoxReasoner reasoner = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
 			//		DAGImpl dag2= InputOWL.createDAG(fileOutput);
 
 			//transform in a named graph
-            TestTBoxReasonerImpl_OnNamedDAG dag2 = new TestTBoxReasonerImpl_OnNamedDAG(reasoner);
-            TestTBoxReasonerImpl_Named dag1 = new TestTBoxReasonerImpl_Named(reasoner);
+			TestTBoxReasonerImpl_OnNamedDAG dag2= new TestTBoxReasonerImpl_OnNamedDAG(reasoner);
+			TestTBoxReasonerImpl_Named dag1 = new TestTBoxReasonerImpl_Named(reasoner);
 			log.debug("Input number {}", i+1 );
 			log.info("First dag {}", dag1);
 			log.info("Second dag {}", dag2);

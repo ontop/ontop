@@ -39,9 +39,6 @@
         <dc:creator rdf:datatype="&xsd;string">Amancio Bouza</dc:creator>
         <dc:contributor rdf:datatype="&xsd;string">Amancio Bouza</dc:contributor>
         <dc:description rdf:datatype="&xsd;string">MO - Movie ontology</dc:description>
-        <!--
-        <owl:imports rdf:resource="http://dbpedia.org/ontology/"/>
-        -->
     </owl:Ontology>
     
 
@@ -146,16 +143,6 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
-    
-
-
-    <!-- http://dbpedia.org/ontology/birthName -->
-
-    <rdf:Description rdf:about="&dbpedia;birthName">
-        <rdfs:label xml:lang="el">όνομα_γέννησης</rdfs:label>
-        <rdfs:label xml:lang="en">birth name</rdfs:label>
-        <rdfs:domain rdf:resource="&dbpedia;Person"/>
-    </rdf:Description>
     
 
 
@@ -523,6 +510,7 @@
     <owl:DatatypeProperty rdf:about="&dbpedia;birthName">
         <rdfs:label xml:lang="el">όνομα_γέννησης</rdfs:label>
         <rdfs:label xml:lang="en">birth name</rdfs:label>
+        <rdfs:domain rdf:resource="&dbpedia;Person"/>
         <rdfs:range rdf:resource="&xsd;string"/>
     </owl:DatatypeProperty>
     
@@ -3883,33 +3871,32 @@
     <rdf:Description>
         <rdf:type rdf:resource="&owl;AllDifferent"/>
         <owl:distinctMembers rdf:parseType="Collection">
-            <rdf:Description rdf:about="&mo;Amazon.com_retailer"/>
-            <rdf:Description rdf:about="&mo;Blockbuster.com_retailer"/>
+            <rdf:Description rdf:about="&mo;Netflix.com_retailer"/>
+            <rdf:Description rdf:about="&mo;RottenTomatoes.com_retailer"/>
         </owl:distinctMembers>
     </rdf:Description>
     <rdf:Description>
         <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
         <owl:members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&mo;Eastern_Africa"/>
-            <rdf:Description rdf:about="&mo;Middle_Africa"/>
-            <rdf:Description rdf:about="&mo;Northern_Africa"/>
-            <rdf:Description rdf:about="&mo;Southern_Africa"/>
-            <rdf:Description rdf:about="&mo;Western_Africa"/>
+            <rdf:Description rdf:about="&mo;Eastern_Europe"/>
+            <rdf:Description rdf:about="&mo;Northern_Europe"/>
+            <rdf:Description rdf:about="&mo;Southern_Europe"/>
+            <rdf:Description rdf:about="&mo;Western_Europe"/>
         </owl:members>
     </rdf:Description>
     <rdf:Description>
         <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
         <owl:members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&mo;Caribbean"/>
-            <rdf:Description rdf:about="&mo;LatinAmerica"/>
-            <rdf:Description rdf:about="&mo;Northern_America"/>
+            <rdf:Description rdf:about="&dbpedia;Language"/>
+            <rdf:Description rdf:about="&mo;Colorinfo"/>
+            <rdf:Description rdf:about="&mo;Sound_Mix"/>
         </owl:members>
     </rdf:Description>
     <rdf:Description>
         <rdf:type rdf:resource="&owl;AllDifferent"/>
         <owl:distinctMembers rdf:parseType="Collection">
             <rdf:Description rdf:about="&mo;Blockbuster.com_retailer"/>
-            <rdf:Description rdf:about="&mo;RottenTomatoes.com_retailer"/>
+            <rdf:Description rdf:about="&mo;Netflix.com_retailer"/>
         </owl:distinctMembers>
     </rdf:Description>
     <rdf:Description>
@@ -3923,18 +3910,9 @@
         </owl:members>
     </rdf:Description>
     <rdf:Description>
-        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
-        <owl:members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&mo;Eastern_Europe"/>
-            <rdf:Description rdf:about="&mo;Northern_Europe"/>
-            <rdf:Description rdf:about="&mo;Southern_Europe"/>
-            <rdf:Description rdf:about="&mo;Western_Europe"/>
-        </owl:members>
-    </rdf:Description>
-    <rdf:Description>
         <rdf:type rdf:resource="&owl;AllDifferent"/>
         <owl:distinctMembers rdf:parseType="Collection">
-            <rdf:Description rdf:about="&mo;Blockbuster.com_retailer"/>
+            <rdf:Description rdf:about="&mo;Amazon.com_retailer"/>
             <rdf:Description rdf:about="&mo;Netflix.com_retailer"/>
         </owl:distinctMembers>
     </rdf:Description>
@@ -3948,8 +3926,8 @@
     <rdf:Description>
         <rdf:type rdf:resource="&owl;AllDifferent"/>
         <owl:distinctMembers rdf:parseType="Collection">
-            <rdf:Description rdf:about="&mo;Amazon.com_retailer"/>
-            <rdf:Description rdf:about="&mo;Netflix.com_retailer"/>
+            <rdf:Description rdf:about="&mo;Blockbuster.com_retailer"/>
+            <rdf:Description rdf:about="&mo;RottenTomatoes.com_retailer"/>
         </owl:distinctMembers>
     </rdf:Description>
     <rdf:Description>
@@ -3959,6 +3937,16 @@
             <rdf:Description rdf:about="&mo;Melanesia"/>
             <rdf:Description rdf:about="&mo;Micronesia"/>
             <rdf:Description rdf:about="&mo;Polynesia"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="&mo;Eastern_Africa"/>
+            <rdf:Description rdf:about="&mo;Middle_Africa"/>
+            <rdf:Description rdf:about="&mo;Northern_Africa"/>
+            <rdf:Description rdf:about="&mo;Southern_Africa"/>
+            <rdf:Description rdf:about="&mo;Western_Africa"/>
         </owl:members>
     </rdf:Description>
     <rdf:Description>
@@ -3974,16 +3962,16 @@
     <rdf:Description>
         <rdf:type rdf:resource="&owl;AllDifferent"/>
         <owl:distinctMembers rdf:parseType="Collection">
-            <rdf:Description rdf:about="&mo;Netflix.com_retailer"/>
-            <rdf:Description rdf:about="&mo;RottenTomatoes.com_retailer"/>
+            <rdf:Description rdf:about="&mo;Amazon.com_retailer"/>
+            <rdf:Description rdf:about="&mo;Blockbuster.com_retailer"/>
         </owl:distinctMembers>
     </rdf:Description>
     <rdf:Description>
         <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
         <owl:members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&dbpedia;Language"/>
-            <rdf:Description rdf:about="&mo;Colorinfo"/>
-            <rdf:Description rdf:about="&mo;Sound_Mix"/>
+            <rdf:Description rdf:about="&mo;Caribbean"/>
+            <rdf:Description rdf:about="&mo;LatinAmerica"/>
+            <rdf:Description rdf:about="&mo;Northern_America"/>
         </owl:members>
     </rdf:Description>
 </rdf:RDF>

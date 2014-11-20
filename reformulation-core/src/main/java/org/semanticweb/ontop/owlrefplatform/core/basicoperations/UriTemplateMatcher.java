@@ -20,13 +20,6 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  * #L%
  */
 
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Variable;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -36,35 +29,44 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.semanticweb.ontop.model.Constant;
+import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+
+/**
+ * Immutable class
+ */
 public class UriTemplateMatcher {
 
 	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+    
+	private final Map<Pattern, Function> matchers;
 
-	private final Map<Pattern, Function> uriTemplateMatcher = new HashMap<Pattern, Function>();
+    public UriTemplateMatcher(Map<Pattern, Function> matchers) {
+        this.matchers = Collections.unmodifiableMap(matchers);
+    }
 	
 	public UriTemplateMatcher() {
-		// NO-OP
+        this.matchers = Collections.unmodifiableMap(new HashMap<Pattern, Function>());
 	}
-	
-	
-	public void clear() {
-		uriTemplateMatcher.clear();
-	}
-	
-	public void put(Pattern uriTemplatePattern, Function uriFunction) {
-		uriTemplateMatcher.put(uriTemplatePattern, uriFunction);
-	}
+
+    public UriTemplateMatcher(UriTemplateMatcher that) {
+        this.matchers = that.matchers;
+    }
 	
 	/***
 	 * We will try to match the URI to one of our patterns, if this happens, we
-	 * have a corresponding function, and the parameters for this function. The
+	 * have a corresponding function, and the paramters for this function. The
 	 * parameters are the values for the groups of the pattern.
 	 */
 	public Function generateURIFunction(String uriString) {
 		Function functionURI = null;
 
-		List<Pattern> patternsMatched = new LinkedList<>();
-		for (Pattern pattern : uriTemplateMatcher.keySet()) {
+		List<Pattern> patternsMatched = new LinkedList<Pattern>();
+		for (Pattern pattern : matchers.keySet()) {
 
 			Matcher matcher = pattern.matcher(uriString);
 			boolean match = matcher.matches();
@@ -81,7 +83,7 @@ public class UriTemplateMatcher {
 
 		Collections.sort(patternsMatched, comparator); 
 		for (Pattern pattern : patternsMatched) {
-			Function matchingFunction = uriTemplateMatcher.get(pattern);
+			Function matchingFunction = matchers.get(pattern);
 			Term baseParameter = matchingFunction.getTerms().get(0);
 			if (baseParameter instanceof Constant) {
 				/*
@@ -105,12 +107,13 @@ public class UriTemplateMatcher {
 				 * we need to match x with the subjectURI
 				 */
 				functionURI = ofac.getUriTemplate(ofac.getConstantLiteral(uriString));
+
 			}
 			break;
 		}
 		if (functionURI == null) {
-			/* If we cannot match against a template, we try to match against the most general template (which will
-			 * generate empty quires later in the query answering process
+			/* If we cannot match againts a tempalte, we try to match againts the most general tempalte (which will 
+			 * generate empty queires later in the query answering process
 			 */
 			functionURI = ofac.getUriTemplate(ofac.getConstantLiteral(uriString));
 		}

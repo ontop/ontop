@@ -56,6 +56,7 @@ import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.ontology.DataPropertyExpression;
 import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.PropertyExpression;
 import org.semanticweb.ontop.protege4.gui.IconLoader;
 import org.semanticweb.ontop.protege4.gui.MapItem;
 import org.semanticweb.ontop.protege4.gui.PredicateItem;

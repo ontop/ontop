@@ -22,17 +22,19 @@ package org.semanticweb.ontop.quest.dag;
 
 
 
-import java.util.ArrayList;
-import junit.framework.TestCase;
-
-import org.jgrapht.Graphs;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
+import org.semanticweb.ontop.ontology.ClassExpression;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
 import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.Property;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.NamedDAG;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+
+import java.util.ArrayList;
+import junit.framework.TestCase;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +99,7 @@ public void testIndexes() throws Exception{
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		TBoxReasonerImpl dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+		TBoxReasoner dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
 
 
 		//add input named graph

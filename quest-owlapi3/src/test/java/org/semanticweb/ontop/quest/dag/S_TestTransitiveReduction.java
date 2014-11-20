@@ -22,6 +22,11 @@ package org.semanticweb.ontop.quest.dag;
 
 
 
+import org.semanticweb.ontop.ontology.ClassExpression;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -29,10 +34,6 @@ import junit.framework.TestCase;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +110,7 @@ public class S_TestTransitiveReduction extends TestCase {
 			log.info("First graph {}", dag2.getObjectPropertyGraph());
 			log.info("First graph {}", dag2.getClassGraph());
 			log.info("Second dag {}", dag2);
-
+						
 			assertTrue(testRedundantEdges(reasonerd1,dag2));
 
 
@@ -130,18 +131,18 @@ public class S_TestTransitiveReduction extends TestCase {
 		int numberRedundants=0;
 
 		for (Equivalences<ObjectPropertyExpression> equivalents: d2.getObjectPropertyDAG())
-			if (equivalents.size()>=2)
+			if(equivalents.size()>=2)
 				numberEquivalents += equivalents.size();
 		
 		for (Equivalences<ClassExpression> equivalents: d2.getClassDAG())
-			if (equivalents.size()>=2)
+			if(equivalents.size()>=2)
 				numberEquivalents += equivalents.size();
 
 
 		{
 			DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> g1 = 	reasonerd1.getObjectPropertyGraph();	
 			for (Equivalences<ObjectPropertyExpression> equivalents: reasonerd1.getObjectPropertyDAG()) {
-
+				
 				log.info("equivalents {} ", equivalents);
 				
 				//check if there are redundant edges
@@ -171,7 +172,7 @@ public class S_TestTransitiveReduction extends TestCase {
 			DefaultDirectedGraph<ClassExpression,DefaultEdge> g1 =	reasonerd1.getClassGraph();	
 
 			for (Equivalences<ClassExpression> equivalents : reasonerd1.getClassDAG()) {
-
+				
 				log.info("equivalents {} ", equivalents);
 				
 				//check if there are redundant edges

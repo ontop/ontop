@@ -120,14 +120,14 @@ public class QuestDBStatement implements OBDAStatement {
 				
 				EquivalentTriplePredicateIterator aBoxNormalIter = 
 						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos), 
-								st.questInstance.getReasoner());
+								questInstance.getReasoner());
 				
 				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
 			} 
 			else if (ext.toLowerCase().equals(".nt")) {				
 				NTripleAssertionIterator it = new NTripleAssertionIterator(rdffile);
 				EquivalentTriplePredicateIterator aBoxNormalIter = 
-						new EquivalentTriplePredicateIterator(it, st.questInstance.getReasoner());
+						new EquivalentTriplePredicateIterator(it, questInstance.getReasoner());
 				
 				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
 			}
@@ -283,7 +283,7 @@ public class QuestDBStatement implements OBDAStatement {
 		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 		ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
 		
-		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.questInstance.getUriTemplateMatcher());
+		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.getQuestInstance().getUriTemplateMatcher());
 		
 		LinkedList<String> signatureContainer = new LinkedList<String>();
 		tr.getSignature(pq, signatureContainer);

@@ -26,7 +26,6 @@ import java.util.Map;
 
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 
 /**
  * A general interface which should be use to implement new source query
@@ -49,8 +48,10 @@ public interface SQLQueryGenerator extends Serializable {
 	 */
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException;
 
-	//void setUriMap(SemanticIndexURIMap uriRefIds);
-	// public ViewManager getViewManager();
+	
 
     public SQLQueryGenerator cloneGenerator();
+    
+    //in version2, it is replaced by another constructor
+    //void setUriMap(SemanticIndexURIMap uriRefIds);
 }

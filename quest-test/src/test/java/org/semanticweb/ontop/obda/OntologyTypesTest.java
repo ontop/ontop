@@ -145,7 +145,7 @@ public class OntologyTypesTest{
 		//no value in the mapping
 		//xsd:long in the ontology, asking for the general case we will not have any result
 		String query1 = "PREFIX : <http://www.company.com/ARES#>" +
-				"select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
+				"select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
 		runTests(p, query1, 0);
 //
@@ -229,7 +229,7 @@ public class OntologyTypesTest{
         //no value in the mapping
         //xsd:long in the ontology, asking for the general case we will not have any result
         String query1 = "PREFIX : <http://www.company.com/ARES#>" +
-                "select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
+                "select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
         runTests(p, query1, 0);
 //
@@ -305,7 +305,7 @@ public class OntologyTypesTest{
 		} catch (Exception e) {
            
             
-            assertEquals(e.getCause().getClass().getCanonicalName(), "org.semanticweb.ontop.model.OBDAException" );
+            assertEquals(e.getCause().getClass().getCanonicalName(), "it.unibz.krdb.obda.model.OBDAException" );
 
 
 		} 

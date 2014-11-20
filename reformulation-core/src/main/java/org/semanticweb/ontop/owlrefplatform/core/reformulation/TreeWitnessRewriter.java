@@ -30,7 +30,6 @@ import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
 import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Loop;
 import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessSet.CompatibleTreeWitnessSetIterator;
-import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import org.semanticweb.ontop.utils.QueryUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

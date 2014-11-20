@@ -49,6 +49,7 @@ import org.semanticweb.ontop.querymanager.QueryControllerQuery;
 import org.semanticweb.ontop.sql.JDBCConnectionManager;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;

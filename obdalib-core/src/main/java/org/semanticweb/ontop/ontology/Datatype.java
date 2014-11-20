@@ -22,14 +22,6 @@ package org.semanticweb.ontop.ontology;
 
 import org.semanticweb.ontop.model.Predicate;
 
-/**
- * Represents Datatype in OWL 2 Specification
- * 
- * @author roman
- *
- */
-
-
 public interface Datatype extends DataRangeExpression {
 	
 	public Predicate getPredicate();

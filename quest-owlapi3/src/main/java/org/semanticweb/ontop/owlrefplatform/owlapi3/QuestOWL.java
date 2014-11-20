@@ -32,6 +32,7 @@ import org.semanticweb.ontop.ontology.DataPropertyExpression;
 import org.semanticweb.ontop.ontology.NaryAxiom;
 import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
 import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.ontology.*;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import org.semanticweb.ontop.owlrefplatform.core.Quest;
@@ -43,6 +44,7 @@ import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateI
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.semanticweb.ontop.utils.VersionInfo;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
+
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -224,8 +226,8 @@ public class QuestOWL extends OWLReasonerBase {
 
 	}
 
-	
-	 /** This constructor is the same as the default constructor, except that extra constraints (i.e. primary and foreign keys) may be
+	/**
+	 * This constructor is the same as the default constructor, except that extra constraints (i.e. primary and foreign keys) may be
 	 * supplied 
 	 * @param userConstraints User-supplied primary and foreign keys
 	 */
@@ -239,7 +241,8 @@ public class QuestOWL extends OWLReasonerBase {
 		
 		this.init(rootOntology, obdaModel, configuration, preferences);
 	}
-	 
+	
+	
 	 /**
 	 * extract version from {@link org.semanticweb.ontop.utils.VersionInfo}, which is from the file {@code version.properties}
 	 */
@@ -331,7 +334,7 @@ public class QuestOWL extends OWLReasonerBase {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
 					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure);
-					EquivalentTriplePredicateIterator aBoxNormalIter = 
+					EquivalentTriplePredicateIterator aBoxNormalIter =
 							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
 					
 					int count = st.insertData(aBoxNormalIter, 5000, 500);

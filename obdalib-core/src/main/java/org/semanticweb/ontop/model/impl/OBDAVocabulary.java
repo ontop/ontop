@@ -27,12 +27,12 @@ import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.ValueConstant;
 
 public class OBDAVocabulary {
-	
+
 	/*
 	 * Singleton
 	 */
 	private OBDAVocabulary(){
-		
+
 	}
 	
 
@@ -44,7 +44,7 @@ public class OBDAVocabulary {
 
 	
 	/* Numeric operation predicates */
-	
+
 	public static final Predicate MINUS = new NumericalOperationPredicateImpl("minus", 1); // TODO (ROMAN): check -- never used
 	public static final Predicate ADD = new NumericalOperationPredicateImpl("add", 2);
 	public static final Predicate SUBTRACT = new NumericalOperationPredicateImpl("subtract", 2);
@@ -68,8 +68,8 @@ public class OBDAVocabulary {
 	public static final BooleanOperationPredicate IS_NOT_NULL = new BooleanOperationPredicateImpl("IS_NOT_NULL", 1);
 	public static final BooleanOperationPredicate IS_TRUE = new BooleanOperationPredicateImpl("IS_TRUE", 1);
 
-	
-	
+
+
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
 
@@ -86,7 +86,7 @@ public class OBDAVocabulary {
 	public static final String PREFIX_OWL = "owl:";
 	public static final String PREFIX_QUEST = "quest:";
 
-	
+
 	// TODO: to be removed
 	public static final String RDFS_LITERAL_URI = "http://www.w3.org/2000/01/rdf-schema#Literal";
 	
@@ -98,12 +98,12 @@ public class OBDAVocabulary {
 	public static final Predicate QUEST_TRIPLE_PRED = new PredicateImpl("triple", 3, new COL_TYPE[3]);
 
 	public static final Predicate QUEST_CAST = new PredicateImpl("cast", 2, new COL_TYPE[2]);
-	
+
 	public static final String QUEST_QUERY = "ans1";
 
 	// TODO: GX refactor
-	
-	
+
+
 	/* SPARQL algebra operations */
 	// TODO: remove it
 	public static final String XSD_STRING_URI = "http://www.w3.org/2001/XMLSchema#string";
@@ -111,13 +111,13 @@ public class OBDAVocabulary {
 	public static final String SPARQL_STR_URI = "str";
 
 	public static final String SPARQL_COUNT_URI = "Count";
-	
+
 	public static final String SPARQL_AVG_URI = "Avg";
-	
+
 	public static final String SPARQL_SUM_URI = "Sum";
-	
+
 	public static final String SPARQL_MIN_URI = "Min";
-	
+
 	public static final String SPARQL_MAX_URI = "Max";
 
 	/* SPARQL Algebra predicate */
@@ -141,7 +141,7 @@ public class OBDAVocabulary {
 
 	
 	/* SPARQL built-in predicates */
-	
+
 	public static final BooleanOperationPredicate SPARQL_IS_LITERAL = new BooleanOperationPredicateImpl("isLiteral", 1);
 	public static final BooleanOperationPredicate SPARQL_IS_URI = new BooleanOperationPredicateImpl("isURI", 1);
 	public static final BooleanOperationPredicate SPARQL_IS_IRI = new BooleanOperationPredicateImpl("isIRI", 1);

@@ -37,7 +37,7 @@ import java.util.Set;
  *  Typical algebraic operations on substitution functions are composition and union.
  *
  *  See the SubstitutionUtilities
- *  {@link it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SubstitutionUtilities}
+ *  {@link org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities}
  *
  */
 public interface Substitution {

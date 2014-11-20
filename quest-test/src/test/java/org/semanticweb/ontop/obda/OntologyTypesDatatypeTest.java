@@ -1,4 +1,4 @@
-package it.unibz.krdb.odba;
+package org.semanticweb.ontop.obda;
 
 /*
  * #%L
@@ -34,6 +34,8 @@ import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

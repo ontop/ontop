@@ -20,7 +20,41 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
-
+import org.semanticweb.ontop.model.BNode;
+import org.semanticweb.ontop.model.CQIE;
+import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDAException;
+import org.semanticweb.ontop.model.OBDAMappingAxiom;
+import org.semanticweb.ontop.model.OBDASQLQuery;
+import org.semanticweb.ontop.model.ObjectConstant;
+import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.Predicate.COL_TYPE;
+import org.semanticweb.ontop.model.URIConstant;
+import org.semanticweb.ontop.model.ValueConstant;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.ontology.Assertion;
+import org.semanticweb.ontop.ontology.ClassExpression;
+import org.semanticweb.ontop.ontology.DataPropertyAssertion;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.DataPropertyRangeExpression;
+import org.semanticweb.ontop.ontology.DataRangeExpression;
+import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.ClassAssertion;
+import org.semanticweb.ontop.ontology.Datatype;
+import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.OntologyFactory;
+import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
+import org.semanticweb.ontop.ontology.impl.OntologyVocabularyImpl;
+import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
+import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Interval;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexCache;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -47,44 +81,12 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import org.semanticweb.ontop.model.BNode;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAMappingAxiom;
-import org.semanticweb.ontop.model.OBDASQLQuery;
-import org.semanticweb.ontop.model.ObjectConstant;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.URIConstant;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Predicate.COL_TYPE;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.ontology.Assertion;
-import org.semanticweb.ontop.ontology.ClassAssertion;
-import org.semanticweb.ontop.ontology.DataPropertyAssertion;
-import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
-import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
-import org.semanticweb.ontop.ontology.impl.OntologyImpl;
-import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSDataRepositoryManager;
-
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.*;
-import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Store ABox assertions in the DB
- *
+ * 
  */
 
 public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
@@ -107,9 +109,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private static final String class_table = "QUEST_CLASS_ASSERTION";
 	private static final String role_table = "QUEST_OBJECT_PROPERTY_ASSERTION";
 	private static final String attribute_table_literal = "QUEST_DATA_PROPERTY_LITERAL_ASSERTION";
-
+  
 	private static final Map<COL_TYPE, String> attribute_table = new HashMap<COL_TYPE, String>();
-
+	
 	static {
 		attribute_table.put(COL_TYPE.STRING, "QUEST_DATA_PROPERTY_STRING_ASSERTION");    // 1
 		attribute_table.put(COL_TYPE.INTEGER, "QUEST_DATA_PROPERTY_INTEGER_ASSERTION");   // 2
@@ -126,11 +128,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		attribute_table.put(COL_TYPE.DATETIME, "QUEST_DATA_PROPERTY_DATETIME_ASSERTION"); // 13
 		attribute_table.put(COL_TYPE.BOOLEAN,  "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION");  // 14
 	}
-
-	/**
-	 *  CREATE metadata tables
-	 */
-
+	
+/**
+ *  CREATE metadata tables
+ */
+	
 	private final static String create_idx = "CREATE TABLE " + index_table + " ( " + "URI VARCHAR(400), "
 			+ "IDX INTEGER, ENTITY_TYPE INTEGER" + ")";
 
@@ -139,23 +141,23 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	private final static String create_emptyness_index = "CREATE TABLE " + emptyness_index_table + " ( TABLEID INTEGER, IDX INTEGER, "
 			+ " TYPE1 INTEGER, TYPE2 INTEGER )";
-
+	
 	private final static String create_uri_id = "CREATE TABLE " + uri_id_table + " ( " + "ID INTEGER, " + "URI VARCHAR(400) " + ")";
 
 
-	/**
-	 *  INSERT metadata
-	 */
-
+/**
+ *  INSERT metadata
+ */
+	
 	private final static String insert_idx_query = "INSERT INTO " + index_table + "(URI, IDX, ENTITY_TYPE) VALUES(?, ?, ?)";
 	private final static String uriid_insert = "INSERT INTO " + uri_id_table + "(ID, URI) VALUES(?, ?)";
 	private final static String insert_interval_query = "INSERT INTO " + interval_table
 			+ "(URI, IDX_FROM, IDX_TO, ENTITY_TYPE) VALUES(?, ?, ?, ?)";
-
-	/**
-	 *  CREATE data tables
-	 */
-
+	
+/**
+ *  CREATE data tables
+ */
+	
 	private static final String class_table_create = "CREATE TABLE " + class_table + " ( " + "\"URI\" INTEGER NOT NULL, "
 			+ "\"IDX\"  SMALLINT NOT NULL, " + " ISBNODE BOOLEAN NOT NULL DEFAULT FALSE " + ")";
 
@@ -173,36 +175,36 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			+ "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	private static final String attribute_table_int_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.INT) + " ( "
-			+ "\"URI\" INTEGER  NOT NULL, " + "VAL INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_negative_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.NEGATIVE_INTEGER) + " ( "
-			+ "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_positive_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.POSITIVE_INTEGER) + " ( "
-			+ "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_unsigned_int_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.UNSIGNED_INT) + " ( "
-			+ "\"URI\" INTEGER  NOT NULL, " + "VAL INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_non_positive_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.NON_POSITIVE_INTEGER) + " ( "
-			+ "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_non_negative_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.NON_NEGATIVE_INTEGER) + " ( "
-			+ "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_long_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.LONG) + " ( "
-			+ "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_decimal_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.DECIMAL) + " ( "
+            + "\"URI\" INTEGER  NOT NULL, " + "VAL INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+    private static final String attribute_table_negative_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.NEGATIVE_INTEGER) + " ( "
+            + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+    private static final String attribute_table_positive_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.POSITIVE_INTEGER) + " ( "
+            + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+    private static final String attribute_table_unsigned_int_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.UNSIGNED_INT) + " ( "
+            + "\"URI\" INTEGER  NOT NULL, " + "VAL INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+    private static final String attribute_table_non_positive_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.NON_POSITIVE_INTEGER) + " ( "
+            + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+    private static final String attribute_table_non_negative_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.NON_NEGATIVE_INTEGER) + " ( "
+            + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+    private static final String attribute_table_long_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.LONG) + " ( "
+            + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+    private static final String attribute_table_decimal_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.DECIMAL) + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL DECIMAL NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	private static final String attribute_table_double_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.DOUBLE) + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL DOUBLE PRECISION NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	private static final String attribute_table_float_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.FLOAT) + " ( "
-			+ "\"URI\" INTEGER NOT NULL, " + "VAL DOUBLE PRECISION NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_datetime_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.DATETIME) + " ( "
+            + "\"URI\" INTEGER NOT NULL, " + "VAL DOUBLE PRECISION NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
+            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+    private static final String attribute_table_datetime_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.DATETIME) + " ( "
 			+ "\"URI\" INTEGER NOT NULL, " + "VAL TIMESTAMP NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	private static final String attribute_table_boolean_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.BOOLEAN) + " ( "
@@ -210,29 +212,29 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 
 
-	/**
-	 *  INSERT data 	
-	 */
-
+/**
+ *  INSERT data 	
+ */
+	
 	private static final String class_insert = "INSERT INTO " + class_table + " (URI, IDX, ISBNODE) VALUES (?, ?, ?)";
 	private static final String role_insert = "INSERT INTO " + role_table + " (URI1, URI2, IDX, ISBNODE, ISBNODE2) VALUES (?, ?, ?, ?, ?)";
 
 	private static final String attribute_table_literal_insert = "INSERT INTO " + attribute_table_literal
 			+ " (URI, VAL, LANG, IDX, ISBNODE) VALUES (?, ?, ?, ?, ?)";
-
+	
 	private static final Map<COL_TYPE, String> attribute_table_insert = new HashMap<COL_TYPE, String>();
-
+	
 	static {
-		for (Entry<COL_TYPE, String> entry : attribute_table.entrySet())
-			attribute_table_insert.put(entry.getKey(), "INSERT INTO " + entry.getValue()
-					+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)");
+		for (Entry<COL_TYPE, String> entry : attribute_table.entrySet()) 
+			attribute_table_insert.put(entry.getKey(), "INSERT INTO " + entry.getValue() 
+											+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)");
 	}
+	
 
-
-	/**
-	 *  Indexes
-	 */
-
+/**
+ *  Indexes
+ */
+	
 	private static final String indexclass_composite = "CREATE INDEX idxclassfull ON " + class_table + " (URI, IDX, ISBNODE)";
 	private static final String indexrole_composite1 = "CREATE INDEX idxrolefull1 ON " + role_table + " (URI1, URI2, IDX, ISBNODE, ISBNODE2)";
 	private static final String indexrole_composite2 = "CREATE INDEX idxrolefull2 ON " + role_table + " (URI2, URI1, IDX, ISBNODE2, ISBNODE)";
@@ -243,7 +245,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private static final String attribute_index_literal = "IDX_LITERAL_ATTRIBUTE";
 
 	private static final Map<COL_TYPE, String> attribute_index = new HashMap<COL_TYPE, String>();
-
+	
 	static {
 		attribute_index.put(COL_TYPE.STRING, "IDX_STRING_ATTRIBUTE");
 		attribute_index.put(COL_TYPE.INTEGER, "IDX_INTEGER_ATTRIBUTE");
@@ -260,42 +262,42 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		attribute_index.put(COL_TYPE.DATETIME, "IDX_DATETIME_ATTRIBUTE");
 		attribute_index.put(COL_TYPE.BOOLEAN, "IDX_BOOLEAN_ATTRIBUTE");
 	}
+	
+
+	
 
 
-
-
-
-
-
-
+	
+	
+	
 	private static final String select_mapping_class = "SELECT \"URI\" as X FROM " + class_table;
 
 	private static final Map<COL_TYPE, String> select_mapping_attribute = new HashMap<COL_TYPE, String>();
-
+	
 	static {
 		// two special cases
 		select_mapping_attribute.put(COL_TYPE.OBJECT, "SELECT \"URI1\" as X, \"URI2\" as Y FROM " + role_table);
 		select_mapping_attribute.put(COL_TYPE.LITERAL, "SELECT \"URI\" as X, VAL as Y, LANG as Z FROM " + attribute_table_literal);
 		//
-		for (Entry<COL_TYPE, String> entry : attribute_table.entrySet())
-			select_mapping_attribute.put(entry.getKey(),  "SELECT \"URI\" as X, VAL as Y FROM " + entry.getValue());
+		for (Entry<COL_TYPE, String> entry : attribute_table.entrySet()) 
+			select_mapping_attribute.put(entry.getKey(),  "SELECT \"URI\" as X, VAL as Y FROM " + entry.getValue());  			
 	}
-
-
+	
+	
 	private static final String whereSingleCondition = "IDX = %d";
 	private static final String whereIntervalCondition = "IDX >= %d AND IDX <= %d";
-
+	
 
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
-
+	
 	private TBoxReasoner reasonerDag;
 
 	private SemanticIndexCache cacheSI;
-
+	
 	private boolean isIndexed;
 
 	private static final boolean mergeUniions = false;
@@ -325,7 +327,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 	@Override
 	public void setTBox(TBoxReasoner reasonerDag) {
-		this.reasonerDag = reasonerDag;
+		this.reasonerDag = reasonerDag;		
 		cacheSI = new SemanticIndexCache(reasonerDag);
 	}
 
@@ -337,7 +339,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	public SemanticIndexURIMap getUriMap() {
 		return uriMap;
 	}
-
+	
 
 	@Override
 	public void getSQLInserts(Iterator<Assertion> data, OutputStream outstream) throws IOException {
@@ -347,11 +349,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		String role_insert_str = role_insert.replace("?", "%s");
 
 		final String attribute_insert_literal_str = attribute_table_literal_insert.replace("?", "%s");
-
+		
 		final Map<COL_TYPE, String> attribute_insert_str = new HashMap<COL_TYPE, String>();
 		for (Entry<COL_TYPE, String> entry : attribute_table_insert.entrySet())
 			attribute_insert_str.put(entry.getKey(), entry.getValue().replace("?", "%s"));
-
+		
 		String cls_insert_str = class_insert.replace("?", "%s");
 
 		while (data.hasNext()) {
@@ -371,7 +373,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 					uri = ((BNode) c1).getName();
 				else
 					uri = ((URIConstant) c1).getURI().toString();
-
+				
 				String quotedUri = getQuotedString(uri);
 
 				String lit = value.getValue();
@@ -393,56 +395,56 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 
 				switch (attributeType) {
-					case LITERAL:
-						out.append(String.format(attribute_insert_literal_str, quotedUri, getQuotedString(lit),
-								getQuotedString(lang), idx, c1isBNode));
-						break;
-					case STRING:
-						out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, getQuotedString(lit), idx, c1isBNode));
-						break;
-					case INT:
-						out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Integer.parseInt(lit), idx, c1isBNode));
-						break;
-					case UNSIGNED_INT:
-						out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Integer.parseInt(lit), idx, c1isBNode));
-						break;
-					case NEGATIVE_INTEGER:
-						out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
-						break;
-					case NON_NEGATIVE_INTEGER:
-						out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
-						break;
-					case NON_POSITIVE_INTEGER:
-						out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
-						break;
-					case POSITIVE_INTEGER:
-						out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
-						break;
-					case INTEGER:
-						out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
-						break;
-					case LONG:
-						out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
-						break;
-					case DECIMAL:
-						out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, parseBigDecimal(lit), idx, c1isBNode));
-						break;
-					case DOUBLE:
-						out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Double.parseDouble(lit), idx, c1isBNode));
-						break;
-					case FLOAT:
-						out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Float.parseFloat(lit), idx, c1isBNode));
-						break;
-					case DATETIME:
-						out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, parseTimestamp(lit), idx, c1isBNode));
-						break;
-					case BOOLEAN:
-						out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Boolean.parseBoolean(lit), idx,
-								c1isBNode));
-						break;
+				case LITERAL:
+					out.append(String.format(attribute_insert_literal_str, quotedUri, getQuotedString(lit),
+							getQuotedString(lang), idx, c1isBNode));
+					break;
+				case STRING:
+					out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, getQuotedString(lit), idx, c1isBNode));
+					break;
+                case INT:
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Integer.parseInt(lit), idx, c1isBNode));
+                    break;
+                case UNSIGNED_INT:
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Integer.parseInt(lit), idx, c1isBNode));
+                    break;
+                case NEGATIVE_INTEGER:
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
+                    break;
+                case NON_NEGATIVE_INTEGER:
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
+                    break;
+                case NON_POSITIVE_INTEGER:
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
+                    break;
+                case POSITIVE_INTEGER:
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
+                    break;
+				case INTEGER:
+					out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
+					break;
+                case LONG:
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Long.parseLong(lit), idx, c1isBNode));
+                    break;
+				case DECIMAL:
+					out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, parseBigDecimal(lit), idx, c1isBNode));
+					break;
+				case DOUBLE:
+					out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Double.parseDouble(lit), idx, c1isBNode));
+					break;
+                case FLOAT:
+                    out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Float.parseFloat(lit), idx, c1isBNode));
+                    break;
+				case DATETIME:
+					out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, parseTimestamp(lit), idx, c1isBNode));
+					break;
+				case BOOLEAN:
+					out.append(String.format(attribute_insert_str.get(attributeType), quotedUri, Boolean.parseBoolean(lit), idx,
+							c1isBNode));
+					break;
 				}
-
-			}
+				
+			} 
 			else if (ax instanceof ObjectPropertyAssertion) {
 
 				ObjectPropertyAssertion roleABoxAssertion = (ObjectPropertyAssertion) ax;
@@ -491,7 +493,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				int idx = cacheSI.getIndex(roleABoxAssertion.getProperty());
 
 				out.append(String.format(role_insert_str, getQuotedString(uri1), getQuotedString(uri2), idx, c1isBNode, c2isBNode));
-			}
+			} 
 			else if (ax instanceof ClassAssertion) {
 
 				ClassAssertion classAssertion = (ClassAssertion) ax;
@@ -543,7 +545,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			return;
 		}
 		st.addBatch(create_uri_id);
-
+		
 		st.addBatch(create_idx);
 		st.addBatch(create_interval);
 		st.addBatch(create_emptyness_index);
@@ -554,22 +556,22 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(attribute_table_literal_create);
 		st.addBatch(attribute_table_string_create);
 		st.addBatch(attribute_table_integer_create);
-		st.addBatch(attribute_table_int_create);
-		st.addBatch(attribute_table_unsigned_int_create);
-		st.addBatch(attribute_table_negative_integer_create);
-		st.addBatch(attribute_table_non_negative_integer_create);
-		st.addBatch(attribute_table_positive_integer_create);
-		st.addBatch(attribute_table_non_positive_integer_create);
-		st.addBatch(attribute_table_float_create);
-		st.addBatch(attribute_table_long_create);
+        st.addBatch(attribute_table_int_create);
+        st.addBatch(attribute_table_unsigned_int_create);
+        st.addBatch(attribute_table_negative_integer_create);
+        st.addBatch(attribute_table_non_negative_integer_create);
+        st.addBatch(attribute_table_positive_integer_create);
+        st.addBatch(attribute_table_non_positive_integer_create);
+        st.addBatch(attribute_table_float_create);
+        st.addBatch(attribute_table_long_create);
 		st.addBatch(attribute_table_decimal_create);
 		st.addBatch(attribute_table_double_create);
 		st.addBatch(attribute_table_datetime_create);
 		st.addBatch(attribute_table_boolean_create);
 
-
-
-
+		
+		
+		
 		st.executeBatch();
 		st.close();
 	}
@@ -584,47 +586,47 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 //		st.addBatch(indexrole1);
 //		st.addBatch(indexrole2);
 //		st.addBatch(indexrole3);
-
-		st.addBatch("CREATE INDEX " + attribute_index_literal + "1 ON " + attribute_table_literal + " (URI)");
+		
+		st.addBatch("CREATE INDEX " + attribute_index_literal + "1 ON " + attribute_table_literal + " (URI)");		
 		st.addBatch("CREATE INDEX " + attribute_index_literal + "2 ON " + attribute_table_literal + " (IDX)");
-		st.addBatch("CREATE INDEX " + attribute_index_literal + "3 ON " + attribute_table_literal + " (VAL)");
-
+		st.addBatch("CREATE INDEX " + attribute_index_literal + "3 ON " + attribute_table_literal + " (VAL)");			
+		
 
 		for (Entry<COL_TYPE, String> entry : attribute_index.entrySet()) {
-			st.addBatch("CREATE INDEX " + entry.getValue() + "1 ON " + attribute_table.get(entry.getKey()) + " (URI)");
+			st.addBatch("CREATE INDEX " + entry.getValue() + "1 ON " + attribute_table.get(entry.getKey()) + " (URI)");		
 			st.addBatch("CREATE INDEX " + entry.getValue() + "2 ON " + attribute_table.get(entry.getKey()) + " (IDX)");
 			st.addBatch("CREATE INDEX " + entry.getValue() + "3 ON " + attribute_table.get(entry.getKey()) + " (VAL)");
 		}
-
+		
 		st.addBatch(indexclass_composite);
 		st.addBatch(indexrole_composite1);
 		st.addBatch(indexrole_composite2);
-
+		
 		st.addBatch(indexclassfull2);
 		st.addBatch(indexrolefull22);
-
+		
 		st.executeBatch();
-
+		
 		log.debug("Executing ANALYZE");
 		st.addBatch("ANALYZE");
 		st.executeBatch();
-
+		
 		st.close();
 
 		isIndexed = true;
 	}
 
-
+	
 	private final static String drop_idx = "DROP TABLE " + index_table;
 	private final static String drop_interval = "DROP TABLE " + interval_table;
 	private final static String drop_emptyness = "DROP TABLE " + emptyness_index_table;
 	private final static String drop_uri_id = "DROP TABLE " + uri_id_table;
-
+	
 	private static final String class_table_drop = "DROP TABLE " + class_table;
 	private static final String role_table_drop = "DROP TABLE " + role_table;
 	private static final String attribute_table_literal_drop = "DROP TABLE " + attribute_table_literal;
-
-
+		
+	
 	@Override
 	public void dropDBSchema(Connection conn) throws SQLException {
 
@@ -637,10 +639,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(class_table_drop);
 		st.addBatch(role_table_drop);
 		st.addBatch(attribute_table_literal_drop);
-
+		
 		for (Entry<COL_TYPE, String> entry : attribute_table.entrySet())
-			st.addBatch("DROP TABLE " + entry.getValue());
-
+			st.addBatch("DROP TABLE " + entry.getValue()); 
+		
 		st.addBatch(drop_uri_id);
 
 		st.executeBatch();
@@ -665,13 +667,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		PreparedStatement classStm = conn.prepareStatement(class_insert);
 		PreparedStatement roleStm = conn.prepareStatement(role_insert);
 		PreparedStatement attributeLiteralStm = conn.prepareStatement(attribute_table_literal_insert);
-
+		
 		Map<COL_TYPE, PreparedStatement> attributeStm = new HashMap<COL_TYPE, PreparedStatement>();
 		for (Entry<COL_TYPE, String> entry : attribute_table_insert.entrySet()) {
 			PreparedStatement stm = conn.prepareStatement(entry.getValue());
 			attributeStm.put(entry.getKey(), stm);
 		}
-
+		
 		// For counting the insertion
 		InsertionMonitor monitor = new InsertionMonitor();
 
@@ -695,7 +697,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				int index = 0;
 				if (ax instanceof ClassAssertion) {
 					index = cacheSI.getIndex(((ClassAssertion) ax).getConcept());
-				}
+				} 
 				else if (ax instanceof ObjectPropertyAssertion) {
 					index = cacheSI.getIndex(((ObjectPropertyAssertion)ax).getProperty());
 				}
@@ -708,7 +710,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			} catch (Exception e) {
 				if (ax instanceof ClassAssertion) {
 					monitor.fail(((ClassAssertion)ax).getConcept().getPredicate());
-				}
+				} 
 				else if (ax instanceof ObjectPropertyAssertion) {
 					monitor.fail(((ObjectPropertyAssertion)ax).getProperty().getPredicate());
 				}
@@ -743,7 +745,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			executeBatch(stm);
 		executeBatch(classStm);
 
-
+	
 		// Close all open statements
 		uriidStm.close();
 		roleStm.close();;
@@ -772,8 +774,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement classStm, PreparedStatement roleStm, PreparedStatement attributeLiteralStm,
-									  Map<COL_TYPE, PreparedStatement> attributeStatement,
-									  InsertionMonitor monitor, Assertion ax) throws SQLException {
+			Map<COL_TYPE, PreparedStatement> attributeStatement,
+			InsertionMonitor monitor, Assertion ax) throws SQLException {
 		int uri_id = 0;
 		int uri2_id = 0;
 //		boolean newUri = false;
@@ -788,64 +790,64 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			ObjectConstant subject = attributeAssertion.getSubject();
 
 			String uri = subject.getName();
-			uri_id = uriMap.idOfURI(uri);
-			uriidStm.setInt(1, uri_id);
-			uriidStm.setString(2, uri);
-			uriidStm.addBatch();
-
+			 uri_id = uriMap.idOfURI(uri);
+				uriidStm.setInt(1, uri_id);
+				uriidStm.setString(2, uri);
+				uriidStm.addBatch();
+			
 			boolean c1isBNode = subject instanceof BNode;
 
 			int idx = cacheSI.getIndex(prop);
 
-			// Get the object property assertion
-			String uri2 = object.getName();
-			boolean c2isBNode = object instanceof BNode;
+				// Get the object property assertion
+				String uri2 = object.getName();
+				boolean c2isBNode = object instanceof BNode;
 
-			if (isInverse(prop)) {
+				if (isInverse(prop)) {
 
 					/* Swapping values */
 
-				String tmp = uri;
-				uri = uri2;
-				uri2 = tmp;
+					String tmp = uri;
+					uri = uri2;
+					uri2 = tmp;
 
-				boolean tmpb = c1isBNode;
-				c1isBNode = c2isBNode;
-				c2isBNode = tmpb;
-			}
+					boolean tmpb = c1isBNode;
+					c1isBNode = c2isBNode;
+					c2isBNode = tmpb;
+				}
 
-			// Construct the database INSERT statement
-			// replace URIs with their ids
+				// Construct the database INSERT statement
+				// replace URIs with their ids
+				
+				uri_id = uriMap.idOfURI(uri);
+				uriidStm.setInt(1, uri_id);
+				uriidStm.setString(2, uri);
+				uriidStm.addBatch();
 
-			uri_id = uriMap.idOfURI(uri);
-			uriidStm.setInt(1, uri_id);
-			uriidStm.setString(2, uri);
-			uriidStm.addBatch();
+				uri2_id = uriMap.idOfURI(uri2);
+				uriidStm.setInt(1, uri2_id);
+				uriidStm.setString(2, uri2);
+				uriidStm.addBatch();
+				
+				//roleStm.setString(1, uri);
+				//roleStm.setString(2, uri2);
+				roleStm.setInt(1, uri_id);
+				roleStm.setInt(2, uri2_id);
+				
+				
+				roleStm.setInt(3, idx);
+				roleStm.setBoolean(4, c1isBNode);
+				roleStm.setBoolean(5, c2isBNode);
+				roleStm.addBatch();
 
-			uri2_id = uriMap.idOfURI(uri2);
-			uriidStm.setInt(1, uri2_id);
-			uriidStm.setString(2, uri2);
-			uriidStm.addBatch();
+				// log.debug("role");
 
-			//roleStm.setString(1, uri);
-			//roleStm.setString(2, uri2);
-			roleStm.setInt(1, uri_id);
-			roleStm.setInt(2, uri2_id);
-
-
-			roleStm.setInt(3, idx);
-			roleStm.setBoolean(4, c1isBNode);
-			roleStm.setBoolean(5, c2isBNode);
-			roleStm.addBatch();
-
-			// log.debug("role");
-
-			// log.debug("inserted: {} {}", uri, uri2);
-			// log.debug("inserted: {} property", idx);
+				// log.debug("inserted: {} {}", uri, uri2);
+				// log.debug("inserted: {} property", idx);
 
 			monitor.success(); // advanced the success counter
 
-		}
+		} 
 		else if (ax instanceof DataPropertyAssertion) {
 			// Get the data property assertion
 			DataPropertyAssertion attributeAssertion = (DataPropertyAssertion) ax;
@@ -858,11 +860,11 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			ObjectConstant subject = attributeAssertion.getSubject();
 
 			String uri = subject.getName();
-			uri_id = uriMap.idOfURI(uri);
-			uriidStm.setInt(1, uri_id);
-			uriidStm.setString(2, uri);
-			uriidStm.addBatch();
-
+			 uri_id = uriMap.idOfURI(uri);
+				uriidStm.setInt(1, uri_id);
+				uriidStm.setString(2, uri);
+				uriidStm.addBatch();
+			
 			boolean c1isBNode = subject instanceof BNode;
 
 			int idx = cacheSI.getIndex(prop);
@@ -872,92 +874,92 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			String lang = object.getLanguage();
 
 			switch (attributeType) {
-				case BNODE:
-				case OBJECT:
-					throw new RuntimeException("Data property cannot have a URI as object");
-				case LITERAL:
-				case LITERAL_LANG:
-					setInputStatement(attributeLiteralStm, uri_id, value, lang, idx, c1isBNode);
-					// log.debug("literal");
-					break;
-				case STRING:
-					setInputStatement(attributeStatement.get(attributeType), uri_id, value, idx, c1isBNode);
-					// log.debug("string");
-					break;
-				case INTEGER:
-					if (value.charAt(0) == '+')
-						value = value.substring(1, value.length());
-					setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-					// log.debug("Integer");
-					break;
-				case INT:
-					if (value.charAt(0) == '+')
-						value = value.substring(1, value.length());
-					setInputStatement(attributeStatement.get(attributeType), uri_id, Integer.parseInt(value), idx, c1isBNode);
-					// log.debug("Int");
-					break;
-				case UNSIGNED_INT:
-					setInputStatement(attributeStatement.get(attributeType), uri_id, Integer.parseInt(value), idx, c1isBNode);
-					// log.debug("Int");
-					break;
-				case NEGATIVE_INTEGER:
-					setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-					// log.debug("Integer");
-					break;
-				case POSITIVE_INTEGER:
-					if (value.charAt(0) == '+')
-						value = value.substring(1, value.length());
-					setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-					// log.debug("Integer");
-					break;
-				case NON_NEGATIVE_INTEGER:
-					if (value.charAt(0) == '+')
-						value = value.substring(1, value.length());
-					setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-					// log.debug("Integer");
-					break;
-				case NON_POSITIVE_INTEGER:
+			case BNODE:
+			case OBJECT:
+				throw new RuntimeException("Data property cannot have a URI as object");
+			case LITERAL:
+			case LITERAL_LANG:
+				setInputStatement(attributeLiteralStm, uri_id, value, lang, idx, c1isBNode);
+				// log.debug("literal");
+				break;
+			case STRING:
+				setInputStatement(attributeStatement.get(attributeType), uri_id, value, idx, c1isBNode);
+				// log.debug("string");
+				break;
+            case INTEGER:
+                if (value.charAt(0) == '+')
+                    value = value.substring(1, value.length());
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
+                // log.debug("Integer");
+                break;
+            case INT:
+                if (value.charAt(0) == '+')
+                    value = value.substring(1, value.length());
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Integer.parseInt(value), idx, c1isBNode);
+                // log.debug("Int");
+                break;
+            case UNSIGNED_INT:
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Integer.parseInt(value), idx, c1isBNode);
+                // log.debug("Int");
+                break;
+            case NEGATIVE_INTEGER:
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
+                // log.debug("Integer");
+                break;
+            case POSITIVE_INTEGER:
+                if (value.charAt(0) == '+')
+                    value = value.substring(1, value.length());
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
+                // log.debug("Integer");
+                break;
+            case NON_NEGATIVE_INTEGER:
+                if (value.charAt(0) == '+')
+                    value = value.substring(1, value.length());
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
+                // log.debug("Integer");
+                break;
+            case NON_POSITIVE_INTEGER:
+                    value = value.substring(1, value.length());
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
+                // log.debug("Integer");
+                break;
+            case FLOAT:
+                setInputStatement(attributeStatement.get(attributeType), uri_id, Float.parseFloat(value), idx, c1isBNode);
+                // log.debug("Float");
+                break;
+            case LONG:
+				if (value.charAt(0) == '+')
 					value = value.substring(1, value.length());
-					setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-					// log.debug("Integer");
-					break;
-				case FLOAT:
-					setInputStatement(attributeStatement.get(attributeType), uri_id, Float.parseFloat(value), idx, c1isBNode);
-					// log.debug("Float");
-					break;
-				case LONG:
-					if (value.charAt(0) == '+')
-						value = value.substring(1, value.length());
-					setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-					// log.debug("Long");
-					break;
-				case DECIMAL:
-					setInputStatement(attributeStatement.get(attributeType), uri_id, parseBigDecimal(value), idx, c1isBNode);
-					// log.debug("BigDecimal");
-					break;
-				case DOUBLE:
-					setInputStatement(attributeStatement.get(attributeType), uri_id, Double.parseDouble(value), idx, c1isBNode);
-					// log.debug("Double");
-					break;
-				case DATETIME:
-					setInputStatement(attributeStatement.get(attributeType), uri_id, parseTimestamp(value), idx, c1isBNode);
-					// log.debug("Date");
-					break;
-				case BOOLEAN:
-					value = getBooleanString(value); // PostgreSQL
-					// abbreviates the
-					// boolean value to
-					// 't' and 'f'
-					setInputStatement(attributeStatement.get(attributeType), uri_id, Boolean.parseBoolean(value), idx, c1isBNode);
-					// log.debug("boolean");
-					break;
-				case UNSUPPORTED:
-				default:
-					log.warn("Ignoring assertion: {}", ax);
+				setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
+				// log.debug("Long");
+				break;
+			case DECIMAL:
+				setInputStatement(attributeStatement.get(attributeType), uri_id, parseBigDecimal(value), idx, c1isBNode);
+				// log.debug("BigDecimal");
+				break;
+			case DOUBLE:
+				setInputStatement(attributeStatement.get(attributeType), uri_id, Double.parseDouble(value), idx, c1isBNode);
+				// log.debug("Double");
+				break;
+			case DATETIME:
+				setInputStatement(attributeStatement.get(attributeType), uri_id, parseTimestamp(value), idx, c1isBNode);
+				// log.debug("Date");
+				break;
+			case BOOLEAN:
+				value = getBooleanString(value); // PostgreSQL
+													// abbreviates the
+													// boolean value to
+													// 't' and 'f'
+				setInputStatement(attributeStatement.get(attributeType), uri_id, Boolean.parseBoolean(value), idx, c1isBNode);
+				// log.debug("boolean");
+				break;
+			case UNSUPPORTED:
+			default:
+				log.warn("Ignoring assertion: {}", ax);
 			}
 			monitor.success(); // advanced the success counter
 
-		}
+		} 
 		else if (ax instanceof ClassAssertion) {
 			// Get the class assertion
 			ClassAssertion classAssertion = (ClassAssertion) ax;
@@ -979,7 +981,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			uri_id = uriMap.idOfURI(uri);
 			uriidStm.setInt(1, uri_id);
 			uriidStm.setString(2, uri);
-			uriidStm.addBatch();
+			uriidStm.addBatch();			
 
 			classStm.setInt(1, uri_id);
 			int conceptIndex = cacheSI.getIndex(concept);
@@ -1002,10 +1004,10 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	}
 
 	private boolean isInverse(ObjectPropertyExpression property) {
-
+	
 		ObjectPropertyExpression desc = reasonerDag.getObjectPropertyDAG().getVertex(property).getRepresentative();
 		if (!property.equals(desc)) {
-			if (desc.isInverse())
+			if (desc.isInverse()) 
 				return true;
 		}
 		return false; // representative is never an inverse
@@ -1021,291 +1023,291 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	 * Class(uri(x))
 	 * <p>
 	 * triple(uri(x),uri(rdf:type),uri(Class))
-	 *
+	 * 
 	 * <p>
 	 * Note, this method also takes into account the ontology in that an ABox
 	 * assertion about a role R affects non-emptyness about any S such that R
 	 * subPropertyOf S, similar for concept hierarchies, domain, range and
 	 * inverse inferences.
 	 */
-	// private void assertNonEmptyness(Assertion assertion) {
+	 // private void assertNonEmptyness(Assertion assertion) {
 
-	// if (assertion instanceof BinaryAssertion) {
-	// BinaryAssertion ba = (BinaryAssertion) assertion;
+		// if (assertion instanceof BinaryAssertion) {
+			// BinaryAssertion ba = (BinaryAssertion) assertion;
 
-	// /*
-	// * getting the data for each term
-	// */
-	// Predicate p = ba.getPredicate();
+			// /*
+			 // * getting the data for each term
+			 // */
+			// Predicate p = ba.getPredicate();
 
-	// Predicate typeSubject = dfac.getTypePredicate(ba.getValue1()
-	// .getType());
-	// Predicate typePredicate = dfac.getUriTemplatePredicate(1);
-	// Predicate typeObject = dfac.getTypePredicate(ba.getValue2()
-	// .getType());
+			// Predicate typeSubject = dfac.getTypePredicate(ba.getValue1()
+					// .getType());
+			// Predicate typePredicate = dfac.getUriTemplatePredicate(1);
+			// Predicate typeObject = dfac.getTypePredicate(ba.getValue2()
+					// .getType());
 
-	// Function fsubject;
-	// if (ba.getValue1().getType() != COL_TYPE.LITERAL_LANG) {
-	// fsubject = dfac.getFunctionalTerm(typeSubject,
-	// dfac.getVariable("x"));
-	// } else {
-	// fsubject = dfac.getFunctionalTerm(typeSubject,
-	// dfac.getVariable("x"), dfac.getVariable("x2"));
-	// }
+			// Function fsubject;
+			// if (ba.getValue1().getType() != COL_TYPE.LITERAL_LANG) {
+				// fsubject = dfac.getFunctionalTerm(typeSubject,
+						// dfac.getVariable("x"));
+			// } else {
+				// fsubject = dfac.getFunctionalTerm(typeSubject,
+						// dfac.getVariable("x"), dfac.getVariable("x2"));
+			// }
 
-	// Function fpredicate = dfac.getFunctionalTerm(typePredicate,
-	// dfac.getURIConstant(p.getName()));
-	// Function fobject;
+			// Function fpredicate = dfac.getFunctionalTerm(typePredicate,
+					// dfac.getURIConstant(p.getName()));
+			// Function fobject;
 
-	// if (ba.getValue2().getType() != COL_TYPE.LITERAL_LANG) {
-	// fobject = dfac.getFunctionalTerm(typeObject,
-	// dfac.getVariable("y"));
-	// } else {
-	// fobject = dfac.getFunctionalTerm(typeObject,
-	// dfac.getVariable("y"), dfac.getVariable("y2"));
-	// }
+			// if (ba.getValue2().getType() != COL_TYPE.LITERAL_LANG) {
+				// fobject = dfac.getFunctionalTerm(typeObject,
+						// dfac.getVariable("y"));
+			// } else {
+				// fobject = dfac.getFunctionalTerm(typeObject,
+						// dfac.getVariable("y"), dfac.getVariable("y2"));
+			// }
 
-	// // DL style head
-	// Function headDL = dfac.getFunctionalTerm(p, fsubject, fobject);
+			// // DL style head
+			// Function headDL = dfac.getFunctionalTerm(p, fsubject, fobject);
 
-	// // Triple style head
-	// Function headTriple = dfac.getFunctionalTerm(
-	// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject, fpredicate,
-	// fobject);
+			// // Triple style head
+			// Function headTriple = dfac.getFunctionalTerm(
+					// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject, fpredicate,
+					// fobject);
 
-	// assertNonEmptyness(headDL);
-	// assertNonEmptyness(headTriple);
+			// assertNonEmptyness(headDL);
+			// assertNonEmptyness(headTriple);
 
-	// /*
-	// * Dealing with emptyness of upper level roles in the hierarchy
-	// */
+			// /*
+			 // * Dealing with emptyness of upper level roles in the hierarchy
+			 // */
 
-	// Description node = dag.getNode(ofac.createProperty(p));
+			// Description node = dag.getNode(ofac.createProperty(p));
+			
+			// //get ancestors has also the equivalent nodes
+			// Set<Set<Description>> parents = reasonerDag.getAncestors(node, false);
+			
+			
+			// for (Set<Description> parent : parents) 
+			// {
+				// for(Description desc: parent)
+				// {
+					
+				// Property parentProp = (Property) desc;
+				// Predicate parentP = parentProp.getPredicate();
+				// boolean inverse = parentProp.isInverse();
 
-	// //get ancestors has also the equivalent nodes
-	// Set<Set<Description>> parents = reasonerDag.getAncestors(node, false);
+				// fpredicate = dfac.getFunctionalTerm(typePredicate,
+						// dfac.getURIConstant(parentP.getName()));
 
+				// // DL style head
+				// if (!inverse)
+					// headDL = dfac.getFunctionalTerm(parentP, fsubject, fobject);
+				// else
+					// headDL = dfac.getFunctionalTerm(parentP, fobject, fsubject);
 
-	// for (Set<Description> parent : parents) 
-	// {
-	// for(Description desc: parent)
-	// {
+				// // Triple style head
+				// if (!inverse)
+					// headTriple = dfac.getFunctionalTerm(
+							// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject,
+							// fpredicate, fobject);
+				// else
+					// headTriple = dfac.getFunctionalTerm(
+							// OBDAVocabulary.QUEST_TRIPLE_PRED, fobject,
+							// fpredicate, fsubject);
 
-	// Property parentProp = (Property) desc;
-	// Predicate parentP = parentProp.getPredicate();
-	// boolean inverse = parentProp.isInverse();
+				// assertNonEmptyness(headDL);
+				// assertNonEmptyness(headTriple);
+				
+				// }
+			// }
 
-	// fpredicate = dfac.getFunctionalTerm(typePredicate,
-	// dfac.getURIConstant(parentP.getName()));
+			// /*
+			 // * Dealing with domain and range inferences
+			 // */
 
-	// // DL style head
-	// if (!inverse)
-	// headDL = dfac.getFunctionalTerm(parentP, fsubject, fobject);
-	// else
-	// headDL = dfac.getFunctionalTerm(parentP, fobject, fsubject);
-
-	// // Triple style head
-	// if (!inverse)
-	// headTriple = dfac.getFunctionalTerm(
-	// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject,
-	// fpredicate, fobject);
-	// else
-	// headTriple = dfac.getFunctionalTerm(
-	// OBDAVocabulary.QUEST_TRIPLE_PRED, fobject,
-	// fpredicate, fsubject);
-
-	// assertNonEmptyness(headDL);
-	// assertNonEmptyness(headTriple);
-
-	// }
-	// }
-
-	// /*
-	// * Dealing with domain and range inferences
-	// */
-
-	// /*
-	// * First domain (inverse false for \exists R)
-	// */
-	// Description d = ofac.createPropertySomeRestriction(p, false);
-	// Description dagNode = dag.getNode(d);
-	// parents = reasonerDag.getAncestors(dagNode, false); //get ancestors has already the equivalences of dagNode
+			// /*
+			 // * First domain (inverse false for \exists R)
+			 // */
+			// Description d = ofac.createPropertySomeRestriction(p, false);
+			// Description dagNode = dag.getNode(d);
+			// parents = reasonerDag.getAncestors(dagNode, false); //get ancestors has already the equivalences of dagNode
 // //			parents.add(reasonerDag.getEquivalences(dagNode, false));
+			
+			
+			// for (Set<Description> parent : parents) {
+				// // DL style head
+				// for(Description desc:parent)
+				// {
+				// ClassDescription classDescription = (ClassDescription) desc;
 
+				// assertNonEmptynessOfClassExpression(typePredicate, typeObject,
+						// fsubject, classDescription);
+				// }
+			// }
 
-	// for (Set<Description> parent : parents) {
-	// // DL style head
-	// for(Description desc:parent)
-	// {
-	// ClassDescription classDescription = (ClassDescription) desc;
-
-	// assertNonEmptynessOfClassExpression(typePredicate, typeObject,
-	// fsubject, classDescription);
-	// }
-	// }
-
-	// /*
-	// * First range (inverse true for \exists R^-)
-	// */
-	// d = ofac.createPropertySomeRestriction(p, true);
-	// dagNode = dag.getNode(d);
-	// parents = reasonerDag.getAncestors(dagNode, false);
+			// /*
+			 // * First range (inverse true for \exists R^-)
+			 // */
+			// d = ofac.createPropertySomeRestriction(p, true);
+			// dagNode = dag.getNode(d);
+			// parents = reasonerDag.getAncestors(dagNode, false);
 // //			parents.add(reasonerDag.getEquivalences(dagNode, false));
+			
+			
+			// for (Set<Description> parent : parents) {
+				// // DL style head
+				// for(Description desc:parent)
+				// {
+					
+				
+				// ClassDescription classDescription = (ClassDescription) desc;
 
+				// assertNonEmptynessOfClassExpression(typePredicate, typeObject,
+						// fsubject, classDescription);
+				// }
+			// }
 
-	// for (Set<Description> parent : parents) {
-	// // DL style head
-	// for(Description desc:parent)
-	// {
+		// } else if (assertion instanceof UnaryAssertion) {
+			// UnaryAssertion ua = (UnaryAssertion) assertion;
 
+			// /*
+			 // * getting the data for each term
+			 // */
+			// Predicate p = ua.getPredicate();
 
-	// ClassDescription classDescription = (ClassDescription) desc;
+			// Predicate typeSubject = dfac.getTypePredicate(ua.getValue()
+					// .getType());
+			// Predicate typePredicate = dfac.getUriTemplatePredicate(1);
+			// Predicate typeObject = dfac.getUriTemplatePredicate(1);
 
-	// assertNonEmptynessOfClassExpression(typePredicate, typeObject,
-	// fsubject, classDescription);
-	// }
-	// }
+			// Function fsubject;
+			// if (ua.getValue().getType() != COL_TYPE.LITERAL_LANG) {
+				// fsubject = dfac.getFunctionalTerm(typeSubject,
+						// dfac.getVariable("x"));
+			// } else {
+				// fsubject = dfac.getFunctionalTerm(typeSubject,
+						// dfac.getVariable("x"), dfac.getVariable("x2"));
+			// }
 
-	// } else if (assertion instanceof UnaryAssertion) {
-	// UnaryAssertion ua = (UnaryAssertion) assertion;
+			// Function fpredicate = dfac.getFunctionalTerm(typeObject,
+					// dfac.getURIConstant(ifac.construct(OBDAVocabulary.RDF_TYPE)));
+			// Function fobject = dfac.getFunctionalTerm(typePredicate,
+					// dfac.getURIConstant(p.getName()));
 
-	// /*
-	// * getting the data for each term
-	// */
-	// Predicate p = ua.getPredicate();
+			// // DL style head
+			// Function headDL = dfac.getFunctionalTerm(p, fsubject);
 
-	// Predicate typeSubject = dfac.getTypePredicate(ua.getValue()
-	// .getType());
-	// Predicate typePredicate = dfac.getUriTemplatePredicate(1);
-	// Predicate typeObject = dfac.getUriTemplatePredicate(1);
+			// // Triple style head
+			// Function headTriple = dfac.getFunctionalTerm(
+					// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject, fpredicate,
+					// fobject);
 
-	// Function fsubject;
-	// if (ua.getValue().getType() != COL_TYPE.LITERAL_LANG) {
-	// fsubject = dfac.getFunctionalTerm(typeSubject,
-	// dfac.getVariable("x"));
-	// } else {
-	// fsubject = dfac.getFunctionalTerm(typeSubject,
-	// dfac.getVariable("x"), dfac.getVariable("x2"));
-	// }
+			// assertNonEmptyness(headDL);
+			// assertNonEmptyness(headTriple);
 
-	// Function fpredicate = dfac.getFunctionalTerm(typeObject,
-	// dfac.getURIConstant(ifac.construct(OBDAVocabulary.RDF_TYPE)));
-	// Function fobject = dfac.getFunctionalTerm(typePredicate,
-	// dfac.getURIConstant(p.getName()));
+			// /*
+			 // * Asserting non-emptyness for all the super classes of the current
+			 // * class
+			 // */
 
-	// // DL style head
-	// Function headDL = dfac.getFunctionalTerm(p, fsubject);
+			// Description node = dag.getNode(ofac.createClass(p));
+			// Set<Set<Description>> parents = reasonerDag.getAncestors(node, false);
+			
+			// for (Set<Description> parent : parents) {
+				// // DL style head
+				// for(Description desc:parent)
+				// {
+				// ClassDescription classDescription = (ClassDescription) desc;
 
-	// // Triple style head
-	// Function headTriple = dfac.getFunctionalTerm(
-	// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject, fpredicate,
-	// fobject);
+				// assertNonEmptynessOfClassExpression(typePredicate, typeObject,
+						// fsubject, classDescription);
+				// }
+			// }
 
-	// assertNonEmptyness(headDL);
-	// assertNonEmptyness(headTriple);
-
-	// /*
-	// * Asserting non-emptyness for all the super classes of the current
-	// * class
-	// */
-
-	// Description node = dag.getNode(ofac.createClass(p));
-	// Set<Set<Description>> parents = reasonerDag.getAncestors(node, false);
-
-	// for (Set<Description> parent : parents) {
-	// // DL style head
-	// for(Description desc:parent)
-	// {
-	// ClassDescription classDescription = (ClassDescription) desc;
-
-	// assertNonEmptynessOfClassExpression(typePredicate, typeObject,
-	// fsubject, classDescription);
-	// }
-	// }
-
-	// }
+		// }
 	// }
 
 	// private void assertNonEmptynessOfClassExpression(Predicate typePredicate,
-	// Predicate typeObject, Function fsubject,
-	// ClassDescription classDescription) {
-	// Function fpredicate;
-	// Function fobject;
-	// Function headDL;
-	// Function headTriple;
-	// if (classDescription instanceof OClass) {
+			// Predicate typeObject, Function fsubject,
+			// ClassDescription classDescription) {
+		// Function fpredicate;
+		// Function fobject;
+		// Function headDL;
+		// Function headTriple;
+		// if (classDescription instanceof OClass) {
 
-	// OClass className = (OClass) classDescription;
+			// OClass className = (OClass) classDescription;
 
-	// Predicate predicate = className.getPredicate();
-	// headDL = dfac.getFunctionalTerm(predicate, fsubject);
+			// Predicate predicate = className.getPredicate();
+			// headDL = dfac.getFunctionalTerm(predicate, fsubject);
 
-	// fpredicate = dfac.getFunctionalTerm(typeObject,
-	// dfac.getURIConstant(OBDAVocabulary.RDF_TYPE));
-	// fobject = dfac.getFunctionalTerm(typePredicate,
-	// dfac.getURIConstant(predicate.getName()));
+			// fpredicate = dfac.getFunctionalTerm(typeObject,
+					// dfac.getURIConstant(OBDAVocabulary.RDF_TYPE));
+			// fobject = dfac.getFunctionalTerm(typePredicate,
+					// dfac.getURIConstant(predicate.getName()));
 
-	// // Triple style head
-	// headTriple = dfac.getFunctionalTerm(
-	// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject, fpredicate,
-	// fobject);
+			// // Triple style head
+			// headTriple = dfac.getFunctionalTerm(
+					// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject, fpredicate,
+					// fobject);
 
-	// assertNonEmptyness(headDL);
-	// assertNonEmptyness(headTriple);
-	// } else if (classDescription instanceof PropertySomeRestriction) {
-	// PropertySomeRestriction className = (PropertySomeRestriction) classDescription;
+			// assertNonEmptyness(headDL);
+			// assertNonEmptyness(headTriple);
+		// } else if (classDescription instanceof PropertySomeRestriction) {
+			// PropertySomeRestriction className = (PropertySomeRestriction) classDescription;
 
-	// Predicate predicate = className.getPredicate();
+			// Predicate predicate = className.getPredicate();
 
-	// fpredicate = dfac.getFunctionalTerm(typeObject,
-	// dfac.getURIConstant(ifac.construct(predicate.toString())));
-	// fobject = dfac.getFunctionalTerm(typePredicate,
-	// dfac.getVariable("X2"));
+			// fpredicate = dfac.getFunctionalTerm(typeObject,
+					// dfac.getURIConstant(ifac.construct(predicate.toString())));
+			// fobject = dfac.getFunctionalTerm(typePredicate,
+					// dfac.getVariable("X2"));
 
-	// if (!className.isInverse())
-	// headDL = dfac.getFunctionalTerm(predicate, fsubject, fobject);
-	// else
-	// headDL = dfac.getFunctionalTerm(predicate, fobject, fsubject);
+			// if (!className.isInverse())
+				// headDL = dfac.getFunctionalTerm(predicate, fsubject, fobject);
+			// else
+				// headDL = dfac.getFunctionalTerm(predicate, fobject, fsubject);
 
-	// // Triple style head
-	// if (!className.isInverse())
-	// headTriple = dfac.getFunctionalTerm(
-	// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject, fpredicate,
-	// fobject);
-	// else
-	// headTriple = dfac.getFunctionalTerm(
-	// OBDAVocabulary.QUEST_TRIPLE_PRED, fobject, fpredicate,
-	// fsubject);
+			// // Triple style head
+			// if (!className.isInverse())
+				// headTriple = dfac.getFunctionalTerm(
+						// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject, fpredicate,
+						// fobject);
+			// else
+				// headTriple = dfac.getFunctionalTerm(
+						// OBDAVocabulary.QUEST_TRIPLE_PRED, fobject, fpredicate,
+						// fsubject);
 
-	// assertNonEmptyness(headDL);
-	// assertNonEmptyness(headTriple);
-	// } else if (classDescription instanceof DataType) {
-	// DataType className = (DataType) classDescription;
+			// assertNonEmptyness(headDL);
+			// assertNonEmptyness(headTriple);
+		// } else if (classDescription instanceof DataType) {
+			// DataType className = (DataType) classDescription;
 
-	// Predicate predicate = className.getPredicate();
+			// Predicate predicate = className.getPredicate();
 
-	// headDL = dfac.getFunctionalTerm(predicate, fsubject,
-	// dfac.getVariable("X2"));
+			// headDL = dfac.getFunctionalTerm(predicate, fsubject,
+					// dfac.getVariable("X2"));
 
-	// fpredicate = dfac.getFunctionalTerm(typeObject,
-	// dfac.getURIConstant(ifac.construct(predicate.toString())));
-	// fobject = dfac.getFunctionalTerm(typePredicate,
-	// dfac.getVariable("X2"));
+			// fpredicate = dfac.getFunctionalTerm(typeObject,
+					// dfac.getURIConstant(ifac.construct(predicate.toString())));
+			// fobject = dfac.getFunctionalTerm(typePredicate,
+					// dfac.getVariable("X2"));
 
-	// // Triple style head
+			// // Triple style head
 
-	// headTriple = dfac.getFunctionalTerm(
-	// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject, fpredicate,
-	// fobject);
-	// assertNonEmptyness(headDL);
-	// assertNonEmptyness(headTriple);
-	// }
+			// headTriple = dfac.getFunctionalTerm(
+					// OBDAVocabulary.QUEST_TRIPLE_PRED, fsubject, fpredicate,
+					// fobject);
+			// assertNonEmptyness(headDL);
+			// assertNonEmptyness(headTriple);
+		// }
 
 	// }
 
 	// private void assertNonEmptyness(Function headDL) {
-	// int hash1 = getIndexHash(headDL);
-	// emptynessIndexes.put(hash1, false);
+		// int hash1 = getIndexHash(headDL);
+		// emptynessIndexes.put(hash1, false);
 	// } 
 
 	private String getBooleanString(String value) {
@@ -1415,13 +1417,13 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			}
 		}
 		return null; // the string can't be parsed to one of the datetime
-		// formats.
+						// formats.
 	}
 
 	// Attribute datatype from TBox
 	private COL_TYPE getAttributeType(Predicate attribute) {
 		DataPropertyExpression prop = ofac.createDataProperty(attribute.getName());
-		DataPropertyRangeExpression role = prop.getRange();
+		DataPropertyRangeExpression role = prop.getRange(); 
 		Equivalences<DataRangeExpression> roleNode = reasonerDag.getDataRanges().getVertex(role);
 		Set<Equivalences<DataRangeExpression>> ancestors = reasonerDag.getDataRanges().getSuper(roleNode);
 
@@ -1431,8 +1433,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				if (desc instanceof Datatype) {
 					Datatype datatype = (Datatype) desc;
 					return datatype.getPredicate().getType(0); // TODO Put some
-					// check for
-					// multiple types
+																// check for
+																// multiple types
 				}
 			}
 		}
@@ -1444,7 +1446,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		log.debug("Loading semantic index metadata from the database *");
 
 		cacheSI.clear();
-
+		
 		nonEmptyEntityRecord.clear();
 
 
@@ -1547,26 +1549,26 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			ObjectPropertyExpression node = set.getRepresentative();
 			// only named roles are mapped
-			if (node.isInverse())
+			if (node.isInverse()) 
 				continue;
 			// We need to make sure we make no mappings for Auxiliary roles
 			// introduced by the Ontology translation process.
-			if (OntologyVocabularyImpl.isAuxiliaryProperty(node))
+			if (OntologyVocabularyImpl.isAuxiliaryProperty(node)) 
 				continue;
-
-
+			
+			
 			roleNodes.add(node.getPredicate());
 		}
-
+		
 		for (Equivalences<DataPropertyExpression> set: reasonerDag.getDataPropertyDAG()) {
 
 			DataPropertyExpression node = set.getRepresentative();
-
+			
 			// We need to make sure we make no mappings for Auxiliary roles
 			// introduced by the Ontology translation process.
-			if (OntologyVocabularyImpl.isAuxiliaryProperty(node))
+			if (OntologyVocabularyImpl.isAuxiliaryProperty(node)) 
 				continue;
-
+			
 			roleNodes.add(node.getPredicate());
 			
 /*
@@ -1632,14 +1634,14 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		Set<OClass> classNodesMaps = new HashSet<OClass>();
 //		Map<Description, Set<PropertySomeRestriction>> classExistsMaps = new HashMap<Description, Set<PropertySomeRestriction>>();		
 		EquivalencesDAG<ClassExpression> classes = reasonerDag.getClassDAG();
-
+		
 		for (Equivalences<ClassExpression> set : classes) {
-
+			
 			ClassExpression node = set.getRepresentative();
-
+			
 			if (!(node instanceof OClass))
 				continue;
-
+						
 			classNodesMaps.add((OClass)node);
 /*
  	
@@ -1718,7 +1720,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			 * component is an object, or one of the supported datatypes. For
 			 * each case we will construct 1 target query, one source query and
 			 * the mapping axiom.
-			 *
+			 * 
 			 * The resulting mapping will be added to the list. In this way,
 			 * each property can act as an object or data property of any type.
 			 */
@@ -1801,53 +1803,53 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.INTEGER, 2))
 				currentMappings.add(basicmapping);
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.INT);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.INT);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.INT, 2))
-				currentMappings.add(basicmapping);
+            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.INT);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.INT);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.INT, 2))
+                currentMappings.add(basicmapping);
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.UNSIGNED_INT);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.UNSIGNED_INT);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.UNSIGNED_INT, 2))
-				currentMappings.add(basicmapping);
+            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.UNSIGNED_INT);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.UNSIGNED_INT);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.UNSIGNED_INT, 2))
+                currentMappings.add(basicmapping);
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.NEGATIVE_INTEGER);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.NEGATIVE_INTEGER);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.NEGATIVE_INTEGER, 2))
-				currentMappings.add(basicmapping);
+            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.NEGATIVE_INTEGER);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.NEGATIVE_INTEGER);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.NEGATIVE_INTEGER, 2))
+                currentMappings.add(basicmapping);
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_NEGATIVE_INTEGER);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_NEGATIVE_INTEGER);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.NON_NEGATIVE_INTEGER, 2))
-				currentMappings.add(basicmapping);
+            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_NEGATIVE_INTEGER);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_NEGATIVE_INTEGER);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.NON_NEGATIVE_INTEGER, 2))
+                currentMappings.add(basicmapping);
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.POSITIVE_INTEGER);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.POSITIVE_INTEGER);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.POSITIVE_INTEGER, 2))
-				currentMappings.add(basicmapping);
+            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.POSITIVE_INTEGER);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.POSITIVE_INTEGER);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.POSITIVE_INTEGER, 2))
+                currentMappings.add(basicmapping);
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_POSITIVE_INTEGER);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_POSITIVE_INTEGER);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.NON_POSITIVE_INTEGER, 2))
-				currentMappings.add(basicmapping);
+            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_POSITIVE_INTEGER);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_POSITIVE_INTEGER);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.NON_POSITIVE_INTEGER, 2))
+                currentMappings.add(basicmapping);
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.FLOAT);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.FLOAT);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.FLOAT, 2))
-				currentMappings.add(basicmapping);
+            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.FLOAT);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.FLOAT);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.FLOAT, 2))
+                currentMappings.add(basicmapping);
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.LONG);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.LONG);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.LONG, 2))
-				currentMappings.add(basicmapping);
+            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.LONG);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.LONG);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.LONG, 2))
+                currentMappings.add(basicmapping);
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.STRING);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.STRING);
@@ -1908,54 +1910,54 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				currentMappings.add(basicmapping);
 			;
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.INT);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.INT);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.INT, 2))
-				currentMappings.add(basicmapping);
+            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.INT);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.INT);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.INT, 2))
+                currentMappings.add(basicmapping);
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.UNSIGNED_INT);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.UNSIGNED_INT);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.UNSIGNED_INT, 2))
-				currentMappings.add(basicmapping);
+            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.UNSIGNED_INT);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.UNSIGNED_INT);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.UNSIGNED_INT, 2))
+                currentMappings.add(basicmapping);
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.NEGATIVE_INTEGER);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.NEGATIVE_INTEGER);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.NEGATIVE_INTEGER, 2))
-				currentMappings.add(basicmapping);
+            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.NEGATIVE_INTEGER);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.NEGATIVE_INTEGER);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.NEGATIVE_INTEGER, 2))
+                currentMappings.add(basicmapping);
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_NEGATIVE_INTEGER);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_NEGATIVE_INTEGER);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.NON_NEGATIVE_INTEGER, 2))
-				currentMappings.add(basicmapping);
+            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_NEGATIVE_INTEGER);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_NEGATIVE_INTEGER);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.NON_NEGATIVE_INTEGER, 2))
+                currentMappings.add(basicmapping);
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.POSITIVE_INTEGER);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.POSITIVE_INTEGER);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.POSITIVE_INTEGER, 2))
-				currentMappings.add(basicmapping);
+            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.POSITIVE_INTEGER);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.POSITIVE_INTEGER);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.POSITIVE_INTEGER, 2))
+                currentMappings.add(basicmapping);
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_POSITIVE_INTEGER);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_POSITIVE_INTEGER);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.NON_POSITIVE_INTEGER, 2))
-				currentMappings.add(basicmapping);
+            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_POSITIVE_INTEGER);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_POSITIVE_INTEGER);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.NON_POSITIVE_INTEGER, 2))
+                currentMappings.add(basicmapping);
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.FLOAT);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.FLOAT);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.FLOAT, 2))
-				currentMappings.add(basicmapping);
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.LONG);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.LONG);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.LONG, 2))
-				currentMappings.add(basicmapping);
-			;
+            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.FLOAT);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.FLOAT);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.FLOAT, 2))
+                currentMappings.add(basicmapping);
+            
+            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.LONG);
+            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.LONG);
+            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.LONG, 2))
+                currentMappings.add(basicmapping);
+            ;
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.STRING);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.STRING);
@@ -1970,7 +1972,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		 * Creating mappings for each concept
 		 */
 
-
+		
 
 		for (OClass classNode : classNodesMaps) {
 
@@ -2027,7 +2029,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 				currentMappings.add(basicmapping);
 
 			/* FOR BNODE */
-
+			
 			appendIntervalString(intervals, sql2);
 
 			basicmapping = dfac.getRDBMSMappingAxiom(sql2.toString(), targetQuery2);
@@ -2080,7 +2082,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	/***
 	 * We use 1 for classes 2 for properties. Tells you if there has been
 	 * inserts that can make this mapping non empty.
-	 *
+	 * 
 	 * @param iri
 	 * @param type1
 	 * @param type2
@@ -2116,22 +2118,22 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			table = SITable.DPROPDoub;
 		else if (type2 == COL_TYPE.INTEGER)
 			table = SITable.DPROPInte;
-		else if (type2 == COL_TYPE.INT)
-			table = SITable.DPROPInt;
-		else if (type2 == COL_TYPE.UNSIGNED_INT)
-			table = SITable.DPROPUnsignedInt;
-		else if (type2 == COL_TYPE.NEGATIVE_INTEGER)
-			table = SITable.DPROPNegInte;
-		else if (type2 == COL_TYPE.NON_NEGATIVE_INTEGER)
-			table = SITable.DPROPNonNegInte;
-		else if (type2 == COL_TYPE.POSITIVE_INTEGER)
-			table = SITable.DPROPPosInte;
-		else if (type2 == COL_TYPE.NON_POSITIVE_INTEGER)
-			table = SITable.DPROPNonPosInte;
-		else if (type2 == COL_TYPE.FLOAT)
-			table = SITable.DPROPFloat;
-		else if (type2 == COL_TYPE.LONG)
-			table = SITable.DPROPLong;
+        else if (type2 == COL_TYPE.INT)
+            table = SITable.DPROPInt;
+        else if (type2 == COL_TYPE.UNSIGNED_INT)
+            table = SITable.DPROPUnsignedInt;
+        else if (type2 == COL_TYPE.NEGATIVE_INTEGER)
+            table = SITable.DPROPNegInte;
+        else if (type2 == COL_TYPE.NON_NEGATIVE_INTEGER)
+            table = SITable.DPROPNonNegInte;
+        else if (type2 == COL_TYPE.POSITIVE_INTEGER)
+            table = SITable.DPROPPosInte;
+        else if (type2 == COL_TYPE.NON_POSITIVE_INTEGER)
+            table = SITable.DPROPNonPosInte;
+        else if (type2 == COL_TYPE.FLOAT)
+            table = SITable.DPROPFloat;
+        else if (type2 == COL_TYPE.LONG)
+            table = SITable.DPROPLong;
 		else if (type2 == COL_TYPE.LITERAL || type2 == COL_TYPE.LITERAL_LANG)
 			table = SITable.DPROPLite;
 		else if (type2 == COL_TYPE.STRING)
@@ -2188,21 +2190,21 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 
 			objectTerm = dfac.getBNodeTemplate(dfac.getVariable("Y"));
 
-		}
+		} 
 		else if (type2 == COL_TYPE.OBJECT) {
 
 			objectTerm = dfac.getUriTemplate(dfac.getVariable("Y"));
 
-		}
-		else if (type2 == COL_TYPE.LITERAL_LANG) {
+		} 
+		else if (type2 == COL_TYPE.LITERAL_LANG) { 
 			objectTerm = dfac.getTypedTerm(dfac.getVariable("Y"), dfac.getVariable("Z"));
-		}
+		} 
 		else {
 			if (type2 == COL_TYPE.DATE || type2 == COL_TYPE.TIME || type2 == COL_TYPE.YEAR) {
 				// R: the three types below were not covered by the switch
 				throw new RuntimeException("Unsuported type: " + type2);
 			}
-
+			
 			objectTerm = dfac.getTypedTerm(dfac.getVariable("Y"), type2);
 		}
 		bodyTerms.add(objectTerm);
@@ -2216,16 +2218,16 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private String constructSourceQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) throws OBDAException {
 		StringBuilder sql = new StringBuilder();
 		switch (type2) {
-			case OBJECT:
-			case BNODE:
-				sql.append(select_mapping_attribute.get(COL_TYPE.OBJECT));
-				break;
-			case LITERAL:
-			case LITERAL_LANG:
-				sql.append(select_mapping_attribute.get(COL_TYPE.LITERAL));
-				break;
-			default:
-				sql.append(select_mapping_attribute.get(type2));
+		case OBJECT:
+		case BNODE:
+			sql.append(select_mapping_attribute.get(COL_TYPE.OBJECT));
+			break;
+		case LITERAL:
+		case LITERAL_LANG:
+			sql.append(select_mapping_attribute.get(COL_TYPE.LITERAL));
+			break;
+		default:
+			sql.append(select_mapping_attribute.get(type2));
 		}
 
 		sql.append(" WHERE ");
@@ -2261,12 +2263,12 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		if (intervals == null)
 			throw new OBDAException("Could not create mapping for predicate: " + predicate.getName()
 					+ ". Couldn not find semantic index intervals for the predicate.");
-
+		
 		appendIntervalString(intervals, sql);
 
 		return sql.toString();
 	}
-
+	
 
 	private void appendIntervalString(List<Interval> intervals, StringBuilder sql) {
 		if (intervals.size() > 1)
@@ -2278,9 +2280,9 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			sql.append(getIntervalString0(intervals.get(intervali)));
 		}
 		if (intervals.size() > 1)
-			sql.append(")");
+			sql.append(")");	
 	}
-
+	
 	private String getIntervalString0(Interval interval) {
 		if (interval.getStart() == interval.getEnd()) {
 			return String.format(whereSingleCondition, interval.getStart());
@@ -2426,18 +2428,18 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		return bf.toString();
 	}
 
-
+	
 	/**
 	 *  DROP indexes	
 	 */
-
+		
 	private static final String dropindexclass1 = "DROP INDEX \"idxclass1\"";
 	private static final String dropindexclass2 = "DROP INDEX \"idxclass2\"";
 
 	private static final String dropindexrole1 = "DROP INDEX \"idxrole1\"";
 	private static final String dropindexrole2 = "DROP INDEX \"idxrole2\"";
 	private static final String dropindexrole3 = "DROP INDEX \"idxrole3\"";
-
+	
 
 	@Override
 	public void dropIndexes(Connection conn) throws SQLException {
@@ -2452,17 +2454,17 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		st.addBatch(dropindexrole2);
 		st.addBatch(dropindexrole3);
 
-		st.addBatch("DROP INDEX " + attribute_index_literal + "1");
-		st.addBatch("DROP INDEX " + attribute_index_literal + "2");
-		st.addBatch("DROP INDEX " + attribute_index_literal + "3");
-
-
+		st.addBatch("DROP INDEX " + attribute_index_literal + "1");	
+		st.addBatch("DROP INDEX " + attribute_index_literal + "2");	
+		st.addBatch("DROP INDEX " + attribute_index_literal + "3");	
+		
+		
 		for (Entry<COL_TYPE, String> entry : attribute_index.entrySet()) {
 			st.addBatch("DROP INDEX " + entry.getValue() + "1");
 			st.addBatch("DROP INDEX " + entry.getValue() + "2");
 			st.addBatch("DROP INDEX " + entry.getValue() + "3");
 		}
-
+		
 		st.executeBatch();
 		st.close();
 
@@ -2484,7 +2486,7 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_literal));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.STRING)));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.INTEGER)));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.LONG)));
+            st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.LONG)));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.DECIMAL)));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.DOUBLE)));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.DATETIME)));
@@ -2917,6 +2919,6 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 		}
 	}
 
-
+	
 
 }
