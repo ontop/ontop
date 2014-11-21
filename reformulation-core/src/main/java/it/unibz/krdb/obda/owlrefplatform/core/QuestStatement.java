@@ -212,7 +212,7 @@ public class QuestStatement implements OBDAStatement {
 		@Override
 		public void run() {
 
-			log.debug("Executing query: \n{}", strquery);
+			log.debug("Executing SPARQL query: \n{}", strquery);
 
 			try {
 
@@ -226,7 +226,7 @@ public class QuestStatement implements OBDAStatement {
 				List<String> signature = signaturecache.get(strquery);
 				ParsedQuery query = sesameQueryCache.get(strquery);
 
-				log.debug("Executing the query and get the result...");
+				log.debug("Executing the SQL query and get the result...");
 				if (sql.equals("") && !isBoolean) {
 					tupleResult = new EmptyQueryResultSet(signature, QuestStatement.this);
 				} else if (sql.equals("")) {
@@ -428,14 +428,14 @@ public class QuestStatement implements OBDAStatement {
 			}
 			program = translator.translate(pq, signature);
 
-			log.debug("Translated query: \n{}", program);
+			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
 			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
 			removeNonAnswerQueries(program);
 
 			program = unfolder.unfold(program, "ans1");
 
-			log.debug("Flattened query: \n{}", program);
+			log.debug("Flattened program: \n{}", program);
 		} catch (Exception e) {
 			e.printStackTrace();
 			OBDAException ex = new OBDAException(e.getMessage());
@@ -456,12 +456,14 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Start the partial evaluation process...");
 
-		DatalogProgram unfolding = questInstance.unfold((DatalogProgram) query, "ans1");
-		log.debug("Partial evaluation: \n{}", unfolding);
+		DatalogProgram unfolding = questInstance.unfold(query, "ans1");
+		//log.debug("Partial evaluation: \n{}", unfolding);
+		log.debug("Data atoms evaluated: \n{}", unfolding);
 
 		removeNonAnswerQueries(unfolding);
 
-		log.debug("After target rules removed: \n{}", unfolding);
+		//log.debug("After target rules removed: \n{}", unfolding);
+		log.debug("Irrelevant rules removed: \n{}", unfolding);
 
 		ExpressionEvaluator evaluator = new ExpressionEvaluator();
 		evaluator.setUriTemplateMatcher(questInstance.getUriTemplateMatcher());
@@ -493,7 +495,7 @@ public class QuestStatement implements OBDAStatement {
 		// query = DatalogNormalizer.normalizeDatalogProgram(query);
 		String sql = querygenerator.generateSourceQuery((DatalogProgram) query, signature);
 
-		log.debug("Resulting sql: \n{}", sql);
+		log.debug("Resulting SQL: \n{}", sql);
 		return sql;
 	}
 
@@ -728,7 +730,7 @@ public class QuestStatement implements OBDAStatement {
 			if (set.next()) {
 				return set.getInt(1);
 			} else {
-				throw new Exception("Tuple count faild due to empty result set.");
+				throw new Exception("Tuple count failed due to empty result set.");
 			}
 		} else {
 			throw new Exception("Action canceled.");
