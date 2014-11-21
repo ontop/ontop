@@ -248,7 +248,7 @@ public class SigmaTBoxOptimizer {
 		if (check_directly_redundant(parent, child))
 			return true;
 		else {
-			for (Equivalences<DataRangeExpression> children_prime : isa.getDataRanges().getDirectSub(isa.getDataRanges().getVertex(parent))) {
+			for (Equivalences<DataRangeExpression> children_prime : isa.getDataRangeDAG().getDirectSub(isa.getDataRangeDAG().getVertex(parent))) {
 				DataRangeExpression child_prime = children_prime.getRepresentative();
 
 				if (!child_prime.equals(child) && 
@@ -345,27 +345,27 @@ public class SigmaTBoxOptimizer {
 	
 	private boolean check_directly_redundant(DataRangeExpression parent, DataRangeExpression child) {
 		
-		Equivalences<DataRangeExpression> sp = sigmaChain.getDataRanges().getVertex(parent);
-		Equivalences<DataRangeExpression> sc = sigmaChain.getDataRanges().getVertex(child);
+		Equivalences<DataRangeExpression> sp = sigmaChain.getDataRangeDAG().getVertex(parent);
+		Equivalences<DataRangeExpression> sc = sigmaChain.getDataRangeDAG().getVertex(child);
 		
 		// if one of them is not in the respective DAG
 		if (sp == null || sc == null) 
 			return false;
 
-		Set<Equivalences<DataRangeExpression>> spChildren =  sigmaChain.getDataRanges().getDirectSub(sp);
+		Set<Equivalences<DataRangeExpression>> spChildren =  sigmaChain.getDataRangeDAG().getDirectSub(sp);
 		
 		if (!spChildren.contains(sc))
 			return false;
 		
 		
 		
-		Equivalences<DataRangeExpression> tc = isaChain.getDataRanges().getVertex(child);
+		Equivalences<DataRangeExpression> tc = isaChain.getDataRangeDAG().getVertex(child);
 		// if one of them is not in the respective DAG
 		if (tc == null) 
 			return false;
 		
-		Set<Equivalences<DataRangeExpression>> scChildren = sigmaChain.getDataRanges().getSub(sc);
-		Set<Equivalences<DataRangeExpression>> tcChildren = isaChain.getDataRanges().getSub(tc);
+		Set<Equivalences<DataRangeExpression>> scChildren = sigmaChain.getDataRangeDAG().getSub(sc);
+		Set<Equivalences<DataRangeExpression>> tcChildren = isaChain.getDataRangeDAG().getSub(tc);
 
 		return scChildren.containsAll(tcChildren);
 	}

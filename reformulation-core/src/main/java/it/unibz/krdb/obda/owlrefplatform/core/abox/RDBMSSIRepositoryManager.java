@@ -1424,8 +1424,8 @@ public class RDBMSSIRepositoryManager implements RDBMSDataRepositoryManager {
 	private COL_TYPE getAttributeType(Predicate attribute) {
 		DataPropertyExpression prop = ofac.createDataProperty(attribute.getName());
 		DataPropertyRangeExpression role = prop.getRange(); 
-		Equivalences<DataRangeExpression> roleNode = reasonerDag.getDataRanges().getVertex(role);
-		Set<Equivalences<DataRangeExpression>> ancestors = reasonerDag.getDataRanges().getSuper(roleNode);
+		Equivalences<DataRangeExpression> roleNode = reasonerDag.getDataRangeDAG().getVertex(role);
+		Set<Equivalences<DataRangeExpression>> ancestors = reasonerDag.getDataRangeDAG().getSuper(roleNode);
 
 		for (Equivalences<DataRangeExpression> node : ancestors) {
 			for(DataRangeExpression desc: node)

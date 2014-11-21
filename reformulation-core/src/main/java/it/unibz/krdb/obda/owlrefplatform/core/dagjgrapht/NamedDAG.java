@@ -53,7 +53,7 @@ public class NamedDAG  {
 		objectPropertyDAG = getNamedDAG(reasoner.getObjectPropertyDAG());
 		dataPropertyDAG = getNamedDAG(reasoner.getDataPropertyDAG());
 		classDAG = getNamedDAG(reasoner.getClassDAG());
-		dataRangeDAG = getNamedDAG(reasoner.getDataRanges());
+		dataRangeDAG = getNamedDAG(reasoner.getDataRangeDAG());
 	}
 	
 	@Override
