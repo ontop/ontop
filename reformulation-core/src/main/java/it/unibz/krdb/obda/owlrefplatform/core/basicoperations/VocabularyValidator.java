@@ -131,9 +131,9 @@ public class VocabularyValidator {
 				if (atom.isBooleanFunction())
 					continue;
 
-				T newatom = (T)getNormal(atom);
+				T newAtom = (T)getNormal(atom);
 
-				body.set(i, newatom);
+				body.set(i, newAtom);
 			}
 		}
 	}

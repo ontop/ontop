@@ -106,7 +106,7 @@ public class TestTBoxReasonerImpl_OnGraph implements TBoxReasoner {
 	}
 	
 	@Override
-	public EquivalencesDAG<DataRangeExpression> getDataRanges() {
+	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG() {
 		return dataRangeDAG;
 	}
 

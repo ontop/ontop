@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Joiner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +97,10 @@ public class QuestUnfolder {
 		
 		Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
-        log.debug("Final set of mappings: \n{}", unfoldingProgram);
+        log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
+//		for(CQIE rule : unfoldingProgram){
+//			log.debug("{}", rule);
+//		}
 
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
@@ -211,7 +215,7 @@ public class QuestUnfolder {
 			unfoldingProgram.add(rule);
 			count++;
 		}
-		log.debug("Appended {} ABox assertions as fact rules", count);		
+		log.debug("Appended {} class assertions from ontology as fact rules", count);
 	}		
 	
 	public void addObjectPropertyAssertionsAsFacts(Iterable<ObjectPropertyAssertion> assertions) {
@@ -229,7 +233,7 @@ public class QuestUnfolder {
 			unfoldingProgram.add(rule);
 			count++;
 		}
-		log.debug("Appended {} ABox assertions as fact rules", count);		
+		log.debug("Appended {} object property assertions as fact rules", count);
 	}		
 	
 	public void addDataPropertyAssertionsAsFacts(Iterable<DataPropertyAssertion> assertions) {

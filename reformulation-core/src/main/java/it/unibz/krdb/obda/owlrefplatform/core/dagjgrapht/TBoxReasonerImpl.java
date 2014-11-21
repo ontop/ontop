@@ -165,7 +165,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 
 	@Override
-	public EquivalencesDAG<DataRangeExpression> getDataRanges() {
+	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG() {
 		return dataRangeDAG;
 	}
 	
@@ -550,7 +550,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		EquivalencesDAGImpl<ClassExpression> classDAG = new EquivalencesDAGImpl<ClassExpression>(null, classes, classEquivalences);
 		
 		
-		return new TBoxReasonerImpl(classDAG,  (EquivalencesDAGImpl<DataRangeExpression>)reasoner.getDataRanges(), objectPropertyDAG, dataPropertyDAG, classEquivalenceMap, objectPropertyEquivalenceMap, dataPropertyEquivalenceMap);
+		return new TBoxReasonerImpl(classDAG,  (EquivalencesDAGImpl<DataRangeExpression>)reasoner.getDataRangeDAG(), objectPropertyDAG, dataPropertyDAG, classEquivalenceMap, objectPropertyEquivalenceMap, dataPropertyEquivalenceMap);
 	}
 	
 	

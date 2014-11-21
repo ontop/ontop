@@ -63,7 +63,7 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<DataRangeExpression> getDataRanges();
+	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG();
 	
 	/**
 	 * 

@@ -405,9 +405,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 
 		log.debug("Quest configuration:");
-		log.debug("Reformulation technique: {}", reformulationTechnique);
-		log.debug("Optimize equivalences: {}", bOptimizeEquivalences);
-		log.debug("Optimize TBox: {}", bOptimizeTBoxSigma);
+
+		log.debug("Extensional query rewriting enabled: {}", reformulate);
+		//log.debug("Reformulation technique: {}", reformulationTechnique);
+		if(reformulate){
+			log.debug("Extensional query rewriting technique: {}", reformulationTechnique);
+		}
+		log.debug("Optimize TBox using class/property equivalences: {}", bOptimizeEquivalences);
+		log.debug("Optimize TBox using dependencies in ABox: {}", bOptimizeTBoxSigma);
 		log.debug("ABox mode: {}", aboxMode);
 		if (!aboxMode.equals("virtual")) {
 			log.debug("Use in-memory database: {}", inmemory);
