@@ -42,7 +42,6 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
@@ -468,7 +467,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, ca);
 					index = cacheSI.getIndex(ca.getConcept()); // WOW ! NullPointerException here
 					// Register non emptiness
-					SemanticIndexRecord record = SemanticIndexRecord.getRecord(ax, index);
+					COL_TYPE t1 = ca.getIndividual().getType();
+					SemanticIndexRecord record = new SemanticIndexRecord(SITable.CLASS, t1, COL_TYPE.OBJECT, index);
 					nonEmptyEntityRecord.add(record);
 				}
 				catch (Exception e) {
@@ -485,7 +485,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, opa);	
 					index = cacheSI.getIndex(opa.getProperty());
 					// Register non emptiness
-					SemanticIndexRecord record = SemanticIndexRecord.getRecord(ax, index);
+					COL_TYPE t1 = opa.getSubject().getType();
+					COL_TYPE t2 = opa.getObject().getType();		
+					SemanticIndexRecord record = new SemanticIndexRecord(SITable.OPROP, t1, t2, index);
 					nonEmptyEntityRecord.add(record);
 				}
 				catch (Exception e) {
@@ -501,9 +503,13 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				try {
 					addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, dpa);										
 					index = cacheSI.getIndex(dpa.getProperty());
-					// Register non emptiness
-					SemanticIndexRecord record = SemanticIndexRecord.getRecord(ax, index);
-					nonEmptyEntityRecord.add(record);
+					COL_TYPE t1 = dpa.getSubject().getType();
+					COL_TYPE t2 = dpa.getValue().getType();		
+					SITable table = SemanticIndexRecord.COLTYPEtoSITable.get(t2);	
+					if (table != null) { // IMPORTANT: can be null is the datatype is not recognised
+						SemanticIndexRecord record = new SemanticIndexRecord(table, t1, t2, index);
+						nonEmptyEntityRecord.add(record);
+					}
 				}
 				catch (Exception e) {
 					Predicate predicate = dpa.getProperty().getPredicate();
@@ -1120,7 +1126,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.OBJECT);
 
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.OBJECT, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.OBJECT))
 				currentMappings.add(basicmapping);
 
 			/*
@@ -1131,21 +1137,21 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.BNODE);
 
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.BNODE, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.BNODE))
 				currentMappings.add(basicmapping);
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.OBJECT);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.OBJECT);
 
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.OBJECT, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.OBJECT))
 				currentMappings.add(basicmapping);
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.BNODE);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.BNODE);
 
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.BNODE, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.BNODE))
 				currentMappings.add(basicmapping);
 
 			/*
@@ -1155,97 +1161,97 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.LITERAL);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.LITERAL);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.LITERAL, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.LITERAL))
 				currentMappings.add(basicmapping);
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.LITERAL_LANG);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.LITERAL_LANG);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.LITERAL_LANG, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.LITERAL_LANG))
 				currentMappings.add(basicmapping);
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.BOOLEAN);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.BOOLEAN);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.BOOLEAN, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.BOOLEAN))
 				currentMappings.add(basicmapping);
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.DATETIME);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.DATETIME);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.DATETIME, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.DATETIME))
 				currentMappings.add(basicmapping);
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.DECIMAL);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.DECIMAL);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.DECIMAL, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.DECIMAL))
 				currentMappings.add(basicmapping);
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.DOUBLE);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.DOUBLE);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.DOUBLE, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.DOUBLE))
 				currentMappings.add(basicmapping);
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.INTEGER);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.INTEGER);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.INTEGER, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.INTEGER))
 				currentMappings.add(basicmapping);
 
             targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.INT);
             sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.INT);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.INT, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.INT))
                 currentMappings.add(basicmapping);
 
             targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.UNSIGNED_INT);
             sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.UNSIGNED_INT);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.UNSIGNED_INT, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.UNSIGNED_INT))
                 currentMappings.add(basicmapping);
 
             targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.NEGATIVE_INTEGER);
             sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.NEGATIVE_INTEGER);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.NEGATIVE_INTEGER, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.NEGATIVE_INTEGER))
                 currentMappings.add(basicmapping);
 
             targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_NEGATIVE_INTEGER);
             sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_NEGATIVE_INTEGER);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.NON_NEGATIVE_INTEGER, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.NON_NEGATIVE_INTEGER))
                 currentMappings.add(basicmapping);
 
             targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.POSITIVE_INTEGER);
             sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.POSITIVE_INTEGER);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.POSITIVE_INTEGER, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.POSITIVE_INTEGER))
                 currentMappings.add(basicmapping);
 
             targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_POSITIVE_INTEGER);
             sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_POSITIVE_INTEGER);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.NON_POSITIVE_INTEGER, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.NON_POSITIVE_INTEGER))
                 currentMappings.add(basicmapping);
 
             targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.FLOAT);
             sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.FLOAT);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.FLOAT, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.FLOAT))
                 currentMappings.add(basicmapping);
 
             targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.LONG);
             sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.LONG);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.LONG, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.LONG))
                 currentMappings.add(basicmapping);
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.STRING);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.STRING);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.STRING, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.STRING))
 				currentMappings.add(basicmapping);
 
 			/*
@@ -1255,105 +1261,105 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.LITERAL);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.LITERAL);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.LITERAL, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.LITERAL))
 				currentMappings.add(basicmapping);
 			;
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.LITERAL_LANG);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.LITERAL_LANG);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.LITERAL_LANG, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.LITERAL_LANG))
 				currentMappings.add(basicmapping);
 			;
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.BOOLEAN);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.BOOLEAN);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.BOOLEAN, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.BOOLEAN))
 				currentMappings.add(basicmapping);
 			;
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.DATETIME);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.DATETIME);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.DATETIME, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.DATETIME))
 				currentMappings.add(basicmapping);
 			;
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.DECIMAL);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.DECIMAL);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.DECIMAL, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.DECIMAL))
 				currentMappings.add(basicmapping);
 			;
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.DOUBLE);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.DOUBLE);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.DOUBLE, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.DOUBLE))
 				currentMappings.add(basicmapping);
 			;
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.INTEGER);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.INTEGER);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.INTEGER, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.INTEGER))
 				currentMappings.add(basicmapping);
 			;
 
             targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.INT);
             sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.INT);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.INT, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.INT))
                 currentMappings.add(basicmapping);
 
             targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.UNSIGNED_INT);
             sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.UNSIGNED_INT);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.UNSIGNED_INT, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.UNSIGNED_INT))
                 currentMappings.add(basicmapping);
 
             targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.NEGATIVE_INTEGER);
             sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.NEGATIVE_INTEGER);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.NEGATIVE_INTEGER, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.NEGATIVE_INTEGER))
                 currentMappings.add(basicmapping);
 
             targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_NEGATIVE_INTEGER);
             sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_NEGATIVE_INTEGER);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.NON_NEGATIVE_INTEGER, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.NON_NEGATIVE_INTEGER))
                 currentMappings.add(basicmapping);
 
             targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.POSITIVE_INTEGER);
             sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.POSITIVE_INTEGER);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.POSITIVE_INTEGER, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.POSITIVE_INTEGER))
                 currentMappings.add(basicmapping);
 
             targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_POSITIVE_INTEGER);
             sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_POSITIVE_INTEGER);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.NON_POSITIVE_INTEGER, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.NON_POSITIVE_INTEGER))
                 currentMappings.add(basicmapping);
 
             targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.FLOAT);
             sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.FLOAT);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.FLOAT, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.FLOAT))
                 currentMappings.add(basicmapping);
             
             targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.LONG);
             sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.LONG);
             basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.LONG, 2))
+            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.LONG))
                 currentMappings.add(basicmapping);
             ;
 
 			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.STRING);
 			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.STRING);
 			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.STRING, 2))
+			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.STRING))
 				currentMappings.add(basicmapping);
 			;
 
@@ -1416,7 +1422,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 
 			OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sql1.toString(), targetQuery1);
-			if (!isMappingEmpty(classuri.getName(), COL_TYPE.OBJECT, COL_TYPE.OBJECT, 1))
+			if (!isMappingEmpty(classNode, COL_TYPE.OBJECT))
 				currentMappings.add(basicmapping);
 
 			/* FOR BNODE */
@@ -1424,7 +1430,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			appendIntervalString(intervals, sql2);
 
 			basicmapping = dfac.getRDBMSMappingAxiom(sql2.toString(), targetQuery2);
-			if (!isMappingEmpty(classuri.getName(), COL_TYPE.BNODE, COL_TYPE.OBJECT, 1))
+			if (!isMappingEmpty(classNode, COL_TYPE.BNODE))
 				currentMappings.add(basicmapping);
 		}
 
@@ -1471,72 +1477,21 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	/***
-	 * We use 1 for classes 2 for properties. Tells you if there has been
-	 * inserts that can make this mapping non empty.
-	 * 
 	 * @param iri
 	 * @param type1
-	 * @param type2
-	 * @param classPredicate
 	 * @return
 	 */
-	private boolean isMappingEmpty(String iri, COL_TYPE type1, COL_TYPE type2, int classPredicate) {
+	private boolean isMappingEmpty(OClass concept, COL_TYPE type1) {
 
-		OBJType t1 = null;
-		OBJType t2 = OBJType.URI;
-
-		if (type1 == COL_TYPE.OBJECT) {
-			t1 = OBJType.URI;
-		} else {
-			t1 = OBJType.BNode;
-		}
-
-		SITable table = null;
-		if (classPredicate == 1) {
-			table = SITable.CLASS;
-		} else if (type2 == COL_TYPE.OBJECT) {
-			table = SITable.OPROP;
-		} else if (type2 == COL_TYPE.BNODE) {
-			table = SITable.OPROP;
-			t2 = OBJType.BNode;
-		} else if (type2 == COL_TYPE.BOOLEAN)
-			table = SITable.DPROPBool;
-		else if (type2 == COL_TYPE.DATETIME)
-			table = SITable.DPROPDate;
-		else if (type2 == COL_TYPE.DECIMAL)
-			table = SITable.DPROPDeci;
-		else if (type2 == COL_TYPE.DOUBLE)
-			table = SITable.DPROPDoub;
-		else if (type2 == COL_TYPE.INTEGER)
-			table = SITable.DPROPInte;
-        else if (type2 == COL_TYPE.INT)
-            table = SITable.DPROPInt;
-        else if (type2 == COL_TYPE.UNSIGNED_INT)
-            table = SITable.DPROPUnsignedInt;
-        else if (type2 == COL_TYPE.NEGATIVE_INTEGER)
-            table = SITable.DPROPNegInte;
-        else if (type2 == COL_TYPE.NON_NEGATIVE_INTEGER)
-            table = SITable.DPROPNonNegInte;
-        else if (type2 == COL_TYPE.POSITIVE_INTEGER)
-            table = SITable.DPROPPosInte;
-        else if (type2 == COL_TYPE.NON_POSITIVE_INTEGER)
-            table = SITable.DPROPNonPosInte;
-        else if (type2 == COL_TYPE.FLOAT)
-            table = SITable.DPROPFloat;
-        else if (type2 == COL_TYPE.LONG)
-            table = SITable.DPROPLong;
-		else if (type2 == COL_TYPE.LITERAL || type2 == COL_TYPE.LITERAL_LANG)
-			table = SITable.DPROPLite;
-		else if (type2 == COL_TYPE.STRING)
-			table = SITable.DPROPStri;
+		SITable table = SITable.CLASS;
 
 		boolean empty = true;
-		List<Interval> intervals = cacheSI.getIntervals(iri, classPredicate);
+		List<Interval> intervals = cacheSI.getIntervals(concept.getPredicate().getName(), 1);
 
 		for (Interval interval : intervals) {
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
 
-				SemanticIndexRecord record = SemanticIndexRecord.createSIRecord(table.ordinal(), t1.ordinal(), t2.ordinal(), i);
+				SemanticIndexRecord record = new SemanticIndexRecord(table, type1, COL_TYPE.OBJECT, i);
 				empty = empty && !nonEmptyEntityRecord.contains(record);
 				if (!empty)
 					break;
@@ -1548,6 +1503,34 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		return empty;
 	}
 
+	/***
+	 * @param iri
+	 * @param type1
+	 * @param type2
+	 * @return
+	 */
+	private boolean isMappingEmpty(String iri, COL_TYPE type1, COL_TYPE type2) {
+
+		SITable table = SemanticIndexRecord.COLTYPEtoSITable.get(type2);			
+
+		boolean empty = true;
+		List<Interval> intervals = cacheSI.getIntervals(iri, 2);
+
+		for (Interval interval : intervals) {
+			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
+
+				SemanticIndexRecord record = new SemanticIndexRecord(table, type1, type2, i);
+				empty = empty && !nonEmptyEntityRecord.contains(record);
+				if (!empty)
+					break;
+			}
+			if (!empty)
+				break;
+		}
+
+		return empty;
+	}
+	
 	private CQIE constructTargetQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) {
 		// Initialize the predicate and term objects.
 		Predicate headPredicate, bodyPredicate = null;

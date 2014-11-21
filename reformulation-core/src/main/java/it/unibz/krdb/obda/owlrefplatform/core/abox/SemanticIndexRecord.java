@@ -20,11 +20,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  * #L%
  */
 
+import java.util.HashMap;
+import java.util.Map;
+
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
-import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 
 /***
  * A record to keep track of which tables in the semantic index tables have rows
@@ -40,21 +39,20 @@ public class SemanticIndexRecord {
 		CLASS, OPROP, DPROPLite, DPROPStri, DPROPInte, DPROPLong, DPROPDeci, DPROPDoub, DPROPDate, DPROPInt, DPROPUnsignedInt, DPROPNegInte, DPROPNonNegInte, DPROPPosInte, DPROPNonPosInte, DPROPFloat, DPROPBool
 	}
 
-	public enum OBJType {
-		URI, BNode
-	}
+	private static final int OBJ_TYPE_URI = 0;
+	private static final int OBJ_TYPE_BNode = 1;
 
 	private final int idx;
-	private final OBJType type1;
-	private final OBJType type2;
+	private final int type1;
+	private final int type2;
 	private final SITable table;
 
-	private SemanticIndexRecord(SITable table, OBJType t1, OBJType t2, int idx) {
+	public SemanticIndexRecord(SITable table, COL_TYPE t1, COL_TYPE t2, int idx) {
+		this.type1 = (t1 == COL_TYPE.BNODE)  ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
+		this.type2 = (t2 == COL_TYPE.BNODE) ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
+		
 		this.table = table;
-		this.type1 = t1;
-		this.type2 = t2;
 		this.idx = idx;
-
 	}
 	
 	public int getIndex() {
@@ -62,11 +60,11 @@ public class SemanticIndexRecord {
 	}
 	
 	public int getType1() {
-		return type1.ordinal();
+		return type1;
 	}
 
 	public int getType2() {
-		return type2.ordinal();
+		return type2;
 	}
 	
 	public int getTable() {
@@ -74,47 +72,30 @@ public class SemanticIndexRecord {
 	}
 	
 	public static SemanticIndexRecord createSIRecord(int table, int t1, int t2, int idx) {
-		SITable sitable = null;
-		
-		for (SITable t : SITable.values()) {
-			if (t.ordinal() == table) {
+		SITable sitable = null;		
+		for (SITable t : SITable.values()) 
+			if (t.ordinal() == table) 
 				sitable = t;
-			}
-		}
 		if (sitable == null)
 			throw new RuntimeException("Unknown table kind: " + table);
 		
-		OBJType type1 = null, type2 = null;
-		for (OBJType t : OBJType.values()) {
-			if (t.ordinal() == t1) {
-				type1 = t;
-			}
-			if (t.ordinal() == t2) {
-				type2 = t;
-			}
-		}
-		if (type1 == null)
-			throw new RuntimeException("Unknown object type1: " + t1);
-				
-		if (type2 == null)
-			throw new RuntimeException("Unknown object type2: " + t2);
-			
-		return new SemanticIndexRecord(sitable, type1, type2, idx);
-
+		COL_TYPE tt2 = (t2 == OBJ_TYPE_BNode) ? COL_TYPE.BNODE : COL_TYPE.OBJECT;
+		COL_TYPE tt1 = (t1 == OBJ_TYPE_BNode) ? COL_TYPE.BNODE : COL_TYPE.OBJECT;
+		
+		return new SemanticIndexRecord(sitable, tt1, tt2, idx);
 	}
 
 	/***
-	 * This hash will provide no colisions as long as the number of
+	 * This hash will provide no collisions as long as the number of
 	 * classes/properties is bellow
 	 * 
 	 */
 	@Override
 	public int hashCode() {
-		int hash = 0;
-		hash += (idx);
-		hash += (table.ordinal() + 1 * 10000000);
-		hash += (type1.ordinal() + 1 * 100000000);
-		hash += (type2.ordinal() + 1 * 1000000000);
+		int hash = idx;
+		hash += (table.ordinal() + 1) * 10000000;
+		hash += (type1 + 1) * 100000000;
+		hash += (type2 + 1) * 1000000000;
 		return hash;
 	}
 
@@ -126,108 +107,30 @@ public class SemanticIndexRecord {
 		return (this.idx == r2.idx) && (this.table == r2.table) && (this.type1 == r2.type1) && (this.type2 == r2.type2);
 	}
 
-	/**
-	 * Gets the semantic index record for this assertion (that is, the kind of
-	 * row that is inserted in the database).
-	 * 
-	 * @param aboxAssertion
-	 * @return
-	 */
-	public static SemanticIndexRecord getRecord(Assertion assertion, int index) {
-		OBJType t1 = null;
-		OBJType t2 = OBJType.URI;
-		SITable table = null;
-
-		if (assertion instanceof ClassAssertion) {
-			ClassAssertion ca = (ClassAssertion) assertion;
-			table = SITable.CLASS;
-			COL_TYPE atype1 = ca.getIndividual().getType();
-
-			if (atype1 == COL_TYPE.BNODE) 
-				t1 = OBJType.BNode;
-			else 
-				t1 = OBJType.URI;
-		} 
-		else {
-			COL_TYPE atype1, atype2;
-			if (assertion instanceof ObjectPropertyAssertion) {
-				ObjectPropertyAssertion ba = (ObjectPropertyAssertion) assertion;
-				atype1 = ba.getSubject().getType();
-				atype2 = ba.getObject().getType();		
-			}
-			else {
-				DataPropertyAssertion ba = (DataPropertyAssertion) assertion;
-				atype1 = ba.getSubject().getType();
-				atype2 = ba.getValue().getType();						
-			}
-				
-			if (atype1 == COL_TYPE.BNODE) 
-				t1 = OBJType.BNode;
-			else 
-				t1 = OBJType.URI;
-
-			switch (atype2) {
-			case OBJECT:
-				t2 = OBJType.URI;
-				table = SITable.OPROP;
-				break;
-			case BNODE:
-				t2 = OBJType.BNode;
-				table = SITable.OPROP;
-				break;
-			case LITERAL:
-			case LITERAL_LANG:
-				table = SITable.DPROPLite;
-				break;
-			case STRING:
-				table = SITable.DPROPStri;
-				break;
-			case INTEGER:
-				table = SITable.DPROPInte;
-				break;
-            case INT:
-                table = SITable.DPROPInt;
-                break;
-            case UNSIGNED_INT:
-                table = SITable.DPROPUnsignedInt;
-                break;
-            case NEGATIVE_INTEGER:
-                table = SITable.DPROPNegInte;
-                break;
-            case NON_NEGATIVE_INTEGER:
-                table = SITable.DPROPNonNegInte;
-                break;
-            case POSITIVE_INTEGER:
-                table = SITable.DPROPPosInte;
-                break;
-            case NON_POSITIVE_INTEGER:
-                table = SITable.DPROPNonPosInte;
-                break;
-            case FLOAT:
-                table = SITable.DPROPFloat;
-                break;
-            case LONG:
-                table = SITable.DPROPLong;
-                break;
-			case DECIMAL:
-				table = SITable.DPROPDeci;
-				break;
-			case DOUBLE:
-				table = SITable.DPROPDoub;
-				break;
-			case DATETIME:
-				table = SITable.DPROPDate;
-				break;
-			case BOOLEAN:
-				table = SITable.DPROPBool;
-				break;
-
-			}
-
-		}
-		return new SemanticIndexRecord(table, t1, t2, index);
+	public static Map<COL_TYPE, SITable> COLTYPEtoSITable = new HashMap<>();
+	
+	static {
+		COLTYPEtoSITable.put(COL_TYPE.OBJECT, SITable.OPROP);
+		COLTYPEtoSITable.put(COL_TYPE.BNODE, SITable.OPROP);
+		COLTYPEtoSITable.put(COL_TYPE.LITERAL, SITable.DPROPLite);
+		COLTYPEtoSITable.put(COL_TYPE.LITERAL_LANG, SITable.DPROPLite);
+		COLTYPEtoSITable.put(COL_TYPE.STRING, SITable.DPROPStri);
+		COLTYPEtoSITable.put(COL_TYPE.INTEGER, SITable.DPROPInte);
+		COLTYPEtoSITable.put(COL_TYPE.INT, SITable.DPROPInt);
+		COLTYPEtoSITable.put(COL_TYPE.UNSIGNED_INT, SITable.DPROPUnsignedInt);
+		COLTYPEtoSITable.put(COL_TYPE.NEGATIVE_INTEGER, SITable.DPROPNegInte);
+		COLTYPEtoSITable.put(COL_TYPE.NON_NEGATIVE_INTEGER, SITable.DPROPNonNegInte);
+		COLTYPEtoSITable.put(COL_TYPE.POSITIVE_INTEGER, SITable.DPROPPosInte);
+		COLTYPEtoSITable.put(COL_TYPE.NON_POSITIVE_INTEGER, SITable.DPROPNonPosInte);
+		COLTYPEtoSITable.put(COL_TYPE.FLOAT, SITable.DPROPFloat);
+		COLTYPEtoSITable.put(COL_TYPE.LONG, SITable.DPROPLong);
+		COLTYPEtoSITable.put(COL_TYPE.DECIMAL, SITable.DPROPDeci);
+		COLTYPEtoSITable.put(COL_TYPE.DOUBLE, SITable.DPROPDoub);
+		COLTYPEtoSITable.put(COL_TYPE.DATETIME, SITable.DPROPDate);
+		COLTYPEtoSITable.put(COL_TYPE.BOOLEAN, SITable.DPROPBool);
 	}
-
+	
+	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append("T: ");
