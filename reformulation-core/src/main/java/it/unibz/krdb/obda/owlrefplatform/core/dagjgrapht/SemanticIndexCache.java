@@ -187,14 +187,16 @@ public class SemanticIndexCache {
 	 * @param i
 	 * @return
 	 */
-	public List<Interval> getIntervals(String name, int type) {
-		if (type == CLASS_TYPE) 
-			return classIntervals.get(name);
-		
-		else if (type == ROLE_TYPE) 
-			return roleIntervals.get(name);
-		
-		throw new RuntimeException("Could not find semantic index intervals for: String =  " + name + " type = " + type);
+	public List<Interval> getIntervals(OClass concept) {
+		return classIntervals.get(concept.getPredicate().getName());
+	}
+	@Deprecated
+	public List<Interval> getClassIntervals(String name) {
+		return classIntervals.get(name);
+	}
+	
+	public List<Interval> getRoleIntervals(String name) {
+		return roleIntervals.get(name);
 	}
 	
 	public void setIntervals(String name, int type, List<Interval> intervals) {

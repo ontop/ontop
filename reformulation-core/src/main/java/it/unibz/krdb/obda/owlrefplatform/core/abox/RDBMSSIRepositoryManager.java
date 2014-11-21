@@ -23,7 +23,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -32,6 +31,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassExpression;
@@ -59,7 +59,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -260,17 +259,17 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 	
 	
-	private static final String select_mapping_class = "SELECT \"URI\" as X FROM " + class_table;
+	private static final String select_mapping_class = "SELECT \"URI\" as X FROM " + class_table + " WHERE ";
 
 	private static final Map<COL_TYPE, String> select_mapping_attribute = new HashMap<COL_TYPE, String>();
 	
 	static {
 		// two special cases
-		select_mapping_attribute.put(COL_TYPE.OBJECT, "SELECT \"URI1\" as X, \"URI2\" as Y FROM " + role_table);
-		select_mapping_attribute.put(COL_TYPE.LITERAL, "SELECT \"URI\" as X, VAL as Y, LANG as Z FROM " + attribute_table_literal);
+		select_mapping_attribute.put(COL_TYPE.OBJECT, "SELECT \"URI1\" as X, \"URI2\" as Y FROM " + role_table + " WHERE ");
+		select_mapping_attribute.put(COL_TYPE.LITERAL, "SELECT \"URI\" as X, VAL as Y, LANG as Z FROM " + attribute_table_literal + " WHERE ");
 		//
 		for (Entry<COL_TYPE, String> entry : attribute_table.entrySet()) 
-			select_mapping_attribute.put(entry.getKey(),  "SELECT \"URI\" as X, VAL as Y FROM " + entry.getValue());  			
+			select_mapping_attribute.put(entry.getKey(),  "SELECT \"URI\" as X, VAL as Y FROM " + entry.getValue() + " WHERE ");  			
 	}
 	
 	
@@ -424,8 +423,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	public int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException {
 		log.debug("Inserting data into DB");
 
-		// The precondition for the limit number must be greater or equal to
-		// one.
+		// The precondition for the limit number must be greater or equal to one.
 		commitLimit = (commitLimit < 1) ? 1 : commitLimit;
 		batchLimit = (batchLimit < 1) ? 1 : batchLimit;
 
@@ -464,7 +462,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			if (ax instanceof ClassAssertion) {
 				ClassAssertion ca = (ClassAssertion) ax; 
 				try {
-					addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, ca);
+					addPreparedStatement(uriidStm, classStm, ca);
 					index = cacheSI.getIndex(ca.getConcept()); // WOW ! NullPointerException here
 					// Register non emptiness
 					COL_TYPE t1 = ca.getIndividual().getType();
@@ -482,7 +480,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			else if (ax instanceof ObjectPropertyAssertion) {
 				ObjectPropertyAssertion opa = (ObjectPropertyAssertion)ax;
 				try {
-					addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, opa);	
+					addPreparedStatement(uriidStm, roleStm, opa);	
 					index = cacheSI.getIndex(opa.getProperty());
 					// Register non emptiness
 					COL_TYPE t1 = opa.getSubject().getType();
@@ -501,7 +499,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			else /* (ax instanceof DataPropertyAssertion) */ {
 				DataPropertyAssertion dpa = (DataPropertyAssertion)ax;
 				try {
-					addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, dpa);										
+					addPreparedStatement(uriidStm, attributeLiteralStm, attributeStm, dpa);										
 					index = cacheSI.getIndex(dpa.getProperty());
 					COL_TYPE t1 = dpa.getSubject().getType();
 					COL_TYPE t2 = dpa.getValue().getType();		
@@ -583,8 +581,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 	}
 
-	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement classStm, PreparedStatement roleStm, PreparedStatement attributeLiteralStm,
-			Map<COL_TYPE, PreparedStatement> attributeStatement, ObjectPropertyAssertion ax) throws SQLException {
+	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement roleStm, ObjectPropertyAssertion ax) throws SQLException {
 
 		ObjectPropertyExpression prop = ax.getProperty();
 
@@ -646,7 +643,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		// log.debug("inserted: {} property", idx);
 	} 
 
-	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement classStm, PreparedStatement roleStm, PreparedStatement attributeLiteralStm,
+	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement attributeLiteralStm,
 			Map<COL_TYPE, PreparedStatement> attributeStatement, DataPropertyAssertion ax) throws SQLException {
 		
 
@@ -756,8 +753,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 	
 	
-	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement classStm, PreparedStatement roleStm, PreparedStatement attributeLiteralStm,
-			Map<COL_TYPE, PreparedStatement> attributeStatement, ClassAssertion ax) throws SQLException {
+	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement classStm, ClassAssertion ax) throws SQLException {
 
 		// Construct the database INSERT statements
 		ObjectConstant c1 = ax.getIndividual();
@@ -893,20 +889,26 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		stm.addBatch();
 	}
 
-	private BigDecimal parseBigDecimal(String value) {
+	private static BigDecimal parseBigDecimal(String value) {
 		return new BigDecimal(value);
 	}
 
-	private Timestamp parseTimestamp(String lit) {
-		final String[] formatStrings = { "yyyy-MM-dd HH:mm:ss.SS", "yyyy-MM-dd HH:mm:ss.S", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd",
-				"yyyy-MM-dd'T'HH:mm:ssz", };
+	private static final String[] formatStrings = { 
+				"yyyy-MM-dd HH:mm:ss.SS", 
+				"yyyy-MM-dd HH:mm:ss.S", 
+				"yyyy-MM-dd HH:mm:ss", 
+				"yyyy-MM-dd",
+				"yyyy-MM-dd'T'HH:mm:ssz" };
+	
+	private static Timestamp parseTimestamp(String lit) {
 
 		for (String formatString : formatStrings) {
 			try {
 				long time = new SimpleDateFormat(formatString).parse(lit).getTime();
 				Timestamp ts = new Timestamp(time);
 				return ts;
-			} catch (ParseException e) {
+			} 
+			catch (ParseException e) {
 			}
 		}
 		return null; // the string can't be parsed to one of the datetime
@@ -959,7 +961,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		res.close();
 
 		/*
-		 * fecthing the intervals data, note that a given String can have one ore
+		 * fetching the intervals data, note that a given String can have one ore
 		 * more intervals (a set) hence we need to go through several rows to
 		 * collect all of them. To do this we sort the table by URI (to get all
 		 * the intervals for a given String in sequence), then we collect all the
@@ -1029,6 +1031,16 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 	}
 
+	private static final COL_TYPE objectTypes[] = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.BNODE };
+
+	private static final COL_TYPE types[] = new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL_LANG, COL_TYPE.BOOLEAN, 
+		COL_TYPE.DATETIME, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.INTEGER, COL_TYPE.INT,
+		COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER, 
+		COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER, COL_TYPE.FLOAT,  COL_TYPE.LONG, 
+		COL_TYPE.STRING };
+
+
+	
 	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException {
 
 		Set<Predicate> roleNodes = new HashSet<Predicate>();
@@ -1108,10 +1120,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
 			mappings.put(role, currentMappings);
 
-			CQIE targetQuery;
-			String sourceQuery;
-			OBDAMappingAxiom basicmapping;
-
 			/***
 			 * Generating one mapping for each supported cases, i.e., the second
 			 * component is an object, or one of the supported datatypes. For
@@ -1121,317 +1129,77 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			 * The resulting mapping will be added to the list. In this way,
 			 * each property can act as an object or data property of any type.
 			 */
+			
+			for (COL_TYPE obType1 : objectTypes) {
+				for (COL_TYPE obType2 : objectTypes) {
+					CQIE targetQuery = constructTargetQuery(role, obType1, obType2);
+					String sourceQuery = constructSourceQuery(role, obType1, obType2);
+					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+					if (!isMappingEmpty(role.getName(), obType1, obType2))
+						currentMappings.add(basicmapping);					
+				}
+			}
 
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.OBJECT);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.OBJECT);
-
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.OBJECT))
-				currentMappings.add(basicmapping);
-
-			/*
-			 * object, bnode object, object bnode, object bnode, bnode
-			 */
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.BNODE);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.BNODE);
-
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.BNODE))
-				currentMappings.add(basicmapping);
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.OBJECT);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.OBJECT);
-
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.OBJECT))
-				currentMappings.add(basicmapping);
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.BNODE);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.BNODE);
-
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.BNODE))
-				currentMappings.add(basicmapping);
-
-			/*
-			 * object, type
-			 */
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.LITERAL);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.LITERAL);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.LITERAL))
-				currentMappings.add(basicmapping);
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.LITERAL_LANG);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.LITERAL_LANG);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.LITERAL_LANG))
-				currentMappings.add(basicmapping);
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.BOOLEAN);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.BOOLEAN);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.BOOLEAN))
-				currentMappings.add(basicmapping);
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.DATETIME);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.DATETIME);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.DATETIME))
-				currentMappings.add(basicmapping);
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.DECIMAL);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.DECIMAL);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.DECIMAL))
-				currentMappings.add(basicmapping);
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.DOUBLE);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.DOUBLE);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.DOUBLE))
-				currentMappings.add(basicmapping);
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.INTEGER);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.INTEGER);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.INTEGER))
-				currentMappings.add(basicmapping);
-
-            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.INT);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.INT);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.INT))
-                currentMappings.add(basicmapping);
-
-            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.UNSIGNED_INT);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.UNSIGNED_INT);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.UNSIGNED_INT))
-                currentMappings.add(basicmapping);
-
-            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.NEGATIVE_INTEGER);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.NEGATIVE_INTEGER);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.NEGATIVE_INTEGER))
-                currentMappings.add(basicmapping);
-
-            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_NEGATIVE_INTEGER);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_NEGATIVE_INTEGER);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.NON_NEGATIVE_INTEGER))
-                currentMappings.add(basicmapping);
-
-            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.POSITIVE_INTEGER);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.POSITIVE_INTEGER);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.POSITIVE_INTEGER))
-                currentMappings.add(basicmapping);
-
-            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_POSITIVE_INTEGER);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.NON_POSITIVE_INTEGER);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.NON_POSITIVE_INTEGER))
-                currentMappings.add(basicmapping);
-
-            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.FLOAT);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.FLOAT);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.FLOAT))
-                currentMappings.add(basicmapping);
-
-            targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.LONG);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.LONG);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.LONG))
-                currentMappings.add(basicmapping);
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.OBJECT, COL_TYPE.STRING);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.OBJECT, COL_TYPE.STRING);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.OBJECT, COL_TYPE.STRING))
-				currentMappings.add(basicmapping);
-
-			/*
-			 * bnode, type
-			 */
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.LITERAL);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.LITERAL);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.LITERAL))
-				currentMappings.add(basicmapping);
-			;
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.LITERAL_LANG);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.LITERAL_LANG);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.LITERAL_LANG))
-				currentMappings.add(basicmapping);
-			;
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.BOOLEAN);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.BOOLEAN);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.BOOLEAN))
-				currentMappings.add(basicmapping);
-			;
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.DATETIME);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.DATETIME);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.DATETIME))
-				currentMappings.add(basicmapping);
-			;
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.DECIMAL);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.DECIMAL);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.DECIMAL))
-				currentMappings.add(basicmapping);
-			;
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.DOUBLE);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.DOUBLE);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.DOUBLE))
-				currentMappings.add(basicmapping);
-			;
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.INTEGER);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.INTEGER);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.INTEGER))
-				currentMappings.add(basicmapping);
-			;
-
-            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.INT);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.INT);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.INT))
-                currentMappings.add(basicmapping);
-
-            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.UNSIGNED_INT);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.UNSIGNED_INT);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.UNSIGNED_INT))
-                currentMappings.add(basicmapping);
-
-            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.NEGATIVE_INTEGER);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.NEGATIVE_INTEGER);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.NEGATIVE_INTEGER))
-                currentMappings.add(basicmapping);
-
-            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_NEGATIVE_INTEGER);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_NEGATIVE_INTEGER);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.NON_NEGATIVE_INTEGER))
-                currentMappings.add(basicmapping);
-
-            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.POSITIVE_INTEGER);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.POSITIVE_INTEGER);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.POSITIVE_INTEGER))
-                currentMappings.add(basicmapping);
-
-            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_POSITIVE_INTEGER);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.NON_POSITIVE_INTEGER);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.NON_POSITIVE_INTEGER))
-                currentMappings.add(basicmapping);
-
-            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.FLOAT);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.FLOAT);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.FLOAT))
-                currentMappings.add(basicmapping);
-            
-            targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.LONG);
-            sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.LONG);
-            basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-            if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.LONG))
-                currentMappings.add(basicmapping);
-            ;
-
-			targetQuery = constructTargetQuery(role, COL_TYPE.BNODE, COL_TYPE.STRING);
-			sourceQuery = constructSourceQuery(role, COL_TYPE.BNODE, COL_TYPE.STRING);
-			basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-			if (!isMappingEmpty(role.getName(), COL_TYPE.BNODE, COL_TYPE.STRING))
-				currentMappings.add(basicmapping);
-			;
-
+			for (COL_TYPE obType1 : objectTypes) {
+				for (COL_TYPE type2 : types) {			
+					CQIE targetQuery = constructTargetQuery(role, obType1, type2);
+					String sourceQuery = constructSourceQuery(role, obType1, type2);
+					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+					if (!isMappingEmpty(role.getName(), obType1, type2))
+						currentMappings.add(basicmapping);
+				}	
+			}
 		}
 
 		/*
 		 * Creating mappings for each concept
 		 */
 
-		
 
 		for (OClass classNode : classNodesMaps) {
 
 			Predicate classuri = classNode.getPredicate();
-
-			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
-
-			mappings.put(classuri, currentMappings);
-
-			// Mapping head
-
-			Function head = dfac.getFunction(dfac.getPredicate("m", 1), dfac.getVariable("X"));
-			Function body1 = dfac.getFunction(classuri, dfac.getUriTemplate(dfac.getVariable("X")));
-			Function body2 = dfac.getFunction(classuri, dfac.getBNodeTemplate(dfac.getVariable("X")));
-			
-			/*
-			 * This target query is shared by all mappings for this class
-			 */
-
-			/* FOR URI */
-			CQIE targetQuery1 = dfac.getCQIE(head, body1);
-
-			/* FOR BNODE */
-			CQIE targetQuery2 = dfac.getCQIE(head, body2);
-
-			/*
-			 * First mapping: Getting the SQL for the *BASIC* mapping using
-			 * ranges
-			 */
-
-			StringBuilder sql1 = new StringBuilder();
-			sql1.append(select_mapping_class);
-			sql1.append(" WHERE ");
-			sql1.append(" ISBNODE = FALSE AND ");
-
-			/* FOR BNODE */
-
-			StringBuilder sql2 = new StringBuilder();
-			sql2.append(select_mapping_class);
-			sql2.append(" WHERE ");
-			sql2.append(" ISBNODE = TRUE AND ");
-
-
-			List<Interval> intervals = cacheSI.getIntervals(classuri.getName(), 1);
+			List<Interval> intervals = cacheSI.getIntervals(classNode);
 			if (intervals == null) {
 				log.warn("Found URI with no mappings, the ontology might not match the respository. Ill URI: {}", classuri.getName());
 				continue;
 			}
-			appendIntervalString(intervals, sql1);
 
+			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
+			mappings.put(classuri, currentMappings);
 
-			OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sql1.toString(), targetQuery1);
-			if (!isMappingEmpty(classNode, COL_TYPE.OBJECT))
-				currentMappings.add(basicmapping);
-
-			/* FOR BNODE */
+			// Mapping head
+			Function head = dfac.getFunction(dfac.getPredicate("m", 1), dfac.getVariable("X"));
 			
-			appendIntervalString(intervals, sql2);
+			{
+				/* FOR URI */
+				Function body1 = dfac.getFunction(classuri, dfac.getUriTemplate(dfac.getVariable("X")));
+				CQIE targetQuery1 = dfac.getCQIE(head, body1);
 
-			basicmapping = dfac.getRDBMSMappingAxiom(sql2.toString(), targetQuery2);
-			if (!isMappingEmpty(classNode, COL_TYPE.BNODE))
-				currentMappings.add(basicmapping);
+				StringBuilder sql1 = new StringBuilder();
+				sql1.append(select_mapping_class);
+				sql1.append(" ISBNODE = FALSE AND ");
+				appendIntervalString(intervals, sql1);
+
+				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sql1.toString(), targetQuery1);
+				if (!isMappingEmpty(classNode, COL_TYPE.OBJECT))
+					currentMappings.add(basicmapping);
+			}
+			{
+				/* FOR BNODE */
+				
+				Function body2 = dfac.getFunction(classuri, dfac.getBNodeTemplate(dfac.getVariable("X")));
+				CQIE targetQuery2 = dfac.getCQIE(head, body2);
+				
+				StringBuilder sql2 = new StringBuilder();
+				sql2.append(select_mapping_class);
+				sql2.append(" ISBNODE = TRUE AND ");
+				appendIntervalString(intervals, sql2);
+
+				OBDAMappingAxiom  basicmapping = dfac.getRDBMSMappingAxiom(sql2.toString(), targetQuery2);
+				if (!isMappingEmpty(classNode, COL_TYPE.BNODE))
+					currentMappings.add(basicmapping);
+			}
 		}
 
 		/*
@@ -1486,7 +1254,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		SITable table = SITable.CLASS;
 
 		boolean empty = true;
-		List<Interval> intervals = cacheSI.getIntervals(concept.getPredicate().getName(), 1);
+		List<Interval> intervals = cacheSI.getIntervals(concept);
 
 		for (Interval interval : intervals) {
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
@@ -1514,7 +1282,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		SITable table = SemanticIndexRecord.COLTYPEtoSITable.get(type2);			
 
 		boolean empty = true;
-		List<Interval> intervals = cacheSI.getIntervals(iri, 2);
+		List<Interval> intervals = cacheSI.getRoleIntervals(iri);
 
 		for (Interval interval : intervals) {
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
@@ -1532,79 +1300,55 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 	
 	private CQIE constructTargetQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) {
-		// Initialize the predicate and term objects.
-		Predicate headPredicate, bodyPredicate = null;
-		List<Term> headTerms = new ArrayList<Term>();
-		List<Term> bodyTerms = new ArrayList<Term>();
 
-		List<Function> bodyAtoms = new LinkedList<Function>();
+		Variable X = dfac.getVariable("X");
+		Variable Y = dfac.getVariable("Y");
 
-		headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
-		headTerms.add(dfac.getVariable("X"));
-		headTerms.add(dfac.getVariable("Y"));
-
-		bodyPredicate = predicate; // the body
+		Predicate headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.STRING, COL_TYPE.OBJECT });
+		Function head = dfac.getFunction(headPredicate, X, Y);
 
 		Function subjectTerm;
-		if (type1 == COL_TYPE.OBJECT) {
-
-			subjectTerm = dfac.getUriTemplate(dfac.getVariable("X"));
-
-		} else if (type1 == COL_TYPE.BNODE) {
-
-			subjectTerm = dfac.getBNodeTemplate(dfac.getVariable("X"));
-
-		} else {
-			throw new RuntimeException("Unsupported object type: " + type1);
+		if (type1 == COL_TYPE.OBJECT) 
+			subjectTerm = dfac.getUriTemplate(X);
+		else {
+			assert (type1 == COL_TYPE.BNODE); 
+			subjectTerm = dfac.getBNodeTemplate(X);
 		}
-		bodyTerms.add(subjectTerm);
-
+		
 		Function objectTerm;
-		if (type2 == COL_TYPE.BNODE) {
-
-			objectTerm = dfac.getBNodeTemplate(dfac.getVariable("Y"));
-
-		} 
-		else if (type2 == COL_TYPE.OBJECT) {
-
-			objectTerm = dfac.getUriTemplate(dfac.getVariable("Y"));
-
-		} 
+		if (type2 == COL_TYPE.BNODE) 
+			objectTerm = dfac.getBNodeTemplate(Y); 
+		else if (type2 == COL_TYPE.OBJECT) 
+			objectTerm = dfac.getUriTemplate(Y);
 		else if (type2 == COL_TYPE.LITERAL_LANG) { 
-			objectTerm = dfac.getTypedTerm(dfac.getVariable("Y"), dfac.getVariable("Z"));
+			objectTerm = dfac.getTypedTerm(Y, dfac.getVariable("Z"));
 		} 
 		else {
 			if (type2 == COL_TYPE.DATE || type2 == COL_TYPE.TIME || type2 == COL_TYPE.YEAR) {
 				// R: the three types below were not covered by the switch
 				throw new RuntimeException("Unsuported type: " + type2);
 			}
-			
-			objectTerm = dfac.getTypedTerm(dfac.getVariable("Y"), type2);
+			objectTerm = dfac.getTypedTerm(Y, type2);
 		}
-		bodyTerms.add(objectTerm);
 
-		Function head = dfac.getFunction(headPredicate, headTerms);
-		Function body = dfac.getFunction(bodyPredicate, bodyTerms);
-		bodyAtoms.add(0, body);
-		return dfac.getCQIE(head, bodyAtoms);
+		Function body = dfac.getFunction(predicate, subjectTerm, objectTerm);
+		return dfac.getCQIE(head, body);
 	}
 
 	private String constructSourceQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) throws OBDAException {
 		StringBuilder sql = new StringBuilder();
 		switch (type2) {
-		case OBJECT:
-		case BNODE:
-			sql.append(select_mapping_attribute.get(COL_TYPE.OBJECT));
-			break;
-		case LITERAL:
-		case LITERAL_LANG:
-			sql.append(select_mapping_attribute.get(COL_TYPE.LITERAL));
-			break;
-		default:
-			sql.append(select_mapping_attribute.get(type2));
+			case OBJECT:
+			case BNODE:
+				sql.append(select_mapping_attribute.get(COL_TYPE.OBJECT));
+				break;
+			case LITERAL:
+			case LITERAL_LANG:
+				sql.append(select_mapping_attribute.get(COL_TYPE.LITERAL));
+				break;
+			default:
+				sql.append(select_mapping_attribute.get(type2));
 		}
-
-		sql.append(" WHERE ");
 
 		/*
 		 * If the mapping is for something of type Literal we need to add IS
@@ -1613,27 +1357,28 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		 * NULL for every variable in the head of a mapping.
 		 */
 
-		if (type1 == COL_TYPE.BNODE) {
+		if (type1 == COL_TYPE.BNODE) 
 			sql.append("ISBNODE = TRUE AND ");
-		} else if (type1 == COL_TYPE.OBJECT) {
+		else {
+			assert (type1 == COL_TYPE.OBJECT);
 			sql.append("ISBNODE = FALSE AND ");
 		}
 
-		if (type2 == COL_TYPE.BNODE) {
+		if (type2 == COL_TYPE.BNODE) 
 			sql.append("ISBNODE2 = TRUE AND ");
-		} else if (type2 == COL_TYPE.OBJECT) {
+		else if (type2 == COL_TYPE.OBJECT) 
 			sql.append("ISBNODE2 = FALSE AND ");
-		} else if (type2 == COL_TYPE.LITERAL) {
+		else if (type2 == COL_TYPE.LITERAL) 
 			sql.append("LANG IS NULL AND ");
-		} else if (type2 == COL_TYPE.LITERAL_LANG) {
+		else if (type2 == COL_TYPE.LITERAL_LANG)
 			sql.append("LANG IS NOT NULL AND ");
-		}
+		
 
 		/*
 		 * Generating the interval conditions for semantic index
 		 */
 
-		List<Interval> intervals = cacheSI.getIntervals(predicate.getName(), 2);
+		List<Interval> intervals = cacheSI.getRoleIntervals(predicate.getName());
 		if (intervals == null)
 			throw new OBDAException("Could not create mapping for predicate: " + predicate.getName()
 					+ ". Couldn not find semantic index intervals for the predicate.");
@@ -1727,7 +1472,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 			stm = conn.prepareStatement(insert_interval_query);
 			for (String concept : cacheSI.getIntervalsKeys(SemanticIndexCache.CLASS_TYPE)) {
-				for (Interval it : cacheSI.getIntervals(concept, SemanticIndexCache.CLASS_TYPE)) {
+				for (Interval it : cacheSI.getClassIntervals(concept)) {
 					stm.setString(1, concept.toString());
 					stm.setInt(2, it.getStart());
 					stm.setInt(3, it.getEnd());
@@ -1738,7 +1483,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			stm.executeBatch();
 
 			for (String role : cacheSI.getIntervalsKeys(SemanticIndexCache.ROLE_TYPE)) {
-				for (Interval it : cacheSI.getIntervals(role, SemanticIndexCache.ROLE_TYPE)) {
+				for (Interval it : cacheSI.getRoleIntervals(role)) {
 					stm.setString(1, role.toString());
 					stm.setInt(2, it.getStart());
 					stm.setInt(3, it.getEnd());
