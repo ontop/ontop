@@ -59,6 +59,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,22 +85,91 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
 
+	
+	private static final class TableDescription {
+		final String tableName;
+		final String createCommand;
+		final String insertCommand;
+		
+		final List<String> createIndexCommands = new ArrayList<String>(3);
+		final List<String> dropIndexCommands = new ArrayList<String>(3);
+		
+		final String selectCommand;
+		final String dropCommand;
+		
+		TableDescription(String tableName, String columnDefintions, String insertColumns, String select) {
+			this.tableName = tableName;
+			this.dropCommand = "DROP TABLE " + tableName;
+			this.createCommand = "CREATE TABLE " + tableName + " ( " + columnDefintions + " )";
+			this.insertCommand = "INSERT INTO " + tableName + " " + insertColumns;
+			this.selectCommand = "SELECT " + select + " FROM " + tableName + " WHERE "; // REQUIRES CONDITION
+		}
+		
+		void indexOn(String indexName, String columns) {
+			createIndexCommands.add("CREATE INDEX " + indexName + " ON " + tableName + " (" + columns + ")");
+			dropIndexCommands.add("DROP INDEX " + indexName);
+		}
+	}
+
 	/**
 	 * Metadata tables 
 	 */
-	private final static String index_table = "IDX";
-	private final static String interval_table = "IDXINTERVAL";
-	private final static String emptyness_index_table = "NONEMPTYNESSINDEX";
-	private final static String uri_id_table = "URIID";
+	
+	private final static TableDescription indexTable = new TableDescription("IDX", 
+			"URI VARCHAR(400), IDX INTEGER, ENTITY_TYPE INTEGER", 
+			"(URI, IDX, ENTITY_TYPE) VALUES(?, ?, ?)", "*");   
+
+	private final static TableDescription intervalTable = new TableDescription("IDXINTERVAL",
+			"URI VARCHAR(400), IDX_FROM INTEGER, IDX_TO INTEGER, ENTITY_TYPE INTEGER",
+			"(URI, IDX_FROM, IDX_TO, ENTITY_TYPE) VALUES(?, ?, ?, ?)", "*");
+
+	private final static TableDescription uriIdTable = new TableDescription("URIID",
+			"ID INTEGER, URI VARCHAR(400)",
+			"(ID, URI) VALUES(?, ?)", "*");
+	
+	private final static TableDescription emptinessIndexTable = new TableDescription("NONEMPTYNESSINDEX",
+			"TABLEID INTEGER, IDX INTEGER, TYPE1 INTEGER, TYPE2 INTEGER",
+			"(TABLEID, IDX, TYPE1, TYPE2) VALUES (?, ?, ?, ?)", "*");
+	
+	
+	/**
+	 *  Data tables
+	 */
+	
+	private final static TableDescription classTable = new TableDescription("QUEST_CLASS_ASSERTION", 
+			"\"URI\" INTEGER NOT NULL, \"IDX\"  SMALLINT NOT NULL, ISBNODE BOOLEAN NOT NULL DEFAULT FALSE",
+			"(URI, IDX, ISBNODE) VALUES (?, ?, ?)", "\"URI\" as X");
+	
+	private final static TableDescription roleTable = new TableDescription("QUEST_OBJECT_PROPERTY_ASSERTION", 
+			"\"URI1\" INTEGER NOT NULL, \"URI2\" INTEGER NOT NULL, \"IDX\"  SMALLINT NOT NULL, " + 
+			"ISBNODE BOOLEAN NOT NULL DEFAULT FALSE, ISBNODE2 BOOLEAN NOT NULL DEFAULT FALSE",
+			"(URI1, URI2, IDX, ISBNODE, ISBNODE2) VALUES (?, ?, ?, ?, ?)", "\"URI1\" as X, \"URI2\" as Y");
+
+	private final static TableDescription attributeTableLiteral = new TableDescription("QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
+			"\"URI\" INTEGER NOT NULL, VAL VARCHAR(1000) NOT NULL, LANG VARCHAR(20), \"IDX\"  SMALLINT NOT NULL, " + 
+			"ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE ",
+			"(URI, VAL, LANG, IDX, ISBNODE) VALUES (?, ?, ?, ?, ?)", "\"URI\" as X, VAL as Y, LANG as Z");
+	
+	
+	static {
+		classTable.indexOn("idxclassfull", "URI, IDX, ISBNODE");
+		classTable.indexOn("idxclassfull2", "URI, IDX");
+		
+		roleTable.indexOn("idxrolefull1", "URI1, URI2, IDX, ISBNODE, ISBNODE2");
+		roleTable.indexOn("idxrolefull2",  "URI2, URI1, IDX, ISBNODE2, ISBNODE");
+		roleTable.indexOn("idxrolefull22", "URI1, URI2, IDX");
+		
+		attributeTableLiteral.indexOn("IDX_LITERAL_ATTRIBUTE" + "1", "URI");		
+		attributeTableLiteral.indexOn("IDX_LITERAL_ATTRIBUTE" + "2", "IDX");
+		attributeTableLiteral.indexOn("IDX_LITERAL_ATTRIBUTE" + "3", "VAL");				
+	}
+	
 
 	/**
 	 *  Data tables
 	 */
-	private static final String class_table = "QUEST_CLASS_ASSERTION";
-	private static final String role_table = "QUEST_OBJECT_PROPERTY_ASSERTION";
-	private static final String attribute_table_literal = "QUEST_DATA_PROPERTY_LITERAL_ASSERTION";
   
-	private static final Map<COL_TYPE, String> attribute_table = new HashMap<COL_TYPE, String>();
+	private static final Map<COL_TYPE, String> attribute_table = new HashMap<>();
 	
 	static {
 		attribute_table.put(COL_TYPE.STRING, "QUEST_DATA_PROPERTY_STRING_ASSERTION");    // 1
@@ -118,45 +188,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		attribute_table.put(COL_TYPE.BOOLEAN,  "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION");  // 14
 	}
 	
-/**
- *  CREATE metadata tables
- */
 	
-	private final static String create_idx = "CREATE TABLE " + index_table + " ( " + "URI VARCHAR(400), "
-			+ "IDX INTEGER, ENTITY_TYPE INTEGER" + ")";
-
-	private final static String create_interval = "CREATE TABLE " + interval_table + " ( " + "URI VARCHAR(400), " + "IDX_FROM INTEGER, "
-			+ "IDX_TO INTEGER, " + "ENTITY_TYPE INTEGER" + ")";
-
-	private final static String create_emptyness_index = "CREATE TABLE " + emptyness_index_table + " ( TABLEID INTEGER, IDX INTEGER, "
-			+ " TYPE1 INTEGER, TYPE2 INTEGER )";
-	
-	private final static String create_uri_id = "CREATE TABLE " + uri_id_table + " ( " + "ID INTEGER, " + "URI VARCHAR(400) " + ")";
-
-
-/**
- *  INSERT metadata
- */
-	
-	private final static String insert_idx_query = "INSERT INTO " + index_table + "(URI, IDX, ENTITY_TYPE) VALUES(?, ?, ?)";
-	private final static String uriid_insert = "INSERT INTO " + uri_id_table + "(ID, URI) VALUES(?, ?)";
-	private final static String insert_interval_query = "INSERT INTO " + interval_table
-			+ "(URI, IDX_FROM, IDX_TO, ENTITY_TYPE) VALUES(?, ?, ?, ?)";
 	
 /**
  *  CREATE data tables
  */
 	
-	private static final String class_table_create = "CREATE TABLE " + class_table + " ( " + "\"URI\" INTEGER NOT NULL, "
-			+ "\"IDX\"  SMALLINT NOT NULL, " + " ISBNODE BOOLEAN NOT NULL DEFAULT FALSE " + ")";
-
-	private static final String role_table_create = "CREATE TABLE " + role_table + " ( " + "\"URI1\" INTEGER NOT NULL, "
-			+ "\"URI2\" INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL, " + "ISBNODE BOOLEAN NOT NULL DEFAULT FALSE, "
-			+ "ISBNODE2 BOOLEAN NOT NULL DEFAULT FALSE)";
-
-	private static final String attribute_table_literal_create = "CREATE TABLE " + attribute_table_literal + " ( "
-			+ "\"URI\" INTEGER NOT NULL, " + "VAL VARCHAR(1000) NOT NULL, " + "LANG VARCHAR(20), " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
 	private static final String attribute_table_string_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.STRING) + " ( "
 			+ "\"URI\" INTEGER  NOT NULL, " + "VAL VARCHAR(1000), " + "\"IDX\"  SMALLINT  NOT NULL"
 			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
@@ -205,13 +242,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
  *  INSERT data 	
  */
 	
-	private static final String class_insert = "INSERT INTO " + class_table + " (URI, IDX, ISBNODE) VALUES (?, ?, ?)";
-	private static final String role_insert = "INSERT INTO " + role_table + " (URI1, URI2, IDX, ISBNODE, ISBNODE2) VALUES (?, ?, ?, ?, ?)";
-
-	private static final String attribute_table_literal_insert = "INSERT INTO " + attribute_table_literal
-			+ " (URI, VAL, LANG, IDX, ISBNODE) VALUES (?, ?, ?, ?, ?)";
-	
-	private static final Map<COL_TYPE, String> attribute_table_insert = new HashMap<COL_TYPE, String>();
+	private static final Map<COL_TYPE, String> attribute_table_insert = new HashMap<>();
 	
 	static {
 		for (Entry<COL_TYPE, String> entry : attribute_table.entrySet()) 
@@ -224,16 +255,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
  *  Indexes
  */
 	
-	private static final String indexclass_composite = "CREATE INDEX idxclassfull ON " + class_table + " (URI, IDX, ISBNODE)";
-	private static final String indexrole_composite1 = "CREATE INDEX idxrolefull1 ON " + role_table + " (URI1, URI2, IDX, ISBNODE, ISBNODE2)";
-	private static final String indexrole_composite2 = "CREATE INDEX idxrolefull2 ON " + role_table + " (URI2, URI1, IDX, ISBNODE2, ISBNODE)";
 
-	private static final String indexclassfull2 = "CREATE INDEX idxclassfull2 ON " + class_table + " (URI, IDX)";
-	private static final String indexrolefull22 = "CREATE INDEX idxrolefull22 ON " + role_table + " (URI1, URI2, IDX)";
-
-	private static final String attribute_index_literal = "IDX_LITERAL_ATTRIBUTE";
-
-	private static final Map<COL_TYPE, String> attribute_index = new HashMap<COL_TYPE, String>();
+	private static final Map<COL_TYPE, String> attribute_index = new HashMap<>();
 	
 	static {
 		attribute_index.put(COL_TYPE.STRING, "IDX_STRING_ATTRIBUTE");
@@ -259,14 +282,13 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 	
 	
-	private static final String select_mapping_class = "SELECT \"URI\" as X FROM " + class_table + " WHERE ";
 
-	private static final Map<COL_TYPE, String> select_mapping_attribute = new HashMap<COL_TYPE, String>();
+	private static final Map<COL_TYPE, String> select_mapping_attribute = new HashMap<>();
 	
 	static {
 		// two special cases
-		select_mapping_attribute.put(COL_TYPE.OBJECT, "SELECT \"URI1\" as X, \"URI2\" as Y FROM " + role_table + " WHERE ");
-		select_mapping_attribute.put(COL_TYPE.LITERAL, "SELECT \"URI\" as X, VAL as Y, LANG as Z FROM " + attribute_table_literal + " WHERE ");
+		select_mapping_attribute.put(COL_TYPE.OBJECT, roleTable.selectCommand);
+		select_mapping_attribute.put(COL_TYPE.LITERAL, attributeTableLiteral.selectCommand);
 		//
 		for (Entry<COL_TYPE, String> entry : attribute_table.entrySet()) 
 			select_mapping_attribute.put(entry.getKey(),  "SELECT \"URI\" as X, VAL as Y FROM " + entry.getValue() + " WHERE ");  			
@@ -317,16 +339,16 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		Statement st = conn.createStatement();
 
-		st.addBatch(create_uri_id);
+		st.addBatch(uriIdTable.createCommand);
 		
-		st.addBatch(create_idx);
-		st.addBatch(create_interval);
-		st.addBatch(create_emptyness_index);
+		st.addBatch(indexTable.createCommand);
+		st.addBatch(intervalTable.createCommand);
+		st.addBatch(emptinessIndexTable.createCommand);
 
-		st.addBatch(class_table_create);
-		st.addBatch(role_table_create);
+		st.addBatch(classTable.createCommand);
+		st.addBatch(roleTable.createCommand);
 
-		st.addBatch(attribute_table_literal_create);
+		st.addBatch(attributeTableLiteral.createCommand);
 		st.addBatch(attribute_table_string_create);
 		st.addBatch(attribute_table_integer_create);
         st.addBatch(attribute_table_int_create);
@@ -359,10 +381,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 //		st.addBatch(indexrole2);
 //		st.addBatch(indexrole3);
 		
-		st.addBatch("CREATE INDEX " + attribute_index_literal + "1 ON " + attribute_table_literal + " (URI)");		
-		st.addBatch("CREATE INDEX " + attribute_index_literal + "2 ON " + attribute_table_literal + " (IDX)");
-		st.addBatch("CREATE INDEX " + attribute_index_literal + "3 ON " + attribute_table_literal + " (VAL)");			
-		
+		for (String s : attributeTableLiteral.createIndexCommands)
+			st.addBatch(s);
 
 		for (Entry<COL_TYPE, String> entry : attribute_index.entrySet()) {
 			st.addBatch("CREATE INDEX " + entry.getValue() + "1 ON " + attribute_table.get(entry.getKey()) + " (URI)");		
@@ -370,12 +390,11 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			st.addBatch("CREATE INDEX " + entry.getValue() + "3 ON " + attribute_table.get(entry.getKey()) + " (VAL)");
 		}
 		
-		st.addBatch(indexclass_composite);
-		st.addBatch(indexrole_composite1);
-		st.addBatch(indexrole_composite2);
+		for (String s : classTable.createIndexCommands)
+			st.addBatch(s);
 		
-		st.addBatch(indexclassfull2);
-		st.addBatch(indexrolefull22);
+		for (String s : roleTable.createIndexCommands)
+			st.addBatch(s);
 		
 		st.executeBatch();
 		
@@ -389,32 +408,23 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	
-	private final static String drop_idx = "DROP TABLE " + index_table;
-	private final static String drop_interval = "DROP TABLE " + interval_table;
-	private final static String drop_emptyness = "DROP TABLE " + emptyness_index_table;
-	private final static String drop_uri_id = "DROP TABLE " + uri_id_table;
-	
-	private static final String class_table_drop = "DROP TABLE " + class_table;
-	private static final String role_table_drop = "DROP TABLE " + role_table;
-	private static final String attribute_table_literal_drop = "DROP TABLE " + attribute_table_literal;
-		
 	
 	public void dropDBSchema(Connection conn) throws SQLException {
 
 		Statement st = conn.createStatement();
 
-		st.addBatch(drop_idx);
-		st.addBatch(drop_interval);
-		st.addBatch(drop_emptyness);
+		st.addBatch(indexTable.dropCommand);
+		st.addBatch(intervalTable.dropCommand);
+		st.addBatch(emptinessIndexTable.dropCommand);
 
-		st.addBatch(class_table_drop);
-		st.addBatch(role_table_drop);
-		st.addBatch(attribute_table_literal_drop);
+		st.addBatch(classTable.dropCommand);
+		st.addBatch(roleTable.dropCommand);
+		st.addBatch(attributeTableLiteral.dropCommand);
 		
 		for (Entry<COL_TYPE, String> entry : attribute_table.entrySet())
 			st.addBatch("DROP TABLE " + entry.getValue()); 
 		
-		st.addBatch(drop_uri_id);
+		st.addBatch(uriIdTable.dropCommand);
 
 		st.executeBatch();
 		st.close();
@@ -432,10 +442,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		// Create the insert statement for all assertions (i.e, concept, role
 		// and attribute)
-		PreparedStatement uriidStm = conn.prepareStatement(uriid_insert);
-		PreparedStatement classStm = conn.prepareStatement(class_insert);
-		PreparedStatement roleStm = conn.prepareStatement(role_insert);
-		PreparedStatement attributeLiteralStm = conn.prepareStatement(attribute_table_literal_insert);
+		PreparedStatement uriidStm = conn.prepareStatement(uriIdTable.insertCommand);
+		PreparedStatement classStm = conn.prepareStatement(classTable.insertCommand);
+		PreparedStatement roleStm = conn.prepareStatement(roleTable.insertCommand);
+		PreparedStatement attributeLiteralStm = conn.prepareStatement(attributeTableLiteral.insertCommand);
 		
 		Map<COL_TYPE, PreparedStatement> attributeStm = new HashMap<COL_TYPE, PreparedStatement>();
 		for (Entry<COL_TYPE, String> entry : attribute_table_insert.entrySet()) {
@@ -948,7 +958,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		/* Fetching the index data */
 		Statement st = conn.createStatement();
-		ResultSet res = st.executeQuery("SELECT * FROM " + index_table);
+		ResultSet res = st.executeQuery("SELECT * FROM " + indexTable.tableName);
 		while (res.next()) {
 			String string = res.getString(1);
 			if (string.startsWith("file:/"))
@@ -969,7 +979,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		 * interval
 		 */
 
-		res = st.executeQuery("SELECT * FROM " + interval_table + " ORDER BY URI, ENTITY_TYPE");
+		res = st.executeQuery("SELECT * FROM " + intervalTable.tableName + " ORDER BY URI, ENTITY_TYPE");
 
 		List<Interval> currentSet = new LinkedList<Interval>();
 		String previousStringStr = null;
@@ -1017,7 +1027,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		/**
 		 * Restoring the emptyness index
 		 */
-		res = st.executeQuery("SELECT * FROM " + emptyness_index_table);
+		res = st.executeQuery("SELECT * FROM " + emptinessIndexTable.tableName);
 		while (res.next()) {
 			int table = res.getInt(1);
 			int type1 = res.getInt(3);
@@ -1177,7 +1187,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				CQIE targetQuery1 = dfac.getCQIE(head, body1);
 
 				StringBuilder sql1 = new StringBuilder();
-				sql1.append(select_mapping_class);
+				sql1.append(classTable.selectCommand);
 				sql1.append(" ISBNODE = FALSE AND ");
 				appendIntervalString(intervals, sql1);
 
@@ -1192,7 +1202,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				CQIE targetQuery2 = dfac.getCQIE(head, body2);
 				
 				StringBuilder sql2 = new StringBuilder();
-				sql2.append(select_mapping_class);
+				sql2.append(classTable.selectCommand);
 				sql2.append(" ISBNODE = TRUE AND ");
 				appendIntervalString(intervals, sql2);
 
@@ -1435,16 +1445,16 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		conn.setAutoCommit(false);
 
-		PreparedStatement stm = conn.prepareStatement(insert_idx_query);
+		PreparedStatement stm = conn.prepareStatement(indexTable.insertCommand);
 		Statement st = conn.createStatement();
 
 		try {
 
 			/* dropping previous metadata */
 
-			st.executeUpdate("DELETE FROM " + index_table);
-			st.executeUpdate("DELETE FROM " + interval_table);
-			st.executeUpdate("DELETE FROM " + emptyness_index_table);
+			st.executeUpdate("DELETE FROM " + indexTable.tableName);
+			st.executeUpdate("DELETE FROM " + intervalTable.tableName);
+			st.executeUpdate("DELETE FROM " + emptinessIndexTable.tableName);
 
 			/* inserting index data for classes and roles */
 
@@ -1470,7 +1480,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			 * Inserting interval metadata
 			 */
 
-			stm = conn.prepareStatement(insert_interval_query);
+			stm = conn.prepareStatement(intervalTable.insertCommand);
 			for (String concept : cacheSI.getIntervalsKeys(SemanticIndexCache.CLASS_TYPE)) {
 				for (Interval it : cacheSI.getClassIntervals(concept)) {
 					stm.setString(1, concept.toString());
@@ -1495,7 +1505,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 			/* Inserting emptyness index metadata */
 
-			stm = conn.prepareStatement("INSERT INTO " + emptyness_index_table + " (TABLEID, IDX, TYPE1, TYPE2) VALUES (?, ?, ?, ?)");
+			stm = conn.prepareStatement(emptinessIndexTable.insertCommand);
 			for (SemanticIndexRecord record : nonEmptyEntityRecord) {
 				stm.setInt(1, record.getTable());
 				stm.setInt(2, record.getIndex());
@@ -1562,9 +1572,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		st.addBatch(dropindexrole2);
 		st.addBatch(dropindexrole3);
 
-		st.addBatch("DROP INDEX " + attribute_index_literal + "1");	
-		st.addBatch("DROP INDEX " + attribute_index_literal + "2");	
-		st.addBatch("DROP INDEX " + attribute_index_literal + "3");	
+		for (String s : attributeTableLiteral.dropIndexCommands)
+			st.addBatch(s);	
 		
 		
 		for (Entry<COL_TYPE, String> entry : attribute_index.entrySet()) {
@@ -1587,9 +1596,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		Statement st = conn.createStatement();
 		boolean exists = true;
 		try {
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", class_table));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", role_table));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table_literal));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", classTable.tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", roleTable.tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTableLiteral.tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.STRING)));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.INTEGER)));
             st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.LONG)));
