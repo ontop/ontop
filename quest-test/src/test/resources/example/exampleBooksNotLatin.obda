@@ -8,10 +8,10 @@ quest:		http://obda.org/quest#
 
 [SourceDeclaration]
 sourceUri	Books
-connectionUrl	jdbc:h2:tcp://localhost/books;DATABASE_TO_UPPER=FALSE
-username	sa
-password	
-driverClass	org.h2.Driver
+connectionUrl	jdbc:mysql://10.7.20.39/books
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	cl_Authors

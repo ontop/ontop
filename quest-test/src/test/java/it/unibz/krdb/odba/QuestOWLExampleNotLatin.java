@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.reformulation.owlapi3;
+package it.unibz.krdb.odba;
 
 /*
  * #%L
@@ -32,7 +32,9 @@ import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import java.io.File;
 
 public class QuestOWLExampleNotLatin {
@@ -46,9 +48,10 @@ public class QuestOWLExampleNotLatin {
 	 * Test with not latin Character
 	 * 
 	 */
-	final String owlfile = "src/test/resources/exampleBooks/exampleBooksNotLatin.owl";
-	final String obdafile = "src/test/resources/exampleBooks/exampleBooksNotLatin.obda";
+	final String owlfile = "src/test/resources/example/exampleBooksNotLatin.owl";
+	final String obdafile = "src/test/resources/example/exampleBooksNotLatin.obda";
 
+    @Test
 	public void runQuery() throws Exception {
 
 		/*
