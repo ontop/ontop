@@ -57,9 +57,9 @@ public class QuestDBStatement implements OBDAStatement {
 
 	private final QuestStatement st;
 
-	private Logger log = LoggerFactory.getLogger(QuestDBStatement.class);
+	private final Logger log = LoggerFactory.getLogger(QuestDBStatement.class);
 
-	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+	private transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 
 	protected QuestDBStatement(QuestStatement st) {
 		this.st = st;

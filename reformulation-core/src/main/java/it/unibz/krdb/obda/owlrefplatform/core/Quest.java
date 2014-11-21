@@ -157,7 +157,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * General flags and fields
 	 */
 
-	private Logger log = LoggerFactory.getLogger(Quest.class);
+	private final Logger log = LoggerFactory.getLogger(Quest.class);
 
 	/***
 	 * Configuration
@@ -202,17 +202,17 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * are used by the statements
 	 */
 
-	Map<String, String> querycache = new ConcurrentHashMap<String, String>();
+	private final Map<String, String> querycache = new ConcurrentHashMap<String, String>();
 
-	Map<String, List<String>> signaturecache = new ConcurrentHashMap<String, List<String>>();
+	private final Map<String, List<String>> signaturecache = new ConcurrentHashMap<String, List<String>>();
 
-	Map<String, ParsedQuery> sesameQueryCache = new ConcurrentHashMap<String, ParsedQuery>();
+	private final Map<String, ParsedQuery> sesameQueryCache = new ConcurrentHashMap<String, ParsedQuery>();
 
-	Map<String, Boolean> isbooleancache = new ConcurrentHashMap<String, Boolean>();
+	private final Map<String, Boolean> isbooleancache = new ConcurrentHashMap<String, Boolean>();
 
-	Map<String, Boolean> isconstructcache = new ConcurrentHashMap<String, Boolean>();
+	private final Map<String, Boolean> isconstructcache = new ConcurrentHashMap<String, Boolean>();
 
-	Map<String, Boolean> isdescribecache = new ConcurrentHashMap<String, Boolean>();
+	private final Map<String, Boolean> isdescribecache = new ConcurrentHashMap<String, Boolean>();
 
 	private DBMetadata metadata;
 
@@ -552,11 +552,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				// setup connection pool
 				setupConnectionPool();
 
-				dataRepository = new RDBMSSIRepositoryManager(/*reformulationVocabulary*/);
+				dataRepository = new RDBMSSIRepositoryManager(reformulationReasoner);
 				dataRepository.addRepositoryChangedListener(this);
 
-				dataRepository.setTBox(reformulationReasoner);
-				
 				if (inmemory) {
 
 					/*

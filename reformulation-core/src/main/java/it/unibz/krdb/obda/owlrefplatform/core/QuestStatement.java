@@ -49,7 +49,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.renderer.DatalogProgramRenderer;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -76,7 +75,7 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestStatement implements OBDAStatement {
 
-	private SQLQueryGenerator querygenerator = null;
+	private final SQLQueryGenerator querygenerator;
 
 	private boolean canceled = false;
 	
@@ -86,13 +85,11 @@ public class QuestStatement implements OBDAStatement {
 
 	private Statement sqlstatement;
 
-	private QuestConnection conn;
+	private final QuestConnection conn;
 
-	public Quest questInstance;
+	public final Quest questInstance;
 
-	private static Logger log = LoggerFactory.getLogger(QuestStatement.class);
-
-	Thread runningThread = null;
+	private static final Logger log = LoggerFactory.getLogger(QuestStatement.class);
 
 	private QueryExecutionThread executionthread;
 
@@ -100,31 +97,21 @@ public class QuestStatement implements OBDAStatement {
 
 	private DatalogProgram programAfterUnfolding;
 
-	final Map<String, String> querycache;
+	private final Map<String, String> querycache;
 
-	final Map<String, List<String>> signaturecache;
+	private final Map<String, List<String>> signaturecache;
 
-	//private Map<String, Query> jenaQueryCache;
+	private final Map<String, ParsedQuery> sesameQueryCache;
+
+	private final SparqlAlgebraToDatalogTranslator translator;
 	
-	private Map<String, ParsedQuery> sesameQueryCache;
-
-	final Map<String, Boolean> isbooleancache;
-
-	final Map<String, Boolean> isconstructcache;
-
-	final Map<String, Boolean> isdescribecache;
-
-	final SparqlAlgebraToDatalogTranslator translator;
-	
-	SesameConstructTemplate templ = null;
+	private SesameConstructTemplate templ;
 
 	/*
 	 * For benchmark purpose
 	 */
 	private long queryProcessingTime = 0;
-
 	private long rewritingTime = 0;
-
 	private long unfoldingTime = 0;
 
 	public QuestStatement(Quest questinstance, QuestConnection conn, Statement st) {
@@ -134,14 +121,9 @@ public class QuestStatement implements OBDAStatement {
 		this.translator = new SparqlAlgebraToDatalogTranslator(this.questInstance.getUriTemplateMatcher());
 		this.querycache = questinstance.getSQLCache();
 		this.signaturecache = questinstance.getSignatureCache();
-		//this.jenaQueryCache = questinstance.getJenaQueryCache();
 		this.sesameQueryCache = questinstance.getSesameQueryCache();
-		this.isbooleancache = questinstance.getIsBooleanCache();
-		this.isconstructcache = questinstance.getIsConstructCache();
-		this.isdescribecache = questinstance.getIsDescribeCache();
 
 		this.conn = conn;
-		// this.unfoldingmechanism = questinstance.unfolder;
 		this.querygenerator = questinstance.datasourceQueryGenerator;
 
 		this.sqlstatement = st;
@@ -166,7 +148,7 @@ public class QuestStatement implements OBDAStatement {
 			// this.query = QueryFactory.create(strquery);
 		}
 
-		// TODO: repace the magic number by an enum
+		// TODO: replace the magic number by an enum
 		public void setQueryType(int type) {
 			switch (type) {// encoding of query type to from numbers
 			case 1:
@@ -222,9 +204,9 @@ public class QuestStatement implements OBDAStatement {
 				/*
 				 * Obtaineing the query from the cache
 				 */
-				String sql = getSqlString(strquery);
+				String sql = querycache.get(strquery);
 				List<String> signature = signaturecache.get(strquery);
-				ParsedQuery query = sesameQueryCache.get(strquery);
+				//ParsedQuery query = sesameQueryCache.get(strquery);
 
 				log.debug("Executing the SQL query and get the result...");
 				if (sql.equals("") && !isBoolean) {
@@ -879,15 +861,16 @@ public class QuestStatement implements OBDAStatement {
 
 			result = questInstance.getSemanticIndexRepository().insertData(conn.conn, newData, commit, batch);
 		} else {
-			try {
+			//try {
 				// File temporalFile = new File("quest-copy.tmp");
 				// FileOutputStream os = new FileOutputStream(temporalFile);
-				result = (int) questInstance.getSemanticIndexRepository().loadWithFile(conn.conn, newData);
+				// ROMAN: this called DOES NOTHING
+				// result = (int) questInstance.getSemanticIndexRepository().loadWithFile(conn.conn, newData);
 				// os.close();
 
-			} catch (IOException e) {
-				log.error(e.getMessage());
-			}
+			//} catch (IOException e) {
+			//	log.error(e.getMessage());
+			//}
 		}
 
 		try {
@@ -1019,10 +1002,6 @@ public class QuestStatement implements OBDAStatement {
 			}
 		}
 		return (toReturn == Integer.MIN_VALUE) ? 0 : toReturn;
-	}
-
-	private String getSqlString(String sparqlString) {
-		return querycache.get(sparqlString);
 	}
 
 	private static int getBodySize(List<? extends Function> atoms) {
