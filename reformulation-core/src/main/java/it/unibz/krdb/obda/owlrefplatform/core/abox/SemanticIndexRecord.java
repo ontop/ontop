@@ -49,7 +49,7 @@ public class SemanticIndexRecord {
 	private final OBJType type2;
 	private final SITable table;
 
-	public SemanticIndexRecord(SITable table, OBJType t1, OBJType t2, int idx) {
+	private SemanticIndexRecord(SITable table, OBJType t1, OBJType t2, int idx) {
 		this.table = table;
 		this.type1 = t1;
 		this.type2 = t2;
@@ -61,17 +61,16 @@ public class SemanticIndexRecord {
 		return idx;
 	}
 	
-	// ALL THREE ONLY AS ORDINALS
-	public OBJType getType1() {
-		return type1;
+	public int getType1() {
+		return type1.ordinal();
 	}
 
-	public OBJType getType2() {
-		return type2;
+	public int getType2() {
+		return type2.ordinal();
 	}
 	
-	public SITable getTable() {
-		return table;
+	public int getTable() {
+		return table.ordinal();
 	}
 	
 	public static SemanticIndexRecord createSIRecord(int table, int t1, int t2, int idx) {

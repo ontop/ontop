@@ -467,6 +467,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				try {
 					addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, ca);
 					index = cacheSI.getIndex(ca.getConcept()); // WOW ! NullPointerException here
+					// Register non emptiness
+					SemanticIndexRecord record = SemanticIndexRecord.getRecord(ax, index);
+					nonEmptyEntityRecord.add(record);
 				}
 				catch (Exception e) {
 					Predicate predicate = ca.getConcept().getPredicate();
@@ -481,6 +484,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				try {
 					addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, opa);	
 					index = cacheSI.getIndex(opa.getProperty());
+					// Register non emptiness
+					SemanticIndexRecord record = SemanticIndexRecord.getRecord(ax, index);
+					nonEmptyEntityRecord.add(record);
 				}
 				catch (Exception e) {
 					Predicate predicate = opa.getProperty().getPredicate();
@@ -495,6 +501,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				try {
 					addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, dpa);										
 					index = cacheSI.getIndex(dpa.getProperty());
+					// Register non emptiness
+					SemanticIndexRecord record = SemanticIndexRecord.getRecord(ax, index);
+					nonEmptyEntityRecord.add(record);
 				}
 				catch (Exception e) {
 					Predicate predicate = dpa.getProperty().getPredicate();
@@ -504,9 +513,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					failures.put(predicate, counter + 1);					
 				}
 			}
-			// Register non emptiness
-			SemanticIndexRecord record = SemanticIndexRecord.getRecord(ax, index);
-			nonEmptyEntityRecord.add(record);
 
 			// Check if the batch count is already in the batch limit
 			if (batchCount == batchLimit) {
@@ -1530,7 +1536,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		for (Interval interval : intervals) {
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
 
-				SemanticIndexRecord record = new SemanticIndexRecord(table, t1, t2, i);
+				SemanticIndexRecord record = SemanticIndexRecord.createSIRecord(table.ordinal(), t1.ordinal(), t2.ordinal(), i);
 				empty = empty && !nonEmptyEntityRecord.contains(record);
 				if (!empty)
 					break;
@@ -1763,10 +1769,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 			stm = conn.prepareStatement("INSERT INTO " + emptyness_index_table + " (TABLEID, IDX, TYPE1, TYPE2) VALUES (?, ?, ?, ?)");
 			for (SemanticIndexRecord record : nonEmptyEntityRecord) {
-				stm.setInt(1, record.getTable().ordinal());
+				stm.setInt(1, record.getTable());
 				stm.setInt(2, record.getIndex());
-				stm.setInt(3, record.getType1().ordinal());
-				stm.setInt(4, record.getType2().ordinal());
+				stm.setInt(3, record.getType1());
+				stm.setInt(4, record.getType2());
 				stm.addBatch();
 			}
 			stm.executeBatch();
