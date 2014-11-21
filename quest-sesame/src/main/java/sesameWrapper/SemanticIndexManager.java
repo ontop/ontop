@@ -81,11 +81,15 @@ public class SemanticIndexManager {
 
 	public void setupRepository(boolean drop) throws SQLException {
 
-		dataRepository.createDBSchema(conn, drop);
+		if (drop) {
+			log.debug("Droping existing tables");
+			dataRepository.dropDBSchema(conn);
+		}
+		
+		dataRepository.createDBSchema(conn);
 		dataRepository.insertMetadata(conn);
 
 		log.debug("Semantic Index repository has been setup.");
-
 	}
 	
 	public void dropRepository() throws SQLException {

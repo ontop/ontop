@@ -852,15 +852,15 @@ public class QuestStatement implements OBDAStatement {
 	 *            new index will be created.
 	 * @throws SQLException
 	 */
-	public int insertData(Iterator<Assertion> data, boolean useFile, int commit, int batch) throws SQLException {
+	public int insertData(Iterator<Assertion> data,  int commit, int batch) throws SQLException {
 		int result = -1;
 
 		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(data, questInstance.getReasoner());
 
-		if (!useFile) {
+//		if (!useFile) {
 
 			result = questInstance.getSemanticIndexRepository().insertData(conn.conn, newData, commit, batch);
-		} else {
+//		} else {
 			//try {
 				// File temporalFile = new File("quest-copy.tmp");
 				// FileOutputStream os = new FileOutputStream(temporalFile);
@@ -871,7 +871,7 @@ public class QuestStatement implements OBDAStatement {
 			//} catch (IOException e) {
 			//	log.error(e.getMessage());
 			//}
-		}
+//		}
 
 		try {
 			questInstance.updateSemanticIndexMappings();
@@ -884,15 +884,6 @@ public class QuestStatement implements OBDAStatement {
 		return result;
 	}
 
-	/***
-	 * As before, but using recreateIndexes = false.
-	 * 
-	 * @param data
-	 * @throws SQLException
-	 */
-	public int insertData(Iterator<Assertion> data, int commit, int batch) throws SQLException {
-		return insertData(data, false, commit, batch);
-	}
 
 	public void createIndexes() throws Exception {
 		questInstance.getSemanticIndexRepository().createIndexes(conn.conn);
@@ -921,8 +912,8 @@ public class QuestStatement implements OBDAStatement {
 	 * @throws SQLException
 	 */
 	public void createDB() throws SQLException {
-		questInstance.getSemanticIndexRepository().createDBSchema(conn.conn, false);
-		questInstance.getSemanticIndexRepository().insertMetadata(conn.conn);
+		questInstance.getSemanticIndexRepository().createDBSchema(conn.conn);
+		questInstance.getSemanticIndexRepository().insertMetadata(conn.conn); 
 	}
 
 	public void analyze() throws Exception {

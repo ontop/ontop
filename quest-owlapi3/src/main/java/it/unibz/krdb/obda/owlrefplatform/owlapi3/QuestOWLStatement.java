@@ -80,10 +80,10 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  */
 public class QuestOWLStatement {
 
-	private QuestStatement st;
-	private QuestOWLConnection conn;
+	private final QuestStatement st;
+	private final QuestOWLConnection conn;
 	
-	public QuestOWLStatement(QuestStatement st, QuestOWLConnection conn) {
+	protected  QuestOWLStatement(QuestStatement st, QuestOWLConnection conn) {
 		this.conn = conn;
 		this.st = st;
 	}
@@ -150,11 +150,6 @@ public class QuestOWLStatement {
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
 		}
-	}
-
-	public int insertData(File owlFile, int commitSize, int batchsize) throws Exception {
-		int ins = insertData(owlFile, commitSize, batchsize, null);
-		return ins;
 	}
 
 	public int insertData(File owlFile, int commitSize, int batchsize, String baseURI) throws Exception {

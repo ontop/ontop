@@ -566,7 +566,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					/* Creating the ABox repository */
 
 					if (!dataRepository.isDBSchemaDefined(localConnection)) {
-						dataRepository.createDBSchema(localConnection, false);
+						dataRepository.createDBSchema(localConnection);
 						dataRepository.insertMetadata(localConnection);
 					}
 

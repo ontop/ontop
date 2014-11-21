@@ -37,15 +37,10 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.DataPropertyRangeExpression;
-import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.OBJType;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
@@ -285,8 +280,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-
+	
 	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
 	
 	private final TBoxReasoner reasonerDag;
@@ -314,25 +308,17 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 
 
-	public void createDBSchema(Connection conn, boolean dropExisting) throws SQLException {
-
-		log.debug("Creating data tables");
-
-		Statement st = conn.createStatement();
-
-		if (dropExisting) {
-			try {
-				log.debug("Droping existing tables");
-				dropDBSchema(conn);
-			} catch (SQLException e) {
-				log.debug(e.getMessage(), e);
-			}
-		}
+	public void createDBSchema(Connection conn) throws SQLException {
 
 		if (isDBSchemaDefined(conn)) {
 			log.debug("Schema already exists. Skipping creation");
 			return;
 		}
+		
+		log.debug("Creating data tables");
+
+		Statement st = conn.createStatement();
+
 		st.addBatch(create_uri_id);
 		
 		st.addBatch(create_idx);
@@ -461,7 +447,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 		
 		// For counting the insertion
-		InsertionMonitor monitor = new InsertionMonitor();
+		int success = 0;
+		Map<Predicate, Integer> failures = new HashMap<Predicate, Integer>();
 
 		int batchCount = 0;
 		int commitCount = 0;
@@ -469,41 +456,57 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		while (data.hasNext()) {
 			Assertion ax = data.next();
 
-			try {
+			// log.debug("Inserting statement: {}", ax);
+			batchCount++;
+			commitCount++;
 
-				// log.debug("Inserting statement: {}", ax);
-				batchCount += 1;
-				commitCount += 1;
 
-				addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, monitor, ax);
-
-				/*
-				 * Register non emptyness
-				 */
-				int index = 0;
-				if (ax instanceof ClassAssertion) {
-					index = cacheSI.getIndex(((ClassAssertion) ax).getConcept());
-				} 
-				else if (ax instanceof ObjectPropertyAssertion) {
-					index = cacheSI.getIndex(((ObjectPropertyAssertion)ax).getProperty());
+			int index = 0;
+			if (ax instanceof ClassAssertion) {
+				ClassAssertion ca = (ClassAssertion) ax; 
+				try {
+					addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, ca);
 				}
-				else /* (ax instanceof DataPropertyAssertion) */ {
-					index = cacheSI.getIndex(((DataPropertyAssertion)ax).getProperty());
+				catch (Exception e) {
+					Predicate predicate = ca.getConcept().getPredicate();
+					Integer counter = failures.get(predicate);
+					if (counter == null) 
+						counter = 0;
+					failures.put(predicate, counter + 1);					
 				}
-				SemanticIndexRecord record = SemanticIndexRecord.getRecord(ax, index);
-				nonEmptyEntityRecord.add(record);
-
-			} catch (Exception e) {
-				if (ax instanceof ClassAssertion) {
-					monitor.fail(((ClassAssertion)ax).getConcept().getPredicate());
-				} 
-				else if (ax instanceof ObjectPropertyAssertion) {
-					monitor.fail(((ObjectPropertyAssertion)ax).getProperty().getPredicate());
+				index = cacheSI.getIndex(ca.getConcept());
+			} 
+			else if (ax instanceof ObjectPropertyAssertion) {
+				ObjectPropertyAssertion opa = (ObjectPropertyAssertion)ax;
+				try {
+					addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, opa);	
 				}
-				else /* if (ax instanceof DataPropertyAssertion)*/ {
-					monitor.fail(((DataPropertyAssertion)ax).getProperty().getPredicate());
+				catch (Exception e) {
+					Predicate predicate = opa.getProperty().getPredicate();
+					Integer counter = failures.get(predicate);
+					if (counter == null) 
+						counter = 0;
+					failures.put(predicate, counter + 1);					
 				}
+				index = cacheSI.getIndex(opa.getProperty());
 			}
+			else /* (ax instanceof DataPropertyAssertion) */ {
+				DataPropertyAssertion dpa = (DataPropertyAssertion)ax;
+				try {
+					addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, dpa);										
+				}
+				catch (Exception e) {
+					Predicate predicate = dpa.getProperty().getPredicate();
+					Integer counter = failures.get(predicate);
+					if (counter == null) 
+						counter = 0;
+					failures.put(predicate, counter + 1);					
+				}
+				index = cacheSI.getIndex(dpa.getProperty());
+			}
+			// Register non emptiness
+			SemanticIndexRecord record = SemanticIndexRecord.getRecord(ax, index);
+			nonEmptyEntityRecord.add(record);
 
 			// Check if the batch count is already in the batch limit
 			if (batchCount == batchLimit) {
@@ -546,11 +549,20 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		conn.setAutoCommit(oldAutoCommit);
 
 		// Print the monitoring log
-		monitor.printLog();
+		log.debug("Total successful insertions: " + success + ".");
+		int totalFailures = 0;
+		for (Predicate predicate : failures.keySet()) {
+			int failure = failures.get(predicate);
+			log.warn("Failed to insert data for predicate {} ({} tuples).", predicate, failure);
+			totalFailures += failure;
+		}
+		if (totalFailures > 0) {
+			log.warn("Total failed insertions: " + totalFailures + ". (REASON: datatype mismatch between the ontology and database).");
+		}
 
 		fireRepositoryChanged();
 
-		return monitor.getSuccessCount();
+		return success;
 	}
 
 	private void fireRepositoryChanged() {
@@ -560,229 +572,208 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement classStm, PreparedStatement roleStm, PreparedStatement attributeLiteralStm,
-			Map<COL_TYPE, PreparedStatement> attributeStatement,
-			InsertionMonitor monitor, Assertion ax) throws SQLException {
-		int uri_id = 0;
-		int uri2_id = 0;
-//		boolean newUri = false;
-		if (ax instanceof ObjectPropertyAssertion) {
-			// Get the data property assertion
-			ObjectPropertyAssertion attributeAssertion = (ObjectPropertyAssertion) ax;
-			ObjectPropertyExpression prop = attributeAssertion.getProperty();
+			Map<COL_TYPE, PreparedStatement> attributeStatement, ObjectPropertyAssertion ax) throws SQLException {
 
-			ObjectConstant object = attributeAssertion.getObject();
+		ObjectPropertyExpression prop = ax.getProperty();
 
-			// Construct the database INSERT statements
-			ObjectConstant subject = attributeAssertion.getSubject();
+		ObjectConstant object = ax.getObject();
 
-			String uri = subject.getName();
-			 uri_id = uriMap.idOfURI(uri);
-				uriidStm.setInt(1, uri_id);
-				uriidStm.setString(2, uri);
-				uriidStm.addBatch();
-			
-			boolean c1isBNode = subject instanceof BNode;
+		// Construct the database INSERT statements
+		ObjectConstant subject = ax.getSubject();
 
-			int idx = cacheSI.getIndex(prop);
+		String uri = subject.getName();
+		int uri_id = uriMap.idOfURI(uri);
+		uriidStm.setInt(1, uri_id);
+		uriidStm.setString(2, uri);
+		uriidStm.addBatch();
+		
+		boolean c1isBNode = subject instanceof BNode;
 
-				// Get the object property assertion
-				String uri2 = object.getName();
-				boolean c2isBNode = object instanceof BNode;
+		int idx = cacheSI.getIndex(prop);
 
-				if (isInverse(prop)) {
+		// Get the object property assertion
+		String uri2 = object.getName();
+		boolean c2isBNode = object instanceof BNode;
 
-					/* Swapping values */
+		if (isInverse(prop)) {
 
-					String tmp = uri;
-					uri = uri2;
-					uri2 = tmp;
+			/* Swapping values */
 
-					boolean tmpb = c1isBNode;
-					c1isBNode = c2isBNode;
-					c2isBNode = tmpb;
-				}
+			String tmp = uri;
+			uri = uri2;
+			uri2 = tmp;
 
-				// Construct the database INSERT statement
-				// replace URIs with their ids
-				
-				uri_id = uriMap.idOfURI(uri);
-				uriidStm.setInt(1, uri_id);
-				uriidStm.setString(2, uri);
-				uriidStm.addBatch();
+			boolean tmpb = c1isBNode;
+			c1isBNode = c2isBNode;
+			c2isBNode = tmpb;
+		}
 
-				uri2_id = uriMap.idOfURI(uri2);
-				uriidStm.setInt(1, uri2_id);
-				uriidStm.setString(2, uri2);
-				uriidStm.addBatch();
-				
-				//roleStm.setString(1, uri);
-				//roleStm.setString(2, uri2);
-				roleStm.setInt(1, uri_id);
-				roleStm.setInt(2, uri2_id);
-				
-				
-				roleStm.setInt(3, idx);
-				roleStm.setBoolean(4, c1isBNode);
-				roleStm.setBoolean(5, c2isBNode);
-				roleStm.addBatch();
+		// Construct the database INSERT statement
+		// replace URIs with their ids
+		
+		uri_id = uriMap.idOfURI(uri);
+		uriidStm.setInt(1, uri_id);
+		uriidStm.setString(2, uri);
+		uriidStm.addBatch();
 
-				// log.debug("role");
+		int uri2_id = uriMap.idOfURI(uri2);
+		uriidStm.setInt(1, uri2_id);
+		uriidStm.setString(2, uri2);
+		uriidStm.addBatch();
+		
+		roleStm.setInt(1, uri_id);
+		roleStm.setInt(2, uri2_id);		
+		roleStm.setInt(3, idx);
+		roleStm.setBoolean(4, c1isBNode);
+		roleStm.setBoolean(5, c2isBNode);
+		roleStm.addBatch();
 
-				// log.debug("inserted: {} {}", uri, uri2);
-				// log.debug("inserted: {} property", idx);
+		// log.debug("role");
 
-			monitor.success(); // advanced the success counter
+		// log.debug("inserted: {} {}", uri, uri2);
+		// log.debug("inserted: {} property", idx);
+	} 
 
-		} 
-		else if (ax instanceof DataPropertyAssertion) {
-			// Get the data property assertion
-			DataPropertyAssertion attributeAssertion = (DataPropertyAssertion) ax;
-			DataPropertyExpression prop = attributeAssertion.getProperty();
+	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement classStm, PreparedStatement roleStm, PreparedStatement attributeLiteralStm,
+			Map<COL_TYPE, PreparedStatement> attributeStatement, DataPropertyAssertion ax) throws SQLException {
+		
 
-			ValueConstant object = attributeAssertion.getValue();
-			Predicate.COL_TYPE attributeType = object.getType();
+		// Construct the database INSERT statements
+		ObjectConstant subject = ax.getSubject();
+		String uri = subject.getName();
+		int uri_id = uriMap.idOfURI(uri);
+		uriidStm.setInt(1, uri_id);
+		uriidStm.setString(2, uri);
+		uriidStm.addBatch();
+		
+		boolean c1isBNode = subject instanceof BNode;
 
-			// Construct the database INSERT statements
-			ObjectConstant subject = attributeAssertion.getSubject();
+		DataPropertyExpression prop = ax.getProperty();
+		int idx = cacheSI.getIndex(prop);
 
-			String uri = subject.getName();
-			 uri_id = uriMap.idOfURI(uri);
-				uriidStm.setInt(1, uri_id);
-				uriidStm.setString(2, uri);
-				uriidStm.addBatch();
-			
-			boolean c1isBNode = subject instanceof BNode;
+		// The insertion is based on the datatype from TBox
+		ValueConstant object = ax.getValue();
+		Predicate.COL_TYPE attributeType = object.getType();
+		String value = object.getValue();
+		String lang = object.getLanguage();
 
-			int idx = cacheSI.getIndex(prop);
-
-			// The insertion is based on the datatype from TBox
-			String value = object.getValue();
-			String lang = object.getLanguage();
-
-			switch (attributeType) {
-			case BNODE:
-			case OBJECT:
-				throw new RuntimeException("Data property cannot have a URI as object");
-			case LITERAL:
-			case LITERAL_LANG:
-				setInputStatement(attributeLiteralStm, uri_id, value, lang, idx, c1isBNode);
-				// log.debug("literal");
-				break;
-			case STRING:
-				setInputStatement(attributeStatement.get(attributeType), uri_id, value, idx, c1isBNode);
-				// log.debug("string");
-				break;
-            case INTEGER:
-                if (value.charAt(0) == '+')
-                    value = value.substring(1, value.length());
-                setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-                // log.debug("Integer");
-                break;
-            case INT:
-                if (value.charAt(0) == '+')
-                    value = value.substring(1, value.length());
-                setInputStatement(attributeStatement.get(attributeType), uri_id, Integer.parseInt(value), idx, c1isBNode);
-                // log.debug("Int");
-                break;
-            case UNSIGNED_INT:
-                setInputStatement(attributeStatement.get(attributeType), uri_id, Integer.parseInt(value), idx, c1isBNode);
-                // log.debug("Int");
-                break;
-            case NEGATIVE_INTEGER:
-                setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-                // log.debug("Integer");
-                break;
-            case POSITIVE_INTEGER:
-                if (value.charAt(0) == '+')
-                    value = value.substring(1, value.length());
-                setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-                // log.debug("Integer");
-                break;
-            case NON_NEGATIVE_INTEGER:
-                if (value.charAt(0) == '+')
-                    value = value.substring(1, value.length());
-                setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-                // log.debug("Integer");
-                break;
-            case NON_POSITIVE_INTEGER:
-                    value = value.substring(1, value.length());
-                setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-                // log.debug("Integer");
-                break;
-            case FLOAT:
-                setInputStatement(attributeStatement.get(attributeType), uri_id, Float.parseFloat(value), idx, c1isBNode);
-                // log.debug("Float");
-                break;
-            case LONG:
-				if (value.charAt(0) == '+')
-					value = value.substring(1, value.length());
-				setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-				// log.debug("Long");
-				break;
-			case DECIMAL:
-				setInputStatement(attributeStatement.get(attributeType), uri_id, parseBigDecimal(value), idx, c1isBNode);
-				// log.debug("BigDecimal");
-				break;
-			case DOUBLE:
-				setInputStatement(attributeStatement.get(attributeType), uri_id, Double.parseDouble(value), idx, c1isBNode);
-				// log.debug("Double");
-				break;
-			case DATETIME:
-				setInputStatement(attributeStatement.get(attributeType), uri_id, parseTimestamp(value), idx, c1isBNode);
-				// log.debug("Date");
-				break;
-			case BOOLEAN:
-				value = getBooleanString(value); // PostgreSQL
-													// abbreviates the
-													// boolean value to
-													// 't' and 'f'
-				setInputStatement(attributeStatement.get(attributeType), uri_id, Boolean.parseBoolean(value), idx, c1isBNode);
-				// log.debug("boolean");
-				break;
-			case UNSUPPORTED:
-			default:
-				log.warn("Ignoring assertion: {}", ax);
-			}
-			monitor.success(); // advanced the success counter
-
-		} 
-		else if (ax instanceof ClassAssertion) {
-			// Get the class assertion
-			ClassAssertion classAssertion = (ClassAssertion) ax;
-			OClass concept = classAssertion.getConcept();
-
-			// Construct the database INSERT statements
-			ObjectConstant c1 = classAssertion.getIndividual();
-
-			String uri;
-
-			boolean c1isBNode = c1 instanceof BNode;
-
-			if (c1isBNode)
-				uri = ((BNode) c1).getName();
-			else
-				uri = ((URIConstant) c1).getURI().toString();
-
-			// Construct the database INSERT statement
-			uri_id = uriMap.idOfURI(uri);
-			uriidStm.setInt(1, uri_id);
-			uriidStm.setString(2, uri);
-			uriidStm.addBatch();			
-
-			classStm.setInt(1, uri_id);
-			int conceptIndex = cacheSI.getIndex(concept);
-			classStm.setInt(2, conceptIndex);
-			classStm.setBoolean(3, c1isBNode);
-			classStm.addBatch();
-
-			// log.debug("inserted: {} {} class", uri, conceptIndex);
-
-			monitor.success(); // advanced the success counter
-
-			// log.debug("Class");
+		switch (attributeType) {
+		case BNODE:
+		case OBJECT:
+			throw new RuntimeException("Data property cannot have a URI as object");
+		case LITERAL:
+		case LITERAL_LANG:
+			setInputStatement(attributeLiteralStm, uri_id, value, lang, idx, c1isBNode);
+			// log.debug("literal");
+			break;
+		case STRING:
+			setInputStatement(attributeStatement.get(attributeType), uri_id, value, idx, c1isBNode);
+			// log.debug("string");
+			break;
+        case INTEGER:
+            if (value.charAt(0) == '+')
+                value = value.substring(1, value.length());
+            setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
+            // log.debug("Integer");
+            break;
+        case INT:
+            if (value.charAt(0) == '+')
+                value = value.substring(1, value.length());
+            setInputStatement(attributeStatement.get(attributeType), uri_id, Integer.parseInt(value), idx, c1isBNode);
+            // log.debug("Int");
+            break;
+        case UNSIGNED_INT:
+            setInputStatement(attributeStatement.get(attributeType), uri_id, Integer.parseInt(value), idx, c1isBNode);
+            // log.debug("Int");
+            break;
+        case NEGATIVE_INTEGER:
+            setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
+            // log.debug("Integer");
+            break;
+        case POSITIVE_INTEGER:
+            if (value.charAt(0) == '+')
+                value = value.substring(1, value.length());
+            setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
+            // log.debug("Integer");
+            break;
+        case NON_NEGATIVE_INTEGER:
+            if (value.charAt(0) == '+')
+                value = value.substring(1, value.length());
+            setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
+            // log.debug("Integer");
+            break;
+        case NON_POSITIVE_INTEGER:
+                value = value.substring(1, value.length());
+            setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
+            // log.debug("Integer");
+            break;
+        case FLOAT:
+            setInputStatement(attributeStatement.get(attributeType), uri_id, Float.parseFloat(value), idx, c1isBNode);
+            // log.debug("Float");
+            break;
+        case LONG:
+			if (value.charAt(0) == '+')
+				value = value.substring(1, value.length());
+			setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
+			// log.debug("Long");
+			break;
+		case DECIMAL:
+			setInputStatement(attributeStatement.get(attributeType), uri_id, parseBigDecimal(value), idx, c1isBNode);
+			// log.debug("BigDecimal");
+			break;
+		case DOUBLE:
+			setInputStatement(attributeStatement.get(attributeType), uri_id, Double.parseDouble(value), idx, c1isBNode);
+			// log.debug("Double");
+			break;
+		case DATETIME:
+			setInputStatement(attributeStatement.get(attributeType), uri_id, parseTimestamp(value), idx, c1isBNode);
+			// log.debug("Date");
+			break;
+		case BOOLEAN:
+			value = getBooleanString(value); // PostgreSQL
+												// abbreviates the
+												// boolean value to
+												// 't' and 'f'
+			setInputStatement(attributeStatement.get(attributeType), uri_id, Boolean.parseBoolean(value), idx, c1isBNode);
+			// log.debug("boolean");
+			break;
+		case UNSUPPORTED:
+		default:
+			log.warn("Ignoring assertion: {}", ax);
 		}
 	}
+	
+	
+	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement classStm, PreparedStatement roleStm, PreparedStatement attributeLiteralStm,
+			Map<COL_TYPE, PreparedStatement> attributeStatement, ClassAssertion ax) throws SQLException {
 
+		// Construct the database INSERT statements
+		ObjectConstant c1 = ax.getIndividual();
+
+		boolean c1isBNode = c1 instanceof BNode;
+
+		String uri;
+		if (c1isBNode)
+			uri = ((BNode) c1).getName();
+		else
+			uri = ((URIConstant) c1).getURI().toString();
+
+		// Construct the database INSERT statement
+		int uri_id = uriMap.idOfURI(uri);
+		uriidStm.setInt(1, uri_id);
+		uriidStm.setString(2, uri);
+		uriidStm.addBatch();			
+
+		OClass concept = ax.getConcept();
+		int conceptIndex = cacheSI.getIndex(concept);
+	
+		classStm.setInt(1, uri_id);
+		classStm.setInt(2, conceptIndex);
+		classStm.setBoolean(3, c1isBNode);
+		classStm.addBatch();
+
+		// log.debug("inserted: {} {} class", uri, conceptIndex);
+	}
 
 	private void executeBatch(PreparedStatement statement) throws SQLException {
 		statement.executeBatch();
@@ -911,6 +902,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	// Attribute datatype from TBox
+	/*
 	private COL_TYPE getAttributeType(Predicate attribute) {
 		DataPropertyExpression prop = ofac.createDataProperty(attribute.getName());
 		DataPropertyRangeExpression role = prop.getRange(); 
@@ -930,6 +922,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 		return COL_TYPE.LITERAL;
 	}
+	*/
 
 	public void loadMetadata(Connection conn) throws SQLException {
 		log.debug("Loading semantic index metadata from the database *");
@@ -1888,37 +1881,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	//
 	class InsertionMonitor {
 
-		private int success = 0;
-		private Map<Predicate, Integer> failures = new HashMap<Predicate, Integer>();
 
-		void success() {
-			success++;
-		}
 
-		void fail(Predicate predicate) {
-			Integer counter = failures.get(predicate);
-			if (counter == null) {
-				counter = 0;
-			}
-			failures.put(predicate, counter + 1);
-		}
 
-		int getSuccessCount() {
-			return success;
-		}
-
-		public void printLog() {
-			log.debug("Total successful insertions: " + success + ".");
-			int totalFailures = 0;
-			for (Predicate predicate : failures.keySet()) {
-				int failure = failures.get(predicate);
-				log.warn("Failed to insert data for predicate {} ({} tuples).", predicate, failure);
-				totalFailures += failure;
-			}
-			if (totalFailures > 0) {
-				log.warn("Total failed insertions: " + totalFailures + ". (REASON: datatype mismatch between the ontology and database).");
-			}
-		}
 	}
 
 	
