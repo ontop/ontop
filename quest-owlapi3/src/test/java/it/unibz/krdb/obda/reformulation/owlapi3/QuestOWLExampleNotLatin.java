@@ -89,9 +89,9 @@ public class QuestOWLExampleNotLatin {
 		/*
 		 * Get the book information that is stored in the database
 		 */
-		String sparqlQuery = 
+		String sparqlQuery =
 				"PREFIX : <http://meraka/moss/exampleBooks.owl#> \n" +
-				"SELECT DISTINCT ?x ?title ?author ?genre ?edition \n" +
+				"SELECT DISTINCT ?x ?title ?author ?y ?genre ?edition \n" +
 				"WHERE { ?x a :книга; :title ?title; :النوع ?genre; :writtenBy ?y; :hasÉdition ?z. \n" +
 				"		 ?y a :作者; :name ?author. \n" +
 				"		 ?z a :Édition; :editionNumber ?edition }";
