@@ -466,6 +466,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				ClassAssertion ca = (ClassAssertion) ax; 
 				try {
 					addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, ca);
+					index = cacheSI.getIndex(ca.getConcept()); // WOW ! NullPointerException here
 				}
 				catch (Exception e) {
 					Predicate predicate = ca.getConcept().getPredicate();
@@ -474,12 +475,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 						counter = 0;
 					failures.put(predicate, counter + 1);					
 				}
-				index = cacheSI.getIndex(ca.getConcept());
 			} 
 			else if (ax instanceof ObjectPropertyAssertion) {
 				ObjectPropertyAssertion opa = (ObjectPropertyAssertion)ax;
 				try {
 					addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, opa);	
+					index = cacheSI.getIndex(opa.getProperty());
 				}
 				catch (Exception e) {
 					Predicate predicate = opa.getProperty().getPredicate();
@@ -488,12 +489,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 						counter = 0;
 					failures.put(predicate, counter + 1);					
 				}
-				index = cacheSI.getIndex(opa.getProperty());
 			}
 			else /* (ax instanceof DataPropertyAssertion) */ {
 				DataPropertyAssertion dpa = (DataPropertyAssertion)ax;
 				try {
 					addPreparedStatement(uriidStm, classStm, roleStm, attributeLiteralStm, attributeStm, dpa);										
+					index = cacheSI.getIndex(dpa.getProperty());
 				}
 				catch (Exception e) {
 					Predicate predicate = dpa.getProperty().getPredicate();
@@ -502,7 +503,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 						counter = 0;
 					failures.put(predicate, counter + 1);					
 				}
-				index = cacheSI.getIndex(dpa.getProperty());
 			}
 			// Register non emptiness
 			SemanticIndexRecord record = SemanticIndexRecord.getRecord(ax, index);
@@ -1009,7 +1009,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			int type1 = res.getInt(3);
 			int type2 = res.getInt(4);
 			int idx = res.getInt(2);
-			SemanticIndexRecord r = new SemanticIndexRecord(table, type1, type2, idx);
+			SemanticIndexRecord r = SemanticIndexRecord.createSIRecord(table, type1, type2, idx);
 			nonEmptyEntityRecord.add(r);
 		}
 
@@ -1095,8 +1095,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			// Get the indexed node (from the pureIsa dag)
 			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
 			mappings.put(role, currentMappings);
-
-			COL_TYPE type = role.getType(1);
 
 			CQIE targetQuery;
 			String sourceQuery;
@@ -1765,10 +1763,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 			stm = conn.prepareStatement("INSERT INTO " + emptyness_index_table + " (TABLEID, IDX, TYPE1, TYPE2) VALUES (?, ?, ?, ?)");
 			for (SemanticIndexRecord record : nonEmptyEntityRecord) {
-				stm.setInt(1, record.table.ordinal());
-				stm.setInt(2, record.idx);
-				stm.setInt(3, record.type1.ordinal());
-				stm.setInt(4, record.type2.ordinal());
+				stm.setInt(1, record.getTable().ordinal());
+				stm.setInt(2, record.getIndex());
+				stm.setInt(3, record.getType1().ordinal());
+				stm.setInt(4, record.getType2().ordinal());
 				stm.addBatch();
 			}
 			stm.executeBatch();

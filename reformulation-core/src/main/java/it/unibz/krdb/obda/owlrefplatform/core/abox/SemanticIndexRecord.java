@@ -44,17 +44,10 @@ public class SemanticIndexRecord {
 		URI, BNode
 	}
 
-	public int idx;
-
-	public OBJType type1 = null;
-
-	public OBJType type2 = OBJType.URI;
-
-	public SITable table = null;
-
-	public SemanticIndexRecord(SITable table, OBJType t1, int idx) {
-		this(table, t1, null, idx);
-	}
+	private final int idx;
+	private final OBJType type1;
+	private final OBJType type2;
+	private final SITable table;
 
 	public SemanticIndexRecord(SITable table, OBJType t1, OBJType t2, int idx) {
 		this.table = table;
@@ -63,33 +56,51 @@ public class SemanticIndexRecord {
 		this.idx = idx;
 
 	}
+	
+	public int getIndex() {
+		return idx;
+	}
+	
+	// ALL THREE ONLY AS ORDINALS
+	public OBJType getType1() {
+		return type1;
+	}
 
-	public SemanticIndexRecord(int table, int t1, int t2, int idx) {
-
+	public OBJType getType2() {
+		return type2;
+	}
+	
+	public SITable getTable() {
+		return table;
+	}
+	
+	public static SemanticIndexRecord createSIRecord(int table, int t1, int t2, int idx) {
+		SITable sitable = null;
+		
 		for (SITable t : SITable.values()) {
 			if (t.ordinal() == table) {
-				this.table = t;
+				sitable = t;
 			}
 		}
-		if (this.table == null)
+		if (sitable == null)
 			throw new RuntimeException("Unknown table kind: " + table);
 		
-		
+		OBJType type1 = null, type2 = null;
 		for (OBJType t : OBJType.values()) {
 			if (t.ordinal() == t1) {
-				this.type1 = t;
+				type1 = t;
 			}
 			if (t.ordinal() == t2) {
-				this.type2 = t;
+				type2 = t;
 			}
 		}
-		if (this.type1 == null)
+		if (type1 == null)
 			throw new RuntimeException("Unknown object type1: " + t1);
 				
-		if (this.type2 == null)
+		if (type2 == null)
 			throw new RuntimeException("Unknown object type2: " + t2);
-				
-		this.idx = idx;
+			
+		return new SemanticIndexRecord(sitable, type1, type2, idx);
 
 	}
 
@@ -133,13 +144,12 @@ public class SemanticIndexRecord {
 			table = SITable.CLASS;
 			COL_TYPE atype1 = ca.getIndividual().getType();
 
-			if (atype1 == COL_TYPE.BNODE) {
+			if (atype1 == COL_TYPE.BNODE) 
 				t1 = OBJType.BNode;
-			} else {
+			else 
 				t1 = OBJType.URI;
-			}
-
-		} else {
+		} 
+		else {
 			COL_TYPE atype1, atype2;
 			if (assertion instanceof ObjectPropertyAssertion) {
 				ObjectPropertyAssertion ba = (ObjectPropertyAssertion) assertion;
@@ -152,11 +162,10 @@ public class SemanticIndexRecord {
 				atype2 = ba.getValue().getType();						
 			}
 				
-			if (atype1 == COL_TYPE.BNODE) {
+			if (atype1 == COL_TYPE.BNODE) 
 				t1 = OBJType.BNode;
-			} else {
+			else 
 				t1 = OBJType.URI;
-			}
 
 			switch (atype2) {
 			case OBJECT:
