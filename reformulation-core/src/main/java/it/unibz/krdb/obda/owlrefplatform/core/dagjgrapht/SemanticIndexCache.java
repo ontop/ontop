@@ -1,6 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -19,7 +20,9 @@ public class SemanticIndexCache {
 	
 	
 	private Map<OClass, List<Interval>> classIntervals = new HashMap<>();
-	private Map<String, List<Interval>> roleIntervals = new HashMap<>();
+	private Map<Predicate, List<Interval>> roleIntervals = new HashMap<>();
+//	private Map<ObjectPropertyExpression, List<Interval>> opeIntervals = new HashMap<>();
+//	private Map<DataPropertyExpression, List<Interval>> dpeIntervals = new HashMap<>();
 
 	private Map<OClass, Integer> classIndexes = new HashMap<>();
 	private Map<String, Integer> roleIndexes = new HashMap<>();
@@ -61,7 +64,7 @@ public class SemanticIndexCache {
 
 				String iri = cdesc.getPredicate().getName();
 				roleIndexes.put(iri, idx);
-				roleIntervals.put(iri, intervals);
+				roleIntervals.put(cdesc.getPredicate(), intervals);
 			} 
 			else if (description instanceof DataPropertyExpression) {
 				DataPropertyExpression cdesc = (DataPropertyExpression) description;
@@ -71,7 +74,7 @@ public class SemanticIndexCache {
 
 				String iri = cdesc.getPredicate().getName();
 				roleIndexes.put(iri, idx);
-				roleIntervals.put(iri, intervals);
+				roleIntervals.put(cdesc.getPredicate(), intervals);
 			} 
 		}
 	}
@@ -140,10 +143,14 @@ public class SemanticIndexCache {
 		classIndexes.put(concept, idx);
 	}
 		
-	public void setRoleIndex(String iri, Integer idx) {
-		roleIndexes.put(iri, idx);
+	public void setIndex(ObjectPropertyExpression ope, Integer idx) {
+		roleIndexes.put(ope.getPredicate().getName(), idx);
 	}
 
+	public void setIndex(DataPropertyExpression dpe, Integer idx) {
+		roleIndexes.put(dpe.getPredicate().getName(), idx);
+	}
+	
 	/***
 	 * Returns the intervals (semantic index) for a class or property. The String
 	 * identifies a class if type = 1, identifies a property if type = 2.
@@ -161,29 +168,43 @@ public class SemanticIndexCache {
 		return intervals;
 	}
 	
-	public List<Interval> getRoleIntervals(String name)  {
+	public List<Interval> getIntervals(ObjectPropertyExpression ope)  {
 		
-		List<Interval> intervals = roleIntervals.get(name);
+		List<Interval> intervals = roleIntervals.get(ope.getPredicate());
 		if (intervals == null)
-			throw new RuntimeException("Could not create mapping for predicate: " + name
+			throw new RuntimeException("Could not create mapping for predicate: " + ope
 					+ ". Couldn not find semantic index intervals for the predicate.");
 		return intervals;
+	}
+
+	public List<Interval> getIntervals(DataPropertyExpression dpe)  {
 		
+		List<Interval> intervals = roleIntervals.get(dpe.getPredicate());
+		if (intervals == null)
+			throw new RuntimeException("Could not create mapping for predicate: " + dpe
+					+ ". Couldn not find semantic index intervals for the predicate.");
+		return intervals;
 	}
 	
 	public void setIntervals(OClass concept, List<Interval> intervals) {
 		classIntervals.put(concept, intervals);
 	}
 	
-	public void setRoleIntervals(String name, List<Interval> intervals) {
-		roleIntervals.put(name, intervals);
+	public void setIntervals(ObjectPropertyExpression ope, List<Interval> intervals) {
+		roleIntervals.put(ope.getPredicate(), intervals);
+	}
+	
+	public void setIntervals(DataPropertyExpression dpe, List<Interval> intervals) {
+		roleIntervals.put(dpe.getPredicate(), intervals);
 	}
 	
 	public void clear() {
 		classIndexes.clear();
 		classIntervals.clear();
 		roleIndexes.clear();
-		roleIntervals.clear();		
+		roleIntervals.clear();
+//		opeIntervals.clear();		
+//		dpeIntervals.clear();		
 	}
 
 
@@ -203,7 +224,15 @@ public class SemanticIndexCache {
 		return classIntervals.entrySet();
 	}
 	
-	public Set<Entry<String, List<Interval>>> getRoleIntervalsEntries() {
+	public Set<Entry<Predicate, List<Interval>>> getPropertyIntervalsEntries() {
 		return roleIntervals.entrySet();
 	}
+/*	
+	public Set<Entry<ObjectPropertyExpression, List<Interval>>> getObjectPropertyIntervalsEntries() {
+		return opeIntervals.entrySet();
+	}
+	public Set<Entry<DataPropertyExpression, List<Interval>>> getDataPropertyIntervalsEntries() {
+		return dpeIntervals.entrySet();
+	}
+*/	
 }
