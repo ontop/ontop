@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
+import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -186,17 +187,32 @@ public class SemanticIndexCache {
 	 * @param name
 	 * @param i
 	 * @return
+	 * @throws OBDAException 
 	 */
-	public List<Interval> getIntervals(OClass concept) {
-		return classIntervals.get(concept.getPredicate().getName());
+	public List<Interval> getIntervals(OClass concept)  {
+		List<Interval> intervals = classIntervals.get(concept.getPredicate().getName());
+		if (intervals == null)
+			throw new RuntimeException("Could not create mapping for predicate: " + concept
+					+ ". Couldn not find semantic index intervals for the predicate.");
+		return intervals;
 	}
 	@Deprecated
-	public List<Interval> getClassIntervals(String name) {
-		return classIntervals.get(name);
+	public List<Interval> getClassIntervals(String name)  {
+		List<Interval> intervals = classIntervals.get(name);
+		if (intervals == null)
+			throw new RuntimeException("Could not create mapping for predicate: " + name
+					+ ". Couldn not find semantic index intervals for the predicate.");
+		return intervals;
 	}
 	
-	public List<Interval> getRoleIntervals(String name) {
-		return roleIntervals.get(name);
+	public List<Interval> getRoleIntervals(String name)  {
+		
+		List<Interval> intervals = roleIntervals.get(name);
+		if (intervals == null)
+			throw new RuntimeException("Could not create mapping for predicate: " + name
+					+ ". Couldn not find semantic index intervals for the predicate.");
+		return intervals;
+		
 	}
 	
 	public void setIntervals(String name, int type, List<Interval> intervals) {

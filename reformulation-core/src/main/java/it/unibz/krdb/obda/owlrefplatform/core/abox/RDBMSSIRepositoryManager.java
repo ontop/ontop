@@ -1099,7 +1099,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			mappings.put(classuri, currentMappings);
 
 			// Mapping head
-			Function head = dfac.getFunction(dfac.getPredicate("m", 1), dfac.getVariable("X"));
+			Predicate predicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
+			Function head = dfac.getFunction(predicate, dfac.getVariable("X"));
 			
 			{
 				/* FOR URI */
@@ -1178,18 +1179,16 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 * @param iri
 	 * @param type1
 	 * @return
+	 * @throws OBDAException 
 	 */
-	private boolean isMappingEmpty(OClass concept, COL_TYPE type1) {
-
-		SITable table = SITable.CLASS;
+	private boolean isMappingEmpty(OClass concept, COL_TYPE type1)  {
 
 		boolean empty = true;
-		List<Interval> intervals = cacheSI.getIntervals(concept);
 
-		for (Interval interval : intervals) {
+		for (Interval interval : cacheSI.getIntervals(concept)) {
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
 
-				SemanticIndexRecord record = new SemanticIndexRecord(table, type1, COL_TYPE.OBJECT, i);
+				SemanticIndexRecord record = new SemanticIndexRecord(SITable.CLASS, type1, COL_TYPE.OBJECT, i);
 				empty = empty && !nonEmptyEntityRecord.contains(record);
 				if (!empty)
 					break;
@@ -1206,15 +1205,15 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 * @param type1
 	 * @param type2
 	 * @return
+	 * @throws OBDAException 
 	 */
-	private boolean isMappingEmpty(String iri, COL_TYPE type1, COL_TYPE type2) {
+	private boolean isMappingEmpty(String iri, COL_TYPE type1, COL_TYPE type2)  {
 
 		SITable table = SemanticIndexRecord.COLTYPEtoSITable.get(type2);			
 
 		boolean empty = true;
-		List<Interval> intervals = cacheSI.getRoleIntervals(iri);
 
-		for (Interval interval : intervals) {
+		for (Interval interval : cacheSI.getRoleIntervals(iri)) {
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
 
 				SemanticIndexRecord record = new SemanticIndexRecord(table, type1, type2, i);
@@ -1265,7 +1264,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		return dfac.getCQIE(head, body);
 	}
 
-	private String constructSourceQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2) throws OBDAException {
+	private String constructSourceQuery(Predicate predicate, COL_TYPE type1, COL_TYPE type2)  {
 		StringBuilder sql = new StringBuilder();
 		switch (type2) {
 			case OBJECT:
@@ -1309,9 +1308,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		 */
 
 		List<Interval> intervals = cacheSI.getRoleIntervals(predicate.getName());
-		if (intervals == null)
-			throw new OBDAException("Could not create mapping for predicate: " + predicate.getName()
-					+ ". Couldn not find semantic index intervals for the predicate.");
 		
 		appendIntervalString(intervals, sql);
 
@@ -1356,6 +1352,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 * Inserts the metadata about semantic indexes and intervals into the
 	 * database. The metadata is later used to reconstruct a semantic index
 	 * repository.
+	 * @throws  
 	 */
 	public void insertMetadata(Connection conn) throws SQLException {
 
