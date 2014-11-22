@@ -14,15 +14,12 @@ import java.util.Set;
 
 public class SemanticIndexCache {
 
-	public final static int CLASS_TYPE = 1;
-	public final static int ROLE_TYPE = 2;
 	
+	private Map<OClass, SemanticIndexRange> classRanges = new HashMap<>();
 	
-	private Map<OClass, List<Interval>> classIntervals = new HashMap<>();
 	private Map<ObjectPropertyExpression, List<Interval>> opeIntervals = new HashMap<>();
 	private Map<DataPropertyExpression, List<Interval>> dpeIntervals = new HashMap<>();
 
-	private Map<OClass, Integer> classIndexes = new HashMap<>();
 	private Map<String, Integer> roleIndexes = new HashMap<>();
 
 	private final TBoxReasoner reasonerDag; 
@@ -37,12 +34,8 @@ public class SemanticIndexCache {
 		 * Creating cache of semantic indexes and ranges
 		 */
 		for (Entry<ClassExpression, SemanticIndexRange> description : engine.getIndexedClasses()) {
-			int idx = description.getValue().getIndex();
-			List<Interval> intervals = description.getValue().getIntervals();
-
 			OClass cdesc = (OClass)description.getKey();
-			classIndexes.put(cdesc, idx);
-			classIntervals.put(cdesc, intervals);
+			classRanges.put(cdesc, description.getValue());
 		} 
 		for (Entry<ObjectPropertyExpression, SemanticIndexRange> description : engine.getIndexedObjectProperties()) {
 			int idx = description.getValue().getIndex();
@@ -67,15 +60,15 @@ public class SemanticIndexCache {
 	 */
 
 	public int getIndex(OClass c) {
-		Integer index = classIndexes.get(c);
+		SemanticIndexRange range = classRanges.get(c);
 		
-		if (index == null) {
+		if (range == null) {
 			/* direct name is not indexed, maybe there is an equivalent */
 			OClass equivalent = (OClass)reasonerDag.getClassDAG().getVertex(c).getRepresentative();
-			return classIndexes.get(equivalent);
+			range = classRanges.get(equivalent);
 		}
 				
-		return index;
+		return range.getIndex();
 	}
 	
 	public int getIndex(ObjectPropertyExpression p) {
@@ -122,8 +115,8 @@ public class SemanticIndexCache {
 		return index;				
 	}
 	
-	public void setIndex(OClass concept, Integer idx) {
-		classIndexes.put(concept, idx);
+	public void setIndex(OClass concept, int idx) {
+		classRanges.get(concept).setIndex(idx);
 	}
 		
 	public void setIndex(ObjectPropertyExpression ope, Integer idx) {
@@ -144,11 +137,11 @@ public class SemanticIndexCache {
 	 * @throws OBDAException 
 	 */
 	public List<Interval> getIntervals(OClass concept)  {
-		List<Interval> intervals = classIntervals.get(concept);
-		if (intervals == null)
+		SemanticIndexRange range = classRanges.get(concept);
+		if (range == null)
 			throw new RuntimeException("Could not create mapping for predicate: " + concept
 					+ ". Couldn not find semantic index intervals for the predicate.");
-		return intervals;
+		return range.getIntervals();
 	}
 	
 	public List<Interval> getIntervals(ObjectPropertyExpression ope)  {
@@ -170,7 +163,7 @@ public class SemanticIndexCache {
 	}
 	
 	public void setIntervals(OClass concept, List<Interval> intervals) {
-		classIntervals.put(concept, intervals);
+		classRanges.get(concept).setIntervals(intervals);
 	}
 	
 	public void setIntervals(ObjectPropertyExpression ope, List<Interval> intervals) {
@@ -182,10 +175,9 @@ public class SemanticIndexCache {
 	}
 	
 	public void clear() {
-		classIndexes.clear();
-		classIntervals.clear();
+		classRanges.clear();
+		
 		roleIndexes.clear();
-//		roleIntervals.clear();
 		opeIntervals.clear();		
 		dpeIntervals.clear();		
 	}
@@ -195,17 +187,16 @@ public class SemanticIndexCache {
 	 * these four methods are used only by SI Repository to save the metadata
 	 */
 	
-	public Set<Entry<OClass, Integer>> getClassIndexEntries() {
-		return classIndexes.entrySet();
+	public Set<Entry<OClass, SemanticIndexRange>> getClassIndexEntries() {
+		return classRanges.entrySet();
 	}
 		
+	
+	
 	public Set<Entry<String,Integer>> getRoleIndexEntries() {
 		return roleIndexes.entrySet();
 	}
 	
-	public Set<Entry<OClass, List<Interval>>> getClassIntervalsEntries() {
-		return classIntervals.entrySet();
-	}
 	
 	public Set<Entry<ObjectPropertyExpression, List<Interval>>> getObjectPropertyIntervalsEntries() {
 		return opeIntervals.entrySet();

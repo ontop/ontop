@@ -49,6 +49,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexCache;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.Serializable;
@@ -725,6 +726,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 	*/
 
+	
+	public final static int CLASS_TYPE = 1;
+	public final static int ROLE_TYPE = 2;
+	
+	
+	
 	public void loadMetadata(Connection conn) throws SQLException {
 		log.debug("Loading semantic index metadata from the database *");
 
@@ -743,7 +750,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			String iri = string;
 			int idx = res.getInt(2);
 			int type = res.getInt(3);
-			if (type == SemanticIndexCache.CLASS_TYPE)
+			if (type == CLASS_TYPE)
 				cacheSI.setIndex(ofac.createClass(iri), idx);
 			else {
 				ObjectPropertyExpression ope = ofac.createObjectProperty(iri);
@@ -798,7 +805,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				 * we switched URI or type, time to store the collected
 				 * intervals and clear the set
 				 */
-				if (previousType == SemanticIndexCache.CLASS_TYPE)
+				if (previousType == CLASS_TYPE)
 					cacheSI.setIntervals(ofac.createClass(previousString), currentSet);
 				else {
 					ObjectPropertyExpression ope = ofac.createObjectProperty(previousString);
@@ -823,7 +830,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		}
 
-		if (previousType == SemanticIndexCache.CLASS_TYPE)
+		if (previousType == CLASS_TYPE)
 			cacheSI.setIntervals(ofac.createClass(previousString), currentSet);
 		else {
 			ObjectPropertyExpression ope = ofac.createObjectProperty(previousString);
@@ -1340,10 +1347,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 			/* inserting index data for classes and roles */
 
-			for (Entry<OClass,Integer> concept : cacheSI.getClassIndexEntries()) {
+			for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
 				stm.setString(1, concept.getKey().getPredicate().getName());
-				stm.setInt(2, concept.getValue());
-				stm.setInt(3, SemanticIndexCache.CLASS_TYPE);
+				stm.setInt(2, concept.getValue().getIndex());
+				stm.setInt(3, CLASS_TYPE);
 				stm.addBatch();
 			}
 			stm.executeBatch();
@@ -1351,7 +1358,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			for (Entry<String,Integer> role : cacheSI.getRoleIndexEntries()) {
 				stm.setString(1, role.getKey());
 				stm.setInt(2, role.getValue());
-				stm.setInt(3, SemanticIndexCache.ROLE_TYPE);
+				stm.setInt(3, ROLE_TYPE);
 				stm.addBatch();
 			}
 			stm.executeBatch();
@@ -1363,12 +1370,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			 */
 
 			stm = conn.prepareStatement(intervalTable.insertCommand);
-			for (Entry<OClass, List<Interval>> concept : cacheSI.getClassIntervalsEntries()) {
-				for (Interval it : concept.getValue()) {
+			for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
+				for (Interval it : concept.getValue().getIntervals()) {
 					stm.setString(1, concept.getKey().getPredicate().getName());
 					stm.setInt(2, it.getStart());
 					stm.setInt(3, it.getEnd());
-					stm.setInt(4, SemanticIndexCache.CLASS_TYPE);
+					stm.setInt(4, CLASS_TYPE);
 					stm.addBatch();
 				}
 			}
@@ -1379,7 +1386,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					stm.setString(1, role.getKey().getPredicate().getName());
 					stm.setInt(2, it.getStart());
 					stm.setInt(3, it.getEnd());
-					stm.setInt(4, SemanticIndexCache.ROLE_TYPE);
+					stm.setInt(4, ROLE_TYPE);
 					stm.addBatch();
 				}
 			}
@@ -1388,7 +1395,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					stm.setString(1, role.getKey().getPredicate().getName());
 					stm.setInt(2, it.getStart());
 					stm.setInt(3, it.getEnd());
-					stm.setInt(4, SemanticIndexCache.ROLE_TYPE);
+					stm.setInt(4, ROLE_TYPE);
 					stm.addBatch();
 				}
 			}

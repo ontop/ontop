@@ -34,7 +34,7 @@ public class SemanticIndexRange implements Serializable {
 	private static final long serialVersionUID = 8420832314126437803L;
 	
 	private List<Interval> intervals = new LinkedList<>();
-	private final int index;
+	private int index;
 
 	
 	/**
@@ -47,6 +47,17 @@ public class SemanticIndexRange implements Serializable {
 		this.index = index;
 		intervals.add(new Interval(index, index));
 	}
+	
+	@Deprecated // TODO: find a better solution
+	void setIndex(int idx) {
+		this.index = idx;
+	}
+	
+	@Deprecated   // TODO: find a better solution
+	void setIntervals(List<Interval> intervals) {
+		this.intervals = intervals;
+	}
+	
 	
     public void addRange(SemanticIndexRange other) {
         if (this.intervals == other.intervals)
@@ -121,4 +132,6 @@ public class SemanticIndexRange implements Serializable {
       
         return true;
     }
+
+	
 }
