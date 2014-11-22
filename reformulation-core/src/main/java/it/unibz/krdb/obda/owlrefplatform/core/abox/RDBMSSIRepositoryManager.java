@@ -381,16 +381,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			commitCount++;
 
 
-			int index = 0;
 			if (ax instanceof ClassAssertion) {
 				ClassAssertion ca = (ClassAssertion) ax; 
 				try {
-					addPreparedStatement(uriidStm, classStm, ca);
-					index = cacheSI.getIndex(ca.getConcept()); // WOW ! NullPointerException here
-					// Register non emptiness
-					COL_TYPE t1 = ca.getIndividual().getType();
-					SemanticIndexRecord record = new SemanticIndexRecord(SITable.CLASS, t1, COL_TYPE.OBJECT, index);
-					nonEmptyEntityRecord.add(record);
+					process(ca, uriidStm, classStm);
 				}
 				catch (Exception e) {
 					Predicate predicate = ca.getConcept().getPredicate();
@@ -403,13 +397,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			else if (ax instanceof ObjectPropertyAssertion) {
 				ObjectPropertyAssertion opa = (ObjectPropertyAssertion)ax;
 				try {
-					addPreparedStatement(uriidStm, roleStm, opa);	
-					index = cacheSI.getIndex(opa.getProperty());
-					// Register non emptiness
-					COL_TYPE t1 = opa.getSubject().getType();
-					COL_TYPE t2 = opa.getObject().getType();		
-					SemanticIndexRecord record = new SemanticIndexRecord(SITable.OPROP, t1, t2, index);
-					nonEmptyEntityRecord.add(record);
+					process(opa, uriidStm, roleStm);	
 				}
 				catch (Exception e) {
 					Predicate predicate = opa.getProperty().getPredicate();
@@ -422,15 +410,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			else /* (ax instanceof DataPropertyAssertion) */ {
 				DataPropertyAssertion dpa = (DataPropertyAssertion)ax;
 				try {
-					addPreparedStatement(uriidStm, attributeStm, dpa);										
-					index = cacheSI.getIndex(dpa.getProperty());
-					COL_TYPE t1 = dpa.getSubject().getType();
-					COL_TYPE t2 = dpa.getValue().getType();		
-					SITable table = SemanticIndexRecord.COLTYPEtoSITable.get(t2);	
-					if (table != null) { // IMPORTANT: can be null is the datatype is not recognised
-						SemanticIndexRecord record = new SemanticIndexRecord(table, t1, t2, index);
-						nonEmptyEntityRecord.add(record);
-					}
+					process(dpa, uriidStm, attributeStm);										
 				}
 				catch (Exception e) {
 					Predicate predicate = dpa.getProperty().getPredicate();
@@ -501,79 +481,45 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 	}
 
-	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement roleStm, ObjectPropertyAssertion ax) throws SQLException {
+	private void process(ObjectPropertyAssertion ax, PreparedStatement uriidStm, PreparedStatement roleStm) throws SQLException {
 
 		ObjectPropertyExpression prop = ax.getProperty();
 
-		ObjectConstant object = ax.getObject();
-
-		// Construct the database INSERT statements
-		ObjectConstant subject = ax.getSubject();
-
-		String uri = subject.getName();
-		int uri_id = uriMap.idOfURI(uri);
-		uriidStm.setInt(1, uri_id);
-		uriidStm.setString(2, uri);
-		uriidStm.addBatch();
-		
-		boolean c1isBNode = subject instanceof BNode;
-
-		int idx = cacheSI.getIndex(prop);
-
-		// Get the object property assertion
-		String uri2 = object.getName();
-		boolean c2isBNode = object instanceof BNode;
-
+		ObjectConstant o1, o2;
 		if (isInverse(prop)) {
-
-			/* Swapping values */
-
-			String tmp = uri;
-			uri = uri2;
-			uri2 = tmp;
-
-			boolean tmpb = c1isBNode;
-			c1isBNode = c2isBNode;
-			c2isBNode = tmpb;
+			o1 = ax.getObject();
+			o2 = ax.getSubject();
+		}
+		else {
+			o1 = ax.getSubject();			
+			o2 = ax.getObject();
 		}
 
-		// Construct the database INSERT statement
-		// replace URIs with their ids
+		int uri_id = getObjectConstantUriId(o1, uriidStm);
+		int uri2_id = getObjectConstantUriId(o2, uriidStm);
 		
-		uri_id = uriMap.idOfURI(uri);
-		uriidStm.setInt(1, uri_id);
-		uriidStm.setString(2, uri);
-		uriidStm.addBatch();
-
-		int uri2_id = uriMap.idOfURI(uri2);
-		uriidStm.setInt(1, uri2_id);
-		uriidStm.setString(2, uri2);
-		uriidStm.addBatch();
+		int idx = cacheSI.getIndex(prop);
 		
+		// Construct the database INSERT statements		
 		roleStm.setInt(1, uri_id);
 		roleStm.setInt(2, uri2_id);		
 		roleStm.setInt(3, idx);
-		roleStm.setBoolean(4, c1isBNode);
-		roleStm.setBoolean(5, c2isBNode);
+		roleStm.setBoolean(4, o1 instanceof BNode);
+		roleStm.setBoolean(5, o2 instanceof BNode);
 		roleStm.addBatch();
-
-		// log.debug("role");
-
-		// log.debug("inserted: {} {}", uri, uri2);
-		// log.debug("inserted: {} property", idx);
+		
+		// Register non emptiness
+		// TODO (ROMAN): should we not swap the arguments for the inverse?
+		COL_TYPE t1 = ax.getSubject().getType();
+		COL_TYPE t2 = ax.getObject().getType();		
+		SemanticIndexRecord record = new SemanticIndexRecord(SITable.OPROP, t1, t2, idx);
+		nonEmptyEntityRecord.add(record);
 	} 
 
-	private void addPreparedStatement(PreparedStatement uriidStm, Map<COL_TYPE, PreparedStatement> attributeStatement, DataPropertyAssertion ax) throws SQLException {
+	private void process(DataPropertyAssertion ax, PreparedStatement uriidStm, Map<COL_TYPE, PreparedStatement> attributeStatement) throws SQLException {
 		
-
-		// Construct the database INSERT statements
 		ObjectConstant subject = ax.getSubject();
-		
-		String uri = subject.getName();
-		int uri_id = uriMap.idOfURI(uri);
-		uriidStm.setInt(1, uri_id);
-		uriidStm.setString(2, uri);
-		uriidStm.addBatch();
+		int uri_id = getObjectConstantUriId(subject, uriidStm);
 		
 		DataPropertyExpression prop = ax.getProperty();
 		int idx = cacheSI.getIndex(prop);
@@ -584,6 +530,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		if (attributeType == COL_TYPE.LITERAL_LANG)
 			attributeType = COL_TYPE.LITERAL;
 		
+		// Construct the database INSERT statements
 		PreparedStatement stm = attributeStatement.get(attributeType);
 		if (stm == null) {
 			// UNSUPPORTED DATATYPE
@@ -594,54 +541,54 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		String value = object.getValue();
 		
 		switch (attributeType) {
-		case LITERAL:  // 0
-			stm.setString(2, value);
-			stm.setString(3, object.getLanguage());
-			break;  
-		case STRING:   // 1
-			stm.setString(2, value);
-			break;
-        case INT:   // 3
-            if (value.charAt(0) == '+')
-                value = value.substring(1, value.length());
-        	stm.setInt(2, Integer.parseInt(value));
-            break;
-        case UNSIGNED_INT:  // 4
-        	stm.setInt(2, Integer.parseInt(value));
-            break;
-        case INTEGER:  // 2
-        case NEGATIVE_INTEGER:   // 5
-        case POSITIVE_INTEGER:   // 6
-        case NON_NEGATIVE_INTEGER: // 7
-        case NON_POSITIVE_INTEGER: // 8
-        case LONG: // 10
-            if (value.charAt(0) == '+')
-                value = value.substring(1, value.length());
-            stm.setLong(2, Long.parseLong(value));
-            break;
-        case FLOAT: // 9
-			stm.setDouble(2, Float.parseFloat(value));
-            break;
-		case DOUBLE: // 12
-			stm.setDouble(2, Double.parseDouble(value));
-			break;
-		case DECIMAL: // 11
-			stm.setBigDecimal(2, new BigDecimal(value));
-			break;
-		case DATETIME: // 13
-			stm.setTimestamp(2, parseTimestamp(value));
-			break;
-		case BOOLEAN: // 14
-			// PostgreSQL abbreviates the boolean value to 't' and 'f'
-			if (value.equalsIgnoreCase("t") || value.equals("1")) 
-				value = "true";
-			else if (value.equalsIgnoreCase("f") || value.equals("0")) 
-				value= "false";
+			case LITERAL:  // 0
+				stm.setString(2, value);
+				stm.setString(3, object.getLanguage());
+				break;  
+			case STRING:   // 1
+				stm.setString(2, value);
+				break;
+	        case INT:   // 3
+	            if (value.charAt(0) == '+')
+	                value = value.substring(1, value.length());
+	        	stm.setInt(2, Integer.parseInt(value));
+	            break;
+	        case UNSIGNED_INT:  // 4
+	        	stm.setInt(2, Integer.parseInt(value));
+	            break;
+	        case INTEGER:  // 2
+	        case NEGATIVE_INTEGER:   // 5
+	        case POSITIVE_INTEGER:   // 6
+	        case NON_NEGATIVE_INTEGER: // 7
+	        case NON_POSITIVE_INTEGER: // 8
+	        case LONG: // 10
+	            if (value.charAt(0) == '+')
+	                value = value.substring(1, value.length());
+	            stm.setLong(2, Long.parseLong(value));
+	            break;
+	        case FLOAT: // 9
+				stm.setDouble(2, Float.parseFloat(value));
+	            break;
+			case DOUBLE: // 12
+				stm.setDouble(2, Double.parseDouble(value));
+				break;
+			case DECIMAL: // 11
+				stm.setBigDecimal(2, new BigDecimal(value));
+				break;
+			case DATETIME: // 13
+				stm.setTimestamp(2, parseTimestamp(value));
+				break;
+			case BOOLEAN: // 14
+				// PostgreSQL abbreviates the boolean value to 't' and 'f'
+				if (value.equalsIgnoreCase("t") || value.equals("1")) 
+					value = "true";
+				else if (value.equalsIgnoreCase("f") || value.equals("0")) 
+					value= "false";
 			
-			stm.setBoolean(2, Boolean.parseBoolean(value));
-			break;
-		default:
-			assert(false);
+				stm.setBoolean(2, Boolean.parseBoolean(value));
+				break;
+			default:
+				assert(false);
 		}
 		
 		boolean c1isBNode = subject instanceof BNode;
@@ -654,39 +601,64 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			stm.setBoolean(4, c1isBNode);			
 		}
 		stm.addBatch();
+		
+		// register non-emptiness
+		COL_TYPE t1 = subject.getType();
+		COL_TYPE t2 = object.getType();		
+		SITable table = SemanticIndexRecord.COLTYPEtoSITable.get(t2);	
+		if (table != null) { // IMPORTANT: can be null is the datatype is not recognised
+			SemanticIndexRecord record = new SemanticIndexRecord(table, t1, t2, idx);
+			nonEmptyEntityRecord.add(record);
+		}	
 	}
 	
-	
-	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement classStm, ClassAssertion ax) throws SQLException {
+		
+	private void process(ClassAssertion ax, PreparedStatement uriidStm, PreparedStatement classStm) throws SQLException {
 
-		// Construct the database INSERT statements
 		ObjectConstant c1 = ax.getIndividual();
 
-		boolean c1isBNode = c1 instanceof BNode;
-
-		String uri;
-		if (c1isBNode)
-			uri = ((BNode) c1).getName();
-		else
-			uri = ((URIConstant) c1).getURI().toString();
-
-		// Construct the database INSERT statement
-		int uri_id = uriMap.idOfURI(uri);
-		uriidStm.setInt(1, uri_id);
-		uriidStm.setString(2, uri);
-		uriidStm.addBatch();			
+		int uri_id = getObjectConstantUriId(c1, uriidStm); 
 
 		OClass concept = ax.getConcept();
-		int conceptIndex = cacheSI.getIndex(concept);
-	
+		int conceptIndex = cacheSI.getIndex(concept);	 // WOW ! NullPointerException here
+
+		// Construct the database INSERT statements
 		classStm.setInt(1, uri_id);
 		classStm.setInt(2, conceptIndex);
-		classStm.setBoolean(3, c1isBNode);
+		classStm.setBoolean(3, c1 instanceof BNode);
 		classStm.addBatch();
-
-		// log.debug("inserted: {} {} class", uri, conceptIndex);
+	
+		// Register non emptiness
+		COL_TYPE t1 = c1.getType();
+		SemanticIndexRecord record = new SemanticIndexRecord(SITable.CLASS, t1, COL_TYPE.OBJECT, conceptIndex);
+		nonEmptyEntityRecord.add(record);
 	}
 
+
+	// TODO: use database to get the maximum URIId
+	private int maxURIId = -1;
+	
+	private int getObjectConstantUriId(ObjectConstant c, PreparedStatement uriidStm) throws SQLException {
+		
+		// TODO (ROMAN): I am not sure this is entirely correct for blank nodes
+		String uri = (c instanceof BNode) ? ((BNode) c).getName() : ((URIConstant) c).getURI().toString();
+
+		int uri_id = uriMap.getId(uri);
+		if (uri_id < 0) {
+			uri_id = maxURIId + 1;
+			uriMap.set(uri, uri_id);			
+			maxURIId++;		
+			
+			// Construct the database INSERT statement
+			uriidStm.setInt(1, uri_id);
+			uriidStm.setString(2, uri);
+			uriidStm.addBatch();								
+		}
+			
+		return uri_id;
+	}
+	
+	
 	private void executeBatch(PreparedStatement statement) throws SQLException {
 		statement.executeBatch();
 		statement.clearBatch();

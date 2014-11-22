@@ -81,11 +81,6 @@ public class URIConstantImpl implements URIConstant {
 		return COL_TYPE.OBJECT;
 	}
 
-	@Override
-	public String getName() {
-		return iristr;
-	}
-
 	@Deprecated
 	public String getValue() {
 		return iristr;

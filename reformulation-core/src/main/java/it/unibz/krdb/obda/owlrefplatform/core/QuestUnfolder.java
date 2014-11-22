@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Joiner;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,7 @@ import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -206,10 +208,11 @@ public class QuestUnfolder {
 		
 		int count = 0;
 		for (ClassAssertion ca : assertions) {
-			ObjectConstant c = ca.getIndividual();
+			// no blank nodes are supported here
+			URIConstant c = (URIConstant)ca.getIndividual();
 			Predicate p = ca.getConcept().getPredicate();
 			Function head = fac.getFunction(p, 
-							fac.getUriTemplate(fac.getConstantLiteral(c.getName())));
+							fac.getUriTemplate(fac.getConstantLiteral(c.getURI())));
 			CQIE rule = fac.getCQIE(head, Collections.<Function> emptyList());
 				
 			unfoldingProgram.add(rule);
@@ -222,12 +225,13 @@ public class QuestUnfolder {
 		
 		int count = 0;
 		for (ObjectPropertyAssertion pa : assertions) {
-			ObjectConstant s = pa.getSubject();
-			ObjectConstant o = pa.getObject();
+			// no blank nodes are supported here
+			URIConstant s = (URIConstant)pa.getSubject();
+			URIConstant o = (URIConstant)pa.getObject();
 			Predicate p = pa.getProperty().getPredicate();
 			Function head = fac.getFunction(p, 
-							fac.getUriTemplate(fac.getConstantLiteral(s.getName())), 
-							fac.getUriTemplate(fac.getConstantLiteral(o.getName())));
+							fac.getUriTemplate(fac.getConstantLiteral(s.getURI())), 
+							fac.getUriTemplate(fac.getConstantLiteral(o.getURI())));
 			CQIE rule = fac.getCQIE(head, Collections.<Function> emptyList());
 				
 			unfoldingProgram.add(rule);
