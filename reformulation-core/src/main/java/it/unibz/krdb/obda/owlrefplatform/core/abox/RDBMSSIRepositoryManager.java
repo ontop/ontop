@@ -132,6 +132,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			"(TABLEID, IDX, TYPE1, TYPE2) VALUES (?, ?, ?, ?)", "*");
 	
 	
+	
+	
 	/**
 	 *  Data tables
 	 */
@@ -145,33 +147,35 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			"ISBNODE BOOLEAN NOT NULL DEFAULT FALSE, ISBNODE2 BOOLEAN NOT NULL DEFAULT FALSE",
 			"(URI1, URI2, IDX, ISBNODE, ISBNODE2) VALUES (?, ?, ?, ?, ?)", "\"URI1\" as X, \"URI2\" as Y");
 
-	private final static TableDescription attributeTableLiteral = new TableDescription("QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
-			"\"URI\" INTEGER NOT NULL, VAL VARCHAR(1000) NOT NULL, LANG VARCHAR(20), \"IDX\"  SMALLINT NOT NULL, " + 
-			"ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE ",
-			"(URI, VAL, LANG, IDX, ISBNODE) VALUES (?, ?, ?, ?, ?)", "\"URI\" as X, VAL as Y, LANG as Z");
+	private final static Map<COL_TYPE ,TableDescription> attributeTable = new HashMap<>();
 	
 	
 	static {
+				
 		classTable.indexOn("idxclassfull", "URI, IDX, ISBNODE");
 		classTable.indexOn("idxclassfull2", "URI, IDX");
 		
 		roleTable.indexOn("idxrolefull1", "URI1, URI2, IDX, ISBNODE, ISBNODE2");
 		roleTable.indexOn("idxrolefull2",  "URI2, URI1, IDX, ISBNODE2, ISBNODE");
 		roleTable.indexOn("idxrolefull22", "URI1, URI2, IDX");
+	
 		
+		// COL_TYPE.LITERAL is special because of one extra attribute (LANG)
+		
+		TableDescription attributeTableLiteral = new TableDescription("QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
+				"\"URI\" INTEGER NOT NULL, VAL VARCHAR(1000) NOT NULL, LANG VARCHAR(20), \"IDX\"  SMALLINT NOT NULL, " + 
+				"ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE ",
+				"(URI, VAL, LANG, IDX, ISBNODE) VALUES (?, ?, ?, ?, ?)", "\"URI\" as X, VAL as Y, LANG as Z");
+		attributeTable.put(COL_TYPE.LITERAL, attributeTableLiteral);
+			
 		attributeTableLiteral.indexOn("IDX_LITERAL_ATTRIBUTE" + "1", "URI");		
 		attributeTableLiteral.indexOn("IDX_LITERAL_ATTRIBUTE" + "2", "IDX");
 		attributeTableLiteral.indexOn("IDX_LITERAL_ATTRIBUTE" + "3", "VAL");				
-	}
-	
 
-	/**
-	 *  Data tables
-	 */
-  
-	private static final Map<COL_TYPE, String> attribute_table = new HashMap<>();
-	
-	static {
+		
+		// all other datatypes from COL_TYPE are treated similarly
+		
+		Map<COL_TYPE, String> attribute_table = new HashMap<>();
 		attribute_table.put(COL_TYPE.STRING, "QUEST_DATA_PROPERTY_STRING_ASSERTION");    // 1
 		attribute_table.put(COL_TYPE.INTEGER, "QUEST_DATA_PROPERTY_INTEGER_ASSERTION");   // 2
 		attribute_table.put(COL_TYPE.INT, "QUEST_DATA_PROPERTY_INT_ASSERTION");   // 3
@@ -186,79 +190,25 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		attribute_table.put(COL_TYPE.DOUBLE, "QUEST_DATA_PROPERTY_DOUBLE_ASSERTION"); // 12
 		attribute_table.put(COL_TYPE.DATETIME, "QUEST_DATA_PROPERTY_DATETIME_ASSERTION"); // 13
 		attribute_table.put(COL_TYPE.BOOLEAN,  "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION");  // 14
-	}
-	
-	
-	
-/**
- *  CREATE data tables
- */
-	
-	private static final String attribute_table_string_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.STRING) + " ( "
-			+ "\"URI\" INTEGER  NOT NULL, " + "VAL VARCHAR(1000), " + "\"IDX\"  SMALLINT  NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.INTEGER)+ " ( "
-			+ "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_int_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.INT) + " ( "
-            + "\"URI\" INTEGER  NOT NULL, " + "VAL INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_negative_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.NEGATIVE_INTEGER) + " ( "
-            + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_positive_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.POSITIVE_INTEGER) + " ( "
-            + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_unsigned_int_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.UNSIGNED_INT) + " ( "
-            + "\"URI\" INTEGER  NOT NULL, " + "VAL INTEGER NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_non_positive_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.NON_POSITIVE_INTEGER) + " ( "
-            + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_non_negative_integer_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.NON_NEGATIVE_INTEGER) + " ( "
-            + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_long_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.LONG) + " ( "
-            + "\"URI\" INTEGER  NOT NULL, " + "VAL BIGINT NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_decimal_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.DECIMAL) + " ( "
-			+ "\"URI\" INTEGER NOT NULL, " + "VAL DECIMAL NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_double_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.DOUBLE) + " ( "
-			+ "\"URI\" INTEGER NOT NULL, " + "VAL DOUBLE PRECISION NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_float_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.FLOAT) + " ( "
-            + "\"URI\" INTEGER NOT NULL, " + "VAL DOUBLE PRECISION NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-            + ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-    private static final String attribute_table_datetime_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.DATETIME) + " ( "
-			+ "\"URI\" INTEGER NOT NULL, " + "VAL TIMESTAMP NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
-	private static final String attribute_table_boolean_create = "CREATE TABLE " + attribute_table.get(COL_TYPE.BOOLEAN) + " ( "
-			+ "\"URI\" INTEGER NOT NULL, " + "VAL BOOLEAN NOT NULL, " + "\"IDX\"  SMALLINT NOT NULL"
-			+ ", ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE " + ")";
+		
+		
+		Map<COL_TYPE, String> attribute_type = new HashMap<>();
+		attribute_type.put(COL_TYPE.STRING, "VARCHAR(1000)");
+		attribute_type.put(COL_TYPE.INTEGER, "BIGINT");
+		attribute_type.put(COL_TYPE.INT, "INTEGER");
+		attribute_type.put(COL_TYPE.NEGATIVE_INTEGER, "BIGINT");
+		attribute_type.put(COL_TYPE.POSITIVE_INTEGER, "BIGINT");
+		attribute_type.put(COL_TYPE.UNSIGNED_INT, "INTEGER");
+		attribute_type.put(COL_TYPE.NON_POSITIVE_INTEGER, "BIGINT");
+		attribute_type.put(COL_TYPE.NON_NEGATIVE_INTEGER, "BIGINT");
+		attribute_type.put(COL_TYPE.LONG, "BIGINT");
+		attribute_type.put(COL_TYPE.DECIMAL, "DECIMAL");
+		attribute_type.put(COL_TYPE.DOUBLE, "DOUBLE PRECISION");
+		attribute_type.put(COL_TYPE.FLOAT, "DOUBLE PRECISION");
+		attribute_type.put(COL_TYPE.DATETIME, "TIMESTAMP");
+		attribute_type.put(COL_TYPE.BOOLEAN, "BOOLEAN");
 
-
-/**
- *  INSERT data 	
- */
-	
-	private static final Map<COL_TYPE, String> attribute_table_insert = new HashMap<>();
-	
-	static {
-		for (Entry<COL_TYPE, String> entry : attribute_table.entrySet()) 
-			attribute_table_insert.put(entry.getKey(), "INSERT INTO " + entry.getValue() 
-											+ " (URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)");
-	}
-	
-
-/**
- *  Indexes
- */
-	
-
-	private static final Map<COL_TYPE, String> attribute_index = new HashMap<>();
-	
-	static {
+		Map<COL_TYPE, String> attribute_index = new HashMap<>();
 		attribute_index.put(COL_TYPE.STRING, "IDX_STRING_ATTRIBUTE");
 		attribute_index.put(COL_TYPE.INTEGER, "IDX_INTEGER_ATTRIBUTE");
 		attribute_index.put(COL_TYPE.INT,  "XSD_INT_ATTRIBUTE");
@@ -273,6 +223,19 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		attribute_index.put(COL_TYPE.DOUBLE, "IDX_DOUBLE_ATTRIBUTE");
 		attribute_index.put(COL_TYPE.DATETIME, "IDX_DATETIME_ATTRIBUTE");
 		attribute_index.put(COL_TYPE.BOOLEAN, "IDX_BOOLEAN_ATTRIBUTE");
+
+		
+		for (COL_TYPE datatype : attribute_table.keySet()) {
+			TableDescription table = new TableDescription(attribute_table.get(datatype),
+					"\"URI\" INTEGER  NOT NULL, VAL " + attribute_type.get(datatype) + 
+					", \"IDX\"  SMALLINT  NOT NULL, ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE",
+					"(URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)", "\"URI\" as X, VAL as Y");
+			attributeTable.put(datatype, table);
+			
+			table.indexOn(attribute_index.get(datatype) + "1", "URI");		
+			table.indexOn(attribute_index.get(datatype) + "2", "IDX");
+			table.indexOn(attribute_index.get(datatype) + "3", "VAL");
+		}
 	}
 	
 
@@ -280,19 +243,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 
 	
-	
-	
 
-	private static final Map<COL_TYPE, String> select_mapping_attribute = new HashMap<>();
+
 	
-	static {
-		// two special cases
-		select_mapping_attribute.put(COL_TYPE.OBJECT, roleTable.selectCommand);
-		select_mapping_attribute.put(COL_TYPE.LITERAL, attributeTableLiteral.selectCommand);
-		//
-		for (Entry<COL_TYPE, String> entry : attribute_table.entrySet()) 
-			select_mapping_attribute.put(entry.getKey(),  "SELECT \"URI\" as X, VAL as Y FROM " + entry.getValue() + " WHERE ");  			
-	}
 	
 	
 	private static final String whereSingleCondition = "IDX = %d";
@@ -308,9 +261,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 	private boolean isIndexed;  // database index created
 
-	private final HashSet<SemanticIndexRecord> nonEmptyEntityRecord = new HashSet<SemanticIndexRecord>();
+	private final HashSet<SemanticIndexRecord> nonEmptyEntityRecord = new HashSet<>();
 
-	private final List<RepositoryChangedListener> changeList = new LinkedList<RepositoryChangedListener>();
+	private final List<RepositoryChangedListener> changeList = new LinkedList<>();
 
 	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag) {
 		this.reasonerDag = reasonerDag;
@@ -348,24 +301,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		st.addBatch(classTable.createCommand);
 		st.addBatch(roleTable.createCommand);
 
-		st.addBatch(attributeTableLiteral.createCommand);
-		st.addBatch(attribute_table_string_create);
-		st.addBatch(attribute_table_integer_create);
-        st.addBatch(attribute_table_int_create);
-        st.addBatch(attribute_table_unsigned_int_create);
-        st.addBatch(attribute_table_negative_integer_create);
-        st.addBatch(attribute_table_non_negative_integer_create);
-        st.addBatch(attribute_table_positive_integer_create);
-        st.addBatch(attribute_table_non_positive_integer_create);
-        st.addBatch(attribute_table_float_create);
-        st.addBatch(attribute_table_long_create);
-		st.addBatch(attribute_table_decimal_create);
-		st.addBatch(attribute_table_double_create);
-		st.addBatch(attribute_table_datetime_create);
-		st.addBatch(attribute_table_boolean_create);
-
-		
-		
+		for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
+			st.addBatch(entry.getValue().createCommand);
 		
 		st.executeBatch();
 		st.close();
@@ -375,21 +312,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		log.debug("Creating indexes");
 		Statement st = conn.createStatement();
 
-//		st.addBatch(indexclass1);
-//		st.addBatch(indexclass2);
-//		st.addBatch(indexrole1);
-//		st.addBatch(indexrole2);
-//		st.addBatch(indexrole3);
-		
-		for (String s : attributeTableLiteral.createIndexCommands)
-			st.addBatch(s);
-
-		for (Entry<COL_TYPE, String> entry : attribute_index.entrySet()) {
-			st.addBatch("CREATE INDEX " + entry.getValue() + "1 ON " + attribute_table.get(entry.getKey()) + " (URI)");		
-			st.addBatch("CREATE INDEX " + entry.getValue() + "2 ON " + attribute_table.get(entry.getKey()) + " (IDX)");
-			st.addBatch("CREATE INDEX " + entry.getValue() + "3 ON " + attribute_table.get(entry.getKey()) + " (VAL)");
-		}
-		
+		for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
+			for (String s : entry.getValue().createIndexCommands)
+				st.addBatch(s);
+					
 		for (String s : classTable.createIndexCommands)
 			st.addBatch(s);
 		
@@ -419,10 +345,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		st.addBatch(classTable.dropCommand);
 		st.addBatch(roleTable.dropCommand);
-		st.addBatch(attributeTableLiteral.dropCommand);
 		
-		for (Entry<COL_TYPE, String> entry : attribute_table.entrySet())
-			st.addBatch("DROP TABLE " + entry.getValue()); 
+		for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
+			st.addBatch(entry.getValue().dropCommand); 
 		
 		st.addBatch(uriIdTable.dropCommand);
 
@@ -445,11 +370,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		PreparedStatement uriidStm = conn.prepareStatement(uriIdTable.insertCommand);
 		PreparedStatement classStm = conn.prepareStatement(classTable.insertCommand);
 		PreparedStatement roleStm = conn.prepareStatement(roleTable.insertCommand);
-		PreparedStatement attributeLiteralStm = conn.prepareStatement(attributeTableLiteral.insertCommand);
 		
 		Map<COL_TYPE, PreparedStatement> attributeStm = new HashMap<COL_TYPE, PreparedStatement>();
-		for (Entry<COL_TYPE, String> entry : attribute_table_insert.entrySet()) {
-			PreparedStatement stm = conn.prepareStatement(entry.getValue());
+		for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet()) {
+			PreparedStatement stm = conn.prepareStatement(entry.getValue().insertCommand);
 			attributeStm.put(entry.getKey(), stm);
 		}
 		
@@ -509,7 +433,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			else /* (ax instanceof DataPropertyAssertion) */ {
 				DataPropertyAssertion dpa = (DataPropertyAssertion)ax;
 				try {
-					addPreparedStatement(uriidStm, attributeLiteralStm, attributeStm, dpa);										
+					addPreparedStatement(uriidStm, attributeStm, dpa);										
 					index = cacheSI.getIndex(dpa.getProperty());
 					COL_TYPE t1 = dpa.getSubject().getType();
 					COL_TYPE t2 = dpa.getValue().getType();		
@@ -532,7 +456,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			if (batchCount == batchLimit) {
 				executeBatch(uriidStm);
 				executeBatch(roleStm);
-				executeBatch(attributeLiteralStm);
 				for (PreparedStatement stm : attributeStm.values())
 					executeBatch(stm);
 				executeBatch(classStm);
@@ -549,7 +472,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		// Execute the rest of the batch
 		executeBatch(uriidStm);
 		executeBatch(roleStm);
-		executeBatch(attributeLiteralStm);
 		for (PreparedStatement stm : attributeStm.values())
 			executeBatch(stm);
 		executeBatch(classStm);
@@ -557,10 +479,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 		// Close all open statements
 		uriidStm.close();
-		roleStm.close();;
-		attributeLiteralStm.close();;
+		roleStm.close();
 		for (PreparedStatement stm : attributeStm.values())
-			stm.close();;
+			stm.close();
 		classStm.close();
 
 		// Commit the rest of the batch insert
@@ -653,8 +574,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		// log.debug("inserted: {} property", idx);
 	} 
 
-	private void addPreparedStatement(PreparedStatement uriidStm, PreparedStatement attributeLiteralStm,
-			Map<COL_TYPE, PreparedStatement> attributeStatement, DataPropertyAssertion ax) throws SQLException {
+	private void addPreparedStatement(PreparedStatement uriidStm, Map<COL_TYPE, PreparedStatement> attributeStatement, DataPropertyAssertion ax) throws SQLException {
 		
 
 		// Construct the database INSERT statements
@@ -682,7 +602,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			throw new RuntimeException("Data property cannot have a URI as object");
 		case LITERAL:
 		case LITERAL_LANG:
-			setInputStatement(attributeLiteralStm, uri_id, value, lang, idx, c1isBNode);
+			setInputStatement(attributeStatement.get(COL_TYPE.LITERAL), uri_id, value, lang, idx, c1isBNode);
 			// log.debug("literal");
 			break;
 		case STRING:
@@ -1350,14 +1270,14 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		switch (type2) {
 			case OBJECT:
 			case BNODE:
-				sql.append(select_mapping_attribute.get(COL_TYPE.OBJECT));
+				sql.append(roleTable.selectCommand);
 				break;
 			case LITERAL:
 			case LITERAL_LANG:
-				sql.append(select_mapping_attribute.get(COL_TYPE.LITERAL));
+				sql.append(attributeTable.get(COL_TYPE.LITERAL).selectCommand);
 				break;
 			default:
-				sql.append(select_mapping_attribute.get(type2));
+				sql.append(attributeTable.get(type2).selectCommand);
 		}
 
 		/*
@@ -1552,35 +1472,21 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 *  DROP indexes	
 	 */
 		
-	private static final String dropindexclass1 = "DROP INDEX \"idxclass1\"";
-	private static final String dropindexclass2 = "DROP INDEX \"idxclass2\"";
-
-	private static final String dropindexrole1 = "DROP INDEX \"idxrole1\"";
-	private static final String dropindexrole2 = "DROP INDEX \"idxrole2\"";
-	private static final String dropindexrole3 = "DROP INDEX \"idxrole3\"";
-	
 
 	public void dropIndexes(Connection conn) throws SQLException {
 		log.debug("Droping indexes");
 
 		Statement st = conn.createStatement();
 
-		st.addBatch(dropindexclass1);
-		st.addBatch(dropindexclass2);
-
-		st.addBatch(dropindexrole1);
-		st.addBatch(dropindexrole2);
-		st.addBatch(dropindexrole3);
-
-		for (String s : attributeTableLiteral.dropIndexCommands)
+		for (String s : classTable.dropIndexCommands)
 			st.addBatch(s);	
-		
-		
-		for (Entry<COL_TYPE, String> entry : attribute_index.entrySet()) {
-			st.addBatch("DROP INDEX " + entry.getValue() + "1");
-			st.addBatch("DROP INDEX " + entry.getValue() + "2");
-			st.addBatch("DROP INDEX " + entry.getValue() + "3");
-		}
+
+		for (String s : roleTable.dropIndexCommands)
+			st.addBatch(s);	
+
+		for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
+			for (String s : entry.getValue().dropIndexCommands)
+				st.addBatch(s);
 		
 		st.executeBatch();
 		st.close();
@@ -1598,14 +1504,14 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		try {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", classTable.tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", roleTable.tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTableLiteral.tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.STRING)));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.INTEGER)));
-            st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.LONG)));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.DECIMAL)));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.DOUBLE)));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.DATETIME)));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attribute_table.get(COL_TYPE.BOOLEAN)));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.LITERAL).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.STRING).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.INTEGER).tableName));
+            st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.LONG).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DECIMAL).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DOUBLE).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DATETIME).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.BOOLEAN).tableName));
 		} catch (SQLException e) {
 			exists = false;
 			log.debug(e.getMessage());
