@@ -39,35 +39,29 @@ public class SemanticIndexCache {
 		/*
 		 * Creating cache of semantic indexes and ranges
 		 */
-		for (ClassExpression description : engine.getIndexedClasses()) {
-			OClass cdesc = (OClass) description;
-			int idx = engine.getIndex(cdesc);
-			List<Interval> intervals = engine.getIntervals(cdesc);
+		for (Entry<ClassExpression, SemanticIndexRange> description : engine.getIndexedClasses()) {
+			int idx = description.getValue().getIndex();
+			List<Interval> intervals = description.getValue().getIntervals();
 
+			OClass cdesc = (OClass)description.getKey();
 			classIndexes.put(cdesc, idx);
 			classIntervals.put(cdesc, intervals);
 		} 
-		for (ObjectPropertyExpression cdesc : engine.getIndexedObjectProperties()) {
-			if (cdesc.isInverse()) {
-				/* Inverses don't get indexes or intervals */
-				continue;
-			}
+		for (Entry<ObjectPropertyExpression, SemanticIndexRange> description : engine.getIndexedObjectProperties()) {
+			int idx = description.getValue().getIndex();
+			List<Interval> intervals = description.getValue().getIntervals();
 
-			int idx = engine.getIndex(cdesc);
-			List<Interval> intervals = engine.getIntervals(cdesc);
-
-			String iri = cdesc.getPredicate().getName();
+			String iri = description.getKey().getPredicate().getName();
 			roleIndexes.put(iri, idx);
-			roleIntervals.put(cdesc.getPredicate(), intervals);
+			roleIntervals.put(description.getKey().getPredicate(), intervals);
 		} 
-		for (DataPropertyExpression cdesc : engine.getIndexedDataProperties()) {
+		for (Entry<DataPropertyExpression, SemanticIndexRange> description : engine.getIndexedDataProperties()) {
+			int idx = description.getValue().getIndex();
+			List<Interval> intervals = description.getValue().getIntervals();
 
-			int idx = engine.getIndex(cdesc);
-			List<Interval> intervals = engine.getIntervals(cdesc);
-
-			String iri = cdesc.getPredicate().getName();
+			String iri = description.getKey().getPredicate().getName();
 			roleIndexes.put(iri, idx);
-			roleIntervals.put(cdesc.getPredicate(), intervals);
+			roleIntervals.put(description.getKey().getPredicate(), intervals);
 		} 
 	}
 

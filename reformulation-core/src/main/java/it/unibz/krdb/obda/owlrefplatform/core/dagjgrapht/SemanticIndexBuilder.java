@@ -2,14 +2,13 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
@@ -33,11 +32,11 @@ import org.jgrapht.traverse.GraphIterator;
  */
 public class SemanticIndexBuilder  {
 
-	private final TBoxReasoner reasoner;
 	private final Map<ClassExpression, SemanticIndexRange> classRanges;
 	private final Map<ObjectPropertyExpression, SemanticIndexRange> opRanges;
 	private final Map<DataPropertyExpression, SemanticIndexRange> dpRanges;
 	
+	// index_counter is changed during the traversal of all three DAGs
 	private int index_counter = 1;
 
 	/**
@@ -102,12 +101,10 @@ public class SemanticIndexBuilder  {
 		DirectedGraph<T, DefaultEdge> reversed = new EdgeReversedGraph<>(dag);
 		
 		LinkedList<T> roots = new LinkedList<>();
-		for (T n : reversed.vertexSet()) {
-			if ((reversed.incomingEdgesOf(n)).isEmpty()) {
+		for (T n : reversed.vertexSet()) 
+			if ((reversed.incomingEdgesOf(n)).isEmpty()) 
 				roots.add(n);
-			}
-		}
-		
+			
 		Map<T,SemanticIndexRange> ranges = new HashMap<>();
 		for (T root: roots) {
 			// depth-first sort 
@@ -124,8 +121,8 @@ public class SemanticIndexBuilder  {
 	}
 	
 	/**
-	 * Constructor for the NamedDAGBuilder
-	 * @param dag the DAG from which we want to maintain only the named descriptions
+	 * Constructor for the NamedDAG
+	 * @param dag the DAG from which we want to keep only the named descriptions
 	 */
 
 	public static <T> SimpleDirectedGraph <T,DefaultEdge> getNamedDAG(EquivalencesDAG<T> dag) {
@@ -163,77 +160,25 @@ public class SemanticIndexBuilder  {
 	 */
 	
 	public SemanticIndexBuilder(TBoxReasoner reasoner)  {
-		this.reasoner = reasoner;
-		
 		//test with a reversed graph so that the smallest index will be given to the higher ancestor
 		classRanges = createSemanticIndex(getNamedDAG(reasoner.getClassDAG()));
 		opRanges = createSemanticIndex(getNamedDAG(reasoner.getObjectPropertyDAG()));
 		dpRanges = createSemanticIndex(getNamedDAG(reasoner.getDataPropertyDAG()));
 	}
-	
-	public int getIndex(OClass d) {
-		SemanticIndexRange idx = classRanges.get(d); 
-		if (idx != null)
-			return idx.getIndex();
-		return -1;
-	}
-	public int getIndex(ObjectPropertyExpression d) {
-		SemanticIndexRange idx = opRanges.get(d); 
-		if (idx != null)
-			return idx.getIndex();
-		return -1;
-	}
-	public int getIndex(DataPropertyExpression d) {
-		SemanticIndexRange idx = dpRanges.get(d); 
-		if (idx != null)
-			return idx.getIndex();
-		return -1;
-	}
-	
-	
-	public List<Interval> getIntervals(OClass d) {
-
-		Description node = reasoner.getClassDAG().getVertex(d).getRepresentative();
 		
-		SemanticIndexRange range = classRanges.get(node);
-		if (range == null)
-			range = new SemanticIndexRange(-1);
-		return range.getIntervals();
-	}
-
-	public List<Interval> getIntervals(ObjectPropertyExpression d) {
-
-		Description node = reasoner.getObjectPropertyDAG().getVertex(d).getRepresentative();
-		
-		SemanticIndexRange range = opRanges.get(node);
-		if (range == null)
-			range = new SemanticIndexRange(-1);
-		return range.getIntervals();
-	}
-	
-	public List<Interval> getIntervals(DataPropertyExpression d) {
-
-		Description node = reasoner.getDataPropertyDAG().getVertex(d).getRepresentative();
-		
-		SemanticIndexRange range = dpRanges.get(node);
-		if (range == null)
-			range = new SemanticIndexRange(-1);
-		return range.getIntervals();
-	}
 	
 
-	public Set<ClassExpression> getIndexedClasses() {
-		return classRanges.keySet();
+	public Set<Entry<ClassExpression, SemanticIndexRange>> getIndexedClasses() {
+		return classRanges.entrySet();
 	}
-	public Set<ObjectPropertyExpression> getIndexedObjectProperties() {
-		return opRanges.keySet();
+	public Set<Entry<ObjectPropertyExpression, SemanticIndexRange>> getIndexedObjectProperties() {
+		return opRanges.entrySet();
 	}
-	public Set<DataPropertyExpression> getIndexedDataProperties() {
-		return dpRanges.keySet();
+	public Set<Entry<DataPropertyExpression, SemanticIndexRange>> getIndexedDataProperties() {
+		return dpRanges.entrySet();
 	}
 	
 	
-	// TEST ONLY
 	
 	public SemanticIndexRange getRange(OClass d) {
 		return classRanges.get(d);
