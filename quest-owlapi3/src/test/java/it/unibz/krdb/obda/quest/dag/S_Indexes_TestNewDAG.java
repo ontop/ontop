@@ -27,7 +27,6 @@ import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -38,6 +37,8 @@ import java.util.ArrayList;
 import junit.framework.TestCase;
 
 import org.jgrapht.Graphs;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleDirectedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,44 +108,48 @@ public void testIndexes() throws Exception{
 
 		//add input named graph
 		SemanticIndexBuilder engine= new SemanticIndexBuilder(dag);
-		NamedDAG namedDAG = new NamedDAG(dag);
-
 		
 		log.debug("Input number {}", i+1 );
 		log.info("named graph {}", engine);
 		
 		
-		assertTrue(testIndexes(engine, namedDAG));
+		assertTrue(testIndexes(engine, dag));
 	}
 }
 
-	private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG){
+	private boolean testIndexes(SemanticIndexBuilder engine, TBoxReasoner reasoner){
 		boolean result = true;
 		
 		//create semantic index
 		//check that the index of the node is contained in the intervals of the parent node
+		SimpleDirectedGraph<ObjectPropertyExpression, DefaultEdge> namedOP 
+						= SemanticIndexBuilder.getNamedDAG(reasoner.getObjectPropertyDAG());		
 		for (ObjectPropertyExpression vertex: engine.getIndexedObjectProperties()) { // .getNamedDAG().vertexSet()
 			int index = engine.getIndex(vertex);
 			log.info("vertex {} index {}", vertex, index);
-			for(ObjectPropertyExpression parent: Graphs.successorListOf(namedDAG.getObjectPropertyDag(), vertex)){
+			for(ObjectPropertyExpression parent: Graphs.successorListOf(namedOP, vertex)){
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
 				if (!result)
 					return result;
 			}
 		}
+		SimpleDirectedGraph<DataPropertyExpression, DefaultEdge> namedDP 
+						= SemanticIndexBuilder.getNamedDAG(reasoner.getDataPropertyDAG());
 		for (DataPropertyExpression vertex: engine.getIndexedDataProperties()) { // .getNamedDAG().vertexSet()
 			int index = engine.getIndex(vertex);
 			log.info("vertex {} index {}", vertex, index);
-			for(DataPropertyExpression parent: Graphs.successorListOf(namedDAG.getDataPropertyDag(), vertex)){
+			for(DataPropertyExpression parent: Graphs.successorListOf(namedDP, vertex)){
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
 				if (!result)
 					return result;
 			}
 		}
+		SimpleDirectedGraph<ClassExpression, DefaultEdge> namedCL 
+						= SemanticIndexBuilder.getNamedDAG(reasoner.getClassDAG());
 		for (ClassExpression vertex: engine.getIndexedClasses()) { // .getNamedDAG().vertexSet()
 			int index = engine.getIndex((OClass)vertex);
 			log.info("vertex {} index {}", vertex, index);
-			for(ClassExpression parent: Graphs.successorListOf(namedDAG.getClassDag(), vertex)) {
+			for(ClassExpression parent: Graphs.successorListOf(namedCL, vertex)) {
 				result = engine.getRange((OClass)parent).contained(new SemanticIndexRange(index,index));
 				if (!result)
 					return result;

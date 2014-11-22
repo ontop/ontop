@@ -19,6 +19,7 @@ import org.jgrapht.event.TraversalListenerAdapter;
 import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
+import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 
@@ -42,6 +43,7 @@ public class SemanticIndexBuilder  {
 	
 	private int index_counter = 1;
 
+	
 	
 	/**
 	 * Listener that creates the index for each node visited in depth first search.
@@ -128,6 +130,40 @@ public class SemanticIndexBuilder  {
 	}
 	
 	/**
+	 * Constructor for the NamedDAGBuilder
+	 * @param dag the DAG from which we want to maintain only the named descriptions
+	 */
+
+	public static <T> SimpleDirectedGraph <T,DefaultEdge> getNamedDAG(EquivalencesDAG<T> dag) {
+		
+		SimpleDirectedGraph<T,DefaultEdge> namedDAG = new SimpleDirectedGraph<>(DefaultEdge.class); 
+
+		for (Equivalences<T> v : dag) 
+			namedDAG.addVertex(v.getRepresentative());
+
+		for (Equivalences<T> s : dag) 
+			for (Equivalences<T> t : dag.getDirectSuper(s)) 
+				namedDAG.addEdge(s.getRepresentative(), t.getRepresentative());
+
+		for (Equivalences<T> v : dag) 
+			if (!v.isIndexed()) {
+				// eliminate node
+				for (DefaultEdge incEdge : namedDAG.incomingEdgesOf(v.getRepresentative())) { 
+					T source = namedDAG.getEdgeSource(incEdge);
+
+					for (DefaultEdge outEdge : namedDAG.outgoingEdgesOf(v.getRepresentative())) {
+						T target = namedDAG.getEdgeTarget(outEdge);
+
+						namedDAG.addEdge(source, target);
+					}
+				}
+				namedDAG.removeVertex(v.getRepresentative());		// removes all adjacent edges as well				
+			}
+		return namedDAG;
+	}
+	
+	
+	/**
 	 * Assign indexes for the named DAG, use a depth first listener over the DAG 
 	 * @param reasoner used to know ancestors and descendants of the dag
 	 */
@@ -135,12 +171,10 @@ public class SemanticIndexBuilder  {
 	public SemanticIndexBuilder(TBoxReasoner reasoner)  {
 		this.reasoner = reasoner;
 		
-		NamedDAG namedDAG = new NamedDAG(reasoner);
-		
 		//test with a reversed graph so that the smallest index will be given to the higher ancestor
-		createSemanticIndex(namedDAG.getClassDag(), classIndexes, classRanges);
-		createSemanticIndex(namedDAG.getObjectPropertyDag(), opIndexes, opRanges);
-		createSemanticIndex(namedDAG.getDataPropertyDag(), dpIndexes, dpRanges);
+		createSemanticIndex(getNamedDAG(reasoner.getClassDAG()), classIndexes, classRanges);
+		createSemanticIndex(getNamedDAG(reasoner.getObjectPropertyDAG()), opIndexes, opRanges);
+		createSemanticIndex(getNamedDAG(reasoner.getDataPropertyDAG()), dpIndexes, dpRanges);
 		
 		index_counter = 1;
 	}

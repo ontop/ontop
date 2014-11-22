@@ -31,7 +31,6 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -43,6 +42,8 @@ import java.util.ArrayList;
 import junit.framework.TestCase;
 
 import org.jgrapht.Graphs;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleDirectedGraph;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -70,21 +71,15 @@ public class S_Indexes_Compare extends TestCase {
 
 		TBoxReasoner dag = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
 
-
-		//add input named graph
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
-		NamedDAG namedDAG = new NamedDAG(dag);
-
 		
 		log.debug("Input number {}", i+1 );
-		log.info("named graph {}", namedDAG);
 		
-		testIndexes(engine, namedDAG);
+		testIndexes(engine, dag);
 
-		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(fileInput));
-		Ontology onto = t.translate(owlonto);
+		Ontology onto = OWLAPI3TranslatorUtility.translate(owlonto);
 		DAG dag2 = DAGConstructor.getISADAG(onto);
 		dag2.clean();
         DAGOperations.buildDescendants(dag2);
@@ -124,33 +119,39 @@ private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 	}
 
 
-	private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG) {
+	private boolean testIndexes(SemanticIndexBuilder engine, TBoxReasoner reasoner) {
 		
 		boolean result = false;
 		
 		//check that the index of the node is contained in the intervals of the parent node
+		SimpleDirectedGraph<ObjectPropertyExpression, DefaultEdge> namedOP 
+							= SemanticIndexBuilder.getNamedDAG(reasoner.getObjectPropertyDAG());
 		for (ObjectPropertyExpression vertex: engine.getIndexedObjectProperties()) { // .getNamedDAG().vertexSet()
 			int index = engine.getIndex(vertex);
 			log.info("vertex {} index {}", vertex, index);
-			for (ObjectPropertyExpression parent: Graphs.successorListOf(namedDAG.getObjectPropertyDag(), vertex)){
+			for (ObjectPropertyExpression parent: Graphs.successorListOf(namedOP, vertex)){
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
 				if (result)
 					return result;
 			}
 		}
+		SimpleDirectedGraph<DataPropertyExpression, DefaultEdge> namedDP 
+					= SemanticIndexBuilder.getNamedDAG(reasoner.getDataPropertyDAG());
 		for (DataPropertyExpression vertex: engine.getIndexedDataProperties()) { // .getNamedDAG().vertexSet()
 			int index = engine.getIndex(vertex);
 			log.info("vertex {} index {}", vertex, index);
-			for (DataPropertyExpression parent: Graphs.successorListOf(namedDAG.getDataPropertyDag(), vertex)) {
+			for (DataPropertyExpression parent: Graphs.successorListOf(namedDP, vertex)) {
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
 				if (result)
 					return result;
 			}
 		}
+		SimpleDirectedGraph<ClassExpression, DefaultEdge> namedCL 
+						= SemanticIndexBuilder.getNamedDAG(reasoner.getClassDAG());
 		for (ClassExpression vertex: engine.getIndexedClasses()) { // .getNamedDAG().vertexSet()
 			int index = engine.getIndex((OClass)vertex);
 			log.info("vertex {} index {}", vertex, index);			
-			for (ClassExpression parent: Graphs.successorListOf(namedDAG.getClassDag(), vertex)) {
+			for (ClassExpression parent: Graphs.successorListOf(namedCL, vertex)) {
 				result = engine.getRange((OClass)parent).contained(new SemanticIndexRange(index,index));			
 				if (result)
 					return result;
