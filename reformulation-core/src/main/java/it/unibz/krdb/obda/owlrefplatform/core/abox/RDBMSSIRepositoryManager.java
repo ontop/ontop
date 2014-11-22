@@ -750,20 +750,32 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			String iri = string;
 			int idx = res.getInt(2);
 			int type = res.getInt(3);
-			if (type == CLASS_TYPE)
-				cacheSI.setIndex(ofac.createClass(iri), idx);
-			else {
-				ObjectPropertyExpression ope = ofac.createObjectProperty(iri);
-				if (reasonerDag.getObjectPropertyDAG().getVertex(ope) != null)
-					cacheSI.setIndex(ope, idx);
-				else {
-					DataPropertyExpression dpe = ofac.createDataProperty(iri);
-					if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null)
-						cacheSI.setIndex(dpe, idx);
-					else
-						throw new RuntimeException("UNKNOWN PROPERTY: " + iri);
-				}
+			
+			if (type == CLASS_TYPE) {
+				OClass c = ofac.createClass(iri);
+				if (reasonerDag.getClassDAG().getVertex(c) == null) 
+					throw new RuntimeException("UNKNOWN CLASS: " + iri);
+				
+				cacheSI.setIndex(c, idx);
 			}
+			else {
+				boolean one = false;
+				ObjectPropertyExpression ope = ofac.createObjectProperty(iri);
+				if (reasonerDag.getObjectPropertyDAG().getVertex(ope) != null) {
+					cacheSI.setIndex(ope, idx);
+					one = true;
+				}
+
+				DataPropertyExpression dpe = ofac.createDataProperty(iri);
+				if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null) {
+					cacheSI.setIndex(dpe, idx);
+					one = true;
+				}
+				
+				if (!one)
+					throw new RuntimeException("UNKNOWN PROPERTY: " + iri);
+			}
+			
 		}
 		res.close();
 
@@ -805,19 +817,29 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				 * we switched URI or type, time to store the collected
 				 * intervals and clear the set
 				 */
-				if (previousType == CLASS_TYPE)
-					cacheSI.setIntervals(ofac.createClass(previousString), currentSet);
+				if (previousType == CLASS_TYPE) {
+					OClass c = ofac.createClass(previousString);
+					if (reasonerDag.getClassDAG().getVertex(c) == null) 
+						throw new RuntimeException("UNKNOWN CLASS: " + previousString);
+					
+					cacheSI.setIntervals(c, currentSet);	
+				}
 				else {
+					boolean one = false;
 					ObjectPropertyExpression ope = ofac.createObjectProperty(previousString);
-					if (reasonerDag.getObjectPropertyDAG().getVertex(ope) != null)
+					if (reasonerDag.getObjectPropertyDAG().getVertex(ope) != null) {
 						cacheSI.setIntervals(ope, currentSet);
-					else {
-						DataPropertyExpression dpe = ofac.createDataProperty(previousString);
-						if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null)
-							cacheSI.setIntervals(dpe, currentSet);
-						else
-							throw new RuntimeException("UNKNOWN PROPERTY: " + previousString);
+						one = true;
 					}
+
+					DataPropertyExpression dpe = ofac.createDataProperty(previousString);
+					if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null) {
+						cacheSI.setIntervals(dpe, currentSet);
+						one = true;
+					}
+					
+					if (!one)
+						throw new RuntimeException("UNKNOWN PROPERTY: " + previousString);
 				}
 
 				currentSet = new LinkedList<Interval>();
@@ -830,19 +852,29 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		}
 
-		if (previousType == CLASS_TYPE)
-			cacheSI.setIntervals(ofac.createClass(previousString), currentSet);
+		if (previousType == CLASS_TYPE) {
+			OClass c = ofac.createClass(previousString);
+			if (reasonerDag.getClassDAG().getVertex(c) == null) 
+				throw new RuntimeException("UNKNOWN CLASS: " + previousString);
+			
+			cacheSI.setIntervals(c, currentSet);	
+		}
 		else {
+			boolean one = false;
 			ObjectPropertyExpression ope = ofac.createObjectProperty(previousString);
-			if (reasonerDag.getObjectPropertyDAG().getVertex(ope) != null)
+			if (reasonerDag.getObjectPropertyDAG().getVertex(ope) != null) {
 				cacheSI.setIntervals(ope, currentSet);
-			else {
-				DataPropertyExpression dpe = ofac.createDataProperty(previousString);
-				if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null)
-					cacheSI.setIntervals(dpe, currentSet);
-				else
-					throw new RuntimeException("UNKNOWN PROPERTY: " + previousString);
+				one = true;
 			}
+
+			DataPropertyExpression dpe = ofac.createDataProperty(previousString);
+			if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null) {
+				cacheSI.setIntervals(dpe, currentSet);
+				one = true;
+			}
+			
+			if (!one)
+				throw new RuntimeException("UNKNOWN PROPERTY: " + previousString);
 		}
 
 		res.close();
