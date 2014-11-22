@@ -130,7 +130,7 @@ private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 			int index = engine.getIndex(vertex);
 			log.info("vertex {} index {}", vertex, index);
 			for (ObjectPropertyExpression parent: Graphs.successorListOf(namedOP, vertex)){
-				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
+				result = engine.getRange(parent).contained(new SemanticIndexRange(index));			
 				if (result)
 					return result;
 			}
@@ -141,7 +141,7 @@ private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 			int index = engine.getIndex(vertex);
 			log.info("vertex {} index {}", vertex, index);
 			for (DataPropertyExpression parent: Graphs.successorListOf(namedDP, vertex)) {
-				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
+				result = engine.getRange(parent).contained(new SemanticIndexRange(index));			
 				if (result)
 					return result;
 			}
@@ -152,7 +152,7 @@ private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 			int index = engine.getIndex((OClass)vertex);
 			log.info("vertex {} index {}", vertex, index);			
 			for (ClassExpression parent: Graphs.successorListOf(namedCL, vertex)) {
-				result = engine.getRange((OClass)parent).contained(new SemanticIndexRange(index,index));			
+				result = engine.getRange((OClass)parent).contained(new SemanticIndexRange(index));			
 				if (result)
 					return result;
 			}

@@ -52,7 +52,7 @@ public class DAG implements Serializable {
 
 	private int index_counter = 1;
 
-	public final static SemanticIndexRange NULL_RANGE = new SemanticIndexRange(-1, -1);
+	public final static SemanticIndexRange NULL_RANGE = new SemanticIndexRange(-1);
 
 	public final static int NULL_INDEX = -1;
 
@@ -374,7 +374,7 @@ public class DAG implements Serializable {
 
 		if (node.getIndex() == NULL_INDEX) {
 			node.setIndex(index_counter);
-			node.setRange(new SemanticIndexRange(index_counter, index_counter));
+			node.setRange(new SemanticIndexRange(index_counter));
 			index_counter++;
 		} else {
 			return;
