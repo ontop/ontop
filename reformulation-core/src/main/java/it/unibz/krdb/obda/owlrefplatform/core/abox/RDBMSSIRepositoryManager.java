@@ -41,6 +41,8 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
@@ -242,6 +244,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
 	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
 	
@@ -741,7 +744,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			String iri = string;
 			int idx = res.getInt(2);
 			int type = res.getInt(3);
-			cacheSI.setIndex(iri, type, idx);
+			if (type == SemanticIndexCache.CLASS_TYPE)
+				cacheSI.setIndex(ofac.createClass(iri), idx);
+			else
+				cacheSI.setRoleIndex(iri, idx);
 		}
 		res.close();
 
@@ -783,7 +789,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				 * we switched URI or type, time to store the collected
 				 * intervals and clear the set
 				 */
-				cacheSI.setIntervals(previousString, previousType, currentSet);
+				if (previousType == SemanticIndexCache.CLASS_TYPE)
+					cacheSI.setIntervals(ofac.createClass(previousString), currentSet);
+				else
+					cacheSI.setRoleIntervals(previousString, currentSet);
 
 				currentSet = new LinkedList<Interval>();
 				previousStringStr = iristr;
@@ -795,7 +804,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		}
 
-		cacheSI.setIntervals(previousString, previousType, currentSet);
+		if (previousType == SemanticIndexCache.CLASS_TYPE)
+			cacheSI.setIntervals(ofac.createClass(previousString), currentSet);
+		else
+			cacheSI.setRoleIntervals(previousString, currentSet);
 
 		res.close();
 
@@ -859,36 +871,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 
 		/*
-		 * Collecting relevant nodes for each class, that is, the Node itself,
-		 * and each exists R such that there is no other exists P, such that R
-		 * isa P
-		 * 
-		 * Here we cannot collect only the top most, so we do it in two passes.
-		 * First we collect all exists R children, then we remove redundant ones.
-		 */
-
-		// TODO this part can be optimized if we know some existing dependencies
-		// (e.g., coming from given mappings)
-
-		Set<OClass> classNodesMaps = new HashSet<OClass>();
-		EquivalencesDAG<ClassExpression> classes = reasonerDag.getClassDAG();
-		
-		for (Equivalences<ClassExpression> set : classes) {
-			
-			ClassExpression node = set.getRepresentative();
-			
-			if (!(node instanceof OClass))
-				continue;
-						
-			classNodesMaps.add((OClass)node);
-		}
-
-		/*
-		 * We collected all classes and properties that need mappings, and the
-		 * nodes that are relevant for each of their mappings
-		 */
-
-		/*
 		 * PART 2: Creating the mappings
 		 * 
 		 * Note, at every step we always use the pureIsa dag to get the indexes
@@ -940,15 +922,18 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		 * Creating mappings for each concept
 		 */
 
-
-		for (OClass classNode : classNodesMaps) {
-
+		EquivalencesDAG<ClassExpression> classes = reasonerDag.getClassDAG();		
+		for (Equivalences<ClassExpression> set : classes) {
+			
+			ClassExpression node = set.getRepresentative();
+			
+			if (!(node instanceof OClass))
+				continue;
+						
+			OClass classNode = (OClass)node;
+			
 			Predicate classuri = classNode.getPredicate();
 			List<Interval> intervals = cacheSI.getIntervals(classNode);
-			if (intervals == null) {
-				log.warn("Found URI with no mappings, the ontology might not match the respository. Ill URI: {}", classuri.getName());
-				continue;
-			}
 
 			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
 			mappings.put(classuri, currentMappings);
@@ -1100,19 +1085,23 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 		
 		Function objectTerm;
-		if (type2 == COL_TYPE.BNODE) 
-			objectTerm = dfac.getBNodeTemplate(Y); 
-		else if (type2 == COL_TYPE.OBJECT) 
-			objectTerm = dfac.getUriTemplate(Y);
-		else if (type2 == COL_TYPE.LITERAL_LANG) { 
-			objectTerm = dfac.getTypedTerm(Y, dfac.getVariable("Z"));
-		} 
-		else {
-			if (type2 == COL_TYPE.DATE || type2 == COL_TYPE.TIME || type2 == COL_TYPE.YEAR) {
-				// R: the three types below were not covered by the switch
+		switch (type2) {
+			case BNODE:
+				objectTerm = dfac.getBNodeTemplate(Y); 
+				break;
+			case OBJECT:
+				objectTerm = dfac.getUriTemplate(Y);
+				break;
+			case LITERAL_LANG:	
+				objectTerm = dfac.getTypedTerm(Y, dfac.getVariable("Z"));
+				break;
+			case DATE:
+			case TIME:
+			case YEAR:
+				// R: these three types were not covered by the old switch
 				throw new RuntimeException("Unsuported type: " + type2);
-			}
-			objectTerm = dfac.getTypedTerm(Y, type2);
+			default:
+				objectTerm = dfac.getTypedTerm(Y, type2);
 		}
 
 		Function body = dfac.getFunction(predicate, subjectTerm, objectTerm);
@@ -1237,17 +1226,17 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 			/* inserting index data for classes and roles */
 
-			for (String concept : cacheSI.getIndexKeys(SemanticIndexCache.CLASS_TYPE)) {
-				stm.setString(1, concept.toString());
-				stm.setInt(2, cacheSI.getIndex(concept, SemanticIndexCache.CLASS_TYPE));
+			for (Entry<OClass,Integer> concept : cacheSI.getClassIndexEntries()) {
+				stm.setString(1, concept.getKey().getPredicate().getName());
+				stm.setInt(2, concept.getValue());
 				stm.setInt(3, SemanticIndexCache.CLASS_TYPE);
 				stm.addBatch();
 			}
 			stm.executeBatch();
 
-			for (String role : cacheSI.getIndexKeys(SemanticIndexCache.ROLE_TYPE)) {
-				stm.setString(1, role.toString());
-				stm.setInt(2, cacheSI.getIndex(role, SemanticIndexCache.ROLE_TYPE));
+			for (Entry<String,Integer> role : cacheSI.getRoleIndexEntries()) {
+				stm.setString(1, role.getKey());
+				stm.setInt(2, role.getValue());
 				stm.setInt(3, SemanticIndexCache.ROLE_TYPE);
 				stm.addBatch();
 			}
@@ -1260,9 +1249,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			 */
 
 			stm = conn.prepareStatement(intervalTable.insertCommand);
-			for (String concept : cacheSI.getIntervalsKeys(SemanticIndexCache.CLASS_TYPE)) {
-				for (Interval it : cacheSI.getClassIntervals(concept)) {
-					stm.setString(1, concept.toString());
+			for (Entry<OClass, List<Interval>> concept : cacheSI.getClassIntervalsEntries()) {
+				for (Interval it : concept.getValue()) {
+					stm.setString(1, concept.getKey().getPredicate().getName());
 					stm.setInt(2, it.getStart());
 					stm.setInt(3, it.getEnd());
 					stm.setInt(4, SemanticIndexCache.CLASS_TYPE);
@@ -1271,9 +1260,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			}
 			stm.executeBatch();
 
-			for (String role : cacheSI.getIntervalsKeys(SemanticIndexCache.ROLE_TYPE)) {
-				for (Interval it : cacheSI.getRoleIntervals(role)) {
-					stm.setString(1, role.toString());
+			for (Entry<String, List<Interval>> role : cacheSI.getRoleIntervalsEntries()) {
+				for (Interval it : role.getValue()) {
+					stm.setString(1, role.getKey());
 					stm.setInt(2, it.getStart());
 					stm.setInt(3, it.getEnd());
 					stm.setInt(4, SemanticIndexCache.ROLE_TYPE);
