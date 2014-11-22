@@ -568,107 +568,92 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		// Construct the database INSERT statements
 		ObjectConstant subject = ax.getSubject();
+		
 		String uri = subject.getName();
 		int uri_id = uriMap.idOfURI(uri);
 		uriidStm.setInt(1, uri_id);
 		uriidStm.setString(2, uri);
 		uriidStm.addBatch();
 		
-		boolean c1isBNode = subject instanceof BNode;
-
 		DataPropertyExpression prop = ax.getProperty();
 		int idx = cacheSI.getIndex(prop);
 
-		// The insertion is based on the datatype from TBox
 		ValueConstant object = ax.getValue();
 		Predicate.COL_TYPE attributeType = object.getType();
-		String value = object.getValue();
-		String lang = object.getLanguage();
-
-		switch (attributeType) {
-		case BNODE:
-		case OBJECT:
-			throw new RuntimeException("Data property cannot have a URI as object");
-		case LITERAL:
-		case LITERAL_LANG:
-			setInputStatement(attributeStatement.get(COL_TYPE.LITERAL), uri_id, value, lang, idx, c1isBNode);
-			// log.debug("literal");
-			break;
-		case STRING:
-			setInputStatement(attributeStatement.get(attributeType), uri_id, value, idx, c1isBNode);
-			// log.debug("string");
-			break;
-        case INTEGER:
-            if (value.charAt(0) == '+')
-                value = value.substring(1, value.length());
-            setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-            // log.debug("Integer");
-            break;
-        case INT:
-            if (value.charAt(0) == '+')
-                value = value.substring(1, value.length());
-            setInputStatement(attributeStatement.get(attributeType), uri_id, Integer.parseInt(value), idx, c1isBNode);
-            // log.debug("Int");
-            break;
-        case UNSIGNED_INT:
-            setInputStatement(attributeStatement.get(attributeType), uri_id, Integer.parseInt(value), idx, c1isBNode);
-            // log.debug("Int");
-            break;
-        case NEGATIVE_INTEGER:
-            setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-            // log.debug("Integer");
-            break;
-        case POSITIVE_INTEGER:
-            if (value.charAt(0) == '+')
-                value = value.substring(1, value.length());
-            setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-            // log.debug("Integer");
-            break;
-        case NON_NEGATIVE_INTEGER:
-            if (value.charAt(0) == '+')
-                value = value.substring(1, value.length());
-            setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-            // log.debug("Integer");
-            break;
-        case NON_POSITIVE_INTEGER:
-                value = value.substring(1, value.length());
-            setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-            // log.debug("Integer");
-            break;
-        case FLOAT:
-            setInputStatement(attributeStatement.get(attributeType), uri_id, Float.parseFloat(value), idx, c1isBNode);
-            // log.debug("Float");
-            break;
-        case LONG:
-			if (value.charAt(0) == '+')
-				value = value.substring(1, value.length());
-			setInputStatement(attributeStatement.get(attributeType), uri_id, Long.parseLong(value), idx, c1isBNode);
-			// log.debug("Long");
-			break;
-		case DECIMAL:
-			setInputStatement(attributeStatement.get(attributeType), uri_id, parseBigDecimal(value), idx, c1isBNode);
-			// log.debug("BigDecimal");
-			break;
-		case DOUBLE:
-			setInputStatement(attributeStatement.get(attributeType), uri_id, Double.parseDouble(value), idx, c1isBNode);
-			// log.debug("Double");
-			break;
-		case DATETIME:
-			setInputStatement(attributeStatement.get(attributeType), uri_id, parseTimestamp(value), idx, c1isBNode);
-			// log.debug("Date");
-			break;
-		case BOOLEAN:
-			value = getBooleanString(value); // PostgreSQL
-												// abbreviates the
-												// boolean value to
-												// 't' and 'f'
-			setInputStatement(attributeStatement.get(attributeType), uri_id, Boolean.parseBoolean(value), idx, c1isBNode);
-			// log.debug("boolean");
-			break;
-		case UNSUPPORTED:
-		default:
-			log.warn("Ignoring assertion: {}", ax);
+		// special treatment for LITERAL_LANG
+		if (attributeType == COL_TYPE.LITERAL_LANG)
+			attributeType = COL_TYPE.LITERAL;
+		
+		PreparedStatement stm = attributeStatement.get(attributeType);
+		if (stm == null) {
+			// UNSUPPORTED DATATYPE
+			log.warn("Ignoring assertion: {}", ax);			
 		}
+		stm.setInt(1, uri_id);
+		
+		String value = object.getValue();
+		
+		switch (attributeType) {
+		case LITERAL:  // 0
+			stm.setString(2, value);
+			stm.setString(3, object.getLanguage());
+			break;  
+		case STRING:   // 1
+			stm.setString(2, value);
+			break;
+        case INT:   // 3
+            if (value.charAt(0) == '+')
+                value = value.substring(1, value.length());
+        	stm.setInt(2, Integer.parseInt(value));
+            break;
+        case UNSIGNED_INT:  // 4
+        	stm.setInt(2, Integer.parseInt(value));
+            break;
+        case INTEGER:  // 2
+        case NEGATIVE_INTEGER:   // 5
+        case POSITIVE_INTEGER:   // 6
+        case NON_NEGATIVE_INTEGER: // 7
+        case NON_POSITIVE_INTEGER: // 8
+        case LONG: // 10
+            if (value.charAt(0) == '+')
+                value = value.substring(1, value.length());
+            stm.setLong(2, Long.parseLong(value));
+            break;
+        case FLOAT: // 9
+			stm.setDouble(2, Float.parseFloat(value));
+            break;
+		case DOUBLE: // 12
+			stm.setDouble(2, Double.parseDouble(value));
+			break;
+		case DECIMAL: // 11
+			stm.setBigDecimal(2, new BigDecimal(value));
+			break;
+		case DATETIME: // 13
+			stm.setTimestamp(2, parseTimestamp(value));
+			break;
+		case BOOLEAN: // 14
+			// PostgreSQL abbreviates the boolean value to 't' and 'f'
+			if (value.equalsIgnoreCase("t") || value.equals("1")) 
+				value = "true";
+			else if (value.equalsIgnoreCase("f") || value.equals("0")) 
+				value= "false";
+			
+			stm.setBoolean(2, Boolean.parseBoolean(value));
+			break;
+		default:
+			assert(false);
+		}
+		
+		boolean c1isBNode = subject instanceof BNode;
+		if (attributeType == COL_TYPE.LITERAL) {
+			stm.setInt(4, idx);
+			stm.setBoolean(5, c1isBNode);			
+		}
+		else {
+			stm.setInt(3, idx);
+			stm.setBoolean(4, c1isBNode);			
+		}
+		stm.addBatch();
 	}
 	
 	
@@ -718,99 +703,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 
-	private String getBooleanString(String value) {
-		if (value.equalsIgnoreCase("t") || value.equals("1")) {
-			return "true";
-		} else if (value.equalsIgnoreCase("f") || value.equals("0")) {
-			return "false";
-		} else {
-			return value; // nothing change
-		}
-	}
 
-	private void setInputStatement(PreparedStatement stm, int uri, String value, String lang, int idx, boolean isBnode)
-			throws SQLException {
 
-		// log.debug("inserted: {} {}", uri, value);
-		// log.debug("inserted: {} {}", lang, idx);
-		stm.setInt(1, uri);
-		stm.setString(2, value);
-		stm.setString(3, lang);
-		stm.setInt(4, idx);
-		stm.setBoolean(5, isBnode);
-
-		stm.addBatch();
-	}
-
-	private void setInputStatement(PreparedStatement stm, int uri, String value, int idx, boolean isBnode) throws SQLException {
-		// log.debug("inserted: {} {}", uri, value);
-		// log.debug("inserted: {}", idx);
-		stm.setInt(1, uri);
-		stm.setString(2, value);
-		stm.setInt(3, idx);
-		stm.setBoolean(4, isBnode);
-
-		stm.addBatch();
-	}
-
-	private void setInputStatement(PreparedStatement stm, int uri, int value, int idx, boolean isBnode) throws SQLException {
-		// log.debug("inserted: {} {}", uri, value);
-		// log.debug("inserted: {}", idx);
-		stm.setInt(1, uri);
-		stm.setInt(2, value);
-		stm.setInt(3, idx);
-		stm.setBoolean(4, isBnode);
-
-		stm.addBatch();
-	}
-
-	private void setInputStatement(PreparedStatement stm, int uri, BigDecimal value, int idx, boolean isBnode) throws SQLException {
-		// log.debug("inserted: {} {}", uri, value);
-		// log.debug("inserted: {}", idx);
-		stm.setInt(1, uri);
-		stm.setBigDecimal(2, value);
-		stm.setInt(3, idx);
-		stm.setBoolean(4, isBnode);
-
-		stm.addBatch();
-	}
-
-	private void setInputStatement(PreparedStatement stm, int uri, double value, int idx, boolean isBnode) throws SQLException {
-		// log.debug("inserted: {} {}", uri, value);
-		// log.debug("inserted: {}", idx);
-		stm.setInt(1, uri);
-		stm.setDouble(2, value);
-		stm.setInt(3, idx);
-		stm.setBoolean(4, isBnode);
-
-		stm.addBatch();
-	}
-
-	private void setInputStatement(PreparedStatement stm, int uri, Timestamp value, int idx, boolean isBnode) throws SQLException {
-		// log.debug("inserted: {} {}", uri, value);
-		// log.debug("inserted: {}", idx);
-		stm.setInt(1, uri);
-		stm.setTimestamp(2, value);
-		stm.setInt(3, idx);
-		stm.setBoolean(4, isBnode);
-
-		stm.addBatch();
-	}
-
-	private void setInputStatement(PreparedStatement stm, int uri, boolean value, int idx, boolean isBnode) throws SQLException {
-		// log.debug("inserted: {} {}", uri, value);
-		// log.debug("inserted: {}", idx);
-		stm.setInt(1, uri);
-		stm.setBoolean(2, value);
-		stm.setInt(3, idx);
-		stm.setBoolean(4, isBnode);
-
-		stm.addBatch();
-	}
-
-	private static BigDecimal parseBigDecimal(String value) {
-		return new BigDecimal(value);
-	}
 
 	private static final String[] formatStrings = { 
 				"yyyy-MM-dd HH:mm:ss.SS", 
