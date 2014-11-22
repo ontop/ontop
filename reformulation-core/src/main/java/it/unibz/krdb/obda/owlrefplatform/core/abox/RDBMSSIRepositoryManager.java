@@ -489,7 +489,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		ObjectPropertyExpression prop = ax.getProperty();
 
 		ObjectConstant o1, o2;
-		if (isInverse(prop)) {
+		if (cacheSI.isIndexedObjectPropertyInverse(prop)) {
 			o1 = ax.getObject();
 			o2 = ax.getSubject();
 		}
@@ -498,10 +498,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			o2 = ax.getObject();
 		}
 
+		int idx = cacheSI.getIndex(prop);
+		
 		int uri_id = getObjectConstantUriId(o1, uriidStm);
 		int uri2_id = getObjectConstantUriId(o2, uriidStm);
-		
-		int idx = cacheSI.getIndex(prop);
 		
 		// Construct the database INSERT statements		
 		roleStm.setInt(1, uri_id);
@@ -665,16 +665,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	private void executeBatch(PreparedStatement statement) throws SQLException {
 		statement.executeBatch();
 		statement.clearBatch();
-	}
-
-	private boolean isInverse(ObjectPropertyExpression property) {
-	
-		ObjectPropertyExpression desc = reasonerDag.getObjectPropertyDAG().getVertex(property).getRepresentative();
-		if (!property.equals(desc)) {
-			if (desc.isInverse()) 
-				return true;
-		}
-		return false; // representative is never an inverse
 	}
 
 
@@ -908,7 +898,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException {
 
-		Map<Predicate, List<OBDAMappingAxiom>> mappings = new HashMap<Predicate, List<OBDAMappingAxiom>>();
+		List<OBDAMappingAxiom> result = new LinkedList<>();
 
 		/*
 		 * PART 2: Creating the mappings
@@ -924,15 +914,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			// only named roles are mapped
 			if (node.isInverse()) 
 				continue;
+			
 			// We need to make sure we make no mappings for Auxiliary roles
 			// introduced by the Ontology translation process.
 			if (OntologyVocabularyImpl.isAuxiliaryProperty(node)) 
 				continue;
 			
-			// Get the indexed node (from the pureIsa dag)
-			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
-			mappings.put(node.getPredicate(), currentMappings);
-
 			/***
 			 * Generating one mapping for each supported cases, i.e., the second
 			 * component is an object, or one of the supported datatypes. For
@@ -945,21 +932,23 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			
 			for (COL_TYPE obType1 : objectTypes) {
 				for (COL_TYPE obType2 : objectTypes) {
-					CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, obType2);
-					String sourceQuery = constructSourceQuery(node, obType1, obType2);
-					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-					if (!isMappingEmpty(node, obType1, obType2))
-						currentMappings.add(basicmapping);					
+					if (!isMappingEmpty(node, obType1, obType2)) {
+						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, obType2);
+						String sourceQuery = constructSourceQuery(node, obType1, obType2);
+						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+						result.add(basicmapping);		
+					}
 				}
 			}
 
 			for (COL_TYPE obType1 : objectTypes) {
 				for (COL_TYPE type2 : types) {			
-					CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, type2);
-					String sourceQuery = constructSourceQuery(node, obType1, type2);
-					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-					if (!isMappingEmpty(node, obType1, type2))
-						currentMappings.add(basicmapping);
+					if (!isMappingEmpty(node, obType1, type2)) {
+						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, type2);
+						String sourceQuery = constructSourceQuery(node, obType1, type2);
+						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+						result.add(basicmapping);
+					}
 				}	
 			}
 		}
@@ -974,10 +963,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				continue;
 			
 
-			// Get the indexed node (from the pureIsa dag)
-			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
-			mappings.put(node.getPredicate(), currentMappings);
-
 			/***
 			 * Generating one mapping for each supported cases, i.e., the second
 			 * component is an object, or one of the supported datatypes. For
@@ -990,21 +975,23 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			
 			for (COL_TYPE obType1 : objectTypes) {
 				for (COL_TYPE obType2 : objectTypes) {
-					CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, obType2);
-					String sourceQuery = constructSourceQuery(node, obType1, obType2);
-					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-					if (!isMappingEmpty(node, obType1, obType2))
-						currentMappings.add(basicmapping);					
+					if (!isMappingEmpty(node, obType1, obType2)) {
+						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, obType2);
+						String sourceQuery = constructSourceQuery(node, obType1, obType2);
+						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+						result.add(basicmapping);			
+					}
 				}
 			}
 
 			for (COL_TYPE obType1 : objectTypes) {
 				for (COL_TYPE type2 : types) {			
-					CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, type2);
-					String sourceQuery = constructSourceQuery(node, obType1, type2);
-					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-					if (!isMappingEmpty(node, obType1, type2))
-						currentMappings.add(basicmapping);
+					if (!isMappingEmpty(node, obType1, type2)) {
+						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, type2);
+						String sourceQuery = constructSourceQuery(node, obType1, type2);
+						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+						result.add(basicmapping);
+					}
 				}	
 			}
 		}
@@ -1026,14 +1013,11 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			Predicate classuri = classNode.getPredicate();
 			List<Interval> intervals = cacheSI.getIntervals(classNode);
 
-			List<OBDAMappingAxiom> currentMappings = new LinkedList<OBDAMappingAxiom>();
-			mappings.put(classuri, currentMappings);
-
 			// Mapping head
 			Predicate predicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
 			Function head = dfac.getFunction(predicate, dfac.getVariable("X"));
 			
-			{
+			if (!isMappingEmpty(classNode, COL_TYPE.OBJECT)) {
 				/* FOR URI */
 				Function body1 = dfac.getFunction(classuri, dfac.getUriTemplate(dfac.getVariable("X")));
 				CQIE targetQuery1 = dfac.getCQIE(head, body1);
@@ -1044,10 +1028,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				appendIntervalString(sql1, intervals);
 
 				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sql1.toString(), targetQuery1);
-				if (!isMappingEmpty(classNode, COL_TYPE.OBJECT))
-					currentMappings.add(basicmapping);
+				result.add(basicmapping);
 			}
-			{
+			if (!isMappingEmpty(classNode, COL_TYPE.BNODE)) {
 				/* FOR BNODE */
 				
 				Function body2 = dfac.getFunction(classuri, dfac.getBNodeTemplate(dfac.getVariable("X")));
@@ -1059,8 +1042,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				appendIntervalString(sql2, intervals);
 
 				OBDAMappingAxiom  basicmapping = dfac.getRDBMSMappingAxiom(sql2.toString(), targetQuery2);
-				if (!isMappingEmpty(classNode, COL_TYPE.BNODE))
-					currentMappings.add(basicmapping);
+				result.add(basicmapping);
 			}
 		}
 
@@ -1094,14 +1076,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			}
 		}
 		*/
-		/*
-		 * Collecting the result
-		 */
-		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
-		for (Predicate predicate : mappings.keySet()) {
-			log.debug("Predicate: {} Mappings: {}", predicate, mappings.get(predicate).size());
-			result.addAll(mappings.get(predicate));
-		}
 		log.debug("Total: {} mappings", result.size());
 		return result;
 	}
@@ -1140,7 +1114,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
 
 				SemanticIndexRecord record = new SemanticIndexRecord(table, type1, type2, i);
-				if (nonEmptyEntityRecord.contains(record))
+				if (nonEmptyEntityRecord.contains(record)) 
 					return false;
 			}
 
@@ -1387,9 +1361,15 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			}
 			stm.executeBatch();
 
-			for (Entry<String,Integer> role : cacheSI.getRoleIndexEntries()) {
-				stm.setString(1, role.getKey());
-				stm.setInt(2, role.getValue());
+			for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : cacheSI.getObjectPropertyIndexEntries()) {
+				stm.setString(1, role.getKey().getPredicate().getName());
+				stm.setInt(2, role.getValue().getIndex());
+				stm.setInt(3, ROLE_TYPE);
+				stm.addBatch();
+			}
+			for (Entry<DataPropertyExpression, SemanticIndexRange> role : cacheSI.getDataPropertyIndexEntries()) {
+				stm.setString(1, role.getKey().getPredicate().getName());
+				stm.setInt(2, role.getValue().getIndex());
 				stm.setInt(3, ROLE_TYPE);
 				stm.addBatch();
 			}
@@ -1413,8 +1393,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			}
 			stm.executeBatch();
 
-			for (Entry<ObjectPropertyExpression, List<Interval>> role : cacheSI.getObjectPropertyIntervalsEntries()) {
-				for (Interval it : role.getValue()) {
+			for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : cacheSI.getObjectPropertyIndexEntries()) {
+				for (Interval it : role.getValue().getIntervals()) {
 					stm.setString(1, role.getKey().getPredicate().getName());
 					stm.setInt(2, it.getStart());
 					stm.setInt(3, it.getEnd());
@@ -1422,8 +1402,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					stm.addBatch();
 				}
 			}
-			for (Entry<DataPropertyExpression, List<Interval>> role : cacheSI.getDataPropertyIntervalsEntries()) {
-				for (Interval it : role.getValue()) {
+			for (Entry<DataPropertyExpression, SemanticIndexRange> role : cacheSI.getDataPropertyIndexEntries()) {
+				for (Interval it : role.getValue().getIntervals()) {
 					stm.setString(1, role.getKey().getPredicate().getName());
 					stm.setInt(2, it.getStart());
 					stm.setInt(3, it.getEnd());
