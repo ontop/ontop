@@ -3,6 +3,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 
 import java.util.HashMap;
@@ -12,10 +13,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graphs;
 import org.jgrapht.event.ConnectedComponentTraversalEvent;
 import org.jgrapht.event.TraversalListenerAdapter;
 import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 
@@ -30,10 +33,14 @@ import org.jgrapht.traverse.GraphIterator;
 public class SemanticIndexBuilder  {
 
 	private final TBoxReasoner reasoner;
-	private Map< Description, Integer> indexes = new HashMap<Description, Integer>();
-	private Map< Description, SemanticIndexRange> ranges = new HashMap<Description, SemanticIndexRange>();
+	private final Map<ClassExpression, Integer> classIndexes = new HashMap<>();
+	private final Map<ClassExpression, SemanticIndexRange> classRanges = new HashMap<>();
+	private final Map<ObjectPropertyExpression, Integer> opIndexes = new HashMap<>();
+	private final Map<ObjectPropertyExpression, SemanticIndexRange> opRanges = new HashMap<>();
+	private final Map<DataPropertyExpression, Integer> dpIndexes = new HashMap<>();
+	private final Map<DataPropertyExpression, SemanticIndexRange> dpRanges = new HashMap<>();
+	
 	private int index_counter = 1;
-	private final NamedDAG namedDAG;
 
 	
 	/**
@@ -41,11 +48,20 @@ public class SemanticIndexBuilder  {
 	 * extends TraversalListenerAdapter from JGrapht
 	 *
 	 */
-	private final class IndexListener extends TraversalListenerAdapter<Description, DefaultEdge> {
+	private final class SemanticIndexer<T> extends TraversalListenerAdapter<T, DefaultEdge> {
 
-		private Description reference; 		//last root node
+		private T reference; 		//last root node
 		private boolean newComponent = true;
 
+		private final DirectedGraph <T,DefaultEdge> namedDAG;
+		private final Map<T, Integer> indexes;
+		private final Map<T, SemanticIndexRange> ranges;
+		
+		public SemanticIndexer(DirectedGraph<T,DefaultEdge> namedDAG, Map<T, Integer> indexes, Map<T, SemanticIndexRange> ranges) {
+			this.namedDAG = namedDAG;
+			this.indexes = indexes;
+			this.ranges = ranges;
+		}
 		
 		//search for the new root in the graph
 		@Override
@@ -54,9 +70,8 @@ public class SemanticIndexBuilder  {
 		}
 
 		@Override
-		public void vertexTraversed(VertexTraversalEvent<Description> e) {
-
-			Description vertex = e.getVertex();
+		public void vertexTraversed(VertexTraversalEvent<T> e) {
+			T vertex = e.getVertex();
 
 			if (newComponent) {
 				reference = vertex;
@@ -68,6 +83,7 @@ public class SemanticIndexBuilder  {
 			index_counter++;
 		}
 
+		@Override
 		public void connectedComponentFinished(ConnectedComponentTraversalEvent e) {
 			//merge all the interval for the current root of the graph
 			mergeRangeNode(reference);
@@ -76,42 +92,41 @@ public class SemanticIndexBuilder  {
 		 * Merge the indexes of the current connected component 
 		 * @param d  is the root node 
 		 * */
-		private void mergeRangeNode(Description d) {
+		private void mergeRangeNode(T d) {
+			for (T ch : Graphs.successorListOf(namedDAG, d)) { 
+				if (!ch.equals(d)) { 
+					mergeRangeNode(ch);
 
-			if (d instanceof ObjectPropertyExpression) {
-				for (Description ch : namedDAG.getPredecessors((ObjectPropertyExpression)d)) { 
-					if (!ch.equals(d)) { // Roman: was !=
-						mergeRangeNode(ch);
-
-						//merge the index of the node with the index of his child
-						ranges.get(d).addRange(ranges.get(ch));
-					}
+					//merge the index of the node with the index of his child
+					ranges.get(d).addRange(ranges.get(ch));
 				}
-			}
-			else if (d instanceof DataPropertyExpression) {
-				for (Description ch : namedDAG.getPredecessors((DataPropertyExpression)d)) { 
-					if (!ch.equals(d)) { // Roman: was !=
-						mergeRangeNode(ch);
-
-						//merge the index of the node with the index of his child
-						ranges.get(d).addRange(ranges.get(ch));
-					}
-				}
-			}
-			else {
-				for (Description ch : namedDAG.getPredecessors((ClassExpression)d)) { 
-					if (!ch.equals(d)) { // Roman: was !=
-						mergeRangeNode(ch);
-
-						//merge the index of the node with the index of his child
-						ranges.get(d).addRange(ranges.get(ch));
-					}
-				}
-				
 			}
 		}
 	}
 
+	private <T> void createSemanticIndex(DirectedGraph<T, DefaultEdge> dag, Map<T,Integer> indexes, Map<T,SemanticIndexRange> ranges) {
+		DirectedGraph<T, DefaultEdge> reversed = new EdgeReversedGraph<>(dag);
+		
+		LinkedList<T> roots = new LinkedList<>();
+		for (T n : reversed.vertexSet()) {
+			if ((reversed.incomingEdgesOf(n)).isEmpty()) {
+				roots.add(n);
+			}
+		}
+		
+		for (T root: roots) {
+			// depth-first sort 
+			GraphIterator<T, DefaultEdge> orderIterator = new DepthFirstIterator<>(reversed, root);
+		
+			//add Listener to create the indexes and ranges
+			orderIterator.addTraversalListener(new SemanticIndexer<T>(reversed, indexes, ranges));
+		
+			//		System.out.println("\nIndexing:");
+			while (orderIterator.hasNext()) 
+				orderIterator.next();
+		}
+	}
+	
 	/**
 	 * Assign indexes for the named DAG, use a depth first listener over the DAG 
 	 * @param reasoner used to know ancestors and descendants of the dag
@@ -120,70 +135,87 @@ public class SemanticIndexBuilder  {
 	public SemanticIndexBuilder(TBoxReasoner reasoner)  {
 		this.reasoner = reasoner;
 		
-		namedDAG = new NamedDAG(reasoner);
+		NamedDAG namedDAG = new NamedDAG(reasoner);
 		
 		//test with a reversed graph so that the smallest index will be given to the higher ancestor
-		DirectedGraph<Description, DefaultEdge> reversed = namedDAG.getReversedDag();
-
-		LinkedList<Description> roots = new LinkedList<Description>();
-		for (Description n : reversed.vertexSet()) {
-			if ((reversed.incomingEdgesOf(n)).isEmpty()) {
-				roots.add(n);
-			}
-		}
+		createSemanticIndex(namedDAG.getClassDag(), classIndexes, classRanges);
+		createSemanticIndex(namedDAG.getObjectPropertyDag(), opIndexes, opRanges);
+		createSemanticIndex(namedDAG.getDataPropertyDag(), dpIndexes, dpRanges);
 		
-		for (Description root: roots) {
-		//A depth first sort 
-			GraphIterator<Description, DefaultEdge> orderIterator 
-				= new DepthFirstIterator<Description, DefaultEdge>(reversed, root);
-		
-			//add Listener to create the indexes and ranges
-			orderIterator.addTraversalListener(new IndexListener());
-		
-
-			//		System.out.println("\nIndexing:");
-			while (orderIterator.hasNext()) {
-				orderIterator.next();
-			}
-		}
 		index_counter = 1;
 	}
 	
-	public NamedDAG getNamedDAG() {
-		return namedDAG;
+	public int getIndex(OClass d) {
+		Integer idx = classIndexes.get(d); 
+		if (idx != null)
+			return idx;
+		return -1;
 	}
-
-	public int getIndex(Description d) {
-		Integer idx = indexes.get(d); 
+	public int getIndex(ObjectPropertyExpression d) {
+		Integer idx = opIndexes.get(d); 
+		if (idx != null)
+			return idx;
+		return -1;
+	}
+	public int getIndex(DataPropertyExpression d) {
+		Integer idx = dpIndexes.get(d); 
 		if (idx != null)
 			return idx;
 		return -1;
 	}
 	
 	
-	public List<Interval> getIntervals(Description d) {
+	public List<Interval> getIntervals(OClass d) {
 
-		Description node;
-		if (d instanceof ObjectPropertyExpression)
-			node = reasoner.getObjectPropertyDAG().getVertex((ObjectPropertyExpression)d).getRepresentative();
-		else if (d instanceof DataPropertyExpression)
-			node = reasoner.getDataPropertyDAG().getVertex((DataPropertyExpression)d).getRepresentative();
-		else
-			node = reasoner.getClassDAG().getVertex((ClassExpression)d).getRepresentative();
+		Description node = reasoner.getClassDAG().getVertex(d).getRepresentative();
 		
-		SemanticIndexRange range = ranges.get(node);
+		SemanticIndexRange range = classRanges.get(node);
+		if (range == null)
+			range = new SemanticIndexRange(-1, -1);
+		return range.getIntervals();
+	}
+
+	public List<Interval> getIntervals(ObjectPropertyExpression d) {
+
+		Description node = reasoner.getObjectPropertyDAG().getVertex(d).getRepresentative();
+		
+		SemanticIndexRange range = opRanges.get(node);
 		if (range == null)
 			range = new SemanticIndexRange(-1, -1);
 		return range.getIntervals();
 	}
 	
+	public List<Interval> getIntervals(DataPropertyExpression d) {
+
+		Description node = reasoner.getDataPropertyDAG().getVertex(d).getRepresentative();
+		
+		SemanticIndexRange range = dpRanges.get(node);
+		if (range == null)
+			range = new SemanticIndexRange(-1, -1);
+		return range.getIntervals();
+	}
+	
+
+	public Set<ClassExpression> getIndexedClasses() {
+		return classIndexes.keySet();
+	}
+	public Set<ObjectPropertyExpression> getIndexedObjectProperties() {
+		return opIndexes.keySet();
+	}
+	public Set<DataPropertyExpression> getIndexedDataProperties() {
+		return dpIndexes.keySet();
+	}
+	
 	
 	// TEST ONLY
-	public SemanticIndexRange getRange(Description d) {
-		return ranges.get(d);
+	
+	public SemanticIndexRange getRange(OClass d) {
+		return classRanges.get(d);
 	}
-
-	public Set<Description> getIndexed() {
-		return indexes.keySet();
+	public SemanticIndexRange getRange(ObjectPropertyExpression d) {
+		return opRanges.get(d);
+	}
+	public SemanticIndexRange getRange(DataPropertyExpression d) {
+		return dpRanges.get(d);
 	}
 }

@@ -25,6 +25,7 @@ package it.unibz.krdb.obda.quest.dag;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
@@ -33,8 +34,10 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.util.ArrayList;
+
 import junit.framework.TestCase;
 
+import org.jgrapht.Graphs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,56 +107,51 @@ public void testIndexes() throws Exception{
 
 		//add input named graph
 		SemanticIndexBuilder engine= new SemanticIndexBuilder(dag);
+		NamedDAG namedDAG = new NamedDAG(dag);
 
 		
 		log.debug("Input number {}", i+1 );
 		log.info("named graph {}", engine);
 		
 		
-		assertTrue(testIndexes(engine, engine.getNamedDAG()));
-
-
+		assertTrue(testIndexes(engine, namedDAG));
 	}
 }
 
-private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG){
-	boolean result=true;
+	private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG){
+		boolean result = true;
 		
-	//create semantic index
-	//check that the index of the node is contained in the intervals of the parent node
-	for(Description vertex: engine.getIndexed() /*.getNamedDAG().vertexSet()*/){
-		int index= engine.getIndex(vertex);
-		log.info("vertex {} index {}", vertex, index);
-		if (vertex instanceof ObjectPropertyExpression) {
-			for(ObjectPropertyExpression parent: namedDAG.getSuccessors((ObjectPropertyExpression)vertex)){
+		//create semantic index
+		//check that the index of the node is contained in the intervals of the parent node
+		for (ObjectPropertyExpression vertex: engine.getIndexedObjectProperties()) { // .getNamedDAG().vertexSet()
+			int index = engine.getIndex(vertex);
+			log.info("vertex {} index {}", vertex, index);
+			for(ObjectPropertyExpression parent: Graphs.successorListOf(namedDAG.getObjectPropertyDag(), vertex)){
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
-				if(!result)
-					break;
+				if (!result)
+					return result;
 			}
 		}
-		else if (vertex instanceof DataPropertyExpression) {
-			for(DataPropertyExpression parent: namedDAG.getSuccessors((DataPropertyExpression)vertex)){
+		for (DataPropertyExpression vertex: engine.getIndexedDataProperties()) { // .getNamedDAG().vertexSet()
+			int index = engine.getIndex(vertex);
+			log.info("vertex {} index {}", vertex, index);
+			for(DataPropertyExpression parent: Graphs.successorListOf(namedDAG.getDataPropertyDag(), vertex)){
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
-				if(!result)
-					break;
+				if (!result)
+					return result;
 			}
 		}
-		else {
-			for(ClassExpression parent: namedDAG.getSuccessors((ClassExpression)vertex)){
-				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
-				if(!result)
-					break;
+		for (ClassExpression vertex: engine.getIndexedClasses()) { // .getNamedDAG().vertexSet()
+			int index = engine.getIndex((OClass)vertex);
+			log.info("vertex {} index {}", vertex, index);
+			for(ClassExpression parent: Graphs.successorListOf(namedDAG.getClassDag(), vertex)) {
+				result = engine.getRange((OClass)parent).contained(new SemanticIndexRange(index,index));
+				if (!result)
+					return result;
 			}			
 		}
 		
-	}
-	
-	//log.info("ranges {}", ranges);
-	
-	
-	return result;
-	
-
+		return result;
 }
 
 

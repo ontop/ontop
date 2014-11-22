@@ -23,15 +23,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 
-import java.util.List;
-
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 /** 
@@ -63,42 +57,20 @@ public class NamedDAG  {
 	
 	
 	
-	@Deprecated // USED ONLY IN TESTS (3 calls)
 	public SimpleDirectedGraph <ObjectPropertyExpression,DefaultEdge> getObjectPropertyDag() {
 		return objectPropertyDAG;
 	}
-	@Deprecated // USED ONLY IN TESTS (3 calls)
 	public SimpleDirectedGraph <DataPropertyExpression,DefaultEdge> getDataPropertyDag() {
 		return dataPropertyDAG;
 	}
-	@Deprecated // USED ONLY IN TESTS (3 calls)
 	public SimpleDirectedGraph <ClassExpression,DefaultEdge> getClassDag() {
 		return classDAG;
 	}
-	@Deprecated // USED ONLY IN TESTS (3 calls)
 	public SimpleDirectedGraph <DataRangeExpression,DefaultEdge> getDataRangeDag() {
 		return dataRangeDAG;
 	}
 	
-	public List<ObjectPropertyExpression> getSuccessors(ObjectPropertyExpression desc) {
-		return Graphs.successorListOf(objectPropertyDAG, desc);		
-	}
-	public List<DataPropertyExpression> getSuccessors(DataPropertyExpression desc) {
-		return Graphs.successorListOf(dataPropertyDAG, desc);		
-	}
-	public List<ClassExpression> getSuccessors(ClassExpression desc) {
-		return Graphs.successorListOf(classDAG, desc);		
-	}
-	
-	public List<ObjectPropertyExpression> getPredecessors(ObjectPropertyExpression desc) {
-		return Graphs.predecessorListOf(objectPropertyDAG, desc);		
-	}
-	public List<DataPropertyExpression> getPredecessors(DataPropertyExpression desc) {
-		return Graphs.predecessorListOf(dataPropertyDAG, desc);		
-	}
-	public List<ClassExpression> getPredecessors(ClassExpression desc) {
-		return Graphs.predecessorListOf(classDAG, desc);		
-	}
+		
 	
 	
 	/**
@@ -108,7 +80,7 @@ public class NamedDAG  {
 
 	private static <T> SimpleDirectedGraph <T,DefaultEdge> getNamedDAG(EquivalencesDAG<T> dag) {
 		
-		SimpleDirectedGraph<T,DefaultEdge>  namedDAG = new SimpleDirectedGraph <T,DefaultEdge> (DefaultEdge.class); 
+		SimpleDirectedGraph<T,DefaultEdge> namedDAG = new SimpleDirectedGraph<>(DefaultEdge.class); 
 
 		for (Equivalences<T> v : dag) 
 			namedDAG.addVertex(v.getRepresentative());
@@ -133,17 +105,5 @@ public class NamedDAG  {
 			}
 		return namedDAG;
 	}
-	
-
-	public DirectedGraph<Description, DefaultEdge> getReversedDag() {
-		SimpleDirectedGraph <Description,DefaultEdge>  dag 
-			= new SimpleDirectedGraph <Description,DefaultEdge> (DefaultEdge.class); 
-		Graphs.addGraph(dag, objectPropertyDAG);
-		Graphs.addGraph(dag, dataPropertyDAG);
-		Graphs.addGraph(dag, classDAG);
-		DirectedGraph<Description, DefaultEdge> reversed =
-				new EdgeReversedGraph<Description, DefaultEdge>(dag); // WOULD IT NOT BE BETTER TO CACHE?
-		return reversed;
-	}
-		
+			
 }

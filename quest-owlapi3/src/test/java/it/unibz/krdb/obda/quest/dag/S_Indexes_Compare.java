@@ -25,6 +25,7 @@ package it.unibz.krdb.obda.quest.dag;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
@@ -41,6 +42,7 @@ import java.util.ArrayList;
 
 import junit.framework.TestCase;
 
+import org.jgrapht.Graphs;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -57,30 +59,27 @@ public class S_Indexes_Compare extends TestCase {
 		super(name);
 	}
 	
-public void setUp(){
-		
-	
-	input.add("src/test/resources/test/equivalence/test_404.owl");
+	public void setUp() {
+		input.add("src/test/resources/test/equivalence/test_404.owl");
+	}
 
-}
-
-public void testIndexes() throws Exception{
+	public void testIndexes() throws Exception {
 	//for each file in the input
 	for (int i=0; i<input.size(); i++){
 		String fileInput=input.get(i);
 
-		TBoxReasoner dag= new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
+		TBoxReasoner dag = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
 
 
 		//add input named graph
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
+		NamedDAG namedDAG = new NamedDAG(dag);
 
 		
 		log.debug("Input number {}", i+1 );
-		log.info("named graph {}", engine.getNamedDAG());
+		log.info("named graph {}", namedDAG);
 		
-		
-		testIndexes(engine, engine.getNamedDAG());
+		testIndexes(engine, namedDAG);
 
 		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
@@ -121,54 +120,45 @@ private void testOldIndexes(DAG d1, SemanticIndexBuilder d2){
 		System.out.println(d1.getRoleNode(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2")));
 		;
 	}
-	
-
-	
-
-	
-	
-}
-private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG) {
-	boolean result=false;
-	
-	
-	//check that the index of the node is contained in the intervals of the parent node
-	for(Description vertex: engine.getIndexed()) { // .getNamedDAG().vertexSet()
-		int index= engine.getIndex(vertex);
-		log.info("vertex {} index {}", vertex, index);
-		if (vertex instanceof ObjectPropertyExpression) {
-			for (ObjectPropertyExpression parent: namedDAG.getSuccessors((ObjectPropertyExpression)vertex)){
-				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
-				if (result)
-					break;
-			}
-		}
-		else if (vertex instanceof DataPropertyExpression) {
-			for (DataPropertyExpression parent: namedDAG.getSuccessors((DataPropertyExpression)vertex)){
-				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
-				if (result)
-					break;
-			}
-		}
-		else {
-			for (ClassExpression parent: namedDAG.getSuccessors((ClassExpression)vertex)){
-				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
-				if (result)
-					break;
-			}
-			
-		}	
-		if(!result)
-			break;
+		
 	}
-	
-	//log.info("ranges {}", ranges);
-	
-	
-	return result;
-	
 
-}
+
+	private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG) {
+		
+		boolean result = false;
+		
+		//check that the index of the node is contained in the intervals of the parent node
+		for (ObjectPropertyExpression vertex: engine.getIndexedObjectProperties()) { // .getNamedDAG().vertexSet()
+			int index = engine.getIndex(vertex);
+			log.info("vertex {} index {}", vertex, index);
+			for (ObjectPropertyExpression parent: Graphs.successorListOf(namedDAG.getObjectPropertyDag(), vertex)){
+				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
+				if (result)
+					return result;
+			}
+		}
+		for (DataPropertyExpression vertex: engine.getIndexedDataProperties()) { // .getNamedDAG().vertexSet()
+			int index = engine.getIndex(vertex);
+			log.info("vertex {} index {}", vertex, index);
+			for (DataPropertyExpression parent: Graphs.successorListOf(namedDAG.getDataPropertyDag(), vertex)) {
+				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));			
+				if (result)
+					return result;
+			}
+		}
+		for (ClassExpression vertex: engine.getIndexedClasses()) { // .getNamedDAG().vertexSet()
+			int index = engine.getIndex((OClass)vertex);
+			log.info("vertex {} index {}", vertex, index);			
+			for (ClassExpression parent: Graphs.successorListOf(namedDAG.getClassDag(), vertex)) {
+				result = engine.getRange((OClass)parent).contained(new SemanticIndexRange(index,index));			
+				if (result)
+					return result;
+			}
+		}
+		
+		return result;
+	}
 
 
 

@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -35,48 +36,39 @@ public class SemanticIndexCache {
 		//create the indexes		
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(reasonerDag);
 		
-		
 		/*
 		 * Creating cache of semantic indexes and ranges
 		 */
-		// HACKY WAY -- TO BE CHANGED
-		Set<Description> descriptions = engine.getIndexed(); // ((SemanticIndexEngineImpl)engine).getNamedDAG().vertexSet();
-		for (Description description : descriptions) {
-			if (description instanceof OClass) {
+		for (ClassExpression description : engine.getIndexedClasses()) {
+			OClass cdesc = (OClass) description;
+			int idx = engine.getIndex(cdesc);
+			List<Interval> intervals = engine.getIntervals(cdesc);
 
-				OClass cdesc = (OClass) description;
-				int idx = engine.getIndex(cdesc);
-				List<Interval> intervals = engine.getIntervals(cdesc);
+			classIndexes.put(cdesc, idx);
+			classIntervals.put(cdesc, intervals);
+		} 
+		for (ObjectPropertyExpression cdesc : engine.getIndexedObjectProperties()) {
+			if (cdesc.isInverse()) {
+				/* Inverses don't get indexes or intervals */
+				continue;
+			}
 
-				classIndexes.put(cdesc, idx);
-				classIntervals.put(cdesc, intervals);
-			} 
-			else if (description instanceof ObjectPropertyExpression) {
-				ObjectPropertyExpression cdesc = (ObjectPropertyExpression) description;
+			int idx = engine.getIndex(cdesc);
+			List<Interval> intervals = engine.getIntervals(cdesc);
 
-				if (cdesc.isInverse()) {
-					/* Inverses don't get indexes or intervals */
-					continue;
-				}
+			String iri = cdesc.getPredicate().getName();
+			roleIndexes.put(iri, idx);
+			roleIntervals.put(cdesc.getPredicate(), intervals);
+		} 
+		for (DataPropertyExpression cdesc : engine.getIndexedDataProperties()) {
 
-				int idx = engine.getIndex(cdesc);
-				List<Interval> intervals = engine.getIntervals(cdesc);
+			int idx = engine.getIndex(cdesc);
+			List<Interval> intervals = engine.getIntervals(cdesc);
 
-				String iri = cdesc.getPredicate().getName();
-				roleIndexes.put(iri, idx);
-				roleIntervals.put(cdesc.getPredicate(), intervals);
-			} 
-			else if (description instanceof DataPropertyExpression) {
-				DataPropertyExpression cdesc = (DataPropertyExpression) description;
-
-				int idx = engine.getIndex(cdesc);
-				List<Interval> intervals = engine.getIntervals(cdesc);
-
-				String iri = cdesc.getPredicate().getName();
-				roleIndexes.put(iri, idx);
-				roleIntervals.put(cdesc.getPredicate(), intervals);
-			} 
-		}
+			String iri = cdesc.getPredicate().getName();
+			roleIndexes.put(iri, idx);
+			roleIntervals.put(cdesc.getPredicate(), intervals);
+		} 
 	}
 
 	/***
