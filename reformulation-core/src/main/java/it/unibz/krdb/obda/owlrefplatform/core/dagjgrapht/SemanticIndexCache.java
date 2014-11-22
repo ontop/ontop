@@ -1,10 +1,8 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 
@@ -21,9 +19,8 @@ public class SemanticIndexCache {
 	
 	
 	private Map<OClass, List<Interval>> classIntervals = new HashMap<>();
-	private Map<Predicate, List<Interval>> roleIntervals = new HashMap<>();
-//	private Map<ObjectPropertyExpression, List<Interval>> opeIntervals = new HashMap<>();
-//	private Map<DataPropertyExpression, List<Interval>> dpeIntervals = new HashMap<>();
+	private Map<ObjectPropertyExpression, List<Interval>> opeIntervals = new HashMap<>();
+	private Map<DataPropertyExpression, List<Interval>> dpeIntervals = new HashMap<>();
 
 	private Map<OClass, Integer> classIndexes = new HashMap<>();
 	private Map<String, Integer> roleIndexes = new HashMap<>();
@@ -53,7 +50,7 @@ public class SemanticIndexCache {
 
 			String iri = description.getKey().getPredicate().getName();
 			roleIndexes.put(iri, idx);
-			roleIntervals.put(description.getKey().getPredicate(), intervals);
+			opeIntervals.put(description.getKey(), intervals);
 		} 
 		for (Entry<DataPropertyExpression, SemanticIndexRange> description : engine.getIndexedDataProperties()) {
 			int idx = description.getValue().getIndex();
@@ -61,7 +58,7 @@ public class SemanticIndexCache {
 
 			String iri = description.getKey().getPredicate().getName();
 			roleIndexes.put(iri, idx);
-			roleIntervals.put(description.getKey().getPredicate(), intervals);
+			dpeIntervals.put(description.getKey(), intervals);
 		} 
 	}
 
@@ -156,7 +153,7 @@ public class SemanticIndexCache {
 	
 	public List<Interval> getIntervals(ObjectPropertyExpression ope)  {
 		
-		List<Interval> intervals = roleIntervals.get(ope.getPredicate());
+		List<Interval> intervals = opeIntervals.get(ope);
 		if (intervals == null)
 			throw new RuntimeException("Could not create mapping for predicate: " + ope
 					+ ". Couldn not find semantic index intervals for the predicate.");
@@ -165,7 +162,7 @@ public class SemanticIndexCache {
 
 	public List<Interval> getIntervals(DataPropertyExpression dpe)  {
 		
-		List<Interval> intervals = roleIntervals.get(dpe.getPredicate());
+		List<Interval> intervals = dpeIntervals.get(dpe);
 		if (intervals == null)
 			throw new RuntimeException("Could not create mapping for predicate: " + dpe
 					+ ". Couldn not find semantic index intervals for the predicate.");
@@ -177,20 +174,20 @@ public class SemanticIndexCache {
 	}
 	
 	public void setIntervals(ObjectPropertyExpression ope, List<Interval> intervals) {
-		roleIntervals.put(ope.getPredicate(), intervals);
+		opeIntervals.put(ope, intervals);
 	}
 	
 	public void setIntervals(DataPropertyExpression dpe, List<Interval> intervals) {
-		roleIntervals.put(dpe.getPredicate(), intervals);
+		dpeIntervals.put(dpe, intervals);
 	}
 	
 	public void clear() {
 		classIndexes.clear();
 		classIntervals.clear();
 		roleIndexes.clear();
-		roleIntervals.clear();
-//		opeIntervals.clear();		
-//		dpeIntervals.clear();		
+//		roleIntervals.clear();
+		opeIntervals.clear();		
+		dpeIntervals.clear();		
 	}
 
 
@@ -210,15 +207,11 @@ public class SemanticIndexCache {
 		return classIntervals.entrySet();
 	}
 	
-	public Set<Entry<Predicate, List<Interval>>> getPropertyIntervalsEntries() {
-		return roleIntervals.entrySet();
-	}
-/*	
 	public Set<Entry<ObjectPropertyExpression, List<Interval>>> getObjectPropertyIntervalsEntries() {
 		return opeIntervals.entrySet();
 	}
 	public Set<Entry<DataPropertyExpression, List<Interval>>> getDataPropertyIntervalsEntries() {
 		return dpeIntervals.entrySet();
 	}
-*/	
+	
 }

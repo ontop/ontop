@@ -1374,9 +1374,18 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			}
 			stm.executeBatch();
 
-			for (Entry<Predicate, List<Interval>> role : cacheSI.getPropertyIntervalsEntries()) {
+			for (Entry<ObjectPropertyExpression, List<Interval>> role : cacheSI.getObjectPropertyIntervalsEntries()) {
 				for (Interval it : role.getValue()) {
-					stm.setString(1, role.getKey().getName());
+					stm.setString(1, role.getKey().getPredicate().getName());
+					stm.setInt(2, it.getStart());
+					stm.setInt(3, it.getEnd());
+					stm.setInt(4, SemanticIndexCache.ROLE_TYPE);
+					stm.addBatch();
+				}
+			}
+			for (Entry<DataPropertyExpression, List<Interval>> role : cacheSI.getDataPropertyIntervalsEntries()) {
+				for (Interval it : role.getValue()) {
+					stm.setString(1, role.getKey().getPredicate().getName());
 					stm.setInt(2, it.getStart());
 					stm.setInt(3, it.getEnd());
 					stm.setInt(4, SemanticIndexCache.ROLE_TYPE);

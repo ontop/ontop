@@ -57,10 +57,9 @@ public class SemanticIndexBuilder  {
 			this.ranges = ranges;
 		}
 		
-		//search for the new root in the graph
 		@Override
 		public void connectedComponentStarted(ConnectedComponentTraversalEvent e) {
-			newComponent = true;
+			newComponent = true;  // to record a new root
 		}
 
 		@Override
@@ -97,8 +96,11 @@ public class SemanticIndexBuilder  {
 		}
 	}
 
-	private <T> Map<T, SemanticIndexRange> createSemanticIndex(DirectedGraph<T, DefaultEdge> dag) {
-		DirectedGraph<T, DefaultEdge> reversed = new EdgeReversedGraph<>(dag);
+	private <T> Map<T, SemanticIndexRange> createSemanticIndex(EquivalencesDAG<T> dag) {
+		
+		DirectedGraph<T, DefaultEdge> namedDag = getNamedDAG(dag);
+		// reverse the named dag so that we give smallest indexes to ? 
+		DirectedGraph<T, DefaultEdge> reversed = new EdgeReversedGraph<>(namedDag);
 		
 		LinkedList<T> roots = new LinkedList<>();
 		for (T n : reversed.vertexSet()) 
@@ -110,10 +112,10 @@ public class SemanticIndexBuilder  {
 			// depth-first sort 
 			GraphIterator<T, DefaultEdge> orderIterator = new DepthFirstIterator<>(reversed, root);
 		
-			//add Listener to create the indexes and ranges
+			// add Listener to create the ranges
 			orderIterator.addTraversalListener(new SemanticIndexer<T>(reversed, ranges));
 		
-			//		System.out.println("\nIndexing:");
+			// System.out.println("\nIndexing:");
 			while (orderIterator.hasNext()) 
 				orderIterator.next();
 		}
@@ -160,10 +162,9 @@ public class SemanticIndexBuilder  {
 	 */
 	
 	public SemanticIndexBuilder(TBoxReasoner reasoner)  {
-		//test with a reversed graph so that the smallest index will be given to the higher ancestor
-		classRanges = createSemanticIndex(getNamedDAG(reasoner.getClassDAG()));
-		opRanges = createSemanticIndex(getNamedDAG(reasoner.getObjectPropertyDAG()));
-		dpRanges = createSemanticIndex(getNamedDAG(reasoner.getDataPropertyDAG()));
+		classRanges = createSemanticIndex(reasoner.getClassDAG());
+		opRanges = createSemanticIndex(reasoner.getObjectPropertyDAG());
+		dpRanges = createSemanticIndex(reasoner.getDataPropertyDAG());
 	}
 		
 	
