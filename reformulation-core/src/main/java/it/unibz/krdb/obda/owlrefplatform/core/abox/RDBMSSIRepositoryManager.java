@@ -73,6 +73,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Joiner;
+
 /**
  * Store ABox assertions in the DB
  * 
@@ -237,19 +239,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			table.indexOn(attribute_index.get(datatype) + "3", "VAL");
 		}
 	}
-	
-
-	
-
-
-	
-
-
-	
-	
-	
-	private static final String whereSingleCondition = "IDX = %d";
-	private static final String whereIntervalCondition = "IDX >= %d AND IDX <= %d";
 	
 
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
@@ -1110,7 +1099,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				StringBuilder sql1 = new StringBuilder();
 				sql1.append(classTable.selectCommand);
 				sql1.append(" ISBNODE = FALSE AND ");
-				appendIntervalString(intervals, sql1);
+				appendIntervalString(sql1, intervals);
 
 				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sql1.toString(), targetQuery1);
 				if (!isMappingEmpty(classNode, COL_TYPE.OBJECT))
@@ -1125,7 +1114,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				StringBuilder sql2 = new StringBuilder();
 				sql2.append(classTable.selectCommand);
 				sql2.append(" ISBNODE = TRUE AND ");
-				appendIntervalString(intervals, sql2);
+				appendIntervalString(sql2, intervals);
 
 				OBDAMappingAxiom  basicmapping = dfac.getRDBMSMappingAxiom(sql2.toString(), targetQuery2);
 				if (!isMappingEmpty(classNode, COL_TYPE.BNODE))
@@ -1307,34 +1296,41 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		 * Generating the interval conditions for semantic index
 		 */
 
-		List<Interval> intervals = cacheSI.getRoleIntervals(predicate.getName());
-		
-		appendIntervalString(intervals, sql);
+		List<Interval> intervals = cacheSI.getRoleIntervals(predicate.getName());	
+		appendIntervalString(sql, intervals);
 
 		return sql.toString();
 	}
 	
 
-	private void appendIntervalString(List<Interval> intervals, StringBuilder sql) {
-		if (intervals.size() > 1)
-			sql.append("(");
-		sql.append(getIntervalString0(intervals.get(0)));
+	private void appendIntervalString(StringBuilder sql, final List<Interval> intervals) {
+		
+		Joiner.on(" OR ").appendTo(sql, new Iterator<String>() {		
+			private final Iterator<Interval> it = intervals.iterator();
 
-		for (int intervali = 1; intervali < intervals.size(); intervali++) {
-			sql.append(" OR ");
-			sql.append(getIntervalString0(intervals.get(intervali)));
+			@Override
+			public boolean hasNext() { return it.hasNext(); }
+
+			@Override
+			public String next() {
+				Interval interval = it.next();
+				if (interval.getStart() == interval.getEnd()) 
+					return String.format("IDX = %d", interval.getStart());
+				else 
+					return String.format("IDX >= %d AND IDX <= %d", interval.getStart(), interval.getEnd());
+
+			}
+
+			@Override
+			public void remove() { }
+		});
+		
+		if (intervals.size() > 1) {
+			sql.insert(0, "(");
+			sql.append(")");
 		}
-		if (intervals.size() > 1)
-			sql.append(")");	
 	}
 	
-	private String getIntervalString0(Interval interval) {
-		if (interval.getStart() == interval.getEnd()) {
-			return String.format(whereSingleCondition, interval.getStart());
-		} else {
-			return String.format(whereIntervalCondition, interval.getStart(), interval.getEnd());
-		}
-	}
 
 	public void collectStatistics(Connection conn) throws SQLException {
 
@@ -1420,7 +1416,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			}
 			stm.executeBatch();
 
-			/* Inserting emptyness index metadata */
+			/* Inserting emptiness index metadata */
 
 			stm = conn.prepareStatement(emptinessIndexTable.insertCommand);
 			for (SemanticIndexRecord record : nonEmptyEntityRecord) {
@@ -1459,10 +1455,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 
 	}
-
-	/*
-	 * Utilities
-	 */
 
 	
 	/**
@@ -1521,15 +1513,5 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 		return exists;
 	}
-
-	//
-	class InsertionMonitor {
-
-
-
-
-	}
-
-	
 
 }
