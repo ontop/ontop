@@ -44,7 +44,6 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexRecord.SITable;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
@@ -515,7 +514,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		// TODO (ROMAN): should we not swap the arguments for the inverse?
 		COL_TYPE t1 = ax.getSubject().getType();
 		COL_TYPE t2 = ax.getObject().getType();		
-		SemanticIndexRecord record = new SemanticIndexRecord(SITable.OPROP, t1, t2, idx);
+		SemanticIndexRecord record = new SemanticIndexRecord(t1, t2, idx);
 		nonEmptyEntityRecord.add(record);
 	} 
 
@@ -538,6 +537,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		if (stm == null) {
 			// UNSUPPORTED DATATYPE
 			log.warn("Ignoring assertion: {}", ax);			
+			return;
 		}
 		stm.setInt(1, uri_id);
 		
@@ -591,7 +591,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				stm.setBoolean(2, Boolean.parseBoolean(value));
 				break;
 			default:
-				assert(false);
 		}
 		
 		boolean c1isBNode = subject instanceof BNode;
@@ -608,11 +607,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		// register non-emptiness
 		COL_TYPE t1 = subject.getType();
 		COL_TYPE t2 = object.getType();		
-		SITable table = SemanticIndexRecord.COLTYPEtoSITable.get(t2);	
-		if (table != null) { // IMPORTANT: can be null is the datatype is not recognised
-			SemanticIndexRecord record = new SemanticIndexRecord(table, t1, t2, idx);
-			nonEmptyEntityRecord.add(record);
-		}	
+		SemanticIndexRecord record = new SemanticIndexRecord(t1, t2, idx);
+		nonEmptyEntityRecord.add(record);
 	}
 	
 		
@@ -633,7 +629,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 		// Register non emptiness
 		COL_TYPE t1 = c1.getType();
-		SemanticIndexRecord record = new SemanticIndexRecord(SITable.CLASS, t1, COL_TYPE.OBJECT, conceptIndex);
+		SemanticIndexRecord record = new SemanticIndexRecord(t1, conceptIndex);
 		nonEmptyEntityRecord.add(record);
 	}
 
@@ -874,11 +870,16 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		 */
 		res = st.executeQuery("SELECT * FROM " + emptinessIndexTable.tableName);
 		while (res.next()) {
-			int table = res.getInt(1);
+			int sitable = res.getInt(1);
 			int type1 = res.getInt(3);
 			int type2 = res.getInt(4);
 			int idx = res.getInt(2);
-			SemanticIndexRecord r = SemanticIndexRecord.createSIRecord(table, type1, type2, idx);
+			
+			SemanticIndexRecord.checkTypeValue(type1);
+			SemanticIndexRecord.checkTypeValue(type2);
+			SemanticIndexRecord.checkSITableValue(sitable);
+			
+			SemanticIndexRecord r = new SemanticIndexRecord(sitable, type1, type2, idx);
 			nonEmptyEntityRecord.add(r);
 		}
 
@@ -1091,7 +1092,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		for (Interval interval : cacheSI.getIntervals(concept)) 
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
 
-				SemanticIndexRecord record = new SemanticIndexRecord(SITable.CLASS, type1, COL_TYPE.OBJECT, i);
+				SemanticIndexRecord record = new SemanticIndexRecord(type1, i);
 				if (nonEmptyEntityRecord.contains(record))
 					return false;
 			}
@@ -1108,12 +1109,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 */
 	private boolean isMappingEmpty(ObjectPropertyExpression ope, COL_TYPE type1, COL_TYPE type2)  {
 
-		SITable table = SemanticIndexRecord.COLTYPEtoSITable.get(type2);			
-
 		for (Interval interval : cacheSI.getIntervals(ope)) 
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
 
-				SemanticIndexRecord record = new SemanticIndexRecord(table, type1, type2, i);
+				SemanticIndexRecord record = new SemanticIndexRecord(type1, type2, i);
 				if (nonEmptyEntityRecord.contains(record)) 
 					return false;
 			}
@@ -1130,12 +1129,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 */
 	private boolean isMappingEmpty(DataPropertyExpression dpe, COL_TYPE type1, COL_TYPE type2)  {
 
-		SITable table = SemanticIndexRecord.COLTYPEtoSITable.get(type2);			
-
 		for (Interval interval : cacheSI.getIntervals(dpe)) 
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
 
-				SemanticIndexRecord record = new SemanticIndexRecord(table, type1, type2, i);
+				SemanticIndexRecord record = new SemanticIndexRecord(type1, type2, i);
 				if (nonEmptyEntityRecord.contains(record))
 					return false;
 			}
@@ -1317,12 +1314,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	public void collectStatistics(Connection conn) throws SQLException {
 
 		Statement st = conn.createStatement();
-
 		st.addBatch("ANALYZE");
-
 		st.executeBatch();
 		st.close();
-
 	}
 
 

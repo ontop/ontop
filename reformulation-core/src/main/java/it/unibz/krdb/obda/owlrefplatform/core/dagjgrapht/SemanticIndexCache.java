@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
-import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -14,9 +13,9 @@ import java.util.Set;
 
 public class SemanticIndexCache {
 
-	private Map<OClass, SemanticIndexRange> classRanges = new HashMap<>();	
-	private Map<ObjectPropertyExpression, SemanticIndexRange> opeRanges = new HashMap<>();
-	private Map<DataPropertyExpression, SemanticIndexRange> dpeRanges = new HashMap<>();
+	private final Map<OClass, SemanticIndexRange> classRanges = new HashMap<>();	
+	private final Map<ObjectPropertyExpression, SemanticIndexRange> opeRanges = new HashMap<>();
+	private final Map<DataPropertyExpression, SemanticIndexRange> dpeRanges = new HashMap<>();
 
 	private final TBoxReasoner reasonerDag; 
 	

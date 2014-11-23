@@ -35,24 +35,81 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
  */
 public class SemanticIndexRecord {
 
-	public enum SITable {
-		CLASS, OPROP, DPROPLite, DPROPStri, DPROPInte, DPROPLong, DPROPDeci, DPROPDoub, DPROPDate, DPROPInt, DPROPUnsignedInt, DPROPNegInte, DPROPNonNegInte, DPROPPosInte, DPROPNonPosInte, DPROPFloat, DPROPBool
-	}
-
-	private static final int OBJ_TYPE_URI = 0;
-	private static final int OBJ_TYPE_BNode = 1;
-
 	private final int idx;
 	private final int type1;
 	private final int type2;
-	private final SITable table;
+	private final int table;
+	private final int hashCode;
 
-	public SemanticIndexRecord(SITable table, COL_TYPE t1, COL_TYPE t2, int idx) {
-		this.type1 = (t1 == COL_TYPE.BNODE)  ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
-		this.type2 = (t2 == COL_TYPE.BNODE) ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
-		
+	
+	/**
+	 * Constructor for SI Records taken from the database
+	 * 
+	 * NOTE: use the @cite{checkTypeValue} and @cite{checkSITableValue} functions 
+	 *       to ensure that type1, type2 and table have valid values
+	 * 
+	 * @param table
+	 * @param type1
+	 * @param type2
+	 * @param idx
+	 */
+	
+	public SemanticIndexRecord(int table, int type1, int type2, int idx) {
+		this.type1 = type1; 	
+		this.type2 = type2;  
 		this.table = table;
 		this.idx = idx;
+		this.hashCode = idx + (table + 1) * 10000000 + (type1 + 1) * 100000000 + (type2 + 1) * 1000000000;
+	}
+	
+	/**
+	 * checks that type is one of the two valid values
+	 * 
+	 * @param type
+	 * @throws RuntimeException if type is not valid
+	 */
+	
+	public static void checkTypeValue(int type) { 
+		if (type != SemanticIndexRecord.OBJ_TYPE_URI && type != SemanticIndexRecord.OBJ_TYPE_BNode)
+			throw new RuntimeException("Unknown OBJ_TYPE:" + type);
+	}
+	
+	/**
+	 * checks that table is one of the valid values
+	 * 
+	 * @param table
+	 * @throws RuntimeException if table is not valid
+	 */
+
+	public static void checkSITableValue(int table) {
+		SITable sitable = null;		
+		for (SITable t : SITable.values()) 
+			if (t.ordinal() == table) 
+				sitable = t;
+		
+		if (sitable == null)
+			throw new RuntimeException("Unknown SITable: " + table);
+	}
+	
+	/**
+	 * Constructor for Object and Datatype Property SI Records
+	 * @param t1
+	 * @param t2
+	 * @param idx
+	 */
+	
+	public SemanticIndexRecord(COL_TYPE t1, COL_TYPE t2, int idx) {
+		this(COLTYPEtoSITable.get(t2).ordinal(), COLTYPEtoInt(t1), COLTYPEtoInt(t2), idx);  
+	}
+	
+	/**
+	 * Constructor for Class SI Records
+	 * @param type1
+	 * @param idx
+	 */
+	
+	public SemanticIndexRecord(COL_TYPE t1,  int idx) {
+		this(SITable.CLASS.ordinal(), COLTYPEtoInt(t1), OBJ_TYPE_BNode, idx);  
 	}
 	
 	public int getIndex() {
@@ -68,46 +125,71 @@ public class SemanticIndexRecord {
 	}
 	
 	public int getTable() {
-		return table.ordinal();
+		return table;
 	}
 	
-	public static SemanticIndexRecord createSIRecord(int table, int t1, int t2, int idx) {
-		SITable sitable = null;		
-		for (SITable t : SITable.values()) 
-			if (t.ordinal() == table) 
-				sitable = t;
-		if (sitable == null)
-			throw new RuntimeException("Unknown table kind: " + table);
-		
-		COL_TYPE tt2 = (t2 == OBJ_TYPE_BNode) ? COL_TYPE.BNODE : COL_TYPE.OBJECT;
-		COL_TYPE tt1 = (t1 == OBJ_TYPE_BNode) ? COL_TYPE.BNODE : COL_TYPE.OBJECT;
-		
-		return new SemanticIndexRecord(sitable, tt1, tt2, idx);
-	}
-
-	/***
-	 * This hash will provide no collisions as long as the number of
-	 * classes/properties is bellow
-	 * 
-	 */
 	@Override
 	public int hashCode() {
-		int hash = idx;
-		hash += (table.ordinal() + 1) * 10000000;
-		hash += (type1 + 1) * 100000000;
-		hash += (type2 + 1) * 1000000000;
-		return hash;
+		return hashCode;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof SemanticIndexRecord))
 			return false;
+		
 		SemanticIndexRecord r2 = (SemanticIndexRecord) obj;
 		return (this.idx == r2.idx) && (this.table == r2.table) && (this.type1 == r2.type1) && (this.type2 == r2.type2);
 	}
 
-	public static Map<COL_TYPE, SITable> COLTYPEtoSITable = new HashMap<>();
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		b.append("T: ");
+		b.append(table);
+		b.append(" IDX: ");
+		b.append(idx);
+		b.append(" T1: ");
+		b.append(type1);
+		b.append(" T2: ");
+		b.append(type2);
+		return b.toString();
+	}
+	
+	/*
+	 * Implementation details below (in particular, the numbers to be stored in DB)
+	 */
+	
+	
+	// the order provides datatype codes that are stored in DB (starts with 0) 
+	private static enum SITable {
+		CLASS, 
+		OPROP, 
+		DPROPLite, 
+		DPROPStri, 
+		DPROPInte, 
+		DPROPLong, 
+		DPROPDeci, 
+		DPROPDoub, 
+		DPROPDate, 
+		DPROPInt, 
+		DPROPUnsignedInt, 
+		DPROPNegInte, 
+		DPROPNonNegInte, 
+		DPROPPosInte, 
+		DPROPNonPosInte, 
+		DPROPFloat, 
+		DPROPBool
+	}
+
+	private static final int OBJ_TYPE_URI = 0;
+	private static final int OBJ_TYPE_BNode = 1;
+
+	private static int COLTYPEtoInt(COL_TYPE t) {
+		return (t == COL_TYPE.BNODE)  ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
+	}
+	
+	private static Map<COL_TYPE, SITable> COLTYPEtoSITable = new HashMap<>();
 	
 	static {
 		COLTYPEtoSITable.put(COL_TYPE.OBJECT, SITable.OPROP);
@@ -128,19 +210,5 @@ public class SemanticIndexRecord {
 		COLTYPEtoSITable.put(COL_TYPE.DOUBLE, SITable.DPROPDoub);
 		COLTYPEtoSITable.put(COL_TYPE.DATETIME, SITable.DPROPDate);
 		COLTYPEtoSITable.put(COL_TYPE.BOOLEAN, SITable.DPROPBool);
-	}
-	
-	@Override
-	public String toString() {
-		StringBuilder b = new StringBuilder();
-		b.append("T: ");
-		b.append(table);
-		b.append(" IDX: ");
-		b.append(idx);
-		b.append(" T1: ");
-		b.append(type1);
-		b.append(" T2: ");
-		b.append(type2);
-		return b.toString();
 	}
 }
