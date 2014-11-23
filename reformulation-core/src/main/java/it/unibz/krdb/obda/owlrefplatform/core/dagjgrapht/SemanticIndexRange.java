@@ -48,29 +48,13 @@ public class SemanticIndexRange implements Serializable {
 		intervals.add(new Interval(index, index));
 	}
 	
-	@Deprecated // TODO: find a better solution
-	void setIndex(int idx) {
-		this.index = idx;
-	}
-	
-	@Deprecated   // TODO: find a better solution
-	void setIntervals(List<Interval> intervals) {
-		this.intervals = intervals;
-	}
-	
-	
-    public void addRange(SemanticIndexRange other) {
-        if (this.intervals == other.intervals)
-            return;
+		
+    public void addRange(List<Interval> other) {
+        intervals.addAll(other);
 
-        intervals.addAll(other.intervals);
-        merge();
-    }
-
-    /**
-     * Sort in ascending order and collapse overlapping intervals
-     */
-    private void merge() {
+        /**
+         * Sort in ascending order and collapse overlapping intervals
+         */
 
         Collections.sort(intervals);
         List<Interval> new_intervals = new LinkedList<>();

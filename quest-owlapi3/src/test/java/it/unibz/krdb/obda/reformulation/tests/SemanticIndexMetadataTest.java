@@ -4,8 +4,13 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
@@ -15,6 +20,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Properties;
 
@@ -63,7 +69,7 @@ public class SemanticIndexMetadataTest  extends TestCase {
 		}
 		in.close();
 
-		st.executeUpdate(bf.toString());
+		//st.executeUpdate(bf.toString());
 		conn.commit();
 
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -99,32 +105,52 @@ public class SemanticIndexMetadataTest  extends TestCase {
 	public void testSemanticIndexMetadata() throws Exception {
 
 		//prepareTestQueries(tuples);
+		{
+			QuestPreferences p = new QuestPreferences();
+			p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+			p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+			p.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
+			
+			p.setProperty("rewrite", "true");
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setProperty("rewrite", "true");
+			OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+			Ontology ont = ofac.createOntology();
+			ont.getVocabulary().createClass("A");
+			ont.getVocabulary().createObjectProperty("P");
+			ont.getVocabulary().createDataProperty("P");
+			ont.getVocabulary().createObjectProperty("Q");
+			ont.getVocabulary().createDataProperty("D");
+				
+			Quest quest = new Quest(ont, p);
+			quest.setupRepository();
+			
+			RDBMSSIRepositoryManager si = quest.getSemanticIndexRepository();
+			
+			si.createDBSchema(conn);
+			si.insertMetadata(conn);
 
-		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory();
+			
+			Statement st = conn.createStatement();
+			ResultSet res = st.executeQuery("SELECT * FROM IDX ORDER BY IDX");
+			while (res.next()) {
+				String string = res.getString(1);
+				int idx = res.getInt(2);
+				int type = res.getInt(3);
+				System.out.println(string + ", " + idx + ", "+ type);
+			}
+			st.close();
+			
+			// load metadata back from the DB
+			si.loadMetadata(conn);	
+			
 
-		factory.setPreferenceHolder(p);
-
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-
-		// Now we are ready for querying
-		QuestOWLStatement st = reasoner.getStatement();
-
-
-		// Closing resources
-		st.close();
-		reasoner.dispose();
-
-		//assertFalse(fail);
+			
+		}
+		
 	}
 
 

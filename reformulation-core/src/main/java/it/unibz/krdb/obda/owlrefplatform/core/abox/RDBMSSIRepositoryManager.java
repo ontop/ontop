@@ -44,6 +44,7 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
@@ -488,19 +489,28 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 	private void process(ObjectPropertyAssertion ax, PreparedStatement uriidStm, PreparedStatement roleStm) throws SQLException {
 
-		ObjectPropertyExpression prop = ax.getProperty();
-
+		ObjectPropertyExpression ope0 = ax.getProperty();
+		if (ope0.isInverse()) 
+			throw new RuntimeException("INVERSE PROPERTIES ARE NOT SUPPORTED IN ABOX:" + ax);
+		
+		ObjectPropertyExpression ope = reasonerDag.getObjectPropertyDAG().getVertex(ope0).getRepresentative();
+				
 		ObjectConstant o1, o2;
-		if (cacheSI.isIndexedObjectPropertyInverse(prop)) {
+		if (ope.isInverse()) {
+			// the canonical representative is inverse
+			// and so, it is not indexed -- swap the arguments 
+			// and replace the representative with its inverse 
+			// (which must be indexed)
 			o1 = ax.getObject();
 			o2 = ax.getSubject();
+			ope = ope.getInverse();
 		}
 		else {
 			o1 = ax.getSubject();			
 			o2 = ax.getObject();
 		}
 
-		int idx = cacheSI.getIndex(prop);
+		int idx = cacheSI.getEntry(ope).getIndex();
 		
 		int uri_id = getObjectConstantUriId(o1, uriidStm);
 		int uri2_id = getObjectConstantUriId(o2, uriidStm);
@@ -514,9 +524,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		roleStm.addBatch();
 		
 		// Register non emptiness
-		// TODO (ROMAN): should we not swap the arguments for the inverse?
-		COL_TYPE t1 = ax.getSubject().getType();
-		COL_TYPE t2 = ax.getObject().getType();		
+		COL_TYPE t1 = o1.getType();
+		COL_TYPE t2 = o2.getType();		
 		SemanticIndexRecord record = new SemanticIndexRecord(t1, t2, idx);
 		nonEmptyEntityRecord.add(record);
 	} 
@@ -526,8 +535,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		ObjectConstant subject = ax.getSubject();
 		int uri_id = getObjectConstantUriId(subject, uriidStm);
 		
-		DataPropertyExpression prop = ax.getProperty();
-		int idx = cacheSI.getIndex(prop);
+		// replace the property by its canonical representative 
+		DataPropertyExpression dpe0 = ax.getProperty();
+		DataPropertyExpression dpe = reasonerDag.getDataPropertyDAG().getVertex(dpe0).getRepresentative();		
+		int idx = cacheSI.getEntry(dpe).getIndex();
 
 		ValueConstant object = ax.getValue();
 		Predicate.COL_TYPE attributeType = object.getType();
@@ -616,13 +627,15 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 		
 	private void process(ClassAssertion ax, PreparedStatement uriidStm, PreparedStatement classStm) throws SQLException {
-
+		
 		ObjectConstant c1 = ax.getIndividual();
 
 		int uri_id = getObjectConstantUriId(c1, uriidStm); 
 
-		OClass concept = ax.getConcept();
-		int conceptIndex = cacheSI.getIndex(concept);	 // WOW ! NullPointerException here
+		// replace concept by the canonical representative (which must be a concept name)
+		OClass concept0 = ax.getConcept();
+		OClass concept = (OClass)reasonerDag.getClassDAG().getVertex(concept0).getRepresentative();	
+		int conceptIndex = cacheSI.getEntry(concept).getIndex();	
 
 		// Construct the database INSERT statements
 		classStm.setInt(1, uri_id);
@@ -719,152 +732,160 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	public final static int CLASS_TYPE = 1;
 	public final static int ROLE_TYPE = 2;
 	
+	private void setIndex(String iri, int type, int idx) {
+		if (type == CLASS_TYPE) {
+			OClass c = ofac.createClass(iri);
+			if (reasonerDag.getClassDAG().getVertex(c) == null) 
+				throw new RuntimeException("UNKNOWN CLASS: " + iri);
+			
+			if (cacheSI.getEntry(c) != null)
+				throw new RuntimeException("DUPLICATE CLASS INDEX: " + iri);
+			
+			cacheSI.setIndex(c, idx);
+		}
+		else {
+			ObjectPropertyExpression ope = ofac.createObjectProperty(iri);
+			if (reasonerDag.getObjectPropertyDAG().getVertex(ope) != null) {
+				//
+				// a bit elaborate logic is a consequence of using the same type for
+				// both object and data properties (which can have the same name)
+				// according to the SemanticIndexBuilder, object properties are indexed first 
+				// (and have lower indexes), and only then data properties are indexed
+				// so, the first occurrence is an object property, 
+				// and the second occurrence is a datatype property
+				// (here we use the fact that the query result is sorted by idx)
+				//
+				if (cacheSI.getEntry(ope) != null)  {
+					DataPropertyExpression dpe = ofac.createDataProperty(iri);
+					if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null) {
+						if (cacheSI.getEntry(dpe) != null)
+							throw new RuntimeException("DUPLICATE PROPERTY: " + iri);
+						
+						cacheSI.setIndex(dpe, idx);
+					}	
+					else
+						throw new RuntimeException("UNKNOWN PROPERTY: " + iri);
+				}
+				else 
+					cacheSI.setIndex(ope, idx);
+			}
+			else {
+				DataPropertyExpression dpe = ofac.createDataProperty(iri);
+				if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null) {
+					if (cacheSI.getEntry(dpe) != null)
+						throw new RuntimeException("DUPLICATE PROPERTY: " + iri);
+					
+					cacheSI.setIndex(dpe, idx);
+				}	
+				else
+					throw new RuntimeException("UNKNOWN PROPERTY: " + iri);
+			}
+		}		
+	}
 	
+	private boolean checkIntervalsContainIndex(List<Interval> intervals, int idx) {
+		for (Interval interval : intervals) {
+			if (idx >= interval.getStart() && idx <= interval.getEnd())
+				return true;
+		}
+		return false;
+	}
+	
+	private void setIntervals(String iri, int type, List<Interval> intervals, int maxObjectPropertyIndex) {
+		
+		SemanticIndexRange range;
+		if (type == CLASS_TYPE) {
+			OClass c = ofac.createClass(iri);
+			range = cacheSI.getEntry(c);
+		}
+		else {
+			Interval interval = intervals.get(0);
+			// if the first interval is within object property indexes
+			if (interval.getEnd() <= maxObjectPropertyIndex) {
+				ObjectPropertyExpression ope = ofac.createObjectProperty(iri);
+				range = cacheSI.getEntry(ope);
+			}
+			else {
+				DataPropertyExpression dpe = ofac.createDataProperty(iri);
+				range = cacheSI.getEntry(dpe);
+			}
+		}
+		if (!checkIntervalsContainIndex(intervals, range.getIndex()))
+			throw new RuntimeException("INTERVALS " + intervals + " FOR " + iri + "(" + type + ") DO NOT CONTAIN " + range.getIndex());
+
+		range.addRange(intervals);	
+	}
 	
 	public void loadMetadata(Connection conn) throws SQLException {
 		log.debug("Loading semantic index metadata from the database *");
 
-		cacheSI = new SemanticIndexCache(reasonerDag);
-		
+		cacheSI = new SemanticIndexCache(reasonerDag);	
 		nonEmptyEntityRecord.clear();
 
-
-		/* Fetching the index data */
+		// Fetching the index data 
 		Statement st = conn.createStatement();
 		ResultSet res = st.executeQuery("SELECT * FROM " + indexTable.tableName + " ORDER BY IDX");
 		while (res.next()) {
-			String string = res.getString(1);
-			if (string.startsWith("file:/"))
+			String iri = res.getString(1);
+			if (iri.startsWith("file:/"))  // ROMAN: what exactly is this?!
 				continue;
-			String iri = string;
+			
 			int idx = res.getInt(2);
 			int type = res.getInt(3);
-			
-			if (type == CLASS_TYPE) {
-				OClass c = ofac.createClass(iri);
-				if (reasonerDag.getClassDAG().getVertex(c) == null) 
-					throw new RuntimeException("UNKNOWN CLASS: " + iri);
-				
-				cacheSI.setIndex(c, idx);
-			}
-			else {
-				boolean one = false;
-				ObjectPropertyExpression ope = ofac.createObjectProperty(iri);
-				if (reasonerDag.getObjectPropertyDAG().getVertex(ope) != null) {
-					cacheSI.setIndex(ope, idx);
-					one = true;
-				}
-
-				DataPropertyExpression dpe = ofac.createDataProperty(iri);
-				if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null) {
-					cacheSI.setIndex(dpe, idx);
-					one = true;
-				}
-				
-				if (!one)
-					throw new RuntimeException("UNKNOWN PROPERTY: " + iri);
-			}
-			
+			setIndex(iri, type, idx);
 		}
 		res.close();
 
-		/*
-		 * fetching the intervals data, note that a given String can have one ore
-		 * more intervals (a set) hence we need to go through several rows to
-		 * collect all of them. To do this we sort the table by URI (to get all
-		 * the intervals for a given String in sequence), then we collect all the
-		 * intervals row by row until we change URI, at that switch we store the
-		 * interval
-		 */
+		
+		// compute the maximum object property index 
+		// (all data property indexes must be above)
+		int maxObjectPropertyIndex = 0;
+		for (Entry<ObjectPropertyExpression, SemanticIndexRange> entry : cacheSI.getObjectPropertyIndexEntries()) {
+			maxObjectPropertyIndex = Math.max(maxObjectPropertyIndex, entry.getValue().getIndex());
+		}
+		
+		
+		// fetching the intervals data, note that a given String can have one ore
+		// more intervals (a set) hence we need to go through several rows to
+		// collect all of them. To do this we sort the table by URI (to get all
+		// the intervals for a given String in sequence), then we collect all the
+		// intervals row by row until we change URI, at that switch we store the
+		// interval
 
 		res = st.executeQuery("SELECT * FROM " + intervalTable.tableName + " ORDER BY URI, ENTITY_TYPE");
 
-		List<Interval> currentSet = new LinkedList<Interval>();
-		String previousStringStr = null;
+		List<Interval> currentSet = null;
 		int previousType = 0;
 		String previousString = null;
 		while (res.next()) {
-
-			String iristr = res.getString(1);
-			if (iristr.startsWith("file:/"))
+			String iri = res.getString(1);
+			if (iri.startsWith("file:/"))   // ROMAN: what is this?
 				continue;
 
-			String iri = iristr;
-			int low = res.getInt(2);
-			int high = res.getInt(3);
 			int type = res.getInt(4);
 
-			if (previousStringStr == null) {
+			if (previousString == null) { // very first row
 				currentSet = new LinkedList<Interval>();
-				previousStringStr = iristr;
 				previousType = type;
 				previousString = iri;
 			}
 
-			if ((!iristr.equals(previousStringStr) || previousType != type)) {
-				/*
-				 * we switched URI or type, time to store the collected
-				 * intervals and clear the set
-				 */
-				if (previousType == CLASS_TYPE) {
-					OClass c = ofac.createClass(previousString);
-					if (reasonerDag.getClassDAG().getVertex(c) == null) 
-						throw new RuntimeException("UNKNOWN CLASS: " + previousString);
-					
-					cacheSI.setIntervals(c, currentSet);	
-				}
-				else {
-					boolean one = false;
-					ObjectPropertyExpression ope = ofac.createObjectProperty(previousString);
-					if (reasonerDag.getObjectPropertyDAG().getVertex(ope) != null) {
-						cacheSI.setIntervals(ope, currentSet);
-						one = true;
-					}
-
-					DataPropertyExpression dpe = ofac.createDataProperty(previousString);
-					if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null) {
-						cacheSI.setIntervals(dpe, currentSet);
-						one = true;
-					}
-					
-					if (!one)
-						throw new RuntimeException("UNKNOWN PROPERTY: " + previousString);
-				}
+			if ((!iri.equals(previousString) || previousType != type)) {
+				 // we switched URI or type, time to store the collected
+				 // intervals and clear the set
+				setIntervals(previousString, previousType, currentSet, maxObjectPropertyIndex);
 
 				currentSet = new LinkedList<Interval>();
-				previousStringStr = iristr;
 				previousType = type;
 				previousString = iri;
 			}
 
+			int low = res.getInt(2);
+			int high = res.getInt(3);
 			currentSet.add(new Interval(low, high));
-
 		}
 
-		if (previousType == CLASS_TYPE) {
-			OClass c = ofac.createClass(previousString);
-			if (reasonerDag.getClassDAG().getVertex(c) == null) 
-				throw new RuntimeException("UNKNOWN CLASS: " + previousString);
-			
-			cacheSI.setIntervals(c, currentSet);	
-		}
-		else {
-			boolean one = false;
-			ObjectPropertyExpression ope = ofac.createObjectProperty(previousString);
-			if (reasonerDag.getObjectPropertyDAG().getVertex(ope) != null) {
-				cacheSI.setIntervals(ope, currentSet);
-				one = true;
-			}
-
-			DataPropertyExpression dpe = ofac.createDataProperty(previousString);
-			if (reasonerDag.getDataPropertyDAG().getVertex(dpe) != null) {
-				cacheSI.setIntervals(dpe, currentSet);
-				one = true;
-			}
-			
-			if (!one)
-				throw new RuntimeException("UNKNOWN PROPERTY: " + previousString);
-		}
+		setIntervals(previousString, previousType, currentSet, maxObjectPropertyIndex);
 
 		res.close();
 
@@ -1015,7 +1036,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			OClass classNode = (OClass)node;
 			
 			Predicate classuri = classNode.getPredicate();
-			List<Interval> intervals = cacheSI.getIntervals(classNode);
+			List<Interval> intervals = cacheSI.getEntry(classNode).getIntervals();
 
 			// Mapping head
 			Predicate predicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
@@ -1092,9 +1113,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 */
 	private boolean isMappingEmpty(OClass concept, COL_TYPE type1)  {
 		
-		for (Interval interval : cacheSI.getIntervals(concept)) 
+		for (Interval interval : cacheSI.getEntry(concept).getIntervals()) 
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
-
 				SemanticIndexRecord record = new SemanticIndexRecord(type1, i);
 				if (nonEmptyEntityRecord.contains(record))
 					return false;
@@ -1112,9 +1132,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 */
 	private boolean isMappingEmpty(ObjectPropertyExpression ope, COL_TYPE type1, COL_TYPE type2)  {
 
-		for (Interval interval : cacheSI.getIntervals(ope)) 
+		for (Interval interval : cacheSI.getEntry(ope).getIntervals()) 
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
-
 				SemanticIndexRecord record = new SemanticIndexRecord(type1, type2, i);
 				if (nonEmptyEntityRecord.contains(record)) 
 					return false;
@@ -1132,9 +1151,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 */
 	private boolean isMappingEmpty(DataPropertyExpression dpe, COL_TYPE type1, COL_TYPE type2)  {
 
-		for (Interval interval : cacheSI.getIntervals(dpe)) 
+		for (Interval interval : cacheSI.getEntry(dpe).getIntervals()) 
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
-
 				SemanticIndexRecord record = new SemanticIndexRecord(type1, type2, i);
 				if (nonEmptyEntityRecord.contains(record))
 					return false;
@@ -1229,7 +1247,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		 * Generating the interval conditions for semantic index
 		 */
 
-		List<Interval> intervals = cacheSI.getIntervals(ope);	
+		List<Interval> intervals = cacheSI.getEntry(ope).getIntervals();	
 		appendIntervalString(sql, intervals);
 
 		return sql.toString();
@@ -1278,7 +1296,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		 * Generating the interval conditions for semantic index
 		 */
 
-		List<Interval> intervals = cacheSI.getIntervals(dpe);	
+		List<Interval> intervals = cacheSI.getEntry(dpe).getIntervals();	
 		appendIntervalString(sql, intervals);
 
 		return sql.toString();

@@ -90,7 +90,7 @@ public class SemanticIndexBuilder  {
 					mergeRangeNode(ch);
 
 					//merge the index of the node with the index of his child
-					ranges.get(d).addRange(ranges.get(ch));
+					ranges.get(d).addRange(ranges.get(ch).getIntervals());
 				}
 			}
 		}

@@ -43,104 +43,42 @@ public class SemanticIndexCache {
 		} 
 	}
 
-	/***
-	 * Returns the index (semantic index) for a class or property. 
-	 */
-
-	public int getIndex(OClass c) {
-		SemanticIndexRange range = classRanges.get(c);
-		
-		if (range == null) {
-			/* direct name is not indexed, maybe there is an equivalent */
-			OClass equivalent = (OClass)reasonerDag.getClassDAG().getVertex(c).getRepresentative();
-			range = classRanges.get(equivalent);
-		}
-				
-		return range.getIndex();
-	}
-	
-	public int getIndex(ObjectPropertyExpression p) {
-		
-		SemanticIndexRange range = opeRanges.get(p);
-		if (range == null) {
-			// direct name is not indexed, maybe there is an equivalent, we need to test
-			// with object properties and data properties 
-			ObjectPropertyExpression equivalent = reasonerDag.getObjectPropertyDAG().getVertex(p).getRepresentative();
-			if (equivalent.isInverse())
-				range = opeRanges.get(equivalent.getInverse());			
-			else
-				range = opeRanges.get(equivalent);			
-		}
-		return range.getIndex();				
-	}
-	
-	public boolean isIndexedObjectPropertyInverse(ObjectPropertyExpression ope) {
-		ObjectPropertyExpression equivalent = reasonerDag.getObjectPropertyDAG().getVertex(ope).getRepresentative();
-		return equivalent.isInverse(); 
-	}
-
-	public int getIndex(DataPropertyExpression p) {
-		
-		SemanticIndexRange range = dpeRanges.get(p);
-		if (range == null) {
-			// direct name is not indexed, maybe there is an equivalent, we need to test
-			// with object properties and data properties 
-			DataPropertyExpression equivalent = reasonerDag.getDataPropertyDAG().getVertex(p).getRepresentative();		
-			range = dpeRanges.get(equivalent);
-		}
-		
-		return range.getIndex();				
-	}
 	
 	/***
-	 * Returns the intervals (semantic index) for a class or property. The String
-	 * identifies a class if type = 1, identifies a property if type = 2.
+	 * Returns the intervals (semantic index) for a class or property.
 	 * 
 	 * @param name
 	 * @param i
 	 * @return
 	 */
-	public List<Interval> getIntervals(OClass concept)  {
-		SemanticIndexRange range = classRanges.get(concept);
-		return range.getIntervals();
+	public SemanticIndexRange getEntry(OClass concept)  {
+		return classRanges.get(concept);
 	}
 	
-	public List<Interval> getIntervals(ObjectPropertyExpression ope)  {	
-		SemanticIndexRange range = opeRanges.get(ope);
-		return range.getIntervals();
+	public SemanticIndexRange getEntry(ObjectPropertyExpression ope)  {	
+		return opeRanges.get(ope);
 	}
 
-	public List<Interval> getIntervals(DataPropertyExpression dpe)  {
-		SemanticIndexRange range = dpeRanges.get(dpe);
-		return range.getIntervals();
+	public SemanticIndexRange getEntry(DataPropertyExpression dpe)  {
+		return dpeRanges.get(dpe);
 	}
 	
 	
 	
 	
-	
-	public void setIntervals(OClass concept, List<Interval> intervals) {
-		classRanges.get(concept).setIntervals(intervals);
-	}
-	
-	public void setIntervals(ObjectPropertyExpression ope, List<Interval> intervals) {
-		opeRanges.get(ope).setIntervals(intervals);
-	}
-	
-	public void setIntervals(DataPropertyExpression dpe, List<Interval> intervals) {
-		dpeRanges.get(dpe).setIntervals(intervals);
-	}
-
 	public void setIndex(OClass concept, int idx) {
-		classRanges.get(concept).setIndex(idx);
+		SemanticIndexRange range = new SemanticIndexRange(idx);
+		classRanges.put(concept, range);
 	}
 		
 	public void setIndex(ObjectPropertyExpression ope, Integer idx) {
-		opeRanges.get(ope).setIndex(idx);
+		SemanticIndexRange range = new SemanticIndexRange(idx);
+		opeRanges.put(ope, range);
 	}
 
 	public void setIndex(DataPropertyExpression dpe, Integer idx) {
-		dpeRanges.get(dpe).setIndex(idx);
+		SemanticIndexRange range = new SemanticIndexRange(idx);
+		dpeRanges.put(dpe, range);
 	}
 	
 	

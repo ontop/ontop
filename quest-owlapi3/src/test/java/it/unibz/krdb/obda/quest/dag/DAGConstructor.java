@@ -58,7 +58,7 @@ public class DAGConstructor {
 			if (newNode == null) {
 				newNode = new DAGNode(node.getDescription());
 				newNode.setIndex(node.getIndex());
-				newNode.getRange().addRange(node.getRange());
+				newNode.getRange().addRange(node.getRange().getIntervals());
 				newNode.equivalents = new LinkedHashSet<DAGNode>(node.equivalents);
 				classes.put(node.getDescription(), newNode);
 				allnodes.put(node.getDescription(), newNode);

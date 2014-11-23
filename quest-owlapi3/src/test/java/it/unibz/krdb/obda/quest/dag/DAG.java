@@ -364,7 +364,7 @@ public class DAG implements Serializable {
 		for (DAGNode ch : node.getChildren()) {
 			if (ch != node) {
 				mergeRangeNode(ch);
-				node.getRange().addRange(ch.getRange());
+				node.getRange().addRange(ch.getRange().getIntervals());
 			}
 
 		}
