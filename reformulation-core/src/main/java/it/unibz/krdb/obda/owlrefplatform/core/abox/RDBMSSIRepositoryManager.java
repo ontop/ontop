@@ -248,7 +248,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
 	
 	private final TBoxReasoner reasonerDag;
-	private final SemanticIndexCache cacheSI;
+	
+	private SemanticIndexCache cacheSI;
 	
 	private boolean isIndexed;  // database index created
 
@@ -259,6 +260,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag) {
 		this.reasonerDag = reasonerDag;
 		cacheSI = new SemanticIndexCache(reasonerDag);
+		// this is an expensive an unnecessary operation in case the DB stored metadata
+		cacheSI.buildSemanticIndexFromReasoner();
 	}
 
 	public void addRepositoryChangedListener(RepositoryChangedListener list) {
@@ -721,14 +724,14 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	public void loadMetadata(Connection conn) throws SQLException {
 		log.debug("Loading semantic index metadata from the database *");
 
-		cacheSI.clear();
+		cacheSI = new SemanticIndexCache(reasonerDag);
 		
 		nonEmptyEntityRecord.clear();
 
 
 		/* Fetching the index data */
 		Statement st = conn.createStatement();
-		ResultSet res = st.executeQuery("SELECT * FROM " + indexTable.tableName);
+		ResultSet res = st.executeQuery("SELECT * FROM " + indexTable.tableName + " ORDER BY IDX");
 		while (res.next()) {
 			String string = res.getString(1);
 			if (string.startsWith("file:/"))

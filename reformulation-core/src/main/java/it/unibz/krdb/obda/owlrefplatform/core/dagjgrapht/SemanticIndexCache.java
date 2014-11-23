@@ -21,6 +21,9 @@ public class SemanticIndexCache {
 	
 	public SemanticIndexCache(TBoxReasoner reasonerDag) {
 		this.reasonerDag = reasonerDag;
+	}
+	
+	public void buildSemanticIndexFromReasoner() {
 		
 		//create the indexes		
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(reasonerDag);
@@ -141,12 +144,6 @@ public class SemanticIndexCache {
 	}
 	
 	
-	public void clear() {
-		classRanges.clear();
-		opeRanges.clear();
-		dpeRanges.clear();
-	}
-
 
 	/*
 	 * these three methods are used only by SI Repository to save the metadata
