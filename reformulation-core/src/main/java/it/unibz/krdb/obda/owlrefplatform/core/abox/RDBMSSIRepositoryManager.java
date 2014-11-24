@@ -44,7 +44,6 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.impl.OntologyVocabularyImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
@@ -285,69 +284,66 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		
 		log.debug("Creating data tables");
 
-		Statement st = conn.createStatement();
+		try (Statement st = conn.createStatement()) {
+			st.addBatch(uriIdTable.createCommand);
+			
+			st.addBatch(indexTable.createCommand);
+			st.addBatch(intervalTable.createCommand);
+			st.addBatch(emptinessIndexTable.createCommand);
 
-		st.addBatch(uriIdTable.createCommand);
-		
-		st.addBatch(indexTable.createCommand);
-		st.addBatch(intervalTable.createCommand);
-		st.addBatch(emptinessIndexTable.createCommand);
+			st.addBatch(classTable.createCommand);
+			st.addBatch(roleTable.createCommand);
 
-		st.addBatch(classTable.createCommand);
-		st.addBatch(roleTable.createCommand);
-
-		for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
-			st.addBatch(entry.getValue().createCommand);
-		
-		st.executeBatch();
-		st.close();
+			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
+				st.addBatch(entry.getValue().createCommand);
+			
+			st.executeBatch();			
+		}
 	}
 
 	public void createIndexes(Connection conn) throws SQLException {
 		log.debug("Creating indexes");
-		Statement st = conn.createStatement();
-
-		for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
-			for (String s : entry.getValue().createIndexCommands)
+		try (Statement st = conn.createStatement()) {
+			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
+				for (String s : entry.getValue().createIndexCommands)
+					st.addBatch(s);
+						
+			for (String s : classTable.createIndexCommands)
 				st.addBatch(s);
-					
-		for (String s : classTable.createIndexCommands)
-			st.addBatch(s);
-		
-		for (String s : roleTable.createIndexCommands)
-			st.addBatch(s);
-		
-		st.executeBatch();
-		
-		log.debug("Executing ANALYZE");
-		st.addBatch("ANALYZE");
-		st.executeBatch();
-		
-		st.close();
-
-		isIndexed = true;
+			
+			for (String s : roleTable.createIndexCommands)
+				st.addBatch(s);
+			
+			st.executeBatch();
+			st.clearBatch();
+			
+			log.debug("Executing ANALYZE");
+			st.addBatch("ANALYZE");
+			st.executeBatch();
+			
+			isIndexed = true;
+		}
 	}
 
 	
 	
 	public void dropDBSchema(Connection conn) throws SQLException {
 
-		Statement st = conn.createStatement();
+		try (Statement st = conn.createStatement()) {
+			st.addBatch(indexTable.dropCommand);
+			st.addBatch(intervalTable.dropCommand);
+			st.addBatch(emptinessIndexTable.dropCommand);
 
-		st.addBatch(indexTable.dropCommand);
-		st.addBatch(intervalTable.dropCommand);
-		st.addBatch(emptinessIndexTable.dropCommand);
+			st.addBatch(classTable.dropCommand);
+			st.addBatch(roleTable.dropCommand);
+			
+			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
+				st.addBatch(entry.getValue().dropCommand); 
+			
+			st.addBatch(uriIdTable.dropCommand);
 
-		st.addBatch(classTable.dropCommand);
-		st.addBatch(roleTable.dropCommand);
-		
-		for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
-			st.addBatch(entry.getValue().dropCommand); 
-		
-		st.addBatch(uriIdTable.dropCommand);
-
-		st.executeBatch();
-		st.close();
+			st.executeBatch();
+		}
 	}
 
 	public int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException {
@@ -429,11 +425,16 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 			// Check if the batch count is already in the batch limit
 			if (batchCount == batchLimit) {
-				executeBatch(uriidStm);
-				executeBatch(roleStm);
-				for (PreparedStatement stm : attributeStm.values())
-					executeBatch(stm);
-				executeBatch(classStm);
+				uriidStm.executeBatch();
+				uriidStm.clearBatch();
+				roleStm.executeBatch();
+				roleStm.clearBatch();;
+				for (PreparedStatement stm : attributeStm.values()) {
+					stm.executeBatch();
+					stm.clearBatch();
+				}
+				classStm.executeBatch();
+				classStm.clearBatch();
 				batchCount = 0; // reset the counter
 			}
 
@@ -445,11 +446,16 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 
 		// Execute the rest of the batch
-		executeBatch(uriidStm);
-		executeBatch(roleStm);
-		for (PreparedStatement stm : attributeStm.values())
-			executeBatch(stm);
-		executeBatch(classStm);
+		uriidStm.executeBatch();
+		uriidStm.clearBatch();
+		roleStm.executeBatch();
+		roleStm.clearBatch();;
+		for (PreparedStatement stm : attributeStm.values()) {
+			stm.executeBatch();
+			stm.clearBatch();
+		}
+		classStm.executeBatch();
+		classStm.clearBatch();
 
 	
 		// Close all open statements
@@ -673,11 +679,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		return uri_id;
 	}
 	
-	
-	private void executeBatch(PreparedStatement statement) throws SQLException {
-		statement.executeBatch();
-		statement.clearBatch();
-	}
 
 
 
@@ -1334,10 +1335,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 	public void collectStatistics(Connection conn) throws SQLException {
 
-		Statement st = conn.createStatement();
-		st.addBatch("ANALYZE");
-		st.executeBatch();
-		st.close();
+		try (Statement st = conn.createStatement()) {
+			st.addBatch("ANALYZE");
+			st.executeBatch();
+		}
 	}
 
 
@@ -1352,121 +1353,92 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		log.debug("Inserting semantic index metadata. This will allow the repository to reconstruct itself afterwards.");
 
 		boolean commitval = conn.getAutoCommit();
-
 		conn.setAutoCommit(false);
 
-		PreparedStatement stm = conn.prepareStatement(indexTable.insertCommand);
-		Statement st = conn.createStatement();
-
 		try {
-
-			/* dropping previous metadata */
-
-			st.executeUpdate("DELETE FROM " + indexTable.tableName);
-			st.executeUpdate("DELETE FROM " + intervalTable.tableName);
-			st.executeUpdate("DELETE FROM " + emptinessIndexTable.tableName);
-
-			/* inserting index data for classes and roles */
-
-			for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
-				stm.setString(1, concept.getKey().getPredicate().getName());
-				stm.setInt(2, concept.getValue().getIndex());
-				stm.setInt(3, CLASS_TYPE);
-				stm.addBatch();
+			// dropping previous metadata 
+			try (Statement st = conn.createStatement()) {
+				st.executeUpdate("DELETE FROM " + indexTable.tableName);
+				st.executeUpdate("DELETE FROM " + intervalTable.tableName);
+				st.executeUpdate("DELETE FROM " + emptinessIndexTable.tableName);
 			}
-			stm.executeBatch();
 
-			for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : cacheSI.getObjectPropertyIndexEntries()) {
-				stm.setString(1, role.getKey().getPredicate().getName());
-				stm.setInt(2, role.getValue().getIndex());
-				stm.setInt(3, ROLE_TYPE);
-				stm.addBatch();
-			}
-			for (Entry<DataPropertyExpression, SemanticIndexRange> role : cacheSI.getDataPropertyIndexEntries()) {
-				stm.setString(1, role.getKey().getPredicate().getName());
-				stm.setInt(2, role.getValue().getIndex());
-				stm.setInt(3, ROLE_TYPE);
-				stm.addBatch();
-			}
-			stm.executeBatch();
-			stm.clearBatch();
-			stm.close();
-
-			/*
-			 * Inserting interval metadata
-			 */
-
-			stm = conn.prepareStatement(intervalTable.insertCommand);
-			for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
-				for (Interval it : concept.getValue().getIntervals()) {
+			// inserting index data for classes and properties 
+			try (PreparedStatement stm = conn.prepareStatement(indexTable.insertCommand)) {
+				for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
 					stm.setString(1, concept.getKey().getPredicate().getName());
-					stm.setInt(2, it.getStart());
-					stm.setInt(3, it.getEnd());
-					stm.setInt(4, CLASS_TYPE);
+					stm.setInt(2, concept.getValue().getIndex());
+					stm.setInt(3, CLASS_TYPE);
 					stm.addBatch();
 				}
-			}
-			stm.executeBatch();
-
-			for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : cacheSI.getObjectPropertyIndexEntries()) {
-				for (Interval it : role.getValue().getIntervals()) {
+				for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : cacheSI.getObjectPropertyIndexEntries()) {
 					stm.setString(1, role.getKey().getPredicate().getName());
-					stm.setInt(2, it.getStart());
-					stm.setInt(3, it.getEnd());
-					stm.setInt(4, ROLE_TYPE);
+					stm.setInt(2, role.getValue().getIndex());
+					stm.setInt(3, ROLE_TYPE);
 					stm.addBatch();
 				}
-			}
-			for (Entry<DataPropertyExpression, SemanticIndexRange> role : cacheSI.getDataPropertyIndexEntries()) {
-				for (Interval it : role.getValue().getIntervals()) {
+				for (Entry<DataPropertyExpression, SemanticIndexRange> role : cacheSI.getDataPropertyIndexEntries()) {
 					stm.setString(1, role.getKey().getPredicate().getName());
-					stm.setInt(2, it.getStart());
-					stm.setInt(3, it.getEnd());
-					stm.setInt(4, ROLE_TYPE);
+					stm.setInt(2, role.getValue().getIndex());
+					stm.setInt(3, ROLE_TYPE);
 					stm.addBatch();
 				}
+				stm.executeBatch();
 			}
-			
-			stm.executeBatch();
 
-			/* Inserting emptiness index metadata */
-
-			stm = conn.prepareStatement(emptinessIndexTable.insertCommand);
-			for (SemanticIndexRecord record : nonEmptyEntityRecord) {
-				stm.setInt(1, record.getTable());
-				stm.setInt(2, record.getIndex());
-				stm.setInt(3, record.getType1());
-				stm.setInt(4, record.getType2());
-				stm.addBatch();
+			// Inserting interval metadata
+			try (PreparedStatement stm = conn.prepareStatement(intervalTable.insertCommand)) {
+				for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
+					for (Interval it : concept.getValue().getIntervals()) {
+						stm.setString(1, concept.getKey().getPredicate().getName());
+						stm.setInt(2, it.getStart());
+						stm.setInt(3, it.getEnd());
+						stm.setInt(4, CLASS_TYPE);
+						stm.addBatch();
+					}
+				}
+				for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : cacheSI.getObjectPropertyIndexEntries()) {
+					for (Interval it : role.getValue().getIntervals()) {
+						stm.setString(1, role.getKey().getPredicate().getName());
+						stm.setInt(2, it.getStart());
+						stm.setInt(3, it.getEnd());
+						stm.setInt(4, ROLE_TYPE);
+						stm.addBatch();
+					}
+				}
+				for (Entry<DataPropertyExpression, SemanticIndexRange> role : cacheSI.getDataPropertyIndexEntries()) {
+					for (Interval it : role.getValue().getIntervals()) {
+						stm.setString(1, role.getKey().getPredicate().getName());
+						stm.setInt(2, it.getStart());
+						stm.setInt(3, it.getEnd());
+						stm.setInt(4, ROLE_TYPE);
+						stm.addBatch();
+					}
+				}
+				stm.executeBatch();
 			}
-			stm.executeBatch();
 
-			stm.close();
+			// Inserting emptiness index metadata 
+			try (PreparedStatement stm = conn.prepareStatement(emptinessIndexTable.insertCommand)) {
+				for (SemanticIndexRecord record : nonEmptyEntityRecord) {
+					stm.setInt(1, record.getTable());
+					stm.setInt(2, record.getIndex());
+					stm.setInt(3, record.getType1());
+					stm.setInt(4, record.getType2());
+					stm.addBatch();
+				}
+				stm.executeBatch();
+			}
 
 			conn.commit();
-
-		} catch (SQLException e) {
-			try {
-				st.close();
-			} catch (Exception e2) {
-
-			}
-
-			try {
-				stm.close();
-			} catch (Exception e2) {
-
-			}
+		} 
+		catch (SQLException e) {
 			// If there is a big error, restore everything as it was
-			try {
-				conn.rollback();
-			} catch (Exception e2) {
-
-			}
-			conn.setAutoCommit(commitval);
-			throw e;
+			conn.rollback();
 		}
-
+		finally {
+			conn.setAutoCommit(commitval);			
+		}
 	}
 
 	
@@ -1478,22 +1450,21 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	public void dropIndexes(Connection conn) throws SQLException {
 		log.debug("Droping indexes");
 
-		Statement st = conn.createStatement();
+		try (Statement st = conn.createStatement()) {
+			for (String s : classTable.dropIndexCommands)
+				st.addBatch(s);	
 
-		for (String s : classTable.dropIndexCommands)
-			st.addBatch(s);	
+			for (String s : roleTable.dropIndexCommands)
+				st.addBatch(s);	
 
-		for (String s : roleTable.dropIndexCommands)
-			st.addBatch(s);	
+			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
+				for (String s : entry.getValue().dropIndexCommands)
+					st.addBatch(s);
+			
+			st.executeBatch();
 
-		for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
-			for (String s : entry.getValue().dropIndexCommands)
-				st.addBatch(s);
-		
-		st.executeBatch();
-		st.close();
-
-		isIndexed = false;
+			isIndexed = false;
+		}
 	}
 
 	public boolean isIndexed(Connection conn) {
@@ -1501,9 +1472,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	public boolean isDBSchemaDefined(Connection conn) throws SQLException {
-		Statement st = conn.createStatement();
-		boolean exists = true;
-		try {
+		
+		boolean exists = false; // initially pessimistic
+		
+		try (Statement st = conn.createStatement()) {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", classTable.tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", roleTable.tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.LITERAL).tableName));
@@ -1514,15 +1486,11 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DOUBLE).tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DATETIME).tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.BOOLEAN).tableName));
-		} catch (SQLException e) {
-			exists = false;
-			log.debug(e.getMessage());
-		} finally {
-			try {
-				st.close();
-			} catch (SQLException e) {
 
-			}
+			exists = true; // everything is fine if we get to this point
+		} 
+		catch (Exception e) {
+			// ignore all exceptions
 		}
 		return exists;
 	}
