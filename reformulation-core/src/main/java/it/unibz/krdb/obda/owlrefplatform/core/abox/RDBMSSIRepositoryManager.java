@@ -499,6 +499,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		if (ope0.isInverse()) 
 			throw new RuntimeException("INVERSE PROPERTIES ARE NOT SUPPORTED IN ABOX:" + ax);
 		
+		// TODO: could use EquivalentTriplePredicateIterator instead
+		
 		ObjectPropertyExpression ope = reasonerDag.getObjectPropertyDAG().getVertex(ope0).getRepresentative();
 				
 		ObjectConstant o1, o2;
@@ -655,7 +657,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		nonEmptyEntityRecord.add(record);
 	}
 
-
+	// TODO: big issue -- URI map is incomplete -- it is never read back from the DB
+	
 	// TODO: use database to get the maximum URIId
 	private int maxURIId = -1;
 	
@@ -784,14 +787,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}		
 	}
 	
-	private boolean checkIntervalsContainIndex(List<Interval> intervals, int idx) {
-		for (Interval interval : intervals) {
-			if (idx >= interval.getStart() && idx <= interval.getEnd())
-				return true;
-		}
-		return false;
-	}
-	
 	private void setIntervals(String iri, int type, List<Interval> intervals, int maxObjectPropertyIndex) {
 		
 		SemanticIndexRange range;
@@ -811,7 +806,15 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				range = cacheSI.getEntry(dpe);
 			}
 		}
-		if (!checkIntervalsContainIndex(intervals, range.getIndex()))
+		int idx = range.getIndex();
+		boolean idxInIntervals = false;
+		for (Interval interval : intervals) {
+			if (idx >= interval.getStart() && idx <= interval.getEnd()) {
+				idxInIntervals = true;
+				break;
+			}
+		}
+		if (!idxInIntervals)
 			throw new RuntimeException("INTERVALS " + intervals + " FOR " + iri + "(" + type + ") DO NOT CONTAIN " + range.getIndex());
 
 		range.addRange(intervals);	
