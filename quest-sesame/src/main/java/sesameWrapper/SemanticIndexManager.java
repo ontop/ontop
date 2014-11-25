@@ -83,7 +83,12 @@ public class SemanticIndexManager {
 
 		if (drop) {
 			log.debug("Droping existing tables");
-			dataRepository.dropDBSchema(conn);
+			try {
+				dataRepository.dropDBSchema(conn);
+			}
+			catch (SQLException e) {
+				log.debug(e.getMessage(), e);
+			}
 		}
 		
 		dataRepository.createDBSchema(conn);
