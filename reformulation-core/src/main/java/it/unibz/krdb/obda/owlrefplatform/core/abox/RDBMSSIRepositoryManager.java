@@ -964,6 +964,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					if (!isMappingEmpty(node, obType1, obType2)) {
 						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, obType2);
 						String sourceQuery = constructSourceQuery(node, obType1, obType2);
+						if (sourceQuery == null)
+							continue;
 						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 						result.add(basicmapping);		
 					}
@@ -975,6 +977,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					if (!isMappingEmpty(node, obType1, type2)) {
 						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, type2);
 						String sourceQuery = constructSourceQuery(node, obType1, type2);
+						if (sourceQuery == null)
+							continue;
 						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 						result.add(basicmapping);
 					}
@@ -1007,6 +1011,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					if (!isMappingEmpty(node, obType1, obType2)) {
 						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, obType2);
 						String sourceQuery = constructSourceQuery(node, obType1, obType2);
+						if (sourceQuery == null)
+							continue;
 						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 						result.add(basicmapping);			
 					}
@@ -1018,6 +1024,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					if (!isMappingEmpty(node, obType1, type2)) {
 						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, type2);
 						String sourceQuery = constructSourceQuery(node, obType1, type2);
+						if (sourceQuery == null)
+							continue;
 						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 						result.add(basicmapping);
 					}
@@ -1038,9 +1046,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				continue;
 						
 			OClass classNode = (OClass)node;
-			
-			Predicate classuri = classNode.getPredicate();
-			List<Interval> intervals = cacheSI.getEntry(classNode).getIntervals();
+			SemanticIndexRange range = cacheSI.getEntry(classNode);
+			if (range == null) {
+				log.debug("Class: " + classNode + " has no SemanticIndexRange");
+				continue;
+			}
+			List<Interval> intervals = range.getIntervals();
 
 			// Mapping head
 			Predicate predicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
@@ -1048,7 +1059,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			
 			if (!isMappingEmpty(classNode, COL_TYPE.OBJECT)) {
 				/* FOR URI */
-				Function body1 = dfac.getFunction(classuri, dfac.getUriTemplate(dfac.getVariable("X")));
+				Function body1 = dfac.getFunction(classNode.getPredicate(), dfac.getUriTemplate(dfac.getVariable("X")));
 				CQIE targetQuery1 = dfac.getCQIE(head, body1);
 
 				StringBuilder sql1 = new StringBuilder();
@@ -1062,7 +1073,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			if (!isMappingEmpty(classNode, COL_TYPE.BNODE)) {
 				/* FOR BNODE */
 				
-				Function body2 = dfac.getFunction(classuri, dfac.getBNodeTemplate(dfac.getVariable("X")));
+				Function body2 = dfac.getFunction(classNode.getPredicate(), dfac.getBNodeTemplate(dfac.getVariable("X")));
 				CQIE targetQuery2 = dfac.getCQIE(head, body2);
 				
 				StringBuilder sql2 = new StringBuilder();
@@ -1251,7 +1262,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		 * Generating the interval conditions for semantic index
 		 */
 
-		List<Interval> intervals = cacheSI.getEntry(ope).getIntervals();	
+		SemanticIndexRange range = cacheSI.getEntry(ope);
+		if (range == null) {
+			log.debug("Object property " + ope + " has no SemanticIndexRange");
+			return null;
+		}
+		List<Interval> intervals = range.getIntervals();	
 		appendIntervalString(sql, intervals);
 
 		return sql.toString();
@@ -1300,7 +1316,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		 * Generating the interval conditions for semantic index
 		 */
 
-		List<Interval> intervals = cacheSI.getEntry(dpe).getIntervals();	
+		SemanticIndexRange range = cacheSI.getEntry(dpe);
+		if (range == null) {
+			log.debug("Data property " + dpe + " has no SemanticIndexRange");
+			return null;
+		}
+		List<Interval> intervals = range.getIntervals();	
 		appendIntervalString(sql, intervals);
 
 		return sql.toString();
