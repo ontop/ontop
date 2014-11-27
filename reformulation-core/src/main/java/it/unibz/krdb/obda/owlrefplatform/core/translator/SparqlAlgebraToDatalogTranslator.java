@@ -20,18 +20,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.DatatypeFactory;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
@@ -1319,22 +1310,19 @@ public class SparqlAlgebraToDatalogTranslator {
 		/**
 		 * Example of a composite term corresponding to a binding: AND(EQ(X,1), EQ(Y,2))
 		 */
-		List<Term> bindingCompositeTerms = new ArrayList<>();
+		List<Function> bindingCompositeTerms = new ArrayList<>();
 
 		for (BindingSet bindingSet : expression.getBindingSets()) {
 			bindingCompositeTerms.add(createBindingCompositeTerm(variableIndex, bindingSet));
 		}
 
-		switch(bindingCompositeTerms.size()) {
-			case 0:
-				// TODO: find a better exception
-				throw new RuntimeException("Unsupported SPARQL query: VALUES entry without any binding!");
-			case 1:
-				return (Function) bindingCompositeTerms.get(0);
-			default:
-				Function orAtom = ofac.getFunction(OBDAVocabulary.OR, bindingCompositeTerms);
-				return orAtom;
+		if(bindingCompositeTerms.isEmpty()) {
+			// TODO: find a better exception
+			throw new RuntimeException("Unsupported SPARQL query: VALUES entry without any binding!");
 		}
+
+		Function orAtom = buildBooleanTree(bindingCompositeTerms, OBDAVocabulary.OR);
+		return orAtom;
 	}
 
 	private Map<String, Variable> createVariableIndex(Set<String> variableNames) {
@@ -1349,7 +1337,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	 * Used for VALUES bindings
 	 */
 	private Function createBindingCompositeTerm(Map<String, Variable> variableIndex, BindingSet bindingSet) {
-		List<Term> bindingEqualityTerms = new ArrayList<>();
+		List<Function> bindingEqualityTerms = new ArrayList<>();
 
 		for (Binding binding : bindingSet) {
 			Variable variable = variableIndex.get(binding.getName());
@@ -1365,15 +1353,37 @@ public class SparqlAlgebraToDatalogTranslator {
 			bindingEqualityTerms.add(equalityTerm);
 		}
 
-		switch(bindingEqualityTerms.size()) {
-			case 0:
-				//TODO: find a better exception
-				throw new RuntimeException("Empty binding sets are not accepted.");
-			case 1:
-				return (Function) bindingEqualityTerms.get(0);
-			default:
-				Function andAtom = ofac.getFunction(OBDAVocabulary.AND, bindingEqualityTerms);
-				return andAtom;
+		if(bindingEqualityTerms.isEmpty()) {
+			//TODO: find a better exception
+			throw new RuntimeException("Empty binding sets are not accepted.");
+
 		}
+		return buildBooleanTree(bindingEqualityTerms, OBDAVocabulary.AND);
+	}
+
+	/**
+	 * Builds a boolean tree (e.g. AND or OR-tree) out of boolean expressions.
+	 *
+	 * This approach is necessary because AND(..) and OR(..) have a 2-arity.
+	 *
+	 */
+	private Function buildBooleanTree(List<Function> booleanFctTerms, BooleanOperationPredicate booleanFunctionSymbol) {
+		Function topFunction = null;
+		int termNb = booleanFctTerms.size();
+		for(int i=0; i < termNb; i+=2) {
+			Function newFunction;
+			if ((termNb - i) >= 2 ) {
+				newFunction = ofac.getFunction(booleanFunctionSymbol, booleanFctTerms.get(i), booleanFctTerms.get(i + 1));
+			}
+			else {
+				newFunction = booleanFctTerms.get(i);
+			}
+
+			if (topFunction == null)
+				topFunction = newFunction;
+			else
+				topFunction = ofac.getFunction(booleanFunctionSymbol, topFunction, newFunction);
+		}
+		return topFunction;
 	}
 }

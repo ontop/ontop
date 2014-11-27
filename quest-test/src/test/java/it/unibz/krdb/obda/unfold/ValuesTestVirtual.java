@@ -161,6 +161,34 @@ public class ValuesTestVirtual extends TestCase {
 				"  } " +
 				"  ?p a :Person ; :name ?name ; :age ?age ." +
 				"}";
+		String query13 =  prefix +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ." +
+				"  VALUES ?name { \"Alice\" \"Bob\" \"Eve\" } " +
+				"}";
+		String query14 =  prefix +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ." +
+				"  VALUES ?name { \"Alice\" \"Bob\" \"Eve\" \"Mark\" } " +
+				"}";
+		String query15 =  prefix +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ." +
+				"  VALUES ?name { \"Alice\" \"Bob\" \"Eve\" \"Mark\" \"Nobody\" } " +
+				"}";
+		String query16 =  prefix +
+				"SELECT * " +
+				"WHERE {" +
+				"  ?p a :Person ; :name ?name ; :age ?age ; :mbox ?mbox ." +
+				"  VALUES (?name ?age ?mbox) { " +
+				"     (\"Alice\" 18 \"alice@example.org\" ) " +
+				"     (\"Bob\" 19 \"bob@example.org\" ) " +
+				"     (\"Eve\" 20 \"eve@example.org\" ) " +
+				"  } " +
+				"}";
 		
 		try {
 			executeQueryAssertResults(query1, st, 4);
@@ -175,6 +203,10 @@ public class ValuesTestVirtual extends TestCase {
 			executeQueryAssertResults(query10, st, 0);
 			executeQueryAssertResults(query11, st, 2);
 			executeQueryAssertResults(query12, st, 2);
+			executeQueryAssertResults(query13, st, 3);
+			executeQueryAssertResults(query14, st, 4);
+			executeQueryAssertResults(query15, st, 4);
+			executeQueryAssertResults(query16, st, 3);
 			
 		} catch (Exception e) {
 			throw e;
