@@ -31,31 +31,31 @@ target     <http://www.example.org/{stringu12}> a <http://www.example.org/4Tab1>
 source   Select * from view12345st 
 
 mappingId	MAPPING-ID7
-target     <http://www.example.org/{stringu12}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString22j> {stringu21}^^xsd:string .
+target     <http://www.example.org/{stringu12}>  <http://www.example.org/hasString22j> {stringu21}^^xsd:string .
 source   Select * from view12345st 
 
 mappingId	MAPPING-ID9
-target     <http://www.example.org/{stringu12}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString3j> {stringu11}^^xsd:string .
+target     <http://www.example.org/{stringu12}>  <http://www.example.org/hasString3j> {stringu11}^^xsd:string .
 source   Select * from view12345st 
 
 mappingId	MAPPING-ID10
-target     <http://www.example.org/{stringu12}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString23j> {stringu21}^^xsd:string .
+target     <http://www.example.org/{stringu12}>  <http://www.example.org/hasString23j> {stringu21}^^xsd:string .
 source   Select * from view12345st 
 
 mappingId	MAPPING-ID12
-target     <http://www.example.org/{stringu12}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString4j> {stringu11}^^xsd:string .
+target     <http://www.example.org/{stringu12}>  <http://www.example.org/hasString4j> {stringu11}^^xsd:string .
 source   Select * from view12345st 
 
 mappingId	MAPPING-ID13
-target     <http://www.example.org/{stringu12}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString24j> {stringu21}^^xsd:string .
+target     <http://www.example.org/{stringu12}>  <http://www.example.org/hasString24j> {stringu21}^^xsd:string .
 source   Select * from view12345st  
 
 mappingId	MAPPING-ID14
-target     <http://www.example.org/{stringu12}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString5j> {stringu11}^^xsd:string .
+target     <http://www.example.org/{stringu12}>  <http://www.example.org/hasString5j> {stringu11}^^xsd:string .
 source   Select * from view12345st 
 
 mappingId	MAPPING-ID15
-target     <http://www.example.org/{stringu12}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString25j> {stringu21}^^xsd:string .
+target     <http://www.example.org/{stringu12}>  <http://www.example.org/hasString25j> {stringu21}^^xsd:string .
 source   Select * from view12345st 
 
 ]]

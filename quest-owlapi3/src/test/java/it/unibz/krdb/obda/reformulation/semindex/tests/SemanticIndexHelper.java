@@ -27,11 +27,13 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
+
 
 
 
@@ -187,15 +189,21 @@ public class SemanticIndexHelper {
                     inverse = true;
                 }
 
-                p = predicateFactory.getPredicate(uri, arity);
-
                 if (type.equals("classes")) {
-                    if (exists)
-                        description = descFactory.getPropertySomeRestriction(p, inverse);
+                    if (exists) {
+                    	PropertyExpression prop = descFactory.createProperty(uri);
+                    	if (inverse)
+                    		prop = prop.getInverse();
+                        description = descFactory.createPropertySomeRestriction(prop);
+                    }
                     else
-                        description = descFactory.createClass(p);
+                        description = descFactory.createClass(uri);
                 } else {
-                    description = descFactory.createProperty(p, inverse);
+                	PropertyExpression prop = descFactory.createProperty(uri);
+                    if (inverse)
+                    	description = prop.getInverse();
+                    else
+                    	description = prop;
                 }
 
 

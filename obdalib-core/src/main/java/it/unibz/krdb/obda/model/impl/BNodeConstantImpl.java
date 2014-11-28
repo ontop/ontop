@@ -84,12 +84,12 @@ public class BNodeConstantImpl extends AbstractLiteral implements BNode {
 	public Set<Variable> getReferencedVariables() {
 		return new LinkedHashSet<Variable>();
 	}
-
+/*
 	@Override
 	public Map<Variable, Integer> getVariableCount() {
 		return new HashMap<Variable, Integer>();
 	}
-
+*/
 	@Override
 	public COL_TYPE getType() {
 		return COL_TYPE.BNODE;

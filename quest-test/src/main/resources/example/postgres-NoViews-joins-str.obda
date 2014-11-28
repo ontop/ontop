@@ -28,36 +28,34 @@ target     <http://www.example.org/{tab1st.stringu1tab1}> a <http://www.example.
 source   Select * from tab1st, tab2st, tab3st, tab4st, tab5st WHERE tab1st.stringu1tab1 = tab2st.stringu1tab2 AND tab2st.stringu1tab2 = tab3st.stringu1tab3 AND tab4st.stringu1tab4 = tab3st.stringu1tab3 AND   tab4st.stringu1tab4 =  tab5st.stringu1tab5
 
 mappingId	MAPPING-ID6
-target     <http://www.example.org/{tab1st.stringu1tab1}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString2j> {Tab2.stringu1tab2}^^xsd:string .
+target     <http://www.example.org/{tab1st.stringu1tab1}>  <http://www.example.org/hasString2j> {tab2st.stringu1tab2}^^xsd:string .
 source   Select * from tab1st, tab2st WHERE tab1st.stringu1tab1 = tab2st.stringu1tab2 
 
 mappingId	MAPPING-ID7
-target     <http://www.example.org/{tab1st.stringu1tab1}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString22j> {Tab2.stringu2tab2}^^xsd:string .
+target     <http://www.example.org/{tab1st.stringu1tab1}>  <http://www.example.org/hasString22j> {tab2st.stringu2tab2}^^xsd:string .
 source   Select * from tab1st, tab2st WHERE tab1st.stringu1tab1 = tab2st.stringu1tab2
 
 mappingId	MAPPING-ID9
-target     <http://www.example.org/{tab1st.stringu1tab1}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString3j> {Tab3.stringu1tab3}^^xsd:string .
+target     <http://www.example.org/{tab1st.stringu1tab1}>  <http://www.example.org/hasString3j> {tab3st.stringu1tab3}^^xsd:string .
 source   Select * from tab1st, tab2st, tab3st WHERE tab1st.stringu1tab1 = tab2st.stringu1tab2 AND tab2st.stringu1tab2 = tab3st.stringu1tab3
 
 mappingId	MAPPING-ID10
-target     <http://www.example.org/{tab1st.stringu1tab1}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString23j> {Tab3.stringu2tab3}^^xsd:string .
+target     <http://www.example.org/{tab1st.stringu1tab1}>  <http://www.example.org/hasString23j> {tab3st.stringu2tab3}^^xsd:string .
 source   Select * from tab1st, tab2st, tab3st WHERE tab1st.stringu1tab1 = tab2st.stringu1tab2 AND tab2st.stringu1tab2 = tab3st.stringu1tab3
 
 mappingId	MAPPING-ID12
-target     <http://www.example.org/{tab1st.stringu1tab1}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString4j> {Tab4.stringu1tab4}^^xsd:string .
+target     <http://www.example.org/{tab1st.stringu1tab1}>  <http://www.example.org/hasString4j> {tab4st.stringu1tab4}^^xsd:string .
 source   Select * from tab1st, tab2st, tab3st, tab4st WHERE tab1st.stringu1tab1 = tab2st.stringu1tab2 AND tab2st.stringu1tab2 = tab3st.stringu1tab3 AND tab4st.stringu1tab4 = tab3st.stringu1tab3
 
 mappingId	MAPPING-ID13
-target     <http://www.example.org/{tab1st.stringu1tab1}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString24j> {Tab4.stringu2tab4}^^xsd:string .
+target     <http://www.example.org/{tab1st.stringu1tab1}>  <http://www.example.org/hasString24j> {tab4st.stringu2tab4}^^xsd:string .
 source   Select * from tab1st, tab2st, tab3st, tab4st WHERE tab1st.stringu1tab1 = tab2st.stringu1tab2 AND tab2st.stringu1tab2 = tab3st.stringu1tab3 AND tab4st.stringu1tab4 = tab3st.stringu1tab3 
 
 mappingId	MAPPING-ID15
-target     <http://www.example.org/{tab1st.stringu1tab1}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString5j> {Tab5.stringu1tab5}^^xsd:string .
+target     <http://www.example.org/{tab1st.stringu1tab1}>  <http://www.example.org/hasString5j> {tab5st.stringu1tab5}^^xsd:string .
 source   Select * from tab1st, tab2st, tab3st, tab4st, tab5st WHERE tab1st.stringu1tab1 = tab2st.stringu1tab2 AND tab2st.stringu1tab2 = tab3st.stringu1tab3 AND tab4st.stringu1tab4 = tab3st.stringu1tab3 AND   tab4st.stringu1tab4 =  tab5st.stringu1tab5
 
 mappingId	MAPPING-ID16
-target     <http://www.example.org/{tab1st.stringu1tab1}> a <http://www.example.org/4Tab1>; <http://www.example.org/hasString25j> {Tab5.stringu2tab5}^^xsd:string .
+target     <http://www.example.org/{tab1st.stringu1tab1}>  <http://www.example.org/hasString25j> {tab5st.stringu2tab5}^^xsd:string .
 source   Select * from tab1st, tab2st, tab3st, tab4st, tab5st WHERE tab1st.stringu1tab1 = tab2st.stringu1tab2 AND tab2st.stringu1tab2 = tab3st.stringu1tab3 AND tab4st.stringu1tab4 = tab3st.stringu1tab3 AND   tab4st.stringu1tab4 =  tab5st.stringu1tab5
-
-
 ]]

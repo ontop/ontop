@@ -28,9 +28,8 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.BinaryAssertion;
+import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.UnaryAssertion;
 
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
@@ -41,8 +40,7 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 public class SesameStatement implements Statement {
-
-	private static final long serialVersionUID = 3398547980791013746L;
+    private static final long serialVersionUID = 3398547980791013746L;
 	private Resource subject = null;
 	private URI predicate = null;
 	private Value object = null;
@@ -53,11 +51,11 @@ public class SesameStatement implements Statement {
 		
 		Constant subj;
 
-		if (assertion instanceof BinaryAssertion) {
+		if (assertion instanceof PropertyAssertion) {
 			//object or data property assertion
-			BinaryAssertion ba = (BinaryAssertion) assertion;
-			subj = ba.getValue1();
-			Predicate pred = ba.getPredicate();
+			PropertyAssertion ba = (PropertyAssertion) assertion;
+			subj = ba.getSubject();
+			Predicate pred = ba.getProperty().getPredicate();
 			Constant obj = ba.getValue2();
 			
 			// convert string into respective type
@@ -78,12 +76,12 @@ public class SesameStatement implements Statement {
 				object = getLiteral((ValueConstant)obj);
 			
 			
-		} else if (assertion instanceof UnaryAssertion) { 
+		} else if (assertion instanceof ClassAssertion) { 
 			//class assertion
-			UnaryAssertion ua = (UnaryAssertion) assertion;
-			subj = ua.getValue();
+			ClassAssertion ua = (ClassAssertion) assertion;
+			subj = ua.getIndividual();
 			String pred = OBDAVocabulary.RDF_TYPE;
-			Predicate obj = ua.getPredicate();
+			Predicate obj = ua.getConcept().getPredicate();
 			
 			// convert string into respective type
 			if (subj instanceof BNode)
@@ -100,7 +98,7 @@ public class SesameStatement implements Statement {
 		}
 	}
 	
-	private Literal getLiteral(ValueConstant literal)
+	public Literal getLiteral(ValueConstant literal)
 	{
 		URI datatype = null;
 		if (literal.getType() == COL_TYPE.BOOLEAN)
@@ -109,15 +107,48 @@ public class SesameStatement implements Statement {
 		else if (literal.getType() == COL_TYPE.DATETIME)
 			datatype = fact
 					.createURI(OBDAVocabulary.XSD_DATETIME_URI);
+        else if (literal.getType() == COL_TYPE.DATE)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_DATE_URI);
+        else if (literal.getType() == COL_TYPE.TIME)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_TIME_URI);
+        else if (literal.getType() == COL_TYPE.YEAR)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_YEAR_URI);
 		else if (literal.getType() == COL_TYPE.DECIMAL)
 			datatype = fact
 					.createURI(OBDAVocabulary.XSD_DECIMAL_URI);
 		else if (literal.getType() == COL_TYPE.DOUBLE)
 			datatype = fact
 					.createURI(OBDAVocabulary.XSD_DOUBLE_URI);
+        else if (literal.getType() == COL_TYPE.FLOAT)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_FLOAT_URI);
 		else if (literal.getType() == COL_TYPE.INTEGER)
 			datatype = fact
 					.createURI(OBDAVocabulary.XSD_INTEGER_URI);
+        else if (literal.getType() == COL_TYPE.NON_NEGATIVE_INTEGER)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI);
+        else if (literal.getType() == COL_TYPE.POSITIVE_INTEGER)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI);
+        else if (literal.getType() == COL_TYPE.POSITIVE_INTEGER)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI);
+        else if (literal.getType() == COL_TYPE.NON_POSITIVE_INTEGER)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI);
+        else if (literal.getType() == COL_TYPE.UNSIGNED_INT)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_UNSIGNED_INT_URI);
+        else if (literal.getType() == COL_TYPE.INT)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_INT_URI);
+        else if (literal.getType() == COL_TYPE.LONG)
+            datatype = fact
+                    .createURI(OBDAVocabulary.XSD_LONG_URI);
 		else if (literal.getType() == COL_TYPE.LITERAL)
 			datatype = null;
 		else if (literal.getType() == COL_TYPE.LITERAL_LANG)
@@ -151,6 +182,34 @@ public class SesameStatement implements Statement {
 		// TODO Auto-generated method stub
 		return context;
 	}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof Statement)) return false;
+
+        Statement that = (Statement) o;
+
+        Resource thatContext = that.getContext();
+        if (context != null ? !context.equals(thatContext) : thatContext != null) return false;
+        Value thatObject = that.getObject();
+        if (object != null ? !object.equals(thatObject) : thatObject != null) return false;
+        URI thatPredicate = that.getPredicate();
+        if (predicate != null ? !predicate.equals(thatPredicate) : thatPredicate != null) return false;
+        Resource thatSubject = that.getSubject();
+        if (subject != null ? !subject.equals(thatSubject) : thatSubject != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int contextComponent = context != null ? context.hashCode() : 0;
+        int subjectComponent = subject != null ? subject.hashCode() : 0;
+        int predicateComponent = predicate != null ? predicate.hashCode() : 0;
+        int objectComponent = object != null ? object.hashCode() : 0;
+        return 1013 * contextComponent + 961 * subjectComponent + 31 * predicateComponent + objectComponent;
+    }
 
 	@Override
 	public String toString()

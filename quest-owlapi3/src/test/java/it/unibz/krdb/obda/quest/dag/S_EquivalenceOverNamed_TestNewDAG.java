@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.quest.dag;
 
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -507,8 +507,8 @@ public class S_EquivalenceOverNamed_TestNewDAG extends TestCase {
 			}
 */			
 	private boolean checkforNamedVertexesOnly(TestTBoxReasonerImpl_OnNamedDAG dag, TBoxReasoner reasoner){
-		for(Equivalences<Property> node: dag.getProperties()) {
-			Property vertex = node.getRepresentative();
+		for(Equivalences<PropertyExpression> node: dag.getProperties()) {
+			PropertyExpression vertex = node.getRepresentative();
 			if(!reasoner.getProperties().getVertex(vertex).isIndexed())
 				return false;
 		}

@@ -20,26 +20,22 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
-import com.google.common.collect.Lists;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 
-import java.util.List;
 import java.util.Properties;
 
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 
 /***
  * Implementation of an OWLReasonerFactory that can create instances of Quest.
@@ -75,8 +71,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	 * identified by the TMapping algorithm would NOT add any
 	 * new individual.
 	 */
-	private List<SimplePredicate> excludeFromTMappings = Lists.newArrayList();
-	//private boolean applyExcludeFromTMappings = false;
+	private TMappingExclusionConfig excludeFromTMappings = TMappingExclusionConfig.empty();
 	
 	private String name = "Quest";
 
@@ -121,12 +116,11 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	 * identified by the TMapping algorithm would NOT add any
 	 * new individual in the concept.
 	 */
-	public void setExcludeFromTMappingsPredicates(List<SimplePredicate> excludeFromTMappings){
+	public void setExcludeFromTMappingsPredicates(TMappingExclusionConfig excludeFromTMappings){
 		
 		if( excludeFromTMappings == null ) throw new NullPointerException(); 
 		
 		this.excludeFromTMappings = excludeFromTMappings;
-		//this.applyExcludeFromTMappings = true;
 	}
 	
 	@Override
@@ -135,7 +129,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	}
 
 	@Override
-	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology) {
+	public QuestOWL createNonBufferingReasoner(OWLOntology ontology) {
 		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
 			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 			log.warn("You didn't specified mappings, Quest will assume you want to work in 'classic ABox' mode' even though you set the ABox mode to: '"
@@ -148,22 +142,16 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 			log.warn("To avoid this warning, set the value of '" + QuestPreferences.ABOX_MODE + "' to '" + QuestConstants.VIRTUAL + "'");
 		}
 		if(this.applyUserConstraints){
-			//if( this.applyExcludeFromTMappings )
 				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, userConstraints, excludeFromTMappings);
-			//else
-			//	return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, userConstraints);
 		}
 		else{
-			//if( this.applyExcludeFromTMappings )
 				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, excludeFromTMappings);
-			//else
-			//	return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences);
 		}
 		
 	}
 
 	@Override
-	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config)
+	public QuestOWL createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config)
 			throws IllegalConfigurationException {
 		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
 			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -191,7 +179,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	}
 	
 	@Override
-	public OWLReasoner createReasoner(OWLOntology ontology) {
+	public QuestOWL createReasoner(OWLOntology ontology) {
 		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
 			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 			log.warn("You didn't specified mappings, Quest will assume you want to work in 'classic ABox' mode' even though you set the ABox mode to: '"
@@ -218,7 +206,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	}
 
 	@Override
-	public OWLReasoner createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
+	public QuestOWL createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		if (mappingManager == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
 			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 			log.warn("You didn't specified mappings, Quest will assume you want to work in 'classic ABox' mode' even though you set the ABox mode to: '"

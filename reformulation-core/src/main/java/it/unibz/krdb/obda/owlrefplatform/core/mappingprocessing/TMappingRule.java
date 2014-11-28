@@ -6,8 +6,8 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -26,9 +26,9 @@ public class TMappingRule {
 	
 	private final CQIE stripped;	
 	private final List<Function> conditions;	
-	private final CQCUtilities cqc;
-
-	public TMappingRule(Function head, List<Function> body) {
+	final CQContainmentCheckUnderLIDs cqc;   // TODO: make private
+	
+	public TMappingRule(Function head, List<Function> body, CQContainmentCheckUnderLIDs cqc) {
 		conditions = new LinkedList<Function>();
 		List<Function> newbody = new LinkedList<Function>();
 		for (Function atom : body) {
@@ -40,10 +40,10 @@ public class TMappingRule {
 		}
 		Function newhead = (Function)head.clone();
 		stripped = fac.getCQIE(newhead, newbody);
-		cqc = new CQCUtilities(stripped, (Ontology)null /*sigma*/);
+		this.cqc = cqc;
 	}
 
-	public TMappingRule(Function head, TMappingRule baseRule) {
+	public TMappingRule(Function head, TMappingRule baseRule, CQContainmentCheckUnderLIDs cqc) {
 		conditions = new ArrayList<Function>(baseRule.conditions.size());
 		for (Function atom : baseRule.conditions) {
 			Function clone = (Function)atom.clone();
@@ -57,7 +57,7 @@ public class TMappingRule {
 		}
 		Function newhead = (Function)head.clone();
 		stripped = fac.getCQIE(newhead, newbody);
-		cqc = new CQCUtilities(stripped, (Ontology)null /*sigma*/); // could be null -- no optimization is used
+		this.cqc = cqc;
 	}
 	
 	
@@ -66,7 +66,7 @@ public class TMappingRule {
 	}
 	
 	public boolean isContainedIn(TMappingRule other) {
-		return cqc.isContainedIn(other.stripped);
+		return cqc.isContainedIn(stripped, other.stripped);
 	}
 	
 	public CQIE asCQIE() {

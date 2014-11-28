@@ -7,6 +7,8 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgessMonitor;
 import it.unibz.krdb.obda.protege4.utils.OBDAProgressListener;
+
+import java.awt.Component;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JOptionPane;
@@ -49,7 +51,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 	// THe time used by the execution
 	private long time;
 
-	private boolean errorShown = false;
+	private boolean queryExecError = false;
 	private QuestOWLStatement statement = null;
 	private CountDownLatch latch = null;
 	private Thread thread = null;
@@ -57,6 +59,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 	private boolean isCanceled = false;
 	private boolean actionStarted = false;
 	private QuestOWL reasoner;
+	private Component rootView;  // Davide> DAG's hack protegeQueryTabFreezeBug
 
 	private static String QUEST_START_MESSAGE = "Quest must be started before using this feature. To proceed \n * select Quest in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
 
@@ -64,8 +67,9 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 	private static final Logger log = LoggerFactory.getLogger(OBDADataQueryAction.class);
 
 
-	public OBDADataQueryAction(String msg){
+	public OBDADataQueryAction(String msg, Component rootView){ // Davide> DAG's hack protegeQueryTabFreezeBug
 		this.msg = msg;
+		this.rootView = rootView;
 	}
 
 	/**
@@ -92,7 +96,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 		this.queryString = query;
 		this.actionStarted = true;
 		this.isCanceled = false;
-		this.errorShown = false;
+		this.queryExecError = false;
 		OBDAProgessMonitor monitor = null;
 		try {
 			monitor = new OBDAProgessMonitor(this.msg);
@@ -107,20 +111,21 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 				runAction();
 				latch.await();
 				monitor.stop();
-				if(!this.isCancelled() && !(result == null && this.isErrorShown())){
+				if(!this.isCancelled() && !this.isErrorShown()){
 					this.time = System.currentTimeMillis() - startTime;
 					handleResult(result);
 				}
 			} else /* reasoner not QuestOWL */ {
 				JOptionPane.showMessageDialog(
-						null,
+						rootView,
 						QUEST_START_MESSAGE);
 			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(
-					null,
+					rootView,
 					e);
 		} finally {
+			latch.countDown();
 			monitor.stop();
 		}
 	}
@@ -151,14 +156,13 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 					result = executeQuery(statement, queryString);
 					latch.countDown();
 				} catch (Exception e) {
-					latch.countDown();
 					if(!isCancelled()){
-						errorShown = true;
+						queryExecError = true;
 						log.error(e.getMessage(), e);
-						DialogUtils.showQuickErrorDialog(null, e);
+						DialogUtils.showQuickErrorDialog(rootView, e, "Error executing query");
+						latch.countDown();
 					}
-				}
-
+				}	
 			}
 		};
 		thread.start();
@@ -192,7 +196,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 				this.old_latch.countDown();
 			} catch (Exception e) {
 				this.old_latch.countDown();
-				DialogUtils.showQuickErrorDialog(null, e, "Error executing query.");
+				DialogUtils.showQuickErrorDialog(rootView, e, "Error cancelling query.");
 			}
 		}
 	};
@@ -205,7 +209,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 			Canceller canceller = new Canceller();
 			canceller.start();
 		} catch (OBDAException e) {
-			DialogUtils.showQuickErrorDialog(null, e, "Error creating new database connection.");
+			DialogUtils.showQuickErrorDialog(rootView, e, "Error creating new database connection.");
 		} finally {
 			this.actionStarted = false;
 		}
@@ -216,7 +220,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener{
 	}
 
 	public boolean isErrorShown(){
-		return this.errorShown;
+		return this.queryExecError;
 	}
 
 	public void closeConnection() throws OWLException {
