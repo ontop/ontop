@@ -86,7 +86,7 @@ public class QuestOWLExample_OntowisTests {
 	// Exclude from T-Mappings
 	//final String tMappingsConfFile = "src/main/resources/example/tMappingsConf.conf";
 	
-	public void runQuery() throws Exception {
+	public void runQuery(String obdaFile) throws Exception {
 
 		/*
 		 * Get the book information that is stored in the database
@@ -235,7 +235,7 @@ public class QuestOWLExample_OntowisTests {
 		
 		
 		closeEverything(conn);
-		generateFile(resultsOne, resultsTwo, resultsThree);
+		generateFile(resultsOne, resultsTwo, resultsThree,obdaFile);
 		
 
 	
@@ -246,10 +246,11 @@ public class QuestOWLExample_OntowisTests {
 	/**
 	 * @param queriesOneSPARQL
 	 * @param resultsOne
+	 * @param obdaFile 
 	 * @throws UnsupportedEncodingException 
 	 * @throws FileNotFoundException 
 	 */
-	private void generateFile( String[] resultsOne, String[] resultsTwo, String[] resultsThree) throws FileNotFoundException, UnsupportedEncodingException {
+	private void generateFile( String[] resultsOne, String[] resultsTwo, String[] resultsThree, String obdaFile) throws FileNotFoundException, UnsupportedEncodingException {
 		/*
 		 * Generate File !
 		 */
@@ -493,7 +494,7 @@ public class QuestOWLExample_OntowisTests {
 			System.out.println(obdaFile);
 			
 			QuestOWLExample_OntowisTests example = new QuestOWLExample_OntowisTests(obdaFile);
-			example.runQuery();
+			example.runQuery(obdaFile);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -3,7 +3,7 @@
 
 [SourceDeclaration]
 sourceUri	viewTest
-connectionUrl	jdbc:postgresql://10.7.20.39/ontowis
+connectionUrl	jdbc:postgresql://10.7.20.39/ontowis_copy
 username	postgres
 password	postgres
 driverClass	org.postgresql.Driver
