@@ -31,6 +31,7 @@ import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3IndividualTranslator;
 import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestStatementSIRepository;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
@@ -50,13 +51,11 @@ import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.QueryParser;
 import org.openrdf.query.parser.QueryParserUtil;
-
 import org.openrdf.rio.ParserConfig;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.BasicParserSettings;
-
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLException;
@@ -123,15 +122,6 @@ public class QuestOWLStatement {
 		}
 	}
 
-	public void createIndexes() throws Exception {
-		st.createIndexes();
-	}
-
-	public void dropIndexes() throws Exception {
-		st.dropIndexes();
-
-	}
-
 	public List<OWLAxiom> executeGraph(String query) throws OWLException {
 		if (SPARQLQueryUtility.isConstructQuery(query) || SPARQLQueryUtility.isDescribeQuery(query)) {
 		try {
@@ -167,7 +157,7 @@ public class QuestOWLStatement {
 			// TODO: (ROMAN) -- check whether we need to use 
 			// EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
 
-			return st.insertData(aBoxIter, commitSize, batchsize);
+			return st.getSIRepository().insertData(aBoxIter, commitSize, batchsize);
 		} else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
 
 			RDFParser rdfParser = null;
@@ -279,7 +269,7 @@ public class QuestOWLStatement {
 		@Override
 		public void run() {
 			try {
-				insertCount = questStmt.insertData(iterator, commitsize, batchsize);
+				insertCount = questStmt.getSIRepository().insertData(iterator, commitsize, batchsize);
 			} catch (SQLException e) {
 				throw new RuntimeException(e);
 			}
@@ -424,10 +414,6 @@ public class QuestOWLStatement {
 	}
 
 
-	public void analyze() throws Exception {
-		st.analyze();
-
-	}
 	
 	// Davide> Benchmarking
 	public long getUnfoldingTime(){
@@ -444,5 +430,9 @@ public class QuestOWLStatement {
 	
 	public int getUCQSizeAfterRewriting(){
 		return st.getUCQSizeAfterRewriting();
+	}
+
+	public QuestStatementSIRepository getSIRepository() {
+		return st.getSIRepository();
 	}
 }

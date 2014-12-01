@@ -333,7 +333,7 @@ public class QuestOWL extends OWLReasonerBase {
 					EquivalentTriplePredicateIterator aBoxNormalIter = 
 							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
 					
-					int count = st.insertData(aBoxNormalIter, 5000, 500);
+					int count = st.getSIRepository().insertData(aBoxNormalIter, 5000, 500);
 					log.debug("Inserted {} triples from the ontology.", count);
 				}
 				if (bObtainFromMappings) {
@@ -345,7 +345,7 @@ public class QuestOWL extends OWLReasonerBase {
 					
 					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
 					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
-					int count = st.insertData(assertionIter, 5000, 500);
+					int count = st.getSIRepository().insertData(assertionIter, 5000, 500);
 					materializer.disconnect();
 					log.debug("Inserted {} triples from the mappings.", count);
 				}

@@ -65,11 +65,11 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	public int add(Iterator<Assertion> data) throws SQLException {
-		return st.insertData(data, -1, -1);
+		return st.getSIRepository().insertData(data, -1, -1);
 	}
 
 	public int add(Iterator<Assertion> data, int commit, int batch) throws SQLException {
-		return st.insertData(data, commit, batch);
+		return st.getSIRepository().insertData(data, commit, batch);
 	}
 
 	public int add(URI rdffile) throws OBDAException {
@@ -99,14 +99,14 @@ public class QuestDBStatement implements OBDAStatement {
 						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos), 
 								st.questInstance.getReasoner());
 				
-				result = st.insertData(aBoxNormalIter, /*useFile,*/ commit, batch);
+				result = st.getSIRepository().insertData(aBoxNormalIter, /*useFile,*/ commit, batch);
 			} 
 			else if (ext.toLowerCase().equals(".nt")) {				
 				NTripleAssertionIterator it = new NTripleAssertionIterator(rdffile);
 				EquivalentTriplePredicateIterator aBoxNormalIter = 
 						new EquivalentTriplePredicateIterator(it, st.questInstance.getReasoner());
 				
-				result = st.insertData(aBoxNormalIter, /*useFile,*/ commit, batch);
+				result = st.getSIRepository().insertData(aBoxNormalIter, /*useFile,*/ commit, batch);
 			}
 			return result;
 		} catch (Exception e) {
@@ -127,7 +127,7 @@ public class QuestDBStatement implements OBDAStatement {
 			io.load(uri.toString());
 			materializer = new QuestMaterializer(obdaModel);
 			assertionIter =  materializer.getAssertionIterator();
-			int result = st.insertData(assertionIter, /*useFile,*/ commit, batch);
+			int result = st.getSIRepository().insertData(assertionIter, /*useFile,*/ commit, batch);
 			return result;
 
 		} catch (Exception e) {
@@ -164,10 +164,6 @@ public class QuestDBStatement implements OBDAStatement {
 		return st.executeUpdate(query);
 	}
 
-	@Override
-	public OBDAConnection getConnection() throws OBDAException {
-		return st.getConnection();
-	}
 
 	@Override
 	public int getFetchSize() throws OBDAException {
@@ -218,33 +214,10 @@ public class QuestDBStatement implements OBDAStatement {
 	 * QuestSpecific
 	 */
 
-	public void createIndexes() throws Exception {
-		st.createIndexes();
+	public QuestStatementSIRepository getSIRepository() {
+		return st.getSIRepository();
 	}
-
-	public void dropIndexes() throws Exception {
-		st.dropIndexes();
-	}
-
-	public boolean isIndexed() {
-		return st.isIndexed();
-	}
-
-	public void dropRepository() throws SQLException {
-		st.dropRepository();
-	}
-
-	/***
-	 * In an ABox store (classic) this methods triggers the generation of the
-	 * schema and the insertion of the metadata.
-	 */
-	public void createDB() throws SQLException {
-		st.createDB();
-	}
-
-	public void analyze() throws Exception {
-		st.analyze();
-	}
+	
 
 	public String getSQL(String query) throws Exception {
 		return st.getUnfolding(query);

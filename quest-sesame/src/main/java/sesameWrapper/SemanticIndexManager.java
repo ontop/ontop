@@ -69,6 +69,7 @@ public class SemanticIndexManager {
 		reasoner = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(ontoReasoner);
 			
 		dataRepository = new RDBMSSIRepositoryManager(reasoner);
+		dataRepository.generateMetadata(); // generate just in case
 
 		log.debug("TBox has been processed. Ready to ");
 	}
@@ -91,8 +92,7 @@ public class SemanticIndexManager {
 			}
 		}
 		
-		dataRepository.createDBSchema(conn);
-		dataRepository.insertMetadata(conn);
+		dataRepository.createDBSchemaAndInsertMetadata(conn);
 
 		log.debug("Semantic Index repository has been setup.");
 	}

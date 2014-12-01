@@ -562,15 +562,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					 * is clean and Quest will insert new Abox assertions into
 					 * the database.
 					 */
-
+					dataRepository.generateMetadata();
+					
 					/* Creating the ABox repository */
-
-					if (!dataRepository.isDBSchemaDefined(localConnection)) {
-						dataRepository.createDBSchema(localConnection);
-						dataRepository.insertMetadata(localConnection);
-					}
-
-				} else {
+					dataRepository.createDBSchemaAndInsertMetadata(localConnection);
+				} 
+				else {
 					/*
 					 * Here we expect the repository to be already created in
 					 * the database, we will restore the repository and we will

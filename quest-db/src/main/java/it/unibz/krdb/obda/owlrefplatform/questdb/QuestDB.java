@@ -202,7 +202,7 @@ public class QuestDB {
 		try {
 			QuestDBConnection conn = connections.get(storename);
 			QuestDBStatement st = conn.createStatement();
-			st.dropRepository();
+			st.getSIRepository().dropRepository();
 			st.close();
 			conn.commit();
 			conn.close();
@@ -231,7 +231,7 @@ public class QuestDB {
 			boolean inmemory = dbstore.getPreferences().get(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
 			if (classic && inmemory) {
 				QuestDBStatement st = conn.createStatement();
-				st.createDB();
+				st.getSIRepository().createRepository();
 				st.close();
 				conn.commit();
 			}
@@ -326,22 +326,8 @@ public class QuestDB {
 		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
 		QuestDBConnection conn = connections.get(storename);
 		QuestDBStatement st = conn.createStatement();
-		st.createIndexes();
+		st.getSIRepository().createIndexes();
 		st.close();
-	}
-
-	public void analyze(String storename) throws Exception {
-		if (!stores.containsKey(storename))
-			throw new Exception(String.format("The store \"%s\" does not exists.", storename));
-		QuestDBAbstractStore dbstore = stores.get(storename);
-		if (!(dbstore instanceof QuestDBClassicStore))
-			throw new Exception("Unsupported request");
-		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
-		QuestDBConnection conn = connections.get(storename);
-		QuestDBStatement st = conn.createStatement();
-		st.analyze();
-		st.close();
-
 	}
 
 	public void dropIndexes(String storename) throws Exception {
@@ -353,7 +339,7 @@ public class QuestDB {
 		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
 		QuestDBConnection conn = connections.get(storename);
 		QuestDBStatement st = conn.createStatement();
-		st.dropIndexes();
+		st.getSIRepository().dropIndexes();
 		st.close();
 	}
 
@@ -366,7 +352,7 @@ public class QuestDB {
 		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
 		QuestDBConnection conn = connections.get(storename);
 		QuestDBStatement st = conn.createStatement();
-		boolean response = st.isIndexed();
+		boolean response = st.getSIRepository().isIndexed();
 		st.close();
 		return response;
 	}

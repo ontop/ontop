@@ -181,7 +181,7 @@ public class SemanticIndexLUBMHTest extends TestCase {
 //		log.debug("File 24. Total insertion time: {}", time1);
 //		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University24.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
 		
-		st.createIndexes();
+		st.getSIRepository().createIndexes();
 		end = System.nanoTime();
 		double insert_time = (end - start) / 1000000;
 		

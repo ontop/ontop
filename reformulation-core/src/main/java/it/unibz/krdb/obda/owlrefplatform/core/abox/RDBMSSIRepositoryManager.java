@@ -259,11 +259,13 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag) {
 		this.reasonerDag = reasonerDag;
-		cacheSI = new SemanticIndexCache(reasonerDag);
-		// this is an expensive an unnecessary operation in case the DB stored metadata
-		cacheSI.buildSemanticIndexFromReasoner();
 	}
 
+	public void generateMetadata() {
+		cacheSI = new SemanticIndexCache(reasonerDag);
+		cacheSI.buildSemanticIndexFromReasoner();		
+	}
+	
 	public void addRepositoryChangedListener(RepositoryChangedListener list) {
 		this.changeList.add(list);
 	}
@@ -275,7 +277,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 
 
-	public void createDBSchema(Connection conn) throws SQLException {
+	
+	
+	public void createDBSchemaAndInsertMetadata(Connection conn) throws SQLException {
 
 		if (isDBSchemaDefined(conn)) {
 			log.debug("Schema already exists. Skipping creation");
@@ -299,32 +303,33 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			
 			st.executeBatch();			
 		}
+		
+		insertMetadata(conn);
 	}
 
-	public void createIndexes(Connection conn) throws SQLException {
-		log.debug("Creating indexes");
+	private boolean isDBSchemaDefined(Connection conn) throws SQLException {
+		
+		boolean exists = false; // initially pessimistic
+		
 		try (Statement st = conn.createStatement()) {
-			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
-				for (String s : entry.getValue().createIndexCommands)
-					st.addBatch(s);
-						
-			for (String s : classTable.createIndexCommands)
-				st.addBatch(s);
-			
-			for (String s : roleTable.createIndexCommands)
-				st.addBatch(s);
-			
-			st.executeBatch();
-			st.clearBatch();
-			
-			log.debug("Executing ANALYZE");
-			st.addBatch("ANALYZE");
-			st.executeBatch();
-			
-			isIndexed = true;
-		}
-	}
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", classTable.tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", roleTable.tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.LITERAL).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.STRING).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.INTEGER).tableName));
+            st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.LONG).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DECIMAL).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DOUBLE).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DATETIME).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.BOOLEAN).tableName));
 
+			exists = true; // everything is fine if we get to this point
+		} 
+		catch (Exception e) {
+			// ignore all exceptions
+		}
+		return exists;
+	}
 	
 	
 	public void dropDBSchema(Connection conn) throws SQLException {
@@ -487,6 +492,11 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		return success;
 	}
 
+	/*
+	 * fired ONLY when new data is inserted and emptiness index is updated
+	 * (this is done in order to update T-mappings)
+	 */
+	
 	private void fireRepositoryChanged() {
 		for (RepositoryChangedListener listener : changeList) {
 			listener.repositoryChanged();
@@ -1357,14 +1367,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 	
 
-	public void collectStatistics(Connection conn) throws SQLException {
-
-		try (Statement st = conn.createStatement()) {
-			st.addBatch("ANALYZE");
-			st.executeBatch();
-		}
-	}
-
 
 	/***
 	 * Inserts the metadata about semantic indexes and intervals into the
@@ -1466,6 +1468,33 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	
+	
+	
+	
+	public void createIndexes(Connection conn) throws SQLException {
+		log.debug("Creating indexes");
+		try (Statement st = conn.createStatement()) {
+			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
+				for (String s : entry.getValue().createIndexCommands)
+					st.addBatch(s);
+						
+			for (String s : classTable.createIndexCommands)
+				st.addBatch(s);
+			
+			for (String s : roleTable.createIndexCommands)
+				st.addBatch(s);
+			
+			st.executeBatch();
+			st.clearBatch();
+			
+			log.debug("Executing ANALYZE");
+			st.addBatch("ANALYZE");
+			st.executeBatch();
+			
+			isIndexed = true;
+		}
+	}
+	
 	/**
 	 *  DROP indexes	
 	 */
@@ -1494,29 +1523,4 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	public boolean isIndexed(Connection conn) {
 		return isIndexed;
 	}
-
-	public boolean isDBSchemaDefined(Connection conn) throws SQLException {
-		
-		boolean exists = false; // initially pessimistic
-		
-		try (Statement st = conn.createStatement()) {
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", classTable.tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", roleTable.tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.LITERAL).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.STRING).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.INTEGER).tableName));
-            st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.LONG).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DECIMAL).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DOUBLE).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DATETIME).tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.BOOLEAN).tableName));
-
-			exists = true; // everything is fine if we get to this point
-		} 
-		catch (Exception e) {
-			// ignore all exceptions
-		}
-		return exists;
-	}
-
 }

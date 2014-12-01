@@ -26,14 +26,11 @@ import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.GraphResultSet;
-import it.unibz.krdb.obda.model.OBDAConnection;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
@@ -54,7 +51,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -85,8 +81,6 @@ public class QuestStatement implements OBDAStatement {
 
 	private Statement sqlstatement;
 
-	private final QuestConnection conn;
-
 	public final Quest questInstance;
 
 	private static final Logger log = LoggerFactory.getLogger(QuestStatement.class);
@@ -106,6 +100,8 @@ public class QuestStatement implements OBDAStatement {
 	private final SparqlAlgebraToDatalogTranslator translator;
 	
 	private SesameConstructTemplate templ;
+	
+	private final QuestStatementSIRepository siRepository;
 
 	/*
 	 * For benchmark purpose
@@ -123,12 +119,17 @@ public class QuestStatement implements OBDAStatement {
 		this.signaturecache = questinstance.getSignatureCache();
 		this.sesameQueryCache = questinstance.getSesameQueryCache();
 
-		this.conn = conn;
 		this.querygenerator = questinstance.datasourceQueryGenerator;
 
 		this.sqlstatement = st;
+		
+		this.siRepository = new QuestStatementSIRepository(questinstance, conn, translator);
 	}
 
+	public QuestStatementSIRepository getSIRepository() {
+		return siRepository;
+	}
+	
 	private class QueryExecutionThread extends Thread {
 
 		private final CountDownLatch monitor;
@@ -814,11 +815,6 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 	@Override
-	public OBDAConnection getConnection() throws OBDAException {
-		return conn;
-	}
-
-	@Override
 	public TupleResultSet getResultSet() throws OBDAException {
 		return null;
 	}
@@ -839,85 +835,6 @@ public class QuestStatement implements OBDAStatement {
 		} catch (Exception e) {
 			throw new OBDAException(e);
 		}
-	}
-
-	/***
-	 * Inserts a stream of ABox assertions into the repository.
-	 * 
-	 * @param data
-
-	 *            Indicates if indexes (if any) should be dropped before
-	 *            inserting the tuples and recreated afterwards. Note, if no
-	 *            index existed before the insert no drop will be done and no
-	 *            new index will be created.
-	 * @throws SQLException
-	 */
-	public int insertData(Iterator<Assertion> data,  int commit, int batch) throws SQLException {
-		int result = -1;
-
-		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(data, questInstance.getReasoner());
-
-//		if (!useFile) {
-
-			result = questInstance.getSemanticIndexRepository().insertData(conn.conn, newData, commit, batch);
-//		} else {
-			//try {
-				// File temporalFile = new File("quest-copy.tmp");
-				// FileOutputStream os = new FileOutputStream(temporalFile);
-				// ROMAN: this called DOES NOTHING
-				// result = (int) questInstance.getSemanticIndexRepository().loadWithFile(conn.conn, newData);
-				// os.close();
-
-			//} catch (IOException e) {
-			//	log.error(e.getMessage());
-			//}
-//		}
-
-		try {
-			questInstance.updateSemanticIndexMappings();
-			translator.setTemplateMatcher(questInstance.getUriTemplateMatcher());
-
-		} catch (Exception e) {
-			log.error("Error updating semantic index mappings after insert.", e);
-		}
-
-		return result;
-	}
-
-
-	public void createIndexes() throws Exception {
-		questInstance.getSemanticIndexRepository().createIndexes(conn.conn);
-	}
-
-	public void dropIndexes() throws Exception {
-		questInstance.getSemanticIndexRepository().dropIndexes(conn.conn);
-	}
-
-	public boolean isIndexed() {
-		if (questInstance.getSemanticIndexRepository() == null)
-			return false;
-		return questInstance.getSemanticIndexRepository().isIndexed(conn.conn);
-	}
-
-	public void dropRepository() throws SQLException {
-		if (questInstance.getSemanticIndexRepository() == null)
-			return;
-		questInstance.getSemanticIndexRepository().dropDBSchema(conn.conn);
-	}
-
-	/***
-	 * In an ABox store (classic) this methods triggers the generation of the
-	 * schema and the insertion of the metadata.
-	 * 
-	 * @throws SQLException
-	 */
-	public void createDB() throws SQLException {
-		questInstance.getSemanticIndexRepository().createDBSchema(conn.conn);
-		questInstance.getSemanticIndexRepository().insertMetadata(conn.conn); 
-	}
-
-	public void analyze() throws Exception {
-		questInstance.getSemanticIndexRepository().collectStatistics(conn.conn);
 	}
 
 	/*

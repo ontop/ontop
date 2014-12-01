@@ -49,7 +49,7 @@ public abstract class QuestDBAbstractStore implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
-
+	
 	/* Move to query time ? */
 	public Properties getPreferences() {
 		return questInstance.getPreferences();

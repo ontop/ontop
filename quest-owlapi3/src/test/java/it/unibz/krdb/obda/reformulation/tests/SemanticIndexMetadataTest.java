@@ -130,8 +130,7 @@ public class SemanticIndexMetadataTest  extends TestCase {
 			
 			RDBMSSIRepositoryManager si = quest.getSemanticIndexRepository();
 			
-			si.createDBSchema(conn);
-			si.insertMetadata(conn);
+			si.createDBSchemaAndInsertMetadata(conn);
 
 			
 			Statement st = conn.createStatement();
