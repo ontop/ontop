@@ -24,7 +24,7 @@ package it.unibz.krdb.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
@@ -126,8 +126,8 @@ private boolean testIndexes(SemanticIndexBuilder engine, NamedDAG namedDAG){
 	for(Description vertex: engine.getIndexed() /*.getNamedDAG().vertexSet()*/){
 		int index= engine.getIndex(vertex);
 		log.info("vertex {} index {}", vertex, index);
-		if (vertex instanceof Property) {
-			for(Description parent: namedDAG.getSuccessors((Property)vertex)){
+		if (vertex instanceof PropertyExpression) {
+			for(Description parent: namedDAG.getSuccessors((PropertyExpression)vertex)){
 				result = engine.getRange(parent).contained(new SemanticIndexRange(index,index));
 				if(!result)
 					break;

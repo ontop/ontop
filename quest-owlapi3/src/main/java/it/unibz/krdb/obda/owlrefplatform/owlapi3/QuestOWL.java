@@ -20,8 +20,6 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
-import com.google.common.collect.Lists;
-import it.unibz.krdb.config.tmappings.types.SimplePredicate;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
@@ -29,11 +27,15 @@ import it.unibz.krdb.obda.model.ResultSet;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Axiom;
-import it.unibz.krdb.obda.ontology.DisjointClassAxiom;
-import it.unibz.krdb.obda.ontology.DisjointDescriptionAxiom;
-import it.unibz.krdb.obda.ontology.DisjointPropertyAxiom;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DisjointClassesAxiom;
+import it.unibz.krdb.obda.ontology.DisjointPropertiesAxiom;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.PropertyFunctionalAxiom;
+import it.unibz.krdb.obda.ontology.FunctionalPropertyAxiom;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
@@ -193,18 +195,6 @@ public class QuestOWL extends OWLReasonerBase {
 	/* Used to signal whether to apply the user constraints above */
 	private boolean applyUserConstraints = false;
 	
-	// //////////////////////////////////////////////////////////////////////////////////////
-	//  Davide>
-	//  T-Mappings Configuration
-	//  
-	//
-	// //////////////////////////////////////////////////////////////////////////////////////
-
-	private List<SimplePredicate> excludeFromTMappings = Lists.newArrayList();
-	
-	/* Used to signal whether to apply the user constraints above */
-	//private boolean applyExcludeFromTMappings = false;
-	
 	/**
 	 * Initialization code which is called from both of the two constructors. 
 	 * @param obdaModel 
@@ -254,47 +244,7 @@ public class QuestOWL extends OWLReasonerBase {
 		this.init(rootOntology, obdaModel, configuration, preferences);
 	}
 	
-	/**
-	 * This constructor is the same as the default constructor, 
-	 * plus the list of predicates for which TMappings reasoning 
-	 * should be disallowed is supplied 
-	 * @param excludeFromTMappings User-supplied predicates for which TMappings should be forbidden
-	 */
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, List<SimplePredicate> excludeFromTMappings) {
-		super(rootOntology, configuration, bufferingMode);
-		
-		// Davide> T-Mappings handling
-		this.excludeFromTMappings = excludeFromTMappings;
-		assert(excludeFromTMappings != null);
-		//this.applyExcludeFromTMappings = true;
-		
-		this.init(rootOntology, obdaModel, configuration, preferences);
-
-	}
 	
-	/**
-	 * This constructor is the same as the default constructor plus the extra constraints, 
-	 * but the list of predicates for which TMappings reasoning should be disallowed is 
-	 * supplied 
-	 * @param excludeFromTMappings User-supplied predicates for which TMappings should be forbidden
-	 */
-	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, ImplicitDBConstraints userConstraints, 
-			List<SimplePredicate> excludeFromTMappings) {
-		super(rootOntology, configuration, bufferingMode);
-		
-		this.userConstraints = userConstraints;
-		assert(userConstraints != null);
-		this.applyUserConstraints = true;
-		
-		// Davide> T-Mappings handling
-		this.excludeFromTMappings = excludeFromTMappings;
-		assert(excludeFromTMappings != null);
-		//this.applyExcludeFromTMappings = true;
-		
-		this.init(rootOntology, obdaModel, configuration, preferences);
-	}
 	/**
 	 * extract version from {@link it.unibz.krdb.obda.utils.VersionInfo}, which is from the file {@code version.properties}
 	 */
@@ -362,10 +312,7 @@ public class QuestOWL extends OWLReasonerBase {
 
 		if(this.applyUserConstraints)
 			questInstance.setImplicitDBConstraints(userConstraints);
-		
-		//if( this.applyExcludeFromTMappings )
-			questInstance.setExcludeFromTMappings(this.excludeFromTMappings);
-		
+				
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		
 
@@ -390,7 +337,7 @@ public class QuestOWL extends OWLReasonerBase {
 					log.debug("Loading data from Ontology into the database");
 					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure);
 					EquivalentTriplePredicateIterator aBoxNormalIter = 
-							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getEquivalenceMap());
+							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
 					
 					int count = st.insertData(aBoxNormalIter, 5000, 500);
 					log.debug("Inserted {} triples from the ontology.", count);
@@ -400,9 +347,8 @@ public class QuestOWL extends OWLReasonerBase {
 					log.debug("Loading data from Mappings into the database");
 
 					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-					for (Predicate p: translatedOntologyMerge.getVocabulary()) {
-						obdaModelForMaterialization.declarePredicate(p);
-					}
+					obdaModelForMaterialization.declareAll(translatedOntologyMerge.getVocabulary());
+					
 					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
 					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
 					int count = st.insertData(assertionIter, 5000, 500);
@@ -627,44 +573,48 @@ public class QuestOWL extends OWLReasonerBase {
 	
 	private boolean isDisjointAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
 		boolean isConsistent = true;
-		
+
 		//deal with disjoint classes
-		Set<DisjointDescriptionAxiom> disjointAxioms = translatedOntologyMerge.getDisjointDescriptionAxioms();
-		Iterator<DisjointDescriptionAxiom> it = disjointAxioms.iterator();
-		
-		//create ask query
-		String strQueryClass = "ASK {?x a <%s>; a <%s> }";
-		String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
-		String strQuery = "";
-		
-		while (isConsistent && it.hasNext()) {		
+		{
+			final String strQueryClass = "ASK {?x a <%s>; a <%s> }";
 			
-			DisjointDescriptionAxiom dda = it.next();
-			if (dda instanceof DisjointClassAxiom) {
-				DisjointClassAxiom dc = (DisjointClassAxiom)dda;
-				strQuery = String.format(strQueryClass, dc.getFirst(), dc.getSecond());
-			} else if (dda instanceof DisjointPropertyAxiom) {
-				DisjointPropertyAxiom dp = (DisjointPropertyAxiom) dda;
-				strQuery = String.format(strQueryProp, dp.getFirst(), dp.getSecond());
-			}
+			Set<DisjointClassesAxiom> disjointAxioms = translatedOntologyMerge.getDisjointClassesAxioms();
+			Iterator<DisjointClassesAxiom> it = disjointAxioms.iterator();
 			
-			QuestStatement query;
-			try {
-				query = conn.createStatement();
-				ResultSet rs = query.execute(strQuery);
-				TupleResultSet trs = ((TupleResultSet)rs);
-				if (trs!= null && trs.nextRow()){
-					String value = trs.getConstant(0).getValue();
-					boolean b = Boolean.parseBoolean(value);
-					isConsistent = !b;
-					if (!isConsistent) {
-						inconsistent = dda;
-					}
-					trs.close();
-				}
+			while (isConsistent && it.hasNext()) {		
+				// TODO: handle complex class expressions and many pairs of disjoint classes
+				DisjointClassesAxiom dda = it.next();
+				Set<ClassExpression> disj = dda.getClasses();
+				Iterator<ClassExpression> classIterator = disj.iterator();
+				ClassExpression s1 = classIterator.next();
+				ClassExpression s2 = classIterator.next();
+				String strQuery = String.format(strQueryClass, s1, s2);
 				
-			} catch (OBDAException e) {
-				e.printStackTrace();
+				isConsistent = executeConsistencyQuery(strQuery);
+				if (!isConsistent) 
+					inconsistent = dda;
+			}
+		}
+		
+		//deal with disjoint properties
+		{
+			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
+
+			Set<DisjointPropertiesAxiom> disjointAxioms = translatedOntologyMerge.getDisjointPropertiesAxioms();
+			Iterator<DisjointPropertiesAxiom> it = disjointAxioms.iterator();
+			
+			while (isConsistent && it.hasNext()) {		
+				// TODO: handle role inverses and multiple arguments			
+				DisjointPropertiesAxiom dda = it.next();
+				Set<PropertyExpression> props = dda.getProperties();
+				Iterator<PropertyExpression> iterator = props.iterator();
+				PropertyExpression p1 = iterator.next();
+				PropertyExpression p2 = iterator.next();
+				String strQuery = String.format(strQueryProp, p1, p2);
+				
+				isConsistent = executeConsistencyQuery(strQuery);
+				if (!isConsistent) 
+					inconsistent = dda;
 			}
 		}
 		
@@ -675,40 +625,45 @@ public class QuestOWL extends OWLReasonerBase {
 		boolean isConsistent = true;
 		
 		//deal with functional properties
-		Set<PropertyFunctionalAxiom> funcPropAxioms = translatedOntologyMerge.getFunctionalPropertyAxioms();
-		Iterator<PropertyFunctionalAxiom> itf = funcPropAxioms.iterator();
+		Set<FunctionalPropertyAxiom> funcPropAxioms = translatedOntologyMerge.getFunctionalPropertyAxioms();
+		Iterator<FunctionalPropertyAxiom> itf = funcPropAxioms.iterator();
 		
 		String strQueryFunc = "ASK { ?x <%s> ?y; <%s> ?z. FILTER (?z != ?y) }";
-		String strQuery = "";
 		
 		while (isConsistent && itf.hasNext()) {
 			
-			PropertyFunctionalAxiom pfa = itf.next();
-			String propFunc = pfa.getReferencedEntities().iterator().next().getName();
-			strQuery = String.format(strQueryFunc, propFunc, propFunc);
+			FunctionalPropertyAxiom pfa = itf.next();
+			// TODO: handle inverses
+			String propFunc = pfa.getProperty().getPredicate().getName();
+			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
-			QuestStatement query;
-			try {
-				query = conn.createStatement();
-				ResultSet rs = query.execute(strQuery);
-				TupleResultSet trs = ((TupleResultSet)rs);
-				if (trs!= null && trs.nextRow()){
-					String value = trs.getConstant(0).getValue();
-					boolean b = Boolean.parseBoolean(value);
-					isConsistent = !b;
-					if (!isConsistent) {
-						inconsistent = pfa;
-					}
-					trs.close();
-				}
-			} catch (OBDAException e) {
-				e.printStackTrace();
-			}
+			isConsistent = executeConsistencyQuery(strQuery);
+			if (!isConsistent) 
+				inconsistent = pfa;
 		}
 		
 		return isConsistent;
 	}
 	
+	private boolean executeConsistencyQuery(String strQuery) {
+		QuestStatement query;
+		try {
+			query = conn.createStatement();
+			ResultSet rs = query.execute(strQuery);
+			TupleResultSet trs = ((TupleResultSet)rs);
+			if (trs!= null && trs.nextRow()){
+				String value = trs.getConstant(0).getValue();
+				boolean b = Boolean.parseBoolean(value);				
+				trs.close();
+				if (b) 
+					return false;
+			}
+			
+		} catch (OBDAException e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
 
 	public boolean isSatisfiable(OWLClassExpression classExpression) throws ReasonerInterruptedException, TimeOutException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, InconsistentOntologyException {

@@ -39,7 +39,9 @@
         <dc:creator rdf:datatype="&xsd;string">Amancio Bouza</dc:creator>
         <dc:contributor rdf:datatype="&xsd;string">Amancio Bouza</dc:contributor>
         <dc:description rdf:datatype="&xsd;string">MO - Movie ontology</dc:description>
+        <!--
         <owl:imports rdf:resource="http://dbpedia.org/ontology/"/>
+        -->
     </owl:Ontology>
     
 
@@ -531,7 +533,7 @@
     <owl:DatatypeProperty rdf:about="&dbpedia;budget">
         <rdfs:label xml:lang="el">προϋπολογισμός ($)</rdfs:label>
         <rdfs:label xml:lang="en">budget ($)</rdfs:label>
-        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;double"/>
     </owl:DatatypeProperty>
     
 
@@ -541,7 +543,7 @@
     <owl:DatatypeProperty rdf:about="&dbpedia;gross">
         <rdfs:label xml:lang="el">ακαθάριστα ($)</rdfs:label>
         <rdfs:label xml:lang="en">gross ($)</rdfs:label>
-        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;double"/>
     </owl:DatatypeProperty>
     
 

@@ -10,7 +10,7 @@
     mf:entries
     ( 
       :date :date-bgp
-      :time :time-bgp
+      :timeLiteral :time-bgp
       :datetime :datetime-str
       :timestamp :timestamp-str
       :year :year-bgp
@@ -23,7 +23,7 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
     mf:action
-            [ qt:query <date.rq> ] ;
+            [ qt:query <dateLiteral.rq> ] ;
     mf:result <noresult.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mysql.obda> .
@@ -39,7 +39,7 @@
     mf:mappings <datatypes-mysql.obda> .
     
 ## >>> This test should fail!
-:time rdf:type mf:DatatypeEvaluationTest ;
+:timeLiteral rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIME" ;
     mf:comment	"Quest will assign this column into rdfs:Literal type" ;
     obdat:approval obdat:Approved ;

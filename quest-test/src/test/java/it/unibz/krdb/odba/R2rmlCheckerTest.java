@@ -28,7 +28,9 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.Ontology;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -147,8 +149,9 @@ public class R2rmlCheckerTest {
 
 		// Now we are ready for querying
 		log.debug("Comparing concepts");
-		for (Predicate concept : onto.getConcepts()) {
-
+		for (OClass cl : onto.getVocabulary().getClasses()) {
+			Predicate concept = cl.getPredicate();
+					
 			int conceptOBDA = runSPARQLConceptsQuery("<" + concept.getName()
 					+ ">", reasonerOBDA.getConnection());
 			int conceptR2rml = runSPARQLConceptsQuery("<" + concept.getName()
@@ -157,19 +160,31 @@ public class R2rmlCheckerTest {
 			assertEquals(conceptOBDA, conceptR2rml);
 		}
 
-		log.debug("Comparing roles");
-		for (Predicate role : onto.getRoles()) {
-
+		log.debug("Comparing object properties");
+		for (PropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
+			Predicate role = prop.getPredicate();
+			
 			log.debug("description " + role);
 			int roleOBDA = runSPARQLRolesQuery("<" + role.getName() + ">",
 					reasonerOBDA.getConnection());
 			int roleR2rml = runSPARQLRolesQuery("<" + role.getName() + ">",
 					reasonerR2rml.getConnection());
 
-			assertEquals(roleOBDA, roleR2rml);
-			
+			assertEquals(roleOBDA, roleR2rml);			
 		}
 
+		log.debug("Comparing data properties");
+		for (PropertyExpression prop : onto.getVocabulary().getDataProperties()) {
+			Predicate role = prop.getPredicate();
+			
+			log.debug("description " + role);
+			int roleOBDA = runSPARQLRolesQuery("<" + role.getName() + ">",
+					reasonerOBDA.getConnection());
+			int roleR2rml = runSPARQLRolesQuery("<" + role.getName() + ">",
+					reasonerR2rml.getConnection());
+
+			assertEquals(roleOBDA, roleR2rml);			
+		}
 	}
 
 	/**

@@ -41,6 +41,7 @@ import it.unibz.krdb.sql.api.SelectJSQL;
 import it.unibz.krdb.sql.api.SelectionJSQL;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -79,27 +80,23 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 
 public class Mapping2DatalogConverter {
 
-	private List<OBDAMappingAxiom> mappingAxioms;
 	private DBMetadata dbMetadata;
 
-	private SQLQueryParser sqlQueryParser;
-
-	private static final OBDADataFactory factory = OBDADataFactoryImpl
-			.getInstance();
+	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public Mapping2DatalogConverter(List<OBDAMappingAxiom> mappingAxioms,
-                                    DBMetadata dbMetadata) {
-		this.mappingAxioms = mappingAxioms;
+	public Mapping2DatalogConverter(DBMetadata dbMetadata) {
 		this.dbMetadata = dbMetadata;
-
-		sqlQueryParser = new SQLQueryParser(dbMetadata);
 	}
 
-	public DatalogProgram constructDatalogProgram() {
-		DatalogProgram datalogProgram = factory.getDatalogProgram();
+	public List<CQIE> constructDatalogProgram(List<OBDAMappingAxiom> mappingAxioms) {
+		
+		SQLQueryParser sqlQueryParser = new SQLQueryParser(dbMetadata);
+		
+		//DatalogProgram datalogProgram = factory.getDatalogProgram();
+		List<CQIE> datalogProgram = new LinkedList<CQIE>();
 		List<String> errorMessages = new ArrayList<>();
 		for (OBDAMappingAxiom mappingAxiom : mappingAxioms) {
 			try {
@@ -136,8 +133,8 @@ public class Mapping2DatalogConverter {
                     // Construct the head from the target query.
                     Function head = createHeadAtom(atom, lookupTable);
                     // Create a new rule from the new head and the body
-                    CQIE rule = factory.getCQIE(head, bodyAtoms);
-                    datalogProgram.appendRule(rule);
+                    CQIE rule = fac.getCQIE(head, bodyAtoms);
+                    datalogProgram.add(rule);
                 }
 
 			} catch (Exception e) {
@@ -169,17 +166,17 @@ public class Mapping2DatalogConverter {
      * @param lookupTable
      * @return a head atom
      */
-    private Function createHeadAtom(Function atom, LookupTable lookupTable) {
+    private static Function createHeadAtom(Function atom, LookupTable lookupTable) {
         List<Term> terms = atom.getTerms();
         List<Term> newTerms = new ArrayList<>();
         for (Term term : terms) {
             newTerms.add(renameVariables(term, lookupTable));
         }
-        return factory.getFunction(atom.getFunctionSymbol(),
+        return fac.getFunction(atom.getFunctionSymbol(),
                 newTerms);
     }
 
-    private void addWhereClauseAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
+    private static void addWhereClauseAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
         // For the "where" clause
         SelectionJSQL whereClause = parsedSQLQuery.getWhereClause();
         if (whereClause != null) {
@@ -195,7 +192,7 @@ public class Mapping2DatalogConverter {
     /**
      * For each join condition, creates an atom and adds it to the body
      */
-    private void addJoinConditionAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
+    private static void addJoinConditionAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
         List<Expression> joinConditions = parsedSQLQuery.getJoinConditions();
         for (Expression condition : joinConditions) {
             Expression2FunctionConverter visitor = new Expression2FunctionConverter(lookupTable);
@@ -221,7 +218,7 @@ public class Mapping2DatalogConverter {
 
             // Construct the predicate using the table name
             int arity = dbMetadata.getDefinition(tableName).getNumOfAttributes();
-            Predicate predicate = factory.getPredicate(tableName, arity);
+            Predicate predicate = fac.getPredicate(tableName, arity);
 
             // Swap the column name with a new variable from the lookup table
             List<Term> terms = new ArrayList<>();
@@ -234,11 +231,11 @@ public class Mapping2DatalogConverter {
                     throw new IllegalStateException("Column '" + columnName
                             + "'was not found in the lookup table: ");
                 }
-                Variable var = factory.getVariable(termName);
+                Variable var = fac.getVariable(termName);
                 terms.add(var);
             }
             // Create an atom for a particular table
-            Function atom = factory.getFunction(predicate, terms);
+            Function atom = fac.getFunction(predicate, terms);
             bodyAtoms.add(atom);
         }
     }
@@ -248,7 +245,7 @@ public class Mapping2DatalogConverter {
      * Returns a new term by renaming variables occurring in the  {@code term}
      *  according to the {@code lookupTable}
      */
-    private Term renameVariables(Term term, LookupTable lookupTable) {
+    private static Term renameVariables(Term term, LookupTable lookupTable) {
         Term result = null;
 
         if (term instanceof Variable) {
@@ -264,7 +261,7 @@ public class Mapping2DatalogConverter {
                 final String msg = String.format(messageFormat, var);
                 throw new RuntimeException(msg);
             }
-            result = factory.getVariable(termName);
+            result = fac.getVariable(termName);
 
         } else if (term instanceof Function) {
             Function func = (Function) term;
@@ -273,7 +270,7 @@ public class Mapping2DatalogConverter {
             for (Term innerTerm : terms) {
                 newTerms.add(renameVariables(innerTerm, lookupTable));
             }
-            result = factory.getFunction(func.getFunctionSymbol(), newTerms);
+            result = fac.getFunction(func.getFunctionSymbol(), newTerms);
         } else if (term instanceof Constant) {
             result = term.clone();
         }
@@ -410,7 +407,7 @@ public class Mapping2DatalogConverter {
     /**
      * This visitor class converts the SQL Expression to a Function
      */
-    private class Expression2FunctionConverter implements ExpressionVisitor {
+    private static class Expression2FunctionConverter implements ExpressionVisitor {
 
         private final LookupTable lookupTable;
 
@@ -449,59 +446,59 @@ public class Mapping2DatalogConverter {
             Function compositeTerm;
             switch (op) {
                 case "=":
-                    compositeTerm = factory.getFunctionEQ(t1, t2);
+                    compositeTerm = fac.getFunctionEQ(t1, t2);
                     break;
                 case ">":
-                    compositeTerm = factory.getFunctionGT(t1, t2);
+                    compositeTerm = fac.getFunctionGT(t1, t2);
                     break;
                 case "<":
-                    compositeTerm = factory.getFunctionLT(t1, t2);
+                    compositeTerm = fac.getFunctionLT(t1, t2);
                     break;
                 case ">=":
-                    compositeTerm = factory.getFunctionGTE(t1, t2);
+                    compositeTerm = fac.getFunctionGTE(t1, t2);
                     break;
                 case "<=":
-                    compositeTerm = factory.getFunctionLTE(t1, t2);
+                    compositeTerm = fac.getFunctionLTE(t1, t2);
                     break;
                 case "<>":
                 case "!=":
-                    compositeTerm = factory.getFunctionNEQ(t1, t2);
+                    compositeTerm = fac.getFunctionNEQ(t1, t2);
                     break;
                 case "AND":
-                    compositeTerm = factory.getFunctionAND(t1, t2);
+                    compositeTerm = fac.getFunctionAND(t1, t2);
                     break;
                 case "OR":
-                    compositeTerm = factory.getFunctionOR(t1, t2);
+                    compositeTerm = fac.getFunctionOR(t1, t2);
                     break;
                 case "+":
-                    compositeTerm = factory.getFunctionAdd(t1, t2);
+                    compositeTerm = fac.getFunctionAdd(t1, t2);
                     break;
                 case "-":
-                    compositeTerm = factory.getFunctionSubstract(t1, t2);
+                    compositeTerm = fac.getFunctionSubstract(t1, t2);
                     break;
                 case "*":
-                    compositeTerm = factory.getFunctionMultiply(t1, t2);
+                    compositeTerm = fac.getFunctionMultiply(t1, t2);
                     break;
                 case "LIKE":
-                    compositeTerm = factory.getFunctionLike(t1, t2);
+                    compositeTerm = fac.getFunctionLike(t1, t2);
                     break;
                 case "~":
-                    compositeTerm = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral(""));
+                    compositeTerm = fac.getFunctionRegex(t1, t2, fac.getConstantLiteral(""));
                     break;
                 case "~*":
-                    compositeTerm = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral("i")); // i flag for case insensitivity
+                    compositeTerm = fac.getFunctionRegex(t1, t2, fac.getConstantLiteral("i")); // i flag for case insensitivity
                     break;
                 case "!~":
-                    compositeTerm = factory.getFunctionNOT(factory.getFunctionRegex(t1, t2, factory.getConstantLiteral("")));
+                    compositeTerm = fac.getFunctionNOT(fac.getFunctionRegex(t1, t2, fac.getConstantLiteral("")));
                     break;
                 case "!~*":
-                    compositeTerm = factory.getFunctionNOT(factory.getFunctionRegex(t1, t2, factory.getConstantLiteral("i")));
+                    compositeTerm = fac.getFunctionNOT(fac.getFunctionRegex(t1, t2, fac.getConstantLiteral("i")));
                     break;
                 case "REGEXP":
-                    compositeTerm = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral("i"));
+                    compositeTerm = fac.getFunctionRegex(t1, t2, fac.getConstantLiteral("i"));
                     break;
                 case "REGEXP BINARY":
-                    compositeTerm = factory.getFunctionRegex(t1, t2, factory.getConstantLiteral(""));
+                    compositeTerm = fac.getFunctionRegex(t1, t2, fac.getConstantLiteral(""));
                     break;
                 default:
                     throw new UnsupportedOperationException("Unknown operator: " + op);
@@ -544,9 +541,9 @@ public class Mapping2DatalogConverter {
                         Expression third = expressions.get(2);
                         t3 = visitEx(third);
                     } else {
-                        t3 = factory.getConstantLiteral("");
+                        t3 = fac.getConstantLiteral("");
                     }
-                    result = factory.getFunctionRegex(t1, t2, t3);
+                    result = fac.getFunctionRegex(t1, t2, t3);
                 }
             } else {
                 throw new UnsupportedOperationException("Unsupported expression " + expression);
@@ -571,31 +568,31 @@ public class Mapping2DatalogConverter {
         @Override
         public void visit(DoubleValue expression) {
             String termRightName = expression.toString();
-            result = factory.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
+            result = fac.getConstantLiteral(termRightName, COL_TYPE.DOUBLE);
         }
 
         @Override
         public void visit(LongValue expression) {
             String termRightName = expression.getStringValue();
-            result = factory.getConstantLiteral(termRightName, COL_TYPE.INTEGER);
+            result = fac.getConstantLiteral(termRightName, COL_TYPE.LONG);
         }
 
         @Override
         public void visit(DateValue expression) {
             String termRightName = expression.getValue().toString();
-            result = factory.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
+            result = fac.getConstantLiteral(termRightName, COL_TYPE.DATE);
         }
 
         @Override
         public void visit(TimeValue expression) {
             String termRightName = expression.getValue().toString();
-            result = factory.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
+            result = fac.getConstantLiteral(termRightName, COL_TYPE.TIME);
         }
 
         @Override
         public void visit(TimestampValue expression) {
             String termRightName = expression.getValue().toString();
-            result = factory.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
+            result = fac.getConstantLiteral(termRightName, COL_TYPE.DATETIME);
         }
 
         @Override
@@ -604,7 +601,7 @@ public class Mapping2DatalogConverter {
 
             //Consider the case of NOT(...)
             if(expression.isNot()){
-                result = factory.getFunctionNOT(visitEx(inside));
+                result = fac.getFunctionNOT(visitEx(inside));
             } else {
                 result = visitEx(inside);
             }
@@ -613,7 +610,7 @@ public class Mapping2DatalogConverter {
         @Override
         public void visit(StringValue expression) {
             String termRightName = expression.getValue();
-            result = factory.getConstantLiteral(termRightName, COL_TYPE.STRING);
+            result = fac.getConstantLiteral(termRightName, COL_TYPE.STRING);
         }
 
         @Override
@@ -714,12 +711,12 @@ public class Mapping2DatalogConverter {
                 throw new RuntimeException(
                         "Unable to find column name for variable: " + columnName);
             }
-            Term var = factory.getVariable(variableName);
+            Term var = fac.getVariable(variableName);
 
             if (!expression.isNot()) {
-                result = factory.getFunctionIsNull(var);
+                result = fac.getFunctionIsNull(var);
             } else {
-                result = factory.getFunctionIsNotNull(var);
+                result = fac.getFunctionIsNotNull(var);
             }
         }
 
@@ -751,14 +748,14 @@ public class Mapping2DatalogConverter {
                 /*
                  * If the termName is not null, create a variable
                  */
-                result = factory.getVariable(termName);
+                result = fac.getVariable(termName);
             } else {
                 // Constructs constant
                 // if the columns contains a boolean value
                 String columnName = expression.getColumnName();
                 if (columnName.toLowerCase().equals("true")
                         || columnName.toLowerCase().equals("false")) {
-                    result = factory.getConstantLiteral(columnName, COL_TYPE.BOOLEAN);
+                    result = fac.getConstantLiteral(columnName, COL_TYPE.BOOLEAN);
                 }
                 else
                     throw new RuntimeException(
@@ -833,7 +830,7 @@ public class Mapping2DatalogConverter {
                 throw new RuntimeException(
                         "Unable to find column name for variable: " + columnName);
             }
-            Term var = factory.getVariable(variableName);
+            Term var = fac.getVariable(variableName);
 
             ColDataType datatype = expression.getType();
 
@@ -843,7 +840,7 @@ public class Mapping2DatalogConverter {
 
             //first value is a column, second value is a datatype. It can  also have the size
 
-            result = factory.getFunctionCast(var, var2);
+            result = fac.getFunctionCast(var, var2);
 
         }
 

@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht;
 
 import it.unibz.krdb.obda.ontology.BasicClassDescription;
 import it.unibz.krdb.obda.ontology.Description;
-import it.unibz.krdb.obda.ontology.Property;
+import it.unibz.krdb.obda.ontology.PropertyExpression;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 
 public class NamedDAG  {
 	
-	private final SimpleDirectedGraph <Property,DefaultEdge> propertyDAG;
+	private final SimpleDirectedGraph <PropertyExpression,DefaultEdge> propertyDAG;
 	private final SimpleDirectedGraph <BasicClassDescription,DefaultEdge> classDAG;
 	
 	public NamedDAG(TBoxReasoner reasoner) {			
@@ -58,7 +58,7 @@ public class NamedDAG  {
 	
 	
 	@Deprecated // USED ONLY IN TESTS (3 calls)
-	public SimpleDirectedGraph <Property,DefaultEdge> getPropertyDag() {
+	public SimpleDirectedGraph <PropertyExpression,DefaultEdge> getPropertyDag() {
 		return propertyDAG;
 	}
 	@Deprecated // USED ONLY IN TESTS (3 calls)
@@ -66,14 +66,14 @@ public class NamedDAG  {
 		return classDAG;
 	}
 	
-	public List<Property> getSuccessors(Property desc) {
+	public List<PropertyExpression> getSuccessors(PropertyExpression desc) {
 		return Graphs.successorListOf(propertyDAG, desc);		
 	}
 	public List<BasicClassDescription> getSuccessors(BasicClassDescription desc) {
 		return Graphs.successorListOf(classDAG, desc);		
 	}
 	
-	public List<Property> getPredecessors(Property desc) {
+	public List<PropertyExpression> getPredecessors(PropertyExpression desc) {
 		return Graphs.predecessorListOf(propertyDAG, desc);		
 	}
 	public List<BasicClassDescription> getPredecessors(BasicClassDescription desc) {
