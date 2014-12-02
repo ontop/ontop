@@ -190,20 +190,20 @@ public class QuestOWLExample_OntowisTests {
 		
 		
 		//1 SQL JOIN
-		queriesThreeSPARQL[0]=	"PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :1Tab1 . ?x :Tab2unique2Tab2 ?y .  ?x :hasString5j ?y2 . ?x :hasString22j ?y3 .Filter( ?y < 101000)  }  ";
-		queriesThreeSPARQL[1]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString5j ?y2 . ?x :hasString22j ?y3 . Filter( ?y0 < 110000)  } ";
-		queriesThreeSPARQL[2]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString5j ?y2 . ?x :hasString22j ?y3 . Filter( ?y0 < 120000)  } ";
-		queriesThreeSPARQL[3]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString5j ?y2 . ?x :hasString22j ?y3 . Filter( ?y0 < 150000)  } ";
-		queriesThreeSPARQL[4]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString5j ?y2 . ?x :hasString22j ?y3 . Filter( ?y0 < 1100000)  } ";
-		queriesThreeSPARQL[5]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.   ?x :hasString5j ?y2 . ?x :hasString22j ?y3 . Filter( ?y0 < 1500000)  } ";
+		queriesThreeSPARQL[0]=	"PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {       ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y .  ?x :hasString2j ?y2 . ?x :hasString22j ?y3 .Filter( ?y < 101000)  }  ";
+		queriesThreeSPARQL[1]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString2j ?y2 . ?x :hasString22j ?y3 . Filter( ?y0 < 110000)  } ";
+		queriesThreeSPARQL[2]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString2j ?y2 . ?x :hasString22j ?y3 . Filter( ?y0 < 120000)  } ";
+		queriesThreeSPARQL[3]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString2j ?y2 . ?x :hasString22j ?y3 . Filter( ?y0 < 150000)  } ";
+		queriesThreeSPARQL[4]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString2j ?y2 . ?x :hasString22j ?y3 . Filter( ?y0 < 1100000)  } ";
+		queriesThreeSPARQL[5]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.   ?x :hasString2j ?y2 . ?x :hasString22j ?y3 . Filter( ?y0 < 1500000)  } ";
 
 		//2 SQL JOIN
-		queriesThreeSPARQL[6]=	"PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :2Tab1 . ?x :Tab3unique2Tab3 ?y .  ?x :hasString5j ?y2 . ?x :hasString23j ?y3 . Filter( ?y < 101000)  }  ";
-		queriesThreeSPARQL[7]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString5j ?y2 . ?x :hasString23j ?y3 . Filter( ?y1 < 110000)  } ";
-		queriesThreeSPARQL[8]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString5j ?y2 . ?x :hasString23j ?y3 . Filter( ?y1 < 120000)  } ";
-		queriesThreeSPARQL[9]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString5j ?y2 . ?x :hasString23j ?y3 . Filter( ?y1 < 150000)  } ";
-		queriesThreeSPARQL[10]="PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString5j ?y2 . ?x :hasString23j ?y3 . Filter( ?y1 < 1100000)  } ";
-		queriesThreeSPARQL[11]="PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString5j ?y2 . ?x :hasString23j ?y3 . Filter( ?y1 < 1500000)  } ";
+		queriesThreeSPARQL[6]=	"PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :2Tab1 . ?x :Tab3unique2Tab3 ?y .  ?x :hasString3j ?y2 . ?x :hasString23j ?y3 . Filter( ?y < 101000)  }  ";
+		queriesThreeSPARQL[7]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 . ?x :hasString23j ?y3 . Filter( ?y1 < 110000)  } ";
+		queriesThreeSPARQL[8]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 . ?x :hasString23j ?y3 . Filter( ?y1 < 120000)  } ";
+		queriesThreeSPARQL[9]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 . ?x :hasString23j ?y3 . Filter( ?y1 < 150000)  } ";
+		queriesThreeSPARQL[10]="PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 . ?x :hasString23j ?y3 . Filter( ?y1 < 1100000)  } ";
+		queriesThreeSPARQL[11]="PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 . ?x :hasString23j ?y3 . Filter( ?y1 < 1500000)  } ";
 
 		//3 SQL JOIN
 		queriesThreeSPARQL[12]="PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :3Tab1 . ?x :Tab4unique2Tab4 ?y .  ?x :hasString4j ?y4 . ?x :hasString24j ?y3 . Filter( ?y < 101000)  } "; 
