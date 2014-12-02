@@ -565,8 +565,7 @@ public class QuestStatement implements OBDAStatement {
 		}
 		
 		// Obtain the query signature
-		List<String> signatureContainer = new LinkedList<String>();
-		translator.getSignature(query, signatureContainer);
+		List<String> signatureContainer = translator.getSignature(query);
 		
 		
 		// Translate the SPARQL algebra to datalog program
@@ -636,8 +635,7 @@ public class QuestStatement implements OBDAStatement {
 				queryIsParsed = false;
 			}
 
-			List<String> signatureContainer = new LinkedList<String>();
-			translator.getSignature(query, signatureContainer);
+			List<String> signatureContainer = translator.getSignature(query);
 
 			questInstance.getSesameQueryCache().put(strquery, query);
 			questInstance.getSignatureCache().put(strquery, signatureContainer);

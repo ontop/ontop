@@ -371,8 +371,7 @@ public class QuestOWLStatement {
 			ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
 			SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.questInstance.getUriTemplateMatcher());
 
-			LinkedList<String> signatureContainer = new LinkedList<String>();
-			tr.getSignature(pq, signatureContainer);
+			List<String> signatureContainer = tr.getSignature(pq);
 			return st.getRewriting(pq, signatureContainer);
 		} catch (Exception e) {
 			throw new OntopOWLException(e);

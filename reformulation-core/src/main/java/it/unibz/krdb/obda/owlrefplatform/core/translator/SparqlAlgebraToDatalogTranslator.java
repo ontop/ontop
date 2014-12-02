@@ -96,6 +96,7 @@ import org.openrdf.query.algebra.Var;
 import org.openrdf.query.parser.ParsedGraphQuery;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
@@ -121,6 +122,9 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	private SemanticIndexURIMap uriRef = null;  // used only in the Semantic Index mode
 	
+	private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
+	
+	
 	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher) {
 		uriTemplateMatcher = templateMatcher;
 	}
@@ -133,8 +137,6 @@ public class SparqlAlgebraToDatalogTranslator {
 		this.uriRef = uriRef;
 	}
 	
-
-	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
 
 	public DatalogProgram translate(ParsedQuery pq, List<String> signature) {
 		TupleExpr te = pq.getTupleExpr();
@@ -1263,12 +1265,13 @@ public class SparqlAlgebraToDatalogTranslator {
 		return output;
 	}
 	
-	public void getSignature(ParsedQuery query, List<String> signatureContainer) {
-		signatureContainer.clear();
+	public List<String> getSignature(ParsedQuery query) {
+		List<String> signatureContainer = new LinkedList<>();
 		if (query instanceof ParsedTupleQuery || query instanceof ParsedGraphQuery) {
 			TupleExpr te = query.getTupleExpr();
 			signatureContainer.addAll(te.getBindingNames());
 		}
+		return signatureContainer;
 	}
 	
 //	public void getSignature(Query query, List<String> signatureContainer) {

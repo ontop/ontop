@@ -38,6 +38,7 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.openrdf.query.QueryLanguage;
@@ -229,8 +230,7 @@ public class QuestDBStatement implements OBDAStatement {
 		
 		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(st.questInstance.getUriTemplateMatcher());
 		
-		LinkedList<String> signatureContainer = new LinkedList<String>();
-		tr.getSignature(pq, signatureContainer);
+		List<String> signatureContainer = tr.getSignature(pq);
 		return st.getRewriting(pq, signatureContainer);
 	}
 }
