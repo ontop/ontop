@@ -43,6 +43,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Set;
 
 import org.openrdf.model.Literal;
@@ -86,6 +87,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	
 	private Set<OWLOntology> closure;
 
+	private Quest questInstance;	
+	
 	public QuestDBClassicStore(String name, java.net.URI tboxFile) 	throws Exception {
 		this(name, tboxFile, null);
 	}
@@ -295,4 +298,10 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		}
 
 	}
+
+	@Override
+	public Properties getPreferences() 	{
+		return questInstance.getPreferences();
+	}
+
 }

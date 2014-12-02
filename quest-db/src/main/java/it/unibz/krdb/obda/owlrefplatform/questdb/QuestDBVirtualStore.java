@@ -43,6 +43,7 @@ import it.unibz.krdb.sql.ImplicitDBConstraints;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Properties;
 import java.util.Set;
 
 import org.openrdf.model.Model;
@@ -68,6 +69,10 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 
 	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 	private OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
+
+	private QuestConnection questConn;
+	private Quest questInstance;
+	
 	
 	private boolean isinitalized = false;
 
@@ -351,4 +356,10 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 	public void close() {
 		questInstance.close();
 	}
+	
+	@Override
+	public Properties getPreferences() 	{
+		return questInstance.getPreferences();
+	}
+	
 }
