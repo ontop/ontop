@@ -31,7 +31,6 @@ import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3IndividualTranslator;
 import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestStatementSIRepository;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
@@ -157,8 +156,9 @@ public class QuestOWLStatement {
 			// TODO: (ROMAN) -- check whether we need to use 
 			// EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
 
-			return st.getSIRepository().insertData(aBoxIter, commitSize, batchsize);
-		} else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
+			return st.insertData(aBoxIter, commitSize, batchsize);
+		} 
+		else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
 
 			RDFParser rdfParser = null;
 
@@ -269,7 +269,7 @@ public class QuestOWLStatement {
 		@Override
 		public void run() {
 			try {
-				insertCount = questStmt.getSIRepository().insertData(iterator, commitsize, batchsize);
+				insertCount = questStmt.insertData(iterator, commitsize, batchsize);
 			} catch (SQLException e) {
 				throw new RuntimeException(e);
 			}
@@ -432,7 +432,4 @@ public class QuestOWLStatement {
 		return st.getUCQSizeAfterRewriting();
 	}
 
-	public QuestStatementSIRepository getSIRepository() {
-		return st.getSIRepository();
-	}
 }

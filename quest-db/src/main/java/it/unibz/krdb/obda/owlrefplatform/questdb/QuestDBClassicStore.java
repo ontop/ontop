@@ -36,6 +36,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -162,7 +163,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			EquivalentTriplePredicateIterator aBoxNormalIter = 
 							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
 			
-			int count = st.getSIRepository().insertData(aBoxNormalIter, 5000, 500);
+			int count = st.insertData(aBoxNormalIter, 5000, 500);
 			log.debug("Inserted {} triples from the ontology.", count);
 		}
 		if (bObtainFromMappings) {
@@ -173,7 +174,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			
 			QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
 			Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
-			int count = st.getSIRepository().insertData(assertionIter, 5000, 500);
+			int count = st.insertData(assertionIter, 5000, 500);
 			materializer.disconnect();
 			log.debug("Inserted {} triples from the mappings.", count);
 		}
@@ -302,6 +303,11 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	@Override
 	public Properties getPreferences() 	{
 		return questInstance.getPreferences();
+	}
+
+	@Override
+	public RDBMSSIRepositoryManager getSemanticIndexRepository() {
+		return questInstance.getSemanticIndexRepository();
 	}
 
 }

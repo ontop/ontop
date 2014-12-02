@@ -31,6 +31,8 @@ import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
@@ -38,7 +40,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultS
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.EmptyQueryResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestGraphResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestResultset;
-import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.DatalogToSparqlTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
@@ -46,14 +47,15 @@ import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.renderer.DatalogProgramRenderer;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import org.openrdf.query.MalformedQueryException;
@@ -71,19 +73,22 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestStatement implements OBDAStatement {
 
-	private final SQLQueryGenerator querygenerator;
+	public final Quest questInstance;
 
+	private final QuestConnection conn;
+
+	private final SparqlAlgebraToDatalogTranslator translator;
+	
+	private final Statement sqlstatement;
+
+
+	
+	
 	private boolean canceled = false;
 	
 	private boolean queryIsParsed = false;
 	
 	private ParsedQuery parsedQ = null;
-
-	private Statement sqlstatement;
-
-	public final Quest questInstance;
-
-	private static final Logger log = LoggerFactory.getLogger(QuestStatement.class);
 
 	private QueryExecutionThread executionthread;
 
@@ -91,18 +96,12 @@ public class QuestStatement implements OBDAStatement {
 
 	private DatalogProgram programAfterUnfolding;
 
-	private final Map<String, String> querycache;
-
-	private final Map<String, List<String>> signaturecache;
-
-	private final Map<String, ParsedQuery> sesameQueryCache;
-
-	private final SparqlAlgebraToDatalogTranslator translator;
-	
 	private SesameConstructTemplate templ;
-	
-	private final QuestStatementSIRepository siRepository;
 
+	
+	private static final Logger log = LoggerFactory.getLogger(QuestStatement.class);
+
+	
 	/*
 	 * For benchmark purpose
 	 */
@@ -114,22 +113,14 @@ public class QuestStatement implements OBDAStatement {
 
 		this.questInstance = questinstance;
 
-		this.translator = new SparqlAlgebraToDatalogTranslator(this.questInstance.getUriTemplateMatcher());
-		this.querycache = questinstance.getSQLCache();
-		this.signaturecache = questinstance.getSignatureCache();
-		this.sesameQueryCache = questinstance.getSesameQueryCache();
-
-		this.querygenerator = questinstance.datasourceQueryGenerator;
+		this.conn = conn;
 
 		this.sqlstatement = st;
 		
-		this.siRepository = new QuestStatementSIRepository(questinstance, conn, translator);
+		this.translator = new SparqlAlgebraToDatalogTranslator(questInstance.getUriTemplateMatcher());
 	}
 
-	public QuestStatementSIRepository getSIRepository() {
-		return siRepository;
-	}
-	
+
 	private class QueryExecutionThread extends Thread {
 
 		private final CountDownLatch monitor;
@@ -199,22 +190,24 @@ public class QuestStatement implements OBDAStatement {
 
 			try {
 
-				if (!querycache.containsKey(strquery)) {
+				if (!questInstance.hasCachedSQL(strquery)) {
 					getUnfolding(strquery);
 				}
-				/*
-				 * Obtaineing the query from the cache
-				 */
-				String sql = querycache.get(strquery);
-				List<String> signature = signaturecache.get(strquery);
+				
+				// Obtaining the query from the cache
+				 
+				String sql = questInstance.getCachedSQL(strquery);
+				List<String> signature = questInstance.getSignatureCache().get(strquery);
 				//ParsedQuery query = sesameQueryCache.get(strquery);
 
 				log.debug("Executing the SQL query and get the result...");
 				if (sql.equals("") && !isBoolean) {
 					tupleResult = new EmptyQueryResultSet(signature, QuestStatement.this);
-				} else if (sql.equals("")) {
+				} 
+				else if (sql.equals("")) {
 					tupleResult = new BooleanOWLOBDARefResultSet(false, QuestStatement.this);
-				} else {
+				} 
+				else {
 					try {
 
 						// Execute the SQL query string
@@ -476,7 +469,7 @@ public class QuestStatement implements OBDAStatement {
 		log.debug("Producing the SQL string...");
 
 		// query = DatalogNormalizer.normalizeDatalogProgram(query);
-		String sql = querygenerator.generateSourceQuery((DatalogProgram) query, signature);
+		String sql = questInstance.getDatasourceQueryGenerator().generateSourceQuery((DatalogProgram) query, signature);
 
 		log.debug("Resulting SQL: \n{}", sql);
 		return sql;
@@ -580,7 +573,7 @@ public class QuestStatement implements OBDAStatement {
 		DatalogProgram initialProgram = translateAndPreProcess(query, signatureContainer);
 		
 		// Perform the query rewriting
-		DatalogProgram programAfterRewriting = questInstance.getRewriter().rewrite(initialProgram);
+		DatalogProgram programAfterRewriting = questInstance.getRewriting(initialProgram);
 		
 		// Translate the output datalog program back to SPARQL string
 		// TODO Re-enable the prefix manager using Sesame prefix manager
@@ -597,7 +590,7 @@ public class QuestStatement implements OBDAStatement {
 
 		DatalogProgram program = translateAndPreProcess(query, signature);
 
-		DatalogProgram rewriting = questInstance.getRewriter().rewrite(program);
+		DatalogProgram rewriting = questInstance.getRewriting(program);
 		return DatalogProgramRenderer.encode(rewriting);
 	}
 	
@@ -621,9 +614,9 @@ public class QuestStatement implements OBDAStatement {
 		
 		// Check the cache first if the system has processed the query string
 		// before
-		if (querycache.containsKey(strquery)) {
+		if (questInstance.hasCachedSQL(strquery)) {
 			// Obtain immediately the SQL string from cache
-			sql = querycache.get(strquery);
+			sql = questInstance.getCachedSQL(strquery);
 
 			//signatureContainer = signaturecache.get(strquery);
 			//query = sesameQueryCache.get(strquery);
@@ -646,8 +639,8 @@ public class QuestStatement implements OBDAStatement {
 			List<String> signatureContainer = new LinkedList<String>();
 			translator.getSignature(query, signatureContainer);
 
-			sesameQueryCache.put(strquery, query);
-			signaturecache.put(strquery, signatureContainer);
+			questInstance.getSesameQueryCache().put(strquery, query);
+			questInstance.getSignatureCache().put(strquery, signatureContainer);
 
 			DatalogProgram program = translateAndPreProcess(query, signatureContainer);
 			try {
@@ -669,16 +662,8 @@ public class QuestStatement implements OBDAStatement {
 				log.debug("Start the rewriting process...");
 
 				final long startTime0 = System.currentTimeMillis();
-				
-				// Query optimization w.r.t Sigma rules
-				for (CQIE cq : program.getRules())
-					CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), questInstance.getDataDependencies());
-				programAfterRewriting = questInstance.getRewriter().rewrite(program);
-				for (CQIE cq : program.getRules())
-					CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), questInstance.getDataDependencies());
-				
+				programAfterRewriting = questInstance.getOptimizedRewriting(program);
 				rewritingTime = System.currentTimeMillis() - startTime0;
-
 
 				final long startTime = System.currentTimeMillis();
 				programAfterUnfolding = getUnfolding(programAfterRewriting);
@@ -687,7 +672,7 @@ public class QuestStatement implements OBDAStatement {
 				
 				sql = getSQL(programAfterUnfolding, signatureContainer);
 				// cacheQueryAndProperties(strquery, sql);
-				querycache.put(strquery, sql);
+				questInstance.cacheSQL(strquery, sql);
 			} 
 			catch (Exception e1) {
 				log.debug(e1.getMessage(), e1);
@@ -922,4 +907,44 @@ public class QuestStatement implements OBDAStatement {
 		}
 		return counter;
 	}
+	
+	/***
+	 * Inserts a stream of ABox assertions into the repository.
+	 * 
+	 * @param data
+	 * 
+	 * @throws SQLException
+	 */
+	public int insertData(Iterator<Assertion> data,  int commit, int batch) throws SQLException {
+		int result = -1;
+
+		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(data, questInstance.getReasoner());
+
+//		if (!useFile) {
+
+			result = questInstance.getSemanticIndexRepository().insertData(conn.getConnection(), newData, commit, batch);
+//		} else {
+			//try {
+				// File temporalFile = new File("quest-copy.tmp");
+				// FileOutputStream os = new FileOutputStream(temporalFile);
+				// ROMAN: this called DOES NOTHING
+				// result = (int) questInstance.getSemanticIndexRepository().loadWithFile(conn.conn, newData);
+				// os.close();
+
+			//} catch (IOException e) {
+			//	log.error(e.getMessage());
+			//}
+//		}
+
+		try {
+			questInstance.updateSemanticIndexMappings();
+			translator.setTemplateMatcher(questInstance.getUriTemplateMatcher());
+
+		} catch (Exception e) {
+			log.error("Error updating semantic index mappings after insert.", e);
+		}
+
+		return result;
+	}
+	
 }

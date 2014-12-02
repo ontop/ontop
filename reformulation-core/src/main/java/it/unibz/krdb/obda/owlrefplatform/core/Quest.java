@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  */
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
+import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
@@ -32,6 +33,7 @@ import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RepositoryChangedListener;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
@@ -105,11 +107,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * Internal components
 	 */
 
-	/* The active ABox repository, might be null */
+	/* The active ABox repository (is null if there is no Semantic Index, i.e., in Virtual Mode) */
 	private RDBMSSIRepositoryManager dataRepository = null;
-
-	// /* The query answering engine */
-	// private TechniqueWrapper techwrapper = null;
 
 	private VocabularyValidator vocabularyValidator;
 
@@ -120,7 +119,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private QueryRewriter rewriter;
 
 	/* The active SQL generator */
-	protected SQLQueryGenerator datasourceQueryGenerator = null;
+	private SQLQueryGenerator datasourceQueryGenerator = null;
 
 	/* The active query evaluation engine */
 	protected EvaluationEngine evaluationEngine = null;
@@ -208,11 +207,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private final Map<String, ParsedQuery> sesameQueryCache = new ConcurrentHashMap<String, ParsedQuery>();
 
-	private final Map<String, Boolean> isbooleancache = new ConcurrentHashMap<String, Boolean>();
-
-	private final Map<String, Boolean> isconstructcache = new ConcurrentHashMap<String, Boolean>();
-
-	private final Map<String, Boolean> isdescribecache = new ConcurrentHashMap<String, Boolean>();
+//	private final Map<String, Boolean> isbooleancache = new ConcurrentHashMap<String, Boolean>();
+//	private final Map<String, Boolean> isconstructcache = new ConcurrentHashMap<String, Boolean>();
+//	private final Map<String, Boolean> isdescribecache = new ConcurrentHashMap<String, Boolean>();
 
 	private DBMetadata metadata;
 
@@ -294,50 +291,73 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		this.userConstraints = userConstraints;
 		this.applyUserConstraints = true;
 	}
+
+	protected String getCachedSQL(String query) {
+		return querycache.get(query);
+	}
 	
-	protected Map<String, String> getSQLCache() {
-		return querycache;
+	protected boolean hasCachedSQL(String query) {
+		return querycache.containsKey(query);
 	}
 
+	protected void cacheSQL(String strquery, String sql) {
+		querycache.put(strquery, sql);
+	}
+	
+	// TODO: replace by a couple of methods to get/set values
 	protected Map<String, List<String>> getSignatureCache() {
 		return signaturecache;
 	}
+	// TODO: replace by a couple of methods to get/set value 
+	// Note, however, that this one is never read (only put in QuestStatement)
+	protected Map<String, ParsedQuery> getSesameQueryCache() {
+		return sesameQueryCache;
+	}
+	
 	
 	public TBoxReasoner getReasoner() {
 		return reformulationReasoner;
 	}
 	
-	public QueryRewriter getRewriter() {
-		return this.rewriter;
+	public DatalogProgram getRewriting(DatalogProgram cqie) throws OBDAException {
+		return rewriter.rewrite(cqie);
+	}
+
+	public DatalogProgram getOptimizedRewriting(DatalogProgram cqie) throws OBDAException {
+		// Query optimization w.r.t Sigma rules
+		for (CQIE cq : cqie.getRules())
+			CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+		cqie = rewriter.rewrite(cqie);
+		for (CQIE cq : cqie.getRules())
+			CQCUtilities.optimizeQueryWithSigmaRules(cq.getBody(), sigma);
+		return cqie;
 	}
 	
-	public LinearInclusionDependencies getDataDependencies() {
-		return sigma;
+	public DatalogProgram unfold(DatalogProgram query, String targetPredicate) throws OBDAException {
+		return unfolder.unfold(query, targetPredicate);
 	}
-	
+
+	public UriTemplateMatcher getUriTemplateMatcher() {
+		return unfolder.getUriTemplateMatcher();
+	}
+
+	// used only once
 	public VocabularyValidator getVocabularyValidator() {
-		return this.vocabularyValidator;
+		return vocabularyValidator;
 	}
 
 //	protected Map<String, Query> getJenaQueryCache() {
 //		return jenaQueryCache;
 //	}
-
-	protected Map<String, ParsedQuery> getSesameQueryCache() {
-		return sesameQueryCache;
-	}
-	
-	protected Map<String, Boolean> getIsBooleanCache() {
-		return isbooleancache;
-	}
-
-	protected Map<String, Boolean> getIsConstructCache() {
-		return isconstructcache;
-	}
-
-	public Map<String, Boolean> getIsDescribeCache() {
-		return isdescribecache;
-	}
+//	protected Map<String, Boolean> getIsBooleanCache() {
+//		return isbooleancache;
+//	}
+//	protected Map<String, Boolean> getIsConstructCache() {
+//		return isconstructcache;
+//	}
+//	public Map<String, Boolean> getIsDescribeCache() {
+//		return isdescribecache;
+//	}
 
 	private void loadOBDAModel(OBDAModel model) {
 
@@ -1100,14 +1120,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		return metadata;
 	}
 
-	public UriTemplateMatcher getUriTemplateMatcher() {
-		return unfolder.getUriTemplateMatcher();
-	}
-
-	public DatalogProgram unfold(DatalogProgram query, String targetPredicate) throws OBDAException {
-		return unfolder.unfold(query, targetPredicate);
-	}
-
 	public void repositoryChanged() {
 		// clear cache
 		this.querycache.clear();
@@ -1120,4 +1132,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public RDBMSSIRepositoryManager getSemanticIndexRepository() {
 		return dataRepository;
 	}
+	
+	public SQLQueryGenerator getDatasourceQueryGenerator() {
+		return datasourceQueryGenerator;		
+	}
+
 }

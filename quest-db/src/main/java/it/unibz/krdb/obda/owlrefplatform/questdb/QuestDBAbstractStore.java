@@ -21,8 +21,10 @@ package it.unibz.krdb.obda.owlrefplatform.questdb;
  */
 
 import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 
 import java.io.Serializable;
 import java.util.Properties;
@@ -63,4 +65,5 @@ public abstract class QuestDBAbstractStore implements Serializable {
 	
 	public abstract QuestConnection getQuestConnection();
 
+	public abstract RDBMSSIRepositoryManager getSemanticIndexRepository();
 }

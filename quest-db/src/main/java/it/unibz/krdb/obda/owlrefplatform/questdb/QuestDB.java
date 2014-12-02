@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 
 import java.io.File;
 import java.net.URI;
@@ -191,12 +192,12 @@ public class QuestDB {
 		if (!stores.containsKey(storename))
 			throw new Exception(String.format("The store \"%s\" does not exists.", storename));
 
-		// QuestDBAbstractStore dbstore = stores.get(storename);
+		QuestDBAbstractStore dbstore = stores.get(storename);
 		try {
 			QuestDBConnection conn = connections.get(storename);
-			QuestDBStatement st = conn.createStatement();
-			st.getSIRepository().dropRepository();
-			st.close();
+			RDBMSSIRepositoryManager si = dbstore.getSemanticIndexRepository();
+			if (si != null)
+				si.dropDBSchema(conn.getConnection());
 			conn.commit();
 			conn.close();
 		} 
@@ -224,10 +225,7 @@ public class QuestDB {
 			boolean classic = dbstore.getPreferences().get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC);
 			boolean inmemory = dbstore.getPreferences().get(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
 			if (classic && inmemory) {
-				QuestDBStatement st = conn.createStatement();
-				st.getSIRepository().createRepository();
-				
-				st.close();
+				dbstore.getSemanticIndexRepository().createDBSchemaAndInsertMetadata(conn.getConnection());
 				conn.commit();
 			}
 			connections.put(storename, conn);
@@ -317,11 +315,14 @@ public class QuestDB {
 		QuestDBAbstractStore dbstore = stores.get(storename);
 		if (!(dbstore instanceof QuestDBClassicStore))
 			throw new Exception("Unsupported request");
-		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
+		//QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
 		QuestDBConnection conn = connections.get(storename);
-		QuestDBStatement st = conn.createStatement();
-		st.getSIRepository().createIndexes();
-		st.close();
+		RDBMSSIRepositoryManager si = dbstore.getSemanticIndexRepository();
+		si.createIndexes(conn.getConnection());
+		conn.commit();
+		//QuestDBStatement st = conn.createStatement();
+		//st.getSIRepository().createIndexes();
+		//st.close();
 	}
 
 	public void dropIndexes(String storename) throws Exception {
@@ -330,11 +331,14 @@ public class QuestDB {
 		QuestDBAbstractStore dbstore = stores.get(storename);
 		if (!(dbstore instanceof QuestDBClassicStore))
 			throw new Exception("Unsupported request");
-		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
+		//QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
 		QuestDBConnection conn = connections.get(storename);
-		QuestDBStatement st = conn.createStatement();
-		st.getSIRepository().dropIndexes();
-		st.close();
+		//QuestDBStatement st = conn.createStatement();
+		//st.getSIRepository().dropIndexes();
+		RDBMSSIRepositoryManager si = dbstore.getSemanticIndexRepository();
+		si.dropIndexes(conn.getConnection());
+		//st.close();
+		conn.commit();
 	}
 
 	public boolean isIndexed(String storename) throws Exception {
@@ -343,11 +347,16 @@ public class QuestDB {
 		QuestDBAbstractStore dbstore = stores.get(storename);
 		if (!(dbstore instanceof QuestDBClassicStore))
 			throw new Exception("Unsupported request");
-		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
+		
 		QuestDBConnection conn = connections.get(storename);
-		QuestDBStatement st = conn.createStatement();
-		boolean response = st.getSIRepository().isIndexed();
-		st.close();
+		//QuestDBStatement st = conn.createStatement();
+		
+		RDBMSSIRepositoryManager si = dbstore.getSemanticIndexRepository();
+		boolean response = false;
+		if (si != null)
+			response = si.isIndexed(conn.getConnection());
+		
+		//st.close();
 		return response;
 	}
 

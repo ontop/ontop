@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  */
 
 import it.unibz.krdb.obda.io.ModelIOManager;
-import it.unibz.krdb.obda.model.OBDAConnection;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAStatement;
@@ -65,11 +64,11 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	public int add(Iterator<Assertion> data) throws SQLException {
-		return st.getSIRepository().insertData(data, -1, -1);
+		return st.insertData(data, -1, -1);
 	}
 
 	public int add(Iterator<Assertion> data, int commit, int batch) throws SQLException {
-		return st.getSIRepository().insertData(data, commit, batch);
+		return st.insertData(data, commit, batch);
 	}
 
 	public int add(URI rdffile) throws OBDAException {
@@ -99,14 +98,14 @@ public class QuestDBStatement implements OBDAStatement {
 						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos), 
 								st.questInstance.getReasoner());
 				
-				result = st.getSIRepository().insertData(aBoxNormalIter, /*useFile,*/ commit, batch);
+				result = st.insertData(aBoxNormalIter, /*useFile,*/ commit, batch);
 			} 
 			else if (ext.toLowerCase().equals(".nt")) {				
 				NTripleAssertionIterator it = new NTripleAssertionIterator(rdffile);
 				EquivalentTriplePredicateIterator aBoxNormalIter = 
 						new EquivalentTriplePredicateIterator(it, st.questInstance.getReasoner());
 				
-				result = st.getSIRepository().insertData(aBoxNormalIter, /*useFile,*/ commit, batch);
+				result = st.insertData(aBoxNormalIter, /*useFile,*/ commit, batch);
 			}
 			return result;
 		} catch (Exception e) {
@@ -127,7 +126,7 @@ public class QuestDBStatement implements OBDAStatement {
 			io.load(uri.toString());
 			materializer = new QuestMaterializer(obdaModel);
 			assertionIter =  materializer.getAssertionIterator();
-			int result = st.getSIRepository().insertData(assertionIter, /*useFile,*/ commit, batch);
+			int result = st.insertData(assertionIter, /*useFile,*/ commit, batch);
 			return result;
 
 		} catch (Exception e) {
@@ -213,12 +212,7 @@ public class QuestDBStatement implements OBDAStatement {
 	/*
 	 * QuestSpecific
 	 */
-
-	public QuestStatementSIRepository getSIRepository() {
-		return st.getSIRepository();
-	}
 	
-
 	public String getSQL(String query) throws Exception {
 		return st.getUnfolding(query);
 	}
