@@ -111,7 +111,6 @@ public class ThetaApplicationTest extends TestCase {
 		entries.put(s3.getVariable(), s3.getTerm());
         Substitution mgu = new SubstitutionImpl(entries);
 
-		UnifierUtilities unifier = new UnifierUtilities();
 		CQIE newquery = SubstitutionUtilities.applySubstitution(query, mgu);
 
 		List<Function> newbody = newquery.getBody();
