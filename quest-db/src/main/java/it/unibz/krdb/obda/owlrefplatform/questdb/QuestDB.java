@@ -405,7 +405,6 @@ public class QuestDB {
 	public QuestDBStatement getStatement(String storename) throws Exception {
 		if (!stores.containsKey(storename))
 			throw new Exception(String.format("The store \"%s\" does not exists.", storename));
-		QuestDBAbstractStore dbstore = stores.get(storename);
 		QuestDBConnection conn = connections.get(storename);
 		return conn.createStatement();
 	}

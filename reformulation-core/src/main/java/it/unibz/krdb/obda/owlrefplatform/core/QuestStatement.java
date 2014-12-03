@@ -31,9 +31,9 @@ import it.unibz.krdb.obda.model.OBDAStatement;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
@@ -47,7 +47,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.renderer.DatalogProgramRenderer;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -409,7 +408,7 @@ public class QuestStatement implements OBDAStatement {
 			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
 			removeNonAnswerQueries(program);
 
-			program = unfolder.unfold(program, "ans1");
+			program = unfolder.unfold(program, OBDAVocabulary.QUEST_QUERY);
 
 			log.debug("Flattened program: \n{}", program);
 		} catch (Exception e) {
@@ -432,7 +431,7 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Start the partial evaluation process...");
 
-		DatalogProgram unfolding = questInstance.unfold(query, "ans1");
+		DatalogProgram unfolding = questInstance.unfold(query, OBDAVocabulary.QUEST_QUERY);
 		//log.debug("Partial evaluation: \n{}", unfolding);
 		log.debug("Data atoms evaluated: \n{}", unfolding);
 
@@ -455,7 +454,7 @@ public class QuestStatement implements OBDAStatement {
 		List<CQIE> toRemove = new LinkedList<CQIE>();
 		for (CQIE rule : program.getRules()) {
 			Predicate headPredicate = rule.getHead().getFunctionSymbol();
-			if (!headPredicate.getName().toString().equals("ans1")) {
+			if (!headPredicate.getName().toString().equals(OBDAVocabulary.QUEST_QUERY)) {
 				toRemove.add(rule);
 			}
 		}

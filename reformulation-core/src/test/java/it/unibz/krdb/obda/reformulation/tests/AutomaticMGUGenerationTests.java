@@ -24,14 +24,12 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SingletonSubstitution;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SubstitutionImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -45,7 +43,6 @@ import org.slf4j.LoggerFactory;
  */
 public class AutomaticMGUGenerationTests extends TestCase {
 
-	private UnifierUtilities					unifier		= null;
 	private AutomaticMGUTestDataGenerator	generator	= null;
 	private Logger						log			= LoggerFactory.getLogger(AutomaticMGUGenerationTests.class);
 
@@ -59,7 +56,6 @@ public class AutomaticMGUGenerationTests extends TestCase {
 		 * Predicate class instead of FunctionSymbol class
 		 */
 
-		unifier = new UnifierUtilities();
 		generator = new AutomaticMGUTestDataGenerator();
 
 	}
@@ -117,6 +113,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			casecounter += 1;
 			testcase = in.readLine();
 		}
+		in.close();
 		log.info("Suceffully executed {} test cases for MGU computation");
 	}
 

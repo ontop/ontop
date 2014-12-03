@@ -24,8 +24,6 @@ package it.unibz.krdb.obda.reformulation.tests;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
@@ -129,8 +127,6 @@ public class DAGEquivalenceTest extends TestCase {
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(
 				testEquivalenceRoles));
 		Ontology onto = OWLAPI3TranslatorUtility.translate(owlonto);
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-
 		// generate DAG
 		TBoxReasoner dag = new TBoxReasonerImpl(onto);
 		// generate named DAG
@@ -191,8 +187,6 @@ public class DAGEquivalenceTest extends TestCase {
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(
 				testEquivalenceRolesInverse));
 		Ontology onto = OWLAPI3TranslatorUtility.translate(owlonto);
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-
 		// generate DAG
 		TBoxReasoner dag = new TBoxReasonerImpl(onto);
 		// generate named DAG

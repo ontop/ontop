@@ -269,9 +269,8 @@ public class QuestResultset implements TupleResultSet {
 						else {
 							String value = set.getString(column);
 							DateFormat df = new SimpleDateFormat("dd-MMM-yy");
-							java.util.Date date;
 							try {
-								date = df.parse(value);
+								java.util.Date date = df.parse(value);
 							} catch (ParseException e) {
 								throw new RuntimeException(e);
 							}

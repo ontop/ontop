@@ -44,8 +44,7 @@ public class S_NewGraphTest  extends TestCase{
 		String classowlfile = "src/test/resources/dag-tests-1.owl";
 		String roleowlfile = "src/test/resources/test/dag/test-role-hierarchy.owl";
 		
-		 String owlfile =
-		 "src/test/resources/test/stockexchange-unittest.owl";
+		String owlfile = "src/test/resources/test/stockexchange-unittest.owl";
 		log.info("Loading ontology");
 
 		// Loading the OWL file

@@ -206,7 +206,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 //			log.debug("Normalized CQ: \n{}", cq);
 
 			Predicate headPredicate = cq.getHead().getFunctionSymbol();
-			if (!headPredicate.getName().toString().equals("ans1")) {
+			if (!headPredicate.getName().toString().equals(OBDAVocabulary.QUEST_QUERY)) {
 				// not a target query, skip it.
 				continue;
 			}

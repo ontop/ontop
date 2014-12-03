@@ -29,8 +29,6 @@ import it.unibz.krdb.sql.JDBCConnectionManager;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-
 import org.semanticweb.owlapi.model.OWLOntology;
 
 public abstract class AbstractDBMetadata

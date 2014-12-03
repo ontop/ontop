@@ -30,8 +30,6 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 
@@ -64,7 +62,6 @@ public class DAG implements Serializable {
 
 	public final Map<Description, DAGNode> allnodes;
 
-	private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
 	// public final static String thingStr =
 	// "http://www.w3.org/2002/07/owl#Thing";

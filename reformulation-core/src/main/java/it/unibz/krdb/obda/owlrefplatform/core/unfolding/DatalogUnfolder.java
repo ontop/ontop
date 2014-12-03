@@ -1868,13 +1868,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	private static Function getTerm(Stack<Integer> termidx, CQIE rule) {
 		Function atom = null;
 		if (termidx.size() > 1) {
-			Stack stack = new Stack();
+			Stack<Integer> stack = new Stack<>();
 			stack.addAll(termidx.subList(0, termidx.size() - 1));
 			List innerTerms = getNestedList(stack, rule);
-			atom = (Function) innerTerms.get((Integer) stack.peek());
+			atom = (Function) innerTerms.get(stack.peek());
 		} else {
 			List<Function> body = rule.getBody();
-			Integer peek = (Integer) termidx.peek();
+			Integer peek = termidx.peek();
 			if (body.size() == 0 || peek >= body.size()) 
 				return null;
 			

@@ -112,7 +112,6 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 	
 	private Ontology readOntology(String tboxFile) throws Exception {
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 		File f = new File(tboxFile);
 		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(f.getParentFile(), false);
 		man.addIRIMapper(iriMapper);
@@ -124,7 +123,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			owlontology = man.loadOntologyFromOntologyDocument(new File(tboxFile));
 		}
 		closure = man.getImportsClosure(owlontology);
-		return translator.mergeTranslateOntologies(closure);
+		return OWLAPI3TranslatorUtility.mergeTranslateOntologies(closure);
 	}
 
 

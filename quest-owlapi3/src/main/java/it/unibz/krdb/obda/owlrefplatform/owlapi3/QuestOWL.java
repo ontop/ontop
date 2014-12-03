@@ -410,13 +410,11 @@ public class QuestOWL extends OWLReasonerBase {
 		 */
 		log.debug("Load ontologies called. Translating ontologies.");
 
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
-
 		try {
 
 			OWLOntologyManager man = ontology.getOWLOntologyManager();
 			Set<OWLOntology> closure = man.getImportsClosure(ontology);
-			Ontology mergeOntology = translator.mergeTranslateOntologies(closure);
+			Ontology mergeOntology = OWLAPI3TranslatorUtility.mergeTranslateOntologies(closure);
 			return mergeOntology;
 		} catch (Exception e) {
 			throw e;

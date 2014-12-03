@@ -118,7 +118,7 @@ public class DatalogNormalizer {
 	public static CQIE unfoldJoinTrees(CQIE query, boolean clone) {
 		if (clone)
 			query = query.clone();
-		List body = query.getBody();
+		List<Function> body = query.getBody();
 		unfoldJoinTrees(body, true);
 		return query;
 	}
@@ -165,14 +165,14 @@ public class DatalogNormalizer {
 	public static CQIE foldJoinTrees(CQIE query, boolean clone) {
 		if (clone)
 			query = query.clone();
-		List body = query.getBody();
+		List<Function> body = query.getBody();
 		foldJoinTrees(body, false);
 		return query;
 	}
 
 	public static void foldJoinTrees(List atoms, boolean isJoin) {
-		List<Function> dataAtoms = new LinkedList<Function>();
-		List<Function> booleanAtoms = new LinkedList<Function>();
+		List<Function> dataAtoms = new LinkedList<>();
+		List<Function> booleanAtoms = new LinkedList<>();
 
 		/*
 		 * Collecting all data and boolean atoms for later processing. Calling
@@ -245,10 +245,10 @@ public class DatalogNormalizer {
 		Substitution substitutions = new SubstitutionImpl();
 		int[] newVarCounter = { 1 };
 
-		Set<Function> booleanAtoms = new HashSet<Function>();
-		List<Function> equalities = new LinkedList<Function>();
+		Set<Function> booleanAtoms = new HashSet<>();
+		List<Function> equalities = new LinkedList<>();
 		pullOutEqualities(query.getBody(), substitutions, equalities, newVarCounter, false);
-		List body = query.getBody();
+		List<Function> body = query.getBody();
 		body.addAll(equalities);
 
 		/*
@@ -443,7 +443,7 @@ public class DatalogNormalizer {
 	// to rely on DBMS for nested JOIN optimisations (PostgreSQL case for BSBM
 	// Q3)
 	private static void saturateEqualities(Set<Function> boolSet) {
-		List<Set> equalitySets = new ArrayList();
+		List<Set<Term>> equalitySets = new ArrayList<>();
 		Iterator<Function> iter = boolSet.iterator();
 		while (iter.hasNext()) {
 			Function eq = iter.next();
@@ -452,14 +452,14 @@ public class DatalogNormalizer {
 			Term v1 = eq.getTerm(0);
 			Term v2 = eq.getTerm(1);
 			if (equalitySets.size() == 0) {
-				Set firstSet = new LinkedHashSet();
+				Set<Term> firstSet = new LinkedHashSet<>();
 				firstSet.add(v1);
 				firstSet.add(v2);
 				equalitySets.add(firstSet);
 				continue;
 			}
 			for (int k = 0; k < equalitySets.size(); k++) {
-				Set set = equalitySets.get(k);
+				Set<Term> set = equalitySets.get(k);
 				if (set.contains(v1)) {
 					set.add(v2);
 					continue;
@@ -469,7 +469,7 @@ public class DatalogNormalizer {
 					continue;
 				}
 				if (k == equalitySets.size() - 1) {
-					Set newSet = new LinkedHashSet();
+					Set<Term> newSet = new LinkedHashSet<>();
 					newSet.add(v1);
 					newSet.add(v2);
 					equalitySets.add(newSet);
@@ -480,10 +480,10 @@ public class DatalogNormalizer {
 		}
 
 		for (int k = 0; k < equalitySets.size(); k++) {
-			List varList = new ArrayList(equalitySets.get(k));
+			List<Term> varList = new ArrayList<>(equalitySets.get(k));
 			for (int i = 0; i < varList.size() - 1; i++) {
 				for (int j = i + 1; j < varList.size(); j++) {
-					Function equality = fac.getFunctionEQ((Term) varList.get(i), (Term) varList.get(j));
+					Function equality = fac.getFunctionEQ(varList.get(i), varList.get(j));
 					boolSet.add(equality);
 				}
 			}
@@ -801,7 +801,7 @@ public class DatalogNormalizer {
 	public static void pullOutLeftJoinConditions(CQIE query) {
 		Set<Function> booleanAtoms = new HashSet<Function>();
 		Set<Function> tempBooleans = new HashSet<Function>();
-		List body = query.getBody();
+		List<Function> body = query.getBody();
 		
 		pullOutLJCond(body, booleanAtoms, false, tempBooleans, false);
 		body.addAll(booleanAtoms);
@@ -812,7 +812,7 @@ public class DatalogNormalizer {
 		boolean firstDataAtomFound = false;
 		boolean secondDataAtomFound = false;
 		boolean is2 = false;
-		List tempTerms = new LinkedList();
+		List tempTerms = new LinkedList<>();
 		tempTerms.addAll(currentTerms);
 		Set<Function> tempConditionBooleans = new HashSet<Function>();
 		
