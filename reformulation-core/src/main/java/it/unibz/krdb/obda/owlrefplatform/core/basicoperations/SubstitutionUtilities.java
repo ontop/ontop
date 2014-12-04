@@ -41,6 +41,8 @@ public class SubstitutionUtilities {
      * Exception occurring when computing a substitution.
      */
     public static class SubstitutionException extends Exception {
+
+		private static final long serialVersionUID = 2820771912046570562L;
     }
 
     /**
@@ -49,6 +51,8 @@ public class SubstitutionUtilities {
      *
      */
     public static class SubstitutionUnionException extends SubstitutionException {
+
+		private static final long serialVersionUID = 1587922941160561062L;
     }
 
 
