@@ -26,7 +26,6 @@ package it.unibz.krdb.obda.r2rml;
  */
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DataTypePredicate;
-import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
@@ -61,7 +60,6 @@ import eu.optique.api.mapping.impl.SubjectMapImpl;
 public class R2RMLParser {
 
 	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	List<Predicate> classPredicates; 
 	List<Resource> joinPredObjNodes; 

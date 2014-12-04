@@ -57,7 +57,6 @@ import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.StatementCollector;
 
 import eu.optique.api.mapping.Join;
-import eu.optique.api.mapping.PredicateMap;
 import eu.optique.api.mapping.PredicateObjectMap;
 import eu.optique.api.mapping.RefObjectMap;
 import eu.optique.api.mapping.TriplesMap;

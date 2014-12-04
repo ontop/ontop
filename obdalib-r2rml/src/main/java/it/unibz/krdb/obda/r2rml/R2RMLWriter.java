@@ -24,21 +24,8 @@ package it.unibz.krdb.obda.r2rml;
  * Class responsible to write an r2rml turtle file given an obda model
  */
 import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DataTypePredicate;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.URITemplatePredicate;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.BNodePredicateImpl;
-import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -49,23 +36,15 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.impl.GraphImpl;
-import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
-import org.openrdf.rio.helpers.StatementCollector;
-import org.openrdf.rio.turtle.TurtleWriter;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import eu.optique.api.mapping.R2RMLMappingManager;

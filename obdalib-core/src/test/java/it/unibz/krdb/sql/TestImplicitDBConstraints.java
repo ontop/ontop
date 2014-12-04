@@ -5,9 +5,7 @@ import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.RelationJSQL;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 

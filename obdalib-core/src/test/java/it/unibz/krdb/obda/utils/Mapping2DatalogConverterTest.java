@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;

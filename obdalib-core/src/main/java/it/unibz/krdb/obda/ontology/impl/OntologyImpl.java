@@ -28,7 +28,6 @@ import it.unibz.krdb.obda.ontology.NaryAxiom;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
@@ -44,8 +43,6 @@ public class OntologyImpl implements Ontology {
 	private static final long serialVersionUID = 758424053258299151L;
 	
 	private final OntologyVocabularyImpl vocabulary = new OntologyVocabularyImpl();
-	
-	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
 	// axioms and assertions
 

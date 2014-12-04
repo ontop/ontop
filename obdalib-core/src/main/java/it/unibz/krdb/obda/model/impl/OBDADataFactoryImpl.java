@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;

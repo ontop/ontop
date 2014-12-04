@@ -101,6 +101,7 @@ try{
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -187,6 +188,7 @@ try{
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -283,6 +285,7 @@ try{
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -388,6 +391,7 @@ try{
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -455,6 +459,7 @@ try{
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -556,6 +561,7 @@ try{
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
