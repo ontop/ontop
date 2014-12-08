@@ -76,8 +76,6 @@ public class QuestStatement implements OBDAStatement {
 
 	private final QuestConnection conn;
 
-	private final SparqlAlgebraToDatalogTranslator translator;
-	
 	private final Statement sqlstatement;
 
 
@@ -115,8 +113,6 @@ public class QuestStatement implements OBDAStatement {
 		this.conn = conn;
 
 		this.sqlstatement = st;
-		
-		this.translator = new SparqlAlgebraToDatalogTranslator(questInstance.getUriTemplateMatcher());
 	}
 
 
@@ -398,9 +394,7 @@ public class QuestStatement implements OBDAStatement {
 	private DatalogProgram translateAndPreProcess(ParsedQuery pq, List<String> signature) {
 		DatalogProgram program = null;
 		try {
-			if (questInstance.isSemIdx()) {
-				translator.setSemanticIndexUriRef(questInstance.getSemanticIndexRepository().getUriMap());
-			}
+			SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();
 			program = translator.translate(pq, signature);
 
 			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
@@ -431,7 +425,7 @@ public class QuestStatement implements OBDAStatement {
 
 		log.debug("Start the partial evaluation process...");
 
-		DatalogProgram unfolding = questInstance.unfold(query, OBDAVocabulary.QUEST_QUERY);
+		DatalogProgram unfolding = questInstance.getUnfolder().unfold(query);
 		//log.debug("Partial evaluation: \n{}", unfolding);
 		log.debug("Data atoms evaluated: \n{}", unfolding);
 
@@ -440,8 +434,7 @@ public class QuestStatement implements OBDAStatement {
 		//log.debug("After target rules removed: \n{}", unfolding);
 		log.debug("Irrelevant rules removed: \n{}", unfolding);
 
-		ExpressionEvaluator evaluator = new ExpressionEvaluator();
-		evaluator.setUriTemplateMatcher(questInstance.getUriTemplateMatcher());
+		ExpressionEvaluator evaluator = questInstance.getExpressionEvaluator();
 		evaluator.evaluateExpressions(unfolding);
 
 		log.debug("Boolean expression evaluated: \n{}", unfolding);
@@ -462,13 +455,13 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 	private String getSQL(DatalogProgram query, List<String> signature) throws OBDAException {
-		if (((DatalogProgram) query).getRules().size() == 0) {
+		if (query.getRules().size() == 0) {
 			return "";
 		}
 		log.debug("Producing the SQL string...");
 
 		// query = DatalogNormalizer.normalizeDatalogProgram(query);
-		String sql = questInstance.getDatasourceQueryGenerator().generateSourceQuery((DatalogProgram) query, signature);
+		String sql = questInstance.getDatasourceQueryGenerator().generateSourceQuery(query, signature);
 
 		log.debug("Resulting SQL: \n{}", sql);
 		return sql;
@@ -564,6 +557,7 @@ public class QuestStatement implements OBDAStatement {
 		}
 		
 		// Obtain the query signature
+		SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();		
 		List<String> signatureContainer = translator.getSignature(query);
 		
 		
@@ -634,6 +628,7 @@ public class QuestStatement implements OBDAStatement {
 				queryIsParsed = false;
 			}
 
+			SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();
 			List<String> signatureContainer = translator.getSignature(query);
 
 			questInstance.getSesameQueryCache().put(strquery, query);
@@ -935,9 +930,8 @@ public class QuestStatement implements OBDAStatement {
 
 		try {
 			questInstance.updateSemanticIndexMappings();
-			translator.setTemplateMatcher(questInstance.getUriTemplateMatcher());
-
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			log.error("Error updating semantic index mappings after insert.", e);
 		}
 

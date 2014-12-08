@@ -262,7 +262,7 @@ public class TMappingProcessor {
 					 * predicate and, if the child is inverse and the current is
 					 * positive, it will also invert the terms in the head
 					 */
-					boolean requiresInverse = (current.isInverse() != childproperty.isInverse());
+					boolean requiresInverse = childproperty.isInverse();
 
 					for (CQIE childmapping : originalMappings) {
 
@@ -288,8 +288,7 @@ public class TMappingProcessor {
 
 			/* Setting up mappings for the equivalent classes */
 			for (ObjectPropertyExpression equivProperty : propertySet) {
-			
-				 
+					 
 				Predicate p = equivProperty.getPredicate();
 
 				// skip the property and its inverse (if it is symmetric)
@@ -302,7 +301,7 @@ public class TMappingProcessor {
 					List<Term> terms = currentNodeMapping.getHeadTerms();
 					
 					Function newhead;
-					if (equivProperty.isInverse() == current.isInverse()) 
+					if (!equivProperty.isInverse()) 
 						newhead = fac.getFunction(p, terms);
 					else 
 						newhead = fac.getFunction(p, terms.get(1), terms.get(0));
@@ -328,28 +327,26 @@ public class TMappingProcessor {
 			Predicate currentPredicate = current.getPredicate();
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
 
-			for (Equivalences<DataPropertyExpression> descendants : dag.getSub(propertySet)) {
-				for(DataPropertyExpression childproperty : descendants) {
+			if (full) {
+				for (Equivalences<DataPropertyExpression> descendants : dag.getSub(propertySet)) {
+					for(DataPropertyExpression childproperty : descendants) {
 
-					/*
-					 * adding the mappings of the children as own mappings, the new
-					 * mappings use the current predicate instead of the child's
-					 * predicate and, if the child is inverse and the current is
-					 * positive, it will also invert the terms in the head
-					 */
-					for (CQIE childmapping : originalMappings) {
+						/*
+						 * adding the mappings of the children as own mappings, the new
+						 * mappings use the current predicate instead of the child's
+						 * predicate and, if the child is inverse and the current is
+						 * positive, it will also invert the terms in the head
+						 */
+						for (CQIE childmapping : originalMappings) {
+							if (!childmapping.getHead().getFunctionSymbol().equals(childproperty.getPredicate()))
+								continue;
+							
+							List<Term> terms = childmapping.getHead().getTerms();
 
-						if (!childmapping.getHead().getFunctionSymbol().equals(childproperty.getPredicate()))
-							continue;
-						
-						List<Term> terms = childmapping.getHead().getTerms();
-
-						Function newMappingHead;
-						if (!full)
-							continue;
-						newMappingHead = fac.getFunction(currentPredicate, terms);
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody(), cqc);				
-						currentNodeMappings.mergeMappingsWithCQC(newmapping);
+							Function newMappingHead = fac.getFunction(currentPredicate, terms);
+							TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody(), cqc);				
+							currentNodeMappings.mergeMappingsWithCQC(newmapping);
+						}
 					}
 				}
 			}

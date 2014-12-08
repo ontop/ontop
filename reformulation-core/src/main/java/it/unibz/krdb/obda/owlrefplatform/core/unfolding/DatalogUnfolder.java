@@ -70,9 +70,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	private static final Logger log = LoggerFactory.getLogger(DatalogUnfolder.class);
 
-	private Map<Predicate, List<Integer>> primaryKeys = new HashMap<Predicate, List<Integer>>();
+	private final Map<Predicate, List<Integer>> primaryKeys;
 
-	private Map<Predicate, List<CQIE>> ruleIndex = new LinkedHashMap<Predicate, List<CQIE>>();
+	private final Map<Predicate, List<CQIE>> ruleIndex = new LinkedHashMap<>();
 
 	/***
 	 * Leaf predicates are those that do not appear in the head of any rule. If
@@ -125,7 +125,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		}
 
 		/*
-		 * the predicates taht do not appear in the head of rules are leaf
+		 * the predicates that do not appear in the head of rules are leaf
 		 * predicates
 		 */
 		allPredicates.removeAll(ruleIndex.keySet());

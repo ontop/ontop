@@ -67,12 +67,12 @@ import org.slf4j.LoggerFactory;
  */
 public class MetaMappingExpander {
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
-	private Connection connection;
-	private SQLQueryParser translator;
-	private List<OBDAMappingAxiom> expandedMappings;
-	private OBDADataFactory dfac;
+	private final Connection connection;
+	private final SQLQueryParser translator;
+	private final List<OBDAMappingAxiom> expandedMappings;
+	private final OBDADataFactory dfac;
 
 	/**
 	 * TODO

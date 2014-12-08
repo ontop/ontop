@@ -118,22 +118,19 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	private final TermComparator comparator = new TermComparator();
 
-	private UriTemplateMatcher uriTemplateMatcher;
-
-	private SemanticIndexURIMap uriRef = null;  // used only in the Semantic Index mode
+	private final UriTemplateMatcher uriTemplateMatcher;
+	private final SemanticIndexURIMap uriRef;  
 	
 	private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
 	
+	/**
+	 * 
+	 * @param templateMatcher
+	 * @param uriRef is used only in the Semantic Index mode
+	 */
 	
-	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher) {
+	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher, SemanticIndexURIMap uriRef) {
 		uriTemplateMatcher = templateMatcher;
-	}
-	
-	public void setTemplateMatcher(UriTemplateMatcher templateMatcher) {
-		uriTemplateMatcher = templateMatcher;
-	}
-	
-	public void setSemanticIndexUriRef(SemanticIndexURIMap uriRef) {
 		this.uriRef = uriRef;
 	}
 	

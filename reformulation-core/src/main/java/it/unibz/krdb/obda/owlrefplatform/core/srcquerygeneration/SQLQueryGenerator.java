@@ -47,6 +47,4 @@ public interface SQLQueryGenerator extends Serializable {
 	 * @throws Exception
 	 */
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException;
-
-	void setUriMap(SemanticIndexURIMap uriRefIds);
 }
