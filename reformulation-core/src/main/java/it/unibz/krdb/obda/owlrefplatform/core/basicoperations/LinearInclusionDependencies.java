@@ -25,7 +25,7 @@ public class LinearInclusionDependencies {
 
     private static final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
     
-	private final Map<Predicate, List<CQIE>> rules = new HashMap<Predicate, List<CQIE>>();
+	private final Map<Predicate, List<CQIE>> rules = new HashMap<>();
 	
 	public List<CQIE> getRules(Predicate pred) {
 		List<CQIE> rrs = rules.get(pred);
@@ -166,4 +166,8 @@ public class LinearInclusionDependencies {
 		} 
 	}
 
+    @Override
+    public String toString() {
+    	return rules.toString();
+    }
 }

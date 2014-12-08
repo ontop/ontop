@@ -122,34 +122,26 @@ public class TMappingProcessor {
 			while (mappingIterator.hasNext()) {
 
 				TMappingRule currentRule = mappingIterator.next(); 
-				
+								
 				if (!newRule.isContainedIn(currentRule))
-				continue;
+					continue;
 
+				if (currentRule.isConditionsEmpty()) {
+					// if the new mapping is redundant and there are no conditions then do not add anything		
+					return;
+				}
+				
 				if (!currentRule.isContainedIn(newRule))
-				continue;
-
+					continue;
 				
 				// We found an equivalence, we will try to merge the conditions of
 				// newmapping into the currentMapping.
 				
-				if (!newRule.isConditionsEmpty() && currentRule.isConditionsEmpty()) {
-					// There is a containment and there is no need to add the new
-					// mapping since there there is no extra conditions in the new
-					// mapping
-					return;
-				} 
-				else if (newRule.isConditionsEmpty() && !currentRule.isConditionsEmpty()) {
-				
+				if (newRule.isConditionsEmpty()) {		
 					// The existing query is more specific than the new query, so we
 					// need to add the new query and remove the old	 
 					mappingIterator.remove();
 					break;
-				} 
-				else if (newRule.isConditionsEmpty() && currentRule.isConditionsEmpty()) {
-				
-					// There are no conditions, and the new mapping is redundant, do not add anything					
-					return;
 				} 
 				else {
 				
@@ -161,7 +153,7 @@ public class TMappingProcessor {
 				
 	                // we do not add a new mapping if the conditions are exactly the same
 	                if (existingconditions.equals(newconditions)) 
-	                    continue;
+	                    return;
 	                			
 	                mappingIterator.remove();
 
@@ -238,7 +230,7 @@ public class TMappingProcessor {
 	}
 
 	private static void getObjectTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, 
-			List<CQIE> originalMappings,
+			Map<Predicate, List<CQIE>> originalMappings,
 			EquivalencesDAG<ObjectPropertyExpression> dag, 
 			CQContainmentCheckUnderLIDs cqc,
 			boolean full) {
@@ -264,10 +256,11 @@ public class TMappingProcessor {
 					 */
 					boolean requiresInverse = childproperty.isInverse();
 
-					for (CQIE childmapping : originalMappings) {
-
-						if (!childmapping.getHead().getFunctionSymbol().equals(childproperty.getPredicate()))
-							continue;
+					List<CQIE> childmappings = originalMappings.get(childproperty.getPredicate());
+					if (childmappings == null)
+						continue;
+					
+					for (CQIE childmapping : childmappings) {
 						
 						List<Term> terms = childmapping.getHead().getTerms();
 
@@ -314,7 +307,7 @@ public class TMappingProcessor {
 		
 	}
 	private static void getDataTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, 
-			List<CQIE> originalMappings,
+			Map<Predicate, List<CQIE>> originalMappings,
 			EquivalencesDAG<DataPropertyExpression> dag, 
 			CQContainmentCheckUnderLIDs cqc,
 			boolean full) {
@@ -337,9 +330,11 @@ public class TMappingProcessor {
 						 * predicate and, if the child is inverse and the current is
 						 * positive, it will also invert the terms in the head
 						 */
-						for (CQIE childmapping : originalMappings) {
-							if (!childmapping.getHead().getFunctionSymbol().equals(childproperty.getPredicate()))
-								continue;
+						List<CQIE> childmappings = originalMappings.get(childproperty.getPredicate());
+						if (childmappings == null)
+							continue;
+						
+						for (CQIE childmapping : childmappings) {
 							
 							List<Term> terms = childmapping.getHead().getTerms();
 
@@ -384,13 +379,12 @@ public class TMappingProcessor {
 	 * @return
 	 */
 
-	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full) {
+	public static List<CQIE> getTMappings(List<CQIE> originalMappings, TBoxReasoner reasoner, boolean full, CQContainmentCheckUnderLIDs cqc) {
 
-		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(); // no dependencies used at the moment
-											   // TODO: use foreign keys here
-			
-		Map<Predicate, TMappingIndexEntry> mappingIndex = new HashMap<Predicate, TMappingIndexEntry>();
+		Map<Predicate, TMappingIndexEntry> mappingIndex = new HashMap<>();
 
+		Map<Predicate, List<CQIE>> originalMappingIndex = new HashMap<>();
+		
 		/***
 		 * Creates an index of all mappings based on the predicate of the head of
 		 * the mapping. The returned map can be used for fast access to the mapping
@@ -400,6 +394,12 @@ public class TMappingProcessor {
 		for (CQIE mapping : originalMappings) {
 			
 			CQIE mapping1 = normalizeConstants(mapping);
+			List<CQIE> ms = originalMappingIndex.get(mapping1.getHead().getFunctionSymbol());
+			if (ms == null) {
+				ms = new LinkedList<>();
+				originalMappingIndex.put(mapping1.getHead().getFunctionSymbol(), ms);
+			}
+			ms.add(mapping1);
 						
 			TMappingIndexEntry set = getMappings(mappingIndex, mapping1.getHead().getFunctionSymbol());
 			TMappingRule rule = new TMappingRule(mapping1.getHead(), mapping1.getBody(), cqc);
@@ -417,8 +417,8 @@ public class TMappingProcessor {
 		 * the TMappings specification.
 		 */
 
-		getObjectTMappings(mappingIndex, originalMappings, reasoner.getObjectPropertyDAG(), cqc, full);
-		getDataTMappings(mappingIndex, originalMappings, reasoner.getDataPropertyDAG(), cqc, full);
+		getObjectTMappings(mappingIndex, originalMappingIndex, reasoner.getObjectPropertyDAG(), cqc, full);
+		getDataTMappings(mappingIndex, originalMappingIndex, reasoner.getDataPropertyDAG(), cqc, full);
 
 		/*
 		 * Property t-mappings are done, we now continue with class t-mappings.
@@ -468,10 +468,11 @@ public class TMappingProcessor {
 						isInverse = false;  // can never be an inverse
 					} 
 					
-					for (CQIE childmapping : originalMappings) {
-						
-						if (!childmapping.getHead().getFunctionSymbol().equals(childPredicate))
-							continue;
+					List<CQIE> childmappings = originalMappingIndex.get(childPredicate);
+					if (childmappings == null)
+						continue;
+					
+					for (CQIE childmapping : childmappings) {
 						
 						List<Term> terms = childmapping.getHead().getTerms();
 

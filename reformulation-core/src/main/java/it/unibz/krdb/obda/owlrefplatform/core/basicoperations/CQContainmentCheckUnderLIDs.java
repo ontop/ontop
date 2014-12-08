@@ -299,4 +299,9 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 				
 		return q1freeze.hasAnswer(q2);
 	}	
+	
+	@Override
+	public String toString() {
+		return sigma.toString();
+	}
 }

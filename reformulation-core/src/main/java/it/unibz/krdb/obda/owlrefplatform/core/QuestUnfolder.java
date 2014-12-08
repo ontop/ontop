@@ -98,18 +98,13 @@ public class QuestUnfolder {
 	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, DBMetadata metadata) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
-		
-		unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full);
-		
-		// Eliminating redundancy from the unfolding program
-		// TODO: move the foreign-key optimisation inside t-mapping generation 
-		//              -- at this point it has little effect
+
+		// for eliminating redundancy from the unfolding program
 		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);	
 		CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
-
-		Collections.sort(unfoldingProgram, CQCUtilities.ComparatorCQIE);
-		CQCUtilities.removeContainedQueries(unfoldingProgram, foreignKeyCQC);
-
+		
+		unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full, foreignKeyCQC);
+		
 		final long endTime = System.currentTimeMillis();
 		log.debug("TMapping size: {}", unfoldingProgram.size());
 		log.debug("TMapping processing time: {} ms", (endTime - startTime));
