@@ -273,16 +273,14 @@ public class R2RMLManager {
 			//get object atom
 			Term objectAtom = r2rmlParser.getObjectAtom(pom);
 			
-		
-			
 			if (objectAtom == null) {
 				// skip, object is a join
 				continue;
 			}
 			
 			// construct the atom, add it to the body
-			List<Term> terms = new ArrayList<Term>();
-			terms.add(subjectAtom);
+			//List<Term> terms = new ArrayList<Term>();
+			//terms.add(subjectAtom);
 			
 			
 			for (Predicate bodyPred : bodyPredicates) {
@@ -295,36 +293,35 @@ public class R2RMLManager {
 					if (objectAtom.getReferencedVariables().isEmpty()) { 	
 						Function funcObjectAtom = (Function) objectAtom;
 						Term term0 = funcObjectAtom.getTerm(0);
-						if(term0 instanceof Function){
+						if (term0 instanceof Function) {
 							Function constPred = (Function) term0;
 							Predicate newpred = constPred.getFunctionSymbol();
-							Function newAtom = fac.getFunction(newpred, subjectAtom);
-							body.add(newAtom);
+							Function bodyAtom = fac.getFunction(newpred, subjectAtom);
+							body.add(bodyAtom);
 						}
 						else if (term0 instanceof ValueConstant) {							
 							ValueConstant vconst = (ValueConstant) term0;
 							String predName = vconst.getValue();
 							Predicate newpred = fac.getPredicate(predName, 1);
-							Function newAtom = fac.getFunction(newpred, subjectAtom);
-							body.add(newAtom);
+							Function bodyAtom = fac.getFunction(newpred, subjectAtom);
+							body.add(bodyAtom);
 						} 
-						else {
+						else 
 							throw new IllegalStateException();
-						}
 					}
 					else{ // if object is a variable
 						// TODO (ROMAN): double check -- the list terms appears to accumulate the PO pairs
-						Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
+						//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
 						Function rdftype = fac.getUriTemplate(fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
-						terms.add(rdftype);
-						terms.add(objectAtom);
-						body.add(fac.getFunction(newpred, terms));
+						//terms.add(rdftype);
+						//terms.add(objectAtom);
+						Function bodyAtom = fac.getTripleAtom(subjectAtom, rdftype, objectAtom);
+						body.add(bodyAtom); // fac.getFunction(newpred, terms)
 					}
 				} 
 				else {
 					// create predicate(subject, object) and add it to the body
-					terms.add(objectAtom);
-					Function bodyAtom = fac.getFunction(bodyPred, terms);
+					Function bodyAtom = fac.getFunction(bodyPred, subjectAtom, objectAtom);
 					body.add(bodyAtom);
 				}
 			}
@@ -332,10 +329,11 @@ public class R2RMLManager {
 			//treat predicates that contain a variable (column or template declarations)
 			for (Function predFunction : bodyURIPredicates) {
 				//create triple(subj, predURIFunction, objAtom) terms
-				Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
-				terms.add(predFunction);
-				terms.add(objectAtom);
-				body.add(fac.getFunction(newpred, terms));
+				//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
+				//terms.add(predFunction);
+				//terms.add(objectAtom);
+				Function bodyAtom = fac.getTripleAtom(subjectAtom, predFunction, objectAtom);
+				body.add(bodyAtom);   // objectAtom
 			}
 		}
 		return body;

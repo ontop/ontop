@@ -512,8 +512,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		 * Fixing the typing of predicates, in case they are not properly given.
 		 */
 		if (inputOBDAModel != null && !inputOntology.getVocabulary().isEmpty()) {
-			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
-			repairmodel.fixOBDAModel(inputOBDAModel, inputOntology.getVocabulary());
+			MappingVocabularyRepair.fixOBDAModel(inputOBDAModel, inputOntology.getVocabulary());
 		}
 
 		unfoldingOBDAModel = fac.getOBDAModel();

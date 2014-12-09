@@ -471,7 +471,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getTripleAtom(Term subject, Term predicate, Term object) {
-		return getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, predicate, object);
+		return getFunction(PredicateImpl.QUEST_TRIPLE_PRED, subject, predicate, object);
 	}
 
 	

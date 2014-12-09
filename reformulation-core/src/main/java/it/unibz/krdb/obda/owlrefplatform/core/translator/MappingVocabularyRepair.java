@@ -36,12 +36,12 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,14 +55,14 @@ import org.slf4j.LoggerFactory;
  */
 public class MappingVocabularyRepair {
 
-	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 
-	Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
+	private static final Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
 
-	public void fixOBDAModel(OBDAModel model, OntologyVocabulary vocabulary) {
+	public static void fixOBDAModel(OBDAModel model, OntologyVocabulary vocabulary) {
 		log.debug("Fixing OBDA Model");
 		for (OBDADataSource source : model.getSources()) {
-			Collection<OBDAMappingAxiom> mappings = new LinkedList<OBDAMappingAxiom>(model.getMappings(source.getSourceID()));
+			Collection<OBDAMappingAxiom> mappings = new LinkedList<>(model.getMappings(source.getSourceID()));
 			model.removeAllMappings(source.getSourceID());
 			try {
 				model.addMappings(source.getSourceID(), fixMappingPredicates(mappings, vocabulary));
@@ -80,9 +80,10 @@ public class MappingVocabularyRepair {
 	 * @param vocabulary
 	 * @return
 	 */
-	public Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, OntologyVocabulary vocabulary) {
+	public static Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, OntologyVocabulary vocabulary) {
 		//		log.debug("Reparing/validating {} mappings", originalMappings.size());
-		HashMap<String, Predicate> urimap = new HashMap<String, Predicate>();
+
+		Map<String, Predicate> urimap = new HashMap<>();
 		for (OClass p : vocabulary.getClasses()) 
 			urimap.put(p.getPredicate().getName(), p.getPredicate());
 
@@ -92,29 +93,27 @@ public class MappingVocabularyRepair {
 		for (DataPropertyExpression p : vocabulary.getDataProperties()) 
 			urimap.put(p.getPredicate().getName(), p.getPredicate());
 
-		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
+		Collection<OBDAMappingAxiom> result = new LinkedList<>();
 		for (OBDAMappingAxiom mapping : originalMappings) {
 			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
-			List<Function> body = targetQuery.getBody();
-			List<Function> newbody = new LinkedList<Function>();
+			List<Function> newbody = new LinkedList<>();
 
-			for (Function atom : body) {
+			for (Function atom : targetQuery.getBody()) {
 				Predicate p = atom.getFunctionSymbol();
 
-				Function newatom = null;
-				Predicate predicate = urimap.get(p.getName());
-
 				/* Fixing terms */
-				LinkedList<Term> newTerms = new LinkedList<Term>();
+				List<Term> newTerms = new LinkedList<>();
 				for (Term term : atom.getTerms()) {
 					newTerms.add(fixTerm(term));
 				}
+				
+				Function newatom = null;
 
+				Predicate predicate = urimap.get(p.getName());
 				if (predicate == null) {
 					/**
 					 * ignore triple  
 					 */
-					//if (!p.equals(OBDAVocabulary.QUEST_TRIPLE_PRED)){
 					if (!p.isTriplePredicate()){
 						//throw new RuntimeException("ERROR: Mapping references an unknown class/property: " + p.getName());
 						log.warn("WARNING: Mapping references an unknown class/property: " + p.getName());
@@ -123,15 +122,15 @@ public class MappingVocabularyRepair {
 						 * All this part is to handle the case where the predicate or the class is defined
 						 * by the mapping but not present in the ontology.
 						 */
-						if (newTerms.size()==1){
-							predicate=dfac.getClassPredicate(p.getName());
-						} else if (newTerms.size()==2){
+						if (newTerms.size() == 1) {
+							Predicate pred = dfac.getClassPredicate(p.getName());
+							newatom = dfac.getFunction(pred, getNormalTerm(newTerms.get(0)));
+						} 
+						else if (newTerms.size() == 2) {
+							Term t1 = newTerms.get(0);
+							Term t2 = newTerms.get(1);
 
-
-							Term t1= newTerms.get(0);
-							Term t2= newTerms.get(1);
-
-							if (( t1 instanceof Function) && ( t2 instanceof Function)){
+							if ((t1 instanceof Function) && (t2 instanceof Function)) {
 
 								Function ft1 = (Function) t1;
 								Function ft2 = (Function) t2;
@@ -139,33 +138,39 @@ public class MappingVocabularyRepair {
 								boolean t1uri = (ft1.getFunctionSymbol() instanceof URITemplatePredicate);  
 								boolean t2uri = (ft2.getFunctionSymbol() instanceof URITemplatePredicate);
 
-								if (t1uri && t2uri){
-									predicate= dfac.getObjectPropertyPredicate(p.getName());
-								}else{
-									predicate=dfac.getDataPropertyPredicate(p.getName());
+								if (t1uri && t2uri) {
+									Predicate pred = dfac.getObjectPropertyPredicate(p.getName());
+									newatom = dfac.getFunction(pred, getNormalTerm(newTerms.get(0)), getNormalTerm(newTerms.get(1)));
 								}
-							} else {
-								throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + p.getName());
-							}
+								else {
+									Predicate pred = dfac.getDataPropertyPredicate(p.getName());
+									newatom = dfac.getFunction(pred, getNormalTerm(newTerms.get(0)), newTerms.get(1));
+								}
+							} 
+							else 
+								throw new RuntimeException("INTERNAL ERROR: " + p.getName());
 						}
-					}else{
-						predicate = OBDAVocabulary.QUEST_TRIPLE_PRED;
+						else 
+							throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + p.getName());
 					}
-
-				}// predicate null
-
-				/*
-				 * Fixing wrapping each variable with a URI function if the
-				 * position corresponds to an URI only position
-				 */
-				Term t0 = newTerms.get(0);
-				if (!(t0 instanceof Function)){
-					newTerms.set(0, dfac.getUriTemplate(t0));
+					else {
+						newatom = dfac.getTripleAtom(newTerms.get(0), newTerms.get(2), newTerms.get(3));
+					}
 				}
-				if (predicate.isObjectProperty() && !(newTerms.get(1) instanceof Function)) {
-					newTerms.set(1, dfac.getUriTemplate(newTerms.get(1)));
+				else {
+					if (newTerms.size() == 1) {
+						newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)));
+					}
+					else if (newTerms.size() == 2) {
+						if (predicate instanceof ObjectPropertyExpression) {
+							newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)), getNormalTerm(newTerms.get(1)));							
+						}
+						else {
+							newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)), newTerms.get(1));							
+						}
+					}
 				}
-				newatom = dfac.getFunction(predicate, newTerms);
+
 				newbody.add(newatom);
 			} //end for
 			
@@ -175,51 +180,53 @@ public class MappingVocabularyRepair {
 //		log.debug("Repair done. Returning {} mappings", result.size());
 		return result;
 	}
-
-	/***
-	 * Fixes any issues with the terms in mappings
-	 * 
-	 * @param term
-	 * @return
+	
+	/**
+	 * Fixing wrapping each variable with a URI function if the
+	 * position corresponds to an URI only position
 	 */
-	public Term fixTerm(Term term) {
-		Term result = term;
-		if (term instanceof Function) {
-			result = fixTerm((Function) term);
-		}
-		return result;
+	private static Term getNormalTerm(Term t) {
+		if (!(t instanceof Function))
+			return dfac.getUriTemplate(t);
+		else
+			return t;
 	}
 
 	/***
 	 * Fix functions that represent URI templates. Currently,the only fix
 	 * necessary is replacing the old-style template function with the new one,
-	 * that uses a string tempalte and placeholders.
+	 * that uses a string template and placeholders.
 	 * 
 	 * @param term
 	 * @return
 	 */
-	public Function fixTerm(Function term) {
-		Predicate predicate = term.getFunctionSymbol();
-		if (predicate instanceof DataTypePredicate) {
-			// no fix nexessary
-			return term;
-		}
-		if (predicate instanceof URITemplatePredicate) {
-			// no fix necessary
-			return term;
-		}
-		// We have a function that is not a built-in, hence its an old-style uri
-		// template function(parm1,parm2,...)
-		StringBuilder newTemplate = new StringBuilder();
-		newTemplate.append(predicate.getName().toString());
-		for (int i = 0; i < term.getArity(); i++) {
-			newTemplate.append("-{}");
-		}
+	private static Term fixTerm(Term term) {
+		if (term instanceof Function) {
+			Function fterm = (Function)term;
+			Predicate predicate = fterm.getFunctionSymbol();
+			if (predicate instanceof DataTypePredicate) {
+				// no fix nexessary
+				return term;
+			}
+			if (predicate instanceof URITemplatePredicate) {
+				// no fix necessary
+				return term;
+			}
+			// We have a function that is not a built-in, hence its an old-style uri
+			// template function(parm1,parm2,...)
+			StringBuilder newTemplate = new StringBuilder();
+			newTemplate.append(predicate.getName().toString());
+			for (int i = 0; i < fterm.getArity(); i++) {
+				newTemplate.append("-{}");
+			}
 
-		LinkedList<Term> newTerms = new LinkedList<Term>();
-		newTerms.add(dfac.getConstantLiteral(newTemplate.toString()));
-		newTerms.addAll(term.getTerms());
+			LinkedList<Term> newTerms = new LinkedList<>();
+			newTerms.add(dfac.getConstantLiteral(newTemplate.toString()));
+			newTerms.addAll(fterm.getTerms());
 
-		return dfac.getUriTemplate(newTerms);
+			return dfac.getUriTemplate(newTerms);
+		}
+		return term;
 	}
+
 }

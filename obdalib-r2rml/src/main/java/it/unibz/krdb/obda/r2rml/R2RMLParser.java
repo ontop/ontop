@@ -217,16 +217,13 @@ public class R2RMLParser {
 	 * Get body predicates
 	 * @param pom
 	 * @return
-	 * @throws Exception
 	 */
-	public List<Predicate> getBodyPredicates(PredicateObjectMap pom)
-			throws Exception {
+	public List<Predicate> getBodyPredicates(PredicateObjectMap pom) {
 		List<Predicate> bodyPredicates = new ArrayList<Predicate>();
-		Predicate bodyPredicate = null;
 
 		// process PREDICATEs
 		for (PredicateMap pm : pom.getPredicateMaps()) {
-			bodyPredicate = fac.getPredicate(pm.getConstant(), 2);
+			Predicate bodyPredicate = fac.getPredicate(pm.getConstant(), 2);
 			bodyPredicates.add(bodyPredicate);
 		}
 		return bodyPredicates;
@@ -236,27 +233,24 @@ public class R2RMLParser {
 	 * Get body predicates with templates
 	 * @param pom
 	 * @return
-	 * @throws Exception
 	 */
-	public List<Function> getBodyURIPredicates(PredicateObjectMap pom)
-			throws Exception {
-		List<Function> predicateAtoms = new ArrayList<Function>();
-		Function predicateAtom;
+	public List<Function> getBodyURIPredicates(PredicateObjectMap pom) {
+		List<Function> predicateAtoms = new ArrayList<>();
 
 		// process PREDICATEMAP
 		for (PredicateMap pm : pom.getPredicateMaps()) {
 			Template t = pm.getTemplate();
-			if(t != null) 
+			if (t != null) 
 			{
 				// craete uri("...",var)
-				predicateAtom = getURIFunction(t.toString());
+				Function predicateAtom = getURIFunction(t.toString());
 				predicateAtoms.add(predicateAtom);
 			}
 
 			// process column declaration
 			String c = pm.getColumn();
 			if (c != null) {
-				predicateAtom = getURIFunction(c);
+				Function predicateAtom = getURIFunction(c);
 				predicateAtoms.add(predicateAtom);
 			}
 		}
@@ -264,8 +258,7 @@ public class R2RMLParser {
 
 	}
 
-	public Term getObjectAtom(PredicateObjectMap pom)
-			throws Exception {
+	public Term getObjectAtom(PredicateObjectMap pom)  {
 		return getObjectAtom(pom, "");
 	}
 
@@ -276,8 +269,7 @@ public class R2RMLParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public Term getObjectAtom(PredicateObjectMap pom, String joinCond)
-			throws Exception {
+	public Term getObjectAtom(PredicateObjectMap pom, String joinCond) {
 		Term objectAtom = null;
 		if (pom.getObjectMaps().isEmpty()) {
 			return null;
@@ -409,8 +401,7 @@ public class R2RMLParser {
 	}
 
 	@Deprecated
-	public List<Resource> getJoinNodes(TriplesMap tm)
-	{
+	public List<Resource> getJoinNodes(TriplesMap tm) {
 		List<Resource> joinPredObjNodes = new ArrayList<Resource>();
 		// get predicate-object nodes
 		Set<Resource> predicateObjectNodes = getPredicateObjects(tm);
