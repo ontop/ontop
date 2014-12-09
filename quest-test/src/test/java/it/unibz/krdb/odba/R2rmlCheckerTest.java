@@ -95,7 +95,6 @@ public class R2rmlCheckerTest {
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA,
 				QuestConstants.FALSE);
 
-		loadOBDA(p);
 
 		String jdbcurl = "jdbc:mysql://10.7.20.39/npd";
 		String username = "fish";
@@ -110,6 +109,9 @@ public class R2rmlCheckerTest {
 				username, password, driverclass);
 
 		loadR2rml(p, dataSource);
+
+		loadOBDA(p);
+	
 	}
 
 	@After

@@ -186,13 +186,13 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 			throw e;
 		} finally {
 			try {
-
-			} catch (Exception e) {
 				st.close();
+			} catch (Exception e) {
 				throw e;
+			} finally {
+				conn.close();
+				reasoner.dispose();
 			}
-			conn.close();
-			reasoner.dispose();
 		}
 	}
 

@@ -102,7 +102,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
-
+		in.close();
 		st.executeUpdate(bf.toString());
 		conn.commit();
 
@@ -138,7 +138,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
-
+		in.close();
 		st.executeUpdate(bf.toString());
 		st.close();
 		conn.commit();

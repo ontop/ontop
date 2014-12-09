@@ -309,7 +309,7 @@ public class R2RMLManager {
 						else 
 							throw new IllegalStateException();
 					}
-					else{ // if object is a variable
+					else { // if object is a variable
 						// TODO (ROMAN): double check -- the list terms appears to accumulate the PO pairs
 						//Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
 						Function rdftype = fac.getUriTemplate(fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));

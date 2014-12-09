@@ -98,6 +98,8 @@ public class MappingVocabularyRepair {
 			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
 			List<Function> newbody = new LinkedList<>();
 
+//			System.err.println("TARGET: " + targetQuery);
+	
 			for (Function atom : targetQuery.getBody()) {
 				Predicate p = atom.getFunctionSymbol();
 
@@ -136,18 +138,22 @@ public class MappingVocabularyRepair {
 
 								if (t1uri && t2uri) {
 									Predicate pred = dfac.getObjectPropertyPredicate(p.getName());
-									newatom = dfac.getFunction(pred, getNormalTerm(newTerms.get(0)), getNormalTerm(newTerms.get(1)));
+									newatom = dfac.getFunction(pred, getNormalTerm(t1), getNormalTerm(t2));
 								}
 								else {
 									Predicate pred = dfac.getDataPropertyPredicate(p.getName());
-									newatom = dfac.getFunction(pred, getNormalTerm(newTerms.get(0)), newTerms.get(1));
+									newatom = dfac.getFunction(pred, getNormalTerm(t1), t2);
 								}
 							} 
-							else 
+							else  {
+								System.err.println("INTERNAL ERROR: " + p.getName());
 								throw new RuntimeException("INTERNAL ERROR: " + p.getName());
+							}
 						}
-						else 
+						else  {
+							System.err.println("ERROR: Predicate has an incorrect arity: " + p.getName());
 							throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + p.getName());
+						}
 					}
 					else {
 						// TODO (ROMAN): WHY ONLY THE SUBJECT IS NORMALIZED?
@@ -186,8 +192,10 @@ public class MappingVocabularyRepair {
 	 * position corresponds to an URI only position
 	 */
 	private static Term getNormalTerm(Term t) {
-		if (!(t instanceof Function))
+		if (!(t instanceof Function)) {
+//			System.err.println("NORMALIZE: " + t);
 			return dfac.getUriTemplate(t);
+		}
 		else
 			return t;
 	}
