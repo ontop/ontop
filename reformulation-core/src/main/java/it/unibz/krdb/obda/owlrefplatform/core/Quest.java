@@ -640,7 +640,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				// setup connection pool
 				setupConnectionPool();
 
-				unfoldingOBDAModel.addSource(obdaSource);
 
 				/*
 				 * Processing mappings with respect to the vocabulary
@@ -650,8 +649,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				Collection<OBDAMappingAxiom> newMappings = 
 						vocabularyValidator.replaceEquivalences(inputOBDAModel.getMappings(obdaSource.getSourceID()));
 
+				unfoldingOBDAModel.addSource(obdaSource);
 				unfoldingOBDAModel.addMappings(obdaSource.getSourceID(), newMappings);
-
 			}
 
 			// NOTE: Currently the system only supports one data source.

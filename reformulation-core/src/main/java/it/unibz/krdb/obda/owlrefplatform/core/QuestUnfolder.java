@@ -306,6 +306,8 @@ public class QuestUnfolder {
 
 		unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
 
+		// this call is required to complete the T-mappings by rules taking account of 
+		// existential quantifiers and inverse roles
 		applyTMappings(reformulationReasoner, false, metadata);
 		
 		setupUnfolder(metadata);

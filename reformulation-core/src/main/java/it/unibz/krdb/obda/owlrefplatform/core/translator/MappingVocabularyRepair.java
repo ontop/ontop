@@ -80,7 +80,7 @@ public class MappingVocabularyRepair {
 	 * @param vocabulary
 	 * @return
 	 */
-	public static Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, OntologyVocabulary vocabulary) {
+	private static Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, OntologyVocabulary vocabulary) {
 		//		log.debug("Reparing/validating {} mappings", originalMappings.size());
 
 		Map<String, Predicate> urimap = new HashMap<>();
@@ -111,14 +111,10 @@ public class MappingVocabularyRepair {
 
 				Predicate predicate = urimap.get(p.getName());
 				if (predicate == null) {
-					/**
-					 * ignore triple  
-					 */
-					if (!p.isTriplePredicate()){
-						//throw new RuntimeException("ERROR: Mapping references an unknown class/property: " + p.getName());
+					if (!p.isTriplePredicate()) {
 						log.warn("WARNING: Mapping references an unknown class/property: " + p.getName());
 						
-						/**
+						/*
 						 * All this part is to handle the case where the predicate or the class is defined
 						 * by the mapping but not present in the ontology.
 						 */
@@ -154,21 +150,25 @@ public class MappingVocabularyRepair {
 							throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + p.getName());
 					}
 					else {
-						newatom = dfac.getTripleAtom(newTerms.get(0), newTerms.get(2), newTerms.get(3));
+						// TODO (ROMAN): WHY ONLY THE SUBJECT IS NORMALIZED?
+						newatom = dfac.getTripleAtom(getNormalTerm(newTerms.get(0)), newTerms.get(1), newTerms.get(2));
 					}
 				}
 				else {
+					
 					if (newTerms.size() == 1) {
 						newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)));
 					}
 					else if (newTerms.size() == 2) {
-						if (predicate instanceof ObjectPropertyExpression) {
+						if (predicate.isObjectProperty()) {
 							newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)), getNormalTerm(newTerms.get(1)));							
 						}
 						else {
 							newatom = dfac.getFunction(predicate, getNormalTerm(newTerms.get(0)), newTerms.get(1));							
 						}
 					}
+					else 
+						throw new RuntimeException("ERROR: Predicate has an incorrect arity: " + p.getName());			
 				}
 
 				newbody.add(newatom);
@@ -205,7 +205,7 @@ public class MappingVocabularyRepair {
 			Function fterm = (Function)term;
 			Predicate predicate = fterm.getFunctionSymbol();
 			if (predicate instanceof DataTypePredicate) {
-				// no fix nexessary
+				// no fix necessary
 				return term;
 			}
 			if (predicate instanceof URITemplatePredicate) {
