@@ -98,8 +98,6 @@ public class MappingVocabularyRepair {
 			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
 			List<Function> newbody = new LinkedList<>();
 
-//			System.err.println("TARGET: " + targetQuery);
-	
 			for (Function atom : targetQuery.getBody()) {
 				Predicate p = atom.getFunctionSymbol();
 
@@ -193,7 +191,6 @@ public class MappingVocabularyRepair {
 	 */
 	private static Term getNormalTerm(Term t) {
 		if (!(t instanceof Function)) {
-//			System.err.println("NORMALIZE: " + t);
 			return dfac.getUriTemplate(t);
 		}
 		else

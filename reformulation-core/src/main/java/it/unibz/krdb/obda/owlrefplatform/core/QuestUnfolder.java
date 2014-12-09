@@ -104,6 +104,12 @@ public class QuestUnfolder {
 		CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
 		
 		unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full, foreignKeyCQC);
+
+		int s0 = unfoldingProgram.size();
+		Collections.sort(unfoldingProgram, CQCUtilities.ComparatorCQIE);
+		CQCUtilities.removeContainedQueries(unfoldingProgram, foreignKeyCQC);		
+		if (s0 != unfoldingProgram.size())
+			System.err.println("CQC REMOVED: " + s0 + " - " + unfoldingProgram.size());
 		
 		final long endTime = System.currentTimeMillis();
 		log.debug("TMapping size: {}", unfoldingProgram.size());
