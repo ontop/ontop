@@ -153,7 +153,7 @@ public class TMappingProcessor {
 				
 	                // we do not add a new mapping if the conditions are exactly the same
 	                if (existingconditions.equals(newconditions)) 
-	                    return;
+	                    continue; // ROMAN: OK?
 	                			
 	                mappingIterator.remove();
 
