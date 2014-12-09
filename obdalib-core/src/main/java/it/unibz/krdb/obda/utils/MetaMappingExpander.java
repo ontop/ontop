@@ -75,10 +75,9 @@ public class MetaMappingExpander {
 	private final OBDADataFactory dfac;
 
 	/**
-	 * TODO
+	 *
 	 * 
-	 * @param connection
-	 * @param metadata
+	 * @param connection a JDBC connection
 	 */
 	public MetaMappingExpander(Connection connection) {
 		this.connection = connection;
@@ -184,21 +183,19 @@ public class MetaMappingExpander {
 				List<List<String>> paramsForClassTemplate = new ArrayList<List<String>>();
 				
 				
-				Statement st;
-				
-					st = connection.createStatement();
-					ResultSet rs = st.executeQuery(distinctParamsSQL);
-					while(rs.next()){
-						ArrayList<String> params = new ArrayList<String>(varsInTemplate.size());
-						for(int i = 1 ; i <= varsInTemplate.size(); i++){
-							 params.add(rs.getString(i));
+				try(Statement st = connection.createStatement()) {
+					try(ResultSet rs = st.executeQuery(distinctParamsSQL)) {
+						while (rs.next()) {
+							ArrayList<String> params = new ArrayList<>(varsInTemplate.size());
+							for (int i = 1; i <= varsInTemplate.size(); i++) {
+								params.add(rs.getString(i));
+							}
+							paramsForClassTemplate.add(params);
 						}
-						paramsForClassTemplate.add(params);
-						
 					}
-				
-				
-				List<SelectExpressionItem>  columnsForValues = new ArrayList<SelectExpressionItem>(columnList);
+				}
+
+				List<SelectExpressionItem>  columnsForValues = new ArrayList<>(columnList);
 				columnsForValues.removeAll(columnsForTemplate);
 				
 				String id = mapping.getId();
@@ -466,8 +463,9 @@ public class MetaMappingExpander {
 	/**
 	 * this method expands the input mappings, which may include meta mappings, to the concrete mappings
 	 * 
-	 * @param mappings
-	 * 		a list of mappings, which may include meta mappings
+	 * @param obdaModel
+	 * 		the container for the list of mappings, which may include meta mappings
+	 * @param sourceURI
 	 * @return
 	 * 		expanded normal mappings
 	 * @throws Exception 
