@@ -109,17 +109,6 @@ public class OBDAVocabulary {
 	//TODO: Remove this if it is not used!!
 	public static final String XSD_INT_URI = "http://www.w3.org/2001/XMLSchema#int";
 
-	public static final String OWL_REAL_URI = "http://www.w3.org/2002/07/owl#real";
-
-	public static final String XSD_POSITIVE_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#positiveInteger";
-
-	public static final String XSD_NEGATIVE_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#negativeInteger";
-
-	public static final String XSD_NON_POSITIVE_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#nonPositiveInteger";
-
-	public static final String XSD_UNSIGNED_INT_URI = "http://www.w3.org/2001/XMLSchema#unsignedInt";
-
-	public static final String XSD_NON_NEGATIVE_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#nonNegativeInteger";
 
 	public static final String XSD_INTEGER_URI = "http://www.w3.org/2001/XMLSchema#integer";
 
@@ -127,19 +116,12 @@ public class OBDAVocabulary {
 
 	public static final String XSD_DECIMAL_URI = "http://www.w3.org/2001/XMLSchema#decimal";
 
-	public static final String XSD_FLOAT_URI = "http://www.w3.org/2001/XMLSchema#float";
-
 	public static final String XSD_DOUBLE_URI = "http://www.w3.org/2001/XMLSchema#double";
 
 	public static final String XSD_DATETIME_URI = "http://www.w3.org/2001/XMLSchema#dateTime";
 
 	public static final String XSD_BOOLEAN_URI = "http://www.w3.org/2001/XMLSchema#boolean";
 
-	public static final String XSD_DATE_URI = "http://www.w3.org/2001/XMLSchema#date";
-
-	public static final String XSD_TIME_URI = "http://www.w3.org/2001/XMLSchema#time";
-
-	public static final String XSD_YEAR_URI = "http://www.w3.org/2001/XMLSchema#gYear";
 	public static final String SPARQL_COUNT_URI = "Count";
 
 	public static final String SPARQL_AVG_URI = "Avg";
