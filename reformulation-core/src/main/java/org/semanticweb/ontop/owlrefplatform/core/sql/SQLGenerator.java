@@ -1632,6 +1632,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (type != null) {
 			typeString = String.format("%d", type.getQuestCode());
 		}
+		else if (typeString == null) {
+			throw new RuntimeException("Cannot generate SELECT for term: "
+						+ projectedTerm.toString());
+		}
 
 		return String.format(typeStrForSELECT, typeString, varName);
 
@@ -2066,7 +2070,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 						return String.valueOf(id);
 				}
 			}
-			return sqladapter.getSQLLexicalFormString(ct.getValue());
+			return getSQLLexicalForm(ct);
 		} else if (term instanceof URIConstant) {
 			if (isSI) {
 				String uri = term.toString();
