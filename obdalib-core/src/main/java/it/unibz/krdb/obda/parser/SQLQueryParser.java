@@ -28,16 +28,14 @@ import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.AllColumns;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -216,61 +214,143 @@ public class SQLQueryParser {
 	
 	
 	private ViewDefinition createViewDefinition(String viewName, String query) {
-		int start = 6; // the keyword 'select'
-		int end = query.toLowerCase().indexOf("from");	
-		
-		boolean uppercase=false;
-		boolean quoted;
-		if (end == -1) {
-			throw new RuntimeException("Error parsing SQL query: Couldn't find FROM clause");
-		}
-			
-		if (database.contains("Oracle") || database.contains("DB2") || database.contains("H2") || database.contains("HSQL")) {
-			// If the database engine is Oracle, H2 or DB2 unquoted columns are changed in uppercase
-			uppercase=true;
-		}
-		
-		String projection = query.substring(start, end).trim();
-		
-		//split where comma is present but not inside parenthesis
-		String[] columns = projection.split(",+(?![^\\(]*\\))");  
-		
-		ViewDefinition viewDefinition = new ViewDefinition();
-		viewDefinition.setName(viewName);
-		viewDefinition.copy(query);		
-		for (int i = 0; i < columns.length; i++) {
-			quoted = false;
-			String columnName = columns[i].trim();
-			
-			
-			/*
-			 * Take the alias name if the column name has it.
-			 */
-			String[] aliasSplitters = new String[2];
-			aliasSplitters[0] = " as ";
-			aliasSplitters[1] = " AS ";
-			
-			for(String aliasSplitter : aliasSplitters){
-				if (columnName.contains(aliasSplitter)) { // has an alias
-					columnName = columnName.split(aliasSplitter)[1].trim();
-					break;
-				}
-			}
-			////split where space is present but not inside single quotes
-			if(columnName.contains(" "))
-				columnName = columnName.split("\\s+(?![^'\"]*')")[1].trim();;
+
+
+        ViewDefinition viewDefinition = new ViewDefinition();
+        viewDefinition.setName(viewName);
+        viewDefinition.copy(query);
+
+        ParsedSQLQuery queryParser = null;
+        boolean supported =true;
+        boolean quoted;
+        boolean uppercase = false;
+
+        if (database.contains("Oracle") || database.contains("DB2") || database.contains("H2") || database.contains("HSQL")) {
+            // If the database engine is Oracle, H2 or DB2 unquoted columns are changed in uppercase
+            uppercase = true;
+        }
+
+        try {
+
+            queryParser = new ParsedSQLQuery(query,false);
+
+        } catch (JSQLParserException e)
+        {
+            supported=false;
+        }
+
+        if(supported){
+
+            int i=1; // the attribute index always start at 1
+
+            try {
+                List<SelectExpressionItem> columns = queryParser.getProjection().getColumnList();
+            for (SelectExpressionItem columnExpression : columns){
+                quoted = false;
+                String columnName;
+
+
+                if(columnExpression.getAlias()!=null){
+                  columnName =  columnExpression.getAlias().getName();
+
+                }
+                else{
+                    columnName = columnExpression.getExpression().toString();
+                }
 			/*
 			 * Remove any identifier quotes
 			 * Example:
 			 * 		INPUT: "table"."column"
 			 * 		OUTPUT: table.column
 			 */
-			Pattern pattern = Pattern.compile("[\"`\\[].*[\"`\\]]");
-			Matcher matcher = pattern.matcher(columnName);
-			if (matcher.find()) {
-				columnName = columnName.replaceAll("[\\[\\]\"`]", "");
-				quoted=true;
-			}
+                Pattern pattern = Pattern.compile("[\"`\\[].*[\"`\\]]");
+                Matcher matcher = pattern.matcher(columnName);
+                if (matcher.find()) {
+                    columnName = columnName.replaceAll("[\\[\\]\"`]", "");
+                    quoted = true;
+                }
+
+
+			/*
+			 * Get only the short name if the column name uses qualified name.
+			 * Example:
+			 * 		INPUT: table.column
+			 * 		OUTPUT: column
+			 */
+                if (columnName.contains(".")) {
+                    columnName = columnName.substring(columnName.lastIndexOf(".") + 1, columnName.length()); // get only the name
+                }
+
+
+                if (!quoted) {
+                    if (uppercase)
+                        columnName = columnName.toUpperCase();
+                    else
+                        columnName = columnName.toLowerCase();
+                }
+                viewDefinition.setAttribute(i, new Attribute(columnName));
+
+                i++;
+            }
+
+            } catch (JSQLParserException e)
+            {
+
+            }
+        }
+
+        else {
+
+            int start = 6; // the keyword 'select'
+            int end = query.toLowerCase().indexOf("from");
+
+
+            if (end == -1) {
+                throw new RuntimeException("Error parsing SQL query: Couldn't find FROM clause");
+            }
+
+
+            String projection = query.substring(start, end).trim();
+
+            //split where comma is present but not inside parenthesis
+		    String[] columns = projection.split(",+(?!.*\\))");
+//            String[] columns = projection.split(",+(?![^\\(]*\\))");
+
+
+            for (int i = 0; i < columns.length; i++) {
+                quoted = false;
+                String columnName = columns[i].trim();
+			
+			
+			/*
+			 * Take the alias name if the column name has it.
+			 */
+                String[] aliasSplitters = new String[2];
+                aliasSplitters[0] = " as ";
+                aliasSplitters[1] = " AS ";
+
+                for (String aliasSplitter : aliasSplitters) {
+                    if (columnName.contains(aliasSplitter)) { // has an alias
+                        columnName = columnName.split(aliasSplitter)[1].trim();
+                        break;
+                    }
+                }
+                ////split where space is present but not inside single quotes
+                if (columnName.contains(" "))
+                    columnName = columnName.split("\\s+(?![^'\"]*')")[1].trim();
+                ;
+			/*
+			 * Remove any identifier quotes
+			 * Example:
+			 * 		INPUT: "table"."column"
+			 * 		OUTPUT: table.column
+			 */
+                Pattern pattern = Pattern.compile("[\"`\\[].*[\"`\\]]");
+                Matcher matcher = pattern.matcher(columnName);
+                if (matcher.find()) {
+                    columnName = columnName.replaceAll("[\\[\\]\"`]", "");
+                    quoted = true;
+                }
 			
 
 			/*
@@ -279,22 +359,24 @@ public class SQLQueryParser {
 			 * 		INPUT: table.column
 			 * 		OUTPUT: column
 			 */
-			if (columnName.contains(".")) {
-				columnName = columnName.substring(columnName.lastIndexOf(".")+1, columnName.length()); // get only the name
-			}
-			
+                if (columnName.contains(".")) {
+                    columnName = columnName.substring(columnName.lastIndexOf(".") + 1, columnName.length()); // get only the name
+                }
 
-			if(!quoted){
-				if(uppercase)
-					columnName=columnName.toUpperCase();
-				else
-					columnName=columnName.toLowerCase();
-			}
-		
-			
-			viewDefinition.setAttribute(i+1, new Attribute(columnName)); // the attribute index always start at 1
-		}
-		return viewDefinition;
+
+                if (!quoted) {
+                    if (uppercase)
+                        columnName = columnName.toUpperCase();
+                    else
+                        columnName = columnName.toLowerCase();
+                }
+
+
+                viewDefinition.setAttribute(i + 1, new Attribute(columnName)); // the attribute index always start at 1
+            }
+        }
+            return viewDefinition;
+
 	}
 
 }

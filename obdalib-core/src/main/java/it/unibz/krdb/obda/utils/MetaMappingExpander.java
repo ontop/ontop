@@ -79,7 +79,7 @@ public class MetaMappingExpander {
 	 * TODO
 	 * 
 	 * @param connection
-	 * @param metadata
+
 	 */
 	public MetaMappingExpander(Connection connection) {
 		this.connection = connection;
@@ -466,9 +466,7 @@ public class MetaMappingExpander {
 
 	/**
 	 * this method expands the input mappings, which may include meta mappings, to the concrete mappings
-	 * 
-	 * @param mappings
-	 * 		a list of mappings, which may include meta mappings
+	 *
 	 * @return
 	 * 		expanded normal mappings
 	 * @throws Exception 

@@ -127,7 +127,7 @@ public class ParsedSQLQuery implements Serializable {
 	public ParsedSQLQuery(Statement statement, boolean deepParsing)
 			throws JSQLParserException {
 
-		pQuotes = Pattern.compile("[\"`\\[].*[\"`\\]]");
+//		pQuotes = Pattern.compile("[\"`\\[].*[\"`\\]]");
 
 		query = statement.toString();
 
@@ -257,7 +257,7 @@ public class ParsedSQLQuery implements Serializable {
 	}
 
 	/**
-	 * Get the list of columns
+	 * Get the list of columns alias
 	 * 
 	 * @return
 	 */
