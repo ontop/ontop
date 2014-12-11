@@ -545,10 +545,12 @@ public class QuestStatement implements OBDAStatement {
 		if (canPush) {
 			List<CQIE> newTypedRules = TypeLift.liftTypes(datalogProgram.getRules(), multiTypedFunctionSymbolMap);
 
+			OBDAQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
 			//TODO: can we avoid using this intermediate variable???
 			//datalogProgram.removeAllRules();
 			datalogProgram = ofac.getDatalogProgram();
 			datalogProgram.appendRule(newTypedRules);
+			datalogProgram.setQueryModifiers(queryModifiers);
 			log.debug("Types Pushed: \n{}",datalogProgram);
 		}
 
