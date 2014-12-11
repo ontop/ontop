@@ -1632,6 +1632,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (type != null) {
 			typeString = String.format("%d", type.getQuestCode());
 		}
+		else if (typeString == null) {
+			throw new RuntimeException("Cannot generate SELECT for term: "
+						+ projectedTerm.toString());
+		}
 
 		return String.format(typeStrForSELECT, typeString, varName);
 
