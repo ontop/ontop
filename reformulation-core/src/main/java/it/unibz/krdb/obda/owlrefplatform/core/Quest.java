@@ -38,7 +38,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
-import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
@@ -406,9 +405,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		}
 
 		log.debug("Quest configuration:");
-		log.debug("Reformulation technique: {}", reformulationTechnique);
-		log.debug("Optimize equivalences: {}", bOptimizeEquivalences);
-		log.debug("Optimize TBox: {}", bOptimizeTBoxSigma);
+
+		log.debug("Extensional query rewriting enabled: {}", reformulate);
+		//log.debug("Reformulation technique: {}", reformulationTechnique);
+		if(reformulate){
+			log.debug("Extensional query rewriting technique: {}", reformulationTechnique);
+		}
+		log.debug("Optimize TBox using class/property equivalences: {}", bOptimizeEquivalences);
+		log.debug("Optimize TBox using dependencies in ABox: {}", bOptimizeTBoxSigma);
 		log.debug("ABox mode: {}", aboxMode);
 		if (!aboxMode.equals("virtual")) {
 			log.debug("Use in-memory database: {}", inmemory);
@@ -700,11 +704,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					.getSQLDialectAdapter(datasource
 							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 
-			JDBCUtility jdbcutil = new JDBCUtility(
-					datasource
-							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
-			datasourceQueryGenerator = new SQLGenerator(metadata, jdbcutil,
-					sqladapter, sqlGenerateReplace);
+			datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace);
 
 
 
@@ -755,8 +755,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfolder.applyTMappings(reformulationReasoner, true);
 				
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
-                unfolder.addABoxAssertionsAsFacts(inputOntology.getClassAssertions());
-                unfolder.addABoxAssertionsAsFacts(inputOntology.getPropertyAssertions());
+                unfolder.addClassAssertionsAsFacts(inputOntology.getClassAssertions());
+                unfolder.addObjectPropertyAssertionsAsFacts(inputOntology.getObjectPropertyAssertions());
+                unfolder.addDataPropertyAssertionsAsFacts(inputOntology.getDataPropertyAssertions());
 
 				// Adding data typing on the mapping axioms.
 				unfolder.extendTypesWithMetadata(reformulationReasoner);

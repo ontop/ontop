@@ -34,7 +34,6 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
@@ -73,13 +72,13 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestMaterializer {
 
-	private OBDAModel model;
-	private Quest questInstance;
+	private final OBDAModel model;
+	private final Quest questInstance;
 	private Ontology ontology;
 	
-	private Set<Predicate> vocabulary;
+	private final Set<Predicate> vocabulary;
 
-	protected long counter = 0;
+	private long counter = 0;
 	private VirtualTripleIterator iterator;
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -124,12 +123,12 @@ public class QuestMaterializer {
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);
 		}
-		for (PropertyExpression prop : model.getDeclaredObjectProperties()) {
+		for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) {
 			Predicate p = prop.getPredicate();
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);
 		}
-		for (PropertyExpression prop : model.getDeclaredDataProperties()) {
+		for (DataPropertyExpression prop : model.getDeclaredDataProperties()) {
 			Predicate p = prop.getPredicate();
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);
@@ -154,8 +153,8 @@ public class QuestMaterializer {
 						&& !vocabulary.contains(p))
 					vocabulary.add(p);
 			}
-		} else
-		{
+		} 
+		else {
 			//from mapping undeclared predicates (can happen)
 			for (URI uri : this.model.getMappings().keySet()){
 				for (OBDAMappingAxiom axiom : this.model.getMappings(uri))
@@ -180,13 +179,13 @@ public class QuestMaterializer {
 			// TODO: use Vocabulary for OBDAModel as well
 			
 			for (OClass pred : model.getDeclaredClasses()) 
-				ontology.getVocabulary().declareClass(pred.getPredicate().getName());				
+				ontology.getVocabulary().createClass(pred.getPredicate().getName());				
 			
 			for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) 
-				ontology.getVocabulary().declareObjectProperty(prop.getPredicate().getName());
+				ontology.getVocabulary().createObjectProperty(prop.getPredicate().getName());
 
 			for (DataPropertyExpression prop : model.getDeclaredDataProperties()) 
-				ontology.getVocabulary().declareDataProperty(prop.getPredicate().getName());
+				ontology.getVocabulary().createDataProperty(prop.getPredicate().getName());
 		}
 		
 		

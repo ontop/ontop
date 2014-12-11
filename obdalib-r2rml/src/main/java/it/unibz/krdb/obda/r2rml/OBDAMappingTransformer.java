@@ -20,49 +20,27 @@ package it.unibz.krdb.obda.r2rml;
  * #L%
  */
 
+import eu.optique.api.mapping.*;
+import eu.optique.api.mapping.TermMap.TermMapType;
 import it.unibz.krdb.obda.io.PrefixManager;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAQueryModifiers;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.URITemplatePredicate;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.SQLQueryImpl;
 import it.unibz.krdb.obda.utils.IDGenerator;
 import it.unibz.krdb.obda.utils.URITemplates;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import javax.xml.datatype.DatatypeFactory;
-
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.*;
 
-import eu.optique.api.mapping.LogicalTable;
-import eu.optique.api.mapping.MappingFactory;
-import eu.optique.api.mapping.ObjectMap;
-import eu.optique.api.mapping.PredicateMap;
-import eu.optique.api.mapping.PredicateObjectMap;
-import eu.optique.api.mapping.R2RMLMappingManager;
-import eu.optique.api.mapping.R2RMLMappingManagerFactory;
-import eu.optique.api.mapping.SubjectMap;
-import eu.optique.api.mapping.Template;
-import eu.optique.api.mapping.TermMap.TermMapType;
-import eu.optique.api.mapping.TriplesMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 /**
  * Transform OBDA mappings in R2rml mappings
  * @author Sarah, Mindas, Timi, Guohui, Martin
@@ -160,26 +138,24 @@ public class OBDAMappingTransformer {
 			String predName = pred.getName();
 			URI predUri = null; String predURIString ="";
 			
-			if (pred.equals(OBDAVocabulary.QUEST_TRIPLE_PRED))
-			{
+			if (pred.isTriplePredicate()) {
 				//triple
 				Function predf = (Function)func.getTerm(1);
-				if (predf.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI))
-				{
+				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
 					if (predf.getTerms().size() == 1) //fixed string
 					{
 						pred = OBDADataFactoryImpl.getInstance().getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
 						predUri = vf.createURI(pred.getName());
 					}
-					else
-					{
+				    else {
 						//custom predicate
 						predURIString = URITemplates.getUriTemplateString(predf, prefixmng);
 						predUri = vf.createURI(predURIString);
 					}
 				}
 				
-			} else {
+			} 
+			else {
 				predUri = vf.createURI(predName);
 			}
 			predURIString = predUri.stringValue();
@@ -202,7 +178,7 @@ public class OBDAMappingTransformer {
 				Statement triple_main_predicate = vf.createStatement(mainNode, R2RMLVocabulary.predicateObjectMap, predObjNode);
 				statements.add(triple_main_predicate);
 				
-				if (!predName.equals(OBDAVocabulary.QUEST_TRIPLE_STR)) {
+				if (!pred.isTriplePredicate()) {
 					//add predicate declaration to predObj node
 					Statement triple_predicateObject_predicate_uri = vf.createStatement(predObjNode, R2RMLVocabulary.predicate, predUri);
 					statements.add(triple_predicateObject_predicate_uri);
@@ -309,26 +285,22 @@ public class OBDAMappingTransformer {
 			String predName = pred.getName();
 			URI predUri = null; String predURIString ="";
 			
-			if (pred.equals(OBDAVocabulary.QUEST_TRIPLE_PRED))
-			{
+			if (pred.isTriplePredicate()) {
 				//triple
 				Function predf = (Function)func.getTerm(1);
-				if (predf.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI))
-				{
-					if (predf.getTerms().size() == 1) //fixed string
-					{
+				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
+					if (predf.getTerms().size() == 1) { //fixed string 
 						pred = OBDADataFactoryImpl.getInstance().getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
 						predUri = vf.createURI(pred.getName());
 					}
-					else
-					{
+					else {
 						//custom predicate
 						predURIString = URITemplates.getUriTemplateString(predf, prefixmng);
 						predUri = vf.createURI(predURIString);
 					}
-				}
-				
-			} else {
+				}	
+			} 
+			else {
 				predUri = vf.createURI(predName);
 			}
 			predURIString = predUri.stringValue();
@@ -344,23 +316,23 @@ public class OBDAMappingTransformer {
 				sm.addClass(predUri);
 				
 			} else {
-				
-				PredicateMap predM = mfact.createPredicateMap(TermMapType.CONSTANT_VALUED, "predicateObjectMap"+ random_number);
+//                PredicateMap predM = null;
+				PredicateMap predM = mfact.createPredicateMap(TermMapType.CONSTANT_VALUED, predURIString);
 				ObjectMap obm = null; PredicateObjectMap pom = null;
-				if (!predName.equals(OBDAVocabulary.QUEST_TRIPLE_STR)) {
-					predM.setConstant(predURIString);
+                Term object = null;
+				if (!pred.isTriplePredicate()) {
+//					predM.setConstant(predURIString);
+                    //add object declaration to predObj node
+                    //term 0 is always the subject, we are interested in term 1
+                     object = func.getTerm(1);
 				}
 				else {
-					//add predicate template declaration
-					Template templo = mfact.createTemplate(predURIString);
-					obm = mfact.createObjectMap(templo);
-					pom = mfact.createPredicateObjectMap(predM, obm);
-					tm.addPredicateObjectMap(pom);
+
+                    //add object declaration to predObj node
+                    //term 0 is always the subject,  term 1 is the predicate, we check term 2 to have the object
+                    object = func.getTerm(2);
 				}
 
-				//add object declaration to predObj node
-				//term 0 is always the subject, we are interested in term 1
-				Term object = func.getTerm(1);
 								
  				if (object instanceof Variable){ //we create an rr:column
 					if(ontology!= null && objectProperties.contains(objectProperty)){
@@ -409,7 +381,7 @@ public class OBDAMappingTransformer {
 							
 							
 							//check if it is not a plain literal
-							if(!objectPred.equals(OBDAVocabulary.RDFS_LITERAL)){
+							if(!objectPred.getName().equals(OBDAVocabulary.RDFS_LITERAL_URI)){
 								
 								//set the datatype for the typed literal								
 								obm.setDatatype(vf.createURI(objectPred.getName()));
@@ -419,7 +391,11 @@ public class OBDAMappingTransformer {
 								if(objectPred.getArity()==2){
 									
 									Term langTerm = ((Function) object).getTerm(1);
-									obm.setLanguageTag(langTerm.toString());
+
+
+                                    if(langTerm instanceof Constant) {
+                                        obm.setLanguageTag(((Constant) langTerm).getValue());
+                                    }
 								}
 							}
 							

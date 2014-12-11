@@ -28,11 +28,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.QueryAnonymizer;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Unifier;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,7 +60,7 @@ public class DatalogQueryServices {
 			else
 				termscopy.add(t.clone());
 		}
-		return fac.getFunction(a.getPredicate(), termscopy);
+		return fac.getFunction(a.getFunctionSymbol(), termscopy);
 		
 	}
 	
@@ -92,7 +88,7 @@ public class DatalogQueryServices {
 			while (bodyIterator.hasNext()) {
 				Function currentAtom = bodyIterator.next(); // body.get(i);	
 
-				List<CQIE> definitions = defs.getRules(currentAtom.getPredicate());
+				List<CQIE> definitions = defs.getRules(currentAtom.getFunctionSymbol());
 				if ((definitions != null) && (definitions.size() != 0)) {
 					if ((chosenDefinitions == null) || (chosenDefinitions.size() < definitions.size())) {
 						chosenDefinitions = definitions;
@@ -113,8 +109,8 @@ public class DatalogQueryServices {
 				
 				for (CQIE rule : chosenDefinitions) {				
 					//CQIE newquery = ResolutionEngine.resolve(rule, query, chosenAtomIdx);					
-					Unifier mgu = Unifier.getMGU(getFreshAtom(rule.getHead(), suffix), 
-																	query.getBody().get(chosenAtomIdx));
+					Substitution mgu = UnifierUtilities.getMGU(getFreshAtom(rule.getHead(), suffix),
+                            query.getBody().get(chosenAtomIdx));
 					if (mgu != null) {
 						CQIE newquery = query.clone();
 						List<Function> newbody = newquery.getBody();
@@ -123,7 +119,7 @@ public class DatalogQueryServices {
 							newbody.add(getFreshAtom(a, suffix));
 												
 						// newquery contains only cloned atoms, so it is safe to unify "in-place"
-						UnifierUtilities.applyUnifier(newquery, mgu, false);
+						SubstitutionUtilities.applySubstitution(newquery, mgu, false);
 						
 						// REDUCE
 						EQNormalizer.enforceEqualities(newquery);

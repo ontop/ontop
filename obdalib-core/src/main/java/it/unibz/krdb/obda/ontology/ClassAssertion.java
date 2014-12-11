@@ -23,7 +23,9 @@ package it.unibz.krdb.obda.ontology;
 import it.unibz.krdb.obda.model.ObjectConstant;
 
 /***
- * Represents ClassAssertion in the OWL 2 specification
+ * Represents ClassAssertion in the OWL 2 QL specification
+ * 
+ * ClassAssertion := 'ClassAssertion' '(' axiomAnnotations Class Individual ')'
  * 
  * 
  * A data assertion for a class, 

@@ -21,15 +21,12 @@ package it.unibz.krdb.obda.reformulation.tests;
  */
 
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -39,25 +36,24 @@ import junit.framework.TestCase;
 
 public class SigmaTest extends TestCase {
 
-    private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
     private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
     public void test_exists_simple() {
         Ontology ontology = descFactory.createOntology();
 
-        OClass ac = descFactory.createClass("a");
-        OClass cc = descFactory.createClass("c");
-        PropertyExpression rprop = descFactory.createObjectProperty("r");
-        SomeValuesFrom er = descFactory.createPropertySomeRestriction(rprop);
+        OClass ac = ontology.getVocabulary().createClass("a");
+        OClass cc = ontology.getVocabulary().createClass("c");
+        ObjectPropertyExpression rprop = ontology.getVocabulary().createObjectProperty("r");
+        ObjectSomeValuesFrom er = rprop.getDomain();
  
-        ontology.addSubClassOfAxiomWithReferencedEntities(er, ac);
-        ontology.addSubClassOfAxiomWithReferencedEntities(cc, er);
+        ontology.addSubClassOfAxiom(er, ac);
+        ontology.addSubClassOfAxiom(cc, er);
 
        
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 		TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(TBoxReasonerToOntology.getOntology(reasoner, true));						
 
-		EquivalencesDAG<BasicClassDescription> classes = sigmaReasoner.getClasses();
+		EquivalencesDAG<ClassExpression> classes = sigmaReasoner.getClassDAG();
 
         assertTrue(classes.getSub(classes.getVertex(ac)).contains(classes.getVertex(er)));
 

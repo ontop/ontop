@@ -21,12 +21,9 @@ package it.unibz.krdb.obda.reformulation.tests;
  */
 
 
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.ontology.OntologyVocabulary;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
@@ -41,7 +38,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 
 public class EquivalenceSimplificationTest extends TestCase {
 
-	final String	path	= "src/test/resources/test/equivalence/";
+	private final String testURI = "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#";
+	private final String path = "src/test/resources/test/equivalence/";
 
 	public void test_equivalence_namedclasses() throws Exception {
 
@@ -55,8 +53,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		File file = new File(path + "test_401.owl");
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3Translator translator = new OWLAPI3Translator();
-		Ontology ontology = translator.translate(owlonto);
+		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
@@ -65,30 +62,38 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(3, simpleonto.getVocabulary().getClasses().size());
 		assertEquals(0, simpleonto.getVocabulary().getObjectProperties().size());
 		System.out.println(simpleonto.getSubClassAxioms());
-		System.out.println(simpleonto.getSubPropertyAxioms());
-		assertEquals(3, simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
+		System.out.println(simpleonto.getSubObjectPropertyAxioms());
+		System.out.println(simpleonto.getSubDataPropertyAxioms());
+		assertEquals(3, simpleonto.getSubClassAxioms().size() 
+					+ simpleonto.getSubObjectPropertyAxioms().size() 
+					+ simpleonto.getSubDataPropertyAxioms().size());
 //		assertEquals(3, simpleonto.getVocabulary().size());
 
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-		OBDADataFactory odfac = OBDADataFactoryImpl.getInstance();
+		OntologyVocabulary voc = ontology.getVocabulary();
 
 		//assertEquals(6, eqMap.keySetSize());
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1")) != null);
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1")) != null);
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1")) != null);
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A2")) != null);
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")) != null);
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2")) != null);
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3")) != null); // Roman: instead of B1
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2")) != null);
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")) != null);
+		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "A1")) != null);
+		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "B1")) != null);
+		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "C1")) != null);
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "A2")) != null); // no A2 in the ontology
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "A3")) != null);
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "B2")) != null);
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "B3")) != null); // Roman: instead of B1
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "C2")) != null);
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "C3")) != null);
 		
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1"),simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A2")));
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1"),simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")));
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1"),simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2"))); // Roman: B3 -> B1
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1"),simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3"))); // Roman: B3 <-> B1
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1"),simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2")));
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1"),simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")));
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "A1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "A2")));
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "A1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "A3")));
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "B1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "B2"))); // Roman: B3 -> B1
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "B1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "B3"))); // Roman: B3 <-> B1
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "C1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "C2")));
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "C1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "C3")));
 
 	}
 	
@@ -105,8 +110,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		File file = new File(path + "test_402.owl");
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3Translator translator = new OWLAPI3Translator();
-		Ontology ontology = translator.translate(owlonto);
+		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
 		
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
@@ -114,29 +118,36 @@ public class EquivalenceSimplificationTest extends TestCase {
 
 		assertEquals(0, simpleonto.getVocabulary().getClasses().size());
 		assertEquals(3, simpleonto.getVocabulary().getObjectProperties().size());
-		assertEquals(12,  simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
+		assertEquals(12,  simpleonto.getSubClassAxioms().size() 
+							+ simpleonto.getSubObjectPropertyAxioms().size() 
+							+ simpleonto.getSubDataPropertyAxioms().size());
 //		assertEquals(3, simpleonto.getVocabulary().size());
 
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-		OBDADataFactory odfac = OBDADataFactoryImpl.getInstance();
+		OntologyVocabulary voc = ontology.getVocabulary();
 		
 		//assertEquals(6, eqMap.keySetSize());
-		assertFalse(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1")) != null);
-		assertFalse(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1")) != null);
-		assertFalse(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1")) != null);
-		assertTrue(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A2")) != null);
-		assertTrue(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")) != null);
-		assertTrue(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2")) != null);
-		assertTrue(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3")) != null); // ROMAN: B1 and B3 ARE SYMMETRIC
-		assertTrue(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2")) != null);
-		assertTrue(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")) != null);
+		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A1")) != null);
+		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B1")) != null);
+		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C1")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A2")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A3")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B2")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B3")) != null); // ROMAN: B1 and B3 ARE SYMMETRIC
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C2")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C3")) != null);
 		
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1"),simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A2")));
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1"),simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")));
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1"),simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2"))); // ROMAN: B3 -> B1
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1"),simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3"))); // ROMAN: B3 <-> B1
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1"),simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2")));
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1"),simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")));
+		assertEquals(voc.getObjectProperty(testURI + "A1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A2")));
+		assertEquals(voc.getObjectProperty(testURI + "A1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A3")));
+		assertEquals(voc.getObjectProperty(testURI + "B1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B2"))); // ROMAN: B3 -> B1
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "B1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B3"))); // ROMAN: B3 <-> B1
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "C1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C2")));
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "C1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C3")));
 	}
 	
 	
@@ -152,8 +163,7 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		File file = new File(path + "test_403.owl");
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3Translator translator = new OWLAPI3Translator();
-		Ontology ontology = translator.translate(owlonto);
+		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
@@ -162,26 +172,29 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(simpleonto.getVocabulary().getClasses().toString(), 3, simpleonto.getVocabulary().getClasses().size());
 		assertEquals(3, simpleonto.getVocabulary().getObjectProperties().size());
 		assertEquals(3, simpleonto.getVocabulary().getClasses().size());
-		assertEquals(9,  simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
+		assertEquals(9,  simpleonto.getSubClassAxioms().size() 
+							+ simpleonto.getSubObjectPropertyAxioms().size() 
+							+ simpleonto.getSubDataPropertyAxioms().size());
 //		assertEquals(6, simpleonto.getVocabulary().size());
 
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-		OBDADataFactory odfac = OBDADataFactoryImpl.getInstance();
+		OntologyVocabulary voc = ontology.getVocabulary();
 
 		//assertEquals(3, eqMap.keySetSize());
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1")) != null);
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1")) != null);
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1")) != null);
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A2")) != null);
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2")) != null);
-		assertFalse(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2")) != null);
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")) != null);
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3")) != null); // Roman: instead of B1
-		assertTrue(simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")) != null);
+		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "A1")) != null);
+		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "B1")) != null);
+		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "C1")) != null);
+//		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "B2")) != null); // Roman: no B2 in the ontology
+//		assertFalse(simple.getClassRepresentative(voc.getClass(testURI + "C2")) != null); // Roman: no C2 in the ontology
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "A3")) != null);
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "B3")) != null); // Roman: instead of B1
+		assertTrue(simple.getClassRepresentative(voc.getClass(testURI + "C3")) != null);
 		
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1"),simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")));
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1"),simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3"))); // Roman B1 <-> B3
-		assertEquals(ofac.createClass("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1"),simple.getClassRepresentative(odfac.getClassPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")));
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "A1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "A3")));
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "B1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "B3"))); // Roman B1 <-> B3
+		assertEquals(simpleonto.getVocabulary().getClass(testURI + "C1"),
+					simple.getClassRepresentative(voc.getClass(testURI + "C3")));
 		
 	}
 	
@@ -197,38 +210,44 @@ public class EquivalenceSimplificationTest extends TestCase {
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		File file = new File(path + "test_404.owl");
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(file);
-		OWLAPI3Translator translator = new OWLAPI3Translator();
-		Ontology ontology = translator.translate(owlonto);
+		Ontology ontology = OWLAPI3TranslatorUtility.translate(owlonto);
 
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 		TBoxReasoner simple = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(reasoner);
 		Ontology simpleonto = TBoxReasonerToOntology.getOntology(simple);
 
-		assertEquals(12,  simpleonto.getSubClassAxioms().size() + simpleonto.getSubPropertyAxioms().size());
+		assertEquals(12,  simpleonto.getSubClassAxioms().size() 
+								+ simpleonto.getSubObjectPropertyAxioms().size() 
+								+ simpleonto.getSubDataPropertyAxioms().size());
 		assertEquals(0, simpleonto.getVocabulary().getClasses().size());
 		assertEquals(3, simpleonto.getVocabulary().getObjectProperties().size());
 //		assertEquals(3, simpleonto.getVocabulary().size());
 
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-		OBDADataFactory odfac = OBDADataFactoryImpl.getInstance();
+		OntologyVocabulary voc = ontology.getVocabulary();
 
 		//assertEquals(6, eqMap.keySetSize());
-		assertFalse(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1")) != null);
-		assertFalse(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1")) != null);
-		assertFalse(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1")) != null);
-		assertTrue(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A2")) != null);
-		assertTrue(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")) != null);
-		assertTrue(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2")) != null);
-		assertTrue(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3")) != null); // ROMAN: again, B1 and B3 are symmetric
-		assertTrue(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2")) != null);
-		assertTrue(simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")) != null);
+		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A1")) != null);
+		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B1")) != null);
+		assertFalse(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C1")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A2")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A3")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B2")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B3")) != null); // ROMAN: again, B1 and B3 are symmetric
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C2")) != null);
+		assertTrue(simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C3")) != null);
 		
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1").getInverse(),simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A2")));
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A1"),simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#A3")));
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1").getInverse(),simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B2"))); // B3 -> B1
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B1"),simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#B3")));  //  B1 <-> B3
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1").getInverse(),simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C2")));
-		assertEquals(ofac.createObjectProperty("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C1"),simple.getPropertyRepresentative(odfac.getObjectPropertyPredicate("http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#C3")));
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "A1").getInverse(),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A2")));
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "A1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "A3")));
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "B1").getInverse(),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B2"))); // B3 -> B1
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "B1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "B3")));  //  B1 <-> B3
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "C1").getInverse(),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C2")));
+		assertEquals(simpleonto.getVocabulary().getObjectProperty(testURI + "C1"),
+				simple.getObjectPropertyRepresentative(voc.getObjectProperty(testURI + "C3")));
 	}
 
 }

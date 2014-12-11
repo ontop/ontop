@@ -26,6 +26,7 @@ package it.unibz.krdb.obda.r2rml;
  */
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.DataTypePredicate;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
@@ -33,23 +34,16 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.DataTypePredicateImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.r2rml.R2RMLVocabulary;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.openrdf.model.BNode;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
 
 import eu.optique.api.mapping.ObjectMap;
 import eu.optique.api.mapping.PredicateMap;
@@ -66,8 +60,8 @@ import eu.optique.api.mapping.impl.SubjectMapImpl;
 
 public class R2RMLParser {
 
-	private ValueFactory fact;
-	private OBDADataFactory fac;
+	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	List<Predicate> classPredicates; 
 	List<Resource> joinPredObjNodes; 
@@ -84,8 +78,6 @@ public class R2RMLParser {
 		mapManager = R2RMLMappingManagerFactory.getSesameMappingManager();
 		classPredicates = new ArrayList<Predicate>();
 		joinPredObjNodes = new ArrayList<Resource>();
-		fact = new ValueFactoryImpl();
-		fac = OBDADataFactoryImpl.getInstance();
 	}
 
 	/**
@@ -307,28 +299,23 @@ public class R2RMLParser {
 			// } catch (IllegalArgumentException e){
 			//
 			// }
-			Predicate pred;
-			if (obj.startsWith("http://")) {
-				pred = fac.getUriTemplatePredicate(1);
-			} else {
-
-				pred = OBDAVocabulary.RDFS_LITERAL;
-			}
 
 			// if the literal has a language property or a datatype property we
 			// create the function object later
-			if (lan != null || datatype != null) 
-			{
+			if (lan != null || datatype != null) {
 				objectAtom = fac.getConstantLiteral(obj);
 				
 			} 
-			else 
-			{
+			else {
 				Term newlit = fac.getConstantLiteral(obj);
-				objectAtom = fac.getFunction(pred, newlit);
-
+				
+				if (obj.startsWith("http://")) {
+					objectAtom = fac.getUriTemplate(newlit);
+				} 
+				else {
+					objectAtom = fac.getTypedTerm(newlit, COL_TYPE.LITERAL); // .RDFS_LITERAL;
+				}
 			}
-
 		}
 
 		//we check if the object map is a column (can be only literal)
@@ -375,9 +362,7 @@ public class R2RMLParser {
 		//we check if it is a literal with language tag
 		
 		if (lan != null) {
-			Term lang = fac.getConstantLiteral(lan.toLowerCase());
-			Predicate literal = OBDAVocabulary.RDFS_LITERAL_LANG;
-			Term langAtom = fac.getFunction(literal, objectAtom, lang);
+			Term langAtom = fac.getTypedTerm(objectAtom, lan);
 			objectAtom = langAtom;
 		}
 		
@@ -400,8 +385,7 @@ public class R2RMLParser {
 		else
 		{	//literal
 			Constant constt = fac.getConstantLiteral(objectString);
-			Predicate pred = fac.getDataTypePredicateLiteral();
-			return fac.getFunction(pred, constt);
+			return fac.getTypedTerm(constt, COL_TYPE.LITERAL);
 
 		}
 	}
@@ -522,34 +506,31 @@ public class R2RMLParser {
 
 
 		Term uriTemplate = null;
-		Predicate pred = null;
 		switch (type) {
 		//constant uri
 		case 0:
 			uriTemplate = fac.getConstantLiteral(string);
-			pred = fac.getUriTemplatePredicate(terms.size());
-			break;
+			terms.add(0, uriTemplate);  // the URI template is always on the first position in the term list
+			return fac.getUriTemplate(terms);
 			// URI or IRI
 		case 1:
 			uriTemplate = fac.getConstantLiteral(string);
-			pred = fac.getUriTemplatePredicate(terms.size());
-			break;
+			terms.add(0, uriTemplate);    // the URI template is always on the first position in the term list
+			return fac.getUriTemplate(terms);
 			// BNODE
 		case 2:
 			uriTemplate = fac.getConstantBNode(string);
-			pred = fac.getBNodeTemplatePredicate(terms.size());
-			break;
+			terms.add(0, uriTemplate);  			// the URI template is always on the first position in the term list
+			return fac.getBNodeTemplate(terms);
 			// simple LITERAL 
 		case 3:
 			uriTemplate = terms.remove(0);
-			pred = OBDAVocabulary.RDFS_LITERAL; 
-			break;
+			// pred = dtfac.getTypePredicate(); // OBDAVocabulary.RDFS_LITERAL; 
+			// the URI template is always on the first position in the term list
+			//terms.add(0, uriTemplate);
+			return fac.getTypedTerm(uriTemplate, COL_TYPE.LITERAL); 
 		}
-
-		// the URI template is always on the first position in the term list
-		terms.add(0, uriTemplate);
-		return fac.getFunction(pred, terms);
-
+		return null;
 	}
 
 	/**

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Joiner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,20 +19,20 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
+import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.PropertyAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.abox.ABoxToFactRuleConverter;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
@@ -96,7 +97,10 @@ public class QuestUnfolder {
 		
 		Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
-        log.debug("Final set of mappings: \n{}", unfoldingProgram);
+        log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
+//		for(CQIE rule : unfoldingProgram){
+//			log.debug("{}", rule);
+//		}
 
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
@@ -198,21 +202,57 @@ public class QuestUnfolder {
 	/***
 	 * Adding ontology assertions (ABox) as rules (facts, head with no body).
 	 */
-	public <T extends Assertion>  void addABoxAssertionsAsFacts(Iterable<T> assertions) {
+	public void addClassAssertionsAsFacts(Iterable<ClassAssertion> assertions) {
 		
 		int count = 0;
-		for (T a : assertions) {
-			CQIE fact;
-			if (a instanceof ClassAssertion)
-				fact = ABoxToFactRuleConverter.getRule((ClassAssertion)a);
-			else
-				fact = ABoxToFactRuleConverter.getRule((PropertyAssertion)a);
-			if (fact != null) {
-				unfoldingProgram.add(fact);
-				count++;
-			}
+		for (ClassAssertion ca : assertions) {
+			ObjectConstant c = ca.getIndividual();
+			Predicate p = ca.getConcept().getPredicate();
+			Function head = fac.getFunction(p, 
+							fac.getUriTemplate(fac.getConstantLiteral(c.getName())));
+			CQIE rule = fac.getCQIE(head, Collections.<Function> emptyList());
+				
+			unfoldingProgram.add(rule);
+			count++;
 		}
-		log.debug("Appended {} ABox assertions as fact rules", count);		
+		log.debug("Appended {} class assertions from ontology as fact rules", count);
+	}		
+	
+	public void addObjectPropertyAssertionsAsFacts(Iterable<ObjectPropertyAssertion> assertions) {
+		
+		int count = 0;
+		for (ObjectPropertyAssertion pa : assertions) {
+			ObjectConstant s = pa.getSubject();
+			ObjectConstant o = pa.getObject();
+			Predicate p = pa.getProperty().getPredicate();
+			Function head = fac.getFunction(p, 
+							fac.getUriTemplate(fac.getConstantLiteral(s.getName())), 
+							fac.getUriTemplate(fac.getConstantLiteral(o.getName())));
+			CQIE rule = fac.getCQIE(head, Collections.<Function> emptyList());
+				
+			unfoldingProgram.add(rule);
+			count++;
+		}
+		log.debug("Appended {} object property assertions as fact rules", count);
+	}		
+	
+	public void addDataPropertyAssertionsAsFacts(Iterable<DataPropertyAssertion> assertions) {
+		
+//		int count = 0;
+//		for (DataPropertyAssertion a : assertions) {
+			// WE IGNORE DATA PROPERTY ASSERTIONS UNTIL THE NEXT RELEASE
+//			DataPropertyAssertion ca = (DataPropertyAssertion) assertion;
+//			ObjectConstant s = ca.getObject();
+//			ValueConstant o = ca.getValue();
+//			String typeURI = getURIType(o.getType());
+//			Predicate p = ca.getPredicate();
+//			Predicate urifuction = factory.getUriTemplatePredicate(1);
+//			head = factory.getFunction(p, factory.getFunction(urifuction, s), factory.getFunction(factory.getPredicate(typeURI,1), o));
+//			rule = factory.getCQIE(head, new LinkedList<Function>());
+//		} 	
+				
+//		}
+//		log.debug("Appended {} ABox assertions as fact rules", count);		
 	}		
 		
 
@@ -237,7 +277,7 @@ public class QuestUnfolder {
 					continue;
 				}
 				Function fun = (Function) term;
-				if (!(fun.getFunctionSymbol().toString().equals(OBDAVocabulary.QUEST_URI))) {
+				if (!(fun.getFunctionSymbol() instanceof URITemplatePredicate)) {
 					continue;
 				}
 				/*
@@ -255,7 +295,7 @@ public class QuestUnfolder {
 					if (templateStrings.contains("(.+)")) {
 						continue;
 					}
-					Function templateFunction = fac.getFunction(fac.getUriTemplatePredicate(1), fac.getVariable("x"));
+					Function templateFunction = fac.getUriTemplate(fac.getVariable("x"));
 					Pattern matcher = Pattern.compile("(.+)");
 					uriTemplateMatcher.put(matcher, templateFunction);
 					templateStrings.add("(.+)");
@@ -308,12 +348,11 @@ public class QuestUnfolder {
 				 * uri(Class))
 				 */
 				terms.add(currenthead.getTerm(0));
-				Function rdfTypeConstant = fac.getFunction(fac.getUriTemplatePredicate(1),
-						fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
+				Function rdfTypeConstant = fac.getUriTemplate(fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 				terms.add(rdfTypeConstant);
 
 				String classname = currenthead.getFunctionSymbol().getName();
-				terms.add(fac.getFunction(fac.getUriTemplatePredicate(1), fac.getConstantLiteral(classname)));
+				terms.add(fac.getUriTemplate(fac.getConstantLiteral(classname)));
 				newhead = fac.getFunction(pred, terms);
 
 			} else if (currenthead.getArity() == 2) {
@@ -324,7 +363,7 @@ public class QuestUnfolder {
 				terms.add(currenthead.getTerm(0));
 
 				String propname = currenthead.getFunctionSymbol().getName();
-				Function propconstant = fac.getFunction(fac.getUriTemplatePredicate(1), fac.getConstantLiteral(propname));
+				Function propconstant = fac.getUriTemplate(fac.getConstantLiteral(propname));
 				terms.add(propconstant);
 				terms.add(currenthead.getTerm(1));
 				newhead = fac.getFunction(pred, terms);

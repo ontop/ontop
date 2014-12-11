@@ -37,7 +37,6 @@ import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
 import it.unibz.krdb.obda.querymanager.QueryController;
 
 import java.io.IOException;
@@ -376,15 +375,26 @@ public class OBDAModelImpl implements OBDAModel {
 	}
 
 	@Override
-	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid) {
+	public int updateMapping(URI datasource_uri, String mapping_id, String new_mappingid) throws DuplicateMappingException {
 		OBDAMappingAxiom mapping = getMapping(datasource_uri, mapping_id);
 
+		// adds a new mapping
 		if (!containsMapping(datasource_uri, new_mappingid)) {
 			mapping.setId(new_mappingid);
 			fireMappigUpdated(datasource_uri, mapping_id, mapping);
 			return 0;
+		} 
+		// updates an existing mapping
+		else {
+			// updates the mapping without changing the mapping id
+			if (new_mappingid.equals(mapping_id)) {
+				return -1;
+			} 
+			// changes the mapping id to an existing one  
+			else {
+				throw new DuplicateMappingException(new_mappingid);
+			}
 		}
-		return -1;
 	}
 
 	@Override

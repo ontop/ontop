@@ -240,7 +240,7 @@ public class R2RMLManager {
 		}
 		int arity = vars.size();
 		List<Term> dvars = new ArrayList<Term>(vars);
-		Function head = fac.getFunction(fac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), dvars);
+		Function head = fac.getFunction(fac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), dvars);
 		return head;
 	}
 	
@@ -301,24 +301,28 @@ public class R2RMLManager {
 							Predicate newpred = constPred.getFunctionSymbol();
 							Function newAtom = fac.getFunction(newpred, subjectAtom);
 							body.add(newAtom);
-						}else if (term0 instanceof ValueConstant) {							
+						}
+						else if (term0 instanceof ValueConstant) {							
 							ValueConstant vconst = (ValueConstant) term0;
 							String predName = vconst.getValue();
 							Predicate newpred = fac.getPredicate(predName, 1);
 							Function newAtom = fac.getFunction(newpred, subjectAtom);
 							body.add(newAtom);
-						} else {
+						} 
+						else {
 							throw new IllegalStateException();
 						}
-					}else{ // if object is a variable
+					}
+					else{ // if object is a variable
+						// TODO (ROMAN): double check -- the list terms appears to accumulate the PO pairs
 						Predicate newpred = OBDAVocabulary.QUEST_TRIPLE_PRED;
-						Predicate uriPred = fac.getUriTemplatePredicate(1);
-						Function rdftype = fac.getFunction(uriPred, fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
+						Function rdftype = fac.getUriTemplate(fac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 						terms.add(rdftype);
 						terms.add(objectAtom);
 						body.add(fac.getFunction(newpred, terms));
 					}
-				} else {
+				} 
+				else {
 					// create predicate(subject, object) and add it to the body
 					terms.add(objectAtom);
 					Function bodyAtom = fac.getFunction(bodyPred, terms);

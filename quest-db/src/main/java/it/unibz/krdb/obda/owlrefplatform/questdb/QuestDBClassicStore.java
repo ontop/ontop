@@ -24,14 +24,11 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.SubClassOfAxiom;
-import it.unibz.krdb.obda.ontology.SubPropertyOfAxiom;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -111,7 +108,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 	
 	private Ontology readOntology(String tboxFile) throws Exception {
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 		File f = new File(tboxFile);
 		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(f.getParentFile(), false);
 		man.addIRIMapper(iriMapper);
@@ -126,11 +123,13 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		return translator.mergeTranslateOntologies(closure);
 	}
 
+
 	public QuestDBClassicStore(String name, Dataset data, QuestPreferences config) throws Exception {
 		super(name);
 		Ontology tbox = getTBox(data);
 		setup(tbox, config);
 	}
+
 	
 	private void setup(Ontology onto, QuestPreferences config) throws Exception {
 		if (config == null) {
@@ -212,13 +211,15 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		Ontology result = ofac.createOntology();
 
 		for (URI graphURI : graphURIs) {
-			Ontology o = getOntology(((URI) graphURI), graphURI);
+			Ontology o = getOntology(graphURI, graphURI);
 			result.getVocabulary().merge(o.getVocabulary());
 			
-			for (SubPropertyOfAxiom ax : result.getSubPropertyAxioms())  // TODO (ROMAN): check whether it's result and not o
-				result.add(ax);
-			for (SubClassOfAxiom ax : result.getSubClassAxioms())  // TODO (ROMAN): check whether it's result and not o
-				result.add(ax);
+			// TODO: restore copying ontology axioms (it was copying from result into result, at least since July 2013)
+			
+			//for (SubPropertyOfAxiom ax : result.getSubPropertyAxioms()) 
+			//	result.add(ax);
+			//for (SubClassOfAxiom ax : result.getSubClassAxioms()) 
+			//	result.add(ax);	
 		}
 		return result;
 	}
@@ -268,15 +269,15 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			Value obj = st.getObject();
 			if (obj instanceof Literal) {
 				String dataProperty = pred.stringValue();
-				ontology.getVocabulary().declareDataProperty(dataProperty);
+				ontology.getVocabulary().createDataProperty(dataProperty);
 			} 
 			else if (pred.stringValue().equals(OBDAVocabulary.RDF_TYPE)) {
 				String className = obj.stringValue();
-				ontology.getVocabulary().declareClass(className);
+				ontology.getVocabulary().createClass(className);
 			} 
 			else {
 				String objectProperty = pred.stringValue();
-				ontology.getVocabulary().declareObjectProperty(objectProperty);
+				ontology.getVocabulary().createObjectProperty(objectProperty);
 			}
 
 		/*
@@ -289,7 +290,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		*/
 		}
 
-		public Axiom getTBoxAxiom(Statement st) {
+		public Object getTBoxAxiom(Statement st) {
 			return null;
 		}
 

@@ -22,10 +22,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.impl.PunningException;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.IOException;
@@ -36,7 +33,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;
-import java.util.Set;
 
 /***
  * A Data Repository Manager is an utility setup the data back end of the
@@ -63,28 +59,16 @@ public interface RDBMSDataRepositoryManager extends Serializable {
 
 	public static String TYPE_UNIVERSAL = "universaldbabox";
 
+	
 	public void setConfig(Properties confi);
 
-	// public void disconnect();
-	//
-	// public Connection getConnection();
-	//
-	// public void setDatabase(Connection conn);
 
 	public void setTBox(TBoxReasoner reasonerDag);
 
-	// public void setVocabulary(Set<Predicate> vocabulary) throws PunningException;
-
 	public String getType();
 
-	public void getTablesDDL(OutputStream out) throws IOException;
-
-	public void getIndexDDL(OutputStream out) throws IOException;
 
 	public void getSQLInserts(Iterator<Assertion> data, OutputStream out) throws IOException;
-
-	// public void getCSVInserts(Iterator<Assertion> data, OutputStream out)
-	// throws IOException;
 
 	public void createDBSchema(Connection conn, boolean dropExisting) throws SQLException;
 
@@ -143,7 +127,6 @@ public interface RDBMSDataRepositoryManager extends Serializable {
 	 */
 	public boolean isIndexed(Connection conn);
 
-	//public Ontology getABoxDependencies();
 
 	/***
 	 * Attempts to load the metadata from the database. This will override the
@@ -175,10 +158,6 @@ public interface RDBMSDataRepositoryManager extends Serializable {
 	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException;
 
 	public void collectStatistics(Connection conn) throws SQLException;
-
-	void getDropDDL(OutputStream out) throws IOException;
-
-	void getMetadataSQLInserts(OutputStream outstream) throws IOException;
 
 	void insertMetadata(Connection conn) throws SQLException;
 

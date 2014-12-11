@@ -29,8 +29,11 @@ import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Collection;
@@ -128,28 +131,39 @@ public class VocabularyValidator {
 				if (atom.isBooleanFunction())
 					continue;
 
-				T newatom = (T)getNormal(atom);
+				T newAtom = (T)getNormal(atom);
 
-				body.set(i, newatom);
+				body.set(i, newAtom);
 			}
 		}
 	}
 	
+	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	
 	public Function getNormal(Function atom) {
-		Predicate p = atom.getPredicate();
+		Predicate p = atom.getFunctionSymbol();
 		
 		if (p.getArity() == 1) {
-			OClass equivalent = reasoner.getClassRepresentative(p);
+			OClass c = ofac.createClass(p.getName());
+			OClass equivalent = reasoner.getClassRepresentative(c);
 			if (equivalent != null)
 				return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 		} 
 		else {
-			PropertyExpression equivalent = reasoner.getPropertyRepresentative(p);
+			ObjectPropertyExpression op = ofac.createObjectProperty(p.getName());
+			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyRepresentative(op);
 			if (equivalent != null) {
 				if (!equivalent.isInverse()) 
 					return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 				else 
 					return dfac.getFunction(equivalent.getPredicate(), atom.getTerm(1), atom.getTerm(0));
+			}
+			else {
+				DataPropertyExpression dp = ofac.createDataProperty(p.getName());
+				DataPropertyExpression equiv2 = reasoner.getDataPropertyRepresentative(dp);
+				if (equiv2 != null) {
+					return dfac.getFunction(equiv2.getPredicate(), atom.getTerms());
+				}				
 			}
 		}
 		return atom;
@@ -174,7 +188,6 @@ public class VocabularyValidator {
 	 * The same is done for classes.
 	 * 
 	 * @param originalMappings
-	 * @param equivalencesMap
 	 * @return
 	 */
 	public Collection<OBDAMappingAxiom> replaceEquivalences(Collection<OBDAMappingAxiom> originalMappings) {
@@ -185,7 +198,7 @@ public class VocabularyValidator {
 			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
 			
 			CQIE newTargetQuery = replaceEquivalences(targetQuery, false);
-			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(),((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
+			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), mapping.getSourceQuery().toString(), newTargetQuery));
 
 		}
 		return result;
