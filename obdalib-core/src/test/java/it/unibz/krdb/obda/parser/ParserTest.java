@@ -115,7 +115,7 @@ public class ParserTest extends TestCase {
 	public void test_1_5_extra_3() {
 		final boolean result = parseJSQL("select to_char(REGION_ID) as RID FROM HR.REGIONS");
 		printJSQL("test_1_5_extra_3", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
@@ -271,7 +271,7 @@ public class ParserTest extends TestCase {
 	public void test_3_1() {
 		final boolean result = parseJSQL("SELECT MAX(score) FROM grade");
 		printJSQL("test_3_1", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
@@ -279,7 +279,7 @@ public class ParserTest extends TestCase {
 	public void test_3_2() {
 		final boolean result = parseJSQL("SELECT MIN(score) FROM grade");
 		printJSQL("test_3_2", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
@@ -287,7 +287,7 @@ public class ParserTest extends TestCase {
 	public void test_3_3() {
 		final boolean result = parseJSQL("SELECT AVG(score) FROM grade");
 		printJSQL("test_3_3", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
@@ -295,7 +295,7 @@ public class ParserTest extends TestCase {
 	public void test_3_4() {
 		final boolean result = parseJSQL("SELECT SUM(amount) FROM tax");
 		printJSQL("test_3_4", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
@@ -303,7 +303,7 @@ public class ParserTest extends TestCase {
 	public void test_3_5() {
 		final boolean result = parseJSQL("SELECT COUNT(*) FROM student");
 		printJSQL("test_3_5", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
@@ -311,7 +311,7 @@ public class ParserTest extends TestCase {
 	public void test_3_6() {
 		final boolean result = parseJSQL("SELECT COUNT(id) FROM student");
 		printJSQL("test_3_6", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
@@ -319,7 +319,7 @@ public class ParserTest extends TestCase {
 	public void test_3_7() {
 		final boolean result = parseJSQL("SELECT EVERY(id) FROM student");
 		printJSQL("test_3_7", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
@@ -363,7 +363,7 @@ public class ParserTest extends TestCase {
 	public void test_4_1() {
 		final boolean result = parseJSQL("SELECT nationality, COUNT(id) as num_nat FROM student GROUP BY nationality");
 		printJSQL("test_4_1", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
@@ -371,7 +371,7 @@ public class ParserTest extends TestCase {
 	public void test_4_2() {
 		final boolean result = parseJSQL("SELECT nationality, COUNT(id) num_nat FROM student WHERE birth_year>2000 GROUP BY nationality");
 		printJSQL("test_4_2", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
