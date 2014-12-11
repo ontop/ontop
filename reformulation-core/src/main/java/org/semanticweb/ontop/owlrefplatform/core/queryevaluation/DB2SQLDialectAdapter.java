@@ -40,6 +40,7 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 		SqlDatatypes.put(Types.TIME, "TIME");
 		SqlDatatypes.put(Types.TIMESTAMP, "TIMESTAMP");
 		SqlDatatypes.put(Types.BOOLEAN, "BOOLEAN");
+		SqlDatatypes.put(Types.BIGINT, "BIGINT");
 	}
 	@Override
 	public String strconcat(String[] strings) {
@@ -80,7 +81,11 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 	@Override
 	public String sqlCast(String value, int type) {
 		String strType = SqlDatatypes.get(type);
-		
+
+		if (strType == null) {
+			throw new RuntimeException("Unsupported SQL type (not recognized)");
+		}
+
 		boolean noCast = strType.equals("BOOLEAN");
 
 		if (strType != null && !noCast ) {	
