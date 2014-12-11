@@ -2070,7 +2070,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 						return String.valueOf(id);
 				}
 			}
-			return sqladapter.getSQLLexicalFormString(ct.getValue());
+			return getSQLLexicalForm(ct);
 		} else if (term instanceof URIConstant) {
 			if (isSI) {
 				String uri = term.toString();
