@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.core;
 
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Multimap;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
@@ -85,7 +86,8 @@ public class QuestUnfolder {
 
 		Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram);
 
-		log.debug("Final set of mappings: \n{}", unfoldingProgram);
+		log.debug("Final set of mappings: \n {}", Joiner.on("\n").join(unfoldingProgram));
+
 
 		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
 	}
