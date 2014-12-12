@@ -202,7 +202,7 @@ public class SQLQueryParser {
 		
 		ParsedSQLQuery queryParsed = null;
 		try {
-			queryParsed = new ParsedSQLQuery(select,true);
+			queryParsed = new ParsedSQLQuery(select,false);
 			
 		} catch (JSQLParserException e) {
 			if(e.getCause() instanceof ParseException)

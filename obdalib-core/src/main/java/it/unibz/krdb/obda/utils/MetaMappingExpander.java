@@ -355,8 +355,6 @@ public class MetaMappingExpander {
 			boolean found = false;
 			for (SelectExpressionItem column : columnList) {
 				String expression=column.getExpression().toString();
-				if(ParsedSQLQuery.pQuotes.matcher(expression).matches()) //remove the quotes when present to compare with var
-					expression= expression.substring(1, expression.length()-1);
 									
 				if ((column.getAlias()==null && expression.equals(var.getName())) ||
 						(column.getAlias()!=null && column.getAlias().getName().equals(var.getName()))) {
