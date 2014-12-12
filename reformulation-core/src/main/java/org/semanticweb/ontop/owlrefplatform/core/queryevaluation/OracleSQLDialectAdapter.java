@@ -37,9 +37,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		SqlDatatypes.put(Types.TIMESTAMP, "TIMESTAMP");
 		SqlDatatypes.put(Types.INTEGER, "INTEGER");
 		SqlDatatypes.put(Types.BIGINT, "NUMBER(19)");
-		//TODO: should we use BINARY_FLOAT for real? See http://www.mssqltips.com/sqlservertip/2944/comparing-sql-server-and-oracle-datatypes/
 		SqlDatatypes.put(Types.REAL, "NUMBER");
-		//TODO: should we use BINARY_DOUBLE for float and double?
 		SqlDatatypes.put(Types.FLOAT, "NUMBER");
 		SqlDatatypes.put(Types.DOUBLE, "NUMBER");
 //		SqlDatatypes.put(Types.DOUBLE, "DECIMAL"); // it fails aggregate test with double
