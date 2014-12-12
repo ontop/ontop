@@ -205,12 +205,16 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 
 	@Override
 	public void visit(SelectExpressionItem selectExpr) {
-		// selectExpr.getExpression().accept(this);
+
 		/*
 		 * Here we found a column
 		 */
-		if(selectExpr.getAlias()!=null)
-		this.columns.add(selectExpr.getAlias().getName());
+		if(selectExpr.getAlias()!=null) {
+			this.columns.add(selectExpr.getAlias().getName());
+		}
+		else{
+			selectExpr.getExpression().accept(this);
+		}
 	}
 
 	@Override

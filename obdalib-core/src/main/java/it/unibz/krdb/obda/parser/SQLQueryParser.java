@@ -120,7 +120,7 @@ public class SQLQueryParser {
      * @param deeply <ul>
      *               <li>
      *               <p/>
-     *               If true, (i) unquote columns, (ii) create a view if an error is generated,
+     *               If true, (i) deepParsing columns, (ii) create a view if an error is generated,
      *               and (iii) store information about the different part of the query
      *               </li>
      *               <li>
@@ -222,9 +222,10 @@ public class SQLQueryParser {
 
         ParsedSQLQuery queryParser = null;
         boolean supported =true;
-        boolean quoted;
+
         boolean uppercase = false;
 
+        //TODO: we could use the sql adapter, but it's in the package reformulation-core
         if (database.contains("Oracle") || database.contains("DB2") || database.contains("H2") || database.contains("HSQL")) {
             // If the database engine is Oracle, H2 or DB2 unquoted columns are changed in uppercase
             uppercase = true;
@@ -241,67 +242,39 @@ public class SQLQueryParser {
 
         if(supported){
 
+
             int i=1; // the attribute index always start at 1
 
-            try {
-                List<SelectExpressionItem> columns = queryParser.getProjection().getColumnList();
-            for (SelectExpressionItem columnExpression : columns){
-                quoted = false;
-                String columnName;
+
+                List<String> columns = queryParser.getColumns();
+            for (String columnName : columns){
+
+                if (!ParsedSQLQuery.pQuotes.matcher(columnName).matches()) { //if it is not quoted, change it in uppercase when needed
 
 
-                if(columnExpression.getAlias()!=null){
-                  columnName =  columnExpression.getAlias().getName();
-
-                }
-                else{
-                    columnName = columnExpression.getExpression().toString();
-                }
-			/*
-			 * Remove any identifier quotes
-			 * Example:
-			 * 		INPUT: "table"."column"
-			 * 		OUTPUT: table.column
-			 */
-                Pattern pattern = Pattern.compile("[\"`\\[].*[\"`\\]]");
-                Matcher matcher = pattern.matcher(columnName);
-                if (matcher.find()) {
-                    columnName = columnName.replaceAll("[\\[\\]\"`]", "");
-                    quoted = true;
-                }
-
-
-			/*
-			 * Get only the short name if the column name uses qualified name.
-			 * Example:
-			 * 		INPUT: table.column
-			 * 		OUTPUT: column
-			 */
-                if (columnName.contains(".")) {
-                    columnName = columnName.substring(columnName.lastIndexOf(".") + 1, columnName.length()); // get only the name
-                }
-
-
-                if (!quoted) {
                     if (uppercase)
                         columnName = columnName.toUpperCase();
                     else
-                        columnName = columnName.toLowerCase();
+                      columnName = columnName.toLowerCase();
                 }
+				else // if quoted remove the quotes
+				{
+					columnName= columnName.substring(1, columnName.length()-1);
+				}
+
                 viewDefinition.setAttribute(i, new Attribute(columnName));
 
                 i++;
             }
 
-            } catch (JSQLParserException e)
-            {
 
-            }
         }
 
         else {
 
             int start = 6; // the keyword 'select'
+			boolean quoted;
+
             int end = query.toLowerCase().indexOf("from");
 
 
