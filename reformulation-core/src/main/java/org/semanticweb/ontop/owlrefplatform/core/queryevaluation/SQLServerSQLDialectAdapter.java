@@ -28,8 +28,9 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	
 	private static Map<Integer, String> SqlDatatypes;
 	static {
-		SqlDatatypes = new HashMap<Integer, String>();
+		SqlDatatypes = new HashMap<>();
 		SqlDatatypes.put(Types.INTEGER, "INT");
+		SqlDatatypes.put(Types.BIGINT, "BIGINT");
 		SqlDatatypes.put(Types.DECIMAL, "DECIMAL");
 		SqlDatatypes.put(Types.REAL, "FLOAT");
 		SqlDatatypes.put(Types.FLOAT, "DECIMAL");
@@ -83,25 +84,21 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	@Override
 	public String sqlCast(String value, int type) {
 		
-	String strType = SqlDatatypes.get(type);
-		
+		String strType = SqlDatatypes.get(type);
+
+		if (strType == null) {
+			throw new RuntimeException(String.format("Unsupported SQL type %d", type));
+		}
+
 		boolean noCast = strType.equals("BOOLEAN");
 
-		if (strType != null && !noCast ) {	
+		if (strType != null && !noCast ) {
 			return "CAST(" + value + " AS " + strType + ")";
 		} else	if (noCast){
 				return value;
-			
+
 		}
 		throw new RuntimeException("Unsupported SQL type");
-	/*	String strType = null;
-		if (type == Types.VARCHAR) {
-			strType = "VARCHAR(8000)";
-		} else {
-			throw new RuntimeException("Unsupported SQL type");
-		}
-		return "CAST(" + value + " AS " + strType + ")";
-		*/
 	}
 	
 	public String sqlLimit(String originalString, long limit) {

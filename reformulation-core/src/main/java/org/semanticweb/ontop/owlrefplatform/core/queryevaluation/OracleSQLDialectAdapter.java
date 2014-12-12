@@ -28,7 +28,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 	private static Map<Integer, String> SqlDatatypes;
 	static {
-		SqlDatatypes = new HashMap<Integer, String>();
+		SqlDatatypes = new HashMap<>();
 		SqlDatatypes.put(Types.DECIMAL, "NUMBER");
 		SqlDatatypes.put(Types.FLOAT, "FLOAT");
 		SqlDatatypes.put(Types.CHAR, "CHAR");
@@ -36,7 +36,10 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		SqlDatatypes.put(Types.CLOB, "CLOB");
 		SqlDatatypes.put(Types.TIMESTAMP, "TIMESTAMP");
 		SqlDatatypes.put(Types.INTEGER, "INTEGER");
+		SqlDatatypes.put(Types.BIGINT, "NUMBER(19)");
+		//TODO: should we use BINARY_FLOAT for real? See http://www.mssqltips.com/sqlservertip/2944/comparing-sql-server-and-oracle-datatypes/
 		SqlDatatypes.put(Types.REAL, "NUMBER");
+		//TODO: should we use BINARY_DOUBLE for float and double?
 		SqlDatatypes.put(Types.FLOAT, "NUMBER");
 		SqlDatatypes.put(Types.DOUBLE, "NUMBER");
 //		SqlDatatypes.put(Types.DOUBLE, "DECIMAL"); // it fails aggregate test with double
@@ -53,6 +56,11 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	@Override
 	public String sqlCast(String value, int type) {
 		String strType = SqlDatatypes.get(type);
+
+		if (strType == null) {
+			throw new RuntimeException(String.format("Unsupported SQL type %d", type));
+		}
+
 		boolean noCast = strType.equals("BOOLEAN");
 
 		if (strType != null && !noCast ) {	
