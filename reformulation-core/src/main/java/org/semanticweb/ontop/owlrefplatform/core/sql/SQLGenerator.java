@@ -1429,8 +1429,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					Term term = ov.getTerms().get(0);
 					if (term instanceof ValueConstant) {
-						termStr = sqladapter.getSQLLexicalFormString(
-								((ValueConstant) term) .getValue());
+						termStr = getSQLLexicalForm((ValueConstant) term);
 					} else {
 						termStr = getSQLString(term, index, false);
 					}
