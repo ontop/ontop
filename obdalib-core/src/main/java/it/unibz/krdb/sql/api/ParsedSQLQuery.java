@@ -54,7 +54,7 @@ public class ParsedSQLQuery implements Serializable {
 
 	private Select selectQuery; // the parsed query
 
-	public static Pattern pQuotes = Pattern.compile("[\"`\\[][^\\.]*[\"`\\]]");
+	public static Pattern pQuotes = Pattern.compile("[\"`\\['][^\\.]*[\"`\\]']");
 	private List<RelationJSQL> tables;
 	private List<SelectJSQL> subSelects;
 	private Map<String, String> aliasMap;
@@ -165,7 +165,7 @@ public class ParsedSQLQuery implements Serializable {
 	 * 
 	 * @throws JSQLParserException
 	 */
-	public void unquote() throws JSQLParserException {
+	public void deepParsing() throws JSQLParserException {
 		this.deepParsing = true;
 
 		tables = getTables();
@@ -176,6 +176,22 @@ public class ParsedSQLQuery implements Serializable {
 		groupByClause = getGroupByClause();
 
 	}
+
+	/**
+	 * Unquote the query
+	 *
+	 * @throws JSQLParserException
+	 */
+
+    public void unquote() throws JSQLParserException {
+		tables = getTables();
+		whereClause = getWhereClause();
+		projection = getProjection();
+		joins = getJoinConditions();
+		aliasMap = getAliasMap();
+		groupByClause = getGroupByClause();
+
+    }
 
 	@Override
 	public String toString() {
@@ -257,7 +273,7 @@ public class ParsedSQLQuery implements Serializable {
 	}
 
 	/**
-	 * Get the list of columns alias
+	 * Get the list of columns do not remove quotes
 	 * 
 	 * @return
 	 */

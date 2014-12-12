@@ -635,6 +635,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
 			URI sourceId = datasource.getSourceID();
 
+            SQLDialectAdapter sqladapter = SQLAdapterFactory
+                    .getSQLDialectAdapter(datasource
+                            .getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 			
 			//if the metadata was not already set
 			if (metadata == null) {
@@ -700,9 +703,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			}
 				
 
-			SQLDialectAdapter sqladapter = SQLAdapterFactory
-					.getSQLDialectAdapter(datasource
-							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
+
 
 			datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace);
 
