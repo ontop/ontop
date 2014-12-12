@@ -36,6 +36,7 @@ import it.unibz.krdb.obda.parser.SQLQueryParser;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
+import it.unibz.krdb.sql.api.ProjectionJSQL;
 import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.SelectJSQL;
 import it.unibz.krdb.sql.api.SelectionJSQL;
@@ -75,6 +76,7 @@ import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
 import net.sf.jsqlparser.expression.operators.relational.RegExpMySQLOperator;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 
@@ -120,6 +122,9 @@ public class Mapping2DatalogConverter {
                 // For each table, creates an atom and adds it to the body
                 addTableAtoms(bodyAtoms, parsedSQLQuery, lookupTable);
 
+                // For each function application in the select clause, create an atom and add it to the body
+                addFunctionAtoms(bodyAtoms, parsedSQLQuery, lookupTable);
+                
                 // For each join condition, creates an atom and adds it to the body
                 addJoinConditionAtoms(bodyAtoms, parsedSQLQuery, lookupTable);
 
@@ -201,6 +206,25 @@ public class Mapping2DatalogConverter {
         }
     }
 
+    
+    /**
+     * For each function application in the select clause, create an atom and add it to the body
+     * @param bodyAtoms
+     *  will be extended
+     * @param parsedSQLQuery
+     * @param lookupTable
+     * @author Dag Hovland
+     */
+    private void addFunctionAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
+    	ProjectionJSQL proj = parsedSQLQuery.getProjection();
+    	List<SelectExpressionItem> selects = proj.getColumnList();
+    	for(SelectExpressionItem select : selects){
+    		Expression expr = select.getExpression();
+    		
+    	}
+    }
+
+    
     /**
      * For each table, creates an atom and adds it to the body
      * @param bodyAtoms

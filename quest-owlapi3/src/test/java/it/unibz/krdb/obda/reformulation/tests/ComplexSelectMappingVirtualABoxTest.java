@@ -215,5 +215,4 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 		runTests(p);
 	}
 
-
 }
