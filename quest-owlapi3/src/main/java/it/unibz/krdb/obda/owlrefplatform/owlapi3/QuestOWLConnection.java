@@ -49,7 +49,7 @@ import org.semanticweb.owlapi.model.OWLException;
  * @see QuestOWL
  * @see QuestStatement
  */
-public class QuestOWLConnection {
+public class QuestOWLConnection implements AutoCloseable {
 
 	private final QuestConnection conn;
 
