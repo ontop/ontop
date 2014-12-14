@@ -214,13 +214,17 @@ public class Mapping2DatalogConverter {
      * @param parsedSQLQuery
      * @param lookupTable
      * @author Dag Hovland
+     * 
+     * TODO: Not finished! Will break anything
      */
     private void addFunctionAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
     	ProjectionJSQL proj = parsedSQLQuery.getProjection();
     	List<SelectExpressionItem> selects = proj.getColumnList();
     	for(SelectExpressionItem select : selects){
-    		Expression expr = select.getExpression();
-    		
+    		Expression select_expr = select.getExpression();
+    		Expression2FunctionConverter visitor = new Expression2FunctionConverter(lookupTable);
+            Term atom = visitor.visitEx(select_expr);
+            bodyAtoms.add((Function) atom);
     	}
     }
 
@@ -569,6 +573,11 @@ public class Mapping2DatalogConverter {
                     }
                     result = fac.getFunctionRegex(t1, t2, t3);
                 }
+            } else if (regex.getName().toLowerCase().endsWith("replace")){
+            	// TODO: Translate REPLACE to Datalog
+            	List<Expression> expressions = regex.getParameters().getExpressions();
+            	if(expressions.size() != 3)
+            		throw new RuntimeException("Wrong number of arguments (found " + expressions.size() + ", ontly 3 supported) to sql function REPLACE");
             } else {
                 throw new UnsupportedOperationException("Unsupported expression " + expression);
             }
