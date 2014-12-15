@@ -26,11 +26,11 @@ public class TMappingRule {
 	
 	private final CQIE stripped;	
 	private final List<Function> conditions;	
-	final CQContainmentCheckUnderLIDs cqc;   // TODO: make private
+	private final CQContainmentCheckUnderLIDs cqc;   
 	
 	public TMappingRule(Function head, List<Function> body, CQContainmentCheckUnderLIDs cqc) {
-		conditions = new LinkedList<Function>();
-		List<Function> newbody = new LinkedList<Function>();
+		conditions = new LinkedList<>();
+		List<Function> newbody = new LinkedList<>();
 		for (Function atom : body) {
 			Function clone = (Function)atom.clone();
 			if (clone.getFunctionSymbol() instanceof BuiltinPredicate) 
@@ -43,21 +43,40 @@ public class TMappingRule {
 		this.cqc = cqc;
 	}
 
-	public TMappingRule(Function head, TMappingRule baseRule, CQContainmentCheckUnderLIDs cqc) {
-		conditions = new ArrayList<Function>(baseRule.conditions.size());
-		for (Function atom : baseRule.conditions) {
-			Function clone = (Function)atom.clone();
-			conditions.add(clone);	
-		}
-				
-		List<Function> newbody = new ArrayList<Function>(baseRule.stripped.getBody().size());
-		for (Function atom : baseRule.stripped.getBody()) {
-			Function clone = (Function)atom.clone();
-			newbody.add(clone);	
-		}
+	public TMappingRule(TMappingRule baseRule, List<Function> conditionsOR) {
+		List<Function> newbody = cloneList(baseRule.stripped.getBody());
+		Function newhead = (Function)baseRule.stripped.getHead().clone();
+		stripped = fac.getCQIE(newhead, newbody);
+
+		List<Function> conditions1 = cloneList(baseRule.conditions);
+		List<Function> conditions2 = cloneList(conditionsOR);
+		
+		Function orAtom = fac.getFunctionOR(getMergedConditions(conditions1), 
+											getMergedConditions(conditions2));
+		conditions = new LinkedList<>();
+		conditions.add(orAtom);
+
+		cqc = baseRule.cqc;
+	}
+	
+	
+	public TMappingRule(Function head, TMappingRule baseRule) {
+		conditions = cloneList(baseRule.conditions);
+
+		List<Function> newbody = cloneList(baseRule.stripped.getBody());
 		Function newhead = (Function)head.clone();
 		stripped = fac.getCQIE(newhead, newbody);
-		this.cqc = cqc;
+		
+		cqc = baseRule.cqc;
+	}
+	
+	private static List<Function> cloneList(List<Function> list) {
+		List<Function> newlist = new ArrayList<>(list.size());
+		for (Function atom : list) {
+			Function clone = (Function)atom.clone();
+			newlist.add(clone);	
+		}
+		return newlist;
 	}
 	
 	
@@ -89,12 +108,6 @@ public class TMappingRule {
 		return stripped.getHead().getTerms();
 	}
 	
-	// ROMAN: avoid using it because it gives access to the internal presentation
-	@Deprecated
-	public CQIE getStripped() {
-		return stripped;
-	}
-	
 	public List<Function> getConditions() {
 		return conditions;
 	}
@@ -111,8 +124,7 @@ public class TMappingRule {
 	 * 
 	 * @return
 	 */
-	public Function getMergedConditions() {
-		// one might prefer to cache merged conditions
+	private static Function getMergedConditions(List<Function> conditions) {
 		Iterator<Function> iter = conditions.iterator();
 		Function mergedConditions = iter.next(); // IMPORTANT: assume that conditions is non-empty
 		while (iter.hasNext()) {
@@ -120,23 +132,6 @@ public class TMappingRule {
 			mergedConditions = fac.getFunctionAND(e, mergedConditions);
 		}
 		return mergedConditions;
-/*		
-		if (conditions.size() == 1)
-			return conditions.get(0);
-		Function atom0 = conditions.remove(0);
-		Function atom1 = conditions.remove(0);
-		Term f0 = fac.getFunction(atom0.getPredicate(), atom0.getTerms());
-		Term f1 = fac.getFunction(atom1.getPredicate(), atom1.getTerms());
-		Function nestedAnd = fac.getFunctionAND(f0, f1);
-		while (conditions.size() != 0) {
-			Function condition = conditions.remove(0);
-			Term term0 = nestedAnd.getTerm(1);
-			Term term1 = fac.getFunction(condition.getPredicate(), condition.getTerms());
-			Term newAND = fac.getFunctionAND(term0, term1);
-			nestedAnd.setTerm(1, newAND);
-		}
-		return nestedAnd;
-*/
 	}
 	
 	@Override

@@ -136,59 +136,25 @@ public class TMappingProcessor {
 				} 
 				
 				if ((toNewRule != null) && (fromNewRule != null)) {
-
 					// We found an equivalence, we will try to merge the conditions of
 					// newRule into the currentRule
+					//System.err.println("\n" + newRule + "\n v \n" + currentRule + "\n");
 					
-					System.err.println("\n" + newRule + "\n v \n" + currentRule + "\n");
-					
-				 	// Here we can merge conditions of the new query with the one we
-					// just found.
-					Function newconditions = newRule.getMergedConditions();
-					Function existingconditions = currentRule.getMergedConditions();
+				 	// Here we can merge conditions of the new query with the one we have
+					// just found
+					List<Function> newconditions = newRule.getConditions();
+					for (Function f : newconditions)
+						SubstitutionUtilities.applySubstitution(f, fromNewRule);
 
-					SubstitutionUtilities.applySubstitution(newconditions, fromNewRule);
+					List<Function> existingconditions = currentRule.getConditions();
 					if (newconditions.equals(existingconditions)) {
-						System.err.println("IGNORE");
 						return;
 					}	
 					
 	                mappingIterator.remove();
 
-					CQIE newmapping = currentRule.getStripped();
-					Function orAtom = fac.getFunctionOR(existingconditions, newconditions);
-					newmapping.getBody().add(orAtom);
-					
-					newRule = new TMappingRule(newmapping.getHead(), newmapping.getBody(), currentRule.cqc);
+					newRule = new TMappingRule(currentRule, newconditions);
 					break;
-					
-/*				 
-					Function newconditions = newRule.getMergedConditions();
-					Function existingconditions = currentRule.getMergedConditions();
-				
-	                // we do not add a new mapping if the conditions are exactly the same
-	                if (existingconditions.equals(newconditions)) 
-	                    continue; // ROMAN: OK?
-	                			
-	                mappingIterator.remove();
-
-					// ROMAN: i do not quite understand the code (in particular, the 1 atom in the body)
-					//        (but leave this fragment with minimal changes)
-					CQIE newmapping = currentRule.getStripped();
-					Substitution mgu = null;
-					if (newmapping.getBody().size() == 1) {
-						mgu = UnifierUtilities.getMGU(newmapping.getBody().get(0), newRule.getStripped().getBody().get(0));
-					}			
-					
-					Function orAtom = fac.getFunctionOR(existingconditions, newconditions);
-					newmapping.getBody().add(orAtom);
-				
-					if (mgu != null) {
-						newmapping = SubstitutionUtilities.applySubstitution(newmapping, mgu);
-					}
-					newRule = new TMappingRule(newmapping.getHead(), newmapping.getBody(), currentRule.cqc);
-					break;
-*/					
 				}				
 			}
 			rules.add(newRule);
@@ -315,7 +281,7 @@ public class TMappingProcessor {
 					else 
 						newhead = fac.getFunction(p, terms.get(1), terms.get(0));
 					
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, cqc);				
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
 					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
 				}
 			}
@@ -379,7 +345,7 @@ public class TMappingProcessor {
 					
 					Function newhead = fac.getFunction(p, terms);
 					
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, cqc);				
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
 					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
 				}
 			}
@@ -520,7 +486,7 @@ public class TMappingProcessor {
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
 					Function newhead = fac.getFunction(p, currentNodeMapping.getHeadTerms());
 
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, cqc);				
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
 					equivalentClassMappings.mergeMappingsWithCQC(newrule);
 				}
 			}
