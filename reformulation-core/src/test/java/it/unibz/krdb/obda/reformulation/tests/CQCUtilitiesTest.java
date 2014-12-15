@@ -108,7 +108,8 @@ public class CQCUtilitiesTest {
 
 		initialquery1 = tfac.getCQIE(head, body);
 	}
-
+/*
+ * ROMAN: commented out because there is no freeze anymore
     @Test
 	public void testGrounding() {
     	CQContainmentCheckUnderLIDs.FreezeCQ c2cq = new CQContainmentCheckUnderLIDs.FreezeCQ(initialquery1.getHead(), initialquery1.getBody());
@@ -136,7 +137,7 @@ public class CQCUtilitiesTest {
 		assertTrue(f1.getTerms().get(0).equals(tfac.getConstantLiteral(CANx1)));
 		assertTrue(head.get(2).equals(tfac.getConstantLiteral(CANy2)));
 	}
-
+*/
     @Test
 	public void testContainment1() {
 

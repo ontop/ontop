@@ -1,6 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
@@ -22,7 +20,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 
-	private final Map<CQIE,FreezeCQ> freezeCQcache = new HashMap<CQIE,FreezeCQ>();
+	private final Map<CQIE,FreezeCQ> freezeCQcache = new HashMap<>();
 	
 	private final LinearInclusionDependencies sigma;
 	
@@ -57,7 +55,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	 */
 	private static Set<Function> chaseAtoms(Collection<Function> atoms, LinearInclusionDependencies dependencies) {
 
-		Set<Function> derivedAtoms = new HashSet<Function>();
+		Set<Function> derivedAtoms = new HashSet<>();
 		for (Function fact : atoms) {
 			derivedAtoms.add(fact);
 			for (CQIE rule : dependencies.getRules(fact.getFunctionSymbol())) {
@@ -69,7 +67,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 					Function newFact = (Function)ruleHead.clone();
 					// unify to get fact is needed because the dependencies are not necessarily full
 					// (in other words, they may contain existentials in the head)
-					SubstitutionUtilities.applySubstitutionToGetFact(newFact, theta);
+					SubstitutionUtilities.applySubstitution(newFact, theta); // ToGetFact
 					derivedAtoms.add(newFact);
 				}
 			}
@@ -96,11 +94,11 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		
 		public FreezeCQ(Function head, Collection<Function> body) { 
 			
-			Map<Variable, ValueConstant> substitution = new HashMap<Variable, ValueConstant>();
+			Map<Variable, ValueConstant> substitution = new HashMap<>();
 						
 			this.head = freezeAtom(head, substitution);
 
-			this.factMap = new HashMap<Predicate, List<Function>>(body.size() * 2);
+			this.factMap = new HashMap<>(body.size() * 2);
 
 			for (Function atom : body) 
 				// not boolean, not algebra, not arithmetic, not datatype
@@ -132,8 +130,10 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		 * @return freeze atom
 		 */
 		private static Function freezeAtom(Function atom, Map<Variable, ValueConstant> substitution) {
+			return atom;
 			
-			List<Term> newTerms = new LinkedList<Term>();
+/*			
+			List<Term> newTerms = new LinkedList<>();
 			for (Term term : atom.getTerms()) 
 				if (term instanceof Function) {
 					Function function = (Function) term;
@@ -143,6 +143,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 					newTerms.add(freezeTerm(term, substitution));		
 			
 			return fac.getFunction(atom.getFunctionSymbol(), newTerms);
+*/
 		}
 
 		private static Term freezeTerm(Term term, Map<Variable, ValueConstant> substitution) {
@@ -166,136 +167,18 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		}
 
 		
-		private boolean hasAnswer(CQIE query) {
+		private Substitution computeHomomorphism(CQIE query) {
 			SubstitutionBuilder sb = new  SubstitutionBuilder();
 
 			boolean headResult = HomomorphismUtilities.extendHomomorphism(sb, query.getHead(), head);
-			Substitution sub;
-			if (headResult)
-				sub = HomomorphismUtilities.computeHomomorphism(sb, query.getBody(), factMap);
-			else
-				sub = null;
+			if (!headResult)
+				return null;
 			
-			boolean r = hasAnswer2(query);
+			Substitution sub = HomomorphismUtilities.computeHomomorphism(sb, query.getBody(), factMap);
 			
-			if (sub == null) {
-				if (r) {
-					System.err.println("NO, OLD YES: " + query + " TO " + head.toString() + " :- " + factMap);
-					SubstitutionBuilder sb2 = new  SubstitutionBuilder();
-					boolean h2 = HomomorphismUtilities.extendHomomorphism(sb2, query.getHead(), head);
-					if (h2) {
-						Substitution s2 = HomomorphismUtilities.computeHomomorphism(sb2, query.getBody(), factMap);
-					}
-				}
-				return false;
-			}
-			if (!r) {
-				System.err.println("YES, OLD NO: " + query + " TO " + head.toString() + " :- " + factMap);
-				hasAnswer2(query);
-				SubstitutionBuilder sb2 = new  SubstitutionBuilder();
-				boolean h2 = HomomorphismUtilities.extendHomomorphism(sb2, query.getHead(), head);
-				if (h2) {
-					Substitution s2 = HomomorphismUtilities.computeHomomorphism(sb2, query.getBody(), factMap);
-				}
-			}
-			
-			return true;
-		}
-		
-	    /**
-	     * TODO!!!
-	     *
-	     * @param query
-	     * @return
-	     */
-		
-		private boolean hasAnswer2(CQIE query) {
-			
-			// query = QueryAnonymizer.deAnonymize(query);
-
-			int bodysize = query.getBody().size();
-			
-			// ROMAN: fix for facts
-			if (bodysize == 0) {
-				if (UnifierUtilities.getMGU(head, query.getHead()) == null)
-					return true;
-				return false;
-			}
-					
-			ArrayList<Stack<Function>> choicesMap = new ArrayList<Stack<Function>>(bodysize);
-			
-			Stack<CQIE> queryStack = new Stack<CQIE>();
-			queryStack.push(null);   // to ensure that the last pop works fine
-
-			CQIE currentQuery = query;			
-			int currentAtomIdx = 0;
-			
-			while (currentAtomIdx >= 0) {
-
-				Function currentAtom = currentQuery.getBody().get(currentAtomIdx);							
-
-				// looking for options for this atom 
-				Stack<Function> factChoices;
-				if (currentAtomIdx >= choicesMap.size()) {			
-					// we have never reached this atom, setting up the initial list
-					// of choices from the original fact list.				 
-					factChoices = new Stack<Function>();
-					factChoices.addAll(factMap.get(currentAtom.getFunctionSymbol()));
-					choicesMap.add(currentAtomIdx, factChoices);
-				}
-				else
-					factChoices = choicesMap.get(currentAtomIdx);
-
-				boolean choiceMade = false;
-				CQIE newquery = null;
-				while (!factChoices.isEmpty()) {
-					Substitution mgu = UnifierUtilities.getMGU(currentAtom, factChoices.pop());
-					if (mgu == null) {
-						// No way to use the current fact 
-						continue;
-					}
-					
-					newquery = SubstitutionUtilities.applySubstitution(currentQuery, mgu);
-					
-					// stopping early if we have chosen an MGU that has no
-					// possibility of being successful because of the head.				
-					if (UnifierUtilities.getMGU(head, newquery.getHead()) == null) {
-						// there is no chance to unify the two heads, hence this
-						// fact is not good.
-						continue;
-					}
-
-					// the current fact was applicable, no conflicts so far, we can
-					// advance to the next atom
-					choiceMade = true;
-					break;
-				}
-				if (!choiceMade) {
-					
-					// reseting choices state and backtracking and resetting the set
-					// of choices for the current position
-					factChoices.addAll(factMap.get(currentAtom.getFunctionSymbol()));
-					currentAtomIdx--;
-					currentQuery = queryStack.pop();
-				} 
-				else {
-					if (currentAtomIdx == bodysize - 1) {
-						// we have found a successful set of facts 
-						return true;
-					}
-
-					// advancing to the next index 
-					queryStack.push(currentQuery);
-					currentAtomIdx++;
-					currentQuery = newquery;
-				}
-			}
-			// exhausted all the choices
-			return false;
-		}
-		
+			return sub;
+		}	
 	}
-	
 
 	
 	/***
@@ -308,15 +191,13 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	 */
 	@Override	
 	public boolean isContainedIn(CQIE q1, CQIE q2) {
-
+		return (computeHomomorphsim(q1, q2) != null);
+	}
+	
+	@Override
+	public Substitution computeHomomorphsim(CQIE q1, CQIE q2) {
 		if (!q2.getHead().getFunctionSymbol().equals(q1.getHead().getFunctionSymbol()))
-			return false;
-
-//		ROMAN: this was plain wrong -- facts can also be contained in queries  
-//			   (see the fix in hasAnswer)
-//        List<Function> q2body = q2.getBody();
-//        if (q2body.isEmpty())
-//           return false;
+			return null;
 
         FreezeCQ q1freeze = freezeCQcache.get(q1);
         if (q1freeze == null) {
@@ -331,10 +212,10 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
         for (Function q2atom : q2.getBody()) 
 			if (!q1freeze.factMap.containsKey(q2atom.getFunctionSymbol())) { 
 				// in particular, !q2atom.isDataFunction() 
-				return false;
+				return null;
 			}
 				
-		return q1freeze.hasAnswer(q2);
+		return q1freeze.computeHomomorphism(q2);
 	}	
 	
 	@Override
