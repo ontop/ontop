@@ -7,6 +7,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -64,8 +65,8 @@ public class TMappingRule {
 		return conditions.isEmpty();
 	}
 	
-	public boolean isContainedIn(TMappingRule other) {
-		return cqc.isContainedIn(stripped, other.stripped);
+	public Substitution computeHomomorphsim(TMappingRule other) {
+		return cqc.computeHomomorphsim(stripped, other.stripped);
 	}
 	
 	public CQIE asCQIE() {
@@ -92,6 +93,10 @@ public class TMappingRule {
 	@Deprecated
 	public CQIE getStripped() {
 		return stripped;
+	}
+	
+	public List<Function> getConditions() {
+		return conditions;
 	}
 	
 	/***

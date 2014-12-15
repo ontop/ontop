@@ -41,19 +41,17 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class TMappingProcessor {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	private static class TMappingIndexEntry implements Iterable<TMappingRule> {
-		private final Set<TMappingRule> rules = new HashSet<TMappingRule>();
+		private final List<TMappingRule> rules = new LinkedList<>();
 	
 
 		@Override
@@ -122,32 +120,49 @@ public class TMappingProcessor {
 			while (mappingIterator.hasNext()) {
 
 				TMappingRule currentRule = mappingIterator.next(); 
-								
-				if (!newRule.isContainedIn(currentRule))
-					continue;
-
-				if (currentRule.isConditionsEmpty()) {
+						
+				Substitution toNewRule = newRule.computeHomomorphsim(currentRule);
+				if ((toNewRule != null) && currentRule.isConditionsEmpty()) {
 					// if the new mapping is redundant and there are no conditions then do not add anything		
 					return;
 				}
 				
-				if (!currentRule.isContainedIn(newRule))
-					continue;
-				
-				// We found an equivalence, we will try to merge the conditions of
-				// newmapping into the currentMapping.
-				
-				if (newRule.isConditionsEmpty()) {		
+				Substitution fromNewRule = currentRule.computeHomomorphsim(newRule);		
+				if ((fromNewRule != null) && newRule.isConditionsEmpty()) {		
 					// The existing query is more specific than the new query, so we
 					// need to add the new query and remove the old	 
 					mappingIterator.remove();
-					break;
+					continue;
 				} 
-				else {
 				
+				if ((toNewRule != null) && (fromNewRule != null)) {
+
+					// We found an equivalence, we will try to merge the conditions of
+					// newRule into the currentRule
+					
+					System.err.println("\n" + newRule + "\n v \n" + currentRule + "\n");
+					
 				 	// Here we can merge conditions of the new query with the one we
 					// just found.
-				 
+					Function newconditions = newRule.getMergedConditions();
+					Function existingconditions = currentRule.getMergedConditions();
+
+					SubstitutionUtilities.applySubstitution(newconditions, fromNewRule);
+					if (newconditions.equals(existingconditions)) {
+						System.err.println("IGNORE");
+						return;
+					}	
+					
+	                mappingIterator.remove();
+
+					CQIE newmapping = currentRule.getStripped();
+					Function orAtom = fac.getFunctionOR(existingconditions, newconditions);
+					newmapping.getBody().add(orAtom);
+					
+					newRule = new TMappingRule(newmapping.getHead(), newmapping.getBody(), currentRule.cqc);
+					break;
+					
+/*				 
 					Function newconditions = newRule.getMergedConditions();
 					Function existingconditions = currentRule.getMergedConditions();
 				
@@ -173,7 +188,8 @@ public class TMappingProcessor {
 					}
 					newRule = new TMappingRule(newmapping.getHead(), newmapping.getBody(), currentRule.cqc);
 					break;
-				}
+*/					
+				}				
 			}
 			rules.add(newRule);
 		}
