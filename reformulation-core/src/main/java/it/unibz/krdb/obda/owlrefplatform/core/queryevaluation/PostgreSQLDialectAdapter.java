@@ -85,6 +85,7 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 	public String getSQLLexicalFormBoolean(boolean value) {
 		return value ? 	"TRUE" : "FALSE";
 	}
+
 	/***
 	 * Given an XSD dateTime this method will generate a SQL TIMESTAMP value.
 	 * The method will strip any fractional seconds found in the date time
@@ -96,6 +97,7 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 	 * @param rdfliteral
 	 * @return
 	 */
+	@Override
 	public String getSQLLexicalFormDatetime(String v) {
 		String datetime = v.replace('T', ' ');
 		int dotlocation = datetime.indexOf('.');
