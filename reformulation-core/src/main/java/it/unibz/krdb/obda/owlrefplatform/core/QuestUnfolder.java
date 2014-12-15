@@ -31,7 +31,6 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
@@ -105,11 +104,13 @@ public class QuestUnfolder {
 		
 		unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full, foreignKeyCQC);
 
+/*		
 		int s0 = unfoldingProgram.size();
 		Collections.sort(unfoldingProgram, CQCUtilities.ComparatorCQIE);
 		CQCUtilities.removeContainedQueries(unfoldingProgram, foreignKeyCQC);		
 		if (s0 != unfoldingProgram.size())
 			System.err.println("CQC REMOVED: " + s0 + " - " + unfoldingProgram.size());
+*/
 		
 		final long endTime = System.currentTimeMillis();
 		log.debug("TMapping size: {}", unfoldingProgram.size());
@@ -369,6 +370,7 @@ public class QuestUnfolder {
 	public DatalogProgram unfold(DatalogProgram query) throws OBDAException {
 		return unfolder.unfold(query, OBDAVocabulary.QUEST_QUERY);
 	}
+
 
 
 }

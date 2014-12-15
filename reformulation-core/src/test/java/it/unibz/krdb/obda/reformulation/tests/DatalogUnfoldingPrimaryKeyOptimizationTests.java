@@ -130,7 +130,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
 	public void testRedundancyElimination() throws Exception {
 		Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram.getRules());
-		DatalogUnfolder unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
+		DatalogUnfolder unfolder = new DatalogUnfolder(unfoldingProgram.getRules(), pkeys);
 
 		LinkedList<Term> headterms = new LinkedList<Term>();
 		headterms.add(fac.getVariable("m"));

@@ -83,20 +83,12 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * (either cause of lack of MGU, or because of a rule for the predicate of
 	 * the atom) is logically empty w.r.t. to the program.
 	 */
-	private Set<Predicate> extensionalPredicates = new HashSet<Predicate>();
+	private final Set<Predicate> extensionalPredicates = new HashSet<Predicate>();
 
-	public DatalogUnfolder(DatalogProgram unfoldingProgram) {
-		this(unfoldingProgram.getRules(), new HashMap<Predicate, List<Integer>>());
-	}
-	
 	public DatalogUnfolder(List<CQIE> unfoldingProgram) {
 		this(unfoldingProgram, new HashMap<Predicate, List<Integer>>());
 	}
 
-	public DatalogUnfolder(DatalogProgram unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys) {
-		this(unfoldingProgram.getRules(), primaryKeys);
-	}
-	
 	public DatalogUnfolder(List<CQIE> unfoldingProgram, Map<Predicate, List<Integer>> primaryKeys) {
 		this.primaryKeys = primaryKeys;
 
@@ -104,13 +96,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * Creating a local index for the rules according to their predicate
 		 */
 
-		HashSet<Predicate> allPredicates = new HashSet<Predicate>();
+		Set<Predicate> allPredicates = new HashSet<>();
 		for (CQIE mappingrule : unfoldingProgram) {
 			Function head = mappingrule.getHead();
 
 			List<CQIE> rules = ruleIndex.get(head.getFunctionSymbol());
 			if (rules == null) {
-				rules = new LinkedList<CQIE>();
+				rules = new LinkedList<>();
 				ruleIndex.put(head.getFunctionSymbol(), rules);
 			}
 			rules.add(mappingrule);
@@ -132,8 +124,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		extensionalPredicates.addAll(allPredicates);
 	}
 
-	private Set<Predicate> getPredicates(Function atom) {
-		Set<Predicate> predicates = new HashSet<Predicate>();
+	private final Set<Predicate> getPredicates(Function atom) {
+		Set<Predicate> predicates = new HashSet<>();
 		Predicate currentpred = atom.getFunctionSymbol();
 		if (currentpred instanceof BooleanOperationPredicate)
 			return predicates;
@@ -278,7 +270,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 * replacing B(x,newvar1), R(x,newvar2)
 		 */
 		
-		List<CQIE> workingSet = new LinkedList<CQIE>();
+		List<CQIE> workingSet = new LinkedList<>();
 		for (CQIE query : inputquery.getRules()) 
 			workingSet.add(QueryAnonymizer.deAnonymize(query));
 				
@@ -1066,7 +1058,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 	}
 
-	public static Term getFreshTerm(Term term, int suffix) {
+	private static Term getFreshTerm(Term term, int suffix) {
 		Term newTerm = null;
 		if (term instanceof VariableImpl) {
 			VariableImpl variable = (VariableImpl) term;

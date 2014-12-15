@@ -64,7 +64,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		CQIE rule3 = fac.getCQIE(head, body);
 		p.appendRule(rule3);
 
-		DatalogUnfolder unfolder = new DatalogUnfolder(p);
+		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
 		DatalogProgram result = unfolder.unfold(queryProgram, "q");
 
 		System.out.println(result);
@@ -115,7 +115,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		CQIE rule3 = fac.getCQIE(head, body);
 		p.appendRule(rule3);
 
-		DatalogUnfolder unfolder = new DatalogUnfolder(p);
+		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
 		DatalogProgram result = unfolder.unfold(queryProgram, "q");
 
 		System.out.println(result);
@@ -164,7 +164,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		CQIE rule3 = fac.getCQIE(head, body);
 		p.appendRule(rule3);
 
-		DatalogUnfolder unfolder = new DatalogUnfolder(p);
+		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
 		DatalogProgram result = unfolder.unfold(queryProgram, "q");
 
 		// Only one rule should be returned where y is null
@@ -210,7 +210,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 			CQIE rule3 = fac.getCQIE(head, body);
 			p.appendRule(rule3);
 
-			DatalogUnfolder unfolder = new DatalogUnfolder(p);
+			DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
 			DatalogProgram result = unfolder.unfold(queryProgram, "q");
 
 			// Only one rule should be returned where y is null
@@ -249,7 +249,7 @@ public class LeftJoinUnfoldingTest extends TestCase {
 		CQIE rule1 = fac.getCQIE(head, lj);
 		query.appendRule(rule1);
 
-		DatalogUnfolder unfolder = new DatalogUnfolder(p);
+		DatalogUnfolder unfolder = new DatalogUnfolder(p.getRules());
 		DatalogProgram result = unfolder.unfold(query, "q");
 
 		// Only one rule should be returned where y is null

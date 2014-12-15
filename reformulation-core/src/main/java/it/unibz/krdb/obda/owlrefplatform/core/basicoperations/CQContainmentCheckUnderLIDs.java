@@ -130,13 +130,15 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	 */
 	@Override	
 	public boolean isContainedIn(CQIE q1, CQIE q2) {
+
+		if (!q2.getHead().getFunctionSymbol().equals(q1.getHead().getFunctionSymbol()))
+			return false;
+		
 		return (computeHomomorphsim(q1, q2) != null);
 	}
 	
 	@Override
 	public Substitution computeHomomorphsim(CQIE q1, CQIE q2) {
-		if (!q2.getHead().getFunctionSymbol().equals(q1.getHead().getFunctionSymbol()))
-			return null;
 
         IndexedCQ indexedQ1 = indexedCQcache.get(q1);
         if (indexedQ1 == null) {
@@ -148,6 +150,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
     		indexedCQcache.put(q1, indexedQ1);
         }
            
+        // just to speed up the check in case there can be no match
         for (Function q2atom : q2.getBody()) 
 			if (!indexedQ1.factMap.containsKey(q2atom.getFunctionSymbol())) { 
 				// in particular, !q2atom.isDataFunction() 

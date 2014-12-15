@@ -2,11 +2,14 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
 
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 
 import java.util.ArrayList;
@@ -24,51 +27,91 @@ public class TMappingRule {
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
-	private final CQIE stripped;	
-	private final List<Function> conditions;	
+	private final Function head;
+	private final List<Function> databaseAtoms;	
+	private final CQIE stripped;
+	private final List<Function> filterAtoms;	
 	private final CQContainmentCheckUnderLIDs cqc;   
+
+	
+	/***
+	 * Given a mappings in {@link currentMapping}, this method will
+	 * return a new mappings in which no constants appear in the body of
+	 * database predicates. This is done by replacing the constant occurrence
+	 * with a fresh variable, and adding a new equality condition to the body of
+	 * the mapping.
+	 * <p/>
+	 * 
+	 * For example, let the mapping m be
+	 * <p/>
+	 * A(x) :- T(x,y,22)
+	 * 
+	 * <p>
+	 * Then this method will replace m by the mapping m'
+	 * <p>
+	 * A(x) :- T(x,y,z), EQ(z,22)
+	 * 
+	 */
 	
 	public TMappingRule(Function head, List<Function> body, CQContainmentCheckUnderLIDs cqc) {
-		conditions = new LinkedList<>();
-		List<Function> newbody = new LinkedList<>();
+		this.filterAtoms = new ArrayList<>(body.size()); // we estimate the size
+		this.databaseAtoms = new ArrayList<>(body.size());
+		
+		int freshVarCount = 0;
+		
 		for (Function atom : body) {
 			Function clone = (Function)atom.clone();
-			if (clone.getFunctionSymbol() instanceof BuiltinPredicate) 
-				conditions.add(clone);
-			else 
-				newbody.add(clone);			
+			if (clone.getFunctionSymbol() instanceof BuiltinPredicate) {
+				filterAtoms.add(clone);
+			}
+			else {
+				// database atom, we need to replace all constants by filters
+				for (int i = 0; i < clone.getTerms().size(); i++) {
+					Term term = clone.getTerm(i);
+					if (term instanceof Constant) {
+						// Found a constant, replacing with a fresh variable
+						// and adding the new equality atom.
+						freshVarCount++;
+						Variable freshVariable = fac.getVariable("?FreshVar" + freshVarCount);
+						filterAtoms.add(fac.getFunctionEQ(freshVariable, term));
+						clone.setTerm(i, freshVariable);
+					}
+				}
+				databaseAtoms.add(clone);			
+			}
 		}
-		Function newhead = (Function)head.clone();
-		stripped = fac.getCQIE(newhead, newbody);
+		// TODO: would it not be a good idea to eliminate constants from the head as well?
+		this.head = (Function)head.clone();
+		this.stripped = fac.getCQIE(head, databaseAtoms);
 		this.cqc = cqc;
 	}
 
 	public TMappingRule(TMappingRule baseRule, List<Function> conditionsOR) {
-		List<Function> newbody = cloneList(baseRule.stripped.getBody());
-		Function newhead = (Function)baseRule.stripped.getHead().clone();
-		stripped = fac.getCQIE(newhead, newbody);
+		this.databaseAtoms = cloneList(baseRule.databaseAtoms);
+		this.head = (Function)baseRule.head.clone();
 
-		List<Function> conditions1 = cloneList(baseRule.conditions);
+		List<Function> conditions1 = cloneList(baseRule.filterAtoms);
 		List<Function> conditions2 = cloneList(conditionsOR);
 		
 		Function orAtom = fac.getFunctionOR(getMergedConditions(conditions1), 
 											getMergedConditions(conditions2));
-		conditions = new LinkedList<>();
-		conditions.add(orAtom);
+		filterAtoms = new ArrayList<>(1);
+		filterAtoms.add(orAtom);
 
-		cqc = baseRule.cqc;
+		this.stripped = fac.getCQIE(head, databaseAtoms);
+		this.cqc = baseRule.cqc;
 	}
 	
 	
 	public TMappingRule(Function head, TMappingRule baseRule) {
-		conditions = cloneList(baseRule.conditions);
-
-		List<Function> newbody = cloneList(baseRule.stripped.getBody());
-		Function newhead = (Function)head.clone();
-		stripped = fac.getCQIE(newhead, newbody);
+		this.filterAtoms = cloneList(baseRule.filterAtoms);
+		this.databaseAtoms = cloneList(baseRule.databaseAtoms);
+		this.head = (Function)head.clone();
 		
-		cqc = baseRule.cqc;
+		this.stripped = fac.getCQIE(head, databaseAtoms);
+		this.cqc = baseRule.cqc;
 	}
+	
 	
 	private static List<Function> cloneList(List<Function> list) {
 		List<Function> newlist = new ArrayList<>(list.size());
@@ -81,7 +124,7 @@ public class TMappingRule {
 	
 	
 	public boolean isConditionsEmpty() {
-		return conditions.isEmpty();
+		return filterAtoms.isEmpty();
 	}
 	
 	public Substitution computeHomomorphsim(TMappingRule other) {
@@ -90,26 +133,29 @@ public class TMappingRule {
 	
 	public CQIE asCQIE() {
 		List<Function> combinedBody;
-		if (!conditions.isEmpty()) {
-			combinedBody = new LinkedList<Function>(); 
-			combinedBody.addAll(stripped.getBody());
-			combinedBody.addAll(conditions);
+		if (!filterAtoms.isEmpty()) {
+			combinedBody = new ArrayList<>(databaseAtoms.size() + filterAtoms.size()); 
+			combinedBody.addAll(databaseAtoms);
+			combinedBody.addAll(filterAtoms);
 		}
 		else
-			combinedBody = stripped.getBody();
-		return fac.getCQIE(stripped.getHead(), combinedBody);				
+			combinedBody = databaseAtoms;
+		
+		CQIE cq = fac.getCQIE(head, combinedBody);
+		EQNormalizer.enforceEqualities(cq);
+		return cq;
 	}
 	
 	public boolean isFact() {
-		return stripped.getBody().isEmpty() && conditions.isEmpty();
+		return databaseAtoms.isEmpty() && filterAtoms.isEmpty();
 	}
 	
 	public List<Term> getHeadTerms() {
-		return stripped.getHead().getTerms();
+		return head.getTerms();
 	}
 	
 	public List<Function> getConditions() {
-		return conditions;
+		return filterAtoms;
 	}
 	
 	/***
@@ -136,20 +182,22 @@ public class TMappingRule {
 	
 	@Override
 	public int hashCode() {
-		return stripped.hashCode() ^ conditions.hashCode();
+		return head.hashCode() ^ databaseAtoms.hashCode() ^ filterAtoms.hashCode();
 	}
 	
 	@Override
 	public boolean equals(Object other) {
 		if (other instanceof TMappingRule) {
 			TMappingRule otherRule = (TMappingRule)other;
-			return (stripped.equals(otherRule.stripped) && conditions.equals(otherRule.conditions));
+			return (head.equals(otherRule.head) && 
+					databaseAtoms.equals(otherRule.databaseAtoms) && 
+					filterAtoms.equals(otherRule.filterAtoms));
 		}
 		return false;
 	}
 
 	@Override 
 	public String toString() {
-		return stripped + " AND " + conditions;
+		return head + " <- " + databaseAtoms + " AND " + filterAtoms;
 	}
 }

@@ -20,14 +20,11 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
@@ -45,6 +42,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class TMappingProcessor {
 
@@ -164,57 +162,10 @@ public class TMappingProcessor {
 	// end of the inner class
 
 
-	/***
-	 * Given a mappings in {@link currentMapping}, this method will
-	 * return a new mappings in which no constants appear in the body of
-	 * database predicates. This is done by replacing the constant occurrence
-	 * with a fresh variable, and adding a new equality condition to the body of
-	 * the mapping.
-	 * <p/>
-	 * 
-	 * For example, let the mapping m be
-	 * <p/>
-	 * A(x) :- T(x,y,22)
-	 * 
-	 * <p>
-	 * Then this method will replace m by the mapping m'
-	 * <p>
-	 * A(x) :- T(x,y,z), EQ(z,22)
-	 * 
-	 * @param currentMapping
-	 * @return a new CQ that has been normalized in the way described above.
-	 */
-	private static CQIE normalizeConstants(CQIE currentMapping) {
-		
-		int freshVarCount = 0;
-		List<Function> newBody = new LinkedList<Function>();
-		for (Function currentAtom : currentMapping.getBody()) {
-			if (!(currentAtom.getFunctionSymbol() instanceof BuiltinPredicate)) {
-				Function clone = (Function)currentAtom.clone();
-				for (int i = 0; i < clone.getTerms().size(); i++) {
-					Term term = clone.getTerm(i);
-					if (term instanceof Constant) {
-						// Found a constant, replacing with a fresh variable
-						// and adding the new equality atom.
-						freshVarCount++;
-						Variable freshVariable = fac.getVariable("?FreshVar" + freshVarCount);
-						newBody.add(fac.getFunctionEQ(freshVariable, term));
-						clone.setTerm(i, freshVariable);
-					}
-				}
-				newBody.add(clone);
-			} else {
-				newBody.add((Function)currentAtom.clone());
-			}
-		}
-		Function head = (Function)currentMapping.getHead().clone();		
-		return fac.getCQIE(head, newBody);
-	}
 
 	private static void getObjectTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, 
-			Map<Predicate, List<CQIE>> originalMappings,
+			Map<Predicate, List<TMappingRule>> originalMappings,
 			EquivalencesDAG<ObjectPropertyExpression> dag, 
-			CQContainmentCheckUnderLIDs cqc,
 			boolean full) {
 		
 		for (Equivalences<ObjectPropertyExpression> propertySet : dag) {
@@ -238,13 +189,13 @@ public class TMappingProcessor {
 					 */
 					boolean requiresInverse = childproperty.isInverse();
 
-					List<CQIE> childmappings = originalMappings.get(childproperty.getPredicate());
+					List<TMappingRule> childmappings = originalMappings.get(childproperty.getPredicate());
 					if (childmappings == null)
 						continue;
 					
-					for (CQIE childmapping : childmappings) {
+					for (TMappingRule childmapping : childmappings) {
 						
-						List<Term> terms = childmapping.getHead().getTerms();
+						List<Term> terms = childmapping.getHeadTerms();
 
 						Function newMappingHead;
 						if (!requiresInverse) {
@@ -255,7 +206,7 @@ public class TMappingProcessor {
 						else {
 							newMappingHead = fac.getFunction(currentPredicate, terms.get(1), terms.get(0));
 						}
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody(), cqc);				
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -289,9 +240,8 @@ public class TMappingProcessor {
 		
 	}
 	private static void getDataTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, 
-			Map<Predicate, List<CQIE>> originalMappings,
+			Map<Predicate, List<TMappingRule>> originalMappings,
 			EquivalencesDAG<DataPropertyExpression> dag, 
-			CQContainmentCheckUnderLIDs cqc,
 			boolean full) {
 		
 		for (Equivalences<DataPropertyExpression> propertySet : dag) {
@@ -312,16 +262,16 @@ public class TMappingProcessor {
 						 * predicate and, if the child is inverse and the current is
 						 * positive, it will also invert the terms in the head
 						 */
-						List<CQIE> childmappings = originalMappings.get(childproperty.getPredicate());
+						List<TMappingRule> childmappings = originalMappings.get(childproperty.getPredicate());
 						if (childmappings == null)
 							continue;
 						
-						for (CQIE childmapping : childmappings) {
+						for (TMappingRule childmapping : childmappings) {
 							
-							List<Term> terms = childmapping.getHead().getTerms();
+							List<Term> terms = childmapping.getHeadTerms();
 
 							Function newMappingHead = fac.getFunction(currentPredicate, terms);
-							TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody(), cqc);				
+							TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
 							currentNodeMappings.mergeMappingsWithCQC(newmapping);
 						}
 					}
@@ -341,9 +291,7 @@ public class TMappingProcessor {
 				TMappingIndexEntry equivalentPropertyMappings = getMappings(mappingIndex, p);
 					
 				for (TMappingRule currentNodeMapping : currentNodeMappings) {
-					List<Term> terms = currentNodeMapping.getHeadTerms();
-					
-					Function newhead = fac.getFunction(p, terms);
+					Function newhead = fac.getFunction(p, currentNodeMapping.getHeadTerms());
 					
 					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping);				
 					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
@@ -365,7 +313,7 @@ public class TMappingProcessor {
 
 		Map<Predicate, TMappingIndexEntry> mappingIndex = new HashMap<>();
 
-		Map<Predicate, List<CQIE>> originalMappingIndex = new HashMap<>();
+		Map<Predicate, List<TMappingRule>> originalMappingIndex = new HashMap<>();
 		
 		/***
 		 * Creates an index of all mappings based on the predicate of the head of
@@ -373,18 +321,17 @@ public class TMappingProcessor {
 		 * list.
 		 */
 		
-		for (CQIE mapping : originalMappings) {
-			
-			CQIE mapping1 = normalizeConstants(mapping);
-			List<CQIE> ms = originalMappingIndex.get(mapping1.getHead().getFunctionSymbol());
+		for (CQIE mapping : originalMappings) {			
+			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc);
+			Predicate ruleIndex = mapping.getHead().getFunctionSymbol();
+			List<TMappingRule> ms = originalMappingIndex.get(ruleIndex);
 			if (ms == null) {
 				ms = new LinkedList<>();
-				originalMappingIndex.put(mapping1.getHead().getFunctionSymbol(), ms);
+				originalMappingIndex.put(ruleIndex, ms);
 			}
-			ms.add(mapping1);
+			ms.add(rule);
 						
-			TMappingIndexEntry set = getMappings(mappingIndex, mapping1.getHead().getFunctionSymbol());
-			TMappingRule rule = new TMappingRule(mapping1.getHead(), mapping1.getBody(), cqc);
+			TMappingIndexEntry set = getMappings(mappingIndex, ruleIndex);
 			set.mergeMappingsWithCQC(rule);
 		}
 		
@@ -399,8 +346,8 @@ public class TMappingProcessor {
 		 * the TMappings specification.
 		 */
 
-		getObjectTMappings(mappingIndex, originalMappingIndex, reasoner.getObjectPropertyDAG(), cqc, full);
-		getDataTMappings(mappingIndex, originalMappingIndex, reasoner.getDataPropertyDAG(), cqc, full);
+		getObjectTMappings(mappingIndex, originalMappingIndex, reasoner.getObjectPropertyDAG(), full);
+		getDataTMappings(mappingIndex, originalMappingIndex, reasoner.getDataPropertyDAG(), full);
 
 		/*
 		 * Property t-mappings are done, we now continue with class t-mappings.
@@ -450,13 +397,13 @@ public class TMappingProcessor {
 						isInverse = false;  // can never be an inverse
 					} 
 					
-					List<CQIE> childmappings = originalMappingIndex.get(childPredicate);
+					List<TMappingRule> childmappings = originalMappingIndex.get(childPredicate);
 					if (childmappings == null)
 						continue;
 					
-					for (CQIE childmapping : childmappings) {
+					for (TMappingRule childmapping : childmappings) {
 						
-						List<Term> terms = childmapping.getHead().getTerms();
+						List<Term> terms = childmapping.getHeadTerms();
 
 						Function newMappingHead;
 						if (isClass) {
@@ -468,7 +415,7 @@ public class TMappingProcessor {
 							else 
 								newMappingHead = fac.getFunction(currentPredicate, terms.get(1));
 						}
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody(), cqc);				
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping);				
 						currentNodeMappings.mergeMappingsWithCQC(newmapping);
 					}
 				}
@@ -492,14 +439,12 @@ public class TMappingProcessor {
 			}
 		}
 		
-		List<CQIE> tmappingsProgram = new LinkedList<CQIE>();
-		for (Predicate key : mappingIndex.keySet()) {
-			for (TMappingRule mapping : mappingIndex.get(key)) {
+		List<CQIE> tmappingsProgram = new LinkedList<>();
+		for (Entry<Predicate, TMappingIndexEntry> entry : mappingIndex.entrySet()) 
+			for (TMappingRule mapping : entry.getValue()) {
 				CQIE cq = mapping.asCQIE();
-				EQNormalizer.enforceEqualities(cq);
 				tmappingsProgram.add(cq);
 			}
-		}
 		
 		return tmappingsProgram;
 	}

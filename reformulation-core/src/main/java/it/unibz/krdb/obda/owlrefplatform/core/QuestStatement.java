@@ -399,7 +399,7 @@ public class QuestStatement implements OBDAStatement {
 
 			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
-			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
+			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone().getRules());
 			removeNonAnswerQueries(program);
 
 			program = unfolder.unfold(program, OBDAVocabulary.QUEST_QUERY);
