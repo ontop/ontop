@@ -164,6 +164,43 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 			else 
 				return term;
 		}
+
+		
+		private boolean hasAnswer(CQIE query) {
+			SubstitutionBuilder sb = new  SubstitutionBuilder();
+
+			boolean headResult = HomomorphismUtilities.extendHomomorphism(sb, query.getHead(), head);
+			Substitution sub;
+			if (headResult)
+				sub = HomomorphismUtilities.computeHomomorphism(sb, query.getBody(), factMap);
+			else
+				sub = null;
+			
+			boolean r = hasAnswer2(query);
+			
+			if (sub == null) {
+				if (r) {
+					System.err.println("NO, OLD YES: " + query + " TO " + head.toString() + " :- " + factMap);
+					SubstitutionBuilder sb2 = new  SubstitutionBuilder();
+					boolean h2 = HomomorphismUtilities.extendHomomorphism(sb2, query.getHead(), head);
+					if (h2) {
+						Substitution s2 = HomomorphismUtilities.computeHomomorphism(sb2, query.getBody(), factMap);
+					}
+				}
+				return false;
+			}
+			if (!r) {
+				System.err.println("YES, OLD NO: " + query + " TO " + head.toString() + " :- " + factMap);
+				hasAnswer2(query);
+				SubstitutionBuilder sb2 = new  SubstitutionBuilder();
+				boolean h2 = HomomorphismUtilities.extendHomomorphism(sb2, query.getHead(), head);
+				if (h2) {
+					Substitution s2 = HomomorphismUtilities.computeHomomorphism(sb2, query.getBody(), factMap);
+				}
+			}
+			
+			return true;
+		}
 		
 	    /**
 	     * TODO!!!
@@ -172,7 +209,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	     * @return
 	     */
 		
-		private boolean hasAnswer(CQIE query) {
+		private boolean hasAnswer2(CQIE query) {
 			
 			// query = QueryAnonymizer.deAnonymize(query);
 

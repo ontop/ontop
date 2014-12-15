@@ -21,12 +21,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  */
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * An atomic substitution accepts only one variable in its domain.
@@ -81,8 +79,4 @@ public class SingletonSubstitution implements Substitution {
         throw new UnsupportedOperationException("Every SingletonSubstitution is immutable.");
     }
 
-    @Override
-    public Set<VariableImpl> keySet() {
-        return ImmutableSet.of(variable);
-    }
 }

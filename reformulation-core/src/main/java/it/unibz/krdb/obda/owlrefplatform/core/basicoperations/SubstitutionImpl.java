@@ -64,12 +64,6 @@ public class SubstitutionImpl implements Substitution {
     }
 
     @Override
-    @Deprecated
-    public Set<VariableImpl> keySet() {
-        return map.keySet();
-    }
-
-    @Override
     public String toString() {
         return Joiner.on(", ").withKeyValueSeparator("/").join(map);
     }

@@ -95,7 +95,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			if (mgu == null) {
 				computedmgu = null;
 			} else {
-				for (VariableImpl var : mgu.keySet()) {
+				for (VariableImpl var : mgu.getMap().keySet()) {
 					computedmgu.add(new SingletonSubstitution(var, mgu.get(var)));
 				}
 			}
