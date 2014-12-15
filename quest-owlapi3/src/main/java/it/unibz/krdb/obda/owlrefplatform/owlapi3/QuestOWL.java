@@ -122,7 +122,7 @@ import org.slf4j.LoggerFactory;
  * The OBDAOWLReformulationPlatform implements the OWL reasoner interface and is
  * the implementation of the reasoning method in the reformulation project.
  */
-public class QuestOWL extends OWLReasonerBase {
+public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 
 	// //////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -1155,6 +1155,11 @@ public class QuestOWL extends OWLReasonerBase {
 		for (int i = 0; i < level; i++) {
 			System.out.print("    ");
 		}
+	}
+
+	@Override
+	public void close() throws Exception {
+		dispose();
 	}
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
