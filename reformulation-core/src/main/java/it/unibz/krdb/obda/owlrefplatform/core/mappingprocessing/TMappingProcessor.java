@@ -141,7 +141,7 @@ public class TMappingProcessor {
 				 	// Here we can merge conditions of the new query with the one we have
 					// just found
 					// new map always has just one set of filters  !!
-					List<Function> newconditions = newRule.getConditions().get(0);
+					List<Function> newconditions = TMappingRule.cloneList(newRule.getConditions().get(0));
 					for (Function f : newconditions) 
 						SubstitutionUtilities.applySubstitution(f, fromNewRule);
 

@@ -138,7 +138,7 @@ public class TMappingRule {
 	}
 	
 	
-	private static List<Function> cloneList(List<Function> list) {
+	public static List<Function> cloneList(List<Function> list) {
 		List<Function> newlist = new ArrayList<>(list.size());
 		for (Function atom : list) {
 			Function clone = (Function)atom.clone();
