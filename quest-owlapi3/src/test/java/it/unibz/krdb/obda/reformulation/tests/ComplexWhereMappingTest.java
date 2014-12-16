@@ -158,25 +158,13 @@ public class ComplexWhereMappingTest extends TestCase {
 		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
 		StringBuilder bf = new StringBuilder(query);
 		try {
-			
-			/*
-			 * Enable this if you want to test performance, it will run several cycles
-			 */
-//			long start = System.currentTimeMillis();
-//			for (int i = 0; i < 3000; i++) {
-//				QuestQuestOWLStatement sto = (QuestQuestOWLStatement)st;
-//				String q = sto.getUnfolding(bf.insert(7, ' ').toString());
-//			}
-//			long end = System.currentTimeMillis();
-//			long elapsed = end-start;
-//			log.info("Elapsed time: {}", elapsed);
-			QuestOWLResultSet rs = st.executeTuple(query);
+				QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			OWLIndividual ind2 = rs.getOWLIndividual("y");
 			OWLLiteral val = rs.getOWLLiteral("z");
-			assertEquals("<uri1>", ind1.toString());
-			assertEquals("<uri1>", ind2.toString());
+			assertEquals("<http://it.unibz.krdb/obda/test/simple#uri1>", ind1.toString());
+			assertEquals("<http://it.unibz.krdb/obda/test/simple#uri1>", ind2.toString());
 			assertEquals("\"value1\"", val.toString());
 			
 

@@ -52,6 +52,15 @@
     <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U"/>
     
 
+    <!-- http://it.unibz.krdb/obda/test/simple#U2 -->
+
+    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U2"/>
+    
+    
+        <!-- http://it.unibz.krdb/obda/test/simple#U3 -->
+
+    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U3"/>
+
 
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////

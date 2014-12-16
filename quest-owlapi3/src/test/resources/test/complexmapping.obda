@@ -16,7 +16,11 @@ source	SELECT REPLACE(uri, " ", "%20") AS u, val FROM TABLE1
 
 
 mappingId	mapping2
-target	:{uri} :P {valcat} .
+target	:{uri} :U2 {valcat} .
 source	SELECT uri, 'NO ' || val as valcat FROM TABLE1
+
+mappingId	mapping3
+target	:{uri} :U3 {valcat} .
+source	SELECT uri, val || 'to' as valcat FROM TABLE1
 ]]
 

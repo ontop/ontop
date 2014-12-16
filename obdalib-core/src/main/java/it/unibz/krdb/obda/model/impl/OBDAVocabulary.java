@@ -63,11 +63,15 @@ public class OBDAVocabulary {
 	/* String predicate names */
 	
 	public static final String REPLACE_STR = "REPLACE";
+	public static final String CONCAT_STR = "CONCAT";
 	
 	/* String predicates */
 	
 	public static final Predicate REPLACE = new PredicateImpl(
 			REPLACE_STR, 3, new COL_TYPE[]{COL_TYPE.STRING, COL_TYPE.STRING, COL_TYPE.STRING});  
+	
+	public static final Predicate CONCAT = new PredicateImpl(
+			CONCAT_STR, 2, new COL_TYPE[]{COL_TYPE.STRING, COL_TYPE.STRING});  
 	
 	
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";

@@ -1201,8 +1201,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String op = getSQLString(term1, index, true);
 				return String.format(expressionFormat, op);
 				
+			} else if (functionSymbol.getName().equals(OBDAVocabulary.CONCAT_STR) && size == 2) {
+				String[] strs = new String[2];
+				strs[0] = getSQLString(function.getTerm(0), index, false);
+				strs[1] = getSQLString(function.getTerm(1), index, false);
+				String result = sqladapter.strconcat(strs);
+				return result;
 			} else if (isBinary(function)) {
-				// for binary functions, e.g., AND, OR, EQ, NEQ, GT, etc.
+				// for binary functions, e.g., AND, OR, EQ, NEQ, GT etc.
 				String leftOp = getSQLString(term1, index, true);
 				Term term2 = function.getTerms().get(1);
 				String rightOp = getSQLString(term2, index, true);
@@ -1278,7 +1284,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String in_str = function.getTerm(2).toString();
 				String result = sqladapter.strreplace(orig, out_str, in_str);
 				return result;
-			}
+			} 
 		}
 
 		/*

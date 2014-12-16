@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.parser.SQLQueryParser;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
@@ -223,10 +224,10 @@ public class Mapping2DatalogConverter {
     	List<SelectExpressionItem> selects = proj.getColumnList();
     	for(SelectExpressionItem select : selects){
     		Expression select_expr = select.getExpression();
-    		if(select_expr instanceof net.sf.jsqlparser.expression.Function){
+    		if(select_expr instanceof net.sf.jsqlparser.expression.Function  || select_expr instanceof Concat){
     			Alias alias = select.getAlias();
     			if(alias == null){
-    				throw new JSQLParserException("The xpression" + select + " does not have an alias. This is not supported by ontop. Add an alias.");
+    				throw new JSQLParserException("The expression" + select + " does not have an alias. This is not supported by ontop. Add an alias.");
     			}
     			String alias_name = alias.getName();
     			Expression2FunctionConverter visitor = new Expression2FunctionConverter(lookupTable);
@@ -554,10 +555,10 @@ public class Mapping2DatalogConverter {
 
         @Override
         public void visit(net.sf.jsqlparser.expression.Function expression) {
-            net.sf.jsqlparser.expression.Function regex = expression;
-            if (regex.getName().toLowerCase().equals("regexp_like")) {
+            net.sf.jsqlparser.expression.Function func = expression;
+            if (func.getName().toLowerCase().equals("regexp_like")) {
 
-                List<Expression> expressions = regex.getParameters().getExpressions();
+                List<Expression> expressions = func.getParameters().getExpressions();
                 if (expressions.size() == 2 || expressions.size() == 3) {
 
                     Term t1; // first parameter is a source_string, generally a column
@@ -585,7 +586,7 @@ public class Mapping2DatalogConverter {
                     }
                     result = fac.getFunctionRegex(t1, t2, t3);
                 }
-            } else if (regex.getName().toLowerCase().endsWith("replace")){
+            } else if (func.getName().toLowerCase().endsWith("replace")){
             	// TODO: Translate REPLACE to Datalog
             	List<Expression> expressions = expression.getParameters().getExpressions();
             	if (expressions.size() == 2 || expressions.size() == 3) {
@@ -865,7 +866,11 @@ public class Mapping2DatalogConverter {
 
         @Override
         public void visit(Concat concat) {
-            throw new UnsupportedOperationException();
+        	Expression left = concat.getLeftExpression();
+        	Expression right = concat.getRightExpression();
+        	Term l = visitEx(left);
+        	Term r = visitEx(right);
+        	result = fac.getFunction(OBDAVocabulary.CONCAT, l, r);
         }
 
         @Override

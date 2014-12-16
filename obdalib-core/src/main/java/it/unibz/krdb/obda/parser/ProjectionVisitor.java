@@ -559,9 +559,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(Concat concat) {
-		notSupported = true;
-		// TODO Auto-generated method stub
-		
+		//TODO In work, Dag 16.12.2014
 	}
 
 	@Override

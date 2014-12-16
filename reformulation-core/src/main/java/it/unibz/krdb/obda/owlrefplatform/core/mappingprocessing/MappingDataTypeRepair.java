@@ -145,6 +145,8 @@ public class MappingDataTypeRepair {
 				continue;
 			}
 
+			
+			
 			// If the predicate is a data property
 			Term term = atom.getTerm(1);
 
@@ -157,6 +159,10 @@ public class MappingDataTypeRepair {
 					continue;
 				}
 
+				//TODO: This is a crude hack, just because I did not understand what to do with the sql concatenation here. Dag
+				if (functionSymbol.getName().equals("CONCAT"))
+					continue;
+				
 				if (functionSymbol.isDataTypePredicate()) {
 
                     Function normal = qvv.getNormal(atom);

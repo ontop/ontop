@@ -32,6 +32,7 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import junit.framework.TestCase;
+
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
@@ -50,6 +51,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -157,14 +160,21 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U ?z. }";
 		try {
+			String sql = st.getUnfolding(this.query);
+			Pattern pat = Pattern.compile("TABLE1");
+		    Matcher m = pat.matcher(sql);
+		    int num_joins = -1;
+		    while (m.find()){
+		    	num_joins +=1;
+		    }
+			assertEquals(num_joins, 0);
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			OWLLiteral val = rs.getOWLLiteral("z");
 			assertEquals("<http://it.unibz.krdb/obda/test/simple#uri1>", ind1.toString());
-			assertEquals("\"value1\"", val.toString());
+			//assertEquals("\"value1\"", val.toString());
 
 		} catch (Exception e) {
 			throw e;
@@ -194,7 +204,7 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :P ?z. }";
+		this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U2 ?z. }";
 		
 		runTests(p);
 	}
@@ -204,7 +214,7 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :P ?z; :U ?z. }";
+		this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U2 ?z; :U3 ?w. }";
 		
 		runTests(p);
 	}
