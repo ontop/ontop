@@ -223,5 +223,6 @@ public class SemanticIndexLUBMHTest extends TestCase {
 			log.debug("Data insertion time: {} ms", insert_time);
 			log.debug("Query execution time: {} ms", time);
 		}
+		quest.dispose();
 	}
 }

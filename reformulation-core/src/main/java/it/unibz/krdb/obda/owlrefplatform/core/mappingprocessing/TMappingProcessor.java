@@ -140,14 +140,23 @@ public class TMappingProcessor {
 					
 				 	// Here we can merge conditions of the new query with the one we have
 					// just found
-					List<Function> newconditions = newRule.getConditions();
-					for (Function f : newconditions)
+					// new map always has just one set of filters  !!
+					List<Function> newconditions = newRule.getConditions().get(0);
+					for (Function f : newconditions) 
 						SubstitutionUtilities.applySubstitution(f, fromNewRule);
 
-					List<Function> existingconditions = currentRule.getConditions();
-					if (newconditions.equals(existingconditions)) {
-						return;
-					}	
+					List<List<Function>> existingconditions = currentRule.getConditions();
+					for (List<Function> econd : existingconditions) {
+						boolean found = true;
+						for (Function nc : newconditions)
+							if (!econd.contains(nc)) { 
+								found = false;
+								break;
+							}	
+						// if each of the new conditions is found among econd then the new map is redundant
+						if (found)
+							return;
+					}
 					
 	                mappingIterator.remove();
 
@@ -156,6 +165,7 @@ public class TMappingProcessor {
 				}				
 			}
 			rules.add(newRule);
+			//System.out.println("AFTER CQC:\n" + rules);
 		}
 	}
 
@@ -443,9 +453,10 @@ public class TMappingProcessor {
 		for (Entry<Predicate, TMappingIndexEntry> entry : mappingIndex.entrySet()) 
 			for (TMappingRule mapping : entry.getValue()) {
 				CQIE cq = mapping.asCQIE();
+				//System.out.println(cq);
 				tmappingsProgram.add(cq);
 			}
-		
+		//System.out.println(tmappingsProgram);
 		return tmappingsProgram;
 	}
 

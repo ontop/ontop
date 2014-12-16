@@ -13,9 +13,12 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /***
  * Splits a given {@link mapping} into builtin predicates ({@link conditions})
@@ -30,7 +33,8 @@ public class TMappingRule {
 	private final Function head;
 	private final List<Function> databaseAtoms;	
 	private final CQIE stripped;
-	private final List<Function> filterAtoms;	
+	// an OR-connected list of AND-connected atomic filters
+	private final List<List<Function>> filterAtoms;	  
 	private final CQContainmentCheckUnderLIDs cqc;   
 
 	
@@ -54,49 +58,67 @@ public class TMappingRule {
 	 */
 	
 	public TMappingRule(Function head, List<Function> body, CQContainmentCheckUnderLIDs cqc) {
-		this.filterAtoms = new ArrayList<>(body.size()); // we estimate the size
-		this.databaseAtoms = new ArrayList<>(body.size());
+		this.databaseAtoms = new ArrayList<>(body.size()); // we estimate the size
 		
-		int freshVarCount = 0;
+		List<Function> filters = new ArrayList<>(body.size());
 		
 		for (Function atom : body) {
-			Function clone = (Function)atom.clone();
-			if (clone.getFunctionSymbol() instanceof BuiltinPredicate) {
-				filterAtoms.add(clone);
+			if (atom.getFunctionSymbol() instanceof BuiltinPredicate) {
+				Function clone = (Function)atom.clone();
+				filters.add(clone);
 			}
 			else {
 				// database atom, we need to replace all constants by filters
-				for (int i = 0; i < clone.getTerms().size(); i++) {
-					Term term = clone.getTerm(i);
-					if (term instanceof Constant) {
-						// Found a constant, replacing with a fresh variable
-						// and adding the new equality atom.
-						freshVarCount++;
-						Variable freshVariable = fac.getVariable("?FreshVar" + freshVarCount);
-						filterAtoms.add(fac.getFunctionEQ(freshVariable, term));
-						clone.setTerm(i, freshVariable);
-					}
-				}
-				databaseAtoms.add(clone);			
+				databaseAtoms.add(replaceConstants(atom, filters));			
 			}
 		}
-		// TODO: would it not be a good idea to eliminate constants from the head as well?
-		this.head = (Function)head.clone();
-		this.stripped = fac.getCQIE(head, databaseAtoms);
+		if (filters.isEmpty()) 
+			this.filterAtoms = Collections.emptyList();
+		else {
+			this.filterAtoms = new ArrayList<>(1); // one element
+			this.filterAtoms.add(filters);
+		}
+		
+		this.head = replaceConstants(head, filters);
+		this.stripped = fac.getCQIE(this.head, databaseAtoms);
 		this.cqc = cqc;
 	}
 
+	
+	private int freshVarCount = 0;
+	private final Map<Constant, Variable> valueMap = new HashMap<>();
+	
+	private Function replaceConstants(Function a, List<Function> filters) {
+		Function atom = (Function)a.clone();
+		
+		for (int i = 0; i < atom.getTerms().size(); i++) {
+			Term term = atom.getTerm(i);
+			if (term instanceof Constant) {
+				// Found a constant, replacing with a fresh variable
+				// and adding the new equality atom
+				Constant c = (Constant)term;
+				Variable var = valueMap.get(c);
+				if (var == null) {
+					freshVarCount++;
+					var = fac.getVariable("?FreshVar" + freshVarCount);
+					valueMap.put(c, var);
+					filters.add(fac.getFunctionEQ(var, c));
+				}
+				atom.setTerm(i, var);
+			}
+		}
+		
+		return atom;
+	}
+	
 	public TMappingRule(TMappingRule baseRule, List<Function> conditionsOR) {
 		this.databaseAtoms = cloneList(baseRule.databaseAtoms);
 		this.head = (Function)baseRule.head.clone();
 
-		List<Function> conditions1 = cloneList(baseRule.filterAtoms);
-		List<Function> conditions2 = cloneList(conditionsOR);
-		
-		Function orAtom = fac.getFunctionOR(getMergedConditions(conditions1), 
-											getMergedConditions(conditions2));
-		filterAtoms = new ArrayList<>(1);
-		filterAtoms.add(orAtom);
+		this.filterAtoms = new ArrayList<>(baseRule.filterAtoms.size() + 1);
+		for (List<Function> baseList: baseRule.filterAtoms)
+			filterAtoms.add(cloneList(baseList));		
+		filterAtoms.add(conditionsOR);
 
 		this.stripped = fac.getCQIE(head, databaseAtoms);
 		this.cqc = baseRule.cqc;
@@ -104,7 +126,10 @@ public class TMappingRule {
 	
 	
 	public TMappingRule(Function head, TMappingRule baseRule) {
-		this.filterAtoms = cloneList(baseRule.filterAtoms);
+		this.filterAtoms = new ArrayList<>(baseRule.filterAtoms.size());
+		for (List<Function> baseList: baseRule.filterAtoms)
+			filterAtoms.add(cloneList(baseList));
+		
 		this.databaseAtoms = cloneList(baseRule.databaseAtoms);
 		this.head = (Function)head.clone();
 		
@@ -136,7 +161,17 @@ public class TMappingRule {
 		if (!filterAtoms.isEmpty()) {
 			combinedBody = new ArrayList<>(databaseAtoms.size() + filterAtoms.size()); 
 			combinedBody.addAll(databaseAtoms);
-			combinedBody.addAll(filterAtoms);
+			
+			Iterator<List<Function>> iterOR = filterAtoms.iterator();
+			List<Function> list = iterOR.next(); // IMPORTANT: assume that conditions is non-empty
+			Function mergedConditions = getMergedByAND(list);
+			while (iterOR.hasNext()) {
+				list = iterOR.next();
+				Function e = getMergedByAND(list);
+				mergedConditions = fac.getFunctionOR(e, mergedConditions);				
+			}
+			
+			combinedBody.add(mergedConditions);
 		}
 		else
 			combinedBody = databaseAtoms;
@@ -146,6 +181,17 @@ public class TMappingRule {
 		return cq;
 	}
 	
+	private static Function getMergedByAND(List<Function> list) {
+		Iterator<Function> iterAND = list.iterator();
+		Function mergedConditions = iterAND.next();
+		while (iterAND.hasNext()) {
+			Function e = iterAND.next();
+			mergedConditions = fac.getFunctionAND(e, mergedConditions);				
+		}		
+		return mergedConditions;
+	}
+	
+	
 	public boolean isFact() {
 		return databaseAtoms.isEmpty() && filterAtoms.isEmpty();
 	}
@@ -154,7 +200,7 @@ public class TMappingRule {
 		return head.getTerms();
 	}
 	
-	public List<Function> getConditions() {
+	public List<List<Function>> getConditions() {
 		return filterAtoms;
 	}
 	
@@ -170,15 +216,6 @@ public class TMappingRule {
 	 * 
 	 * @return
 	 */
-	private static Function getMergedConditions(List<Function> conditions) {
-		Iterator<Function> iter = conditions.iterator();
-		Function mergedConditions = iter.next(); // IMPORTANT: assume that conditions is non-empty
-		while (iter.hasNext()) {
-			Function e = iter.next();
-			mergedConditions = fac.getFunctionAND(e, mergedConditions);
-		}
-		return mergedConditions;
-	}
 	
 	@Override
 	public int hashCode() {

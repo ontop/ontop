@@ -1,0 +1,25 @@
+git a[PrefixDeclaration]
+:		http://it.unibz.krdb/obda/test/simple#
+quest:		http://obda.org/quest#
+
+[SourceDeclaration]
+sourceUri	h2
+connectionUrl	jdbc:h2:mem:questjunitdb
+username	sa
+password	
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	mapping1
+target	{uri} :U {val1} . 
+source	SELECT uri, val1 FROM TABLE1 WHERE val1 = 1
+
+mappingId	mapping2
+target	{uri} :U {val1} . 
+source	SELECT uri, val1 FROM TABLE1 WHERE val2 = 1
+
+mappingId	mapping3
+target	{uri} :U {val1} . 
+source	SELECT uri, val1 FROM TABLE1 WHERE val3 = 1
+]] 
+
