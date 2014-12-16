@@ -45,7 +45,7 @@ public class SQLAdapterFactory {
 				return new OracleSQLDialectAdapter();
 			case "org.teiid.jdbc.TeiidDriver":
 				return new TeiidSQLDialectAdapter();
-			case "net.sourceforge.jtds.jdbc":
+			case "net.sourceforge.jtds.jdbc.Driver":
 			case "com.microsoft.sqlserver.jdbc.SQLServerDriver":
 				return new SQLServerSQLDialectAdapter();
 			case "madgik.adp.federatedjdbc.AdpDriver":
