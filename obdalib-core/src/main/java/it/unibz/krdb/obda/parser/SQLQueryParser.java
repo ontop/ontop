@@ -177,7 +177,7 @@ public class SQLQueryParser {
 	
 	
 	/*
-	 * To create a view, I start building a new select statement and add the viewName information in a table in the FROMitem expression
+	 * To create a view, I start building a new select statement and add the viewName information in a table in the FROM item expression
 	 * We create a query that looks like SELECT * FROM viewName
 	 */
 	private ParsedSQLQuery createViewParsed(String viewName, String query) {

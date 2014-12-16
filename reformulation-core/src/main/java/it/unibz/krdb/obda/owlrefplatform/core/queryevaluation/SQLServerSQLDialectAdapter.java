@@ -135,6 +135,22 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 		
 		return bf.toString();
 	}
+
+
+	/** Used in {@link it.unibz.krdb.obda.owlrefplatform.core.Quest.preprocessProjection();}  to get the columns name from the *
+	 *
+	 * @param originalQuery
+	 * @return
+	 */
+
+	@Override
+	public String createDummyQueryToFetchColumns(String originalQuery) {
+		String toReturn = String.format("select * from (%s) view20130219 ", originalQuery);
+
+			toReturn = sqlLimit(toReturn, 1);
+
+		return toReturn;
+	}
 	
 
 }

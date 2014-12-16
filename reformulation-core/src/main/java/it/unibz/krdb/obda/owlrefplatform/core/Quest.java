@@ -21,12 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  */
 
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -40,7 +35,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
-import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessRewriter;
@@ -51,31 +45,26 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair
 import it.unibz.krdb.obda.utils.MappingParser;
 import it.unibz.krdb.obda.utils.MappingSplitter;
 import it.unibz.krdb.obda.utils.MetaMappingExpander;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.JDBCConnectionManager;
-import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.ImplicitDBConstraints;
-import it.unibz.krdb.sql.api.Attribute;
-import it.unibz.krdb.sql.api.RelationJSQL;
+import it.unibz.krdb.sql.*;
+import it.unibz.krdb.sql.api.*;
 
 import java.io.Serializable;
 import java.net.URI;
 import java.security.InvalidParameterException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.JSQLParserException;
 
+import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.*;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.openrdf.query.parser.ParsedQuery;
@@ -713,29 +702,29 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				datasourceQueryGenerator.setUriMap(dataRepository.getUriMap());
 			}
 
-			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
+			preprocessProjection(metadata, unfoldingOBDAModel.getMappings(sourceId), fac);
 
-			
+
 			/***
 			 * Starting mapping processing
 			 */
-			
-			
+
+
 			/**
 			 * Split the mapping
 			 */
-			MappingSplitter mappingSplitler = new MappingSplitter();			
+			MappingSplitter mappingSplitler = new MappingSplitter();
 			mappingSplitler.splitMappings(unfoldingOBDAModel, sourceId);
-			
-			
+
+
 			/**
-			 * Expand the meta mapping 
+			 * Expand the meta mapping
 			 */
 			MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
 			metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
-			
 
-			List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(obdaSource.getSourceID());
+
+			List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
 			unfolder = new QuestUnfolder(mappings, metadata);
 
 			/***
@@ -855,131 +844,348 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 * 
 	 * @param mappings
 	 * @param factory
-	 * @param adapter
 	 * @throws SQLException
 	 */
-	private static void preprocessProjection(Connection localConnection, ArrayList<OBDAMappingAxiom> mappings, OBDADataFactory factory,
-			SQLDialectAdapter adapter) throws SQLException {
+	private static void preprocessProjection(DBMetadata metadata, ArrayList<OBDAMappingAxiom> mappings, OBDADataFactory factory) throws SQLException, JSQLParserException {
 
-		// TODO this code seems buggy, it will probably break easily (check the
-		// part with
-		// parenthesis in the beginning of the for loop.
 
-		Statement st = null;
-		try {
-			st = localConnection.createStatement();
 			for (OBDAMappingAxiom axiom : mappings) {
 				String sourceString = axiom.getSourceQuery().toString();
 
-				/*
-				 * Check if the projection contains select all keyword, i.e.,
-				 * 'SELECT * [...]'.
-				 */
-				if (containSelectAll(sourceString)) {
-					StringBuilder sb = new StringBuilder();
+				Select select = (Select) CCJSqlParserUtil.parse(sourceString);
+				PreprocessProjection ps = new PreprocessProjection(metadata);
+				String query = ps.getMappingQuery(select);
+				axiom.setSourceQuery(factory.getSQLQuery(query));
 
-					 // If the SQL string has sub-queries in its statement
-					if (containChildParentSubQueries(sourceString)) {
-						int childquery1 = sourceString.indexOf("(");
-						int childquery2 = sourceString.indexOf(") AS child");
-						String childquery = sourceString.substring(childquery1 + 1, childquery2);
+//				/*
+//				 * Check if the projection contains select all keyword, i.e.,
+//				 * 'SELECT * [...]'.
+//				 */
+//				if (containSelectAll(sourceString)) {
+//					StringBuilder sb = new StringBuilder();
+//
+//					 // If the SQL string has sub-queries in its statement
+//					if (containChildParentSubQueries(sourceString)) {
+//						int childquery1 = sourceString.indexOf("(");
+//						int childquery2 = sourceString.indexOf(") AS child");
+//						String childquery = sourceString.substring(childquery1 + 1, childquery2);
+//
+//						String copySourceQuery = adapter.createDummyQueryToFetchColumns(childquery);
+//						if (st.execute(copySourceQuery)) {
+//							ResultSetMetaData rsm = st.getResultSet().getMetaData();
+//							boolean needComma = false;
+//							for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
+//								if (needComma) {
+//									sb.append(", ");
+//								}
+//								String col = rsm.getColumnName(pos);
+//								String alias = rsm.getColumnLabel(pos);
+//
+//								//sb.append("CHILD." + col );
+//								sb.append("child.\"" + col + "\" AS \"child_" + (col)+"\"");
+//								needComma = true;
+//							}
+//						}
+//						sb.append(", ");
+//
+//						int parentquery1 = sourceString.indexOf(", (", childquery2);
+//						int parentquery2 = sourceString.indexOf(") AS parent");
+//						String parentquery = sourceString.substring(parentquery1 + 3, parentquery2);
+//
+//						copySourceQuery = adapter.createDummyQueryToFetchColumns(parentquery);
+//						if (st.execute(copySourceQuery)) {
+//							ResultSetMetaData rsm = st.getResultSet().getMetaData();
+//							boolean needComma = false;
+//							for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
+//								if (needComma) {
+//									sb.append(", ");
+//								}
+//								String col = rsm.getColumnName(pos);
+//								//sb.append("PARENT." + col);
+//								sb.append("parent.\"" + col + "\" AS \"parent_" + (col)+"\"");
+//								needComma = true;
+//							}
+//						}
+//
+//						 //If the SQL string doesn't have sub-queries
+//					} else
+//
+//					{
+//						String copySourceQuery = adapter.createDummyQueryToFetchColumns(sourceString);
+//						if (st.execute(copySourceQuery)) {
+//							ResultSetMetaData rsm = st.getResultSet().getMetaData();
+//							boolean needComma = false;
+//							for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
+//								if (needComma) {
+//									sb.append(", ");
+//								}
+//								sb.append("\"" + rsm.getColumnName(pos) + "\"");
+//								needComma = true;
+//							}
+//						}
+//					}
+//
+//					/*
+//					 * Replace the asterisk with the proper column names
+//					 */
+//					String columnProjection = sb.toString();
+//					String tmp = axiom.getSourceQuery().toString();
+//					int fromPosition = tmp.toLowerCase().indexOf("from");
+//					int asteriskPosition = tmp.indexOf('*');
+//					if (asteriskPosition != -1 && asteriskPosition < fromPosition) {
+//						String str = sourceString.replaceFirst("\\*", columnProjection);
+//						axiom.setSourceQuery(factory.getSQLQuery(str));
+//					}
+//				}
+//			}
+//		} finally {
+//			if (st != null) {
+//				st.close();
+//			}
+		}
+	}
 
-						String copySourceQuery = createDummyQueryToFetchColumns(childquery, adapter);
-						if (st.execute(copySourceQuery)) {
-							ResultSetMetaData rsm = st.getResultSet().getMetaData();
-							boolean needComma = false;
-							for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
-								if (needComma) {
-									sb.append(", ");
-								}
-								String col = rsm.getColumnName(pos);
-								//sb.append("CHILD." + col );
-								sb.append("child.\"" + col + "\" AS \"child_" + (col)+"\"");
-								needComma = true;
-							}
-						}
-						sb.append(", ");
+	/**
+	 * This visitor class remove * and substitute with the columns name
+	 */
+	private static class PreprocessProjection implements SelectVisitor, SelectItemVisitor, FromItemVisitor {
 
-						int parentquery1 = sourceString.indexOf(", (", childquery2);
-						int parentquery2 = sourceString.indexOf(") AS parent");
-						String parentquery = sourceString.substring(parentquery1 + 3, parentquery2);
 
-						copySourceQuery = createDummyQueryToFetchColumns(parentquery, adapter);
-						if (st.execute(copySourceQuery)) {
-							ResultSetMetaData rsm = st.getResultSet().getMetaData();
-							boolean needComma = false;
-							for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
-								if (needComma) {
-									sb.append(", ");
-								}
-								String col = rsm.getColumnName(pos);
-								//sb.append("PARENT." + col);
-								sb.append("parent.\"" + col + "\" AS \"parent_" + (col)+"\"");
-								needComma = true;
-							}
-						}
 
-						 //If the SQL string doesn't have sub-queries
-					} else 
-					
-					{
-						String copySourceQuery = createDummyQueryToFetchColumns(sourceString, adapter);
-						if (st.execute(copySourceQuery)) {
-							ResultSetMetaData rsm = st.getResultSet().getMetaData();
-							boolean needComma = false;
-							for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
-								if (needComma) {
-									sb.append(", ");
-								}
-								sb.append("\"" + rsm.getColumnName(pos) + "\"");
-								needComma = true;
-							}
-						}
-					}
 
-					/*
-					 * Replace the asterisk with the proper column names
-					 */
-					String columnProjection = sb.toString();
-					String tmp = axiom.getSourceQuery().toString();
-					int fromPosition = tmp.toLowerCase().indexOf("from");
-					int asteriskPosition = tmp.indexOf('*');
-					if (asteriskPosition != -1 && asteriskPosition < fromPosition) {
-						String str = sourceString.replaceFirst("\\*", columnProjection);
-						axiom.setSourceQuery(factory.getSQLQuery(str));
-					}
+		private List<SelectItem> columns =  new ArrayList<SelectItem>();
+		private List<SelectItem> aliasColumns =  new ArrayList<SelectItem>();
+
+		private boolean selectAll = false;
+
+
+		private DBMetadata metadata;
+
+		public PreprocessProjection(DBMetadata metadata ) throws SQLException {
+
+
+
+			this.metadata =  metadata;
+
+		}
+
+		private List<SelectItem> obtainColumnsFromMetadata( Table table){
+
+			List<SelectItem> columnNames = new ArrayList<>();
+
+			DataDefinition tableDefinition = metadata.getDefinition(table.getFullyQualifiedName());
+
+			if (tableDefinition == null) {
+				throw new RuntimeException("Definition not found for table '" + table + "'.");
+			}
+
+			int size = tableDefinition.getNumOfAttributes();
+
+			for (int pos = 1; pos <= size; pos++) {
+				SelectExpressionItem columnName = new SelectExpressionItem(new Column (metadata.getAttributeName(table.getFullyQualifiedName(), pos)));
+
+				columnNames.add(columnName);
+			}
+			return columnNames;
+
+		}
+
+		public String getMappingQuery(Select select) throws JSQLParserException {
+
+			if (select.getWithItemsList() != null) {
+				for (WithItem withItem : select.getWithItemsList()) {
+					withItem.accept(this);
 				}
 			}
-		} finally {
-			if (st != null) {
-				st.close();
+			select.getSelectBody().accept(this);
+
+			return select.toString();
+		}
+
+		private List<SelectItem> obtainColumns(PlainSelect select){
+
+			List<SelectItem> columnNames =  new ArrayList<SelectItem>();
+
+			FromItem table= select.getFromItem();
+
+			for (SelectItem expr : select.getSelectItems()){
+				expr.accept(this);
+
+				//create a list of selectItem
+				//if * add all selectItems obtained
+
+				if(selectAll) {
+
+					columnNames.addAll(obtainColumnsFromMetadata((Table) table));
+
+				}
+
+//				else add only the column
+				else {
+
+					columnNames.add(expr);
+				}
+
+				selectAll=false;
+			}
+
+
+
+			return columnNames;
+
+
+		}
+
+		private void buildColumnsForMainSelect(List<SelectItem> subSelectColumns, String alias) {
+
+			for (SelectItem column:  subSelectColumns){
+
+				Table table =  new Table(alias);
+				SelectExpressionItem mainColumn = new SelectExpressionItem( new Column ( table,  column.toString() ));
+				mainColumn.setAlias(new Alias(table+"_"+column.toString()));
+				aliasColumns.add( mainColumn );
 			}
 		}
-	}
 
-	private static final String selectAllPattern = "(S|s)(E|e)(L|l)(E|e)(C|c)(T|t)\\s+\\*";
-	private static final String subQueriesPattern = "\\(.*\\)\\s+(A|a)(S|s)\\s+(C|c)(H|h)(I|i)(L|l)(D|d),\\s+\\(.*\\)\\s+(A|a)(S|s)\\s+(P|p)(A|a)(R|r)(E|e)(N|n)(T|t)";
 
-	private static boolean containSelectAll(String sql) {
-		final Pattern pattern = Pattern.compile(selectAllPattern);
-		return pattern.matcher(sql).find();
-	}
+		@Override
+		public void visit(PlainSelect plainSelect) {
 
-	private static boolean containChildParentSubQueries(String sql) {
-		final Pattern pattern = Pattern.compile(subQueriesPattern);
-		return pattern.matcher(sql).find();
-	}
 
-	private static String createDummyQueryToFetchColumns(String originalQuery, SQLDialectAdapter adapter) {
-		String toReturn = String.format("select * from (%s) view20130219 ", originalQuery);
-		if (adapter instanceof SQLServerSQLDialectAdapter) {
-			SQLServerSQLDialectAdapter sqlServerAdapter = (SQLServerSQLDialectAdapter) adapter;
-			toReturn = sqlServerAdapter.sqlLimit(toReturn, 1);
-		} else {
-			toReturn += adapter.sqlSlice(0, Long.MIN_VALUE);
+		for (SelectItem expr : plainSelect.getSelectItems()){
+					expr.accept(this);
+
+					//create a list of selectItem
+					//if * add all selectItems obtained
+
+					if(!selectAll) {
+						columns.add(expr);
+					}
+
+
+				}
+
+			if(selectAll) {
+
+				plainSelect.getFromItem().accept(this);
+
+				if (plainSelect.getJoins() != null) {
+					for (Join join : plainSelect.getJoins()) {
+						join.getRightItem().accept(this);
+					}
+				}
+
+				selectAll=false;
+
+				if (!aliasColumns.isEmpty()) {
+
+					columns.addAll(aliasColumns);
+
+				} else {
+
+					columns.addAll(obtainColumns(plainSelect));
+
+
+				}
+
+				plainSelect.setSelectItems(columns);
+			}
+
+
+
 		}
-		return toReturn;
+
+
+
+		@Override
+		public void visit(SetOperationList setOpList) {
+
+		}
+
+		@Override
+		public void visit(WithItem withItem) {
+
+		}
+
+		@Override
+		public void visit(AllColumns allColumns) {
+
+			selectAll=true;
+
+		}
+
+		@Override
+		public void visit(AllTableColumns allTableColumns) {
+
+
+			selectAll=true;
+
+		}
+
+		@Override
+		public void visit(SelectExpressionItem selectExpressionItem) {
+
+		}
+
+		@Override
+		public void visit(Table tableName) {
+
+		}
+
+		@Override
+		public void visit(SubSelect subSelect) {
+
+			List<SelectItem> subSelectColumns = new ArrayList<>();
+
+			if (subSelect.getSelectBody() instanceof PlainSelect) {
+
+				PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
+
+				if (!(subSelBody.getJoins() != null) && !(subSelBody.getWhere() != null)) {
+
+					subSelectColumns = obtainColumns(subSelBody);
+
+					subSelBody.setSelectItems(subSelectColumns);
+				}
+			}
+
+			String alias = subSelect.getAlias().getName();
+			buildColumnsForMainSelect(subSelectColumns, alias);
+
+		}
+
+		@Override
+		public void visit(SubJoin subjoin) {
+
+		}
+
+		@Override
+		public void visit(LateralSubSelect lateralSubSelect) {
+
+		}
+
+		@Override
+		public void visit(ValuesList valuesList) {
+
+		}
+
+
+
 	}
+
+//	private static final String selectAllPattern = "(S|s)(E|e)(L|l)(E|e)(C|c)(T|t)\\s+\\*";
+//	private static final String subQueriesPattern = "\\(.*\\)\\s+(A|a)(S|s)\\s+(C|c)(H|h)(I|i)(L|l)(D|d),\\s+\\(.*\\)\\s+(A|a)(S|s)\\s+(P|p)(A|a)(R|r)(E|e)(N|n)(T|t)";
+//
+//	private static boolean containSelectAll(String sql) {
+//		final Pattern pattern = Pattern.compile(selectAllPattern);
+//		return pattern.matcher(sql).find();
+//	}
+//
+//	private static boolean containChildParentSubQueries(String sql) {
+//		final Pattern pattern = Pattern.compile(subQueriesPattern);
+//		return pattern.matcher(sql).find();
+//	}
+
 
 
 

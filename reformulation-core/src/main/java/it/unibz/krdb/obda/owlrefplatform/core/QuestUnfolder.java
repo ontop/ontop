@@ -9,22 +9,10 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Joiner;
+import it.unibz.krdb.obda.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.URITemplatePredicate;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
@@ -68,9 +56,11 @@ public class QuestUnfolder {
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
-	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata)
+	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata )
 	{
-		this.metadata = metadata;	
+		this.metadata = metadata;
+
+
 		
 		analyzer = new Mapping2DatalogConverter(metadata);
 

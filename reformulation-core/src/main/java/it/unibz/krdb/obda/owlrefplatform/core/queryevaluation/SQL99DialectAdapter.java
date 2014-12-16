@@ -190,6 +190,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	 * not supported there.
 	 *
 	 */
+	@Override
 	public String getSQLLexicalFormDatetime(String v) {
 		// TODO: check whether this implementation inherited from JDBCUtility is correct
 		
@@ -224,6 +225,15 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		bf.append("'");
 		
 		return bf.toString();
+	}
+
+	@Override
+	public String createDummyQueryToFetchColumns(String originalQuery) {
+		String toReturn = String.format("select * from (%s) view20130219 ", originalQuery);
+
+			toReturn += sqlSlice(0, Long.MIN_VALUE);
+
+		return toReturn;
 	}
 	
 }

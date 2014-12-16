@@ -55,9 +55,10 @@ public class MappingParser {
 		this.sqlQueryParser = new SQLQueryParser(conn);
 		this.parsedMappings = this.parseMappings();
 	}
-	
 
-	/**
+
+
+    /**
 	 * Called by Quest when fetching non-full metadata
 	 * Only metadata for the tables in this list is extracted by Quest
 	 * 
