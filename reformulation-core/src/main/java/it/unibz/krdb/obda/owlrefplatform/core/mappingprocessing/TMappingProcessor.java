@@ -343,8 +343,10 @@ public class TMappingProcessor {
 		 * list.
 		 */
 		
+		CQContainmentCheckUnderLIDs cqc0 = new CQContainmentCheckUnderLIDs(null);
+		
 		for (CQIE mapping : originalMappings) {			
-			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc);
+			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc0);
 			Predicate ruleIndex = mapping.getHead().getFunctionSymbol();
 			List<TMappingRule> ms = originalMappingIndex.get(ruleIndex);
 			if (ms == null) {
@@ -468,6 +470,7 @@ public class TMappingProcessor {
 				//System.out.println(cq);
 				tmappingsProgram.add(cq);
 			}
+				
 		//System.out.println(tmappingsProgram);
 		return tmappingsProgram;
 	}
