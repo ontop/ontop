@@ -69,6 +69,11 @@ public class QuestUnfolder {
 	public int getRulesSize() {
 		return unfoldingProgram.size();
 	}
+
+	@Deprecated
+	public List<CQIE> getRules() {
+		return unfoldingProgram;
+	}
 	
 	/**
 	 * Setting up the unfolder and SQL generation
