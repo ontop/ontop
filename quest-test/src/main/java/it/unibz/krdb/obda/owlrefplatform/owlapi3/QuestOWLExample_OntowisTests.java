@@ -62,185 +62,52 @@ interface ParamConst{
 	public static final String MYSQL = "src/main/resources/example/ontowis-5joins-int.obda";
 	public static final String DB2_VIEW = "src/main/resources/example/ontowis-5joins-int-view-db2.obda";
 }
+
+enum DbType{
+	MYSQL, POSTGRES
+}
+
 public class QuestOWLExample_OntowisTests {
+	final String obdafile;
+	final DbType type;
+
+	final String owlfile = "src/main/resources/example/ontowis-5joins-int.owl";
+	final String usrConstrinFile = "src/main/resources/example/funcCons.txt";
 	
-	public QuestOWLExample_OntowisTests(String obdaFile){
-		this.obdafile = obdaFile;
-	}
 	
-	/*
-	 * Use the sample database using H2 from
-	 * https://github.com/ontop/ontop/wiki/InstallingTutorialDatabases
-	 * 
-	 * Please use the pre-bundled H2 server from the above link
-	 * 
-	 */
-	String owlfile = "src/main/resources/example/ontowis-5joins-int.owl";
-	String obdafile;
-	String usrConstrinFile = "src/main/resources/example/funcCons.txt";
-	
+	// Internal Modifiable State
 	QuestOWL reasoner ;
 	
-	
-	
+	public QuestOWLExample_OntowisTests(String obdaFile, DbType type){
+		this.obdafile = obdaFile;
+		this.type = type;
+	}
+
 	// Exclude from T-Mappings
 	//final String tMappingsConfFile = "src/main/resources/example/tMappingsConf.conf";
-	
+
 	public void runQuery(String obdaFile) throws Exception {
-
-		/*
-		 * Get the book information that is stored in the database
-		 */
 		
-		String[] queriesOneSPARQL = new String[24];
-		String[] queriesTwoSPARQL = new String[24];
-		String[] queriesThreeSPARQL = new String[24];
-		String[] resultsOne = new String[31];
-		String[] resultsTwo = new String[31];
-		String[] resultsThree = new String[31];
-
-		
-		//queriesThreeSPARQL[0]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString5j ?y2 . ?x :hasString25j ?y3 .  Filter( ?y  < 500000)  } ";
-
-		/*
-		 * OneSPARQL JOINS
-		 */
-		//1 SQL JOIN
-		queriesOneSPARQL[0]="PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :1Tab1 . ?x :Tab2unique2Tab2 ?y . Filter( ?y < 101000)  }  ";
-		queriesOneSPARQL[1]="PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 110000)  } ";
-		queriesOneSPARQL[2]="PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 120000)  } ";
-		queriesOneSPARQL[3]="PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 150000)  } ";
-		queriesOneSPARQL[4]="PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 1100000)  } ";
-		queriesOneSPARQL[5]="PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  Filter( ?y0 < 1500000)  } ";
-
-
-		queriesOneSPARQL[6]="PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :2Tab1 . ?x :Tab3unique2Tab3 ?y . Filter( ?y < 101000)  }  ";
-		queriesOneSPARQL[7]="PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  Filter( ?y1 < 110000)  } ";
-		queriesOneSPARQL[8]="PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  Filter( ?y1 < 120000)  } ";
-		queriesOneSPARQL[9]="PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  Filter( ?y1 < 150000)  } ";
-		queriesOneSPARQL[10]="PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  Filter( ?y1 < 1100000)  } ";
-		queriesOneSPARQL[11]="PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  Filter( ?y1 < 1500000)  } ";
-
-
-		queriesOneSPARQL[12]="PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :3Tab1 . ?x :Tab4unique2Tab4 ?y . Filter( ?y < 101000)  } "; 
-		queriesOneSPARQL[13]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  Filter( ?y2 < 110000)  }"; 
-		queriesOneSPARQL[14]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  Filter( ?y2 < 120000)  } ";
-		queriesOneSPARQL[15]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  Filter( ?y2 < 150000)  } ";
-		queriesOneSPARQL[16]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  Filter( ?y2 < 1100000)  } ";
-		queriesOneSPARQL[17]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  Filter( ?y2 < 1500000)  } ";
-
-
-
-		//4 SQL JOIN
-		queriesOneSPARQL[18]="PREFIX :	<http://www.example.org/>  SELECT ?x ?y  WHERE {?x a  :4Tab1 . ?x :Tab5unique2Tab5 ?y . Filter( ?y < 101000) } ";
-		queriesOneSPARQL[19]="PREFIX :	<http://www.example.org/>  select  ?x   ?y3   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y3.  Filter( ?y3 < 110000)  } ";
-		queriesOneSPARQL[20]="PREFIX :	<http://www.example.org/>  select  ?x   ?y3   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y3.  Filter( ?y3 < 120000)  } ";
-		queriesOneSPARQL[21]="PREFIX :	<http://www.example.org/>  select  ?x   ?y3   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y3.  Filter( ?y3 < 150000)  } ";
-		queriesOneSPARQL[22]="PREFIX :	<http://www.example.org/>  select  ?x   ?y3   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y3.  Filter( ?y3 < 1100000)  } ";
-		queriesOneSPARQL[23]="PREFIX :	<http://www.example.org/>  select  ?x   ?y3   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y3.  Filter( ?y3 < 1500000)  } ";
-
-		
-		
-		
-		
-		
-		/*
-		 * TWO SPARQL JOINS
-		 */
-		//1 SQL JOIN
-		queriesTwoSPARQL[0]=	"PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :1Tab1 . ?x :Tab2unique2Tab2 ?y .  ?x :hasString2j ?y2 . Filter( ?y < 101000)  }  ";
-		queriesTwoSPARQL[1]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString2j ?y2 .  Filter( ?y0 < 110000)  } ";
-		queriesTwoSPARQL[2]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString2j ?y2 .  Filter( ?y0 < 120000)  } ";
-		queriesTwoSPARQL[3]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString2j ?y2 .  Filter( ?y0 < 150000)  } ";
-		queriesTwoSPARQL[4]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString2j ?y2 .  Filter( ?y0 < 1100000)  } ";
-		queriesTwoSPARQL[5]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.   ?x :hasString2j ?y2 .  Filter( ?y0 < 1500000)  } ";
-
-
-		queriesTwoSPARQL[6]=	"PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :2Tab1 . ?x :Tab3unique2Tab3 ?y .  ?x :hasString3j ?y2 .  Filter( ?y < 101000)  }  ";
-		queriesTwoSPARQL[7]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 .  Filter( ?y1 < 110000)  } ";
-		queriesTwoSPARQL[8]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 .  Filter( ?y1 < 120000)  } ";
-		queriesTwoSPARQL[9]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 .  Filter( ?y1 < 150000)  } ";
-		queriesTwoSPARQL[10]=   "PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 .  Filter( ?y1 < 1100000)  } ";
-		queriesTwoSPARQL[11]=   "PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 .  Filter( ?y1 < 1500000)  } ";
-
-
-		queriesTwoSPARQL[12]="PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :3Tab1 . ?x :Tab4unique2Tab4 ?y .  ?x :hasString4j ?y3 .  Filter( ?y < 101000)  } "; 
-		queriesTwoSPARQL[13]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  ?x :hasString4j ?y3 .  Filter( ?y2 < 110000)  }"; 
-		queriesTwoSPARQL[14]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  ?x :hasString4j ?y3 .  Filter( ?y2 < 120000)  } ";
-		queriesTwoSPARQL[15]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  ?x :hasString4j ?y3 .  Filter( ?y2 < 150000)  } ";
-		queriesTwoSPARQL[16]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  ?x :hasString4j ?y3 .  Filter( ?y2 < 1100000)  } ";
-		queriesTwoSPARQL[17]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.   ?x :hasString4j ?y3 .  Filter( ?y2 < 1500000)  } ";
-
-		//4 SQL JOIN
-		queriesTwoSPARQL[18]="PREFIX :	<http://www.example.org/>  SELECT *  WHERE {?x a  :4Tab1 . ?x :Tab5unique2Tab5 ?y . ?x :hasString5j ?y2 .   Filter( ?y < 101000)  } ";
-		queriesTwoSPARQL[19]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString5j ?y2 .   Filter( ?y < 110000)  } ";
-		queriesTwoSPARQL[20]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString5j ?y2 .   Filter( ?y < 120000)  } ";
-		queriesTwoSPARQL[21]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString5j ?y2 .   Filter( ?y < 150000)  } ";
-		queriesTwoSPARQL[22]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString5j ?y2 .   Filter( ?y < 1100000)  } ";
-		queriesTwoSPARQL[23]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString5j ?y2 .   Filter( ?y  < 1500000)  } ";
-
-		
-		
-		
-		
-
-		/*
-		 * Three SPARQL JOINS
-		 */
-		
-		
-		//1 SQL JOIN
-		queriesThreeSPARQL[0]=	"PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {       ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y .  ?x :hasString2j ?y2 . ?x :hasString22j ?y3 .Filter( ?y < 101000)  }  ";
-		queriesThreeSPARQL[1]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString2j ?y2 . ?x :hasString22j ?y3 . Filter( ?y0 < 110000)  } ";
-		queriesThreeSPARQL[2]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString2j ?y2 . ?x :hasString22j ?y3 . Filter( ?y0 < 120000)  } ";
-		queriesThreeSPARQL[3]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString2j ?y2 . ?x :hasString22j ?y3 . Filter( ?y0 < 150000)  } ";
-		queriesThreeSPARQL[4]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.  ?x :hasString2j ?y2 . ?x :hasString22j ?y3 . Filter( ?y0 < 1100000)  } ";
-		queriesThreeSPARQL[5]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y0   where { ?x a :1Tab1 . ?x :Tab2unique2Tab2 ?y0.   ?x :hasString2j ?y2 . ?x :hasString22j ?y3 . Filter( ?y0 < 1500000)  } ";
-
-		//2 SQL JOIN
-		queriesThreeSPARQL[6]=	"PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :2Tab1 . ?x :Tab3unique2Tab3 ?y .  ?x :hasString3j ?y2 . ?x :hasString23j ?y3 . Filter( ?y < 101000)  }  ";
-		queriesThreeSPARQL[7]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 . ?x :hasString23j ?y3 . Filter( ?y1 < 110000)  } ";
-		queriesThreeSPARQL[8]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 . ?x :hasString23j ?y3 . Filter( ?y1 < 120000)  } ";
-		queriesThreeSPARQL[9]=	"PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 . ?x :hasString23j ?y3 . Filter( ?y1 < 150000)  } ";
-		queriesThreeSPARQL[10]="PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 . ?x :hasString23j ?y3 . Filter( ?y1 < 1100000)  } ";
-		queriesThreeSPARQL[11]="PREFIX :	<http://www.example.org/>  select  ?x   ?y1   where { ?x a :2Tab1 . ?x :Tab3unique2Tab3 ?y1.  ?x :hasString3j ?y2 . ?x :hasString23j ?y3 . Filter( ?y1 < 1500000)  } ";
-
-		//3 SQL JOIN
-		queriesThreeSPARQL[12]="PREFIX :	<http://www.example.org/> SELECT ?x ?y  WHERE {?x a  :3Tab1 . ?x :Tab4unique2Tab4 ?y .  ?x :hasString4j ?y4 . ?x :hasString24j ?y3 . Filter( ?y < 101000)  } "; 
-		queriesThreeSPARQL[13]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  ?x :hasString4j ?y4 . ?x :hasString24j ?y3 . Filter( ?y2 < 110000)  }"; 
-		queriesThreeSPARQL[14]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  ?x :hasString4j ?y4 . ?x :hasString24j ?y3 . Filter( ?y2 < 120000)  } ";
-		queriesThreeSPARQL[15]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  ?x :hasString4j ?y4 . ?x :hasString24j ?y3 . Filter( ?y2 < 150000)  } ";
-		queriesThreeSPARQL[16]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.  ?x :hasString4j ?y4 . ?x :hasString24j ?y3 . Filter( ?y2 < 1100000)  } ";
-		queriesThreeSPARQL[17]="PREFIX :	<http://www.example.org/>  select  ?x   ?y2   where { ?x a :3Tab1 . ?x :Tab4unique2Tab4 ?y2.   ?x :hasString4j ?y4 . ?x :hasString24j ?y3 . Filter( ?y2 < 1500000)  } ";
-
-		//4 SQL JOIN
-		queriesThreeSPARQL[18]="PREFIX :	<http://www.example.org/>  SELECT *  WHERE {?x a  :4Tab1 . ?x :Tab5unique2Tab5 ?y . ?x :hasString5j ?y2 . ?x :hasString25j ?y3 .  Filter( ?y < 101000)  } ";
-		queriesThreeSPARQL[19]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString5j ?y2 . ?x :hasString25j ?y3 .  Filter( ?y < 110000)  } ";
-		queriesThreeSPARQL[20]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString5j ?y2 . ?x :hasString25j ?y3 .  Filter( ?y < 120000)  } ";
-		queriesThreeSPARQL[21]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString5j ?y2 . ?x :hasString25j ?y3 .  Filter( ?y < 150000)  } ";
-		queriesThreeSPARQL[22]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString5j ?y2 . ?x :hasString25j ?y3 .  Filter( ?y < 1100000)  } ";
-		queriesThreeSPARQL[23]="PREFIX :	<http://www.example.org/>  select  *   where { ?x a :4Tab1 . ?x :Tab5unique2Tab5 ?y. ?x :hasString5j ?y2 . ?x :hasString25j ?y3 .  Filter( ?y  < 1500000)  } ";
-
-
-
-	//	queries[30]="PREFIX :	<http://www.example.org/>  SELECT ?x   WHERE {?x a  :4Tab1 .   } LIMIT 100000  ";
+		//	queries[30]="PREFIX :	<http://www.example.org/>  SELECT ?x   WHERE {?x a  :4Tab1 .   } LIMIT 100000  ";
 
 		QuestOWLConnection conn =  createStuff(false);
 		
-		runQueries(conn, queriesOneSPARQL, resultsOne);
+		// Results
+		String[] resultsOne = new String[31];
+		String[] resultsTwo = new String[31];
+		String[] resultsThree = new String[31];
+		
+		// Create Queries to be run
+		QueryFactory queries = new QueryFactory(type);
+		
+		// Run the tests on the queries
+		runQueries(conn, queries.queriesOneSPARQL, resultsOne);		
+		runQueries(conn, queries.queriesTwoSPARQL, resultsTwo);
+		runQueries(conn, queries.queriesThreeSPARQL, resultsThree);
 
-		runQueries(conn, queriesTwoSPARQL, resultsTwo);
-		
-		runQueries(conn, queriesThreeSPARQL, resultsThree);
-		
-		
 		closeEverything(conn);
-		generateFile(resultsOne, resultsTwo, resultsThree,obdaFile);
-		
+		//		generateFile(resultsOne, resultsTwo, resultsThree,obdaFile);
 
-	
-	
-	
 	}
 
 	/**
@@ -256,27 +123,27 @@ public class QuestOWLExample_OntowisTests {
 		 */
 		PrintWriter writer = new PrintWriter("src/main/resources/example/table.txt", "UTF-8");
 		PrintWriter writerG = new PrintWriter("src/main/resources/example/graph.txt", "UTF-8");
-		
-		
-		
-		
+
+
+
+
 		int j=0;
 		while (j<24){
 			writer.println(resultsOne[j] + " & " + resultsTwo[j] + " & " + resultsThree[j]);
-			
+
 			if (j<=5){
 				String gline = "(1,"+resultsOne[j]+")" + "(2,"+resultsTwo[j]+")" + "(3,"+resultsThree[j]+")" + "(4,"+resultsOne[j+6]+")" + "(5,"+resultsTwo[j+6]+")" + "(6,"+resultsThree[j+6]+")" + "(7,"+resultsOne[j+12]+")" + "(8,"+resultsTwo[j+12]+")" + "(9,"+resultsThree[j+12]+")" + "(10,"+resultsOne[j+18]+")" + "(11,"+resultsTwo[j+18]+")" + "(12,"+resultsThree[j+18]+")" ;
 				writerG.println(gline);
 			}
-			
-			
+
+
 			j++;
-		
-		
-		
+
+
+
 		}
-		
-		
+
+
 		writer.close();
 		writerG.close();
 	}
@@ -289,7 +156,7 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * Close connection and resources
 		 */
-		
+
 		if (conn != null && !conn.isClosed()) {
 			conn.close();
 		}
@@ -308,9 +175,9 @@ public class QuestOWLExample_OntowisTests {
 	 * @throws IOException 
 	 * @throws OWLException
 	 */
-	
-	
-	
+
+
+
 	private QuestOWLConnection createStuff(boolean manualKeys) throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
 
 		/*
@@ -333,19 +200,19 @@ public class QuestOWLExample_OntowisTests {
 		 */
 		QuestPreferences preference = new QuestPreferences();
 		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-//		TEST preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
-		
+		//		TEST preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
+
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
 		QuestOWLFactory factory = new QuestOWLFactory();
 		factory.setOBDAController(obdaModel);
 		factory.setPreferenceHolder(preference);
-		
+
 		/*
 		 * USR CONSTRAINTS !!!!
 		 */
-		
+
 		if (manualKeys){
 			ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
 			factory.setImplicitDBConstraints(constr);
@@ -363,12 +230,12 @@ public class QuestOWLExample_OntowisTests {
 		 * Prepare the data connection for querying.
 		 */
 		QuestOWLConnection conn = reasoner.getConnection();
-		
+
 		return conn;
 
 	}
-	
-	
+
+
 	private void runQueries( QuestOWLConnection conn,
 			String[] queriesOneSPARQL, String[] results) throws OWLException {
 		int j=0;
@@ -376,15 +243,15 @@ public class QuestOWLExample_OntowisTests {
 			String sparqlQuery = queriesOneSPARQL[j];
 			QuestOWLStatement st = conn.createStatement();
 			try {
-	            
+
 				long time = 0;
 				int count = 0;
-				
+
 				for (int i=0; i<4; i++){
 					long t1 = System.currentTimeMillis();
 					QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
 					int columnSize = rs.getColumnCount();
-					 count = 0;
+					count = 0;
 					while (rs.nextRow()) {
 						count ++;
 						for (int idx = 1; idx <= columnSize; idx++) {
@@ -398,8 +265,8 @@ public class QuestOWLExample_OntowisTests {
 					System.out.println("partial time:" + time);
 					rs.close();
 				}
-	            
-	 			/*
+
+				/*
 				 * Print the query summary
 				 */
 				QuestOWLStatement qst = (QuestOWLStatement) st;
@@ -410,21 +277,21 @@ public class QuestOWLExample_OntowisTests {
 				System.out.println("=======================");
 				System.out.println(sparqlQuery);
 				System.out.println();
-				
+
 				System.out.println("The output SQL query:");
 				System.out.println("=====================");
 				System.out.println(sqlQuery);
 
-	            System.out.println("Query Execution Time:");
-	            System.out.println("=====================");
-	            System.out.println((time/4) + "ms");
-	            
-	            results[j] = (time/4)+"" ;
-				
-	            System.out.println("The number of results:");
-	            System.out.println("=====================");
-	            System.out.println(count);
-	            
+				System.out.println("Query Execution Time:");
+				System.out.println("=====================");
+				System.out.println((time/4) + "ms");
+
+				results[j] = (time/4)+"" ;
+
+				System.out.println("The number of results:");
+				System.out.println("=====================");
+				System.out.println(count);
+
 			} finally {
 				if (st != null && !st.isClosed()) {
 					st.close();
@@ -432,8 +299,8 @@ public class QuestOWLExample_OntowisTests {
 			}
 			j++;
 		}
-		
-	
+
+
 
 	}
 
@@ -441,41 +308,47 @@ public class QuestOWLExample_OntowisTests {
 	 * Main client program
 	 */
 	public static void main(String[] args) {
-		
+
 		String obdaFile = null;
-		
+		DbType type = null;
+
 		switch(args[0]){
 		case "--help":{
 			System.out.println(
 					"Options:\n\n"
-					+ "--MYSQL; --POSTGRES; --DB2; "
-					+ "--MYSQL-VIEW; --POSTGRES-VIEW; --DB2-VIEW"
-					+ "\n\n"
-					+ "The concepts for which T-mappings should"
-					+ "be disabled are defined the file tMappingsConf.conf");
+							+ "--MYSQL; --POSTGRES; --DB2; "
+							+ "--MYSQL-VIEW; --POSTGRES-VIEW; --DB2-VIEW"
+							+ "\n\n"
+							+ "The concepts for which T-mappings should"
+							+ "be disabled are defined the file tMappingsConf.conf");
 			System.exit(0);
 			break;
 		}
-		
+
 		case "--MYSQL":{
 			obdaFile = ParamConst.MYSQL;
+			type = DbType.MYSQL;
 			break;
 		}
 		case "--POSTGRESInt":{
 			obdaFile = ParamConst.POSTGRESInt;
+			type = DbType.POSTGRES;
 			break;
 		}
-		
+
 		case "--POSTGRESStr":{
 			obdaFile = ParamConst.POSTGRESStr;
+			type = DbType.POSTGRES;
 			break;
 		}
 		case "--POSTGRESIntView":{
 			obdaFile = ParamConst.POSTGRESIntView;
+			type = DbType.POSTGRES;
 			break;
 		}
 		case "--POSTGRESStrView":{
 			obdaFile = ParamConst.POSTGRESStrView;
+			type = DbType.POSTGRES;
 			break;
 		}
 		case "--DB2" :{
@@ -484,6 +357,7 @@ public class QuestOWLExample_OntowisTests {
 		}
 		case "--MYSQL-VIEW":{
 			obdaFile = ParamConst.MYSQL_VIEW;
+			type = DbType.MYSQL;
 			break;
 		}
 		case "--DB2-VIEW":{
@@ -492,11 +366,132 @@ public class QuestOWLExample_OntowisTests {
 		}	
 		try {
 			System.out.println(obdaFile);
-			
-			QuestOWLExample_OntowisTests example = new QuestOWLExample_OntowisTests(obdaFile);
+
+			QuestOWLExample_OntowisTests example = new QuestOWLExample_OntowisTests(obdaFile, type);
 			example.runQuery(obdaFile);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 }
+
+class QueryTemplates{
+	
+	private final static String SPARQL_END = "}";
+	
+	static String oneSparqlJoinQuery(int nSqlJoins, int filter){
+		String result = oneSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
+		return result;
+	}
+	
+	static String twoSparqlJoinQuery(int nSqlJoins, int filter){
+		String result = twoSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
+		return result;
+	}
+	
+	static String threeSparqlJoinQuery(int nSqlJoins, int filter){
+		String result = threeSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
+		return result;
+	}
+	
+	static private String filter(int filter){
+		return "Filter( ?y < "+filter+" )";
+	}
+	
+	static private String oneSparqlJoinTemplate(int nSqlJoins) {
+		String templ = 
+				"PREFIX :	<http://www.example.org/> "
+						+ "SELECT ?x ?y  "
+						+ "WHERE {"
+						+ "?x a  :"+nSqlJoins+"Tab1 . "
+						+ "?x :Tab"+(nSqlJoins+1)+"unique2Tab"+(nSqlJoins+1)+" ?y . ";
+						return templ;
+	}
+	static private String twoSparqlJoinTemplate(int nSqlJoins){
+		String templ =
+				oneSparqlJoinTemplate(nSqlJoins) +
+				"?x :hasString"+(nSqlJoins+1)+"j ?y1 . "; // Additional Sparql join 1
+		return templ;
+	}
+	static private String threeSparqlJoinTemplate(int nSqlJoins){
+		String templ = twoSparqlJoinTemplate(nSqlJoins) +
+				"?x :hasString2"+(nSqlJoins+1)+"j ?y2 . "; // Additional Sparql Join 2
+				return templ;
+	}
+};
+
+class QueryFactory {
+
+	String[] queriesOneSPARQL = new String[24];
+	String[] queriesTwoSPARQL = new String[24];
+	String[] queriesThreeSPARQL = new String[24];
+	
+	int[] filters = new int[6];
+	
+	QueryFactory(DbType type){
+		fillFilters(type);
+		fillQueryArrays();
+	}
+
+	private void fillQueryArrays (){
+		// 1 SPARQL Join
+		fillOneSparqlJoin();
+		
+		// 2 SPARQL Joins
+		fillTwoSparqlJoins();
+		
+		// 3 SPARQL Joins
+		fillThreeSparqlJoins();
+	}
+	
+	
+	private void fillFilters(DbType type) {
+		switch(type){
+		case MYSQL:	
+			filters[0] = 1000;
+			filters[1] = 10000;
+			filters[2] = 20000;
+			filters[3] = 50000;
+			filters[4] = 100000;
+			filters[5] = 500000;
+			break;
+		case POSTGRES:
+			filters[0] = 101000;
+			filters[1] = 110000;
+			filters[2] = 120000;
+			filters[3] = 150000;
+			filters[4] = 1100000;
+			filters[5] = 1500000;
+			break;
+		}
+	}
+
+	private void fillOneSparqlJoin(){
+		for( int i = 0; i < 24; ++i ){
+			if( i < 6 )	queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(1, filters[i % 6]); // 1 SQL Join
+			else if ( i < 12 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(2, filters[i % 6]); // 2 SQL Joins
+			else if ( i < 18 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(3, filters[i % 6]); // 3 SQL Joins
+			else if ( i < 24 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(4, filters[i % 6]); // 4 SQL Joins
+		}
+	}
+	
+	private void fillTwoSparqlJoins(){
+		for( int i = 0; i < 24; ++i ){
+			if( i < 6 )	queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(1, filters[i % 6]); // 1 SQL Join
+			else if ( i < 12 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(2, filters[i % 6]); // 2 SQL Joins
+			else if ( i < 18 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(3, filters[i % 6]); // 3 SQL Joins
+			else if ( i < 24 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(4, filters[i % 6]); // 4 SQL Joins
+		}
+	}
+	
+	private void fillThreeSparqlJoins(){
+		for( int i = 0; i < 24; ++i ){
+			if( i < 6 )	queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(1, filters[i % 6]); // 1 SQL Join
+			else if ( i < 12 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(2, filters[i % 6]); // 2 SQL Joins
+			else if ( i < 18 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(3, filters[i % 6]); // 3 SQL Joins
+			else if ( i < 24 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(4, filters[i % 6]); // 4 SQL Joins
+		}
+	}
+	
+
+};
