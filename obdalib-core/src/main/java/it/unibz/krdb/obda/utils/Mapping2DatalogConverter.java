@@ -30,6 +30,7 @@ import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.parser.SQLQueryParser;
@@ -222,9 +223,20 @@ public class Mapping2DatalogConverter {
     	List<SelectExpressionItem> selects = proj.getColumnList();
     	for(SelectExpressionItem select : selects){
     		Expression select_expr = select.getExpression();
-    		Expression2FunctionConverter visitor = new Expression2FunctionConverter(lookupTable);
-            Term atom = visitor.visitEx(select_expr);
-            bodyAtoms.add((Function) atom);
+    		if(select_expr instanceof net.sf.jsqlparser.expression.Function){
+    			Alias alias = select.getAlias();
+    			if(alias == null){
+    				throw new JSQLParserException("The xpression" + select + " does not have an alias. This is not supported by ontop. Add an alias.");
+    			}
+    			String alias_name = alias.getName();
+    			Expression2FunctionConverter visitor = new Expression2FunctionConverter(lookupTable);
+    			Term atom = visitor.visitEx(select_expr);
+    			String var = lookupTable.lookup(alias_name);
+    			Term datalog_alias = fac.getVariable(var);
+    			Function equalityTerm = fac.getFunctionEQ(datalog_alias, atom);
+    			// TODO create equality atom
+    			bodyAtoms.add(equalityTerm);
+    		}
     	}
     }
 
@@ -575,9 +587,32 @@ public class Mapping2DatalogConverter {
                 }
             } else if (regex.getName().toLowerCase().endsWith("replace")){
             	// TODO: Translate REPLACE to Datalog
-            	List<Expression> expressions = regex.getParameters().getExpressions();
-            	if(expressions.size() != 3)
-            		throw new RuntimeException("Wrong number of arguments (found " + expressions.size() + ", ontly 3 supported) to sql function REPLACE");
+            	List<Expression> expressions = expression.getParameters().getExpressions();
+            	if (expressions.size() == 2 || expressions.size() == 3) {
+
+                    Term t1; // first parameter is a function expression
+                    Expression first = expressions.get(0);
+                    t1 = visitEx(first);
+
+                    if (t1 == null)
+                        throw new RuntimeException("Unable to find source expression: "
+                                + first);
+
+                    Term out_string; // second parameter is a string
+                    out_string = fac.getConstantLiteral(expressions.get(1).toString());
+                    
+                    /*
+                     * Term t3 is optional: no string means delete occurrences of second param
+			         */
+                    Term in_string;
+                    if(expressions.size() == 3){
+                        in_string = fac.getConstantLiteral(expressions.get(2).toString());
+                    } else {
+                        in_string = fac.getConstantLiteral("");
+                    }
+                    result = fac.getFunctionReplace(t1, out_string, in_string);
+            	} else 
+            		throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");
             } else {
                 throw new UnsupportedOperationException("Unsupported expression " + expression);
             }

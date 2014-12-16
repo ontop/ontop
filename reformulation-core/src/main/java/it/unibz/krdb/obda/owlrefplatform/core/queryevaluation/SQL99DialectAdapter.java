@@ -47,14 +47,12 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String strreplace(String str, char oldchar, char newchar) {
-		// TODO Auto-generated method stub
-		return null;
+		return String.format("REPLACE(%s, '%s', '%s')", str, oldchar, newchar);
 	}
 
 	@Override
 	public String strreplace(String str, String oldstr, String newstr) {
-		// TODO Auto-generated method stub
-		return null;
+		return String.format("REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
 	}
 
 	@Override

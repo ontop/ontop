@@ -147,6 +147,8 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getFunctionRegex(Term term1, Term term2, Term term3);
 	
+	public Function getFunctionReplace(Term term1, Term term2, Term term3);
+	
 
 	/*
 	 * Numerical arithmethic functions

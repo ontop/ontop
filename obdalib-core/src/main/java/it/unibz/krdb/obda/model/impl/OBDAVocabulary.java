@@ -60,6 +60,14 @@ public class OBDAVocabulary {
 	public static final BooleanOperationPredicate IS_NOT_NULL = new BooleanOperationPredicateImpl("IS_NOT_NULL", 1);
 	public static final BooleanOperationPredicate IS_TRUE = new BooleanOperationPredicateImpl("IS_TRUE", 1);
 
+	/* String predicate names */
+	
+	public static final String REPLACE_STR = "REPLACE";
+	
+	/* String predicates */
+	
+	public static final Predicate REPLACE = new PredicateImpl(
+			REPLACE_STR, 3, new COL_TYPE[]{COL_TYPE.STRING, COL_TYPE.STRING, COL_TYPE.STRING});  
 	
 	
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
@@ -94,7 +102,6 @@ public class OBDAVocabulary {
 	public static final String QUEST_QUERY = "ans1";
 
 
-	
 	
 	/* SPARQL algebra operations */
 

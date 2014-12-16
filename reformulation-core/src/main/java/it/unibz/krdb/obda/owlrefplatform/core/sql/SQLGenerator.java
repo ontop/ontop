@@ -1272,6 +1272,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					return sqladapter.sqlCast(columnName, Types.VARCHAR);
 				}
+			} else if (functionName.equals(OBDAVocabulary.REPLACE_STR) && size == 3) {
+				String orig = getSQLString(function.getTerm(0), index, false);
+				String out_str = function.getTerm(1).toString();
+				String in_str = function.getTerm(2).toString();
+				String result = sqladapter.strreplace(orig, out_str, in_str);
+				return result;
 			}
 		}
 

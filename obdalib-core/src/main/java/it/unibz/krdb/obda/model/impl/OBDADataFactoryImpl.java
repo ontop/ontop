@@ -401,6 +401,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 	
 	@Override
+	public Function getFunctionReplace(Term term1, Term term2, Term term3) {
+		return getFunction(OBDAVocabulary.REPLACE, term1, term2, term3 );
+	}
+	
+	@Override
 	public Function getFunctionMinus(Term term1) {
 		return getFunction(OBDAVocabulary.MINUS, term1);
 	}

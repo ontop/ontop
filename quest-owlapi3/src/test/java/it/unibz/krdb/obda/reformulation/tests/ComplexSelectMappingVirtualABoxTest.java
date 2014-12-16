@@ -67,6 +67,8 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 	private OBDADataFactory fac;
 	private Connection conn;
 
+	String query = null;
+	
 	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
@@ -155,30 +157,14 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x a :A; :P ?y; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z; :P ?y; :U ?z; :P ?y ; :U ?z }";
-		StringBuilder bf = new StringBuilder(query);
+		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U ?z. }";
 		try {
-			
-			/*
-			 * Enable this if you want to test performance, it will run several cycles
-			 */
-//			long start = System.currentTimeMillis();
-//			for (int i = 0; i < 3000; i++) {
-//				QuestQuestOWLStatement sto = (QuestQuestOWLStatement)st;
-//				String q = sto.getUnfolding(bf.insert(7, ' ').toString());
-//			}
-//			long end = System.currentTimeMillis();
-//			long elapsed = end-start;
-//			log.info("Elapsed time: {}", elapsed);
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
-			OWLIndividual ind2 = rs.getOWLIndividual("y");
 			OWLLiteral val = rs.getOWLLiteral("z");
-			assertEquals("<uri1>", ind1.toString());
-			assertEquals("<uri1>", ind2.toString());
+			assertEquals("<http://it.unibz.krdb/obda/test/simple#uri1>", ind1.toString());
 			assertEquals("\"value1\"", val.toString());
-			
 
 		} catch (Exception e) {
 			throw e;
@@ -194,25 +180,24 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 		}
 	}
 
-	public void testViEqSig() throws Exception {
+	public void testReplace() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
+		this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U ?z. }";
+		
 		runTests(p);
 	}
-	
-	public void testClassicEqSig() throws Exception {
+
+
+	public void testConcat() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :P ?z. }";
+		
 		runTests(p);
 	}
 
+	
 }
