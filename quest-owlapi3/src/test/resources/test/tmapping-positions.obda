@@ -25,5 +25,9 @@ source	SELECT uri, val1 FROM TABLE1 WHERE val3 = 1
 mappingId	mapping4
 target	{uri2} :P {uri3} . 
 source	SELECT uri2, uri3 FROM table2 INNER JOIN table3 ON table2.val = table3.val
+
+mappingId	mapping5
+target	{uri2} a :B . 
+source	SELECT uri2 FROM table2
 ]] 
 

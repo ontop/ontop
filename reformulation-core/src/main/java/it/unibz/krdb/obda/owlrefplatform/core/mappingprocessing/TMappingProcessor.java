@@ -125,7 +125,8 @@ public class TMappingProcessor {
 				if ((toNewRule != null) && currentRule.isConditionsEmpty()) {
 					if (newRule.databaseAtomsSize() < currentRule.databaseAtomsSize()) {
 						couldIgnore = true;
-						System.err.println("IGNORE " + newRule + " because of " + currentRule);
+						if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
+							System.err.println("COULD IGNORE " + newRule + " because of " + currentRule);
 					}
 					else {
 						if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
