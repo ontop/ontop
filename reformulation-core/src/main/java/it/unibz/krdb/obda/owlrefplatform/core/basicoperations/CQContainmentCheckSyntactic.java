@@ -26,8 +26,7 @@ public class CQContainmentCheckSyntactic implements CQContainmentCheck {
 	
 	@Override
 	public Substitution computeHomomorphsim(CQIE q1, CQIE q2) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException("Unimplemented method");
 	}
 
 }

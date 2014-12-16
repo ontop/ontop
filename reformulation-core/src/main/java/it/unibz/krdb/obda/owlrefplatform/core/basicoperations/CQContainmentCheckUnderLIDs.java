@@ -10,13 +10,17 @@ import java.util.Set;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 
+	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	
 	private final Map<CQIE,IndexedCQ> indexedCQcache = new HashMap<>();
 	
-	private final LinearInclusionDependencies sigma;
+	private final LinearInclusionDependencies dependencies;
 	
 	/***
 	 * Constructs a CQC utility using the given query. If Sigma is not null and
@@ -24,15 +28,15 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	 *
 	 */
 	public CQContainmentCheckUnderLIDs() {
-		sigma = null;
+		dependencies = null;
 	}
 
 	/**
 	 * *@param sigma
 	 * A set of ABox dependencies
 	 */
-	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies sigma) {
-		this.sigma = sigma;
+	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies dependencies) {
+		this.dependencies = dependencies;
 	}
 	
 	
@@ -45,16 +49,15 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	 * @param atoms
 	 * @return
 	 */
-	private static Set<Function> chaseAtoms(Collection<Function> atoms, LinearInclusionDependencies dependencies) {
+	private Set<Function> chaseAtoms(Collection<Function> atoms) {
 
 		Set<Function> derivedAtoms = new HashSet<>();
 		for (Function fact : atoms) {
 			derivedAtoms.add(fact);
 			for (CQIE rule : dependencies.getRules(fact.getFunctionSymbol())) {
+				rule = fac.getFreshCQIECopy(rule);
 				Function ruleBody = rule.getBody().get(0);
 				Substitution theta = UnifierUtilities.getMGU(ruleBody, fact);
-				// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule
-				// TODO: make local renaming of the lablelled nulls instead
 				if (theta != null && !theta.isEmpty()) {
 					Function ruleHead = rule.getHead();
 					Function newFact = (Function)ruleHead.clone();
@@ -143,8 +146,8 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
         IndexedCQ indexedQ1 = indexedCQcache.get(q1);
         if (indexedQ1 == null) {
         	Collection<Function> q1body = q1.getBody();
-        	if (sigma != null)
-        		q1body = chaseAtoms(q1body, sigma);
+        	if (dependencies != null)
+        		q1body = chaseAtoms(q1body);
         	
         	indexedQ1 = new IndexedCQ(q1.getHead(), q1body);
     		indexedCQcache.put(q1, indexedQ1);
@@ -162,6 +165,9 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	
 	@Override
 	public String toString() {
-		return sigma.toString();
+		if (dependencies != null)
+			return dependencies.toString();
+		
+		return "(empty)";
 	}
 }

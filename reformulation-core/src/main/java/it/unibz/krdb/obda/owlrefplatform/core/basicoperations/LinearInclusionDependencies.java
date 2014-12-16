@@ -38,18 +38,15 @@ public class LinearInclusionDependencies {
 	/*
 	 * adds a rule to the indexed linear dependencies
 	 * 
-	 * IMPORTANT: this method does NOT rename variables
-	 * 
 	 * @param head: atom
 	 * @param body: atom
 	 */
 	public void addRule(Function head, Function body) {
         CQIE rule = ofac.getCQIE(head, body);
-		//rule = DatalogUnfolder.getFreshRule(rule, 4022013); // Random suffix number
 		
         List<CQIE> list = rules.get(body.getFunctionSymbol());
         if (list == null) {
-        	list = new LinkedList<CQIE>();
+        	list = new LinkedList<>();
         	rules.put(body.getFunctionSymbol(), list);
         }
 		
@@ -112,7 +109,7 @@ public class LinearInclusionDependencies {
 	                	if (cla == subclass)
 	                		continue;
 
-	                	// use a different variable name in case th ebody has an existetial as well
+	                	// use a different variable name in case the body has an existential as well
 		                Function head = translate(cla, variableZname);	
 		                dependencies.addRule(head, body);
 					}
@@ -123,9 +120,9 @@ public class LinearInclusionDependencies {
 		return dependencies;
 	}
 
-	private static final String variableXname = "x_4022013";
-	private static final String variableYname = "y_4022013";
-	private static final String variableZname = "z_4022013";
+	private static final String variableXname = "x";
+	private static final String variableYname = "y";
+	private static final String variableZname = "z";
 	
     private static Function translate(ObjectPropertyExpression property) {
 		final Variable varX = ofac.getVariable(variableXname);
