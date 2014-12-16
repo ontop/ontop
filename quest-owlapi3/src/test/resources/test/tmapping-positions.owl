@@ -39,6 +39,9 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
+    <owl:ObjectProperty rdf:about="http://it.unibz.krdb/obda/test/simple#P">
+  		<rdfs:domain rdf:resource="http://it.unibz.krdb/obda/test/simple#B"/>
+  	</owl:ObjectProperty>	    
     
 
 
@@ -63,6 +66,9 @@
     <!-- http://it.unibz.krdb/obda/test/simple#A -->
 
     <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#A"/>
+    
+    <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#B"/>
+    
 </rdf:RDF>
 
 

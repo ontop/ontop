@@ -44,29 +44,20 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /***
- * A simple test that check if the system is able to handle Mappings for
- * classes/roles and attributes even if there are no URI templates. i.e., the
- * database stores URI's directly.
- * 
- * We are going to create an H2 DB, the .sql file is fixed. We will map directly
- * there and then query on top.
  */
+
 public class TMappingConstantPositionsTest extends TestCase {
 
 	private OBDADataFactory fac;
 	private Connection conn;
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
@@ -98,6 +89,7 @@ public class TMappingConstantPositionsTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -151,6 +143,8 @@ public class TMappingConstantPositionsTest extends TestCase {
 
 		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
+		System.out.println(reasoner.getQuestInstance().getUnfolder().getRules());
+		
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
@@ -162,27 +156,16 @@ public class TMappingConstantPositionsTest extends TestCase {
 			assertTrue(rs.nextRow());
 			assertTrue(rs.nextRow());
 			assertFalse(rs.nextRow());
-			//OWLIndividual ind1 = rs.getOWLIndividual("x");
-			//OWLLiteral val = rs.getOWLLiteral("z");
-			//assertEquals("<uri1>", ind1.toString());
-			//assertEquals("<uri1>", ind2.toString());
-			//assertEquals("\"value1\"", val.toString());
 		} 
 		catch (Exception e) {
 			throw e;
 		} 
 		finally {
-			try {
-				st.close();
-			} catch (Exception e) {
-				throw e;
-			} finally {
-				conn.close();
-				reasoner.dispose();
-			}
+			st.close();
 		}
 	}
 
+	@Test
 	public void testViEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -193,6 +176,7 @@ public class TMappingConstantPositionsTest extends TestCase {
 		runTests(p);
 	}
 	
+	@Test
 	public void testClassicEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();

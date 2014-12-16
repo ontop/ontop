@@ -119,12 +119,20 @@ public class TMappingProcessor {
 
 				TMappingRule currentRule = mappingIterator.next(); 
 						
+				boolean couldIgnore = false;
+				
 				Substitution toNewRule = newRule.computeHomomorphsim(currentRule);
 				if ((toNewRule != null) && currentRule.isConditionsEmpty()) {
-					if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
+					if (newRule.databaseAtomsSize() < currentRule.databaseAtomsSize()) {
+						couldIgnore = true;
 						System.err.println("IGNORE " + newRule + " because of " + currentRule);
-					// if the new mapping is redundant and there are no conditions then do not add anything		
-					return;
+					}
+					else {
+						if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
+							System.err.println("IGNORE " + newRule + " because of " + currentRule);
+						// if the new mapping is redundant and there are no conditions then do not add anything		
+						return;
+					}
 				}
 				
 				Substitution fromNewRule = currentRule.computeHomomorphsim(newRule);		
@@ -136,6 +144,13 @@ public class TMappingProcessor {
 						System.err.println("REMOVE " + currentRule + " because of " + newRule);
 					continue;
 				} 
+				
+				if (couldIgnore) {
+					if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
+						System.err.println("FINAL IGNORE " + newRule + " because of " + currentRule);
+					// if the new mapping is redundant and there are no conditions then do not add anything		
+					return;					
+				}
 				
 				if ((toNewRule != null) && (fromNewRule != null)) {
 					// We found an equivalence, we will try to merge the conditions of
@@ -343,10 +358,10 @@ public class TMappingProcessor {
 		 * list.
 		 */
 		
-		CQContainmentCheckUnderLIDs cqc0 = new CQContainmentCheckUnderLIDs(null);
+		//CQContainmentCheckUnderLIDs cqc0 = new CQContainmentCheckUnderLIDs(null);
 		
 		for (CQIE mapping : originalMappings) {			
-			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc0);
+			TMappingRule rule = new TMappingRule(mapping.getHead(), mapping.getBody(), cqc);
 			Predicate ruleIndex = mapping.getHead().getFunctionSymbol();
 			List<TMappingRule> ms = originalMappingIndex.get(ruleIndex);
 			if (ms == null) {

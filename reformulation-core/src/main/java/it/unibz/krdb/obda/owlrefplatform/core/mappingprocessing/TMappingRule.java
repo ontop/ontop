@@ -74,10 +74,8 @@ public class TMappingRule {
 		}
 		if (filters.isEmpty()) 
 			this.filterAtoms = Collections.emptyList();
-		else {
-			this.filterAtoms = new ArrayList<>(1); // one element
-			this.filterAtoms.add(filters);
-		}
+		else 
+			this.filterAtoms = Collections.singletonList(filters);
 		
 		this.head = replaceConstants(head, filters);
 		this.stripped = fac.getCQIE(this.head, databaseAtoms);
@@ -147,6 +145,7 @@ public class TMappingRule {
 		return newlist;
 	}
 	
+	@Deprecated // TEST ONLY
 	Function getHead() {
 		return head;
 	}
@@ -184,6 +183,18 @@ public class TMappingRule {
 		return cq;
 	}
 	
+	/***
+	 * Takes a list of boolean atoms and returns one single atom
+	 * representing the conjunction 
+	 * 
+	 * ASSUMPTION: the list is non-empty
+	 * 
+	 * Example: A -> A
+	 *          A, B -> AND(B,A)
+	 *          A, B, C -> AND(C,AND(B,A))
+	 * 
+	 */
+	
 	private static Function getMergedByAND(List<Function> list) {
 		Iterator<Function> iterAND = list.iterator();
 		Function mergedConditions = iterAND.next();
@@ -203,22 +214,13 @@ public class TMappingRule {
 		return head.getTerms();
 	}
 	
+	public int databaseAtomsSize() {
+		return databaseAtoms.size();
+	}
+	
 	public List<List<Function>> getConditions() {
 		return filterAtoms;
 	}
-	
-	/***
-	 * Takes a conjunctive boolean atoms and returns one single atom
-	 * representing the conjunction 
-	 * 
-	 * ASSUMPTION: conditions is NOT empty
-	 * 
-	 * Example: A -> A
-	 *          A, B -> AND(B,A)
-	 *          A, B, C -> AND(C,AND(B,A))
-	 * 
-	 * @return
-	 */
 	
 	@Override
 	public int hashCode() {

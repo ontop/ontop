@@ -1,5 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +13,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
@@ -44,10 +46,10 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	 * This method is used to chase foreign key constraint rule in which the rule
 	 * has only one atom in the body.
 	 * 
-	 * IMPORTANT: each rule is applied once to each atom
+	 * IMPORTANT: each rule is applied only ONCE to each atom
 	 * 
 	 * @param atoms
-	 * @return
+	 * @return set of atoms
 	 */
 	private Set<Function> chaseAtoms(Collection<Function> atoms) {
 
@@ -162,6 +164,43 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 				
 		return indexedQ1.computeHomomorphism(q2);
 	}	
+
+/*	
+	public CQIE removeRedundantAtoms(CQIE query) {
+		List<Function> nonRedundantAtoms = new ArrayList<>(query.getBody().size());
+		
+		Set<Variable> filterVariables = new HashSet<>();
+		for (Function atom : query.getBody())
+			if (!atom.isDataFunction())
+				filterVariables.addAll(atom.getVariables());
+		
+		for (Function atom : query.getBody()) {
+			if (atom.isDataFunction()) {
+				boolean variableOccurrence = false;
+				for (Variable term : atom.getVariables()) 
+					if (filterVariables.contains(term)) {
+						variableOccurrence = true;
+						break;
+					}
+				if (variableOccurrence) {
+					nonRedundantAtoms.add(atom);
+					continue;
+				}
+					
+				CQIE clone = query.clone();
+				clone.getBody().remove(atom);
+				if (!isContainedIn(clone, query))
+					nonRedundantAtoms.add(atom);
+				else
+					System.err.println("CQC REMOVED ATOM: " + atom + " FROM " + query);
+			}
+			else
+				nonRedundantAtoms.add(atom);
+		}
+		
+		return fac.getCQIE(query.getHead(), nonRedundantAtoms);
+	}
+*/
 	
 	@Override
 	public String toString() {

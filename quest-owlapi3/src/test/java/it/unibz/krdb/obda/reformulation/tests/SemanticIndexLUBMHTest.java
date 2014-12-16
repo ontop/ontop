@@ -21,8 +21,6 @@ package it.unibz.krdb.obda.reformulation.tests;
  */
 
 import it.unibz.krdb.obda.io.QueryIOManager;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
@@ -50,13 +48,12 @@ import org.slf4j.LoggerFactory;
  */
 public class SemanticIndexLUBMHTest extends TestCase {
 
-	String owlfile = "src/test/resources/test/lubm-ex-20-uni1/University0-imports.owl";
+	private final String owlfile = "src/test/resources/test/lubm-ex-20-uni1/University0-imports.owl";
 
-	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public SemanticIndexLUBMHTest() throws Exception {
 		manager = OWLManager.createOWLOntologyManager();
@@ -223,6 +220,7 @@ public class SemanticIndexLUBMHTest extends TestCase {
 			log.debug("Data insertion time: {} ms", insert_time);
 			log.debug("Query execution time: {} ms", time);
 		}
+		st.close();
 		quest.dispose();
 	}
 }

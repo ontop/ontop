@@ -101,6 +101,7 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();

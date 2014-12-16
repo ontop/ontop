@@ -62,6 +62,7 @@ public class SemanticIndexMetadataTest  extends TestCase {
 		in.close();
 
 		//st.executeUpdate(bf.toString());
+		st.close();
 		conn.commit();
 
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
