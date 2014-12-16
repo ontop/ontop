@@ -448,20 +448,20 @@ class QueryFactory {
 	private void fillFilters(DbType type) {
 		switch(type){
 		case MYSQL:	
-			filters[0] = 1000;
-			filters[1] = 10000;
-			filters[2] = 20000;
-			filters[3] = 50000;
-			filters[4] = 100000;
-			filters[5] = 500000;
+			filters[0] = 10;
+			filters[1] = 100;
+			filters[2] = 500;
+			filters[3] = 1000;
+			filters[4] = 5000;
+			filters[5] = 10000;
 			break;
 		case POSTGRES:
-			filters[0] = 101000;
-			filters[1] = 110000;
-			filters[2] = 120000;
-			filters[3] = 150000;
-			filters[4] = 1100000;
-			filters[5] = 1500000;
+			filters[0] = 10000;   // 0.05%
+			filters[1] = 100000;  // 0.1%
+			filters[2] = 500000;  // 0.5%
+			filters[3] = 1000000; // 1%
+			filters[4] = 5000000; // 5%
+			filters[5] = 10000000; // 10%
 			break;
 		}
 	}
