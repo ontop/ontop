@@ -34,7 +34,6 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
 
@@ -137,33 +136,13 @@ public class R2rmlCheckerTest {
 	
 	@Test 
 	public void testMappings() throws Exception {
-		CQContainmentCheckUnderLIDs cqc = new CQContainmentCheckUnderLIDs(null);
-		
 		for (CQIE q : reasonerOBDA.getQuestInstance().getUnfolder().getRules()) {
-			if (!reasonerR2rml.getQuestInstance().getUnfolder().getRules().contains(q)) {
-				boolean found = false;
-				for (CQIE q2 : reasonerR2rml.getQuestInstance().getUnfolder().getRules()) {
-					if (cqc.isContainedIn(q, q2) && cqc.isContainedIn(q2, q)) {
-						found = true;
-						break;
-					}	
-				}
-				if (!found)
-					System.out.println("NOT IN R2RML: " + q);
-			}
+			if (!reasonerR2rml.getQuestInstance().getUnfolder().getRules().contains(q)) 
+				System.out.println("NOT IN R2RML: " + q);
 		}
 		for (CQIE q : reasonerR2rml.getQuestInstance().getUnfolder().getRules()) {
-			if (!reasonerOBDA.getQuestInstance().getUnfolder().getRules().contains(q)) {
-				boolean found = false;
-				for (CQIE q2 : reasonerOBDA.getQuestInstance().getUnfolder().getRules()) {
-					if (cqc.isContainedIn(q, q2) && cqc.isContainedIn(q2, q)) {
-						found = true;
-						break;
-					}	
-				}
-				if (!found)
-					System.out.println("NOT IN OBDA: " + q);
-			}
+			if (!reasonerOBDA.getQuestInstance().getUnfolder().getRules().contains(q))
+				System.out.println("NOT IN OBDA: " + q);
 		}
 	}
 

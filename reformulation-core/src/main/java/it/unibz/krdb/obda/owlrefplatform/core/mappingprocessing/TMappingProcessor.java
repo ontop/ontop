@@ -121,6 +121,8 @@ public class TMappingProcessor {
 						
 				Substitution toNewRule = newRule.computeHomomorphsim(currentRule);
 				if ((toNewRule != null) && currentRule.isConditionsEmpty()) {
+					if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
+						System.err.println("IGNORE " + newRule + " because of " + currentRule);
 					// if the new mapping is redundant and there are no conditions then do not add anything		
 					return;
 				}
@@ -130,6 +132,8 @@ public class TMappingProcessor {
 					// The existing query is more specific than the new query, so we
 					// need to add the new query and remove the old	 
 					mappingIterator.remove();
+					if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
+						System.err.println("REMOVE " + currentRule + " because of " + newRule);
 					continue;
 				} 
 				
@@ -159,8 +163,16 @@ public class TMappingProcessor {
 					}
 					
 	                mappingIterator.remove();
+	                
+					if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
+						System.err.println("MERGE " + newRule + " because of " + currentRule);
 
+	                
 					newRule = new TMappingRule(currentRule, newconditions);
+
+					if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
+						System.err.println("MERGE RESULT " + newRule);					
+					
 					break;
 				}				
 			}

@@ -147,6 +147,9 @@ public class TMappingRule {
 		return newlist;
 	}
 	
+	Function getHead() {
+		return head;
+	}
 	
 	public boolean isConditionsEmpty() {
 		return filterAtoms.isEmpty();
