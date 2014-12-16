@@ -200,4 +200,13 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 	}
 
 	
+	public void testDoubleConcat() throws Exception {
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :P ?z; :U ?z. }";
+		
+		runTests(p);
+	}
+	
 }
