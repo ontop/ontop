@@ -183,7 +183,13 @@ public class TMappingProcessor {
 	// end of the inner class
 
 
-
+	/**
+	 * constructs the TMappings for object properties using DAG
+	 * @param mappingIndex
+	 * @param originalMappings
+	 * @param dag
+	 * @param full
+	 */
 	private static void getObjectTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, 
 			Map<Predicate, List<TMappingRule>> originalMappings,
 			EquivalencesDAG<ObjectPropertyExpression> dag, 
@@ -260,6 +266,14 @@ public class TMappingProcessor {
 		} // Properties loop ended
 		
 	}
+
+	/**
+	 * constructs the TMappings for data properties using DAG
+	 * @param mappingIndex
+	 * @param originalMappings
+	 * @param dag
+	 * @param full
+	 */
 	private static void getDataTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, 
 			Map<Predicate, List<TMappingRule>> originalMappings,
 			EquivalencesDAG<DataPropertyExpression> dag, 
@@ -323,7 +337,7 @@ public class TMappingProcessor {
 	}
 	
 	/**
-	 * 
+	 * constructs the TMappings using DAG
 	 * @param originalMappings
 	 * @param reasoner
 	 * @param full (false for the Semantic Index)

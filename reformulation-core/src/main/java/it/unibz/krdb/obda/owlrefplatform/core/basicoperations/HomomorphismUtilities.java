@@ -52,7 +52,15 @@ public class HomomorphismUtilities {
 		
 		return true;
 	}
-	
+
+	/**
+	 * Extends a given substitution that maps each atom in {@code from} to match at least one atom in {@code to}
+	 *
+	 * @param sb
+	 * @param from
+	 * @param to
+	 * @return
+	 */
 	public static Substitution computeHomomorphism(SubstitutionBuilder sb, List<Function> from, Map<Predicate, List<Function>> to) {
 	
 		int fromSize = from.size();
