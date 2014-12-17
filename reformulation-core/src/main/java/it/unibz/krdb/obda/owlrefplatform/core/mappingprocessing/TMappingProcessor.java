@@ -19,7 +19,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
  * limitations under the License.
  * #L%
  */
-
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -125,13 +124,9 @@ public class TMappingProcessor {
 				if ((toNewRule != null) && currentRule.isConditionsEmpty()) {
 					if (newRule.databaseAtomsSize() < currentRule.databaseAtomsSize()) {
 						couldIgnore = true;
-						if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
-							System.err.println("COULD IGNORE " + newRule + " because of " + currentRule);
 					}
 					else {
 						// if the new mapping is redundant and there are no conditions then do not add anything		
-						if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
-							System.err.println("IGNORE " + newRule + " because of " + currentRule);
 						return;
 					}
 				}
@@ -141,14 +136,10 @@ public class TMappingProcessor {
 					// The existing query is more specific than the new query, so we
 					// need to add the new query and remove the old	 
 					mappingIterator.remove();
-					if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
-						System.err.println("REMOVE " + couldIgnore + " " + currentRule + " because of " + newRule);
 					continue;
 				} 
 				
 				if (couldIgnore) {
-					if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
-						System.err.println("FINAL IGNORE " + newRule + " because of " + currentRule);
 					// if the new mapping is redundant and there are no conditions then do not add anything		
 					return;					
 				}
@@ -180,20 +171,12 @@ public class TMappingProcessor {
 					
 	                mappingIterator.remove();
 	                
-					if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
-						System.err.println("MERGE " + newRule + " because of " + currentRule);
-
-	                
 					newRule = new TMappingRule(currentRule, newconditions);
 
-					if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
-						System.err.println("MERGE RESULT " + newRule);					
-					
 					break;
 				}				
 			}
 			rules.add(newRule);
-			//System.out.println("AFTER CQC:\n" + rules);
 		}
 	}
 
@@ -483,11 +466,9 @@ public class TMappingProcessor {
 		for (Entry<Predicate, TMappingIndexEntry> entry : mappingIndex.entrySet()) 
 			for (TMappingRule mapping : entry.getValue()) {
 				CQIE cq = mapping.asCQIE();
-				//System.out.println(cq);
 				tmappingsProgram.add(cq);
 			}
 				
-		//System.out.println(tmappingsProgram);
 		return tmappingsProgram;
 	}
 
