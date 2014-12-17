@@ -52,11 +52,15 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 interface ParamConst{
+	// Postgres
 	public static final String POSTGRESInt = "src/main/resources/example/postgres-NoViews-joins-int.obda";
 	public static final String POSTGRESStr = "src/main/resources/example/postgres-NoViews-joins-str.obda";
 	public static final String POSTGRESStrView = "src/main/resources/example/postgres-Views-joins-str.obda";
 	public static final String POSTGRESIntView = "src/main/resources/example/postgres-Views-joins-int.obda";
 
+	// MySQL
+	public static final String MYSQLInt = "src/main/resources/example/mysql-NoViews-joins-int.obda";
+	
 	public static final String DB2 = "src/main/resources/example/ontowis-5joins-int-db2.obda";
 	public static final String MYSQL_VIEW = "src/main/resources/example/ontowis-5joins-int-view.obda";
 	public static final String MYSQL = "src/main/resources/example/ontowis-5joins-int.obda";
@@ -106,7 +110,7 @@ public class QuestOWLExample_OntowisTests {
 		runQueries(conn, queries.queriesThreeSPARQL, resultsThree);
 
 		closeEverything(conn);
-		//		generateFile(resultsOne, resultsTwo, resultsThree,obdaFile);
+		generateFile(resultsOne, resultsTwo, resultsThree,obdaFile);
 
 	}
 
@@ -316,7 +320,9 @@ public class QuestOWLExample_OntowisTests {
 		case "--help":{
 			System.out.println(
 					"Options:\n\n"
-							+ "--MYSQL; --POSTGRES; --DB2; "
+							+ "--POSTGRESInt; --POSTGRESIntView; --POSTGRESStr; --POSTGRESStrView"
+							+ "--MYSQLInt;"
+							+ "--DB2; "
 							+ "--MYSQL-VIEW; --POSTGRES-VIEW; --DB2-VIEW"
 							+ "\n\n"
 							+ "The concepts for which T-mappings should"
@@ -327,6 +333,11 @@ public class QuestOWLExample_OntowisTests {
 
 		case "--MYSQL":{
 			obdaFile = ParamConst.MYSQL;
+			type = DbType.MYSQL;
+			break;
+		}
+		case "--MYSQLInt":{
+			obdaFile = ParamConst.MYSQLInt;
 			type = DbType.MYSQL;
 			break;
 		}
@@ -448,20 +459,20 @@ class QueryFactory {
 	private void fillFilters(DbType type) {
 		switch(type){
 		case MYSQL:	
-			filters[0] = 10;
-			filters[1] = 100;
-			filters[2] = 500;
-			filters[3] = 1000;
-			filters[4] = 5000;
-			filters[5] = 10000;
+			filters[0] = 1; // 0.001%
+			filters[1] = 5; // 0.005%
+			filters[2] = 10; // 0.01%
+			filters[3] = 50; // 0.05%
+			filters[4] = 100; // 0.1%
+			filters[5] = 1000; //1%
 			break;
 		case POSTGRES:
-			filters[0] = 10000;   // 0.05%
-			filters[1] = 100000;  // 0.1%
-			filters[2] = 500000;  // 0.5%
-			filters[3] = 1000000; // 1%
-			filters[4] = 5000000; // 5%
-			filters[5] = 10000000; // 10%
+			filters[0] = 1000;   // 0.001%
+			filters[1] = 5000;  // 0.005%
+			filters[2] = 10000;  // 0.01%
+			filters[3] = 50000; // 0.05%
+			filters[4] = 100000; // 0.1%
+			filters[5] = 1000000; // 1%
 			break;
 		}
 	}
