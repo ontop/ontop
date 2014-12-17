@@ -129,9 +129,9 @@ public class TMappingProcessor {
 							System.err.println("COULD IGNORE " + newRule + " because of " + currentRule);
 					}
 					else {
+						// if the new mapping is redundant and there are no conditions then do not add anything		
 						if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
 							System.err.println("IGNORE " + newRule + " because of " + currentRule);
-						// if the new mapping is redundant and there are no conditions then do not add anything		
 						return;
 					}
 				}
@@ -142,7 +142,7 @@ public class TMappingProcessor {
 					// need to add the new query and remove the old	 
 					mappingIterator.remove();
 					if (newRule.getHead().getFunctionSymbol().getName().endsWith("#Facility"))
-						System.err.println("REMOVE " + currentRule + " because of " + newRule);
+						System.err.println("REMOVE " + couldIgnore + " " + currentRule + " because of " + newRule);
 					continue;
 				} 
 				

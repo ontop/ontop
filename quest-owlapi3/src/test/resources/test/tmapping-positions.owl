@@ -68,7 +68,7 @@
     <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#C"/>
 
     <owl:Class rdf:about="http://it.unibz.krdb/obda/test/simple#B">
-    	<owl:subClassOf rdf:resource="http://it.unibz.krdb/obda/test/simple#C"/>
+    	<rdfs:subClassOf rdf:resource="http://it.unibz.krdb/obda/test/simple#C"/>
     </owl:Class>	
     
 </rdf:RDF>

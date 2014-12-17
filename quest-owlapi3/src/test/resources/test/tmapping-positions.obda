@@ -23,11 +23,18 @@ target	{uri} :U {val1} .
 source	SELECT uri, val1 FROM TABLE1 WHERE val3 = 1
 
 mappingId	mapping4
-target	{uri2} :P {uri3} . 
-source	SELECT uri2, uri3 FROM table2 INNER JOIN table3 ON table2.val = table3.val
+target	{URI2} :P {uri3} . 
+source	SELECT URI2, URI3 FROM TABLE2 INNER JOIN TABLE3 ON TABLE2.VAL = TABLE3.VAL
+
+mappingId	mapping4.5
+target	{URI2} a :B . 
+source	SELECT URI2 FROM TABLE2 INNER JOIN TABLE3 ON TABLE2.VAL = TABLE3.VAL
+
 
 mappingId	mapping5
-target	{uri2} a :B . 
-source	SELECT uri2 FROM table2
+target	{URI2} a :B . 
+source	SELECT URI2 FROM TABLE2
+
+
 ]] 
 
