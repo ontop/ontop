@@ -331,11 +331,6 @@ public class QuestOWLExample_OntowisTests {
 			break;
 		}
 
-		case "--MYSQL":{
-			obdaFile = ParamConst.MYSQL;
-			type = DbType.MYSQL;
-			break;
-		}
 		case "--MYSQLInt":{
 			obdaFile = ParamConst.MYSQLInt;
 			type = DbType.MYSQL;
@@ -459,20 +454,20 @@ class QueryFactory {
 	private void fillFilters(DbType type) {
 		switch(type){
 		case MYSQL:	
-			filters[0] = 1; // 0.001%
-			filters[1] = 5; // 0.005%
-			filters[2] = 10; // 0.01%
-			filters[3] = 50; // 0.05%
-			filters[4] = 100; // 0.1%
-			filters[5] = 1000; //1%
+			filters[0] = 1; // 0.01%
+			filters[1] = 5; // 0.05%
+			filters[2] = 10; // 0.1%
+			filters[3] = 50; // 0.5%
+			filters[4] = 100; // 1%
+			filters[5] = 1000; //10%
 			break;
 		case POSTGRES:
-			filters[0] = 1000;   // 0.001%
-			filters[1] = 5000;  // 0.005%
-			filters[2] = 10000;  // 0.01%
-			filters[3] = 50000; // 0.05%
-			filters[4] = 100000; // 0.1%
-			filters[5] = 1000000; // 1%
+			filters[0] = 100;   // 0.0001%
+			filters[1] = 500;  // 0.0005%
+			filters[2] = 1000;  // 0.001%
+			filters[3] = 5000; // 0.005%
+			filters[4] = 10000; // 0.01%
+			filters[5] = 100000; // 0.1%
 			break;
 		}
 	}
