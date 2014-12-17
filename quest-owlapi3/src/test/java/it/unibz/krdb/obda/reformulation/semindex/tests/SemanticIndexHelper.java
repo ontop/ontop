@@ -216,16 +216,16 @@ public class SemanticIndexHelper {
         String resfile = owlloc + resname + ".abox";
         List<String[]> rv = new LinkedList<String[]>();
       
-
-            FileInputStream fstream = new FileInputStream(resfile);
-            DataInputStream in = new DataInputStream(fstream);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String strLine;
-            while ((strLine = br.readLine()) != null) {
-                String[] tokens = strLine.split(" ");
-                rv.add(tokens);
-            }
-       
+        FileInputStream fstream = new FileInputStream(resfile);
+        DataInputStream in = new DataInputStream(fstream);
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        String strLine;
+        while ((strLine = br.readLine()) != null) {
+            String[] tokens = strLine.split(" ");
+            rv.add(tokens);
+        }
+        br.close();
+        
         return rv;
     }
 

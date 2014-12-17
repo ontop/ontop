@@ -92,6 +92,7 @@ public class MultiSchemaTestH2 extends TestCase {
             bf.append(line);
             line = in.readLine();
         }
+        in.close();
 
         st.execute("DROP ALL OBJECTS DELETE FILES");
         st.executeUpdate(bf.toString());
@@ -148,7 +149,6 @@ public class MultiSchemaTestH2 extends TestCase {
 	
 	private void runTests(String query) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
-		StringBuilder bf = new StringBuilder(query);
 		try {
 			
 

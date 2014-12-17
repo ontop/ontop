@@ -87,8 +87,6 @@ public class OBDAVocabulary {
 	// The name of the function that creates URI's in Quest
 	public static final String QUEST_URI = "URI";
 
-	public static final Predicate QUEST_TRIPLE_PRED = new PredicateImpl("triple", 3, new COL_TYPE[3]);
-
 	public static final Predicate QUEST_CAST = new PredicateImpl("cast", 2, new COL_TYPE[2]);
 	
 	public static final String QUEST_QUERY = "ans1";

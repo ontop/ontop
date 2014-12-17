@@ -8,41 +8,37 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
 public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 
-	private final Map<CQIE,FreezeCQ> freezeCQcache = new HashMap<CQIE,FreezeCQ>();
+	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
-	private final LinearInclusionDependencies sigma;
+	private final Map<CQIE,IndexedCQ> indexedCQcache = new HashMap<>();
 	
-	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-
+	private final LinearInclusionDependencies dependencies;
+	
 	/***
 	 * Constructs a CQC utility using the given query. If Sigma is not null and
 	 * not empty, then it will also be used to verify containment w.r.t.\ Sigma.
 	 *
 	 */
 	public CQContainmentCheckUnderLIDs() {
-		sigma = null;
+		dependencies = null;
 	}
 
 	/**
 	 * *@param sigma
 	 * A set of ABox dependencies
 	 */
-	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies sigma) {
-		this.sigma = sigma;
+	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies dependencies) {
+		this.dependencies = dependencies;
 	}
 	
 	
@@ -50,26 +46,26 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 	 * This method is used to chase foreign key constraint rule in which the rule
 	 * has only one atom in the body.
 	 * 
-	 * IMPORTANT: each rule is applied once to each atom
+	 * IMPORTANT: each rule is applied only ONCE to each atom
 	 * 
 	 * @param atoms
-	 * @return
+	 * @return set of atoms
 	 */
-	private static Set<Function> chaseAtoms(Collection<Function> atoms, LinearInclusionDependencies dependencies) {
+	private Set<Function> chaseAtoms(Collection<Function> atoms) {
 
-		Set<Function> derivedAtoms = new HashSet<Function>();
+		Set<Function> derivedAtoms = new HashSet<>();
 		for (Function fact : atoms) {
 			derivedAtoms.add(fact);
 			for (CQIE rule : dependencies.getRules(fact.getFunctionSymbol())) {
+				rule = fac.getFreshCQIECopy(rule);
 				Function ruleBody = rule.getBody().get(0);
 				Substitution theta = UnifierUtilities.getMGU(ruleBody, fact);
-				// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule
 				if (theta != null && !theta.isEmpty()) {
 					Function ruleHead = rule.getHead();
 					Function newFact = (Function)ruleHead.clone();
 					// unify to get fact is needed because the dependencies are not necessarily full
 					// (in other words, they may contain existentials in the head)
-					SubstitutionUtilities.applySubstitutionToGetFact(newFact, theta);
+					SubstitutionUtilities.applySubstitution(newFact, theta); 
 					derivedAtoms.add(newFact);
 				}
 			}
@@ -77,7 +73,7 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		return derivedAtoms;
 	}
 	
-	public static final class FreezeCQ {
+	public static final class IndexedCQ {
 		
 		private final Function head;
 		/***
@@ -94,171 +90,39 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 		 * 
 		 */
 		
-		public FreezeCQ(Function head, Collection<Function> body) { 
+		public IndexedCQ(Function head, Collection<Function> body) { 
 			
-			Map<Variable, ValueConstant> substitution = new HashMap<Variable, ValueConstant>();
-						
-			this.head = freezeAtom(head, substitution);
+			this.head = head;
 
-			this.factMap = new HashMap<Predicate, List<Function>>(body.size() * 2);
-
+			this.factMap = new HashMap<>(body.size() * 2);
 			for (Function atom : body) 
 				// not boolean, not algebra, not arithmetic, not datatype
 				if (atom != null && atom.isDataFunction()) {
-					Function fact = freezeAtom(atom, substitution);
-					
-					Predicate pred = fact.getFunctionSymbol();
+					Predicate pred = atom.getFunctionSymbol();
 					List<Function> facts = factMap.get(pred);
 					if (facts == null) {
 						facts = new LinkedList<Function>();
 						factMap.put(pred, facts);
 					}
-					facts.add(fact);
-			}
-		}
-		
-		public Function getHead() {
-			return head;
-		}
-		
-		public List<Function> getBodyAtoms(Predicate p) {
-			return factMap.get(p);
-		}
-		
-		/***
-		 * Replaces each variable inside the atom with a fresh constant. 
-		 * 
-		 * @param atom
-		 * @return freeze atom
-		 */
-		private static Function freezeAtom(Function atom, Map<Variable, ValueConstant> substitution) {
-			
-			List<Term> newTerms = new LinkedList<Term>();
-			for (Term term : atom.getTerms()) 
-				if (term instanceof Function) {
-					Function function = (Function) term;
-					newTerms.add(freezeAtom(function, substitution));
-				}	
-				else
-					newTerms.add(freezeTerm(term, substitution));		
-			
-			return fac.getFunction(atom.getFunctionSymbol(), newTerms);
-		}
-
-		private static Term freezeTerm(Term term, Map<Variable, ValueConstant> substitution) {
-			
-			if (term instanceof Variable) {
-				// interface Variables is implemented by VariableImpl and AnonymousVariable  
-				if (!(term instanceof AnonymousVariable)) {
-					ValueConstant replacement = substitution.get(term);
-					if (replacement == null) {
-						replacement = fac.getConstantFreshLiteral();
-						substitution.put((Variable) term, replacement);
-					}
-					return replacement;
+					facts.add(atom);
 				}
-				else
-					// AnonymousVariablea are replaced simply by fresh constants  
-					return fac.getConstantFreshLiteral();
-			}
-			else 
-				return term;
 		}
 		
-	    /**
-	     * TODO!!!
-	     *
-	     * @param query
-	     * @return
-	     */
-		
-		private boolean hasAnswer(CQIE query) {
+		private Substitution computeHomomorphism(CQIE query) {
+			SubstitutionBuilder sb = new  SubstitutionBuilder();
+
+			// get the substitution for the head first 
+			// it will ensure that all answer variables are mapped either to constants or
+			//       to answer variables in the base (but not to the labelled nulls generated by the chase)
+			boolean headResult = HomomorphismUtilities.extendHomomorphism(sb, query.getHead(), head);
+			if (!headResult)
+				return null;
 			
-			// query = QueryAnonymizer.deAnonymize(query);
-
-			int bodysize = query.getBody().size();
+			Substitution sub = HomomorphismUtilities.computeHomomorphism(sb, query.getBody(), factMap);
 			
-			// ROMAN: fix for facts
-			if (bodysize == 0) {
-				if (UnifierUtilities.getMGU(head, query.getHead()) == null)
-					return true;
-				return false;
-			}
-					
-			ArrayList<Stack<Function>> choicesMap = new ArrayList<Stack<Function>>(bodysize);
-			
-			Stack<CQIE> queryStack = new Stack<CQIE>();
-			queryStack.push(null);   // to ensure that the last pop works fine
-
-			CQIE currentQuery = query;			
-			int currentAtomIdx = 0;
-			
-			while (currentAtomIdx >= 0) {
-
-				Function currentAtom = currentQuery.getBody().get(currentAtomIdx);							
-
-				// looking for options for this atom 
-				Stack<Function> factChoices;
-				if (currentAtomIdx >= choicesMap.size()) {			
-					// we have never reached this atom, setting up the initial list
-					// of choices from the original fact list.				 
-					factChoices = new Stack<Function>();
-					factChoices.addAll(factMap.get(currentAtom.getFunctionSymbol()));
-					choicesMap.add(currentAtomIdx, factChoices);
-				}
-				else
-					factChoices = choicesMap.get(currentAtomIdx);
-
-				boolean choiceMade = false;
-				CQIE newquery = null;
-				while (!factChoices.isEmpty()) {
-					Substitution mgu = UnifierUtilities.getMGU(currentAtom, factChoices.pop());
-					if (mgu == null) {
-						// No way to use the current fact 
-						continue;
-					}
-					
-					newquery = SubstitutionUtilities.applySubstitution(currentQuery, mgu);
-					
-					// stopping early if we have chosen an MGU that has no
-					// possibility of being successful because of the head.				
-					if (UnifierUtilities.getMGU(head, newquery.getHead()) == null) {
-						// there is no chance to unify the two heads, hence this
-						// fact is not good.
-						continue;
-					}
-
-					// the current fact was applicable, no conflicts so far, we can
-					// advance to the next atom
-					choiceMade = true;
-					break;
-				}
-				if (!choiceMade) {
-					
-					// reseting choices state and backtracking and resetting the set
-					// of choices for the current position
-					factChoices.addAll(factMap.get(currentAtom.getFunctionSymbol()));
-					currentAtomIdx--;
-					currentQuery = queryStack.pop();
-				} 
-				else {
-					if (currentAtomIdx == bodysize - 1) {
-						// we have found a successful set of facts 
-						return true;
-					}
-
-					// advancing to the next index 
-					queryStack.push(currentQuery);
-					currentAtomIdx++;
-					currentQuery = newquery;
-				}
-			}
-			// exhausted all the choices
-			return false;
-		}
-		
+			return sub;
+		}	
 	}
-	
 
 	
 	/***
@@ -274,29 +138,75 @@ public class CQContainmentCheckUnderLIDs implements CQContainmentCheck {
 
 		if (!q2.getHead().getFunctionSymbol().equals(q1.getHead().getFunctionSymbol()))
 			return false;
+		
+		return (computeHomomorphsim(q1, q2) != null);
+	}
+	
+	@Override
+	public Substitution computeHomomorphsim(CQIE q1, CQIE q2) {
 
-//		ROMAN: this was plain wrong -- facts can also be contained in queries  
-//			   (see the fix in hasAnswer)
-//        List<Function> q2body = q2.getBody();
-//        if (q2body.isEmpty())
-//           return false;
-
-        FreezeCQ q1freeze = freezeCQcache.get(q1);
-        if (q1freeze == null) {
+        IndexedCQ indexedQ1 = indexedCQcache.get(q1);
+        if (indexedQ1 == null) {
         	Collection<Function> q1body = q1.getBody();
-        	if (sigma != null)
-        		q1body = chaseAtoms(q1body, sigma);
+        	if (dependencies != null)
+        		q1body = chaseAtoms(q1body);
         	
-        	q1freeze = new FreezeCQ(q1.getHead(), q1body);
-    		freezeCQcache.put(q1, q1freeze);
+        	indexedQ1 = new IndexedCQ(q1.getHead(), q1body);
+    		indexedCQcache.put(q1, indexedQ1);
         }
            
+        // just to speed up the check in case there can be no match
         for (Function q2atom : q2.getBody()) 
-			if (!q1freeze.factMap.containsKey(q2atom.getFunctionSymbol())) { 
+			if (!indexedQ1.factMap.containsKey(q2atom.getFunctionSymbol())) { 
 				// in particular, !q2atom.isDataFunction() 
-				return false;
+				return null;
 			}
 				
-		return q1freeze.hasAnswer(q2);
+		return indexedQ1.computeHomomorphism(q2);
 	}	
+
+/*	
+	public CQIE removeRedundantAtoms(CQIE query) {
+		List<Function> nonRedundantAtoms = new ArrayList<>(query.getBody().size());
+		
+		Set<Variable> filterVariables = new HashSet<>();
+		for (Function atom : query.getBody())
+			if (!atom.isDataFunction())
+				filterVariables.addAll(atom.getVariables());
+		
+		for (Function atom : query.getBody()) {
+			if (atom.isDataFunction()) {
+				boolean variableOccurrence = false;
+				for (Variable term : atom.getVariables()) 
+					if (filterVariables.contains(term)) {
+						variableOccurrence = true;
+						break;
+					}
+				if (variableOccurrence) {
+					nonRedundantAtoms.add(atom);
+					continue;
+				}
+					
+				CQIE clone = query.clone();
+				clone.getBody().remove(atom);
+				if (!isContainedIn(clone, query))
+					nonRedundantAtoms.add(atom);
+				else
+					System.err.println("CQC REMOVED ATOM: " + atom + " FROM " + query);
+			}
+			else
+				nonRedundantAtoms.add(atom);
+		}
+		
+		return fac.getCQIE(query.getHead(), nonRedundantAtoms);
+	}
+*/
+	
+	@Override
+	public String toString() {
+		if (dependencies != null)
+			return dependencies.toString();
+		
+		return "(empty)";
+	}
 }

@@ -84,9 +84,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		chooseClassRepresentatives(classDAG, objectPropertyDAG, dataPropertyDAG);
 		chooseDataRangeRepresentatives(dataRangeDAG, dataPropertyDAG);
 		
-		this.classEquivalenceMap = new HashMap<Predicate, OClass>();
-		this.objectPropertyEquivalenceMap = new  HashMap<Predicate, ObjectPropertyExpression>();		
-		this.dataPropertyEquivalenceMap = new  HashMap<Predicate, DataPropertyExpression>();		
+		this.classEquivalenceMap = new HashMap<>();
+		this.objectPropertyEquivalenceMap = new  HashMap<>();		
+		this.dataPropertyEquivalenceMap = new  HashMap<>();		
 	}
 
 	/**
@@ -132,9 +132,9 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		chooseClassRepresentatives(classDAG, objectPropertyDAG, dataPropertyDAG);
 		chooseDataRangeRepresentatives(dataRangeDAG, dataPropertyDAG);
 		
-		this.classEquivalenceMap = new HashMap<Predicate, OClass>();
-		this.objectPropertyEquivalenceMap = new  HashMap<Predicate, ObjectPropertyExpression>();				
-		this.dataPropertyEquivalenceMap = new  HashMap<Predicate, DataPropertyExpression>();				
+		this.classEquivalenceMap = new HashMap<>();
+		this.objectPropertyEquivalenceMap = new  HashMap<>();				
+		this.dataPropertyEquivalenceMap = new  HashMap<>();				
 	}
 
 	@Override
@@ -414,11 +414,10 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 	
 	public static TBoxReasonerImpl getEquivalenceSimplifiedReasoner(TBoxReasoner reasoner) {
 
-		Map<Predicate, ObjectPropertyExpression> objectPropertyEquivalenceMap = new HashMap<Predicate, ObjectPropertyExpression>();
+		Map<Predicate, ObjectPropertyExpression> objectPropertyEquivalenceMap = new HashMap<>();
 		SimpleDirectedGraph <Equivalences<ObjectPropertyExpression>,DefaultEdge> objectProperties 
-					= new SimpleDirectedGraph<Equivalences<ObjectPropertyExpression>,DefaultEdge>(DefaultEdge.class);
-		Map<ObjectPropertyExpression, Equivalences<ObjectPropertyExpression>> objectPropertyEquivalences 
-					= new HashMap<ObjectPropertyExpression, Equivalences<ObjectPropertyExpression>>();
+					= new SimpleDirectedGraph<>(DefaultEdge.class);
+		Map<ObjectPropertyExpression, Equivalences<ObjectPropertyExpression>> objectPropertyEquivalences = new HashMap<>();
 
 
 		// create vertices for properties 
@@ -427,8 +426,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 			ObjectPropertyExpression prop = node.getRepresentative();
 			ObjectPropertyExpression inverseProp = prop.getInverse();
 			
-			Set<ObjectPropertyExpression> reduced = new HashSet<ObjectPropertyExpression>();
-			Equivalences<ObjectPropertyExpression> reducedNode = new Equivalences<ObjectPropertyExpression>(reduced, prop);
+			Set<ObjectPropertyExpression> reduced = new HashSet<>();
+			Equivalences<ObjectPropertyExpression> reducedNode = new Equivalences<>(reduced, prop);
 			
 			for (ObjectPropertyExpression equi : node) {
 				// no map entry if the property coincides with its inverse
@@ -452,14 +451,13 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		
 		// create edges for the properties graph
 		copyEdges(reasoner.getObjectPropertyDAG(), objectPropertyEquivalences, objectProperties);
-		EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG = new EquivalencesDAGImpl<ObjectPropertyExpression>(null, objectProperties, objectPropertyEquivalences);
+		EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG = new EquivalencesDAGImpl<>(null, objectProperties, objectPropertyEquivalences);
 
 		
-		Map<Predicate, DataPropertyExpression> dataPropertyEquivalenceMap = new HashMap<Predicate, DataPropertyExpression>();
+		Map<Predicate, DataPropertyExpression> dataPropertyEquivalenceMap = new HashMap<>();
 		SimpleDirectedGraph <Equivalences<DataPropertyExpression>,DefaultEdge> dataProperties 
-					= new SimpleDirectedGraph<Equivalences<DataPropertyExpression>,DefaultEdge>(DefaultEdge.class);
-		Map<DataPropertyExpression, Equivalences<DataPropertyExpression>> dataPropertyEquivalences 
-					= new HashMap<DataPropertyExpression, Equivalences<DataPropertyExpression>>();
+					= new SimpleDirectedGraph<>(DefaultEdge.class);
+		Map<DataPropertyExpression, Equivalences<DataPropertyExpression>> dataPropertyEquivalences = new HashMap<>();
 		
 		
 		// create vertices for properties 
@@ -467,8 +465,8 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		for(Equivalences<DataPropertyExpression> node : reasoner.getDataPropertyDAG()) {
 			DataPropertyExpression prop = node.getRepresentative();
 			
-			Set<DataPropertyExpression> reduced = new HashSet<DataPropertyExpression>();
-			Equivalences<DataPropertyExpression> reducedNode = new Equivalences<DataPropertyExpression>(reduced, prop);
+			Set<DataPropertyExpression> reduced = new HashSet<>();
+			Equivalences<DataPropertyExpression> reducedNode = new Equivalences<>(reduced, prop);
 			
 			for (DataPropertyExpression equi : node) {
 				// no map entry if the property coincides with its inverse
@@ -489,7 +487,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		
 		// create edges for the properties graph
 		copyEdges(reasoner.getDataPropertyDAG(), dataPropertyEquivalences, dataProperties);
-		EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG = new EquivalencesDAGImpl<DataPropertyExpression>(null, dataProperties, dataPropertyEquivalences);
+		EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG = new EquivalencesDAGImpl<>(null, dataProperties, dataPropertyEquivalences);
 		
 		
 		//
@@ -497,18 +495,16 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		// 
 		
 		
-		Map<Predicate, OClass> classEquivalenceMap = new HashMap<Predicate, OClass>();
-		SimpleDirectedGraph <Equivalences<ClassExpression>,DefaultEdge> classes 
-				= new SimpleDirectedGraph<Equivalences<ClassExpression>,DefaultEdge>(DefaultEdge.class);
-		Map<ClassExpression, Equivalences<ClassExpression>> classEquivalences 
-				= new HashMap<ClassExpression, Equivalences<ClassExpression>>();
+		Map<Predicate, OClass> classEquivalenceMap = new HashMap<>();
+		SimpleDirectedGraph <Equivalences<ClassExpression>,DefaultEdge> classes = new SimpleDirectedGraph<>(DefaultEdge.class);
+		Map<ClassExpression, Equivalences<ClassExpression>> classEquivalences = new HashMap<>();
 	
 		// create vertices for classes
 		
 		for(Equivalences<ClassExpression> node : reasoner.getClassDAG()) {
 			ClassExpression rep = node.getRepresentative();
-			Set<ClassExpression> reduced = new HashSet<ClassExpression>();
-			Equivalences<ClassExpression> reducedNode = new Equivalences<ClassExpression>(reduced, rep);
+			Set<ClassExpression> reduced = new HashSet<>();
+			Equivalences<ClassExpression> reducedNode = new Equivalences<>(reduced, rep);
 			
 			for (ClassExpression equi : node) {	
 				if (equi.equals(rep)) {
@@ -547,7 +543,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 
 		// create edges for the classes graph
 		copyEdges(reasoner.getClassDAG(), classEquivalences, classes);
-		EquivalencesDAGImpl<ClassExpression> classDAG = new EquivalencesDAGImpl<ClassExpression>(null, classes, classEquivalences);
+		EquivalencesDAGImpl<ClassExpression> classDAG = new EquivalencesDAGImpl<>(null, classes, classEquivalences);
 		
 		
 		return new TBoxReasonerImpl(classDAG,  (EquivalencesDAGImpl<DataRangeExpression>)reasoner.getDataRangeDAG(), objectPropertyDAG, dataPropertyDAG, classEquivalenceMap, objectPropertyEquivalenceMap, dataPropertyEquivalenceMap);
@@ -615,7 +611,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 		
 		// move everything to a graph that admits cycles
 		DefaultDirectedGraph<ClassExpression,DefaultEdge> modifiedGraph = 
-				new  DefaultDirectedGraph<ClassExpression,DefaultEdge>(DefaultEdge.class);
+				new  DefaultDirectedGraph<>(DefaultEdge.class);
 
 		// clone all the vertex and edges from dag
 		for (Equivalences<ClassExpression> v : classes) 
@@ -627,7 +623,7 @@ public class TBoxReasonerImpl implements TBoxReasoner {
 				modifiedGraph.addEdge(s, vp.getRepresentative());
 		}
 
-		HashSet<ClassExpression> processedNodes = new HashSet<ClassExpression>();
+		HashSet<ClassExpression> processedNodes = new HashSet<>();
 		
 		for (Equivalences<ClassExpression> existsNode : classes) {
 			ClassExpression node = existsNode.getRepresentative();

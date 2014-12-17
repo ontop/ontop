@@ -35,7 +35,7 @@ import java.util.List;
 
 public class QuestResultset implements TupleResultSet {
 
-	private boolean isSemIndex = false;
+	//private boolean isSemIndex = false;
 	private ResultSet set = null;
 	QuestStatement st;
 	private List<String> signature;
@@ -70,11 +70,7 @@ public class QuestResultset implements TupleResultSet {
 	public QuestResultset(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
 		this.set = set;
 		this.st = st;
-		this.isSemIndex = st.questInstance.isSemIdx();
-		if (isSemIndex) 
-			uriMap = st.questInstance.getSemanticIndexRepository().getUriMap();
-		else
-			uriMap = null;
+		this.uriMap = st.questInstance.getUriMap();
 		this.signature = signature;
 		
 		columnMap = new HashMap<String, Integer>(signature.size() * 2);
@@ -153,7 +149,7 @@ public class QuestResultset implements TupleResultSet {
 				return null;
 			} else {
 				if (type == COL_TYPE.OBJECT) {
-					if (isSemIndex) {
+					if (uriMap != null) {
 						try {
 							Integer id = Integer.parseInt(realValue);
 							realValue = uriMap.getURI(id);
@@ -269,9 +265,8 @@ public class QuestResultset implements TupleResultSet {
 						else {
 							String value = set.getString(column);
 							DateFormat df = new SimpleDateFormat("dd-MMM-yy");
-							java.util.Date date;
 							try {
-								date = df.parse(value);
+								java.util.Date date = df.parse(value);
 							} catch (ParseException e) {
 								throw new RuntimeException(e);
 							}

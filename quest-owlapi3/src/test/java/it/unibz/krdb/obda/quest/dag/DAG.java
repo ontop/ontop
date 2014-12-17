@@ -30,8 +30,6 @@ import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.ontology.BinaryAxiom;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 
@@ -52,7 +50,7 @@ public class DAG implements Serializable {
 
 	private int index_counter = 1;
 
-	public final static SemanticIndexRange NULL_RANGE = new SemanticIndexRange(-1, -1);
+	public final static SemanticIndexRange NULL_RANGE = new SemanticIndexRange(-1);
 
 	public final static int NULL_INDEX = -1;
 
@@ -64,7 +62,6 @@ public class DAG implements Serializable {
 
 	public final Map<Description, DAGNode> allnodes;
 
-	private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
 	// public final static String thingStr =
 	// "http://www.w3.org/2002/07/owl#Thing";
@@ -364,7 +361,7 @@ public class DAG implements Serializable {
 		for (DAGNode ch : node.getChildren()) {
 			if (ch != node) {
 				mergeRangeNode(ch);
-				node.getRange().addRange(ch.getRange());
+				node.getRange().addRange(ch.getRange().getIntervals());
 			}
 
 		}
@@ -374,7 +371,7 @@ public class DAG implements Serializable {
 
 		if (node.getIndex() == NULL_INDEX) {
 			node.setIndex(index_counter);
-			node.setRange(new SemanticIndexRange(index_counter, index_counter));
+			node.setRange(new SemanticIndexRange(index_counter));
 			index_counter++;
 		} else {
 			return;
