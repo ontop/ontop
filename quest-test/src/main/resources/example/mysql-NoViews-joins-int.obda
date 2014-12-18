@@ -6,7 +6,7 @@ sourceUri	viewTest
 connectionUrl	jdbc:mysql://vulcan/ontowis_100k
 username	test
 password	fish
-driverClass	org.postgresql.Driver
+driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPPING-ID2

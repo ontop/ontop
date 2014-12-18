@@ -55,16 +55,15 @@ interface ParamConst{
 	// Postgres
 	public static final String POSTGRESInt = "src/main/resources/example/postgres-NoViews-joins-int.obda";
 	public static final String POSTGRESStr = "src/main/resources/example/postgres-NoViews-joins-str.obda";
-	public static final String POSTGRESStrView = "src/main/resources/example/postgres-Views-joins-str.obda";
 	public static final String POSTGRESIntView = "src/main/resources/example/postgres-Views-joins-int.obda";
+	public static final String POSTGRESStrView = "src/main/resources/example/postgres-Views-joins-str.obda";
 
 	// MySQL
 	public static final String MYSQLInt = "src/main/resources/example/mysql-NoViews-joins-int.obda";
+	public static final String MYSQLStr = "src/main/resources/example/mysql-NoViews-joins-str.obda";
+	public static final String MYSQLIntView = "src/main/resources/example/mysql-Views-joins-int.obda";
+	public static final String MYSQLStrView = "src/main/resources/example/mysql-Views-joins-str.obda";
 	
-	public static final String DB2 = "src/main/resources/example/ontowis-5joins-int-db2.obda";
-	public static final String MYSQL_VIEW = "src/main/resources/example/ontowis-5joins-int-view.obda";
-	public static final String MYSQL = "src/main/resources/example/ontowis-5joins-int.obda";
-	public static final String DB2_VIEW = "src/main/resources/example/ontowis-5joins-int-view-db2.obda";
 }
 
 enum DbType{
@@ -128,9 +127,6 @@ public class QuestOWLExample_OntowisTests {
 		PrintWriter writer = new PrintWriter("src/main/resources/example/table.txt", "UTF-8");
 		PrintWriter writerG = new PrintWriter("src/main/resources/example/graph.txt", "UTF-8");
 
-
-
-
 		int j=0;
 		while (j<24){
 			writer.println(resultsOne[j] + " & " + resultsTwo[j] + " & " + resultsThree[j]);
@@ -139,15 +135,8 @@ public class QuestOWLExample_OntowisTests {
 				String gline = "(1,"+resultsOne[j]+")" + "(2,"+resultsTwo[j]+")" + "(3,"+resultsThree[j]+")" + "(4,"+resultsOne[j+6]+")" + "(5,"+resultsTwo[j+6]+")" + "(6,"+resultsThree[j+6]+")" + "(7,"+resultsOne[j+12]+")" + "(8,"+resultsTwo[j+12]+")" + "(9,"+resultsThree[j+12]+")" + "(10,"+resultsOne[j+18]+")" + "(11,"+resultsTwo[j+18]+")" + "(12,"+resultsThree[j+18]+")" ;
 				writerG.println(gline);
 			}
-
-
 			j++;
-
-
-
 		}
-
-
 		writer.close();
 		writerG.close();
 	}
@@ -241,10 +230,10 @@ public class QuestOWLExample_OntowisTests {
 
 
 	private void runQueries( QuestOWLConnection conn,
-			String[] queriesOneSPARQL, String[] results) throws OWLException {
+			String[] queriesSPARQL, String[] results) throws OWLException {
 		int j=0;
-		while (j < queriesOneSPARQL.length){
-			String sparqlQuery = queriesOneSPARQL[j];
+		while (j < queriesSPARQL.length){
+			String sparqlQuery = queriesSPARQL[j];
 			QuestOWLStatement st = conn.createStatement();
 			try {
 
@@ -321,7 +310,7 @@ public class QuestOWLExample_OntowisTests {
 			System.out.println(
 					"Options:\n\n"
 							+ "--POSTGRESInt; --POSTGRESIntView; --POSTGRESStr; --POSTGRESStrView"
-							+ "--MYSQLInt;"
+							+ "--MYSQLInt; --MYSQLIntView; --MYSQLStr; --MYSQLStrView;"
 							+ "--DB2; "
 							+ "--MYSQL-VIEW; --POSTGRES-VIEW; --DB2-VIEW"
 							+ "\n\n"
@@ -333,6 +322,21 @@ public class QuestOWLExample_OntowisTests {
 
 		case "--MYSQLInt":{
 			obdaFile = ParamConst.MYSQLInt;
+			type = DbType.MYSQL;
+			break;
+		}
+		case "--MYSQLIntView":{
+			obdaFile = ParamConst.MYSQLIntView;
+			type = DbType.MYSQL;
+			break;
+		}
+		case "--MYSQLStr":{
+			obdaFile = ParamConst.MYSQLStr;
+			type = DbType.MYSQL;
+			break;
+		}
+		case "--MYSQLStrView":{
+			obdaFile = ParamConst.MYSQLStrView;
 			type = DbType.MYSQL;
 			break;
 		}
@@ -356,18 +360,6 @@ public class QuestOWLExample_OntowisTests {
 			obdaFile = ParamConst.POSTGRESStrView;
 			type = DbType.POSTGRES;
 			break;
-		}
-		case "--DB2" :{
-			obdaFile = ParamConst.DB2;
-			break;
-		}
-		case "--MYSQL-VIEW":{
-			obdaFile = ParamConst.MYSQL_VIEW;
-			type = DbType.MYSQL;
-			break;
-		}
-		case "--DB2-VIEW":{
-			obdaFile = ParamConst.DB2_VIEW;
 		}
 		}	
 		try {
@@ -454,12 +446,12 @@ class QueryFactory {
 	private void fillFilters(DbType type) {
 		switch(type){
 		case MYSQL:	
-			filters[0] = 1; // 0.01%
-			filters[1] = 5; // 0.05%
-			filters[2] = 10; // 0.1%
-			filters[3] = 50; // 0.5%
-			filters[4] = 100; // 1%
-			filters[5] = 1000; //10%
+			filters[0] = 1; // 0.001%
+			filters[1] = 5; // 0.005%
+			filters[2] = 10; // 0.01%
+			filters[3] = 50; // 0.05%
+			filters[4] = 100; // 0.1%
+			filters[5] = 1000; //1%
 			break;
 		case POSTGRES:
 			filters[0] = 100;   // 0.0001%

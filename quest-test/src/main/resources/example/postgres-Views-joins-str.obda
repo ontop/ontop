@@ -13,6 +13,18 @@ mappingId	MAPPING-ID2
 target     <http://www.example.org/{stringu12}> a <http://www.example.org/1Tab1>; <http://www.example.org/Tab2unique2Tab2> {unique12}^^xsd:integer .
 source   Select * from view12st 
 
+mappingId	MAPPING-ID3
+target     <http://www.example.org/{stringu12}> a <http://www.example.org/2Tab1>; <http://www.example.org/Tab3unique2Tab3> {unique13}^^xsd:integer .
+source   Select * from view123st
+
+mappingId	MAPPING-ID4
+target     <http://www.example.org/{stringu12}> a <http://www.example.org/3Tab1>; <http://www.example.org/Tab4unique2Tab4> {unique14}^^xsd:integer .
+source   Select * from view1234st 
+
+mappingId	MAPPING-ID5
+target     <http://www.example.org/{stringu12}> a <http://www.example.org/4Tab1>; <http://www.example.org/Tab5unique2Tab5> {unique15}^^xsd:integer .
+source   Select * from view12345st 
+
 mappingId	MAPPING-ID6
 target     <http://www.example.org/{stringu12}>  <http://www.example.org/hasString2j> {stringu11}^^xsd:string .
 source   Select * from view12st 
@@ -20,13 +32,6 @@ source   Select * from view12st
 mappingId	MAPPING-ID7
 target     <http://www.example.org/{stringu12}>  <http://www.example.org/hasString22j> {stringu21}^^xsd:string .
 source   Select * from view12st 
-
-
-
-
-mappingId	MAPPING-ID3
-target     <http://www.example.org/{stringu12}> a <http://www.example.org/2Tab1>; <http://www.example.org/Tab3unique2Tab3> {unique13}^^xsd:integer .
-source   Select * from view123st
 
 mappingId	MAPPING-ID9
 target     <http://www.example.org/{stringu12}>  <http://www.example.org/hasString3j> {stringu11}^^xsd:string .
@@ -36,12 +41,6 @@ mappingId	MAPPING-ID10
 target     <http://www.example.org/{stringu12}>  <http://www.example.org/hasString23j> {stringu21}^^xsd:string .
 source   Select * from view123st 
 
-
-
-mappingId	MAPPING-ID4
-target     <http://www.example.org/{stringu12}> a <http://www.example.org/3Tab1>; <http://www.example.org/Tab4unique2Tab4> {unique14}^^xsd:integer .
-source   Select * from view1234st 
-
 mappingId	MAPPING-ID12
 target     <http://www.example.org/{stringu12}>  <http://www.example.org/hasString4j> {stringu11}^^xsd:string .
 source   Select * from view1234st 
@@ -49,12 +48,6 @@ source   Select * from view1234st
 mappingId	MAPPING-ID13
 target     <http://www.example.org/{stringu12}>  <http://www.example.org/hasString24j> {stringu21}^^xsd:string .
 source   Select * from view1234st  
-
-
-
-mappingId	MAPPING-ID5
-target     <http://www.example.org/{stringu12}> a <http://www.example.org/4Tab1>; <http://www.example.org/Tab5unique2Tab5> {unique15}^^xsd:integer .
-source   Select * from view12345st 
 
 mappingId	MAPPING-ID14
 target     <http://www.example.org/{stringu12}>  <http://www.example.org/hasString5j> {stringu11}^^xsd:string .
