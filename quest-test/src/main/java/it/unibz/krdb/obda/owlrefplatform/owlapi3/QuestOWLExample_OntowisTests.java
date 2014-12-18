@@ -230,10 +230,10 @@ public class QuestOWLExample_OntowisTests {
 
 
 	private void runQueries( QuestOWLConnection conn,
-			String[] queriesSPARQL, String[] results) throws OWLException {
+			String[] queriesOneSPARQL, String[] results) throws OWLException {
 		int j=0;
-		while (j < queriesSPARQL.length){
-			String sparqlQuery = queriesSPARQL[j];
+		while (j < queriesOneSPARQL.length){
+			String sparqlQuery = queriesOneSPARQL[j];
 			QuestOWLStatement st = conn.createStatement();
 			try {
 
