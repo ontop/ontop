@@ -293,8 +293,6 @@ public class QuestOWLExample_OntowisTests {
 			j++;
 		}
 
-
-
 	}
 
 	/**

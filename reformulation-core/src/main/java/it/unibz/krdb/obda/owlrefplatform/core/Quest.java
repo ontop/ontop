@@ -83,6 +83,38 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+enum ConnClasses{
+	
+	MYSQL("class com.mysql.jdbc.JDBC4Connection"),
+	POSTGRES("class org.postgresql.jdbc4.Jdbc4Connection");
+	
+	private final String connClass;
+	
+	ConnClasses(String connClass){
+		this.connClass = connClass;
+	}
+	
+	public static ConnClasses fromString(String text) {
+		
+		ConnClasses result = null;
+		
+	    if (text != null) {
+	      for (ConnClasses b : ConnClasses.values()) {
+	        if (text.equals(b.connClass)) {
+	          result = b;
+	        }
+	      }
+	    }
+	    else throw new IllegalArgumentException("No constant with text " + text + " found");
+	    return result;
+	}
+	
+	@Override
+	public String toString(){
+		return this.connClass.toString();
+	}
+	
+}
 
 public class Quest implements Serializable, RepositoryChangedListener {
 
@@ -227,6 +259,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 	private DBMetadata metadata;
 
+	// TODO Remove this
+	private static boolean timeoutSet = false;
+	
 
     /***
 	 * Will prepare an instance of Quest in "classic ABox mode", that is, to
@@ -943,6 +978,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 					
 					{
 						String copySourceQuery = createDummyQueryToFetchColumns(sourceString, adapter);
+						
 						if (st.execute(copySourceQuery)) {
 							ResultSetMetaData rsm = st.getResultSet().getMetaData();
 							boolean needComma = false;
@@ -974,6 +1010,43 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				st.close();
 			}
 		}
+	}
+	
+	// Davide> TODO: Test
+	public void setQueryTimeout(Statement st) throws SQLException {
+		
+		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().toString());
+		switch(connClass){
+		case MYSQL:
+			st.setQueryTimeout(10);
+			break;
+		case POSTGRES:
+		{
+			if( !timeoutSet ){
+				String query = "SET statement_timeout TO 10000"; // 1000 = one second
+				st.execute(query);
+			}
+			break;
+		}
+		default:
+			break;
+		
+		}		
+	}
+	
+	public void resetTimeouts(Statement st) throws SQLException {
+		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().toString());
+		switch(connClass){
+		case MYSQL:
+			// Do nothing
+			break;
+		case POSTGRES:
+		{
+			String query = "RESET statement_timeout;";
+			st.execute(query);
+			break;
+		}		
+		}		
 	}
 
 	private static final String selectAllPattern = "(S|s)(E|e)(L|l)(E|e)(C|c)(T|t)\\s+\\*";

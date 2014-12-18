@@ -36,7 +36,7 @@ import java.sql.SQLException;
  */
 public class QuestConnection implements OBDAConnection {
 
-	protected Connection conn;
+	protected Connection conn; 
 
 	private Quest questinstance;
 	
