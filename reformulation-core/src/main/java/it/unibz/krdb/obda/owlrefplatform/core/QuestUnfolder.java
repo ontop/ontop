@@ -1,15 +1,23 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.net.URI;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Joiner;
 import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.parser.PreprocessProjection;
+import it.unibz.krdb.obda.utils.MappingSplitter;
+import it.unibz.krdb.obda.utils.MetaMappingExpander;
+import it.unibz.krdb.sql.DataDefinition;
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,14 +64,31 @@ public class QuestUnfolder {
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
-	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata )
-	{
+	public QuestUnfolder(OBDAModel unfoldingOBDAModel, DBMetadata metadata, Connection localConnection, URI sourceId) throws Exception {
 		this.metadata = metadata;
 
+
+		/** Substitute select * with column names **/
+		List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
+		preprocessProjection(mappings, fac);
+
+		/**
+		 * Split the mapping
+		 */
+		MappingSplitter mappingSplitler = new MappingSplitter();
+		mappingSplitler.splitMappings(unfoldingOBDAModel, sourceId);
+
+
+		/**
+		 * Expand the meta mapping
+		 */
+		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
+		metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
 
 		
 		analyzer = new Mapping2DatalogConverter(metadata);
 
+		mappings = unfoldingOBDAModel.getMappings(sourceId);
 		unfoldingProgram = analyzer.constructDatalogProgram(mappings);
 	}
 		
@@ -372,5 +397,27 @@ public class QuestUnfolder {
 		return unfolder.unfold(query, targetPredicate);
 	}
 
+
+	/***
+	 * Expands a SELECT * into a SELECT with all columns implicit in the *
+	 *
+	 * @param mappings
+	 * @param factory
+	 * @throws java.sql.SQLException
+	 */
+	private void preprocessProjection( List<OBDAMappingAxiom> mappings, OBDADataFactory factory) throws SQLException, JSQLParserException {
+
+
+		for (OBDAMappingAxiom axiom : mappings) {
+			String sourceString = axiom.getSourceQuery().toString();
+
+			Select select = (Select) CCJSqlParserUtil.parse(sourceString);
+			PreprocessProjection ps = new PreprocessProjection(metadata);
+			String query = ps.getMappingQuery(select);
+			axiom.setSourceQuery(factory.getSQLQuery(query));
+
+//
+		}
+	}
 
 }

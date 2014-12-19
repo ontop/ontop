@@ -262,9 +262,9 @@ public class SQLQueryParser {
 					columnName= columnName.substring(1, columnName.length()-1);
 				}
 
-                viewDefinition.setAttribute(i, new Attribute(columnName));
+                viewDefinition.setAttribute(i , new Attribute(columnName));
+				i++;
 
-                i++;
             }
 
 

@@ -3,7 +3,7 @@
 	<http://www.w3.org/ns/r2rml#tableName> "northwind.Orders" .
 
 <http://www.optique-project.eu/resource/logicalTable72336904027299547675624201232973> a <http://www.w3.org/ns/r2rml#LogicalTable> , <http://www.w3.org/ns/r2rml#R2RMLView> ;
-	<http://www.w3.org/ns/r2rml#sqlQuery> "SELECT MD5(CONCAT(COALESCE(Address, RAND()), COALESCE(City, RAND()), COALESCE(Region, RAND()), COALESCE(PostalCode, RAND()), COALESCE(Country, RAND()) )) AS locationID FROM northwind.Suppliers" .
+	<http://www.w3.org/ns/r2rml#sqlQuery> "Select * from Territories  join Region  ON Territories.RegionID= Region.RegionID" .
 
 <http://www.optique-project.eu/resource/logicalTable76218130670180120556307341451308> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
 	<http://www.w3.org/ns/r2rml#tableName> "northwind.Suppliers" .
