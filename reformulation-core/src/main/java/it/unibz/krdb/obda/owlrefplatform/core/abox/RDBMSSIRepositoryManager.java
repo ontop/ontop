@@ -37,6 +37,7 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
@@ -152,6 +153,19 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 	private final static Map<COL_TYPE ,TableDescription> attributeTable = new HashMap<>();
 	
+	private static final class AttributeTableDescritpion {
+		final COL_TYPE type;
+		final String tableName;
+		final String sqlTypeName;
+		final String indexName;
+		
+		public AttributeTableDescritpion(COL_TYPE type, String tableName, String sqlTypeName, String indexName) {
+			this.type = type;
+			this.tableName = tableName;
+			this.sqlTypeName = sqlTypeName;
+			this.indexName = indexName;
+		}
+	}
 	
 	static {
 				
@@ -178,66 +192,47 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		
 		// all other datatypes from COL_TYPE are treated similarly
 		
-		Map<COL_TYPE, String> attribute_table = new HashMap<>();
-		attribute_table.put(COL_TYPE.STRING, "QUEST_DATA_PROPERTY_STRING_ASSERTION");    // 1
-		attribute_table.put(COL_TYPE.INTEGER, "QUEST_DATA_PROPERTY_INTEGER_ASSERTION");   // 2
-		attribute_table.put(COL_TYPE.INT, "QUEST_DATA_PROPERTY_INT_ASSERTION");   // 3
-		attribute_table.put(COL_TYPE.UNSIGNED_INT, "QUEST_DATA_PROPERTY_UNSIGNED_INT_ASSERTION");   // 4
-		attribute_table.put(COL_TYPE.NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NEGATIVE_INTEGER_ASSERTION");  // 5
-		attribute_table.put(COL_TYPE.NON_NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_NEGATIVE_INTEGER_ASSERTION"); // 6
-		attribute_table.put(COL_TYPE.POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_POSITIVE_INTEGER_ASSERTION");  // 7
-		attribute_table.put(COL_TYPE.NON_POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_POSITIVE_INTEGER_ASSERTION");  // 8
-		attribute_table.put(COL_TYPE.LONG, "QUEST_DATA_PROPERTY_LONG_ASSERTION");  // 9
-		attribute_table.put(COL_TYPE.DECIMAL, "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION"); // 10
-		attribute_table.put(COL_TYPE.FLOAT, "QUEST_DATA_PROPERTY_FLOAT_ASSERTION");  // 11
-		attribute_table.put(COL_TYPE.DOUBLE, "QUEST_DATA_PROPERTY_DOUBLE_ASSERTION"); // 12
-		attribute_table.put(COL_TYPE.DATETIME, "QUEST_DATA_PROPERTY_DATETIME_ASSERTION"); // 13
-		attribute_table.put(COL_TYPE.BOOLEAN,  "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION");  // 14
-		
-		
-		Map<COL_TYPE, String> attribute_type = new HashMap<>();
-		attribute_type.put(COL_TYPE.STRING, "VARCHAR(1000)");
-		attribute_type.put(COL_TYPE.INTEGER, "BIGINT");
-		attribute_type.put(COL_TYPE.INT, "INTEGER");
-		attribute_type.put(COL_TYPE.NEGATIVE_INTEGER, "BIGINT");
-		attribute_type.put(COL_TYPE.POSITIVE_INTEGER, "BIGINT");
-		attribute_type.put(COL_TYPE.UNSIGNED_INT, "INTEGER");
-		attribute_type.put(COL_TYPE.NON_POSITIVE_INTEGER, "BIGINT");
-		attribute_type.put(COL_TYPE.NON_NEGATIVE_INTEGER, "BIGINT");
-		attribute_type.put(COL_TYPE.LONG, "BIGINT");
-		attribute_type.put(COL_TYPE.DECIMAL, "DECIMAL");
-		attribute_type.put(COL_TYPE.DOUBLE, "DOUBLE PRECISION");
-		attribute_type.put(COL_TYPE.FLOAT, "DOUBLE PRECISION");
-		attribute_type.put(COL_TYPE.DATETIME, "TIMESTAMP");
-		attribute_type.put(COL_TYPE.BOOLEAN, "BOOLEAN");
-
-		Map<COL_TYPE, String> attribute_index = new HashMap<>();
-		attribute_index.put(COL_TYPE.STRING, "IDX_STRING_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.INTEGER, "IDX_INTEGER_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.INT,  "XSD_INT_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.UNSIGNED_INT, "XSD_UNSIGNED_INT_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.NEGATIVE_INTEGER, "XSD_NEGATIVE_INTEGER_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.NON_NEGATIVE_INTEGER, "XSD_NON_NEGATIVE_INTEGER_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.POSITIVE_INTEGER, "XSD_POSITIVE_INTEGER_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.NON_POSITIVE_INTEGER, "XSD_NON_POSITIVE_INTEGER_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.FLOAT, "XSD_FLOAT_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.LONG, "IDX_LONG_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.DECIMAL, "IDX_DECIMAL_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.DOUBLE, "IDX_DOUBLE_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.DATETIME, "IDX_DATETIME_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.BOOLEAN, "IDX_BOOLEAN_ATTRIBUTE");
+		List<AttributeTableDescritpion> attributeDescritions = new ArrayList<>();
+		attributeDescritions.add(new AttributeTableDescritpion(   // 1
+				COL_TYPE.STRING, "QUEST_DATA_PROPERTY_STRING_ASSERTION", "VARCHAR(1000)", "IDX_STRING_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 2
+				COL_TYPE.INTEGER, "QUEST_DATA_PROPERTY_INTEGER_ASSERTION", "BIGINT", "IDX_INTEGER_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 3
+				COL_TYPE.INT, "QUEST_DATA_PROPERTY_INT_ASSERTION", "INTEGER", "XSD_INT_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 4
+				COL_TYPE.UNSIGNED_INT, "QUEST_DATA_PROPERTY_UNSIGNED_INT_ASSERTION", "INTEGER", "XSD_UNSIGNED_INT_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 5
+				COL_TYPE.NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NEGATIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NEGATIVE_INTEGER_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 6
+				COL_TYPE.NON_NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_NEGATIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NON_NEGATIVE_INTEGER_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 7
+				COL_TYPE.POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_POSITIVE_INTEGER_ASSERTION", "BIGINT", "XSD_POSITIVE_INTEGER_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 8
+				COL_TYPE.NON_POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_POSITIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NON_POSITIVE_INTEGER_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 9
+				COL_TYPE.LONG, "QUEST_DATA_PROPERTY_LONG_ASSERTION", "BIGINT", "IDX_LONG_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 10
+				COL_TYPE.DECIMAL, "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION", "DECIMAL", "IDX_DECIMAL_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 11
+				COL_TYPE.FLOAT, "QUEST_DATA_PROPERTY_FLOAT_ASSERTION", "DOUBLE PRECISION", "XSD_FLOAT_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 12
+				COL_TYPE.DOUBLE, "QUEST_DATA_PROPERTY_DOUBLE_ASSERTION", "DOUBLE PRECISION", "IDX_DOUBLE_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 13
+				COL_TYPE.DATETIME, "QUEST_DATA_PROPERTY_DATETIME_ASSERTION", "TIMESTAMP", "IDX_DATETIME_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 14
+				COL_TYPE.BOOLEAN,  "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION", "BOOLEAN", "IDX_BOOLEAN_ATTRIBUTE"));
 
 		
-		for (COL_TYPE datatype : attribute_table.keySet()) {
-			TableDescription table = new TableDescription(attribute_table.get(datatype),
-					"\"URI\" INTEGER  NOT NULL, VAL " + attribute_type.get(datatype) + 
+		for (AttributeTableDescritpion descrtiption : attributeDescritions) {
+			TableDescription table = new TableDescription(descrtiption.tableName,
+					"\"URI\" INTEGER  NOT NULL, VAL " + descrtiption.sqlTypeName + 
 					", \"IDX\"  SMALLINT  NOT NULL, ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE",
 					"(URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)", "\"URI\" as X, VAL as Y");
-			attributeTable.put(datatype, table);
+			attributeTable.put(descrtiption.type, table);
 			
-			table.indexOn(attribute_index.get(datatype) + "1", "URI");		
-			table.indexOn(attribute_index.get(datatype) + "2", "IDX");
-			table.indexOn(attribute_index.get(datatype) + "3", "VAL");
+			table.indexOn(descrtiption.indexName + "1", "URI");		
+			table.indexOn(descrtiption.indexName + "2", "IDX");
+			table.indexOn(descrtiption.indexName + "3", "VAL");
 		}
 	}
 	
