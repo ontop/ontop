@@ -2,7 +2,9 @@ package it.unibz.krdb.obda.owlrefplatform.core;
 
 import java.net.URI;
 import java.sql.Connection;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -405,19 +407,29 @@ public class QuestUnfolder {
 	 * @param factory
 	 * @throws java.sql.SQLException
 	 */
-	private void preprocessProjection( List<OBDAMappingAxiom> mappings, OBDADataFactory factory) throws SQLException, JSQLParserException {
+	private void preprocessProjection(List<OBDAMappingAxiom> mappings, OBDADataFactory factory) throws SQLException {
 
 
 		for (OBDAMappingAxiom axiom : mappings) {
 			String sourceString = axiom.getSourceQuery().toString();
 
-			Select select = (Select) CCJSqlParserUtil.parse(sourceString);
+			Select select = null;
+			try {
+				select = (Select) CCJSqlParserUtil.parse(sourceString);
+
 			PreprocessProjection ps = new PreprocessProjection(metadata);
 			String query = ps.getMappingQuery(select);
 			axiom.setSourceQuery(factory.getSQLQuery(query));
 
+			} catch (JSQLParserException e) {
+				log.debug("SQL Query cannot be preprocessed by the parser");
+
+
+			}
 //
 		}
 	}
+
+
 
 }

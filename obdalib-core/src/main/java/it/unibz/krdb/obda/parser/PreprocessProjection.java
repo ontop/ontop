@@ -133,12 +133,19 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
         for (SelectItem column : subSelectColumns) {
 
             SelectExpressionItem mainColumn = ((SelectExpressionItem) column);
-            mainColumn.setAlias(new Alias(alias + "_" + mainColumn.getExpression().toString()));
+            Alias aliasName=  mainColumn.getAlias();
+            if(aliasName==null) {
+                aliasName = new Alias (alias + "_" + mainColumn.getExpression().toString());
+//            Column maincolumn = new Column (new Table(alias), columnName);
+
+                mainColumn.setAlias(aliasName);
+            }
+//            mainColumn.setExpression(maincolumn);
 //            Table table = new Table(alias);
 //            SelectExpressionItem mainColumn = new SelectExpressionItem(new Column(table, ));
 //            mainColumn.setAlias(new Alias(table + "_" + column.toString()));
 //            aliasColumns.add(mainColumn);
-            aliasColumns.add(column);
+            aliasColumns.add(new SelectExpressionItem(new Column(aliasName.getName())));
         }
     }
 

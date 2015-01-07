@@ -29,8 +29,5 @@ mappingId	MAPID-createComplex
 target		:{locationID} a :Location .
 source		SELECT child.RegionID as locationID FROM (SELECT * FROM Territories) AS child, (select RegionID, RegionDescription FROM Region  WHERE RegionDescription='Eastern' ) AS parent WHERE child.RegionID=parent.RegionID
 
-mappingId	MAPID-createView
-target		:{OrderID} :orderDetailDiscount {randomdiscount} .
-source		select *, MD5(Discount) as randomdiscount from OrderDetails as t1, (SELECT OrderID as idOrder, OrderDate from Orders) as t2 where t1.OrderID =  t2.idorder
 ]]
 

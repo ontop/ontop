@@ -120,7 +120,7 @@ public class ParserAndLookupTableTest {
 
 
     @Test
-    public void testNorthwind() throws Exception {
+    public void testViewCreation() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
 
