@@ -14,6 +14,8 @@ import java.util.List;
 
 /**
  * This visitor class remove * in select clause and substitute it with the columns name
+ * Gets the column names also from the subclasses.
+ *
  */
 
 public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, FromItemVisitor {
@@ -29,10 +31,16 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
     public PreprocessProjection(DBMetadata metadata) throws SQLException {
 
+        //use the metadata to get the column names
         this.metadata = metadata;
 
     }
 
+
+    /**
+    From a table, obtain all its columns using the metadata information
+     @return List<SelectItem> list of columns in JSQL SelectItem class the column is rewritten as tableName.columnName
+     */
     private List<SelectItem> obtainColumnsFromMetadata(Table table) {
 
         List<SelectItem> columnNames = new ArrayList<>();
@@ -45,17 +53,20 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
         int size = tableDefinition.getNumOfAttributes();
 
+        Table tableName;
+        //use the alias if present
+        if(table.getAlias()!=null){
+            tableName= new Table(table.getAlias().getName());
+        }
+        else{
+            tableName=table;
+        }
+
         for (int pos = 1; pos <= size; pos++) {
 
             //construct a column as table.column
 
-            Table tableName;
-        if(table.getAlias()!=null){
-            tableName= new Table(table.getAlias().getName());
-        }
-            else{
-            tableName=table;
-        }
+
             SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, metadata.getAttributeName(table.getFullyQualifiedName(), pos)));
 
             columnNames.add(columnName);
@@ -64,7 +75,12 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
     }
 
-    public String getMappingQuery(Select select) throws JSQLParserException {
+    /**
+     * Method to substitute * from the select query.
+     * @param select the query with or without *
+     * @return  the query with columns or functions in the projection part
+     */
+    public String getMappingQuery(Select select) {
 
         if (select.getWithItemsList() != null) {
             for (WithItem withItem : select.getWithItemsList()) {
@@ -76,6 +92,11 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
         return select.toString();
     }
 
+    /**
+     * Main method search for * in the select query and in the subselect
+     * @param select
+     * @return
+     */
     private List<SelectItem> obtainColumns(PlainSelect select) {
 
         List<SelectItem> columnNames = new ArrayList<SelectItem>();
@@ -92,7 +113,6 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
                 joinTable.accept(this);
             }
         }
-
 
 
         for (SelectItem expr : select.getSelectItems()) {
@@ -128,26 +148,30 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
     }
 
+    /** method that given a list of columns in a subselect query s , generate an alias for each of the columns if an alias is not already present.
+     * The aliases of each columns are stored in aliasColumns that will be used by the select query containing s.
+     *
+     * @param subSelectColumns
+     * @param alias
+     */
+
     private void buildAliasColumns(List<SelectItem> subSelectColumns, String alias) {
 
         for (SelectItem column : subSelectColumns) {
 
             SelectExpressionItem mainColumn = ((SelectExpressionItem) column);
             Alias aliasName=  mainColumn.getAlias();
+           Column completeColumn= (Column) mainColumn.getExpression();
             if(aliasName==null) {
-                aliasName = new Alias (alias + "_" + mainColumn.getExpression().toString());
-//            Column maincolumn = new Column (new Table(alias), columnName);
+                aliasName = new Alias (alias + "_" + completeColumn.getTable() + completeColumn.getColumnName());
 
                 mainColumn.setAlias(aliasName);
             }
-//            mainColumn.setExpression(maincolumn);
-//            Table table = new Table(alias);
-//            SelectExpressionItem mainColumn = new SelectExpressionItem(new Column(table, ));
-//            mainColumn.setAlias(new Alias(table + "_" + column.toString()));
-//            aliasColumns.add(mainColumn);
+
             aliasColumns.add(new SelectExpressionItem(new Column(aliasName.getName())));
         }
     }
+
 
 
     @Override
@@ -160,9 +184,6 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
             //create a list of selectItem
             //if * add all selectItems obtained
 
-//            if (!selectAll) {
-//                columns.add(expr);
-//            }
 
             if (selectAll) {
 
@@ -187,6 +208,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
     if(!columns.isEmpty())
 
     {
+        //substitute * with the column names or aliases
         plainSelect.setSelectItems(columns);
     }
 
@@ -238,8 +260,6 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
             PlainSelect subSelBody = (PlainSelect) (subSelect.getSelectBody());
 
-            if (!(subSelBody.getJoins() != null) ) { // we do not support if the subqueries have joins
-
                 subSelectColumns = obtainColumns(subSelBody);
 
                 if(!aliasColumns.isEmpty()) {
@@ -247,8 +267,6 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
                     aliasColumns.clear();
                 }
                     subSelBody.setSelectItems(subSelectColumns);
-
-            }
         }
 
         String alias = subSelect.getAlias().getName();
