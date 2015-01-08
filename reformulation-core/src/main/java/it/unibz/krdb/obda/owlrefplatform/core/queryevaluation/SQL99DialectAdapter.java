@@ -226,5 +226,6 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		
 		return bf.toString();
 	}
+
 	
 }

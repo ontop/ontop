@@ -108,7 +108,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	boolean bdistinctOn = false; // true when a SELECT distinct is present
 	boolean setProj = false; // true when we are using the method setProjection
 	boolean notSupported = false; 
-	boolean unquote=false; //remove quotes from columns 
+
 	
 	
 	/**
@@ -118,10 +118,10 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	 * @throws JSQLParserException 
 	 */
 	
-	public ProjectionJSQL getProjection(Select select, boolean unquote) throws JSQLParserException {
+	public ProjectionJSQL getProjection(Select select, boolean deepParsing) throws JSQLParserException {
 		
 //		projections = new ArrayList<ProjectionJSQL>(); //used if we want to consider UNION
-		this.unquote=unquote;
+
 		
 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -130,7 +130,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		}
 		select.getSelectBody().accept(this);
 		
-		if(notSupported && unquote) // used to throw exception for the currently unsupported methods
+		if(notSupported && deepParsing) // used to throw exception for the currently unsupported methods
 				throw new JSQLParserException("Query not yet supported");
 		
 		return projection;	
@@ -490,11 +490,11 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	@Override
 	public void visit(Column tableColumn) {
 		String columnName= tableColumn.getColumnName();
-		if(unquote && ParsedSQLQuery.pQuotes.matcher(columnName).matches())
+		if(ParsedSQLQuery.pQuotes.matcher(columnName).matches())
 			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
 				
 		Table table= tableColumn.getTable();
-		if(table.getName()!=null && unquote){
+		if(table.getName()!=null){
 			
 			TableJSQL fixTable = new TableJSQL(table); //create a tablejsql that recognized between quoted and unquoted tables
 			table.setAlias(fixTable.getAlias());

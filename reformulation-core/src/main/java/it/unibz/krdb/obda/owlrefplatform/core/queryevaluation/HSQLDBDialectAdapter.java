@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import java.sql.Types;
 import java.util.List;
 
-public class HSQLDBDialectAdapter implements SQLDialectAdapter {
+public class HSQLDBDialectAdapter extends SQL99DialectAdapter {
 
 
 	@Override
@@ -176,6 +176,7 @@ public class HSQLDBDialectAdapter implements SQLDialectAdapter {
 	 * @param rdfliteral
 	 * @return
 	 */
+	@Override
 	public String getSQLLexicalFormDatetime(String v) {
 		// TODO: check whether this inherited implementation is OK
 		
