@@ -1,0 +1,7 @@
+@prefix rsi:      <http://ontop.inf.unibz.it/tests/rs-info#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix :        <http://example.org/#> .
+
+[]    rdf:type      rsi:ResultSetInfo ;
+      rsi:size      "58" .
+      # it was 59 before. The difference is a trivial triple with topDataProperty.

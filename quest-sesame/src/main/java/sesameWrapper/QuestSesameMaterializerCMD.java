@@ -25,11 +25,9 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OBDAModelSynchronizer;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBVirtualStore;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
+import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import it.unibz.krdb.obda.sesame.SesameStatementIterator;
-import it.unibz.krdb.obda.sesame.r2rml.R2RMLReader;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -116,12 +114,13 @@ class QuestSesameMaterializerCMD {
 			if (owlfile != null) {
 			// Loading the OWL ontology from the file as with normal OWLReasoners
 				ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-				 onto =  new OWLAPI3Translator().translate(ontology);
+				 onto =  OWLAPI3TranslatorUtility.translate(ontology);
+				 model.declareAll(onto.getVocabulary());
 			}
 			else {
 				ontology = manager.createOntology();
 			}
-			OBDAModelSynchronizer.declarePredicates(ontology, model);
+			//OBDAModelSynchronizer.declarePredicates(ontology, model);
 
 			 //start materializer
 			SesameMaterializer materializer = new SesameMaterializer(model, onto);

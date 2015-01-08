@@ -25,8 +25,7 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.impl.PunningException;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualIterator;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
 import it.unibz.krdb.obda.sesame.SesameStatementIterator;
@@ -71,14 +70,14 @@ public class SesameMaterializerCmdTest extends TestCase {
 		modelIO.load(f);
 	}
 	
-	public void setUpOnto() throws OWLOntologyCreationException, PunningException {
+	public void setUpOnto() throws OWLOntologyCreationException {
 		//create onto
 		
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		File f = new File("src/test/resources/materializer/MaterializeTest.owl");
 		// Loading the OWL ontology from the file as with normal OWLReasoners
 		ontology = manager.loadOntologyFromOntologyDocument(f);
-		onto =  new OWLAPI3Translator().translate(ontology);
+		onto =  OWLAPI3TranslatorUtility.translate(ontology);
 	}
 	
 	public void testModelN3() throws Exception {

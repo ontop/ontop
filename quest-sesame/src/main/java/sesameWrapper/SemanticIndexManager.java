@@ -20,13 +20,12 @@ package sesameWrapper;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
 
@@ -36,12 +35,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
 
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
-import org.openrdf.rio.helpers.StatementCollector;
-import org.openrdf.rio.ntriples.NTriplesParser;
 import org.openrdf.rio.turtle.TurtleParser;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
@@ -56,39 +52,26 @@ import org.slf4j.LoggerFactory;
  */
 public class SemanticIndexManager {
 
-	Connection conn = null;
+	private final Connection conn;
 
-	Ontology ontologyClosure = null;
+	private final TBoxReasoner reasoner;
 
-	Ontology optimizedOntology = null;
+	private final RDBMSSIRepositoryManager dataRepository;
 
-	private Map<Predicate, Description> equivalenceMaps;
-
-	private RDBMSSIRepositoryManager dataRepository = null;
-
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public SemanticIndexManager(OWLOntology tbox, Connection connection) throws Exception {
 		conn = connection;
-		ontologyClosure = QuestOWL.loadOntologies(tbox);
+		Ontology ontologyClosure = QuestOWL.loadOntologies(tbox);
 
-		EquivalenceTBoxOptimizer equiOptimizer = new EquivalenceTBoxOptimizer(ontologyClosure);
-		equiOptimizer.optimize();
-
-		/* This generates a new TBox with a simpler vocabulary */
-		optimizedOntology = equiOptimizer.getOptimalTBox();
-
-		/*
-		 * This is used to simplify the vocabulary of ABox assertions and
-		 * mappings
-		 */
-		equivalenceMaps = equiOptimizer.getEquivalenceMap();
-
-		dataRepository = new RDBMSSIRepositoryManager(optimizedOntology.getVocabulary());
-		dataRepository.setTBox(optimizedOntology);
+		TBoxReasoner ontoReasoner = new TBoxReasonerImpl(ontologyClosure);
+		// generate a new TBox with a simpler vocabulary
+		reasoner = TBoxReasonerImpl.getEquivalenceSimplifiedReasoner(ontoReasoner);
+			
+		dataRepository = new RDBMSSIRepositoryManager(reasoner);
+		dataRepository.generateMetadata(); // generate just in case
 
 		log.debug("TBox has been processed. Ready to ");
-
 	}
 
 	public void restoreRepository() throws SQLException {
@@ -99,11 +82,19 @@ public class SemanticIndexManager {
 
 	public void setupRepository(boolean drop) throws SQLException {
 
-		dataRepository.createDBSchema(conn, drop);
-		dataRepository.insertMetadata(conn);
+		if (drop) {
+			log.debug("Droping existing tables");
+			try {
+				dataRepository.dropDBSchema(conn);
+			}
+			catch (SQLException e) {
+				log.debug(e.getMessage(), e);
+			}
+		}
+		
+		dataRepository.createDBSchemaAndInsertMetadata(conn);
 
 		log.debug("Semantic Index repository has been setup.");
-
 	}
 	
 	public void dropRepository() throws SQLException {
@@ -117,10 +108,8 @@ public class SemanticIndexManager {
 
 	public int insertData(OWLOntology ontology, int commitInterval, int batchSize) throws SQLException {
 
-		OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(ontology.getOWLOntologyManager().getImportsClosure(ontology),
-				equivalenceMaps);
-
-		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
+		OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(ontology.getOWLOntologyManager().getImportsClosure(ontology));
+		EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, reasoner);
 		int result = dataRepository.insertData(conn, newData, commitInterval, batchSize);
 
 		log.info("Loaded {} items into the DB.", result);
@@ -138,7 +127,7 @@ public class SemanticIndexManager {
 		
 		parser.setRDFHandler(aBoxIter);
 		
-		final EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
+		final EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, reasoner);
 
 
 		Thread t = new Thread() {
@@ -167,8 +156,6 @@ public class SemanticIndexManager {
 
 		Thread t2 = new Thread() {
 
-			int result;
-
 			@Override
 			public void run() {
 				try {
@@ -177,7 +164,7 @@ public class SemanticIndexManager {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				log.info("Loaded {} items into the DB.", result);
+				log.info("Loaded {} items into the DB.", val[0]);
 
 			}
 

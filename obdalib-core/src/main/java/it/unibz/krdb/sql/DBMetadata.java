@@ -22,11 +22,9 @@ package it.unibz.krdb.sql;
 
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.sql.api.Attribute;
-import it.unibz.krdb.sql.api.VisitedQuery;
 
 import java.io.Serializable;
 import java.sql.DatabaseMetaData;
@@ -376,9 +374,9 @@ public class DBMetadata implements Serializable {
 	 * @param program
 	 */
 	public static Map<Predicate, List<Integer>> extractPKs(DBMetadata metadata,
-			DatalogProgram program) {
+			List<CQIE> program) {
 		Map<Predicate, List<Integer>> pkeys = new HashMap<Predicate, List<Integer>>();
-		for (CQIE mapping : program.getRules()) {
+		for (CQIE mapping : program) {
 			for (Function newatom : mapping.getBody()) {
 				Predicate newAtomPredicate = newatom.getFunctionSymbol();
 				if (newAtomPredicate instanceof BooleanOperationPredicate) {
@@ -390,7 +388,7 @@ public class DBMetadata implements Serializable {
 				DataDefinition def = metadata.getDefinition(newAtomName);
 				if (def != null) {
 					List<Integer> pkeyIdx = new LinkedList<Integer>();
-					for (int columnidx = 1; columnidx <= def.countAttribute(); columnidx++) {
+					for (int columnidx = 1; columnidx <= def.getNumOfAttributes(); columnidx++) {
 						Attribute column = def.getAttribute(columnidx);
 						if (column.isPrimaryKey()) {
 							pkeyIdx.add(columnidx);

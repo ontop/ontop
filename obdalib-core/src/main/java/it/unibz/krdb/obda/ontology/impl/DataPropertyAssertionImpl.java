@@ -1,5 +1,10 @@
 package it.unibz.krdb.obda.ontology.impl;
 
+import it.unibz.krdb.obda.model.ObjectConstant;
+import it.unibz.krdb.obda.model.ValueConstant;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+
 /*
  * #%L
  * ontop-obdalib-core
@@ -20,31 +25,22 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.ontology.BinaryAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+public class DataPropertyAssertionImpl implements DataPropertyAssertion {
 
-import java.util.HashSet;
-import java.util.Set;
+	private static final long serialVersionUID = -8834975903851540150L;
+	
+	private final DataPropertyExpression prop;
+	private final ValueConstant o2;
+	private final ObjectConstant o1;
 
-public class DataPropertyAssertionImpl implements DataPropertyAssertion, BinaryAssertion {
-
-	private static final long serialVersionUID = -8174920394359563293L;
-	private Predicate role;
-	private ValueConstant o2;
-	private ObjectConstant o1;
-
-	DataPropertyAssertionImpl(Predicate attribute, ObjectConstant o1, ValueConstant o2) {
-		this.role = attribute;
+	DataPropertyAssertionImpl(DataPropertyExpression prop, ObjectConstant o1, ValueConstant o2) {
+		this.prop = prop;
 		this.o1 = o1;
 		this.o2 = o2;
 	}
 
 	@Override
-	public ObjectConstant getObject() {
+	public ObjectConstant getSubject() {
 		return o1;
 	}
 
@@ -54,38 +50,28 @@ public class DataPropertyAssertionImpl implements DataPropertyAssertion, BinaryA
 	}
 
 	@Override
-	public Predicate getAttribute() {
-		return role;
+	public DataPropertyExpression getProperty() {
+		return prop;
 	}
-
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof DataPropertyAssertionImpl) {
+			DataPropertyAssertionImpl other = (DataPropertyAssertionImpl)obj;
+			return prop.equals(other.prop) && o1.equals(other.o1)  && o2.equals(other.o2);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return prop.hashCode() + o1.hashCode() + o2.hashCode();
+	}
+	
+	@Override
 	public String toString() {
-		return role.toString() + "(" + o1.toString() + ", " + o2.toString() + ")";
+		return prop + "(" + o1 + ", " + o2 + ")";
 	}
 
-	@Override
-	public Set<Predicate> getReferencedEntities() {
-		Set<Predicate> res = new HashSet<Predicate>();
-		res.add(role);
-		return res;
-	}
-
-	@Override
-	public int getArity() {
-		return 2;
-	}
-
-	@Override
-	public Constant getValue1() {
-		return getObject();
-	}
-
-	@Override
-	public Constant getValue2() {
-		return getValue();
-	}
-
-	@Override
-	public Predicate getPredicate() {
-		return role;
-	}
 }
+

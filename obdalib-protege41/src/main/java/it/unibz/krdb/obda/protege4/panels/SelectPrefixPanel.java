@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.protege4.panels;
 
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 
 import java.awt.Dimension;

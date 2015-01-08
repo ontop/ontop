@@ -12,5 +12,19 @@ driverClass	oracle.jdbc.driver.OracleDriver
 mappingId	Countries
 target		:Country-{COUNTRY_NAME} a :Country ; :name {COUNTRY_NAME} . 
 source		select COUNTRY_NAME FROM "HR"."COUNTRIES"
+
+mappingId	CountriesWithSpace
+target		:Country-{COUNTRY_NAME} a :CountryWithSpace ; :name {COUNTRY_NAME} . 
+source		select COUNTRY_NAME, POSITION FROM  (select COUNTRY_NAME, regexp_instr( COUNTRY_NAME, '\s+' ) as POSITION  from "HR"."COUNTRIES" ) tmp where POSITION>0
+
+
+mappingId	CountriesWithSpaceNoWhere
+target		:Country-{COUNTRY_NAME} a :CountriesWithSpaceNoWhere ; :position {POSITION} . 
+source		select COUNTRY_NAME, POSITION FROM  (select COUNTRY_NAME, regexp_instr( COUNTRY_NAME, '\s+' ) as POSITION  from "HR"."COUNTRIES" ) tmp 
+
+mappingId	CountriesWithSpaceNoWhereNoSubquery
+target		:Country-{COUNTRY_NAME} a :CountriesWithSpaceNoWhereNoSubquery ; :position {POSITION} . 
+source		select COUNTRY_NAME,  regexp_instr( COUNTRY_NAME, '\s+' ) as POSITION  from "HR"."COUNTRIES"  
+
 ]]
 

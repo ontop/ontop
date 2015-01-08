@@ -21,23 +21,71 @@ package it.unibz.krdb.obda.model;
  */
 
 import java.io.Serializable;
-
-//import com.hp.hpl.jena.iri.IRI;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * A predicate is a property that the elements of the set have in common.
- * <p>
- * The notation {@code P(x)} is used to denote a sentence or statement {@code P}
- * concerning the variable object {@code x}. Also, the set defined by
- * {@code P(x)} written <code>{x|P(x)</code> is just a collection of all the
- * objects for which {@code P} is true.
+* The Predicate class currently represents (1) first-order predicts, (2) function symbols, and
+ * (3) logical operators (e.g. join, left join)
+ *
  */
 public interface Predicate extends Cloneable, Serializable {
 
-	public enum COL_TYPE {
-		OBJECT, BNODE, LITERAL, LITERAL_LANG, INTEGER, DECIMAL, DOUBLE, STRING, DATETIME, BOOLEAN, UNSUPPORTED
-	};
+	public static enum COL_TYPE {
+		
+		UNSUPPORTED (-1), // created only in SesameRDFIterator, ignored by SI and exceptions in all other cases
+		NULL (0),
+		OBJECT (1),
+		BNODE (2),
+		LITERAL (3),
+		LITERAL_LANG (-3), // not to be mapped from code
+		INTEGER (4),
+		DECIMAL (5),
+		DOUBLE (6),
+		STRING (7),
+		DATETIME (8),
+		BOOLEAN (9),
+		DATE (10),
+		TIME (11),
+		YEAR (12),
+		LONG (13),
+		FLOAT (14),
+		NEGATIVE_INTEGER (15),
+		NON_NEGATIVE_INTEGER (16),
+		POSITIVE_INTEGER (17),
+		NON_POSITIVE_INTEGER (18),
+		INT (19),
+		UNSIGNED_INT (20);
+		
+		private static final Map<Integer, Predicate.COL_TYPE> codeToTypeMap = new HashMap<>();
+		
+		static {
+			for (COL_TYPE type : COL_TYPE.values()) {
+				// ignore UNSUPPORTED and LITERAL_LANG
+				if (type.code >= 0)
+					codeToTypeMap.put(type.code, type);
+			}
+		}
+		
+		private final int code;
+		
+		// private constructor
+		private COL_TYPE(int code) {
+			this.code = code;
+		}
+		
+		public int getQuestCode() {
+			return code;
+		}
+		
+		public static COL_TYPE getQuestType(int code) {
+			return codeToTypeMap.get(code);
+		}
+  };
 
+  
+  
+    
 	/**
 	 * Get the name of the predicate. In practice, the predicate name is
 	 * constructed as a URI to indicate a unique resource.
@@ -55,7 +103,7 @@ public interface Predicate extends Cloneable, Serializable {
 
 	/***
 	 * Returns the typing of the component given by component. Types can be
-	 * "Object" or "Literal", defined by the inner enumerator PRED_TYPE
+	 * "Object" or "Literal", defined by the inner enumerator {@Code Predicate.COL_TYPE}
 	 * 
 	 * @param column
 	 */

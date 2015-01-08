@@ -25,11 +25,14 @@ import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.DataTypePredicate;
 import it.unibz.krdb.obda.model.NumericalOperationPredicate;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
 public class PredicateImpl implements Predicate {
 
 	private static final long serialVersionUID = -7096056207721170465L;
 
+	public static final Predicate QUEST_TRIPLE_PRED = new PredicateImpl("triple", 3, new COL_TYPE[3]);	
+	
 	private int arity = -1;
 	private String name = null;
 	private int identifier = -1;
@@ -135,7 +138,7 @@ public class PredicateImpl implements Predicate {
 
 	@Override
 	public boolean isTriplePredicate() {
-		if (arity == 3 && name.equals(OBDAVocabulary.QUEST_TRIPLE_STR)) {
+		if (arity == 3 && name.equals(QUEST_TRIPLE_PRED.getName())) {
 			return true;
 		}
 		return false;

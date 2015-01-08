@@ -22,17 +22,14 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Variable;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
+import java.util.Collections;
 import java.util.Set;
 
-public class AnonymousVariable extends AbstractLiteral implements Variable {
+public class AnonymousVariable implements Variable {
 
 	private static final long serialVersionUID = 6099056787768897902L;
 
 	private static final String DEFAULT_NAME = "_";
-	
 	private static final int identifier = -4000;
 
 	protected AnonymousVariable() {
@@ -69,15 +66,6 @@ public class AnonymousVariable extends AbstractLiteral implements Variable {
 
 	@Override
 	public Set<Variable> getReferencedVariables() {
-		return new LinkedHashSet<Variable>();
+		return Collections.emptySet();
 	}
-	
-	@Override
-	public Map<Variable, Integer> getVariableCount() {
-		// TODO This is wrong but it shouldn't affect query containment
-		Map<Variable,Integer> count =  new HashMap<Variable,Integer>();
-		count.put(this, 1);
-		return count;
-	}
-
 }

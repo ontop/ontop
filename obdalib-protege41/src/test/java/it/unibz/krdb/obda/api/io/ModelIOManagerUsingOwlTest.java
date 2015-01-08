@@ -29,9 +29,13 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
 
 import java.io.File;
@@ -54,6 +58,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 public class ModelIOManagerUsingOwlTest extends TestCase {
 
     private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
+    private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
     private OBDAModel model;
 
@@ -102,15 +107,15 @@ public class ModelIOManagerUsingOwlTest extends TestCase {
         
         // Setup the entity declarations
         for (OWLClass c : schoolOntology.getClassesInSignature()) {
-            Predicate pred = dfac.getClassPredicate(c.getIRI().toString());
+            OClass pred = ofac.createClass(c.getIRI().toString());
             model.declareClass(pred);
         }
         for (OWLObjectProperty r : schoolOntology.getObjectPropertiesInSignature()) {
-            Predicate pred = dfac.getObjectPropertyPredicate(r.getIRI().toString());
+        	ObjectPropertyExpression pred = ofac.createObjectProperty(r.getIRI().toString());
             model.declareObjectProperty(pred);
         }
         for (OWLDataProperty p : schoolOntology.getDataPropertiesInSignature()) {
-            Predicate pred = dfac.getDataPropertyPredicate(p.getIRI().toString());
+        	DataPropertyExpression pred = ofac.createDataProperty(p.getIRI().toString());
             model.declareDataProperty(pred);
         }
     }

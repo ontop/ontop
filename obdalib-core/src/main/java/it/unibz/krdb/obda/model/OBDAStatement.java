@@ -30,8 +30,6 @@ public interface OBDAStatement {
 
 	public int executeUpdate(String query) throws OBDAException;
 
-	public OBDAConnection getConnection() throws OBDAException;
-
 	public int getFetchSize() throws OBDAException;
 
 	public int getMaxRows() throws OBDAException;

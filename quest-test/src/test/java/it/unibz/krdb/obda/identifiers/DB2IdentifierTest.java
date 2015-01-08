@@ -34,7 +34,6 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
 
-
 import junit.framework.TestCase;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -118,6 +117,7 @@ public class DB2IdentifierTest extends TestCase {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			conn.close();
 			reasoner.dispose();

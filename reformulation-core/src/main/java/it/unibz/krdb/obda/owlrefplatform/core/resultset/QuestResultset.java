@@ -20,43 +20,40 @@ package it.unibz.krdb.obda.owlrefplatform.core.resultset;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAStatement;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 
 import java.net.URISyntaxException;
+import java.sql.*;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
+import java.text.*;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class QuestResultset implements TupleResultSet {
 
-	private boolean isSemIndex = false;
+	//private boolean isSemIndex = false;
 	private ResultSet set = null;
 	QuestStatement st;
 	private List<String> signature;
-	DecimalFormat formatter = new DecimalFormat("0.0###E0");
+	private final DecimalFormat formatter = new DecimalFormat("0.0###E0");
 
-	private HashMap<String, Integer> columnMap;
+	private final HashMap<String, Integer> columnMap;
 
-	private HashMap<String, String> bnodeMap;
+	private final HashMap<String, String> bnodeMap;
 
 	// private LinkedHashSet<String> uriRef = new LinkedHashSet<String>();
 	private int bnodeCounter = 0;
 
-	private OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	private Map<Integer, String> uriMap; 
+	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private final SemanticIndexURIMap uriMap;
+	
+	private final String vendor;
+	private final boolean isOracle;
+    private final boolean isMsSQL;
 
 	/***
 	 * Constructs an OBDA statement from an SQL statement, a signature described
@@ -73,7 +70,6 @@ public class QuestResultset implements TupleResultSet {
 	public QuestResultset(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
 		this.set = set;
 		this.st = st;
-		this.isSemIndex = st.questInstance.isSemIdx();
 		this.uriMap = st.questInstance.getUriMap();
 		this.signature = signature;
 		
@@ -88,9 +84,15 @@ public class QuestResultset implements TupleResultSet {
 		symbol.setDecimalSeparator('.');
 		formatter.setDecimalFormatSymbols(symbol);
 
+			 vendor =  st.questInstance.getMetaData().getDriverName();
+			 isOracle = vendor.contains("Oracle");
+             isMsSQL = vendor.contains("SQL Server");
+						
+
+
 	}
 
-	public int getColumCount() throws OBDAException {
+	public int getColumnCount() throws OBDAException {
 		return signature.size();
 	}
 
@@ -141,16 +143,16 @@ public class QuestResultset implements TupleResultSet {
 
 		try {
 			realValue = set.getString(column);
-			COL_TYPE type = getQuestType((byte) set.getInt(column - 2));
+			COL_TYPE type = getQuestType( set.getInt(column - 2));
 
-			if (type == null || realValue == null) {
+			if (type == COL_TYPE.NULL || realValue == null) {
 				return null;
 			} else {
 				if (type == COL_TYPE.OBJECT) {
-					if (isSemIndex) {
+					if (uriMap != null) {
 						try {
 							Integer id = Integer.parseInt(realValue);
-							realValue = this.uriMap.get(id);
+							realValue = uriMap.getURI(id);
 						} catch (NumberFormatException e) {
 							/*
 							 * If its not a number, then it has to be a URI, so
@@ -159,7 +161,7 @@ public class QuestResultset implements TupleResultSet {
 						}
 					}
 
-					result = fac.getConstantURI(realValue);
+					result = fac.getConstantURI(realValue.trim());
 
 				} else if (type == COL_TYPE.BNODE) {
 					String rawLabel = set.getString(column);
@@ -187,21 +189,97 @@ public class QuestResultset implements TupleResultSet {
 					} else if (type == COL_TYPE.BOOLEAN) {
 						boolean value = set.getBoolean(column);
 						if (value) {
-							result = fac.getConstantLiteral("true", type);
+							result = fac.getConstantLiteral("true", COL_TYPE.BOOLEAN);
 						} else {
-							result = fac.getConstantLiteral("false", type);
+							result = fac.getConstantLiteral("false", COL_TYPE.BOOLEAN);
 						}
 					} else if (type == COL_TYPE.DOUBLE) {
 						double d = set.getDouble(column);
 						// format name into correct double representation
 
 						String s = formatter.format(d);
-						result = fac.getConstantLiteral(s, type);
+						result = fac.getConstantLiteral(s, COL_TYPE.DOUBLE);
 
 					} else if (type == COL_TYPE.DATETIME) {
-						Timestamp value = set.getTimestamp(column);
-						result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
-					} else {
+
+                        /** set.getTimestamp() gives problem with MySQL and Oracle drivers we need to specify the dateformat
+                         MySQL DateFormat ("MMM DD YYYY HH:mmaa");
+                         Oracle DateFormat "dd-MMM-yy HH.mm.ss.SSSSSS aa" For oracle driver v.11 and less
+                         Oracle "dd-MMM-yy HH:mm:ss,SSSSSS" FOR ORACLE DRIVER 12.1.0.2
+                         To overcome the problem we create a new Timestamp */
+
+                    try {
+
+
+                        Timestamp value = set.getTimestamp(column);
+                        result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
+
+                    }
+                    catch (Exception e){
+
+                        if (isMsSQL) {
+                            String value = set.getString(column);
+
+                            DateFormat df = new SimpleDateFormat("MMM DD YYYY HH:mmaa");
+                            java.util.Date date;
+                            try {
+                                date = df.parse(value);
+                                Timestamp ts = new Timestamp(date.getTime());
+                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
+
+                            } catch (ParseException pe) {
+
+                                throw new RuntimeException(pe);
+                            }
+                        } else {
+                            if (isOracle) {
+
+                                String value = set.getString(column);
+                                //TODO Oracle driver - this date format depends on the version of the driver
+                                DateFormat df = new SimpleDateFormat("dd-MMM-yy HH.mm.ss.SSSSSS aa"); // For oracle driver v.11 and less
+//							DateFormat df = new SimpleDateFormat("dd-MMM-yy HH:mm:ss,SSSSSS"); // THIS WORKS FOR ORACLE DRIVER 12.1.0.2
+                                java.util.Date date;
+                                try {
+                                    date = df.parse(value);
+                                } catch (ParseException pe) {
+                                    throw new RuntimeException(pe);
+                                }
+
+                                Timestamp ts = new Timestamp(date.getTime());
+                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
+                            }
+                            else{
+                                throw new RuntimeException(e);
+                            }
+                        }
+
+                        }
+
+
+                    } 
+					else if (type == COL_TYPE.DATE) {
+						if (!isOracle) {
+							Date value = set.getDate(column);
+							result = fac.getConstantLiteral(value.toString(), COL_TYPE.DATE);
+						} 
+						else {
+							String value = set.getString(column);
+							DateFormat df = new SimpleDateFormat("dd-MMM-yy");
+							try {
+								java.util.Date date = df.parse(value);
+							} catch (ParseException e) {
+								throw new RuntimeException(e);
+							}
+							result = fac.getConstantLiteral(value.toString(), COL_TYPE.DATE);
+						}
+						
+						
+					} 
+                    else if (type == COL_TYPE.TIME) {
+						Time value = set.getTime(column);						
+						result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), COL_TYPE.TIME);
+					} 
+					else {
 						result = fac.getConstantLiteral(realValue, type);
 					}
 				}
@@ -248,30 +326,18 @@ public class QuestResultset implements TupleResultSet {
 		return getConstant(columnIndex);
 	}
 
-	private COL_TYPE getQuestType(byte sqltype) {
-		if (sqltype == 1) {
-			return COL_TYPE.OBJECT;
-		} else if (sqltype == 2) {
-			return COL_TYPE.BNODE;
-		} else if (sqltype == 3) {
-			return COL_TYPE.LITERAL;
-		} else if (sqltype == 4) {
-			return COL_TYPE.INTEGER;
-		} else if (sqltype == 5) {
-			return COL_TYPE.DECIMAL;
-		} else if (sqltype == 6) {
-			return COL_TYPE.DOUBLE;
-		} else if (sqltype == 7) {
-			return COL_TYPE.STRING;
-		} else if (sqltype == 8) {
-			return COL_TYPE.DATETIME;
-		} else if (sqltype == 9) {
-			return COL_TYPE.BOOLEAN;
-		} else if (sqltype == 0) {
-			return null;
-		} else {
-			throw new RuntimeException("COLTYPE unknown: " + sqltype);
-		}
+    /**
+     * Numbers codetype are defined see also  #getTypeColumnForSELECT SQLGenerator
+     */
+
+	private COL_TYPE getQuestType(int typeCode) {
+
+        COL_TYPE questType = COL_TYPE.getQuestType(typeCode);
+
+        if (questType == null)
+        	throw new RuntimeException("typeCode unknown: " + typeCode);
+        
+        return questType;
 	}
 
 	// @Override

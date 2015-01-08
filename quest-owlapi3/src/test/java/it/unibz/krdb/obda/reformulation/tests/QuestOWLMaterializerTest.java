@@ -25,10 +25,9 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
-import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
@@ -100,13 +99,10 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 	@Override
 	public void tearDown() throws Exception {
-		try {
+
 			dropTables();
-			// conn.close();
+//			 conn.close();
 			jdbcconn.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -117,8 +113,8 @@ public class QuestOWLMaterializerTest extends TestCase {
 		jdbcconn.commit();
 	}
 
-	public void testDataWithModel() {
-		try {
+	public void testDataWithModel() throws Exception {
+	
 			File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
 			OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
 			ModelIOManager man = new ModelIOManager(model);
@@ -130,24 +126,23 @@ public class QuestOWLMaterializerTest extends TestCase {
 			int objAss = 0;
 			while (iterator.hasNext()) {
 				Assertion assertion = iterator.next();
-				if (assertion instanceof ClassAssertion) {
+				if (assertion instanceof ClassAssertion) 
 					classAss++;
-				} else if (assertion instanceof DataPropertyAssertion) {
-					propAss++;
-				} else if (assertion instanceof ObjectPropertyAssertion) {
+				
+				else if (assertion instanceof ObjectPropertyAssertion) 
 					objAss++;
-				}
+				
+				else // DataPropertyAssertion
+					propAss++;
 			}
 			Assert.assertEquals(3, classAss); //3 data rows for T1
 			Assert.assertEquals(21, propAss); //7 tables * 3 data rows each T2-T8
 			Assert.assertEquals(3, objAss); //3 data rows for T9
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
 	}
 	
-	public void testDataWithModelAndOnto() {
-		try {
+	public void testDataWithModelAndOnto() throws Exception {
+
 			// read model
 			File f = new File("src/test/resources/test/materializer/MaterializeTest.obda");
 			OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
@@ -158,8 +153,10 @@ public class QuestOWLMaterializerTest extends TestCase {
 			File fo = new File("src/test/resources/test/materializer/MaterializeTest.owl");
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLOntology owl_onto = manager.loadOntologyFromOntologyDocument(fo);
-			Ontology onto =  new OWLAPI3Translator().translate(owl_onto);
-			System.out.println(onto.getAssertions());
+			Ontology onto =  OWLAPI3TranslatorUtility.translate(owl_onto);
+			System.out.println(onto.getSubClassAxioms());
+			System.out.println(onto.getSubObjectPropertyAxioms());
+			System.out.println(onto.getSubDataPropertyAxioms());
 			
 			QuestMaterializer mat = new QuestMaterializer(model, onto, prefs);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
@@ -168,19 +165,18 @@ public class QuestOWLMaterializerTest extends TestCase {
 			int objAss = 0;
 			while (iterator.hasNext()) {
 				Assertion assertion = iterator.next();
-				if (assertion instanceof ClassAssertion) {
+				if (assertion instanceof ClassAssertion) 
 					classAss++;
-				} else if (assertion instanceof DataPropertyAssertion) {
-					propAss++;
-				} else if (assertion instanceof ObjectPropertyAssertion) {
+	
+				else if (assertion instanceof ObjectPropertyAssertion) 
 					objAss++;
-				}
+				
+				else // DataPropertyAssertion
+					propAss++;
 			}
 			Assert.assertEquals(6, classAss); //3 data rows x2 for subclass prop
 			Assert.assertEquals(42, propAss); //8 tables * 3 data rows each x2 for subclass
 			Assert.assertEquals(3, objAss); //3 since no subprop for obj prop
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
 	}
 }

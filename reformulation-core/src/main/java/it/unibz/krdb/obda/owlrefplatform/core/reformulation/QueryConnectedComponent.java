@@ -28,7 +28,6 @@ import it.unibz.krdb.obda.model.Variable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,9 +37,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * QueryConnectedComponent represents a connected component of a CQ
  * 
@@ -49,6 +45,21 @@ import org.slf4j.LoggerFactory;
  * a connected component can either be degenerate (if it has no proper edges, i.e., just a loop)
  * 
  * @author Roman Kontchakov
+ * 
+ * 
+ * types of predicates (as of 1 October 2014)
+ * 
+ * Constant: NULL (string), TRUE, FALSE (boolean)
+ * 
+ * NumericalOperationPredicate: MINUS, ADD, SUBTRACT, MULTIPLY
+ * BooleanOperationPredicate: AND, NOT, OR, EQ, NEQ, GTE, GT, LTE, LT, IS_NULL, IS_NOT_NULL, IS_TRUE, 
+ *                            SPARQL_IS_LITERAL_URI, SPARQL_IS_URI, SPARQL_IS_IRI, SPARQL_IS_BLANK, SPARQL_LANGMATCHES, 
+ *                            SPARQL_REGEX, SPARQL_LIKE
+ * NonBooleanOperationPredicate: SPARQL_STR, SPARQL_DATATYPE, SPARQL_LANG                        
+ * DataTypePredicate: RDFS_LITERAL, RDFS_LITERAL_LANG, XSD_STRING, XSD_INTEGER, XSD_DECIMAL, XSD_DOUBLE, XSD_DATETIME,
+ *                    XSD_BOOLEAN, XSD_DATE, XSD_TIME, XSD_YEAR
+ * Predicate: QUEST_TRIPLE_PRED, QUEST_CAST                    
+ * AlgebraOperatorPredicate: SPARQL_JOIN, SPARQL_LEFTJOIN 
  *
  */
 
@@ -66,8 +77,6 @@ public class QueryConnectedComponent {
 	private boolean noFreeTerms; // no free variables and no constants 
 	                             // if true the component can be mapped onto the anonymous part of the canonical model
 
-	private static final Logger log = LoggerFactory.getLogger(QueryConnectedComponent.class);
-	
 	/**
 	 * constructor is private as instances created only by the static method getConnectedComponents
 	 * 
@@ -92,11 +101,10 @@ public class QueryConnectedComponent {
 			Term t = l.getTerm(); 
 			if (t instanceof Variable) {
 				variables.add(t);
-				//if (headNewLiterals.contains(t))
+				//if (headterms.contains(t))
 				if (l.isExistentialVariable())
 					quantifiedVariables.add(l);
-				else 
-					{
+				else {
 					freeVariables.add(t);
 					noFreeTerms = false;
 				}
@@ -130,7 +138,7 @@ public class QueryConnectedComponent {
 			allLoops.remove(seed);
 		}
 		
-		// expand the current CC by adding all edges that are have at least one of the NewLiterals in them
+		// expand the current CC by adding all edges that are have at least one of the terms in them
 		boolean expanded = true;
 		while (expanded) {
 			expanded = false;
@@ -194,10 +202,8 @@ public class QueryConnectedComponent {
 	 */
 	
 	public static List<QueryConnectedComponent> getConnectedComponents(CQIE cqie) {
-		List<QueryConnectedComponent> ccs = new LinkedList<QueryConnectedComponent>();
 
 		Set<Term> headTerms = new HashSet<Term>(cqie.getHead().getTerms());
-
 
 		// collect all edges and loops 
 		//      an edge is a binary predicate P(t, t') with t \ne t'
@@ -235,6 +241,9 @@ public class QueryConnectedComponent {
 				nonDLAtoms.add(a);
 			}
 		}	
+
+		
+		List<QueryConnectedComponent> ccs = new LinkedList<QueryConnectedComponent>();
 		
 		// form the list of connected components from the list of edges
 		while (!pairs.isEmpty()) {
@@ -251,7 +260,7 @@ public class QueryConnectedComponent {
 		}
 
 		// create degenerate connected components for all remaining loops (which are disconnected from anything else)
-		//for (Entry<NewLiteral, Loop> loop : allLoops.entrySet()) {
+		//for (Entry<term, Loop> loop : allLoops.entrySet()) {
 		while (!allLoops.isEmpty()) {
 			Term seed = allLoops.keySet().iterator().next();
 			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed));			
@@ -332,7 +341,7 @@ public class QueryConnectedComponent {
 	/**
 	 * Loop: class representing loops of connected components
 	 * 
-	 * a loop is characterized by a Term and a set of atoms involving only that Term
+	 * a loop is characterized by a term and a set of atoms involving only that term
 	 * 
 	 * @author Roman Kontchakov
 	 *
@@ -340,7 +349,7 @@ public class QueryConnectedComponent {
 	
 	static class Loop {
 		private final Term term;
-		private Collection<Function> atoms;
+		private final List<Function> atoms;
 		private final boolean isExistentialVariable;
 		
 		public Loop(Term term, boolean isExistentialVariable) {
@@ -383,7 +392,7 @@ public class QueryConnectedComponent {
 	/**
 	 * Edge: class representing edges of connected components
 	 * 
-	 * an edge is characterized by a pair of Terms and a set of atoms involving only those Terms
+	 * an edge is characterized by a pair of terms and a set of atoms involving only those terms
 	 * 
 	 * @author Roman Kontchakov
 	 *
@@ -391,7 +400,7 @@ public class QueryConnectedComponent {
 	
 	static class Edge {
 		private final Loop l0, l1;
-		private Collection<Function> bAtoms;
+		private final List<Function> bAtoms;
 		
 		public Edge(Loop l0, Loop l1) {
 			this.bAtoms = new ArrayList<Function>(10);
@@ -442,12 +451,10 @@ public class QueryConnectedComponent {
 	
 	private static class TermPair {
 		private final Term t0, t1;
-		private final int hashCode;
 
 		public TermPair(Term t0, Term t1) {
 			this.t0 = t0;
 			this.t1 = t1;
-			this.hashCode = t0.hashCode() ^ t1.hashCode();
 		}
 
 		@Override
@@ -469,7 +476,7 @@ public class QueryConnectedComponent {
 		
 		@Override
 		public int hashCode() {
-			return hashCode;
+			return t0.hashCode() ^ t1.hashCode();
 		}
 	}	
 }

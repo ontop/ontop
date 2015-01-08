@@ -29,6 +29,9 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ResultSet;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -37,7 +40,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 
 import java.net.URI;
 import java.sql.SQLException;
@@ -70,13 +72,13 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestMaterializer {
 
-	private OBDAModel model;
-	private Quest questInstance;
+	private final OBDAModel model;
+	private final Quest questInstance;
 	private Ontology ontology;
 	
-	private Set<Predicate> vocabulary;
+	private final Set<Predicate> vocabulary;
 
-	protected long counter = 0;
+	private long counter = 0;
 	private VirtualTripleIterator iterator;
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -96,8 +98,8 @@ public class QuestMaterializer {
 		
 	}
 	
-	public QuestMaterializer(OBDAModel modell, Ontology onto) throws Exception {
-		this(modell, onto, getDefaultPreferences());
+	public QuestMaterializer(OBDAModel model, Ontology onto) throws Exception {
+		this(model, onto, getDefaultPreferences());
 	}
 	
 	/***
@@ -106,32 +108,56 @@ public class QuestMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public QuestMaterializer(OBDAModel modell, Ontology onto, QuestPreferences preferences) throws Exception {
-		this.model = modell;
+	public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences preferences) throws Exception {
+		this.model = model;
 		this.ontology = onto;
 		this.vocabulary = new HashSet<Predicate>();
 		
-		if (model.getSources()!= null && model.getSources().size() > 1)
+		if (this.model.getSources()!= null && this.model.getSources().size() > 1)
 			throw new Exception("Cannot materialize with multiple data sources!");
 		
 		//add all class/data/object predicates to vocabulary
 		//add declared predicates in model
-		for (Predicate p: model.getDeclaredPredicates()) {
+		for (OClass cl : model.getDeclaredClasses()) {
+			Predicate p = cl.getPredicate();
+			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+				vocabulary.add(p);
+		}
+		for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) {
+			Predicate p = prop.getPredicate();
+			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+				vocabulary.add(p);
+		}
+		for (DataPropertyExpression prop : model.getDeclaredDataProperties()) {
+			Predicate p = prop.getPredicate();
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);
 		}
 		if (onto != null) {
 			//from ontology
-			for (Predicate p : onto.getVocabulary()) {
+			for (OClass cl : onto.getVocabulary().getClasses()) {
+				Predicate p = cl.getPredicate(); 
 				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 						&& !vocabulary.contains(p))
 					vocabulary.add(p);
 			}
-		} else
-		{
+			for (ObjectPropertyExpression role : onto.getVocabulary().getObjectProperties()) {
+				Predicate p = role.getPredicate();
+				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+						&& !vocabulary.contains(p))
+					vocabulary.add(p);
+			}
+			for (DataPropertyExpression role : onto.getVocabulary().getDataProperties()) {
+				Predicate p = role.getPredicate();
+				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+						&& !vocabulary.contains(p))
+					vocabulary.add(p);
+			}
+		} 
+		else {
 			//from mapping undeclared predicates (can happen)
-			for (URI uri : model.getMappings().keySet()){
-				for (OBDAMappingAxiom axiom : model.getMappings(uri))
+			for (URI uri : this.model.getMappings().keySet()){
+				for (OBDAMappingAxiom axiom : this.model.getMappings(uri))
 				{
 					if (axiom.getTargetQuery() instanceof CQIE)
 					{
@@ -149,13 +175,23 @@ public class QuestMaterializer {
 		//start a quest instance
 		if (ontology == null) {
 			ontology = ofac.createOntology();
-			ontology.addEntities(model.getDeclaredPredicates());
+			
+			// TODO: use Vocabulary for OBDAModel as well
+			
+			for (OClass pred : model.getDeclaredClasses()) 
+				ontology.getVocabulary().createClass(pred.getPredicate().getName());				
+			
+			for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) 
+				ontology.getVocabulary().createObjectProperty(prop.getPredicate().getName());
+
+			for (DataPropertyExpression prop : model.getDeclaredDataProperties()) 
+				ontology.getVocabulary().createDataProperty(prop.getPredicate().getName());
 		}
 		
 		
 		preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
-		questInstance = new Quest(ontology, model, preferences);
+		questInstance = new Quest(ontology, this.model, preferences);
 					
 		questInstance.setupRepository();
 	}
@@ -250,10 +286,10 @@ public class QuestMaterializer {
 						ResultSet execute = stm.execute(query);
 
 						results = (GraphResultSet) execute;
-						if (results!=null){
-							hasNext = results.hasNext();
-
-						}					
+//						if (results!=null){
+//							hasNext = results.hasNext();
+//
+//						}					
 					}else{
 						break;
 					}

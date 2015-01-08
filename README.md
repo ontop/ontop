@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ontop/ontop.png?branch=develop)](https://www.travis-ci.org/ontop/ontop)
+[![Build Status](https://travis-ci.org/ontop/ontop.png?branch=develop)](https://travis-ci.org/ontop/ontop)
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/ontop/ontop/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 Ontop
 ==================
@@ -33,7 +33,7 @@ Links
 
 official website and documentations: http://ontop.inf.unibz.it/
 
-Mail list: ontop4obda AT googlegroups DOT com
+Google Group: https://groups.google.com/forum/#!forum/ontop4obda
 
 Blog: http://ontop-obda.blogspot.it/
 

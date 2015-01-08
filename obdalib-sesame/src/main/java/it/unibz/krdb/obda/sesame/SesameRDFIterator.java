@@ -20,13 +20,17 @@ package it.unibz.krdb.obda.sesame;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
@@ -48,6 +52,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 	
 	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 	private final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	private BlockingQueue<Statement> buffer;
 	private Iterator<Statement> iterator;
@@ -163,52 +168,55 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 		// Create the assertion
 		Assertion assertion = null;
 		if (currentPredicate.getArity() == 1) {
-			assertion = ofac.createClassAssertion(currentPredicate, c);
-		} else if (currentPredicate.getArity() == 2) {
-			Constant c2;
+			OClass concept = ofac.createClass(currentPredicate.getName());
+			assertion = ofac.createClassAssertion(concept, c);
+		} 
+		else if (currentPredicate.getArity() == 2) {
 			if (currObject instanceof URI) {
-				c2 = obdafac.getConstantURI(currObject.stringValue());
-			} else if (currObject instanceof BNode) {
-				c2 = obdafac.getConstantBNode(currObject.stringValue());
-			} else if (currObject instanceof Literal) {
-				Literal l = (Literal) currObject;
-				Predicate.COL_TYPE type = getColumnType(l.getDatatype());
+				ObjectConstant c2 = obdafac.getConstantURI(currObject.stringValue());
+				ObjectPropertyExpression prop = ofac.createObjectProperty(currentPredicate.getName());
+				assertion = ofac.createObjectPropertyAssertion(prop, c, c2);
+			} 
+			else if (currObject instanceof BNode) {
+				ObjectConstant c2 = obdafac.getConstantBNode(currObject.stringValue());
+				ObjectPropertyExpression prop = ofac.createObjectProperty(currentPredicate.getName());
+				assertion = ofac.createObjectPropertyAssertion(prop, c, c2);
+			} 
+			else if (currObject instanceof Literal) {
+				Literal l = (Literal) currObject;				
 				String lang = l.getLanguage();
+				ValueConstant c2;
 				if (lang == null) {
+					URI datatype = l.getDatatype();
+					Predicate.COL_TYPE type; 
+					
+					if (datatype == null) {
+						type = Predicate.COL_TYPE.LITERAL;
+					} 
+					else {
+						type = dtfac.getDataType(datatype);
+						if (type == null)
+							type = Predicate.COL_TYPE.UNSUPPORTED;
+					}			
+					
 					c2 = obdafac.getConstantLiteral(l.getLabel(), type);
-				} else {
+				} 
+				else {
 					c2 = obdafac.getConstantLiteral(l.getLabel(), lang);
 				}
-			} else {
+				DataPropertyExpression prop = ofac.createDataProperty(currentPredicate.getName());
+				assertion = ofac.createDataPropertyAssertion(prop, c, c2);			
+			} 
+			else {
 				throw new RuntimeException("Unsupported object found in triple: " + st.toString() + " (Required URI, BNode or Literal)");
 			}
-			assertion = ofac.createPropertyAssertion(currentPredicate, c, c2);
-		} else {
+		} 
+		else {
 			throw new RuntimeException("Unsupported statement: " + st.toString());
 		}
 		return assertion;
 	}
 
-	private Predicate.COL_TYPE getColumnType(URI datatype) {
-		if (datatype == null) {
-			return Predicate.COL_TYPE.LITERAL;
-		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_STRING_URI)) {
-			return Predicate.COL_TYPE.STRING;
-		} else if (datatype.stringValue().equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-			return Predicate.COL_TYPE.LITERAL;
-		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_INTEGER_URI)) {
-			return Predicate.COL_TYPE.INTEGER;
-		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-			return Predicate.COL_TYPE.DECIMAL;
-		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-			return Predicate.COL_TYPE.DOUBLE;
-		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-			return Predicate.COL_TYPE.DATETIME;
-		} else if (datatype.stringValue().equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-			return Predicate.COL_TYPE.BOOLEAN;
-		}
-		return Predicate.COL_TYPE.UNSUPPORTED;
-	}
 
 	/**
 	 * Removes the entry at the beginning in the buffer.

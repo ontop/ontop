@@ -120,12 +120,10 @@ public class LungCancerH2TestVirtual extends TestCase {
 
 	@Override
 	public void tearDown() throws Exception {
-		try {
+
 			dropTables();
 			conn.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
+		
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -200,6 +198,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 
 			} catch (Exception e) {
 				st.close();
+				throw e;
 			}
 			conn.close();
 			reasoner.dispose();
@@ -211,7 +210,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 		int count = 0;
 		while (rs.nextRow()) {
 			count++;
-			for (int i = 1; i <= rs.getColumCount(); i++) {
+			for (int i = 1; i <= rs.getColumnCount(); i++) {
 				System.out.print(rs.getSignature().get(i-1));
 				System.out.print("=" + rs.getOWLObject(i));
 				System.out.print(" ");

@@ -122,6 +122,7 @@ public class RDB2RDFManifestUtils {
 		}
 
 		manifestResults.close();
+		con.commit();
 		con.close();
 		manifestRep.shutDown();
 

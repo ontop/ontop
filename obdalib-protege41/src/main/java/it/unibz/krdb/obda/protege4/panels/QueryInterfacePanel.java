@@ -21,23 +21,23 @@ package it.unibz.krdb.obda.protege4.panels;
  */
 
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.protege4.gui.IconLoader;
 import it.unibz.krdb.obda.protege4.gui.action.OBDADataQueryAction;
 import it.unibz.krdb.obda.protege4.utils.DialogUtils;
 import it.unibz.krdb.obda.querymanager.QueryController;
 import it.unibz.krdb.obda.utils.OBDAPreferenceChangeListener;
 
-import java.awt.Color;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyleContext;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 /**
  * Creates a new panel to execute queries. Remember to execute the
@@ -54,11 +54,12 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	
 	private DefaultStyledDocument styledDocument;
 	
-	private OBDADataQueryAction executeUCQAction;
-	private OBDADataQueryAction executeEQLAction;
-	private OBDADataQueryAction retrieveUCQExpansionAction;
-	private OBDADataQueryAction retrieveUCQUnfoldingAction;
-	private OBDADataQueryAction retrieveEQLUnfoldingAction;
+	private OBDADataQueryAction<QuestOWLResultSet> executeSelectAction;
+	private OBDADataQueryAction<?> executeGraphQueryAction;
+	private OBDADataQueryAction<?> executeEQLAction;
+	private OBDADataQueryAction<String> retrieveUCQExpansionAction;
+	private OBDADataQueryAction<String> retrieveUCQUnfoldingAction;
+	private OBDADataQueryAction<?> retrieveEQLUnfoldingAction;
 	
 	private OBDAModel apic;
 
@@ -146,7 +147,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 //        });
 //        sparqlPopupMenu.add(getSPARQLExpansion);
 
-        getSPARQLSQLExpansion.setText("Get expanded/unfolded query for this UCQ...");
+        getSPARQLSQLExpansion.setText("Get SQL translation...");
         getSPARQLSQLExpansion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 getSPARQLSQLExpansionActionPerformed(evt);
@@ -185,6 +186,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
             }
         });
         pnlExecutionInfo.add(chkShowAll, new java.awt.GridBagConstraints());
+        chkShowAll.doClick();
 
         chkShowShortURI.setText("Short IRI");
         chkShowShortURI.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -287,22 +289,27 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
         add(pnlQueryEditor, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void chkShowAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkShowAllActionPerformed
-    	if (chkShowAll.isSelected()) {
-    		fetchSizeCache = getFetchSize();
-    		txtFetchSize.setText(0+"");
-    		txtFetchSize.setEditable(false);
-    	} else {
-    		txtFetchSize.setText(fetchSizeCache+"");
-    		txtFetchSize.setEditable(true);
-    	}
+    private synchronized void chkShowAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkShowAllActionPerformed
+    	Runnable runner = new Runnable(){
+    		public void run(){
+    			if (chkShowAll.isSelected()) {
+    				fetchSizeCache = getFetchSize();
+    				txtFetchSize.setText(0+"");
+    				txtFetchSize.setEditable(false);
+    			} else {
+    				txtFetchSize.setText(fetchSizeCache+"");
+    				txtFetchSize.setEditable(true);
+    			}
+    		}
+    	};
+    	SwingUtilities.invokeLater(runner);
     }//GEN-LAST:event_chkShowAllActionPerformed
 
 	private void getSPARQLExpansionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getSPARQLExpansionActionPerformed
 		Thread queryRunnerThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				OBDADataQueryAction action = QueryInterfacePanel.this.getRetrieveUCQExpansionAction();
+				OBDADataQueryAction<?> action = QueryInterfacePanel.this.getRetrieveUCQExpansionAction();
 				action.run(queryTextPane.getText());
 			}
 		});
@@ -313,7 +320,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		Thread queryRunnerThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				OBDADataQueryAction action = QueryInterfacePanel.this.getRetrieveUCQUnfoldingAction();
+				OBDADataQueryAction<?> action = QueryInterfacePanel.this.getRetrieveUCQUnfoldingAction();
 				action.run(queryTextPane.getText());
 			}
 		});
@@ -331,21 +338,37 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 			Thread queryRunnerThread = new Thread(new Runnable() {
 				@Override
 				public void run() {
-					OBDADataQueryAction action = QueryInterfacePanel.this.getExecuteUCQAction();
-					action.run(queryTextPane.getText());
-
+					SPARQLQueryUtility query = new SPARQLQueryUtility(queryTextPane.getText());
+					OBDADataQueryAction<?> action = null;
+					if (query.isSelectQuery() || query.isAskQuery()) {
+						action = QueryInterfacePanel.this.getExecuteSelectAction();
+					} else if ( (query.isConstructQuery() || query.isDescribeQuery()) ){
+						action = QueryInterfacePanel.this.getExecuteGraphQueryAction();
+					} else {
+						JOptionPane.showMessageDialog(QueryInterfacePanel.this, "This type of SPARQL expression is not handled. Please use SELECT, ASK, DESCRIBE, or CONSTRUCT.");
+					}
+					action.run(query.getQueryString());
 					execTime = action.getExecutionTime();
-					int rows = action.getNumberOfRows();
-					updateStatus(rows);
+					do {
+						int rows = action.getNumberOfRows();
+						updateStatus(rows);	
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							break;
+						}
+					} while (action.isRunning());
+					updateStatus(action.getNumberOfRows());
 				};
 			});
 			queryRunnerThread.start();
 		} catch (Exception e) {
-			DialogUtils.showQuickErrorDialog(null, e);
+			DialogUtils.showQuickErrorDialog(QueryInterfacePanel.this, e);
 		}
 	}// GEN-LAST:event_buttonExecuteActionPerformed
 
-	private void cmdSaveChangesActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveActionPerformed
+
+	private synchronized void cmdSaveChangesActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveActionPerformed
 		final String query = queryTextPane.getText();
 		if (!currentId.isEmpty()) {
 			if (!currentGroup.isEmpty()) {
@@ -354,63 +377,97 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 				qc.addQuery(query, currentId);
 			}
 		} else {
-			JOptionPane.showMessageDialog(this,
+			JOptionPane.showMessageDialog(QueryInterfacePanel.this,
 					"Please select first the query node that you would like to update",
 					"Warning",
 					JOptionPane.WARNING_MESSAGE);
-		}		
+		}	
 	}// GEN-LAST:event_buttonSaveActionPerformed
 
+	
+	private class QueryChanger implements Runnable {
+		String new_query;
+		
+		QueryChanger(String new_query){
+			this.new_query = new_query;
+		}
+		public void run(){
+			queryTextPane.setText(new_query);	
+		}
+	}
+	
 	public void selectedQuerychanged(String new_group, String new_query, String new_id) {
-		queryTextPane.setText(new_query);
-		currentGroup = new_group;
-		currentId = new_id;
+			Runnable runner = new QueryChanger(new_query);
+			SwingUtilities.invokeLater(runner);
+			currentGroup = new_group;
+			currentId = new_id;
+		}
+
+	public void setExecuteSelectAction(OBDADataQueryAction<QuestOWLResultSet> executeUCQAction) {
+		this.executeSelectAction = executeUCQAction;
 	}
 
-	public void setExecuteUCQAction(OBDADataQueryAction executeUCQAction) {
-		this.executeUCQAction = executeUCQAction;
+	public OBDADataQueryAction<?> getExecuteSelectAction() {
+		return executeSelectAction;
 	}
 
-	public OBDADataQueryAction getExecuteUCQAction() {
-		return executeUCQAction;
+	public void setExecuteGraphQueryAction(OBDADataQueryAction<?> action) {
+		this.executeGraphQueryAction = action;
 	}
 
-	public void setExecuteEQLAction(OBDADataQueryAction executeEQLAction) {
+	public OBDADataQueryAction<?> getExecuteGraphQueryAction() {
+		return this.executeGraphQueryAction;
+	}
+
+	
+	public void setExecuteEQLAction(OBDADataQueryAction<?> executeEQLAction) {
 		this.executeEQLAction = executeEQLAction;
 	}
 
-	public OBDADataQueryAction getExecuteEQLAction() {
+	public OBDADataQueryAction<?> getExecuteEQLAction() {
 		return executeEQLAction;
 	}
 
-	public void setRetrieveUCQExpansionAction(OBDADataQueryAction retrieveUCQExpansionAction) {
+	public void setRetrieveUCQExpansionAction(OBDADataQueryAction<String> retrieveUCQExpansionAction) {
 		this.retrieveUCQExpansionAction = retrieveUCQExpansionAction;
 	}
 
-	public OBDADataQueryAction getRetrieveUCQExpansionAction() {
+	public OBDADataQueryAction<?> getRetrieveUCQExpansionAction() {
 		return retrieveUCQExpansionAction;
 	}
 
-	public void setRetrieveUCQUnfoldingAction(OBDADataQueryAction retrieveUCQUnfoldingAction) {
+	public void setRetrieveUCQUnfoldingAction(OBDADataQueryAction<String> retrieveUCQUnfoldingAction) {
 		this.retrieveUCQUnfoldingAction = retrieveUCQUnfoldingAction;
 	}
 
-	public OBDADataQueryAction getRetrieveUCQUnfoldingAction() {
+	public OBDADataQueryAction<?> getRetrieveUCQUnfoldingAction() {
 		return retrieveUCQUnfoldingAction;
 	}
 
-	public void setRetrieveEQLUnfoldingAction(OBDADataQueryAction retrieveEQLUnfoldingAction) {
+	public void setRetrieveEQLUnfoldingAction(OBDADataQueryAction<?> retrieveEQLUnfoldingAction) {
 		this.retrieveEQLUnfoldingAction = retrieveEQLUnfoldingAction;
 	}
 
-	public OBDADataQueryAction getRetrieveEQLUnfoldingAction() {
+	public OBDADataQueryAction<?> getRetrieveEQLUnfoldingAction() {
 		return retrieveEQLUnfoldingAction;
 	}
 
+	private class ExecTimeSetter implements Runnable {
+		String s;
+		ExecTimeSetter(String s){
+			super();
+			this.s = s;
+		}
+		public void run(){
+			lblExecutionInfo.setText(s);	
+		}
+	}
+	
 	public void updateStatus(int rows) {
 		Double time = Double.valueOf(execTime / 1000);
 		String s = String.format("Execution time: %s sec - Number of rows retrieved: %,d ", time, rows);
-		lblExecutionInfo.setText(s);
+		Runnable time_setter = new ExecTimeSetter(s);
+		SwingUtilities.invokeLater(time_setter);
 	}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -467,9 +524,21 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 		return fetchSize;
 	}
 
+	private class SetQueryTextPane implements Runnable{
+		String query;
+		SetQueryTextPane(String query){
+			super();
+			this.query = query;
+		}
+		public void run(){
+			queryTextPane.setText(query);	
+		}
+	}
+	
 	@Override
-	public void preferenceChanged() {
+	public synchronized void preferenceChanged() {
 		String query = queryTextPane.getText();
-		queryTextPane.setText(query);
+		SetQueryTextPane setter = new SetQueryTextPane(query);
+		SwingUtilities.invokeLater(setter);
 	}
 }

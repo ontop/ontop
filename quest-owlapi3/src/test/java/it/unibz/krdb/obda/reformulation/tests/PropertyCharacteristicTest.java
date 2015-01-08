@@ -105,13 +105,11 @@ public class PropertyCharacteristicTest extends TestCase {
 
 	@Override
 	public void tearDown() throws Exception {
-		try {
+	
 			dropTables();
 			conn.close();
 			jdbcconn.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
+		
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -176,7 +174,7 @@ public class PropertyCharacteristicTest extends TestCase {
 		while (rs.nextRow()) {
 			counter++;
 			if (stdout) {
-				for (int column = 1; column <= rs.getColumCount(); column++) {
+				for (int column = 1; column <= rs.getColumnCount(); column++) {
 					OWLObject binding = rs.getOWLObject(column);
 					System.out.print(binding.toString() + ", ");
 				}

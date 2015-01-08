@@ -26,15 +26,15 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBVirtualStore;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Properties;
 
-import org.openrdf.model.Graph;
+import org.openrdf.model.Model;
 import org.openrdf.repository.RepositoryException;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -55,23 +55,24 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, boolean existential, String rewriting)
 			throws Exception {
 		super();
-		createRepo(name, tboxFile, obdaFile, getPreferencesFromSettings(existential, rewriting));
+		createRepo(name, tboxFile, obdaFile, getPreferencesFromSettings(existential, rewriting), null);
 	}	
 	
 	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, String configFileName) throws Exception {
 		super();
-		createRepo(name, tboxFile, obdaFile, getPreferencesFromFile(configFileName));
+		createRepo(name, tboxFile, obdaFile, getPreferencesFromFile(configFileName), null);
 	}
 	
-	public SesameVirtualRepo(String name, OWLOntology tbox, Graph mappings, String configFileName) throws Exception {
+	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, String configFileName) throws Exception {
 		super();
 		createRepo(name, tbox, mappings, null, getPreferencesFromFile(configFileName));
 	}
 
-	public SesameVirtualRepo(String name, OWLOntology tbox, Graph mappings, QuestPreferences config) throws Exception {
+	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, QuestPreferences config) throws Exception {
 		this(name, tbox, mappings, null, config);
 	}
-	public SesameVirtualRepo(String name, OWLOntology tbox, Graph mappings, DBMetadata metadata, QuestPreferences prop) throws Exception {
+	
+	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences prop) throws Exception {
 		super();
 		createRepo(name, tbox, mappings, metadata, prop);
 	}
@@ -115,15 +116,48 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		return pref;
 	}
 	
-	private void createRepo(String name, OWLOntology tbox, Graph mappings, DBMetadata metadata, QuestPreferences pref) throws Exception 
+	private void createRepo(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences pref) throws Exception 
 	{
 		this.virtualStore = new QuestDBVirtualStore(name, tbox, mappings, metadata, pref);
 	}
 	
-	private void createRepo(String name, String tboxFile, String mappingFile, QuestPreferences pref) throws Exception
+	
+	/**
+	 * Sets the implicit db constraints, i.e. primary and foreign keys not in the database
+	 * Must be called before the call to initialize
+	 * 
+	 * @param userConstraints
+	 */
+	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
+		if(userConstraints == null)
+			throw new NullPointerException();
+		if(this.isinitialized)
+			throw new Error("Implicit DB Constraints must be given before the call to initialize to have effect. See https://github.com/ontop/ontop/wiki/Implicit-database-constraints and https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
+		this.virtualStore.setImplicitDBConstraints(userConstraints);
+	}
+
+	/**
+	 * This method leads to the reasoner being initalized, which includes the call to {@link Quest.setupRepository}: connecting to the database, 
+	 * analyzing mappings etc. This must be called before any queries are run, i.e. before {@link getQuestConnection}.
+	 * @throws RepositoryException 
+	 * 
+	 */
+	@Override
+	public void initialize() throws RepositoryException{
+		super.initialize();
+		try {
+			this.virtualStore.initialize();
+		}
+		catch (Exception e){
+			throw new RepositoryException(e);
+		}
+	}
+	
+	private void createRepo(String name, String tboxFile, String mappingFile, QuestPreferences pref, ImplicitDBConstraints userConstraints) throws Exception
 	{
 		if (mappingFile == null) {
-			//if we have no mappings
+			//if we have no mappings 
+			// (then user constraints are also no point)
 			this.virtualStore = new QuestDBVirtualStore(name, pref);
 			
 		} else {
@@ -150,8 +184,15 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		}
 	}
 	
+	/**
+	 * Returns a connection which can be used to run queries over the repository
+	 * Before this method can be used, {@link initialize()} must be called once.
+	 */
 	@Override
 	public QuestDBConnection getQuestConnection() throws OBDAException {
+		if(!super.isinitialized)
+			throw new Error("The SesameVirtualRepo must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
+		
 		questDBConn = this.virtualStore.getConnection();
 		return questDBConn;
 	}

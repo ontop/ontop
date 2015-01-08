@@ -20,17 +20,12 @@ package it.unibz.krdb.obda.owlrefplatform.core.resultset;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.BNode;
 import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.TupleResultSet;
 import it.unibz.krdb.obda.model.OBDAStatement;
-import it.unibz.krdb.obda.model.ValueConstant;
 
-import java.net.URI;
 import java.util.List;
-
-//import com.hp.hpl.jena.iri.IRI;
 
 public class EmptyQueryResultSet implements TupleResultSet {
 
@@ -77,7 +72,7 @@ public class EmptyQueryResultSet implements TupleResultSet {
 //	}
 
 	@Override
-	public int getColumCount() throws OBDAException {
+	public int getColumnCount() throws OBDAException {
 		return head.size();
 	}
 

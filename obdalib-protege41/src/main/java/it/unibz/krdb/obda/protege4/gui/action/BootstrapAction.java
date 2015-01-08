@@ -52,6 +52,8 @@ import org.slf4j.LoggerFactory;
 
 public class BootstrapAction extends ProtegeAction {
 
+	private static final long serialVersionUID = 8671527155950905524L;
+	
 	private OWLEditorKit editorKit = null;
 	private OWLWorkspace workspace;
 	private OWLModelManager owlManager;
@@ -154,8 +156,7 @@ public class BootstrapAction extends ProtegeAction {
 
 		@Override
 		public void actionCanceled() throws Exception {
-			// TODO Auto-generated method stub
-
+			throw new Exception("Cancelling boostrapping is not implemented.");
 		}
 
 		public void run(String baseUri, OWLOntology currentOnto,
@@ -163,6 +164,16 @@ public class BootstrapAction extends ProtegeAction {
 				throws Exception {
 			dm = new DirectMappingBootstrapper(baseUri, currentOnto,
 					currentModel, currentSource);
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return false;
+		}
+
+		@Override
+		public boolean isErrorShown() {
+			return false;
 		}
 
 	}

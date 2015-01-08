@@ -48,8 +48,10 @@ public class QuestPreferences extends Properties {
 	public static final String  OPTIMIZE_EQUIVALENCES 	= "org.obda.owlreformulationplatform.optimizeEquivalences";
 	
 	public static final String OBTAIN_FULL_METADATA = "OBTAIN_FULL_METADATA";
-	
-	public static final String  REWRITE 	= "rewrite";
+
+    public static final String SQL_GENERATE_REPLACE = "org.obda.owlreformulationplatform.sqlGenerateReplace";
+
+    public static final String  REWRITE 	= "rewrite";
 	
 	public static final String  OPTIMIZE_TBOX_SIGMA 	= "org.obda.owlreformulationplatform.optimizeTboxSigma";
 //	public static final String 	CREATE_TEST_MAPPINGS 	= "org.obda.owlreformulationplatform.createTestMappings";
@@ -66,13 +68,14 @@ public class QuestPreferences extends Properties {
 	
 	public static final String JDBC_DRIVER = "JDBC_DRIVER";
 	
+	public static final String PRINT_KEYS = "PRINT_KEYS";
+
 	// Tomcat connection pool properties
 	public static final String MAX_POOL_SIZE = "max_pool_size";
 	public static final String INIT_POOL_SIZE = "initial_pool_size";
 	public static final String REMOVE_ABANDONED = "remove_abandoned";
 	public static final String ABANDONED_TIMEOUT = "abandoned_timeout";
-	public static final String KEEP_ALIVE = "keep_alive";
-	
+	public static final String KEEP_ALIVE = "keep_alive";	
 	
 	private Logger				log						= LoggerFactory.getLogger(QuestPreferences.class);
 

@@ -20,25 +20,16 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.utils.TypeMapper;
+import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.Reference;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class DirectMappingAxiom {
 	protected DBMetadata metadata;
@@ -46,7 +37,7 @@ public class DirectMappingAxiom {
 	protected String SQLString;
 	protected String baseuri;
 	private OBDADataFactory df;
-
+	
 	public DirectMappingAxiom() {
 	}
 
@@ -109,7 +100,7 @@ public class DirectMappingAxiom {
 		for (Attribute pk : pks)
 			Column += Table + ".\"" + pk.getName() + "\" AS "+this.table.getName()+"_"+pk.getName()+", ";
 		} else {
-			for (int i = 0; i < tableDef.countAttribute(); i++) {
+			for (int i = 0; i < tableDef.getNumOfAttributes(); i++) {
 				String attrName = tableDef.getAttributeName(i + 1);
 				Column += Table + ".\"" + attrName + "\" AS " + this.table.getName()+"_"+attrName +", ";
 			}
@@ -147,7 +138,7 @@ public class DirectMappingAxiom {
 							Column += ", " + refPki + " AS " + tableRef + "_" + pki;
 					}
 				} else {
-					for (int i = 0; i < tdef.countAttribute(); i++) {
+					for (int i = 0; i < tdef.getNumOfAttributes(); i++) {
 						String attrName = tdef.getAttributeName(i + 1);
 						Column += ", \""+ tableRef + "\".\"" + attrName +
 								"\" AS " + tableRef+"_"+attrName;
@@ -169,18 +160,18 @@ public class DirectMappingAxiom {
 		
 		
 		//DataType Atoms
-		TypeMapper typeMapper = TypeMapper.getInstance();
-		for(int i=0;i<table.countAttribute();i++){
+		JdbcTypeMapper typeMapper = df.getJdbcTypeMapper();
+		for(int i=0;i<table.getNumOfAttributes();i++){
 			Attribute att = table.getAttribute(i+1);
-			Predicate type = typeMapper.getPredicate(att.getType());
-			if (type.equals(OBDAVocabulary.RDFS_LITERAL)) {
+			Predicate.COL_TYPE type = typeMapper.getPredicate(att.getType());
+			if (type == COL_TYPE.LITERAL) {
 				Variable objV = df.getVariable(att.getName());
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, objV));
-			} else {
-				Function obj = df.getFunction(type,
-						df.getVariable(att.getName()));
+			} 
+			else {
+				Function obj = df.getTypedTerm(df.getVariable(att.getName()), type);
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, obj));
@@ -189,7 +180,7 @@ public class DirectMappingAxiom {
 	
 		//To construct the head, there is no static field about this predicate
 		List<Term> headTerms = new ArrayList<Term>();
-		for(int i=0;i<table.countAttribute();i++){
+		for(int i=0;i<table.getNumOfAttributes();i++){
 			headTerms.add(df.getVariable(table.getAttributeName(i+1)));
 		}
 		Predicate headPredicate = df.getPredicate("http://obda.inf.unibz.it/quest/vocabulary#q", headTerms.size());
@@ -206,7 +197,7 @@ public class DirectMappingAxiom {
 
 		// Object Atoms
 		// Foreign key reference
-		for (int i = 0; i < table.countAttribute(); i++) {
+		for (int i = 0; i < table.getNumOfAttributes(); i++) {
 			if (table.getAttribute(i + 1).isForeignKey()) {
 				Attribute att = table.getAttribute(i + 1);
 				Reference ref = att.getReference();
@@ -276,8 +267,6 @@ public class DirectMappingAxiom {
 			tableName = percentEncode(td.getName()) + "_";
 
 		if (td.getPrimaryKeys().size() > 0) {
-			Predicate uritemple = df.getUriTemplatePredicate(td
-					.getPrimaryKeys().size() + 1);
 			List<Term> terms = new ArrayList<Term>();
 			terms.add(df.getConstantLiteral(subjectTemple(td, td.getPrimaryKeys()
 					.size())));
@@ -285,16 +274,15 @@ public class DirectMappingAxiom {
 				terms.add(df.getVariable(tableName
 						+ td.getPrimaryKeys().get(i).getName()));
 			}
-			return df.getFunction(uritemple, terms);
+			return df.getUriTemplate(terms);
 
 		} else {
 			List<Term> vars = new ArrayList<Term>();
-			for (int i = 0; i < td.countAttribute(); i++) {
+			for (int i = 0; i < td.getNumOfAttributes(); i++) {
 				vars.add(df.getVariable(tableName + td.getAttributeName(i + 1)));
 			}
 
-			Predicate bNode = df.getBNodeTemplatePredicate(1);
-			return df.getFunction(bNode, vars);
+			return df.getBNodeTemplate(vars);
 		}
 	}
 

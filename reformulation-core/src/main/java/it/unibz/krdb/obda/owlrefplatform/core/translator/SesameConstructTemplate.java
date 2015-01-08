@@ -28,7 +28,6 @@ import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.algebra.Extension;
 import org.openrdf.query.algebra.MultiProjection;
 import org.openrdf.query.algebra.Projection;
-import org.openrdf.query.algebra.ProjectionElem;
 import org.openrdf.query.algebra.ProjectionElemList;
 import org.openrdf.query.algebra.Reduced;
 import org.openrdf.query.algebra.TupleExpr;

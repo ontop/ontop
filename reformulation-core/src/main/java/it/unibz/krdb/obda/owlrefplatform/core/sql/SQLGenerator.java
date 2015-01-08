@@ -20,29 +20,15 @@ package it.unibz.krdb.obda.owlrefplatform.core.sql;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
-import it.unibz.krdb.obda.model.BNode;
-import it.unibz.krdb.obda.model.BooleanOperationPredicate;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.NumericalOperationPredicate;
-import it.unibz.krdb.obda.model.OBDAException;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.URITemplatePredicate;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.owlrefplatform.core.Quest;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
-import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.JDBCUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.sql.DBMetadata;
@@ -51,20 +37,11 @@ import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 
-import java.sql.Types;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.openrdf.model.Literal;
-import org.slf4j.LoggerFactory;
 
-//import com.hp.hpl.jena.rdf.model.Literal;
+import java.sql.Types;
+import java.util.*;
+
 
 public class SQLGenerator implements SQLQueryGenerator {
 
@@ -86,8 +63,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String IS_NOT_NULL_OPERATOR = "%s IS NOT NULL";
 
 	private static final String ADD_OPERATOR = "%s + %s";
-	private static final String SUBSTRACT_OPERATOR = "%s - %s";
+	private static final String SUBTRACT_OPERATOR = "%s - %s";
 	private static final String MULTIPLY_OPERATOR = "%s * %s";
+	
 	
 	private static final String LIKE_OPERATOR = "%s LIKE %s";
 
@@ -101,27 +79,40 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String VIEW_NAME = "QVIEW%s";
 
 	private final DBMetadata metadata;
-	private final JDBCUtility jdbcutil;
 	private final SQLDialectAdapter sqladapter;
+
+
+    private boolean generatingREPLACE = true;
 
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
 	private boolean isSI = false;
-	private Map<String, Integer> uriRefIds;
+	private SemanticIndexURIMap uriRefIds;
 	
-	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGenerator.class);
+	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
-	public SQLGenerator(DBMetadata metadata, JDBCUtility jdbcutil, SQLDialectAdapter sqladapter) {
+	public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter) {
 		this.metadata = metadata;
-		this.jdbcutil = jdbcutil;
 		this.sqladapter = sqladapter;
 	}
+
+	/**
+	 * 
+	 * @param metadata
+	 * @param sqladapter
+	 * @param sqlGenerateReplace
+	 * @param uriid is null in case we are not in the SI mode
+	 */
 	
-	@Override
-	public void setUriIds (Map<String,Integer> uriid){
-		this.isSI = true;
-		this.uriRefIds = uriid;
-	}
+    public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace, SemanticIndexURIMap uriid) {
+        this(metadata, sqladapter);
+        this.generatingREPLACE = sqlGenerateReplace;
+        if (uriid != null) {
+    		this.isSI = true;
+    		this.uriRefIds = uriid;
+        }
+    }
+
 
 	/**
 	 * Generates and SQL query ready to be executed by Quest. Each query is a
@@ -197,7 +188,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 //			log.debug("Before pushing equalities: \n{}", cq);
 
-			DatalogNormalizer.enforceEqualities(cq, false);
+			EQNormalizer.enforceEqualities(cq);
 
 //			log.debug("Before folding Joins: \n{}", cq);
 
@@ -222,7 +213,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 //			log.debug("Normalized CQ: \n{}", cq);
 
 			Predicate headPredicate = cq.getHead().getFunctionSymbol();
-			if (!headPredicate.getName().toString().equals("ans1")) {
+			if (!headPredicate.getName().toString().equals(OBDAVocabulary.QUEST_QUERY)) {
 				// not a target query, skip it.
 				continue;
 			}
@@ -257,7 +248,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		while (queryStringIterator.hasNext()) {
 			result.append("\n");
 			result.append(UNION);
-			result.append("\n\n");
+			result.append("\n");
 			result.append(queryStringIterator.next());
 		}
 
@@ -304,6 +295,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 				int type = getVariableDataType(term, index);
 				if (type == Types.INTEGER) return String.format("NOT %s > 0", column);
+                if (type == Types.BIGINT) return String.format("NOT %s > 0", column);
+                if (type == Types.FLOAT) return String.format("NOT %s > 0", column);
 				if (type == Types.DOUBLE) return String.format("NOT %s > 0", column);
 				if (type == Types.BOOLEAN) return String.format("NOT %s", column);
 				if (type == Types.VARCHAR) return String.format("NOT LENGTH(%s) > 0", column);
@@ -314,6 +307,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				//int type = 8;
 				int type = getVariableDataType(term, index);
 				if (type == Types.INTEGER) return String.format("%s > 0", column);
+                if (type == Types.BIGINT) return String.format("%s > 0", column);
+                if (type == Types.FLOAT) return String.format("%s > 0", column);
 				if (type == Types.DOUBLE) return String.format("%s > 0", column);
 				if (type == Types.BOOLEAN) return String.format("%s", column);
 				if (type == Types.VARCHAR) return String.format("LENGTH(%s) > 0", column);
@@ -330,7 +325,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String rightOp = getSQLString(right, index, true);
 				return String.format("(" + expressionFormat + ")", leftOp, rightOp);
 			} else if (atom.isArithmeticFunction()) {
-				// For numerical operators, e.g., MUTLIPLY, SUBSTRACT, ADDITION
+				// For numerical operators, e.g., MUTLIPLY, SUBTRACT, ADDITION
 				String expressionFormat = getNumericalOperatorString(functionSymbol);
 				Term left = atom.getTerm(0);
 				Term right = atom.getTerm(1);
@@ -383,7 +378,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * If process boolean operators is enabled, all boolean conditions will be
 	 * added to the ON clause of the first JOIN.
 	 * 
-	 * @param atoms
+	 * @param inneratoms
 	 * @param index
 	 * @param isTopLevel
 	 *            indicates if the list of atoms is actually the main body of
@@ -421,7 +416,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		int size = tableDefinitions.size();
 		if (isTopLevel) {
 			if (size == 0) {
-				tableDefinitionsString.append("(" + jdbcutil.getDummyTable() + ") tdummy ");
+				tableDefinitionsString.append("(" + sqladapter.getDummyTable() + ") tdummy ");
 				
 			} else {
 			Iterator<String> tableDefinitionsIterator = tableDefinitions.iterator();
@@ -681,20 +676,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return equalities;
 	}
 
+	
 	// return variable SQL data type
 	private int getVariableDataType (Term term, QueryAliasIndex idx) {
 		Function f = (Function) term;
 		if (f.isDataTypeFunction()) {
 			Predicate p = f.getFunctionSymbol();
-			if (p.toString() == OBDAVocabulary.XSD_BOOLEAN_URI) return Types.BOOLEAN;
-			if (p.toString() == OBDAVocabulary.XSD_INT_URI)  return Types.INTEGER;
-			if (p.toString() == OBDAVocabulary.XSD_INTEGER_URI)  return Types.INTEGER;
-			if (p.toString() == OBDAVocabulary.XSD_DOUBLE_URI) return Types.DOUBLE;
-			if (p.toString() == OBDAVocabulary.XSD_STRING_URI) return Types.VARCHAR;
-			if (p.toString() == OBDAVocabulary.RDFS_LITERAL_URI) return Types.VARCHAR;
+			Predicate.COL_TYPE type = dtfac.getDataType(p.toString());			
+			return OBDADataFactoryImpl.getInstance().getJdbcTypeMapper().getSQLType(type);
 		}
 		// Return varchar for unknown
-		return 12;
+		return Types.VARCHAR;
 	}
 
 	private String getWHERE(CQIE query, QueryAliasIndex index) {
@@ -712,7 +704,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	/**
 	 * produces the select clause of the sql query for the given CQIE
 	 * 
-	 * @param q
+	 * @param query
 	 *            the query
 	 * @return the sql select clause
 	 */
@@ -728,8 +720,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		if (distinct) {
 			sb.append("DISTINCT ");
 		}
+		//Only for ASK
 		if (headterms.size() == 0) {
-			sb.append("true as x");
+			sb.append("'true' as x");
 			return sb.toString();
 		}
 
@@ -764,7 +757,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		if (ht instanceof URIConstant) {
 			URIConstant uc = (URIConstant) ht;
-			mainColumn = jdbcutil.getSQLLexicalForm(uc.getURI().toString());
+			mainColumn = sqladapter.getSQLLexicalFormString(uc.getURI().toString());
 		} else if (ht == OBDAVocabulary.NULL) {
 			mainColumn = "NULL";
 		} else if (ht instanceof Function) {
@@ -774,7 +767,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			Function ov = (Function) ht;
 			Predicate function = ov.getFunctionSymbol();
-			String functionString = function.toString();
 
 			/*
 			 * Adding the column(s) with the actual value(s)
@@ -793,28 +785,24 @@ public class SQLGenerator implements SQLQueryGenerator {
 				else {
 					Term term = ov.getTerms().get(0);
 					if (term instanceof ValueConstant) {
-						termStr = jdbcutil.getSQLLexicalForm((ValueConstant) term);
+						termStr = getSQLLexicalForm((ValueConstant) term);
 					} else {
 						termStr = getSQLString(term, index, false);
 					}
 				}
 				mainColumn = termStr;
 
-			} else if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
-				/***
-				 * New template based URI building functions
-				 */
-
+			} 
+			else if (function instanceof URITemplatePredicate) {
+				// New template based URI building functions
+				mainColumn = getSQLStringForTemplateFunction(ov, index);
+			} 
+			else if (function instanceof BNodePredicate) {
+				// New template based BNODE building functions
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
 
-			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
-				/***
-				 * New template based BNODE building functions
-				 */
-
-				mainColumn = getSQLStringForTemplateFunction(ov, index);
-
-			} else {
+			} 
+			else {
 				throw new IllegalArgumentException(
 						"Error generating SQL query. Found an invalid function during translation: "
 								+ ov.toString());
@@ -834,15 +822,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 		return String.format(mainTemplate, mainColumn, sqladapter.sqlQuote(signature.get(hpos)));
 	}
 
+	
+	private static final String langStrForSELECT = "%s AS \"%sLang\"";
+	
 	private String getLangColumnForSELECT(Term ht, List<String> signature, int hpos, QueryAliasIndex index) {
 
-		String langStr = "%s AS \"%sLang\"";
 
 		if (ht instanceof Function) {
 			Function ov = (Function) ht;
 			Predicate function = ov.getFunctionSymbol();
 
-			if (function == OBDAVocabulary.RDFS_LITERAL || function == OBDAVocabulary.RDFS_LITERAL_LANG)
+			if (dtfac.isLiteral(function))
 				if (ov.getTerms().size() > 1) {
 				/*
 				 * Case for rdf:literal s with a language, we need to select 2
@@ -859,56 +849,57 @@ public class SQLGenerator implements SQLQueryGenerator {
 				if (langTerm == OBDAVocabulary.NULL) {
 					lang = "NULL";
 				} else if (langTerm instanceof ValueConstant) {
-					lang = jdbcutil.getSQLLexicalForm((ValueConstant) langTerm);
+					lang = getSQLLexicalForm((ValueConstant) langTerm);
 				} else {
 					lang = getSQLString(langTerm, index, false);
 				}
-				return (String.format(langStr, lang, signature.get(hpos)));
+				return (String.format(langStrForSELECT, lang, signature.get(hpos)));
 			}
 		}
-		return (String.format(langStr, "NULL", signature.get(hpos)));
+		return (String.format(langStrForSELECT, "NULL", signature.get(hpos)));
 
 	}
 
-	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
+	private static final String typeStrForSELECT = "%s AS \"%sQuestType\"";
+	
 
-		String typeStr = "%s AS \"%sQuestType\"";
+	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
+		COL_TYPE type;
 
 		if (ht instanceof Function) {
 			Function ov = (Function) ht;
 			Predicate function = ov.getFunctionSymbol();
-			String functionString = function.toString();
 
 			/*
 			 * Adding the ColType column to the projection (used in the result
 			 * set to know the type of constant)
+			 * 
+			 * NOTE NULL is IDENTIFIER 0 in QuestResultSet do not USE for any 
+			 * type
 			 */
-			if (functionString.equals(OBDAVocabulary.XSD_BOOLEAN.getName().toString())) {
-				return (String.format(typeStr, 9, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-				return (String.format(typeStr, 8, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-				return (String.format(typeStr, 5, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-				return (String.format(typeStr, 6, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
-				return (String.format(typeStr, 4, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.XSD_STRING_URI)) {
-				return (String.format(typeStr, 7, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-				return (String.format(typeStr, 3, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.QUEST_URI)) {
-				return (String.format(typeStr, 1, signature.get(hpos)));
-			} else if (functionString.equals(OBDAVocabulary.QUEST_BNODE)) {
-				return (String.format(typeStr, 2, signature.get(hpos)));
+			
+			if (function instanceof URITemplatePredicate) {
+                type = COL_TYPE.OBJECT;
+			} 
+			else if (function instanceof BNodePredicate) {
+                type = COL_TYPE.BNODE;
 			}
-		} else if (ht instanceof URIConstant) {
-			return (String.format(typeStr, 1, signature.get(hpos)));
-		} else if (ht == OBDAVocabulary.NULL) {
-			return (String.format(typeStr, 0, signature.get(hpos)));
+			else {
+				String functionString = function.toString();
+				type = dtfac.getDataType(functionString);
+			}
+		} 
+		else if (ht instanceof URIConstant) {
+            type = COL_TYPE.OBJECT;
+		} 
+		else if (ht == OBDAVocabulary.NULL) {  // NULL is an instance of ValueConstant
+            type = COL_TYPE.NULL;
 		}
-		throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
-
+		else
+			throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
+		
+		int code = type.getQuestCode();
+		return String.format(typeStrForSELECT, code, signature.get(hpos));
 	}
 
 	public String getSQLStringForTemplateFunction(Function ov, QueryAliasIndex index) {
@@ -930,40 +921,52 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			if (t instanceof BNode) {
 				c = (BNode) t;
-				literalValue = ((BNode) t).getValue();
+				literalValue = ((BNode) t).getName();
 			} else {
 				c = (ValueConstant) t;	
 				literalValue = ((ValueConstant) t).getValue();
 			}		
 			Predicate pred = ov.getFunctionSymbol();
-			String replace1 = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
-					"REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" ;
-			String replace2 = ",' ', '%20')," +
-					  "'!', '%21')," +
-					  "'@', '%40'),"+
-					  "'#', '%23')," +
-					  "'$', '%24'),"+
-					  "'&', '%26'),"+
-					  "'*', '%42'), "+
-					  "'(', '%28'), "+
-					  "')', '%29'), "+
-					  "'[', '%5B'), "+
-					  "']', '%5D'), "+
-					  "',', '%2C'), "+
-					  "';', '%3B'), "+
-					  "':', '%3A'), "+
-					  "'?', '%3F'), "+
-					  "'=', '%3D'), "+
-					  "'+', '%2B'), "+
-					  "'''', '%22'), "+
-					  "'/', '%2F')";
-				
-			String template = trim(literalValue);
+
+
+
+
+			String replace1;
+            String replace2;
+            if(generatingREPLACE) {
+
+                replace1 = "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
+                        "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(";
+
+                replace2 = ",' ', '%20')," +
+                        "'!', '%21')," +
+                        "'@', '%40')," +
+                        "'#', '%23')," +
+                        "'$', '%24')," +
+                        "'&', '%26')," +
+                        "'*', '%42'), " +
+                        "'(', '%28'), " +
+                        "')', '%29'), " +
+                        "'[', '%5B'), " +
+                        "']', '%5D'), " +
+                        "',', '%2C'), " +
+                        "';', '%3B'), " +
+                        "':', '%3A'), " +
+                        "'?', '%3F'), " +
+                        "'=', '%3D'), " +
+                        "'+', '%2B'), " +
+                        "'''', '%22'), " +
+                        "'/', '%2F')";
+            } else {
+                replace1 = replace2 = "";
+            }
+
+            String template = trim(literalValue);
 			String[] split = template.split("[{][}]");
 			
 			List<String> vex = new LinkedList<String>();
 			if (split.length > 0 && !split[0].isEmpty()) {
-				vex.add(jdbcutil.getSQLLexicalForm(split[0]));
+				vex.add(sqladapter.getSQLLexicalFormString(split[0]));
 			}
 			
 			/*
@@ -972,7 +975,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 */
 			if (ov.getTerms().size() > 1) {
 				int size = ov.getTerms().size();
-				if (pred == OBDAVocabulary.RDFS_LITERAL || pred == OBDAVocabulary.RDFS_LITERAL_LANG) {
+				if (dtfac.isLiteral(pred)) {
 					size--;
 				}
 				for (int termIndex = 1; termIndex < size; termIndex++) {
@@ -985,7 +988,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 					vex.add(repl);
 					if (termIndex < split.length ) {
-						vex.add(jdbcutil.getSQLLexicalForm(split[termIndex]));
+						vex.add(sqladapter.getSQLLexicalFormString(split[termIndex]));
 					}
 				}
 			}
@@ -1007,7 +1010,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * The function is of the form uri(x), we need to simply return the
 			 * value of X
 			 */
-			return getSQLString(((Variable) t), index, false);
+			return sqladapter.sqlCast(getSQLString(t, index, false), Types.VARCHAR);
 			
 		} else if (t instanceof URIConstant) {
 			/*
@@ -1015,7 +1018,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * concrete URI, we return the string representing that URI.
 			 */
 			URIConstant uc = (URIConstant) t;
-			return jdbcutil.getSQLLexicalForm(uc.getURI().toString());
+			return sqladapter.getSQLLexicalFormString(uc.getURI());
 		}
 
 		/*
@@ -1024,7 +1027,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		throw new IllegalArgumentException("Error, cannot generate URI constructor clause for a term: " + ov.toString());
 
 	}
-	
+
+	// TODO: move to SQLAdapter
 	private String getStringConcatenation(SQLDialectAdapter adapter, String[] params) {
 		String toReturn = sqladapter.strconcat(params);
 		if (adapter instanceof DB2SQLDialectAdapter) {
@@ -1047,8 +1051,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				/*
 				 * A URI function always returns a string, thus it is a string column type.
 				 */
-				if (isSI) return false;
-				return true;
+				return !isSI;
 			} else {
 				if (isUnary(function)) {
 					/*
@@ -1110,14 +1113,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * Determines if it is a unary function.
 	 */
 	private boolean isUnary(Function fun) {
-		return (fun.getArity() == 1) ? true : false;
+		return (fun.getArity() == 1);
 	}
 
 	/**
 	 * Determines if it is a binary function.
 	 */
 	private boolean isBinary(Function fun) {
-		return (fun.getArity() == 2) ? true : false;
+		return (fun.getArity() == 2);
 	}
 
 	/**
@@ -1144,20 +1147,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 			ValueConstant ct = (ValueConstant) term;
 			if (isSI) {
 				if (ct.getType() == COL_TYPE.OBJECT || ct.getType() == COL_TYPE.LITERAL) {
-					int id = getUriid(ct.getValue());
+					int id = uriRefIds.getId(ct.getValue());
 					if (id >= 0)
-						return jdbcutil.getSQLLexicalForm(String.valueOf(id));
+						return sqladapter.getSQLLexicalFormString(String.valueOf(id));
 				}
 			}
-			return jdbcutil.getSQLLexicalForm(ct);
+			return getSQLLexicalForm(ct);
 		} else if (term instanceof URIConstant) {
 			if (isSI) {
 				String uri = term.toString();
-				int id = getUriid(uri);
-				return jdbcutil.getSQLLexicalForm(String.valueOf(id));
+				int id = uriRefIds.getId(uri);
+				return sqladapter.getSQLLexicalFormString(String.valueOf(id));
 			}
 			URIConstant uc = (URIConstant) term;
-			return jdbcutil.getSQLLexicalForm(uc.toString());
+			return sqladapter.getSQLLexicalFormString(uc.toString());
 		} else if (term instanceof Variable) {
 			Variable var = (Variable) term;
 			LinkedHashSet<String> posList = index.getColumnReferences(var);
@@ -1195,7 +1198,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 					String column = getSQLString(term1, index, false);
 					int type = getVariableDataType(term1, index);
 					if (type == Types.INTEGER) return String.format("%s > 0", column);
+                    if (type == Types.BIGINT) return String.format("%s > 0", column);
 					if (type == Types.DOUBLE) return String.format("%s > 0", column);
+                    if (type == Types.FLOAT) return String.format("%s > 0", column);
 					if (type == Types.BOOLEAN) return String.format("%s", column);
 					if (type == Types.VARCHAR) return String.format("LENGTH(%s) > 0", column);
 					return "1";
@@ -1215,7 +1220,30 @@ public class SQLGenerator implements SQLQueryGenerator {
 					return result;
 				}
 			} else {
-				throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
+				if (functionSymbol == OBDAVocabulary.SPARQL_REGEX) {
+					boolean caseinSensitive = false;
+					boolean multiLine = false;
+					boolean dotAllMode = false;
+					if (function.getArity() == 3) {
+						if (function.getTerm(2).toString().contains("i")) {
+							caseinSensitive = true;
+						}
+						if (function.getTerm(2).toString().contains("m")) {
+							multiLine = true;
+						}
+						if (function.getTerm(2).toString().contains("s")) {
+							dotAllMode = true;
+						}
+					}
+					Term p1 = function.getTerm(0);
+					Term p2 = function.getTerm(1);
+					
+					String column = getSQLString(p1, index, false);
+					String pattern = getSQLString(p2, index, false);
+					return sqladapter.sqlRegex(column, pattern, caseinSensitive, multiLine, dotAllMode);
+				}
+				else
+					throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
 			}
 			
 		} else if (functionSymbol instanceof NumericalOperationPredicate) {
@@ -1232,11 +1260,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 			
 		} else {
 			String functionName = functionSymbol.toString();
-			if (functionName.equals(OBDAVocabulary.QUEST_CAST_STR)) {
+			if (functionName.equals(OBDAVocabulary.QUEST_CAST.getName())) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				String datatype = ((Constant) function.getTerm(1)).getValue();
 				int sqlDatatype = -1;
-				if (datatype.equals(OBDAVocabulary.XSD_STRING_URI)) {
+				if (datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
 					sqlDatatype = Types.VARCHAR;
 				}
 				if (isStringColType(function, index)) {
@@ -1244,7 +1272,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					return sqladapter.sqlCast(columnName, sqlDatatype);
 				}
-			} else if (functionName.equals(OBDAVocabulary.SPARQL_STR_URI)) {
+			} else if (functionName.equals(OBDAVocabulary.SPARQL_STR.getName())) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				if (isStringColType(function, index)) {
 					return columnName;
@@ -1257,30 +1285,64 @@ public class SQLGenerator implements SQLQueryGenerator {
 		/*
 		 * The atom must be of the form uri("...", x, y)
 		 */
-		String functionName = function.getFunctionSymbol().toString();
-		if (functionName.equals(OBDAVocabulary.QUEST_URI) || functionName.equals(OBDAVocabulary.QUEST_BNODE)) {
+		// String functionName = function.getFunctionSymbol().toString();
+		if ((functionSymbol instanceof URITemplatePredicate) || (functionSymbol instanceof BNodePredicate)) {
 			return getSQLStringForTemplateFunction(function, index);
-		} else {
-			throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
+		} 
+		else {
+			throw new RuntimeException("Unexpected function in the query: " + function);
 		}
 	}
 
-
 	/***
-	 * We look for the ID in the list of IDs, if its not there, we return -2, which we know will never appear
-	 * on the DB. This is correct because if a constant appears in a query, and that constant was never inserted
-	 * in the DB, the query must be empty (that atom), by putting -2 as id, we will enforce that.
-	 * @param uri
+	 * Returns the valid SQL lexical form of rdf literals based on the current
+	 * database and the datatype specified in the function predicate.
+	 * 
+	 * <p>
+	 * For example, if the function is xsd:boolean, and the current database is
+	 * H2, the SQL lexical form would be for "true" "TRUE" (or any combination
+	 * of lower and upper case) or "1" is always
+	 * 
+	 * @param constant
 	 * @return
 	 */
-	private int getUriid(String uri) {
-		
-		Integer id = uriRefIds.get(uri);
-		if (id != null)
-			return id;
-		return -2;
-					
+	private String getSQLLexicalForm(ValueConstant constant) {
+		String sql = null;
+		if (constant.getType() == COL_TYPE.BNODE || constant.getType() == COL_TYPE.LITERAL || constant.getType() == COL_TYPE.OBJECT
+				|| constant.getType() == COL_TYPE.STRING) {
+			sql = "'" + constant.getValue() + "'";
+		} 
+		else if (constant.getType() == COL_TYPE.BOOLEAN) {
+			String value = constant.getValue().toLowerCase();
+			if (value.equals("1") || value.equals("true") || value.equals("t")) {
+				sql = sqladapter.getSQLLexicalFormBoolean(true);
+			} 
+			else if (value.equals("0") || value.equals("false") || value.equals("f")) {
+				sql = sqladapter.getSQLLexicalFormBoolean(false);
+			} 
+			else {
+				throw new RuntimeException("Invalid lexical form for xsd:boolean. Found: " + value);
+			}
+		} 
+		else if (constant.getType() == COL_TYPE.DATETIME) {
+			sql = sqladapter.getSQLLexicalFormDatetime(constant.getValue());
+		} 
+		else if (constant.getType() == COL_TYPE.DECIMAL || constant.getType() == COL_TYPE.DOUBLE
+				|| constant.getType() == COL_TYPE.INTEGER || constant.getType() == COL_TYPE.LONG
+                || constant.getType() == COL_TYPE.FLOAT || constant.getType() == COL_TYPE.NON_POSITIVE_INTEGER
+                || constant.getType() == COL_TYPE.INT || constant.getType() == COL_TYPE.UNSIGNED_INT
+                || constant.getType() == COL_TYPE.NEGATIVE_INTEGER
+                || constant.getType() == COL_TYPE.POSITIVE_INTEGER || constant.getType() == COL_TYPE.NON_NEGATIVE_INTEGER) {
+			sql = constant.getValue();
+		} 
+		else {
+			sql = "'" + constant.getValue() + "'";
+		}
+		return sql;
+
 	}
+	
+
 
 	/**
 	 * Returns the SQL string for the boolean operator, including placeholders
@@ -1317,18 +1379,21 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = IS_TRUE_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_LIKE)) {
 			operator = LIKE_OPERATOR;
-		} else {
+		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_REGEX)) {
+			operator = ""; //we do not need the operator for regex, it should not be used, because the sql adapter will take care of this
+		} 
+		else {
 			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);
 		}
 		return operator;
 	}
 
 	private String getNumericalOperatorString(Predicate functionSymbol) {
-		String operator = null;
+		String operator;
 		if (functionSymbol.equals(OBDAVocabulary.ADD)) {
 			operator = ADD_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.SUBSTRACT)) {
-			operator = SUBSTRACT_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.SUBTRACT)) {
+			operator = SUBTRACT_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.MULTIPLY)) {
 			operator = MULTIPLY_OPERATOR;
 		} else {
@@ -1336,18 +1401,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 		return operator;
 	}
-
-	/**
+    /**
 	 * Utility class to resolve "database" atoms to view definitions ready to be
 	 * used in a FROM clause, and variables, to column references defined over
 	 * the existing view definitons of a query.
 	 */
 	public class QueryAliasIndex {
 
-		Map<Function, String> viewNames = new HashMap<Function, String>();
-		Map<Function, String> tableNames = new HashMap<Function, String>();
-		Map<Function, DataDefinition> dataDefinitions = new HashMap<Function, DataDefinition>();
-		Map<Variable, LinkedHashSet<String>> columnReferences = new HashMap<Variable, LinkedHashSet<String>>();
+		Map<Function, String> viewNames = new HashMap<>();
+		Map<Function, String> tableNames = new HashMap<>();
+		Map<Function, DataDefinition> dataDefinitions = new HashMap<>();
+		Map<Variable, LinkedHashSet<String>> columnReferences = new HashMap<>();
 
 		int dataTableCount = 0;
 		boolean isEmpty = false;
@@ -1420,7 +1484,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 				LinkedHashSet<String> references = columnReferences.get(term);
 				if (references == null) {
-					references = new LinkedHashSet<String>();
+					references = new LinkedHashSet<>();
 					columnReferences.put((Variable) term, references);
 				}
 				String columnName = def.getAttributeName(index + 1);

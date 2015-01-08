@@ -64,4 +64,15 @@ public interface SQLDialectAdapter {
 	public String sqlCast(String value, int type);
 	
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode);
+	
+	public String getDummyTable();
+	
+
+	public String getSQLLexicalFormString(String constant);
+	
+	public String getSQLLexicalFormBoolean(boolean value);
+	
+	public String getSQLLexicalFormDatetime(String value);
+	
+	
 }

@@ -50,8 +50,6 @@ import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -69,7 +67,6 @@ public class BindTest extends TestCase {
 	private OBDADataFactory fac;
 	private Connection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
@@ -99,7 +96,8 @@ public class BindTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
-
+		in.close();
+		
 		st.executeUpdate(bf.toString());
 		conn.commit();
 
@@ -115,12 +113,10 @@ public class BindTest extends TestCase {
 
 	@Override
 	public void tearDown() throws Exception {
-		try {
+
 			dropTables();
 			conn.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
+		
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -135,7 +131,8 @@ public class BindTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
-
+		in.close();
+		
 		st.executeUpdate(bf.toString());
 		st.close();
 		conn.commit();
@@ -167,22 +164,18 @@ public class BindTest extends TestCase {
 				+ "}";
 
 
-		StringBuilder bf = new StringBuilder(query);
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			OWLIndividual ind2 = rs.getOWLIndividual("y");
 			OWLLiteral val = rs.getOWLLiteral("z");
 
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-			}
-			conn.close();
+		} 
+		finally {
+			st.close();
 			reasoner.dispose();
 		}
 	}

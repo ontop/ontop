@@ -23,16 +23,13 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.model.Variable;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
-public class VariableImpl extends AbstractLiteral implements Variable {
+public class VariableImpl implements Variable {
 
 	private static final long serialVersionUID = 5723075311798541659L;
 
 	private final String name;
-
 	private final int identifier;
 
 	protected VariableImpl(String name) {
@@ -67,7 +64,7 @@ public class VariableImpl extends AbstractLiteral implements Variable {
 	// case
 	@Override
 	public String toString() {
-		return TermUtil.toString(this);
+		return name;
 	}
 
 	@Override
@@ -77,15 +74,6 @@ public class VariableImpl extends AbstractLiteral implements Variable {
 
 	@Override
 	public Set<Variable> getReferencedVariables() {
-		return Collections.singleton((Variable)this);
+		return Collections.<Variable>singleton(this);
 	}
-	
-	@Override
-	public Map<Variable, Integer> getVariableCount() {
-		Map<Variable,Integer> count =  new HashMap<Variable,Integer>();
-		count.put(this, 1);
-		return count;
-	}
-	
-
 }

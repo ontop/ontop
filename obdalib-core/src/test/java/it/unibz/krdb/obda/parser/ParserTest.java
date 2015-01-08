@@ -20,9 +20,8 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.sql.api.VisitedQuery;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import junit.framework.TestCase;
-import net.sf.jsqlparser.JSQLParserException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,20 +94,20 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT JSQL PARSER VALUE is considered as a SQL function
+	
 	public void test_1_5_extra() {
 
 		final boolean result = parseJSQL("SELECT \"URI\" as X, VALUE as Y, LANG as Z FROM QUEST_DATA_PROPERTY_LITERAL_ASSERTION WHERE ISBNODE = FALSE AND LANG IS NULL AND IDX = 1");
 		printJSQL("test_1_5_extra", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT JSQL PARSER VALUE is considered as a SQL function
+	
 	public void test_1_5_extra_2() {
 		final boolean result = parseJSQL("SELECT id, name as alias1, value as alias2 FROM table1");
 		printJSQL("test_1_5_extra_2", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
@@ -658,14 +657,14 @@ public class ParserTest extends TestCase {
 
 	private String queryText;
 
-	VisitedQuery queryP;
+	ParsedSQLQuery queryP;
 
 	private boolean parseJSQL(String input) {
 
 		queryText = input;
 
 		try {
-			queryP = new VisitedQuery(input,true);
+			queryP = new ParsedSQLQuery(input,true);
 		} catch (Exception e) {
 
 			return false;
@@ -679,20 +678,20 @@ public class ParserTest extends TestCase {
 			System.out.println(title + ": " + queryP.toString());
 			
 			try {
-				System.out.println("  Tables: " + queryP.getTableSet());
+				System.out.println("  Tables: " + queryP.getTables());
 				System.out.println("  Projection: " + queryP.getProjection());
 
 				System.out.println("  Selection: "
-						+ ((queryP.getSelection() == null) ? "--" : queryP
-								.getSelection()));
+						+ ((queryP.getWhereClause() == null) ? "--" : queryP
+								.getWhereClause()));
 
 				System.out.println("  Aliases: "
 						+ (queryP.getAliasMap().isEmpty() ? "--" : queryP
 								.getAliasMap()));
 				System.out.println("  GroupBy: " + queryP.getGroupByClause());
 				System.out.println("  Join conditions: "
-						+ (queryP.getJoinCondition().isEmpty() ? "--" : queryP
-								.getJoinCondition()));
+						+ (queryP.getJoinConditions().isEmpty() ? "--" : queryP
+								.getJoinConditions()));
 			} catch (Exception e) {
 
 				e.printStackTrace();
