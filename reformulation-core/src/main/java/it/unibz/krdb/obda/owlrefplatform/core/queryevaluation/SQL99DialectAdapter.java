@@ -227,13 +227,5 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		return bf.toString();
 	}
 
-	@Override
-	public String createDummyQueryToFetchColumns(String originalQuery) {
-		String toReturn = String.format("select * from (%s) view20130219 ", originalQuery);
-
-			toReturn += sqlSlice(0, Long.MIN_VALUE);
-
-		return toReturn;
-	}
 	
 }

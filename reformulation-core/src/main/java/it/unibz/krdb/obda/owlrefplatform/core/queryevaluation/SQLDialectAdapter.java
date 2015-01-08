@@ -73,8 +73,6 @@ public interface SQLDialectAdapter {
 	public String getSQLLexicalFormBoolean(boolean value);
 	
 	public String getSQLLexicalFormDatetime(String value);
-
-	public String createDummyQueryToFetchColumns(String originalQuery);
 	
 	
 }
