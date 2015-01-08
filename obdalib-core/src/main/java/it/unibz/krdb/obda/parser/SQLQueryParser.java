@@ -48,7 +48,7 @@ public class SQLQueryParser {
 	
 	//This field will contain all the target SQL from the 
 	//mappings that could not be parsed by the parser.
-	private ArrayList<ViewDefinition> viewDefinitions;
+//	private ArrayList<ViewDefinition> viewDefinitions;
 	
 	private static int id_counter;
 	
@@ -69,7 +69,7 @@ public class SQLQueryParser {
 	public SQLQueryParser(Connection conn) throws SQLException {
 		connection=conn;
 		database=connection.getMetaData().getDriverName();
-		this.viewDefinitions = new ArrayList<ViewDefinition>();
+//		this.viewDefinitions = new ArrayList<ViewDefinition>();
 		this.dbMetaData = null;
 		id_counter = 0;		
 	}
@@ -77,7 +77,7 @@ public class SQLQueryParser {
 	public SQLQueryParser() {
 		database=null;
 		connection=null;
-		this.viewDefinitions = new ArrayList<ViewDefinition>();
+//		this.viewDefinitions = new ArrayList<ViewDefinition>();
 		this.dbMetaData = null;
 		id_counter = 0;		
 	}
@@ -86,9 +86,9 @@ public class SQLQueryParser {
 	 *  Returns all the target SQL from the 
 	 *  mappings that could not be parsed by the parser.
 	 */
-	public ArrayList<ViewDefinition> getViewDefinitions(){
-		return this.viewDefinitions;
-	}
+//	public ArrayList<ViewDefinition> getViewDefinitions(){
+//		return this.viewDefinitions;
+//	}
 
 	/**
 	 * Called from ParsedMapping. Returns the query, even if there were 
@@ -167,8 +167,8 @@ public class SQLQueryParser {
 		
 		if(dbMetaData != null)
 			dbMetaData.add(vd);
-		else
-			viewDefinitions.add(vd);
+//		else
+//			viewDefinitions.add(vd);
 		}
 		
 		ParsedSQLQuery vt = createViewParsed(viewName, query);
