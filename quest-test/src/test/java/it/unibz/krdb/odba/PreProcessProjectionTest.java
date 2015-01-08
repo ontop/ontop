@@ -58,7 +58,7 @@ public class PreProcessProjectionTest {
 
     }
 
-    private void runTests(Properties p, String query) throws Exception {
+    private int runTests(Properties p, String query) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
@@ -72,9 +72,10 @@ public class PreProcessProjectionTest {
         QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();
 
+        int results = 0;
 
         try {
-            executeQueryAssertResults(query, st);
+           results= executeQueryAssertResults(query, st);
 
         } catch (Exception e) {
             st.close();
@@ -87,10 +88,11 @@ public class PreProcessProjectionTest {
             conn.close();
             reasoner.dispose();
         }
+        return results;
 
     }
 
-    private void executeQueryAssertResults(String query, QuestOWLStatement st) throws Exception {
+    private int executeQueryAssertResults(String query, QuestOWLStatement st) throws Exception {
         QuestOWLResultSet rs = st.executeTuple(query);
         int count = 0;
         while (rs.nextRow()) {
@@ -103,6 +105,8 @@ public class PreProcessProjectionTest {
             System.out.println();
         }
         rs.close();
+
+        return count;
 
     }
 
@@ -118,7 +122,8 @@ public class PreProcessProjectionTest {
         QuestPreferences p = new QuestPreferences();
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x a :Category}";
-        runTests(p, query);
+        int nResults = runTests(p, query);
+        assertEquals(8, nResults);
     }
 
     @Test
@@ -128,7 +133,8 @@ public class PreProcessProjectionTest {
         QuestPreferences p = new QuestPreferences();
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x a :Customer}";
-        runTests(p, query);
+        int nResults = runTests(p, query);
+        assertEquals(2155, nResults);
     }
 
     @Test
@@ -138,7 +144,8 @@ public class PreProcessProjectionTest {
         QuestPreferences p = new QuestPreferences();
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x :locationRegion ?y}";
-        runTests(p, query);
+        int nResults = runTests(p, query);
+        assertEquals(53, nResults);
     }
 
     @Test
@@ -148,7 +155,8 @@ public class PreProcessProjectionTest {
         QuestPreferences p = new QuestPreferences();
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x :orderDetailDiscount ?y}";
-        runTests(p, query);
+        int nResults = runTests(p, query);
+        assertEquals(2155, nResults);
     }
 
     @Test
@@ -158,7 +166,8 @@ public class PreProcessProjectionTest {
         QuestPreferences p = new QuestPreferences();
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x a :Location}";
-        runTests(p, query);
+        int nResults = runTests(p, query);
+        assertEquals(72, nResults);
     }
 
 

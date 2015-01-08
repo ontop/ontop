@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.Properties;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class ViewGenerationParserTest {
@@ -48,7 +49,7 @@ public class ViewGenerationParserTest {
 
     }
 
-    private void runTests(Properties p, String query) throws Exception {
+    private int runTests(Properties p, String query) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();
@@ -62,9 +63,10 @@ public class ViewGenerationParserTest {
         QuestOWLConnection conn = reasoner.getConnection();
         QuestOWLStatement st = conn.createStatement();
 
+        int results = 0;
 
         try {
-            executeQueryAssertResults(query, st);
+            results= executeQueryAssertResults(query, st);
 
         } catch (Exception e) {
             st.close();
@@ -77,10 +79,11 @@ public class ViewGenerationParserTest {
             conn.close();
             reasoner.dispose();
         }
+        return results;
 
     }
 
-    private void executeQueryAssertResults(String query, QuestOWLStatement st) throws Exception {
+    private int executeQueryAssertResults(String query, QuestOWLStatement st) throws Exception {
         QuestOWLResultSet rs = st.executeTuple(query);
         int count = 0;
         while (rs.nextRow()) {
@@ -94,7 +97,10 @@ public class ViewGenerationParserTest {
         }
         rs.close();
 
+        return count;
+
     }
+
 
 
 
@@ -108,7 +114,8 @@ public class ViewGenerationParserTest {
         QuestPreferences p = new QuestPreferences();
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x a :Category}";
-        runTests(p, query);
+        int nResults = runTests(p, query);
+        assertEquals(8, nResults);
     }
 
     @Test
@@ -118,7 +125,8 @@ public class ViewGenerationParserTest {
         QuestPreferences p = new QuestPreferences();
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x a :Customer}";
-        runTests(p, query);
+        int nResults = runTests(p, query);
+        assertEquals(93, nResults);
     }
 
     @Test
@@ -128,7 +136,8 @@ public class ViewGenerationParserTest {
         QuestPreferences p = new QuestPreferences();
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x :locationRegion ?y}";
-        runTests(p, query);
+        int nResults = runTests(p, query);
+        assertEquals(4, nResults);
     }
 
     @Test
@@ -138,7 +147,8 @@ public class ViewGenerationParserTest {
         QuestPreferences p = new QuestPreferences();
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x :orderDetailDiscount ?y}";
-        runTests(p, query);
+        int nResults = runTests(p, query);
+        assertEquals(830, nResults);
     }
 
 
