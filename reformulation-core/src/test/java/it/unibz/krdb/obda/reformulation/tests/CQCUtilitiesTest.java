@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.reformulation.tests;
 
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
@@ -108,7 +107,8 @@ public class CQCUtilitiesTest {
 
 		initialquery1 = tfac.getCQIE(head, body);
 	}
-
+/*
+ * ROMAN: commented out because there is no freeze anymore
     @Test
 	public void testGrounding() {
     	CQContainmentCheckUnderLIDs.FreezeCQ c2cq = new CQContainmentCheckUnderLIDs.FreezeCQ(initialquery1.getHead(), initialquery1.getBody());
@@ -136,7 +136,7 @@ public class CQCUtilitiesTest {
 		assertTrue(f1.getTerms().get(0).equals(tfac.getConstantLiteral(CANx1)));
 		assertTrue(head.get(2).equals(tfac.getConstantLiteral(CANy2)));
 	}
-
+*/
     @Test
 	public void testContainment1() {
 
@@ -662,7 +662,7 @@ public class CQCUtilitiesTest {
         List<Term> headTerms = new LinkedList<Term>();
         headTerms.add(x);
 
-        Function head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), headTerms);
+        Function head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
 
         List<Function> body = new LinkedList<Function>();
 

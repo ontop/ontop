@@ -96,16 +96,23 @@ public class SQLGenerator implements SQLQueryGenerator {
 		this.sqladapter = sqladapter;
 	}
 
-    public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace) {
+	/**
+	 * 
+	 * @param metadata
+	 * @param sqladapter
+	 * @param sqlGenerateReplace
+	 * @param uriid is null in case we are not in the SI mode
+	 */
+	
+    public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace, SemanticIndexURIMap uriid) {
         this(metadata, sqladapter);
         this.generatingREPLACE = sqlGenerateReplace;
+        if (uriid != null) {
+    		this.isSI = true;
+    		this.uriRefIds = uriid;
+        }
     }
 
-    @Override
-	public void setUriMap (SemanticIndexURIMap uriid){
-		this.isSI = true;
-		this.uriRefIds = uriid;
-	}
 
 	/**
 	 * Generates and SQL query ready to be executed by Quest. Each query is a
@@ -206,7 +213,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 //			log.debug("Normalized CQ: \n{}", cq);
 
 			Predicate headPredicate = cq.getHead().getFunctionSymbol();
-			if (!headPredicate.getName().toString().equals("ans1")) {
+			if (!headPredicate.getName().toString().equals(OBDAVocabulary.QUEST_QUERY)) {
 				// not a target query, skip it.
 				continue;
 			}

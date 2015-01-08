@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 
 import java.util.List;

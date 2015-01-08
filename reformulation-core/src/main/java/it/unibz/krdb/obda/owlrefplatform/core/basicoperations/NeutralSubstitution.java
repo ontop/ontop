@@ -55,11 +55,6 @@ public class NeutralSubstitution implements Substitution {
     }
 
     @Override
-    public Set<VariableImpl> keySet() {
-        return ImmutableSet.of();
-    }
-
-    @Override
 	public String toString() {
 		return "{-/-}";
 	}

@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A general interface which should be use to implement new source query
@@ -48,6 +47,4 @@ public interface SQLQueryGenerator extends Serializable {
 	 * @throws Exception
 	 */
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException;
-
-	void setUriMap(SemanticIndexURIMap uriRefIds);
 }

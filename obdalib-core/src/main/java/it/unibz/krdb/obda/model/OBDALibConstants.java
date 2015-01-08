@@ -20,7 +20,7 @@ package it.unibz.krdb.obda.model;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+
 
 //import com.hp.hpl.jena.iri.IRI;
 

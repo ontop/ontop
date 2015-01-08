@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -33,7 +32,6 @@ import it.unibz.krdb.sql.api.Attribute;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -46,8 +44,6 @@ public class DBMetadataUtil {
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
 	private static Logger log = LoggerFactory.getLogger(DBMetadataUtil.class);
-	
-	private static final String variableSuffix = "_4022013_";
 	
 	/*
 	 * generate CQIE rules from foreign key info of db metadata
@@ -67,7 +63,7 @@ public class DBMetadataUtil {
 					String table1 = def.getName();
 					String table2 = "";
 					TableDefinition def2 = null;
-					Map<Integer, Integer> positionMatch = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> positionMatch = new HashMap<>();
 					for (Attribute attr : fkAttributes) {
 						// Get current table and column (1)
 						String column1 = attr.getName();
@@ -97,17 +93,17 @@ public class DBMetadataUtil {
 					}
 					// Construct CQIE
 					Predicate p1 = fac.getPredicate(table1, def.getNumOfAttributes());					
-					List<Term> terms1 = new ArrayList<Term>(def.getNumOfAttributes());
-					for (int i=0; i < def.getNumOfAttributes(); i++) {
-						 terms1.add(fac.getVariable("t" + variableSuffix + (i+1)));
+					List<Term> terms1 = new ArrayList<>(def.getNumOfAttributes());
+					for (int i = 0; i < def.getNumOfAttributes(); i++) {
+						 terms1.add(fac.getVariable("t" + (i+1)));
 					}
 					
 					Predicate p2 = fac.getPredicate(table2, def2.getNumOfAttributes());
-					List<Term> terms2 = new ArrayList<Term>(def2.getNumOfAttributes());
-					for (int i=0; i < def2.getNumOfAttributes(); i++) {
-						 terms2.add(fac.getVariable("p" + variableSuffix + (i+1)));
+					List<Term> terms2 = new ArrayList<>(def2.getNumOfAttributes());
+					for (int i = 0; i < def2.getNumOfAttributes(); i++) {
+						 terms2.add(fac.getVariable("p" + (i+1)));
 					}
-					// Do the swapping
+					// do the swapping
 					for (Entry<Integer,Integer> swap : positionMatch.entrySet()) 
 						terms1.set(swap.getKey(), terms2.get(swap.getValue()));
 					

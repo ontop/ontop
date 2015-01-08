@@ -45,6 +45,7 @@ public class AdpSQLDialectAdapter extends SQL99DialectAdapter {
 	 * @param rdfliteral
 	 * @return
 	 */
+	@Override
 	public String getSQLLexicalFormDatetime(String v) {
 		// TODO: check whether this inherited implementation is OK
 		

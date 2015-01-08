@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class ValueConstantImpl implements ValueConstant {

@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -79,8 +78,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
 		mappingList.add(mappingAxiom);
 		
-		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(md);
-		List<CQIE> dp = analyzer.constructDatalogProgram(mappingList);
+		List<CQIE> dp = Mapping2DatalogConverter.constructDatalogProgram(mappingList, md);
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());

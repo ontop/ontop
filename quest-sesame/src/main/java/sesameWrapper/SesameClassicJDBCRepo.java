@@ -22,8 +22,6 @@ package sesameWrapper;
 
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDB;
-import it.unibz.krdb.obda.owlrefplatform.questdb.QuestDBClassicStore;
 
 public class SesameClassicJDBCRepo extends SesameClassicRepo {
 

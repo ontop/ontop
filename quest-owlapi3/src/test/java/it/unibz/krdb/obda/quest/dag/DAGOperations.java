@@ -26,8 +26,6 @@ import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -212,7 +210,6 @@ public class DAGOperations {
 	public static void removeCycles(Map<Description, DAGNode> dagnodes, Map<Description, Description> equi_mapp, DAG dag) {
 
 		// Finding the cycles (strongly connected components)
-		OntologyFactory fac = OntologyFactoryImpl.getInstance();
 
 		ArrayList<ArrayList<DAGNode>> sccs = scc(dagnodes);
 

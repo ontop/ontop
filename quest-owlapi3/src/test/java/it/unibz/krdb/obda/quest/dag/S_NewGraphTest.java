@@ -23,8 +23,9 @@ package it.unibz.krdb.obda.quest.dag;
 
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+
 import java.io.File;
 
 import junit.framework.TestCase;
@@ -43,8 +44,7 @@ public class S_NewGraphTest  extends TestCase{
 		String classowlfile = "src/test/resources/dag-tests-1.owl";
 		String roleowlfile = "src/test/resources/test/dag/test-role-hierarchy.owl";
 		
-		 String owlfile =
-		 "src/test/resources/test/stockexchange-unittest.owl";
+		String owlfile = "src/test/resources/test/stockexchange-unittest.owl";
 		log.info("Loading ontology");
 
 		// Loading the OWL file
@@ -83,13 +83,12 @@ public class S_NewGraphTest  extends TestCase{
 //		System.out.println("ancestors "+d+" "+ tbox.getAncestors(d));
 //		}
 		log.info("Get named dag");
-		NamedDAG namedDAG = new NamedDAG(r);
-		System.out.println(namedDAG);
 		
 		log.info("See information named DAG");
 		System.out.println(r.getClassDAG());
 		System.out.println(r.getObjectPropertyDAG());
-		System.out.println(namedDAG);
+		System.out.println(SemanticIndexBuilder.getNamedDAG(r.getClassDAG()));
+		System.out.println(SemanticIndexBuilder.getNamedDAG(r.getObjectPropertyDAG()));
 		
 //		log.info("See relations named DAG");
 //		TBoxReasonerImpl tbox2= new TBoxReasonerImpl(dag);

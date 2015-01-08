@@ -34,7 +34,6 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 
-import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
 
 public class R2RMLReader {

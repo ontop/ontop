@@ -23,8 +23,6 @@ package it.unibz.krdb.obda.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.unibz.krdb.sql.api.ProjectionJSQL;
-import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;

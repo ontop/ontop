@@ -40,17 +40,9 @@ public class UriTemplateMatcher {
 
 	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
-	private final Map<Pattern, Function> uriTemplateMatcher = new HashMap<Pattern, Function>();
+	private final Map<Pattern, Function> uriTemplateMatcher = new HashMap<>();
 	
-	public UriTemplateMatcher() {
-		// NO-OP
-	}
-	
-	
-	public void clear() {
-		uriTemplateMatcher.clear();
-	}
-	
+
 	public void put(Pattern uriTemplatePattern, Function uriFunction) {
 		uriTemplateMatcher.put(uriTemplatePattern, uriFunction);
 	}
@@ -110,7 +102,7 @@ public class UriTemplateMatcher {
 		}
 		if (functionURI == null) {
 			/* If we cannot match against a template, we try to match against the most general template (which will
-			 * generate empty quires later in the query answering process
+			 * generate empty queries later in the query answering process
 			 */
 			functionURI = ofac.getUriTemplate(ofac.getConstantLiteral(uriString));
 		}

@@ -892,7 +892,7 @@ public class ExpressionEvaluator {
 			else {
 				Function result = null;
 				List<Function> temp = new ArrayList<Function>();
-				Set<VariableImpl> keys = theta.keySet();
+				Set<VariableImpl> keys = theta.getMap().keySet();
 				for (VariableImpl var : keys) {
 					result = createEqNeqFilter(var, theta.get(var), isEqual);
 					temp.add(result);

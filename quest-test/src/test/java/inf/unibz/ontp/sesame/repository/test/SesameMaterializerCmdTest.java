@@ -77,7 +77,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		File f = new File("src/test/resources/materializer/MaterializeTest.owl");
 		// Loading the OWL ontology from the file as with normal OWLReasoners
 		ontology = manager.loadOntologyFromOntologyDocument(f);
-		onto =  new OWLAPI3TranslatorUtility().translate(ontology);
+		onto =  OWLAPI3TranslatorUtility.translate(ontology);
 	}
 	
 	public void testModelN3() throws Exception {
