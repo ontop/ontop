@@ -2,7 +2,7 @@ package org.semanticweb.ontop.cli;
 
 /*
  * #%L
- * ontop-quest-owlapi3
+ * ontop-cli
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%

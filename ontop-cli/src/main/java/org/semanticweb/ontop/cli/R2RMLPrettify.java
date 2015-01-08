@@ -2,7 +2,7 @@ package org.semanticweb.ontop.cli;
 
 /*
  * #%L
- * ontop-obdalib-sesame
+ * ontop-cli
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -19,6 +19,7 @@ package org.semanticweb.ontop.cli;
  * limitations under the License.
  * #L%
  */
+
 
 import com.hp.hpl.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
