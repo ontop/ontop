@@ -24,6 +24,7 @@ import it.unibz.krdb.obda.exception.InvalidPrefixWritingException;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 
 import java.util.Arrays;
@@ -102,9 +103,9 @@ public class URITemplates {
 
 	
 	public static String getUriTemplateString(Function uriFunction) {
-		Term term = uriFunction.getTerm(0);
-		String template = term.toString();
-		Iterator<Variable> vars = uriFunction.getVariables().iterator();
+		ValueConstant term = (ValueConstant) uriFunction.getTerm(0);
+		String template = term.getValue();
+		Iterator<Variable> vars = uriFunction.getVariablesList().iterator();
 		String[] split = template.split("\\{\\}");
 		int i = 0;
 		template = "";
@@ -113,11 +114,7 @@ public class URITemplates {
 			i++;
 		}
 		//the number of place holdes should be equal to the number of variables.
-		if (split.length-i == 1){
-			template += split[i];
-			//we remove the quotes cos later the literal constructor adds them
-			template= template.substring(1, template.length()-1);
-		}else{
+		if (!(split.length == i)){
 			throw new IllegalArgumentException("the number of place holdes should be equal to the number of variables.");
 		}
 		
