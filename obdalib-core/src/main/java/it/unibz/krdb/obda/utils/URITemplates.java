@@ -114,7 +114,11 @@ public class URITemplates {
 			i++;
 		}
 		//the number of place holdes should be equal to the number of variables.
-		if (!(split.length == i)){
+		if (split.length-i == 1){
+			template += split[i];
+		} else if(split.length == i){
+			// do nothing
+		} else{
 			throw new IllegalArgumentException("the number of place holdes should be equal to the number of variables.");
 		}
 		
