@@ -146,13 +146,15 @@ public class QuestOWLMaterializerCMD {
 
 	private static void printUsage() {
 		System.out.println("Usage");
-		System.out.println(" QuestOWLMaterializerCMD -obda mapping.obda [-onto ontology.owl] [-format format] [-output outputfile]");
+		System.out.println(" QuestOWLMaterializerCMD -obda mapping.obda [-onto ontology.owl] [-format format] [-out outputFile] [--enable-reasoning | --disable-reasoning]");
 		System.out.println("");
 		System.out.println(" -obda mapping.obda    The full path to the OBDA file");
 		System.out.println(" -onto ontology.owl    [OPTIONAL] The full path to the OWL file");
 		System.out.println(" -format format        [OPTIONAL] The format of the materialized ontology: ");
 		System.out.println("                          Options: rdfxml, owlxml, turtle. Default: rdfxml");
-		System.out.println(" -output outputfile    [OPTIONAL] The full path to the output file. If not specified, the output will be stdout");
+		System.out.println(" -output outputFile    [OPTIONAL] The full path to the output file. If not specified, the output will be stdout");
+		System.out.println(" --enable-reasoning    [OPTIONAL] enable the OWL reasoning (default)");
+		System.out.println(" --disable-reasoning   [OPTIONAL] disable the OWL reasoning (not implemented yet) ");
 		System.out.println("");
 	}
 
@@ -173,7 +175,7 @@ public class QuestOWLMaterializerCMD {
 				format = args[i + 1];
 				i += 2;
 				break;
-			case "-output":
+			case "-out":
 				outputFile = args[i + 1];
 				i += 2;
 				break;
