@@ -1016,6 +1016,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public void setQueryTimeout(Statement st) throws SQLException {
 		
 		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().toString());
+
+		if(connClass == null){
+			// TODO: set a proper timeout value
+			//st.setQueryTimeout(10);
+			return;
+		}
+
+
 		switch(connClass){
 		case MYSQL:
 			st.setQueryTimeout(10);
@@ -1036,6 +1044,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	
 	public void resetTimeouts(Statement st) throws SQLException {
 		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().toString());
+
+		if(connClass == null){
+			// TODO: check
+			return;
+		}
+
 		switch(connClass){
 		case MYSQL:
 			// Do nothing
