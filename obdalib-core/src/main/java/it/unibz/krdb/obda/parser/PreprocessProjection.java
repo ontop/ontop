@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
@@ -45,7 +46,11 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
         List<SelectItem> columnNames = new ArrayList<>();
 
-        DataDefinition tableDefinition = metadata.getDefinition(table.getFullyQualifiedName());
+        String tableFullName= table.getFullyQualifiedName();
+        if (ParsedSQLQuery.pQuotes.matcher(tableFullName).matches()) {
+            tableFullName = tableFullName.substring(1, tableFullName.length()-1);
+        }
+        DataDefinition tableDefinition = metadata.getDefinition(tableFullName);
 
         if (tableDefinition == null) {
             throw new RuntimeException("Definition not found for table '" + table + "'.");
@@ -66,8 +71,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
             //construct a column as table.column
 
-
-            SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, metadata.getAttributeName(table.getFullyQualifiedName(), pos)));
+            SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, metadata.getAttributeName(tableFullName, pos)));
 
             columnNames.add(columnName);
         }
