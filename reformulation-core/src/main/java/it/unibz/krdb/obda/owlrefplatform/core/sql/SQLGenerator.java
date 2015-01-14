@@ -1324,7 +1324,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				throw new RuntimeException("Invalid lexical form for xsd:boolean. Found: " + value);
 			}
 		} 
-		else if (constant.getType() == COL_TYPE.DATETIME) {
+		else if (constant.getType() == COL_TYPE.DATETIME || constant.getType() == COL_TYPE.DATETIME_STAMP) {
 			sql = sqladapter.getSQLLexicalFormDatetime(constant.getValue());
 		} 
 		else if (constant.getType() == COL_TYPE.DECIMAL || constant.getType() == COL_TYPE.DOUBLE

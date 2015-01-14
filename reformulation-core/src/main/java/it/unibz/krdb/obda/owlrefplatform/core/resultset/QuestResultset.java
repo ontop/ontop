@@ -200,7 +200,7 @@ public class QuestResultset implements TupleResultSet {
 						String s = formatter.format(d);
 						result = fac.getConstantLiteral(s, COL_TYPE.DOUBLE);
 
-					} else if (type == COL_TYPE.DATETIME) {
+					} else if (type == COL_TYPE.DATETIME || type == COL_TYPE.DATETIME_STAMP) {
 
                         /** set.getTimestamp() gives problem with MySQL and Oracle drivers we need to specify the dateformat
                          MySQL DateFormat ("MMM DD YYYY HH:mmaa");
@@ -212,7 +212,7 @@ public class QuestResultset implements TupleResultSet {
 
 
                         Timestamp value = set.getTimestamp(column);
-                        result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
+                        result = fac.getConstantLiteral(value.toString().replace(' ', 'T'), type);
 
                     }
                     catch (Exception e){
@@ -225,7 +225,7 @@ public class QuestResultset implements TupleResultSet {
                             try {
                                 date = df.parse(value);
                                 Timestamp ts = new Timestamp(date.getTime());
-                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
+                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
 
                             } catch (ParseException pe) {
 
@@ -246,7 +246,7 @@ public class QuestResultset implements TupleResultSet {
                                 }
 
                                 Timestamp ts = new Timestamp(date.getTime());
-                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), COL_TYPE.DATETIME);
+                                result = fac.getConstantLiteral(ts.toString().replace(' ', 'T'), type);
                             }
                             else{
                                 throw new RuntimeException(e);

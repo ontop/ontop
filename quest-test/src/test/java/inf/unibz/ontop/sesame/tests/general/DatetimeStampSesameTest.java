@@ -31,10 +31,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-public class DatetimeStampTest extends TestCase {
+public class DatetimeStampSesameTest extends TestCase {
 
 	String owlfile = "src/test/resources/northwind/northwind-dmo.owl";
-	String mappingfile = "src/test/resources/northwind/mapping-1416995185830.ttl";
+	String mappingfile = "src/test/resources/northwind/mapping-northwind-dmo.ttl";
 	String queryfile = "";
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
@@ -43,7 +43,7 @@ public class DatetimeStampTest extends TestCase {
 	RepositoryConnection con;
 	QuestPreferences pref;
 
-	public DatetimeStampTest() {
+	public DatetimeStampSesameTest() {
 		// create owlontology from file
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(
@@ -178,6 +178,29 @@ public class DatetimeStampTest extends TestCase {
 
 		//read next query
 		sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/> select * {?x :BirthDate ?y}" ;
+		//read expected result
+		expectedResult = 9;
+
+		obtainedResult = runQuery(sparqlQuery);
+		log.debug("results "+obtainedResult);
+		assertEquals(expectedResult, obtainedResult);
+
+	}
+
+	@Test
+	public void testEmployeesBinary() {
+
+		//read next query
+		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/> select * {?x :Photo ?y}" ;
+		//read expected result
+		int expectedResult = 9;
+
+		int obtainedResult = runQuery(sparqlQuery);
+		log.debug("results " + obtainedResult);
+		assertEquals(expectedResult, obtainedResult);
+
+		//read next query
+		sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/> select * {?x :Picture ?y}" ;
 		//read expected result
 		expectedResult = 9;
 
