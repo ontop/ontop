@@ -228,7 +228,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		attribute_index.put(COL_TYPE.DOUBLE, "IDX_DOUBLE_ATTRIBUTE");
 		attribute_index.put(COL_TYPE.DATETIME, "IDX_DATETIME_ATTRIBUTE");
 		attribute_index.put(COL_TYPE.BOOLEAN, "IDX_BOOLEAN_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.DATETIME_STAMP, "IDX_DATETIME_ATTRIBUTE");
+		attribute_index.put(COL_TYPE.DATETIME_STAMP, "IDX_DATETIMESTAMP_ATTRIBUTE");
 
 		
 		for (COL_TYPE datatype : attribute_table.keySet()) {
