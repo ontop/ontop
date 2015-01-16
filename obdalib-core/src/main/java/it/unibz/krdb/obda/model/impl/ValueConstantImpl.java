@@ -68,7 +68,8 @@ public class ValueConstantImpl implements ValueConstant {
             case DATE:
             case TIME:
             case YEAR:
-			case DATETIME: 
+			case DATETIME:
+			case DATETIME_STAMP:
 				sb.append("\"").append(value).append("\""); 
 				break;
 			case INTEGER:

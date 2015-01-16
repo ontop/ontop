@@ -24,42 +24,27 @@ package it.unibz.krdb.obda.r2rml;
  * @author timea bagosi
  * The R2RML parser class that breaks down the responsibility of parsing by case
  */
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.DataTypePredicateImpl;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.r2rml.R2RMLVocabulary;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.openrdf.model.Model;
-import org.openrdf.model.Resource;
-
-import eu.optique.api.mapping.ObjectMap;
-import eu.optique.api.mapping.PredicateMap;
-import eu.optique.api.mapping.PredicateObjectMap;
-import eu.optique.api.mapping.R2RMLMappingManager;
-import eu.optique.api.mapping.R2RMLMappingManagerFactory;
-import eu.optique.api.mapping.SubjectMap;
-import eu.optique.api.mapping.Template;
+import eu.optique.api.mapping.*;
 import eu.optique.api.mapping.TermMap.TermMapType;
-import eu.optique.api.mapping.TriplesMap;
 import eu.optique.api.mapping.impl.InvalidR2RMLMappingException;
 import eu.optique.api.mapping.impl.SubjectMapImpl;
+import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.DataTypePredicateImpl;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import org.openrdf.model.Model;
+import org.openrdf.model.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 
 public class R2RMLParser {
 
 	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	List<Predicate> classPredicates; 
 	List<Resource> joinPredObjNodes; 
@@ -68,7 +53,7 @@ public class R2RMLParser {
 	String subjectString = "";
 	String objectString = "";
 	R2RMLMappingManager mapManager;
-
+	Logger logger = LoggerFactory.getLogger(R2RMLParser.class);
 	/**
 	 * empty constructor 
 	 */
@@ -359,9 +344,17 @@ public class R2RMLParser {
 		//we check if it is a typed literal 
 		if (datatype != null)
 		{
-			Predicate dtype =  new DataTypePredicateImpl(datatype.toString(), COL_TYPE.OBJECT);
-			Term dtAtom = fac.getFunction(dtype, objectAtom);
-			objectAtom = dtAtom;
+			Predicate.COL_TYPE type = dtfac.getDataType(datatype.toString());
+			if (type == null) {
+//				throw new RuntimeException("Unsupported datatype: " + datatype.toString());
+				logger.warn("Unsupported datatype will not be converted: " + datatype.toString());
+			}
+			else {
+				Term dtAtom = fac.getTypedTerm(objectAtom, type);
+//			Predicate dtype =  new DataTypePredicateImpl(datatype.toString(), COL_TYPE.OBJECT);
+//			Term dtAtom = fac.getFunction(dtype, objectAtom);
+				objectAtom = dtAtom;
+			}
 		}
 
 		return objectAtom;

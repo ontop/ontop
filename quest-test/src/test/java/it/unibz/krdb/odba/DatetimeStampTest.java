@@ -1,6 +1,7 @@
 package it.unibz.krdb.odba;
 
 
+import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.io.QueryIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
@@ -25,33 +26,21 @@ import java.io.File;
 import java.net.URI;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class ParserAndLookupTableTest {
+public class DatetimeStampTest {
     private OBDADataFactory fac;
 
     Logger log = LoggerFactory.getLogger(this.getClass());
     private OBDAModel obdaModel;
     private OWLOntology ontology;
 
-    final String owlFile = "src/test/resources/northwind/northwind.owl";
-    final String r2rmlFile = "src/test/resources/northwind/mapping-northwind-platform.ttl";
+    final String owlFile = "src/test/resources/northwind/northwind-dmo.owl";
+    final String r2rmlFile = "src/test/resources/northwind/mapping-northwind-dmo.ttl";
+    final String obdaFile = "src/test/resources/northwind/mapping-northwind-dmo.obda";
 
     @Before
     public void setUp() throws Exception {
-
-        String jdbcurl = "jdbc:mysql://10.7.20.39/northwind";
-        String username = "fish";
-        String password = "fish";
-        String driverclass = "com.mysql.jdbc.Driver";
-
-        OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-        // String sourceUrl = "http://example.org/customOBDA";
-        URI obdaURI = new File(r2rmlFile).toURI();
-        String sourceUrl = obdaURI.toString();
-        OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-                username, password, driverclass);
 
         fac = OBDADataFactoryImpl.getInstance();
 
@@ -59,11 +48,7 @@ public class ParserAndLookupTableTest {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
 
-        log.info("Loading r2rml file");
 
-        R2RMLReader reader = new R2RMLReader(r2rmlFile);
-
-        obdaModel = reader.readModel(dataSource);
 
 
     }
@@ -85,7 +70,7 @@ public class ParserAndLookupTableTest {
 
         QueryController qc = new QueryController();
         QueryIOManager qman = new QueryIOManager(qc);
-        qman.load("src/test/resources/northwind.q");
+        qman.load("src/test/resources/northwind/northwind.q");
 
         for (QueryControllerGroup group : qc.getGroups()) {
             for (QueryControllerQuery query : group.getQueries()) {
@@ -102,6 +87,11 @@ public class ParserAndLookupTableTest {
                 int count = 0;
                 while (res.nextRow()) {
                     count += 1;
+
+//                    for (int i = 1; i <= res.getColumnCount(); i++) {
+//                        log.debug(res.getSignature().get(i-1) +" = " + res.getOWLObject(i));
+//
+//                    }
                 }
                 log.debug("Total result: {}", count);
                 assertFalse(count == 0);
@@ -120,12 +110,49 @@ public class ParserAndLookupTableTest {
 
 
     @Test
-    public void testViewCreation() throws Exception {
+    public void testR2rml() throws Exception {
+
+
+        String jdbcurl = "jdbc:mysql://10.7.20.39/northwind";
+        String username = "fish";
+        String password = "fish";
+        String driverclass = "com.mysql.jdbc.Driver";
+
+        OBDADataFactory f = OBDADataFactoryImpl.getInstance();
+        // String sourceUrl = "http://example.org/customOBDA";
+        URI obdaURI = new File(r2rmlFile).toURI();
+        String sourceUrl = obdaURI.toString();
+        OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
+                username, password, driverclass);
+
+
+        log.info("Loading r2rml file");
+
+        R2RMLReader reader = new R2RMLReader(r2rmlFile);
+
+        obdaModel = reader.readModel(dataSource);
 
         QuestPreferences p = new QuestPreferences();
 
         runTests(p);
     }
+
+
+    @Test
+    public void testOBDA() throws Exception {
+
+        log.info("Loading OBDA file");
+
+        // Loading the OBDA data
+        obdaModel = fac.getOBDAModel();
+        ModelIOManager ioManager = new ModelIOManager(obdaModel);
+        ioManager.load(obdaFile);
+
+        QuestPreferences p = new QuestPreferences();
+
+        runTests(p);
+    }
+
 
 
 

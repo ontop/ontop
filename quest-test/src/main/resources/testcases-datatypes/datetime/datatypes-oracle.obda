@@ -19,7 +19,7 @@ target		:character-{ID} a :Row ; :hasVarChar2 {TYPE_VARCHAR2} ; :hasChar {TYPE_C
 source		select ID, TYPE_VARCHAR2, TYPE_CHAR, TYPE_CHAR_VARYING, TYPE_CHARACTER, TYPE_CHARACTER_VARYING, TYPE_CLOB, TYPE_LONG_VARCHAR, TYPE_NAT_CHAR, TYPE_NAT_CHAR_VARYING, TYPE_NAT_CHARACTER, TYPE_NAT_CHARACTER_VARYING, TYPE_NCLOB, TYPE_NVARCHAR2, TYPE_VARCHAR, TYPE_NCHAR_VARYING, TYPE_NCHAR from "CHARACTER"
 
 mappingId	Date-Time Types
-target		:datetime-{ID} a :Row ; :hasDate {TYPE_DATE} ; :hasDateString {TYPE_DATE}^^xsd:string ; :hasTimestamp {TYPE_TIMESTAMP} ; :hasTimestampString {TYPE_TIMESTAMP}^^xsd:string .
-source		select ID, TYPE_DATE, TYPE_INTERVAL_DAY, TYPE_INTERVAL_YEAR, TYPE_TIMESTAMP from DATETIME
+target		:datetime-{ID} a :Row ; :hasDate {TYPE_DATE} ; :hasDateString {TYPE_DATE}^^xsd:string ; :hasTimestamp {TYPE_TIMESTAMP} ; :hasTimestampString {TYPE_TIMESTAMP}^^xsd:string ; :hasTimestampTZ {TYPE_TIMESTAMPTZ}^^xsd:dateTimeStamp .
+source		select ID, TYPE_DATE, TYPE_INTERVAL_DAY, TYPE_INTERVAL_YEAR, TYPE_TIMESTAMP, TYPE_TIMESTAMPTZ from DATETIMES
 ]]
 
