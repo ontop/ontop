@@ -24,3 +24,17 @@ select *
 {?x :BirthDate ?y}
 
 ]]
+
+QueryGroup="Base64Stamp"] @collection [[
+
+[QueryItem="Picture"]
+PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Categories/>
+select *
+{?x :Picture ?y}
+
+[QueryItem="Photo"]
+PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/>
+select *
+{?x :Photo ?y}
+
+]]

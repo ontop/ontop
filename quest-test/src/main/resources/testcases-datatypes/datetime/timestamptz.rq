@@ -3,5 +3,5 @@ PREFIX : <http://ontop.inf.unibz.it/test/datatypes#>
 SELECT ?x ?y
 WHERE {
    ?x a :Row; :hasTimestampTZ ?y
-   FILTER ( ?y = "2013-03-19T03:12:10+01:00"^^<http://www.w3.org/2001/XMLSchema#dateTimeStamp> ) .
+   FILTER ( ?y = "2013-03-18T10:12:10-08:00"^^<http://www.w3.org/2001/XMLSchema#dateTimeStamp> ) .
 }

@@ -323,8 +323,6 @@
 	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
 	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
 	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Employees"/>
-	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#base64Binary"/>
-	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#base64Binary"/>
 	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.Photo</comment>
 	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Employees.Photo</label>
 </rdf:Description>
@@ -730,8 +728,6 @@
 	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
 	<domain_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Categories"/>
 	<domain xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.optique-project.eu/resource/northwind/northwind/Categories"/>
-	<range_class xmlns="http://eu.optique.ontology/annotations#" rdf:resource="http://www.w3.org/2001/XMLSchema#base64Binary"/>
-	<range xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:resource="http://www.w3.org/2001/XMLSchema#base64Binary"/>
 	<comment xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Categories.Picture</comment>
 	<label xmlns="http://www.w3.org/2000/01/rdf-schema#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Categories.Picture</label>
 </rdf:Description>

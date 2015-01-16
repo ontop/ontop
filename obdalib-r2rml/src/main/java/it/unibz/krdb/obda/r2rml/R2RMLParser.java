@@ -24,13 +24,8 @@ package it.unibz.krdb.obda.r2rml;
  * @author timea bagosi
  * The R2RML parser class that breaks down the responsibility of parsing by case
  */
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.impl.DataTypePredicateImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.r2rml.R2RMLVocabulary;
@@ -60,6 +55,7 @@ import eu.optique.api.mapping.impl.SubjectMapImpl;
 public class R2RMLParser {
 
 	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	List<Predicate> classPredicates; 
 	List<Resource> joinPredObjNodes; 
@@ -359,8 +355,13 @@ public class R2RMLParser {
 		//we check if it is a typed literal 
 		if (datatype != null)
 		{
-			Predicate dtype =  new DataTypePredicateImpl(datatype.toString(), COL_TYPE.OBJECT);
-			Term dtAtom = fac.getFunction(dtype, objectAtom);
+			Predicate.COL_TYPE type = dtfac.getDataType(datatype.toString());
+			if (type == null) {
+				throw new RuntimeException("Unsupported datatype: " + datatype.toString());
+			}
+			Term dtAtom = fac.getTypedTerm(objectAtom, type);
+//			Predicate dtype =  new DataTypePredicateImpl(datatype.toString(), COL_TYPE.OBJECT);
+//			Term dtAtom = fac.getFunction(dtype, objectAtom);
 			objectAtom = dtAtom;
 		}
 
