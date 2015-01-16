@@ -20,18 +20,14 @@ package it.unibz.krdb.obda.owlrefplatform.core.resultset;
  * #L%
  */
 
-import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
-import com.sun.tools.corba.se.idl.constExpr.Times;
+
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.sql.DBMetadata;
-import org.openrdf.model.datatypes.XMLDatatypeUtil;
-import org.openrdf.model.datatypes.XMLDateTime;
 
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.net.URISyntaxException;
 import java.sql.*;
 import java.sql.Date;
