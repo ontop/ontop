@@ -26,7 +26,6 @@ import java.io.File;
 import java.net.URI;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 public class DatetimeStampTest {
@@ -89,10 +88,10 @@ public class DatetimeStampTest {
                 while (res.nextRow()) {
                     count += 1;
 
-                    for (int i = 1; i <= res.getColumnCount(); i++) {
-                        log.debug(res.getSignature().get(i-1) +" = " + res.getOWLObject(i));
-
-                    }
+//                    for (int i = 1; i <= res.getColumnCount(); i++) {
+//                        log.debug(res.getSignature().get(i-1) +" = " + res.getOWLObject(i));
+//
+//                    }
                 }
                 log.debug("Total result: {}", count);
                 assertFalse(count == 0);

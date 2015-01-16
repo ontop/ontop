@@ -188,7 +188,7 @@ public class DatetimeStampSesameTest extends TestCase {
 	}
 
 	@Test
-	public void testEmployeesBinary() {
+	public void testBinary() {
 
 		//read next query
 		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/> select * {?x :Photo ?y}" ;
@@ -200,9 +200,9 @@ public class DatetimeStampSesameTest extends TestCase {
 		assertEquals(expectedResult, obtainedResult);
 
 		//read next query
-		sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Employees/> select * {?x :Picture ?y}" ;
+		sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/Categories/> select * {?x :Picture ?y}" ;
 		//read expected result
-		expectedResult = 9;
+		expectedResult = 8;
 
 		obtainedResult = runQuery(sparqlQuery);
 		log.debug("results "+obtainedResult);
