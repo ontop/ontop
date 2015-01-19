@@ -55,7 +55,8 @@ public interface Predicate extends Cloneable, Serializable {
 		POSITIVE_INTEGER (17),
 		NON_POSITIVE_INTEGER (18),
 		INT (19),
-		UNSIGNED_INT (20);
+		UNSIGNED_INT (20),
+		DATETIME_STAMP (21);
 		
 		private static final Map<Integer, Predicate.COL_TYPE> codeToTypeMap = new HashMap<>();
 		

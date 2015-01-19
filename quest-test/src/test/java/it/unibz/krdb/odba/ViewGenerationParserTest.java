@@ -30,7 +30,7 @@ public class ViewGenerationParserTest {
     private OWLOntology ontology;
 
     final String owlFile = "src/test/resources/northwind/northwind.owl";
-    final String obdaFile = "src/test/resources/northwind/northwind.obda";
+    final String obdaFile = "src/test/resources/northwind/northwindComplex.obda";
 
     @Before
     public void setUp() throws Exception {
@@ -150,18 +150,6 @@ public class ViewGenerationParserTest {
         int nResults = runTests(p, query);
         assertEquals(830, nResults);
     }
-
-    @Test
-    public void testDetail() throws Exception {
-
-
-        QuestPreferences p = new QuestPreferences();
-        String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
-                " select * {?x a :OrderDetails}";
-        int nResults = runTests(p, query);
-
-    }
-
 
 
 

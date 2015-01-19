@@ -209,6 +209,7 @@ public class SemanticIndexRecord {
 		COLTYPEtoSITable.put(COL_TYPE.DECIMAL, SITable.DPROPDeci);
 		COLTYPEtoSITable.put(COL_TYPE.DOUBLE, SITable.DPROPDoub);
 		COLTYPEtoSITable.put(COL_TYPE.DATETIME, SITable.DPROPDate);
+		COLTYPEtoSITable.put(COL_TYPE.DATETIME_STAMP, SITable.DPROPDate);
 		COLTYPEtoSITable.put(COL_TYPE.BOOLEAN, SITable.DPROPBool);
 	}
 }

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.openrdf.model.URI;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDFS;
 import org.openrdf.model.vocabulary.XMLSchema;
 
@@ -27,7 +29,7 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	private final DataTypePredicateImpl XSD_INT, XSD_UNSIGNED_INT, XSD_LONG;
 	private final DataTypePredicateImpl XSD_DECIMAL;
 	private final DataTypePredicateImpl XSD_DOUBLE, XSD_FLOAT;
-	private final DataTypePredicateImpl XSD_DATETIME;
+	private final DataTypePredicateImpl XSD_DATETIME, XSD_DATETIME_STAMP;
 	private final DataTypePredicateImpl XSD_BOOLEAN;
 	private final DataTypePredicateImpl XSD_DATE, XSD_TIME, XSD_YEAR;
 	
@@ -43,6 +45,9 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		XSD_DOUBLE = registerType(XMLSchema.DOUBLE, COL_TYPE.DOUBLE);  // 6 "http://www.w3.org/2001/XMLSchema#double"
 		XSD_STRING = registerType(XMLSchema.STRING, COL_TYPE.STRING);  // 7 "http://www.w3.org/2001/XMLSchema#string"
 		XSD_DATETIME = registerType(XMLSchema.DATETIME, COL_TYPE.DATETIME); // 8 "http://www.w3.org/2001/XMLSchema#dateTime"
+		ValueFactory factory = new ValueFactoryImpl();
+		URI datetimestamp = factory.createURI("http://www.w3.org/2001/XMLSchema#dateTimeStamp"); // value datetime stamp is missing in XMLSchema
+		XSD_DATETIME_STAMP = registerType(datetimestamp, COL_TYPE.DATETIME_STAMP);
 		XSD_BOOLEAN = registerType(XMLSchema.BOOLEAN, COL_TYPE.BOOLEAN);  // 9 "http://www.w3.org/2001/XMLSchema#boolean"
 		XSD_DATE = registerType(XMLSchema.DATE, COL_TYPE.DATE);  // 10 "http://www.w3.org/2001/XMLSchema#date";
 		XSD_TIME = registerType(XMLSchema.TIME, COL_TYPE.TIME);  // 11 "http://www.w3.org/2001/XMLSchema#time";
@@ -55,10 +60,13 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		XSD_NON_POSITIVE_INTEGER = registerType(XMLSchema.NON_POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER); // 18 "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
 		XSD_INT = registerType(XMLSchema.INT, COL_TYPE.INT);  // 19 "http://www.w3.org/2001/XMLSchema#int"
 		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, COL_TYPE.UNSIGNED_INT);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
+
 		
 		// special case
 		// used in ExpressionEvaluator only(?) use proper method there? 
 		mapCOLTYPEtoPredicate.put(COL_TYPE.LITERAL_LANG, RDFS_LITERAL_LANG);
+
+
 	}
 	
 	private final DataTypePredicateImpl registerType(org.openrdf.model.URI uri, COL_TYPE type) {

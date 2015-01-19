@@ -1114,6 +1114,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				case UNSIGNED_INT:
 					constantString = lit.intValue() + "";
 					break;
+				case DATETIME_STAMP:
 				case DATETIME:
 				case YEAR:
 				case DATE:
