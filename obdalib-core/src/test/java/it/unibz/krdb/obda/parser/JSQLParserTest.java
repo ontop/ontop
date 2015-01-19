@@ -724,7 +724,14 @@ public class JSQLParserTest extends TestCase {
 		printJSQL("testRegexNotMySQL", result);
 		assertFalse(result);
 	}
-	
+
+    public void test_md5() {
+        final boolean result = parseJSQL("SELECT MD5(CONCAT(COALESCE(Address, RAND()), COALESCE(City, RAND()),\n" +
+                "COALESCE(Region, RAND()), COALESCE(PostalCode, RAND()), COALESCE(Country,\n" +
+                "RAND()) )) AS locationID FROM northwind.Suppliers");
+        printJSQL("test_13", result);
+        assertTrue(result);
+    }
 
 	private String queryText;
 

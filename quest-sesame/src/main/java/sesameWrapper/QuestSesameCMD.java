@@ -28,8 +28,6 @@ import java.io.FileWriter;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.Query;
 import org.openrdf.query.QueryLanguage;

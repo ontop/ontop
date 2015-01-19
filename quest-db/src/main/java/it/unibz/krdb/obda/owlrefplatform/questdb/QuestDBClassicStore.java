@@ -36,6 +36,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +44,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Set;
 
 import org.openrdf.model.Literal;
@@ -86,6 +88,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	
 	private Set<OWLOntology> closure;
 
+	private Quest questInstance;	
+	
 	public QuestDBClassicStore(String name, java.net.URI tboxFile) 	throws Exception {
 		this(name, tboxFile, null);
 	}
@@ -108,7 +112,6 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	}
 	
 	private Ontology readOntology(String tboxFile) throws Exception {
-		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 		File f = new File(tboxFile);
 		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(f.getParentFile(), false);
 		man.addIRIMapper(iriMapper);
@@ -120,7 +123,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			owlontology = man.loadOntologyFromOntologyDocument(new File(tboxFile));
 		}
 		closure = man.getImportsClosure(owlontology);
-		return translator.mergeTranslateOntologies(closure);
+		return OWLAPI3TranslatorUtility.mergeTranslateOntologies(closure);
 	}
 
 
@@ -177,7 +180,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 //		st.createIndexes();
 		st.close();
 		if (!conn.getAutoCommit())
-		conn.commit();
+			conn.commit();
 		
 		questInstance.updateSemanticIndexMappings();
 
@@ -295,4 +298,15 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		}
 
 	}
+
+	@Override
+	public Properties getPreferences() 	{
+		return questInstance.getPreferences();
+	}
+
+	@Override
+	public RDBMSSIRepositoryManager getSemanticIndexRepository() {
+		return questInstance.getSemanticIndexRepository();
+	}
+
 }

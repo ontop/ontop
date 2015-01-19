@@ -96,6 +96,7 @@ import org.openrdf.query.algebra.Var;
 import org.openrdf.query.parser.ParsedGraphQuery;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /***
@@ -117,24 +118,22 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	private final TermComparator comparator = new TermComparator();
 
-	private UriTemplateMatcher uriTemplateMatcher;
-
-	private SemanticIndexURIMap uriRef = null;  // used only in the Semantic Index mode
+	private final UriTemplateMatcher uriTemplateMatcher;
+	private final SemanticIndexURIMap uriRef;  
 	
-	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher) {
+	private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
+	
+	/**
+	 * 
+	 * @param templateMatcher
+	 * @param uriRef is used only in the Semantic Index mode
+	 */
+	
+	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher, SemanticIndexURIMap uriRef) {
 		uriTemplateMatcher = templateMatcher;
-	}
-	
-	public void setTemplateMatcher(UriTemplateMatcher templateMatcher) {
-		uriTemplateMatcher = templateMatcher;
-	}
-	
-	public void setSemanticIndexUriRef(SemanticIndexURIMap uriRef) {
 		this.uriRef = uriRef;
 	}
 	
-
-	private static final org.slf4j.Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
 
 	public DatalogProgram translate(ParsedQuery pq, List<String> signature) {
 		TupleExpr te = pq.getTupleExpr();
@@ -714,95 +713,75 @@ public class SparqlAlgebraToDatalogTranslator {
 	 * @param triple
 	 * @return
 	 */
-	public void translate(List<Variable> vars, StatementPattern triple,
+	private void translate(List<Variable> vars, StatementPattern triple,
 			DatalogProgram pr, long i, int[] varcount) {
 		
-		Var obj = triple.getObjectVar();
-		Var pred = triple.getPredicateVar();
-		Var subj = triple.getSubjectVar();
-		
-		Value o = obj.getValue();
+		Var pred = triple.getPredicateVar();		
 		Value p = pred.getValue();
-		Value s = subj.getValue();
 		
 		if (!(p instanceof URIImpl || (p == null))) {
 			// if predicate is a variable or literal
 			throw new RuntimeException("Unsupported query syntax");
 		}
 
-		LinkedList<Function> result = new LinkedList<Function>();
-
-		// Instantiate the subject and object URI
-		URI objectUri = null;
-
-		// Instantiate the subject and object data type
-		COL_TYPE subjectType = null;
-		COL_TYPE objectType = null;
-
+		Var subj = triple.getSubjectVar();
+		Value s = subj.getValue();
+		Var obj = triple.getObjectVar();
+		Value o = obj.getValue();
+		
 		// / Instantiate the atom components: predicate and terms.
-		Predicate predicate = null;
-		Vector<Term> terms = new Vector<Term>();
+		Function atom = null;
 
-		if (p instanceof URIImpl && p.toString().equals(RDF.TYPE.stringValue())) {
-			// Subject node
-			
-			terms.add(getOntopTerm(subj, s));
+		// Subject node		
+		Term sTerm = getOntopTerm(subj, s);
+		
+		if ((p != null) && p.toString().equals(RDF.TYPE.stringValue())) {
 
 			// Object node
 			if (o == null) {
-				predicate = OBDAVocabulary.QUEST_TRIPLE_PRED;
-
 				Function rdfTypeConstant = ofac.getUriTemplate(ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
-				terms.add(rdfTypeConstant);
-				terms.add(ofac.getVariable(obj.getName()));
-			} 
-			else if (o instanceof LiteralImpl) {
-				throw new RuntimeException("Unsupported query syntax");
+				atom = ofac.getTripleAtom(sTerm, rdfTypeConstant, ofac.getVariable(obj.getName()));
 			} 
 			else if (o instanceof URIImpl) {
-				objectUri = (URI)o; 
-			}
-
-			// Construct the predicate
-			if (objectUri == null) {
-				// NO OP, already assigned
-			} 
-			else {
+				URI objectUri = (URI)o; 
 				Predicate.COL_TYPE type = dtfac.getDataType(objectUri);
 				if (type != null) {
-					predicate = dtfac.getTypePredicate(type);
+					Predicate predicate = dtfac.getTypePredicate(type);
+					atom = ofac.getFunction(predicate, sTerm);
 				}
 	            else {
-					predicate = ofac.getPredicate(objectUri.stringValue(), new COL_TYPE[] { subjectType });
+	        		COL_TYPE subjectType = null; // are never changed
+					Predicate predicate = ofac.getPredicate(objectUri.stringValue(), new COL_TYPE[] { subjectType });
+					atom = ofac.getFunction(predicate, sTerm);
 				}
 			}
+			else /* if (o instanceof LiteralImpl)*/ {
+				throw new RuntimeException("Unsupported query syntax");
+			} 
 		} 
 		else {
 			/*
 			 * The predicate is NOT rdf:type
 			 */
 
-			terms.add(getOntopTerm(subj, s));
-
-			terms.add(getOntopTerm(obj,o));
+			Term oTerm = getOntopTerm(obj, o); 
 			
-			// Construct the predicate
-
-			if (p instanceof URIImpl) {
-				String predicateUri = p.stringValue();
-				predicate = ofac.getPredicate(predicateUri, new COL_TYPE[] { subjectType, objectType });
+			if (p != null) {
+        		COL_TYPE subjectType = null; // are never changed
+				COL_TYPE objectType = null;
+				Predicate predicate = ofac.getPredicate(p.stringValue(), new COL_TYPE[] { subjectType, objectType });
+				atom = ofac.getFunction(predicate, sTerm, oTerm);
 			} 
-			else if (p == null) {
-				predicate = OBDAVocabulary.QUEST_TRIPLE_PRED;
-				terms.add(1, ofac.getVariable(pred.getName()));
+			else {
+				atom = ofac.getTripleAtom(sTerm, ofac.getVariable(pred.getName()), oTerm);
 			}
 		}
-		// Construct the atom
-		Function atom = ofac.getFunction(predicate, terms);
+		
+		LinkedList<Function> result = new LinkedList<>();
 		result.addFirst(atom);
 
 		// Collections.sort(vars, comparator);
-		List<Term> newvars = new LinkedList<Term>();
+		List<Term> newvars = new LinkedList<>();
 		for (Variable var : vars) {
 			newvars.add(var);
 		}
@@ -1135,6 +1114,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				case UNSIGNED_INT:
 					constantString = lit.intValue() + "";
 					break;
+				case DATETIME_STAMP:
 				case DATETIME:
 				case YEAR:
 				case DATE:
@@ -1263,12 +1243,13 @@ public class SparqlAlgebraToDatalogTranslator {
 		return output;
 	}
 	
-	public void getSignature(ParsedQuery query, List<String> signatureContainer) {
-		signatureContainer.clear();
+	public List<String> getSignature(ParsedQuery query) {
+		List<String> signatureContainer = new LinkedList<>();
 		if (query instanceof ParsedTupleQuery || query instanceof ParsedGraphQuery) {
 			TupleExpr te = query.getTupleExpr();
 			signatureContainer.addAll(te.getBindingNames());
 		}
+		return signatureContainer;
 	}
 	
 //	public void getSignature(Query query, List<String> signatureContainer) {

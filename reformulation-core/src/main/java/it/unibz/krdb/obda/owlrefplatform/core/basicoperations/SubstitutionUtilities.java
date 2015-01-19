@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  */
 
 import it.unibz.krdb.obda.model.*;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 
@@ -41,6 +40,8 @@ public class SubstitutionUtilities {
      * Exception occurring when computing a substitution.
      */
     public static class SubstitutionException extends Exception {
+
+		private static final long serialVersionUID = 2820771912046570562L;
     }
 
     /**
@@ -49,10 +50,10 @@ public class SubstitutionUtilities {
      *
      */
     public static class SubstitutionUnionException extends SubstitutionException {
+
+		private static final long serialVersionUID = 1587922941160561062L;
     }
 
-
-    private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
     /**
      * This method will return a new query, resulting from the application of
@@ -109,39 +110,13 @@ public class SubstitutionUtilities {
                 Term replacement = unifier.get((VariableImpl) t);
                 if (replacement != null)
                     terms.set(i, replacement);
-            } else if (t instanceof Function) {
-                Function t2 = (Function) t;
-                applySubstitution(t2, unifier);
+            } 
+            else if (t instanceof Function) {
+                applySubstitution((Function) t, unifier);
             }
         }
     }
 
-    /**
-     * @param atom
-     * @param unifier
-     */
-    public static void applySubstitutionToGetFact(Function atom, Substitution unifier) {
-
-        List<Term> terms = atom.getTerms();
-        for (int i = 0; i < terms.size(); i++) {
-            Term t = terms.get(i);
-            /*
-             * unifiers only apply to variables, simple or inside functional
-             * terms
-             */
-            if (t instanceof VariableImpl) {
-                Term replacement = unifier.get((VariableImpl) t);
-                if (replacement != null) {
-                    terms.set(i, replacement);
-                } else {
-                    terms.set(i, ofac.getConstantFreshLiteral());
-                }
-            } else if (t instanceof Function) {
-                Function t2 = (Function) t;
-                applySubstitution(t2, unifier);
-            }
-        }
-    }
 
     /**
      * returns a substitution that assigns NULLs to all variables in the list

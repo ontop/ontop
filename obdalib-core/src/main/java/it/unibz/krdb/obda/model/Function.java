@@ -71,6 +71,8 @@ public interface Function extends Term {
 
 	public Set<Variable> getVariables();
 
+	public List<Variable> getVariablesList();
+
 	public void updateTerms(List<Term> literals);
 
 	public void setPredicate(Predicate p);

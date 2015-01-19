@@ -22,7 +22,6 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.api.Attribute;
-import java.sql.Connection;
 import java.io.File;
 import java.util.Set;
 import org.semanticweb.owlapi.apibinding.OWLManager;

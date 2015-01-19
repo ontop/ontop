@@ -1,0 +1,17 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#
+
+[SourceDeclaration]
+sourceUri	northwind
+connectionUrl	jdbc:mysql://10.7.20.39/northwindSpaced
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-simpleexample
+target		:OrderDetails/{OrderID}/{ProductID} a :OrderDetails .
+source		Select * from  `Order Details`
+
+]]
+

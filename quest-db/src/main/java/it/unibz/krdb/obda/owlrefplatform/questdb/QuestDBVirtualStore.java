@@ -36,6 +36,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.Quest;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
@@ -43,6 +44,7 @@ import it.unibz.krdb.sql.ImplicitDBConstraints;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Properties;
 import java.util.Set;
 
 import org.openrdf.model.Model;
@@ -67,7 +69,10 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	private static OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-	private OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
+
+	private QuestConnection questConn;
+	private Quest questInstance;
+	
 	
 	private boolean isinitalized = false;
 
@@ -241,7 +246,7 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 	private Ontology getOntologyFromOWLOntology(OWLOntology owlontology) throws Exception{
 		//compute closure first (owlontology might contain include other source declarations)
 		Set<OWLOntology> clousure = owlontology.getOWLOntologyManager().getImportsClosure(owlontology);
-		return translator.mergeTranslateOntologies(clousure);
+		return OWLAPI3TranslatorUtility.mergeTranslateOntologies(clousure);
 	}
 	
 	private void setupQuest(Ontology tbox, OBDAModel obdaModel, DBMetadata metadata, QuestPreferences pref) throws Exception {
@@ -351,4 +356,15 @@ private OBDADataSource getDataSourceFromConfig(QuestPreferences config) {
 	public void close() {
 		questInstance.close();
 	}
+	
+	@Override
+	public Properties getPreferences() 	{
+		return questInstance.getPreferences();
+	}
+
+	@Override
+	public RDBMSSIRepositoryManager getSemanticIndexRepository() {
+		return questInstance.getSemanticIndexRepository();
+	}
+	
 }

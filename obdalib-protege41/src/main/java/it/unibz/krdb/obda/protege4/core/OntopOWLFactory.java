@@ -5,7 +5,6 @@ import javax.swing.JOptionPane;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;

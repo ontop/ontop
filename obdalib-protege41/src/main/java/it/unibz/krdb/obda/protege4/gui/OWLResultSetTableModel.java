@@ -23,7 +23,6 @@ package it.unibz.krdb.obda.protege4.gui;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 

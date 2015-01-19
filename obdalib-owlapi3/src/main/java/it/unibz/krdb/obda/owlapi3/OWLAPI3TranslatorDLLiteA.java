@@ -99,11 +99,9 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	 * put them in this map to avoid generating too many auxiliary
 	 * roles/classes.
 	 */
-	private final Map<OWLObjectSomeValuesFrom, ObjectSomeValuesFrom> auxiliaryClassProperties 
-							= new HashMap<OWLObjectSomeValuesFrom, ObjectSomeValuesFrom>();
+	private final Map<OWLObjectSomeValuesFrom, ObjectSomeValuesFrom> auxiliaryClassProperties = new HashMap<>();
 	
-	private final Map<OWLDataSomeValuesFrom, DataSomeValuesFrom> auxiliaryDatatypeProperties 
-							= new HashMap<OWLDataSomeValuesFrom, DataSomeValuesFrom>();
+	private final Map<OWLDataSomeValuesFrom, DataSomeValuesFrom> auxiliaryDatatypeProperties = new HashMap<>();
 
 	
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -184,7 +182,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		ObjectPropertyExpression p = getPropertyExpression(ax.getProperty());
 		
 		// [R3] of the grammar simplifications
-		Set<ObjectPropertyExpression> disjointProperties = new HashSet<ObjectPropertyExpression>();
+		Set<ObjectPropertyExpression> disjointProperties = new HashSet<>();
 		disjointProperties.add(p);
 		disjointProperties.add(p.getInverse());
 		dl_onto.addDisjointObjectPropertiesAxiom(disjointProperties);
@@ -203,7 +201,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	@Override
 	public void visit(OWLDisjointClassesAxiom ax) {
 		try {
-			Set<ClassExpression> disjointClasses = new HashSet<ClassExpression>();
+			Set<ClassExpression> disjointClasses = new HashSet<>();
 			for (OWLClassExpression oc : ax.getClassExpressionsAsList()) {
 				ClassExpression c = getSubclassExpression(oc);
 				disjointClasses.add(c);
@@ -256,7 +254,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	public void visit(OWLEquivalentObjectPropertiesAxiom ax) {
 
 		// TODO: avoid using intermediate list 		
-		List<ObjectPropertyExpression> result = new LinkedList<ObjectPropertyExpression>();
+		List<ObjectPropertyExpression> result = new LinkedList<>();
 		for (OWLObjectPropertyExpression rolExpression : ax.getProperties()) 
 			result.add(getPropertyExpression(rolExpression));
 
@@ -279,7 +277,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 
 	@Override
 	public void visit(OWLDisjointDataPropertiesAxiom ax) {
-		Set<DataPropertyExpression> disjointProperties = new HashSet<DataPropertyExpression>();
+		Set<DataPropertyExpression> disjointProperties = new HashSet<>();
 		for (OWLDataPropertyExpression prop : ax.getProperties()) {
 			DataPropertyExpression p = getPropertyExpression(prop);
 			disjointProperties.add(p);
@@ -289,7 +287,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 
 	@Override
 	public void visit(OWLDisjointObjectPropertiesAxiom ax) {
-		Set<ObjectPropertyExpression> disjointProperties = new HashSet<ObjectPropertyExpression>();
+		Set<ObjectPropertyExpression> disjointProperties = new HashSet<>();
 		for (OWLObjectPropertyExpression prop : ax.getProperties()) {
 			ObjectPropertyExpression p = getPropertyExpression(prop);
 			disjointProperties.add(p);
@@ -404,7 +402,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		//if (profile.order() < LanguageProfile.OWL2QL.order())
 		//	throw new TranslationException();
 
-		List<DataPropertyExpression> result = new LinkedList<DataPropertyExpression>();
+		List<DataPropertyExpression> result = new LinkedList<>();
 		for (OWLDataPropertyExpression rolExpression : ax.getProperties()) 
 			result.add(getPropertyExpression(rolExpression));
 
@@ -433,7 +431,7 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 		//	throw new TranslationException();
 
 		try {
-			List<ClassExpression> result = new LinkedList<ClassExpression>();
+			List<ClassExpression> result = new LinkedList<>();
 			for (OWLClassExpression OWLClassExpression : ax.getClassExpressions())
 				result.add(getSubclassExpression(OWLClassExpression));
 
@@ -843,9 +841,9 @@ public class OWLAPI3TranslatorDLLiteA extends OWLAPI3TranslatorBase {
 	
 
 	
-	private final Set<String> objectproperties = new HashSet<String>();
-	private final Set<String> dataproperties = new HashSet<String>();
-	private final Set<String> punnedPredicates = new HashSet<String>();
+	private final Set<String> objectproperties = new HashSet<>();
+	private final Set<String> dataproperties = new HashSet<>();
+	private final Set<String> punnedPredicates = new HashSet<>();
 	
 	@Override
 	public void declare(OWLClass entity) {

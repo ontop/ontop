@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.utils;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
@@ -80,18 +79,12 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 
 public class Mapping2DatalogConverter {
 
-	private DBMetadata dbMetadata;
-
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	/**
 	 * Creates a mapping analyzer by taking into account the OBDA model.
 	 */
-	public Mapping2DatalogConverter(DBMetadata dbMetadata) {
-		this.dbMetadata = dbMetadata;
-	}
-
-	public List<CQIE> constructDatalogProgram(List<OBDAMappingAxiom> mappingAxioms) {
+	public static List<CQIE> constructDatalogProgram(List<OBDAMappingAxiom> mappingAxioms, DBMetadata dbMetadata) {
 		
 		SQLQueryParser sqlQueryParser = new SQLQueryParser(dbMetadata);
 		
@@ -111,14 +104,14 @@ public class Mapping2DatalogConverter {
 				ParsedSQLQuery parsedSQLQuery = sqlQueryParser.parseDeeply(sourceQuery.toString());
 
 				// Create a lookup table for variable swapping
-				LookupTable lookupTable = createLookupTable(parsedSQLQuery);
+				LookupTable lookupTable = createLookupTable(parsedSQLQuery, dbMetadata);
 
 
 				// Construct the body from the source query
 				List<Function> bodyAtoms = new ArrayList<>();
 
                 // For each table, creates an atom and adds it to the body
-                addTableAtoms(bodyAtoms, parsedSQLQuery, lookupTable);
+                addTableAtoms(bodyAtoms, parsedSQLQuery, lookupTable, dbMetadata);
 
                 // For each join condition, creates an atom and adds it to the body
                 addJoinConditionAtoms(bodyAtoms, parsedSQLQuery, lookupTable);
@@ -208,7 +201,7 @@ public class Mapping2DatalogConverter {
      * @param parsedSQLQuery
      * @param lookupTable
      */
-    private void addTableAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
+    private static void addTableAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable, DBMetadata dbMetadata) throws JSQLParserException {
         // Tables mentioned in the SQL query
         List<RelationJSQL> tables = parsedSQLQuery.getTables();
 
@@ -282,7 +275,7 @@ public class Mapping2DatalogConverter {
      * (1) Collects all the possible column names from the tables mentioned in the query, and aliases.
      * (2) Assigns new variables to them
       */
-    private LookupTable createLookupTable(ParsedSQLQuery queryParsed) throws JSQLParserException {
+    private static LookupTable createLookupTable(ParsedSQLQuery queryParsed, DBMetadata dbMetadata) throws JSQLParserException {
 		LookupTable lookupTable = new LookupTable();
 
 		List<RelationJSQL> tables = queryParsed.getTables();
