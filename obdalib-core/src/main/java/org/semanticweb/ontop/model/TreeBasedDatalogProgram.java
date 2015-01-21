@@ -57,7 +57,7 @@ public class TreeBasedDatalogProgram {
      *
      * Third elements of the tree labels are ignored.
      */
-    public static TreeBasedDatalogProgram fromP3RuleTree(Tree<P3<Predicate, List<CQIE>, Option<Function>>> p3Tree) {
+    public static TreeBasedDatalogProgram fromP3RuleTree(Tree<P3<Predicate, List<CQIE>, Option<TypeProposal>>> p3Tree) {
         return new TreeBasedDatalogProgram(convertP32P2RuleTree(p3Tree));
     }
 
@@ -87,16 +87,16 @@ public class TreeBasedDatalogProgram {
      * and the predicate definition map.
      *
      * Each node refers to a predicate, its definition rules
-     * but also an optional Function. The latter is none.
+     * but also an optional TypeProposal. The latter is none.
      *
      * This structure is used for lifting types.
      */
-    public Tree<P3<Predicate, List<CQIE>, Option<Function>>> getP3RuleTree() {
-        Tree<P3<Predicate, List<CQIE>, Option<Function>>> ruleTree = this.ruleTree.fmap(
-                new F<P2<Predicate, List<CQIE>>, P3<Predicate, List<CQIE>, Option<Function>>>() {
+    public Tree<P3<Predicate, List<CQIE>, Option<TypeProposal>>> getP3RuleTree() {
+        Tree<P3<Predicate, List<CQIE>, Option<TypeProposal>>> ruleTree = this.ruleTree.fmap(
+                new F<P2<Predicate, List<CQIE>>, P3<Predicate, List<CQIE>, Option<TypeProposal>>>() {
                     @Override
-                    public P3<Predicate, List<CQIE>, Option<Function>> f(P2<Predicate, List<CQIE>> label) {
-                        return P.p(label._1(), label._2(), Option.<Function>none());
+                    public P3<Predicate, List<CQIE>, Option<TypeProposal>> f(P2<Predicate, List<CQIE>> label) {
+                        return P.p(label._1(), label._2(), Option.<TypeProposal>none());
                     }
                 });
         return ruleTree;
@@ -150,10 +150,10 @@ public class TreeBasedDatalogProgram {
     /**
      * Converts the P3 rule tree into a P2 tree without the type proposal element.
      */
-    private static Tree<P2<Predicate, List<CQIE>>> convertP32P2RuleTree(Tree<P3<Predicate, List<CQIE>, Option<Function>>> p3Tree) {
-        return p3Tree.fmap(new F<P3<Predicate, List<CQIE>, Option<Function>>, P2<Predicate, List<CQIE>>>() {
+    private static Tree<P2<Predicate, List<CQIE>>> convertP32P2RuleTree(Tree<P3<Predicate, List<CQIE>, Option<TypeProposal>>> p3Tree) {
+        return p3Tree.fmap(new F<P3<Predicate, List<CQIE>, Option<TypeProposal>>, P2<Predicate, List<CQIE>>>() {
             @Override
-            public P2<Predicate, List<CQIE>> f(P3<Predicate, List<CQIE>, Option<Function>> label) {
+            public P2<Predicate, List<CQIE>> f(P3<Predicate, List<CQIE>, Option<TypeProposal>> label) {
                 return P.p(label._1(), label._2());
             }
         });
