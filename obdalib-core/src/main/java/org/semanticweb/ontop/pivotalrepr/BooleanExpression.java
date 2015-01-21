@@ -3,5 +3,5 @@ package org.semanticweb.ontop.pivotalrepr;
 /**
  *
  */
-public interface ExpressionElement {
+public interface BooleanExpression {
 }

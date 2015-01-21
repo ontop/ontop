@@ -6,8 +6,10 @@ import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.semanticweb.ontop.pivotalrepr.IntermediateQuery;
-import org.semanticweb.ontop.pivotalrepr.NodeView;
+import org.semanticweb.ontop.pivotalrepr.QueryNode;
+
 import java.util.List;
+import java.util.Set;
 
 /**
  * TODO: describe
@@ -17,13 +19,13 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     /**
      * TODO: explain
      */
-    private final DirectedAcyclicGraph<NodeView, DefaultEdge> queryDAG;
+    private final DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG;
 
     /**
      * Cached value (non final)
      *
      */
-    private ImmutableList<NodeView> nodesInAntiTopologicalOrder;
+    private ImmutableList<QueryNode> nodesInAntiTopologicalOrder;
 
     /**
      * TODO: integrate with Guice
@@ -35,16 +37,16 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
 
     @Override
-    public ImmutableList<NodeView> getNodesInAntiTopologicalOrder() {
+    public ImmutableList<QueryNode> getNodesInAntiTopologicalOrder() {
 
         /**
          * Computes the list if not cached
          */
         if (nodesInAntiTopologicalOrder == null) {
-            TopologicalOrderIterator<NodeView, DefaultEdge> it =
+            TopologicalOrderIterator<QueryNode, DefaultEdge> it =
                     new TopologicalOrderIterator<>(queryDAG);
 
-            List<NodeView> nodesInTopologicalOrder = Lists.newArrayList(it);
+            List<QueryNode> nodesInTopologicalOrder = Lists.newArrayList(it);
             nodesInAntiTopologicalOrder = ImmutableList.copyOf(Lists.reverse(
                     nodesInTopologicalOrder));
         }
@@ -52,5 +54,15 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         return nodesInAntiTopologicalOrder;
     }
 
-    public
+    @Override
+    public ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node) {
+        Set<DefaultEdge> outgoingEdges = queryDAG.outgoingEdgesOf(node);
+        ImmutableList.Builder<QueryNode> nodeListBuilder = ImmutableList.builder();
+        for (DefaultEdge edge : outgoingEdges) {
+            nodeListBuilder.add((QueryNode) edge.getTarget());
+        }
+
+        return nodeListBuilder.build();
+    }
+
 }
