@@ -229,11 +229,24 @@ public class TypeLift {
      */
     private static TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> liftTypeFromChildrenToParent(
             final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper) throws MultiTypeException {
+
+        /**
+         * Children proposals. At most one type proposal per child predicate.
+         */
+        final HashMap<Predicate, TypeProposal> childProposalIndex = retrieveChildrenProposals(parentZipper);
+
+        /**
+         * Removes child types. This has to be done BEFORE making a TypeProposal for the parent
+         * BECAUSE CHILD HEAD ARITIES MAY CHANGE AT TYPE REMOVAL TIME.
+         */
+        final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> untypedChildrenZipper = removeChildTypes(
+                parentZipper, childProposalIndex);
+
         /**
          * Main operation: makes a type proposal for the current (parent) predicate.
          * May throw a MultiTypeException.
          */
-        Option<TypeProposal> parentProposal = proposeType(parentZipper);
+        Option<TypeProposal> parentProposal = proposeType(parentZipper, childProposalIndex);
 
         /**
          * If no type has been proposed by the children nor by the node itself,
@@ -243,30 +256,68 @@ public class TypeLift {
             return parentZipper;
         }
 
-
-        /**
-         * Removes types from the children rules (as much as possible).
-         */
-        final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> cleanedZipper = applyToChildren(removeTypeFunction, parentZipper);
-
         /**
          * Sets the proposal to the parent node.
          */
-        final P3<Predicate, List<CQIE>, Option<TypeProposal>> parentLabel = cleanedZipper.getLabel();
-        // Non final (may be re-affected in a special case).
-        TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> newTreeZipper =
-                cleanedZipper.setLabel(P.p(parentLabel._1(), parentLabel._2(), parentProposal));
+        final P3<Predicate, List<CQIE>, Option<TypeProposal>> parentLabel = untypedChildrenZipper.getLabel();
 
         /**
-         * Special case: if the proposal is not supported for type lifting, applies it directly to the parent node.
-         * It will then not appear as a proposal to the grand-parent node.
-         *
+         * Returns a new zipper with the updated label.
          */
-        if (!isSupportedProposal(parentProposal.some())) {
-            newTreeZipper = applyTypeFunction.f(newTreeZipper);
-        }
+        return untypedChildrenZipper.setLabel(P.p(parentLabel._1(), parentLabel._2(), parentProposal));
+    }
 
-        return newTreeZipper;
+    /**
+     * Removes child types and updates the parent rules if the arity of some body atoms change.
+     *
+     */
+    private static TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> removeChildTypes(
+            final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper,
+            final HashMap<Predicate, TypeProposal> childProposalIndex) {
+        /**
+         * Removes types from the children rules (as much as possible).
+         */
+        final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> untypedChildrenZipper = applyToChildren(
+                removeTypeFunction, parentZipper);
+
+        /**
+         * Type removal may change the arity of the child heads.
+         * ---> Some body atoms of the parent rules may have to updated.
+         */
+        return propagateChildArityChangesToBodies(untypedChildrenZipper, childProposalIndex);
+    }
+
+    /**
+     * Updates the rule bodies of the parent node according to possible arity changes of child heads.
+     *
+     * Typically, arity changes are caused by MultiVariableUriTemplateTypeProposals.
+     *
+     */
+    private static TreeZipper<P3<Predicate,List<CQIE>,Option<TypeProposal>>> propagateChildArityChangesToBodies(
+            final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper,
+            final HashMap<Predicate, TypeProposal> childProposalIndex) {
+
+        final P3<Predicate, List<CQIE>, Option<TypeProposal>> parentLabel = parentZipper.getLabel();
+        final List<CQIE> initialParentRules = parentLabel._2();
+
+        /**
+         * For each child proposal, we update the parentRules.
+         * This sub-task is forwarded to the TypeProposal object.
+         *
+         * From a FP point of view, this is a (left) folding operation.
+         */
+        final List<TypeProposal> childProposals = childProposalIndex.values();
+        List<CQIE> updatedRules = childProposals.foldLeft(new F2<List<CQIE>, TypeProposal, List<CQIE>>() {
+            @Override
+            public List<CQIE> f(List<CQIE> parentRules, TypeProposal childProposal) {
+                return childProposal.propagateChildArityChangeToBodies(parentRules);
+            }
+        }, initialParentRules);
+
+        /**
+         * Returns the updated parent zipper with updated definition rules.
+         */
+        return parentZipper.setLabel(P.p(parentLabel._1(), updatedRules, parentLabel._3()));
     }
 
     /**
@@ -279,13 +330,9 @@ public class TypeLift {
      *
      * Returns the type proposal.
      */
-    private static Option<TypeProposal> proposeType(final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper)
+    private static Option<TypeProposal> proposeType(final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper,
+                                                    final HashMap<Predicate, TypeProposal> childProposalIndex)
             throws MultiTypeException {
-
-        /**
-         * Children proposals. At most one type proposal per child predicate.
-         */
-        final HashMap<Predicate, TypeProposal> childProposalIndex = retrieveChildrenProposals(parentZipper);
 
         /**
          * If there is no child proposal, no need to aggregate.
@@ -555,54 +602,6 @@ public class TypeLift {
         return Option.none();
     }
 
-    /**
-     * Some types cannot be lifted for the moment.
-     * If such a type is detected in a type proposal, returns false.
-     *
-     * Unsupported "types":
-     *   - URI templates using more than one variable.
-     *      Reason: cannot be replaced directly by one variable.
-     *
-     * TODO: remove this function since the support limitation will be removed.
-     */
-    @Deprecated
-    private static boolean isSupportedProposal(TypeProposal typeProposal) {
-
-        if (typeProposal instanceof BasicTypeProposal) {
-
-
-            Function functionProposed = typeProposal.getProposedHead();
-            List<Term> terms = List.iterableList(functionProposed.getTerms());
-            /**
-             * Makes sure all the terms are supported.
-             */
-            return terms.forall(new F<Term, Boolean>() {
-                /**
-                 * Support test (for a given term)
-                 */
-                @Override
-                public Boolean f(Term term) {
-                    return isSupportedTerm(term);
-                }
-            });
-        }
-        return true;
-    }
-
-    @Deprecated
-    private static boolean isSupportedTerm(Term term) {
-        if (term instanceof Function) {
-            Function functionalTerm = (Function) term;
-
-            /**
-             * Uri-templates using more than one variable are not supported.
-             */
-            if (functionalTerm.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)) {
-                return functionalTerm.getTerms().size() <= 2;
-            }
-        }
-        return true;
-    }
 
     /**
      * Uri-templates using more than one variable.

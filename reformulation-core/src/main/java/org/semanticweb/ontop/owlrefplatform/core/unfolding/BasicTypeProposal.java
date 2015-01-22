@@ -84,4 +84,12 @@ public class BasicTypeProposal extends TypeProposalImpl {
         });
 
     }
+
+    /**
+     * NO EFFECT because this type proposal cannot provoke any arity change.
+     */
+    @Override
+    public List<CQIE> propagateChildArityChangeToBodies(List<CQIE> initialRules) {
+        return initialRules;
+    }
 }

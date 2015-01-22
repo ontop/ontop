@@ -20,13 +20,27 @@ public class MultiVariateUriTemplateTypeProposal extends TypeProposalImpl {
         super(proposedHead);
     }
 
+    /**
+     * TODO: implement it!
+     */
     @Override
     public List<CQIE> applyType(List<CQIE> initialRules) {
         return null;
     }
 
+    /**
+     * TODO: implement it!
+     */
     @Override
     public List<CQIE> removeType(List<CQIE> initialRules) {
+        return null;
+    }
+
+    /**
+     * TODO: implement it!
+     */
+    @Override
+    public List<CQIE> propagateChildArityChangeToBodies(List<CQIE> initialRules) {
         return null;
     }
 }
