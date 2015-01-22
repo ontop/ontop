@@ -3,9 +3,11 @@ package org.semanticweb.ontop.pivotalrepr;
 import com.google.common.collect.ImmutableList;
 
 /**
- * Mutable (under certain conditions).
+ * Almost immutable: except isRejected (can be set to true)?
  *
- * Why mutable? Because of the tree structure.
+ * Or should allow some modifier update and filter expression?
+ *
+ * Or fully immutable?
  *
  *
  * TODO: complete it
@@ -16,9 +18,23 @@ public interface QueryNode {
     public boolean hasModifiers();
 
     /**
-     * Apply optimization locally (no "navigation with side-effects"??)
+     * Apply optimization locally (no "navigation with side-effects"??).
+     *
+     * To be implemented by leaf classes ("visitor" pattern).
      */
-    public void applyOptimization(QueryOptimizer optimizer);
+    public LocalOptimizationProposal proposeOptimization(QueryOptimizer optimizer);
+
+    /**
+     * "Visitor"-like method.
+     * TODO: look if there is not a better pattern name
+     *
+     * Should called ONLY by the optimization proposal.
+     *
+     * TODO: replace OptimizationProposal by a more specific one.
+     *
+     *
+     */
+    public void applyOptimizationProposal(LocalOptimizationProposal proposal);
 
     public BooleanExpression getFilterExpression();
     public boolean hasFilterExpression();

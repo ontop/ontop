@@ -36,14 +36,6 @@ public class QueryNodeImpl implements QueryNode {
      * TODO: implement
      */
     @Override
-    public void applyOptimization(QueryOptimizer optimizer) {
-
-    }
-
-    /**
-     * TODO: implement
-     */
-    @Override
     public BooleanExpression getFilterExpression() {
         return null;
     }

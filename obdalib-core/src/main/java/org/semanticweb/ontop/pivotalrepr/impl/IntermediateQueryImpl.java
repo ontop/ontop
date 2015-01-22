@@ -37,7 +37,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
 
     @Override
-    public ImmutableList<QueryNode> getNodesInAntiTopologicalOrder() {
+    public ImmutableList<QueryNode> getNodesInBottomUpOrder() {
 
         /**
          * Computes the list if not cached

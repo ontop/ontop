@@ -3,5 +3,5 @@ package org.semanticweb.ontop.pivotalrepr;
 /**
  * TODO: develop
  */
-public interface OptimizationProposal {
+public interface LocalOptimizationProposal {
 }
