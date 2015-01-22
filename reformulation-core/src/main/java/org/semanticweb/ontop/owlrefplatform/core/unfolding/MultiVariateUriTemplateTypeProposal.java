@@ -11,15 +11,13 @@ import org.semanticweb.ontop.model.TypeProposal;
  *
  * TODO: implement it
  */
-public class MultiVariateUriTemplateTypeProposal implements TypeProposal {
-    @Override
-    public Function getProposedHead() {
-        return null;
-    }
+public class MultiVariateUriTemplateTypeProposal extends TypeProposalImpl {
 
-    @Override
-    public Predicate getPredicate() {
-        return null;
+    /**
+     * TODO: update it
+     */
+    public MultiVariateUriTemplateTypeProposal(Function proposedHead) {
+        super(proposedHead);
     }
 
     @Override

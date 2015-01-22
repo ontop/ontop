@@ -489,7 +489,7 @@ public class TypeLift {
      *
      * Returns updated rules.
      */
-    private static List<CQIE> applyTypeToRules(List<CQIE> initialRules, final TypeProposal typeProposal)
+    private static List<CQIE> applyTypeToRules(final List<CQIE> initialRules, final TypeProposal typeProposal)
             throws TypeApplicationError{
         return typeProposal.applyType(initialRules);
     }
@@ -511,38 +511,10 @@ public class TypeLift {
     /**
      * Removes types from rules.
      *
-     * Reuses the DatalogUnfolder.untypeTerm() static method.
-     *
      * Returns updated rules.
      */
-    private static List<CQIE> removeTypesFromRules(List<CQIE> initialRules) {
-        return initialRules.map(new F<CQIE, CQIE>() {
-            @Override
-            public CQIE f(CQIE initialRule) {
-                Function initialHead = initialRule.getHead();
-                List<Term> initialHeadTerms =  List.iterableList(initialHead.getTerms());
-
-                /**
-                 * Computes untyped arguments for the head predicate.
-                 */
-                List<Term> newHeadTerms = initialHeadTerms.map(new F<Term, Term>() {
-                    @Override
-                    public Term f(Term term) {
-                        return untypeTerm(term);
-                    }
-                });
-
-                /**
-                 * Builds a new rule.
-                 * TODO: modernize the CQIE API (make it immutable).
-                 */
-                CQIE newRule = initialRule.clone();
-                Function newHead = (Function)initialHead.clone();
-                newHead.updateTerms(new ArrayList<>(newHeadTerms.toCollection()));
-                newRule.updateHead(newHead);
-                return newRule;
-            }
-        });
+    private static List<CQIE> removeTypesFromRules(final List<CQIE> initialRules, final TypeProposal typeProposal) {
+        return typeProposal.removeType(initialRules);
     }
 
     /**
@@ -802,11 +774,11 @@ public class TypeLift {
         @Override
         public TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> f(TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> treeZipper) {
             P3<Predicate, List<CQIE>, Option<TypeProposal>> label = treeZipper.getLabel();
-            Option<TypeProposal> typeProposal = label._3();
+            Option<TypeProposal> optionalTypeProposal = label._3();
             /**
              * If no previous proposal, no type removal.
              */
-            if (typeProposal.isNone()) {
+            if (optionalTypeProposal.isNone()) {
                 return treeZipper;
             }
             /**
@@ -814,7 +786,7 @@ public class TypeLift {
              */
             else {
                 List<CQIE> initialRules = label._2();
-                List<CQIE> updatedRules = removeTypesFromRules(initialRules);
+                List<CQIE> updatedRules = removeTypesFromRules(initialRules, optionalTypeProposal.some());
                 return treeZipper.setLabel(P.p(label._1(), updatedRules, Option.<TypeProposal>none()));
             }
         }
@@ -918,56 +890,6 @@ public class TypeLift {
             }
         }));
 
-    }
-
-    /**
-     * Removes the type for a given term.
-     * This method also deals with special cases that should not be untyped.
-     *
-     * Note that type removal only concern functional terms.
-     */
-    private static Term untypeTerm(Term term) {
-        /**
-         * Types are assumed to functional terms.
-         *
-         * Other type of terms are not concerned.
-         */
-        if (!(term instanceof Function)) {
-            return term;
-        }
-
-        /**
-         * Special cases that should not be untyped:
-         *   - Aggregates
-         *   - Non-supported terms.
-         */
-        if (DatalogUnfolder.detectAggregateInArgument(term) || (!isSupportedTerm(term)))
-            return term;
-
-        Function functionalTerm = (Function) term;
-        java.util.List<Term> functionArguments = functionalTerm.getTerms();
-        Predicate functionSymbol = functionalTerm.getFunctionSymbol();
-
-        /**
-         * Special case: URI templates using just one variable
-         * (others are not supported).
-         */
-        boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
-        if (isURI && functionArguments.size() == 2) {
-            // Returns the first variable, not the regular expression.
-            return functionArguments.get(1);
-        }
-
-        /**
-         * Other functional terms are expected to be type
-         * and to have an arity of 1.
-         *
-         * Raises an exception if it is not the case.
-         */
-        if (functionArguments.size() != 1) {
-            throw new RuntimeException("Removing types of non-unary functional terms is not supported.");
-        }
-        return functionArguments.get(0);
     }
 
 

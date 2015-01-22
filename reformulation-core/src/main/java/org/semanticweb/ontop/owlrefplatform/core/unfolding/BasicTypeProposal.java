@@ -2,40 +2,27 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import fj.F;
 import fj.data.List;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.TypeProposal;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions;
+
+import java.util.ArrayList;
 
 import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift.applyBasicTypeProposal;
 
 /**
  * Normal case.
  */
-public class BasicTypeProposal implements TypeProposal {
-
-    private final Function proposedFunction;
+public class BasicTypeProposal extends TypeProposalImpl {
 
     public BasicTypeProposal(Function typeProposal) {
-        this.proposedFunction = typeProposal;
-    }
-
-    /**
-     * TODO: remove it when possible
-     */
-    @Override
-    public Function getProposedHead() {
-        return proposedFunction;
+        super(typeProposal);
     }
 
     @Override
-    public Predicate getPredicate() {
-        return proposedFunction.getFunctionSymbol();
-    }
+    public List<CQIE> applyType(final List<CQIE> initialRules) throws TypeApplicationError {
+        final Function proposedFunction = getProposedHead();
 
-    @Override
-    public List<CQIE> applyType(List<CQIE> initialRules) throws TypeApplicationError {
         return initialRules.map(new F<CQIE, CQIE>() {
             @Override
             public CQIE f(CQIE initialRule) {
@@ -68,6 +55,33 @@ public class BasicTypeProposal implements TypeProposal {
      */
     @Override
     public List<CQIE> removeType(List<CQIE> initialRules) {
-        return null;
+        return initialRules.map(new F<CQIE, CQIE>() {
+            @Override
+            public CQIE f(CQIE initialRule) {
+                Function initialHead = initialRule.getHead();
+                List<Term> initialHeadTerms =  List.iterableList(initialHead.getTerms());
+
+                /**
+                 * Computes untyped arguments for the head predicate.
+                 */
+                List<Term> newHeadTerms = initialHeadTerms.map(new F<Term, Term>() {
+                    @Override
+                    public Term f(Term term) {
+                        return untypeTerm(term);
+                    }
+                });
+
+                /**
+                 * Builds a new rule.
+                 * TODO: modernize the CQIE API (make it immutable).
+                 */
+                CQIE newRule = initialRule.clone();
+                Function newHead = (Function)initialHead.clone();
+                newHead.updateTerms(new ArrayList<>(newHeadTerms.toCollection()));
+                newRule.updateHead(newHead);
+                return newRule;
+            }
+        });
+
     }
 }
