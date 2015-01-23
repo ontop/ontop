@@ -11,23 +11,20 @@ import org.semanticweb.ontop.model.impl.OBDAVocabulary;
  */
 public abstract class TypeProposalImpl implements TypeProposal {
 
-    private final Function proposedFunction;
+    private final Function unifiableAtom;
 
-    protected TypeProposalImpl(Function typeProposal) {
-        this.proposedFunction = typeProposal;
+    protected TypeProposalImpl(Function unifiableAtom) {
+        this.unifiableAtom = unifiableAtom;
     }
 
-    /**
-     * TODO: remove it when possible
-     */
     @Override
-    public Function getProposedHead() {
-        return proposedFunction;
+    public Function getUnifiableAtom() {
+        return unifiableAtom;
     }
 
     @Override
     public Predicate getPredicate() {
-        return proposedFunction.getFunctionSymbol();
+        return unifiableAtom.getFunctionSymbol();
     }
 
     /**

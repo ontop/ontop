@@ -8,11 +8,9 @@ import fj.data.List;
 public interface TypeProposal {
 
     /**
-     * TODO: explain
-     *
+     * Atom used for computing the unifier in order to propagate the types it contains.
      */
-    @Deprecated
-    public Function getProposedHead();
+    public Function getUnifiableAtom();
 
     /**
      * TODO: explain

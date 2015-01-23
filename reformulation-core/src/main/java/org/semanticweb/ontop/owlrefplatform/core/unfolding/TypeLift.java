@@ -443,7 +443,7 @@ public class TypeLift {
                  * TODO: check if the unifier still makes sense
                  */
                 Unifier proposedSubstitutionFunction = computeTypePropagatingSubstitution(
-                        bodyAtom, optionalChildProposal.some().getProposedHead());
+                        bodyAtom, optionalChildProposal.some().getUnifiableAtom());
 
                 if (optionalSubstitutionFunction.isNone()) {
                     newOptionalSubstitutionFct = Option.some(proposedSubstitutionFunction);
@@ -585,7 +585,8 @@ public class TypeLift {
             TypeProposal typeProposal;
 
             /**
-             * Multi-variate URI template case
+             * Multi-variate URI template case.
+             * TODO: this is plain wrong. FIX IT!!!! (confusing the atom with URITemplate() functional term)
              */
             if (isMultiVariateURITemplate(proposedHead)) {
                 //TODO: call the right constructor
@@ -602,11 +603,29 @@ public class TypeLift {
         return Option.none();
     }
 
+    /**
+     * TODO: describe
+     *
+     */
+    protected static boolean containsMultiVariateURITemplate(Function atom) {
+        for(Term term : atom.getTerms()) {
+            if (isMultiVariateURITemplate(term))
+                return true;
+        }
+        return false;
+    }
+
+
 
     /**
      * Uri-templates using more than one variable.
      */
-    private static boolean isMultiVariateURITemplate(Function functionalTerm) {
+    protected static boolean isMultiVariateURITemplate(Term term) {
+        if (!(term instanceof Function))
+            return false;
+
+        Function functionalTerm = (Function) term;
+
         if (functionalTerm.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)) {
             return functionalTerm.getTerms().size() <= 2;
         }

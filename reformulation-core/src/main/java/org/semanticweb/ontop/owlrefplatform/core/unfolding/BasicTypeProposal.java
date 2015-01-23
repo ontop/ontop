@@ -3,7 +3,6 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 import fj.F;
 import fj.data.List;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions;
 
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ public class BasicTypeProposal extends TypeProposalImpl {
 
     @Override
     public List<CQIE> applyType(final List<CQIE> initialRules) throws TypeApplicationError {
-        final Function proposedFunction = getProposedHead();
+        final Function proposedFunction = getUnifiableAtom();
 
         return initialRules.map(new F<CQIE, CQIE>() {
             @Override
@@ -49,9 +48,7 @@ public class BasicTypeProposal extends TypeProposalImpl {
     }
 
     /**
-     * TODO: implement it
-     * @param initialRules
-     * @return
+     * TODO: describe it
      */
     @Override
     public List<CQIE> removeType(List<CQIE> initialRules) {
