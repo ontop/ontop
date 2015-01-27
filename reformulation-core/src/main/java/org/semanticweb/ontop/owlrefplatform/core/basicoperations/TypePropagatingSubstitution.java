@@ -9,10 +9,7 @@ import fj.P2;
 import fj.data.HashMap;
 import fj.data.Stream;
 import fj.data.TreeMap;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.*;
 
 import java.util.Map;
@@ -58,23 +55,27 @@ public class TypePropagatingSubstitution extends Unifier {
      *
      * TODO: return a generic Substitution (need merging with v1)
      */
-    public static TypePropagatingSubstitution createTypePropagatingSubstitution(Function firstAtom, Function secondAtom,
+    public static TypePropagatingSubstitution createTypePropagatingSubstitution(TypeProposal typeProposal, Function bodyAtom,
                                                                  Multimap<Predicate, Integer> multiTypedPredicateIndex) {
+
+        Function typedAtom = typeProposal.getUnifiableAtom();
+        Function untypedAtom = typeProposal.prepareBodyAtomForUnification(bodyAtom);
+
 
         /**
          * Basic condition: if predicates are different or their arity is different,
          * then no type propagation
          */
 
-        if ((firstAtom.getArity() != secondAtom.getArity()
-                || !firstAtom.getFunctionSymbol().equals(secondAtom.getFunctionSymbol()))) {
+        if ((typedAtom.getArity() != untypedAtom.getArity()
+                || !typedAtom.getFunctionSymbol().equals(untypedAtom.getFunctionSymbol()))) {
             return null;
         }
 
-        Function clonedFirstAtom = (Function) firstAtom.clone();
-        Function clonedSecondAtom = (Function) secondAtom.clone();
+        Function clonedFirstAtom = (Function) typedAtom.clone();
+        Function clonedSecondAtom = (Function) untypedAtom.clone();
 
-        int arity = firstAtom.getArity();
+        int arity = typedAtom.getArity();
         // Mutable object
         TypePropagatingSubstitution substitution = new TypePropagatingSubstitution();
 

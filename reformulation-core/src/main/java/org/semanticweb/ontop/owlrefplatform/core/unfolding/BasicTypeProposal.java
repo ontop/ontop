@@ -3,11 +3,8 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 import fj.F;
 import fj.data.List;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions;
 
 import java.util.ArrayList;
-
-import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift.applyBasicTypeProposal;
 
 /**
  * Normal case.
@@ -19,32 +16,8 @@ public class BasicTypeProposal extends TypeProposalImpl {
     }
 
     @Override
-    public List<CQIE> applyType(final List<CQIE> initialRules) throws TypeApplicationError {
-        final Function proposedFunction = getUnifiableAtom();
-
-        return initialRules.map(new F<CQIE, CQIE>() {
-            @Override
-            public CQIE f(CQIE initialRule) {
-                Function currentHead = initialRule.getHead();
-                try {
-                    Function newHead = applyBasicTypeProposal(currentHead, proposedFunction);
-
-                    // Mutable object
-                    CQIE newRule = initialRule.clone();
-                    newRule.updateHead(newHead);
-                    return newRule;
-                    /**
-                     * A SubstitutionException exception should not appear at this level.
-                     * There is an inconsistency somewhere.
-                     *
-                     * Throws a runtime exception (TypeApplicationError)
-                     * that should not be expected.
-                     */
-                } catch(Substitutions.SubstitutionException e) {
-                    throw new TypeApplicationError();
-                }
-            }
-        });
+    public Function getUnifiableAtom() {
+        return getProposedAtom();
     }
 
     /**
@@ -88,5 +61,10 @@ public class BasicTypeProposal extends TypeProposalImpl {
     @Override
     public List<CQIE> propagateChildArityChangeToBodies(List<CQIE> initialRules) {
         return initialRules;
+    }
+
+    @Override
+    public Function prepareBodyAtomForUnification(Function bodyAtom, java.util.Set<Variable> alreadyKnownRuleVariables) {
+        return bodyAtom;
     }
 }

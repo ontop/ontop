@@ -35,4 +35,8 @@ public interface TypeProposal {
      */
     public List<CQIE> propagateChildArityChangeToBodies(List<CQIE> initialRules);
 
+    /**
+     * TODO: explain
+     */
+    Function prepareBodyAtomForUnification(Function bodyAtom, java.util.Set<Variable> alreadyKnownRuleVariables);
 }

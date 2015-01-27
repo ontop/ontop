@@ -443,7 +443,7 @@ public class TypeLift {
                  * TODO: check if the unifier still makes sense
                  */
                 Unifier proposedSubstitutionFunction = computeTypePropagatingSubstitution(
-                        bodyAtom, optionalChildProposal.some().getUnifiableAtom());
+                        bodyAtom, optionalChildProposal.some());
 
                 if (optionalSubstitutionFunction.isNone()) {
                     newOptionalSubstitutionFct = Option.some(proposedSubstitutionFunction);
@@ -503,7 +503,7 @@ public class TypeLift {
      * If such a substitution function does not exist, throws a SubstitutionException.
      *
      */
-    private static TypePropagatingSubstitution computeTypePropagatingSubstitution(Function localAtom, Function proposedAtom)
+    private static TypePropagatingSubstitution computeTypePropagatingSubstitution(Function localAtom, TypeProposal proposal)
             throws SubstitutionException {
         /**
          * Type propagating substitution function between the proposedAtom and the localAtom.
@@ -511,7 +511,7 @@ public class TypeLift {
          * TODO: make the latter function throw the exception.
          */
         TypePropagatingSubstitution typePropagatingSubstitutionFunction = TypePropagatingSubstitution.createTypePropagatingSubstitution(
-                proposedAtom, localAtom, ImmutableMultimap.<Predicate, Integer>of());
+                proposal, localAtom, ImmutableMultimap.<Predicate, Integer>of());
 
         /**
          * Impossible to unify the multiple types proposed for this predicate.
@@ -544,7 +544,7 @@ public class TypeLift {
     /**
      * Propagates type from a typeProposal to one head atom.
      */
-    protected static Function applyBasicTypeProposal(Function headAtom, Function typeProposal) throws SubstitutionException {
+    protected static Function applyTypeProposal(Function headAtom, TypeProposal typeProposal) throws SubstitutionException {
         Unifier substitutionFunction = computeTypePropagatingSubstitution(headAtom, typeProposal);
 
         // Mutable object
@@ -961,22 +961,22 @@ public class TypeLift {
 
         Function headFirstRule = predicateDefinitionRules.head().getHead();
 
-        return isMultiTypedPredicate(headFirstRule, predicateDefinitionRules.tail());
+        return isMultiTypedPredicate(new BasicTypeProposal(headFirstRule), predicateDefinitionRules.tail());
     }
 
     /**
      * Tail recursive sub-method that "iterates" over the rules.
      */
-    private static boolean isMultiTypedPredicate(Function currentType, List<CQIE> remainingRules) {
+    private static boolean isMultiTypedPredicate(TypeProposal currentTypeProposal, List<CQIE> remainingRules) {
         if (remainingRules.isEmpty())
             return false;
 
         Function ruleHead = remainingRules.head().getHead();
         try {
-            Function newType = applyBasicTypeProposal(ruleHead, currentType);
+            Function newType = applyTypeProposal(ruleHead, currentTypeProposal);
 
             // Tail recursion
-            return isMultiTypedPredicate(newType, remainingRules.tail());
+            return isMultiTypedPredicate(new BasicTypeProposal(newType), remainingRules.tail());
             /**
              * Multi-type problem detected
              */
