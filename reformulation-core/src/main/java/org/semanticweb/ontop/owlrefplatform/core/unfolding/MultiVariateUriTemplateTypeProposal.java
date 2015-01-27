@@ -1,17 +1,14 @@
 package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import fj.F;
-import fj.data.Array;
+import fj.Ord;
 import fj.data.List;
+import fj.data.Set;
 import fj.data.Stream;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * For URI templates using more than one variable.
@@ -37,38 +34,63 @@ public class MultiVariateUriTemplateTypeProposal extends TypeProposalImpl {
     private static Function computeUnifiableAtom(final Function nonTypePropagatedAtom) {
         final Function newAtom = (Function) nonTypePropagatedAtom.clone();
 
-        final java.util.List<Variable> topVariables = extractTopVariables(newAtom);
-        final java.util.List<Variable> variablesToAdd = new ArrayList<>();
+        final Set<Variable> topVariables = extractTopVariables(newAtom);
 
         /**
-         * For all the URI templates using more than one variable...
+         * All the URI templates terms using more than one variable
          */
-        for(Term subTerm : newAtom.getTerms()) {
-            if (TypeLift.isMultiVariateURITemplate(subTerm)) {
+        final Stream<Function> uriTemplateTerms = Stream.iterableStream(newAtom.getTerms()).filter(new F<Term, Boolean>() {
+            @Override
+            public Boolean f(Term term) {
+                return TypeLift.isMultiVariateURITemplate(term);
+            }
+        }).map(new F<Term, Function>() {
+            @Override
+            public Function f(Term term) {
+                return (Function) term;
+            }
+        });
+
+
+        /**
+         *All the variables used by the URI templates except the first ones.
+         */
+        final Stream<Variable> nonFirstTemplateVariableStream = uriTemplateTerms.bind(new F<Function, Stream<Variable>>() {
+            @Override
+            public Stream<Variable> f(Function uriTemplateTerm) {
+                Stream<Variable> variables = Stream.iterableStream(uriTemplateTerm.getTerms()).filter(new F<Term, Boolean>() {
+                    @Override
+                    public Boolean f(Term term) {
+                        return term instanceof Variable;
+                    }
+                }).map(new F<Term, Variable>() {
+                    @Override
+                    public Variable f(Term term) {
+                        return (Variable) term;
+                    }
+                });
 
                 /**
-                 * Template string and the first variable are ignored.
-                 * ---> We only consider the other variables
+                 * We do not consider the first variable (associated to the URITemplate).
                  */
-                java.util.List<Term> templateSubTerms = ((Function) subTerm).getTerms();
-                for(int i = 2; i < templateSubTerms.size(); i++ ) {
-                    Term templateSubTerm = templateSubTerms.get(i);
-
-                    // MUST be a variable
-                    if (!(templateSubTerm instanceof Variable)) {
-                        throw new RuntimeException("Inconsistent URI template: " + subTerm.toString());
-                    }
-
-                    Variable variable = (Variable) templateSubTerm;
-                    if   (topVariables.contains(variable)) {
-                        //TODO: continue
-                    }
-                }
+                return variables.tail()._1();
             }
-        }
+        });
+        final Set<Variable> nonFirstTemplateVariableSet = Set.iterableSet(Ord.<Variable>hashEqualsOrd(),
+                nonFirstTemplateVariableStream);
 
-        //TODO: continue
+        /**
+         * Variables to add to the atom: new not-first variables found in the URI templates
+         */
+        final Set<Variable> extraVariables = nonFirstTemplateVariableSet.minus(topVariables);
 
+
+        /**
+         * SIDE EFFECT: adds the extra variables to the atom.
+         * ---> Augments the effective arity.
+         */
+        // UGLY!!!! But necessary with the current API...
+        newAtom.getTerms().addAll(extraVariables.toStream().toCollection());
 
         return newAtom;
     }
@@ -77,7 +99,7 @@ public class MultiVariateUriTemplateTypeProposal extends TypeProposalImpl {
     /**
      * By top variable we mean, variables are are direct sub-term of the given functional term.
      */
-    private static java.util.List<Variable> extractTopVariables(Function functionalTerm) {
+    private static Set<Variable> extractTopVariables(Function functionalTerm) {
         Stream<Term> termStream = Stream.iterableStream(functionalTerm.getTerms());
         Stream<Variable> variableStream = termStream.filter(new F<Term, Boolean>() {
             @Override
@@ -91,7 +113,7 @@ public class MultiVariateUriTemplateTypeProposal extends TypeProposalImpl {
             }
         });
 
-        return new ArrayList<Variable>(variableStream.toCollection());
+        return Set.iterableSet(Ord.<Variable>hashEqualsOrd(), variableStream);
     }
 
     /**
