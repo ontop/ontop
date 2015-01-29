@@ -43,7 +43,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
-import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.DummyReformulator;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.QueryRewriter;
 import it.unibz.krdb.obda.owlrefplatform.core.reformulation.TreeWitnessRewriter;
@@ -68,7 +67,6 @@ import java.net.URI;
 import java.security.InvalidParameterException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -658,6 +656,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			OBDADataSource datasource = unfoldingOBDAModel.getSources().get(0);
 			URI sourceId = datasource.getSourceID();
 
+            SQLDialectAdapter sqladapter = SQLAdapterFactory
+                    .getSQLDialectAdapter(datasource
+                            .getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 			
 			//if the metadata was not already set
 			if (metadata == null) {
@@ -723,35 +724,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			}
 				
 
-			SQLDialectAdapter sqladapter = SQLAdapterFactory
-					.getSQLDialectAdapter(datasource
-							.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER));
 
 			datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, getUriMap());
 
-			preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
 
-			
-			/***
-			 * Starting mapping processing
-			 */
-			
-			
-			/**
-			 * Split the mapping
-			 */
-			MappingSplitter.splitMappings(unfoldingOBDAModel, sourceId);
-			
-			
-			/**
-			 * Expand the meta mapping 
-			 */
-			MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
-			metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
-			
 
-			List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
-			unfolder = new QuestUnfolder(mappings, metadata);
+
+
+			unfolder = new QuestUnfolder(unfoldingOBDAModel, metadata, localConnection, sourceId);
 
 			/***
 			 * T-Mappings and Fact mappings
@@ -857,139 +837,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		unfolder.updateSemanticIndexMappings(unfoldingOBDAModel.getMappings(obdaSource.getSourceID()), 
 										reformulationReasoner, metadata);
 	}
-	
-	
 
-	/***
-	 * Expands a SELECT * into a SELECT with all columns implicit in the *
-	 * 
-	 * @param mappings
-	 * @param factory
-	 * @param adapter
-	 * @throws SQLException
-	 */
-	private static void preprocessProjection(Connection localConnection, ArrayList<OBDAMappingAxiom> mappings, OBDADataFactory factory,
-			SQLDialectAdapter adapter) throws SQLException {
 
-		// TODO this code seems buggy, it will probably break easily (check the
-		// part with
-		// parenthesis in the beginning of the for loop.
-
-		Statement st = null;
-		try {
-			st = localConnection.createStatement();
-			for (OBDAMappingAxiom axiom : mappings) {
-				String sourceString = axiom.getSourceQuery().toString();
-
-				/*
-				 * Check if the projection contains select all keyword, i.e.,
-				 * 'SELECT * [...]'.
-				 */
-				if (containSelectAll(sourceString)) {
-					StringBuilder sb = new StringBuilder();
-
-					 // If the SQL string has sub-queries in its statement
-					if (containChildParentSubQueries(sourceString)) {
-						int childquery1 = sourceString.indexOf("(");
-						int childquery2 = sourceString.indexOf(") AS child");
-						String childquery = sourceString.substring(childquery1 + 1, childquery2);
-
-						String copySourceQuery = createDummyQueryToFetchColumns(childquery, adapter);
-						if (st.execute(copySourceQuery)) {
-							ResultSetMetaData rsm = st.getResultSet().getMetaData();
-							boolean needComma = false;
-							for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
-								if (needComma) {
-									sb.append(", ");
-								}
-								String col = rsm.getColumnName(pos);
-								//sb.append("CHILD." + col );
-								sb.append("child.\"" + col + "\" AS \"child_" + (col)+"\"");
-								needComma = true;
-							}
-						}
-						sb.append(", ");
-
-						int parentquery1 = sourceString.indexOf(", (", childquery2);
-						int parentquery2 = sourceString.indexOf(") AS parent");
-						String parentquery = sourceString.substring(parentquery1 + 3, parentquery2);
-
-						copySourceQuery = createDummyQueryToFetchColumns(parentquery, adapter);
-						if (st.execute(copySourceQuery)) {
-							ResultSetMetaData rsm = st.getResultSet().getMetaData();
-							boolean needComma = false;
-							for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
-								if (needComma) {
-									sb.append(", ");
-								}
-								String col = rsm.getColumnName(pos);
-								//sb.append("PARENT." + col);
-								sb.append("parent.\"" + col + "\" AS \"parent_" + (col)+"\"");
-								needComma = true;
-							}
-						}
-
-						 //If the SQL string doesn't have sub-queries
-					} else 
-					
-					{
-						String copySourceQuery = createDummyQueryToFetchColumns(sourceString, adapter);
-						if (st.execute(copySourceQuery)) {
-							ResultSetMetaData rsm = st.getResultSet().getMetaData();
-							boolean needComma = false;
-							for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
-								if (needComma) {
-									sb.append(", ");
-								}
-								sb.append("\"" + rsm.getColumnName(pos) + "\"");
-								needComma = true;
-							}
-						}
-					}
-
-					/*
-					 * Replace the asterisk with the proper column names
-					 */
-					String columnProjection = sb.toString();
-					String tmp = axiom.getSourceQuery().toString();
-					int fromPosition = tmp.toLowerCase().indexOf("from");
-					int asteriskPosition = tmp.indexOf('*');
-					if (asteriskPosition != -1 && asteriskPosition < fromPosition) {
-						String str = sourceString.replaceFirst("\\*", columnProjection);
-						axiom.setSourceQuery(factory.getSQLQuery(str));
-					}
-				}
-			}
-		} finally {
-			if (st != null) {
-				st.close();
-			}
-		}
-	}
-
-	private static final String selectAllPattern = "(S|s)(E|e)(L|l)(E|e)(C|c)(T|t)\\s+\\*";
-	private static final String subQueriesPattern = "\\(.*\\)\\s+(A|a)(S|s)\\s+(C|c)(H|h)(I|i)(L|l)(D|d),\\s+\\(.*\\)\\s+(A|a)(S|s)\\s+(P|p)(A|a)(R|r)(E|e)(N|n)(T|t)";
-
-	private static boolean containSelectAll(String sql) {
-		final Pattern pattern = Pattern.compile(selectAllPattern);
-		return pattern.matcher(sql).find();
-	}
-
-	private static boolean containChildParentSubQueries(String sql) {
-		final Pattern pattern = Pattern.compile(subQueriesPattern);
-		return pattern.matcher(sql).find();
-	}
-
-	private static String createDummyQueryToFetchColumns(String originalQuery, SQLDialectAdapter adapter) {
-		String toReturn = String.format("select * from (%s) view20130219 ", originalQuery);
-		if (adapter instanceof SQLServerSQLDialectAdapter) {
-			SQLServerSQLDialectAdapter sqlServerAdapter = (SQLServerSQLDialectAdapter) adapter;
-			toReturn = sqlServerAdapter.sqlLimit(toReturn, 1);
-		} else {
-			toReturn += adapter.sqlSlice(0, Long.MIN_VALUE);
-		}
-		return toReturn;
-	}
 
 
 

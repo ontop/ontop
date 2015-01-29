@@ -221,7 +221,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				COL_TYPE.DATETIME, "QUEST_DATA_PROPERTY_DATETIME_ASSERTION", "TIMESTAMP", "IDX_DATETIME_ATTRIBUTE"));
 		attributeDescritions.add(new AttributeTableDescritpion(   // 14
 				COL_TYPE.BOOLEAN,  "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION", "BOOLEAN", "IDX_BOOLEAN_ATTRIBUTE"));
-
+		attributeDescritions.add(new AttributeTableDescritpion(   // 15
+				COL_TYPE.DATETIME_STAMP, "QUEST_DATA_PROPERTY_DATETIMESTAMP_ASSERTION", "TIMESTAMP", "IDX_DATETIMESTAMP_ATTRIBUTE"));
 		
 		for (AttributeTableDescritpion descrtiption : attributeDescritions) {
 			TableDescription table = new TableDescription(descrtiption.tableName,
@@ -317,6 +318,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DOUBLE).tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DATETIME).tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.BOOLEAN).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DATETIME_STAMP).tableName));
 
 			exists = true; // everything is fine if we get to this point
 		} 
@@ -605,6 +607,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			case DECIMAL: // 11
 				stm.setBigDecimal(2, new BigDecimal(value));
 				break;
+			case DATETIME_STAMP:
 			case DATETIME: // 13
 				stm.setTimestamp(2, parseTimestamp(value));
 				break;
@@ -923,7 +926,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	private static final COL_TYPE objectTypes[] = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.BNODE };
 
 	private static final COL_TYPE types[] = new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL_LANG, COL_TYPE.BOOLEAN, 
-		COL_TYPE.DATETIME, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.INTEGER, COL_TYPE.INT,
+		COL_TYPE.DATETIME, COL_TYPE.DATETIME_STAMP, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.INTEGER, COL_TYPE.INT,
 		COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER, 
 		COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER, COL_TYPE.FLOAT,  COL_TYPE.LONG, 
 		COL_TYPE.STRING };

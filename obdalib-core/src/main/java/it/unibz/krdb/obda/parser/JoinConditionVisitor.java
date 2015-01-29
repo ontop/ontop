@@ -103,7 +103,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	
 	ArrayList<Expression> joinConditions;
 	boolean notSupported = false;
-	boolean unquote; //remove quotes form columns 
+
 	
 	/**
 	 * Obtain the join conditions in a format "expression condition expression"
@@ -112,12 +112,12 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	 * @param select statement with the parsed query
 	 * @return a list of string containing the join conditions
 	 */
-	public ArrayList<Expression> getJoinConditions(Select select, boolean unquote)  throws JSQLParserException {
-		this.unquote=unquote;
+	public ArrayList<Expression> getJoinConditions(Select select, boolean deepParsing)  throws JSQLParserException {
+
 		joinConditions = new ArrayList<Expression>();
 		select.getSelectBody().accept(this);
 	
-		if(notSupported && unquote) // used to throw exception for the currently unsupported methods
+		if(notSupported && deepParsing) // used to throw exception for the currently unsupported methods
 			throw new JSQLParserException("Query not yet supported");
 		
 		return joinConditions;
@@ -144,7 +144,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 				{
 					String columnName= column.getColumnName();
 					
-					if(unquote && ParsedSQLQuery.pQuotes.matcher(columnName).matches())
+					if(ParsedSQLQuery.pQuotes.matcher(columnName).matches())
 					{
 						columnName=columnName.substring(1, columnName.length()-1);
 						column.setColumnName(columnName);
@@ -481,7 +481,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 	@Override
 	public void visit(Column col) {
 		Table table= col.getTable();
-		if(table.getName()!=null && unquote){
+		if(table.getName()!=null){
 			
 			TableJSQL fixTable = new TableJSQL(table);
 			table.setAlias(fixTable.getAlias());
@@ -490,7 +490,7 @@ public class JoinConditionVisitor implements SelectVisitor, ExpressionVisitor, F
 		
 		}
 		String columnName= col.getColumnName();
-		if(unquote && ParsedSQLQuery.pQuotes.matcher(columnName).matches())
+		if(ParsedSQLQuery.pQuotes.matcher(columnName).matches())
 			col.setColumnName(columnName.substring(1, columnName.length()-1));
 		
 	}

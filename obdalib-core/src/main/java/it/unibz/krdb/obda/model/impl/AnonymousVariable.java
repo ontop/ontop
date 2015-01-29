@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.model.Variable;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 public class AnonymousVariable implements Variable {
@@ -67,5 +68,10 @@ public class AnonymousVariable implements Variable {
 	@Override
 	public Set<Variable> getReferencedVariables() {
 		return Collections.emptySet();
+	}
+
+	@Override
+	public List<Variable> getReferencedVariablesList() {
+		return Collections.emptyList();
 	}
 }
