@@ -35,7 +35,6 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.io.File;
-import java.util.Properties;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -168,8 +167,6 @@ public class QuestOWLExample_OntowisTests {
 
 
 		queries[24]="PREFIX :	<http://www.example.org/>  SELECT ?x   WHERE {?x a  :4Tab1 . } ";
-
-		StringBuilder csvOut = new StringBuilder();
 		
 		
 		int j=0;

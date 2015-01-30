@@ -22,8 +22,6 @@ package it.unibz.krdb.obda.quest.dag;
 
 
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -49,11 +47,9 @@ public class R_TBoxReasonerImpl extends TestCase {
 
 	public void testIndexClasses() throws Exception {
 		String testURI = "http://it.unibz.krdb/obda/ontologies/test.owl#";
-		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File(testIndexClasses));
-		Ontology onto = t.translate(owlonto);
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+		Ontology onto = OWLAPI3TranslatorUtility.translate(owlonto);
 
 		// generate DAG
 		TBoxReasoner dag = new TBoxReasonerImpl(onto);

@@ -104,7 +104,7 @@ import net.sf.jsqlparser.statement.select.WithItem;
 public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, ExpressionVisitor{
 
 	HashMap<String,String> aliasMap;
-	boolean unquote; //remove quotes from columns
+
 	
 	/**
 	 * Return a map between the column in the select statement and its alias.
@@ -112,9 +112,8 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 	 * @return alias map
 	 */
 	
-	public HashMap<String,String> getAliasMap(Select select, boolean unquote) {
-		
-		this.unquote= unquote;
+	public HashMap<String,String> getAliasMap(Select select, boolean deepParsing) {
+
 		aliasMap = new HashMap<String, String>();
 		
 		if (select.getWithItemsList() != null) {
@@ -165,7 +164,7 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, Expres
 			Expression e = selectExpr.getExpression();
 			e.accept(this);
 			//remove alias quotes if present
-			if(unquote && ParsedSQLQuery.pQuotes.matcher(alias).matches()){
+			if(ParsedSQLQuery.pQuotes.matcher(alias).matches()){
 				aliasMap.put(e.toString().toLowerCase(), alias.substring(1, alias.length()-1));
 			}
 			else

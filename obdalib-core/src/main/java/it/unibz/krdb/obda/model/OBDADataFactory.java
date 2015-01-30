@@ -37,6 +37,9 @@ public interface OBDADataFactory extends Serializable {
 	public CQIE getCQIE(Function head, Function... body );
 	
 	public CQIE getCQIE(Function head, List<Function> body);
+	
+	public CQIE getFreshCQIECopy(CQIE rule);	
+	
 
 	public OBDADataSource getDataSource(URI id);
 
@@ -298,5 +301,5 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getSPARQLJoin(Term t1, Term t2);
 
-	public Function getSPARQLLeftJoin(Term t1, Term t2);	
+	public Function getSPARQLLeftJoin(Term t1, Term t2);
 }

@@ -23,8 +23,6 @@ package it.unibz.krdb.obda.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.unibz.krdb.sql.api.ProjectionJSQL;
-import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnalyticExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -205,12 +203,16 @@ public class ColumnsVisitor implements SelectVisitor, SelectItemVisitor, Express
 
 	@Override
 	public void visit(SelectExpressionItem selectExpr) {
-		// selectExpr.getExpression().accept(this);
+
 		/*
 		 * Here we found a column
 		 */
-		if(selectExpr.getAlias()!=null)
-		this.columns.add(selectExpr.getAlias().getName());
+		if(selectExpr.getAlias()!=null) {
+			this.columns.add(selectExpr.getAlias().getName());
+		}
+		else{
+			selectExpr.getExpression().accept(this);
+		}
 	}
 
 	@Override

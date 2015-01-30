@@ -13,6 +13,7 @@
       :timeLiteral :time :time-str :time-bgp
       :datetime :datetime-str
       :datetime2 :datetime2-str
+      :timestamp_tz
 
     ) .
 
@@ -143,5 +144,14 @@
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mssql.obda> .
 
+:timestamp_tz rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIMESTAMP WITH TIMEZONE" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <datetimeoffset.rq> ] ;
+    mf:result <datetimeoffset.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mssql.obda> .
 
 

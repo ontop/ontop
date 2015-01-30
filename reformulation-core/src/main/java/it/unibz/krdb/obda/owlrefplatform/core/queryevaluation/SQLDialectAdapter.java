@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 
 import java.util.List;
@@ -74,6 +73,8 @@ public interface SQLDialectAdapter {
 	public String getSQLLexicalFormBoolean(boolean value);
 	
 	public String getSQLLexicalFormDatetime(String value);
+
+	public String getSQLLexicalFormDatetimeStamp(String v);
 	
 	
 }

@@ -96,16 +96,23 @@ public class SQLGenerator implements SQLQueryGenerator {
 		this.sqladapter = sqladapter;
 	}
 
-    public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace) {
+	/**
+	 * 
+	 * @param metadata
+	 * @param sqladapter
+	 * @param sqlGenerateReplace
+	 * @param uriid is null in case we are not in the SI mode
+	 */
+	
+    public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace, SemanticIndexURIMap uriid) {
         this(metadata, sqladapter);
         this.generatingREPLACE = sqlGenerateReplace;
+        if (uriid != null) {
+    		this.isSI = true;
+    		this.uriRefIds = uriid;
+        }
     }
 
-    @Override
-	public void setUriMap (SemanticIndexURIMap uriid){
-		this.isSI = true;
-		this.uriRefIds = uriid;
-	}
 
 	/**
 	 * Generates and SQL query ready to be executed by Quest. Each query is a
@@ -206,7 +213,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 //			log.debug("Normalized CQ: \n{}", cq);
 
 			Predicate headPredicate = cq.getHead().getFunctionSymbol();
-			if (!headPredicate.getName().toString().equals("ans1")) {
+			if (!headPredicate.getName().toString().equals(OBDAVocabulary.QUEST_QUERY)) {
 				// not a target query, skip it.
 				continue;
 			}
@@ -1329,9 +1336,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 				throw new RuntimeException("Invalid lexical form for xsd:boolean. Found: " + value);
 			}
 		} 
-		else if (constant.getType() == COL_TYPE.DATETIME) {
+		else if (constant.getType() == COL_TYPE.DATETIME ) {
 			sql = sqladapter.getSQLLexicalFormDatetime(constant.getValue());
-		} 
+		}
+		else if (constant.getType() == COL_TYPE.DATETIME_STAMP ) {
+			sql = sqladapter.getSQLLexicalFormDatetimeStamp(constant.getValue());
+		}
 		else if (constant.getType() == COL_TYPE.DECIMAL || constant.getType() == COL_TYPE.DOUBLE
 				|| constant.getType() == COL_TYPE.INTEGER || constant.getType() == COL_TYPE.LONG
                 || constant.getType() == COL_TYPE.FLOAT || constant.getType() == COL_TYPE.NON_POSITIVE_INTEGER

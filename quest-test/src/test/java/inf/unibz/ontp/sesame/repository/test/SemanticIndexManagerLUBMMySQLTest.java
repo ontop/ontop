@@ -37,14 +37,12 @@ import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
 import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 
-import java.beans.Statement;
 import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
 
 import junit.framework.TestCase;
 
-import org.junit.Ignore;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;

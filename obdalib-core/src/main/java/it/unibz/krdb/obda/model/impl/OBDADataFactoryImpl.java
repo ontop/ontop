@@ -45,6 +45,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,7 +61,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	private static int counter = 0;
 	
-	protected OBDADataFactoryImpl() {
+	private OBDADataFactoryImpl() {
 		// protected constructor prevents instantiation from other classes.
 	}
 
@@ -477,8 +478,85 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public Function getTripleAtom(Term subject, Term predicate, Term object) {
-		return getFunction(OBDAVocabulary.QUEST_TRIPLE_PRED, subject, predicate, object);
+		return getFunction(PredicateImpl.QUEST_TRIPLE_PRED, subject, predicate, object);
 	}
 
+	private int suffix = 0;
 	
+	/***
+	 * Replaces each variable 'v' in the query for a new variable constructed
+	 * using the name of the original variable plus the counter. For example
+	 * 
+	 * <pre>
+	 * q(x) :- C(x)
+	 * 
+	 * results in
+	 * 
+	 * q(x_1) :- C(x_1)
+	 * 
+	 * if counter = 1.
+	 * </pre>
+	 * 
+	 * <p>
+	 * This method can be used to generate "fresh" rules from a datalog program
+	 * so that it can be used during a resolution step.
+	 * 
+	 * @param rule
+	 * @param suffix
+	 *            The integer that will be apended to every variable name
+	 * @return
+	 */
+	@Override
+	public CQIE getFreshCQIECopy(CQIE rule) {
+		
+		int suff = ++suffix;
+		
+		// This method doesn't support nested functional terms
+		CQIE freshRule = rule.clone();
+		Function head = freshRule.getHead();
+		List<Term> headTerms = head.getTerms();
+		for (int i = 0; i < headTerms.size(); i++) {
+			Term term = headTerms.get(i);
+			Term newTerm = getFreshTerm(term, suff);
+			headTerms.set(i, newTerm);
+		}
+
+		List<Function> body = freshRule.getBody();
+		for (Function atom : body) {
+			List<Term> atomTerms = atom.getTerms();
+			for (int i = 0; i < atomTerms.size(); i++) {
+				Term term = atomTerms.get(i);
+				Term newTerm = getFreshTerm(term, suff);
+				atomTerms.set(i, newTerm);
+			}
+		}
+		return freshRule;
+	}
+
+	private Term getFreshTerm(Term term, int suff) {
+		Term newTerm;
+		if (term instanceof VariableImpl) {
+			VariableImpl variable = (VariableImpl) term;
+			newTerm = getVariable(variable.getName() + "_" + suff);
+		} 
+		else if (term instanceof Function) {
+			Function functionalTerm = (Function) term;
+			List<Term> innerTerms = functionalTerm.getTerms();
+			List<Term> newInnerTerms = new LinkedList<>();
+			for (int j = 0; j < innerTerms.size(); j++) {
+				Term innerTerm = innerTerms.get(j);
+				newInnerTerms.add(getFreshTerm(innerTerm, suff));
+			}
+			Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
+			Function newFunctionalTerm = getFunction(newFunctionSymbol, newInnerTerms);
+			newTerm = newFunctionalTerm;
+		} 
+		else if (term instanceof Constant) {
+			newTerm = term.clone();
+		} 
+		else {
+			throw new RuntimeException("Unsupported term: " + term);
+		}
+		return newTerm;
+	}
 }

@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 public class ValueConstantImpl implements ValueConstant {
@@ -68,7 +68,8 @@ public class ValueConstantImpl implements ValueConstant {
             case DATE:
             case TIME:
             case YEAR:
-			case DATETIME: 
+			case DATETIME:
+			case DATETIME_STAMP:
 				sb.append("\"").append(value).append("\""); 
 				break;
 			case INTEGER:
@@ -135,5 +136,10 @@ public class ValueConstantImpl implements ValueConstant {
 	@Override
 	public Set<Variable> getReferencedVariables() {
 		return Collections.emptySet();
+	}
+
+	@Override
+	public List<Variable> getReferencedVariablesList() {
+		return Collections.emptyList();
 	}
 }

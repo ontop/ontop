@@ -20,6 +20,8 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
+import java.sql.Connection;
+
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
@@ -35,7 +37,7 @@ import org.semanticweb.owlapi.model.OWLException;
  * parallel with good performance (as with JDBC).
  * 
  * <p>
- * Besides parallel connections, at the moment, the class is not very usefull,
+ * Besides parallel connections, at the moment, the class is not very useful,
  * it will be when transactions and updates are implemented. Or when we allow
  * the user to setup the kind of statement that he wants to use.
  * 
@@ -57,6 +59,11 @@ public class QuestOWLConnection {
 		this.conn = conn;
 	}
 
+	@Deprecated // used in one test only
+	public Connection getConnection() {
+		return conn.getConnection();
+	}
+	
 	/***
 	 * Releases the connection object
 	 * 
@@ -66,8 +73,7 @@ public class QuestOWLConnection {
 		try {
 			conn.close();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e); 
 		}
 
 	}
@@ -76,8 +82,7 @@ public class QuestOWLConnection {
 		try {
 			return new QuestOWLStatement(conn.createStatement(), this);
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e); 
 		}
 	}
 
@@ -85,28 +90,23 @@ public class QuestOWLConnection {
 		try {
 			conn.close();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e); 
 		}
-
 	}
 
 	public void setAutoCommit(boolean autocommit) throws OWLException {
 		try {
 			conn.setAutoCommit(autocommit);
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e); 
 		}
-
 	}
 
 	public boolean getAutoCommit() throws OWLException {
 		try {
 			return conn.getAutoCommit();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e);
 		}
 	}
 
@@ -114,8 +114,7 @@ public class QuestOWLConnection {
 		try {
 			return conn.isClosed();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e);
 		}
 	}
 
@@ -123,8 +122,7 @@ public class QuestOWLConnection {
 		try {
 			return conn.isReadOnly();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e);
 		}
 	}
 
@@ -132,10 +130,8 @@ public class QuestOWLConnection {
 		try {
 			conn.rollBack();
 		} catch (OBDAException e) {
-			throw new OWLException(e) {
-			};
+			throw new OWLException(e); 
 		}
-
 	}
 
 }

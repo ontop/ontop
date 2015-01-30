@@ -124,10 +124,10 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 	 * Main entry for this Tool class. A list of found tables is returned.
 	 *
 	 * @param select
-	 * @param unquote 
+	 * @param deepParsing
 	 * @return
 	 */
-	public List<RelationJSQL> getTables(Select select, boolean unquote) throws JSQLParserException {
+	public List<RelationJSQL> getTables(Select select, boolean deepParsing) throws JSQLParserException {
 		init();
  		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -136,7 +136,7 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
 		}
 		select.getSelectBody().accept(this);
 		
-		if(unsupported && unquote) // used to throw exception for the currently unsupported methods
+		if(unsupported && deepParsing) // used to throw exception for the currently unsupported methods
 			throw new JSQLParserException("Query not yet supported");
 		
 		return tables;

@@ -22,7 +22,6 @@ package it.unibz.krdb.sql;
 
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.sql.api.Attribute;
@@ -44,6 +43,7 @@ public class DBMetadata implements Serializable {
 	private HashMap<String, DataDefinition> schema = new HashMap<String, DataDefinition>();
 
 	private String driverName;
+	private String driverVersion;
 	private String databaseProductName;
 
 	private boolean storesLowerCaseIdentifiers = false;
@@ -82,6 +82,7 @@ public class DBMetadata implements Serializable {
 	public void load(DatabaseMetaData md) {
 		try {
 			setDriverName(md.getDriverName());
+			setDriverVersion(md.getDriverVersion());
 			setDatabaseProductName(md.getDatabaseProductName());
 			setStoresLowerCaseIdentifier(md.storesLowerCaseIdentifiers());
 			setStoresLowerCaseQuotedIdentifiers(md
@@ -294,6 +295,15 @@ public class DBMetadata implements Serializable {
 		return driverName;
 	}
 
+	public void setDriverVersion(String driverVersion) {
+
+		this.driverVersion = driverVersion;
+	}
+
+	public String getDriverVersion() {
+		return driverVersion;
+	}
+
 	public void setDatabaseProductName(String databaseProductName) {
 		this.databaseProductName = databaseProductName;
 	}
@@ -403,4 +413,6 @@ public class DBMetadata implements Serializable {
 		}
 		return pkeys;
 	}
+
+
 }

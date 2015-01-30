@@ -24,44 +24,27 @@ package it.unibz.krdb.obda.r2rml;
  * @author timea bagosi
  * The R2RML parser class that breaks down the responsibility of parsing by case
  */
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
-import it.unibz.krdb.obda.model.DatatypeFactory;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.DataTypePredicateImpl;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.r2rml.R2RMLVocabulary;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.openrdf.model.Model;
-import org.openrdf.model.Resource;
-
-import eu.optique.api.mapping.ObjectMap;
-import eu.optique.api.mapping.PredicateMap;
-import eu.optique.api.mapping.PredicateObjectMap;
-import eu.optique.api.mapping.R2RMLMappingManager;
-import eu.optique.api.mapping.R2RMLMappingManagerFactory;
-import eu.optique.api.mapping.SubjectMap;
-import eu.optique.api.mapping.Template;
+import eu.optique.api.mapping.*;
 import eu.optique.api.mapping.TermMap.TermMapType;
-import eu.optique.api.mapping.TriplesMap;
 import eu.optique.api.mapping.impl.InvalidR2RMLMappingException;
 import eu.optique.api.mapping.impl.SubjectMapImpl;
+import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.DataTypePredicateImpl;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import org.openrdf.model.Model;
+import org.openrdf.model.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 
 public class R2RMLParser {
 
 	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	List<Predicate> classPredicates; 
 	List<Resource> joinPredObjNodes; 
@@ -70,7 +53,7 @@ public class R2RMLParser {
 	String subjectString = "";
 	String objectString = "";
 	R2RMLMappingManager mapManager;
-
+	Logger logger = LoggerFactory.getLogger(R2RMLParser.class);
 	/**
 	 * empty constructor 
 	 */
@@ -219,16 +202,13 @@ public class R2RMLParser {
 	 * Get body predicates
 	 * @param pom
 	 * @return
-	 * @throws Exception
 	 */
-	public List<Predicate> getBodyPredicates(PredicateObjectMap pom)
-			throws Exception {
+	public List<Predicate> getBodyPredicates(PredicateObjectMap pom) {
 		List<Predicate> bodyPredicates = new ArrayList<Predicate>();
-		Predicate bodyPredicate = null;
 
 		// process PREDICATEs
 		for (PredicateMap pm : pom.getPredicateMaps()) {
-			bodyPredicate = fac.getPredicate(pm.getConstant(), 2);
+			Predicate bodyPredicate = fac.getPredicate(pm.getConstant(), 2);
 			bodyPredicates.add(bodyPredicate);
 		}
 		return bodyPredicates;
@@ -238,27 +218,24 @@ public class R2RMLParser {
 	 * Get body predicates with templates
 	 * @param pom
 	 * @return
-	 * @throws Exception
 	 */
-	public List<Function> getBodyURIPredicates(PredicateObjectMap pom)
-			throws Exception {
-		List<Function> predicateAtoms = new ArrayList<Function>();
-		Function predicateAtom;
+	public List<Function> getBodyURIPredicates(PredicateObjectMap pom) {
+		List<Function> predicateAtoms = new ArrayList<>();
 
 		// process PREDICATEMAP
 		for (PredicateMap pm : pom.getPredicateMaps()) {
 			Template t = pm.getTemplate();
-			if(t != null) 
+			if (t != null) 
 			{
 				// craete uri("...",var)
-				predicateAtom = getURIFunction(t.toString());
+				Function predicateAtom = getURIFunction(t.toString());
 				predicateAtoms.add(predicateAtom);
 			}
 
 			// process column declaration
 			String c = pm.getColumn();
 			if (c != null) {
-				predicateAtom = getURIFunction(c);
+				Function predicateAtom = getURIFunction(c);
 				predicateAtoms.add(predicateAtom);
 			}
 		}
@@ -266,8 +243,7 @@ public class R2RMLParser {
 
 	}
 
-	public Term getObjectAtom(PredicateObjectMap pom)
-			throws Exception {
+	public Term getObjectAtom(PredicateObjectMap pom)  {
 		return getObjectAtom(pom, "");
 	}
 
@@ -278,8 +254,7 @@ public class R2RMLParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public Term getObjectAtom(PredicateObjectMap pom, String joinCond)
-			throws Exception {
+	public Term getObjectAtom(PredicateObjectMap pom, String joinCond) {
 		Term objectAtom = null;
 		if (pom.getObjectMaps().isEmpty()) {
 			return null;
@@ -369,9 +344,17 @@ public class R2RMLParser {
 		//we check if it is a typed literal 
 		if (datatype != null)
 		{
-			Predicate dtype =  new DataTypePredicateImpl(datatype.toString(), COL_TYPE.OBJECT);
-			Term dtAtom = fac.getFunction(dtype, objectAtom);
-			objectAtom = dtAtom;
+			Predicate.COL_TYPE type = dtfac.getDataType(datatype.toString());
+			if (type == null) {
+//				throw new RuntimeException("Unsupported datatype: " + datatype.toString());
+				logger.warn("Unsupported datatype will not be converted: " + datatype.toString());
+			}
+			else {
+				Term dtAtom = fac.getTypedTerm(objectAtom, type);
+//			Predicate dtype =  new DataTypePredicateImpl(datatype.toString(), COL_TYPE.OBJECT);
+//			Term dtAtom = fac.getFunction(dtype, objectAtom);
+				objectAtom = dtAtom;
+			}
 		}
 
 		return objectAtom;
@@ -411,8 +394,7 @@ public class R2RMLParser {
 	}
 
 	@Deprecated
-	public List<Resource> getJoinNodes(TriplesMap tm)
-	{
+	public List<Resource> getJoinNodes(TriplesMap tm) {
 		List<Resource> joinPredObjNodes = new ArrayList<Resource>();
 		// get predicate-object nodes
 		Set<Resource> predicateObjectNodes = getPredicateObjects(tm);

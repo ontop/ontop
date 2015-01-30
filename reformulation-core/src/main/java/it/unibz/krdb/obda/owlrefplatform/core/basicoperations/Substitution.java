@@ -87,6 +87,6 @@ public interface Substitution {
     @Deprecated
     void put(VariableImpl var, Term term);
 
-    @Deprecated
-    Set<VariableImpl> keySet();
+//    @Deprecated
+//    Set<VariableImpl> keySet();
 }

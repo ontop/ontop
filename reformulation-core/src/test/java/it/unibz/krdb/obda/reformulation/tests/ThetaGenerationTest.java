@@ -33,6 +33,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SingletonSubstitut
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
@@ -46,15 +47,14 @@ public class ThetaGenerationTest extends TestCase {
 	OBDADataFactory termFactory =  OBDADataFactoryImpl.getInstance();
 	OBDADataFactory tfac =  OBDADataFactoryImpl.getInstance();
 	OBDADataFactory predFactory = OBDADataFactoryImpl.getInstance();
-	//IRIFactory ifac = OBDADataFactoryImpl.getIRIFactory();
 
 	private Vector<SingletonSubstitution> getMGUAsVector(Substitution mgu) {
 		Vector<SingletonSubstitution> computedmgu = new Vector<>();
 		if (mgu == null) {
 			computedmgu = null;
 		} else {
-			for (VariableImpl var : mgu.keySet()) {
-				computedmgu.add(new SingletonSubstitution(var, mgu.get(var)));
+			for (Map.Entry<VariableImpl,Term> m : mgu.getMap().entrySet()) {
+				computedmgu.add(new SingletonSubstitution(m.getKey(), m.getValue()));
 			}
 		}
 		return computedmgu;
