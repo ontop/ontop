@@ -168,6 +168,7 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 		    while (m.find()){
 		    	num_joins +=1;
 		    }
+		    System.out.println(sql);
 			assertEquals(num_joins, 0);
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());

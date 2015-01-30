@@ -212,7 +212,7 @@ public class Mapping2DatalogConverter {
      * 
      * TODO: Not finished! Will break anything
      */
-    private void addFunctionAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
+    private static void addFunctionAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
     	ProjectionJSQL proj = parsedSQLQuery.getProjection();
     	List<SelectExpressionItem> selects = proj.getColumnList();
     	for(SelectExpressionItem select : selects){

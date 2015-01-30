@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.StringOperationPredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 
 public class OBDAVocabulary {
@@ -67,10 +68,10 @@ public class OBDAVocabulary {
 	
 	/* String predicates */
 	
-	public static final Predicate REPLACE = new PredicateImpl(
+	public static final StringOperationPredicate REPLACE = new StringOperationPredicateImpl(
 			REPLACE_STR, 3, new COL_TYPE[]{COL_TYPE.STRING, COL_TYPE.STRING, COL_TYPE.STRING});  
 	
-	public static final Predicate CONCAT = new PredicateImpl(
+	public static final StringOperationPredicate CONCAT = new StringOperationPredicateImpl(
 			CONCAT_STR, 2, new COL_TYPE[]{COL_TYPE.STRING, COL_TYPE.STRING});  
 	
 	

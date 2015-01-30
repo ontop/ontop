@@ -800,7 +800,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 			else if (function instanceof BNodePredicate) {
 				// New template based BNODE building functions
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
-
+			} 
+			else if (function instanceof StringOperationPredicate) {
+				// Functions returning string values
+				mainColumn = getSQLString(ov, index, false);
 			} 
 			else {
 				throw new IllegalArgumentException(
@@ -883,6 +886,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			} 
 			else if (function instanceof BNodePredicate) {
                 type = COL_TYPE.BNODE;
+			}
+			else if (function instanceof StringOperationPredicate) {
+				type = COL_TYPE.STRING;
 			}
 			else {
 				String functionString = function.toString();
@@ -1292,6 +1298,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String result = sqladapter.strreplace(orig, out_str, in_str);
 				return result;
 			} 
+			 else if (functionName.equals(OBDAVocabulary.CONCAT_STR) && size == 2) {
+					String left = getSQLString(function.getTerm(0), index, false);
+					String right = getSQLString(function.getTerm(1), index, false);
+					String result = sqladapter.strconcat(new String[]{left, right});
+					return result;
+				} 
 		}
 
 		/*

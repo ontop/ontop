@@ -61,7 +61,6 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 		XSD_INT = registerType(XMLSchema.INT, COL_TYPE.INT);  // 19 "http://www.w3.org/2001/XMLSchema#int"
 		XSD_UNSIGNED_INT = registerType(XMLSchema.UNSIGNED_INT, COL_TYPE.UNSIGNED_INT);   // 20 "http://www.w3.org/2001/XMLSchema#unsignedInt"
 
-		
 		// special case
 		// used in ExpressionEvaluator only(?) use proper method there? 
 		mapCOLTYPEtoPredicate.put(COL_TYPE.LITERAL_LANG, RDFS_LITERAL_LANG);
@@ -81,6 +80,9 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 	
 	@Override
 	public COL_TYPE getDataType(String uri) {
+		if(! mapURItoCOLTYPE.containsKey(uri)){
+			throw new NullPointerException("No type defined for \"" + uri + "\".");
+		}
 		return mapURItoCOLTYPE.get(uri);
 	}
 	
