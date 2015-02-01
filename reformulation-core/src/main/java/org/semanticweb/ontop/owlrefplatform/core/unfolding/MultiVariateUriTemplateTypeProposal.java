@@ -176,7 +176,7 @@ public class MultiVariateUriTemplateTypeProposal extends TypeProposalImpl {
     }
 
     /**
-     * TODO: implement it!
+     * TODO: explain
      */
     @Override
     public List<CQIE> propagateChildArityChangeToBodies(List<CQIE> initialRules) {

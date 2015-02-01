@@ -236,61 +236,29 @@ public class TypeLift {
         final HashMap<Predicate, TypeProposal> childProposalIndex = retrieveChildrenProposals(parentZipper);
 
         /**
-         * Removes child types. This has to be done BEFORE making a TypeProposal for the parent
-         * BECAUSE CHILD HEAD ARITIES MAY CHANGE AT TYPE REMOVAL TIME.
-         */
-        final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> untypedChildrenZipper = removeChildTypes(
-                parentZipper, childProposalIndex);
-
-        /**
          * Main operation: makes a type proposal for the current (parent) predicate.
          * May throw a MultiTypeException.
+         *
+         * TODO: rephrase this comment.
          */
-        Option<TypeProposal> parentProposal = proposeType(parentZipper, childProposalIndex);
+        TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> partiallyUpdatedTreeZipper = proposeTypeAndUpdateBodies(parentZipper, childProposalIndex);
 
         /**
-         * If no type has been proposed by the children nor by the node itself,
-         * no need to remove types from the children rules.
-         */
-        if (parentProposal.isNone()) {
-            return parentZipper;
-        }
-
-        /**
-         * Sets the proposal to the parent node.
-         */
-        final P3<Predicate, List<CQIE>, Option<TypeProposal>> parentLabel = untypedChildrenZipper.getLabel();
-
-        /**
-         * Returns a new zipper with the updated label.
-         */
-        return untypedChildrenZipper.setLabel(P.p(parentLabel._1(), parentLabel._2(), parentProposal));
-    }
-
-    /**
-     * Removes child types and updates the parent rules if the arity of some body atoms change.
-     *
-     */
-    private static TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> removeChildTypes(
-            final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper,
-            final HashMap<Predicate, TypeProposal> childProposalIndex) {
-        /**
-         * Removes types from the children rules (as much as possible).
+         * Removes child types.
          */
         final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> untypedChildrenZipper = applyToChildren(
-                removeTypeFunction, parentZipper);
+                removeTypeFunction, partiallyUpdatedTreeZipper);
 
-        /**
-         * Type removal may change the arity of the child heads.
-         * ---> Some body atoms of the parent rules may have to updated.
-         */
-        return propagateChildArityChangesToBodies(untypedChildrenZipper, childProposalIndex);
+        return untypedChildrenZipper;
     }
+
 
     /**
      * Updates the rule bodies of the parent node according to possible arity changes of child heads.
      *
      * Typically, arity changes are caused by MultiVariableUriTemplateTypeProposals.
+     *
+     * TODO: REMOVE or completely transform.
      *
      */
     private static TreeZipper<P3<Predicate,List<CQIE>,Option<TypeProposal>>> propagateChildArityChangesToBodies(
@@ -329,9 +297,14 @@ public class TypeLift {
      * If the multi-typing problem is detected, throws a MultiTypeException.
      *
      * Returns the type proposal.
+     *
+     * TODO: update this comment
+     * Please note that the returned tree zipper IS NOT FULLY CONSISTENT
+     *
+     *
      */
-    private static Option<TypeProposal> proposeType(final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper,
-                                                    final HashMap<Predicate, TypeProposal> childProposalIndex)
+    private static TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> proposeTypeAndUpdateBodies(final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper,
+                                                                   final HashMap<Predicate, TypeProposal> childProposalIndex)
             throws MultiTypeException {
 
         /**
@@ -359,7 +332,13 @@ public class TypeLift {
         UnifierUtilities.applyUnifier(newFunctionProposal, proposedSubstitutionFct);
 
         TypeProposal newProposal = new BasicTypeProposal(newFunctionProposal);
-        return Option.some(newProposal);
+
+
+        /**
+         * Returns a new zipper with the updated label.
+         * TODO: update this comment
+         */
+        return untypedChildrenZipper.setLabel(P.p(parentLabel._1(), parentLabel._2(), Option.some(newProposal)));
     }
 
     /**
