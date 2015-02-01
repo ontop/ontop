@@ -5,7 +5,7 @@ package org.semanticweb.ontop.pivotalrepr;
  *
  * Immutable.
  */
-public interface QueryTerm extends ExpressionElement {
+public interface QueryTerm {
 
     public String getDatatype();
     public boolean hasDatatype();

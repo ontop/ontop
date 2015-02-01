@@ -3,14 +3,10 @@ package org.semanticweb.ontop.pivotalrepr;
 import com.google.common.collect.ImmutableList;
 
 /**
- * Almost immutable: except isRejected (can be set to true)?
+ * Mutable BUT ONLY WHEN APPLYING LocalOptimizationProposal forwarded by the IntermediateQuery.
  *
- * Or should allow some modifier update and filter expression?
+ * --> Mutations under control.
  *
- * Or fully immutable?
- *
- *
- * TODO: complete it
  */
 public interface QueryNode {
 
@@ -18,23 +14,13 @@ public interface QueryNode {
     public boolean hasModifiers();
 
     /**
-     * Apply optimization locally (no "navigation with side-effects"??).
+     * "Accept" method for the "Visitor" pattern.
      *
-     * To be implemented by leaf classes ("visitor" pattern).
+     * To be implemented by leaf classes.
+     *
+     * TODO: check if visitor is the proper name.
      */
-    public LocalOptimizationProposal proposeOptimization(QueryOptimizer optimizer);
-
-    /**
-     * "Visitor"-like method.
-     * TODO: look if there is not a better pattern name
-     *
-     * Should called ONLY by the optimization proposal.
-     *
-     * TODO: replace OptimizationProposal by a more specific one.
-     *
-     *
-     */
-    public void applyOptimizationProposal(LocalOptimizationProposal proposal);
+    public LocalOptimizationProposal acceptOptimizer(QueryOptimizer optimizer);
 
     public BooleanExpression getFilterExpression();
     public boolean hasFilterExpression();

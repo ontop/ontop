@@ -5,7 +5,7 @@ package org.semanticweb.ontop.pivotalrepr;
  */
 public interface QueryOptimizer {
 
-    public LocalOptimizationProposal optimize(JoinNode node);
+    public LocalOptimizationProposal makeProposal(JoinNode node);
     //TODO: complete the list
 
 }

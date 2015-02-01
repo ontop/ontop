@@ -7,7 +7,7 @@ import org.semanticweb.ontop.pivotalrepr.QueryOptimizer;
 public class JoinNodeImpl extends QueryNodeImpl implements JoinNode {
 
     @Override
-    public LocalOptimizationProposal proposeOptimization(QueryOptimizer optimizer) {
-        return optimizer.optimize(this);
+    public LocalOptimizationProposal acceptOptimizer(QueryOptimizer optimizer) {
+        return optimizer.makeProposal(this);
     }
 }
