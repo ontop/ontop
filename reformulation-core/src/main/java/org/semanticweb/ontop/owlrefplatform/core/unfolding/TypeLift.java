@@ -42,7 +42,7 @@ public class TypeLift {
      * This indicates that the predicate for which the type propagation
      * has been tried should be considered as multi-typed.
      */
-    private static class MultiTypeException extends Exception {
+    protected static class MultiTypeException extends Exception {
     }
 
     private static Logger LOGGER = LoggerFactory.getLogger(TypeLift.class);
@@ -236,12 +236,15 @@ public class TypeLift {
         final HashMap<Predicate, TypeProposal> childProposalIndex = retrieveChildrenProposals(parentZipper);
 
         /**
-         * Main operation: makes a type proposal for the current (parent) predicate.
+         * Main operations:
+         *  (i) makes a type proposal for the current (parent) predicate,
+         *  (ii) updates body atoms (compatible with the future un-typed child heads).
          * May throw a MultiTypeException.
          *
-         * TODO: rephrase this comment.
+         * Note that this data structure is partially inconsistent (needs the child heads to be updated).
          */
-        TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> partiallyUpdatedTreeZipper = proposeTypeAndUpdateBodies(parentZipper, childProposalIndex);
+        TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> partiallyUpdatedTreeZipper =
+                proposeTypeAndUpdateBodies(parentZipper, childProposalIndex);
 
         /**
          * Removes child types.
@@ -249,6 +252,9 @@ public class TypeLift {
         final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> untypedChildrenZipper = applyToChildren(
                 removeTypeFunction, partiallyUpdatedTreeZipper);
 
+        /**
+         * Now the tree zipper is consistent :)
+         */
         return untypedChildrenZipper;
     }
 
@@ -261,6 +267,7 @@ public class TypeLift {
      * TODO: REMOVE or completely transform.
      *
      */
+    @Deprecated
     private static TreeZipper<P3<Predicate,List<CQIE>,Option<TypeProposal>>> propagateChildArityChangesToBodies(
             final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper,
             final HashMap<Predicate, TypeProposal> childProposalIndex) {
@@ -301,151 +308,92 @@ public class TypeLift {
      * TODO: update this comment
      * Please note that the returned tree zipper IS NOT FULLY CONSISTENT
      *
-     *
      */
-    private static TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> proposeTypeAndUpdateBodies(final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper,
-                                                                   final HashMap<Predicate, TypeProposal> childProposalIndex)
+    private static TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> proposeTypeAndUpdateBodies(
+            final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper,
+            final HashMap<Predicate, TypeProposal> childProposalIndex)
             throws MultiTypeException {
 
         /**
-         * If there is no child proposal, no need to aggregate.
-         * Builds and returns a proposal just by looking at the rules defining the parent predicate.
-         */
-        if (childProposalIndex.isEmpty()) {
-            return proposeTypeFromLocalRules(parentZipper);
-        }
-
-        /**
-         * Aggregates all these proposals according to the rules defining the parent predicate.
+         * Aggregates all these proposals according to the rules defining the parent predicate into a PredicateSubstitution.
          *
          * If such aggregation is not possible, a MultiTypeException will be thrown.
          *
-         * Returns the resulting proposal.
          *
          */
-        final List<CQIE> parentRules = parentZipper.getLabel()._2();
-        final Unifier proposedSubstitutionFct = aggregateChildrenProposalsAndRules(
-                Option.<Unifier>none(), parentRules, childProposalIndex);
+        final P3<Predicate,List<CQIE>,Option<TypeProposal>> parentLabel = parentZipper.getLabel();
+        final List<CQIE> parentRules = parentLabel._2();
+        final PredicateLevelSubstitution predicateLevelSubstitution = proposeSubstitutionFromRulesAndChildProposals(parentRules, childProposalIndex);
 
-        Function newFunctionProposal = (Function) parentRules.head().getHead().clone();
+        /**
+         * Makes a TypeProposal by applying the substitution to the head of one rule.
+         */
+        final Function newFunctionProposal = (Function) parentRules.head().getHead().clone();
         // Side-effect!
-        UnifierUtilities.applyUnifier(newFunctionProposal, proposedSubstitutionFct);
+        UnifierUtilities.applyUnifier(newFunctionProposal, predicateLevelSubstitution.getGlobalSubstitution());
 
-        TypeProposal newProposal = new BasicTypeProposal(newFunctionProposal);
+        /**
+         * TODO: FIX IT!!! What about possible URI templates?
+         */
+        final TypeProposal newProposal = new BasicTypeProposal(newFunctionProposal);
+
+        /**
+         * TODO: describe
+         */
+        final List<CQIE> updatedParentRules =  predicateLevelSubstitution.getUpdatedRules();
 
 
         /**
          * Returns a new zipper with the updated label.
-         * TODO: update this comment
+         * Note that this tree zipper is not fully consistent (child heads not yet updated).
          */
-        return untypedChildrenZipper.setLabel(P.p(parentLabel._1(), parentLabel._2(), Option.some(newProposal)));
+        return parentZipper.setLabel(P.p(parentLabel._1(), updatedParentRules, Option.some(newProposal)));
     }
 
     /**
-     * Tail-recursive method "iterating" over the rules defining the parent predicate.
-     * In most case, there is just one of these rules.
-     *
-     * It brings a substitution function that is "updated" (new object)
-     * for each rule.
-     *
-     * Returns the final substitution function.
-     * May raises a MultiTypedException.
+     * TODO: comment it!
+     */
+    private static PredicateLevelSubstitution proposeSubstitutionFromRulesAndChildProposals(List<CQIE> parentRules,
+                                                                                       HashMap<Predicate, TypeProposal> childProposalIndex)
+            throws MultiTypeException {
+        return proposeSubstitutionFromRulesAndChildProposals(Option.<Unifier>none(), parentRules, List.<RuleLevelSubstitution>nil(), childProposalIndex);
+    }
+
+    /**
+     * TODO: describe it!
      *
      */
-    private static Unifier aggregateChildrenProposalsAndRules(Option<Unifier> optionalSubstitutionFct,
-                                                              List<CQIE> remainingRules, HashMap<Predicate, TypeProposal> childProposalIndex)
-            throws MultiTypeException {
+    private static PredicateLevelSubstitution proposeSubstitutionFromRulesAndChildProposals(Option<Unifier> optionalSubstitution, List<CQIE> remainingRules, List<RuleLevelSubstitution> ruleSubstitutions,
+                                                                                       HashMap<Predicate, TypeProposal> childProposalIndex) throws MultiTypeException {
         /**
          * Stop condition (no more rule to consider).
          */
         if (remainingRules.isEmpty()) {
-            if (optionalSubstitutionFct.isNone()) {
+            if (optionalSubstitution.isNone())
                 throw new IllegalArgumentException("Do not give a None head with an empty list of rules");
-            }
-            /**
-             * Returns the proposed substitutions obtained from the previous rules.
-             */
-            return optionalSubstitutionFct.some();
+            return new PredicateLevelSubstitution(ruleSubstitutions, optionalSubstitution.some());
         }
 
-        /**
-         * Main operation: updates the substitution function according to the current rule and the children proposals.
-         * May throw a MultipleTypeException.
-         */
         CQIE rule = remainingRules.head();
-        Unifier proposedSubstitutionFct = aggregateRuleAndProposals(optionalSubstitutionFct, extractBodyAtoms(rule),
-                childProposalIndex);
 
         /**
-         * Tail recursion.
+         * TODO: describe
          */
-        return aggregateChildrenProposalsAndRules(Option.some(proposedSubstitutionFct), remainingRules.tail(), childProposalIndex);
-    }
+        RuleLevelSubstitution newRuleLevelSubstitution = new RuleLevelSubstitution(rule, childProposalIndex);
 
-    /**
-     * Tail-recursive method that "iterates" over the body atoms of a given rule defining the parent predicate.
-     *
-     * For a given body atom, tries to make the *union* (NOT composition) of the current substitution function with
-     * the one deduced from the child proposal corresponding to the current atom.
-     *
-     * If some problems with a substitution function occur, throws a MultiTypeException.
-     *
-     */
-    private static Unifier aggregateRuleAndProposals(final Option<Unifier> optionalSubstitutionFunction,
-                                                                         final List<Function> remainingBodyAtoms,
-                                                                         final HashMap<Predicate, TypeProposal> childProposalIndex) throws MultiTypeException {
         /**
-         * Stop condition (no further body atom).
+         * TODO: describe this part
+         *
+         * TODO: Analyse the assumption made: the union of the substitution proposed by the rules makes sense.
+         *
          */
-        if (remainingBodyAtoms.isEmpty()) {
-            if (optionalSubstitutionFunction.isNone()) {
-                throw new IllegalArgumentException("Do not give a None substitution function with an empty list of rules");
-            }
-            return optionalSubstitutionFunction.some();
+        Option<Unifier> proposedSubstitution;
+        if (optionalSubstitution.isNone()) {
+            proposedSubstitution = Option.some(newRuleLevelSubstitution.getSubstitution());
         }
-
-        Function bodyAtom = remainingBodyAtoms.head();
-        Option<TypeProposal> optionalChildProposal = childProposalIndex.get(bodyAtom.getFunctionSymbol());
-
-        Option<Unifier> newOptionalSubstitutionFct;
-
-        /**
-         * If there is a child proposal corresponding to the current body atom,
-         * computes a substitution function that propagates types.
-         *
-         * Then, makes the union of this substitution function with the previous one.
-         *
-         */
-        if (optionalChildProposal.isSome()) {
+        else {
             try {
-                /**
-                 * TODO: check if the unifier still makes sense
-                 */
-                Unifier proposedSubstitutionFunction = computeTypePropagatingSubstitution(
-                        bodyAtom, optionalChildProposal.some());
-
-                if (optionalSubstitutionFunction.isNone()) {
-                    newOptionalSubstitutionFct = Option.some(proposedSubstitutionFunction);
-                }
-                /**
-                 * We do NOT consider the composition of the substitution functions (like during unifier)
-                 * BUT THEIR UNION.
-                 *
-                 * Why? Because we want to apply a type only once, not multiple times.
-                 *
-                 * By composition "{ x/int(x) } o { x/int(x) } = { x/int(int(x) }" which is not what we want.
-                 * With unions, "{ x/int(x) } U { x/int(x) } = { x/int(x) }".
-                 *
-                 * Throw a type propagation exception if the substitutions are conflicting.
-                 * For example, this "union" does not a produce a function.
-                 *
-                 * " {x/int(x) } U { x/str(x) } "
-                 *
-                 */
-                else {
-                    newOptionalSubstitutionFct = Option.some(union(optionalSubstitutionFunction.some(),
-                            proposedSubstitutionFunction));
-                }
+                proposedSubstitution = Option.some(union(optionalSubstitution.some(), newRuleLevelSubstitution.getSubstitution()));
             }
             /**
              * Impossible to propagate type.
@@ -455,18 +403,17 @@ public class TypeLift {
                 throw new MultiTypeException();
             }
         }
-        /**
-         * Otherwise, keeps the same proposed head.
-         */
-        else {
-            newOptionalSubstitutionFct = optionalSubstitutionFunction;
-        }
+
+        List<RuleLevelSubstitution> newRuleSubstitutionList =  ruleSubstitutions.append(List.cons(newRuleLevelSubstitution,
+                List.<RuleLevelSubstitution>nil()));
 
         /**
          * Tail recursion
          */
-        return aggregateRuleAndProposals(newOptionalSubstitutionFct, remainingBodyAtoms.tail(), childProposalIndex);
+        return proposeSubstitutionFromRulesAndChildProposals(proposedSubstitution, remainingRules.tail(),
+                newRuleSubstitutionList, childProposalIndex);
     }
+
 
     /**
      * Low-level function.
@@ -481,8 +428,10 @@ public class TypeLift {
      *
      * If such a substitution function does not exist, throws a SubstitutionException.
      *
+     * TODO: keep it here or move it?
+     *
      */
-    private static TypePropagatingSubstitution computeTypePropagatingSubstitution(Function localAtom, TypeProposal proposal)
+    protected static TypePropagatingSubstitution computeTypePropagatingSubstitution(Function localAtom, TypeProposal proposal)
             throws SubstitutionException {
         /**
          * Type propagating substitution function between the proposedAtom and the localAtom.
