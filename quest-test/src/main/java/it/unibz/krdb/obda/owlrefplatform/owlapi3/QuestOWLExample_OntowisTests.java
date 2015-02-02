@@ -50,32 +50,35 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
-interface ParamConst{
-	// Postgres
-	public static final String POSTGRESInt = "src/main/resources/example/postgres-NoViews-joins-int.obda";
-	public static final String POSTGRESStr = "src/main/resources/example/postgres-NoViews-joins-str.obda";
-	public static final String POSTGRESIntView = "src/main/resources/example/postgres-Views-joins-int.obda";
-	public static final String POSTGRESStrView = "src/main/resources/example/postgres-Views-joins-str.obda";
-
-	// MySQL
-	public static final String MYSQLInt = "src/main/resources/example/mysql-NoViews-joins-int.obda";
-	public static final String MYSQLStr = "src/main/resources/example/mysql-NoViews-joins-str.obda";
-	public static final String MYSQLIntView = "src/main/resources/example/mysql-Views-joins-int.obda";
-	public static final String MYSQLStrView = "src/main/resources/example/mysql-Views-joins-str.obda";
-
-}
-
-enum DbType{
-	MYSQL, POSTGRES, SMALL_POSTGRES
-}
-
-class Settings{
-	String obdaFile;
-	DbType type;
-	boolean mKeys = false;
-}
 
 public class QuestOWLExample_OntowisTests {
+	interface ParamConst{
+		// Postgres
+		public static final String POSTGRESInt = "src/main/resources/example/postgres-NoViews-joins-int.obda";
+		public static final String POSTGRESStr = "src/main/resources/example/postgres-NoViews-joins-str.obda";
+		public static final String POSTGRESIntView = "src/main/resources/example/postgres-Views-joins-int.obda";
+		public static final String POSTGRESStrView = "src/main/resources/example/postgres-Views-joins-str.obda";
+		
+		// MySQL
+		public static final String MYSQLInt = "src/main/resources/example/mysql-NoViews-joins-int.obda";
+		public static final String MYSQLStr = "src/main/resources/example/mysql-NoViews-joins-str.obda";
+		public static final String MYSQLIntView = "src/main/resources/example/mysql-Views-joins-int.obda";
+		public static final String MYSQLStrView = "src/main/resources/example/mysql-Views-joins-str.obda";
+		
+	}
+	
+	enum DbType{
+		MYSQL, POSTGRES, SMALL_POSTGRES
+	}
+	
+	public static class Settings{
+		static String obdaFile;
+		static DbType type;
+		static boolean mKeys = false;
+		
+		
+	}
+	// private static final String QuestOWLExample_OntowisTests = null;
 	final String obdafile;
 	final DbType type;
 	boolean mKeys = false;
@@ -325,8 +328,8 @@ public class QuestOWLExample_OntowisTests {
 	 */
 	public static void main(String[] args) {
 
-		Settings s = new Settings();
-		s.mKeys = false;
+		//QuestOWLExample_OntowisTests.Settings s = new Settings();
+		Settings.mKeys = false;
 
 		switch(args[0]){
 		case "--help":{
@@ -345,87 +348,87 @@ public class QuestOWLExample_OntowisTests {
 			break;
 		}	
 		case "--mKeysON":{
-			s.mKeys = true;	
-			defaults(args[1], s);
+			Settings.mKeys = true;	
+			defaults(args[1]);
 			break;
 		}
 		default:
-			defaults(args[0], s);
+			defaults(args[0]);
 			break;
 		}			
 		try {
-			System.out.println(s.obdaFile);
+			System.out.println(Settings.obdaFile);
 
-			QuestOWLExample_OntowisTests example = new QuestOWLExample_OntowisTests(s.obdaFile, s.type, s.mKeys);
-			example.runQuery(s.obdaFile);
+			QuestOWLExample_OntowisTests example = new QuestOWLExample_OntowisTests(Settings.obdaFile, Settings.type, Settings.mKeys);
+			example.runQuery(Settings.obdaFile);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private static void defaults(String string, Settings s) {
+	private static void defaults(String string) {
 
 		switch(string){
 		case "--MYSQLInt":{
-			s.obdaFile = ParamConst.MYSQLInt;
-			s.type = DbType.MYSQL;
+			Settings.obdaFile = ParamConst.MYSQLInt;
+			Settings.type = DbType.MYSQL;
 			break;
 		}
 		case "--MYSQLIntView":{
-			s.obdaFile = ParamConst.MYSQLIntView;
-			s.type = DbType.MYSQL;
+			Settings.obdaFile = ParamConst.MYSQLIntView;
+			Settings.type = DbType.MYSQL;
 			break;
 		}
 		case "--MYSQLStr":{
-			s.obdaFile = ParamConst.MYSQLStr;
-			s.type = DbType.MYSQL;
+			Settings.obdaFile = ParamConst.MYSQLStr;
+			Settings.type = DbType.MYSQL;
 			break;
 		}
 		case "--MYSQLStrView":{
-			s.obdaFile = ParamConst.MYSQLStrView;
-			s.type = DbType.MYSQL;
+			Settings.obdaFile = ParamConst.MYSQLStrView;
+			Settings.type = DbType.MYSQL;
 			break;
 		}
 		case "--POSTGRESInt":{
-			s.obdaFile = ParamConst.POSTGRESInt;
-			s.type = DbType.POSTGRES;
+			Settings.obdaFile = ParamConst.POSTGRESInt;
+			Settings.type = DbType.POSTGRES;
 			break;
 		}
 
 		case "--POSTGRESStr":{
-			s.obdaFile = ParamConst.POSTGRESStr;
-			s.type = DbType.POSTGRES;
+			Settings.obdaFile = ParamConst.POSTGRESStr;
+			Settings.type = DbType.POSTGRES;
 			break;
 		}
 		case "--POSTGRESIntView":{
-			s.obdaFile = ParamConst.POSTGRESIntView;
-			s.type = DbType.POSTGRES;
+			Settings.obdaFile = ParamConst.POSTGRESIntView;
+			Settings.type = DbType.POSTGRES;
 			break;
 		}
 		case "--POSTGRESStrView":{
-			s.obdaFile = ParamConst.POSTGRESStrView;
-			s.type = DbType.POSTGRES;
+			Settings.obdaFile = ParamConst.POSTGRESStrView;
+			Settings.type = DbType.POSTGRES;
 			break;
 		}
 		case "--POSTGRESSmallInt":{
-			s.obdaFile = ParamConst.POSTGRESInt;
-			s.type = DbType.SMALL_POSTGRES;
+			Settings.obdaFile = ParamConst.POSTGRESInt;
+			Settings.type = DbType.SMALL_POSTGRES;
 			break;
 		}
 
 		case "--POSTGRESSmallStr":{
-			s.obdaFile = ParamConst.POSTGRESStr;
-			s.type = DbType.SMALL_POSTGRES;
+			Settings.obdaFile = ParamConst.POSTGRESStr;
+			Settings.type = DbType.SMALL_POSTGRES;
 			break;
 		}
 		case "--POSTGRESSmallIntView":{
-			s.obdaFile = ParamConst.POSTGRESIntView;
-			s.type = DbType.SMALL_POSTGRES;
+			Settings.obdaFile = ParamConst.POSTGRESIntView;
+			Settings.type = DbType.SMALL_POSTGRES;
 			break;
 		}
 		case "--POSTGRESSmallStrView":{
-			s.obdaFile = ParamConst.POSTGRESStrView;
-			s.type = DbType.SMALL_POSTGRES;
+			Settings.obdaFile = ParamConst.POSTGRESStrView;
+			Settings.type = DbType.SMALL_POSTGRES;
 			break;
 		}
 		default :{
@@ -445,133 +448,132 @@ public class QuestOWLExample_OntowisTests {
 		}
 		}
 	}
+	static class QueryTemplates{
+		
+		private final static String SPARQL_END = "}";
+		
+		static String oneSparqlJoinQuery(int nSqlJoins, int filter){
+			String result = oneSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
+			return result;
+		}
+		
+		static String twoSparqlJoinQuery(int nSqlJoins, int filter){
+			String result = twoSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
+			return result;
+		}
+		
+		static String threeSparqlJoinQuery(int nSqlJoins, int filter){
+			String result = threeSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
+			return result;
+		}
+		
+		static private String filter(int filter){
+			return "Filter( ?y < "+filter+" )";
+		}
+		
+		static private String oneSparqlJoinTemplate(int nSqlJoins) {
+			String templ = 
+					"PREFIX :	<http://www.example.org/> "
+							+ "SELECT ?x ?y  "
+							+ "WHERE {"
+							+ "?x a  :"+nSqlJoins+"Tab1 . "
+							+ "?x :Tab"+(nSqlJoins+1)+"unique2Tab"+(nSqlJoins+1)+" ?y . ";
+			return templ;
+		}
+		static private String twoSparqlJoinTemplate(int nSqlJoins){
+			String templ =
+					oneSparqlJoinTemplate(nSqlJoins) +
+					"?x :hasString"+(nSqlJoins+1)+"j ?y1 . "; // Additional Sparql join 1
+			return templ;
+		}
+		static private String threeSparqlJoinTemplate(int nSqlJoins){
+			String templ = twoSparqlJoinTemplate(nSqlJoins) +
+					"?x :hasString2"+(nSqlJoins+1)+"j ?y2 . "; // Additional Sparql Join 2
+			return templ;
+		}
+	};
+	
+	class QueryFactory {
+		
+		String[] queriesOneSPARQL = new String[24];
+		String[] queriesTwoSPARQL = new String[24];
+		String[] queriesThreeSPARQL = new String[24];
+		
+		int[] filters = new int[6];
+		
+		QueryFactory(DbType type){
+			fillFilters(type);
+			fillQueryArrays();
+		}
+		
+		private void fillQueryArrays (){
+			// 1 SPARQL Join
+			fillOneSparqlJoin();
+			
+			// 2 SPARQL Joins
+			fillTwoSparqlJoins();
+			
+			// 3 SPARQL Joins
+			fillThreeSparqlJoins();
+		}
+		
+		
+		private void fillFilters(DbType type) {
+			switch(type){
+			case MYSQL:	
+				filters[0] = 1; // 0.001%
+				filters[1] = 5; // 0.005%
+				filters[2] = 10; // 0.01%
+				filters[3] = 50; // 0.05%
+				filters[4] = 100; // 0.1%
+				filters[5] = 1000; //1%
+				break;
+			case POSTGRES:
+				filters[0] = 100;   // 0.0001%
+				filters[1] = 500;  // 0.0005%
+				filters[2] = 1000;  // 0.001%
+				filters[3] = 5000; // 0.005%
+				filters[4] = 10000; // 0.01%
+				filters[5] = 100000; // 0.1%
+				break;
+			case SMALL_POSTGRES:
+				filters[0] = 1; // 0.001%
+				filters[1] = 5; // 0.005%
+				filters[2] = 10; // 0.01%
+				filters[3] = 50; // 0.05%
+				filters[4] = 100; // 0.1%
+				filters[5] = 1000; //1%
+				break;
+			default:
+				break;
+			}
+		}
+		
+		private void fillOneSparqlJoin(){
+			for( int i = 0; i < 24; ++i ){
+				if( i < 6 )	queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(1, filters[i % 6]); // 1 SQL Join
+				else if ( i < 12 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(2, filters[i % 6]); // 2 SQL Joins
+				else if ( i < 18 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(3, filters[i % 6]); // 3 SQL Joins
+				else if ( i < 24 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(4, filters[i % 6]); // 4 SQL Joins
+			}
+		}
+		
+		private void fillTwoSparqlJoins(){
+			for( int i = 0; i < 24; ++i ){
+				if( i < 6 )	queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(1, filters[i % 6]); // 1 SQL Join
+				else if ( i < 12 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(2, filters[i % 6]); // 2 SQL Joins
+				else if ( i < 18 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(3, filters[i % 6]); // 3 SQL Joins
+				else if ( i < 24 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(4, filters[i % 6]); // 4 SQL Joins
+			}
+		}
+		
+		private void fillThreeSparqlJoins(){
+			for( int i = 0; i < 24; ++i ){
+				if( i < 6 )	queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(1, filters[i % 6]); // 1 SQL Join
+				else if ( i < 12 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(2, filters[i % 6]); // 2 SQL Joins
+				else if ( i < 18 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(3, filters[i % 6]); // 3 SQL Joins
+				else if ( i < 24 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(4, filters[i % 6]); // 4 SQL Joins
+			}
+		}	
+	};
 }
-
-class QueryTemplates{
-
-	private final static String SPARQL_END = "}";
-
-	static String oneSparqlJoinQuery(int nSqlJoins, int filter){
-		String result = oneSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
-		return result;
-	}
-
-	static String twoSparqlJoinQuery(int nSqlJoins, int filter){
-		String result = twoSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
-		return result;
-	}
-
-	static String threeSparqlJoinQuery(int nSqlJoins, int filter){
-		String result = threeSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
-		return result;
-	}
-
-	static private String filter(int filter){
-		return "Filter( ?y < "+filter+" )";
-	}
-
-	static private String oneSparqlJoinTemplate(int nSqlJoins) {
-		String templ = 
-				"PREFIX :	<http://www.example.org/> "
-						+ "SELECT ?x ?y  "
-						+ "WHERE {"
-						+ "?x a  :"+nSqlJoins+"Tab1 . "
-						+ "?x :Tab"+(nSqlJoins+1)+"unique2Tab"+(nSqlJoins+1)+" ?y . ";
-		return templ;
-	}
-	static private String twoSparqlJoinTemplate(int nSqlJoins){
-		String templ =
-				oneSparqlJoinTemplate(nSqlJoins) +
-				"?x :hasString"+(nSqlJoins+1)+"j ?y1 . "; // Additional Sparql join 1
-		return templ;
-	}
-	static private String threeSparqlJoinTemplate(int nSqlJoins){
-		String templ = twoSparqlJoinTemplate(nSqlJoins) +
-				"?x :hasString2"+(nSqlJoins+1)+"j ?y2 . "; // Additional Sparql Join 2
-		return templ;
-	}
-};
-
-class QueryFactory {
-
-	String[] queriesOneSPARQL = new String[24];
-	String[] queriesTwoSPARQL = new String[24];
-	String[] queriesThreeSPARQL = new String[24];
-
-	int[] filters = new int[6];
-
-	QueryFactory(DbType type){
-		fillFilters(type);
-		fillQueryArrays();
-	}
-
-	private void fillQueryArrays (){
-		// 1 SPARQL Join
-		fillOneSparqlJoin();
-
-		// 2 SPARQL Joins
-		fillTwoSparqlJoins();
-
-		// 3 SPARQL Joins
-		fillThreeSparqlJoins();
-	}
-
-
-	private void fillFilters(DbType type) {
-		switch(type){
-		case MYSQL:	
-			filters[0] = 1; // 0.001%
-			filters[1] = 5; // 0.005%
-			filters[2] = 10; // 0.01%
-			filters[3] = 50; // 0.05%
-			filters[4] = 100; // 0.1%
-			filters[5] = 1000; //1%
-			break;
-		case POSTGRES:
-			filters[0] = 100;   // 0.0001%
-			filters[1] = 500;  // 0.0005%
-			filters[2] = 1000;  // 0.001%
-			filters[3] = 5000; // 0.005%
-			filters[4] = 10000; // 0.01%
-			filters[5] = 100000; // 0.1%
-			break;
-		case SMALL_POSTGRES:
-			filters[0] = 1; // 0.001%
-			filters[1] = 5; // 0.005%
-			filters[2] = 10; // 0.01%
-			filters[3] = 50; // 0.05%
-			filters[4] = 100; // 0.1%
-			filters[5] = 1000; //1%
-			break;
-		default:
-			break;
-		}
-	}
-
-	private void fillOneSparqlJoin(){
-		for( int i = 0; i < 24; ++i ){
-			if( i < 6 )	queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(1, filters[i % 6]); // 1 SQL Join
-			else if ( i < 12 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(2, filters[i % 6]); // 2 SQL Joins
-			else if ( i < 18 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(3, filters[i % 6]); // 3 SQL Joins
-			else if ( i < 24 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(4, filters[i % 6]); // 4 SQL Joins
-		}
-	}
-
-	private void fillTwoSparqlJoins(){
-		for( int i = 0; i < 24; ++i ){
-			if( i < 6 )	queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(1, filters[i % 6]); // 1 SQL Join
-			else if ( i < 12 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(2, filters[i % 6]); // 2 SQL Joins
-			else if ( i < 18 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(3, filters[i % 6]); // 3 SQL Joins
-			else if ( i < 24 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(4, filters[i % 6]); // 4 SQL Joins
-		}
-	}
-
-	private void fillThreeSparqlJoins(){
-		for( int i = 0; i < 24; ++i ){
-			if( i < 6 )	queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(1, filters[i % 6]); // 1 SQL Join
-			else if ( i < 12 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(2, filters[i % 6]); // 2 SQL Joins
-			else if ( i < 18 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(3, filters[i % 6]); // 3 SQL Joins
-			else if ( i < 24 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(4, filters[i % 6]); // 4 SQL Joins
-		}
-	}	
-};
