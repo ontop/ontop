@@ -244,16 +244,30 @@ public class QuestStatement implements OBDAStatement {
 						
 //						resetTimeouts(sqlstatement);
 					}
-					catch (com.mysql.jdbc.exceptions.MySQLTimeoutException|org.postgresql.util.PSQLException|SQLTimeoutException e) {
-						// DO NOTHING
-					}	
+					catch (SQLTimeoutException e) {
+						log.warn("SQL execution is time out");
+					}
 					catch (SQLException e){
-						exception = e;
 
-						error = true;
-						log.error(e.getMessage(), e);
+						final String MySQLTimeoutExceptionClassName = "com.mysql.jdbc.exceptions.MySQLTimeoutException";
+						final String PSQLExceptionClassName = "org.postgresql.util.PSQLException";
 
-						throw new OBDAException("Error executing SQL query: \n" + e.getMessage() + "\nSQL query:\n " + sql, e);
+						String exceptionClassName = e.getClass().getName();
+
+						// Since the exceptions of MySQL and Postgres are extending SQLTimeoutException,
+						// the following hack is needed.
+						// See <http://bugs.mysql.com/bug.php?id=71589>
+						if(exceptionClassName.equals(MySQLTimeoutExceptionClassName)
+								|| exceptionClassName.equals(PSQLExceptionClassName)){
+							log.warn("SQL execution is time out");
+						} else {
+							exception = e;
+
+							error = true;
+							log.error(e.getMessage(), e);
+							throw new OBDAException("Error executing SQL query: \n" + e.getMessage() + "\nSQL query:\n " + sql, e);
+						}
+
 					}
 					if( set == null ){ // Exception SQLTimeout
 						tupleResult = new EmptyQueryResultSet(signature, QuestStatement.this);
