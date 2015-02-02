@@ -29,6 +29,9 @@ mappingId	MAPID-createComplex
 target		:{locationID} a :Location .
 source		SELECT child.RegionID as locationID FROM (SELECT * FROM Territories) AS child, (select RegionID, RegionDescription FROM Region  WHERE RegionDescription='Eastern' ) AS parent WHERE child.RegionID=parent.RegionID
 
+mappingId	MAPID-joinWithSameName
+target		:{OrderID} a :OrderDetails .
+source		Select * from Orders as t1  join OrderDetails  ON Orders.OrderID= OrderDetails.OrderID
 
 
 ]]

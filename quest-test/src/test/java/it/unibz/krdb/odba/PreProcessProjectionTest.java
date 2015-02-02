@@ -2,18 +2,11 @@ package it.unibz.krdb.odba;
 
 
 import it.unibz.krdb.obda.io.ModelIOManager;
-import it.unibz.krdb.obda.io.QueryIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-import it.unibz.krdb.obda.querymanager.QueryController;
-import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
-import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
-import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -24,11 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.net.URI;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class PreProcessProjectionTest {
@@ -170,6 +161,16 @@ public class PreProcessProjectionTest {
         assertEquals(72, nResults);
     }
 
+    @Test
+    public void testjoinWithSameName() throws Exception {
+
+
+        QuestPreferences p = new QuestPreferences();
+        String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
+                " select * {?x a :OrderDetail}";
+        int nResults = runTests(p, query);
+        assertEquals(2155, nResults);
+    }
 
 
 

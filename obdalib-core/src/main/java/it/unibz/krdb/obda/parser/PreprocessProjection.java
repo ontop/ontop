@@ -1,17 +1,18 @@
 package it.unibz.krdb.obda.parser;
 
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
-import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * This visitor class remove * in select clause and substitute it with the columns name
@@ -29,11 +30,17 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
 
     final private DBMetadata metadata;
+    final private Set<Variable> variables;
+    private Map<Variable, Variable> variableNewAlias;
 
-    public PreprocessProjection(DBMetadata metadata) throws SQLException {
+    private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+
+    public PreprocessProjection(DBMetadata metadata, Set<Variable> variables) throws SQLException {
 
         //use the metadata to get the column names
         this.metadata = metadata;
+        this.variables = variables;
+        variableNewAlias = new HashMap<>();
 
     }
 
@@ -69,11 +76,15 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
         for (int pos = 1; pos <= size; pos++) {
 
+
+           String columnFromMetadata= metadata.getAttributeName(tableFullName, pos);
             //construct a column as table.column
+//            if (variables.contains(fac.getVariable(columnFromMetadata))) {
 
-            SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, metadata.getAttributeName(tableFullName, pos)));
+                SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, columnFromMetadata));
 
-            columnNames.add(columnName);
+                columnNames.add(columnName);
+//            }
         }
         return columnNames;
 
@@ -96,6 +107,15 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
         return select.toString();
     }
 
+    private boolean isSelectAll(SelectItem expr){
+        expr.accept(this);
+        boolean result =selectAll;
+        selectAll = false;
+        return result;
+    }
+
+
+
     /**
      * Main method search for * in the select query and in the subselect
      * @param select
@@ -107,33 +127,52 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
         FromItem table = select.getFromItem();
 
-        table.accept(this);
+//        table.accept(this);
 
         FromItem joinTable = null;
 
         if (select.getJoins() != null) {
             for (Join join : select.getJoins()) {
                 joinTable = join.getRightItem();
-                joinTable.accept(this);
+//                joinTable.accept(this);
             }
         }
 
 
         for (SelectItem expr : select.getSelectItems()) {
-            expr.accept(this);
+
 
             //create a list of selectItem
             //if * add all selectItems obtained
 
-            if (selectAll) {
+            if (isSelectAll(expr)) {
 
 
                 if (joinTable instanceof Table) {
                     columnNames.addAll(obtainColumnsFromMetadata((Table) joinTable));
                 }
+                else{
+                    if(joinTable!=null){
+                        joinTable.accept(this);
+
+                        if(!aliasColumns.isEmpty()) {
+                            columnNames.addAll(aliasColumns);
+                            aliasColumns.clear();
+                        }
+                    }
+                }
                 if (table instanceof Table)
                     columnNames.addAll(obtainColumnsFromMetadata((Table) table));
+                else{
+                    if(table!=null){
+                        table.accept(this);
 
+                        if(!aliasColumns.isEmpty()) {
+                            columnNames.addAll(aliasColumns);
+                            aliasColumns.clear();
+                        }
+                    }
+                }
 
             }
 
@@ -143,7 +182,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
                 columnNames.add(expr);
             }
 
-            selectAll = false;
+
         }
 
 
@@ -164,15 +203,33 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
         for (SelectItem column : subSelectColumns) {
 
             SelectExpressionItem mainColumn = ((SelectExpressionItem) column);
-            Alias aliasName=  mainColumn.getAlias();
-           Column completeColumn= (Column) mainColumn.getExpression();
-            if(aliasName==null) {
-                aliasName = new Alias (alias + "_" + completeColumn.getTable() + completeColumn.getColumnName());
+            Alias aliasName = mainColumn.getAlias();
+            Column completeColumn = (Column) mainColumn.getExpression();
 
-                mainColumn.setAlias(aliasName);
+//            if (aliasName == null) {
+//                String columnString = completeColumn.getColumnName();
+//                aliasName = new Alias(alias + "_" + completeColumn.getTable() + columnString);
+//
+//                mainColumn.setAlias(aliasName);
+//
+//                if (variables.contains(fac.getVariable(columnString))) {
+//
+//                    variableNewAlias.put(fac.getVariable(columnString), fac.getVariable(aliasName.getName()));
+//
+//
+//                }
+//            }
+
+            if (aliasName != null ) {
+
+                String aliasString = aliasName.getName();
+
+
+                aliasColumns.add(new SelectExpressionItem(new Column(aliasString)));
+
             }
 
-            aliasColumns.add(new SelectExpressionItem(new Column(aliasName.getName())));
+
         }
     }
 
@@ -183,16 +240,13 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
 
         for (SelectItem expr : plainSelect.getSelectItems()) {
-            expr.accept(this);
+
 
             //create a list of selectItem
             //if * add all selectItems obtained
 
 
-            if (selectAll) {
-
-                selectAll = false;
-
+            if (isSelectAll(expr)) {
 
                 columns.addAll(obtainColumns(plainSelect));
 
@@ -212,6 +266,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
     if(!columns.isEmpty())
 
     {
+
         //substitute * with the column names or aliases
         plainSelect.setSelectItems(columns);
     }
@@ -275,6 +330,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
         String alias = subSelect.getAlias().getName();
         buildAliasColumns(subSelectColumns, alias);
+
 
     }
 
