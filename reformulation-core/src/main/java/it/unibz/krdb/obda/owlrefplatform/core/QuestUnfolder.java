@@ -389,6 +389,8 @@ public class QuestUnfolder {
 	private void preprocessProjection(OBDAModel unfoldingOBDAModel, URI sourceId, DBMetadata metadata) throws SQLException {
 
 		List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
+		PreprocessProjection ps = new PreprocessProjection(metadata);
+
 		for (OBDAMappingAxiom axiom : mappings) {
 			String sourceString = axiom.getSourceQuery().toString();
 
@@ -399,8 +401,8 @@ public class QuestUnfolder {
 				select = (Select) CCJSqlParserUtil.parse(sourceString);
 
 				Set<Variable> variables = ((CQIE) targetQuery).getReferencedVariables();
-				PreprocessProjection ps = new PreprocessProjection(metadata, variables);
-				String query = ps.getMappingQuery(select);
+
+				String query = ps.getMappingQuery(select, variables);
 				axiom.setSourceQuery(fac.getSQLQuery(query));
 
 			} catch (JSQLParserException e) {

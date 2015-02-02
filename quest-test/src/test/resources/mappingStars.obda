@@ -27,10 +27,10 @@ source		select *, MD5(Discount) as randomdiscount from OrderDetails as t1, (SELE
 
 mappingId	MAPID-createComplex
 target		:{locationID} a :Location .
-source		SELECT child.RegionID as locationID FROM (SELECT * FROM Territories) AS child, (select RegionID, RegionDescription FROM Region  WHERE RegionDescription='Eastern' ) AS parent WHERE child.RegionID=parent.RegionID
+source		SELECT *, child.RegionID as locationID  FROM (SELECT * FROM Territories) AS child, (select RegionID, RegionDescription FROM Region  WHERE RegionDescription='Eastern' ) AS parent WHERE child.RegionID=parent.RegionID
 
 mappingId	MAPID-joinWithSameName
-target		:{OrderID} a :OrderDetails .
+target		:{OrderID} a :OrderDetail .
 source		Select * from Orders as t1  join OrderDetails  ON Orders.OrderID= OrderDetails.OrderID
 
 

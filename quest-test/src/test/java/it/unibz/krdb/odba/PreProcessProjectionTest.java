@@ -88,12 +88,12 @@ public class PreProcessProjectionTest {
         int count = 0;
         while (rs.nextRow()) {
             count++;
-            for (int i = 1; i <= rs.getColumnCount(); i++) {
-                System.out.print(rs.getSignature().get(i-1));
-                System.out.print("=" + rs.getOWLObject(i));
-                System.out.print(" ");
-            }
-            System.out.println();
+//            for (int i = 1; i <= rs.getColumnCount(); i++) {
+//                System.out.print(rs.getSignature().get(i-1));
+//                System.out.print("=" + rs.getOWLObject(i));
+//                System.out.print(" ");
+//            }
+//            System.out.println();
         }
         rs.close();
 
@@ -169,7 +169,7 @@ public class PreProcessProjectionTest {
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x a :OrderDetail}";
         int nResults = runTests(p, query);
-        assertEquals(2155, nResults);
+        assertEquals(4310, nResults);
     }
 
 
