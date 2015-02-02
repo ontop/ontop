@@ -242,7 +242,7 @@ public class QuestStatement implements OBDAStatement {
 						
 						set = sqlstatement.executeQuery(sql);
 						
-						resetTimeouts(sqlstatement);
+//						resetTimeouts(sqlstatement);
 					}
 					catch (com.mysql.jdbc.exceptions.MySQLTimeoutException|org.postgresql.util.PSQLException|SQLTimeoutException e) {
 						// DO NOTHING

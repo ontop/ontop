@@ -1018,13 +1018,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().toString());
 		switch(connClass){
 		case MYSQL:
-			st.setQueryTimeout(10);
+			st.setQueryTimeout(1200);
 			break;
 		case POSTGRES:
 		{
 			if( !timeoutSet ){
-				String query = "SET statement_timeout TO 10000"; // 1000 = one second
+				String query = "SET statement_timeout TO 1200000"; // 1000 = one second
 				st.execute(query);
+				timeoutSet = true;
 			}
 			break;
 		}

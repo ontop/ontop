@@ -41,7 +41,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.Properties;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
@@ -63,46 +62,54 @@ interface ParamConst{
 	public static final String MYSQLStr = "src/main/resources/example/mysql-NoViews-joins-str.obda";
 	public static final String MYSQLIntView = "src/main/resources/example/mysql-Views-joins-int.obda";
 	public static final String MYSQLStrView = "src/main/resources/example/mysql-Views-joins-str.obda";
-	
+
 }
 
 enum DbType{
-	MYSQL, POSTGRES
+	MYSQL, POSTGRES, SMALL_POSTGRES
+}
+
+class Settings{
+	String obdaFile;
+	DbType type;
+	boolean mKeys = false;
 }
 
 public class QuestOWLExample_OntowisTests {
 	final String obdafile;
 	final DbType type;
+	boolean mKeys = false;
 
 	final String owlfile = "src/main/resources/example/ontowis-5joins-int.owl";
 	final String usrConstrinFile = "src/main/resources/example/funcCons.txt";
-	
-	
+
+
 	// Internal Modifiable State
 	QuestOWL reasoner ;
-	
-	public QuestOWLExample_OntowisTests(String obdaFile, DbType type){
+
+	public QuestOWLExample_OntowisTests(String obdaFile, DbType type, boolean mKeys){
 		this.obdafile = obdaFile;
 		this.type = type;
+		this.mKeys = mKeys;
 	}
 
 	// Exclude from T-Mappings
 	//final String tMappingsConfFile = "src/main/resources/example/tMappingsConf.conf";
 
 	public void runQuery(String obdaFile) throws Exception {
-		
+
 		//	queries[30]="PREFIX :	<http://www.example.org/>  SELECT ?x   WHERE {?x a  :4Tab1 .   } LIMIT 100000  ";
 
-		QuestOWLConnection conn =  createStuff(false);
-		
+		QuestOWLConnection conn =  createStuff(mKeys);
+
 		// Results
 		String[] resultsOne = new String[31];
 		String[] resultsTwo = new String[31];
 		String[] resultsThree = new String[31];
-		
+
 		// Create Queries to be run
 		QueryFactory queries = new QueryFactory(type);
-		
+
 		// Run the tests on the queries
 		runQueries(conn, queries.queriesOneSPARQL, resultsOne);		
 		runQueries(conn, queries.queriesTwoSPARQL, resultsTwo);
@@ -180,13 +187,14 @@ public class QuestOWLExample_OntowisTests {
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
 		/*
-		 * Load the OBDA model from an external .obda file
+		 * Load the OBDA model from an externa
+		 * l .obda file
 		 */
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		OBDAModel obdaModel = fac.getOBDAModel();
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
 		ioManager.load(obdafile);
-
+		
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
@@ -207,6 +215,7 @@ public class QuestOWLExample_OntowisTests {
 		 */
 
 		if (manualKeys){
+			System.out.println();
 			ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
 			factory.setImplicitDBConstraints(constr);
 		}
@@ -237,10 +246,25 @@ public class QuestOWLExample_OntowisTests {
 			QuestOWLStatement st = conn.createStatement();
 			try {
 
+				// Warm ups
+				for (int i=0; i<1; i++){
+					QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+					int columnSize = rs.getColumnCount();
+					while (rs.nextRow()) {
+						for (int idx = 1; idx <= columnSize; idx++) {
+							@SuppressWarnings("unused")
+							OWLObject binding = rs.getOWLObject(idx);
+							//System.out.print(binding.toString() + ", ");
+						}
+						//System.out.print("\n");
+					}
+				}
+				
+				
 				long time = 0;
 				int count = 0;
-
-				for (int i=0; i<4; i++){
+				
+				for (int i=0; i<3; i++){
 					long t1 = System.currentTimeMillis();
 					QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
 					int columnSize = rs.getColumnCount();
@@ -248,6 +272,7 @@ public class QuestOWLExample_OntowisTests {
 					while (rs.nextRow()) {
 						count ++;
 						for (int idx = 1; idx <= columnSize; idx++) {
+							@SuppressWarnings("unused")
 							OWLObject binding = rs.getOWLObject(idx);
 							//System.out.print(binding.toString() + ", ");
 						}
@@ -277,9 +302,9 @@ public class QuestOWLExample_OntowisTests {
 
 				System.out.println("Query Execution Time:");
 				System.out.println("=====================");
-				System.out.println((time/4) + "ms");
+				System.out.println((time/3) + "ms");
 
-				results[j] = (time/4)+"" ;
+				results[j] = (time/3)+"" ;
 
 				System.out.println("The number of results:");
 				System.out.println("=====================");
@@ -300,13 +325,114 @@ public class QuestOWLExample_OntowisTests {
 	 */
 	public static void main(String[] args) {
 
-		String obdaFile = null;
-		DbType type = null;
+		Settings s = new Settings();
+		s.mKeys = false;
 
 		switch(args[0]){
 		case "--help":{
 			System.out.println(
 					"Options:\n\n"
+							+ "--mKeysON (default=off. SPECIFY AS FIRST OPTION!!)"
+							+ "\n\n"
+							+ "--POSTGRESInt; --POSTGRESIntView; --POSTGRESStr; --POSTGRESStrView"
+							+ "--MYSQLInt; --MYSQLIntView; --MYSQLStr; --MYSQLStrView;"
+							+ "--DB2; "
+							+ "--MYSQL-VIEW; --POSTGRES-VIEW; --DB2-VIEW"
+							+ "\n\n"
+							+ "The concepts for which T-mappings should"
+							+ "be disabled are defined the file tMappingsConf.conf");
+			System.exit(0);
+			break;
+		}	
+		case "--mKeysON":{
+			s.mKeys = true;	
+			defaults(args[1], s);
+			break;
+		}
+		default:
+			defaults(args[0], s);
+			break;
+		}			
+		try {
+			System.out.println(s.obdaFile);
+
+			QuestOWLExample_OntowisTests example = new QuestOWLExample_OntowisTests(s.obdaFile, s.type, s.mKeys);
+			example.runQuery(s.obdaFile);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void defaults(String string, Settings s) {
+
+		switch(string){
+		case "--MYSQLInt":{
+			s.obdaFile = ParamConst.MYSQLInt;
+			s.type = DbType.MYSQL;
+			break;
+		}
+		case "--MYSQLIntView":{
+			s.obdaFile = ParamConst.MYSQLIntView;
+			s.type = DbType.MYSQL;
+			break;
+		}
+		case "--MYSQLStr":{
+			s.obdaFile = ParamConst.MYSQLStr;
+			s.type = DbType.MYSQL;
+			break;
+		}
+		case "--MYSQLStrView":{
+			s.obdaFile = ParamConst.MYSQLStrView;
+			s.type = DbType.MYSQL;
+			break;
+		}
+		case "--POSTGRESInt":{
+			s.obdaFile = ParamConst.POSTGRESInt;
+			s.type = DbType.POSTGRES;
+			break;
+		}
+
+		case "--POSTGRESStr":{
+			s.obdaFile = ParamConst.POSTGRESStr;
+			s.type = DbType.POSTGRES;
+			break;
+		}
+		case "--POSTGRESIntView":{
+			s.obdaFile = ParamConst.POSTGRESIntView;
+			s.type = DbType.POSTGRES;
+			break;
+		}
+		case "--POSTGRESStrView":{
+			s.obdaFile = ParamConst.POSTGRESStrView;
+			s.type = DbType.POSTGRES;
+			break;
+		}
+		case "--POSTGRESSmallInt":{
+			s.obdaFile = ParamConst.POSTGRESInt;
+			s.type = DbType.SMALL_POSTGRES;
+			break;
+		}
+
+		case "--POSTGRESSmallStr":{
+			s.obdaFile = ParamConst.POSTGRESStr;
+			s.type = DbType.SMALL_POSTGRES;
+			break;
+		}
+		case "--POSTGRESSmallIntView":{
+			s.obdaFile = ParamConst.POSTGRESIntView;
+			s.type = DbType.SMALL_POSTGRES;
+			break;
+		}
+		case "--POSTGRESSmallStrView":{
+			s.obdaFile = ParamConst.POSTGRESStrView;
+			s.type = DbType.SMALL_POSTGRES;
+			break;
+		}
+		default :{
+			System.out.println(
+					"Options:\n\n"
+							+ "--mKeysON (default=off. SPECIFY AS FIRST OPTION!!)"
+							+ "\n\n"
 							+ "--POSTGRESInt; --POSTGRESIntView; --POSTGRESStr; --POSTGRESStrView"
 							+ "--MYSQLInt; --MYSQLIntView; --MYSQLStr; --MYSQLStrView;"
 							+ "--DB2; "
@@ -317,83 +443,33 @@ public class QuestOWLExample_OntowisTests {
 			System.exit(0);
 			break;
 		}
-
-		case "--MYSQLInt":{
-			obdaFile = ParamConst.MYSQLInt;
-			type = DbType.MYSQL;
-			break;
-		}
-		case "--MYSQLIntView":{
-			obdaFile = ParamConst.MYSQLIntView;
-			type = DbType.MYSQL;
-			break;
-		}
-		case "--MYSQLStr":{
-			obdaFile = ParamConst.MYSQLStr;
-			type = DbType.MYSQL;
-			break;
-		}
-		case "--MYSQLStrView":{
-			obdaFile = ParamConst.MYSQLStrView;
-			type = DbType.MYSQL;
-			break;
-		}
-		case "--POSTGRESInt":{
-			obdaFile = ParamConst.POSTGRESInt;
-			type = DbType.POSTGRES;
-			break;
-		}
-
-		case "--POSTGRESStr":{
-			obdaFile = ParamConst.POSTGRESStr;
-			type = DbType.POSTGRES;
-			break;
-		}
-		case "--POSTGRESIntView":{
-			obdaFile = ParamConst.POSTGRESIntView;
-			type = DbType.POSTGRES;
-			break;
-		}
-		case "--POSTGRESStrView":{
-			obdaFile = ParamConst.POSTGRESStrView;
-			type = DbType.POSTGRES;
-			break;
-		}
-		}	
-		try {
-			System.out.println(obdaFile);
-
-			QuestOWLExample_OntowisTests example = new QuestOWLExample_OntowisTests(obdaFile, type);
-			example.runQuery(obdaFile);
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 }
 
 class QueryTemplates{
-	
+
 	private final static String SPARQL_END = "}";
-	
+
 	static String oneSparqlJoinQuery(int nSqlJoins, int filter){
 		String result = oneSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
 		return result;
 	}
-	
+
 	static String twoSparqlJoinQuery(int nSqlJoins, int filter){
 		String result = twoSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
 		return result;
 	}
-	
+
 	static String threeSparqlJoinQuery(int nSqlJoins, int filter){
 		String result = threeSparqlJoinTemplate(nSqlJoins) + filter(filter) + SPARQL_END;
 		return result;
 	}
-	
+
 	static private String filter(int filter){
 		return "Filter( ?y < "+filter+" )";
 	}
-	
+
 	static private String oneSparqlJoinTemplate(int nSqlJoins) {
 		String templ = 
 				"PREFIX :	<http://www.example.org/> "
@@ -401,7 +477,7 @@ class QueryTemplates{
 						+ "WHERE {"
 						+ "?x a  :"+nSqlJoins+"Tab1 . "
 						+ "?x :Tab"+(nSqlJoins+1)+"unique2Tab"+(nSqlJoins+1)+" ?y . ";
-						return templ;
+		return templ;
 	}
 	static private String twoSparqlJoinTemplate(int nSqlJoins){
 		String templ =
@@ -412,7 +488,7 @@ class QueryTemplates{
 	static private String threeSparqlJoinTemplate(int nSqlJoins){
 		String templ = twoSparqlJoinTemplate(nSqlJoins) +
 				"?x :hasString2"+(nSqlJoins+1)+"j ?y2 . "; // Additional Sparql Join 2
-				return templ;
+		return templ;
 	}
 };
 
@@ -421,9 +497,9 @@ class QueryFactory {
 	String[] queriesOneSPARQL = new String[24];
 	String[] queriesTwoSPARQL = new String[24];
 	String[] queriesThreeSPARQL = new String[24];
-	
+
 	int[] filters = new int[6];
-	
+
 	QueryFactory(DbType type){
 		fillFilters(type);
 		fillQueryArrays();
@@ -432,15 +508,15 @@ class QueryFactory {
 	private void fillQueryArrays (){
 		// 1 SPARQL Join
 		fillOneSparqlJoin();
-		
+
 		// 2 SPARQL Joins
 		fillTwoSparqlJoins();
-		
+
 		// 3 SPARQL Joins
 		fillThreeSparqlJoins();
 	}
-	
-	
+
+
 	private void fillFilters(DbType type) {
 		switch(type){
 		case MYSQL:	
@@ -459,6 +535,16 @@ class QueryFactory {
 			filters[4] = 10000; // 0.01%
 			filters[5] = 100000; // 0.1%
 			break;
+		case SMALL_POSTGRES:
+			filters[0] = 1; // 0.001%
+			filters[1] = 5; // 0.005%
+			filters[2] = 10; // 0.01%
+			filters[3] = 50; // 0.05%
+			filters[4] = 100; // 0.1%
+			filters[5] = 1000; //1%
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -470,7 +556,7 @@ class QueryFactory {
 			else if ( i < 24 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(4, filters[i % 6]); // 4 SQL Joins
 		}
 	}
-	
+
 	private void fillTwoSparqlJoins(){
 		for( int i = 0; i < 24; ++i ){
 			if( i < 6 )	queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(1, filters[i % 6]); // 1 SQL Join
@@ -479,7 +565,7 @@ class QueryFactory {
 			else if ( i < 24 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(4, filters[i % 6]); // 4 SQL Joins
 		}
 	}
-	
+
 	private void fillThreeSparqlJoins(){
 		for( int i = 0; i < 24; ++i ){
 			if( i < 6 )	queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(1, filters[i % 6]); // 1 SQL Join
@@ -487,7 +573,5 @@ class QueryFactory {
 			else if ( i < 18 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(3, filters[i % 6]); // 3 SQL Joins
 			else if ( i < 24 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(4, filters[i % 6]); // 4 SQL Joins
 		}
-	}
-	
-
+	}	
 };
