@@ -75,9 +75,8 @@ public class QuestOWLExample_OntowisTests {
 		static String obdaFile;
 		static DbType type;
 		static boolean mKeys = false;
-		
-		
 	}
+
 	// private static final String QuestOWLExample_OntowisTests = null;
 	final String obdafile;
 	final DbType type;
@@ -124,7 +123,6 @@ public class QuestOWLExample_OntowisTests {
 	}
 
 	/**
-	 * @param queriesOneSPARQL
 	 * @param resultsOne
 	 * @param obdaFile 
 	 * @throws UnsupportedEncodingException 
@@ -167,10 +165,6 @@ public class QuestOWLExample_OntowisTests {
 	}
 
 	/**
-	 * @param reasoner
-	 * @param conn
-	 * @param queriesOneSPARQL
-	 * @param results
 	 * @throws OBDAException 
 	 * @throws OWLOntologyCreationException 
 	 * @throws InvalidMappingException 
@@ -178,9 +172,6 @@ public class QuestOWLExample_OntowisTests {
 	 * @throws IOException 
 	 * @throws OWLException
 	 */
-
-
-
 	private QuestOWLConnection createStuff(boolean manualKeys) throws OBDAException, OWLOntologyCreationException, IOException, InvalidPredicateDeclarationException, InvalidMappingException{
 
 		/*
@@ -242,10 +233,10 @@ public class QuestOWLExample_OntowisTests {
 
 
 	private void runQueries( QuestOWLConnection conn,
-			String[] queriesOneSPARQL, String[] results) throws OWLException {
+			String[] queries, String[] results) throws OWLException {
 		int j=0;
-		while (j < queriesOneSPARQL.length){
-			String sparqlQuery = queriesOneSPARQL[j];
+		while (j < queries.length){
+			String sparqlQuery = queries[j];
 			QuestOWLStatement st = conn.createStatement();
 			try {
 
