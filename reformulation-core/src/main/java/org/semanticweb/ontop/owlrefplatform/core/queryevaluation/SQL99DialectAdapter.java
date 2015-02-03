@@ -102,10 +102,27 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 //		return name;
 	}
 
+	/**
+	 * There is no standard for this part.
+	 *
+	 * Arbitrary default implementation proposed
+	 * (may not work with many DB engines).
+	 */
 	@Override
 	public String sqlSlice(long limit, long offset) {
-		// TODO Auto-generated method stub
-		return null;
+		if ((limit < 0) && (offset < 0)) {
+			return "";
+		}
+		else if ((limit >= 0) && (offset >= 0)) {
+			return String.format("LIMIT %d, %d", offset, limit);
+		}
+		else if (offset < 0) {
+			return String.format("LIMIT %d", limit);
+		}
+		// Else -> (limit < 0)
+		else {
+			return String.format("OFFSET %d", offset);
+		}
 	}
 
 	@Override
