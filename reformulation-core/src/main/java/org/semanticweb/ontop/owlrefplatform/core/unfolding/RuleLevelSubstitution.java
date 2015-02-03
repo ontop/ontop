@@ -17,7 +17,7 @@ import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitu
 import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift.computeTypePropagatingSubstitution;
 
 /**
- * TODO: improve its name.
+ * TODO: improve its name. Avoid confusion with real substitutions.
  *
  * See if turns into a substitution.
  *

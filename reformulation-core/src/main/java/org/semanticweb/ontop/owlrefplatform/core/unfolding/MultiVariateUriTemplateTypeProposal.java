@@ -16,7 +16,7 @@ import java.util.UUID;
  * For URI templates with more than one variable.
  *
  * TODO: implement it
- * TODO: extend it (remove the restriction) to all URI templates.
+ * All URI templates.
  *
  */
 public class MultiVariateUriTemplateTypeProposal extends TypeProposalImpl {
@@ -38,11 +38,88 @@ public class MultiVariateUriTemplateTypeProposal extends TypeProposalImpl {
         unifiableAtom = insertExtraVariables(proposedAtom, extraVariables);
     }
 
+    @Override
+    public Function getUnifiableAtom() {
+        return unifiableAtom;
+    }
+
+
+    /**
+     * TODO: remove
+     */
+    @Deprecated
+    @Override
+    public List<CQIE> propagateChildArityChangeToBodies(List<CQIE> initialRules) {
+        final Predicate predicate = getPredicate();
+
+        return initialRules.map(new F<CQIE, CQIE>() {
+            @Override
+            public CQIE f(CQIE initialRule) {
+                final CQIE newRule = initialRule.clone();
+                /**
+                 * Updates the body atom(s?) corresponding to this type proposal.
+                 */
+                Stream.iterableStream(newRule.getBody()).foreach(new Effect<Function>() {
+                    @Override
+                    public void e(Function atom) {
+                        if (atom.getFunctionSymbol().equals(predicate)) {
+                            final java.util.List<Term> subTerms = atom.getTerms();
+
+                            /**
+                             * Removes the variables corresponding to URI templates.
+                             */
+                            uriTemplateIndexesInReverseOrder.foreach(new Effect<Integer>() {
+                                @Override
+                                public void e(Integer index) {
+                                    // UGLY!!! But imposed by the current API....
+                                    subTerms.remove(index);
+                                }
+                            });
+                        }
+                    }
+                });
+                return newRule;
+            }
+        });
+    }
+
+
+    /**
+     * Adds new variables at the right in the atom.
+     * Makes sure these variable names are new (no conflict introduced).
+     */
+    @Override
+    public Function prepareBodyAtomForUnification(Function bodyAtom, java.util.Set<Variable> alreadyKnownRuleVariables) {
+        Set<Variable> renamedExtraVariables = giveNonConflictingNamesToVariables(extraVariables, alreadyKnownRuleVariables);
+        Function newAtom = insertExtraVariables(bodyAtom, renamedExtraVariables);
+        return newAtom;
+    }
+
+    /**
+     * Gives new names (randomly generated) to variables that are already known.
+     */
+    private static Set<Variable> giveNonConflictingNamesToVariables(Set<Variable> extraVariables,
+                                                                    final java.util.Set<Variable> alreadyKnownRuleVariables) {
+        final OBDADataFactory obdaDataFactory = OBDADataFactoryImpl.getInstance();
+
+        return extraVariables.map(Ord.<Variable>hashEqualsOrd(), new F<Variable, Variable>() {
+            @Override
+            public Variable f(Variable variable) {
+                // Keep the variable if not conflicting
+                if (!alreadyKnownRuleVariables.contains(variable)) {
+                    return variable;
+                }
+                // New variable
+                return obdaDataFactory.getVariable("v" + UUID.randomUUID());
+            }
+        });
+    }
+
     private static List<Integer> locateMultiVariateURITemplates(Function proposedAtom) {
         return Stream.iterableStream(proposedAtom.getTerms()).zipIndex().filter(new F<P2<Term, Integer>, Boolean>() {
             @Override
             public Boolean f(P2<Term, Integer> pair) {
-                return TypeLift.isMultiVariateURITemplate(pair._1());
+                return TypeLift.isURITemplate(pair._1());
             }
         }).map(new F<P2<Term, Integer>, Integer>() {
             @Override
@@ -67,7 +144,7 @@ public class MultiVariateUriTemplateTypeProposal extends TypeProposalImpl {
         final Stream<Function> uriTemplateTerms = Stream.iterableStream(proposedAtom.getTerms()).filter(new F<Term, Boolean>() {
             @Override
             public Boolean f(Term term) {
-                return TypeLift.isMultiVariateURITemplate(term);
+                return TypeLift.isURITemplate(term);
             }
         }).map(new F<Term, Function>() {
             @Override
@@ -162,84 +239,4 @@ public class MultiVariateUriTemplateTypeProposal extends TypeProposalImpl {
         return Set.iterableSet(Ord.<Variable>hashEqualsOrd(), variableStream);
     }
 
-    @Override
-    public Function getUnifiableAtom() {
-        return unifiableAtom;
-    }
-
-    /**
-     * TODO: implement it!
-     */
-    @Override
-    public List<CQIE> removeType(List<CQIE> initialRules) {
-        return null;
-    }
-
-    /**
-     * TODO: explain
-     */
-    @Override
-    public List<CQIE> propagateChildArityChangeToBodies(List<CQIE> initialRules) {
-        final Predicate predicate = getPredicate();
-
-        return initialRules.map(new F<CQIE, CQIE>() {
-            @Override
-            public CQIE f(CQIE rule) {
-                /**
-                 * Updates the body atom(s?) corresponding to this type proposal.
-                 */
-                Stream.iterableStream(rule.getBody()).foreach(new Effect<Function>() {
-                    @Override
-                    public void e(Function atom) {
-                        if (atom.getFunctionSymbol().equals(predicate)) {
-                            final java.util.List<Term> subTerms = atom.getTerms();
-
-                            /**
-                             * Removes the variables corresponding to URI templates.
-                             */
-                            uriTemplateIndexesInReverseOrder.foreach(new Effect<Integer>() {
-                                @Override
-                                public void e(Integer index) {
-                                  // UGLY!!! But imposed by the current API....
-                                  subTerms.remove(index);
-                                }
-                            });
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-
-    /**
-     * Adds new variables at the right in the atom.
-     * Makes sure these variable names are new (no conflict introduced).
-     */
-    @Override
-    public Function prepareBodyAtomForUnification(Function bodyAtom, java.util.Set<Variable> alreadyKnownRuleVariables) {
-        Set<Variable> renamedExtraVariables = giveNotExistingNamesToVariables(extraVariables, alreadyKnownRuleVariables);
-        Function newAtom = insertExtraVariables(bodyAtom, renamedExtraVariables);
-        return newAtom;
-    }
-
-    /**
-     * Gives new names (randomly generated) to variables that are already known.
-     */
-    private static Set<Variable> giveNotExistingNamesToVariables(Set<Variable> extraVariables,
-                                                                 final java.util.Set<Variable> alreadyKnownRuleVariables) {
-        final OBDADataFactory obdaDataFactory = OBDADataFactoryImpl.getInstance();
-
-        return extraVariables.map(Ord.<Variable>hashEqualsOrd(), new F<Variable, Variable>() {
-            @Override
-            public Variable f(Variable variable) {
-                // Keep the variable if not conflicting
-                if (!alreadyKnownRuleVariables.contains(variable)) {
-                    return variable;
-                }
-                // New variable
-                return obdaDataFactory.getVariable("v" + UUID.randomUUID());
-            }
-        });
-    }
 }

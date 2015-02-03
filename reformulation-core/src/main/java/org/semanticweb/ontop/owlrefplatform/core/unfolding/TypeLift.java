@@ -367,7 +367,7 @@ public class TypeLift {
         /**
          * Special case: multi-variate URI template.
          */
-        if (containsMultiVariateURITemplate(functionalProposal)) {
+        if (containsURITemplate(functionalProposal)) {
             return new MultiVariateUriTemplateTypeProposal(functionalProposal);
         }
         /**
@@ -515,7 +515,7 @@ public class TypeLift {
      * Returns updated rules.
      */
     private static List<CQIE> removeTypesFromRules(final List<CQIE> initialRules, final TypeProposal typeProposal) {
-        return typeProposal.removeType(initialRules);
+        return typeProposal.removeHeadTypes(initialRules);
     }
 
     /**
@@ -528,8 +528,8 @@ public class TypeLift {
      *  1. Unifying all the rule heads (case where is there is multiple rules).
      *  2. Detecting if no type is present in the proposal and returning a None in
      *     this case.
+     *
      */
-    @Deprecated
     private static Option<TypeProposal> proposeTypeFromLocalRules(TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> currentZipper) {
         List<CQIE> currentRules = currentZipper.getLabel()._2();
         if (currentRules.isNotEmpty()) {
@@ -537,21 +537,7 @@ public class TypeLift {
             // Head of the first rule (cloned because mutable).
             Function proposedHead = (Function) currentRules.head().getHead().clone();
 
-            TypeProposal typeProposal;
-
-            /**
-             * Multi-variate URI template case.
-             */
-            if (containsMultiVariateURITemplate(proposedHead)) {
-                //TODO: call the right constructor
-                typeProposal = null;
-            }
-            /**
-             * Normal case
-             */
-            else {
-                typeProposal = new BasicTypeProposal(proposedHead);
-            }
+            TypeProposal typeProposal = constructTypeProposal(proposedHead);
             return Option.some(typeProposal);
         }
         return Option.none();
@@ -561,9 +547,9 @@ public class TypeLift {
      * TODO: describe
      *
      */
-    protected static boolean containsMultiVariateURITemplate(Function atom) {
+    protected static boolean containsURITemplate(Function atom) {
         for(Term term : atom.getTerms()) {
-            if (isMultiVariateURITemplate(term))
+            if (isURITemplate(term))
                 return true;
         }
         return false;
@@ -572,16 +558,16 @@ public class TypeLift {
 
 
     /**
-     * Uri-templates using more than one variable.
+     * Uri-templates.
      */
-    protected static boolean isMultiVariateURITemplate(Term term) {
+    protected static boolean isURITemplate(Term term) {
         if (!(term instanceof Function))
             return false;
 
         Function functionalTerm = (Function) term;
 
         if (functionalTerm.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)) {
-            return functionalTerm.getTerms().size() <= 2;
+            return true;
         }
         return false;
     }

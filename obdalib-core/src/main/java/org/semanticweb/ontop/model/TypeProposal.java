@@ -28,11 +28,12 @@ public interface TypeProposal {
      * Only executed if no type should appear the given rules.
      *
      */
-    public List<CQIE> removeType(List<CQIE> initialRules);
+    public List<CQIE> removeHeadTypes(List<CQIE> initialRules);
 
     /**
-     * TODO: explain
+     * TODO: remove
      */
+    @Deprecated
     public List<CQIE> propagateChildArityChangeToBodies(List<CQIE> initialRules);
 
     /**

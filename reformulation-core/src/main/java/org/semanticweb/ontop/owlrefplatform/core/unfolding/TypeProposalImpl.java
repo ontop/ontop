@@ -6,6 +6,8 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions;
 
+import java.util.ArrayList;
+
 import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift.applyTypeProposal;
 
 /**
@@ -62,6 +64,9 @@ public abstract class TypeProposalImpl implements TypeProposal {
      * This method also deals with special cases that should not be untyped.
      *
      * Note that type removal only concern functional terms.
+     *
+     * If the returned value is null, the term must be eliminated.
+     *
      */
     protected static Term untypeTerm(Term term) {
         /**
@@ -85,13 +90,12 @@ public abstract class TypeProposalImpl implements TypeProposal {
         Predicate functionSymbol = functionalTerm.getFunctionSymbol();
 
         /**
-         * Special case: URI templates using just one variable
-         * (others are not supported).
+         * Special case: URI templates --> to be removed.
+         *
          */
         boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
-        if (isURI && functionArguments.size() == 2) {
-            // Returns the first variable, not the regular expression.
-            return functionArguments.get(1);
+        if (isURI) {
+            return null;
         }
 
         /**
@@ -104,6 +108,46 @@ public abstract class TypeProposalImpl implements TypeProposal {
             throw new RuntimeException("Removing types of non-unary functional terms is not supported.");
         }
         return functionArguments.get(0);
+    }
+
+    /**
+     * TODO: describe it
+     */
+    @Override
+    public List<CQIE> removeHeadTypes(List<CQIE> initialRules) {
+        return initialRules.map(new F<CQIE, CQIE>() {
+            @Override
+            public CQIE f(CQIE initialRule) {
+                Function initialHead = initialRule.getHead();
+                List<Term> initialHeadTerms =  List.iterableList(initialHead.getTerms());
+
+                /**
+                 * Computes untyped arguments for the head predicate.
+                 */
+                List<Term> newHeadTerms = initialHeadTerms.map(new F<Term, Term>() {
+                    @Override
+                    public Term f(Term term) {
+                        return untypeTerm(term);
+                    }
+                }).filter(new F<Term, Boolean>() {
+                    @Override
+                    public Boolean f(Term term) {
+                        return term != null;
+                    }
+                });
+
+                /**
+                 * Builds a new rule.
+                 * TODO: modernize the CQIE API (make it immutable).
+                 */
+                CQIE newRule = initialRule.clone();
+                Function newHead = (Function)initialHead.clone();
+                newHead.updateTerms(new ArrayList<>(newHeadTerms.toCollection()));
+                newRule.updateHead(newHead);
+                return newRule;
+            }
+        });
+
     }
 
 }
