@@ -33,6 +33,17 @@ import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypeProp
  * This implementation uses tree zippers for navigating and "updating" persistent trees.
  * It is based on the FunctionalJava library and thus adopts a functional programming style.
  *
+ * Assumptions/restrictions:
+ *   - Queries are Union of Conjunctive Queries (if some Left Joins are hidden in the Datalog-like data structure,
+ *        they will not be considered).
+ *   - Rule bodies are composed of data and filter atoms.
+ *   - Type lifting is locally stopped if a sub-goal predicate is found to be multi-typed.
+ *
+ *
+ * Accidental complexity of this implementation: multi-variate URI template support implies to change arity
+ * of data atoms, create new variables, etc. Note that this complications are due to the Datalog data structure.
+ * In the future, some of these manipulations could vanish with a better data structure for intermediate queries.
+ *
  */
 public class TypeLift {
 
@@ -166,11 +177,13 @@ public class TypeLift {
                     currentZipper = currentZipper.parent().some();
                 }
                 /**
-                 * The root has been reached. Applies its proposal and breaks
-                 * the loop.
+                 * The root has been reached.
+                 * Applies its proposal and breaks the loop.
+                 * TODO: update this comment.
                  */
                 else {
-                    currentZipper = applyTypeFunction.f(currentZipper);
+                    //TODO: remove this line! Types are systematically applied.
+                    //currentZipper = applyTypeFunction.f(currentZipper);
                     break;
                 }
             }
@@ -209,14 +222,15 @@ public class TypeLift {
             catch(MultiTypeException ex) {
             }
         }
-        /**
-         * Fallback strategy in reaction to multi-typing (of the current predicate).
-         *
-         * No new type should be given to the current node.
-         * Children must apply their type proposals to themselves.
-         */
-        TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> newTreeZipper = applyToChildren(applyTypeFunction, currentZipper);
-        return newTreeZipper;
+//        /**
+//         * Fallback strategy in reaction to multi-typing (of the current predicate).
+//         *
+//         * No new type should be given to the current node.
+//         * Children must apply their type proposals to themselves.
+//         */
+//        TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> newTreeZipper = applyToChildren(applyTypeFunction, currentZipper);
+//        return newTreeZipper;
+        return currentZipper;
     }
 
     /**
@@ -259,41 +273,41 @@ public class TypeLift {
     }
 
 
-    /**
-     * Updates the rule bodies of the parent node according to possible arity changes of child heads.
-     *
-     * Typically, arity changes are caused by MultiVariableUriTemplateTypeProposals.
-     *
-     * TODO: REMOVE or completely transform.
-     *
-     */
-    @Deprecated
-    private static TreeZipper<P3<Predicate,List<CQIE>,Option<TypeProposal>>> propagateChildArityChangesToBodies(
-            final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper,
-            final HashMap<Predicate, TypeProposal> childProposalIndex) {
-
-        final P3<Predicate, List<CQIE>, Option<TypeProposal>> parentLabel = parentZipper.getLabel();
-        final List<CQIE> initialParentRules = parentLabel._2();
-
-        /**
-         * For each child proposal, we update the parentRules.
-         * This sub-task is forwarded to the TypeProposal object.
-         *
-         * From a FP point of view, this is a (left) folding operation.
-         */
-        final List<TypeProposal> childProposals = childProposalIndex.values();
-        List<CQIE> updatedRules = childProposals.foldLeft(new F2<List<CQIE>, TypeProposal, List<CQIE>>() {
-            @Override
-            public List<CQIE> f(List<CQIE> parentRules, TypeProposal childProposal) {
-                return childProposal.propagateChildArityChangeToBodies(parentRules);
-            }
-        }, initialParentRules);
-
-        /**
-         * Returns the updated parent zipper with updated definition rules.
-         */
-        return parentZipper.setLabel(P.p(parentLabel._1(), updatedRules, parentLabel._3()));
-    }
+//    /**
+//     * Updates the rule bodies of the parent node according to possible arity changes of child heads.
+//     *
+//     * Typically, arity changes are caused by MultiVariableUriTemplateTypeProposals.
+//     *
+//     * TODO: REMOVE or completely transform.
+//     *
+//     */
+//    @Deprecated
+//    private static TreeZipper<P3<Predicate,List<CQIE>,Option<TypeProposal>>> propagateChildArityChangesToBodies(
+//            final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper,
+//            final HashMap<Predicate, TypeProposal> childProposalIndex) {
+//
+//        final P3<Predicate, List<CQIE>, Option<TypeProposal>> parentLabel = parentZipper.getLabel();
+//        final List<CQIE> initialParentRules = parentLabel._2();
+//
+//        /**
+//         * For each child proposal, we update the parentRules.
+//         * This sub-task is forwarded to the TypeProposal object.
+//         *
+//         * From a FP point of view, this is a (left) folding operation.
+//         */
+//        final List<TypeProposal> childProposals = childProposalIndex.values();
+//        List<CQIE> updatedRules = childProposals.foldLeft(new F2<List<CQIE>, TypeProposal, List<CQIE>>() {
+//            @Override
+//            public List<CQIE> f(List<CQIE> parentRules, TypeProposal childProposal) {
+//                return childProposal.propagateChildArityChangeToBodies(parentRules);
+//            }
+//        }, initialParentRules);
+//
+//        /**
+//         * Returns the updated parent zipper with updated definition rules.
+//         */
+//        return parentZipper.setLabel(P.p(parentLabel._1(), updatedRules, parentLabel._3()));
+//    }
 
     /**
      * Proposes a typed atom for the current (parent) predicate.
@@ -331,16 +345,12 @@ public class TypeLift {
         final Function newFunctionProposal = (Function) parentRules.head().getHead().clone();
         // Side-effect!
         UnifierUtilities.applyUnifier(newFunctionProposal, predicateLevelSubstitution.getGlobalSubstitution());
+        final TypeProposal newProposal = constructTypeProposal(newFunctionProposal);
 
         /**
-         * TODO: FIX IT!!! What about possible URI templates?
+         * Updated rules: type is applied to these rules (heads and bodies).
          */
-        final TypeProposal newProposal = new BasicTypeProposal(newFunctionProposal);
-
-        /**
-         * TODO: describe
-         */
-        final List<CQIE> updatedParentRules =  predicateLevelSubstitution.getUpdatedRules();
+        final List<CQIE> updatedParentRules = predicateLevelSubstitution.getUpdatedRules();
 
 
         /**
@@ -348,6 +358,22 @@ public class TypeLift {
          * Note that this tree zipper is not fully consistent (child heads not yet updated).
          */
         return parentZipper.setLabel(P.p(parentLabel._1(), updatedParentRules, Option.some(newProposal)));
+    }
+
+    /**
+     * Constructs a TypeProposal of the proper type.
+     */
+    private static TypeProposal constructTypeProposal(Function functionalProposal) {
+        /**
+         * Special case: multi-variate URI template.
+         */
+        if (containsMultiVariateURITemplate(functionalProposal)) {
+            return new MultiVariateUriTemplateTypeProposal(functionalProposal);
+        }
+        /**
+         * Default case
+         */
+        return new BasicTypeProposal(functionalProposal);
     }
 
     /**
@@ -503,6 +529,7 @@ public class TypeLift {
      *  2. Detecting if no type is present in the proposal and returning a None in
      *     this case.
      */
+    @Deprecated
     private static Option<TypeProposal> proposeTypeFromLocalRules(TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> currentZipper) {
         List<CQIE> currentRules = currentZipper.getLabel()._2();
         if (currentRules.isNotEmpty()) {
@@ -514,9 +541,8 @@ public class TypeLift {
 
             /**
              * Multi-variate URI template case.
-             * TODO: this is plain wrong. FIX IT!!!! (confusing the atom with URITemplate() functional term)
              */
-            if (isMultiVariateURITemplate(proposedHead)) {
+            if (containsMultiVariateURITemplate(proposedHead)) {
                 //TODO: call the right constructor
                 typeProposal = null;
             }

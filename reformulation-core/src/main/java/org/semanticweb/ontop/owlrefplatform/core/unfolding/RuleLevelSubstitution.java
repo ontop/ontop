@@ -4,12 +4,14 @@ import fj.F;
 import fj.data.HashMap;
 import fj.data.List;
 import fj.data.Option;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.TypeProposal;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.CQIEImpl;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
+
+import java.util.ArrayList;
 
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions.union;
 import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift.computeTypePropagatingSubstitution;
@@ -22,21 +24,20 @@ import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift.compu
  */
 public class RuleLevelSubstitution {
 
-    private final List<Function> unifiableDataAtoms;
-    private final List<Function> filterAtoms;
     private final Unifier typingSubstitution;
+    private final CQIE typedRule;
 
-    public RuleLevelSubstitution(CQIE rule, HashMap<Predicate, TypeProposal> childProposalIndex) throws TypeLift.MultiTypeException {
+    public RuleLevelSubstitution(CQIE initialRule, HashMap<Predicate, TypeProposal> childProposalIndex) throws TypeLift.MultiTypeException {
 
-        List<Function> bodyAtoms = List.iterableList(rule.getBody());
+        List<Function> bodyAtoms = List.iterableList(initialRule.getBody());
 
-        unifiableDataAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
+        List<Function> unifiableDataAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
             @Override
             public Boolean f(Function atom) {
                 return atom.isDataFunction();
             }
         });
-        filterAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
+        List<Function> filterAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
             @Override
             public Boolean f(Function atom) {
                 return atom.isBooleanFunction();
@@ -47,25 +48,17 @@ public class RuleLevelSubstitution {
          * TODO: explain
          */
         typingSubstitution = aggregateRuleAndProposals(Option.<Unifier>none(), unifiableDataAtoms, childProposalIndex);
-    }
 
-    /**
-     * TODO: implement
-     *
-     */
-    public List<Function> getUntypedDataAtoms() {
-        return null;
-    }
+        typedRule = constructTypedRule(initialRule, typingSubstitution, unifiableDataAtoms, filterAtoms);
 
-    /**
-     * TODO: implement
-     */
-    public List<Function> getTypedFilterAtoms() {
-        return null;
     }
 
     public Unifier getSubstitution() {
         return typingSubstitution;
+    }
+
+    public CQIE getTypedRule() {
+        return typedRule;
     }
 
 
@@ -150,6 +143,28 @@ public class RuleLevelSubstitution {
          * Tail recursion
          */
         return aggregateRuleAndProposals(newOptionalSubstitutionFct, remainingBodyAtoms.tail(), childProposalIndex);
+    }
+
+    /**
+     * TODO: describe it
+     *
+     */
+    private static CQIE constructTypedRule(CQIE initialRule, Unifier typingSubstitution, List<Function> unifiableDataAtoms, List<Function> filterAtoms) {
+        Function typedHead = initialRule.getHead();
+        UnifierUtilities.applyUnifier(typedHead, typingSubstitution);
+
+        List<Function> untypedDataAtoms = untypeDataAtoms(unifiableDataAtoms);
+
+        java.util.List<Function> typedRuleBody = new ArrayList<>(untypedDataAtoms.append(filterAtoms).toCollection());
+        CQIE typedRule = OBDADataFactoryImpl.getInstance().getCQIE(typedHead, typedRuleBody);
+        return typedRule;
+    }
+
+    /**
+     * TODO: implement it
+     */
+    private static List<Function> untypeDataAtoms(List<Function> unifiableDataAtoms) {
+        return null;
     }
 
 }
