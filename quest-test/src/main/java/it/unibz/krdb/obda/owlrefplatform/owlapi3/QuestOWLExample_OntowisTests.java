@@ -73,10 +73,14 @@ public class QuestOWLExample_OntowisTests {
 		public static final String MYSQLIntView = "src/main/resources/example/mysql-Views-joins-int.obda";
 		public static final String MYSQLStrView = "src/main/resources/example/mysql-Views-joins-str.obda";
 		
+		// DB2
+		public static final String DB2Int = "src/main/resources/example/db2-NoViews-joins-int.obda";
+		public static final String DB2IntView = "src/main/resources/example/db2-NoViews-joins-str.obda";
+		
 	}
 	
 	enum DbType{
-		MYSQL, POSTGRES, SMALL_POSTGRES
+		MYSQL, POSTGRES, SMALL_POSTGRES, DB2
 	}
 	
 	public static class Settings{
@@ -342,6 +346,7 @@ public class QuestOWLExample_OntowisTests {
 							+ "\n\n"
 							+ "--POSTGRESInt; --POSTGRESIntView; --POSTGRESStr; --POSTGRESStrView"
 							+ "--MYSQLInt; --MYSQLIntView; --MYSQLStr; --MYSQLStrView;"
+							+ "--DB2Int; --DB2IntView;"
 							+ "\n\n"
 							+ "The concepts for which T-mappings should"
 							+ "be disabled are defined the file tMappingsConf.conf");
@@ -432,6 +437,16 @@ public class QuestOWLExample_OntowisTests {
 			Settings.type = DbType.SMALL_POSTGRES;
 			break;
 		}
+		case "--DB2Int":{
+			Settings.obdaFile = ParamConst.DB2Int;
+			Settings.type = DbType.DB2;
+			break;
+		}
+		case "--DB2IntView":{
+			Settings.obdaFile = ParamConst.DB2IntView;
+			Settings.type = DbType.DB2;
+			break;
+		}
 		default :{
 			System.out.println(
 					"Options:\n\n"
@@ -439,8 +454,7 @@ public class QuestOWLExample_OntowisTests {
 							+ "\n\n"
 							+ "--POSTGRESInt; --POSTGRESIntView; --POSTGRESStr; --POSTGRESStrView"
 							+ "--MYSQLInt; --MYSQLIntView; --MYSQLStr; --MYSQLStrView;"
-							+ "--DB2; "
-							+ "--MYSQL-VIEW; --POSTGRES-VIEW; --DB2-VIEW"
+							+ "--DB2Int; --DB2IntView;"
 							+ "\n\n"
 							+ "The concepts for which T-mappings should"
 							+ "be disabled are defined the file tMappingsConf.conf");
@@ -538,7 +552,10 @@ public class QuestOWLExample_OntowisTests {
 				filters[1] = 100; // 0.005%
 				filters[2] = 1000; // 0.01%
 				break;
-			default:
+			case DB2:
+				filters[0] = 100;
+				filters[1] = 10000;
+				filters[2] = 100000;
 				break;
 			}
 		}
