@@ -21,7 +21,7 @@ import java.util.Set;
 
 /**
  * This visitor class remove * in select clause and substitute it with the columns name
- * Gets the column names also from the subclasses.
+ * Gets the column names or aliases also from the subclasses.
  *
  */
 
@@ -37,8 +37,6 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
     final private DBMetadata metadata;
     private Set<Variable> variables;
-    Logger log = LoggerFactory.getLogger(this.getClass());
-//    private Map<Variable, Variable> variableNewAlias;
 
     private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
@@ -47,14 +45,12 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
         //use the metadata to get the column names
         this.metadata = metadata;
 
-//        variableNewAlias = new HashMap<>();
-
     }
 
     /**
-     * Method to substitute * from the select query.
+     * Method to substitute * from the select query. It add the columns name that are used in the mapping
      * @param select the query with or without *
-     * @param variables see the variables used in the mapping, this are the needed column for our select query
+     * @param variables the variables used in the mapping, this are the needed columns for our select query
      * @return  the query with columns or functions in the projection part
      */
     public String getMappingQuery(Select select, Set<Variable> variables) {
@@ -72,64 +68,50 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
     }
 
 
-
-
-
+    /*
+    Create a set of selectItem (columns)
+    if * add all selectItems obtained by the metadata or the subselect clause
+    */
 
     @Override
     public void visit(PlainSelect plainSelect) {
 
         List<SelectItem> columnNames = new ArrayList<SelectItem>();
 
+        //get the from clause (can have subselect)
         FromItem table = plainSelect.getFromItem();
-
-//        table.accept(this);
 
         FromItem joinTable = null;
 
+        //get the join clause (can have subselect)
         if (plainSelect.getJoins() != null) {
             for (Join join : plainSelect.getJoins()) {
                 joinTable = join.getRightItem();
-//                joinTable.accept(this);
             }
         }
 
-
+        // look at the projection clause
         for (SelectItem expr : plainSelect.getSelectItems()) {
 
 
-            //create a list of selectItem
-            //if * add all selectItems obtained
+            //create a set of selectItem (columns)
+            //if * add all selectItems obtained by the metadata or the subselect clause
 
             if (isSelectAll(expr)) {
 
 
-//                if (joinTable instanceof Table) {
-//                    columnNames.addAll(obtainColumnsFromMetadata((Table) joinTable));
-//                }
-//                else{
                     if(joinTable!=null){
                         joinTable.accept(this);
                         columnNames.addAll(columns);
                         columns.clear();
-//                        if(!aliasColumns.isEmpty()) {
-//                            columnNames.addAll(aliasColumns);
-//                            aliasColumns.clear();
-//                        }
+
                     }
-//                }
-//                if (table instanceof Table)
-//                    columnNames.addAll(obtainColumnsFromMetadata((Table) table));
-//                else{
+
                     if(table!=null){
                         table.accept(this);
                         columnNames.addAll(columns);
                         columns.clear();
-//                        if(!aliasColumns.isEmpty()) {
-//                            columnNames.addAll(aliasColumns);
-//                            aliasColumns.clear();
-//                        }
-//                    }
+
                 }
 
 
@@ -141,7 +123,8 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
                 if(!subselect) {
                     columnNames.add(expr);
                 }
-                else {
+                else { //in case of subselects
+
                     //see if there is an alias
                     SelectExpressionItem mainColumn = ((SelectExpressionItem) expr);
                     Alias aliasName = mainColumn.getAlias();
@@ -149,14 +132,15 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
                         String aliasString = aliasName.getName();
 
-                        //construct a column from alias
+                        //construct a column from alias name
                         if (variables.contains(fac.getVariable(aliasString)) || variables.contains(fac.getVariable(aliasString.toLowerCase())) ) {
                             columnNames.add(new SelectExpressionItem(new Column(aliasString)));
                         }
 
-                    } else {
+                    } else { //when there are no alias add te columns that are used in the mappings
 
                         String columnName = ((SelectExpressionItem) expr).getExpression().toString();
+
                         if (variables.contains(fac.getVariable(columnName)) || variables.contains(fac.getVariable(columnName.toLowerCase()))) {
                             columnNames.add(expr);
                         }
@@ -167,15 +151,8 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
             }
 
 
-
-
-
         }
 
-
-        if(columnNames.isEmpty()) {
-            log.error("wierd " + columns);
-        }
         if(!subselect) {
             plainSelect.setSelectItems(columnNames);
         }
@@ -186,8 +163,6 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
 
 }
-
-
 
     @Override
     public void visit(SetOperationList setOpList) {
@@ -263,7 +238,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
     /**
      From a table, obtain all its columns using the metadata information
-     @return List<SelectItem> list of columns in JSQL SelectItem class the column is rewritten as tableName.columnName
+     @return List<SelectItem> list of columns in JSQL SelectItem class the column is rewritten as tableName.columnName or aliasName.columnName
      */
     private Set<SelectItem> obtainColumnsFromMetadata(Table table) {
 

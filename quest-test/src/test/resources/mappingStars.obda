@@ -33,6 +33,10 @@ mappingId	MAPID-joinWithSameName
 target		:{OrderID} a :OrderDetail .
 source		Select * from Orders as t1  join OrderDetails  ON Orders.OrderID= OrderDetails.OrderID
 
+mappingId	MAPID-aliasinSubQuery
+target		:{locationID} :locationAddress {address} .
+source		SELECT *, child.RegionID as locationID FROM (SELECT * FROM Territories) AS child, (select RegionID, RegionDescription as address FROM Region  WHERE RegionDescription='Eastern' ) AS parent WHERE child.RegionID=parent.RegionID
+
 
 ]]
 
