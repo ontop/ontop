@@ -82,7 +82,7 @@ public abstract class SesameAbstractQuery implements Query {
     @Override
     public void setIncludeInferred(boolean b) {
         if (b == false)
-            throw new IllegalArgumentException("Inference can't be disabled.");
+            throw new UnsupportedOperationException("Inference can't be disabled.");
     }
 
     @Override
