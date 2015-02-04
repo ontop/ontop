@@ -88,11 +88,11 @@ public class PreProcessProjectionTest {
         int count = 0;
         while (rs.nextRow()) {
             count++;
-            for (int i = 1; i <= rs.getColumnCount(); i++) {
-
-                log.debug(rs.getSignature().get(i-1) + "=" + rs.getOWLObject(i));
-
-            }
+//            for (int i = 1; i <= rs.getColumnCount(); i++) {
+//
+//                log.debug(rs.getSignature().get(i-1) + "=" + rs.getOWLObject(i));
+//
+//            }
 
         }
         rs.close();

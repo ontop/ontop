@@ -1,8 +1,10 @@
 package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
@@ -14,10 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This visitor class remove * in select clause and substitute it with the columns name
@@ -28,8 +27,8 @@ import java.util.Set;
 public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, FromItemVisitor {
 
 
-    private Set<SelectItem> columns = new HashSet<>();
-    private List<SelectItem> aliasColumns = new ArrayList<SelectItem>();
+    final private List<SelectItem> columns = new ArrayList<>();
+    final private Set<String> noRepeteadColumns = new HashSet<>();
 
     private boolean selectAll = false;
     private boolean subselect = false;
@@ -102,18 +101,21 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
                     if(joinTable!=null){
                         joinTable.accept(this);
+
                         columnNames.addAll(columns);
+
                         columns.clear();
 
                     }
 
                     if(table!=null){
                         table.accept(this);
+
                         columnNames.addAll(columns);
+
                         columns.clear();
 
                 }
-
 
             }
 
@@ -121,28 +123,34 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
             else {
 
                 if(!subselect) {
+
                     columnNames.add(expr);
                 }
                 else { //in case of subselects
 
                     //see if there is an alias
-                    SelectExpressionItem mainColumn = ((SelectExpressionItem) expr);
-                    Alias aliasName = mainColumn.getAlias();
+
+                    Alias aliasName = ((SelectExpressionItem) expr).getAlias();
                     if (aliasName != null) {
 
                         String aliasString = aliasName.getName();
 
                         //construct a column from alias name
                         if (variables.contains(fac.getVariable(aliasString)) || variables.contains(fac.getVariable(aliasString.toLowerCase())) ) {
-                            columnNames.add(new SelectExpressionItem(new Column(aliasString)));
+                            if(noRepeteadColumns.add(aliasString)) {
+                                columnNames.add(new SelectExpressionItem(new Column(aliasString)));
+                            }
                         }
 
-                    } else { //when there are no alias add te columns that are used in the mappings
+                    } else { //when there are no alias add the columns that are used in the mappings
 
-                        String columnName = ((SelectExpressionItem) expr).getExpression().toString();
+                        String columnName = ((Column)((SelectExpressionItem) expr).getExpression()).getColumnName();
 
                         if (variables.contains(fac.getVariable(columnName)) || variables.contains(fac.getVariable(columnName.toLowerCase()))) {
-                            columnNames.add(expr);
+
+                            if(noRepeteadColumns.add(columnName)) {
+                                columnNames.add(expr);
+                            }
                         }
 
                     }
@@ -157,6 +165,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
             plainSelect.setSelectItems(columnNames);
         }
         else{
+
             columns.addAll(columnNames);
         }
 
@@ -196,7 +205,10 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
     @Override
     public void visit(Table tableName) {
-        columns = obtainColumnsFromMetadata(tableName);
+
+        //obtain the column names from the metadata
+        obtainColumnsFromMetadata(tableName);
+
     }
 
     @Override
@@ -240,9 +252,8 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
      From a table, obtain all its columns using the metadata information
      @return List<SelectItem> list of columns in JSQL SelectItem class the column is rewritten as tableName.columnName or aliasName.columnName
      */
-    private Set<SelectItem> obtainColumnsFromMetadata(Table table) {
+    private void obtainColumnsFromMetadata(Table table) {
 
-        Set<SelectItem> columnNames = new HashSet<>();
 
         String tableFullName= table.getFullyQualifiedName();
         if (ParsedSQLQuery.pQuotes.matcher(tableFullName).matches()) {
@@ -272,12 +283,14 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
             //construct a column as table.column
             if (variables.contains(fac.getVariable(columnFromMetadata)) || variables.contains(fac.getVariable(columnFromMetadata.toLowerCase()))) {
 
-            SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, columnFromMetadata));
+                if(noRepeteadColumns.add(columnFromMetadata)) {
+                    SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, columnFromMetadata));
 
-            columnNames.add(columnName);
+                    columns.add(columnName);
+                }
             }
         }
-        return columnNames;
+
 
     }
 
