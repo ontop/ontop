@@ -19,7 +19,7 @@ import java.util.UUID;
  * All URI templates.
  *
  */
-public class MultiVariateUriTemplateTypeProposal extends TypeProposalImpl {
+public class UriTemplateTypeProposal extends TypeProposalImpl {
 
     /**
      * Indexes in the proposed atom.
@@ -30,7 +30,7 @@ public class MultiVariateUriTemplateTypeProposal extends TypeProposalImpl {
     private final Set<Variable> extraVariables;
     private final Function unifiableAtom;
 
-    public MultiVariateUriTemplateTypeProposal(Function proposedAtom) {
+    public UriTemplateTypeProposal(Function proposedAtom) {
         super(proposedAtom);
 
         uriTemplateIndexesInReverseOrder = locateMultiVariateURITemplates(proposedAtom);

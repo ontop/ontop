@@ -14,20 +14,20 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilitie
 import java.util.ArrayList;
 
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions.union;
-import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift.computeTypePropagatingSubstitution;
+import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.computeTypePropagatingSubstitution;
 
 /**
- * TODO: improve its name. Avoid confusion with real substitutions.
+ * TODO: Name: should we still call it a proposal?
  *
  * See if turns into a substitution.
  *
  */
-public class RuleLevelSubstitution {
+public class RuleLevelProposalImpl implements RuleLevelProposal {
 
     private final Unifier typingSubstitution;
     private final CQIE typedRule;
 
-    public RuleLevelSubstitution(CQIE initialRule, HashMap<Predicate, TypeProposal> childProposalIndex) throws TypeLift.MultiTypeException {
+    public RuleLevelProposalImpl(CQIE initialRule, HashMap<Predicate, PredicateLevelProposal> childProposalIndex) throws TypeLift.MultiTypeException {
 
         List<Function> bodyAtoms = List.iterableList(initialRule.getBody());
 
@@ -53,10 +53,12 @@ public class RuleLevelSubstitution {
 
     }
 
+    @Override
     public Unifier getSubstitution() {
         return typingSubstitution;
     }
 
+    @Override
     public CQIE getTypedRule() {
         return typedRule;
     }
@@ -73,7 +75,7 @@ public class RuleLevelSubstitution {
      */
     private static Unifier aggregateRuleAndProposals(final Option<Unifier> optionalSubstitutionFunction,
                                                      final List<Function> remainingBodyAtoms,
-                                                     final HashMap<Predicate, TypeProposal> childProposalIndex) throws TypeLift.MultiTypeException {
+                                                     final HashMap<Predicate, PredicateLevelProposal> childProposalIndex) throws TypeLift.MultiTypeException {
         /**
          * Stop condition (no further body atom).
          */
@@ -85,7 +87,7 @@ public class RuleLevelSubstitution {
         }
 
         Function bodyAtom = remainingBodyAtoms.head();
-        Option<TypeProposal> optionalChildProposal = childProposalIndex.get(bodyAtom.getFunctionSymbol());
+        Option<PredicateLevelProposal> optionalChildProposal = childProposalIndex.get(bodyAtom.getFunctionSymbol());
 
         Option<Unifier> newOptionalSubstitutionFct;
 
@@ -99,7 +101,7 @@ public class RuleLevelSubstitution {
         if (optionalChildProposal.isSome()) {
             try {
                 Unifier proposedSubstitutionFunction = computeTypePropagatingSubstitution(
-                        bodyAtom, optionalChildProposal.some());
+                        bodyAtom, optionalChildProposal.some().getTypeProposal());
 
                 if (optionalSubstitutionFunction.isNone()) {
                     newOptionalSubstitutionFct = Option.some(proposedSubstitutionFunction);

@@ -1,0 +1,252 @@
+package org.semanticweb.ontop.owlrefplatform.core.unfolding;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import fj.Effect;
+import fj.F;
+import fj.P2;
+import fj.data.List;
+import fj.data.Stream;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypePropagatingSubstitution;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
+
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypePropagatingSubstitution.forceVariableReuse;
+
+/**
+ * TODO: explain
+ */
+public class TypeLiftTools {
+    /**
+     * TODO: describe
+     *
+     */
+    public static boolean containsURITemplate(Function atom) {
+        for(Term term : atom.getTerms()) {
+            if (isURITemplate(term))
+                return true;
+        }
+        return false;
+    }
+
+
+    /**
+     * Uri-templates.
+     */
+    public static boolean isURITemplate(Term term) {
+        if (!(term instanceof Function))
+            return false;
+
+        Function functionalTerm = (Function) term;
+
+        if (functionalTerm.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)) {
+            return true;
+        }
+        return false;
+    }
+
+
+    /**
+     * Low-level function.
+     *
+     * The goal is to build a substitution function
+     * that would be able to transfer the proposed types (given by the proposedAtom)
+     * to the local atom.
+     *
+     *
+     * One sensitive constraint here is to propagate types without changing the
+     * variable names.
+     *
+     * If such a substitution function does not exist, throws a SubstitutionException.
+     *
+     * TODO: keep it here or move it?
+     *
+     */
+    protected static TypePropagatingSubstitution computeTypePropagatingSubstitution(Function localAtom, TypeProposal proposal)
+            throws Substitutions.SubstitutionException {
+        /**
+         * Type propagating substitution function between the proposedAtom and the localAtom.
+         *
+         * TODO: make the latter function throw the exception.
+         */
+        TypePropagatingSubstitution typePropagatingSubstitutionFunction = TypePropagatingSubstitution.createTypePropagatingSubstitution(
+                proposal, localAtom, ImmutableMultimap.<Predicate, Integer>of());
+
+        /**
+         * Impossible to unify the multiple types proposed for this predicate.
+         */
+        if (typePropagatingSubstitutionFunction == null) {
+            throw new Substitutions.SubstitutionException();
+        }
+
+        /**
+         * The current substitution function may change variable names because they were not the same in the two atoms.
+         *
+         * Here, we are just interested in the types but we do not want to change the variable names.
+         * Thus, we force variable reuse.
+         */
+        TypePropagatingSubstitution renamedSubstitutions = forceVariableReuse(typePropagatingSubstitutionFunction);
+
+        return renamedSubstitutions;
+    }
+
+    /**
+     * Looks for predicates are not yet declared as multi-typed (while they should).
+     *
+     * This tests relies on the ability of rules defining one predicate to be unified.
+     *
+     * This class strongly relies on the assumption that the multi-typed predicate index is complete.
+     * This method offers such a protection against non-detections by previous components.
+     */
+    protected static Multimap<Predicate, Integer> updateMultiTypedFunctionSymbolIndex(final TreeBasedDatalogProgram initialDatalogProgram,
+                                                                                      final Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
+        // Mutable index (may be updated)
+        final Multimap<Predicate, Integer> newIndex = ArrayListMultimap.create(multiTypedFunctionSymbolIndex);
+
+        final Stream<P2<Predicate, List<CQIE>>> ruleEntries = Stream.iterableStream(initialDatalogProgram.getRuleTree());
+        /**
+         * Applies the following effect on each rule entry:
+         *   If the predicate has not been declared as multi-typed, checks if it really is.
+         *
+         *   When a false negative is detected, adds it to the index (side-effect).
+         */
+        ruleEntries.foreach(new Effect<P2<Predicate, List<CQIE>>>() {
+            @Override
+            public void e(P2<Predicate, List<CQIE>> ruleEntry) {
+                Predicate predicate = ruleEntry._1();
+                if (multiTypedFunctionSymbolIndex.containsKey(predicate))
+                    return;
+
+                List<CQIE> rules = ruleEntry._2();
+                if (isMultiTypedPredicate(rules)) {
+                    // TODO: Is there some usage for this count?
+                    int count = 1;
+                    newIndex.put(predicate, count);
+                }
+            }
+        });
+        return newIndex;
+    }
+
+    /**
+     * Tests if the rules defining one predicate cannot be unified
+     * because they have different types.
+     *
+     * Returns true if the predicate is detected as multi-typed.
+     */
+    private static boolean isMultiTypedPredicate(List<CQIE> predicateDefinitionRules) {
+        if (predicateDefinitionRules.length() <= 1)
+            return false;
+
+        Function headFirstRule = predicateDefinitionRules.head().getHead();
+
+        return isMultiTypedPredicate(new BasicTypeProposal(headFirstRule), predicateDefinitionRules.tail());
+    }
+
+    /**
+     * Tail recursive sub-method that "iterates" over the rules.
+     */
+    private static boolean isMultiTypedPredicate(TypeProposal currentTypeProposal, List<CQIE> remainingRules) {
+        if (remainingRules.isEmpty())
+            return false;
+
+        Function ruleHead = remainingRules.head().getHead();
+        try {
+            Function newType = applyTypeProposal(ruleHead, currentTypeProposal);
+
+            // Tail recursion
+            return isMultiTypedPredicate(new BasicTypeProposal(newType), remainingRules.tail());
+            /**
+             * Multi-type problem detected
+             */
+        } catch (Substitutions.SubstitutionException e) {
+            return true;
+        }
+    }
+
+    /**
+     * Propagates type from a typeProposal to one head atom.
+     */
+    public static Function applyTypeProposal(Function headAtom, TypeProposal typeProposal) throws Substitutions.SubstitutionException {
+        Unifier substitutionFunction = computeTypePropagatingSubstitution(headAtom, typeProposal);
+
+        // Mutable object
+        Function newHead = (Function) headAtom.clone();
+        // Limited side-effect
+        UnifierUtilities.applyUnifier(newHead, substitutionFunction);
+
+        return newHead;
+    }
+
+    /**
+     * Sometimes rule bodies contains algebra functions (e.g. left joins).
+     * These should not be considered as atoms.
+     *
+     * These method makes sure only real (non algebra) atoms are returned.
+     * Some of these atoms may be found inside algebra functions.
+     *
+     */
+    public static List<Function> extractBodyAtoms(CQIE rule) {
+        List<Function> directBody = List.iterableList(rule.getBody());
+
+        return List.join(directBody.map(new F<Function, List<Function>>() {
+            @Override
+            public List<Function> f(Function functionalTerm) {
+                return extractAtoms(functionalTerm);
+            }
+        }));
+    }
+
+    /**
+     * Extracts real atoms from a functional term.
+     *
+     * If this functional term is not algebra, it is an atom and is
+     * thus directly returned.
+     *
+     * Otherwise, looks for atoms recursively by looking
+     * at the functional sub terms for the algebra function.
+     *
+     * Recursive function.
+     */
+    private static List<Function> extractAtoms(Function functionalTerm) {
+        /**
+         * Normal case: not an algebra function (e.g. left join).
+         */
+        if (!functionalTerm.isAlgebraFunction()) {
+            return List.cons(functionalTerm, List.<Function>nil());
+        }
+
+        /**
+         * Sub-terms that are functional.
+         */
+        List<Function> subFunctionalTerms = List.iterableList(functionalTerm.getTerms()).filter(new F<Term, Boolean>() {
+            @Override
+            public Boolean f(Term term) {
+                return term instanceof Function;
+            }
+        }).map(new F<Term, Function>() {
+            @Override
+            public Function f(Term term) {
+                return (Function) term;
+            }
+        });
+
+        /**
+         * Recursive call over these functional sub-terms.
+         * The atoms they returned are then joined.
+         * Their union is then returned.
+         */
+        return List.join(subFunctionalTerms.map(new F<Function, List<Function>>() {
+            @Override
+            public List<Function> f(Function functionalTerm) {
+                return extractAtoms(functionalTerm);
+            }
+        }));
+
+    }
+
+}

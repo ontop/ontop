@@ -1,25 +1,17 @@
 package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import fj.*;
 import fj.data.*;
 import fj.data.HashMap;
 import fj.data.List;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypePropagatingSubstitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions.*;
-import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypePropagatingSubstitution.forceVariableReuse;
+import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.updateMultiTypedFunctionSymbolIndex;
 
 /**
  * Type lifting consists in:
@@ -78,13 +70,12 @@ public class TypeLift {
          * Builds a tree zipper from the input Datalog rules.
          */
         TreeBasedDatalogProgram initialDatalogProgram = TreeBasedDatalogProgram.fromRules(inputRules);
-        TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> initialRootZipper = TreeZipper.fromTree(
-                initialDatalogProgram.getP3RuleTree());
+        TreeZipper<TypeLiftNode> initialRootZipper = TreeZipper.fromTree(initialDatalogProgram.getTypeLiftTree());
 
         /**
          * Navigates into the tree until reaching the leftmost leaf.
          */
-        TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> leftmostTreeZipper =
+        TreeZipper<TypeLiftNode> leftmostTreeZipper =
                 navigateToLeftmostLeaf(initialRootZipper);
 
 
@@ -97,9 +88,9 @@ public class TypeLift {
         /**
          * Computes a new Datalog program by applying type lifting.
          */
-        TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> newTreeZipper = liftTypesOnTreeZipper(
+        TreeZipper<TypeLiftNode> newTreeZipper = liftTypesOnTreeZipper(
                 leftmostTreeZipper, multiTypedFunctionSymbolIndex);
-        TreeBasedDatalogProgram newDatalogProgram = TreeBasedDatalogProgram.fromP3RuleTree(newTreeZipper.toTree());
+        TreeBasedDatalogProgram newDatalogProgram = TreeBasedDatalogProgram.fromTypeLiftTree(newTreeZipper.toTree());
 
         LOGGER.debug(newDatalogProgram.toString());
 
@@ -114,10 +105,10 @@ public class TypeLift {
      *  (even if not optimized by the JVM, should not be too profound (tree depth)).
      *
      */
-    private static TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> navigateToLeftmostLeaf(
-            TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> currentZipper) {
+    private static TreeZipper<TypeLiftNode> navigateToLeftmostLeaf(
+            TreeZipper<TypeLiftNode> currentZipper) {
 
-        Option<TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>> optionalFirstChild = currentZipper.firstChild();
+        Option<TreeZipper<TypeLiftNode>> optionalFirstChild = currentZipper.firstChild();
         /**
          * Goes to its left child
          */
@@ -135,14 +126,14 @@ public class TypeLift {
      *   (i) the tail-recursion optimization is apparently still not supported in Java 8.
      *   (ii) the recursion is too profound (equal to the number of predicates).
      */
-    private static TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> liftTypesOnTreeZipper(
-            final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> initialTreeZipper,
+    private static TreeZipper<TypeLiftNode> liftTypesOnTreeZipper(
+            final TreeZipper<TypeLiftNode> initialTreeZipper,
             final Multimap<Predicate,Integer> multiTypedFunctionSymbolIndex) {
 
         /**
          * Non-final variable (will be re-assigned) multiple times.
          */
-        TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> currentZipper = initialTreeZipper;
+        TreeZipper<TypeLiftNode> currentZipper = initialTreeZipper;
         /**
          * Iterates over all the predicates (exactly one time for each predicate)
          * in a topological order so that no parent is evaluated before its children.
@@ -160,7 +151,7 @@ public class TypeLift {
             /**
              * Moves to the leftmost leaf of the right sibling if possible.
              */
-            final Option<TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>> optionalRightSibling = currentZipper.right();
+            final Option<TreeZipper<TypeLiftNode>> optionalRightSibling = currentZipper.right();
             if (optionalRightSibling.isSome()) {
                 /**
                  * If the right sibling is not a leaf, reaches the leftmost leaf of its sub-tree.
@@ -172,7 +163,7 @@ public class TypeLift {
              * If already at the root, terminates.
              */
             else {
-                final Option<TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>> optionalParent = currentZipper.parent();
+                final Option<TreeZipper<TypeLiftNode>> optionalParent = currentZipper.parent();
                 if (optionalParent.isSome()) {
                     currentZipper = currentZipper.parent().some();
                 }
@@ -200,11 +191,10 @@ public class TypeLift {
      *
      * Returns the updated treeZipper at the same position.
      */
-    private static TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> updateSubTree(
-            final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> currentZipper,
-            final Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
+    private static TreeZipper<TypeLiftNode> updateSubTree(final TreeZipper<TypeLiftNode> currentZipper,
+                                                          final Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
 
-        Predicate currentPredicate = currentZipper.getLabel()._1();
+        Predicate currentPredicate = currentZipper.getLabel().getPredicate();
 
         /**
          * If there is no multi-typing problem, tries to lift the type from the children.
@@ -212,7 +202,7 @@ public class TypeLift {
         boolean isMultiTyped = multiTypedFunctionSymbolIndex.containsKey(currentPredicate);
         if (!isMultiTyped) {
             try {
-                TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> newTreeZipper = liftTypeFromChildrenToParent(currentZipper);
+                TreeZipper<TypeLiftNode> newTreeZipper = liftTypeFromChildrenToParent(currentZipper);
                 return newTreeZipper;
             }
             /**
@@ -228,7 +218,7 @@ public class TypeLift {
 //         * No new type should be given to the current node.
 //         * Children must apply their type proposals to themselves.
 //         */
-//        TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> newTreeZipper = applyToChildren(applyTypeFunction, currentZipper);
+//        TreeZipper<TypeLiftNode> newTreeZipper = applyToChildren(applyTypeFunction, currentZipper);
 //        return newTreeZipper;
         return currentZipper;
     }
@@ -241,13 +231,8 @@ public class TypeLift {
      *
      * Returns an updated tree zipper at the same position.
      */
-    private static TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> liftTypeFromChildrenToParent(
-            final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper) throws MultiTypeException {
-
-        /**
-         * Children proposals. At most one type proposal per child predicate.
-         */
-        final HashMap<Predicate, TypeProposal> childProposalIndex = retrieveChildrenProposals(parentZipper);
+    private static TreeZipper<TypeLiftNode> liftTypeFromChildrenToParent(
+            final TreeZipper<TypeLiftNode> parentZipper) throws MultiTypeException {
 
         /**
          * Main operations:
@@ -257,14 +242,12 @@ public class TypeLift {
          *
          * Note that this data structure is partially inconsistent (needs the child heads to be updated).
          */
-        TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> partiallyUpdatedTreeZipper =
-                proposeTypeAndUpdateBodies(parentZipper, childProposalIndex);
+        TreeZipper<TypeLiftNode> partiallyUpdatedTreeZipper = proposeTypeAndUpdateBodies(parentZipper);
 
         /**
          * Removes child types.
          */
-        final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> untypedChildrenZipper = applyToChildren(
-                removeTypeFunction, partiallyUpdatedTreeZipper);
+        final TreeZipper<TypeLiftNode> untypedChildrenZipper = applyToChildren(removeTypeFunction, partiallyUpdatedTreeZipper);
 
         /**
          * Now the tree zipper is consistent :)
@@ -283,10 +266,10 @@ public class TypeLift {
 //     */
 //    @Deprecated
 //    private static TreeZipper<P3<Predicate,List<CQIE>,Option<TypeProposal>>> propagateChildArityChangesToBodies(
-//            final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper,
+//            final TreeZipper<TypeLiftNode> parentZipper,
 //            final HashMap<Predicate, TypeProposal> childProposalIndex) {
 //
-//        final P3<Predicate, List<CQIE>, Option<TypeProposal>> parentLabel = parentZipper.getLabel();
+//        final TypeLiftNode parentLabel = parentZipper.getLabel();
 //        final List<CQIE> initialParentRules = parentLabel._2();
 //
 //        /**
@@ -323,193 +306,59 @@ public class TypeLift {
      * Please note that the returned tree zipper IS NOT FULLY CONSISTENT
      *
      */
-    private static TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> proposeTypeAndUpdateBodies(
-            final TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper,
-            final HashMap<Predicate, TypeProposal> childProposalIndex)
+    private static TreeZipper<TypeLiftNode> proposeTypeAndUpdateBodies(
+            final TreeZipper<TypeLiftNode> parentZipper)
             throws MultiTypeException {
+
+        /**
+         * Children proposals. At most one type proposal per child predicate.
+         */
+        final HashMap<Predicate, PredicateLevelProposal> childProposalIndex = retrieveChildrenProposals(parentZipper);
 
         /**
          * Aggregates all these proposals according to the rules defining the parent predicate into a PredicateSubstitution.
          *
          * If such aggregation is not possible, a MultiTypeException will be thrown.
          *
+         * TODO: update this comment.
          *
          */
-        final P3<Predicate,List<CQIE>,Option<TypeProposal>> parentLabel = parentZipper.getLabel();
-        final List<CQIE> parentRules = parentLabel._2();
-        final PredicateLevelSubstitution predicateLevelSubstitution = proposeSubstitutionFromRulesAndChildProposals(parentRules, childProposalIndex);
-
-        /**
-         * Makes a TypeProposal by applying the substitution to the head of one rule.
-         *
-         * TODO: move this part in the "PredicateLevelSubstitution"???
-         */
-        final Function newFunctionProposal = (Function) parentRules.head().getHead().clone();
-        // Side-effect!
-        UnifierUtilities.applyUnifier(newFunctionProposal, predicateLevelSubstitution.getGlobalSubstitution());
-        final TypeProposal newProposal = constructTypeProposal(newFunctionProposal);
+        final TypeLiftNode parentLabel = parentZipper.getLabel();
+        final PredicateLevelProposal proposal = makeProposal(parentLabel.getDefinitionRules(), childProposalIndex);
 
         /**
          * Updated rules: type is applied to these rules (heads and bodies).
          */
-        final List<CQIE> updatedParentRules = predicateLevelSubstitution.getUpdatedRules();
+        final List<CQIE> updatedParentRules = proposal.getTypedRules();
 
 
         /**
          * Returns a new zipper with the updated label.
          * Note that this tree zipper is not fully consistent (child heads not yet updated).
          */
-        return parentZipper.setLabel(P.p(parentLabel._1(), updatedParentRules, Option.some(newProposal)));
+        return parentZipper.setLabel(parentLabel.newRulesAndProposal(updatedParentRules, proposal));
     }
 
-    /**
-     * Constructs a TypeProposal of the proper type.
-     */
-    private static TypeProposal constructTypeProposal(Function functionalProposal) {
-        /**
-         * Special case: multi-variate URI template.
-         */
-        if (containsURITemplate(functionalProposal)) {
-            return new MultiVariateUriTemplateTypeProposal(functionalProposal);
-        }
-        /**
-         * Default case
-         */
-        return new BasicTypeProposal(functionalProposal);
-    }
 
     /**
      * TODO: comment it!
      */
-    private static PredicateLevelSubstitution proposeSubstitutionFromRulesAndChildProposals(List<CQIE> parentRules,
-                                                                                       HashMap<Predicate, TypeProposal> childProposalIndex)
+    private static PredicateLevelProposal makeProposal(List<CQIE> parentRules,
+                                                       HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
             throws MultiTypeException {
-        return proposeSubstitutionFromRulesAndChildProposals(Option.<Unifier>none(), parentRules, List.<RuleLevelSubstitution>nil(), childProposalIndex);
-    }
-
-    /**
-     * TODO: describe it!
-     *
-     */
-    private static PredicateLevelSubstitution proposeSubstitutionFromRulesAndChildProposals(Option<Unifier> optionalSubstitution, List<CQIE> remainingRules, List<RuleLevelSubstitution> ruleSubstitutions,
-                                                                                       HashMap<Predicate, TypeProposal> childProposalIndex) throws MultiTypeException {
-        /**
-         * Stop condition (no more rule to consider).
-         */
-        if (remainingRules.isEmpty()) {
-            if (optionalSubstitution.isNone())
-                throw new IllegalArgumentException("Do not give a None head with an empty list of rules");
-            return new PredicateLevelSubstitution(ruleSubstitutions, optionalSubstitution.some());
-        }
-
-        CQIE rule = remainingRules.head();
-
-        /**
-         * TODO: describe
-         */
-        RuleLevelSubstitution newRuleLevelSubstitution = new RuleLevelSubstitution(rule, childProposalIndex);
-
-        /**
-         * TODO: describe this part
-         *
-         * TODO: Analyse the assumption made: the union of the substitution proposed by the rules makes sense.
-         *
-         */
-        Option<Unifier> proposedSubstitution;
-        if (optionalSubstitution.isNone()) {
-            proposedSubstitution = Option.some(newRuleLevelSubstitution.getSubstitution());
-        }
-        else {
-            try {
-                proposedSubstitution = Option.some(union(optionalSubstitution.some(), newRuleLevelSubstitution.getSubstitution()));
-            }
-            /**
-             * Impossible to propagate type.
-             * This happens when multiple types are proposed for this predicate.
-             */
-            catch(SubstitutionException e) {
-                throw new MultiTypeException();
-            }
-        }
-
-        List<RuleLevelSubstitution> newRuleSubstitutionList =  ruleSubstitutions.append(List.cons(newRuleLevelSubstitution,
-                List.<RuleLevelSubstitution>nil()));
-
-        /**
-         * Tail recursion
-         */
-        return proposeSubstitutionFromRulesAndChildProposals(proposedSubstitution, remainingRules.tail(),
-                newRuleSubstitutionList, childProposalIndex);
+        return new PredicateLevelProposalImpl(parentRules, childProposalIndex);
     }
 
 
-    /**
-     * Low-level function.
-     *
-     * The goal is to build a substitution function
-     * that would be able to transfer the proposed types (given by the proposedAtom)
-     * to the local atom.
-     *
-     *
-     * One sensitive constraint here is to propagate types without changing the
-     * variable names.
-     *
-     * If such a substitution function does not exist, throws a SubstitutionException.
-     *
-     * TODO: keep it here or move it?
-     *
-     */
-    protected static TypePropagatingSubstitution computeTypePropagatingSubstitution(Function localAtom, TypeProposal proposal)
-            throws SubstitutionException {
-        /**
-         * Type propagating substitution function between the proposedAtom and the localAtom.
-         *
-         * TODO: make the latter function throw the exception.
-         */
-        TypePropagatingSubstitution typePropagatingSubstitutionFunction = TypePropagatingSubstitution.createTypePropagatingSubstitution(
-                proposal, localAtom, ImmutableMultimap.<Predicate, Integer>of());
-
-        /**
-         * Impossible to unify the multiple types proposed for this predicate.
-         */
-        if (typePropagatingSubstitutionFunction == null) {
-            throw new SubstitutionException();
-        }
-
-        /**
-         * The current substitution function may change variable names because they were not the same in the two atoms.
-         *
-         * Here, we are just interested in the types but we do not want to change the variable names.
-         * Thus, we force variable reuse.
-         */
-        TypePropagatingSubstitution renamedSubstitutions = forceVariableReuse(typePropagatingSubstitutionFunction);
-
-        return renamedSubstitutions;
-    }
-
-    /**
-     * Applies the type proposal to the rule heads.
-     *
-     * Returns updated rules.
-     */
-    private static List<CQIE> applyTypeToRules(final List<CQIE> initialRules, final TypeProposal typeProposal)
-            throws TypeApplicationError{
-        return typeProposal.applyType(initialRules);
-    }
-
-    /**
-     * Propagates type from a typeProposal to one head atom.
-     */
-    protected static Function applyTypeProposal(Function headAtom, TypeProposal typeProposal) throws SubstitutionException {
-        Unifier substitutionFunction = computeTypePropagatingSubstitution(headAtom, typeProposal);
-
-        // Mutable object
-        Function newHead = (Function) headAtom.clone();
-        // Limited side-effect
-        UnifierUtilities.applyUnifier(newHead, substitutionFunction);
-
-        return newHead;
-    }
+//    /**
+//     * Applies the type proposal to the rule heads.
+//     *
+//     * Returns updated rules.
+//     */
+//    private static List<CQIE> applyTypeToRules(final List<CQIE> initialRules, final TypeProposal typeProposal)
+//            throws TypeApplicationError{
+//        return typeProposal.applyType(initialRules);
+//    }
 
     /**
      * Removes types from rules.
@@ -522,96 +371,72 @@ public class TypeLift {
         return typeProposal.removeHeadTypes(initialRules);
     }
 
-    /**
-     * Makes a type proposal by looking at the rules defining the current predicate.
-     *
-     * Its current implementation is very basic and could be improved.
-     * It returns the head of the first rule.
-     *
-     * TODO: Several improvements could be done:
-     *  1. Unifying all the rule heads (case where is there is multiple rules).
-     *  2. Detecting if no type is present in the proposal and returning a None in
-     *     this case.
-     *
-     */
-    private static Option<TypeProposal> proposeTypeFromLocalRules(TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> currentZipper) {
-        List<CQIE> currentRules = currentZipper.getLabel()._2();
-        if (currentRules.isNotEmpty()) {
-
-            // Head of the first rule (cloned because mutable).
-            Function proposedHead = (Function) currentRules.head().getHead().clone();
-
-            TypeProposal typeProposal = constructTypeProposal(proposedHead);
-            return Option.some(typeProposal);
-        }
-        return Option.none();
-    }
-
-    /**
-     * TODO: describe
-     *
-     */
-    protected static boolean containsURITemplate(Function atom) {
-        for(Term term : atom.getTerms()) {
-            if (isURITemplate(term))
-                return true;
-        }
-        return false;
-    }
-
-
-
-    /**
-     * Uri-templates.
-     */
-    protected static boolean isURITemplate(Term term) {
-        if (!(term instanceof Function))
-            return false;
-
-        Function functionalTerm = (Function) term;
-
-        if (functionalTerm.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)) {
-            return true;
-        }
-        return false;
-    }
+//    /**
+//     * Makes a type proposal by looking at the rules defining the current predicate.
+//     *
+//     * Its current implementation is very basic and could be improved.
+//     * It returns the head of the first rule.
+//     *
+//     * TODO: Several improvements could be done:
+//     *  1. Unifying all the rule heads (case where is there is multiple rules).
+//     *  2. Detecting if no type is present in the proposal and returning a None in
+//     *     this case.
+//     *
+//     */
+//    @Deprecated
+//    private static Option<TypeProposal> proposeTypeFromLocalRules(TreeZipper<TypeLiftNode> currentZipper) {
+//        List<CQIE> currentRules = currentZipper.getLabel()._2();
+//        if (currentRules.isNotEmpty()) {
+//
+//            // Head of the first rule (cloned because mutable).
+//            Function proposedHead = (Function) currentRules.head().getHead().clone();
+//
+//            TypeProposal typeProposal = constructTypeProposal(proposedHead);
+//            return Option.some(typeProposal);
+//        }
+//        return Option.none();
+//    }
 
     /**
      * Indexes the proposals of the children of the current parent node according to their predicate.
      *
      * Returns the index.
      */
-    private static HashMap<Predicate, TypeProposal> retrieveChildrenProposals(final TreeZipper<P3<Predicate, List<CQIE>,
-            Option<TypeProposal>>> parentZipper) {
+    private static HashMap<Predicate, PredicateLevelProposal> retrieveChildrenProposals(final TreeZipper<TypeLiftNode> parentZipper) {
         /**
          * Child forest.
          */
-        Stream<Tree<P3<Predicate, List<CQIE>, Option<TypeProposal>>>> subForest = parentZipper.focus().subForest()._1();
+        Stream<Tree<TypeLiftNode>> subForest = parentZipper.focus().subForest()._1();
         /**
          * No child: returns an empty map.
          */
         if (subForest.isEmpty()) {
-            return HashMap.from(Stream.<P2<Predicate, TypeProposal>>nil());
+            return HashMap.from(Stream.<P2<Predicate, PredicateLevelProposal>>nil());
         }
 
         /**
          * Children labels (roots of the child forest).
          */
-        Stream<P3<Predicate, List<CQIE>, Option<TypeProposal>>> childrenLabels =  subForest.map(
-                Tree.<P3<Predicate, List<CQIE>, Option<TypeProposal>>>root_());
+        Stream<TypeLiftNode> childrenLabels =  subForest.map(
+                Tree.<TypeLiftNode>root_());
 
-        Stream<Option<TypeProposal>> proposals = childrenLabels.map(P3.<Predicate, List<CQIE>, Option<TypeProposal>>__3());
+        Stream<Option<PredicateLevelProposal>> proposals = childrenLabels.map(new F<TypeLiftNode, Option<PredicateLevelProposal>>() {
+            @Override
+            public Option<PredicateLevelProposal> f(TypeLiftNode typeLiftNode) {
+                return typeLiftNode.getOptionalProposal();
+            }
+        });
 
         /**
          * Only positive proposals.
          */
-        List<TypeProposal> positiveProposals = Option.somes(proposals).toList();
+        List<PredicateLevelProposal> positiveProposals = Option.somes(proposals).toList();
 
         /**
          * Computes equivalent predicate index (generic method).
          *
          */
-        HashMap<Predicate, List<TypeProposal>> predicateIndex = buildPredicateIndex(positiveProposals);
+        HashMap<Predicate, List<PredicateLevelProposal>> predicateIndex = buildPredicateIndex(positiveProposals);
 
         /**
          * Because only one proposal can be made per predicate (child),
@@ -619,10 +444,10 @@ public class TypeLift {
          *
          * Returns this simplified index.
          */
-        HashMap<Predicate, TypeProposal> simplifiedPredicateIndex = predicateIndex.map(new F<P2<Predicate, List<TypeProposal>>, P2<Predicate, TypeProposal>>() {
+        HashMap<Predicate, PredicateLevelProposal> simplifiedPredicateIndex = predicateIndex.map(new F<P2<Predicate, List<PredicateLevelProposal>>, P2<Predicate, PredicateLevelProposal>>() {
             @Override
-            public P2<Predicate, TypeProposal> f(P2<Predicate, List<TypeProposal>> mapEntry) {
-                List<TypeProposal> proposals = mapEntry._2();
+            public P2<Predicate, PredicateLevelProposal> f(P2<Predicate, List<PredicateLevelProposal>> mapEntry) {
+                List<PredicateLevelProposal> proposals = mapEntry._2();
                 if (proposals.length() != 1) {
                     // Code inconsistency
                     throw new InternalError("According to the tree, only one proposal can be made per predicate." +
@@ -639,10 +464,10 @@ public class TypeLift {
      *
      * Returns the updated tree zipper at the parent position.
      */
-    private static TreeZipper<P3<Predicate,List<CQIE>,Option<TypeProposal>>> applyToChildren(
-            F<TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>, TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>> f,
-            TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> parentZipper) {
-        Option<TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>> optionalFirstChild = parentZipper.firstChild();
+    private static TreeZipper<TypeLiftNode> applyToChildren(
+            F<TreeZipper<TypeLiftNode>, TreeZipper<TypeLiftNode>> f,
+            TreeZipper<TypeLiftNode> parentZipper) {
+        Option<TreeZipper<TypeLiftNode>> optionalFirstChild = parentZipper.firstChild();
 
         /**
          * No child, nothing to apply
@@ -656,7 +481,7 @@ public class TypeLift {
          *
          * IMPROVEMENT: Find a way to replace this usage by a map only applied to the children of a given parent node.
          */
-        TreeZipper<P3<Predicate,List<CQIE>,Option<TypeProposal>>> lastChildZipper = applyToNodeAndRightSiblings(f, optionalFirstChild.some());
+        TreeZipper<TypeLiftNode> lastChildZipper = applyToNodeAndRightSiblings(f, optionalFirstChild.some());
 
         /**
          *  Move back to the parent node
@@ -669,18 +494,18 @@ public class TypeLift {
      *
      * Tail-recursive function.
      */
-    private static TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> applyToNodeAndRightSiblings(
-            F<TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>, TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>> f,
-            TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> currentZipper) {
+    private static TreeZipper<TypeLiftNode> applyToNodeAndRightSiblings(
+            F<TreeZipper<TypeLiftNode>, TreeZipper<TypeLiftNode>> f,
+            TreeZipper<TypeLiftNode> currentZipper) {
         /**
          * Applies f to the current node
          */
-        TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> updatedCurrentZipper = f.f(currentZipper);
+        TreeZipper<TypeLiftNode> updatedCurrentZipper = f.f(currentZipper);
 
         /**
          * Looks for the right sibling
          */
-        Option<TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>> optionalRightSibling = updatedCurrentZipper.right();
+        Option<TreeZipper<TypeLiftNode>> optionalRightSibling = updatedCurrentZipper.right();
         if (optionalRightSibling.isSome()) {
             /**
              * Recursive call
@@ -694,62 +519,63 @@ public class TypeLift {
     }
 
 
-    /**
-     * Low-level. Applies the type to the rules of the current predicate.
-     *
-     * Returns the updated zipper at the same location.
-     */
-    private static F<TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>, TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>> applyTypeFunction
-            = new F<TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>, TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>>() {
-        @Override
-        public TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> f(TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> treeZipper) {
-            /**
-             * Extracts values from the node
-             */
-            P3<Predicate, List<CQIE>, Option<TypeProposal>> label = treeZipper.getLabel();
-            List<CQIE> initialRules = label._2();
-            Option<TypeProposal> optionalNewTypeAtom = label._3();
-
-            /**
-             * No type atom proposed, nothing to change.
-             */
-            if (optionalNewTypeAtom.isNone())
-                return treeZipper;
-            /**
-             * Otherwise, applies the proposed types
-             * and returns the updated tree zipper.
-             */
-            else {
-                List<CQIE> newRules = applyTypeToRules(initialRules, optionalNewTypeAtom.some());
-                return treeZipper.setLabel(P.p(label._1(), newRules, Option.<TypeProposal>none()));
-            }
-        }
-    };
+//    /**
+//     * Low-level. Applies the type to the rules of the current predicate.
+//     *
+//     * Returns the updated zipper at the same location.
+//     */
+//    @Deprecated
+//    private static F<TreeZipper<TypeLiftNode>, TreeZipper<TypeLiftNode>> applyTypeFunction
+//            = new F<TreeZipper<TypeLiftNode>, TreeZipper<TypeLiftNode>>() {
+//        @Override
+//        public TreeZipper<TypeLiftNode> f(TreeZipper<TypeLiftNode> treeZipper) {
+//            /**
+//             * Extracts values from the node
+//             */
+//            TypeLiftNode node = treeZipper.getLabel();
+//            List<CQIE> initialRules = node.getDefinitionRules();
+//            Option<PredicateLevelProposal> newOptionalProposal = node.getOptionalProposal();
+//
+//            /**
+//             * No type atom proposed, nothing to change.
+//             */
+//            if (newOptionalProposal.isNone())
+//                return treeZipper;
+//            /**
+//             * Otherwise, applies the proposed types
+//             * and returns the updated tree zipper.
+//             */
+//            else {
+//                List<CQIE> newRules = applyTypeToRules(initialRules, newOptionalProposal.some().getTypeProposal());
+//                return treeZipper.setLabel(node.newRulesNoProposal(newRules));
+//            }
+//        }
+//    };
 
     /**
      * Removes types from the rules of the current node if the latter has made a proposal in the past.
      *
      * If no proposal has been done before, it is maybe because some types should remain local.
      */
-    private static F<TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>, TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>> removeTypeFunction
-            = new F<TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>, TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>>>() {
+    private static F<TreeZipper<TypeLiftNode>, TreeZipper<TypeLiftNode>> removeTypeFunction
+            = new F<TreeZipper<TypeLiftNode>, TreeZipper<TypeLiftNode>>() {
         @Override
-        public TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> f(TreeZipper<P3<Predicate, List<CQIE>, Option<TypeProposal>>> treeZipper) {
-            P3<Predicate, List<CQIE>, Option<TypeProposal>> label = treeZipper.getLabel();
-            Option<TypeProposal> optionalTypeProposal = label._3();
+        public TreeZipper<TypeLiftNode> f(TreeZipper<TypeLiftNode> treeZipper) {
+            TypeLiftNode label = treeZipper.getLabel();
+            Option<PredicateLevelProposal> optionalProposal = label.getOptionalProposal();
             /**
              * If no previous proposal, no type removal.
              */
-            if (optionalTypeProposal.isNone()) {
+            if (optionalProposal.isNone()) {
                 return treeZipper;
             }
             /**
              * Otherwise, remove types.
              */
             else {
-                List<CQIE> initialRules = label._2();
-                List<CQIE> updatedRules = removeTypesFromRules(initialRules, optionalTypeProposal.some());
-                return treeZipper.setLabel(P.p(label._1(), updatedRules, Option.<TypeProposal>none()));
+                List<CQIE> initialRules = label.getDefinitionRules();
+                List<CQIE> updatedRules = removeTypesFromRules(initialRules, optionalProposal.some().getTypeProposal());
+                return treeZipper.setLabel(label.newRulesNoProposal(updatedRules));
             }
         }
     };
@@ -758,18 +584,18 @@ public class TypeLift {
     /**
      * Generic method that indexes a list of proposals according to their head predicates.
      */
-    private static HashMap<Predicate, List<TypeProposal>> buildPredicateIndex(List<TypeProposal> atoms) {
-        List<P2<Predicate, List<TypeProposal>>> predicateAtomList = atoms.group(
+    private static HashMap<Predicate, List<PredicateLevelProposal>> buildPredicateIndex(List<PredicateLevelProposal> atoms) {
+        List<P2<Predicate, List<PredicateLevelProposal>>> predicateAtomList = atoms.group(
                 /**
                  * Groups by predicate
                  */
-                Equal.equal(new F<TypeProposal, F<TypeProposal, Boolean>>() {
+                Equal.equal(new F<PredicateLevelProposal, F<PredicateLevelProposal, Boolean>>() {
                     @Override
-                    public F<TypeProposal, Boolean> f(final TypeProposal typeProposal) {
-                        return new F<TypeProposal, Boolean>() {
+                    public F<PredicateLevelProposal, Boolean> f(final PredicateLevelProposal proposal) {
+                        return new F<PredicateLevelProposal, Boolean>() {
                             @Override
-                            public Boolean f(TypeProposal other) {
-                                return other.getPredicate().equals(typeProposal.getPredicate());
+                            public Boolean f(PredicateLevelProposal other) {
+                                return other.getPredicate().equals(proposal.getPredicate());
                             }
                         };
                     }
@@ -777,155 +603,13 @@ public class TypeLift {
                 /**
                  * Transforms it into a P2 list (predicate and list of functions).
                  */
-                new F<List<TypeProposal>, P2<Predicate, List<TypeProposal>>>() {
+                new F<List<PredicateLevelProposal>, P2<Predicate, List<PredicateLevelProposal>>>() {
                     @Override
-                    public P2<Predicate, List<TypeProposal>> f(List<TypeProposal> proposals) {
+                    public P2<Predicate, List<PredicateLevelProposal>> f(List<PredicateLevelProposal> proposals) {
                         return P.p(proposals.head().getPredicate(), proposals);
                     }
                 });
 
         return HashMap.from(predicateAtomList);
-    }
-
-    /**
-     * Sometimes rule bodies contains algebra functions (e.g. left joins).
-     * These should not be considered as atoms.
-     *
-     * These method makes sure only real (non algebra) atoms are returned.
-     * Some of these atoms may be found inside algebra functions.
-     *
-     */
-    private static List<Function> extractBodyAtoms(CQIE rule) {
-        List<Function> directBody = List.iterableList(rule.getBody());
-
-        return List.join(directBody.map(new F<Function, List<Function>>() {
-            @Override
-            public List<Function> f(Function functionalTerm) {
-                return extractAtoms(functionalTerm);
-            }
-        }));
-    }
-
-    /**
-     * Extracts real atoms from a functional term.
-     *
-     * If this functional term is not algebra, it is an atom and is
-     * thus directly returned.
-     *
-     * Otherwise, looks for atoms recursively by looking
-     * at the functional sub terms for the algebra function.
-     *
-     * Recursive function.
-     */
-    private static List<Function> extractAtoms(Function functionalTerm) {
-        /**
-         * Normal case: not an algebra function (e.g. left join).
-         */
-        if (!functionalTerm.isAlgebraFunction()) {
-            return List.cons(functionalTerm, List.<Function>nil());
-        }
-
-        /**
-         * Sub-terms that are functional.
-         */
-        List<Function> subFunctionalTerms = List.iterableList(functionalTerm.getTerms()).filter(new F<Term, Boolean>() {
-            @Override
-            public Boolean f(Term term) {
-                return term instanceof Function;
-            }
-        }).map(new F<Term, Function>() {
-            @Override
-            public Function f(Term term) {
-                return (Function) term;
-            }
-        });
-
-        /**
-         * Recursive call over these functional sub-terms.
-         * The atoms they returned are then joined.
-         * Their union is then returned.
-         */
-        return List.join(subFunctionalTerms.map(new F<Function, List<Function>>() {
-            @Override
-            public List<Function> f(Function functionalTerm) {
-                return extractAtoms(functionalTerm);
-            }
-        }));
-
-    }
-
-
-    /**
-     * Looks for predicates are not yet declared as multi-typed (while they should).
-     *
-     * This tests relies on the ability of rules defining one predicate to be unified.
-     *
-     * This class strongly relies on the assumption that the multi-typed predicate index is complete.
-     * This method offers such a protection against non-detections by previous components.
-     */
-    protected static Multimap<Predicate, Integer> updateMultiTypedFunctionSymbolIndex(final TreeBasedDatalogProgram initialDatalogProgram,
-                                                                                      final Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
-        // Mutable index (may be updated)
-        final Multimap<Predicate, Integer> newIndex = ArrayListMultimap.create(multiTypedFunctionSymbolIndex);
-
-        final Stream<P2<Predicate, List<CQIE>>> ruleEntries = Stream.iterableStream(initialDatalogProgram.getRuleTree());
-        /**
-         * Applies the following effect on each rule entry:
-         *   If the predicate has not been declared as multi-typed, checks if it really is.
-         *
-         *   When a false negative is detected, adds it to the index (side-effect).
-         */
-        ruleEntries.foreach(new Effect<P2<Predicate, List<CQIE>>>() {
-            @Override
-            public void e(P2<Predicate, List<CQIE>> ruleEntry) {
-                Predicate predicate = ruleEntry._1();
-                if (multiTypedFunctionSymbolIndex.containsKey(predicate))
-                    return;
-
-                List<CQIE> rules = ruleEntry._2();
-                if (isMultiTypedPredicate(rules)) {
-                    // TODO: Is there some usage for this count?
-                    int count = 1;
-                    newIndex.put(predicate, count);
-                }
-            }
-        });
-        return newIndex;
-    }
-
-    /**
-     * Tests if the rules defining one predicate cannot be unified
-     * because they have different types.
-     *
-     * Returns true if the predicate is detected as multi-typed.
-     */
-    private static boolean isMultiTypedPredicate(List<CQIE> predicateDefinitionRules) {
-        if (predicateDefinitionRules.length() <= 1)
-            return false;
-
-        Function headFirstRule = predicateDefinitionRules.head().getHead();
-
-        return isMultiTypedPredicate(new BasicTypeProposal(headFirstRule), predicateDefinitionRules.tail());
-    }
-
-    /**
-     * Tail recursive sub-method that "iterates" over the rules.
-     */
-    private static boolean isMultiTypedPredicate(TypeProposal currentTypeProposal, List<CQIE> remainingRules) {
-        if (remainingRules.isEmpty())
-            return false;
-
-        Function ruleHead = remainingRules.head().getHead();
-        try {
-            Function newType = applyTypeProposal(ruleHead, currentTypeProposal);
-
-            // Tail recursion
-            return isMultiTypedPredicate(new BasicTypeProposal(newType), remainingRules.tail());
-            /**
-             * Multi-type problem detected
-             */
-        } catch (SubstitutionException e) {
-            return true;
-        }
     }
 }
