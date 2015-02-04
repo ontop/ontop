@@ -147,12 +147,16 @@ public class QuestOWLExample_OntowisTests {
 		PrintWriter writer = new PrintWriter("src/main/resources/example/table.txt", "UTF-8");
 		PrintWriter writerG = new PrintWriter("src/main/resources/example/graph.txt", "UTF-8");
 
+		int sizeQueriesArray = Constants.nFilters * Constants.nSqlJoins;
+		int nF = Constants.nFilters;
+		
 		int j=0;
-		while (j<24){
-			writer.println(resultsOne[j] + " & " + resultsTwo[j] + " & " + resultsThree[j]);
+		
+		while (j<sizeQueriesArray){
+			writer.println(resultsOne[j] + " & " + resultsTwo[j] + " & " + resultsThree[j]); // table
 
-			if (j<=5){
-				String gline = "(1,"+resultsOne[j]+")" + "(2,"+resultsTwo[j]+")" + "(3,"+resultsThree[j]+")" + "(4,"+resultsOne[j+6]+")" + "(5,"+resultsTwo[j+6]+")" + "(6,"+resultsThree[j+6]+")" + "(7,"+resultsOne[j+12]+")" + "(8,"+resultsTwo[j+12]+")" + "(9,"+resultsThree[j+12]+")" + "(10,"+resultsOne[j+18]+")" + "(11,"+resultsTwo[j+18]+")" + "(12,"+resultsThree[j+18]+")" ;
+			if (j<Constants.nFilters){
+				String gline = "(1,"+resultsOne[j]+")" + "(2,"+resultsTwo[j]+")" + "(3,"+resultsThree[j]+")" + "(4,"+resultsOne[j+(nF)]+")" + "(5,"+resultsTwo[j+nF]+")" + "(6,"+resultsThree[j+nF]+")" + "(7,"+resultsOne[j+(nF*2)]+")" + "(8,"+resultsTwo[j+nF*2]+")" + "(9,"+resultsThree[j+nF*2]+")" + "(10,"+resultsOne[j+nF*3]+")" + "(11,"+resultsTwo[j+nF*3]+")" + "(12,"+resultsThree[j+nF*3]+")" ;
 				writerG.println(gline);
 			}
 			j++;
