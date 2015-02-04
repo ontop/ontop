@@ -2,6 +2,7 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import fj.F;
 import fj.data.List;
+import fj.data.Option;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions;
@@ -64,18 +65,17 @@ public abstract class TypeProposalImpl implements TypeProposal {
      * This method also deals with special cases that should not be untyped.
      *
      * Note that type removal only concern functional terms.
-     *
-     * If the returned value is null, the term must be eliminated.
+     * If the returned value is None, the term must be eliminated.
      *
      */
-    protected static Term untypeTerm(Term term) {
+    protected static Option<Term> untypeTerm(Term term) {
         /**
          * Types are assumed to functional terms.
          *
          * Other type of terms are not concerned.
          */
         if (!(term instanceof Function)) {
-            return term;
+            return Option.some(term);
         }
 
         /**
@@ -83,7 +83,7 @@ public abstract class TypeProposalImpl implements TypeProposal {
          *   - Aggregates
          */
         if (DatalogUnfolder.detectAggregateInArgument(term))
-            return term;
+            return Option.some(term);
 
         Function functionalTerm = (Function) term;
         java.util.List<Term> functionArguments = functionalTerm.getTerms();
@@ -95,7 +95,7 @@ public abstract class TypeProposalImpl implements TypeProposal {
          */
         boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
         if (isURI) {
-            return null;
+            return Option.none();
         }
 
         /**
@@ -107,7 +107,7 @@ public abstract class TypeProposalImpl implements TypeProposal {
         if (functionArguments.size() != 1) {
             throw new RuntimeException("Removing types of non-unary functional terms is not supported.");
         }
-        return functionArguments.get(0);
+        return Option.some(functionArguments.get(0));
     }
 
     /**
@@ -124,17 +124,12 @@ public abstract class TypeProposalImpl implements TypeProposal {
                 /**
                  * Computes untyped arguments for the head predicate.
                  */
-                List<Term> newHeadTerms = initialHeadTerms.map(new F<Term, Term>() {
+                List<Term> newHeadTerms = Option.somes(initialHeadTerms.map(new F<Term, Option<Term>>() {
                     @Override
-                    public Term f(Term term) {
+                    public Option<Term> f(Term term) {
                         return untypeTerm(term);
                     }
-                }).filter(new F<Term, Boolean>() {
-                    @Override
-                    public Boolean f(Term term) {
-                        return term != null;
-                    }
-                });
+                }));
 
                 /**
                  * Builds a new rule.

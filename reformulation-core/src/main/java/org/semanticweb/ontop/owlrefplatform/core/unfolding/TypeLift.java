@@ -341,6 +341,8 @@ public class TypeLift {
 
         /**
          * Makes a TypeProposal by applying the substitution to the head of one rule.
+         *
+         * TODO: move this part in the "PredicateLevelSubstitution"???
          */
         final Function newFunctionProposal = (Function) parentRules.head().getHead().clone();
         // Side-effect!
@@ -513,6 +515,8 @@ public class TypeLift {
      * Removes types from rules.
      *
      * Returns updated rules.
+     *
+     * TODO: move the code here. No need to transfer it to type proposals.
      */
     private static List<CQIE> removeTypesFromRules(final List<CQIE> initialRules, final TypeProposal typeProposal) {
         return typeProposal.removeHeadTypes(initialRules);

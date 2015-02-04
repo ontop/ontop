@@ -23,11 +23,10 @@ public interface TypeProposal {
     public List<CQIE> applyType(List<CQIE> initialRules);
 
     /**
-     * TODO: explain
-     *
-     * Only executed if no type should appear the given rules.
+     * TODO: remove
      *
      */
+    @Deprecated
     public List<CQIE> removeHeadTypes(List<CQIE> initialRules);
 
     /**
