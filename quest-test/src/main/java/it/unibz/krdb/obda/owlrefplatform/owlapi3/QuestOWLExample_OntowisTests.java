@@ -29,11 +29,6 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.io.File;
@@ -41,6 +36,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
@@ -51,15 +48,18 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 
-class Constants {
-	static final int nFilters = 3;
-	static final int nSqlJoins = 4;
-	
-	static final int nRuns = 2;
-	static final int nWarmUps = 1;
-}
+
 
 public class QuestOWLExample_OntowisTests {
+
+    class Constants {
+        static final int NUM_FILTERS = 3;
+        static final int NUM_SQL_JOINS = 4;
+
+        static final int NUM_RUNS = 2;
+        static final int NUM_WARM_UPS = 4;
+    }
+
 	interface ParamConst{
 		// Postgres
 		public static final String POSTGRESInt = "src/main/resources/example/postgres-NoViews-joins-int.obda";
@@ -79,19 +79,19 @@ public class QuestOWLExample_OntowisTests {
 		
 	}
 	
-	enum DbType{
+	enum DBType {
 		MYSQL, POSTGRES, SMALL_POSTGRES, DB2
 	}
 	
 	public static class Settings{
 		static String obdaFile;
-		static DbType type;
+		static DBType type;
 		static boolean mKeys = false;
 	}
 
 	// private static final String QuestOWLExample_OntowisTests = null;
-	final String obdafile;
-	final DbType type;
+	final String obdaFile;
+	final DBType dbType;
 	boolean mKeys = false;
 
 	final String owlfile = "src/main/resources/example/ontowis-5joins-int.owl";
@@ -101,9 +101,9 @@ public class QuestOWLExample_OntowisTests {
 	// Internal Modifiable State
 	QuestOWL reasoner ;
 
-	public QuestOWLExample_OntowisTests(String obdaFile, DbType type, boolean mKeys){
-		this.obdafile = obdaFile;
-		this.type = type;
+	public QuestOWLExample_OntowisTests(String obdaFile, DBType type, boolean mKeys){
+		this.obdaFile = obdaFile;
+		this.dbType = type;
 		this.mKeys = mKeys;
 	}
 
@@ -117,22 +117,60 @@ public class QuestOWLExample_OntowisTests {
 		QuestOWLConnection conn =  createStuff(mKeys);
 
 		// Results
-		String[] resultsOne = new String[31];
-		String[] resultsTwo = new String[31];
-		String[] resultsThree = new String[31];
+//		String[] resultsOne = new String[31];
+//		String[] resultsTwo = new String[31];
+//		String[] resultsThree = new String[31];
 
 		// Create Queries to be run
-		QueryFactory queries = new QueryFactory(type);
+		QueryFactory queryFactory = new QueryFactory(dbType);
 
 		// Run the tests on the queries
-		runQueries(conn, queries.queriesOneSPARQL, resultsOne);		
-		runQueries(conn, queries.queriesTwoSPARQL, resultsTwo);
-		runQueries(conn, queries.queriesThreeSPARQL, resultsThree);
 
+
+        List<List<Long>> resultsOne_list = new ArrayList<>();
+        List<List<Long>> resultsTwo_list = new ArrayList<>();
+        List<List<Long>> resultsThree_list = new ArrayList<>();
+
+
+        runQueries(conn, queryFactory.warmUpQueries);
+
+        for(int i = 0; i < Constants.NUM_RUNS; i++) {
+            List<Long> resultsOne = runQueries(conn, queryFactory.queriesOneSPARQL);
+            resultsOne_list.add(resultsOne);
+
+            List<Long> resultsTwo = runQueries(conn, queryFactory.queriesTwoSPARQL);
+            resultsTwo_list.add(resultsTwo);
+
+            List<Long> resultsThree = runQueries(conn, queryFactory.queriesThreeSPARQL);
+            resultsThree_list.add(resultsThree);
+        }
 		closeEverything(conn);
-		generateFile(resultsOne, resultsTwo, resultsThree,obdaFile);
+
+        List<Long> avg_resultsOne = average(resultsOne_list);
+        List<Long> avg_resultsTwo = average(resultsTwo_list);
+        List<Long> avg_resultsThree = average(resultsThree_list);
+
+		generateFile(avg_resultsOne, avg_resultsTwo, avg_resultsThree);
 
 	}
+
+    public List<Long> average(List<List<Long>> lists ){
+
+        int numList = lists.size();
+
+        int size = lists.get(0).size();
+
+        List<Long> results = new ArrayList<>();
+
+        for(int i = 0 ; i < size; i++){
+            long sum = 0;
+            for (List<Long> list : lists) {
+                sum += list.get(i);
+            }
+            results.add(sum/numList);
+        }
+        return results;
+    }
 
 	/**
 	 * @param resultsOne
@@ -140,24 +178,29 @@ public class QuestOWLExample_OntowisTests {
 	 * @throws UnsupportedEncodingException 
 	 * @throws FileNotFoundException 
 	 */
-	private void generateFile( String[] resultsOne, String[] resultsTwo, String[] resultsThree, String obdaFile) throws FileNotFoundException, UnsupportedEncodingException {
+	private void generateFile( List<Long> resultsOne, List<Long> resultsTwo, List<Long> resultsThree) throws FileNotFoundException, UnsupportedEncodingException {
 		/*
 		 * Generate File !
 		 */
-		PrintWriter writer = new PrintWriter("src/main/resources/example/table.txt", "UTF-8");
+		PrintWriter writer = new PrintWriter("src/main/resources/example/table-0.txt", "UTF-8");
 		PrintWriter writerG = new PrintWriter("src/main/resources/example/graph.txt", "UTF-8");
 
-		int sizeQueriesArray = Constants.nFilters * Constants.nSqlJoins;
-		int nF = Constants.nFilters;
+		int sizeQueriesArray = Constants.NUM_FILTERS * Constants.NUM_SQL_JOINS;
+		int nF = Constants.NUM_FILTERS;
 		
 		int j=0;
 		
 		while (j<sizeQueriesArray){
-			writer.println(resultsOne[j] + " & " + resultsTwo[j] + " & " + resultsThree[j]); // table
+			writer.println(resultsOne.get(j) + " & " + resultsTwo.get(j) + " & " + resultsThree.get(j)); // table
 
-			if (j<Constants.nFilters){
-				String gline = "(1,"+resultsOne[j]+")" + "(2,"+resultsTwo[j]+")" + "(3,"+resultsThree[j]+")" + "(4,"+resultsOne[j+(nF)]+")" + "(5,"+resultsTwo[j+nF]+")" + "(6,"+resultsThree[j+nF]+")" + "(7,"+resultsOne[j+(nF*2)]+")" + "(8,"+resultsTwo[j+nF*2]+")" + "(9,"+resultsThree[j+nF*2]+")" + "(10,"+resultsOne[j+nF*3]+")" + "(11,"+resultsTwo[j+nF*3]+")" + "(12,"+resultsThree[j+nF*3]+")" ;
-				writerG.println(gline);
+			if (j<Constants.NUM_FILTERS){
+                String gline = "(1," + resultsOne.get(j) + ")" + "(2," + resultsTwo.get(j) + ")"
+                        + "(3," + resultsThree.get(j) + ")" + "(4," + resultsOne.get(j + 6) + ")"
+                        + "(5," + resultsTwo.get(j + 6) + ")" + "(6," + resultsThree.get(j + 6) + ")"
+                        + "(7," + resultsOne.get(j + 12) + ")" + "(8," + resultsTwo.get(j + 12) + ")"
+                        + "(9," + resultsThree.get(j + 12) + ")" + "(10," + resultsOne.get(j + 18) + ")"
+                        + "(11," + resultsTwo.get(j + 18) + ")" + "(12," + resultsThree.get(j + 18) + ")";
+                writerG.println(gline);
 			}
 			j++;
 		}
@@ -203,7 +246,7 @@ public class QuestOWLExample_OntowisTests {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		OBDAModel obdaModel = fac.getOBDAModel();
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
+		ioManager.load(obdaFile);
 		
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
@@ -235,7 +278,7 @@ public class QuestOWLExample_OntowisTests {
 		//TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 		//factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		this.reasoner = reasoner;
 		/*
@@ -248,11 +291,12 @@ public class QuestOWLExample_OntowisTests {
 	}
 
 
-	private void runQueries( QuestOWLConnection conn,
-			String[] queries, String[] results) throws OWLException {
+	private List<Long> runQueries(QuestOWLConnection conn, String[] queries) throws OWLException {
 		
-		int nWarmUps = Constants.nWarmUps;
-		int nRuns = Constants.nRuns;
+		//int nWarmUps = Constants.NUM_WARM_UPS;
+		//int nRuns = Constants.NUM_RUNS;
+
+        List<Long> results = new ArrayList<>();
 		
 		int j=0;
 		while (j < queries.length){
@@ -261,24 +305,24 @@ public class QuestOWLExample_OntowisTests {
 			try {
 
 				// Warm ups
-				for (int i=0; i<nWarmUps; ++i){
-					QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
-					int columnSize = rs.getColumnCount();
-					while (rs.nextRow()) {
-						for (int idx = 1; idx <= columnSize; idx++) {
-							@SuppressWarnings("unused")
-							OWLObject binding = rs.getOWLObject(idx);
-							//System.out.print(binding.toString() + ", ");
-						}
-						//System.out.print("\n");
-					}
-				}
-				
+//				for (int i=0; i<nWarmUps; ++i){
+//					QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+//					int columnSize = rs.getColumnCount();
+//					while (rs.nextRow()) {
+//						for (int idx = 1; idx <= columnSize; idx++) {
+//							@SuppressWarnings("unused")
+//							OWLObject binding = rs.getOWLObject(idx);
+//							//System.out.print(binding.toString() + ", ");
+//						}
+//						//System.out.print("\n");
+//					}
+//				}
+//
 				
 				long time = 0;
 				int count = 0;
 				
-				for (int i=0; i<nRuns; ++i){
+				//for (int i=0; i<nRuns; ++i){
 					long t1 = System.currentTimeMillis();
 					QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
 					int columnSize = rs.getColumnCount();
@@ -293,10 +337,11 @@ public class QuestOWLExample_OntowisTests {
 						//System.out.print("\n");
 					}
 					long t2 = System.currentTimeMillis();
-					time = time + (t2-t1);
+					//time = time + (t2-t1);
+                    time =  (t2-t1);
 					System.out.println("partial time:" + time);
 					rs.close();
-				}
+				//}
 
 				/*
 				 * Print the query summary
@@ -316,9 +361,10 @@ public class QuestOWLExample_OntowisTests {
 
 				System.out.println("Query Execution Time:");
 				System.out.println("=====================");
-				System.out.println((time/nRuns) + "ms");
+				//System.out.println((time/nRuns) + "ms");
 
-				results[j] = (time/nRuns)+"" ;
+				//results[j] = (time/nRuns)+"" ;
+                results.add(j, time);
 
 				System.out.println("The number of results:");
 				System.out.println("=====================");
@@ -332,6 +378,7 @@ public class QuestOWLExample_OntowisTests {
 			j++;
 		}
 
+        return results;
 	}
 
 	/**
@@ -381,74 +428,74 @@ public class QuestOWLExample_OntowisTests {
 		switch(string){
 		case "--MYSQLInt":{
 			Settings.obdaFile = ParamConst.MYSQLInt;
-			Settings.type = DbType.MYSQL;
+			Settings.type = DBType.MYSQL;
 			break;
 		}
 		case "--MYSQLIntView":{
 			Settings.obdaFile = ParamConst.MYSQLIntView;
-			Settings.type = DbType.MYSQL;
+			Settings.type = DBType.MYSQL;
 			break;
 		}
 		case "--MYSQLStr":{
 			Settings.obdaFile = ParamConst.MYSQLStr;
-			Settings.type = DbType.MYSQL;
+			Settings.type = DBType.MYSQL;
 			break;
 		}
 		case "--MYSQLStrView":{
 			Settings.obdaFile = ParamConst.MYSQLStrView;
-			Settings.type = DbType.MYSQL;
+			Settings.type = DBType.MYSQL;
 			break;
 		}
 		case "--POSTGRESInt":{
 			Settings.obdaFile = ParamConst.POSTGRESInt;
-			Settings.type = DbType.POSTGRES;
+			Settings.type = DBType.POSTGRES;
 			break;
 		}
 
 		case "--POSTGRESStr":{
 			Settings.obdaFile = ParamConst.POSTGRESStr;
-			Settings.type = DbType.POSTGRES;
+			Settings.type = DBType.POSTGRES;
 			break;
 		}
 		case "--POSTGRESIntView":{
 			Settings.obdaFile = ParamConst.POSTGRESIntView;
-			Settings.type = DbType.POSTGRES;
+			Settings.type = DBType.POSTGRES;
 			break;
 		}
 		case "--POSTGRESStrView":{
 			Settings.obdaFile = ParamConst.POSTGRESStrView;
-			Settings.type = DbType.POSTGRES;
+			Settings.type = DBType.POSTGRES;
 			break;
 		}
 		case "--POSTGRESSmallInt":{
 			Settings.obdaFile = ParamConst.POSTGRESInt;
-			Settings.type = DbType.SMALL_POSTGRES;
+			Settings.type = DBType.SMALL_POSTGRES;
 			break;
 		}
 
 		case "--POSTGRESSmallStr":{
 			Settings.obdaFile = ParamConst.POSTGRESStr;
-			Settings.type = DbType.SMALL_POSTGRES;
+			Settings.type = DBType.SMALL_POSTGRES;
 			break;
 		}
 		case "--POSTGRESSmallIntView":{
 			Settings.obdaFile = ParamConst.POSTGRESIntView;
-			Settings.type = DbType.SMALL_POSTGRES;
+			Settings.type = DBType.SMALL_POSTGRES;
 			break;
 		}
 		case "--POSTGRESSmallStrView":{
 			Settings.obdaFile = ParamConst.POSTGRESStrView;
-			Settings.type = DbType.SMALL_POSTGRES;
+			Settings.type = DBType.SMALL_POSTGRES;
 			break;
 		}
 		case "--DB2Int":{
 			Settings.obdaFile = ParamConst.DB2Int;
-			Settings.type = DbType.DB2;
+			Settings.type = DBType.DB2;
 			break;
 		}
 		case "--DB2IntView":{
 			Settings.obdaFile = ParamConst.DB2IntView;
-			Settings.type = DbType.DB2;
+			Settings.type = DBType.DB2;
 			break;
 		}
 		default :{
@@ -514,20 +561,25 @@ public class QuestOWLExample_OntowisTests {
 	
 	class QueryFactory {
 		
-		private final static int sizeQueriesArray = Constants.nFilters * Constants.nSqlJoins;
+		private final static int sizeQueriesArray = Constants.NUM_FILTERS * Constants.NUM_SQL_JOINS;
 		
 		String[] queriesOneSPARQL = new String[sizeQueriesArray];
 		String[] queriesTwoSPARQL = new String[sizeQueriesArray];
 		String[] queriesThreeSPARQL = new String[sizeQueriesArray];
+
+        String[] warmUpQueries = new String[Constants.NUM_WARM_UPS];
+
+		int[] filters = new int[Constants.NUM_FILTERS];
 		
-		int[] filters = new int[Constants.nFilters];
-		
-		QueryFactory(DbType type){
+		QueryFactory(DBType type){
 			fillFilters(type);
 			fillQueryArrays();
 		}
 		
 		private void fillQueryArrays (){
+
+            fillWarmUpQueries();
+
 			// 1 SPARQL Join
 			fillOneSparqlJoin();
 			
@@ -537,9 +589,15 @@ public class QuestOWLExample_OntowisTests {
 			// 3 SPARQL Joins
 			fillThreeSparqlJoins();
 		}
-		
-		
-		private void fillFilters(DbType type) {
+
+        private void fillWarmUpQueries() {
+            for(int i = 0; i < Constants.NUM_WARM_UPS; i++){
+                warmUpQueries[i] = String.format("SELECT ?x WHERE { ?x a <http://www.example.org/%dTab1> }", i);
+            }
+        }
+
+
+        private void fillFilters(DBType type) {
 			switch(type){
 			case MYSQL:	
 				filters[0] = 1; // 0.001
@@ -566,28 +624,28 @@ public class QuestOWLExample_OntowisTests {
 		
 		private void fillOneSparqlJoin(){
 			for( int i = 0; i < sizeQueriesArray; ++i ){
-				if( i < Constants.nFilters )	queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(1, filters[i % Constants.nFilters]); // 1 SQL Join
-				else if ( i < Constants.nFilters * 2 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(2, filters[i % Constants.nFilters]); // 2 SQL Joins
-				else if ( i < Constants.nFilters * 3 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(3, filters[i % Constants.nFilters]); // 3 SQL Joins
-				else if ( i < Constants.nFilters * 4 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(4, filters[i % Constants.nFilters]); // 4 SQL Joins
+				if( i < Constants.NUM_FILTERS)	queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(1, filters[i % Constants.NUM_FILTERS]); // 1 SQL Join
+				else if ( i < Constants.NUM_FILTERS * 2 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(2, filters[i % Constants.NUM_FILTERS]); // 2 SQL Joins
+				else if ( i < Constants.NUM_FILTERS * 3 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(3, filters[i % Constants.NUM_FILTERS]); // 3 SQL Joins
+				else if ( i < Constants.NUM_FILTERS * 4 ) queriesOneSPARQL[i] = QueryTemplates.oneSparqlJoinQuery(4, filters[i % Constants.NUM_FILTERS]); // 4 SQL Joins
 			}
 		}
 		
 		private void fillTwoSparqlJoins(){
 			for( int i = 0; i < sizeQueriesArray; ++i ){
-				if( i < Constants.nFilters )	queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(1, filters[i % Constants.nFilters]); // 1 SQL Join
-				else if ( i < Constants.nFilters * 2 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(2, filters[i % Constants.nFilters]); // 2 SQL Joins
-				else if ( i < Constants.nFilters * 3 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(3, filters[i % Constants.nFilters]); // 3 SQL Joins
-				else if ( i < Constants.nFilters * 4 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(4, filters[i % Constants.nFilters]); // 4 SQL Joins
+				if( i < Constants.NUM_FILTERS)	queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(1, filters[i % Constants.NUM_FILTERS]); // 1 SQL Join
+				else if ( i < Constants.NUM_FILTERS * 2 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(2, filters[i % Constants.NUM_FILTERS]); // 2 SQL Joins
+				else if ( i < Constants.NUM_FILTERS * 3 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(3, filters[i % Constants.NUM_FILTERS]); // 3 SQL Joins
+				else if ( i < Constants.NUM_FILTERS * 4 ) queriesTwoSPARQL[i] = QueryTemplates.twoSparqlJoinQuery(4, filters[i % Constants.NUM_FILTERS]); // 4 SQL Joins
 			}
 		}
 		
 		private void fillThreeSparqlJoins(){
 			for( int i = 0; i < sizeQueriesArray; ++i ){
-				if( i < Constants.nFilters )	queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(1, filters[i % Constants.nFilters]); // 1 SQL Join
-				else if ( i < Constants.nFilters * 2 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(2, filters[i % Constants.nFilters]); // 2 SQL Joins
-				else if ( i < Constants.nFilters * 3 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(3, filters[i % Constants.nFilters]); // 3 SQL Joins
-				else if ( i < Constants.nFilters * 4 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(4, filters[i % Constants.nFilters]); // 4 SQL Joins
+				if( i < Constants.NUM_FILTERS)	queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(1, filters[i % Constants.NUM_FILTERS]); // 1 SQL Join
+				else if ( i < Constants.NUM_FILTERS * 2 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(2, filters[i % Constants.NUM_FILTERS]); // 2 SQL Joins
+				else if ( i < Constants.NUM_FILTERS * 3 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(3, filters[i % Constants.NUM_FILTERS]); // 3 SQL Joins
+				else if ( i < Constants.NUM_FILTERS * 4 ) queriesThreeSPARQL[i] = QueryTemplates.threeSparqlJoinQuery(4, filters[i % Constants.NUM_FILTERS]); // 4 SQL Joins
 			}
 		}	
 	};

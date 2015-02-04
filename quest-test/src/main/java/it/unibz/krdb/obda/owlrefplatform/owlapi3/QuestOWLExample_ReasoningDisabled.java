@@ -57,8 +57,8 @@ public class QuestOWLExample_ReasoningDisabled {
 
     public static class Settings {
         static String obdaFile;
-        static DbType type;
-        static String tmapConfigFile;
+        static DbType dbType;
+        static String tMappingConfFile;
     }
 
     static class QueryFactory {
@@ -87,17 +87,17 @@ public class QuestOWLExample_ReasoningDisabled {
         }
 
         static String prefix = "PREFIX : <http://www.example.org/> \n";
-
-        static List<String> createSPARQLQueries(DbType dbType){
-
-            List<String> sparqls = new ArrayList<>();
-
-            sparqls.addAll(createSPARQLs_one_concepts(dbType));
-            sparqls.addAll(createSPARQLs_two_concepts(dbType));
-            sparqls.addAll(createSPARQLs_three_concepts(dbType));
-
-            return sparqls;
-        }
+//
+//        static List<String> createSPARQLQueries(DbType dbType){
+//
+//            List<String> sparqls = new ArrayList<>();
+//
+//            sparqls.addAll(createSPARQLs_one_concepts(dbType));
+//            sparqls.addAll(createSPARQLs_two_concepts(dbType));
+//            sparqls.addAll(createSPARQLs_three_concepts(dbType));
+//
+//            return sparqls;
+//        }
 
         static public List<String> createSPARQLs_three_concepts(DbType dbType){
             List<String> sparqls = new ArrayList<>();
@@ -112,8 +112,8 @@ public class QuestOWLExample_ReasoningDisabled {
                                             " WHERE {" +
                                             "?x a :A%d . ?x :R ?y . " +
                                             "?y a :A%d . ?y :R ?z . " +
-                                            "?z a :A%d . " +
-                                            "Filter (?x < %d) }",
+                                            "?z a :A%d . ?z :S ?w . " +
+                                            "Filter (?w < %d) }",
                                     i1, i2, i3, filter);
                             sparqls.add(sparql);
                         }
@@ -131,11 +131,11 @@ public class QuestOWLExample_ReasoningDisabled {
                         for (int filter : getFilters(dbType)) {
                             String sparql = String.format(
                                     "PREFIX : <http://www.example.org/> " +
-                                            "SELECT DISTINCT ?x ?y    " +
+                                            "SELECT DISTINCT ?x ?y ?z   " +
                                             " WHERE {" +
                                             "?x a :A%d. ?x :R ?y . " +
-                                            "?y a :A%d .  " +
-                                            "Filter (?x < %d) }",
+                                            "?y a :A%d. ?y :S ?z  .  " +
+                                            "Filter (?z < %d) }",
                                     i1, i2, filter);
                             sparqls.add(sparql);
                         }
@@ -154,8 +154,8 @@ public class QuestOWLExample_ReasoningDisabled {
                                 "PREFIX : <http://www.example.org/> " +
                                         " SELECT  DISTINCT ?x       " +
                                         " WHERE {" +
-                                        "?x a :A%d. " +
-                                        "Filter (?x < %d) }",
+                                        "?x a :A%d. ?x :S ?y ." +
+                                        "Filter (?y < %d) }",
                                 i1, filter);
                         sparqls.add(sparql);
 
@@ -167,7 +167,6 @@ public class QuestOWLExample_ReasoningDisabled {
     }
 
     /**
-     * @param resultsOne
      * @throws java.io.UnsupportedEncodingException
      * @throws java.io.FileNotFoundException
      */
@@ -178,21 +177,43 @@ public class QuestOWLExample_ReasoningDisabled {
         PrintWriter writer = new PrintWriter("src/main/resources/example/table.txt", "UTF-8");
         PrintWriter writerG = new PrintWriter("src/main/resources/example/graph.txt", "UTF-8");
 
+        writer.write(String.format("%s\n", "# group 1"));
         int j = 0;
-        while (j < 24) {
-            writer.println(resultsOne.get(j) + " & " + resultsTwo.get(j) + " & " + resultsThree.get(j));
-
-            if (j <= 5) {
-                String gline = "(1," + resultsOne.get(j) + ")" + "(2," + resultsTwo.get(j) + ")"
-                        + "(3," + resultsThree.get(j) + ")" + "(4," + resultsOne.get(j + 6) + ")"
-                        + "(5," + resultsTwo.get(j + 6) + ")" + "(6," + resultsThree.get(j + 6) + ")"
-                        + "(7," + resultsOne.get(j + 12) + ")" + "(8," + resultsTwo.get(j + 12) + ")"
-                        + "(9," + resultsThree.get(j + 12) + ")" + "(10," + resultsOne.get(j + 18) + ")"
-                        + "(11," + resultsTwo.get(j + 18) + ")" + "(12," + resultsThree.get(j + 18) + ")";
-                writerG.println(gline);
-            }
+        for(String result: resultsOne){
+            writer.write(String.format("%d %d %d %s\n", j, j / 6, j % 6, result));
             j++;
         }
+
+        writer.write(String.format("%s\n", "# group 2"));
+        j = 0;
+        for(String result: resultsTwo){
+            writer.write(String.format("%d %d %d %s\n", j, j / 6, j % 6, result));
+            j++;
+        }
+
+        writer.write(String.format("%s\n", "# group 3"));
+        j = 0;
+        for(String result: resultsThree){
+            writer.write(String.format("%d %d %d %s\n", j, j / 6, j % 6, result));
+            j++;
+        }
+
+
+//        int j = 0;
+//        while (j < 24) {
+//            writer.println(resultsOne.get(j) + " & " + resultsTwo.get(j) + " & " + resultsThree.get(j));
+//
+////            if (j <= 5) {
+////                String gline = "(1," + resultsOne.get(j) + ")" + "(2," + resultsTwo.get(j) + ")"
+////                        + "(3," + resultsThree.get(j) + ")" + "(4," + resultsOne.get(j + 6) + ")"
+////                        + "(5," + resultsTwo.get(j + 6) + ")" + "(6," + resultsThree.get(j + 6) + ")"
+////                        + "(7," + resultsOne.get(j + 12) + ")" + "(8," + resultsTwo.get(j + 12) + ")"
+////                        + "(9," + resultsThree.get(j + 12) + ")" + "(10," + resultsOne.get(j + 18) + ")"
+////                        + "(11," + resultsTwo.get(j + 18) + ")" + "(12," + resultsThree.get(j + 18) + ")";
+////                writerG.println(gline);
+////            }
+//            j++;
+//        }
         writer.close();
         writerG.close();
     }
@@ -234,7 +255,7 @@ public class QuestOWLExample_ReasoningDisabled {
         OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
         OBDAModel obdaModel = fac.getOBDAModel();
         ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(obdafile);
+        ioManager.load(Settings.obdaFile);
 
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
@@ -242,6 +263,7 @@ public class QuestOWLExample_ReasoningDisabled {
 		 */
         QuestPreferences preference = new QuestPreferences();
         preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        preference.setCurrentValueOf(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
 
 		/*
 		 * Create the instance of Quest OWL reasoner.
@@ -250,9 +272,7 @@ public class QuestOWLExample_ReasoningDisabled {
         factory.setOBDAController(obdaModel);
         factory.setPreferenceHolder(preference);
 
-
-
-        TMappingExclusionConfig config = TMappingExclusionConfig.parseFile(Settings.tmapConfigFile);
+        TMappingExclusionConfig config = TMappingExclusionConfig.parseFile(Settings.tMappingConfFile);
         factory.setExcludeFromTMappingsPredicates(config);
 
 
@@ -271,9 +291,9 @@ public class QuestOWLExample_ReasoningDisabled {
 
 
     public QuestOWLExample_ReasoningDisabled(DbType dbType, String obdaFile, String tMappingsConfFile){
-        this.obdafile = obdaFile;
-        this.dbType = dbType;
-        this.tMappingsConfFile = tMappingsConfFile;
+        Settings.obdaFile = obdaFile;
+        Settings.dbType = dbType;
+        Settings.tMappingConfFile = tMappingsConfFile;
     }
 
     /*
@@ -284,10 +304,10 @@ public class QuestOWLExample_ReasoningDisabled {
      *
      */
     final String owlfile = "src/main/resources/example/disableReasoning/ontowis-hierarchy.owl";
-    //final String obdafile = "src/main/resources/example/ontowis-5joins-int-view.obda";
-    final String obdafile;// = "src/main/resources/example/ontowis-5joins-int-view.obda";
+    //final String obdaFile = "src/main/resources/example/ontowis-5joins-int-view.obda";
+    //final String obdaFile;// = "src/main/resources/example/ontowis-5joins-int-view.obda";
 
-    private final DbType dbType;
+    //private final DbType dbType;
 
     // Exclude from T-Mappings
     String tMappingsConfFile;
@@ -303,11 +323,10 @@ public class QuestOWLExample_ReasoningDisabled {
         List<String> resultsTwo = new ArrayList<>();
         List<String> resultsThree = new ArrayList<>();
 
-
         // Run the tests on the queries
-        runQueries(conn, QueryFactory.createSPARQLs_one_concepts(dbType), resultsOne);
-        runQueries(conn, QueryFactory.createSPARQLs_two_concepts(dbType), resultsTwo);
-        runQueries(conn, QueryFactory.createSPARQLs_three_concepts(dbType), resultsTwo);
+        runQueries(conn, QueryFactory.createSPARQLs_one_concepts(Settings.dbType), resultsOne);
+        runQueries(conn, QueryFactory.createSPARQLs_two_concepts(Settings.dbType), resultsTwo);
+        runQueries(conn, QueryFactory.createSPARQLs_three_concepts(Settings.dbType), resultsThree);
 
         closeEverything(conn);
         generateFile(resultsOne, resultsTwo, resultsThree);
@@ -366,8 +385,7 @@ public class QuestOWLExample_ReasoningDisabled {
 				/*
 				 * Print the query summary
 				 */
-                QuestOWLStatement qst = st;
-                String sqlQuery = qst.getUnfolding(sparqlQuery);
+                String sqlQuery = st.getUnfolding(sparqlQuery);
 
                 System.out.println();
                 System.out.println("The input SPARQL query:");
@@ -383,12 +401,14 @@ public class QuestOWLExample_ReasoningDisabled {
                 System.out.println("=====================");
                 System.out.println((time/3) + "ms");
 
-                //results[j] = (time/3)+"" ;
-                results.set(j, (time/3) + "");
+                results.add(j, (time / 3) + "");
 
                 System.out.println("The number of results:");
                 System.out.println("=====================");
                 System.out.println(count);
+
+//                if(j > 7)
+//                    break;
 
             } finally {
                 if (st != null && !st.isClosed()) {
@@ -401,155 +421,26 @@ public class QuestOWLExample_ReasoningDisabled {
     }
 
 
-    public void runQuery0() throws Exception {
-
-		/*
-		 * Load the ontology from an external .owl file.
-		 */
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-
-		/*
-		 * Load the OBDA model from an external .obda file
-		 */
-        OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-        OBDAModel obdaModel = fac.getOBDAModel();
-        ModelIOManager ioManager = new ModelIOManager(obdaModel);
-        ioManager.load(obdafile);
-
-		/*
-		 * Prepare the configuration for the Quest instance. The example below shows the setup for
-		 * "Virtual ABox" mode
-		 */
-        QuestPreferences preference = new QuestPreferences();
-        preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-//		TEST preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
-
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
-        QuestOWLFactory factory = new QuestOWLFactory();
-        factory.setOBDAController(obdaModel);
-        factory.setPreferenceHolder(preference);
-
-		/*
-		 * T-Mappings Handling!!
-		 */
-        factory.setExcludeFromTMappingsPredicates(TMappingExclusionConfig.parseFile(tMappingsConfFile));
-
-        QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
-
-		/*
-		 * Prepare the data connection for querying.
-		 */
-        QuestOWLConnection conn = reasoner.getConnection();
-
-		/*
-		 * Get the book information that is stored in the database
-		 */
-
-        //String[] results = new String[20];
-
-        List<String> queries = QueryFactory.createSPARQLQueries(dbType);
-        List<String> results = new ArrayList<>(queries.size());
-
-        StringBuilder csvOut = new StringBuilder();
-
-        int j = 0;
-        for (String sparqlQuery : queries) {
-            //    String sparqlQuery = queries[j];
-            QuestOWLStatement st = conn.createStatement();
-            try {
-                long time = 0;
-                int count = 0;
-
-                for (int i = 0; i < 4; i++) {
-                    long t1 = System.currentTimeMillis();
-                    QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
-                    int columnSize = rs.getColumnCount();
-                    count = 0;
-                    while (rs.nextRow()) {
-                        count++;
-                        for (int idx = 1; idx <= columnSize; idx++) {
-                            OWLObject binding = rs.getOWLObject(idx);
-                            //System.out.print(binding.toString() + ", ");
-                        }
-                        //System.out.print("\n");
-                    }
-                    long t2 = System.currentTimeMillis();
-                    time = time + (t2 - t1);
-                    System.out.println("partial time:" + time);
-                    System.out.println("query results:" + count);
-                    rs.close();
-                }
-
-	 			/*
-                 * Print the query summary
-				 */
-                QuestOWLStatement qst = st;
-                String sqlQuery = qst.getUnfolding(sparqlQuery);
-
-                System.out.println();
-                System.out.println("The input SPARQL query:");
-                System.out.println("=======================");
-                System.out.println(sparqlQuery);
-                System.out.println();
-
-                System.out.println("The output SQL query:");
-                System.out.println("=====================");
-                System.out.println(sqlQuery);
-
-                System.out.println("Query Execution Time:");
-                System.out.println("=====================");
-                System.out.println((time / 4) + "ms");
-
-                //results.set(j, (time / 4) + "ms");
-                results.add(j, (time / 4) + "ms");
-
-                System.out.println("The number of results:");
-                System.out.println("=====================");
-                System.out.println(count);
-
-            } finally {
-                if (st != null && !st.isClosed()) {
-                    st.close();
-                }
-            }
-            j += 1;
-            //break;
-        }
-
-		/*
-		 * Close connection and resources
-		 */
-
-        if (conn != null && !conn.isClosed()) {
-            conn.close();
-        }
-        reasoner.dispose();
-    }
-
     /**
      * Main client program
      */
     public static void main(String[] args) {
 
-        String obdaFile = null;
         String arg;
+
         if(args.length > 0){
             arg = args[0];
+            Settings.tMappingConfFile = ParamConst.tMappingConfFiles[Integer.parseInt(args[1])];
         } else {
             arg = "--MYSQL-SMALL";
+            Settings.tMappingConfFile = ParamConst.tMappingConfFiles[1];
         }
-
-        String tMappingConfFile = ParamConst.tMappingConfFiles[Integer.parseInt(args[1])];
-
 
         defaults(arg);
 
         try {
             QuestOWLExample_ReasoningDisabled example = new QuestOWLExample_ReasoningDisabled(
-                    DbType.MYSQL, obdaFile, tMappingConfFile);
+                    DbType.MYSQL, Settings.obdaFile, Settings.tMappingConfFile);
             example.runQuery();
         } catch (Exception e) {
             e.printStackTrace();
@@ -561,41 +452,40 @@ public class QuestOWLExample_ReasoningDisabled {
         switch(string){
             case "--MYSQL-SMALL":{
                 Settings.obdaFile = ParamConst.MYSQL_SMALL_OBDA_FILE;
-                Settings.type = DbType.MYSQL;
+                Settings.dbType = DbType.MYSQL;
                 break;
             }
             case "--MYSQL":{
                 Settings.obdaFile = ParamConst.MYSQL_OBDA_FILE;
-                Settings.type = DbType.MYSQL;
+                Settings.dbType = DbType.MYSQL;
                 break;
             }
             case "--POSTGRES-SMALL":{
                 Settings.obdaFile = ParamConst.MYSQL_SMALL_OBDA_FILE;
-                Settings.type = DbType.MYSQL;
+                Settings.dbType = DbType.MYSQL;
                 break;
             }
             case "--POSTGRES":{
-                Settings.obdaFile = ParamConst.MYSQL_OBDA_FILE;
-                Settings.type = DbType.MYSQL;
+                Settings.obdaFile = ParamConst.POSTGRES_OBDA_FILE;
+                Settings.dbType = DbType.POSTGRES;
                 break;
             }
             case "--DB2-SMALL":{
-                Settings.obdaFile = ParamConst.MYSQL_SMALL_OBDA_FILE;
-                Settings.type = DbType.MYSQL;
+                Settings.obdaFile = ParamConst.POSTGRES_SMALL_OBDA_FILE;
+                Settings.dbType = DbType.POSTGRES;
                 break;
             }
             case "--DB2":{
-                Settings.obdaFile = ParamConst.MYSQL_OBDA_FILE;
-                Settings.type = DbType.MYSQL;
+                Settings.obdaFile = ParamConst.POSTGRES_OBDA_FILE;
+                Settings.dbType = DbType.POSTGRES;
                 break;
             }
 
             default :{
                 System.out.println(
                         "Options:\n\n"
-                                + "--mKeysON (default=off. SPECIFY AS FIRST OPTION!!)"
                                 + "\n\n"
-                                + "--POSTGRESInt; --POSTGRESIntView; --POSTGRESStr; --POSTGRESStrView"
+                                + "--MYSQL-SMALL; "
                                 + "--MYSQLInt; --MYSQLIntView; --MYSQLStr; --MYSQLStrView;"
                                 + "--DB2; "
                                 + "--MYSQL-VIEW; --POSTGRES-VIEW; --DB2-VIEW"

@@ -1,5 +1,5 @@
 [PrefixDeclaration]
-:		http://www.example.org/#
+:		http://www.example.org/
 
 [SourceDeclaration]
 sourceUri	viewTest
@@ -10,7 +10,7 @@ driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-A1
-target		<http://www.example.org/{Tab1.unique2Tab1}> a <http://www.example.org/A1> . 
+target		<http://www.example.org/{Tab1.unique2Tab1}> a <http://www.example.org/A1> .
 source		SELECT * FROM Tab1 WHERE twentyTab1 < 5
 
 mappingId	MAPID-A2
@@ -27,6 +27,10 @@ source		SELECT * FROM Tab4 WHERE twentyTab4 < 20
 
 mappingId	MAPID-R1
 target		<http://www.example.org/{Tab5.unique2Tab5}> <http://www.example.org/R> <http://www.example.org/{Tab5.unique1Tab5}> .
+source		SELECT * FROM Tab5
+
+mappingId	MAPID-S
+target		<http://www.example.org/{Tab5.unique2Tab5}> <http://www.example.org/S> {Tab5.unique1Tab5}^^xsd:integer .
 source		SELECT * FROM Tab5
 ]]
 

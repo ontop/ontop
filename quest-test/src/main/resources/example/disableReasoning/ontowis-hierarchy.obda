@@ -1,5 +1,5 @@
 [PrefixDeclaration]
-:		http://www.example.org/#
+:		http://www.example.org/
 
 [SourceDeclaration]
 sourceUri	viewTest
@@ -10,23 +10,27 @@ driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-A1
-target		<http://www.example.org/{Tab1.unique2Tab1}> a <http://www.example.org/A1> . 
+target		:A/{Tab1.unique2Tab1} a :A1 . 
 source		SELECT * FROM Tab1 WHERE twentyTab1 < 5
 
 mappingId	MAPID-A2
-target		<http://www.example.org/{Tab2.unique2Tab2}> a <http://www.example.org/A2> . 
+target		:A/{Tab2.unique2Tab2} a :A2 . 
 source		SELECT * FROM Tab2 WHERE twentyTab2 < 10
 
 mappingId	MAPID-A3
-target		<http://www.example.org/{Tab3.unique2Tab3}> a <http://www.example.org/A3> . 
+target		:A/{Tab3.unique2Tab3} a :A3 . 
 source		SELECT * FROM Tab3 WHERE twentyTab3 < 15
 
 mappingId	MAPID-A4
-target		<http://www.example.org/{Tab4.unique2Tab4}> a <http://www.example.org/A4> . 
+target		:A/{Tab4.unique2Tab4} a :A4 . 
 source		SELECT * FROM Tab4 WHERE twentyTab4 < 20
 
-mappingId	MAPID-R1
-target		<http://www.example.org/{Tab5.unique2Tab5}> <http://www.example.org/R> <http://www.example.org/{Tab5.unique1Tab5}> . 
+mappingId	MAPID-R
+target		:A/{Tab5.unique2Tab5} :R :A/{Tab5.unique1Tab5} . 
+source		SELECT * FROM Tab5
+
+mappingId	MAPID-S
+target		:A/{Tab5.unique2Tab5} :S {Tab5.unique1Tab5}^^xsd:integer . 
 source		SELECT * FROM Tab5
 ]]
 

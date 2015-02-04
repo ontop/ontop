@@ -9,7 +9,7 @@
 ]>
 
 
-<rdf:RDF xmlns="http://www.example.org/#"
+<rdf:RDF xmlns="http://www.example.org/"
      xml:base="http://www.example.org/"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
@@ -33,6 +33,23 @@
     <!-- http://www.example.org/R -->
 
     <owl:ObjectProperty rdf:about="http://www.example.org/R"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.example.org/S -->
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/S"/>
     
 
 
