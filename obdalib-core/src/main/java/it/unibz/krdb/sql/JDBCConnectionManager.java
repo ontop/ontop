@@ -564,7 +564,8 @@ public class JDBCConnectionManager {
 				try {
 					final String tblSchema = resultSet.getString("TABSCHEMA");
 					final String tblName = resultSet.getString("TABNAME");
-					final Set<List<String>> primaryKeys = getPrimaryKey(md, null, tblSchema, tblName);
+					final List<String> primaryKeys = getPrimaryKey(md, null, tblSchema, tblName);
+                    final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tblSchema, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tblSchema, tblName);
 					
 					TableDefinition td = new TableDefinition(tblName);
@@ -574,9 +575,12 @@ public class JDBCConnectionManager {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
 						final int dataType = rsColumns.getInt("DATA_TYPE");
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
-						final Reference reference = foreignKeys.get(columnName);
+                        final boolean isUnique = uniqueAttributes.contains(columnName);
+
+                        final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
-						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference,
+                                isNullable, /*typeName*/null, isUnique));
 					}
 					// Add this information to the DBMetadata
 					metadata.add(td);

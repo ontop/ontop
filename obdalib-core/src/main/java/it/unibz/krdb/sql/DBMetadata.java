@@ -20,6 +20,11 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.SetMultimap;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -374,9 +379,9 @@ public class DBMetadata implements Serializable {
 	 * @param pkeys
 	 * @param program
 	 */
-	public static Map<Predicate, List<Integer>> extractPKs(DBMetadata metadata,
+	public static Multimap<Predicate, List<Integer>> extractPKs(DBMetadata metadata,
 			List<CQIE> program) {
-		Map<Predicate, List<Integer>> pkeys = new HashMap<Predicate, List<Integer>>();
+		Multimap<Predicate, List<Integer>> pkeys = HashMultimap.create();
 		for (CQIE mapping : program) {
 			for (Function newatom : mapping.getBody()) {
 				Predicate newAtomPredicate = newatom.getFunctionSymbol();

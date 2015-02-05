@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
+import com.google.common.collect.HashMultimap;
 import it.unibz.krdb.obda.model.BuiltinPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
@@ -462,7 +463,7 @@ public class QuestStatement implements OBDAStatement {
 
 			log.debug("Translated query: \n{}", program);
 
-			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), new HashMap<Predicate, List<Integer>>());
+			DatalogUnfolder unfolder = new DatalogUnfolder(program.clone(), HashMultimap.<Predicate, List<Integer>>create());
 			removeNonAnswerQueries(program);
 
 			program = unfolder.unfold(program, "ans1");
