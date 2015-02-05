@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -266,7 +267,7 @@ public class JDBCConnectionManager {
 				final String tblCatalog = rsTables.getString("TABLE_CAT");
 				final String tblName = rsTables.getString("TABLE_NAME");
 				final String tblSchema = rsTables.getString("TABLE_SCHEM");
-				final ArrayList<String> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
+				final Set<List<String>> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
 				final Map<String, Reference> foreignKeys = getForeignKey(md, null, null, tblName);
 
 				TableDefinition td = new TableDefinition(tblName);
@@ -374,7 +375,7 @@ public class JDBCConnectionManager {
 				break;
 			}
 			
-			final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableSchema, tblName);
+			final Set<List<String>> primaryKeys = getPrimaryKey(md, null, tableSchema, tblName);
 			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
 
 			TableDefinition td = new TableDefinition(tableGivenName);
@@ -505,7 +506,7 @@ public class JDBCConnectionManager {
 					final String tblCatalog = resultSet.getString("TABLE_CATALOG");
 					final String tblSchema = resultSet.getString("TABLE_SCHEMA");
 					final String tblName = resultSet.getString("TABLE_NAME");
-					final ArrayList<String> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
+					final Set<List<String>> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, tblCatalog, tblSchema, tblName);
 
 					TableDefinition td = new TableDefinition(tblName);
@@ -563,7 +564,7 @@ public class JDBCConnectionManager {
 				try {
 					final String tblSchema = resultSet.getString("TABSCHEMA");
 					final String tblName = resultSet.getString("TABNAME");
-					final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tblSchema, tblName);
+					final Set<List<String>> primaryKeys = getPrimaryKey(md, null, tblSchema, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tblSchema, tblName);
 					
 					TableDefinition td = new TableDefinition(tblName);
@@ -637,7 +638,7 @@ public class JDBCConnectionManager {
 				ResultSet rsColumns = null;
 				try {
 					final String tblName = resultSet.getString("object_name");
-					final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
+					final Set<List<String>> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
 					
 					TableDefinition td = new TableDefinition(tblName);
@@ -756,7 +757,7 @@ public class JDBCConnectionManager {
 					else
 						tableOwner = loggedUser.toUpperCase();
 						
-					final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
+					final Set<List<String>> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
 					
 					TableDefinition td = new TableDefinition(tableGivenName);
@@ -825,11 +826,19 @@ public class JDBCConnectionManager {
 	
 	
 
-	/* Retrives the primary key(s) from a table */
-	private static ArrayList<String> getPrimaryKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
-		ArrayList<String> pk = new ArrayList<String>();
+	/* Retrives the primary key(s) AND  the unique attributes(s) from a table */
+	private static Set<List<String>>  getPrimaryKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
+		LinkedList<String> pk = new LinkedList<String>();
+		Set<List<String>> uniqueSet  = new HashSet<List<String>>();
+		
+		Set<List<String>> keysAndUniqueAttributes  = new HashSet<List<String>>();
+
+		
 		ResultSet rsPrimaryKeys = null;
+		ResultSet rsUnique = null;
+
 		try {
+			/*extracting Primary */
 			rsPrimaryKeys = md.getPrimaryKeys(tblCatalog, schema, table);
 			while (rsPrimaryKeys.next()) {
 				String colName = rsPrimaryKeys.getString("COLUMN_NAME");
@@ -838,12 +847,34 @@ public class JDBCConnectionManager {
 					pk.add(colName);
 				}
 			}
+			
+			/*extracting unique */
+			rsUnique= md.getIndexInfo(tblCatalog, schema, table, true	, true);
+			while (rsUnique.next()) {
+				LinkedList<String> unique = new LinkedList<String>();
+				String colName = rsUnique.getString("COLUMN_NAME");
+				String isUnique = rsUnique.getString("NON_UNIQUE");
+				if ((isUnique.equals("f")) && !(pk.contains(colName)) ) {
+					unique.add(colName);
+					uniqueSet.add(unique);
+				}
+			}
+			
+		/*closing result sets */
 		} finally {
 			if (rsPrimaryKeys != null) {
 				rsPrimaryKeys.close();
 			}
+			if (rsUnique != null) {
+				rsUnique.close();
+			}
 		}
-		return pk;
+		
+		/*Adding keys and Unique*/
+		keysAndUniqueAttributes.add(pk);
+		keysAndUniqueAttributes.addAll(uniqueSet);
+		
+		return keysAndUniqueAttributes;
 	}
 	
 	/* Retrieves the foreign key(s) from a table */
