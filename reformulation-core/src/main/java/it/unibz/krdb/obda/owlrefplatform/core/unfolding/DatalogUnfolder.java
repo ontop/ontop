@@ -1747,6 +1747,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
                 innerAtoms.remove(newatomidx);
                 newatomidx -= 1;
                 newatomcount -= 1;
+                break;
             }
 		}
 

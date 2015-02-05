@@ -38,7 +38,7 @@ import java.sql.Types;
 import java.util.LinkedList;
 import java.util.List;
 
-public class DatalogUnfoldingMultiplePrimaryKeyOptimizationTests extends TestCase {
+public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase {
 
 	DBMetadata metadata;
 
@@ -50,10 +50,10 @@ public class DatalogUnfoldingMultiplePrimaryKeyOptimizationTests extends TestCas
 	public void setUp() {
 		metadata = new DBMetadata();
 		TableDefinition table = new TableDefinition("TABLE");
-		table.setAttribute(1, new Attribute("col1", Types.INTEGER, true, false));
-		table.setAttribute(2, new Attribute("col2", Types.INTEGER, false, false));
-		table.setAttribute(3, new Attribute("col3", Types.INTEGER, false, false));
-		table.setAttribute(4, new Attribute("col4", Types.INTEGER, true, false));
+		table.setAttribute(1, new Attribute("col1", Types.INTEGER, true, null, 1, null, false));
+		table.setAttribute(2, new Attribute("col2", Types.INTEGER, false, null, 1, null, false));
+		table.setAttribute(3, new Attribute("col3", Types.INTEGER, false, null, 1, null, false));
+		table.setAttribute(4, new Attribute("col4", Types.INTEGER, false, null, 1, null, true));
 		metadata.add(table);
 		
 		
@@ -173,7 +173,7 @@ public class DatalogUnfoldingMultiplePrimaryKeyOptimizationTests extends TestCas
 		}
 		
 		System.out.println("output " + output);
-		assertEquals(output.toString(), 14, atomcount);
+		assertEquals(output.toString(), 1, atomcount);
 
 
 //        // q(x, y, m, o) :- name(s1, x),  name(s2, m),  lastname(s1, y), lastname(s2, o)
