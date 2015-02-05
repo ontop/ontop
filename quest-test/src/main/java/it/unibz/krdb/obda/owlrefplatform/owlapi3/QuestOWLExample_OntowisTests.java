@@ -182,7 +182,7 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * Generate File !
 		 */
-		PrintWriter writer = new PrintWriter("src/main/resources/example/table-0.txt", "UTF-8");
+		PrintWriter writer = new PrintWriter("src/main/resources/example/table.txt", "UTF-8");
 		PrintWriter writerG = new PrintWriter("src/main/resources/example/graph.txt", "UTF-8");
 
 		int sizeQueriesArray = Constants.NUM_FILTERS * Constants.NUM_SQL_JOINS;
@@ -195,11 +195,11 @@ public class QuestOWLExample_OntowisTests {
 
 			if (j<Constants.NUM_FILTERS){
                 String gline = "(1," + resultsOne.get(j) + ")" + "(2," + resultsTwo.get(j) + ")"
-                        + "(3," + resultsThree.get(j) + ")" + "(4," + resultsOne.get(j + 6) + ")"
-                        + "(5," + resultsTwo.get(j + 6) + ")" + "(6," + resultsThree.get(j + 6) + ")"
-                        + "(7," + resultsOne.get(j + 12) + ")" + "(8," + resultsTwo.get(j + 12) + ")"
-                        + "(9," + resultsThree.get(j + 12) + ")" + "(10," + resultsOne.get(j + 18) + ")"
-                        + "(11," + resultsTwo.get(j + 18) + ")" + "(12," + resultsThree.get(j + 18) + ")";
+                        + "(3," + resultsThree.get(j) + ")" + "(4," + resultsOne.get(j + nF*1) + ")"
+                        + "(5," + resultsTwo.get(j + nF*1) + ")" + "(6," + resultsThree.get(j + nF*1) + ")"
+                        + "(7," + resultsOne.get(j + nF*2) + ")" + "(8," + resultsTwo.get(j + nF*2) + ")"
+                        + "(9," + resultsThree.get(j + nF*2) + ")" + "(10," + resultsOne.get(j + nF*3) + ")"
+                        + "(11," + resultsTwo.get(j + nF*3) + ")" + "(12," + resultsThree.get(j + nF*3) + ")";
                 writerG.println(gline);
 			}
 			j++;
