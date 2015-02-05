@@ -1,9 +1,9 @@
 package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
+import com.google.common.collect.ImmutableSet;
 import fj.F;
-import fj.data.HashMap;
-import fj.data.List;
-import fj.data.Option;
+import fj.P2;
+import fj.data.*;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions;
@@ -39,7 +39,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
          */
         List<Function> bodyAtoms = extractBodyAtoms(initialRule);
 
-        List<Function> unifiableDataAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
+        List<Function> dataAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
             @Override
             public Boolean f(Function atom) {
                 return atom.isDataFunction();
@@ -55,10 +55,61 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
         /**
          * TODO: explain
          */
-        typingSubstitution = aggregateRuleAndProposals(Option.<Unifier>none(), unifiableDataAtoms, childProposalIndex);
+        List<Function> unifiableDataAtoms = computeUnifiableDataAtoms(dataAtoms, childProposalIndex);
+
+        /**
+         * TODO: explain
+         */
+        typingSubstitution = aggregateRuleAndProposals(unifiableDataAtoms, childProposalIndex);
 
         typedRule = constructTypedRule(initialRule, typingSubstitution, unifiableDataAtoms, filterAtoms);
 
+    }
+
+    /**
+     * Converts each data atom into an unifiable atom thanks to its corresponding type proposal.
+     * If no type proposal corresponds to a data atom, it means it is already unifiable.
+     *
+     * Some of these conversions may introduce new non-conflicting variables.
+     *
+     */
+    private static List<Function> computeUnifiableDataAtoms(final List<Function> dataAtoms,
+                                                            final HashMap<Predicate, PredicateLevelProposal> childProposalIndex) {
+
+        /**
+         * All the variables are supposed to be present in the data atoms (safe Datalog rules).
+         *
+         * Append-only Set.
+         */
+        final java.util.Set<Variable> alreadyKnownRuleVariables = extractVariables(dataAtoms);
+
+        return dataAtoms.map(new F<Function, Function>() {
+            @Override
+            public Function f(Function atom) {
+                Option<PredicateLevelProposal> optionalChildPredProposal = childProposalIndex.get(atom.getFunctionSymbol());
+                /**
+                 * No child proposal --> return the original atom.
+                 */
+                if (optionalChildPredProposal.isNone())
+                    return atom;
+
+                /**
+                 * Converts into an unifiable atom thanks to the type proposal.
+                 *
+                 * If new variables are created, they are added to the tracking set.
+                 *
+                 */
+                TypeProposal childTypeProposal = optionalChildPredProposal.some().getTypeProposal();
+                P2<Function, java.util.Set<Variable>> newAtomAndVariables = childTypeProposal.convertIntoUnifiableAtom(atom,
+                        ImmutableSet.copyOf(alreadyKnownRuleVariables));
+
+                // Appends new variables
+                alreadyKnownRuleVariables.addAll(newAtomAndVariables._2());
+
+                Function unifiableAtom = newAtomAndVariables._1();
+                return unifiableAtom;
+            }
+        });
     }
 
     @Override
@@ -73,7 +124,17 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
 
 
     /**
-     * Tail-recursive method that "iterates" over the body atoms of a given rule defining the parent predicate.
+     * Entry point for the homonym tail-recursive function.
+     */
+    private static Unifier aggregateRuleAndProposals(final List<Function> unifiableBodyAtoms,
+                                                     final HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
+            throws TypeLiftTools.MultiTypeException {
+        return aggregateRuleAndProposals(Option.<Unifier>none(), unifiableBodyAtoms, childProposalIndex);
+    }
+
+
+    /**
+     * Tail-recursive function that "iterates" over the body atoms of a given rule defining the parent predicate.
      *
      * For a given body atom, tries to make the *union* (NOT composition) of the current substitution function with
      * the one deduced from the child proposal corresponding to the current atom.
@@ -83,7 +144,8 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
      */
     private static Unifier aggregateRuleAndProposals(final Option<Unifier> optionalSubstitutionFunction,
                                                      final List<Function> remainingBodyAtoms,
-                                                     final HashMap<Predicate, PredicateLevelProposal> childProposalIndex) throws TypeLiftTools.MultiTypeException {
+                                                     final HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
+            throws TypeLiftTools.MultiTypeException {
         /**
          * Stop condition (no further body atom).
          */
@@ -160,21 +222,30 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
      *
      */
     private static CQIE constructTypedRule(CQIE initialRule, Unifier typingSubstitution, List<Function> unifiableDataAtoms, List<Function> filterAtoms) {
-        Function typedHead = initialRule.getHead();
-        UnifierUtilities.applyUnifier(typedHead, typingSubstitution);
+        Function newHead = initialRule.getHead();
+        // SIDE-EFFECT: makes the new head typed.
+        UnifierUtilities.applyUnifier(newHead, typingSubstitution);
 
-        List<Function> untypedDataAtoms = untypeDataAtoms(unifiableDataAtoms);
+        List<Function> allAtoms = unifiableDataAtoms.append(filterAtoms);
 
-        java.util.List<Function> typedRuleBody = new ArrayList<>(untypedDataAtoms.append(filterAtoms).toCollection());
-        CQIE typedRule = OBDADataFactoryImpl.getInstance().getCQIE(typedHead, typedRuleBody);
+        java.util.List<Function> typedRuleBody = new ArrayList<>(allAtoms.toCollection());
+        CQIE typedRule = OBDADataFactoryImpl.getInstance().getCQIE(newHead, typedRuleBody);
         return typedRule;
     }
 
     /**
-     * TODO: implement it
+     * TODO: describe
+     *
      */
-    private static List<Function> untypeDataAtoms(List<Function> unifiableDataAtoms) {
-        return null;
+    private static java.util.Set<Variable> extractVariables(List<Function> atoms) {
+        List<Variable> variableList = atoms.bind(new F<Function, List<Variable>>() {
+            @Override
+            public List<Variable> f(Function atom) {
+                return List.iterableList(atom.getVariables());
+            }
+        });
+
+        return new java.util.HashSet(variableList.toCollection());
     }
 
 }

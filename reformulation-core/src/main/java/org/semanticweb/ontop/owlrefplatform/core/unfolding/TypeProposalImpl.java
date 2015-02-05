@@ -2,14 +2,10 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import fj.F;
 import fj.data.List;
-import fj.data.Option;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions;
 
-import java.util.ArrayList;
-
-import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift.applyTypeProposal;
+import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.applyTypeProposal;
 
 /**
  * Base class
@@ -58,91 +54,6 @@ public abstract class TypeProposalImpl implements TypeProposal {
     @Override
     public Predicate getPredicate() {
         return proposedAtom.getFunctionSymbol();
-    }
-
-    /**
-     * Removes the type for a given term.
-     * This method also deals with special cases that should not be untyped.
-     *
-     * Note that type removal only concern functional terms.
-     * If the returned value is None, the term must be eliminated.
-     *
-     */
-    protected static Option<Term> untypeTerm(Term term) {
-        /**
-         * Types are assumed to functional terms.
-         *
-         * Other type of terms are not concerned.
-         */
-        if (!(term instanceof Function)) {
-            return Option.some(term);
-        }
-
-        /**
-         * Special case that should not be untyped:
-         *   - Aggregates
-         */
-        if (DatalogUnfolder.detectAggregateInArgument(term))
-            return Option.some(term);
-
-        Function functionalTerm = (Function) term;
-        java.util.List<Term> functionArguments = functionalTerm.getTerms();
-        Predicate functionSymbol = functionalTerm.getFunctionSymbol();
-
-        /**
-         * Special case: URI templates --> to be removed.
-         *
-         */
-        boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
-        if (isURI) {
-            return Option.none();
-        }
-
-        /**
-         * Other functional terms are expected to be type
-         * and to have an arity of 1.
-         *
-         * Raises an exception if it is not the case.
-         */
-        if (functionArguments.size() != 1) {
-            throw new RuntimeException("Removing types of non-unary functional terms is not supported.");
-        }
-        return Option.some(functionArguments.get(0));
-    }
-
-    /**
-     * TODO: describe it
-     */
-    @Override
-    public List<CQIE> removeHeadTypes(List<CQIE> initialRules) {
-        return initialRules.map(new F<CQIE, CQIE>() {
-            @Override
-            public CQIE f(CQIE initialRule) {
-                Function initialHead = initialRule.getHead();
-                List<Term> initialHeadTerms =  List.iterableList(initialHead.getTerms());
-
-                /**
-                 * Computes untyped arguments for the head predicate.
-                 */
-                List<Term> newHeadTerms = Option.somes(initialHeadTerms.map(new F<Term, Option<Term>>() {
-                    @Override
-                    public Option<Term> f(Term term) {
-                        return untypeTerm(term);
-                    }
-                }));
-
-                /**
-                 * Builds a new rule.
-                 * TODO: modernize the CQIE API (make it immutable).
-                 */
-                CQIE newRule = initialRule.clone();
-                Function newHead = (Function)initialHead.clone();
-                newHead.updateTerms(new ArrayList<>(newHeadTerms.toCollection()));
-                newRule.updateHead(newHead);
-                return newRule;
-            }
-        });
-
     }
 
 }

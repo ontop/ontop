@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.removeHeadTypes;
 import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.updateMultiTypedFunctionSymbolIndex;
 
 /**
@@ -66,8 +67,7 @@ public class TypeLift {
         /**
          * Navigates into the tree until reaching the leftmost leaf.
          */
-        TreeZipper<TypeLiftNode> leftmostTreeZipper =
-                navigateToLeftmostLeaf(initialRootZipper);
+        TreeZipper<TypeLiftNode> leftmostTreeZipper = navigateToLeftmostLeaf(initialRootZipper);
 
 
         /**
@@ -427,7 +427,7 @@ public class TypeLift {
              */
             else {
                 List<CQIE> initialRules = label.getDefinitionRules();
-                List<CQIE> updatedRules = removeTypesFromRules(initialRules, optionalProposal.some().getTypeProposal());
+                List<CQIE> updatedRules = removeTypesFromRules(initialRules);
                 return treeZipper.setLabel(label.newRulesNoProposal(updatedRules));
             }
         }
@@ -437,11 +437,9 @@ public class TypeLift {
      * Removes types from rules.
      *
      * Returns updated rules.
-     *
-     * TODO: move the code here. No need to transfer it to type proposals.
      */
-    private static List<CQIE> removeTypesFromRules(final List<CQIE> initialRules, final TypeProposal typeProposal) {
-        return typeProposal.removeHeadTypes(initialRules);
+    private static List<CQIE> removeTypesFromRules(final List<CQIE> initialRules) {
+        return removeHeadTypes(initialRules);
     }
 
 

@@ -1,5 +1,7 @@
 package org.semanticweb.ontop.model;
 
+import com.google.common.collect.ImmutableSet;
+import fj.P2;
 import fj.data.List;
 
 /**
@@ -23,20 +25,9 @@ public interface TypeProposal {
     public List<CQIE> applyType(List<CQIE> initialRules);
 
     /**
-     * TODO: remove
-     *
-     */
-    @Deprecated
-    public List<CQIE> removeHeadTypes(List<CQIE> initialRules);
-
-    /**
-     * TODO: remove
-     */
-    @Deprecated
-    public List<CQIE> propagateChildArityChangeToBodies(List<CQIE> initialRules);
-
-    /**
      * TODO: explain
+     *
+     * Returns the unifiable body atom and the new variable created.
      */
-    Function prepareBodyAtomForUnification(Function bodyAtom, java.util.Set<Variable> alreadyKnownRuleVariables);
+    P2<Function, java.util.Set<Variable>> convertIntoUnifiableAtom(Function bodyAtom, ImmutableSet<Variable> alreadyKnownRuleVariables);
 }

@@ -1,31 +1,22 @@
 package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
-import fj.Effect;
-import fj.F;
-import fj.Ord;
-import fj.P2;
+import com.google.common.collect.ImmutableSet;
+import fj.*;
 import fj.data.List;
 import fj.data.Set;
 import fj.data.Stream;
 import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 
 import java.util.UUID;
 
 /**
- * For URI templates with more than one variable.
- *
- * TODO: implement it
- * All URI templates.
+ * For all URI templates.
  *
  */
 public class UriTemplateTypeProposal extends TypeProposalImpl {
 
-    /**
-     * Indexes in the proposed atom.
-     * They remain valid in the unifiable atom (since new variables are added at the right).
-     */
-    private final List<Integer> uriTemplateIndexesInReverseOrder;
 
     private final Set<Variable> extraVariables;
     private final Function unifiableAtom;
@@ -33,7 +24,6 @@ public class UriTemplateTypeProposal extends TypeProposalImpl {
     public UriTemplateTypeProposal(Function proposedAtom) {
         super(proposedAtom);
 
-        uriTemplateIndexesInReverseOrder = locateMultiVariateURITemplates(proposedAtom);
         extraVariables = extractExtraVariables(proposedAtom);
         unifiableAtom = insertExtraVariables(proposedAtom, extraVariables);
     }
@@ -45,54 +35,14 @@ public class UriTemplateTypeProposal extends TypeProposalImpl {
 
 
     /**
-     * TODO: remove
-     */
-    @Deprecated
-    @Override
-    public List<CQIE> propagateChildArityChangeToBodies(List<CQIE> initialRules) {
-        final Predicate predicate = getPredicate();
-
-        return initialRules.map(new F<CQIE, CQIE>() {
-            @Override
-            public CQIE f(CQIE initialRule) {
-                final CQIE newRule = initialRule.clone();
-                /**
-                 * Updates the body atom(s?) corresponding to this type proposal.
-                 */
-                Stream.iterableStream(newRule.getBody()).foreach(new Effect<Function>() {
-                    @Override
-                    public void e(Function atom) {
-                        if (atom.getFunctionSymbol().equals(predicate)) {
-                            final java.util.List<Term> subTerms = atom.getTerms();
-
-                            /**
-                             * Removes the variables corresponding to URI templates.
-                             */
-                            uriTemplateIndexesInReverseOrder.foreach(new Effect<Integer>() {
-                                @Override
-                                public void e(Integer index) {
-                                    // UGLY!!! But imposed by the current API....
-                                    subTerms.remove(index);
-                                }
-                            });
-                        }
-                    }
-                });
-                return newRule;
-            }
-        });
-    }
-
-
-    /**
      * Adds new variables at the right in the atom.
      * Makes sure these variable names are new (no conflict introduced).
      */
     @Override
-    public Function prepareBodyAtomForUnification(Function bodyAtom, java.util.Set<Variable> alreadyKnownRuleVariables) {
+    public P2<Function, java.util.Set<Variable>> convertIntoUnifiableAtom(Function bodyAtom, ImmutableSet<Variable> alreadyKnownRuleVariables) {
         Set<Variable> renamedExtraVariables = giveNonConflictingNamesToVariables(extraVariables, alreadyKnownRuleVariables);
         Function newAtom = insertExtraVariables(bodyAtom, renamedExtraVariables);
-        return newAtom;
+        return P.p(newAtom, (java.util.Set<Variable>) ImmutableSet.copyOf(renamedExtraVariables));
     }
 
     /**
@@ -115,20 +65,6 @@ public class UriTemplateTypeProposal extends TypeProposalImpl {
         });
     }
 
-    private static List<Integer> locateMultiVariateURITemplates(Function proposedAtom) {
-        return Stream.iterableStream(proposedAtom.getTerms()).zipIndex().filter(new F<P2<Term, Integer>, Boolean>() {
-            @Override
-            public Boolean f(P2<Term, Integer> pair) {
-                return TypeLift.isURITemplate(pair._1());
-            }
-        }).map(new F<P2<Term, Integer>, Integer>() {
-            @Override
-            public Integer f(P2<Term, Integer> pair) {
-                return pair._2();
-            }
-        }).toList().reverse();
-    }
-
     /**
      * "Extracts" the other variables from the URI template
      */
@@ -144,7 +80,7 @@ public class UriTemplateTypeProposal extends TypeProposalImpl {
         final Stream<Function> uriTemplateTerms = Stream.iterableStream(proposedAtom.getTerms()).filter(new F<Term, Boolean>() {
             @Override
             public Boolean f(Term term) {
-                return TypeLift.isURITemplate(term);
+                return TypeLiftTools.isURITemplate(term);
             }
         }).map(new F<Term, Function>() {
             @Override

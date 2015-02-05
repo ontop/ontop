@@ -1,10 +1,12 @@
 package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
-import fj.F;
-import fj.data.List;
+import com.google.common.collect.ImmutableSet;
+import fj.P;
+import fj.P2;
 import org.semanticweb.ontop.model.*;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Normal case.
@@ -20,17 +22,8 @@ public class BasicTypeProposal extends TypeProposalImpl {
         return getProposedAtom();
     }
 
-    /**
-     * NO EFFECT because this type proposal cannot provoke any arity change.
-     */
     @Override
-    @Deprecated
-    public List<CQIE> propagateChildArityChangeToBodies(List<CQIE> initialRules) {
-        return initialRules;
-    }
-
-    @Override
-    public Function prepareBodyAtomForUnification(Function bodyAtom, java.util.Set<Variable> alreadyKnownRuleVariables) {
-        return bodyAtom;
+    public P2<Function, Set<Variable>> convertIntoUnifiableAtom(Function bodyAtom, ImmutableSet<Variable> alreadyKnownRuleVariables) {
+        return P.p(bodyAtom, (Set<Variable>) new HashSet<Variable>());
     }
 }

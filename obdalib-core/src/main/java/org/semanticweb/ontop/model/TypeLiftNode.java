@@ -1,6 +1,5 @@
 package org.semanticweb.ontop.model;
 
-import fj.P3;
 import fj.data.List;
 import fj.data.Option;
 

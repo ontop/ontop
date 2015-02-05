@@ -55,11 +55,10 @@ public class TypePropagatingSubstitution extends Unifier {
      *
      * TODO: return a generic Substitution (need merging with v1)
      */
-    public static TypePropagatingSubstitution createTypePropagatingSubstitution(TypeProposal typeProposal, Function bodyAtom,
+    public static TypePropagatingSubstitution createTypePropagatingSubstitution(TypeProposal typeProposal, Function untypedAtom,
                                                                  Multimap<Predicate, Integer> multiTypedPredicateIndex) {
 
         Function typedAtom = typeProposal.getUnifiableAtom();
-        Function untypedAtom = typeProposal.prepareBodyAtomForUnification(bodyAtom);
 
 
         /**
