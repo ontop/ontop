@@ -1,10 +1,8 @@
 package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.Datatype;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
@@ -12,11 +10,11 @@ import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This visitor class remove * in select clause and substitute it with the columns name
@@ -147,10 +145,12 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
                         String aliasString = aliasName.getName();
 
+                        SelectExpressionItem columnAlias = new SelectExpressionItem(new Column(tableName, aliasString));
                         //construct a column from alias name
-                        if (variables.contains(fac.getVariable(aliasString)) || variables.contains(fac.getVariable(aliasString.toLowerCase())) ) {
+                        if (variables.contains(fac.getVariable(aliasString)) || variables.contains(fac.getVariable(aliasString.toLowerCase()))
+                                || variables.contains(fac.getVariable(columnAlias.toString())) || variables.contains(fac.getVariable(aliasString.toString().toLowerCase()))) {
 
-                                columnNames.add(new SelectExpressionItem(new Column(tableName, aliasString)));
+                                columnNames.add(columnAlias);
 
                         }
 
@@ -158,9 +158,9 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
                         String columnName = ((Column)((SelectExpressionItem) expr).getExpression()).getColumnName();
 
-                        if (variables.contains(fac.getVariable(columnName)) || variables.contains(fac.getVariable(columnName.toLowerCase()))) {
-
                             SelectExpressionItem column = new SelectExpressionItem(new Column(tableName, columnName));
+                        if (variables.contains(fac.getVariable(columnName)) || variables.contains(fac.getVariable(columnName.toLowerCase()))
+                                || variables.contains(fac.getVariable(column.toString())) || variables.contains(fac.getVariable(columnName.toString().toLowerCase()))) {
                                 columnNames.add(column);
 
                         }
@@ -300,11 +300,10 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
 
             String columnFromMetadata= metadata.getAttributeName(tableFullName, pos);
+            SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, columnFromMetadata));
             //construct a column as table.column
-            if (variables.contains(fac.getVariable(columnFromMetadata)) || variables.contains(fac.getVariable(columnFromMetadata.toLowerCase()))) {
-
-
-                    SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, columnFromMetadata));
+            if (variables.contains(fac.getVariable(columnFromMetadata)) || variables.contains(fac.getVariable(columnFromMetadata.toLowerCase()))
+                    || variables.contains(fac.getVariable(columnName.toString())) || variables.contains(fac.getVariable(columnName.toString().toLowerCase()))){
 
                     columns.add(columnName);
 
