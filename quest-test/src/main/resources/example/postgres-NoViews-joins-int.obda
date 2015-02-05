@@ -10,7 +10,7 @@ driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPPING-ID2
-target     <http://www.example.org/{Tab1.unique2Tab1}> a <http://www.example.org/1Tab1>; <http://www.example.org/Tab2unique2Tab2> {Tab2.unique1Tab2}^^xsd:integer .
+target     <http://www.example.org/{Tab0.unique2Tab1}> a <http://www.example.org/1Tab1>; <http://www.example.org/Tab2unique2Tab2> {Tab2.unique1Tab2}^^xsd:integer .
 source   Select * from Tab0  join Tab2  ON Tab0.unique2Tab1= Tab2.unique2Tab2
 
 mappingId	MAPPING-ID3

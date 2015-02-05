@@ -53,6 +53,18 @@
     
 
 
+    <!-- http://www.example.org/S1 -->
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/S1"/>
+    
+
+
+    <!-- http://www.example.org/S2 -->
+
+    <owl:DatatypeProperty rdf:about="http://www.example.org/S2"/>
+    
+
+
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //

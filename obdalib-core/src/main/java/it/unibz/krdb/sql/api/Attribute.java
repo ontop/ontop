@@ -145,4 +145,8 @@ public class Attribute implements Serializable{
 	public void setSQLTypeName(String typeName) {
 		this.typeName = typeName;
 	}
+
+    public boolean isUnique() {
+        return unique;
+    }
 }

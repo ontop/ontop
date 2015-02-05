@@ -20,7 +20,15 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.BooleanOperationPredicate;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.SetMultimap;
+
+        import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
@@ -369,7 +377,6 @@ public class DBMetadata implements Serializable {
 	 * info in the metadata.
 	 * 
 	 * @param metadata
-	 * @param pkeys
 	 * @param program
 	 */
 	public static Multimap<Predicate, List<Integer>> extractPKs(DBMetadata metadata,
@@ -386,6 +393,8 @@ public class DBMetadata implements Serializable {
 				String newAtomName = newAtomPredicate.toString();
 				DataDefinition def = metadata.getDefinition(newAtomName);
 				if (def != null) {
+
+                    // primary keys
 					List<Integer> pkeyIdx = new LinkedList<Integer>();
 					for (int columnidx = 1; columnidx <= def.getNumOfAttributes(); columnidx++) {
 						Attribute column = def.getAttribute(columnidx);
@@ -396,9 +405,18 @@ public class DBMetadata implements Serializable {
 					if (!pkeyIdx.isEmpty()) {
 						pkeys.put(newatom.getFunctionSymbol(), pkeyIdx);
 					}
+
+                    // unique constraints
+                    for (int columnidx = 1; columnidx <= def.getNumOfAttributes(); columnidx++) {
+                        Attribute column = def.getAttribute(columnidx);
+                        if (column.isUnique()) {
+                            pkeys.put(newatom.getFunctionSymbol(), ImmutableList.of(columnidx));
+                        }
+                    }
 				}
 			}
 		}
+
 		return pkeys;
 	}
 }
