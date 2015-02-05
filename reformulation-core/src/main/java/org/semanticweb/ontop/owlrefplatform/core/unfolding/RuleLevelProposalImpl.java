@@ -5,7 +5,6 @@ import fj.data.HashMap;
 import fj.data.List;
 import fj.data.Option;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.impl.CQIEImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
@@ -15,6 +14,7 @@ import java.util.ArrayList;
 
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions.union;
 import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.computeTypePropagatingSubstitution;
+import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.extractBodyAtoms;
 
 /**
  * TODO: Name: should we still call it a proposal?
@@ -27,9 +27,17 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
     private final Unifier typingSubstitution;
     private final CQIE typedRule;
 
-    public RuleLevelProposalImpl(CQIE initialRule, HashMap<Predicate, PredicateLevelProposal> childProposalIndex) throws TypeLift.MultiTypeException {
+    /**
+     * TODO: describe
+     * May throw a MultiTypeException
+     */
+    public RuleLevelProposalImpl(CQIE initialRule, HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
+            throws TypeLiftTools.MultiTypeException {
 
-        List<Function> bodyAtoms = List.iterableList(initialRule.getBody());
+        /**
+         * All body atoms (even these nested in left-joins)
+         */
+        List<Function> bodyAtoms = extractBodyAtoms(initialRule);
 
         List<Function> unifiableDataAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
             @Override
@@ -75,7 +83,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
      */
     private static Unifier aggregateRuleAndProposals(final Option<Unifier> optionalSubstitutionFunction,
                                                      final List<Function> remainingBodyAtoms,
-                                                     final HashMap<Predicate, PredicateLevelProposal> childProposalIndex) throws TypeLift.MultiTypeException {
+                                                     final HashMap<Predicate, PredicateLevelProposal> childProposalIndex) throws TypeLiftTools.MultiTypeException {
         /**
          * Stop condition (no further body atom).
          */
@@ -131,7 +139,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
              * This happens when multiple types are proposed for this predicate.
              */
             catch(Substitutions.SubstitutionException e) {
-                throw new TypeLift.MultiTypeException();
+                throw new TypeLiftTools.MultiTypeException();
             }
         }
         /**

@@ -39,15 +39,6 @@ import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.
  */
 public class TypeLift {
 
-    /**
-     * Thrown after receiving an SubstitutionException.
-     *
-     * This indicates that the predicate for which the type propagation
-     * has been tried should be considered as multi-typed.
-     */
-    protected static class MultiTypeException extends Exception {
-    }
-
     private static Logger LOGGER = LoggerFactory.getLogger(TypeLift.class);
 
     /**
@@ -88,8 +79,7 @@ public class TypeLift {
         /**
          * Computes a new Datalog program by applying type lifting.
          */
-        TreeZipper<TypeLiftNode> newTreeZipper = liftTypesOnTreeZipper(
-                leftmostTreeZipper, multiTypedFunctionSymbolIndex);
+        TreeZipper<TypeLiftNode> newTreeZipper = liftTypesOnTreeZipper(leftmostTreeZipper, multiTypedFunctionSymbolIndex);
         TreeBasedDatalogProgram newDatalogProgram = TreeBasedDatalogProgram.fromTypeLiftTree(newTreeZipper.toTree());
 
         LOGGER.debug(newDatalogProgram.toString());
@@ -105,8 +95,7 @@ public class TypeLift {
      *  (even if not optimized by the JVM, should not be too profound (tree depth)).
      *
      */
-    private static TreeZipper<TypeLiftNode> navigateToLeftmostLeaf(
-            TreeZipper<TypeLiftNode> currentZipper) {
+    private static TreeZipper<TypeLiftNode> navigateToLeftmostLeaf(TreeZipper<TypeLiftNode> currentZipper) {
 
         Option<TreeZipper<TypeLiftNode>> optionalFirstChild = currentZipper.firstChild();
         /**
@@ -142,7 +131,8 @@ public class TypeLift {
          * This loop breaks after the evaluation of the latter.
          *
          */
-        while (true) {
+        boolean rootHasBeenEvaluated = false;
+        while (!rootHasBeenEvaluated) {
             /**
              * Main operation: updates the current node and its children.
              */
@@ -164,18 +154,9 @@ public class TypeLift {
              */
             else {
                 final Option<TreeZipper<TypeLiftNode>> optionalParent = currentZipper.parent();
-                if (optionalParent.isSome()) {
+                rootHasBeenEvaluated = optionalParent.isNone();
+                if (!rootHasBeenEvaluated) {
                     currentZipper = currentZipper.parent().some();
-                }
-                /**
-                 * The root has been reached.
-                 * Applies its proposal and breaks the loop.
-                 * TODO: update this comment.
-                 */
-                else {
-                    //TODO: remove this line! Types are systematically applied.
-                    //currentZipper = applyTypeFunction.f(currentZipper);
-                    break;
                 }
             }
         }
@@ -194,32 +175,30 @@ public class TypeLift {
     private static TreeZipper<TypeLiftNode> updateSubTree(final TreeZipper<TypeLiftNode> currentZipper,
                                                           final Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
 
-        Predicate currentPredicate = currentZipper.getLabel().getPredicate();
+        final Predicate currentPredicate = currentZipper.getLabel().getPredicate();
 
         /**
          * If there is no multi-typing problem, tries to lift the type from the children.
          */
-        boolean isMultiTyped = multiTypedFunctionSymbolIndex.containsKey(currentPredicate);
+        final boolean isMultiTyped = multiTypedFunctionSymbolIndex.containsKey(currentPredicate);
         if (!isMultiTyped) {
             try {
-                TreeZipper<TypeLiftNode> newTreeZipper = liftTypeFromChildrenToParent(currentZipper);
+                final TreeZipper<TypeLiftNode> newTreeZipper = liftTypeFromChildrenToParent(currentZipper);
                 return newTreeZipper;
             }
             /**
              * Multi-typing conflict detected during type lifting.
              * The latter operation is thus rejected (and has produced no side-effect).
              */
-            catch(MultiTypeException ex) {
+            catch(TypeLiftTools.MultiTypeException ex) {
             }
         }
-//        /**
-//         * Fallback strategy in reaction to multi-typing (of the current predicate).
-//         *
-//         * No new type should be given to the current node.
-//         * Children must apply their type proposals to themselves.
-//         */
-//        TreeZipper<TypeLiftNode> newTreeZipper = applyToChildren(applyTypeFunction, currentZipper);
-//        return newTreeZipper;
+        /**
+         * Fallback strategy in reaction to multi-typing (of the current predicate).
+         *
+         * --> Returns the unmodified zipper.
+         *
+         */
         return currentZipper;
     }
 
@@ -232,17 +211,17 @@ public class TypeLift {
      * Returns an updated tree zipper at the same position.
      */
     private static TreeZipper<TypeLiftNode> liftTypeFromChildrenToParent(
-            final TreeZipper<TypeLiftNode> parentZipper) throws MultiTypeException {
+            final TreeZipper<TypeLiftNode> parentZipper) throws TypeLiftTools.MultiTypeException {
 
         /**
          * Main operations:
          *  (i) makes a type proposal for the current (parent) predicate,
-         *  (ii) updates body atoms (compatible with the future un-typed child heads).
+         *  (ii) updates body and head atoms (compatible with the future untyped child heads).
          * May throw a MultiTypeException.
          *
          * Note that this data structure is partially inconsistent (needs the child heads to be updated).
          */
-        TreeZipper<TypeLiftNode> partiallyUpdatedTreeZipper = proposeTypeAndUpdateBodies(parentZipper);
+        final TreeZipper<TypeLiftNode> partiallyUpdatedTreeZipper = proposeTypeAndUpdateBodies(parentZipper);
 
         /**
          * Removes child types.
@@ -256,59 +235,17 @@ public class TypeLift {
     }
 
 
-//    /**
-//     * Updates the rule bodies of the parent node according to possible arity changes of child heads.
-//     *
-//     * Typically, arity changes are caused by MultiVariableUriTemplateTypeProposals.
-//     *
-//     * TODO: REMOVE or completely transform.
-//     *
-//     */
-//    @Deprecated
-//    private static TreeZipper<P3<Predicate,List<CQIE>,Option<TypeProposal>>> propagateChildArityChangesToBodies(
-//            final TreeZipper<TypeLiftNode> parentZipper,
-//            final HashMap<Predicate, TypeProposal> childProposalIndex) {
-//
-//        final TypeLiftNode parentLabel = parentZipper.getLabel();
-//        final List<CQIE> initialParentRules = parentLabel._2();
-//
-//        /**
-//         * For each child proposal, we update the parentRules.
-//         * This sub-task is forwarded to the TypeProposal object.
-//         *
-//         * From a FP point of view, this is a (left) folding operation.
-//         */
-//        final List<TypeProposal> childProposals = childProposalIndex.values();
-//        List<CQIE> updatedRules = childProposals.foldLeft(new F2<List<CQIE>, TypeProposal, List<CQIE>>() {
-//            @Override
-//            public List<CQIE> f(List<CQIE> parentRules, TypeProposal childProposal) {
-//                return childProposal.propagateChildArityChangeToBodies(parentRules);
-//            }
-//        }, initialParentRules);
-//
-//        /**
-//         * Returns the updated parent zipper with updated definition rules.
-//         */
-//        return parentZipper.setLabel(P.p(parentLabel._1(), updatedRules, parentLabel._3()));
-//    }
-
     /**
-     * Proposes a typed atom for the current (parent) predicate.
-     *
-     * This proposal is done by looking at (i) the children proposals
-     * and (ii) the rules defining the parent predicate.
+     * Makes a PredicateLevelProposal for the current (parent) predicate and updates the current node
+     * according to it.
      *
      * If the multi-typing problem is detected, throws a MultiTypeException.
      *
-     * Returns the type proposal.
-     *
-     * TODO: update this comment
-     * Please note that the returned tree zipper IS NOT FULLY CONSISTENT
+     * Note that the children nodes are NOT UPDATED so the returned tree zipper IS NOT FULLY CONSISTENT.
      *
      */
-    private static TreeZipper<TypeLiftNode> proposeTypeAndUpdateBodies(
-            final TreeZipper<TypeLiftNode> parentZipper)
-            throws MultiTypeException {
+    private static TreeZipper<TypeLiftNode> proposeTypeAndUpdateBodies(final TreeZipper<TypeLiftNode> parentZipper)
+            throws TypeLiftTools.MultiTypeException {
 
         /**
          * Children proposals. At most one type proposal per child predicate.
@@ -316,11 +253,10 @@ public class TypeLift {
         final HashMap<Predicate, PredicateLevelProposal> childProposalIndex = retrieveChildrenProposals(parentZipper);
 
         /**
-         * Aggregates all these proposals according to the rules defining the parent predicate into a PredicateSubstitution.
+         * Aggregates all these proposals according to the rules defining the parent predicate
+         * into a PredicateLevelProposal.
          *
          * If such aggregation is not possible, a MultiTypeException will be thrown.
-         *
-         * TODO: update this comment.
          *
          */
         final TypeLiftNode parentLabel = parentZipper.getLabel();
@@ -338,64 +274,6 @@ public class TypeLift {
          */
         return parentZipper.setLabel(parentLabel.newRulesAndProposal(updatedParentRules, proposal));
     }
-
-
-    /**
-     * TODO: comment it!
-     */
-    private static PredicateLevelProposal makeProposal(List<CQIE> parentRules,
-                                                       HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
-            throws MultiTypeException {
-        return new PredicateLevelProposalImpl(parentRules, childProposalIndex);
-    }
-
-
-//    /**
-//     * Applies the type proposal to the rule heads.
-//     *
-//     * Returns updated rules.
-//     */
-//    private static List<CQIE> applyTypeToRules(final List<CQIE> initialRules, final TypeProposal typeProposal)
-//            throws TypeApplicationError{
-//        return typeProposal.applyType(initialRules);
-//    }
-
-    /**
-     * Removes types from rules.
-     *
-     * Returns updated rules.
-     *
-     * TODO: move the code here. No need to transfer it to type proposals.
-     */
-    private static List<CQIE> removeTypesFromRules(final List<CQIE> initialRules, final TypeProposal typeProposal) {
-        return typeProposal.removeHeadTypes(initialRules);
-    }
-
-//    /**
-//     * Makes a type proposal by looking at the rules defining the current predicate.
-//     *
-//     * Its current implementation is very basic and could be improved.
-//     * It returns the head of the first rule.
-//     *
-//     * TODO: Several improvements could be done:
-//     *  1. Unifying all the rule heads (case where is there is multiple rules).
-//     *  2. Detecting if no type is present in the proposal and returning a None in
-//     *     this case.
-//     *
-//     */
-//    @Deprecated
-//    private static Option<TypeProposal> proposeTypeFromLocalRules(TreeZipper<TypeLiftNode> currentZipper) {
-//        List<CQIE> currentRules = currentZipper.getLabel()._2();
-//        if (currentRules.isNotEmpty()) {
-//
-//            // Head of the first rule (cloned because mutable).
-//            Function proposedHead = (Function) currentRules.head().getHead().clone();
-//
-//            TypeProposal typeProposal = constructTypeProposal(proposedHead);
-//            return Option.some(typeProposal);
-//        }
-//        return Option.none();
-//    }
 
     /**
      * Indexes the proposals of the children of the current parent node according to their predicate.
@@ -460,6 +338,15 @@ public class TypeLift {
     }
 
     /**
+     * Creates a PredicateLevelProposal from the parent rules and the child proposals.
+     */
+    private static PredicateLevelProposal makeProposal(List<CQIE> parentRules,
+                                                       HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
+            throws TypeLiftTools.MultiTypeException {
+        return new PredicateLevelProposalImpl(parentRules, childProposalIndex);
+    }
+
+    /**
      * Applies a function to the children.
      *
      * Returns the updated tree zipper at the parent position.
@@ -518,40 +405,6 @@ public class TypeLift {
         return updatedCurrentZipper;
     }
 
-
-//    /**
-//     * Low-level. Applies the type to the rules of the current predicate.
-//     *
-//     * Returns the updated zipper at the same location.
-//     */
-//    @Deprecated
-//    private static F<TreeZipper<TypeLiftNode>, TreeZipper<TypeLiftNode>> applyTypeFunction
-//            = new F<TreeZipper<TypeLiftNode>, TreeZipper<TypeLiftNode>>() {
-//        @Override
-//        public TreeZipper<TypeLiftNode> f(TreeZipper<TypeLiftNode> treeZipper) {
-//            /**
-//             * Extracts values from the node
-//             */
-//            TypeLiftNode node = treeZipper.getLabel();
-//            List<CQIE> initialRules = node.getDefinitionRules();
-//            Option<PredicateLevelProposal> newOptionalProposal = node.getOptionalProposal();
-//
-//            /**
-//             * No type atom proposed, nothing to change.
-//             */
-//            if (newOptionalProposal.isNone())
-//                return treeZipper;
-//            /**
-//             * Otherwise, applies the proposed types
-//             * and returns the updated tree zipper.
-//             */
-//            else {
-//                List<CQIE> newRules = applyTypeToRules(initialRules, newOptionalProposal.some().getTypeProposal());
-//                return treeZipper.setLabel(node.newRulesNoProposal(newRules));
-//            }
-//        }
-//    };
-
     /**
      * Removes types from the rules of the current node if the latter has made a proposal in the past.
      *
@@ -579,6 +432,17 @@ public class TypeLift {
             }
         }
     };
+
+    /**
+     * Removes types from rules.
+     *
+     * Returns updated rules.
+     *
+     * TODO: move the code here. No need to transfer it to type proposals.
+     */
+    private static List<CQIE> removeTypesFromRules(final List<CQIE> initialRules, final TypeProposal typeProposal) {
+        return typeProposal.removeHeadTypes(initialRules);
+    }
 
 
     /**
@@ -612,4 +476,30 @@ public class TypeLift {
 
         return HashMap.from(predicateAtomList);
     }
+
+    //    /**
+//     * Makes a type proposal by looking at the rules defining the current predicate.
+//     *
+//     * Its current implementation is very basic and could be improved.
+//     * It returns the head of the first rule.
+//     *
+//     * TODO: Several improvements could be done:
+//     *  1. Unifying all the rule heads (case where is there is multiple rules).
+//     *  2. Detecting if no type is present in the proposal and returning a None in
+//     *     this case.
+//     *
+//     */
+//    @Deprecated
+//    private static Option<TypeProposal> proposeTypeFromLocalRules(TreeZipper<TypeLiftNode> currentZipper) {
+//        List<CQIE> currentRules = currentZipper.getLabel()._2();
+//        if (currentRules.isNotEmpty()) {
+//
+//            // Head of the first rule (cloned because mutable).
+//            Function proposedHead = (Function) currentRules.head().getHead().clone();
+//
+//            TypeProposal typeProposal = constructTypeProposal(proposedHead);
+//            return Option.some(typeProposal);
+//        }
+//        return Option.none();
+//    }
 }

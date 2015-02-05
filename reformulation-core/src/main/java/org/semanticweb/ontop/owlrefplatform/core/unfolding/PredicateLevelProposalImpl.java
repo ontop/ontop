@@ -16,6 +16,10 @@ import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.
 
 /**
  * TODO: describe
+ *
+ *
+ * This proposal is done by looking at (i) the children proposals and (ii) the rules defining the parent predicate.
+ *
  */
 public class PredicateLevelProposalImpl implements PredicateLevelProposal {
 
@@ -25,14 +29,23 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
     private final List<RuleLevelProposal> ruleProposals;
     private final TypeProposal typeProposal;
 
+    /**
+     * Constructs the RuleLevelProposals and makes a TypeProposal.
+     *
+     * May throw a MultiTypeException.
+     */
     public PredicateLevelProposalImpl(List<CQIE> parentRules, HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
-            throws TypeLift.MultiTypeException {
-        P2<List<RuleLevelProposal>, Unifier> results = computeRuleProposals(Option.<Unifier>none(), parentRules,
-                List.<RuleLevelProposal>nil(), childProposalIndex);
-
+            throws TypeLiftTools.MultiTypeException {
+        /**
+         * Computes the RuleLevelProposals and the global substitution.
+         */
+        P2<List<RuleLevelProposal>, Unifier> results = computeRuleProposalsAndSubstitution(parentRules, childProposalIndex);
         ruleProposals = results._1();
         Unifier globalSubstitution = results._2();
 
+        /**
+         * Derives the type proposal from these RuleLevelProposals and the global substitution.
+         */
         typeProposal = makeTypeProposal(ruleProposals, globalSubstitution);
     }
 
@@ -46,6 +59,9 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
         return getTypeProposal().getPredicate();
     }
 
+    /**
+     * Returns the typed rules produced by the RuleLevelProposals.
+     */
     @Override
     public List<CQIE> getTypedRules() {
         return ruleProposals.map(new F<RuleLevelProposal, CQIE>() {
@@ -56,65 +72,79 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
         });
     }
 
+    /**
+     * Entry point of the homonym recursive function.
+     */
+    private static P2<List<RuleLevelProposal>, Unifier> computeRuleProposalsAndSubstitution(List<CQIE> parentRules,
+                                                                                            HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
+            throws TypeLiftTools.MultiTypeException {
+        return computeRuleProposalsAndSubstitution(Option.<Unifier>none(), parentRules, List.<RuleLevelProposal>nil(),
+                childProposalIndex);
+    }
 
     /**
-     * TODO: describe it!
+     * Creates RuleLevelProposals and computes the global substitution as the union of the substitutions they propose.
      *
+     * Tail-recursive function.
      */
-    private static P2<List<RuleLevelProposal>, Unifier> computeRuleProposals(Option<Unifier> optionalSubstitution,
-                                                                             List<CQIE> remainingRules,
-                                                                             List<RuleLevelProposal> ruleSubstitutions,
-                                                                             HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
-            throws TypeLift.MultiTypeException {
+    private static P2<List<RuleLevelProposal>, Unifier> computeRuleProposalsAndSubstitution(Option<Unifier> optionalSubstitution,
+                                                                                            List<CQIE> remainingRules,
+                                                                                            List<RuleLevelProposal> ruleProposals,
+                                                                                            HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
+            throws TypeLiftTools.MultiTypeException {
         /**
          * Stop condition (no more rule to consider).
          */
         if (remainingRules.isEmpty()) {
-            if (optionalSubstitution.isNone())
+            if (optionalSubstitution.isNone()) {
                 throw new IllegalArgumentException("Do not give a None substitution with an empty list of rules");
-            return P.p(ruleSubstitutions, optionalSubstitution.some());
+            }
+            return P.p(ruleProposals, optionalSubstitution.some());
         }
 
-        CQIE rule = remainingRules.head();
-
         /**
-         * TODO: describe
+         * Makes a RuleLevelProposal out of the current rule.
          */
-        RuleLevelProposal newRuleLevelSubstitution = new RuleLevelProposalImpl(rule, childProposalIndex);
+        CQIE currentRule = remainingRules.head();
+        RuleLevelProposal newRuleLevelProposal = new RuleLevelProposalImpl(currentRule, childProposalIndex);
 
         /**
-         * TODO: describe this part
+         * Updates the global substitution by computes the union of it with the substitution proposed by the rule.
          *
-         * TODO: Analyse the assumption made: the union of the substitution proposed by the rules makes sense.
+         * If the union is impossible (i.e. does not produce a valid substitution), throws a MultiTypedException.
          *
          */
         Option<Unifier> proposedSubstitution;
         if (optionalSubstitution.isNone()) {
-            proposedSubstitution = Option.some(newRuleLevelSubstitution.getSubstitution());
+            proposedSubstitution = Option.some(newRuleLevelProposal.getSubstitution());
         }
         else {
             try {
-                proposedSubstitution = Option.some(union(optionalSubstitution.some(), newRuleLevelSubstitution.getSubstitution()));
+                proposedSubstitution = Option.some(union(optionalSubstitution.some(), newRuleLevelProposal.getSubstitution()));
             }
             /**
-             * Impossible to propagate type.
+             * Impossible to compute the union of two substitutions.
              * This happens when multiple types are proposed for this predicate.
              */
             catch(Substitutions.SubstitutionException e) {
-                throw new TypeLift.MultiTypeException();
+                throw new TypeLiftTools.MultiTypeException();
             }
         }
 
-        List<RuleLevelProposal> newRuleSubstitutionList =  ruleSubstitutions.append(List.cons(newRuleLevelSubstitution,
+        // Appends the new RuleLevelProposal to the list
+        List<RuleLevelProposal> newRuleProposalList = ruleProposals.append(List.cons(newRuleLevelProposal,
                 List.<RuleLevelProposal>nil()));
 
         /**
          * Tail recursion
          */
-        return computeRuleProposals(proposedSubstitution, remainingRules.tail(),
-                newRuleSubstitutionList, childProposalIndex);
+        return computeRuleProposalsAndSubstitution(proposedSubstitution, remainingRules.tail(),
+                newRuleProposalList, childProposalIndex);
     }
 
+    /**
+     * Makes a type proposal out of the head of one definition rule.
+     */
     private static TypeProposal makeTypeProposal(List<RuleLevelProposal> ruleProposals, Unifier globalSubstitution) {
         /**
          * Makes a TypeProposal by applying the substitution to the head of one rule.

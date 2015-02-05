@@ -21,6 +21,17 @@ import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypeProp
  * TODO: explain
  */
 public class TypeLiftTools {
+
+    /**
+     * Thrown after receiving an SubstitutionException.
+     *
+     * This indicates that the predicate for which the type propagation
+     * has been tried should be considered as multi-typed.
+     */
+    protected static class MultiTypeException extends Exception {
+    }
+
+
     /**
      * TODO: describe
      *
@@ -193,12 +204,12 @@ public class TypeLiftTools {
     public static List<Function> extractBodyAtoms(CQIE rule) {
         List<Function> directBody = List.iterableList(rule.getBody());
 
-        return List.join(directBody.map(new F<Function, List<Function>>() {
+        return directBody.bind(new F<Function, List<Function>>() {
             @Override
-            public List<Function> f(Function functionalTerm) {
-                return extractAtoms(functionalTerm);
+            public List<Function> f(Function atom) {
+                return extractAtoms(atom);
             }
-        }));
+        });
     }
 
     /**
@@ -211,19 +222,21 @@ public class TypeLiftTools {
      * at the functional sub terms for the algebra function.
      *
      * Recursive function.
+     *
+     * TODO: Improvement: transform into a F() object.
      */
-    private static List<Function> extractAtoms(Function functionalTerm) {
+    private static List<Function> extractAtoms(Function atom) {
         /**
          * Normal case: not an algebra function (e.g. left join).
          */
-        if (!functionalTerm.isAlgebraFunction()) {
-            return List.cons(functionalTerm, List.<Function>nil());
+        if (!atom.isAlgebraFunction()) {
+            return List.cons(atom, List.<Function>nil());
         }
 
         /**
          * Sub-terms that are functional.
          */
-        List<Function> subFunctionalTerms = List.iterableList(functionalTerm.getTerms()).filter(new F<Term, Boolean>() {
+        List<Function> subAtoms = List.iterableList(atom.getTerms()).filter(new F<Term, Boolean>() {
             @Override
             public Boolean f(Term term) {
                 return term instanceof Function;
@@ -236,16 +249,16 @@ public class TypeLiftTools {
         });
 
         /**
-         * Recursive call over these functional sub-terms.
+         * Recursive call over these sub-atoms.
          * The atoms they returned are then joined.
          * Their union is then returned.
          */
-        return List.join(subFunctionalTerms.map(new F<Function, List<Function>>() {
+        return subAtoms.bind(new F<Function, List<Function>>() {
             @Override
-            public List<Function> f(Function functionalTerm) {
-                return extractAtoms(functionalTerm);
+            public List<Function> f(Function subAtom) {
+                return extractAtoms(subAtom);
             }
-        }));
+        });
 
     }
 
