@@ -29,12 +29,11 @@ import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.api.Attribute;
+import junit.framework.TestCase;
 
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 public class Mapping2DatalogConverterTest extends TestCase {
 
@@ -216,6 +215,8 @@ public class Mapping2DatalogConverterTest extends TestCase {
 				":S_{StudentId} a :Student .");
 	}
 
+
+
     public void testAnalysis_22() throws Exception{
         runAnalysis("select id, first_name, last_name from Student where year in (2000, 2014)",
                 ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
@@ -224,6 +225,12 @@ public class Mapping2DatalogConverterTest extends TestCase {
     public void testAnalysis_23() throws Exception{
         runAnalysis("select id, first_name, last_name from Student where  (year between 2000 and 2014) and nationality='it'",
                 ":S_{id} a :RecentStudent ; :fname {first_name} ; :lname {last_name} .");
+    }
+
+    public void testAnalysis_24() throws Exception {
+        runAnalysis(
+                "select id from (select id from Student) JOIN Enrollment ON student_id = id where regexp_like(first_name,'foo') ",
+                ":S_{id} a :Student .");
     }
 
 }
