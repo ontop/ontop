@@ -267,7 +267,7 @@ public class JDBCConnectionManager {
 				final String tblCatalog = rsTables.getString("TABLE_CAT");
 				final String tblName = rsTables.getString("TABLE_NAME");
 				final String tblSchema = rsTables.getString("TABLE_SCHEM");
-				final Set<List<String>> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
+				final List<String> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
 				final Map<String, Reference> foreignKeys = getForeignKey(md, null, null, tblName);
 
 				TableDefinition td = new TableDefinition(tblName);
@@ -375,7 +375,7 @@ public class JDBCConnectionManager {
 				break;
 			}
 			
-			final Set<List<String>> primaryKeys = getPrimaryKey(md, null, tableSchema, tblName);
+			final List<String> primaryKeys = getPrimaryKey(md, null, tableSchema, tblName);
 			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
 
 			TableDefinition td = new TableDefinition(tableGivenName);
@@ -506,7 +506,7 @@ public class JDBCConnectionManager {
 					final String tblCatalog = resultSet.getString("TABLE_CATALOG");
 					final String tblSchema = resultSet.getString("TABLE_SCHEMA");
 					final String tblName = resultSet.getString("TABLE_NAME");
-					final Set<List<String>> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
+					final List<String> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, tblCatalog, tblSchema, tblName);
 
 					TableDefinition td = new TableDefinition(tblName);
@@ -565,7 +565,7 @@ public class JDBCConnectionManager {
 					final String tblSchema = resultSet.getString("TABSCHEMA");
 					final String tblName = resultSet.getString("TABNAME");
 					final List<String> primaryKeys = getPrimaryKey(md, null, tblSchema, tblName);
-                    final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tblSchema, tblName);
+                    final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tblSchema, tblName,primaryKeys);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tblSchema, tblName);
 					
 					TableDefinition td = new TableDefinition(tblName);
@@ -601,6 +601,8 @@ public class JDBCConnectionManager {
 		return metadata;
 	}
 	
+
+
 	/**
 	 * Retrieve metadata for Oracle database engine
 	 */
@@ -642,7 +644,7 @@ public class JDBCConnectionManager {
 				ResultSet rsColumns = null;
 				try {
 					final String tblName = resultSet.getString("object_name");
-					final Set<List<String>> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
+					final List<String> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
 					
 					TableDefinition td = new TableDefinition(tblName);
@@ -761,7 +763,7 @@ public class JDBCConnectionManager {
 					else
 						tableOwner = loggedUser.toUpperCase();
 						
-					final Set<List<String>> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
+					final List<String> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
 					
 					TableDefinition td = new TableDefinition(tableGivenName);
@@ -830,17 +832,11 @@ public class JDBCConnectionManager {
 	
 	
 
-	/* Retrives the primary key(s) AND  the unique attributes(s) from a table */
-	private static Set<List<String>>  getPrimaryKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
+	/* Retrives the primary key(s) from a table */
+	private static List<String>   getPrimaryKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
 		LinkedList<String> pk = new LinkedList<String>();
-		Set<List<String>> uniqueSet  = new HashSet<List<String>>();
-		
-		Set<List<String>> keysAndUniqueAttributes  = new HashSet<List<String>>();
-
-		
 		ResultSet rsPrimaryKeys = null;
-		ResultSet rsUnique = null;
-
+	
 		try {
 			/*extracting Primary */
 			rsPrimaryKeys = md.getPrimaryKeys(tblCatalog, schema, table);
@@ -851,35 +847,63 @@ public class JDBCConnectionManager {
 					pk.add(colName);
 				}
 			}
-			
-			/*extracting unique */
-			rsUnique= md.getIndexInfo(tblCatalog, schema, table, true	, true);
-			while (rsUnique.next()) {
-				LinkedList<String> unique = new LinkedList<String>();
-				String colName = rsUnique.getString("COLUMN_NAME");
-				String isUnique = rsUnique.getString("NON_UNIQUE");
-				if ((isUnique.equals("f")) && !(pk.contains(colName)) ) {
-					unique.add(colName);
-					uniqueSet.add(unique);
-				}
-			}
+		
 			
 		/*closing result sets */
 		} finally {
 			if (rsPrimaryKeys != null) {
 				rsPrimaryKeys.close();
 			}
+		
+		}
+		
+		return pk;
+	}
+	
+	/**
+	 * Retrives  the unique attributes(s) 
+	 * @param md
+	 * @param tblCatalog
+	 * @param tblSchema
+	 * @param tblName
+	 * @return
+	 * @throws SQLException 
+	 */
+	private static Set<String> getUniqueAttributes(DatabaseMetaData md,	String tblCatalog, String tblSchema, String tblName, List<String> pk) throws SQLException {
+
+		Set<String> uniqueSet  = new HashSet<String>();
+		ResultSet rsUnique = null;
+
+		try {
+			/*extracting unique */
+			rsUnique= md.getIndexInfo(tblCatalog, tblSchema, tblName, true	, true);
+			while (rsUnique.next()) {
+				String colName = rsUnique.getString("COLUMN_NAME");
+				String isUnique = rsUnique.getString("NON_UNIQUE");
+				if ((isUnique.equals("f")) && !(pk.contains(colName)) ) {
+					
+					uniqueSet.add(colName);
+				}
+			}
+			
+		/*closing result sets */
+		} finally {
 			if (rsUnique != null) {
 				rsUnique.close();
 			}
 		}
 		
 		/*Adding keys and Unique*/
-		keysAndUniqueAttributes.add(pk);
-		keysAndUniqueAttributes.addAll(uniqueSet);
 		
-		return keysAndUniqueAttributes;
+		return uniqueSet;
 	}
+	
+	
+	
+	
+	
+	
+	
 	
 	/* Retrieves the foreign key(s) from a table */
 	private static Map<String, Reference> getForeignKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
