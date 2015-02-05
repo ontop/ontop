@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-public class TableWithSpaceTest extends TestCase {
+public class SesameTableWithSpaceTest extends TestCase {
 
 	String owlfile = "src/test/resources/northwind/1.4a.owl";
 	String mappingfile = "src/test/resources/northwind/mapping-northwind-1421066727259.ttl";
@@ -39,7 +39,7 @@ public class TableWithSpaceTest extends TestCase {
 	RepositoryConnection con;
 	QuestPreferences pref;
 
-	public TableWithSpaceTest() {
+	public SesameTableWithSpaceTest() {
 		// create owlontology from file
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(
