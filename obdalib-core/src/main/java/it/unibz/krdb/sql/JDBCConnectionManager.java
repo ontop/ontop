@@ -646,7 +646,8 @@ public class JDBCConnectionManager {
 					final String tblName = resultSet.getString("object_name");
 					final List<String> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
-					
+                    final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tableOwner, tblName,primaryKeys);
+
 					TableDefinition td = new TableDefinition(tblName);
 					rsColumns = md.getColumns(null, tableOwner, tblName, null);
 					
@@ -665,6 +666,8 @@ public class JDBCConnectionManager {
 						int dataType = rsColumns.getInt("DATA_TYPE");
 						
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
+                        final boolean isUnique = uniqueAttributes.contains(columnName);
+
 						final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
 						
