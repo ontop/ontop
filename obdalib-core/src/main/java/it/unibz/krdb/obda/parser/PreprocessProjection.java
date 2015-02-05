@@ -27,12 +27,13 @@ import java.util.*;
 public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, FromItemVisitor {
 
 
-    final private List<SelectItem> columns = new ArrayList<>();
-    final private Set<String> noRepeteadColumns = new HashSet<>();
+    private List<SelectItem> columns = new ArrayList<>();
+
 
     private boolean selectAll = false;
     private boolean subselect = false;
 
+    private String aliasSubselect ;
 
     final private DBMetadata metadata;
     private Set<Variable> variables;
@@ -129,7 +130,18 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
                 else { //in case of subselects
 
                     //see if there is an alias
-
+                    Table tableName;
+                    if(aliasSubselect != null){
+                        tableName= new Table(aliasSubselect);
+                    }
+                    else {
+                        //use the alias if present
+                        if (table.getAlias() != null) {
+                            tableName = new Table(table.getAlias().getName());
+                        } else {
+                            tableName = (Table)table;
+                        }
+                    }
                     Alias aliasName = ((SelectExpressionItem) expr).getAlias();
                     if (aliasName != null) {
 
@@ -137,9 +149,9 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
                         //construct a column from alias name
                         if (variables.contains(fac.getVariable(aliasString)) || variables.contains(fac.getVariable(aliasString.toLowerCase())) ) {
-                            if(noRepeteadColumns.add(aliasString)) {
-                                columnNames.add(new SelectExpressionItem(new Column(aliasString)));
-                            }
+
+                                columnNames.add(new SelectExpressionItem(new Column(tableName, aliasString)));
+
                         }
 
                     } else { //when there are no alias add the columns that are used in the mappings
@@ -148,9 +160,9 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
                         if (variables.contains(fac.getVariable(columnName)) || variables.contains(fac.getVariable(columnName.toLowerCase()))) {
 
-                            if(noRepeteadColumns.add(columnName)) {
-                                columnNames.add(expr);
-                            }
+                            SelectExpressionItem column = new SelectExpressionItem(new Column(tableName, columnName));
+                                columnNames.add(column);
+
                         }
 
                     }
@@ -168,6 +180,7 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
             columns.addAll(columnNames);
         }
+
 
 
 
@@ -215,9 +228,11 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
     public void visit(SubSelect subSelect) {
 
         subselect = true;
+        aliasSubselect = subSelect.getAlias().getName();
         subSelect.getSelectBody().accept(this);
-        subselect = false;
 
+        subselect = false;
+        aliasSubselect = null;
 
     }
 
@@ -267,13 +282,18 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
 
         int size = tableDefinition.getNumOfAttributes();
 
+
         Table tableName;
-        //use the alias if present
-        if(table.getAlias()!=null){
-            tableName= new Table(table.getAlias().getName());
+        if(aliasSubselect != null){
+            tableName= new Table(aliasSubselect);
         }
-        else{
-            tableName=table;
+        else {
+            //use the alias if present
+            if (table.getAlias() != null) {
+                tableName = new Table(table.getAlias().getName());
+            } else {
+                tableName = table;
+            }
         }
 
         for (int pos = 1; pos <= size; pos++) {
@@ -283,11 +303,11 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
             //construct a column as table.column
             if (variables.contains(fac.getVariable(columnFromMetadata)) || variables.contains(fac.getVariable(columnFromMetadata.toLowerCase()))) {
 
-                if(noRepeteadColumns.add(columnFromMetadata)) {
+
                     SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, columnFromMetadata));
 
                     columns.add(columnName);
-                }
+
             }
         }
 
