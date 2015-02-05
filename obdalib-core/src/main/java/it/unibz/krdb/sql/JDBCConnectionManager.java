@@ -269,6 +269,8 @@ public class JDBCConnectionManager {
 				final String tblSchema = rsTables.getString("TABLE_SCHEM");
 				final List<String> primaryKeys = getPrimaryKey(md, tblCatalog, tblSchema, tblName);
 				final Map<String, Reference> foreignKeys = getForeignKey(md, null, null, tblName);
+				final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tblSchema, tblName,primaryKeys);
+
 
 				TableDefinition td = new TableDefinition(tblName);
 
@@ -284,6 +286,8 @@ public class JDBCConnectionManager {
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
 						final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
+						final boolean isUnique = uniqueAttributes.contains(columnName);
+						
 						
 						final String typeName = rsColumns.getString("TYPE_NAME");
 						
@@ -291,8 +295,9 @@ public class JDBCConnectionManager {
 							dataType = -10000;
 						}
 						
-						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
-
+						//td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference,
+                                isNullable, /*typeName*/null, isUnique));
 						// Check if the columns are unique regardless their letter cases
 						if (!tableColumns.add(columnName.toLowerCase())) {
 							// if exist
@@ -377,6 +382,7 @@ public class JDBCConnectionManager {
 			
 			final List<String> primaryKeys = getPrimaryKey(md, null, tableSchema, tblName);
 			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
+            final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tableSchema, tblName,primaryKeys);
 
 			TableDefinition td = new TableDefinition(tableGivenName);
 
@@ -398,7 +404,7 @@ public class JDBCConnectionManager {
 					final boolean isPrimaryKey = primaryKeys.contains(columnName);
 					final Reference reference = foreignKeys.get(columnName);
 					final int isNullable = rsColumns.getInt("NULLABLE");
-					
+					final boolean isUnique = uniqueAttributes.contains(columnName);
 					/***
 					 * Fix for MySQL YEAR
 					 */
@@ -409,8 +415,10 @@ public class JDBCConnectionManager {
 					}
 					
 					
-					td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, typeName));
-				
+					//td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, typeName));
+					td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference,
+                            isNullable, typeName, isUnique));
+					
 					// Check if the columns are unique regardless their letter cases
 					if (!tableColumns.add(columnName.toLowerCase())) {
 						// if exist
@@ -680,7 +688,9 @@ public class JDBCConnectionManager {
 							dataType = 91;
 						}
 						
-						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, /*typeName*/null, isUnique));
+						
+						
 					}
 					// Add this information to the DBMetadata
 					metadata.add(td);
@@ -768,7 +778,8 @@ public class JDBCConnectionManager {
 						
 					final List<String> primaryKeys = getPrimaryKey(md, null, tableOwner, tblName);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableOwner, tblName);
-					
+                    final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tableOwner, tblName,primaryKeys);
+
 					TableDefinition td = new TableDefinition(tableGivenName);
 //					TableDefinition td = new TableDefinition(tblName);
 					rsColumns = md.getColumns(null, tableOwner, tblName, null);
@@ -797,7 +808,7 @@ public class JDBCConnectionManager {
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
 						final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
-						
+					    final boolean isUnique = uniqueAttributes.contains(columnName);
 						/***
 						 * To fix bug in Oracle 11 and up driver retruning wrong datatype
 						 */
@@ -807,8 +818,9 @@ public class JDBCConnectionManager {
 							dataType = 91;
 						}
 						
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference,
+                                isNullable, typeName, isUnique));
 						
-						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, typeName));
 					}
 					// Add this information to the DBMetadata
 					metadata.add(td);
