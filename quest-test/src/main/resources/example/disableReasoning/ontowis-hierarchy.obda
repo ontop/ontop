@@ -35,10 +35,10 @@ source		SELECT * FROM Tab5
 
 mappingId	MAPID-S1
 target		:A/{a} :S1 {b}^^xsd:integer . 
-source		SELECT Tab4.unique2Tab4 AS a, Tab4.unique1Tab4 As b FROM Tab4
+source		SELECT Tab0.unique1Tab0 AS a, Tab0.unique2Tab0 As b FROM Tab0
 
 mappingId	MAPID-S2
 target		:A/{a} :S2 {b}^^xsd:integer . 
-source		SELECT Tab4.unique2Tab4 AS a, Tab4.unique1Tab4 As b FROM Tab4
+source		SELECT Tab0.unique1Tab0 AS a, Tab0.unique2Tab0 As b FROM Tab0
 ]]
 

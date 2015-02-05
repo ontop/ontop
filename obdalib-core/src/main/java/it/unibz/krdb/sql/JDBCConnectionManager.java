@@ -382,7 +382,7 @@ public class JDBCConnectionManager {
 			
 			final List<String> primaryKeys = getPrimaryKey(md, null, tableSchema, tblName);
 			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
-            final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tableSchema, tblName,primaryKeys);
+            final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tableSchema, tblName, primaryKeys);
 
 			TableDefinition td = new TableDefinition(tableGivenName);
 
@@ -573,7 +573,7 @@ public class JDBCConnectionManager {
 					final String tblSchema = resultSet.getString("TABSCHEMA");
 					final String tblName = resultSet.getString("TABNAME");
 					final List<String> primaryKeys = getPrimaryKey(md, null, tblSchema, tblName);
-                    final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tblSchema, tblName,primaryKeys);
+                    final Set<String> uniqueAttributes = getUniqueAttributes(md, null, tblSchema, tblName, primaryKeys);
 					final Map<String, Reference> foreignKeys = getForeignKey(md, null, tblSchema, tblName);
 					
 					TableDefinition td = new TableDefinition(tblName);
@@ -894,9 +894,11 @@ public class JDBCConnectionManager {
 			rsUnique= md.getIndexInfo(tblCatalog, tblSchema, tblName, true	, true);
 			while (rsUnique.next()) {
 				String colName = rsUnique.getString("COLUMN_NAME");
-				String isUnique = rsUnique.getString("NON_UNIQUE");
-				if ((isUnique.equals("f")) && !(pk.contains(colName)) ) {
-					
+				String nonUnique = rsUnique.getString("NON_UNIQUE");
+                // MySQL: false
+                // Postgres: f
+                boolean unique =  nonUnique.toLowerCase().startsWith("f");
+				if (unique && !(pk.contains(colName)) ) {
 					uniqueSet.add(colName);
 				}
 			}
@@ -912,13 +914,6 @@ public class JDBCConnectionManager {
 		
 		return uniqueSet;
 	}
-	
-	
-	
-	
-	
-	
-	
 	
 	/* Retrieves the foreign key(s) from a table */
 	private static Map<String, Reference> getForeignKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
