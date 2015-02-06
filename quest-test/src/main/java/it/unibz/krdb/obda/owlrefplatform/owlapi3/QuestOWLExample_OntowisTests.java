@@ -127,7 +127,7 @@ public class QuestOWLExample_OntowisTests {
 		// Run the tests on the queries
 
 
-        List<List<Long>> resultsOne_list = new ArrayList<>();
+        List<List<Long>> resultsOne_list = new ArrayList<>(); // There is a list for each run.
         List<List<Long>> resultsTwo_list = new ArrayList<>();
         List<List<Long>> resultsThree_list = new ArrayList<>();
 
@@ -591,8 +591,9 @@ public class QuestOWLExample_OntowisTests {
 		}
 
         private void fillWarmUpQueries() {
-            for(int i = 0; i < Constants.NUM_WARM_UPS; i++){
-                warmUpQueries[i] = String.format("SELECT ?x WHERE { ?x a <http://www.example.org/%dTab1> }", i);
+        	for(int i = 0; i < Constants.NUM_WARM_UPS; i++){
+        		int limit = (i * 1000) + 1;
+                warmUpQueries[i] = String.format("SELECT ?x WHERE { ?x a <http://www.example.org/%dTab1> } LIMIT "+limit, i);
             }
         }
 
