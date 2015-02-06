@@ -296,8 +296,10 @@ public class JDBCConnectionManager {
 						}
 						
 						//td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+						//td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference,
+//                                isNullable, /*typeName*/null, isUnique));
 						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference,
-                                isNullable, /*typeName*/null, isUnique));
+                                isNullable, typeName, isUnique));
 						// Check if the columns are unique regardless their letter cases
 						if (!tableColumns.add(columnName.toLowerCase())) {
 							// if exist
@@ -584,11 +586,12 @@ public class JDBCConnectionManager {
 						final int dataType = rsColumns.getInt("DATA_TYPE");
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
                         final boolean isUnique = uniqueAttributes.contains(columnName);
+						final String typeName = rsColumns.getString("TYPE_NAME");
 
                         final Reference reference = foreignKeys.get(columnName);
 						final int isNullable = rsColumns.getInt("NULLABLE");
 						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference,
-                                isNullable, /*typeName*/null, isUnique));
+                                isNullable, typeName, isUnique));
 					}
 					// Add this information to the DBMetadata
 					metadata.add(td);
@@ -688,7 +691,7 @@ public class JDBCConnectionManager {
 							dataType = 91;
 						}
 						
-						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, /*typeName*/null, isUnique));
+						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, typeName, isUnique));
 						
 						
 					}

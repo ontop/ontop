@@ -216,7 +216,7 @@ public class ImplicitDBConstraints {
 							log.warn("Got wrong attribute " + attr.getName() + " when asking for column " + keyColumn + " from table " + tableName);
 						} else {		
 						//	td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), true, attr.getReference(), 0));
-							td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), false, attr.getReference(),0, /*typeName*/null,true));
+							td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), attr.isPrimaryKey(), attr.getReference(),0, attr.getSQLTypeName(),/*isUnique*/true));
 						}
 					}
 				}
@@ -274,7 +274,8 @@ public class ImplicitDBConstraints {
 						log.warn("Error in user-supplied foreign key: Reference to non-existing column '" + fkColumn + "' in table '" + fkTable + "'");
 						continue;
 					}
-					td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), attr.isPrimaryKey() , ref, attr.canNull() ? 1 : 0));
+					//String type = attr.getType();
+					td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), attr.isPrimaryKey() , ref, attr.canNull() ? 1 : 0,  attr.getSQLTypeName(), attr.isUnique()));
 				}
 			}
 			md.add(td);
