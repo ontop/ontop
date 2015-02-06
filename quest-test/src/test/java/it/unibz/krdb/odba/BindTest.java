@@ -33,8 +33,8 @@ public class BindTest {
     private OBDAModel obdaModel;
     private OWLOntology ontology;
 
-    final String owlFile = "src/test/resources/ontologyOdbs.owl";
-    final String obdaFile = "src/test/resources/mappingsOdbs.obda";
+    final String owlFile = "src/test/resources/bindTest/ontologyOdbs.owl";
+    final String obdaFile = "src/test/resources/bindTest/mappingsOdbs.obda";
 
     @Before
     public void setUp() throws Exception {
@@ -65,17 +65,28 @@ public class BindTest {
 //        String query = "PREFIX : <http://myproject.org/odbs#> \n" +
 //                "\n" +
 //                "SELECT DISTINCT ?f ?d " +
-////                " ?price \n" +
+//                " ?price \n" +
 //                "WHERE {?f a :Film; :hasDirector ?d . \n" +
-////                "BIND (\"123\" AS ?price) \n" +
+//                "BIND (\"123\" AS ?price) \n" +
 //                "}";
 
-        String query = "PREFIX : <http://myproject.org/odbs#> \n" +
-                "\n" +
-                "SELECT DISTINCT ?f ?d (\"123\" AS ?price)" +
+//        String query = "PREFIX : <http://myproject.org/odbs#> \n" +
+//                "\n" +
+//                "SELECT DISTINCT ?f ?d " +
 //                " ?price \n" +
-                "WHERE {?f a :Film; :hasDirector ?d . \n" +
-//                "BIND  \n" +
+//                "WHERE {?f a :Film; :hasDirector ?d . \n" +
+//                "BIND (CONCAT(\"123\", \"456\")  as ?price  )    " +
+////                "BIND  \n" +
+//                "}";
+
+                String query = "PREFIX : <http://myproject.org/odbs#> \n" +
+
+                "SELECT DISTINCT ?f ?d ?price  " +
+                        "\n" +
+                "  \n" +
+                "WHERE {?f a :Film; :hasDirector ?d .  \n" +
+                "BIND (\"123\" AS ?price) \n" +
+//                    "?f :genre ?price . " +
                 "}";
 
          runTestQuery(p, query);

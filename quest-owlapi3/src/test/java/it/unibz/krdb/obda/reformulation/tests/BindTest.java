@@ -45,10 +45,7 @@ import java.util.Properties;
 import junit.framework.TestCase;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 /***
@@ -61,8 +58,7 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
  */
 public class BindTest extends TestCase {
 
-	// TODO We need to extend this test to import the contents of the mappings
-	// into OWL and repeat everything taking form OWL
+
 
 	private OBDADataFactory fac;
 	private Connection conn;
@@ -70,8 +66,8 @@ public class BindTest extends TestCase {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/test/simplemapping.owl";
-	final String obdafile = "src/test/resources/test/simplemapping.obda";
+	final String owlfile = "src/test/resources/test/sparqlBind.owl";
+	final String obdafile = "src/test/resources/test/sparqlBind.obda";
 
 	@Override
 	public void setUp() throws Exception {
@@ -88,7 +84,7 @@ public class BindTest extends TestCase {
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/simplemapping-create-h2.sql");
+		FileReader reader = new FileReader("src/test/resources/test/sparqlBind-create-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -123,7 +119,7 @@ public class BindTest extends TestCase {
 
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/simplemapping-drop-h2.sql");
+		FileReader reader = new FileReader("src/test/resources/test/sparqlBind-drop-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -166,9 +162,11 @@ public class BindTest extends TestCase {
 
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			OWLIndividual ind1 = rs.getOWLIndividual("x");
-			OWLIndividual ind2 = rs.getOWLIndividual("y");
-			OWLLiteral val = rs.getOWLLiteral("z");
+			OWLLiteral ind1 = rs.getOWLLiteral("title");
+			OWLObject ind2 = rs.getOWLObject("price");
+
+
+            assertEquals(17.25, ind2);
 
 		} 
 		catch (Exception e) {
