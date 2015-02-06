@@ -12,20 +12,16 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions.union;
-import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.containsURITemplate;
+import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.constructTypeProposal;
 
 /**
- * TODO: describe
+ * From a high-level point of view, this proposal is done by looking at (i) the children proposals and (ii) the rules defining the parent predicate.
  *
- *
- * This proposal is done by looking at (i) the children proposals and (ii) the rules defining the parent predicate.
+ * Its implementation relies on RuleLevelProposals.
  *
  */
 public class PredicateLevelProposalImpl implements PredicateLevelProposal {
 
-    /**
-     * TODO: describe
-     */
     private final List<RuleLevelProposal> ruleProposals;
     private final TypeProposal typeProposal;
 
@@ -116,11 +112,11 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
          */
         Option<Unifier> proposedSubstitution;
         if (optionalSubstitution.isNone()) {
-            proposedSubstitution = Option.some(newRuleLevelProposal.getSubstitution());
+            proposedSubstitution = Option.some(newRuleLevelProposal.getTypingSubstitution());
         }
         else {
             try {
-                proposedSubstitution = Option.some(union(optionalSubstitution.some(), newRuleLevelProposal.getSubstitution()));
+                proposedSubstitution = Option.some(union(optionalSubstitution.some(), newRuleLevelProposal.getTypingSubstitution()));
             }
             /**
              * Impossible to compute the union of two substitutions.
@@ -157,21 +153,4 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
 
         return newProposal;
     }
-
-    /**
-     * Constructs a TypeProposal of the proper type.
-     */
-    private static TypeProposal constructTypeProposal(Function functionalProposal) {
-        /**
-         * Special case: multi-variate URI template.
-         */
-        if (containsURITemplate(functionalProposal)) {
-            return new UriTemplateTypeProposal(functionalProposal);
-        }
-        /**
-         * Default case
-         */
-        return new BasicTypeProposal(functionalProposal);
-    }
-
 }

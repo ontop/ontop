@@ -150,15 +150,28 @@ public class TypeLiftTools {
      * Tests if the rules defining one predicate cannot be unified
      * because they have different types.
      *
-     * Returns true if the predicate is detected as multi-typed.
+     * Returns true if the predicate is detected as multi-typed
+     * (or some of its rules are not supported).
+     *
+     * TODO: make a clear distinction between multi-typed and having some unsupported rules.
+     *
      */
     private static boolean isMultiTypedPredicate(List<CQIE> predicateDefinitionRules) {
         if (predicateDefinitionRules.length() <= 1)
             return false;
 
-        Function headFirstRule = predicateDefinitionRules.head().getHead();
+        CQIE currentRule = predicateDefinitionRules.head();
 
-        return isMultiTypedPredicate(new BasicTypeProposal(headFirstRule), predicateDefinitionRules.tail());
+        /**
+         * Checks restriction for the current rule:
+         *  --> interpreted (abusively) as multi-typed
+         */
+        if (!isRuleSupportedForTypeLift(currentRule))
+            return true;
+
+        Function headFirstRule = currentRule.getHead();
+
+        return isMultiTypedPredicate(constructTypeProposal(headFirstRule), predicateDefinitionRules.tail());
     }
 
     /**
@@ -168,7 +181,16 @@ public class TypeLiftTools {
         if (remainingRules.isEmpty())
             return false;
 
-        Function ruleHead = remainingRules.head().getHead();
+        CQIE currentRule = remainingRules.head();
+
+        /**
+         * Checks restriction for the current rule
+         * --> interpreted (abusively) as multi-typed
+         */
+        if (!isRuleSupportedForTypeLift(currentRule))
+            return true;
+
+        Function ruleHead = currentRule.getHead();
         try {
             Function newType = applyTypeProposal(ruleHead, currentTypeProposal);
 
@@ -180,6 +202,28 @@ public class TypeLiftTools {
         } catch (Substitutions.SubstitutionException e) {
             return true;
         }
+    }
+
+    /**
+     * Current restriction: Use of meta-atoms (left-joins, etc.)
+     */
+    private static boolean isRuleSupportedForTypeLift(CQIE rule) {
+
+        /**
+         * Checks the body atoms
+         */
+        boolean validBodyAtoms = Stream.iterableStream(rule.getBody()).forall(new F<Function, Boolean>() {
+            @Override
+            public Boolean f(Function atom) {
+                /**
+                 * Algebraic meta-atoms are not supported (left-join, etc.)
+                 */
+                if (atom.isAlgebraFunction())
+                    return false;
+                return true;
+            }
+        });
+        return validBodyAtoms;
     }
 
     /**
@@ -346,5 +390,20 @@ public class TypeLiftTools {
         return Option.some(functionArguments.get(0));
     }
 
+    /**
+     * Constructs a TypeProposal of the proper type.
+     */
+    public static TypeProposal constructTypeProposal(Function typedAtom) {
+        /**
+         * Special case: multi-variate URI template.
+         */
+        if (containsURITemplate(typedAtom)) {
+            return new UriTemplateTypeProposal(typedAtom);
+        }
+        /**
+         * Default case
+         */
+        return new BasicTypeProposal(typedAtom);
+    }
 
 }

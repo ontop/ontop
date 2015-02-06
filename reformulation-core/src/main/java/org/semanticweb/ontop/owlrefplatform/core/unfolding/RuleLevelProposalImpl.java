@@ -14,12 +14,10 @@ import java.util.ArrayList;
 
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions.union;
 import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.computeTypePropagatingSubstitution;
-import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.extractBodyAtoms;
 
 /**
- * TODO: Name: should we still call it a proposal?
- *
- * See if turns into a substitution.
+ * Implementation making the following assumption:
+ *   - Rules corresponds to conjunctive queries (no left-join)
  *
  */
 public class RuleLevelProposalImpl implements RuleLevelProposal {
@@ -28,18 +26,20 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
     private final CQIE typedRule;
 
     /**
-     * TODO: describe
+     * Computes the substitution and the typed rule.
+     *
      * May throw a MultiTypeException
      */
     public RuleLevelProposalImpl(CQIE initialRule, HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
             throws TypeLiftTools.MultiTypeException {
 
+        //List<Function> bodyAtoms = extractBodyAtoms(initialRule);
         /**
-         * All body atoms (even these nested in left-joins)
+         * Only direct atoms (UCQ assumption: left-joins are not supported)
          */
-        List<Function> bodyAtoms = extractBodyAtoms(initialRule);
+        List<Function> bodyAtoms = List.iterableList(initialRule.getBody());
 
-        List<Function> dataAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
+        List<Function> bodyDataAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
             @Override
             public Boolean f(Function atom) {
                 return atom.isDataFunction();
@@ -53,16 +53,20 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
         });
 
         /**
-         * TODO: explain
+         * Adapts the body data atoms so that are compatible with the typed child head for computing
+         * a type propagation substitution.
          */
-        List<Function> unifiableDataAtoms = computeUnifiableDataAtoms(dataAtoms, childProposalIndex);
+        List<Function> unifiableBodyDataAtoms = computeUnifiableBodyDataAtoms(bodyDataAtoms, childProposalIndex);
 
         /**
-         * TODO: explain
+         * Computes the type propagating substitution.
          */
-        typingSubstitution = aggregateRuleAndProposals(unifiableDataAtoms, childProposalIndex);
+        typingSubstitution = aggregateRuleAndProposals(unifiableBodyDataAtoms, childProposalIndex);
 
-        typedRule = constructTypedRule(initialRule, typingSubstitution, unifiableDataAtoms, filterAtoms);
+        /**
+         * TODO: Only works for UCQs (Left-join hacky notation is not supported)
+         */
+        typedRule = constructTypedRule(initialRule, typingSubstitution, unifiableBodyDataAtoms, filterAtoms);
 
     }
 
@@ -73,8 +77,8 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
      * Some of these conversions may introduce new non-conflicting variables.
      *
      */
-    private static List<Function> computeUnifiableDataAtoms(final List<Function> dataAtoms,
-                                                            final HashMap<Predicate, PredicateLevelProposal> childProposalIndex) {
+    private static List<Function> computeUnifiableBodyDataAtoms(final List<Function> dataAtoms,
+                                                                final HashMap<Predicate, PredicateLevelProposal> childProposalIndex) {
 
         /**
          * All the variables are supposed to be present in the data atoms (safe Datalog rules).
@@ -113,7 +117,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
     }
 
     @Override
-    public Unifier getSubstitution() {
+    public Unifier getTypingSubstitution() {
         return typingSubstitution;
     }
 
@@ -142,7 +146,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
      * If some problems with a substitution function occur, throws a MultiTypeException.
      *
      */
-    private static Unifier aggregateRuleAndProposals(final Option<Unifier> optionalSubstitutionFunction,
+    private static Unifier aggregateRuleAndProposals(final Option<Unifier> optionalSubstitution,
                                                      final List<Function> remainingBodyAtoms,
                                                      final HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
             throws TypeLiftTools.MultiTypeException {
@@ -150,16 +154,21 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
          * Stop condition (no further body atom).
          */
         if (remainingBodyAtoms.isEmpty()) {
-            if (optionalSubstitutionFunction.isNone()) {
-                throw new IllegalArgumentException("Do not give a None substitution function with an empty list of rules");
+            /**
+             * If no child proposal corresponds to the body atoms, no substitution is created.
+             * --> Returns an empty substitution.
+             */
+            if (optionalSubstitution.isNone()) {
+                // Empty substitution
+                return new Unifier();
             }
-            return optionalSubstitutionFunction.some();
+            return optionalSubstitution.some();
         }
 
         Function bodyAtom = remainingBodyAtoms.head();
         Option<PredicateLevelProposal> optionalChildProposal = childProposalIndex.get(bodyAtom.getFunctionSymbol());
 
-        Option<Unifier> newOptionalSubstitutionFct;
+        Option<Unifier> newOptionalSubstitution;
 
         /**
          * If there is a child proposal corresponding to the current body atom,
@@ -170,11 +179,11 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
          */
         if (optionalChildProposal.isSome()) {
             try {
-                Unifier proposedSubstitutionFunction = computeTypePropagatingSubstitution(
-                        bodyAtom, optionalChildProposal.some().getTypeProposal());
+                Unifier proposedSubstitution = computeTypePropagatingSubstitution(bodyAtom,
+                        optionalChildProposal.some().getTypeProposal());
 
-                if (optionalSubstitutionFunction.isNone()) {
-                    newOptionalSubstitutionFct = Option.some(proposedSubstitutionFunction);
+                if (optionalSubstitution.isNone()) {
+                    newOptionalSubstitution = Option.some(proposedSubstitution);
                 }
                 /**
                  * We do NOT consider the composition of the substitution functions (like during unifier)
@@ -192,8 +201,8 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
                  *
                  */
                 else {
-                    newOptionalSubstitutionFct = Option.some(union(optionalSubstitutionFunction.some(),
-                            proposedSubstitutionFunction));
+                    newOptionalSubstitution = Option.some(union(optionalSubstitution.some(),
+                            proposedSubstitution));
                 }
             }
             /**
@@ -208,34 +217,43 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
          * Otherwise, keeps the same proposed head.
          */
         else {
-            newOptionalSubstitutionFct = optionalSubstitutionFunction;
+            newOptionalSubstitution = optionalSubstitution;
         }
 
         /**
          * Tail recursion
          */
-        return aggregateRuleAndProposals(newOptionalSubstitutionFct, remainingBodyAtoms.tail(), childProposalIndex);
+        return aggregateRuleAndProposals(newOptionalSubstitution, remainingBodyAtoms.tail(), childProposalIndex);
     }
 
     /**
-     * TODO: describe it
+     * Rebuilds a Datalog rule from the data and filter atoms and the typing substitution.
+     *
+     * Note that it only constructs Conjunctive Queries!
      *
      */
     private static CQIE constructTypedRule(CQIE initialRule, Unifier typingSubstitution, List<Function> unifiableDataAtoms, List<Function> filterAtoms) {
+
+        /**
+         * Derives a typed head by applying the substitution
+         */
         Function newHead = initialRule.getHead();
         // SIDE-EFFECT: makes the new head typed.
         UnifierUtilities.applyUnifier(newHead, typingSubstitution);
 
+        /**
+         * Concats the two list of atoms
+         */
         List<Function> allAtoms = unifiableDataAtoms.append(filterAtoms);
-
         java.util.List<Function> typedRuleBody = new ArrayList<>(allAtoms.toCollection());
+
+
         CQIE typedRule = OBDADataFactoryImpl.getInstance().getCQIE(newHead, typedRuleBody);
         return typedRule;
     }
 
     /**
-     * TODO: describe
-     *
+     * Returns the set of variables found in the atoms.
      */
     private static java.util.Set<Variable> extractVariables(List<Function> atoms) {
         List<Variable> variableList = atoms.bind(new F<Function, List<Variable>>() {

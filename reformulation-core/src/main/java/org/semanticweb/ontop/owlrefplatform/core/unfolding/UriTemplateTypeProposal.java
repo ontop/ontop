@@ -2,7 +2,6 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import com.google.common.collect.ImmutableSet;
 import fj.*;
-import fj.data.List;
 import fj.data.Set;
 import fj.data.Stream;
 import org.semanticweb.ontop.model.*;
@@ -14,28 +13,31 @@ import java.util.UUID;
 /**
  * For all URI templates.
  *
+ * The tricky URI template case is responsible of the creation of this abstraction.
+ *
  */
-public class UriTemplateTypeProposal extends TypeProposalImpl {
-
+public class UriTemplateTypeProposal implements TypeProposal {
 
     private final Set<Variable> extraVariables;
     private final Function unifiableAtom;
 
     public UriTemplateTypeProposal(Function proposedAtom) {
-        super(proposedAtom);
-
         extraVariables = extractExtraVariables(proposedAtom);
         unifiableAtom = insertExtraVariables(proposedAtom, extraVariables);
     }
 
     @Override
-    public Function getUnifiableAtom() {
+    public Function getTypedAtom() {
         return unifiableAtom;
     }
 
+    @Override
+    public Predicate getPredicate() {
+        return unifiableAtom.getFunctionSymbol();
+    }
 
     /**
-     * Adds new variables at the right in the atom.
+     * Adds new variables on the right side of the atom.
      * Makes sure these variable names are new (no conflict introduced).
      */
     @Override
@@ -66,7 +68,7 @@ public class UriTemplateTypeProposal extends TypeProposalImpl {
     }
 
     /**
-     * "Extracts" the other variables from the URI template
+     * "Extracts" the other variables from the URI template.
      */
     private static Set<Variable> extractExtraVariables(Function proposedAtom) {
         /**
@@ -91,7 +93,7 @@ public class UriTemplateTypeProposal extends TypeProposalImpl {
 
 
         /**
-         * All the variables used by the URI templates .
+         * All the variables used by the URI templates.
          */
         final Stream<Variable> templateVariableStream = uriTemplateTerms.bind(new F<Function, Stream<Variable>>() {
             @Override
@@ -115,7 +117,7 @@ public class UriTemplateTypeProposal extends TypeProposalImpl {
                 templateVariableStream);
 
         /**
-         * : non-top variables found in the URI templates
+         * Extra variables: non-top variables found in the URI templates.
          */
         final Set<Variable> extraVariables = templateVariableSet.minus(topVariables);
         return extraVariables;

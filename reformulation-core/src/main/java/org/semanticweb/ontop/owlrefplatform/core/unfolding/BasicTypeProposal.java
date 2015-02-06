@@ -10,16 +10,26 @@ import java.util.Set;
 
 /**
  * Normal case.
+ *
+ * Does "nothing" (does converse but returns the same body atom).
+ *
  */
-public class BasicTypeProposal extends TypeProposalImpl {
+public class BasicTypeProposal implements TypeProposal {
 
-    public BasicTypeProposal(Function typeProposal) {
-        super(typeProposal);
+    private final Function typedAtom;
+
+    public BasicTypeProposal(Function typedAtom) {
+        this.typedAtom = typedAtom;
     }
 
     @Override
-    public Function getUnifiableAtom() {
-        return getProposedAtom();
+    public Function getTypedAtom() {
+        return typedAtom;
+    }
+
+    @Override
+    public Predicate getPredicate() {
+        return typedAtom.getFunctionSymbol();
     }
 
     @Override

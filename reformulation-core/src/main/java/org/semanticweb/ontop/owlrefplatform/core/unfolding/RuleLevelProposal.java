@@ -4,10 +4,14 @@ import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
 
 /**
- * TODO: describe it
+ * Derives a substitution at the level of one definition rule from the child proposals.
+ *
+ * Is also in charge of typing the rule.
+ *
  */
 public interface RuleLevelProposal {
-    Unifier getSubstitution();
+
+    Unifier getTypingSubstitution();
 
     CQIE getTypedRule();
 }

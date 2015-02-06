@@ -73,6 +73,8 @@ public class TypeLift {
         /**
          * Makes sure the multi-typed predicate index is complete.
          * (This step could be disabled in the future once the previous unfolding will be safe enough).
+         *
+         * Currently, is also used for detecting supported rules (TRICK).
          */
         multiTypedFunctionSymbolIndex = updateMultiTypedFunctionSymbolIndex(initialDatalogProgram, multiTypedFunctionSymbolIndex);
 
