@@ -304,21 +304,6 @@ public class QuestOWLExample_OntowisTests {
 			QuestOWLStatement st = conn.createStatement();
 			try {
 
-				// Warm ups
-//				for (int i=0; i<nWarmUps; ++i){
-//					QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
-//					int columnSize = rs.getColumnCount();
-//					while (rs.nextRow()) {
-//						for (int idx = 1; idx <= columnSize; idx++) {
-//							@SuppressWarnings("unused")
-//							OWLObject binding = rs.getOWLObject(idx);
-//							//System.out.print(binding.toString() + ", ");
-//						}
-//						//System.out.print("\n");
-//					}
-//				}
-//
-				
 				long time = 0;
 				int count = 0;
 				
@@ -593,7 +578,8 @@ public class QuestOWLExample_OntowisTests {
         private void fillWarmUpQueries() {
         	for(int i = 0; i < Constants.NUM_WARM_UPS; i++){
         		int limit = (i * 1000) + 1;
-                warmUpQueries[i] = String.format("SELECT ?x WHERE { ?x a <http://www.example.org/%dTab1> } LIMIT "+limit, i);
+                warmUpQueries[i] = String.format("SELECT ?x WHERE { " +
+                        "?x a <http://www.example.org/%dTab1> } LIMIT "+limit, i);
             }
         }
 
