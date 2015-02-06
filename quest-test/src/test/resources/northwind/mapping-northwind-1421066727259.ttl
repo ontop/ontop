@@ -142,7 +142,7 @@
 	<http://www.w3.org/ns/r2rml#predicate> <http://www.optique-project.eu/resource/northwind/northwind/Employees/TitleOfCourtesy> .
 
 <http://www.optique-project.eu/resource/importR2RML15065490841720407183951902679978> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.Products" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.Products" .
 
 <http://www.optique-project.eu/resource/importR2RML15391608126571090204313122442352> a <http://www.w3.org/ns/r2rml#ObjectMap> ;
 	<http://www.w3.org/ns/r2rml#template> "http://www.optique-project.eu/resource/northwind/northwind/Shippers/{ShipVia}" ;
@@ -156,7 +156,7 @@
 	<http://www.w3.org/ns/r2rml#predicateMap> <http://www.optique-project.eu/resource/importR2RML92859885348150833632316521504725> .
 
 <http://www.optique-project.eu/resource/importR2RML16103644593508542890086863124757> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.Customers" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.Customers" .
 
 <http://www.optique-project.eu/resource/importR2RML16518917987747313929619916975443> a <http://www.w3.org/ns/r2rml#ObjectMap> ;
 	<http://www.w3.org/ns/r2rml#column> "Fax" ;
@@ -182,7 +182,7 @@
 	<http://www.w3.org/ns/r2rml#termType> <http://www.w3.org/ns/r2rml#IRI> .
 
 <http://www.optique-project.eu/resource/importR2RML18927720649276054026865639081055> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.Orders" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.Orders" .
 
 <http://www.optique-project.eu/resource/importR2RML19134787943112267081272706475814> a <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
 	<http://www.w3.org/ns/r2rml#objectMap> <http://www.optique-project.eu/resource/importR2RML57385288041686601009223824071241> ;
@@ -226,7 +226,7 @@
 	<http://www.w3.org/ns/r2rml#termType> <http://www.w3.org/ns/r2rml#Literal> .
 
 <http://www.optique-project.eu/resource/importR2RML23400018665644591762159514421444> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.Shippers" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.Shippers" .
 
 <http://www.optique-project.eu/resource/importR2RML23674984455921313647019408366725> a <http://www.w3.org/ns/r2rml#ObjectMap> ;
 	<http://www.w3.org/ns/r2rml#column> "ShipperID" ;
@@ -388,7 +388,7 @@
 	<http://www.w3.org/ns/r2rml#termType> <http://www.w3.org/ns/r2rml#Literal> .
 
 <http://www.optique-project.eu/resource/importR2RML39395724039593877857018862761786> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.Suppliers" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.Suppliers" .
 
 <http://www.optique-project.eu/resource/importR2RML39652598819336826950906217867252> a <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
 	<http://www.w3.org/ns/r2rml#objectMap> <http://www.optique-project.eu/resource/importR2RML47015600579646248513886901674331> ;
@@ -408,7 +408,7 @@
 	<http://www.w3.org/ns/r2rml#predicate> <http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/Discount> .
 
 <http://www.optique-project.eu/resource/importR2RML41791606309149233752917437353417> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.CustomerDemographics" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.CustomerDemographics" .
 
 <http://www.optique-project.eu/resource/importR2RML42221258746466847575901846518965> a <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
 	<http://www.w3.org/ns/r2rml#objectMap> <http://www.optique-project.eu/resource/importR2RML23674984455921313647019408366725> ;
@@ -457,7 +457,7 @@
 	<http://www.w3.org/ns/r2rml#template> "http://www.optique-project.eu/resource/CustomersLocation/{CustomerID}" .
 
 <http://www.optique-project.eu/resource/importR2RML49742713908387340012355715420159> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.Suppliers" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.Suppliers" .
 
 <http://www.optique-project.eu/resource/importR2RML50911772635373068037561303554797> a <http://www.w3.org/ns/r2rml#SubjectMap> ;
 	<http://www.w3.org/ns/r2rml#class> <http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics> ;
@@ -502,7 +502,7 @@
 	<http://www.w3.org/ns/r2rml#termType> <http://www.w3.org/ns/r2rml#Literal> .
 
 <http://www.optique-project.eu/resource/importR2RML53324349097080801764022905725595> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.Orders" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.Orders" .
 
 <http://www.optique-project.eu/resource/importR2RML53670338057545378925438360936540> a <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
 	<http://www.w3.org/ns/r2rml#objectMap> <http://www.optique-project.eu/resource/importR2RML16950374315699452572428221313164> ;
@@ -545,7 +545,7 @@
 	<http://www.w3.org/ns/r2rml#termType> <http://www.w3.org/ns/r2rml#Literal> .
 
 <http://www.optique-project.eu/resource/importR2RML57449292259524874302616789814400> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.EmployeeTerritories" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.EmployeeTerritories" .
 
 <http://www.optique-project.eu/resource/importR2RML57627707981937650293309311184164> a <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
 	<http://www.w3.org/ns/r2rml#objectMap> <http://www.optique-project.eu/resource/importR2RML75977752624913700573059833156058> ;
@@ -560,10 +560,10 @@
 	<http://www.w3.org/ns/r2rml#constant> <http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/Region> .
 
 <http://www.optique-project.eu/resource/importR2RML58185542796139097437455676061517> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.EmployeeTerritories" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.EmployeeTerritories" .
 
 <http://www.optique-project.eu/resource/importR2RML59418525763345363014908427150956> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.Employees" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.Employees" .
 
 <http://www.optique-project.eu/resource/importR2RML59428381580343891861165463305913> a <http://www.w3.org/ns/r2rml#SubjectMap> ;
 	<http://www.w3.org/ns/r2rml#class> <http://www.optique-project.eu/resource/northwind/northwind/Customers> ;
@@ -618,7 +618,7 @@
 	<http://www.w3.org/ns/r2rml#termType> <http://www.w3.org/ns/r2rml#Literal> .
 
 <http://www.optique-project.eu/resource/importR2RML63242616421576119536042865576636> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.Territories" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.Territories" .
 
 <http://www.optique-project.eu/resource/importR2RML63340023625326612488297448887716> a <http://www.w3.org/ns/r2rml#PredicateMap> ;
 	<http://www.w3.org/ns/r2rml#constant> <http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/PostalCode> .
@@ -701,7 +701,7 @@
 	<http://www.w3.org/ns/r2rml#predicate> <http://www.optique-project.eu/resource/northwind/northwind/Territories/RegionID> .
 
 <http://www.optique-project.eu/resource/importR2RML72625978793579698655337354146898> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.Region" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.Region" .
 
 <http://www.optique-project.eu/resource/importR2RML73715908443281638749630932669211> a <http://www.w3.org/ns/r2rml#ObjectMap> ;
 	<http://www.w3.org/ns/r2rml#template> "http://www.optique-project.eu/resource/SuppliersLocation/{SupplierID}" .
@@ -716,7 +716,7 @@
 	<http://www.w3.org/ns/r2rml#termType> <http://www.w3.org/ns/r2rml#Literal> .
 
 <http://www.optique-project.eu/resource/importR2RML74163443859655007931392164958960> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.Customers" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.Customers" .
 
 <http://www.optique-project.eu/resource/importR2RML74318935203381088967229826927470> a <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
 	<http://www.w3.org/ns/r2rml#objectMap> <http://www.optique-project.eu/resource/importR2RML37786498345135473062617635862464> ;
@@ -744,7 +744,7 @@
 	<http://www.w3.org/ns/r2rml#predicate> <http://www.optique-project.eu/resource/northwind/northwind/Products/SupplierID> .
 
 <http://www.optique-project.eu/resource/importR2RML76445932789108983332164764271040> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.Employees" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.Employees" .
 
 <http://www.optique-project.eu/resource/importR2RML76584989402335522869168218465298> a <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
 	<http://www.w3.org/ns/r2rml#objectMap> <http://www.optique-project.eu/resource/importR2RML84671118240081473470000563173526> ;
@@ -880,7 +880,7 @@
 	<http://www.w3.org/ns/r2rml#subjectMap> <http://www.optique-project.eu/resource/importR2RML57891059796235139407824452873662> .
 
 <http://www.optique-project.eu/resource/importR2RML88992093675679445000452533058311> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "Order Details" .
+	<http://www.w3.org/ns/r2rml#tableName> "\"Order Details\"" .
 
 <http://www.optique-project.eu/resource/importR2RML89452046237930918376262916148136> a <http://www.w3.org/ns/r2rml#ObjectMap> ;
 	<http://www.w3.org/ns/r2rml#template> "http://www.optique-project.eu/resource/northwind/northwind/Products/{ProductID}" ;
@@ -951,7 +951,7 @@
 	<http://www.w3.org/ns/r2rml#termType> <http://www.w3.org/ns/r2rml#Literal> .
 
 <http://www.optique-project.eu/resource/importR2RML95161437379532654464405472797360> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.CustomerCustomerDemo" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.CustomerCustomerDemo" .
 
 <http://www.optique-project.eu/resource/importR2RML95276941357998249987838254523854> a <http://www.w3.org/ns/r2rml#PredicateMap> ;
 	<http://www.w3.org/ns/r2rml#constant> <http://www.optique-project.eu/resource/northwind/northwind/super_dProp/string/Region> .
@@ -960,11 +960,11 @@
 	<http://www.w3.org/ns/r2rml#column> "PostalCode" .
 
 <http://www.optique-project.eu/resource/importR2RML95959082517406492317092273363165> a <http://www.w3.org/ns/r2rml#BaseTableOrView> , <http://www.w3.org/ns/r2rml#LogicalTable> ;
-	<http://www.w3.org/ns/r2rml#tableName> "northwind.CustomerCustomerDemo" .
+	<http://www.w3.org/ns/r2rml#tableName> "northwindSpaced.CustomerCustomerDemo" .
 
 <http://www.optique-project.eu/resource/importR2RML96572901992470811704861854094272> a <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
 	<http://www.w3.org/ns/r2rml#objectMap> <http://www.optique-project.eu/resource/importR2RML64116340830189796987841687590082> ;
-	<http://www.w3.org/ns/r2rml#predicate> <http://www.optique-project.eu/resource/northwind/northwind/Employees/Title> .
+	<http://www.w3.org/ns/r2rml#predicate> <http://www.optique-project.eu/resource/northwind/Employees/Title> .
 
 <http://www.optique-project.eu/resource/importR2RML96637479244176964389842659193130> a <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;
 	<http://www.w3.org/ns/r2rml#objectMap> <http://www.optique-project.eu/resource/importR2RML12349336885483076665956640751360> ;
