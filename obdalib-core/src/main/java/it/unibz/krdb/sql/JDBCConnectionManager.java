@@ -898,11 +898,15 @@ public class JDBCConnectionManager {
 			while (rsUnique.next()) {
 				String colName = rsUnique.getString("COLUMN_NAME");
 				String nonUnique = rsUnique.getString("NON_UNIQUE");
+				
+				if (colName!= null){
                 // MySQL: false
                 // Postgres: f
-                boolean unique =  nonUnique.toLowerCase().startsWith("f");
-				if (unique && !(pk.contains(colName)) ) {
-					uniqueSet.add(colName);
+				// DB2 : 0
+					boolean unique =  nonUnique.toLowerCase().startsWith("f") || nonUnique.toLowerCase().startsWith("0") ;
+					if (unique && !(pk.contains(colName)) ) {
+						uniqueSet.add(colName);
+					}
 				}
 			}
 			
