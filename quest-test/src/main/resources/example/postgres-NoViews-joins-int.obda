@@ -3,15 +3,15 @@
 
 [SourceDeclaration]
 sourceUri	viewTest
-connectionUrl	jdbc:postgresql://10.7.20.39/ontowis_copy
+connectionUrl	jdbc:postgresql://10.7.20.39/ontowis_100m
 username	postgres
 password	postgres
 driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPPING-ID2
-target     <http://www.example.org/{Tab1.unique2Tab1}> a <http://www.example.org/1Tab1>; <http://www.example.org/Tab2unique2Tab2> {Tab2.unique1Tab2}^^xsd:integer .
-source   Select * from Tab1  join Tab2  ON Tab1.unique2Tab1= Tab2.unique2Tab2
+target     <http://www.example.org/{Tab0.unique2Tab1}> a <http://www.example.org/1Tab1>; <http://www.example.org/Tab2unique2Tab2> {Tab2.unique1Tab2}^^xsd:integer .
+source   Select * from Tab0  join Tab2  ON Tab0.unique2Tab1 = Tab2.unique2Tab2
 
 mappingId	MAPPING-ID3
 target     <http://www.example.org/{Tab1.unique2Tab1}> a <http://www.example.org/2Tab1>; <http://www.example.org/Tab3unique2Tab3> {Tab3.unique1Tab3}^^xsd:integer .

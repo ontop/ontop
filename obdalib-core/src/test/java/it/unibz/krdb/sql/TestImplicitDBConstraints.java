@@ -51,10 +51,10 @@ public class TestImplicitDBConstraints {
 	@Test
 	public void testAddPrimaryKeys() {
 		ImplicitDBConstraints uc = new ImplicitDBConstraints("src/test/resources/userconstraints/pkeys.lst");
-		uc.addPrimaryKeys(this.md);
+		uc.addFunctionalDependency(this.md);
 		DataDefinition dd = this.md.getDefinition("TABLENAME");
 		Attribute attr = dd.getAttribute(0);
-		assertTrue(attr.isPrimaryKey());
+		assertTrue(attr.isUnique());
 	}
 
 
@@ -88,7 +88,7 @@ public class TestImplicitDBConstraints {
 		Reference ref = attr.getReference();
 		assertTrue(ref.getTableReference().equals("TABLE2"));
 		assertTrue(ref.getColumnReference().equals("KEY1"));
-		assertTrue(attr.isPrimaryKey());
+		assertTrue(attr.isUnique());
 	}
 
 	

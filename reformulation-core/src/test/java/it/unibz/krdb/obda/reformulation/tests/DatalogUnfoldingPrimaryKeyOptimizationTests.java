@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.reformulation.tests;
  * #L%
  */
 
+import com.google.common.collect.Multimap;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -65,7 +66,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		table.setAttribute(4, new Attribute("col4", Types.INTEGER, false, false));
 		metadata.add(table);
 
-		unfoldingProgram = fac.getDatalogProgram();
+        unfoldingProgram = fac.getDatalogProgram();
 
 		Function head = fac.getFunction(fac.getDataPropertyPredicate("name"), fac.getVariable("x"), fac.getVariable("y"));
 		List<Term> bodyTerms = new LinkedList<Term>();
@@ -129,7 +130,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 	}
 
 	public void testRedundancyElimination() throws Exception {
-		Map<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram.getRules());
+		Multimap<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram.getRules());
 		DatalogUnfolder unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
 
 		LinkedList<Term> headterms = new LinkedList<Term>();
