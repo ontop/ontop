@@ -42,10 +42,12 @@ public class QuestOWLExample_ReasoningDisabled {
 
     interface ParamConst{
         public static final String MYSQL_OBDA_FILE  = "src/main/resources/example/disableReasoning/ontowis-hierarchy-mysql.obda";
+
         public static final String POSTGRES_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-postgres.obda";
+
         public static final String DB2_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-db2.obda";
 
-        public static final String MYSQL_SMALL_OBDA_FILE  = "src/main/resources/example/disableReasoning/ontowis-hierarchy-mysql.obda";
+        public static final String MYSQL_SMALL_OBDA_FILE  = "src/main/resources/example/disableReasoning/mysql_vulcan.obda";
         public static final String POSTGRES_SMALL_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-postgres.obda";
         public static final String DB2_SMALL_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-db2.obda";
 
@@ -70,7 +72,7 @@ public class QuestOWLExample_ReasoningDisabled {
 
     static class QueryFactory {
         static private int[] getFilters(DbType type) {
-            int[] filters = new int[6];
+            int[] filters = new int[Constants.NUM_FILTERS];
 
             switch(type){
                 case MYSQL:
@@ -210,8 +212,8 @@ public class QuestOWLExample_ReasoningDisabled {
         /*
 		 * Generate File !
 		 */
-        PrintWriter writer = new PrintWriter("src/main/resources/example/table.txt", "UTF-8");
-        PrintWriter writerG = new PrintWriter("src/main/resources/example/graph.txt", "UTF-8");
+        PrintWriter writer = new PrintWriter("src/main/resources/example/disableReasoning/table.txt", "UTF-8");
+        PrintWriter writerG = new PrintWriter("src/main/resources/example/disableReasoning/graph.txt", "UTF-8");
 
         writer.write(String.format("%s\n", "# group 1"));
         int j = 0;
