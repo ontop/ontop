@@ -41,7 +41,7 @@ public class QuestOWLExample_ReasoningDisabled {
     }
 
     interface ParamConst{
-        public static final String MYSQL_OBDA_FILE  = "src/main/resources/example/disableReasoning/ontowis-hierarchy-mysql.obda";
+        public static final String MYSQL_OBDA_FILE  = "src/main/resources/example/disableReasoning/mysql_obdalin3.obda";
 
         public static final String POSTGRES_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-postgres.obda";
 
@@ -68,6 +68,7 @@ public class QuestOWLExample_ReasoningDisabled {
         static String obdaFile;
         static DbType dbType;
         static String tMappingConfFile;
+        public static String tableFileName;
     }
 
     static class QueryFactory {
@@ -97,8 +98,8 @@ public class QuestOWLExample_ReasoningDisabled {
                     break;
                 case SMALL_MYSQL:
                     filters[0] = 1; // 0.001%
-                    filters[1] = 10; // 0.005%
-                    filters[2] = 100; // 0.01%
+                    filters[1] = 100; // 0.005%
+                    filters[2] = 1000; // 0.01%
                     break;
             }
             return filters;
@@ -208,31 +209,35 @@ public class QuestOWLExample_ReasoningDisabled {
      * @throws java.io.UnsupportedEncodingException
      * @throws java.io.FileNotFoundException
      */
-    private void generateFile(List<Long> resultsOne, List<Long> resultsTwo, List<Long> resultsThree) throws FileNotFoundException, UnsupportedEncodingException {
+    private void generateFile(List<Long> resultsOne, List<Long> resultsTwo, List<Long> resultsThree, String tableFileName) throws FileNotFoundException, UnsupportedEncodingException {
         /*
 		 * Generate File !
 		 */
-        PrintWriter writer = new PrintWriter("src/main/resources/example/disableReasoning/table.txt", "UTF-8");
+        //String tableFileName = "table.txt";
+        PrintWriter writer = new PrintWriter("src/main/resources/example/disableReasoning/" + tableFileName, "UTF-8");
         PrintWriter writerG = new PrintWriter("src/main/resources/example/disableReasoning/graph.txt", "UTF-8");
 
-        writer.write(String.format("%s\n", "# group 1"));
+        //writer.write(String.format("%s\n", "# group 1"));
         int j = 0;
+        int g = 0;
         for(Long result: resultsOne){
-            writer.write(String.format("%d %d %d %d\n", j, j / 6, j % 6, result));
+            writer.write(String.format("%d, %d, %d, %d, %d\n", g, j, j / Constants.NUM_FILTERS, j % Constants.NUM_FILTERS, result));
             j++;
         }
 
-        writer.write(String.format("%s\n", "# group 2"));
+        //writer.write(String.format("%s\n", "# group 2"));
         j = 0;
+        g++;
         for(Long result: resultsTwo){
-            writer.write(String.format("%d %d %d %d\n", j, j / 6, j % 6, result));
+            writer.write(String.format("%d, %d, %d, %d, %d\n", g, j, j / Constants.NUM_FILTERS, j % Constants.NUM_FILTERS, result));
             j++;
         }
 
-        writer.write(String.format("%s\n", "# group 3"));
+        //writer.write(String.format("%s\n", "# group 3"));
         j = 0;
+        g++;
         for(Long result: resultsThree){
-            writer.write(String.format("%d %d %d %d\n", j, j / 6, j % 6, result));
+            writer.write(String.format("%d, %d, %d, %d, %d\n", g, j, j / Constants.NUM_FILTERS, j % Constants.NUM_FILTERS, result));
             j++;
         }
 
@@ -370,7 +375,7 @@ public class QuestOWLExample_ReasoningDisabled {
         List<Long> avg_resultsTwo = average(resultsTwo_list);
         List<Long> avg_resultsThree = average(resultsThree_list);
 
-        generateFile(avg_resultsOne, avg_resultsTwo, avg_resultsThree);
+        generateFile(avg_resultsOne, avg_resultsTwo, avg_resultsThree, Settings.tableFileName);
 
 //        // Run the tests on the queries
 //        runQueries(conn, QueryFactory.createSPARQLs_one_concepts(Settings.dbType), resultsOne);
@@ -482,9 +487,11 @@ public class QuestOWLExample_ReasoningDisabled {
         if(args.length > 0){
             arg = args[0];
             Settings.tMappingConfFile = ParamConst.tMappingConfFiles[Integer.parseInt(args[1])];
+            Settings.tableFileName = String.format("table-%s.txt", args[1]);
         } else {
             arg = "--MYSQL-SMALL";
-            Settings.tMappingConfFile = ParamConst.tMappingConfFiles[1];
+            Settings.tMappingConfFile = ParamConst.tMappingConfFiles[0];
+            Settings.tableFileName = "table-0.txt";
         }
 
         defaults(arg);

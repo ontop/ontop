@@ -372,6 +372,7 @@ public class TMappingProcessor {
 			OClass current = (OClass)classSet.getRepresentative();
 
 			// FIXME: consider equivalences
+            // USE OF excludeFromTMappings
 			if(excludeFromTMappings.contains(current)){
 				continue;
 			}
@@ -383,7 +384,8 @@ public class TMappingProcessor {
 			for (Equivalences<BasicClassDescription> descendants : reasoner.getClasses().getSub(classSet)) {
 				for (BasicClassDescription childDescription : descendants) {
 
-					/* adding the mappings of the children as own mappings, the new
+
+                    /* adding the mappings of the children as own mappings, the new
 					 * mappings. There are three cases, when the child is a named
 					 * class, or when it is an \exists P or \exists \inv P. 
 					 */
@@ -397,6 +399,14 @@ public class TMappingProcessor {
 						childPredicate = ((OClass) childDescription).getPredicate();
 						isClass = true;
 						isInverse = false;
+
+                        /*
+                         * USE OF excludeFromTMappings
+                         */
+                        if(excludeFromTMappings.contains((OClass) childDescription)){
+                            continue;
+                        }
+
 					} 
 					else if (childDescription instanceof SomeValuesFrom) {
 						PropertyExpression some = ((SomeValuesFrom) childDescription).getProperty();
@@ -406,7 +416,9 @@ public class TMappingProcessor {
 					} 
 					else 
 						throw new RuntimeException("Unknown type of node in DAG: " + childDescription);
-					
+
+
+
 					for (CQIE childmapping : originalMappings) {
 						
 						if (!childmapping.getHead().getFunctionSymbol().equals(childPredicate))
