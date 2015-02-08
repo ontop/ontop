@@ -32,13 +32,22 @@ import java.util.List;
 
 public class QuestOWLExample_ReasoningDisabled {
 
+    class Constants {
+        static final int NUM_FILTERS = 3;
+        static final int NUM_SQL_JOINS = 4;
+
+        static final int NUM_RUNS = 2;
+        static final int NUM_WARM_UPS = 4;
+    }
 
     interface ParamConst{
         public static final String MYSQL_OBDA_FILE  = "src/main/resources/example/disableReasoning/ontowis-hierarchy-mysql.obda";
+
         public static final String POSTGRES_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-postgres.obda";
+
         public static final String DB2_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-db2.obda";
 
-        public static final String MYSQL_SMALL_OBDA_FILE  = "src/main/resources/example/disableReasoning/ontowis-hierarchy-mysql.obda";
+        public static final String MYSQL_SMALL_OBDA_FILE  = "src/main/resources/example/disableReasoning/mysql_vulcan.obda";
         public static final String POSTGRES_SMALL_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-postgres.obda";
         public static final String DB2_SMALL_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-db2.obda";
 
@@ -52,7 +61,7 @@ public class QuestOWLExample_ReasoningDisabled {
     }
 
     enum DbType {
-        MYSQL, POSTGRES, SMALL_POSTGRES, SMALL_MYSQL
+        MYSQL, POSTGRES, SMALL_POSTGRES, DB2, SMALL_MYSQL
     }
 
     public static class Settings {
@@ -63,41 +72,40 @@ public class QuestOWLExample_ReasoningDisabled {
 
     static class QueryFactory {
         static private int[] getFilters(DbType type) {
-            int[] filters = new int[6];
+            int[] filters = new int[Constants.NUM_FILTERS];
 
             switch(type){
                 case MYSQL:
-                    filters[0] = 1; // 0.001%
-                    filters[1] = 5; // 0.005%
-                    filters[2] = 10; // 0.01%
-                    filters[3] = 50; // 0.05%
-                    filters[4] = 100; // 0.1%
-                    filters[5] = 1000; //1%
+                    filters[0] = 1; // 0.001
+                    filters[1] = 100; // 0.1%
+                    filters[2] = 1000; //1%
                     break;
                 case POSTGRES:
                     filters[0] = 100;   // 0.0001%
-                    filters[1] = 500;  // 0.0005%
-                    filters[2] = 1000;  // 0.001%
-                    filters[3] = 5000; // 0.005%
-                    filters[4] = 10000; // 0.01%
-                    filters[5] = 100000; // 0.1%
+                    filters[1] = 10000;  // 0.01%
+                    filters[2] = 100000; // 0.1%
+                    break;
+                case SMALL_POSTGRES:
+                    filters[0] = 1; // 0.001%
+                    filters[1] = 100; // 0.005%
+                    filters[2] = 1000; // 0.01%
+                    break;
+                case DB2:
+                    filters[0] = 100;
+                    filters[1] = 10000;
+                    filters[2] = 100000;
+                    break;
+                case SMALL_MYSQL:
+                    filters[0] = 1; // 0.001%
+                    filters[1] = 10; // 0.005%
+                    filters[2] = 100; // 0.01%
                     break;
             }
             return filters;
         }
 
         static String prefix = "PREFIX : <http://www.example.org/> \n";
-//
-//        static List<String> createSPARQLQueries(DbType dbType){
-//
-//            List<String> sparqls = new ArrayList<>();
-//
-//            sparqls.addAll(createSPARQLs_one_concepts(dbType));
-//            sparqls.addAll(createSPARQLs_two_concepts(dbType));
-//            sparqls.addAll(createSPARQLs_three_concepts(dbType));
-//
-//            return sparqls;
-//        }
+
 
         static public List<String> createSPARQLs_three_concepts(DbType dbType){
             List<String> sparqls = new ArrayList<>();
@@ -164,56 +172,70 @@ public class QuestOWLExample_ReasoningDisabled {
             }
             return sparqls;
         }
+
+        static public  List<String> getWarmUpQueries() {
+            List<String> warmUpQueries = new ArrayList<>();
+            for(int i = 0; i < Constants.NUM_WARM_UPS; i++){
+                int limit = (i * 1000) + 1;
+                warmUpQueries.add(String.format("SELECT ?x WHERE { " +
+                        "?x a <http://www.example.org/%dTab1> } LIMIT " + limit, i));
+            }
+            return warmUpQueries;
+        }
     }
+
+    public List<Long> average(List<List<Long>> lists ){
+
+        int numList = lists.size();
+
+        int size = lists.get(0).size();
+
+        List<Long> results = new ArrayList<>();
+
+        for(int i = 0 ; i < size; i++){
+            long sum = 0;
+            for (List<Long> list : lists) {
+                sum += list.get(i);
+            }
+            results.add(sum/numList);
+        }
+        return results;
+    }
+
+
 
     /**
      * @throws java.io.UnsupportedEncodingException
      * @throws java.io.FileNotFoundException
      */
-    private void generateFile(List<String> resultsOne, List<String> resultsTwo, List<String> resultsThree) throws FileNotFoundException, UnsupportedEncodingException {
+    private void generateFile(List<Long> resultsOne, List<Long> resultsTwo, List<Long> resultsThree) throws FileNotFoundException, UnsupportedEncodingException {
         /*
 		 * Generate File !
 		 */
-        PrintWriter writer = new PrintWriter("src/main/resources/example/table.txt", "UTF-8");
-        PrintWriter writerG = new PrintWriter("src/main/resources/example/graph.txt", "UTF-8");
+        PrintWriter writer = new PrintWriter("src/main/resources/example/disableReasoning/table.txt", "UTF-8");
+        PrintWriter writerG = new PrintWriter("src/main/resources/example/disableReasoning/graph.txt", "UTF-8");
 
         writer.write(String.format("%s\n", "# group 1"));
         int j = 0;
-        for(String result: resultsOne){
-            writer.write(String.format("%d %d %d %s\n", j, j / 6, j % 6, result));
+        for(Long result: resultsOne){
+            writer.write(String.format("%d %d %d %d\n", j, j / 6, j % 6, result));
             j++;
         }
 
         writer.write(String.format("%s\n", "# group 2"));
         j = 0;
-        for(String result: resultsTwo){
-            writer.write(String.format("%d %d %d %s\n", j, j / 6, j % 6, result));
+        for(Long result: resultsTwo){
+            writer.write(String.format("%d %d %d %d\n", j, j / 6, j % 6, result));
             j++;
         }
 
         writer.write(String.format("%s\n", "# group 3"));
         j = 0;
-        for(String result: resultsThree){
-            writer.write(String.format("%d %d %d %s\n", j, j / 6, j % 6, result));
+        for(Long result: resultsThree){
+            writer.write(String.format("%d %d %d %d\n", j, j / 6, j % 6, result));
             j++;
         }
 
-
-//        int j = 0;
-//        while (j < 24) {
-//            writer.println(resultsOne.get(j) + " & " + resultsTwo.get(j) + " & " + resultsThree.get(j));
-//
-////            if (j <= 5) {
-////                String gline = "(1," + resultsOne.get(j) + ")" + "(2," + resultsTwo.get(j) + ")"
-////                        + "(3," + resultsThree.get(j) + ")" + "(4," + resultsOne.get(j + 6) + ")"
-////                        + "(5," + resultsTwo.get(j + 6) + ")" + "(6," + resultsThree.get(j + 6) + ")"
-////                        + "(7," + resultsOne.get(j + 12) + ")" + "(8," + resultsTwo.get(j + 12) + ")"
-////                        + "(9," + resultsThree.get(j + 12) + ")" + "(10," + resultsOne.get(j + 18) + ")"
-////                        + "(11," + resultsTwo.get(j + 18) + ")" + "(12," + resultsThree.get(j + 18) + ")";
-////                writerG.println(gline);
-////            }
-//            j++;
-//        }
         writer.close();
         writerG.close();
     }
@@ -319,73 +341,103 @@ public class QuestOWLExample_ReasoningDisabled {
         QuestOWLConnection conn =  createStuff();
 
         // Results
-        List<String> resultsOne = new ArrayList<>();
-        List<String> resultsTwo = new ArrayList<>();
-        List<String> resultsThree = new ArrayList<>();
+//        List<String> resultsOne = new ArrayList<>();
+//        List<String> resultsTwo = new ArrayList<>();
+//        List<String> resultsThree = new ArrayList<>();
 
-        // Run the tests on the queries
-        runQueries(conn, QueryFactory.createSPARQLs_one_concepts(Settings.dbType), resultsOne);
-        runQueries(conn, QueryFactory.createSPARQLs_two_concepts(Settings.dbType), resultsTwo);
-        runQueries(conn, QueryFactory.createSPARQLs_three_concepts(Settings.dbType), resultsThree);
 
+
+        List<List<Long>> resultsOne_list = new ArrayList<>();
+        List<List<Long>> resultsTwo_list = new ArrayList<>();
+        List<List<Long>> resultsThree_list = new ArrayList<>();
+
+
+        runQueries(conn, QueryFactory.getWarmUpQueries());
+
+        for(int i = 0; i < Constants.NUM_RUNS; i++) {
+            List<Long> resultsOne = runQueries(conn, QueryFactory.createSPARQLs_one_concepts(Settings.dbType));
+            resultsOne_list.add(resultsOne);
+
+            List<Long> resultsTwo = runQueries(conn, QueryFactory.createSPARQLs_two_concepts(Settings.dbType));
+            resultsTwo_list.add(resultsTwo);
+
+            List<Long> resultsThree = runQueries(conn, QueryFactory.createSPARQLs_three_concepts(Settings.dbType));
+            resultsThree_list.add(resultsThree);
+        }
         closeEverything(conn);
-        generateFile(resultsOne, resultsTwo, resultsThree);
+
+        List<Long> avg_resultsOne = average(resultsOne_list);
+        List<Long> avg_resultsTwo = average(resultsTwo_list);
+        List<Long> avg_resultsThree = average(resultsThree_list);
+
+        generateFile(avg_resultsOne, avg_resultsTwo, avg_resultsThree);
+
+//        // Run the tests on the queries
+//        runQueries(conn, QueryFactory.createSPARQLs_one_concepts(Settings.dbType), resultsOne);
+//        runQueries(conn, QueryFactory.createSPARQLs_two_concepts(Settings.dbType), resultsTwo);
+//        runQueries(conn, QueryFactory.createSPARQLs_three_concepts(Settings.dbType), resultsThree);
+//
+//        closeEverything(conn);
+//        generateFile(resultsOne, resultsTwo, resultsThree);
 
     }
 
-    private void runQueries(QuestOWLConnection conn,
-                             List<String> queries, List<String> results) throws OWLException {
-        int j=0;
-        //while (j < queries.length){
+    private List<Long> runQueries(QuestOWLConnection conn, List<String> queries) throws OWLException {
+
+        //int nWarmUps = Constants.NUM_WARM_UPS;
+        //int nRuns = Constants.NUM_RUNS;
+
+        List<Long> results = new ArrayList<>();
 
         for(String sparqlQuery:queries){
-
             //String sparqlQuery = queries[j];
             QuestOWLStatement st = conn.createStatement();
             try {
 
                 // Warm ups
-                for (int i=0; i<1; i++){
-                    QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
-                    int columnSize = rs.getColumnCount();
-                    while (rs.nextRow()) {
-                        for (int idx = 1; idx <= columnSize; idx++) {
-                            @SuppressWarnings("unused")
-                            OWLObject binding = rs.getOWLObject(idx);
-                            //System.out.print(binding.toString() + ", ");
-                        }
-                        //System.out.print("\n");
-                    }
-                }
-
+//				for (int i=0; i<nWarmUps; ++i){
+//					QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+//					int columnSize = rs.getColumnCount();
+//					while (rs.nextRow()) {
+//						for (int idx = 1; idx <= columnSize; idx++) {
+//							@SuppressWarnings("unused")
+//							OWLObject binding = rs.getOWLObject(idx);
+//							//System.out.print(binding.toString() + ", ");
+//						}
+//						//System.out.print("\n");
+//					}
+//				}
+//
 
                 long time = 0;
                 int count = 0;
 
-                for (int i = 0; i < 3; i++){
-                    long t1 = System.currentTimeMillis();
-                    QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
-                    int columnSize = rs.getColumnCount();
-                    count = 0;
-                    while (rs.nextRow()) {
-                        count ++;
-                        for (int idx = 1; idx <= columnSize; idx++) {
-                            @SuppressWarnings("unused")
-                            OWLObject binding = rs.getOWLObject(idx);
-                            //System.out.print(binding.toString() + ", ");
-                        }
-                        //System.out.print("\n");
+                //for (int i=0; i<nRuns; ++i){
+                long t1 = System.currentTimeMillis();
+                QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
+                int columnSize = rs.getColumnCount();
+                count = 0;
+                while (rs.nextRow()) {
+                    count ++;
+                    for (int idx = 1; idx <= columnSize; idx++) {
+                        @SuppressWarnings("unused")
+                        OWLObject binding = rs.getOWLObject(idx);
+                        //System.out.print(binding.toString() + ", ");
                     }
-                    long t2 = System.currentTimeMillis();
-                    time = time + (t2-t1);
-                    System.out.println("partial time:" + time);
-                    rs.close();
+                    //System.out.print("\n");
                 }
+                long t2 = System.currentTimeMillis();
+                //time = time + (t2-t1);
+                time =  (t2-t1);
+                System.out.println("partial time:" + time);
+                rs.close();
+                //}
 
 				/*
 				 * Print the query summary
 				 */
-                String sqlQuery = st.getUnfolding(sparqlQuery);
+                QuestOWLStatement qst = (QuestOWLStatement) st;
+                String sqlQuery = qst.getUnfolding(sparqlQuery);
 
                 System.out.println();
                 System.out.println("The input SPARQL query:");
@@ -399,25 +451,24 @@ public class QuestOWLExample_ReasoningDisabled {
 
                 System.out.println("Query Execution Time:");
                 System.out.println("=====================");
-                System.out.println((time/3) + "ms");
+                //System.out.println((time/nRuns) + "ms");
 
-                results.add(j, (time / 3) + "");
+                //results[j] = (time/nRuns)+"" ;
+                results.add(time);
 
                 System.out.println("The number of results:");
                 System.out.println("=====================");
                 System.out.println(count);
-
-//                if(j > 7)
-//                    break;
 
             } finally {
                 if (st != null && !st.isClosed()) {
                     st.close();
                 }
             }
-            j++;
+
         }
 
+        return results;
     }
 
 
