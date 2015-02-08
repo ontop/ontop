@@ -75,7 +75,7 @@ public class QuestOWLExample_OntowisTests {
 		
 		// DB2
 		public static final String DB2Int = "src/main/resources/example/db2-NoViews-joins-int.obda";
-		public static final String DB2IntView = "src/main/resources/example/db2-NoViews-joins-str.obda";
+		public static final String DB2IntView = "src/main/resources/example/db2-Views-joins-int.obda";
 		
 	}
 	
