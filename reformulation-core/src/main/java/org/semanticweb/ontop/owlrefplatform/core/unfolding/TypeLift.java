@@ -254,6 +254,18 @@ public class TypeLift {
          */
         final HashMap<Predicate, PredicateLevelProposal> childProposalIndex = retrieveChildrenProposals(parentZipper);
 
+
+        final TypeLiftNode parentLabel = parentZipper.getLabel();
+        final List<CQIE> parentRules = parentLabel.getDefinitionRules();
+
+        /**
+         * If the current (parent) node has no definition rule, no proposal can be made.
+         * ---> returns the same zipper.
+         */
+        if (parentRules.isEmpty()) {
+            return parentZipper;
+        }
+
         /**
          * Aggregates all these proposals according to the rules defining the parent predicate
          * into a PredicateLevelProposal.
@@ -261,8 +273,7 @@ public class TypeLift {
          * If such aggregation is not possible, a MultiTypeException will be thrown.
          *
          */
-        final TypeLiftNode parentLabel = parentZipper.getLabel();
-        final PredicateLevelProposal proposal = makeProposal(parentLabel.getDefinitionRules(), childProposalIndex);
+        final PredicateLevelProposal proposal = makeProposal(parentRules, childProposalIndex);
 
         /**
          * Updated rules: type is applied to these rules (heads and bodies).
@@ -341,10 +352,14 @@ public class TypeLift {
 
     /**
      * Creates a PredicateLevelProposal from the parent rules and the child proposals.
+     *
      */
     private static PredicateLevelProposal makeProposal(List<CQIE> parentRules,
                                                        HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
             throws TypeLiftTools.MultiTypeException {
+        if (parentRules.isEmpty()) {
+            throw new IllegalArgumentException("Parent rules are required for making a proposal.");
+        }
         return new PredicateLevelProposalImpl(parentRules, childProposalIndex);
     }
 

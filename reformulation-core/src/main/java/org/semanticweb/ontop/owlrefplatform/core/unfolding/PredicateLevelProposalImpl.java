@@ -32,6 +32,10 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
      */
     public PredicateLevelProposalImpl(List<CQIE> parentRules, HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
             throws TypeLiftTools.MultiTypeException {
+        if (parentRules.isEmpty()) {
+            throw new IllegalArgumentException("Parent rules are required for making a proposal.");
+        }
+
         /**
          * Computes the RuleLevelProposals and the global substitution.
          */
