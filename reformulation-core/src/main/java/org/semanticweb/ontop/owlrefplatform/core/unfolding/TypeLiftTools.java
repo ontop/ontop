@@ -58,7 +58,10 @@ public class TypeLiftTools {
         Function functionalTerm = (Function) term;
 
         if (functionalTerm.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI)) {
-            return true;
+            /**
+             * Distinguish normal URI types from URI templates
+             */
+            return functionalTerm.getTerms().size() > 1;
         }
         return false;
     }
@@ -368,16 +371,12 @@ public class TypeLiftTools {
         if (DatalogUnfolder.detectAggregateInArgument(term))
             return Option.some(term);
 
-        Function functionalTerm = (Function) term;
-        java.util.List<Term> functionArguments = functionalTerm.getTerms();
-        Predicate functionSymbol = functionalTerm.getFunctionSymbol();
 
         /**
          * Special case: URI templates --> to be removed.
          *
          */
-        boolean isURI = functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI);
-        if (isURI) {
+        if (isURITemplate(term)) {
             return Option.none();
         }
 
@@ -387,6 +386,8 @@ public class TypeLiftTools {
          *
          * Raises an exception if it is not the case.
          */
+        Function functionalTerm = (Function) term;
+        java.util.List<Term> functionArguments = functionalTerm.getTerms();
         if (functionArguments.size() != 1) {
             throw new RuntimeException("Removing types of non-unary functional terms is not supported.");
         }
