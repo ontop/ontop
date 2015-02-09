@@ -156,9 +156,9 @@ public class UriTemplateTypeProposal implements TypeProposal {
                     if (!functionalTerm.isDataTypeFunction())
                         return false;
                     java.util.List<Term> subTerms = functionalTerm.getTerms();
-                    if (subTerms.size() != 1) {
-                        throw new RuntimeException("Datatype that has not an arity of 1 " + functionalTerm);
-                    }
+                    /**
+                     * Lang datatype has an arity of 2, but the variable is in the first position.
+                     */
                     return subTerms.get(0) instanceof Variable;
                 }
                 return false;
