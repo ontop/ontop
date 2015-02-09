@@ -157,7 +157,10 @@ public class TypeLiftTools {
      *
      */
     private static boolean isMultiTypedPredicate(List<CQIE> predicateDefinitionRules) {
-        if (predicateDefinitionRules.length() <= 1)
+        /**
+         * TODO: after removing isRuleSupportedForTypeLift, test len(predicateDefRules <= 1
+         */
+        if (predicateDefinitionRules.isEmpty())
             return false;
 
         CQIE currentRule = predicateDefinitionRules.head();
