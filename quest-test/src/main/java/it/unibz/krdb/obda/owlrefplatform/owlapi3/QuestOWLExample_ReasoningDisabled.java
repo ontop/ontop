@@ -43,12 +43,12 @@ public class QuestOWLExample_ReasoningDisabled {
     interface ParamConst{
         public static final String MYSQL_OBDA_FILE  = "src/main/resources/example/disableReasoning/mysql_obdalin3.obda";
 
-        public static final String POSTGRES_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-postgres.obda";
+        public static final String POSTGRES_OBDA_FILE = "src/main/resources/example/disableReasoning/pgsql_obdalin3.obda";
 
         public static final String DB2_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-db2.obda";
 
         public static final String MYSQL_SMALL_OBDA_FILE  = "src/main/resources/example/disableReasoning/mysql_vulcan.obda";
-        public static final String POSTGRES_SMALL_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-postgres.obda";
+        public static final String POSTGRES_SMALL_OBDA_FILE = "src/main/resources/example/disableReasoning/pgsql_obdalin3.obda";
         public static final String DB2_SMALL_OBDA_FILE = "src/main/resources/example/disableReasoning/ontowis-hierarchy-db2.obda";
 
 
@@ -456,7 +456,7 @@ public class QuestOWLExample_ReasoningDisabled {
 
                 System.out.println("Query Execution Time:");
                 System.out.println("=====================");
-                //System.out.println((time/nRuns) + "ms");
+                System.out.println(time + "ms");
 
                 //results[j] = (time/nRuns)+"" ;
                 results.add(time);
@@ -519,8 +519,8 @@ public class QuestOWLExample_ReasoningDisabled {
                 break;
             }
             case "--POSTGRES-SMALL":{
-                Settings.obdaFile = ParamConst.MYSQL_SMALL_OBDA_FILE;
-                Settings.dbType = DbType.MYSQL;
+                Settings.obdaFile = ParamConst.POSTGRES_SMALL_OBDA_FILE;
+                Settings.dbType = DbType.SMALL_POSTGRES;
                 break;
             }
             case "--POSTGRES":{
