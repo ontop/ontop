@@ -222,9 +222,11 @@ public class TypeLiftTools {
             @Override
             public Boolean f(Function atom) {
                 /**
-                 * Algebraic meta-atoms are not supported (left-join, etc.)
+                 * Join and Left join meta-predicates are not supported here (but group is...)
+                 * (joins must have been unfolded so that its meta-predicate is not needed.).
                  */
-                if (atom.isAlgebraFunction())
+                Predicate predicate = atom.getFunctionSymbol();
+                if (predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN) || predicate.equals(OBDAVocabulary.SPARQL_JOIN))
                     return false;
                 return true;
             }

@@ -6,6 +6,7 @@ import fj.P2;
 import fj.data.*;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
@@ -53,6 +54,22 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
         });
 
         /**
+         * Excludes joins and left joins but consider group.
+         * TODO: this is very weak. Improve it.
+         */
+        List<Function> nonCompositeAlgebraAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
+            @Override
+            public Boolean f(Function atom) {
+                if (!atom.isAlgebraFunction())
+                    return false;
+                Predicate predicate = atom.getFunctionSymbol();
+                if (predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN) || predicate.equals(OBDAVocabulary.SPARQL_JOIN))
+                    return false;
+                return true;
+            }
+        });
+
+        /**
          * Adapts the body data atoms so that are compatible with the typed child head for computing
          * a type propagation substitution.
          */
@@ -66,7 +83,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
         /**
          * TODO: Only works for UCQs (Left-join hacky notation is not supported)
          */
-        typedRule = constructTypedRule(initialRule, typingSubstitution, unifiableBodyDataAtoms, filterAtoms);
+        typedRule = constructTypedRule(initialRule, typingSubstitution, unifiableBodyDataAtoms, filterAtoms, nonCompositeAlgebraAtoms);
 
     }
 
@@ -232,7 +249,8 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
      * Note that it only constructs Conjunctive Queries!
      *
      */
-    private static CQIE constructTypedRule(CQIE initialRule, Unifier typingSubstitution, List<Function> unifiableDataAtoms, List<Function> filterAtoms) {
+    private static CQIE constructTypedRule(CQIE initialRule, Unifier typingSubstitution, List<Function> unifiableDataAtoms, List<Function> untypedFilterAtoms,
+                                           List<Function> untypedNonCompositeAlgebraAtoms) {
 
         /**
          * Derives a typed head by applying the substitution
@@ -242,14 +260,34 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
         UnifierUtilities.applyUnifier(newHead, typingSubstitution);
 
         /**
-         * Concats the two list of atoms
+         * Types filter and non composite algebra atoms
          */
-        List<Function> allAtoms = unifiableDataAtoms.append(filterAtoms);
+        List<Function> typedBodyAtoms = typeAtoms(typingSubstitution, untypedFilterAtoms.append(untypedNonCompositeAlgebraAtoms));
+
+        /**
+         * Concats the three list of atoms
+         */
+        List<Function> allAtoms = unifiableDataAtoms.append(typedBodyAtoms);
         java.util.List<Function> typedRuleBody = new ArrayList<>(allAtoms.toCollection());
 
 
         CQIE typedRule = OBDADataFactoryImpl.getInstance().getCQIE(newHead, typedRuleBody);
         return typedRule;
+    }
+
+    /**
+     * Applies the typing substitution to a list of atoms.
+     */
+    private static List<Function> typeAtoms(final Unifier typingSubstitution, final List<Function> atoms) {
+        return atoms.map(new F<Function, Function>() {
+            @Override
+            public Function f(Function atom) {
+                Function newAtom = (Function) atom.clone();
+                // SIDE-EFFECT: makes the new head typed.
+                UnifierUtilities.applyUnifier(newAtom, typingSubstitution);
+                return newAtom;
+            }
+        });
     }
 
     /**
