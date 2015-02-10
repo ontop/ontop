@@ -181,19 +181,19 @@ public class BindTest {
                 "}";
 		OWLObject price = runTests(p, querySelect1);
 
-        assertEquals("<33.6>", price.toString());
+        assertEquals("\"33.6\"", price.toString());
 
         //simple case it works
         String querySelect2 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
                 "PREFIX  ns:  <http://example.org/ns#>\n" +
-                "SELECT  ?title (\"17.25\" AS ?price)\n" +
+                "SELECT  ?title (17.25 AS ?price)\n" +
                 "{ ?x ns:price ?p .\n" +
                 "  ?x dc:title ?title . \n" +
                 "  ?x ns:discount ?discount . \n" +
                 "}";
         OWLObject price2 = runTests(p, querySelect2);
 
-        assertEquals("\"17.25\"", price2.toString());
+        assertEquals("\"17.25\"^^xsd:decimal", price2.toString());
 
     }
 
@@ -217,7 +217,7 @@ public class BindTest {
 
         OWLObject price = runTests(p, queryBind);
 
-        assertEquals("<17.25>", price.toString());
+        assertEquals("\"17.25\"", price.toString());
 
     }
 

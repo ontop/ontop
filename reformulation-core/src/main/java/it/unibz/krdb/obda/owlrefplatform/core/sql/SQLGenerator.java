@@ -893,7 +893,7 @@ public class SQLGenerator implements SQLQueryGenerator {
                 type = COL_TYPE.BNODE;
 			}
             else if  (ov.isArithmeticFunction()) {
-                type = COL_TYPE.OBJECT;
+                type = COL_TYPE.LITERAL;
             }
 			else {
 				String functionString = function.toString();

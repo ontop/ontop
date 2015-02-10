@@ -738,6 +738,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		for (Variable var : vars) {
 			newvars.add(var);
 		}
+        Collections.sort(newvars, comparator);
 
 		Predicate answerPred = ofac.getPredicate("ans" + i, vars.size());
 		Function head = ofac.getFunction(answerPred, newvars);
