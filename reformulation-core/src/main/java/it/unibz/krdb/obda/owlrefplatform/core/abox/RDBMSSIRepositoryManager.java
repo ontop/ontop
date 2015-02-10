@@ -37,7 +37,6 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
-import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
@@ -52,6 +51,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexCache;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -305,8 +305,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 	private boolean isDBSchemaDefined(Connection conn) throws SQLException {
 		
-		boolean exists = false; // initially pessimistic
-		
 		try (Statement st = conn.createStatement()) {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", classTable.tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", roleTable.tableName));
@@ -320,12 +318,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.BOOLEAN).tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DATETIME_STAMP).tableName));
 
-			exists = true; // everything is fine if we get to this point
+			return true; // everything is fine if we get to this point
 		} 
 		catch (Exception e) {
 			// ignore all exceptions
 		}
-		return exists;
+		return false; // there was an exception if we have got here
 	}
 	
 	
@@ -364,7 +362,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		PreparedStatement classStm = conn.prepareStatement(classTable.insertCommand);
 		PreparedStatement roleStm = conn.prepareStatement(roleTable.insertCommand);
 		
-		Map<COL_TYPE, PreparedStatement> attributeStm = new HashMap<COL_TYPE, PreparedStatement>();
+		Map<COL_TYPE, PreparedStatement> attributeStm = new HashMap<>();
 		for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet()) {
 			PreparedStatement stm = conn.prepareStatement(entry.getValue().insertCommand);
 			attributeStm.put(entry.getKey(), stm);
@@ -372,7 +370,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		
 		// For counting the insertion
 		int success = 0;
-		Map<Predicate, Integer> failures = new HashMap<Predicate, Integer>();
+		Map<Predicate, Integer> failures = new HashMap<>();
 
 		int batchCount = 0;
 		int commitCount = 0;
@@ -475,30 +473,26 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		// Print the monitoring log
 		log.debug("Total successful insertions: " + success + ".");
 		int totalFailures = 0;
-		for (Predicate predicate : failures.keySet()) {
-			int failure = failures.get(predicate);
-			log.warn("Failed to insert data for predicate {} ({} tuples).", predicate, failure);
-			totalFailures += failure;
+		for (Map.Entry<Predicate, Integer> entry : failures.entrySet()) {
+			log.warn("Failed to insert data for predicate {} ({} tuples).", entry.getKey(), entry.getValue());
+			totalFailures += entry.getValue();
 		}
 		if (totalFailures > 0) {
 			log.warn("Total failed insertions: " + totalFailures + ". (REASON: datatype mismatch between the ontology and database).");
 		}
 
-		fireRepositoryChanged();
+		/*
+		 * fired ONLY when new data is inserted and emptiness index is updated
+		 * (this is done in order to update T-mappings)
+		 */
+
+		for (RepositoryChangedListener listener : changeList) {
+			listener.repositoryChanged();
+		}
 
 		return success;
 	}
 
-	/*
-	 * fired ONLY when new data is inserted and emptiness index is updated
-	 * (this is done in order to update T-mappings)
-	 */
-	
-	private void fireRepositoryChanged() {
-		for (RepositoryChangedListener listener : changeList) {
-			listener.repositoryChanged();
-		}
-	}
 
 	private void process(ObjectPropertyAssertion ax, PreparedStatement uriidStm, PreparedStatement roleStm) throws SQLException {
 
@@ -607,7 +601,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			case DECIMAL: // 11
 				stm.setBigDecimal(2, new BigDecimal(value));
 				break;
-			case DATETIME_STAMP:
+			case DATETIME_STAMP: // 15
 			case DATETIME: // 13
 				stm.setTimestamp(2, parseTimestamp(value));
 				break;
@@ -623,14 +617,13 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			default:
 		}
 		
-		boolean c1isBNode = subject instanceof BNode;
 		if (attributeType == COL_TYPE.LITERAL) {
 			stm.setInt(4, idx);
-			stm.setBoolean(5, c1isBNode);			
+			stm.setBoolean(5, subject instanceof BNode);			
 		}
 		else {
 			stm.setInt(3, idx);
-			stm.setBoolean(4, c1isBNode);			
+			stm.setBoolean(4, subject instanceof BNode);			
 		}
 		stm.addBatch();
 		
@@ -877,7 +870,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			int type = res.getInt(4);
 
 			if (previousString == null) { // very first row
-				currentSet = new LinkedList<Interval>();
+				currentSet = new LinkedList<>();
 				previousType = type;
 				previousString = iri;
 			}
@@ -887,7 +880,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				 // intervals and clear the set
 				setIntervals(previousString, previousType, currentSet, maxObjectPropertyIndex);
 
-				currentSet = new LinkedList<Interval>();
+				currentSet = new LinkedList<>();
 				previousType = type;
 				previousString = iri;
 			}
@@ -925,7 +918,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 	private static final COL_TYPE objectTypes[] = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.BNODE };
 
-	private static final COL_TYPE types[] = new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL_LANG, COL_TYPE.BOOLEAN, 
+	private static final COL_TYPE typesAndObjectTypes[] = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.BNODE, 
+		COL_TYPE.LITERAL, COL_TYPE.LITERAL_LANG, COL_TYPE.BOOLEAN, 
 		COL_TYPE.DATETIME, COL_TYPE.DATETIME_STAMP, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.INTEGER, COL_TYPE.INT,
 		COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER, 
 		COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER, COL_TYPE.FLOAT,  COL_TYPE.LONG, 
@@ -947,15 +941,23 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		for (Equivalences<ObjectPropertyExpression> set: reasonerDag.getObjectPropertyDAG()) {
 
-			ObjectPropertyExpression node = set.getRepresentative();
+			ObjectPropertyExpression ope = set.getRepresentative();
 			// only named roles are mapped
-			if (node.isInverse()) 
+			if (ope.isInverse()) 
 				continue;
 			
 			// We need to make sure we make no mappings for Auxiliary roles
 			// introduced by the Ontology translation process.
-			if (OntologyVocabularyImpl.isAuxiliaryProperty(node)) 
+			if (OntologyVocabularyImpl.isAuxiliaryProperty(ope)) 
 				continue;
+
+			SemanticIndexRange range = cacheSI.getEntry(ope);
+			if (range == null) {
+				log.debug("Object property " + ope + " has no SemanticIndexRange");
+				return null;
+			}
+			List<Interval> intervals = range.getIntervals();	
+			
 			
 			/***
 			 * Generating one mapping for each supported cases, i.e., the second
@@ -968,40 +970,33 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			 */
 			
 			for (COL_TYPE obType1 : objectTypes) {
-				for (COL_TYPE obType2 : objectTypes) {
-					if (!isMappingEmpty(node, obType1, obType2)) {
-						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, obType2);
-						String sourceQuery = constructSourceQuery(node, obType1, obType2);
-						if (sourceQuery == null)
-							continue;
-						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-						result.add(basicmapping);		
-					}
+				for (COL_TYPE obType2 : typesAndObjectTypes) {
+					if (isMappingEmpty(intervals, obType1, obType2))
+						continue;
+					
+					String sourceQuery = constructSqlSource(obType1, obType2, intervals);
+					CQIE targetQuery = constructTargetQuery(ope.getPredicate(), obType1, obType2);
+					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+					result.add(basicmapping);		
 				}
-			}
-
-			for (COL_TYPE obType1 : objectTypes) {
-				for (COL_TYPE type2 : types) {			
-					if (!isMappingEmpty(node, obType1, type2)) {
-						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, type2);
-						String sourceQuery = constructSourceQuery(node, obType1, type2);
-						if (sourceQuery == null)
-							continue;
-						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-						result.add(basicmapping);
-					}
-				}	
 			}
 		}
 
 		for (Equivalences<DataPropertyExpression> set: reasonerDag.getDataPropertyDAG()) {
 
-			DataPropertyExpression node = set.getRepresentative();
+			DataPropertyExpression dpe = set.getRepresentative();
 			
 			// We need to make sure we make no mappings for Auxiliary roles
 			// introduced by the Ontology translation process.
-			if (OntologyVocabularyImpl.isAuxiliaryProperty(node)) 
+			if (OntologyVocabularyImpl.isAuxiliaryProperty(dpe)) 
 				continue;
+			
+			SemanticIndexRange range = cacheSI.getEntry(dpe);
+			if (range == null) {
+				log.debug("Data property " + dpe + " has no SemanticIndexRange");
+				return null;
+			}
+			List<Interval> intervals = range.getIntervals();	
 			
 
 			/***
@@ -1015,29 +1010,15 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			 */
 			
 			for (COL_TYPE obType1 : objectTypes) {
-				for (COL_TYPE obType2 : objectTypes) {
-					if (!isMappingEmpty(node, obType1, obType2)) {
-						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, obType2);
-						String sourceQuery = constructSourceQuery(node, obType1, obType2);
-						if (sourceQuery == null)
-							continue;
-						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-						result.add(basicmapping);			
-					}
+				for (COL_TYPE obType2 : typesAndObjectTypes) {
+					if (isMappingEmpty(intervals, obType1, obType2))
+						continue;
+					
+					String sourceQuery = constructSqlSource(obType1, obType2, intervals);
+					CQIE targetQuery = constructTargetQuery(dpe.getPredicate(), obType1, obType2);
+					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+					result.add(basicmapping);			
 				}
-			}
-
-			for (COL_TYPE obType1 : objectTypes) {
-				for (COL_TYPE type2 : types) {			
-					if (!isMappingEmpty(node, obType1, type2)) {
-						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, type2);
-						String sourceQuery = constructSourceQuery(node, obType1, type2);
-						if (sourceQuery == null)
-							continue;
-						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-						result.add(basicmapping);
-					}
-				}	
 			}
 		}
 		
@@ -1061,35 +1042,13 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			}
 			List<Interval> intervals = range.getIntervals();
 
-			// Mapping head
-			Predicate predicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
-			Function head = dfac.getFunction(predicate, dfac.getVariable("X"));
-			
-			if (!isMappingEmpty(classNode, COL_TYPE.OBJECT)) {
-				/* FOR URI */
-				Function body1 = dfac.getFunction(classNode.getPredicate(), dfac.getUriTemplate(dfac.getVariable("X")));
-				CQIE targetQuery1 = dfac.getCQIE(head, body1);
-
-				StringBuilder sql1 = new StringBuilder();
-				sql1.append(classTable.selectCommand);
-				sql1.append(" ISBNODE = FALSE AND ");
-				appendIntervalString(sql1, intervals);
-
-				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sql1.toString(), targetQuery1);
-				result.add(basicmapping);
-			}
-			if (!isMappingEmpty(classNode, COL_TYPE.BNODE)) {
-				/* FOR BNODE */
+			for (COL_TYPE obType1 : objectTypes) {
+				if (isMappingEmpty(intervals, obType1)) 
+					continue;
 				
-				Function body2 = dfac.getFunction(classNode.getPredicate(), dfac.getBNodeTemplate(dfac.getVariable("X")));
-				CQIE targetQuery2 = dfac.getCQIE(head, body2);
-				
-				StringBuilder sql2 = new StringBuilder();
-				sql2.append(classTable.selectCommand);
-				sql2.append(" ISBNODE = TRUE AND ");
-				appendIntervalString(sql2, intervals);
-
-				OBDAMappingAxiom  basicmapping = dfac.getRDBMSMappingAxiom(sql2.toString(), targetQuery2);
+				String sourceQuery = constructSqlSource(obType1, intervals);
+				CQIE targetQuery = constructTargetQuery(classNode.getPredicate(), obType1);
+				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 				result.add(basicmapping);
 			}
 		}
@@ -1134,9 +1093,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 * @return
 	 * @throws OBDAException 
 	 */
-	private boolean isMappingEmpty(OClass concept, COL_TYPE type1)  {
+	private boolean isMappingEmpty(List<Interval> intervals,  COL_TYPE type1)  {
 		
-		for (Interval interval : cacheSI.getEntry(concept).getIntervals()) 
+		for (Interval interval : intervals) 
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
 				SemanticIndexRecord record = new SemanticIndexRecord(type1, i);
 				if (nonEmptyEntityRecord.contains(record))
@@ -1146,42 +1105,35 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		return true;
 	}
 
-	/***
-	 * @param iri
-	 * @param type1
-	 * @param type2
-	 * @return
-	 * @throws OBDAException 
-	 */
-	private boolean isMappingEmpty(ObjectPropertyExpression ope, COL_TYPE type1, COL_TYPE type2)  {
-
-		for (Interval interval : cacheSI.getEntry(ope).getIntervals()) 
+	private boolean isMappingEmpty(List<Interval> intervals, COL_TYPE type1, COL_TYPE type2)  {
+		
+		for (Interval interval : intervals) 
 			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
 				SemanticIndexRecord record = new SemanticIndexRecord(type1, type2, i);
 				if (nonEmptyEntityRecord.contains(record)) 
 					return false;
 			}
-
+		
 		return true;
 	}
+	
+	private CQIE constructTargetQuery(Predicate predicate, COL_TYPE type) {
 
-	/***
-	 * @param iri
-	 * @param type1
-	 * @param type2
-	 * @return
-	 * @throws OBDAException 
-	 */
-	private boolean isMappingEmpty(DataPropertyExpression dpe, COL_TYPE type1, COL_TYPE type2)  {
+		Variable X = dfac.getVariable("X");
 
-		for (Interval interval : cacheSI.getEntry(dpe).getIntervals()) 
-			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
-				SemanticIndexRecord record = new SemanticIndexRecord(type1, type2, i);
-				if (nonEmptyEntityRecord.contains(record))
-					return false;
-			}
+		Predicate headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
+		Function head = dfac.getFunction(headPredicate, X);
 
-		return true;
+		Function subjectTerm;
+		if (type == COL_TYPE.OBJECT) 
+			subjectTerm = dfac.getUriTemplate(X);
+		else {
+			assert (type == COL_TYPE.BNODE); 
+			subjectTerm = dfac.getBNodeTemplate(X);
+		}
+		
+		Function body = dfac.getFunction(predicate, subjectTerm);
+		return dfac.getCQIE(head, body);
 	}
 	
 	
@@ -1226,9 +1178,34 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	
-	
-	private String constructSourceQuery(ObjectPropertyExpression ope, COL_TYPE type1, COL_TYPE type2)  {
+	private String constructSqlSource(COL_TYPE type, final List<Interval> intervals) {
+		
 		StringBuilder sql = new StringBuilder();
+		
+		sql.append(classTable.selectCommand);
+
+		/*
+		 * If the mapping is for something of type Literal we need to add IS
+		 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
+		 * redundant since we have another stage in Quest where we add IS NOT
+		 * NULL for every variable in the head of a mapping.
+		 */
+
+		if (type == COL_TYPE.BNODE) 
+			sql.append("ISBNODE = TRUE AND ");
+		else {
+			assert (type == COL_TYPE.OBJECT);
+			sql.append("ISBNODE = FALSE AND ");
+		}
+		
+		appendIntervalString(sql, intervals);
+		return sql.toString();		
+	}	
+	
+	private String constructSqlSource(COL_TYPE type1, COL_TYPE type2, final List<Interval> intervals) {
+		
+		StringBuilder sql = new StringBuilder();
+		
 		switch (type2) {
 			case OBJECT:
 			case BNODE:
@@ -1265,78 +1242,16 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		else if (type2 == COL_TYPE.LITERAL_LANG)
 			sql.append("LANG IS NOT NULL AND ");
 		
-
-		/*
-		 * Generating the interval conditions for semantic index
-		 */
-
-		SemanticIndexRange range = cacheSI.getEntry(ope);
-		if (range == null) {
-			log.debug("Object property " + ope + " has no SemanticIndexRange");
-			return null;
-		}
-		List<Interval> intervals = range.getIntervals();	
 		appendIntervalString(sql, intervals);
+		return sql.toString();		
+	}	
 
-		return sql.toString();
-	}
 	
-	private String constructSourceQuery(DataPropertyExpression dpe, COL_TYPE type1, COL_TYPE type2)  {
-		StringBuilder sql = new StringBuilder();
-		switch (type2) {
-			case OBJECT:
-			case BNODE:
-				sql.append(roleTable.selectCommand);
-				break;
-			case LITERAL:
-			case LITERAL_LANG:
-				sql.append(attributeTable.get(COL_TYPE.LITERAL).selectCommand);
-				break;
-			default:
-				sql.append(attributeTable.get(type2).selectCommand);
-		}
-
-		/*
-		 * If the mapping is for something of type Literal we need to add IS
-		 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
-		 * redundant since we have another stage in Quest where we add IS NOT
-		 * NULL for every variable in the head of a mapping.
-		 */
-
-		if (type1 == COL_TYPE.BNODE) 
-			sql.append("ISBNODE = TRUE AND ");
-		else {
-			assert (type1 == COL_TYPE.OBJECT);
-			sql.append("ISBNODE = FALSE AND ");
-		}
-
-		if (type2 == COL_TYPE.BNODE) 
-			sql.append("ISBNODE2 = TRUE AND ");
-		else if (type2 == COL_TYPE.OBJECT) 
-			sql.append("ISBNODE2 = FALSE AND ");
-		else if (type2 == COL_TYPE.LITERAL) 
-			sql.append("LANG IS NULL AND ");
-		else if (type2 == COL_TYPE.LITERAL_LANG)
-			sql.append("LANG IS NOT NULL AND ");
-		
-
-		/*
-		 * Generating the interval conditions for semantic index
-		 */
-
-		SemanticIndexRange range = cacheSI.getEntry(dpe);
-		if (range == null) {
-			log.debug("Data property " + dpe + " has no SemanticIndexRange");
-			return null;
-		}
-		List<Interval> intervals = range.getIntervals();	
-		appendIntervalString(sql, intervals);
-
-		return sql.toString();
-	}
 	
-
 	private void appendIntervalString(StringBuilder sql, final List<Interval> intervals) {
+		/*
+		 * Generating the interval conditions for semantic index
+		 */
 		
 		Joiner.on(" OR ").appendTo(sql, new Iterator<String>() {		
 			private final Iterator<Interval> it = intervals.iterator();
@@ -1358,7 +1273,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			public void remove() { }
 		});
 		
-		if (intervals.size() > 1) {
+		if (intervals.size() > 1) { // TODO: fix
 			sql.insert(0, "(");
 			sql.append(")");
 		}
