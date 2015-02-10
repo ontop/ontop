@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.Properties;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 /**
@@ -56,7 +57,7 @@ public class AssignmentTest {
 
 
     @Test
-    public void testOneQuery() throws Exception {
+    public void testBindQuery() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
 
@@ -85,7 +86,28 @@ public class AssignmentTest {
 
                 "}";
 
-         runTestQuery(p, queryBind);
+
+
+        int results = runTestQuery(p, queryBind);
+        assertEquals(500, results);
+    }
+
+    @Test
+    public void testSelectQuery() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+
+
+        String querySelect = "PREFIX : <http://myproject.org/odbs#> \n" +
+
+                "SELECT DISTINCT ?f ?d (\"123\" AS ?price)  \n" +
+                "WHERE {?f a :Film; :hasDirector ?d .  \n" +
+                "}";
+
+
+
+        int results = runTestQuery(p, querySelect);
+        assertEquals(500, results);
     }
 
     private int runTestQuery(Properties p, String query) throws Exception {

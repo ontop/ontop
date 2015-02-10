@@ -209,8 +209,9 @@ public class SparqlAlgebraToDatalogTranslator {
 
 			Set<Variable> atom1VarsSet = getVariables(subte);
 			List<Term> atom1VarsList = new LinkedList<Term>();
+
+            atom1VarsSet.add(var);
 			atom1VarsList.addAll(atom1VarsSet);
-			atom1VarsList.add(var);
 			Collections.sort(atom1VarsList, comparator);
 			int indexOfvar = atom1VarsList.indexOf(var);
 			atom1VarsList.set(indexOfvar,term);
