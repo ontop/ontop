@@ -1,6 +1,6 @@
 [PrefixDeclaration]
 dc:  http://purl.org/dc/elements/1.1/
-:   http://example.org/book/
+:   http://example.org/book
 ns:  http://example.org/ns#
 
 [SourceDeclaration]

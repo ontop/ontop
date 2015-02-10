@@ -2,15 +2,11 @@ package it.unibz.krdb.odba;
 
 
 import it.unibz.krdb.obda.io.ModelIOManager;
-import it.unibz.krdb.obda.io.QueryIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-import it.unibz.krdb.obda.querymanager.QueryController;
-import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
-import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -23,10 +19,13 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class BindTest {
+/**
+ * Class to test if bind in SPARQL is working properly.
+
+ */
+public class AssignmentTest {
     private OBDADataFactory fac;
 
     Logger log = LoggerFactory.getLogger(this.getClass());
@@ -62,13 +61,13 @@ public class BindTest {
         QuestPreferences p = new QuestPreferences();
 
 //
-//        String query = "PREFIX : <http://myproject.org/odbs#> \n" +
-//                "\n" +
-//                "SELECT DISTINCT ?f ?d " +
-//                " ?price \n" +
-//                "WHERE {?f a :Film; :hasDirector ?d . \n" +
-//                "BIND (\"123\" AS ?price) \n" +
-//                "}";
+        String queryBind = "PREFIX : <http://myproject.org/odbs#> \n" +
+                "\n" +
+                "SELECT DISTINCT ?f ?d " +
+                " ?price \n" +
+                "WHERE {?f a :Film; :hasDirector ?d . \n" +
+                "BIND (\"123\" AS ?price) \n" +
+                "}";
 
 //        String query = "PREFIX : <http://myproject.org/odbs#> \n" +
 //                "\n" +
@@ -79,17 +78,14 @@ public class BindTest {
 ////                "BIND  \n" +
 //                "}";
 
-                String query = "PREFIX : <http://myproject.org/odbs#> \n" +
+                String querySelect = "PREFIX : <http://myproject.org/odbs#> \n" +
 
-                "SELECT DISTINCT ?f ?d ?price  " +
-                        "\n" +
-                "  \n" +
+                "SELECT DISTINCT ?f ?d (\"123\" AS ?price)  \n" +
                 "WHERE {?f a :Film; :hasDirector ?d .  \n" +
-                "BIND (\"123\" AS ?price) \n" +
-//                    "?f :genre ?price . " +
+
                 "}";
 
-         runTestQuery(p, query);
+         runTestQuery(p, queryBind);
     }
 
     private int runTestQuery(Properties p, String query) throws Exception {

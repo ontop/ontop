@@ -20,34 +20,15 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.DatatypeFactory;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
-
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
-
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.datatypes.XMLDatatypeUtil;
@@ -55,49 +36,16 @@ import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.And;
-import org.openrdf.query.algebra.BinaryTupleOperator;
-import org.openrdf.query.algebra.BinaryValueOperator;
-import org.openrdf.query.algebra.Bound;
-import org.openrdf.query.algebra.Compare;
+import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.Compare.CompareOp;
-import org.openrdf.query.algebra.Datatype;
-import org.openrdf.query.algebra.Distinct;
-import org.openrdf.query.algebra.Extension;
-import org.openrdf.query.algebra.ExtensionElem;
-import org.openrdf.query.algebra.Filter;
-import org.openrdf.query.algebra.IsBNode;
-import org.openrdf.query.algebra.IsLiteral;
-import org.openrdf.query.algebra.IsURI;
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.Lang;
-import org.openrdf.query.algebra.LangMatches;
-import org.openrdf.query.algebra.LeftJoin;
-import org.openrdf.query.algebra.MathExpr;
 import org.openrdf.query.algebra.MathExpr.MathOp;
-import org.openrdf.query.algebra.Not;
-import org.openrdf.query.algebra.Or;
-import org.openrdf.query.algebra.Order;
-import org.openrdf.query.algebra.OrderElem;
-import org.openrdf.query.algebra.Projection;
-import org.openrdf.query.algebra.ProjectionElem;
-import org.openrdf.query.algebra.Reduced;
-import org.openrdf.query.algebra.Regex;
-import org.openrdf.query.algebra.SameTerm;
-import org.openrdf.query.algebra.Slice;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.Str;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.UnaryTupleOperator;
-import org.openrdf.query.algebra.UnaryValueOperator;
-import org.openrdf.query.algebra.Union;
-import org.openrdf.query.algebra.ValueExpr;
-import org.openrdf.query.algebra.Var;
 import org.openrdf.query.parser.ParsedGraphQuery;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /***
  * Translate a SPARQL algebra expression into a Datalog program that has the
@@ -367,9 +315,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		/* Preparing the head of the Union rules (2 rules) */
 		// Collections.sort(vars, comparator);
 		List<Term> headVars = new LinkedList<Term>();
-		for (Variable var : vars) {
-			headVars.add(var);
-		}
+//		for (Variable var : vars) {
+			headVars.addAll(vars);
+//		}
+        Collections.sort(headVars, comparator);
 		Predicate answerPred = ofac.getPredicate("ans" + i, vars.size());
 		Function head = ofac.getFunction(answerPred, headVars);
 
@@ -453,11 +402,12 @@ public class SparqlAlgebraToDatalogTranslator {
 //		Function joinAtom = ofac.getFunction(joinp, leftAtom, rightAtom);
 
 		/* Preparing the head of the Join rule */
-		// Collections.sort(vars, comparator);
+
 		List<Term> headVars = new LinkedList<Term>();
-		for (Variable var : vars) {
-			headVars.add(var);
-		}
+//		for (Variable var : vars) {
+			headVars.addAll(vars);
+//		}
+        Collections.sort(headVars, comparator);
 		Predicate answerPred = ofac.getPredicate("ans" + i, vars.size());
 		Function head = ofac.getFunction(answerPred, headVars);
 
@@ -526,9 +476,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		/* Preparing the head of the LeftJoin rule */
 		// Collections.sort(vars, comparator);
 		List<Term> headVars = new LinkedList<Term>();
-		for (Variable var : vars) {
-			headVars.add(var);
-		}
+//		for (Variable var : vars) {
+			headVars.addAll(vars);
+//		}
+        Collections.sort(headVars, comparator);
 		Predicate answerPred = ofac.getPredicate("ans" + i, vars.size());
 		Function head = ofac.getFunction(answerPred, headVars);
 
@@ -654,6 +605,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Predicate predicate = ofac.getPredicate("ans" + (i), var.size());
 		List<Term> vars = new LinkedList<Term>();
 		vars.addAll(var);
+        Collections.sort(vars, comparator);
 		Function head = ofac.getFunction(predicate, vars);
 
 		Predicate pbody;

@@ -26,11 +26,15 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -42,21 +46,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-
-/***
- * A simple test that check if the system is able to handle Mappings for
- * classes/roles and attributes even if there are no URI templates. i.e., the
- * database stores URI's directly.
- * 
- * We are going to create an H2 DB, the .sql file is fixed. We will map directly
- * there and then query on top.
+/**
+ * Class to test if bind in SPARQL is working properly.
+ * It uses the test from http://www.w3.org/TR/sparql11-query/#bind
  */
-public class BindTest extends TestCase {
+
+public class BindTest {
 
 
 
@@ -69,7 +66,7 @@ public class BindTest extends TestCase {
 	final String owlfile = "src/test/resources/test/sparqlBind.owl";
 	final String obdafile = "src/test/resources/test/sparqlBind.obda";
 
-	@Override
+    @Before
 	public void setUp() throws Exception {
 		/*
 		 * Initializing and H2 database with the stock exchange data
@@ -107,7 +104,7 @@ public class BindTest extends TestCase {
 		ioManager.load(obdafile);
 	}
 
-	@Override
+	@After
 	public void tearDown() throws Exception {
 
 			dropTables();
@@ -134,7 +131,7 @@ public class BindTest extends TestCase {
 		conn.commit();
 	}
 
-	private void runTests(Properties p) throws Exception {
+	private OWLObject runTests(Properties p, String query) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
@@ -148,25 +145,14 @@ public class BindTest extends TestCase {
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
-		String query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> "
-				+ "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>"
-				+ "PREFIX  ns:  <http://example.org/ns#>"
-				+ "SELECT  ?title ?price WHERE" 
-				+ "{  ?x ns:hasPrice ?p ."
-				+ "   ?x ns:hasDiscount ?discount"
-				+ "   BIND (?p*(1-?discount) AS ?price)"
-				+ "   FILTER(?price < 20)" 
-				+ "   ?x dc:title ?title ." 
-				+ "}";
-
 
 		try {
 			QuestOWLResultSet rs = st.executeTuple(query);
-			OWLLiteral ind1 = rs.getOWLLiteral("title");
-			OWLObject ind2 = rs.getOWLObject("price");
+            rs.nextRow();
+			OWLObject ind1 = rs.getOWLObject("title");
+            OWLObject ind2 = rs.getOWLObject("price");
 
-
-            assertEquals(17.25, ind2);
+         return ind2;
 
 		} 
 		catch (Exception e) {
@@ -178,14 +164,61 @@ public class BindTest extends TestCase {
 		}
 	}
 
-	public void testBind() throws Exception {
+    @Test
+	public void testSelect() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
-		runTests(p);
-	}
+        String querySelect1 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
+                "PREFIX  ns:  <http://example.org/ns#>\n" +
+                "SELECT  ?title (?p*(1-?discount) AS ?price)\n" +
+                "{ ?x ns:price ?p .\n" +
+                "  ?x dc:title ?title . \n" +
+                "  ?x ns:discount ?discount . \n" +
+                "}";
+		OWLObject price = runTests(p, querySelect1);
+
+        assertEquals("<33.6>", price.toString());
+
+        //simple case it works
+        String querySelect2 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
+                "PREFIX  ns:  <http://example.org/ns#>\n" +
+                "SELECT  ?title (\"17.25\" AS ?price)\n" +
+                "{ ?x ns:price ?p .\n" +
+                "  ?x dc:title ?title . \n" +
+                "  ?x ns:discount ?discount . \n" +
+                "}";
+        OWLObject price2 = runTests(p, querySelect2);
+
+        assertEquals("\"17.25\"", price2.toString());
+
+    }
+
+    @Test
+    public void testBind() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?price WHERE \n"
+                + "{  ?x ns:hasPrice ?p .\n"
+                + "   ?x ns:hasDiscount ?discount\n"
+                + "   BIND (?p*(1-?discount) AS ?price)\n"
+                + "   FILTER(?price < 20)\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+        OWLObject price = runTests(p, queryBind);
+
+        assertEquals("<17.25>", price.toString());
+
+    }
 
 }

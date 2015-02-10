@@ -36,7 +36,6 @@ import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
-
 import org.openrdf.model.Literal;
 
 import java.sql.Types;
@@ -771,7 +770,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			/*
 			 * Adding the column(s) with the actual value(s)
 			 */
-			if (function instanceof DataTypePredicate) {
+			if (function.isDataTypePredicate()) {
 				/*
 				 * Case where we have a typing function in the head (this is the
 				 * case for all literal columns
@@ -801,7 +800,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 				// New template based BNODE building functions
 				mainColumn = getSQLStringForTemplateFunction(ov, index);
 
-			} 
+			}
+            else if (function.isArithmeticPredicate()){
+                // For numerical operators, e.g., MUTLIPLY, SUBTRACT, ADDITION
+                String expressionFormat = getNumericalOperatorString(function);
+                Term left = ov.getTerm(0);
+                Term right = ov.getTerm(1);
+                String leftOp = getSQLString(left, index, true);
+                String rightOp = getSQLString(right, index, true);
+                mainColumn = String.format("(" + expressionFormat + ")", leftOp, rightOp);
+            }
 			else {
 				throw new IllegalArgumentException(
 						"Error generating SQL query. Found an invalid function during translation: "
@@ -884,11 +892,15 @@ public class SQLGenerator implements SQLQueryGenerator {
 			else if (function instanceof BNodePredicate) {
                 type = COL_TYPE.BNODE;
 			}
+            else if  (ov.isArithmeticFunction()) {
+                type = COL_TYPE.OBJECT;
+            }
 			else {
 				String functionString = function.toString();
 				type = dtfac.getDataType(functionString);
 			}
-		} 
+		}
+
 		else if (ht instanceof URIConstant) {
             type = COL_TYPE.OBJECT;
 		} 
