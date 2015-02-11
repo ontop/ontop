@@ -909,7 +909,7 @@ public class QuestImpl implements Serializable, Quest {
 
 	@Override
 	public void releaseSQLPoolConnection(Connection co) {
-
+		dbConnector.releaseSQLPoolConnection(co);
 	}
 
 	@Override

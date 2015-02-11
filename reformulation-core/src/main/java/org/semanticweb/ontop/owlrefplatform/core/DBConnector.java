@@ -41,4 +41,6 @@ public interface DBConnector {
 
     @Deprecated
     Connection getSQLPoolConnection() throws OBDAException;
+
+    void releaseSQLPoolConnection(Connection connection);
 }
