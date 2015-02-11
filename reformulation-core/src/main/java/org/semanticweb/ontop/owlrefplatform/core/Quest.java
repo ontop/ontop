@@ -1,6 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.core;
 
 import com.google.common.collect.Multimap;
+import org.openrdf.query.parser.ParsedQuery;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
@@ -50,16 +51,16 @@ public interface Quest extends RepositoryChangedListener {
 
     Map<Predicate, List<CQIE>> getSigmaRulesIndex();
 
-    void disconnect() throws SQLException;
-
     void setupRepository() throws Exception;
 
     void updateSemanticIndexMappings() throws DuplicateMappingException, OBDAException;
 
     void close();
 
+    @Deprecated
     void releaseSQLPoolConnection(Connection co);
 
+    @Deprecated
     Connection getSQLPoolConnection() throws OBDAException;
 
     // get a real (non pool) connection - used for protege plugin
@@ -84,4 +85,14 @@ public interface Quest extends RepositoryChangedListener {
     RDBMSSIRepositoryManager getSIRepo();
 
     boolean isSemIdx();
+
+    Map<String,String> getSQLCache();
+
+    Map<String,List<String>> getSignatureCache();
+
+    Map<String,ParsedQuery> getSesameQueryCache();
+
+    Map<String,Boolean> getIsBooleanCache();
+
+    Map<String,Boolean> getIsConstructCache();
 }

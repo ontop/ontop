@@ -84,20 +84,9 @@ public class QuestImpl implements Serializable, Quest {
 
 	private static final long serialVersionUID = -6074403119825754295L;
 
-	private PoolProperties poolProperties;
-	private DataSource tomcatPool;
-
 	private boolean isSemanticIdx = false;
 	private Map<String, Integer> uriRefIds;
 	private Map<Integer, String> uriMap;
-	// Tomcat pool default properties
-	// These can be changed in the properties file
-	private int maxPoolSize = 20;
-	private int startPoolSize = 2;
-	private boolean removeAbandoned = true;
-	private boolean logAbandoned = false;
-	private int abandonedTimeout = 60; // 60 seconds
-	private boolean keepAlive = true;
 	
 	// Whether to print primary and foreign keys to stdout.
 	private boolean printKeys;
@@ -113,9 +102,6 @@ public class QuestImpl implements Serializable, Quest {
 	// private TechniqueWrapper techwrapper = null;
 
 	private QueryVocabularyValidator vocabularyValidator;
-
-	/* The active connection used to get metadata from the DBMS */
-	private transient Connection localConnection;
 
 	/* The active query rewriter */
 	private QueryRewriter rewriter;
@@ -232,6 +218,8 @@ public class QuestImpl implements Serializable, Quest {
 
 	private DBMetadata metadata;
 
+	private DBConnector dbConnector;
+
     /**
      * TODO: explain
      */
@@ -336,11 +324,11 @@ public class QuestImpl implements Serializable, Quest {
         return dataSourceQueryGenerator.cloneIfNecessary();
     }
 	
-	protected Map<String, String> getSQLCache() {
+	public Map<String, String> getSQLCache() {
 		return queryCache;
 	}
 
-	protected Map<String, List<String>> getSignatureCache() {
+	public Map<String, List<String>> getSignatureCache() {
 		return signatureCache;
 	}
 
@@ -348,15 +336,15 @@ public class QuestImpl implements Serializable, Quest {
 //		return jenaQueryCache;
 //	}
 
-	protected Map<String, ParsedQuery> getSesameQueryCache() {
+	public Map<String, ParsedQuery> getSesameQueryCache() {
 		return sesameQueryCache;
 	}
 	
-	protected Map<String, Boolean> getIsBooleanCache() {
+	public Map<String, Boolean> getIsBooleanCache() {
 		return isBooleanCache;
 	}
 
-	protected Map<String, Boolean> getIsConstructCache() {
+	public Map<String, Boolean> getIsConstructCache() {
 		return isConstructCache;
 	}
 
@@ -403,20 +391,8 @@ public class QuestImpl implements Serializable, Quest {
 	}
 
 	@Override
-    public void dispose() {
-/*		try {
-			if (evaluationEngine != null)
-				this.evaluationEngine.dispose();
-		} catch (Exception e) {
-			log.debug("Error during disconnect: " + e.getMessage());
-		}
-*/
-		try {
-			if (localConnection != null && !localConnection.isClosed())
-				disconnect();
-		} catch (Exception e) {
-			log.debug("Error during disconnect: " + e.getMessage());
-		}
+	public void dispose() {
+		dbConnector.dispose();
 	}
 
 	@Override
@@ -434,12 +410,6 @@ public class QuestImpl implements Serializable, Quest {
 
 	private void setPreferences(Properties preferences) {
 		this.preferences = preferences;
-
-		keepAlive = Boolean.valueOf((String) preferences.get(QuestPreferences.KEEP_ALIVE));
-		removeAbandoned = Boolean.valueOf((String) preferences.get(QuestPreferences.REMOVE_ABANDONED));
-		abandonedTimeout = Integer.valueOf((String) preferences.get(QuestPreferences.ABANDONED_TIMEOUT));
-		startPoolSize = Integer.valueOf((String) preferences.get(QuestPreferences.INIT_POOL_SIZE));
-		maxPoolSize = Integer.valueOf((String) preferences.get(QuestPreferences.MAX_POOL_SIZE));
 
 		reformulate = Boolean.valueOf((String) preferences.get(QuestPreferences.REWRITE));
 		reformulationTechnique = (String) preferences.get(QuestPreferences.REFORMULATION_TECHNIQUE);
@@ -474,45 +444,6 @@ public class QuestImpl implements Serializable, Quest {
 
 	}
 
-	/***
-	 * Starts the local connection that Quest maintains to the DBMS. This
-	 * connection belongs only to Quest and is used to get information from the
-	 * DBMS. At the moment this connection is mainly used during initialization,
-	 * to get metadata about the DBMS or to create repositories in classic mode.
-	 * 
-	 * @return
-	 * @throws SQLException
-	 */
-	private boolean connect() throws SQLException {
-		if (localConnection != null && !localConnection.isClosed()) {
-			return true;
-		}
-		String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-		String username = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-		String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-
-		try {
-			Class.forName(driver);
-		} catch (ClassNotFoundException e1) {
-			// Does nothing because the SQLException handles this problem also.
-		}
-		localConnection = DriverManager.getConnection(url, username, password);
-
-		if (localConnection != null) {
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-    public void disconnect() throws SQLException {
-		try {
-			localConnection.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
-	}
 
 	/***
 	 * Method that starts all components of a Quest instance. Call this after
@@ -623,9 +554,15 @@ public class QuestImpl implements Serializable, Quest {
 				}
 
 				// TODO one of these is redundant??? check
-				connect();
-				// setup connection pool
-				setupConnectionPool();
+				dbConnector = questComponentFactory.create(obdaSource, this);
+				dbConnector.connect();
+
+				// Classic mode only works with a JDBCConnector
+				if (! (dbConnector instanceof JDBCConnector)) {
+					throw new OBDAException("Classic mode requires using a JDBC connector");
+				}
+				JDBCConnector jdbcConnector = (JDBCConnector) dbConnector;
+				Connection localConnection = jdbcConnector.getSQLConnection();
 
 				dataRepository = new RDBMSSIRepositoryManagerImpl(reformulationVocabulary);
 				dataRepository.addRepositoryChangedListener(this);
@@ -633,6 +570,7 @@ public class QuestImpl implements Serializable, Quest {
 				dataRepository.setTBox(reformulationReasoner);
 				
 				sigma = SigmaTBoxOptimizer.getSigmaOntology(reformulationReasoner);
+
 
 				if (inmemory) {
 
@@ -703,10 +641,9 @@ public class QuestImpl implements Serializable, Quest {
 				obdaSource = sources.iterator().next();
 
 				log.debug("Testing DB connection...");
-				connect();
-
-				// setup connection pool
-				setupConnectionPool();
+				// TODO one of these is redundant??? check
+				dbConnector = questComponentFactory.create(obdaSource, this);
+				dbConnector.connect();
 
 				/*
 				 * Processing mappings with respect to the vocabulary
@@ -740,9 +677,7 @@ public class QuestImpl implements Serializable, Quest {
              */
 
 			if (metadata == null) {
-                DBMetadataExtractor dbMetadataExtractor = nativeQLFactory.create();
-                metadata = dbMetadataExtractor.extract(datasource, localConnection, unfoldingOBDAModel,
-                        userConstraints);
+                metadata = dbConnector.extractDBMetadata(unfoldingOBDAModel, userConstraints);
 			}
             /**
              * Otherwise, if partially configured, complete it by applying
@@ -799,16 +734,7 @@ public class QuestImpl implements Serializable, Quest {
                 dataSourceQueryGenerator = questComponentFactory.create(metadata, datasource);
             }
 
-            /**
-             * TODO: find a way to isolate (or remove if possible) this SQL-specific horror.
-             */
-            boolean isSQL = preferences.getProperty(NativeQueryGenerator.class.getCanonicalName()).equals(
-                    SQLGenerator.class.getCanonicalName());
-            if (isSQL) {
-                String parameter = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-                SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(parameter, (QuestPreferences) preferences);
-                preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
-            }
+			dbConnector.preprocessProjection(unfoldingOBDAModel.getMappings(sourceId));
 
 			
 			/***
@@ -824,10 +750,9 @@ public class QuestImpl implements Serializable, Quest {
 			
 			
 			/**
-			 * Expand the meta mapping 
+			 * Expands the meta mapping
 			 */
-			MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
-			unfoldingOBDAModel = metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
+			unfoldingOBDAModel = dbConnector.expandMetaMappings(unfoldingOBDAModel, sourceId);
 			
 
 			List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(obdaSource.getSourceID());
@@ -931,7 +856,7 @@ public class QuestImpl implements Serializable, Quest {
 				 * If we are not in classic + inmemory mode we can disconnect
 				 * the house-keeping connection, it has already been used.
 				 */
-				disconnect();
+				dbConnector.disconnect();
 			}
 		}
 	}
@@ -976,140 +901,32 @@ public class QuestImpl implements Serializable, Quest {
 		sigma.addEntities(aboxDependencies.getVocabulary());
 		sigma.addAssertions(aboxDependencies.getAssertions());	
 	}
-	
 
-	/***
-	 * Expands a SELECT * into a SELECT with all columns implicit in the *
-	 * 
-	 * @param mappings
-	 * @param factory
-	 * @param adapter
-	 * @throws SQLException
-	 */
-	private static void preprocessProjection(Connection localConnection, List<OBDAMappingAxiom> mappings,
-                                             OBDADataFactory factory, SQLDialectAdapter adapter)
-            throws SQLException {
-
-		// TODO this code seems buggy, it will probably break easily (check the
-		// part with
-		// parenthesis in the beginning of the for loop.
-
-		Statement st = null;
-		try {
-			st = localConnection.createStatement();
-			for (OBDAMappingAxiom axiom : mappings) {
-				String sourceString = axiom.getSourceQuery().toString();
-
-				/*
-				 * Check if the projection contains select all keyword, i.e.,
-				 * 'SELECT * [...]'.
-				 */
-				if (containSelectAll(sourceString)) {
-					StringBuilder sb = new StringBuilder();
-
-					 // If the SQL string has sub-queries in its statement
-					if (containChildParentSubQueries(sourceString)) {
-						int childquery1 = sourceString.indexOf("(");
-						int childquery2 = sourceString.indexOf(") AS child");
-						String childquery = sourceString.substring(childquery1 + 1, childquery2);
-
-						String copySourceQuery = createDummyQueryToFetchColumns(childquery, adapter);
-						if (st.execute(copySourceQuery)) {
-							ResultSetMetaData rsm = st.getResultSet().getMetaData();
-							boolean needComma = false;
-							for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
-								if (needComma) {
-									sb.append(", ");
-								}
-								String col = rsm.getColumnName(pos);
-								//sb.append("CHILD." + col );
-								sb.append("child.\"" + col + "\" AS \"child_" + (col)+"\"");
-								needComma = true;
-							}
-						}
-						sb.append(", ");
-
-						int parentquery1 = sourceString.indexOf(", (", childquery2);
-						int parentquery2 = sourceString.indexOf(") AS parent");
-						String parentquery = sourceString.substring(parentquery1 + 3, parentquery2);
-
-						copySourceQuery = createDummyQueryToFetchColumns(parentquery, adapter);
-						if (st.execute(copySourceQuery)) {
-							ResultSetMetaData rsm = st.getResultSet().getMetaData();
-							boolean needComma = false;
-							for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
-								if (needComma) {
-									sb.append(", ");
-								}
-								String col = rsm.getColumnName(pos);
-								//sb.append("PARENT." + col);
-								sb.append("parent.\"" + col + "\" AS \"parent_" + (col)+"\"");
-								needComma = true;
-							}
-						}
-
-						 //If the SQL string doesn't have sub-queries
-					} else 
-					
-					{
-						String copySourceQuery = createDummyQueryToFetchColumns(sourceString, adapter);
-						boolean execute = st.execute(copySourceQuery);
-						if (execute) {
-							ResultSetMetaData rsm = st.getResultSet().getMetaData();
-							boolean needComma = false;
-							for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
-								if (needComma) {
-									sb.append(", ");
-								}
-								sb.append("\"" + rsm.getColumnName(pos) + "\"");
-								needComma = true;
-							}
-						}
-					}
-
-					/*
-					 * Replace the asterisk with the proper column names
-					 */
-					String columnProjection = sb.toString();
-					String tmp = axiom.getSourceQuery().toString();
-					int fromPosition = tmp.toLowerCase().indexOf("from");
-					int asteriskPosition = tmp.indexOf('*');
-					if (asteriskPosition != -1 && asteriskPosition < fromPosition) {
-						String str = sourceString.replaceFirst("\\*", columnProjection);
-						axiom.setSourceQuery(factory.getSQLQuery(str));
-					}
-				}
-			}
-		} finally {
-			if (st != null) {
-				st.close();
-			}
-		}
+	@Override
+	public void close() {
+		dbConnector.close();
 	}
 
-	private static final String selectAllPattern = "(S|s)(E|e)(L|l)(E|e)(C|c)(T|t)\\s+\\*";
-	private static final String subQueriesPattern = "\\(.*\\)\\s+(A|a)(S|s)\\s+(C|c)(H|h)(I|i)(L|l)(D|d),\\s+\\(.*\\)\\s+(A|a)(S|s)\\s+(P|p)(A|a)(R|r)(E|e)(N|n)(T|t)";
+	@Override
+	public void releaseSQLPoolConnection(Connection co) {
 
-	private static boolean containSelectAll(String sql) {
-		final Pattern pattern = Pattern.compile(selectAllPattern);
-		return pattern.matcher(sql).find();
 	}
 
-	private static boolean containChildParentSubQueries(String sql) {
-		final Pattern pattern = Pattern.compile(subQueriesPattern);
-		return pattern.matcher(sql).find();
+	@Override
+	public synchronized Connection getSQLPoolConnection() throws OBDAException {
+		return dbConnector.getSQLPoolConnection();
 	}
 
-	private static String createDummyQueryToFetchColumns(String originalQuery, SQLDialectAdapter adapter) {
-		String toReturn = String.format("select * from (%s) view20130219 ", originalQuery);
-		if (adapter instanceof SQLServerSQLDialectAdapter) {
-			SQLServerSQLDialectAdapter sqlServerAdapter = (SQLServerSQLDialectAdapter) adapter;
-			toReturn = sqlServerAdapter.sqlLimit(toReturn, 1);
-		} else {
-			toReturn += adapter.sqlSlice(0, Long.MIN_VALUE);
-		}
-		return toReturn;
+	@Override
+	public OBDAConnection getNonPoolConnection() throws OBDAException {
+		return dbConnector.getNonPoolConnection();
 	}
+
+	@Override
+	public OBDAConnection getConnection() throws OBDAException {
+		return dbConnector.getConnection();
+	}
+
 
 	private List<CQIE> createSigmaRules(Ontology ontology) {
 		List<CQIE> rules = new ArrayList<CQIE>();
@@ -1139,139 +956,6 @@ public class QuestImpl implements Serializable, Quest {
 			rules.add(rule);
 		}
 		return sigmaRulesMap;
-	}
-
-
-	private void setupConnectionPool() {
-		String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-		String username = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-		String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-
-		poolProperties = new PoolProperties();
-		poolProperties.setUrl(url);
-		poolProperties.setDriverClassName(driver);
-		poolProperties.setUsername(username);
-		poolProperties.setPassword(password);
-		poolProperties.setJmxEnabled(true);
-
-		// TEST connection before using it
-		poolProperties.setTestOnBorrow(keepAlive);
-		if (keepAlive) {
-			if (driver.contains("oracle"))
-				poolProperties.setValidationQuery("select 1 from dual");
-			else if (driver.contains("db2"))
-				poolProperties.setValidationQuery("select 1 from sysibm.sysdummy1");
-			else
-				poolProperties.setValidationQuery("select 1");
-		}
-
-		poolProperties.setTestOnReturn(false);
-		poolProperties.setMaxActive(maxPoolSize);
-		poolProperties.setMaxIdle(maxPoolSize);
-		poolProperties.setInitialSize(startPoolSize);
-		poolProperties.setMaxWait(30000);
-		poolProperties.setRemoveAbandonedTimeout(abandonedTimeout);
-		poolProperties.setMinEvictableIdleTimeMillis(30000);
-		poolProperties.setLogAbandoned(logAbandoned);
-		poolProperties.setRemoveAbandoned(removeAbandoned);
-		poolProperties.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;"
-				+ "org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
-		tomcatPool = new DataSource();
-		tomcatPool.setPoolProperties(poolProperties);
-
-		log.debug("Connection Pool Properties:");
-		log.debug("Start size: " + startPoolSize);
-		log.debug("Max size: " + maxPoolSize);
-		log.debug("Remove abandoned connections: " + removeAbandoned);
-
-	}
-
-	@Override
-    public void close() {
-		tomcatPool.close();
-	}
-
-	@Override
-    public void releaseSQLPoolConnection(Connection co) {
-		try {
-			co.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-    public synchronized Connection getSQLPoolConnection() throws OBDAException {
-		Connection conn = null;
-		try {
-			conn = tomcatPool.getConnection();
-		} catch (SQLException e) {
-			throw new OBDAException(e);
-		}
-		return conn;
-	}
-
-	/***
-	 * Establishes a new connection to the data source. This is a normal JDBC
-	 * connection. Used only internally to get metadata at the moment.
-	 * 
-	 * @return
-	 * @throws OBDAException
-	 */
-	private Connection getSQLConnection() throws OBDAException {
-		Connection conn;
-
-		String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-		String username = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-		String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-		String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-
-		// if (driver.contains("mysql")) {
-		// url = url + "?relaxAutoCommit=true";
-		// }
-		try {
-			Class.forName(driver);
-		} catch (ClassNotFoundException e1) {
-			log.debug(e1.getMessage());
-		}
-		try {
-			conn = DriverManager.getConnection(url, username, password);
-		} catch (SQLException e) {
-			throw new OBDAException(e.getMessage());
-		} catch (Exception e) {
-			throw new OBDAException(e.getMessage());
-		}
-		return conn;
-	}
-
-	// get a real (non pool) connection - used for protege plugin
-	@Override
-    public OBDAConnection getNonPoolConnection() throws OBDAException {
-
-		return new QuestConnection(this, getSQLConnection());
-	}
-
-	/***
-	 * Returns a QuestConnection, the main object that a client should use to
-	 * access the query answering services of Quest. With the QuestConnection
-	 * you can get a QuestStatement to execute queries.
-	 * 
-	 * <p>
-	 * Note, the QuestConnection is not a normal JDBC connection. It is a
-	 * wrapper of one of the N JDBC connections that quest's connection pool
-	 * starts on initialization. Calling .close() will not actually close the
-	 * connection, with will just release it back to the pool.
-	 * <p>
-	 * to close all connections you must call Quest.close().
-	 * 
-	 * @return
-	 * @throws OBDAException
-	 */
-	@Override
-    public OBDAConnection getConnection() throws OBDAException {
-
-		return new QuestConnection(this, getSQLPoolConnection());
 	}
 
 	@Override
