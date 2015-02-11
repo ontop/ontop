@@ -24,6 +24,7 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
@@ -50,6 +51,8 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Class to test if bind in SPARQL is working properly.
+ * Refer in particular to the class {@link it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator}
+ *
  * It uses the test from http://www.w3.org/TR/sparql11-query/#bind
  */
 
@@ -154,24 +157,38 @@ public class BindTest {
 
          return ind2;
 
-		} 
-		catch (Exception e) {
-			throw e;
-		} 
+		}
 		finally {
 			st.close();
 			reasoner.dispose();
 		}
 	}
 
+    /**
+     * querySelect1 return a literal instead of a numeric datatype
+     * @throws Exception
+     */
     @Test
 	public void testSelect() throws Exception {
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
+        //simple case
+        String querySelect = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
+                "PREFIX  ns:  <http://example.org/ns#>\n" +
+                "SELECT  ?title (17.25 AS ?price)\n" +
+                "{ ?x ns:price ?p .\n" +
+                "  ?x dc:title ?title . \n" +
+                "  ?x ns:discount ?discount . \n" +
+                "}";
+        OWLObject price = runTests(p, querySelect);
+
+        assertEquals("\"17.25\"^^xsd:decimal", price.toString());
+
+        //complex case
         String querySelect1 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
                 "PREFIX  ns:  <http://example.org/ns#>\n" +
                 "SELECT  ?title (?p*(1-?discount) AS ?price)\n" +
@@ -179,21 +196,13 @@ public class BindTest {
                 "  ?x dc:title ?title . \n" +
                 "  ?x ns:discount ?discount . \n" +
                 "}";
-		OWLObject price = runTests(p, querySelect1);
+        OWLObject price1 = runTests(p, querySelect1);
 
-        assertEquals("\"33.6\"", price.toString());
+        assertEquals("\"33.6\"", price1.toString());
 
-        //simple case it works
-        String querySelect2 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
-                "PREFIX  ns:  <http://example.org/ns#>\n" +
-                "SELECT  ?title (17.25 AS ?price)\n" +
-                "{ ?x ns:price ?p .\n" +
-                "  ?x dc:title ?title . \n" +
-                "  ?x ns:discount ?discount . \n" +
-                "}";
-        OWLObject price2 = runTests(p, querySelect2);
 
-        assertEquals("\"17.25\"^^xsd:decimal", price2.toString());
+
+
 
     }
 
@@ -219,6 +228,109 @@ public class BindTest {
 
         assertEquals("\"17.25\"", price.toString());
 
+
     }
+
+    @Test
+    public void testFailingSelect()  throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        //complex case
+        //variable should be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable in FILTER
+        String querySelect1 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
+                "PREFIX  ns:  <http://example.org/ns#>\n" +
+                "SELECT  ?title (?p AS ?fullPrice) (?fullPrice*(1-?discount) AS ?customerPrice)\n" +
+                "{ ?x ns:price ?p .\n" +
+                "   ?x dc:title ?title . \n" +
+                "   ?x ns:discount ?discount \n" +
+                "}";
+        OWLObject price1 = null;
+
+        try {
+
+            price1 = runTests(p, querySelect1);
+
+        } catch (OntopOWLException e) {
+
+            assertEquals("it.unibz.krdb.obda.model.OBDAException", e.getCause().getClass().getName());
+        }
+
+        //variable cannot be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable in FILTER
+        String querySelect2 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
+                "PREFIX  ns:  <http://example.org/ns#>\n" +
+                "SELECT  ?title (?p*(1-?discount) AS ?price)\n" +
+                "{ ?x ns:price ?p .\n" +
+                "  ?x dc:title ?title . \n" +
+                "  ?x ns:discount ?discount . \n" +
+                "  FILTER(?price < 20) \n" +
+                "}";
+        OWLObject price2 = null;
+        try {
+            price2 = runTests(p, querySelect2);
+        } catch (OntopOWLException e) {
+
+            assertEquals("it.unibz.krdb.obda.model.OBDAException", e.getCause().getClass().getName());
+        }
+
+    }
+
+    /**
+     * We don't support the union of BIND
+     * SingletonSet operator is not supported
+     * @throws Exception
+     */
+    @Test
+    public void testFailingBind() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?price WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount\n"
+                + "   {BIND (?p*(1-?discount) AS ?price)}\n"
+                +         "UNION \n"
+                + "   {BIND (?p*(2-?discount) AS ?price)}\n"
+                + "   FILTER(?price < 20)\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+        try {
+        OWLObject price = runTests(p, queryBind);
+
+        } catch (OntopOWLException e) {
+
+            assertEquals("it.unibz.krdb.obda.model.OBDAException", e.getCause().getClass().getName());
+            assertEquals("Operator not supported: SingletonSet", e.getCause().getLocalizedMessage().trim());
+        }
+
+        //error double bind and select
+        String queryBind1 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n" +
+                "SELECT  ?title  (?fullPrice * (1 - ?discount) AS ?customerPrice) WHERE \n" +
+                "{  ?x ns:discount ?discount .\n" +
+                "   ?x dc:title ?title .\n" +
+                "   BIND (?p AS ?fullPrice) \n" +
+                "  ?x ns:price ?fullPrice .\n" +
+                "}";
+
+        try {
+            OWLObject price = runTests(p, queryBind1);
+
+        } catch (OntopOWLException e) {
+
+            assertEquals("it.unibz.krdb.obda.model.OBDAException", e.getCause().getClass().getName());
+
+        }
+
+    }
+
 
 }

@@ -198,6 +198,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		TupleExpr subte = extend.getArg();
 		List<ExtensionElem> elements = extend.getElements();
 		Set<Variable> atom2VarsSet = null;
+        List<Term> atom2VarsList = new LinkedList<Term>();
 		for (ExtensionElem el: elements) {
 			Variable var = null;
 			
@@ -220,7 +221,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			Function head = ofac.getFunction(leftAtomPred, atom1VarsList);
 		
 			atom2VarsSet = getVariables(subte);
-			List<Term> atom2VarsList = new LinkedList<Term>();
+
 			atom2VarsList.addAll(atom2VarsSet);
 			Collections.sort(atom2VarsList, comparator);
 			Predicate rightAtomPred = ofac.getPredicate("ans" + ((2 * i)),
@@ -236,7 +237,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	
 		{
 			List<Variable> vars1 = new LinkedList<Variable>();
-			for (Term var1 : atom2VarsSet)
+			for (Term var1 : atom2VarsList)
 				vars1.add((Variable) var1);
 			translate(vars1, subte, pr, 2 * i, varcount);
 		}
@@ -319,7 +320,7 @@ public class SparqlAlgebraToDatalogTranslator {
 //		for (Variable var : vars) {
 			headVars.addAll(vars);
 //		}
-        Collections.sort(headVars, comparator);
+
 		Predicate answerPred = ofac.getPredicate("ans" + i, vars.size());
 		Function head = ofac.getFunction(answerPred, headVars);
 
@@ -408,7 +409,7 @@ public class SparqlAlgebraToDatalogTranslator {
 //		for (Variable var : vars) {
 			headVars.addAll(vars);
 //		}
-        Collections.sort(headVars, comparator);
+
 		Predicate answerPred = ofac.getPredicate("ans" + i, vars.size());
 		Function head = ofac.getFunction(answerPred, headVars);
 
@@ -480,7 +481,6 @@ public class SparqlAlgebraToDatalogTranslator {
 //		for (Variable var : vars) {
 			headVars.addAll(vars);
 //		}
-        Collections.sort(headVars, comparator);
 		Predicate answerPred = ofac.getPredicate("ans" + i, vars.size());
 		Function head = ofac.getFunction(answerPred, headVars);
 
@@ -606,7 +606,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Predicate predicate = ofac.getPredicate("ans" + (i), var.size());
 		List<Term> vars = new LinkedList<Term>();
 		vars.addAll(var);
-        Collections.sort(vars, comparator);
+//        Collections.sort(vars, comparator);
 		Function head = ofac.getFunction(predicate, vars);
 
 		Predicate pbody;
@@ -738,7 +738,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		for (Variable var : vars) {
 			newvars.add(var);
 		}
-        Collections.sort(newvars, comparator);
+//        Collections.sort(newvars, comparator);
 
 		Predicate answerPred = ofac.getPredicate("ans" + i, vars.size());
 		Function head = ofac.getFunction(answerPred, newvars);
