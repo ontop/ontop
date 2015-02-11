@@ -38,13 +38,14 @@ import org.slf4j.LoggerFactory;
  * @author mariano
  * 
  */
-public class MappingVocabularyRepair {
+public class SQLMappingVocabularyFixer implements MappingVocabularyFixer {
 
 	private static OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
-	private static Logger log = LoggerFactory.getLogger(MappingVocabularyRepair.class);
+	private static Logger log = LoggerFactory.getLogger(SQLMappingVocabularyFixer.class);
 
 
-    public OBDAModel fixOBDAModel(OBDAModel model, Set<Predicate> vocabulary) {
+    @Override
+	public OBDAModel fixOBDAModel(OBDAModel model, Set<Predicate> vocabulary) {
         log.debug("Fixing OBDA Model");
 
         Map<URI, ImmutableList<OBDAMappingAxiom>> mappings = new HashMap<>();

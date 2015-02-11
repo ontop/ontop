@@ -6,6 +6,7 @@ import org.semanticweb.ontop.injection.*;
 import org.semanticweb.ontop.owlrefplatform.core.Quest;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
+import org.semanticweb.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
 
 /**
  *
@@ -30,7 +31,6 @@ public class QuestComponentModule extends OBDAAbstractModule {
                         NativeQueryGenerator.class),
                 QuestComponentFactory.class);
         install(componentFactoryModule);
+        bindFromPreferences(MappingVocabularyFixer.class);
     }
-
-
 }

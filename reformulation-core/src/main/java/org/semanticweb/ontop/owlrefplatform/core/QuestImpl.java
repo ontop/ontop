@@ -57,7 +57,8 @@ import org.semanticweb.ontop.owlrefplatform.core.sql.SQLGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
-import org.semanticweb.ontop.owlrefplatform.core.translator.MappingVocabularyRepair;
+import org.semanticweb.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
+import org.semanticweb.ontop.owlrefplatform.core.translator.SQLMappingVocabularyFixer;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
@@ -83,7 +84,7 @@ public class QuestImpl implements Serializable, Quest {
 
 	private static final long serialVersionUID = -6074403119825754295L;
 
-    private PoolProperties poolProperties;
+	private PoolProperties poolProperties;
 	private DataSource tomcatPool;
 
 	private boolean isSemanticIdx = false;
@@ -237,6 +238,7 @@ public class QuestImpl implements Serializable, Quest {
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final QuestComponentFactory questComponentFactory;
     private final OBDAFactoryWithException obdaFactory;
+	private final MappingVocabularyFixer mappingVocabularyFixer;
 
 	/***
 	 * Will prepare an instance of quest in classic or virtual ABox mode. If the
@@ -267,13 +269,15 @@ public class QuestImpl implements Serializable, Quest {
     @Inject
 	private QuestImpl(@Assisted Ontology tbox, @Assisted @Nullable OBDAModel mappings, @Assisted @Nullable DBMetadata metadata,
                       @Assisted Properties config, NativeQueryLanguageComponentFactory nativeQLFactory,
-                      OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory) throws DuplicateMappingException {
+                      OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory,
+					  MappingVocabularyFixer mappingVocabularyFixer) throws DuplicateMappingException {
         if (tbox == null)
             throw new InvalidParameterException("TBox cannot be null");
 
         this.nativeQLFactory = nativeQLFactory;
         this.obdaFactory = obdaFactory;
         this.questComponentFactory = questComponentFactory;
+		this.mappingVocabularyFixer = mappingVocabularyFixer;
 
         inputTBox = tbox;
 
@@ -531,14 +535,11 @@ public class QuestImpl implements Serializable, Quest {
 			throw new Exception("ERROR: Working in virtual mode but no OBDA model has been defined.");
 		}
 
-		//TODO: check and remove this block
 		/*
 		 * Fixing the typing of predicates, in case they are not properly given.
 		 */
 		if (inputOBDAModel != null && !inputTBox.getVocabulary().isEmpty()) {
-			MappingVocabularyRepair repairmodel = new MappingVocabularyRepair();
-            //TODO: remove this cast (when a non-SQL OBDA model will be used) !
-			inputOBDAModel = repairmodel.fixOBDAModel(inputOBDAModel,
+			inputOBDAModel = mappingVocabularyFixer.fixOBDAModel(inputOBDAModel,
                     inputTBox.getVocabulary());
 		}
 

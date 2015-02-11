@@ -70,4 +70,11 @@ public abstract class OBDAAbstractModule extends AbstractModule {
         return configuration;
     }
 
+    /**
+     * To bind classes with default constructors.
+     */
+    protected void bindFromPreferences(Class abstractClass) {
+        bind(abstractClass).to(getImplementation(abstractClass.getCanonicalName()));
+    }
+
 }
