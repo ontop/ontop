@@ -856,7 +856,9 @@ public class QuestImpl implements Serializable, Quest {
 				 * If we are not in classic + inmemory mode we can disconnect
 				 * the house-keeping connection, it has already been used.
 				 */
-				dbConnector.disconnect();
+				if (dbConnector != null) {
+					dbConnector.disconnect();
+				}
 			}
 		}
 	}
