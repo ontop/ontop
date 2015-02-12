@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  */
 
 
+import com.google.common.collect.Lists;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.DatalogProgram;
@@ -85,33 +86,40 @@ import java.util.regex.Pattern;
 
 enum ConnClasses{
 	
-	MYSQL("class com.mysql.jdbc.JDBC4Connection"),
-	POSTGRES("class org.postgresql.jdbc4.Jdbc4Connection");
+	MYSQL("com.mysql.jdbc.JDBC4Connection"),
+	POSTGRES("org.postgresql.jdbc4.Jdbc4Connection"),
+    DB2("com.ibm.db2.jcc.DB2Connection", "com.ibm.db2.jcc.t4.b");
+
+	private final List<String> connClasses;
 	
-	private final String connClass;
-	
-	ConnClasses(String connClass){
-		this.connClass = connClass;
+	ConnClasses(String... connClasses){
+		this.connClasses = Lists.newArrayList(connClasses);
 	}
 	
-	public static ConnClasses fromString(String text) {
+	public static ConnClasses fromString(String connectionClassName) {
 		
 		ConnClasses result = null;
 		
-	    if (text != null) {
+	    if (connectionClassName != null) {
 	      for (ConnClasses b : ConnClasses.values()) {
-	        if (text.equals(b.connClass)) {
-	          result = b;
-	        }
+
+              if(b.connClasses.indexOf(connectionClassName) != -1){
+                  result = b;
+              }
+
+//	        if (connectionClassName.equals(b.connClass)) {
+//	          result = b;
+//	        }
 	      }
 	    }
-	    else throw new IllegalArgumentException("No constant with text " + text + " found");
+	    else
+            throw new IllegalArgumentException("No constant with text " + connectionClassName + " found");
 	    return result;
 	}
 	
 	@Override
 	public String toString(){
-		return this.connClass.toString();
+		return this.connClasses.toString();
 	}
 	
 }
@@ -1014,8 +1022,10 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	
 	// Davide> TODO: Test
 	public void setQueryTimeout(Statement st) throws SQLException {
-		
-		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().toString());
+
+        int timeout = 1200;
+
+		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().getName());
 
 		if(connClass == null){
 			// TODO: set a proper timeout value
@@ -1025,22 +1035,24 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 
 		switch(connClass){
+        case DB2:
 		case MYSQL:
-			st.setQueryTimeout(1200);
+            st.setQueryTimeout(timeout);
 			break;
 		case POSTGRES:
 		{
 			if( !timeoutSet ){
-				String query = "SET statement_timeout TO 1200000"; // 1000 = one second
+				String query = String.format("SET statement_timeout TO %d", timeout*1000); // 1000ms = one second
 				st.execute(query);
 				timeoutSet = true;
 			}
 			break;
 		}
+
 		default:
-			break;
-		
-		}		
+            st.setQueryTimeout(timeout);
+            break;
+		}
 	}
 	
 	public void resetTimeouts(Statement st) throws SQLException {
@@ -1053,6 +1065,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 		switch(connClass){
 		case MYSQL:
+        case DB2:
 			// Do nothing
 			break;
 		case POSTGRES:

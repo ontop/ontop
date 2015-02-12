@@ -2,6 +2,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 
 
 
+import com.google.common.collect.Lists;
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.model.OBDAException;
@@ -365,6 +366,13 @@ public class QuestOWLExample_ReasoningDisabled {
         List<List<Long>> resultsTwo_list = new ArrayList<>();
         List<List<Long>> resultsThree_list = new ArrayList<>();
 
+
+
+        // for testing TIMEOUT ONLY
+        int length = QueryFactory.createSPARQLs_three_concepts(Settings.dbType).size();
+        runQueries(conn, Lists.newArrayList(QueryFactory.createSPARQLs_three_concepts(Settings.dbType).get(length-1)));
+
+        System.exit(0);
 
         runQueries(conn, QueryFactory.getWarmUpQueries());
 
