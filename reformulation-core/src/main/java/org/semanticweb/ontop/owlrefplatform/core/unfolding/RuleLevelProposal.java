@@ -13,5 +13,13 @@ public interface RuleLevelProposal {
 
     Unifier getTypingSubstitution();
 
+    /**
+     * Rule just after type propagation.
+     */
     CQIE getTypedRule();
+
+    /**
+     * Rule after type removal.
+     */
+    CQIE getDetypedRule();
 }

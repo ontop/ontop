@@ -16,6 +16,11 @@ public interface PredicateLevelProposal {
     List<CQIE> getTypedRules();
 
     /**
+     * Rules after type removal.
+     */
+    List<CQIE> getDetypedRules();
+
+    /**
      * Type proposal for the current query predicate.
      */
     TypeProposal getTypeProposal();

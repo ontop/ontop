@@ -18,12 +18,12 @@ public class BasicTypeProposal implements TypeProposal {
 
     private final Function typedAtom;
 
-    public BasicTypeProposal(Function typedAtom) {
-        this.typedAtom = typedAtom;
+    public BasicTypeProposal(Function unextendedTypedAtom) {
+        this.typedAtom = unextendedTypedAtom;
     }
 
     @Override
-    public Function getTypedAtom() {
+    public Function getExtendedTypedAtom() {
         return typedAtom;
     }
 
@@ -33,7 +33,7 @@ public class BasicTypeProposal implements TypeProposal {
     }
 
     @Override
-    public P2<Function, Set<Variable>> convertIntoUnifiableAtom(Function bodyAtom, ImmutableSet<Variable> alreadyKnownRuleVariables) {
+    public P2<Function, Set<Variable>> convertIntoExtendedAtom(Function bodyAtom, ImmutableSet<Variable> alreadyKnownRuleVariables) {
         return P.p(bodyAtom, (Set<Variable>) new HashSet<Variable>());
     }
 }

@@ -19,21 +19,21 @@ import java.util.UUID;
 public class UriTemplateTypeProposal implements TypeProposal {
 
     private final Set<Variable> extraVariables;
-    private final Function unifiableAtom;
+    private final Function extendedTypedAtom;
 
-    public UriTemplateTypeProposal(Function proposedAtom) {
-        extraVariables = extractExtraVariables(proposedAtom);
-        unifiableAtom = insertExtraVariables(proposedAtom, extraVariables);
+    public UriTemplateTypeProposal(Function unextendedTypedAtom) {
+        extraVariables = extractExtraVariables(unextendedTypedAtom);
+        extendedTypedAtom = insertExtraVariables(unextendedTypedAtom, extraVariables);
     }
 
     @Override
-    public Function getTypedAtom() {
-        return unifiableAtom;
+    public Function getExtendedTypedAtom() {
+        return extendedTypedAtom;
     }
 
     @Override
     public Predicate getPredicate() {
-        return unifiableAtom.getFunctionSymbol();
+        return extendedTypedAtom.getFunctionSymbol();
     }
 
     /**
@@ -41,7 +41,7 @@ public class UriTemplateTypeProposal implements TypeProposal {
      * Makes sure these variable names are new (no conflict introduced).
      */
     @Override
-    public P2<Function, java.util.Set<Variable>> convertIntoUnifiableAtom(Function bodyAtom, ImmutableSet<Variable> alreadyKnownRuleVariables) {
+    public P2<Function, java.util.Set<Variable>> convertIntoExtendedAtom(Function bodyAtom, ImmutableSet<Variable> alreadyKnownRuleVariables) {
         Set<Variable> renamedExtraVariables = giveNonConflictingNamesToVariables(extraVariables, alreadyKnownRuleVariables);
         Function newAtom = insertExtraVariables(bodyAtom, renamedExtraVariables);
         return P.p(newAtom, (java.util.Set<Variable>) ImmutableSet.copyOf(renamedExtraVariables));

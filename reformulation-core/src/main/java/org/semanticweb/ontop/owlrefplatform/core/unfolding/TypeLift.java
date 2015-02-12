@@ -443,21 +443,11 @@ public class TypeLift {
              * Otherwise, remove types.
              */
             else {
-                List<CQIE> initialRules = label.getDefinitionRules();
-                List<CQIE> updatedRules = removeTypesFromRules(initialRules);
+                List<CQIE> updatedRules = optionalProposal.some().getDetypedRules();
                 return treeZipper.setLabel(label.newRulesNoProposal(updatedRules));
             }
         }
     };
-
-    /**
-     * Removes types from rules.
-     *
-     * Returns updated rules.
-     */
-    private static List<CQIE> removeTypesFromRules(final List<CQIE> initialRules) {
-        return removeHeadTypes(initialRules);
-    }
 
 
     /**

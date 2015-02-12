@@ -5,6 +5,7 @@ import fj.F;
 import fj.P2;
 import fj.data.*;
 import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.CQIEImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions;
@@ -15,6 +16,8 @@ import java.util.ArrayList;
 
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions.union;
 import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.computeTypePropagatingSubstitution;
+import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.makeTypeProposal;
+import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.untypeTerm;
 
 /**
  * Implementation making the following assumption:
@@ -25,6 +28,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
 
     private final Unifier typingSubstitution;
     private final CQIE typedRule;
+    private final TypeProposal typeProposal;
 
     /**
      * Computes the substitution and the typed rule.
@@ -34,7 +38,6 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
     public RuleLevelProposalImpl(CQIE initialRule, HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
             throws TypeLiftTools.MultiTypeException {
 
-        //List<Function> bodyAtoms = extractBodyAtoms(initialRule);
         /**
          * Only direct atoms (UCQ assumption: left-joins are not supported)
          */
@@ -55,7 +58,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
 
         /**
          * Excludes joins and left joins but consider group.
-         * TODO: this is very weak. Improve it.
+         * TODO: this filtering test is weak. Improve it.
          */
         List<Function> nonCompositeAlgebraAtoms = bodyAtoms.filter(new F<Function, Boolean>() {
             @Override
@@ -70,20 +73,25 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
         });
 
         /**
-         * Adapts the body data atoms so that are compatible with the typed child head for computing
+         * Extends the body data atoms so that are compatible with the typed child head for computing
          * a type propagation substitution.
          */
-        List<Function> unifiableBodyDataAtoms = computeUnifiableBodyDataAtoms(bodyDataAtoms, childProposalIndex);
+        List<Function> extendedBodyDataAtoms = computeExtendedBodyDataAtoms(bodyDataAtoms, childProposalIndex);
 
         /**
          * Computes the type propagating substitution.
          */
-        typingSubstitution = aggregateRuleAndProposals(unifiableBodyDataAtoms, childProposalIndex);
+        typingSubstitution = aggregateRuleAndProposals(extendedBodyDataAtoms, childProposalIndex);
 
         /**
          * TODO: Only works for UCQs (Left-join hacky notation is not supported)
          */
-        typedRule = constructTypedRule(initialRule, typingSubstitution, unifiableBodyDataAtoms, filterAtoms, nonCompositeAlgebraAtoms);
+        typedRule = constructTypedRule(initialRule, typingSubstitution, extendedBodyDataAtoms, filterAtoms, nonCompositeAlgebraAtoms);
+
+        /**
+         * Derives the type proposal
+         */
+        typeProposal = makeTypeProposal(typedRule, typingSubstitution);
 
     }
 
@@ -94,8 +102,8 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
      * Some of these conversions may introduce new non-conflicting variables.
      *
      */
-    private static List<Function> computeUnifiableBodyDataAtoms(final List<Function> dataAtoms,
-                                                                final HashMap<Predicate, PredicateLevelProposal> childProposalIndex) {
+    private static List<Function> computeExtendedBodyDataAtoms(final List<Function> dataAtoms,
+                                                               final HashMap<Predicate, PredicateLevelProposal> childProposalIndex) {
 
         /**
          * All the variables are supposed to be present in the data atoms (safe Datalog rules).
@@ -121,7 +129,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
                  *
                  */
                 TypeProposal childTypeProposal = optionalChildPredProposal.some().getTypeProposal();
-                P2<Function, java.util.Set<Variable>> newAtomAndVariables = childTypeProposal.convertIntoUnifiableAtom(atom,
+                P2<Function, java.util.Set<Variable>> newAtomAndVariables = childTypeProposal.convertIntoExtendedAtom(atom,
                         ImmutableSet.copyOf(alreadyKnownRuleVariables));
 
                 // Appends new variables
@@ -143,14 +151,24 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
         return typedRule;
     }
 
+    @Override
+    public CQIE getDetypedRule() {
+        Function extendedTypedHead =  typeProposal.getExtendedTypedAtom();
+        Function deTypedHead = (Function) untypeTerm(extendedTypedHead);
+
+        // For bad side-effect joke prevention
+        CQIE typedRule = this.typedRule.clone();
+        return OBDADataFactoryImpl.getInstance().getCQIE(deTypedHead, typedRule.getBody());
+    }
+
 
     /**
      * Entry point for the homonym tail-recursive function.
      */
-    private static Unifier aggregateRuleAndProposals(final List<Function> unifiableBodyAtoms,
+    private static Unifier aggregateRuleAndProposals(final List<Function> extendedBodyDataAtoms,
                                                      final HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
             throws TypeLiftTools.MultiTypeException {
-        return aggregateRuleAndProposals(Option.<Unifier>none(), unifiableBodyAtoms, childProposalIndex);
+        return aggregateRuleAndProposals(Option.<Unifier>none(), extendedBodyDataAtoms, childProposalIndex);
     }
 
 
@@ -164,13 +182,13 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
      *
      */
     private static Unifier aggregateRuleAndProposals(final Option<Unifier> optionalSubstitution,
-                                                     final List<Function> remainingBodyAtoms,
+                                                     final List<Function> remainingBodyDataAtoms,
                                                      final HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
             throws TypeLiftTools.MultiTypeException {
         /**
-         * Stop condition (no further body atom).
+         * Stop condition (no further body data atom).
          */
-        if (remainingBodyAtoms.isEmpty()) {
+        if (remainingBodyDataAtoms.isEmpty()) {
             /**
              * If no child proposal corresponds to the body atoms, no substitution is created.
              * --> Returns an empty substitution.
@@ -182,7 +200,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
             return optionalSubstitution.some();
         }
 
-        Function bodyAtom = remainingBodyAtoms.head();
+        Function bodyAtom = remainingBodyDataAtoms.head();
         Option<PredicateLevelProposal> optionalChildProposal = childProposalIndex.get(bodyAtom.getFunctionSymbol());
 
         Option<Unifier> newOptionalSubstitution;
@@ -240,7 +258,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
         /**
          * Tail recursion
          */
-        return aggregateRuleAndProposals(newOptionalSubstitution, remainingBodyAtoms.tail(), childProposalIndex);
+        return aggregateRuleAndProposals(newOptionalSubstitution, remainingBodyDataAtoms.tail(), childProposalIndex);
     }
 
     /**
@@ -249,15 +267,15 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
      * Note that it only constructs Conjunctive Queries!
      *
      */
-    private static CQIE constructTypedRule(CQIE initialRule, Unifier typingSubstitution, List<Function> unifiableDataAtoms, List<Function> untypedFilterAtoms,
+    private static CQIE constructTypedRule(CQIE initialRule, Unifier typingSubstitution, List<Function> extendedDataAtoms, List<Function> untypedFilterAtoms,
                                            List<Function> untypedNonCompositeAlgebraAtoms) {
 
         /**
          * Derives a typed head by applying the substitution
          */
-        Function newHead = initialRule.getHead();
-        // SIDE-EFFECT: makes the new head typed.
-        UnifierUtilities.applyUnifier(newHead, typingSubstitution);
+        Function typedHead = (Function) initialRule.getHead().clone();
+        //SIDE-EFFECT!!!
+        UnifierUtilities.applyUnifier(typedHead, typingSubstitution);
 
         /**
          * Types filter and non composite algebra atoms
@@ -265,13 +283,18 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
         List<Function> typedBodyAtoms = typeAtoms(typingSubstitution, untypedFilterAtoms.append(untypedNonCompositeAlgebraAtoms));
 
         /**
-         * Concats the three list of atoms
+         * Removes the variables that correspond to URI templates
          */
-        List<Function> allAtoms = unifiableDataAtoms.append(typedBodyAtoms);
-        java.util.List<Function> typedRuleBody = new ArrayList<>(allAtoms.toCollection());
+        List<Function> newUntypedDataAtoms = removeURITemplates(extendedDataAtoms, typingSubstitution);
+
+        /**
+         * Concats the three types of body atoms
+         */
+        List<Function> allBodyAtoms = newUntypedDataAtoms.append(typedBodyAtoms);
+        java.util.List<Function> typedRuleBody = new ArrayList<>(allBodyAtoms.toCollection());
 
 
-        CQIE typedRule = OBDADataFactoryImpl.getInstance().getCQIE(newHead, typedRuleBody);
+        CQIE typedRule = OBDADataFactoryImpl.getInstance().getCQIE(typedHead, typedRuleBody);
         return typedRule;
     }
 
@@ -286,6 +309,22 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
                 // SIDE-EFFECT: makes the new head typed.
                 UnifierUtilities.applyUnifier(newAtom, typingSubstitution);
                 return newAtom;
+            }
+        });
+    }
+
+    private static List<Function> removeURITemplates(List<Function> extendedDataAtoms, final Unifier typingSubstitution) {
+        return extendedDataAtoms.map(new F<Function, Function>() {
+            @Override
+            public Function f(Function atom) {
+                Function typedAtom = (Function) atom.clone();
+                UnifierUtilities.applyUnifier(typedAtom, typingSubstitution);
+
+                /**
+                 * Untyping removes URI template terms.
+                 */
+                Function untypedAtom = (Function) TypeLiftTools.untypeTerm(typedAtom);
+                return untypedAtom;
             }
         });
     }

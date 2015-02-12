@@ -9,10 +9,8 @@ import fj.data.Option;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions.union;
-import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.constructTypeProposal;
 
 /**
  * From a high-level point of view, this proposal is done by looking at (i) the children proposals and (ii) the rules defining the parent predicate.
@@ -68,6 +66,16 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
             @Override
             public CQIE f(RuleLevelProposal ruleLevelProposal) {
                 return ruleLevelProposal.getTypedRule();
+            }
+        });
+    }
+
+    @Override
+    public List<CQIE> getDetypedRules() {
+        return ruleProposals.map(new F<RuleLevelProposal, CQIE>() {
+            @Override
+            public CQIE f(RuleLevelProposal ruleLevelProposal) {
+                return ruleLevelProposal.getDetypedRule();
             }
         });
     }
@@ -146,15 +154,6 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
      * Makes a type proposal out of the head of one definition rule.
      */
     private static TypeProposal makeTypeProposal(List<RuleLevelProposal> ruleProposals, Unifier globalSubstitution) {
-        /**
-         * Makes a TypeProposal by applying the substitution to the head of one rule.
-         *
-         */
-        final Function newFunctionProposal = (Function) ruleProposals.head().getTypedRule().getHead().clone();
-        // Side-effect!
-        UnifierUtilities.applyUnifier(newFunctionProposal, globalSubstitution);
-        final TypeProposal newProposal = constructTypeProposal(newFunctionProposal);
-
-        return newProposal;
+        return TypeLiftTools.makeTypeProposal(ruleProposals.head().getTypedRule(), globalSubstitution);
     }
 }

@@ -399,17 +399,29 @@ public class TypeLiftTools {
     /**
      * Constructs a TypeProposal of the proper type.
      */
-    public static TypeProposal constructTypeProposal(Function typedAtom) {
+    public static TypeProposal constructTypeProposal(Function unextendedTypedAtom) {
         /**
          * Special case: multi-variate URI template.
          */
-        if (containsURITemplate(typedAtom)) {
-            return new UriTemplateTypeProposal(typedAtom);
+        if (containsURITemplate(unextendedTypedAtom)) {
+            return new UriTemplateTypeProposal(unextendedTypedAtom);
         }
         /**
          * Default case
          */
-        return new BasicTypeProposal(typedAtom);
+        return new BasicTypeProposal(unextendedTypedAtom);
+    }
+
+    /**
+     * Makes a TypeProposal by applying the substitution to the head of the rule.
+     */
+    public static TypeProposal makeTypeProposal(CQIE rule, Unifier substitution) {
+        final Function unextendedTypeAtom = (Function) rule.getHead().clone();
+        // Side-effect!
+        UnifierUtilities.applyUnifier(unextendedTypeAtom, substitution);
+        final TypeProposal newProposal = constructTypeProposal(unextendedTypeAtom);
+
+        return newProposal;
     }
 
 }

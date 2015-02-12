@@ -13,8 +13,10 @@ public interface TypeProposal {
 
     /**
      * Atom used for computing the unifier in order to propagate the types it contains.
+     *
+     * This atom is said to be extended: variables used URI templates are also top-level ones.
      */
-    public Function getTypedAtom();
+    public Function getExtendedTypedAtom();
 
     /**
      * Predicate of the atom.
@@ -29,5 +31,5 @@ public interface TypeProposal {
      *
      * Returns the unifiable body atom and the new variable created.
      */
-    P2<Function, java.util.Set<Variable>> convertIntoUnifiableAtom(Function bodyAtom, ImmutableSet<Variable> alreadyKnownRuleVariables);
+    P2<Function, java.util.Set<Variable>> convertIntoExtendedAtom(Function bodyAtom, ImmutableSet<Variable> alreadyKnownRuleVariables);
 }
