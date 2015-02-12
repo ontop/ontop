@@ -51,7 +51,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexCache;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -71,6 +70,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -249,8 +249,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 	private boolean isIndexed;  // database index created
 
-	private final HashSet<SemanticIndexRecord> nonEmptyEntityRecord = new HashSet<>();
-
+	private SemanticIndexViewsManager views = new SemanticIndexViewsManager();
+	
 	private final List<RepositoryChangedListener> changeList = new LinkedList<>();
 
 	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag) {
@@ -533,10 +533,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		roleStm.addBatch();
 		
 		// Register non emptiness
-		COL_TYPE t1 = o1.getType();
-		COL_TYPE t2 = o2.getType();		
-		SemanticIndexRecord record = new SemanticIndexRecord(t1, t2, idx);
-		nonEmptyEntityRecord.add(record);
+		views.setNonEmpty(idx, o1.getType(), o2.getType());
 	} 
 
 	private void process(DataPropertyAssertion ax, PreparedStatement uriidStm, Map<COL_TYPE, PreparedStatement> attributeStatement) throws SQLException {
@@ -628,10 +625,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		stm.addBatch();
 		
 		// register non-emptiness
-		COL_TYPE t1 = subject.getType();
-		COL_TYPE t2 = object.getType();		
-		SemanticIndexRecord record = new SemanticIndexRecord(t1, t2, idx);
-		nonEmptyEntityRecord.add(record);
+		views.setNonEmpty(idx, subject.getType(), object.getType());
 	}
 	
 		
@@ -653,9 +647,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		classStm.addBatch();
 	
 		// Register non emptiness
-		COL_TYPE t1 = c1.getType();
-		SemanticIndexRecord record = new SemanticIndexRecord(t1, conceptIndex);
-		nonEmptyEntityRecord.add(record);
+		views.setNonEmpty(conceptIndex, c1.getType());
 	}
 
 	// TODO: big issue -- URI map is incomplete -- it is never read back from the DB
@@ -825,7 +817,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		log.debug("Loading semantic index metadata from the database *");
 
 		cacheSI = new SemanticIndexCache(reasonerDag);	
-		nonEmptyEntityRecord.clear();
+		views = new SemanticIndexViewsManager();
 
 		// Fetching the index data 
 		Statement st = conn.createStatement();
@@ -850,7 +842,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 		
 		
-		// fetching the intervals data, note that a given String can have one ore
+		// Fetching the intervals data, note that a given String can have one or
 		// more intervals (a set) hence we need to go through several rows to
 		// collect all of them. To do this we sort the table by URI (to get all
 		// the intervals for a given String in sequence), then we collect all the
@@ -904,12 +896,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			int type2 = res.getInt(4);
 			int idx = res.getInt(2);
 			
-			SemanticIndexRecord.checkTypeValue(type1);
-			SemanticIndexRecord.checkTypeValue(type2);
-			SemanticIndexRecord.checkSITableValue(sitable);
-			
-			SemanticIndexRecord r = new SemanticIndexRecord(sitable, type1, type2, idx);
-			nonEmptyEntityRecord.add(r);
+			views.setNonEmpty(sitable, type1, type2, idx);
 		}
 
 		res.close();
@@ -957,6 +944,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				return null;
 			}
 			List<Interval> intervals = range.getIntervals();	
+			String intervalsSqlFilter = getIntervalString(intervals);
 			
 			
 			/***
@@ -971,10 +959,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			
 			for (COL_TYPE obType1 : objectTypes) {
 				for (COL_TYPE obType2 : typesAndObjectTypes) {
-					if (isMappingEmpty(intervals, obType1, obType2))
+					if (views.isMappingEmpty(intervals, obType1, obType2))
 						continue;
 					
-					String sourceQuery = constructSqlSource(obType1, obType2, intervals);
+					String sourceQuery = constructSqlSource(obType1, obType2) + intervalsSqlFilter;
 					CQIE targetQuery = constructTargetQuery(ope.getPredicate(), obType1, obType2);
 					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 					result.add(basicmapping);		
@@ -996,9 +984,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				log.debug("Data property " + dpe + " has no SemanticIndexRange");
 				return null;
 			}
-			List<Interval> intervals = range.getIntervals();	
+			List<Interval> intervals = range.getIntervals();
+			String intervalsSqlFilter = getIntervalString(intervals);
 			
-
+		
 			/***
 			 * Generating one mapping for each supported cases, i.e., the second
 			 * component is an object, or one of the supported datatypes. For
@@ -1011,10 +1000,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			
 			for (COL_TYPE obType1 : objectTypes) {
 				for (COL_TYPE obType2 : typesAndObjectTypes) {
-					if (isMappingEmpty(intervals, obType1, obType2))
+					if (views.isMappingEmpty(intervals, obType1, obType2))
 						continue;
 					
-					String sourceQuery = constructSqlSource(obType1, obType2, intervals);
+					String sourceQuery = constructSqlSource(obType1, obType2) + intervalsSqlFilter;
 					CQIE targetQuery = constructTargetQuery(dpe.getPredicate(), obType1, obType2);
 					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 					result.add(basicmapping);			
@@ -1041,12 +1030,13 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				continue;
 			}
 			List<Interval> intervals = range.getIntervals();
+			String intervalsSqlFilter = getIntervalString(intervals);
 
 			for (COL_TYPE obType1 : objectTypes) {
-				if (isMappingEmpty(intervals, obType1)) 
+				if (views.isMappingEmpty(intervals, obType1)) 
 					continue;
 				
-				String sourceQuery = constructSqlSource(obType1, intervals);
+				String sourceQuery = constructSqlSource(obType1) + intervalsSqlFilter;
 				CQIE targetQuery = constructTargetQuery(classNode.getPredicate(), obType1);
 				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 				result.add(basicmapping);
@@ -1087,35 +1077,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		return result;
 	}
 
-	/***
-	 * @param iri
-	 * @param type1
-	 * @return
-	 * @throws OBDAException 
-	 */
-	private boolean isMappingEmpty(List<Interval> intervals,  COL_TYPE type1)  {
-		
-		for (Interval interval : intervals) 
-			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
-				SemanticIndexRecord record = new SemanticIndexRecord(type1, i);
-				if (nonEmptyEntityRecord.contains(record))
-					return false;
-			}
-		
-		return true;
-	}
-
-	private boolean isMappingEmpty(List<Interval> intervals, COL_TYPE type1, COL_TYPE type2)  {
-		
-		for (Interval interval : intervals) 
-			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
-				SemanticIndexRecord record = new SemanticIndexRecord(type1, type2, i);
-				if (nonEmptyEntityRecord.contains(record)) 
-					return false;
-			}
-		
-		return true;
-	}
 	
 	private CQIE constructTargetQuery(Predicate predicate, COL_TYPE type) {
 
@@ -1178,7 +1139,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	
-	private String constructSqlSource(COL_TYPE type, final List<Interval> intervals) {
+	private String constructSqlSource(COL_TYPE type) {
 		
 		StringBuilder sql = new StringBuilder();
 		
@@ -1198,11 +1159,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			sql.append("ISBNODE = FALSE AND ");
 		}
 		
-		appendIntervalString(sql, intervals);
 		return sql.toString();		
 	}	
 	
-	private String constructSqlSource(COL_TYPE type1, COL_TYPE type2, final List<Interval> intervals) {
+	private String constructSqlSource(COL_TYPE type1, COL_TYPE type2) {
 		
 		StringBuilder sql = new StringBuilder();
 		
@@ -1242,44 +1202,54 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		else if (type2 == COL_TYPE.LITERAL_LANG)
 			sql.append("LANG IS NOT NULL AND ");
 		
-		appendIntervalString(sql, intervals);
 		return sql.toString();		
 	}	
 
 	
+	/**
+	 * Generating the interval conditions for semantic index
+	 */
 	
-	private void appendIntervalString(StringBuilder sql, final List<Interval> intervals) {
-		/*
-		 * Generating the interval conditions for semantic index
-		 */
+	private static String getIntervalString(final List<Interval> intervals) {
 		
-		Joiner.on(" OR ").appendTo(sql, new Iterator<String>() {		
-			private final Iterator<Interval> it = intervals.iterator();
-
-			@Override
-			public boolean hasNext() { return it.hasNext(); }
-
-			@Override
-			public String next() {
-				Interval interval = it.next();
-				if (interval.getStart() == interval.getEnd()) 
-					return String.format("IDX = %d", interval.getStart());
-				else 
-					return String.format("IDX >= %d AND IDX <= %d", interval.getStart(), interval.getEnd());
-
-			}
-
-			@Override
-			public void remove() { }
-		});
+		if (intervals.size() == 1)
+			return getIntervalString(intervals.iterator().next());
 		
-		if (intervals.size() > 1) { // TODO: fix
-			sql.insert(0, "(");
+		else if (intervals.size() > 1) { 
+			StringBuilder sql = new StringBuilder();
+			
+			sql.append("(");
+			Joiner.on(" OR ").appendTo(sql, new Iterator<String>() {		
+				private final Iterator<Interval> it = intervals.iterator();
+
+				@Override
+				public boolean hasNext() { return it.hasNext(); }
+
+				@Override
+				public String next() {
+					Interval interval = it.next();
+					return getIntervalString(interval);
+				}
+
+				@Override
+				public void remove() { }
+			});
 			sql.append(")");
+			
+			return sql.toString();
 		}
+		else // if the size is 0
+			return "";
 	}
 	
 
+	private static String getIntervalString(Interval interval) {
+		if (interval.getStart() == interval.getEnd()) 
+			return String.format("IDX = %d", interval.getStart());
+		else 
+			return String.format("IDX >= %d AND IDX <= %d", interval.getStart(), interval.getEnd());		
+	}
+	
 
 	/***
 	 * Inserts the metadata about semantic indexes and intervals into the
@@ -1359,7 +1329,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 			// Inserting emptiness index metadata 
 			try (PreparedStatement stm = conn.prepareStatement(emptinessIndexTable.insertCommand)) {
-				for (SemanticIndexRecord record : nonEmptyEntityRecord) {
+				for (SemanticIndexRecord record : views.getRecords()) {
 					stm.setInt(1, record.getTable());
 					stm.setInt(2, record.getIndex());
 					stm.setInt(3, record.getType1());

@@ -70,7 +70,7 @@ public class SemanticIndexRecord {
 	 */
 	
 	public static void checkTypeValue(int type) { 
-		if (type != SemanticIndexRecord.OBJ_TYPE_URI && type != SemanticIndexRecord.OBJ_TYPE_BNode)
+		if (type != OBJ_TYPE_URI && type != OBJ_TYPE_BNode)
 			throw new RuntimeException("Unknown OBJ_TYPE:" + type);
 	}
 	
