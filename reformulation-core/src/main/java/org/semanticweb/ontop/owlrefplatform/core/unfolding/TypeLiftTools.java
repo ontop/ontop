@@ -11,10 +11,9 @@ import fj.data.Option;
 import fj.data.Stream;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypePropagatingSubstitution;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 
 import java.util.ArrayList;
 
@@ -84,7 +83,7 @@ public class TypeLiftTools {
      *
      */
     protected static TypePropagatingSubstitution computeTypePropagatingSubstitution(Function localAtom, TypeProposal proposal)
-            throws Substitutions.SubstitutionException {
+            throws SubstitutionUtilities.SubstitutionException {
         /**
          * Type propagating substitution function between the proposedAtom and the localAtom.
          *
@@ -97,7 +96,7 @@ public class TypeLiftTools {
          * Impossible to unify the multiple types proposed for this predicate.
          */
         if (typePropagatingSubstitutionFunction == null) {
-            throw new Substitutions.SubstitutionException();
+            throw new SubstitutionUtilities.SubstitutionException();
         }
 
         /**
@@ -205,7 +204,7 @@ public class TypeLiftTools {
             /**
              * Multi-type problem detected
              */
-        } catch (Substitutions.SubstitutionException e) {
+        } catch (SubstitutionUtilities.SubstitutionException e) {
             return true;
         }
     }
@@ -237,13 +236,13 @@ public class TypeLiftTools {
     /**
      * Propagates type from a typeProposal to one head atom.
      */
-    public static Function applyTypeProposal(Function headAtom, TypeProposal typeProposal) throws Substitutions.SubstitutionException {
-        Unifier substitutionFunction = computeTypePropagatingSubstitution(headAtom, typeProposal);
+    public static Function applyTypeProposal(Function headAtom, TypeProposal typeProposal) throws SubstitutionUtilities.SubstitutionException {
+        Substitution substitution = computeTypePropagatingSubstitution(headAtom, typeProposal);
 
         // Mutable object
         Function newHead = (Function) headAtom.clone();
         // Limited side-effect
-        UnifierUtilities.applyUnifier(newHead, substitutionFunction);
+        SubstitutionUtilities.applySubstitution(newHead, substitution);
 
         return newHead;
     }
@@ -422,10 +421,10 @@ public class TypeLiftTools {
     /**
      * Makes a TypeProposal by applying the substitution to the head of the rule.
      */
-    public static TypeProposal makeTypeProposal(CQIE rule, Unifier substitution) {
+    public static TypeProposal makeTypeProposal(CQIE rule, Substitution substitution) {
         final Function unextendedTypeAtom = (Function) rule.getHead().clone();
         // Side-effect!
-        UnifierUtilities.applyUnifier(unextendedTypeAtom, substitution);
+        SubstitutionUtilities.applySubstitution(unextendedTypeAtom, substitution);
         final TypeProposal newProposal = constructTypeProposal(unextendedTypeAtom);
 
         return newProposal;

@@ -20,21 +20,26 @@ package org.semanticweb.ontop.reformulation.tests;
  * #L%
  */
 
-import java.util.LinkedList;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.ontology.*;
+import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.ObjectSomeValuesFrom;
+import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -48,9 +53,9 @@ public class CQCUtilitiesTest {
 	OBDADataFactory pfac = OBDADataFactoryImpl.getInstance();
 	OBDADataFactory tfac = OBDADataFactoryImpl.getInstance();
 
-	Predicate r = pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-	Predicate s = pfac.getPredicate("S", 3, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-	Predicate q = pfac.getPredicate("q", 5, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT, COL_TYPE.OBJECT,
+	Predicate r = pfac.getPredicate("R", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	Predicate s = pfac.getPredicate("S", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	Predicate q = pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT, COL_TYPE.OBJECT,
 			COL_TYPE.OBJECT, COL_TYPE.OBJECT });
 
 	Term x = tfac.getVariable("x");
@@ -81,7 +86,7 @@ public class CQCUtilitiesTest {
 		List<Term> fterms1 = new LinkedList<Term>();
 		fterms1.add(x);
 		fterms1.add(y);
-		headTerms.add(tfac.getFunction(pfac.getPredicate("f", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
+		headTerms.add(tfac.getFunction(pfac.getPredicate("f", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
 				fterms1));
 
 		Function head = tfac.getFunction(q, headTerms);
@@ -97,7 +102,7 @@ public class CQCUtilitiesTest {
 		atomTerms2.add(c2);
 		List<Term> fterms2 = new LinkedList<Term>();
 		fterms2.add(x);
-		atomTerms2.add(tfac.getFunction(pfac.getPredicate("f", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), fterms2));
+		atomTerms2.add(tfac.getFunction(pfac.getPredicate("f", new COL_TYPE[] { COL_TYPE.OBJECT }), fterms2));
 		atomTerms2.add(y);
 		body.add(tfac.getFunction(s, atomTerms2));
 
@@ -141,19 +146,19 @@ public class CQCUtilitiesTest {
 		headTerms.add(x);
 		headTerms.add(y);
 
-		Function head = tfac.getFunction(pfac.getPredicate("q", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), headTerms);
+		Function head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), headTerms);
 
 		List<Function> body = new LinkedList<Function>();
 
 		List<Term> terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("x"));
 		terms.add(tfac.getVariable("y"));
-		body.add(tfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getObjectPropertyPredicate("R"), terms));
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("y"));
 		terms.add(tfac.getVariable("z"));
-		body.add(tfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getObjectPropertyPredicate("R"), terms));
 
 		CQIE q1 = tfac.getCQIE(head, body);
 
@@ -163,14 +168,14 @@ public class CQCUtilitiesTest {
 		headTerms.add(tfac.getVariable("y"));
 		headTerms.add(tfac.getVariable("y"));
 
-		head = tfac.getFunction(pfac.getPredicate("q", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), headTerms);
+		head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), headTerms);
 
 		body = new LinkedList<Function>();
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("y"));
 		terms.add(tfac.getVariable("y"));
-		body.add(tfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getObjectPropertyPredicate("R"), terms));
 
 		CQIE q2 = tfac.getCQIE(head, body);
 
@@ -180,14 +185,14 @@ public class CQCUtilitiesTest {
 		headTerms.add(tfac.getVariable("m"));
 		headTerms.add(tfac.getVariable("n"));
 
-		head = tfac.getFunction(pfac.getPredicate("q", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), headTerms);
+		head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), headTerms);
 
 		body = new LinkedList<Function>();
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("m"));
 		terms.add(tfac.getVariable("n"));
-		body.add(tfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getObjectPropertyPredicate("R"), terms));
 
 		CQIE q3 = tfac.getCQIE(head, body);
 
@@ -197,67 +202,65 @@ public class CQCUtilitiesTest {
 		headTerms.add(tfac.getVariable("m"));
 		headTerms.add(tfac.getVariable("n"));
 
-		head = tfac.getFunction(pfac.getPredicate("q", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), headTerms);
+		head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), headTerms);
 
 		body = new LinkedList<Function>();
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("m"));
 		terms.add(tfac.getVariable("n"));
-		body.add(tfac.getFunction(pfac.getPredicate("S", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getObjectPropertyPredicate("S"), terms));
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("m"));
 		terms.add(tfac.getVariable("n"));
-		body.add(tfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getObjectPropertyPredicate("R"), terms));
 
 		CQIE q4 = tfac.getCQIE(head, body);
 
 		// Query 5 - q() :- S(x,y)
 
-		head = pfac.getFunction(pfac.getPredicate("q", 0, null), new LinkedList<Term>());
+		head = pfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] {}), new LinkedList<Term>());
 		body = new LinkedList<Function>();
-		body.add(pfac.getFunction(pfac.getPredicate("S", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
-				pfac.getVariable("x"), pfac.getVariable("y")));
+		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("S"), pfac.getVariable("x"), pfac.getVariable("y")));
 
 		CQIE q5 = pfac.getCQIE(head, body);
 
 		// Query 6 - q() :- S(_,_))
 
-		head = pfac.getFunction(pfac.getPredicate("q", 0, null), new LinkedList<Term>());
+		head = pfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] {}), new LinkedList<Term>());
 		body = new LinkedList<Function>();
-		body.add(pfac.getFunction(pfac.getPredicate("S", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
-				pfac.getVariableNondistinguished(), pfac.getVariableNondistinguished()));
+		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("S"), pfac.getVariableNondistinguished(), pfac.getVariableNondistinguished()));
 
 		CQIE q6 = pfac.getCQIE(head, body);
 
 		// Query 7 - q(x,y) :- R(x,y), P(y,_)
 
-		head = pfac.getFunction(pfac.getPredicate("q", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
+		head = pfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
 				pfac.getVariable("x"), pfac.getVariable("y"));
 		body = new LinkedList<Function>();
-		body.add(pfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
+		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("R"),
 				pfac.getVariable("x"), pfac.getVariable("y")));
-		body.add(pfac.getFunction(pfac.getPredicate("P", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
+		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("P"),
 				pfac.getVariable("y"), pfac.getVariableNondistinguished()));
 
 		CQIE q7 = pfac.getCQIE(head, body);
 
 		// Query 8 - q(x,y) :- R(x,y), P(_,_)
 
-		head = pfac.getFunction(pfac.getPredicate("q", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
+		head = pfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
 				pfac.getVariable("x"), pfac.getVariable("y"));
 		body = new LinkedList<Function>();
-		body.add(pfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
+		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("R"),
 				pfac.getVariable("x"), pfac.getVariable("y")));
-		body.add(pfac.getFunction(pfac.getPredicate("P", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
+		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("P"),
 				pfac.getVariableNondistinguished(), pfac.getVariableNondistinguished()));
 
 		CQIE q8 = pfac.getCQIE(head, body);
 
 		// Query 9 - q() :- R(x,m), R(x,y), S(m,n), S(y,z),T(n,o),T(z,x)
 
-		head = pfac.getFunction(pfac.getPredicate("q", 0, null), new LinkedList<Term>());
+		head = pfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] {}), new LinkedList<Term>());
 		body = new LinkedList<Function>();
 		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("R"), pfac.getVariable("x"), pfac.getVariable("m")));
 		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("R"), pfac.getVariable("x"), pfac.getVariable("y")));
@@ -270,7 +273,7 @@ public class CQCUtilitiesTest {
 
 		// Query 10 - q() :- R(i,j), S(j,k), T(k,i)
 
-		head = pfac.getFunction(pfac.getPredicate("q", 0, null), new LinkedList<Term>());
+		head = pfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] {}), new LinkedList<Term>());
 		body = new LinkedList<Function>();
 		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("R"), pfac.getVariable("i"), pfac.getVariable("j")));
 		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("S"), pfac.getVariable("j"), pfac.getVariable("k")));
@@ -327,23 +330,23 @@ public class CQCUtilitiesTest {
 		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(x);
 
-		Function head = tfac.getFunction(pfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
+		Function head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
 
 		List<Function> body = new LinkedList<Function>();
 
 		List<Term> terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("x"));
 		terms.add(tfac.getVariable("y"));
-		body.add(tfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getObjectPropertyPredicate("R"), terms));
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("y"));
 		terms.add(tfac.getVariable("z"));
-		body.add(tfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getObjectPropertyPredicate("R"), terms));
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("x"));
-		body.add(tfac.getFunction(pfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getClassPredicate("A"), terms));
 
 		CQIE q1 = tfac.getCQIE(head, body);
 
@@ -352,14 +355,14 @@ public class CQCUtilitiesTest {
 		headTerms = new LinkedList<Term>();
 		headTerms.add(tfac.getVariable("x"));
 
-		head = tfac.getFunction(pfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
+		head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
 
 		body = new LinkedList<Function>();
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("x"));
 		terms.add(tfac.getVariable("y"));
-		body.add(tfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getObjectPropertyPredicate("R"), terms));
 
 		CQIE q2 = tfac.getCQIE(head, body);
 
@@ -368,13 +371,13 @@ public class CQCUtilitiesTest {
 		headTerms = new LinkedList<Term>();
 		headTerms.add(tfac.getVariable("x"));
 
-		head = tfac.getFunction(pfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
+		head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
 
 		body = new LinkedList<Function>();
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("x"));
-		body.add(tfac.getFunction(pfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getClassPredicate("A"), terms));
 
 		CQIE q3 = tfac.getCQIE(head, body);
 
@@ -401,23 +404,23 @@ public class CQCUtilitiesTest {
 		List<Term> headTerms = new LinkedList<Term>();
 		headTerms.add(x);
 
-		Function head = tfac.getFunction(pfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
+		Function head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
 
 		List<Function> body = new LinkedList<Function>();
 
 		List<Term> terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("x"));
 		terms.add(tfac.getVariable("y"));
-		body.add(tfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getObjectPropertyPredicate("R"), terms));
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("y"));
 		terms.add(tfac.getVariable("z"));
-		body.add(tfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getObjectPropertyPredicate("R"), terms));
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("x"));
-		body.add(tfac.getFunction(pfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getClassPredicate("A"), terms));
 
 		CQIE q1 = tfac.getCQIE(head, body);
 
@@ -426,14 +429,14 @@ public class CQCUtilitiesTest {
 		headTerms = new LinkedList<Term>();
 		headTerms.add(tfac.getVariable("x"));
 
-		head = tfac.getFunction(pfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
+		head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
 
 		body = new LinkedList<Function>();
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("x"));
 		terms.add(tfac.getVariable("y"));
-		body.add(tfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getObjectPropertyPredicate("R"), terms));
 
 		CQIE q2 = tfac.getCQIE(head, body);
 
@@ -442,13 +445,13 @@ public class CQCUtilitiesTest {
 		headTerms = new LinkedList<Term>();
 		headTerms.add(tfac.getVariable("x"));
 
-		head = tfac.getFunction(pfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
+		head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
 
 		body = new LinkedList<Function>();
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("x"));
-		body.add(tfac.getFunction(pfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), terms));
+		body.add(tfac.getFunction(pfac.getClassPredicate("A"), terms));
 
 		CQIE q3 = tfac.getCQIE(head, body);
 
@@ -497,16 +500,16 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- A(x), q(y) :- C(y), with A ISA C
 			Ontology sigma = dfac.createOntology();
-			OClass left = dfac.createClass("A");
-			OClass right = dfac.createClass("C");
-			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
+			OClass left = sigma.getVocabulary().createClass("A");
+			OClass right = sigma.getVocabulary().createClass("C");
+			sigma.addSubClassOfAxiom(left, right);
 
-			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
-			Function body1 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
+			Function head1 = tfac.getFunction(tfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
+			Function body1 = tfac.getFunction(tfac.getClassPredicate("A"), tfac.getVariable("x"));
 			CQIE query1 = tfac.getCQIE(head1, body1);
 
-			Function head2 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
-			Function body2 = tfac.getFunction(tfac.getPredicate("C", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
+			Function head2 = tfac.getFunction(tfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
+			Function body2 = tfac.getFunction(tfac.getClassPredicate("C"), tfac.getVariable("y"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
 			
@@ -522,17 +525,17 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
-			OClass left = dfac.createClass("A");
-			PropertyExpression pright = dfac.createObjectProperty("R");
-			SomeValuesFrom right = dfac.createPropertySomeRestriction(pright);
-			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
+			OClass left = sigma.getVocabulary().createClass("A");
+			ObjectPropertyExpression pright = sigma.getVocabulary().createObjectProperty("R");
+			ObjectSomeValuesFrom right = pright.getDomain();
+			sigma.addSubClassOfAxiom(left, right);
 
-			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
-			Function body1 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
+			Function head1 = tfac.getFunction(tfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
+			Function body1 = tfac.getFunction(tfac.getClassPredicate("A"), tfac.getVariable("x"));
 			CQIE query1 = tfac.getCQIE(head1, body1);
 
-			Function head2 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
-			Function body2 = tfac.getFunction(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
+			Function head2 = tfac.getFunction(tfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
+			Function body2 = tfac.getFunction(tfac.getObjectPropertyPredicate("R"),
 					tfac.getVariable("y"), tfac.getVariable("z"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
@@ -548,17 +551,17 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
 			Ontology sigma = OntologyFactoryImpl.getInstance().createOntology();
-			OClass left = dfac.createClass("A");
-			PropertyExpression pright = dfac.createObjectProperty("R").getInverse();
-			SomeValuesFrom right = dfac.createPropertySomeRestriction(pright);
-			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
+			OClass left = sigma.getVocabulary().createClass("A");
+			ObjectPropertyExpression pright = sigma.getVocabulary().createObjectProperty("R").getInverse();
+			ObjectSomeValuesFrom right = pright.getDomain();
+			sigma.addSubClassOfAxiom(left, right);
 
-			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
-			Function body1 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
+			Function head1 = tfac.getFunction(tfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
+			Function body1 = tfac.getFunction(tfac.getClassPredicate("A"), tfac.getVariable("x"));
 			CQIE query1 = tfac.getCQIE(head1, body1);
 
-			Function head2 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
-			Function body2 = tfac.getFunction(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
+			Function head2 = tfac.getFunction(tfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
+			Function body2 = tfac.getFunction(tfac.getObjectPropertyPredicate("R"),
 					tfac.getVariable("z"), tfac.getVariable("y"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
@@ -574,19 +577,18 @@ public class CQCUtilitiesTest {
 		{
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
 			Ontology sigma = dfac.createOntology();
-			PropertyExpression pleft = dfac.createObjectProperty("R");
-			SomeValuesFrom left = dfac.createPropertySomeRestriction(pleft);
-			OClass right = dfac.createClass("A");
+			ObjectPropertyExpression pleft = sigma.getVocabulary().createObjectProperty("R");
+			ObjectSomeValuesFrom left = pleft.getDomain();
+			OClass right = sigma.getVocabulary().createClass("A");
+			sigma.addSubClassOfAxiom(left, right);
 
-			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
-
-			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
-			Function body1 = tfac.getFunction(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
+			Function head1 = tfac.getFunction(tfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("x"));
+			Function body1 = tfac.getFunction(tfac.getObjectPropertyPredicate("R"),
 					tfac.getVariable("x"), tfac.getVariable("y"));
 			CQIE query1 = tfac.getCQIE(head1, body1);
 
-			Function head2 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("z"));
-			Function body2 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("z"));
+			Function head2 = tfac.getFunction(tfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("z"));
+			Function body2 = tfac.getFunction(tfac.getClassPredicate("A"), tfac.getVariable("z"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
 			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
@@ -601,18 +603,18 @@ public class CQCUtilitiesTest {
 		{
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
 			Ontology sigma = dfac.createOntology();
-			PropertyExpression pleft = dfac.createObjectProperty("R").getInverse();
-			SomeValuesFrom left = dfac.createPropertySomeRestriction(pleft);
-			OClass right = dfac.createClass("A");
-			sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
+			ObjectPropertyExpression pleft = sigma.getVocabulary().createObjectProperty("R").getInverse();
+			ObjectSomeValuesFrom left = pleft.getDomain();
+			OClass right = sigma.getVocabulary().createClass("A");
+			sigma.addSubClassOfAxiom(left, right);
 
-			Function head1 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
-			Function body1 = tfac.getFunction(tfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }),
+			Function head1 = tfac.getFunction(tfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("y"));
+			Function body1 = tfac.getFunction(tfac.getObjectPropertyPredicate("R"),
 					tfac.getVariable("x"), tfac.getVariable("y"));
 			CQIE query1 = tfac.getCQIE(head1, body1);
 
-			Function head2 = tfac.getFunction(tfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("z"));
-			Function body2 = tfac.getFunction(tfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("z"));
+			Function head2 = tfac.getFunction(tfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), tfac.getVariable("z"));
+			Function body2 = tfac.getFunction(tfac.getClassPredicate("A"), tfac.getVariable("z"));
 			CQIE query2 = tfac.getCQIE(head2, body2);
 
 			LinearInclusionDependencies dep = LinearInclusionDependencies.getABoxDependencies(new TBoxReasonerImpl(sigma), false);
@@ -650,28 +652,28 @@ public class CQCUtilitiesTest {
         // q(x) :- , q(x) :- R(x,y), A(x)
 
         Ontology sigma = dfac.createOntology();
-        OClass left = dfac.createClass("A");
-        PropertyExpression pleft = dfac.createObjectProperty("R");
-        SomeValuesFrom right = dfac.createPropertySomeRestriction(pleft);
-        sigma.addSubClassOfAxiomWithReferencedEntities(left, right);
+        OClass left = sigma.getVocabulary().createClass("A");
+        ObjectPropertyExpression pleft = sigma.getVocabulary().createObjectProperty("R");
+        ObjectSomeValuesFrom right = pleft.getDomain();
+        sigma.addSubClassOfAxiom(left, right);
 
 
         // Query 1 q(x) :- R(x,y), A(x)
         List<Term> headTerms = new LinkedList<Term>();
         headTerms.add(x);
 
-        Function head = tfac.getFunction(pfac.getPredicate("q", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), headTerms);
+        Function head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), headTerms);
 
         List<Function> body = new LinkedList<Function>();
 
         List<Term> terms = new LinkedList<Term>();
         terms.add(tfac.getVariable("x"));
         terms.add(tfac.getVariable("y"));
-        body.add(tfac.getFunction(pfac.getPredicate("R", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT }), terms));
+        body.add(tfac.getFunction(pfac.getObjectPropertyPredicate("R"), terms));
 
         terms = new LinkedList<Term>();
         terms.add(tfac.getVariable("x"));
-        body.add(tfac.getFunction(pfac.getPredicate("A", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), terms));
+        body.add(tfac.getFunction(pfac.getClassPredicate("A"), terms));
 
         CQIE query1 = tfac.getCQIE(head, body);
 
@@ -679,7 +681,7 @@ public class CQCUtilitiesTest {
 
         headTerms = new LinkedList<Term>();
         headTerms.add(tfac.getVariable("x"));
-        head = tfac.getFunction(pfac.getPredicate("q", 1, new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
+        head = tfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] { COL_TYPE.OBJECT }), headTerms);
         body = new LinkedList<Function>();
         CQIE query2 = tfac.getCQIE(head, body);
 

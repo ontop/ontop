@@ -20,6 +20,25 @@ package org.semanticweb.ontop.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
+import org.semanticweb.ontop.model.BuiltinPredicate;
+import org.semanticweb.ontop.model.CQIE;
+import org.semanticweb.ontop.model.Constant;
+import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.ontology.ClassExpression;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.DataSomeValuesFrom;
+import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.ObjectSomeValuesFrom;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.*;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,20 +47,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.PropertyExpression;
-import org.semanticweb.ontop.ontology.SomeValuesFrom;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.EQNormalizer;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-
 
 public class TMappingProcessor {
 
@@ -163,16 +168,16 @@ public class TMappingProcessor {
 					// ROMAN: i do not quite understand the code (in particular, the 1 atom in the body)
 					//        (but leave this fragment with minimal changes)
 					CQIE newmapping = currentRule.getStripped();
-					Unifier mgu = null;
+					Substitution mgu = null;
 					if (newmapping.getBody().size() == 1) {
-						mgu = Unifier.getMGU(newmapping.getBody().get(0), newRule.getStripped().getBody().get(0));
+						mgu = UnifierUtilities.getMGU(newmapping.getBody().get(0), newRule.getStripped().getBody().get(0));
 					}			
 					
 					Function orAtom = fac.getFunctionOR(existingconditions, newconditions);
 					newmapping.getBody().add(orAtom);
 				
 					if (mgu != null) {
-						newmapping = UnifierUtilities.applyUnifier(newmapping, mgu);
+						newmapping = SubstitutionUtilities.applySubstitution(newmapping, mgu);
 					}
 					newRule = new TMappingRule(newmapping.getHead(), newmapping.getBody(), currentRule.cqc);
 					break;
@@ -210,7 +215,7 @@ public class TMappingProcessor {
 		int freshVarCount = 0;
 		List<Function> newBody = new LinkedList<Function>();
 		for (Function currentAtom : currentMapping.getBody()) {
-			if (!(currentAtom.getPredicate() instanceof BuiltinPredicate)) {
+			if (!(currentAtom.getFunctionSymbol() instanceof BuiltinPredicate)) {
 				Function clone = (Function)currentAtom.clone();
 				for (int i = 0; i < clone.getTerms().size(); i++) {
 					Term term = clone.getTerm(i);
@@ -232,6 +237,148 @@ public class TMappingProcessor {
 		return fac.getCQIE(head, newBody);
 	}
 
+	private static void getObjectTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, 
+			List<CQIE> originalMappings,
+			EquivalencesDAG<ObjectPropertyExpression> dag, 
+			CQContainmentCheckUnderLIDs cqc,
+			boolean full) {
+		
+		for (Equivalences<ObjectPropertyExpression> propertySet : dag) {
+
+			ObjectPropertyExpression current = propertySet.getRepresentative();
+			if (current.isInverse())
+				continue;
+			
+			/* Getting the current node mappings */
+			Predicate currentPredicate = current.getPredicate();
+			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
+
+			for (Equivalences<ObjectPropertyExpression> descendants : dag.getSub(propertySet)) {
+				for(ObjectPropertyExpression childproperty : descendants) {
+
+					/*
+					 * adding the mappings of the children as own mappings, the new
+					 * mappings use the current predicate instead of the child's
+					 * predicate and, if the child is inverse and the current is
+					 * positive, it will also invert the terms in the head
+					 */
+					boolean requiresInverse = (current.isInverse() != childproperty.isInverse());
+
+					for (CQIE childmapping : originalMappings) {
+
+						if (!childmapping.getHead().getFunctionSymbol().equals(childproperty.getPredicate()))
+							continue;
+						
+						List<Term> terms = childmapping.getHead().getTerms();
+
+						Function newMappingHead;
+						if (!requiresInverse) {
+							if (!full)
+								continue;
+							newMappingHead = fac.getFunction(currentPredicate, terms);
+						} 
+						else {
+							newMappingHead = fac.getFunction(currentPredicate, terms.get(1), terms.get(0));
+						}
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody(), cqc);				
+						currentNodeMappings.mergeMappingsWithCQC(newmapping);
+					}
+				}
+			}
+
+			/* Setting up mappings for the equivalent classes */
+			for (ObjectPropertyExpression equivProperty : propertySet) {
+			
+				 
+				Predicate p = equivProperty.getPredicate();
+
+				// skip the property and its inverse (if it is symmetric)
+				if (p.equals(current.getPredicate()))
+					continue;
+				
+				TMappingIndexEntry equivalentPropertyMappings = getMappings(mappingIndex, p);
+					
+				for (TMappingRule currentNodeMapping : currentNodeMappings) {
+					List<Term> terms = currentNodeMapping.getHeadTerms();
+					
+					Function newhead;
+					if (equivProperty.isInverse() == current.isInverse()) 
+						newhead = fac.getFunction(p, terms);
+					else 
+						newhead = fac.getFunction(p, terms.get(1), terms.get(0));
+					
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, cqc);				
+					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
+				}
+			}
+		} // Properties loop ended
+		
+	}
+	private static void getDataTMappings(Map<Predicate, TMappingIndexEntry> mappingIndex, 
+			List<CQIE> originalMappings,
+			EquivalencesDAG<DataPropertyExpression> dag, 
+			CQContainmentCheckUnderLIDs cqc,
+			boolean full) {
+		
+		for (Equivalences<DataPropertyExpression> propertySet : dag) {
+
+			DataPropertyExpression current = propertySet.getRepresentative();
+			
+			/* Getting the current node mappings */
+			Predicate currentPredicate = current.getPredicate();
+			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
+
+			for (Equivalences<DataPropertyExpression> descendants : dag.getSub(propertySet)) {
+				for(DataPropertyExpression childproperty : descendants) {
+
+					/*
+					 * adding the mappings of the children as own mappings, the new
+					 * mappings use the current predicate instead of the child's
+					 * predicate and, if the child is inverse and the current is
+					 * positive, it will also invert the terms in the head
+					 */
+					for (CQIE childmapping : originalMappings) {
+
+						if (!childmapping.getHead().getFunctionSymbol().equals(childproperty.getPredicate()))
+							continue;
+						
+						List<Term> terms = childmapping.getHead().getTerms();
+
+						Function newMappingHead;
+						if (!full)
+							continue;
+						newMappingHead = fac.getFunction(currentPredicate, terms);
+						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody(), cqc);				
+						currentNodeMappings.mergeMappingsWithCQC(newmapping);
+					}
+				}
+			}
+
+			/* Setting up mappings for the equivalent classes */
+			for (DataPropertyExpression equivProperty : propertySet) {
+			
+				 
+				Predicate p = equivProperty.getPredicate();
+
+				// skip the property and its inverse (if it is symmetric)
+				if (p.equals(current.getPredicate()))
+					continue;
+				
+				TMappingIndexEntry equivalentPropertyMappings = getMappings(mappingIndex, p);
+					
+				for (TMappingRule currentNodeMapping : currentNodeMappings) {
+					List<Term> terms = currentNodeMapping.getHeadTerms();
+					
+					Function newhead = fac.getFunction(p, terms);
+					
+					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, cqc);				
+					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
+				}
+			}
+		} // Properties loop ended
+		
+	}
+	
 	/**
 	 * 
 	 * @param originalMappings
@@ -273,82 +420,15 @@ public class TMappingProcessor {
 		 * the TMappings specification.
 		 */
 
-		for (Equivalences<PropertyExpression> propertySet : reasoner.getProperties()) {
-
-			PropertyExpression current = propertySet.getRepresentative();
-			if (current.isInverse())
-				continue;
-			
-			/* Getting the current node mappings */
-			Predicate currentPredicate = current.getPredicate();
-			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);	
-
-			for (Equivalences<PropertyExpression> descendants : reasoner.getProperties().getSub(propertySet)) {
-				for(PropertyExpression childproperty : descendants) {
-
-					/*
-					 * adding the mappings of the children as own mappings, the new
-					 * mappings use the current predicate instead of the child's
-					 * predicate and, if the child is inverse and the current is
-					 * positive, it will also invert the terms in the head
-					 */
-					boolean requiresInverse = (current.isInverse() != childproperty.isInverse());
-
-					for (CQIE childmapping : originalMappings) {
-
-						if (!childmapping.getHead().getFunctionSymbol().equals(childproperty.getPredicate()))
-							continue;
-						
-						List<Term> terms = childmapping.getHead().getTerms();
-
-						Function newMappingHead;
-						if (!requiresInverse) {
-							if (!full)
-								continue;
-							newMappingHead = fac.getFunction(currentPredicate, terms);
-						} 
-						else {
-							newMappingHead = fac.getFunction(currentPredicate, terms.get(1), terms.get(0));
-						}
-						TMappingRule newmapping = new TMappingRule(newMappingHead, childmapping.getBody(), cqc);				
-						currentNodeMappings.mergeMappingsWithCQC(newmapping);
-					}
-				}
-			}
-
-			/* Setting up mappings for the equivalent classes */
-			for (PropertyExpression equivProperty : propertySet) {
-			
-				 
-				Predicate p = equivProperty.getPredicate();
-
-				// skip the property and its inverse (if it is symmetric)
-				if (p.equals(current.getPredicate()))
-					continue;
-				
-				TMappingIndexEntry equivalentPropertyMappings = getMappings(mappingIndex, p);
-					
-				for (TMappingRule currentNodeMapping : currentNodeMappings) {
-					List<Term> terms = currentNodeMapping.getHeadTerms();
-					
-					Function newhead;
-					if (equivProperty.isInverse() == current.isInverse()) 
-						newhead = fac.getFunction(p, terms);
-					else 
-						newhead = fac.getFunction(p, terms.get(1), terms.get(0));
-					
-					TMappingRule newrule = new TMappingRule(newhead, currentNodeMapping, cqc);				
-					equivalentPropertyMappings.mergeMappingsWithCQC(newrule);
-				}
-			}
-		} // Properties loop ended
+		getObjectTMappings(mappingIndex, originalMappings, reasoner.getObjectPropertyDAG(), cqc, full);
+		getDataTMappings(mappingIndex, originalMappings, reasoner.getDataPropertyDAG(), cqc, full);
 
 		/*
 		 * Property t-mappings are done, we now continue with class t-mappings.
 		 * Starting with the leafs.
 		 */
 
-		for (Equivalences<BasicClassDescription> classSet : reasoner.getClasses()) {
+		for (Equivalences<ClassExpression> classSet : reasoner.getClassDAG()) {
 
 			if (!(classSet.getRepresentative() instanceof OClass)) 
 				continue;
@@ -359,8 +439,8 @@ public class TMappingProcessor {
 			Predicate currentPredicate = current.getPredicate();
 			TMappingIndexEntry currentNodeMappings = getMappings(mappingIndex, currentPredicate);
 
-			for (Equivalences<BasicClassDescription> descendants : reasoner.getClasses().getSub(classSet)) {
-				for (BasicClassDescription childDescription : descendants) {
+			for (Equivalences<ClassExpression> descendants : reasoner.getClassDAG().getSub(classSet)) {
+				for (ClassExpression childDescription : descendants) {
 
 					/* adding the mappings of the children as own mappings, the new
 					 * mappings. There are three cases, when the child is a named
@@ -377,14 +457,19 @@ public class TMappingProcessor {
 						isClass = true;
 						isInverse = false;
 					} 
-					else if (childDescription instanceof SomeValuesFrom) {
-						PropertyExpression some = ((SomeValuesFrom) childDescription).getProperty();
+					else if (childDescription instanceof ObjectSomeValuesFrom) {
+						ObjectPropertyExpression some = ((ObjectSomeValuesFrom) childDescription).getProperty();
 						childPredicate = some.getPredicate();
 						isClass = false;
 						isInverse = some.isInverse();
 					} 
-					else 
-						throw new RuntimeException("Unknown type of node in DAG: " + childDescription);
+					else {
+						assert (childDescription instanceof DataSomeValuesFrom);
+						DataPropertyExpression some = ((DataSomeValuesFrom) childDescription).getProperty();
+						childPredicate = some.getPredicate();
+						isClass = false;
+						isInverse = false;  // can never be an inverse
+					} 
 					
 					for (CQIE childmapping : originalMappings) {
 						
@@ -411,7 +496,7 @@ public class TMappingProcessor {
 
 			
 			/* Setting up mappings for the equivalent classes */
-			for (BasicClassDescription equiv : classSet) {
+			for (ClassExpression equiv : classSet) {
 				if (!(equiv instanceof OClass) || equiv.equals(current))
 					continue;
 				

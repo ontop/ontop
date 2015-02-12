@@ -21,12 +21,17 @@ package org.semanticweb.ontop.owlapi3;
  */
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.ClassAssertion;
-import org.semanticweb.ontop.ontology.PropertyAssertion;
+import org.semanticweb.ontop.ontology.DataPropertyAssertion;
+import org.semanticweb.ontop.ontology.Description;
+import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
@@ -141,15 +146,15 @@ public class OWLAPI3ABoxIterator implements Iterator<Assertion> {
 	private Assertion translate(OWLAxiom axiom) {
 		
 		if (axiom instanceof OWLClassAssertionAxiom) {
-			ClassAssertion translatedAxiom = OWLAPI3Translator.translate((OWLClassAssertionAxiom)axiom);
+			ClassAssertion translatedAxiom = OWLAPI3TranslatorDLLiteA.translate((OWLClassAssertionAxiom)axiom);
 			return translatedAxiom;
 		} 
 		else if (axiom instanceof OWLObjectPropertyAssertionAxiom) {
-			PropertyAssertion translatedAxiom = OWLAPI3Translator.translate((OWLObjectPropertyAssertionAxiom)axiom);
+			ObjectPropertyAssertion translatedAxiom = OWLAPI3TranslatorDLLiteA.translate((OWLObjectPropertyAssertionAxiom)axiom);
 			return translatedAxiom;		
 		} 
 		else if (axiom instanceof OWLDataPropertyAssertionAxiom) {
-			PropertyAssertion translatedAxiom = OWLAPI3Translator.translate((OWLDataPropertyAssertionAxiom)axiom);
+			DataPropertyAssertion translatedAxiom = OWLAPI3TranslatorDLLiteA.translate((OWLDataPropertyAssertionAxiom)axiom);
 			return translatedAxiom;
 		}		
 		return null;

@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
 
 /**
  * Derives a substitution at the level of one definition rule from the child proposals.
@@ -11,7 +11,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
  */
 public interface RuleLevelProposal {
 
-    Unifier getTypingSubstitution();
+    Substitution getTypingSubstitution();
 
     /**
      * Rule just after type propagation.

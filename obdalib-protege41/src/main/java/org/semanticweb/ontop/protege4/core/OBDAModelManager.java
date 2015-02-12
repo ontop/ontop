@@ -82,7 +82,6 @@ import org.semanticweb.ontop.model.OBDAModelListener;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OBDAModelValidator;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.protege4.utils.DialogUtils;
 import org.semanticweb.ontop.querymanager.QueryController;

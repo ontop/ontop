@@ -63,8 +63,8 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 		this.dag = dag;
 		this.equivalencesMap = equivalencesMap;
 		
-		this.cacheSub = new HashMap<Equivalences<T>, Set<Equivalences<T>>>();
-		this.cacheSubRep = new HashMap<T, Set<T>>();
+		this.cacheSub = new HashMap<>();
+		this.cacheSubRep = new HashMap<>();
 	}
 	
 	/** 
@@ -97,11 +97,11 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 
 		Set<Equivalences<T>> result = cacheSub.get(v);
 		if (result == null) {
-			result = new LinkedHashSet<Equivalences<T>>();
+			result = new LinkedHashSet<>();
 
 			BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator = 
 						new BreadthFirstIterator<Equivalences<T>, DefaultEdge>(
-								new EdgeReversedGraph<Equivalences<T>, DefaultEdge>(dag), v);
+								new EdgeReversedGraph<>(dag), v);
 
 			while (iterator.hasNext()) {
 				Equivalences<T> child = iterator.next();
@@ -129,7 +129,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 
 			BreadthFirstIterator<Equivalences<T>, DefaultEdge>  iterator = 
 						new BreadthFirstIterator<Equivalences<T>, DefaultEdge>(
-								new EdgeReversedGraph<Equivalences<T>, DefaultEdge>(dag), eq);
+								new EdgeReversedGraph<>(dag), eq);
 
 			while (iterator.hasNext()) {
 				Equivalences<T> child = iterator.next();
@@ -207,7 +207,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	
 	public DefaultDirectedGraph<T,DefaultEdge> getGraph() {
 		if (graph == null) {
-			graph = new DefaultDirectedGraph<T,DefaultEdge>(DefaultEdge.class);
+			graph = new DefaultDirectedGraph<>(DefaultEdge.class);
 
 			for (Equivalences<T> node : dag.vertexSet()) {
 				for (T v : node) 
@@ -240,8 +240,8 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 		List<Equivalences<TT>> equivalenceSets = inspector.stronglyConnectedSets();
 
 		SimpleDirectedGraph<Equivalences<TT>,DefaultEdge> dag0 = 
-					new SimpleDirectedGraph<Equivalences<TT>,DefaultEdge>(DefaultEdge.class);
-		Map<TT, Equivalences<TT>> equivalencesMap = new HashMap<TT, Equivalences<TT>>();
+					new SimpleDirectedGraph<>(DefaultEdge.class);
+		Map<TT, Equivalences<TT>> equivalencesMap = new HashMap<>();
 
 		for (Equivalences<TT> equivalenceSet : equivalenceSets)  {
 			for (TT node : equivalenceSet) 
@@ -269,7 +269,7 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 		// removed redundant edges
 		
 		SimpleDirectedGraph <Equivalences<TT>,DefaultEdge> dag = 
-						new SimpleDirectedGraph <Equivalences<TT>,DefaultEdge> (DefaultEdge.class);
+						new SimpleDirectedGraph<>(DefaultEdge.class);
 
 		for (Equivalences<TT> v : dag0.vertexSet())
 			dag.addVertex(v);

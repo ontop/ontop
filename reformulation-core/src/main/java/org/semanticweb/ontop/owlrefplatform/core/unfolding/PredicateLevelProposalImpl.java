@@ -7,10 +7,10 @@ import fj.data.HashMap;
 import fj.data.List;
 import fj.data.Option;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 
-import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions.union;
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities.union;
 
 /**
  * From a high-level point of view, this proposal is done by looking at (i) the children proposals and (ii) the rules defining the parent predicate.
@@ -37,9 +37,9 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
         /**
          * Computes the RuleLevelProposals and the global substitution.
          */
-        P2<List<RuleLevelProposal>, Unifier> results = computeRuleProposalsAndSubstitution(parentRules, childProposalIndex);
+        P2<List<RuleLevelProposal>, Substitution> results = computeRuleProposalsAndSubstitution(parentRules, childProposalIndex);
         ruleProposals = results._1();
-        Unifier globalSubstitution = results._2();
+        Substitution globalSubstitution = results._2();
 
         /**
          * Derives the type proposal from these RuleLevelProposals and the global substitution.
@@ -83,10 +83,10 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
     /**
      * Entry point of the homonym recursive function.
      */
-    private static P2<List<RuleLevelProposal>, Unifier> computeRuleProposalsAndSubstitution(List<CQIE> parentRules,
+    private static P2<List<RuleLevelProposal>, Substitution> computeRuleProposalsAndSubstitution(List<CQIE> parentRules,
                                                                                             HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
             throws TypeLiftTools.MultiTypeException {
-        return computeRuleProposalsAndSubstitution(Option.<Unifier>none(), parentRules, List.<RuleLevelProposal>nil(),
+        return computeRuleProposalsAndSubstitution(Option.<Substitution>none(), parentRules, List.<RuleLevelProposal>nil(),
                 childProposalIndex);
     }
 
@@ -95,7 +95,7 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
      *
      * Tail-recursive function.
      */
-    private static P2<List<RuleLevelProposal>, Unifier> computeRuleProposalsAndSubstitution(Option<Unifier> optionalSubstitution,
+    private static P2<List<RuleLevelProposal>, Substitution> computeRuleProposalsAndSubstitution(Option<Substitution> optionalSubstitution,
                                                                                             List<CQIE> remainingRules,
                                                                                             List<RuleLevelProposal> ruleProposals,
                                                                                             HashMap<Predicate, PredicateLevelProposal> childProposalIndex)
@@ -122,7 +122,7 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
          * If the union is impossible (i.e. does not produce a valid substitution), throws a MultiTypedException.
          *
          */
-        Option<Unifier> proposedSubstitution;
+        Option<Substitution> proposedSubstitution;
         if (optionalSubstitution.isNone()) {
             proposedSubstitution = Option.some(newRuleLevelProposal.getTypingSubstitution());
         }
@@ -134,7 +134,7 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
              * Impossible to compute the union of two substitutions.
              * This happens when multiple types are proposed for this predicate.
              */
-            catch(Substitutions.SubstitutionException e) {
+            catch(SubstitutionUtilities.SubstitutionException e) {
                 throw new TypeLiftTools.MultiTypeException();
             }
         }
@@ -153,7 +153,7 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
     /**
      * Makes a type proposal out of the head of one definition rule.
      */
-    private static TypeProposal makeTypeProposal(List<RuleLevelProposal> ruleProposals, Unifier globalSubstitution) {
+    private static TypeProposal makeTypeProposal(List<RuleLevelProposal> ruleProposals, Substitution globalSubstitution) {
         return TypeLiftTools.makeTypeProposal(ruleProposals.head().getTypedRule(), globalSubstitution);
     }
 }

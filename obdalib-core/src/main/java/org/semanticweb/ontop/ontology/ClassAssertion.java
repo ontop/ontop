@@ -24,7 +24,9 @@ import org.semanticweb.ontop.model.ObjectConstant;
 import org.semanticweb.ontop.model.Predicate;
 
 /***
- * Represents ClassAssertion in the OWL 2 specification
+ * Represents ClassAssertion in the OWL 2 QL specification
+ * 
+ * ClassAssertion := 'ClassAssertion' '(' axiomAnnotations Class Individual ')'
  * 
  * 
  * A data assertion for a class, 

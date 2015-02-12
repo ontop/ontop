@@ -20,6 +20,16 @@ package org.semanticweb.ontop.owlrefplatform.core.reformulation;
  * #L%
  */
 
+import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.CQIE;
+import org.semanticweb.ontop.model.DatalogProgram;
+import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.impl.AnonymousVariable;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.*;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -28,16 +38,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.PriorityQueue;
 
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.Variable;
-import org.semanticweb.ontop.model.impl.AnonymousVariable;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ public class DatalogQueryServices {
 	
 	private static final Logger log = LoggerFactory.getLogger(DatalogQueryServices.class);
 
-	// to be taken from it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder
+	// to be taken from org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder
 	
 	private static Function getFreshAtom(Function a, String suffix) {
 		List<Term> termscopy = new ArrayList<Term>(a.getArity());
@@ -60,7 +60,7 @@ public class DatalogQueryServices {
 			else
 				termscopy.add(t.clone());
 		}
-		return fac.getFunction(a.getPredicate(), termscopy);
+		return fac.getFunction(a.getFunctionSymbol(), termscopy);
 		
 	}
 	
@@ -88,7 +88,7 @@ public class DatalogQueryServices {
 			while (bodyIterator.hasNext()) {
 				Function currentAtom = bodyIterator.next(); // body.get(i);	
 
-				List<CQIE> definitions = defs.getRules(currentAtom.getPredicate());
+				List<CQIE> definitions = defs.getRules(currentAtom.getFunctionSymbol());
 				if ((definitions != null) && (definitions.size() != 0)) {
 					if ((chosenDefinitions == null) || (chosenDefinitions.size() < definitions.size())) {
 						chosenDefinitions = definitions;
@@ -109,8 +109,8 @@ public class DatalogQueryServices {
 				
 				for (CQIE rule : chosenDefinitions) {				
 					//CQIE newquery = ResolutionEngine.resolve(rule, query, chosenAtomIdx);					
-					Unifier mgu = Unifier.getMGU(getFreshAtom(rule.getHead(), suffix), 
-																	query.getBody().get(chosenAtomIdx));
+					Substitution mgu = UnifierUtilities.getMGU(getFreshAtom(rule.getHead(), suffix),
+                            query.getBody().get(chosenAtomIdx));
 					if (mgu != null) {
 						CQIE newquery = query.clone();
 						List<Function> newbody = newquery.getBody();
@@ -119,7 +119,7 @@ public class DatalogQueryServices {
 							newbody.add(getFreshAtom(a, suffix));
 												
 						// newquery contains only cloned atoms, so it is safe to unify "in-place"
-						UnifierUtilities.applyUnifier(newquery, mgu, false);
+						SubstitutionUtilities.applySubstitution(newquery, mgu, false);
 						
 						// REDUCE
 						EQNormalizer.enforceEqualities(newquery);

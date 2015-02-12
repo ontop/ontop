@@ -21,10 +21,10 @@ package org.semanticweb.ontop.quest.dag;
  */
 
 
+import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import java.io.File;
 
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -37,7 +37,7 @@ public class S_InputOWL {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(file)));
 
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 		Ontology o = translator.translate(ontology);
 		return o;
 	}

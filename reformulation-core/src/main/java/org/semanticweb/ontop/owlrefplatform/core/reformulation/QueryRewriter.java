@@ -20,8 +20,11 @@ package org.semanticweb.ontop.owlrefplatform.core.reformulation;
  * #L%
  */
 
+import java.io.Serializable;
+
 import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.OBDAException;
+import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
+import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
 import javax.swing.Timer;
 import javax.swing.ToolTipManager;
@@ -351,6 +352,7 @@ public class QueryPainter {
 		CQIE current_query = parse(input);
 
 		if (current_query == null) {
+            JOptionPane.showMessageDialog(null, "An error occured while parsing the mappings. For more info, see the logs.");
 			throw new Exception("Unable to parse the query: " + input + ", " + parsingException);
 		}
 		input = doc.getText(0, doc.getLength());

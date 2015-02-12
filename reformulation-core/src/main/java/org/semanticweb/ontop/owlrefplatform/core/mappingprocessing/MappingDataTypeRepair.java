@@ -20,35 +20,24 @@ package org.semanticweb.ontop.owlrefplatform.core.mappingprocessing;
  * #L%
  */
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.semanticweb.ontop.model.BNodePredicate;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.URIConstant;
-import org.semanticweb.ontop.model.URITemplatePredicate;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
-import org.semanticweb.ontop.model.impl.*;
+import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.AnonymousVariable;
+import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.ontology.*;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.TBoxTraversal;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.TBoxTraverseListener;
+
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.DataDefinition;
 import org.semanticweb.ontop.sql.api.Attribute;
-import org.semanticweb.ontop.utils.TypeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 public class MappingDataTypeRepair {
 
@@ -155,18 +144,19 @@ public class MappingDataTypeRepair {
 			if (!(predicate.getArity() == 2)) { // we check both for data and object property
 				continue;
 			}
+
 			// If the predicate is a data property
 			Term term = atom.getTerm(1);
 
 			if (term instanceof Function) {
 				Function function = (Function) term;
+				Predicate functionSymbol = function.getFunctionSymbol();
 
-				if (function.getFunctionSymbol() instanceof URITemplatePredicate || function.getFunctionSymbol() instanceof BNodePredicate) {
+				if (functionSymbol instanceof URITemplatePredicate || functionSymbol instanceof BNodePredicate) {
 					// NO-OP for object properties
 					continue;
 				}
 
-				Predicate functionSymbol = function.getFunctionSymbol();
 				if (functionSymbol.isDataTypePredicate()) {
 
                     Function normal = qvv.getNormal(atom);
@@ -182,20 +172,19 @@ public class MappingDataTypeRepair {
 
                         }
                         
-                        if(isBooleanDB2(dataType.getPredicate())){
+                        if(isBooleanDB2(dataType.getPredicate())) {
 
                             Variable variable = (Variable)  normal.getTerm(1);
 
                             //No Boolean datatype in DB2 database, the value in the database is used
-                            Predicate replacement = getDataTypeFunctor(termOccurenceIndex, variable);
-                            Term newTerm = fac.getFunction(replacement, variable);
+                            Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
+                            Term newTerm = fac.getTypedTerm(variable, type); 
                             atom.setTerm(1, newTerm);
                         }
                     }
-
-				} else {
-					throw new OBDAException("Unknown data type predicate: "
-							+ functionSymbol.getName());
+				} 
+				else {
+					throw new OBDAException("Unknown data type predicate: " + functionSymbol.getName());
 				}
 
 			} else if (term instanceof Variable) {
@@ -213,14 +202,16 @@ public class MappingDataTypeRepair {
                 // If the term has no data-type predicate then by default the
                 // predicate is created following the database metadata of
                 // column type.
-                Predicate replacement;
-                if (dataType == null || isBooleanDB2(dataType.getPredicate()) ){
-                	replacement = getDataTypeFunctor(termOccurenceIndex, variable);
+                Term newTerm;
+                if (dataType == null || isBooleanDB2(dataType.getPredicate())) {
+                	Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
+                	newTerm = fac.getTypedTerm(variable, type);
                 }
-                else 
-                	replacement = dataType.getPredicate();
+                else {
+                	Predicate replacement = dataType.getPredicate();
+                	newTerm = fac.getFunction(replacement, variable);
+                }
 
-				Term newTerm = fac.getFunction(replacement, variable);
 				atom.setTerm(1, newTerm);
 			}
 		}
@@ -239,7 +230,7 @@ public class MappingDataTypeRepair {
                 || databaseDriver != null && databaseDriver.contains("IBM")){
 
 
-            if(dataType.equals(OBDAVocabulary.XSD_BOOLEAN)){
+            if (fac.getDatatypeFactory().isBoolean(dataType)) {
 
                 log.warn("Boolean dataType do not exist in DB2 database, the value in the database metadata is used instead.");
                 return true;
@@ -251,8 +242,16 @@ public class MappingDataTypeRepair {
 //	private boolean isDataProperty(Predicate predicate) {
 //		return predicate.getArity() == 2 && predicate.getType(1) == Predicate.COL_TYPE.LITERAL;
 //	}
+    
+    /**
+     * returns COL_TYPE for one of the datatype ids
+     * @param termOccurenceIndex
+     * @param variable
+     * @return
+     * @throws OBDAException
+     */
 
-	private Predicate getDataTypeFunctor(Map<String, List<Object[]>> termOccurenceIndex, Variable variable) throws OBDAException {
+	private Predicate.COL_TYPE getDataType(Map<String, List<Object[]>> termOccurenceIndex, Variable variable) throws OBDAException {
 		List<Object[]> list = termOccurenceIndex.get(variable.getName());
 		if (list == null) {
 			throw new OBDAException("Unknown term in head");
@@ -267,7 +266,8 @@ public class MappingDataTypeRepair {
 
 		Attribute attribute = tableMetadata.getAttribute(pos);
 
-		return TypeMapper.getInstance().getPredicate(attribute.getType());
+		Predicate.COL_TYPE type =  fac.getJdbcTypeMapper().getPredicate(attribute.getType());
+		return type;
 	}
 
 	private Map<String, List<Object[]>> createIndex(CQIE rule) {
@@ -306,4 +306,7 @@ public class MappingDataTypeRepair {
 		}
 		return termOccurenceIndex;
 	}
+
+
 }
+

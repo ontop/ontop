@@ -23,7 +23,7 @@ package org.semanticweb.ontop.reformulation.semindex.tests;
 
 import java.util.Set;
 
-import org.semanticweb.ontop.ontology.Axiom;
+
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -36,13 +36,17 @@ public class SemanticReductionTest extends TestCase {
 	
 	SemanticIndexHelper	helper	= new SemanticIndexHelper();
 
+	private static int getSize(Ontology ont) {
+		return ont.getSubClassAxioms().size() + ont.getSubObjectPropertyAxioms().size() + ont.getSubDataPropertyAxioms().size();
+	}
+	
 	public void test_2_0_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_0_0");
 		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
 		Ontology reduced = reduction.getReducedOntology();
-		assertEquals(0, reduced.getSubClassAxioms().size() + reduced.getSubPropertyAxioms().size());
+		assertEquals(0, getSize(reduced));
 	}
 
 	public void test_2_0_1() throws Exception {
@@ -51,7 +55,7 @@ public class SemanticReductionTest extends TestCase {
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
 		Ontology reduced = reduction.getReducedOntology();
-		assertEquals(0, reduced.getSubClassAxioms().size() + reduced.getSubPropertyAxioms().size());
+		assertEquals(0, getSize(reduced));
 	}
 
 	public void test_2_1_0() throws Exception {
@@ -60,7 +64,7 @@ public class SemanticReductionTest extends TestCase {
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
 		Ontology reduced = reduction.getReducedOntology();
-		assertEquals(1, reduced.getSubClassAxioms().size() + reduced.getSubPropertyAxioms().size());
+		assertEquals(1, getSize(reduced));
 	}
 
 	public void test_1_2_0() throws Exception {
@@ -69,7 +73,7 @@ public class SemanticReductionTest extends TestCase {
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
 		Ontology reduced = reduction.getReducedOntology();
-		assertEquals(0, reduced.getSubClassAxioms().size() + reduced.getSubPropertyAxioms().size());
+		assertEquals(0, getSize(reduced));
 	}
 
 	public void test_equivalence() throws Exception {
@@ -86,6 +90,6 @@ public class SemanticReductionTest extends TestCase {
 
 		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner, null);
 		Ontology reduced = reduction.getReducedOntology();
-		assertEquals(45, reduced.getSubClassAxioms().size() + reduced.getSubPropertyAxioms().size());
+		assertEquals(45, getSize(reduced));
 	}
 }

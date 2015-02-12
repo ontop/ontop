@@ -1,6 +1,5 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
-
 import org.semanticweb.ontop.model.CQIE;
 
 public interface CQContainmentCheck {

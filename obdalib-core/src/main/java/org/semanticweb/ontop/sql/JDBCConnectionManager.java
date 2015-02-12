@@ -41,8 +41,10 @@ import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.sql.api.Attribute;
 import org.semanticweb.ontop.sql.api.RelationJSQL;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class JDBCConnectionManager {
 
@@ -388,7 +390,7 @@ public class JDBCConnectionManager {
 					/**
 					 * Print JDBC metadata returned by the driver, enabled in debug mode
 					 */
-					displayColumnNames(md, conn, rsColumns, tableSchema, tblName);
+//					displayColumnNames(md, conn, rsColumns, tableSchema, tblName);
 					
 					
 					final String columnName = rsColumns.getString("COLUMN_NAME");

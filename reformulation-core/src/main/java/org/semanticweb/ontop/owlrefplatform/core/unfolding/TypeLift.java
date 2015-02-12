@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.removeHeadTypes;
 import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.updateMultiTypedFunctionSymbolIndex;
 
 /**
@@ -481,30 +480,4 @@ public class TypeLift {
 
         return HashMap.from(predicateAtomList);
     }
-
-    //    /**
-//     * Makes a type proposal by looking at the rules defining the current predicate.
-//     *
-//     * Its current implementation is very basic and could be improved.
-//     * It returns the head of the first rule.
-//     *
-//     * TODO: Several improvements could be done:
-//     *  1. Unifying all the rule heads (case where is there is multiple rules).
-//     *  2. Detecting if no type is present in the proposal and returning a None in
-//     *     this case.
-//     *
-//     */
-//    @Deprecated
-//    private static Option<TypeProposal> proposeTypeFromLocalRules(TreeZipper<TypeLiftNode> currentZipper) {
-//        List<CQIE> currentRules = currentZipper.getLabel()._2();
-//        if (currentRules.isNotEmpty()) {
-//
-//            // Head of the first rule (cloned because mutable).
-//            Function proposedHead = (Function) currentRules.head().getHead().clone();
-//
-//            TypeProposal typeProposal = constructTypeProposal(proposedHead);
-//            return Option.some(typeProposal);
-//        }
-//        return Option.none();
-//    }
 }

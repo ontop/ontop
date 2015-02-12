@@ -32,7 +32,7 @@ public interface PrefixManager {
 	/**
 	 * Registers a prefix. Leave blank for BASE prefix.
 	 * 	 
-	 * @param name
+	 * @param prefix
 	 * 			The prefix name (without the colon).
 	 * @param uri
 	 * 			The URI definition for the given prefix.

@@ -21,10 +21,11 @@ package org.semanticweb.ontop.quest.dag;
  */
 
 
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
+import org.semanticweb.ontop.ontology.ClassExpression;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.DataRangeExpression;
 import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.PropertyExpression;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -42,12 +43,16 @@ import java.util.Set;
 @Deprecated
 public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 
-	private EquivalencesDAG<PropertyExpression> propertyDAG;
-	private EquivalencesDAG<BasicClassDescription> classDAG;
+	private final EquivalencesDAG<ObjectPropertyExpression> objectPropertyDAG;
+	private final EquivalencesDAG<DataPropertyExpression> dataPropertyDAG;
+	private final EquivalencesDAG<ClassExpression> classDAG;
+	private final EquivalencesDAG<DataRangeExpression> dataRangeDAG;
 
 	public TestTBoxReasonerImpl_Named(TBoxReasoner reasoner) {
-		this.propertyDAG = new EquivalencesDAGImpl<PropertyExpression>(reasoner.getProperties());
-		this.classDAG = new EquivalencesDAGImpl<BasicClassDescription>(reasoner.getClasses());
+		this.objectPropertyDAG = new EquivalencesDAGImpl<ObjectPropertyExpression>(reasoner.getObjectPropertyDAG());
+		this.dataPropertyDAG = new EquivalencesDAGImpl<DataPropertyExpression>(reasoner.getDataPropertyDAG());
+		this.classDAG = new EquivalencesDAGImpl<ClassExpression>(reasoner.getClassDAG());
+		this.dataRangeDAG = new EquivalencesDAGImpl<DataRangeExpression>(reasoner.getDataRanges());
 	}
 
 
@@ -58,8 +63,18 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	 */
 
 	@Override
-	public EquivalencesDAG<PropertyExpression> getProperties() {
-		return propertyDAG;
+	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG() {
+		return objectPropertyDAG;
+	}
+	/**
+	 * Return the DAG of properties
+	 * 
+	 * @return DAG 
+	 */
+
+	@Override
+	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG() {
+		return dataPropertyDAG;
 	}
 	
 	/**
@@ -69,8 +84,13 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	 */
 
 	@Override
-	public EquivalencesDAG<BasicClassDescription> getClasses() {
+	public EquivalencesDAG<ClassExpression> getClassDAG() {
 		return classDAG;
+	}
+	
+	@Override
+	public EquivalencesDAG<DataRangeExpression> getDataRanges() {
+		return dataRangeDAG;
 	}
 
 	/**
@@ -185,14 +205,20 @@ public class TestTBoxReasonerImpl_Named implements TBoxReasoner {
 	}
 
 	@Override
-	public OClass getClassRepresentative(Predicate p) {
+	public OClass getClassRepresentative(OClass p) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
 	@Override
-	public PropertyExpression getPropertyRepresentative(Predicate p) {
+	public ObjectPropertyExpression getObjectPropertyRepresentative(ObjectPropertyExpression p) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public DataPropertyExpression getDataPropertyRepresentative(DataPropertyExpression p) {
 		// TODO Auto-generated method stub
 		return null;
 	}

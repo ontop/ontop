@@ -58,22 +58,12 @@ public interface Function extends Term {
 	 */
 	public Predicate getFunctionSymbol();
 
-	/***
-	 * Same as before
-	 * 
-	 * @return
-	 */
-	@Deprecated
-	public Predicate getPredicate();
-
 	/**
 	 * Get the number of terms (or arguments) in the function symbol.
 	 * 
 	 * @return the arity.
 	 */
 	public int getArity();
-
-	public int getFirstOcurrance(Term t, int i);
 
 	public Term getTerm(int index);
 
