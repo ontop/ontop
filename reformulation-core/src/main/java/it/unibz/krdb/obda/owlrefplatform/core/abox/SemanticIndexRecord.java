@@ -20,10 +20,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  * #L%
  */
 
-import java.util.HashMap;
-import java.util.Map;
-
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
 /***
  * A record to keep track of which tables in the semantic index tables have rows
@@ -62,55 +58,6 @@ public class SemanticIndexRecord {
 		this.hashCode = idx + (table + 1) * 10000000 + (type1 + 1) * 100000000 + (type2 + 1) * 1000000000;
 	}
 	
-	/**
-	 * checks that type is one of the two valid values
-	 * 
-	 * @param type
-	 * @throws RuntimeException if type is not valid
-	 */
-	
-	public static void checkTypeValue(int type) { 
-		if (type != OBJ_TYPE_URI && type != OBJ_TYPE_BNode)
-			throw new RuntimeException("Unknown OBJ_TYPE:" + type);
-	}
-	
-	/**
-	 * checks that table is one of the valid values
-	 * 
-	 * @param table
-	 * @throws RuntimeException if table is not valid
-	 */
-
-	public static void checkSITableValue(int table) {
-		SITable sitable = null;		
-		for (SITable t : SITable.values()) 
-			if (t.ordinal() == table) 
-				sitable = t;
-		
-		if (sitable == null)
-			throw new RuntimeException("Unknown SITable: " + table);
-	}
-	
-	/**
-	 * Constructor for Object and Datatype Property SI Records
-	 * @param t1
-	 * @param t2
-	 * @param idx
-	 */
-	
-	public SemanticIndexRecord(COL_TYPE t1, COL_TYPE t2, int idx) {
-		this(COLTYPEtoSITable.get(t2).ordinal(), COLTYPEtoInt(t1), COLTYPEtoInt(t2), idx);  
-	}
-	
-	/**
-	 * Constructor for Class SI Records
-	 * @param type1
-	 * @param idx
-	 */
-	
-	public SemanticIndexRecord(COL_TYPE t1,  int idx) {
-		this(SITable.CLASS.ordinal(), COLTYPEtoInt(t1), OBJ_TYPE_BNode, idx);  
-	}
 	
 	public int getIndex() {
 		return idx;
@@ -154,62 +101,5 @@ public class SemanticIndexRecord {
 		b.append(" T2: ");
 		b.append(type2);
 		return b.toString();
-	}
-	
-	/*
-	 * Implementation details below (in particular, the numbers to be stored in DB)
-	 */
-	
-	
-	// the order provides datatype codes that are stored in DB (starts with 0) 
-	private static enum SITable {
-		CLASS, 
-		OPROP, 
-		DPROPLite, 
-		DPROPStri, 
-		DPROPInte, 
-		DPROPLong, 
-		DPROPDeci, 
-		DPROPDoub, 
-		DPROPDate, 
-		DPROPInt, 
-		DPROPUnsignedInt, 
-		DPROPNegInte, 
-		DPROPNonNegInte, 
-		DPROPPosInte, 
-		DPROPNonPosInte, 
-		DPROPFloat, 
-		DPROPBool
-	}
-
-	private static final int OBJ_TYPE_URI = 0;
-	private static final int OBJ_TYPE_BNode = 1;
-
-	private static int COLTYPEtoInt(COL_TYPE t) {
-		return (t == COL_TYPE.BNODE)  ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
-	}
-	
-	private static Map<COL_TYPE, SITable> COLTYPEtoSITable = new HashMap<>();
-	
-	static {
-		COLTYPEtoSITable.put(COL_TYPE.OBJECT, SITable.OPROP);
-		COLTYPEtoSITable.put(COL_TYPE.BNODE, SITable.OPROP);
-		COLTYPEtoSITable.put(COL_TYPE.LITERAL, SITable.DPROPLite);
-		COLTYPEtoSITable.put(COL_TYPE.LITERAL_LANG, SITable.DPROPLite);
-		COLTYPEtoSITable.put(COL_TYPE.STRING, SITable.DPROPStri);
-		COLTYPEtoSITable.put(COL_TYPE.INTEGER, SITable.DPROPInte);
-		COLTYPEtoSITable.put(COL_TYPE.INT, SITable.DPROPInt);
-		COLTYPEtoSITable.put(COL_TYPE.UNSIGNED_INT, SITable.DPROPUnsignedInt);
-		COLTYPEtoSITable.put(COL_TYPE.NEGATIVE_INTEGER, SITable.DPROPNegInte);
-		COLTYPEtoSITable.put(COL_TYPE.NON_NEGATIVE_INTEGER, SITable.DPROPNonNegInte);
-		COLTYPEtoSITable.put(COL_TYPE.POSITIVE_INTEGER, SITable.DPROPPosInte);
-		COLTYPEtoSITable.put(COL_TYPE.NON_POSITIVE_INTEGER, SITable.DPROPNonPosInte);
-		COLTYPEtoSITable.put(COL_TYPE.FLOAT, SITable.DPROPFloat);
-		COLTYPEtoSITable.put(COL_TYPE.LONG, SITable.DPROPLong);
-		COLTYPEtoSITable.put(COL_TYPE.DECIMAL, SITable.DPROPDeci);
-		COLTYPEtoSITable.put(COL_TYPE.DOUBLE, SITable.DPROPDoub);
-		COLTYPEtoSITable.put(COL_TYPE.DATETIME, SITable.DPROPDate);
-		COLTYPEtoSITable.put(COL_TYPE.DATETIME_STAMP, SITable.DPROPDate);
-		COLTYPEtoSITable.put(COL_TYPE.BOOLEAN, SITable.DPROPBool);
 	}
 }
