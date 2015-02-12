@@ -64,13 +64,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,13 +88,13 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
 
 	
-	private static final class TableDescription {
+	static final class TableDescription {
 		final String tableName;
 		final String createCommand;
 		final String insertCommand;
 		
-		final List<String> createIndexCommands = new ArrayList<String>(3);
-		final List<String> dropIndexCommands = new ArrayList<String>(3);
+		final List<String> createIndexCommands = new ArrayList<>(3);
+		final List<String> dropIndexCommands = new ArrayList<>(3);
 		
 		final String selectCommand;
 		final String dropCommand;
@@ -131,7 +129,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			"ID INTEGER, URI VARCHAR(400)",
 			"(ID, URI) VALUES(?, ?)", "*");
 	
-	private final static TableDescription emptinessIndexTable = new TableDescription("NONEMPTYNESSINDEX",
+	final static TableDescription emptinessIndexTable = new TableDescription("NONEMPTYNESSINDEX",
 			"TABLEID INTEGER, IDX INTEGER, TYPE1 INTEGER, TYPE2 INTEGER",
 			"(TABLEID, IDX, TYPE1, TYPE2) VALUES (?, ?, ?, ?)", "*");
 	
@@ -142,16 +140,16 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 *  Data tables
 	 */
 	
-	private final static TableDescription classTable = new TableDescription("QUEST_CLASS_ASSERTION", 
+	final static TableDescription classTable = new TableDescription("QUEST_CLASS_ASSERTION", 
 			"\"URI\" INTEGER NOT NULL, \"IDX\"  SMALLINT NOT NULL, ISBNODE BOOLEAN NOT NULL DEFAULT FALSE",
 			"(URI, IDX, ISBNODE) VALUES (?, ?, ?)", "\"URI\" as X");
 	
-	private final static TableDescription roleTable = new TableDescription("QUEST_OBJECT_PROPERTY_ASSERTION", 
+	final static TableDescription roleTable = new TableDescription("QUEST_OBJECT_PROPERTY_ASSERTION", 
 			"\"URI1\" INTEGER NOT NULL, \"URI2\" INTEGER NOT NULL, \"IDX\"  SMALLINT NOT NULL, " + 
 			"ISBNODE BOOLEAN NOT NULL DEFAULT FALSE, ISBNODE2 BOOLEAN NOT NULL DEFAULT FALSE",
 			"(URI1, URI2, IDX, ISBNODE, ISBNODE2) VALUES (?, ?, ?, ?, ?)", "\"URI1\" as X, \"URI2\" as Y");
 
-	private final static Map<COL_TYPE ,TableDescription> attributeTable = new HashMap<>();
+    final static Map<COL_TYPE ,TableDescription> attributeTable = new HashMap<>();
 	
 	private static final class AttributeTableDescritpion {
 		final COL_TYPE type;
@@ -886,21 +884,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		res.close();
 
-		/**
-		 * Restoring the emptiness index
-		 */
-		res = st.executeQuery("SELECT * FROM " + emptinessIndexTable.tableName);
-		while (res.next()) {
-			int sitable = res.getInt(1);
-			int type1 = res.getInt(3);
-			int type2 = res.getInt(4);
-			int idx = res.getInt(2);
-			
-			views.setNonEmpty(sitable, type1, type2, idx);
-		}
-
-		res.close();
-
+		views.load(conn);
 	}
 
 	private static final COL_TYPE objectTypes[] = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.BNODE };
@@ -962,7 +946,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					if (views.isMappingEmpty(intervals, obType1, obType2))
 						continue;
 					
-					String sourceQuery = constructSqlSource(obType1, obType2) + intervalsSqlFilter;
+					String sourceQuery = views.constructSqlSource(obType1, obType2) + intervalsSqlFilter;
 					CQIE targetQuery = constructTargetQuery(ope.getPredicate(), obType1, obType2);
 					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 					result.add(basicmapping);		
@@ -1003,7 +987,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					if (views.isMappingEmpty(intervals, obType1, obType2))
 						continue;
 					
-					String sourceQuery = constructSqlSource(obType1, obType2) + intervalsSqlFilter;
+					String sourceQuery = views.constructSqlSource(obType1, obType2) + intervalsSqlFilter;
 					CQIE targetQuery = constructTargetQuery(dpe.getPredicate(), obType1, obType2);
 					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 					result.add(basicmapping);			
@@ -1036,7 +1020,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				if (views.isMappingEmpty(intervals, obType1)) 
 					continue;
 				
-				String sourceQuery = constructSqlSource(obType1) + intervalsSqlFilter;
+				String sourceQuery = views.constructSqlSource(obType1) + intervalsSqlFilter;
 				CQIE targetQuery = constructTargetQuery(classNode.getPredicate(), obType1);
 				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 				result.add(basicmapping);
@@ -1139,72 +1123,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	}
 
 	
-	private String constructSqlSource(COL_TYPE type) {
-		
-		StringBuilder sql = new StringBuilder();
-		
-		sql.append(classTable.selectCommand);
-
-		/*
-		 * If the mapping is for something of type Literal we need to add IS
-		 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
-		 * redundant since we have another stage in Quest where we add IS NOT
-		 * NULL for every variable in the head of a mapping.
-		 */
-
-		if (type == COL_TYPE.BNODE) 
-			sql.append("ISBNODE = TRUE AND ");
-		else {
-			assert (type == COL_TYPE.OBJECT);
-			sql.append("ISBNODE = FALSE AND ");
-		}
-		
-		return sql.toString();		
-	}	
-	
-	private String constructSqlSource(COL_TYPE type1, COL_TYPE type2) {
-		
-		StringBuilder sql = new StringBuilder();
-		
-		switch (type2) {
-			case OBJECT:
-			case BNODE:
-				sql.append(roleTable.selectCommand);
-				break;
-			case LITERAL:
-			case LITERAL_LANG:
-				sql.append(attributeTable.get(COL_TYPE.LITERAL).selectCommand);
-				break;
-			default:
-				sql.append(attributeTable.get(type2).selectCommand);
-		}
-
-		/*
-		 * If the mapping is for something of type Literal we need to add IS
-		 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
-		 * redundant since we have another stage in Quest where we add IS NOT
-		 * NULL for every variable in the head of a mapping.
-		 */
-
-		if (type1 == COL_TYPE.BNODE) 
-			sql.append("ISBNODE = TRUE AND ");
-		else {
-			assert (type1 == COL_TYPE.OBJECT);
-			sql.append("ISBNODE = FALSE AND ");
-		}
-
-		if (type2 == COL_TYPE.BNODE) 
-			sql.append("ISBNODE2 = TRUE AND ");
-		else if (type2 == COL_TYPE.OBJECT) 
-			sql.append("ISBNODE2 = FALSE AND ");
-		else if (type2 == COL_TYPE.LITERAL) 
-			sql.append("LANG IS NULL AND ");
-		else if (type2 == COL_TYPE.LITERAL_LANG)
-			sql.append("LANG IS NOT NULL AND ");
-		
-		return sql.toString();		
-	}	
-
 	
 	/**
 	 * Generating the interval conditions for semantic index
@@ -1327,18 +1245,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				stm.executeBatch();
 			}
 
-			// Inserting emptiness index metadata 
-			try (PreparedStatement stm = conn.prepareStatement(emptinessIndexTable.insertCommand)) {
-				for (SemanticIndexRecord record : views.getRecords()) {
-					stm.setInt(1, record.getTable());
-					stm.setInt(2, record.getIndex());
-					stm.setInt(3, record.getType1());
-					stm.setInt(4, record.getType2());
-					stm.addBatch();
-				}
-				stm.executeBatch();
-			}
-
+			views.store(conn);
+			
 			conn.commit();
 		} 
 		catch (SQLException e) {
