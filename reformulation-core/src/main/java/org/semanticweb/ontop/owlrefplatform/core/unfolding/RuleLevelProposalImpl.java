@@ -5,7 +5,6 @@ import fj.F;
 import fj.P2;
 import fj.data.*;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.impl.CQIEImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.NeutralSubstitution;
@@ -212,8 +211,8 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
          */
         if (optionalChildProposal.isSome()) {
             try {
-                Substitution proposedSubstitution = computeTypePropagatingSubstitution(bodyAtom,
-                        optionalChildProposal.some().getTypeProposal());
+                Function sourceAtom = optionalChildProposal.some().getTypeProposal().getExtendedTypedAtom();
+                Substitution proposedSubstitution = computeTypePropagatingSubstitution(sourceAtom, bodyAtom);
 
                 if (optionalSubstitution.isNone()) {
                     newOptionalSubstitution = Option.some(proposedSubstitution);

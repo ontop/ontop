@@ -1,23 +1,24 @@
 package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import fj.Effect;
 import fj.F;
+import fj.P;
 import fj.P2;
+import fj.data.HashMap;
 import fj.data.List;
 import fj.data.Option;
 import fj.data.Stream;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypePropagatingSubstitution;
 
 import java.util.ArrayList;
-
-import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypePropagatingSubstitution.forceVariableReuse;
+import java.util.Set;
 
 /**
  * TODO: explain
@@ -65,50 +66,6 @@ public class TypeLiftTools {
         return false;
     }
 
-
-    /**
-     * Low-level function.
-     *
-     * The goal is to build a substitution function
-     * that would be able to transfer the proposed types (given by the proposedAtom)
-     * to the local atom.
-     *
-     *
-     * One sensitive constraint here is to propagate types without changing the
-     * variable names.
-     *
-     * If such a substitution function does not exist, throws a SubstitutionException.
-     *
-     * TODO: keep it here or move it?
-     *
-     */
-    protected static TypePropagatingSubstitution computeTypePropagatingSubstitution(Function localAtom, TypeProposal proposal)
-            throws SubstitutionUtilities.SubstitutionException {
-        /**
-         * Type propagating substitution function between the proposedAtom and the localAtom.
-         *
-         * TODO: make the latter function throw the exception.
-         */
-        TypePropagatingSubstitution typePropagatingSubstitutionFunction = TypePropagatingSubstitution.createTypePropagatingSubstitution(
-                proposal, localAtom, ImmutableMultimap.<Predicate, Integer>of());
-
-        /**
-         * Impossible to unify the multiple types proposed for this predicate.
-         */
-        if (typePropagatingSubstitutionFunction == null) {
-            throw new SubstitutionUtilities.SubstitutionException();
-        }
-
-        /**
-         * The current substitution function may change variable names because they were not the same in the two atoms.
-         *
-         * Here, we are just interested in the types but we do not want to change the variable names.
-         * Thus, we force variable reuse.
-         */
-        TypePropagatingSubstitution renamedSubstitutions = forceVariableReuse(typePropagatingSubstitutionFunction);
-
-        return renamedSubstitutions;
-    }
 
     /**
      * Looks for predicates are not yet declared as multi-typed (while they should).
@@ -234,13 +191,13 @@ public class TypeLiftTools {
     }
 
     /**
-     * Propagates type from a typeProposal to one head atom.
+     * Propagates type from a typeProposal to one target atom.
      */
-    public static Function applyTypeProposal(Function headAtom, TypeProposal typeProposal) throws SubstitutionUtilities.SubstitutionException {
-        Substitution substitution = computeTypePropagatingSubstitution(headAtom, typeProposal);
+    public static Function applyTypeProposal(Function targetAtom, TypeProposal typeProposal) throws SubstitutionUtilities.SubstitutionException {
+        Substitution substitution = computeTypePropagatingSubstitution(typeProposal.getExtendedTypedAtom(), targetAtom);
 
         // Mutable object
-        Function newHead = (Function) headAtom.clone();
+        Function newHead = (Function) targetAtom.clone();
         // Limited side-effect
         SubstitutionUtilities.applySubstitution(newHead, substitution);
 
@@ -311,23 +268,6 @@ public class TypeLiftTools {
             @Override
             public List<Function> f(Function subAtom) {
                 return extractAtoms(subAtom);
-            }
-        });
-
-    }
-
-    public static List<CQIE> removeHeadTypes(List<CQIE> initialRules) {
-        return initialRules.map(new F<CQIE, CQIE>() {
-            @Override
-            public CQIE f(CQIE initialRule) {
-                /**
-                 * Builds a new rule.
-                 * TODO: modernize the CQIE API (make it immutable).
-                 */
-                CQIE newRule = initialRule.clone();
-                Function newHead = removeTypeFromAtom(initialRule.getHead());
-                newRule.updateHead(newHead);
-                return newRule;
             }
         });
 
@@ -428,6 +368,82 @@ public class TypeLiftTools {
         final TypeProposal newProposal = constructTypeProposal(unextendedTypeAtom);
 
         return newProposal;
+    }
+
+    /**
+     * Assumption: the target atom is only composed of variables!
+     *
+     * TODO: split it!
+     * TODO: comment it!
+     */
+    public static Substitution computeTypePropagatingSubstitution(final Function sourceAtom, final Function targetAtom) {
+        java.util.List<Term> sourceTerms = sourceAtom.getTerms();
+        java.util.List<Term> targetTerms = targetAtom.getTerms();
+
+        if (sourceTerms.size() != targetTerms.size()) {
+            return null;
+        }
+
+        List<VariableImpl> targetVariables = List.iterableList(targetTerms).map(new F<Term, VariableImpl>() {
+            @Override
+            public VariableImpl f(Term term) {
+                if (!(term instanceof VariableImpl))
+                    throw new IllegalArgumentException("The target atom must be only composed of variables: " + targetAtom);
+                return (VariableImpl) term;
+            }
+        });
+
+
+        /**
+         * { Source variable --> target variable }
+         */
+        List<P2<Term, VariableImpl>> sourceTargetPairs = List.iterableList(sourceTerms).zip(targetVariables);
+        HashMap<VariableImpl, Term> variableMappings = HashMap.from(Option.somes(sourceTargetPairs.map(
+                new F<P2<Term, VariableImpl>, Option<P2<VariableImpl, Term>>>() {
+            @Override
+            public Option<P2<VariableImpl, Term>> f(P2<Term, VariableImpl> pair) {
+                Term sourceTerm = pair._1();
+                VariableImpl targetVariable = pair._2();
+
+                Set<Variable> sourceVars = sourceTerm.getReferencedVariables();
+                if (sourceVars.size() != 1)
+                    return Option.none();
+
+                return Option.some(P.p((VariableImpl) sourceVars.iterator().next(), (Term)targetVariable));
+            }
+        })));
+
+
+        Substitution targetToSourceVarSubstitution = new SubstitutionImpl(variableMappings.toMap());
+
+        Function renamedSourceAtom = (Function) sourceAtom.clone();
+        //SIDE-EFFECT!
+        SubstitutionUtilities.applySubstitution(renamedSourceAtom, targetToSourceVarSubstitution);
+
+
+        /**
+         *  { Target variable --> typed function }
+         */
+        List<P2<VariableImpl, Term>> targetSourceFunctionPairs = targetVariables.zip(List.iterableList(renamedSourceAtom.getTerms()));
+        HashMap<VariableImpl, Term> variableToTypeMappings = HashMap.from(targetSourceFunctionPairs.filter(new F<P2<VariableImpl, Term>, Boolean>() {
+            @Override
+            public Boolean f(P2<VariableImpl, Term> pair) {
+                return pair._2() instanceof Function;
+            }
+        }));
+
+        /**
+         * TODO: clean type proposal!
+         */
+
+        return new SubstitutionImpl(variableToTypeMappings.toMap());
+    }
+
+    /**
+     * TODO: move some code here!
+     */
+    private Substitution computeBasicVariableSubstitution(final Function sourceAtom, final Function targetAtom) {
+        return null;
     }
 
 }
