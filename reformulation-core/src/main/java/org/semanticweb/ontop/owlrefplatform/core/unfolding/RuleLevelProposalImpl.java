@@ -15,9 +15,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilitie
 import java.util.ArrayList;
 
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitutions.union;
-import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.computeTypePropagatingSubstitution;
-import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.makeTypeProposal;
-import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.untypeTerm;
+import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.*;
 
 /**
  * Implementation making the following assumption:
@@ -154,11 +152,11 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
     @Override
     public CQIE getDetypedRule() {
         Function extendedTypedHead =  typeProposal.getExtendedTypedAtom();
-        Function deTypedHead = (Function) untypeTerm(extendedTypedHead);
+        Function detypedHead = removeTypeFromAtom(extendedTypedHead);
 
-        // For bad side-effect joke prevention
-        CQIE typedRule = this.typedRule.clone();
-        return OBDADataFactoryImpl.getInstance().getCQIE(deTypedHead, typedRule.getBody());
+        CQIE detypedRule = typedRule.clone();
+        detypedRule.updateHead(detypedHead);
+        return detypedRule;
     }
 
 
@@ -323,7 +321,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
                 /**
                  * Untyping removes URI template terms.
                  */
-                Function untypedAtom = (Function) TypeLiftTools.untypeTerm(typedAtom);
+                Function untypedAtom = TypeLiftTools.removeTypeFromAtom(typedAtom);
                 return untypedAtom;
             }
         });

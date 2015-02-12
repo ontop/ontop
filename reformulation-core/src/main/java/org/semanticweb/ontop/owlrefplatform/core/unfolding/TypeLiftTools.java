@@ -321,31 +321,38 @@ public class TypeLiftTools {
         return initialRules.map(new F<CQIE, CQIE>() {
             @Override
             public CQIE f(CQIE initialRule) {
-                Function initialHead = initialRule.getHead();
-                List<Term> initialHeadTerms =  List.iterableList(initialHead.getTerms());
-
-                /**
-                 * Computes untyped arguments for the head predicate.
-                 */
-                List<Term> newHeadTerms = Option.somes(initialHeadTerms.map(new F<Term, Option<Term>>() {
-                    @Override
-                    public Option<Term> f(Term term) {
-                        return untypeTerm(term);
-                    }
-                }));
-
                 /**
                  * Builds a new rule.
                  * TODO: modernize the CQIE API (make it immutable).
                  */
                 CQIE newRule = initialRule.clone();
-                Function newHead = (Function)initialHead.clone();
-                newHead.updateTerms(new ArrayList<>(newHeadTerms.toCollection()));
+                Function newHead = removeTypeFromAtom(initialRule.getHead());
                 newRule.updateHead(newHead);
                 return newRule;
             }
         });
 
+    }
+
+    public static Function removeTypeFromAtom(Function atom) {
+        List<Term> initialHeadTerms =  List.iterableList(atom.getTerms());
+
+        /**
+         * Computes untyped arguments for the head predicate.
+         */
+        List<Term> newHeadTerms = Option.somes(initialHeadTerms.map(new F<Term, Option<Term>>() {
+            @Override
+            public Option<Term> f(Term term) {
+                return untypeTerm(term);
+            }
+        }));
+
+        /**
+         * Builds a new atom.
+         */
+        Function newAtom = (Function)atom.clone();
+        newAtom.updateTerms(new ArrayList<>(newHeadTerms.toCollection()));
+        return newAtom;
     }
 
     /**
