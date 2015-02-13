@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Collections of functions for lifting in type.
+ * Collections of functions for lifting types.
  */
 public class TypeLiftTools {
 
@@ -375,19 +375,15 @@ public class TypeLiftTools {
      *
      * Assumption: the target atom is only composed of variables!
      */
-    public static Substitution computeTypePropagatingSubstitution(final Function sourceAtom, final Function targetAtom) {
+    public static Substitution computeTypePropagatingSubstitution(final Function sourceAtom, final Function targetAtom)
+            throws SubstitutionUtilities.SubstitutionException {
 
         /**
-         * Predicate check
+         * Predicate and arity checks
          */
-        if (!sourceAtom.getFunctionSymbol().equals(targetAtom.getFunctionSymbol())) {
-            return null;
-        }
-        /**
-         * Arity check
-         */
-        if (sourceAtom.getTerms().size() != targetAtom.getTerms().size()) {
-            return null;
+        if ((!sourceAtom.getFunctionSymbol().equals(targetAtom.getFunctionSymbol()))
+                || (sourceAtom.getTerms().size() != targetAtom.getTerms().size())) {
+            throw new SubstitutionUtilities.SubstitutionException();
         }
 
         /**
