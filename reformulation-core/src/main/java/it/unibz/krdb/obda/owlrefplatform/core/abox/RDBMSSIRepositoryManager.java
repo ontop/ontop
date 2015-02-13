@@ -53,6 +53,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -342,6 +343,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 			st.executeBatch();
 		}
+		catch (BatchUpdateException e) {
+			// no-op: ignore all exceptions here
+		}
 	}
 
 	public int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException {
@@ -367,7 +371,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 		
 		// For counting the insertion
-		int success = 0;
+		Integer success = 0;
 		Map<Predicate, Integer> failures = new HashMap<>();
 
 		int batchCount = 0;
@@ -385,6 +389,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				ClassAssertion ca = (ClassAssertion) ax; 
 				try {
 					process(ca, uriidStm, classStm);
+					success++;
 				}
 				catch (Exception e) {
 					Predicate predicate = ca.getConcept().getPredicate();
@@ -398,6 +403,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				ObjectPropertyAssertion opa = (ObjectPropertyAssertion)ax;
 				try {
 					process(opa, uriidStm, roleStm);	
+					success++;
 				}
 				catch (Exception e) {
 					Predicate predicate = opa.getProperty().getPredicate();
@@ -410,7 +416,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			else /* (ax instanceof DataPropertyAssertion) */ {
 				DataPropertyAssertion dpa = (DataPropertyAssertion)ax;
 				try {
-					process(dpa, uriidStm, attributeStm);										
+					process(dpa, uriidStm, attributeStm);				
+					success++;					
 				}
 				catch (Exception e) {
 					Predicate predicate = dpa.getProperty().getPredicate();
@@ -950,7 +957,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					if (views.isViewEmpty(viewId, intervals))
 						continue;
 					
-					String sourceQuery = views.constructSqlSource(obType1, obType2) + intervalsSqlFilter;
+					String sourceQuery = views.getSqlSource(viewId) + intervalsSqlFilter;
 					CQIE targetQuery = constructTargetQuery(ope.getPredicate(), obType1, obType2);
 					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 					result.add(basicmapping);		
@@ -992,7 +999,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 					if (views.isViewEmpty(viewId, intervals))
 						continue;
 					
-					String sourceQuery = views.constructSqlSource(obType1, obType2) + intervalsSqlFilter;
+					String sourceQuery = views.getSqlSource(viewId) + intervalsSqlFilter;
 					CQIE targetQuery = constructTargetQuery(dpe.getPredicate(), obType1, obType2);
 					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 					result.add(basicmapping);			
@@ -1026,7 +1033,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				if (views.isViewEmpty(viewId, intervals))
 					continue;
 				
-				String sourceQuery = views.constructSqlSource(obType1) + intervalsSqlFilter;
+				String sourceQuery = views.getSqlSource(viewId) + intervalsSqlFilter;
 				CQIE targetQuery = constructTargetQuery(classNode.getPredicate(), obType1);
 				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 				result.add(basicmapping);
@@ -1298,7 +1305,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		
 
 	public void dropIndexes(Connection conn) throws SQLException {
-		log.debug("Droping indexes");
+		log.debug("Dropping indexes");
 
 		try (Statement st = conn.createStatement()) {
 			for (String s : classTable.dropIndexCommands)

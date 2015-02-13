@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
+import it.unibz.krdb.obda.model.CQIE;
+import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 
@@ -19,6 +21,10 @@ public class SemanticIndexViewsManager {
 
 	private final Map<SemanticIndexViewID, Set<Integer>> nonEmptyEntityRecord = new HashMap<>();
 
+	public SemanticIndexViewsManager() {
+		init();
+	}
+	
 	public static SemanticIndexViewID getViewId(COL_TYPE t1, COL_TYPE t2) {
 		SemanticIndexViewID viewId = new SemanticIndexViewID(COLTYPEtoSITable.get(t2).ordinal(), COLTYPEtoInt(t1), COLTYPEtoInt(t2));
 		return viewId;
@@ -55,70 +61,92 @@ public class SemanticIndexViewsManager {
 	}
 	
 	
-	public String constructSqlSource(COL_TYPE type) {
-		
-		StringBuilder sql = new StringBuilder();
-		
-		sql.append(RDBMSSIRepositoryManager.classTable.selectCommand);
+	private static final COL_TYPE objectTypes[] = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.BNODE };
 
-		/*
-		 * If the mapping is for something of type Literal we need to add IS
-		 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
-		 * redundant since we have another stage in Quest where we add IS NOT
-		 * NULL for every variable in the head of a mapping.
-		 */
-
-		if (type == COL_TYPE.BNODE) 
-			sql.append("ISBNODE = TRUE AND ");
-		else {
-			assert (type == COL_TYPE.OBJECT);
-			sql.append("ISBNODE = FALSE AND ");
-		}
-		
-		return sql.toString();		
-	}	
+	private static final COL_TYPE typesAndObjectTypes[] = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.BNODE, 
+		COL_TYPE.LITERAL, COL_TYPE.LITERAL_LANG, COL_TYPE.BOOLEAN, 
+		COL_TYPE.DATETIME, COL_TYPE.DATETIME_STAMP, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.INTEGER, COL_TYPE.INT,
+		COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER, 
+		COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER, COL_TYPE.FLOAT,  COL_TYPE.LONG, 
+		COL_TYPE.STRING };
 	
-	public String constructSqlSource(COL_TYPE type1, COL_TYPE type2) {
+	private final Map<SemanticIndexViewID, String> selectCommand = new HashMap<>();
+	
+	private final void init() {
 		
-		StringBuilder sql = new StringBuilder();
-		
-		switch (type2) {
-			case OBJECT:
-			case BNODE:
-				sql.append(RDBMSSIRepositoryManager.roleTable.selectCommand);
-				break;
-			case LITERAL:
-			case LITERAL_LANG:
-				sql.append(RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).selectCommand);
-				break;
-			default:
-				sql.append(RDBMSSIRepositoryManager.attributeTable.get(type2).selectCommand);
+		for (COL_TYPE type1 : objectTypes) {
+			for (COL_TYPE type2 : typesAndObjectTypes) {
+				StringBuilder sql = new StringBuilder();
+				
+				switch (type2) {
+					case OBJECT:
+					case BNODE:
+						sql.append(RDBMSSIRepositoryManager.roleTable.selectCommand);
+						break;
+					case LITERAL:
+					case LITERAL_LANG:
+						sql.append(RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).selectCommand);
+						break;
+					default:
+						sql.append(RDBMSSIRepositoryManager.attributeTable.get(type2).selectCommand);
+				}
+
+				/*
+				 * If the mapping is for something of type Literal we need to add IS
+				 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
+				 * redundant since we have another stage in Quest where we add IS NOT
+				 * NULL for every variable in the head of a mapping.
+				 */
+
+				if (type1 == COL_TYPE.BNODE) 
+					sql.append("ISBNODE = TRUE AND ");
+				else {
+					assert (type1 == COL_TYPE.OBJECT);
+					sql.append("ISBNODE = FALSE AND ");
+				}
+
+				if (type2 == COL_TYPE.BNODE) 
+					sql.append("ISBNODE2 = TRUE AND ");
+				else if (type2 == COL_TYPE.OBJECT) 
+					sql.append("ISBNODE2 = FALSE AND ");
+				else if (type2 == COL_TYPE.LITERAL) 
+					sql.append("LANG IS NULL AND ");
+				else if (type2 == COL_TYPE.LITERAL_LANG)
+					sql.append("LANG IS NOT NULL AND ");
+				
+				SemanticIndexViewID viewId = getViewId(type1, type2);
+				selectCommand.put(viewId, sql.toString());		
+			}
 		}
 
-		/*
-		 * If the mapping is for something of type Literal we need to add IS
-		 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
-		 * redundant since we have another stage in Quest where we add IS NOT
-		 * NULL for every variable in the head of a mapping.
-		 */
+		for (COL_TYPE type : objectTypes) {
+			StringBuilder sql = new StringBuilder();
+			
+			sql.append(RDBMSSIRepositoryManager.classTable.selectCommand);
 
-		if (type1 == COL_TYPE.BNODE) 
-			sql.append("ISBNODE = TRUE AND ");
-		else {
-			assert (type1 == COL_TYPE.OBJECT);
-			sql.append("ISBNODE = FALSE AND ");
+			/*
+			 * If the mapping is for something of type Literal we need to add IS
+			 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
+			 * redundant since we have another stage in Quest where we add IS NOT
+			 * NULL for every variable in the head of a mapping.
+			 */
+
+			if (type == COL_TYPE.BNODE) 
+				sql.append("ISBNODE = TRUE AND ");
+			else {
+				assert (type == COL_TYPE.OBJECT);
+				sql.append("ISBNODE = FALSE AND ");
+			}
+			
+			SemanticIndexViewID viewId = SemanticIndexViewsManager.getViewId(type);
+			selectCommand.put(viewId, sql.toString());		
 		}
-
-		if (type2 == COL_TYPE.BNODE) 
-			sql.append("ISBNODE2 = TRUE AND ");
-		else if (type2 == COL_TYPE.OBJECT) 
-			sql.append("ISBNODE2 = FALSE AND ");
-		else if (type2 == COL_TYPE.LITERAL) 
-			sql.append("LANG IS NULL AND ");
-		else if (type2 == COL_TYPE.LITERAL_LANG)
-			sql.append("LANG IS NOT NULL AND ");
 		
-		return sql.toString();		
+	}
+	
+	
+	public String getSqlSource(SemanticIndexViewID viewId) {
+		return selectCommand.get(viewId);
 	}	
 
 	
