@@ -20,11 +20,13 @@ public class SemanticIndexViewsManager {
 	private final Map<SemanticIndexViewID, Set<Integer>> nonEmptyEntityRecord = new HashMap<>();
 
 	public static SemanticIndexViewID getViewId(COL_TYPE t1, COL_TYPE t2) {
-		return new SemanticIndexViewID(COLTYPEtoSITable.get(t2).ordinal(), COLTYPEtoInt(t1), COLTYPEtoInt(t2));
+		SemanticIndexViewID viewId = new SemanticIndexViewID(COLTYPEtoSITable.get(t2).ordinal(), COLTYPEtoInt(t1), COLTYPEtoInt(t2));
+		return viewId;
 	}
 	
 	public static SemanticIndexViewID getViewId(COL_TYPE t1) {
-		return new SemanticIndexViewID(SITable.CLASS.ordinal(), COLTYPEtoInt(t1), OBJ_TYPE_BNode);
+		SemanticIndexViewID viewId = new SemanticIndexViewID(SITable.CLASS.ordinal(), COLTYPEtoInt(t1), OBJ_TYPE_BNode);
+		return viewId;
 	}
 	
 	
@@ -139,7 +141,9 @@ public class SemanticIndexViewsManager {
 		DPROPPosInte, 
 		DPROPNonPosInte, 
 		DPROPFloat, 
-		DPROPBool
+		DPROPBool,
+		DPROPDateStamp,
+		DPROPLiteLang
 	}
 
 	private static final int OBJ_TYPE_URI = 0;
@@ -155,7 +159,7 @@ public class SemanticIndexViewsManager {
 		COLTYPEtoSITable.put(COL_TYPE.OBJECT, SITable.OPROP);
 		COLTYPEtoSITable.put(COL_TYPE.BNODE, SITable.OPROP);
 		COLTYPEtoSITable.put(COL_TYPE.LITERAL, SITable.DPROPLite);
-		COLTYPEtoSITable.put(COL_TYPE.LITERAL_LANG, SITable.DPROPLite);
+		COLTYPEtoSITable.put(COL_TYPE.LITERAL_LANG, SITable.DPROPLiteLang);
 		COLTYPEtoSITable.put(COL_TYPE.STRING, SITable.DPROPStri);
 		COLTYPEtoSITable.put(COL_TYPE.INTEGER, SITable.DPROPInte);
 		COLTYPEtoSITable.put(COL_TYPE.INT, SITable.DPROPInt);
@@ -169,8 +173,8 @@ public class SemanticIndexViewsManager {
 		COLTYPEtoSITable.put(COL_TYPE.DECIMAL, SITable.DPROPDeci);
 		COLTYPEtoSITable.put(COL_TYPE.DOUBLE, SITable.DPROPDoub);
 		COLTYPEtoSITable.put(COL_TYPE.DATETIME, SITable.DPROPDate);
-		COLTYPEtoSITable.put(COL_TYPE.DATETIME_STAMP, SITable.DPROPDate);
 		COLTYPEtoSITable.put(COL_TYPE.BOOLEAN, SITable.DPROPBool);
+		COLTYPEtoSITable.put(COL_TYPE.DATETIME_STAMP, SITable.DPROPDateStamp);
 	}
 	
 	
