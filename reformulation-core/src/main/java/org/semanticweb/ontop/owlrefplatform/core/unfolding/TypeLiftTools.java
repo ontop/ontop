@@ -373,7 +373,7 @@ public class TypeLiftTools {
     /**
      * Computes a substitution able to propagate types from a source atom to a target atom.
      *
-     * Assumption: the target atom is only composed of variables!
+     * Assumption: the target atom is only composed of (possibly typed) variables!
      */
     public static Substitution computeTypePropagatingSubstitution(final Function sourceAtom, final Function targetAtom)
             throws SubstitutionUtilities.SubstitutionException {
@@ -390,14 +390,7 @@ public class TypeLiftTools {
          * The target atom is expected to be only composed of variables.
          * Extracts them in a list.
          */
-        List<VariableImpl> targetVariables = List.iterableList(targetAtom.getTerms()).map(new F<Term, VariableImpl>() {
-            @Override
-            public VariableImpl f(Term term) {
-                if (!(term instanceof VariableImpl))
-                    throw new IllegalArgumentException("The target atom must be only composed of variables: " + targetAtom);
-                return (VariableImpl) term;
-            }
-        });
+        List<VariableImpl> targetVariables = extractVariablesFromTargetAtom(targetAtom);
 
         /**
          * Gets a cleaned atom that uses the same variables that the target one.
@@ -420,6 +413,43 @@ public class TypeLiftTools {
         }));
 
         return new SubstitutionImpl(variableToTypeMappings.toMap());
+    }
+
+    /**
+     * Extracts the variable from an atom.
+     *
+     * It must be only composed of (possibly typed) variables.
+     */
+    private static List<VariableImpl> extractVariablesFromTargetAtom(final Function targetAtom) {
+        return List.iterableList(targetAtom.getTerms()).map(new F<Term, VariableImpl>() {
+            @Override
+            public VariableImpl f(Term term) {
+                if (term instanceof VariableImpl)
+                    return (VariableImpl) term;
+
+                else if (term instanceof Function) {
+                    Function functionalTerm = (Function) term;
+                    Predicate functionSymbol = functionalTerm.getFunctionSymbol();
+
+                    // Yes, this is horrible
+                    if (functionalTerm.getTerms().size() == 0)
+                        throw new IllegalArgumentException("Inconsistent functional term " + functionalTerm);
+
+                    /**
+                     * Datatype or URI the first sub-term must be a variable.
+                     *
+                     * URI templates are considered here.
+                     */
+                    if (functionSymbol.isDataTypePredicate() || functionSymbol.getName().equals(OBDAVocabulary.QUEST_URI)) {
+                        Term firstTerm = functionalTerm.getTerm(0);
+                        if (firstTerm instanceof VariableImpl)
+                            return (VariableImpl) firstTerm;
+                    }
+                }
+
+                throw new IllegalArgumentException("The target atom must be only composed of (possibly typed) variables. Bad term: " + term);
+            }
+        });
     }
 
     /**
