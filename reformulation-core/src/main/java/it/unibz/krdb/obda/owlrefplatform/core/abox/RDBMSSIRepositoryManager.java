@@ -531,7 +531,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		roleStm.addBatch();
 		
 		// Register non emptiness
-		views.setNonEmpty(idx, o1.getType(), o2.getType());
+		SemanticIndexViewID viewId = SemanticIndexViewsManager.getViewId(o1.getType(), o2.getType());
+		views.addIndexToView(viewId, idx);
 	} 
 
 	private void process(DataPropertyAssertion ax, PreparedStatement uriidStm, Map<COL_TYPE, PreparedStatement> attributeStatement) throws SQLException {
@@ -623,7 +624,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		stm.addBatch();
 		
 		// register non-emptiness
-		views.setNonEmpty(idx, subject.getType(), object.getType());
+		SemanticIndexViewID viewId = SemanticIndexViewsManager.getViewId(subject.getType(), object.getType());
+		views.addIndexToView(viewId, idx);
 	}
 	
 		
@@ -645,7 +647,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		classStm.addBatch();
 	
 		// Register non emptiness
-		views.setNonEmpty(conceptIndex, c1.getType());
+		SemanticIndexViewID viewId = SemanticIndexViewsManager.getViewId(c1.getType());
+		views.addIndexToView(viewId, conceptIndex);
 	}
 
 	// TODO: big issue -- URI map is incomplete -- it is never read back from the DB
@@ -943,7 +946,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			
 			for (COL_TYPE obType1 : objectTypes) {
 				for (COL_TYPE obType2 : typesAndObjectTypes) {
-					if (views.isMappingEmpty(intervals, obType1, obType2))
+					SemanticIndexViewID viewId = SemanticIndexViewsManager.getViewId(obType1, obType2);
+					if (views.isViewEmpty(viewId, intervals))
 						continue;
 					
 					String sourceQuery = views.constructSqlSource(obType1, obType2) + intervalsSqlFilter;
@@ -984,7 +988,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			
 			for (COL_TYPE obType1 : objectTypes) {
 				for (COL_TYPE obType2 : typesAndObjectTypes) {
-					if (views.isMappingEmpty(intervals, obType1, obType2))
+					SemanticIndexViewID viewId = SemanticIndexViewsManager.getViewId(obType1, obType2);
+					if (views.isViewEmpty(viewId, intervals))
 						continue;
 					
 					String sourceQuery = views.constructSqlSource(obType1, obType2) + intervalsSqlFilter;
@@ -1017,7 +1022,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			String intervalsSqlFilter = getIntervalString(intervals);
 
 			for (COL_TYPE obType1 : objectTypes) {
-				if (views.isMappingEmpty(intervals, obType1)) 
+				SemanticIndexViewID viewId = SemanticIndexViewsManager.getViewId(obType1);
+				if (views.isViewEmpty(viewId, intervals))
 					continue;
 				
 				String sourceQuery = views.constructSqlSource(obType1) + intervalsSqlFilter;

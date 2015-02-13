@@ -25,13 +25,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  * A record to keep track of which tables in the semantic index tables have rows
  * in it. It allows allows to know the type of rows each has, as in, for which
  * indexes and which type of object.
- * 
- * @author mariano
- * 
  */
-public class SemanticIndexRecord {
 
-	private final int idx;
+public class SemanticIndexViewID {
+
 	private final int type1;
 	private final int type2;
 	private final int table;
@@ -47,21 +44,15 @@ public class SemanticIndexRecord {
 	 * @param table
 	 * @param type1
 	 * @param type2
-	 * @param idx
 	 */
 	
-	public SemanticIndexRecord(int table, int type1, int type2, int idx) {
+	public SemanticIndexViewID(int table, int type1, int type2) {
 		this.type1 = type1; 	
 		this.type2 = type2;  
 		this.table = table;
-		this.idx = idx;
-		this.hashCode = idx + (table + 1) * 10000000 + (type1 + 1) * 100000000 + (type2 + 1) * 1000000000;
+		this.hashCode = (table + 1) + (type1 + 1) * 10000 + (type2 + 1) * 100000;
 	}
 	
-	
-	public int getIndex() {
-		return idx;
-	}
 	
 	public int getType1() {
 		return type1;
@@ -82,11 +73,11 @@ public class SemanticIndexRecord {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof SemanticIndexRecord))
+		if (!(obj instanceof SemanticIndexViewID))
 			return false;
 		
-		SemanticIndexRecord r2 = (SemanticIndexRecord) obj;
-		return (this.idx == r2.idx) && (this.table == r2.table) && (this.type1 == r2.type1) && (this.type2 == r2.type2);
+		SemanticIndexViewID r2 = (SemanticIndexViewID) obj;
+		return (this.table == r2.table) && (this.type1 == r2.type1) && (this.type2 == r2.type2);
 	}
 
 	@Override
@@ -94,8 +85,6 @@ public class SemanticIndexRecord {
 		StringBuilder b = new StringBuilder();
 		b.append("T: ");
 		b.append(table);
-		b.append(" IDX: ");
-		b.append(idx);
 		b.append(" T1: ");
 		b.append(type1);
 		b.append(" T2: ");

@@ -12,45 +12,44 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 public class SemanticIndexViewsManager {
 
-	private final Set<SemanticIndexRecord> nonEmptyEntityRecord = new HashSet<>();
+	private final Map<SemanticIndexViewID, Set<Integer>> nonEmptyEntityRecord = new HashMap<>();
 
-	public void setNonEmpty(int idx, COL_TYPE t1) {
-		SemanticIndexRecord record = new SemanticIndexRecord(SITable.CLASS.ordinal(), COLTYPEtoInt(t1), OBJ_TYPE_BNode, idx);
-		nonEmptyEntityRecord.add(record);		
+	public static SemanticIndexViewID getViewId(COL_TYPE t1, COL_TYPE t2) {
+		return new SemanticIndexViewID(COLTYPEtoSITable.get(t2).ordinal(), COLTYPEtoInt(t1), COLTYPEtoInt(t2));
 	}
 	
-	public void setNonEmpty(int idx, COL_TYPE t1, COL_TYPE t2) {
-		SemanticIndexRecord record = new SemanticIndexRecord(COLTYPEtoSITable.get(t2).ordinal(), COLTYPEtoInt(t1), COLTYPEtoInt(t2), idx);
-		nonEmptyEntityRecord.add(record);
+	public static SemanticIndexViewID getViewId(COL_TYPE t1) {
+		return new SemanticIndexViewID(SITable.CLASS.ordinal(), COLTYPEtoInt(t1), OBJ_TYPE_BNode);
 	}
 	
 	
-	public boolean isMappingEmpty(List<Interval> intervals,  COL_TYPE type1)  {
+	
+	public boolean isViewEmpty(SemanticIndexViewID viewId, List<Interval> intervals) {
+		
+		Set<Integer> set = nonEmptyEntityRecord.get(viewId);
+		if (set == null) 
+			return true; // the set if empty
 		
 		for (Interval interval : intervals) 
-			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
-				SemanticIndexRecord record = new SemanticIndexRecord(SITable.CLASS.ordinal(), COLTYPEtoInt(type1), OBJ_TYPE_BNode, i);
-				if (nonEmptyEntityRecord.contains(record))
+			for (Integer i = interval.getStart(); i <= interval.getEnd(); i++) 
+				if (set.contains(i)) 
 					return false;
-			}
 		
 		return true;
 	}
 
-	public boolean isMappingEmpty(List<Interval> intervals, COL_TYPE type1, COL_TYPE type2)  {
-		
-		for (Interval interval : intervals) 
-			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
-				SemanticIndexRecord record = new SemanticIndexRecord(COLTYPEtoSITable.get(type2).ordinal(), COLTYPEtoInt(type1), COLTYPEtoInt(type2), i);
-				if (nonEmptyEntityRecord.contains(record)) 
-					return false;
-			}
-		
-		return true;
+	public void addIndexToView(SemanticIndexViewID viewId, Integer idx) {
+		Set<Integer> set = nonEmptyEntityRecord.get(viewId);
+		if (set == null) {
+			set = new HashSet<>();
+			nonEmptyEntityRecord.put(viewId, set);
+		}
+		set.add(idx);			
 	}
 	
 	
@@ -214,12 +213,17 @@ public class SemanticIndexViewsManager {
 	public void store(Connection conn) throws SQLException {
 		
 		try (PreparedStatement stm = conn.prepareStatement(RDBMSSIRepositoryManager.emptinessIndexTable.insertCommand)) {
-			for (SemanticIndexRecord record : nonEmptyEntityRecord) {
-				stm.setInt(1, record.getTable());
-				stm.setInt(2, record.getIndex());
-				stm.setInt(3, record.getType1());
-				stm.setInt(4, record.getType2());
-				stm.addBatch();
+			for (Entry<SemanticIndexViewID, Set<Integer>> record : nonEmptyEntityRecord.entrySet()) {
+				if (record.getValue() != null) {
+					SemanticIndexViewID viewId = record.getKey();
+					for (Integer idx : record.getValue()) {
+						stm.setInt(1, viewId.getTable());
+						stm.setInt(2, idx);
+						stm.setInt(3, viewId.getType1());
+						stm.setInt(4, viewId.getType2());
+						stm.addBatch();
+					}
+				}
 			}
 			stm.executeBatch();
 		}
@@ -244,10 +248,10 @@ public class SemanticIndexViewsManager {
 				checkTypeValue(type2);
 				checkSITableValue(sitable);
 				
-				SemanticIndexRecord r = new SemanticIndexRecord(sitable, type1, type2, idx);
-				nonEmptyEntityRecord.add(r);
+				SemanticIndexViewID viewId = new SemanticIndexViewID(sitable, type1, type2);
+				addIndexToView(viewId, idx);
 			}
 		}
 	}
-	
+		
 }
