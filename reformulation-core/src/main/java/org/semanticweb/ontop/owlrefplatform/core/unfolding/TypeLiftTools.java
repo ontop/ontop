@@ -11,6 +11,7 @@ import fj.data.List;
 import fj.data.Option;
 import fj.data.Stream;
 import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
@@ -19,9 +20,10 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUti
 
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.UUID;
 
 /**
- * TODO: explain
+ * Collections of functions for lifting in type.
  */
 public class TypeLiftTools {
 
@@ -34,10 +36,8 @@ public class TypeLiftTools {
     protected static class MultiTypeException extends Exception {
     }
 
-
     /**
-     * TODO: describe
-     *
+     * Returns true if one term of the atom corresponds to a URI template.
      */
     public static boolean containsURITemplate(Function atom) {
         for(Term term : atom.getTerms()) {
@@ -47,9 +47,9 @@ public class TypeLiftTools {
         return false;
     }
 
-
     /**
-     * Uri-templates.
+     * A URI template is composed of one string and of variables.
+     * It has the URI function symbol.
      */
     public static boolean isURITemplate(Term term) {
         if (!(term instanceof Function))
@@ -371,20 +371,30 @@ public class TypeLiftTools {
     }
 
     /**
-     * Assumption: the target atom is only composed of variables!
+     * Computes a substitution able to propagate types from a source atom to a target atom.
      *
-     * TODO: split it!
-     * TODO: comment it!
+     * Assumption: the target atom is only composed of variables!
      */
     public static Substitution computeTypePropagatingSubstitution(final Function sourceAtom, final Function targetAtom) {
-        java.util.List<Term> sourceTerms = sourceAtom.getTerms();
-        java.util.List<Term> targetTerms = targetAtom.getTerms();
 
-        if (sourceTerms.size() != targetTerms.size()) {
+        /**
+         * Predicate check
+         */
+        if (!sourceAtom.getFunctionSymbol().equals(targetAtom.getFunctionSymbol())) {
+            return null;
+        }
+        /**
+         * Arity check
+         */
+        if (sourceAtom.getTerms().size() != targetAtom.getTerms().size()) {
             return null;
         }
 
-        List<VariableImpl> targetVariables = List.iterableList(targetTerms).map(new F<Term, VariableImpl>() {
+        /**
+         * The target atom is expected to be only composed of variables.
+         * Extracts them in a list.
+         */
+        List<VariableImpl> targetVariables = List.iterableList(targetAtom.getTerms()).map(new F<Term, VariableImpl>() {
             @Override
             public VariableImpl f(Term term) {
                 if (!(term instanceof VariableImpl))
@@ -393,36 +403,17 @@ public class TypeLiftTools {
             }
         });
 
-
         /**
-         * { Source variable --> target variable }
+         * Gets a cleaned atom that uses the same variables that the target one.
          */
-        List<P2<Term, VariableImpl>> sourceTargetPairs = List.iterableList(sourceTerms).zip(targetVariables);
-        HashMap<VariableImpl, Term> variableMappings = HashMap.from(Option.somes(sourceTargetPairs.map(
-                new F<P2<Term, VariableImpl>, Option<P2<VariableImpl, Term>>>() {
-            @Override
-            public Option<P2<VariableImpl, Term>> f(P2<Term, VariableImpl> pair) {
-                Term sourceTerm = pair._1();
-                VariableImpl targetVariable = pair._2();
-
-                Set<Variable> sourceVars = sourceTerm.getReferencedVariables();
-                if (sourceVars.size() != 1)
-                    return Option.none();
-
-                return Option.some(P.p((VariableImpl) sourceVars.iterator().next(), (Term)targetVariable));
-            }
-        })));
-
-
-        Substitution targetToSourceVarSubstitution = new SubstitutionImpl(variableMappings.toMap());
-
-        Function renamedSourceAtom = (Function) sourceAtom.clone();
-        //SIDE-EFFECT!
-        SubstitutionUtilities.applySubstitution(renamedSourceAtom, targetToSourceVarSubstitution);
-
+        Function renamedSourceAtom = renameAndCleanSourceAtomForTypeProg(sourceAtom, targetVariables);
 
         /**
-         *  { Target variable --> typed function }
+         * Computes a new substitution that replaces some target variables by their typed versions.
+         *
+         * Note that their typed versions are functional terms.
+         *
+         *  { Target variable --> typed version }
          */
         List<P2<VariableImpl, Term>> targetSourceFunctionPairs = targetVariables.zip(List.iterableList(renamedSourceAtom.getTerms()));
         HashMap<VariableImpl, Term> variableToTypeMappings = HashMap.from(targetSourceFunctionPairs.filter(new F<P2<VariableImpl, Term>, Boolean>() {
@@ -432,18 +423,133 @@ public class TypeLiftTools {
             }
         }));
 
-        /**
-         * TODO: clean type proposal!
-         */
-
         return new SubstitutionImpl(variableToTypeMappings.toMap());
     }
 
     /**
-     * TODO: move some code here!
+     * Cleans out the aggregation functional terms from the source atom and replaces its variables
+     * by the ones used by the target atom.
      */
-    private Substitution computeBasicVariableSubstitution(final Function sourceAtom, final Function targetAtom) {
-        return null;
+    private static Function renameAndCleanSourceAtomForTypeProg(Function sourceAtom, List<VariableImpl> targetVariables) {
+        /**
+         * Cleans out the aggregation functional terms from the source atom.
+         */
+        Function cleanedSourceAtom = cleanTypedAtom(sourceAtom);
+
+        /**
+         * Computes the substitution that maps the source variable to the target variables.
+         *
+         * { Source variable --> target variable }
+         *
+         * This is only possible for source terms that contains exactly 1 variable. Others are ignored.
+         *
+         */
+        List<P2<Term, VariableImpl>> sourceTargetPairs = List.iterableList(sourceAtom.getTerms()).zip(targetVariables);
+        HashMap<VariableImpl, Term> variableMappings = HashMap.from(Option.somes(sourceTargetPairs.map(
+                new F<P2<Term, VariableImpl>, Option<P2<VariableImpl, Term>>>() {
+                    @Override
+                    public Option<P2<VariableImpl, Term>> f(P2<Term, VariableImpl> pair) {
+                        Term sourceTerm = pair._1();
+                        VariableImpl targetVariable = pair._2();
+
+                        /**
+                         * Extracts the variable if it is unique.
+                         * Otherwise, ignores this pair.
+                         */
+                        Set<Variable> sourceVars = sourceTerm.getReferencedVariables();
+                        if (sourceVars.size() != 1)
+                            return Option.none();
+                        VariableImpl sourceVariable = (VariableImpl) sourceVars.iterator().next();
+
+                        return Option.some(P.p(sourceVariable , (Term) targetVariable));
+                    }
+                })));
+        Substitution targetToSourceVarSubstitution = new SubstitutionImpl(variableMappings.toMap());
+
+        /**
+         * Applies this substitution to the cleaned source atom.
+         */
+        Function renamedSourceAtom = (Function) cleanedSourceAtom.clone();
+        //SIDE-EFFECT!
+        SubstitutionUtilities.applySubstitution(renamedSourceAtom, targetToSourceVarSubstitution);
+        return renamedSourceAtom;
+    }
+
+    /**
+     * Cleans out the aggregation functional terms.
+     * Just keep types and variables.
+     *
+     * Very fragile code... A better data structure is needed!
+     */
+    private static Function cleanTypedAtom(final Function atom) {
+        List<Term> newTerms = List.iterableList(atom.getTerms()).map(new F<Term, Term>() {
+            @Override
+            public Term f(Term term) {
+                if (term instanceof Function) {
+                    Function functionalTerm = (Function) term;
+                    Predicate functionSymbol = functionalTerm.getFunctionSymbol();
+
+                    if (functionSymbol.isDataTypePredicate()) {
+                        java.util.List<Term> newSubTerms = cleanAlreadyTypedSubTerms(functionalTerm.getTerms());
+                        Function newTerm = (Function) functionalTerm.clone();
+                        newTerm.updateTerms(newSubTerms);
+                        return newTerm;
+                    }
+                    /**
+                     * MIN, MAX, SUM, AVG, etc. but NOT COUNT
+                     */
+                    else if (functionSymbol.isAggregationPredicate()) {
+                        if (functionSymbol.equals(OBDAVocabulary.SPARQL_COUNT))
+                            throw new RuntimeException("COUNT functional term should already be typed! " + atom);
+                        /**
+                         * TODO: make it stronger.
+                         */
+                        java.util.List<Term> subTerms = functionalTerm.getTerms();
+                        if (subTerms.size() != 1)
+                            throw new RuntimeException("Non unary aggregation functions are not yet supported" + atom);
+
+                        /**
+                         * Returns the unique sub-term
+                         */
+                        return subTerms.get(0);
+                    }
+                }
+                /**
+                 * Otherwise, keeps the term.
+                 */
+                return term;
+            }
+        });
+
+        Function newAtom = OBDADataFactoryImpl.getInstance().getFunction(atom.getFunctionSymbol(),
+                new ArrayList<>(newTerms.toCollection()));
+        return newAtom;
+    }
+
+    /**
+     * Cleans each (already typed) sub-term.
+     */
+    private static java.util.List<Term> cleanAlreadyTypedSubTerms(java.util.List<Term> terms) {
+        java.util.List<Term> cleanedTerms = new ArrayList<>();
+        for (Term term : terms) {
+            cleanedTerms.add(cleanAlreadyTypedSubTerm(term));
+        }
+        return cleanedTerms;
+    }
+
+    /**
+     * Cleaning an already typed sub-term only affects functional sub-terms: they are
+     * replaced by new variables.
+     */
+    private static Term cleanAlreadyTypedSubTerm(Term subTerm) {
+        if (subTerm instanceof Function) {
+            // New variable
+            return OBDADataFactoryImpl.getInstance().getVariable("v" + UUID.randomUUID());
+        }
+        /**
+         * Otherwise, keeps the term.
+         */
+        return subTerm;
     }
 
 }
