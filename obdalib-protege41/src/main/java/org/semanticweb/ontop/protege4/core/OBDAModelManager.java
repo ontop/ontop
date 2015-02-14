@@ -329,6 +329,27 @@ public class OBDAModelManager implements Disposable {
 		activeOBDAModelWrapper.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);
 
+		declareOntologyElements(activeOBDAModelWrapper);
+
+		OWLOntology activeOntology = mmgr.getActiveOntology();
+
+		String defaultPrefix = prefixManager.getDefaultPrefix();
+		if (defaultPrefix == null) {
+			OWLOntologyID ontologyID = activeOntology.getOntologyID();
+			defaultPrefix = ontologyID.getOntologyIRI().toURI().toString();
+		}
+		activeOBDAModelWrapper.addPrefix(PrefixManager.DEFAULT_PREFIX, defaultPrefix);
+
+		// Add the model
+		URI modelUri = activeOntology.getOntologyID().getOntologyIRI().toURI();
+		obdamodels.put(modelUri, activeOBDAModelWrapper);
+	}
+
+	/**
+	 * To be called just after mapping parsing.
+	 */
+	private void declareOntologyElements(OBDAModelWrapper activeOBDAModelWrapper) {
+		OWLModelManager mmgr = owlEditorKit.getOWLWorkspace().getOWLModelManager();
 		Set<OWLOntology> ontologies = mmgr.getOntologies();
 		for (OWLOntology ontology : ontologies) {
 			// Setup the entity declarations
@@ -345,19 +366,6 @@ public class OBDAModelManager implements Disposable {
 				activeOBDAModelWrapper.declareDataProperty(pred);
 			}
 		}
-
-		OWLOntology activeOntology = mmgr.getActiveOntology();
-
-		String defaultPrefix = prefixManager.getDefaultPrefix();
-		if (defaultPrefix == null) {
-			OWLOntologyID ontologyID = activeOntology.getOntologyID();
-			defaultPrefix = ontologyID.getOntologyIRI().toURI().toString();
-		}
-		activeOBDAModelWrapper.addPrefix(PrefixManager.DEFAULT_PREFIX, defaultPrefix);
-
-		// Add the model
-		URI modelUri = activeOntology.getOntologyID().getOntologyIRI().toURI();
-		obdamodels.put(modelUri, activeOBDAModelWrapper);
 	}
 
 	//	/**
@@ -508,11 +516,13 @@ public class OBDAModelManager implements Disposable {
             if (obdaFile.exists()) {
 
                 /**
-                 * Parse the mappings.
+                 * Parse the mappings and declares the ontology elements to the new OBDAModel object.
                  */
                 try {
                     // TODO: May consider updated Quest preferences.
                     activeOBDAModelWrapper.parseMappings(obdaFile);
+					declareOntologyElements(activeOBDAModelWrapper);
+
                 }  catch (Exception e) {
                     activeOBDAModelWrapper.reset();
                     throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + e.getMessage());
