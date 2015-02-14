@@ -211,7 +211,15 @@ public class OBDAModelImpl implements OBDAModel {
 
 	@Override
 	public ImmutableList<OBDAMappingAxiom> getMappings(URI dataSourceUri) {
-		return mappingIndexByDataSource.get(dataSourceUri);
+        ImmutableList<OBDAMappingAxiom> mappings = mappingIndexByDataSource.get(dataSourceUri);
+        if (mappings != null) {
+            return mappings;
+        }
+        /**
+         * Sometimes, no mappings are defined.
+         * Happens for instance with Protege if we save the OBDAModel without adding any mapping.
+         */
+        return ImmutableList.of();
 	}
 
 	@Override
