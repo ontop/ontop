@@ -309,6 +309,8 @@ public class OBDAModelManager implements Disposable {
 	 * a new object. On creation listeners for the datasources, mappings and
 	 * queries are setup so that changes in these trigger and ontology change.
 	 *
+	 * TODO: see if it can be merged with loadOntologyAndMappings
+	 *
 	 */
 	private void setupNewOBDAModel() {
 		OBDAModelWrapper activeOBDAModelWrapper = getActiveOBDAModelWrapper();
@@ -318,6 +320,7 @@ public class OBDAModelManager implements Disposable {
 		}
 
         OWLModelManager mmgr = owlEditorKit.getOWLWorkspace().getOWLModelManager();
+		OWLOntology activeOntology = mmgr.getActiveOntology();
 
         // Setup the prefixes
         PrefixOWLOntologyFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(mmgr.getActiveOntology());
@@ -329,9 +332,10 @@ public class OBDAModelManager implements Disposable {
 		activeOBDAModelWrapper.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);
 
-		declareOntologyElements(activeOBDAModelWrapper);
-
-		OWLOntology activeOntology = mmgr.getActiveOntology();
+		/**
+		 * Property and class declarations.
+		 */
+		OBDAModelSynchronizer.declarePredicates(activeOntology, activeOBDAModelWrapper.getCurrentImmutableOBDAModel());
 
 		String defaultPrefix = prefixManager.getDefaultPrefix();
 		if (defaultPrefix == null) {
@@ -343,29 +347,6 @@ public class OBDAModelManager implements Disposable {
 		// Add the model
 		URI modelUri = activeOntology.getOntologyID().getOntologyIRI().toURI();
 		obdamodels.put(modelUri, activeOBDAModelWrapper);
-	}
-
-	/**
-	 * To be called just after mapping parsing.
-	 */
-	private void declareOntologyElements(OBDAModelWrapper activeOBDAModelWrapper) {
-		OWLModelManager mmgr = owlEditorKit.getOWLWorkspace().getOWLModelManager();
-		Set<OWLOntology> ontologies = mmgr.getOntologies();
-		for (OWLOntology ontology : ontologies) {
-			// Setup the entity declarations
-			for (OWLClass c : ontology.getClassesInSignature()) {
-				Predicate pred = dfac.getClassPredicate(c.getIRI().toString());
-				activeOBDAModelWrapper.declareClass(pred);
-			}
-			for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature()) {
-				Predicate pred = dfac.getObjectPropertyPredicate(r.getIRI().toString());
-				activeOBDAModelWrapper.declareObjectProperty(pred);
-			}
-			for (OWLDataProperty p : ontology.getDataPropertiesInSignature()) {
-				Predicate pred = dfac.getDataPropertyPredicate(p.getIRI().toString());
-				activeOBDAModelWrapper.declareDataProperty(pred);
-			}
-		}
 	}
 
 	//	/**
@@ -516,17 +497,22 @@ public class OBDAModelManager implements Disposable {
             if (obdaFile.exists()) {
 
                 /**
-                 * Parse the mappings and declares the ontology elements to the new OBDAModel object.
+                 * Parse the mappings.
                  */
                 try {
                     // TODO: May consider updated Quest preferences.
                     activeOBDAModelWrapper.parseMappings(obdaFile);
-					declareOntologyElements(activeOBDAModelWrapper);
 
                 }  catch (Exception e) {
                     activeOBDAModelWrapper.reset();
                     throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + e.getMessage());
                 }
+
+				/**
+				 * Property and class declarations to the new OBDAModel.
+				 */
+				OBDAModelSynchronizer.declarePredicates(activeOntology, activeOBDAModelWrapper.getCurrentImmutableOBDAModel());
+
                 /**
                  * Load the saved queries
                  */
@@ -553,11 +539,6 @@ public class OBDAModelManager implements Disposable {
             OBDAModelValidator validator = new OBDAModelValidator(activeOBDAModelWrapper.getCurrentImmutableOBDAModel(),
                     activeOntology);
             validator.run(); // adding type information to the mapping predicates.
-
-            /**
-             * Property and class declarations
-             */
-            OBDAModelSynchronizer.declarePredicates(activeOntology, activeOBDAModelWrapper.getCurrentImmutableOBDAModel());
 
         } catch (Exception e) {
             OBDAException ex = new OBDAException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());
