@@ -1,7 +1,5 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 
@@ -10,12 +8,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import com.google.common.collect.Lists;
 
 public class SemanticIndexViewsManager {
 
@@ -23,16 +25,6 @@ public class SemanticIndexViewsManager {
 
 	public SemanticIndexViewsManager() {
 		init();
-	}
-	
-	public static SemanticIndexViewID getViewId(COL_TYPE t1, COL_TYPE t2) {
-		SemanticIndexViewID viewId = new SemanticIndexViewID(COLTYPEtoSITable.get(t2).ordinal(), COLTYPEtoInt(t1), COLTYPEtoInt(t2));
-		return viewId;
-	}
-	
-	public static SemanticIndexViewID getViewId(COL_TYPE t1) {
-		SemanticIndexViewID viewId = new SemanticIndexViewID(SITable.CLASS.ordinal(), COLTYPEtoInt(t1), OBJ_TYPE_BNode);
-		return viewId;
 	}
 	
 	
@@ -71,6 +63,17 @@ public class SemanticIndexViewsManager {
 		COL_TYPE.STRING };
 	
 	private final Map<SemanticIndexViewID, String> selectCommand = new HashMap<>();
+	
+	private final List<SemanticIndexViewID> propertyViewIds = new LinkedList<>();
+	private final List<SemanticIndexViewID> classViewIds = new LinkedList<>();
+	
+	public List<SemanticIndexViewID> getPropertyViewIDs() {
+		return Collections.unmodifiableList(propertyViewIds);
+	}
+	
+	public List<SemanticIndexViewID> getClassViewIDs() {
+		return Collections.unmodifiableList(classViewIds);
+	}
 	
 	private final void init() {
 		
@@ -114,8 +117,10 @@ public class SemanticIndexViewsManager {
 				else if (type2 == COL_TYPE.LITERAL_LANG)
 					sql.append("LANG IS NOT NULL AND ");
 				
-				SemanticIndexViewID viewId = getViewId(type1, type2);
+				SemanticIndexViewID viewId = new SemanticIndexViewID(type1, type2);
 				selectCommand.put(viewId, sql.toString());		
+				
+				propertyViewIds.add(viewId);
 			}
 		}
 
@@ -138,8 +143,10 @@ public class SemanticIndexViewsManager {
 				sql.append("ISBNODE = FALSE AND ");
 			}
 			
-			SemanticIndexViewID viewId = SemanticIndexViewsManager.getViewId(type);
-			selectCommand.put(viewId, sql.toString());		
+			SemanticIndexViewID viewId = new SemanticIndexViewID(type);
+			selectCommand.put(viewId, sql.toString());	
+			
+			classViewIds.add(viewId);			
 		}
 		
 	}
@@ -151,90 +158,39 @@ public class SemanticIndexViewsManager {
 
 	
 	
-	// the order provides datatype codes that are stored in DB (starts with 0) 
-	private static enum SITable {
-		CLASS, 
-		OPROP, 
-		DPROPLite, 
-		DPROPStri, 
-		DPROPInte, 
-		DPROPLong, 
-		DPROPDeci, 
-		DPROPDoub, 
-		DPROPDate, 
-		DPROPInt, 
-		DPROPUnsignedInt, 
-		DPROPNegInte, 
-		DPROPNonNegInte, 
-		DPROPPosInte, 
-		DPROPNonPosInte, 
-		DPROPFloat, 
-		DPROPBool,
-		DPROPDateStamp,
-		DPROPLiteLang
-	}
+	// view id codes that are stored in DB (starts with 0)
 
+	private static COL_TYPE[] SITableToCOLTYPE = { 
+		null, // Class SITable 
+		COL_TYPE.OBJECT, COL_TYPE.LITERAL, COL_TYPE.STRING, COL_TYPE.INTEGER,
+		COL_TYPE.LONG, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.DATETIME, 
+		COL_TYPE.INT, COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, 
+		COL_TYPE.NON_NEGATIVE_INTEGER, COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER,
+		COL_TYPE.FLOAT, COL_TYPE.BOOLEAN, COL_TYPE.DATETIME_STAMP, COL_TYPE.LITERAL_LANG
+	};
+	
+	private static Map<COL_TYPE, Integer> COLTYPEtoSITable = new HashMap<>();
+	
+	static {
+		// special case of COL_TYPE.OBJECT and COL_TYPE.BNODE (both are mapped to 1)
+		COLTYPEtoSITable.put(COL_TYPE.BNODE, 1);
+		// Class SITable has value 0 (skip it)
+		for (int i = 1; i < SITableToCOLTYPE.length; i++)
+			COLTYPEtoSITable.put(SITableToCOLTYPE[i], i);
+	}
+	
+	// these two values distinguish between COL_TYPE.OBJECT and COL_TYPE.BNODE
 	private static final int OBJ_TYPE_URI = 0;
 	private static final int OBJ_TYPE_BNode = 1;
-
+	
 	private static int COLTYPEtoInt(COL_TYPE t) {
 		return (t == COL_TYPE.BNODE)  ? OBJ_TYPE_BNode : OBJ_TYPE_URI;
 	}
 	
-	private static Map<COL_TYPE, SITable> COLTYPEtoSITable = new HashMap<>();
-	
-	static {
-		COLTYPEtoSITable.put(COL_TYPE.OBJECT, SITable.OPROP);
-		COLTYPEtoSITable.put(COL_TYPE.BNODE, SITable.OPROP);
-		COLTYPEtoSITable.put(COL_TYPE.LITERAL, SITable.DPROPLite);
-		COLTYPEtoSITable.put(COL_TYPE.LITERAL_LANG, SITable.DPROPLiteLang);
-		COLTYPEtoSITable.put(COL_TYPE.STRING, SITable.DPROPStri);
-		COLTYPEtoSITable.put(COL_TYPE.INTEGER, SITable.DPROPInte);
-		COLTYPEtoSITable.put(COL_TYPE.INT, SITable.DPROPInt);
-		COLTYPEtoSITable.put(COL_TYPE.UNSIGNED_INT, SITable.DPROPUnsignedInt);
-		COLTYPEtoSITable.put(COL_TYPE.NEGATIVE_INTEGER, SITable.DPROPNegInte);
-		COLTYPEtoSITable.put(COL_TYPE.NON_NEGATIVE_INTEGER, SITable.DPROPNonNegInte);
-		COLTYPEtoSITable.put(COL_TYPE.POSITIVE_INTEGER, SITable.DPROPPosInte);
-		COLTYPEtoSITable.put(COL_TYPE.NON_POSITIVE_INTEGER, SITable.DPROPNonPosInte);
-		COLTYPEtoSITable.put(COL_TYPE.FLOAT, SITable.DPROPFloat);
-		COLTYPEtoSITable.put(COL_TYPE.LONG, SITable.DPROPLong);
-		COLTYPEtoSITable.put(COL_TYPE.DECIMAL, SITable.DPROPDeci);
-		COLTYPEtoSITable.put(COL_TYPE.DOUBLE, SITable.DPROPDoub);
-		COLTYPEtoSITable.put(COL_TYPE.DATETIME, SITable.DPROPDate);
-		COLTYPEtoSITable.put(COL_TYPE.BOOLEAN, SITable.DPROPBool);
-		COLTYPEtoSITable.put(COL_TYPE.DATETIME_STAMP, SITable.DPROPDateStamp);
+	private static COL_TYPE IntToCOLTYPE(int t) {
+		return (t == OBJ_TYPE_BNode) ? COL_TYPE.BNODE : COL_TYPE.OBJECT;
 	}
-	
-	
-	/**
-	 * checks that type is one of the two valid values
-	 * 
-	 * @param type
-	 * @throws RuntimeException if type is not valid
-	 */
-	
-	private static void checkTypeValue(int type) { 
-		if (type != OBJ_TYPE_URI && type != OBJ_TYPE_BNode)
-			throw new RuntimeException("Unknown OBJ_TYPE:" + type);
-	}
-	
-	/**
-	 * checks that table is one of the valid values
-	 * 
-	 * @param table
-	 * @throws RuntimeException if table is not valid
-	 */
 
-	private static void checkSITableValue(int table) {
-		SITable sitable = null;		
-		for (SITable t : SITable.values()) 
-			if (t.ordinal() == table) 
-				sitable = t;
-		
-		if (sitable == null)
-			throw new RuntimeException("Unknown SITable: " + table);
-	}
-	
 	
 	
 	/**
@@ -249,10 +205,21 @@ public class SemanticIndexViewsManager {
 				if (record.getValue() != null) {
 					SemanticIndexViewID viewId = record.getKey();
 					for (Integer idx : record.getValue()) {
-						stm.setInt(1, viewId.getTable());
-						stm.setInt(2, idx);
-						stm.setInt(3, viewId.getType1());
-						stm.setInt(4, viewId.getType2());
+						if (viewId.getType2() == null) {
+							// class view (only type1 is relevant)
+							stm.setInt(1, 0); // SITable.CLASS.ordinal()
+							stm.setInt(2, idx);
+							stm.setInt(3, COLTYPEtoInt(viewId.getType1()));
+							stm.setInt(4, OBJ_TYPE_BNode);
+						}
+						else {
+							// property view
+							stm.setInt(1, COLTYPEtoSITable.get(viewId.getType2()));
+							stm.setInt(2, idx);
+							stm.setInt(3, COLTYPEtoInt(viewId.getType1()));
+							stm.setInt(4, COLTYPEtoInt(viewId.getType2()));
+						}
+						
 						stm.addBatch();
 					}
 				}
@@ -276,12 +243,19 @@ public class SemanticIndexViewsManager {
 				int type2 = res.getInt(4);
 				int idx = res.getInt(2);
 				
-				checkTypeValue(type1);
-				checkTypeValue(type2);
-				checkSITableValue(sitable);
-				
-				SemanticIndexViewID viewId = new SemanticIndexViewID(sitable, type1, type2);
-				addIndexToView(viewId, idx);
+				COL_TYPE coltype = SITableToCOLTYPE[sitable];
+				if (coltype == null) {
+					// class view
+					SemanticIndexViewID viewId = new SemanticIndexViewID(IntToCOLTYPE(type1), null);
+					addIndexToView(viewId, idx);
+				}
+				else {
+					// property view
+					if (coltype ==  COL_TYPE.OBJECT)
+						coltype = IntToCOLTYPE(type2);
+					SemanticIndexViewID viewId = new SemanticIndexViewID(IntToCOLTYPE(type1), coltype);
+					addIndexToView(viewId, idx);					
+				}
 			}
 		}
 	}

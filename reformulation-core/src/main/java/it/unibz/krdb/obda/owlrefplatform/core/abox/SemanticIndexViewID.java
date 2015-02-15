@@ -1,5 +1,7 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
+import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+
 /*
  * #%L
  * ontop-reformulation-core
@@ -28,67 +30,51 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  */
 
 public class SemanticIndexViewID {
-
-	private final int type1;
-	private final int type2;
-	private final int table;
-	private final int hashCode;
-
 	
-	/**
-	 * Constructor for SI Records taken from the database
-	 * 
-	 * NOTE: use the @cite{checkTypeValue} and @cite{checkSITableValue} functions 
-	 *       to ensure that type1, type2 and table have valid values
-	 * 
-	 * @param table
-	 * @param type1
-	 * @param type2
-	 */
-	
-	public SemanticIndexViewID(int table, int type1, int type2) {
-		this.type1 = type1; 	
-		this.type2 = type2;  
-		this.table = table;
-		this.hashCode = (table + 1) + (type1 + 1) * 10000 + (type2 + 1) * 100000;
+	private final COL_TYPE type1, type2;
+
+	public SemanticIndexViewID(COL_TYPE type1, COL_TYPE type2) {
+		this.type1 = type1;
+		this.type2 = type2;
 	}
 	
-	
-	public int getType1() {
+	public SemanticIndexViewID(COL_TYPE type1) {
+		this.type1 = type1;
+		this.type2 = null;
+	}
+
+	public COL_TYPE getType1() {
 		return type1;
 	}
 
-	public int getType2() {
+	public COL_TYPE getType2() {
 		return type2;
-	}
-	
-	public int getTable() {
-		return table;
 	}
 	
 	@Override
 	public int hashCode() {
-		return hashCode;
+		return type1.hashCode() ^ ((type2 != null) ? type2.hashCode() << 16 : 0);
 	}
-
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof SemanticIndexViewID))
 			return false;
 		
 		SemanticIndexViewID r2 = (SemanticIndexViewID) obj;
-		return (this.table == r2.table) && (this.type1 == r2.type1) && (this.type2 == r2.type2);
+		return this.type1 == r2.type1 && this.type2 == r2.type2;
 	}
+	
 
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		b.append("T: ");
-		b.append(table);
 		b.append(" T1: ");
 		b.append(type1);
-		b.append(" T2: ");
-		b.append(type2);
+		if (type2 != null) {
+			b.append(" T2: ");
+			b.append(type2);
+		}
 		return b.toString();
 	}
 }

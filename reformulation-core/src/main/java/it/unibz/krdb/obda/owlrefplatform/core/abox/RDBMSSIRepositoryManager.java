@@ -538,7 +538,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		roleStm.addBatch();
 		
 		// Register non emptiness
-		SemanticIndexViewID viewId = SemanticIndexViewsManager.getViewId(o1.getType(), o2.getType());
+		SemanticIndexViewID viewId = new SemanticIndexViewID(o1.getType(), o2.getType());
 		views.addIndexToView(viewId, idx);
 	} 
 
@@ -631,7 +631,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		stm.addBatch();
 		
 		// register non-emptiness
-		SemanticIndexViewID viewId = SemanticIndexViewsManager.getViewId(subject.getType(), object.getType());
+		SemanticIndexViewID viewId = new SemanticIndexViewID(subject.getType(), object.getType());
 		views.addIndexToView(viewId, idx);
 	}
 	
@@ -654,7 +654,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		classStm.addBatch();
 	
 		// Register non emptiness
-		SemanticIndexViewID viewId = SemanticIndexViewsManager.getViewId(c1.getType());
+		SemanticIndexViewID viewId = new SemanticIndexViewID(c1.getType());
 		views.addIndexToView(viewId, conceptIndex);
 	}
 
@@ -897,16 +897,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		views.load(conn);
 	}
 
-	private static final COL_TYPE objectTypes[] = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.BNODE };
-
-	private static final COL_TYPE typesAndObjectTypes[] = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.BNODE, 
-		COL_TYPE.LITERAL, COL_TYPE.LITERAL_LANG, COL_TYPE.BOOLEAN, 
-		COL_TYPE.DATETIME, COL_TYPE.DATETIME_STAMP, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.INTEGER, COL_TYPE.INT,
-		COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER, 
-		COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER, COL_TYPE.FLOAT,  COL_TYPE.LONG, 
-		COL_TYPE.STRING };
-
-
 	
 	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException {
 
@@ -951,17 +941,14 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			 * each property can act as an object or data property of any type.
 			 */
 			
-			for (COL_TYPE obType1 : objectTypes) {
-				for (COL_TYPE obType2 : typesAndObjectTypes) {
-					SemanticIndexViewID viewId = SemanticIndexViewsManager.getViewId(obType1, obType2);
-					if (views.isViewEmpty(viewId, intervals))
-						continue;
-					
-					String sourceQuery = views.getSqlSource(viewId) + intervalsSqlFilter;
-					CQIE targetQuery = constructTargetQuery(ope.getPredicate(), obType1, obType2);
-					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-					result.add(basicmapping);		
-				}
+			for (SemanticIndexViewID viewId : views.getPropertyViewIDs()) {
+				if (views.isViewEmpty(viewId, intervals))
+					continue;
+				
+				String sourceQuery = views.getSqlSource(viewId) + intervalsSqlFilter;
+				CQIE targetQuery = constructTargetQuery(ope.getPredicate(), viewId.getType1(), viewId.getType2());
+				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+				result.add(basicmapping);		
 			}
 		}
 
@@ -993,17 +980,14 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			 * each property can act as an object or data property of any type.
 			 */
 			
-			for (COL_TYPE obType1 : objectTypes) {
-				for (COL_TYPE obType2 : typesAndObjectTypes) {
-					SemanticIndexViewID viewId = SemanticIndexViewsManager.getViewId(obType1, obType2);
-					if (views.isViewEmpty(viewId, intervals))
-						continue;
-					
-					String sourceQuery = views.getSqlSource(viewId) + intervalsSqlFilter;
-					CQIE targetQuery = constructTargetQuery(dpe.getPredicate(), obType1, obType2);
-					OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-					result.add(basicmapping);			
-				}
+			for (SemanticIndexViewID viewId : views.getPropertyViewIDs()) {
+				if (views.isViewEmpty(viewId, intervals))
+					continue;
+				
+				String sourceQuery = views.getSqlSource(viewId) + intervalsSqlFilter;
+				CQIE targetQuery = constructTargetQuery(dpe.getPredicate(), viewId.getType1(), viewId.getType2());
+				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+				result.add(basicmapping);			
 			}
 		}
 		
@@ -1028,13 +1012,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			List<Interval> intervals = range.getIntervals();
 			String intervalsSqlFilter = getIntervalString(intervals);
 
-			for (COL_TYPE obType1 : objectTypes) {
-				SemanticIndexViewID viewId = SemanticIndexViewsManager.getViewId(obType1);
+			for (SemanticIndexViewID viewId : views.getClassViewIDs()) {
 				if (views.isViewEmpty(viewId, intervals))
 					continue;
 				
 				String sourceQuery = views.getSqlSource(viewId) + intervalsSqlFilter;
-				CQIE targetQuery = constructTargetQuery(classNode.getPredicate(), obType1);
+				CQIE targetQuery = constructTargetQuery(classNode.getPredicate(), viewId.getType1());
 				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 				result.add(basicmapping);
 			}
