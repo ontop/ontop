@@ -20,16 +20,20 @@ package org.semanticweb.ontop.model;
  * #L%
  */
 
+
+
+
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
+import org.semanticweb.ontop.utils.JdbcTypeMapper;
 
 public interface OBDADataFactory extends Serializable {
-
-	//public SQLOBDAModel getOBDAModel();
+	
+	public DatatypeFactory getDatatypeFactory();
 
 	public CQIE getCQIE(Function head, Function... body );
 	
@@ -43,62 +47,59 @@ public interface OBDADataFactory extends Serializable {
 
 	public DatalogProgram getDatalogProgram(Collection<CQIE> rules);
 
+
+
+	public Function getTripleAtom(Term subject, Term predicate, Term object);
+
 	/**
 	 * Construct a {@link Predicate} object.
-	 * 
-	 * @param name
+	 *
+	 * @param uri
 	 *            the name of the predicate (defined as a URI).
 	 * @param arity
 	 *            the number of elements inside the predicate.
 	 * @return a predicate object.
 	 */
-
 	@Deprecated
 	public Predicate getPredicate(String uri, int arity);
 
-
-	public Predicate getPredicate(String uri, int arity, COL_TYPE[] types);
+	public Predicate getPredicate(String uri, COL_TYPE[] types);
 
 	public Predicate getObjectPropertyPredicate(String name);
 
-	public Predicate getDataPropertyPredicate(String name);
+	public Predicate getDataPropertyPredicate(String name, COL_TYPE type);
 
+	/**
+	 * with default type COL_TYPE.LITERAL
+	 * @param name
+	 * @return
+	 */
+	
+	public Predicate getDataPropertyPredicate(String name);
+	
 	public Predicate getClassPredicate(String name);
 
 
-	/*
-	 * Data types
-	 */
+	
 
-	public Predicate getDataTypePredicateUnsupported(String uri);
+	public JdbcTypeMapper getJdbcTypeMapper();
 
-	public Predicate getDataTypePredicateLiteral();
-
-	public Predicate getDataTypePredicateLiteralLang();
-
-	public Predicate getDataTypePredicateString();
-
-	public Predicate getDataTypePredicateInteger();
-
-	public Predicate getDataTypePredicateDecimal();
-
-	public Predicate getDataTypePredicateDouble();
-
-	public Predicate getDataTypePredicateDateTime();
-
-	public Predicate getDataTypePredicateBoolean();
+	
 
 	/*
 	 * Built-in function predicates
 	 */
 
-	public Predicate getUriTemplatePredicate(int arity);
-	
 	public Function getUriTemplate(Term...terms);
 
-	public Predicate getBNodeTemplatePredicate(int arity);
+	public Function getUriTemplate(List<Term> terms);
+	
+	public Function getUriTemplateForDatatype(String type);
+	
 
+	public Function getBNodeTemplate(List<Term> terms);
 
+	public Function getBNodeTemplate(Term... terms);
 	
 	/**
 	 * Construct a {@link Function} object. A function expression consists of
@@ -106,7 +107,7 @@ public interface OBDADataFactory extends Serializable {
 	 * 
 	 * @param functor
 	 *            the function symbol name.
-	 * @param arguments
+	 * @param terms
 	 *            a list of arguments.
 	 * @return the function object.
 	 */
@@ -135,6 +136,8 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getFunctionOR(Term term1, Term term2);
 
+	public Function getFunctionIsTrue(Term term);
+	
 	public Function getFunctionIsNull(Term term);
 
 	public Function getFunctionIsNotNull(Term term);
@@ -144,6 +147,7 @@ public interface OBDADataFactory extends Serializable {
 	public Function getFunctionLike(Term term1, Term term2);
 	
 	public Function getFunctionRegex(Term term1, Term term2, Term term3);
+	
 
 	/*
 	 * Numerical arithmethic functions
@@ -199,12 +203,8 @@ public interface OBDADataFactory extends Serializable {
 	
 	public BNode getConstantBNode(String name);
 
-	public Constant getConstantNULL();
-
-	public Constant getConstantTrue();
-
-	public Constant getConstantFalse();
-
+	public ValueConstant getBooleanConstant(boolean value);
+	
 	/**
 	 * Construct a {@link ValueConstant} object.
 	 * 
@@ -232,6 +232,7 @@ public interface OBDADataFactory extends Serializable {
 	 */
 	public ValueConstant getConstantLiteral(String value, Predicate.COL_TYPE type);
 
+
 	/**
 	 * Construct a {@link ValueConstant} object with a language tag.
 	 * <p>
@@ -249,6 +250,10 @@ public interface OBDADataFactory extends Serializable {
 	 */
 	public ValueConstant getConstantLiteral(String value, String language);
 
+	public Function getTypedTerm(Term value, String language);
+	public Function getTypedTerm(Term value, Term language);
+	public Function getTypedTerm(Term value, Predicate.COL_TYPE type);
+	
 	/**
 	 * Construct a {@link ValueConstant} object with a system-assigned name
 	 * that is automatically generated.
@@ -289,14 +294,9 @@ public interface OBDADataFactory extends Serializable {
 
 	public OBDASQLQuery getSQLQuery(String query);
 
-	public Predicate getTypePredicate(Predicate.COL_TYPE type);
+	//public Predicate getTypePredicate(Predicate.COL_TYPE type);
 
-	public Predicate getJoinPredicate();
+	public Function getSPARQLJoin(Term t1, Term t2);
 
-	public Predicate getLeftJoinPredicate();
-
-	public Function getStringVariable(String name);
-
-	public Function getIntegerVariable(String name);
-
+	public Function getSPARQLLeftJoin(Term t1, Term t2);	
 }

@@ -20,6 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.core.resultset;
  * #L%
  */
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.openrdf.query.algebra.ProjectionElem;
 import org.openrdf.query.algebra.ProjectionElemList;
 import org.openrdf.query.algebra.ValueExpr;
 import org.openrdf.query.algebra.Var;
+import org.semanticweb.ontop.model.BNode;
 import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.GraphResultSet;
 import org.semanticweb.ontop.model.OBDADataFactory;
@@ -47,12 +49,15 @@ import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.ClassAssertion;
 import org.semanticweb.ontop.ontology.DataPropertyAssertion;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.OClass;
 import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
 import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SesameConstructTemplate;
 
-//import com.hp.hpl.jena.sparql.syntax.Template;
+
 
 public class QuestGraphResultSet implements GraphResultSet {
 
@@ -60,8 +65,7 @@ public class QuestGraphResultSet implements GraphResultSet {
 
 	private TupleResultSet tupleResultSet;
 
-//	private Template template;
-	
+
 	private SesameConstructTemplate sesameTemplate;
 
 	List <ExtensionElem> extList = null;
@@ -139,48 +143,43 @@ public class QuestGraphResultSet implements GraphResultSet {
 		
 		for (int i = 0; i < size / 3; i++) {
 			
-			Constant subjectConstant = getConstant(peList.getElements().get(i*3), result);
+			ObjectConstant subjectConstant = (ObjectConstant) getConstant(peList.getElements().get(i*3), result);
 			Constant predicateConstant = getConstant(peList.getElements().get(i*3+1), result);
 			Constant objectConstant = getConstant(peList.getElements().get(i*3+2), result);
 
 			// Determines the type of assertion
 			String predicateName = predicateConstant.getValue();
 			if (predicateName.equals(OBDAVocabulary.RDF_TYPE)) {
-				Predicate concept = dfac.getClassPredicate(objectConstant
-						.getValue());
-				ClassAssertion ca = ofac.createClassAssertion(concept,
-						(ObjectConstant) subjectConstant);
+				OClass concept = ofac.createClass(objectConstant.getValue());
+				ClassAssertion ca = ofac.createClassAssertion(concept, subjectConstant);
 				tripleAssertions.add(ca);
-			} else {
+			} 
+			else {
 				if (objectConstant instanceof URIConstant) {
-					Predicate role = dfac
-							.getObjectPropertyPredicate(predicateName);
+					ObjectPropertyExpression prop = ofac.createObjectProperty(predicateName);
 					ObjectPropertyAssertion op = ofac
-							.createObjectPropertyAssertion(role,
-									(ObjectConstant) subjectConstant,
+							.createObjectPropertyAssertion(prop, subjectConstant,
 									(ObjectConstant) objectConstant);
 					tripleAssertions.add(op);
-				} else if (objectConstant instanceof BNodeConstantImpl) {
-					Predicate role = dfac
-							.getObjectPropertyPredicate(predicateName);
+				} 
+				else if (objectConstant instanceof BNode) {
+					ObjectPropertyExpression prop = ofac.createObjectProperty(predicateName);
 					ObjectPropertyAssertion op = ofac
-							.createObjectPropertyAssertion(role,
-									(ObjectConstant) subjectConstant,
+							.createObjectPropertyAssertion(prop, subjectConstant,
 									(ObjectConstant) objectConstant);
 					tripleAssertions.add(op);
-				} else {
-					Predicate attribute = dfac
-							.getDataPropertyPredicate(predicateName);
+				} 
+				else {
+					DataPropertyExpression prop = ofac.createDataProperty(predicateName);
 					DataPropertyAssertion dp = ofac
-							.createDataPropertyAssertion(attribute,
-									(ObjectConstant) subjectConstant,
+							.createDataPropertyAssertion(prop, subjectConstant,
 									(ValueConstant) objectConstant);
 					tripleAssertions.add(dp);
 				}
 			}
 		}
 		}
-		return (tripleAssertions);
+		return tripleAssertions;
 	}
 	
 	@Override

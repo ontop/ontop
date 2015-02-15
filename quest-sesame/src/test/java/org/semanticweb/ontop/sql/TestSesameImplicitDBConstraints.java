@@ -10,7 +10,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.openrdf.model.Model;
 import static org.junit.Assert.*;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
@@ -43,7 +43,7 @@ public class TestSesameImplicitDBConstraints {
 	static String uc_create = "src/test/resources/userconstraints/create.sql";
 
 	private Connection sqlConnection;
-	private OWLAPI3Translator translator = new OWLAPI3Translator();
+	private OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 	private QuestDBStatement qst = null;
 
 	/*

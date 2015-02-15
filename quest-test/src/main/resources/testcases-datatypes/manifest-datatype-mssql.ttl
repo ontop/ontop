@@ -1,0 +1,15 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "Quest datatype tests for MsSQL" ;
+    mf:include (
+       <numeric/manifest-mssql.ttl>
+    	<general/manifest-mssql.ttl>
+       <character/manifest-mssql.ttl>
+        <datetime/manifest-mssql.ttl>
+        <boolean/manifest-mssql.ttl>
+
+    ).

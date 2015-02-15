@@ -20,6 +20,7 @@ package org.semanticweb.ontop.owlapi3.directmapping;
  * #L%
  */
 
+
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
@@ -31,7 +32,11 @@ import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.OBDAModelImpl;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.OntologyFactory;
+import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.DataDefinition;
 import org.semanticweb.ontop.sql.JDBCConnectionManager;
@@ -46,12 +51,6 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-
-import javax.activation.DataSource;
-
-//import com.hp.hpl.jena.iri.impl.IRIFactoryImpl;
-//import it.unibz.krdb.obda.model.net.IRIFactory;
-
 
 
 /***
@@ -71,6 +70,7 @@ public class DirectMappingEngine {
 	private int mapidx = 1;
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
+	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
 	public DirectMappingEngine(String baseUri, int mapnr,
                                NativeQueryLanguageComponentFactory nativeQLFactory,
@@ -152,27 +152,27 @@ public class DirectMappingEngine {
             throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException{
 		OWLDataFactory dataFactory = manager.getOWLDataFactory();
 		
-		Set<Predicate> classset = model.getDeclaredClasses();
-		Set<Predicate> objectset = model.getDeclaredObjectProperties();
-		Set<Predicate> dataset = model.getDeclaredDataProperties();
+		Set<OClass> classset = model.getDeclaredClasses();
+		Set<ObjectPropertyExpression> objectset = model.getDeclaredObjectProperties();
+		Set<DataPropertyExpression> dataset = model.getDeclaredDataProperties();
 		
 		//Add all the classes
-		for(Iterator<Predicate> it = classset.iterator(); it.hasNext();){
-			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getName().toString()));
+		for(Iterator<OClass> it = classset.iterator(); it.hasNext(); ) {
+			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getPredicate().getName()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );
 		}
 		
 		//Add all the object properties
-		for(Iterator<Predicate> it = objectset.iterator(); it.hasNext();){
-			OWLObjectProperty newclass = dataFactory.getOWLObjectProperty(IRI.create(it.next().getName().toString()));
+		for(Iterator<ObjectPropertyExpression> it = objectset.iterator(); it.hasNext();){
+			OWLObjectProperty newclass = dataFactory.getOWLObjectProperty(IRI.create(it.next().getPredicate().getName().toString()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );
 		}
 		
 		//Add all the data properties
-		for(Iterator<Predicate> it = dataset.iterator(); it.hasNext();){
-			OWLDataProperty newclass = dataFactory.getOWLDataProperty(IRI.create(it.next().getName().toString()));
+		for(Iterator<DataPropertyExpression> it = dataset.iterator(); it.hasNext();){
+			OWLDataProperty newclass = dataFactory.getOWLDataProperty(IRI.create(it.next().getPredicate().getName().toString()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );
 		}
@@ -255,12 +255,12 @@ public class DirectMappingEngine {
 				CQIE rule = (CQIE) q;
 				for (Function f : rule.getBody()) {
 					if (f.getArity() == 1)
-                        newModel.declarePredicate(f.getFunctionSymbol());
+						model.declareClass(ofac.createClass(f.getFunctionSymbol().getName()));
 					else if (f.getFunctionSymbol().getType(1)
 							.equals(COL_TYPE.OBJECT))
-                        newModel.declareObjectProperty(f.getFunctionSymbol());
+						model.declareObjectProperty(ofac.createObjectProperty(f.getFunctionSymbol().getName()));
 					else
-                        newModel.declareDataProperty(f.getFunctionSymbol());
+						model.declareDataProperty(ofac.createDataProperty(f.getFunctionSymbol().getName()));
 				}
 			}
 		}

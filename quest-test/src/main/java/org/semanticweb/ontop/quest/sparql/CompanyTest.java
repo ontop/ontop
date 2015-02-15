@@ -180,8 +180,8 @@ public class CompanyTest extends TestCase {
 //
 //				}
 			assertTrue(rs2.nextRow());
-			OWLObject ind1 = rs2.getOWLNamedIndividual("y");
-			OWLObject ind2 = rs2.getOWLNamedIndividual("z");
+			OWLObject ind1 = rs2.getOWLIndividual("y");
+			OWLObject ind2 = rs2.getOWLIndividual("z");
 			
 			assertEquals("<http://it.unibz.krdb/obda/test/company#HR>", ind1.toString());
 			assertEquals("<http://it.unibz.krdb/obda/test/company#mark>", ind2.toString());

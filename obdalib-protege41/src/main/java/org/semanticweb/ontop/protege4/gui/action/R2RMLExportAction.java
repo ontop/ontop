@@ -37,6 +37,11 @@ import org.semanticweb.ontop.r2rml.R2RMLWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.net.URI;
+
 public class R2RMLExportAction extends ProtegeAction {
 
 	private static final long serialVersionUID = -1211395039869926309L;
@@ -61,19 +66,30 @@ public class R2RMLExportAction extends ProtegeAction {
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		
-		final OWLWorkspace workspace = editorKit.getWorkspace();	
-		  URI sourceID = obdaModel.getSources().get(0).getSourceID();
-		  
-		  final JFileChooser fc = new JFileChooser();
-		  fc.setSelectedFile(new File(sourceID+"-mappings.ttl"));
-          fc.showSaveDialog(workspace);
-          File file = fc.getSelectedFile();
-          
-    	  
-		R2RMLWriter writer = new R2RMLWriter(obdaModel.getCurrentImmutableOBDAModel(), sourceID,
-                modelManager.getActiveOntology());
-		writer.write(file);
+
+        try {
+		final OWLWorkspace workspace = editorKit.getWorkspace();
+            if (obdaModel.getSources().isEmpty())
+            {
+                JOptionPane.showMessageDialog(workspace, "The data source is missing. Create one in ontop Mappings. ");
+            }
+            else {
+                URI sourceID = obdaModel.getSources().get(0).getSourceID();
+
+                final JFileChooser fc = new JFileChooser();
+                fc.setSelectedFile(new File(sourceID + "-mappings.ttl"));
+                fc.showSaveDialog(workspace);
+                File file = fc.getSelectedFile();
+
+
+				R2RMLWriter writer = new R2RMLWriter(obdaModel.getCurrentImmutableOBDAModel(), sourceID,
+						modelManager.getActiveOntology());
+                writer.write(file);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "An error occured. For more info, see the logs.");
+            log.error("Error during r2rml export. \n"+ex.getMessage()+"\n"+ex.getLocalizedMessage());
+        }
 
 	}
 }

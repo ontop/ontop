@@ -46,6 +46,6 @@ public class SparqlKeyword {
 	public static final String LESS_THAN = "<";
 	public static final String LESS_THAN_AND_EQUALS = "<=";
 	public static final String ADD = "+";
-	public static final String SUBSTRACT = "-";
+	public static final String SUBTRACT = "-";
 	public static final String MULTIPLY = "*";
 }

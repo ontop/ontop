@@ -23,6 +23,8 @@ package org.semanticweb.ontop.model.impl;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+
+import java.util.Collections;
 import java.util.Set;
 
 import org.semanticweb.ontop.model.URIConstant;
@@ -32,13 +34,11 @@ import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 /**
  * Provides a storage to put the URI constant.
  */
-public class URIConstantImpl extends AbstractLiteral implements URIConstant {
+public class URIConstantImpl implements URIConstant {
 
 	private static final long serialVersionUID = -1263974895010238519L;
-
-
+	
 	private final int identifier;
-
 	private final String iristr;
 
 	protected URIConstantImpl(String iri) {
@@ -62,7 +62,7 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 
 	@Override
 	public String getURI() {
-		return this.iristr;
+		return iristr;
 	}
 
 	@Override
@@ -72,19 +72,13 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 
 	@Override
 	public String toString() {
-		return TermUtil.toString(this);
+		return "<" + iristr + ">";
 	}
 
 	@Override
 	public Set<Variable> getReferencedVariables() {
-		return new LinkedHashSet<Variable>();
+		return Collections.emptySet();
 	}
-
-	@Override
-	public Map<Variable, Integer> getVariableCount() {
-		return new HashMap<Variable, Integer>();
-	}
-
 
 	@Override
 	public COL_TYPE getType() {
@@ -92,12 +86,12 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 	}
 
 	@Override
-	public String getValue() {
+	public String getName() {
 		return iristr;
 	}
 
-	@Override
-	public String getLanguage() {
-		return null;
+	@Deprecated
+	public String getValue() {
+		return iristr;
 	}
 }

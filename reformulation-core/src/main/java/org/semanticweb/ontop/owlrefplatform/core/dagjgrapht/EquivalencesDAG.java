@@ -18,6 +18,8 @@ public interface EquivalencesDAG<T> extends Iterable<Equivalences<T>> {
 
 	Set<Equivalences<T>> getDirectSuper(Equivalences<T> v);
 
+	Set<T> getSubRepresentatives(T v);
+	
 	/**
 	 * Reflexive and transitive closure of the super-description relation
 	 * @param v: an equivalence set of a description (a property or a class)

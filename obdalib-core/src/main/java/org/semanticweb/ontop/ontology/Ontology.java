@@ -21,74 +21,82 @@ package org.semanticweb.ontop.ontology;
  */
 
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import org.semanticweb.ontop.model.Predicate;
 
 public interface Ontology extends Cloneable, Serializable {
 
-	public void addAssertion(Axiom assertion);
-
-	public void addAssertions(Collection<Axiom> assertion);
-
-	public void addEntity(Predicate c);
+	@Deprecated
+	public void addSubClassOfAxiomWithReferencedEntities(DataRangeExpression concept1, DataRangeExpression concept2);
 	
-	public void addConcept(Predicate c);
+	@Deprecated
+	public void addSubClassOfAxiomWithReferencedEntities(ClassExpression concept1, ClassExpression concept2);
 
-	public void addRole(Predicate role);
+	@Deprecated
+	public void addSubPropertyOfAxiomWithReferencedEntities(ObjectPropertyExpression included, ObjectPropertyExpression including);
 
-	public void addConcepts(Collection<Predicate> cd);
+	@Deprecated
+	public void addSubPropertyOfAxiomWithReferencedEntities(DataPropertyExpression included, DataPropertyExpression including);
 
-	public void addRoles(Collection<Predicate> rd);
-
-	public Set<Predicate> getRoles();
-
-	public Set<Predicate> getConcepts();
 	
-	public Set<Predicate> getVocabulary();
+	
+	
+	public void addSubClassOfAxiom(ClassExpression concept1, ClassExpression concept2);
 
-	public Set<Axiom> getAssertions();
+	public void addSubClassOfAxiom(DataRangeExpression concept1, DataRangeExpression concept2);
+	
+	public void addSubPropertyOfAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including);
 
-	public boolean referencesPredicate(Predicate pred);
+	public void addSubPropertyOfAxiom(DataPropertyExpression included, DataPropertyExpression including);
 
-	public boolean referencesPredicates(Collection<Predicate> preds);
+	public void addDisjointClassesAxiom(Set<ClassExpression> classes);
 
-	/***
-	 * This will retrun all the assertions whose right side concept description
-	 * refers to the predicate 'pred'
-	 */
-	public Set<SubDescriptionAxiom> getByIncluding(Predicate pred);
+	public void addDisjointObjectPropertiesAxiom(Set<ObjectPropertyExpression> properties);
+	
+	public void addDisjointDataPropertiesAxiom(Set<DataPropertyExpression> properties);
 
-	/***
-	 * As before but it will only return assetions where the right side is an
-	 * existential role concept description
-	 */
-	public Set<SubDescriptionAxiom> getByIncludingExistOnly(Predicate pred);
+	public void addFunctionalObjectPropertyAxiom(ObjectPropertyExpression prop);
 
-	public Set<SubDescriptionAxiom> getByIncludingNoExist(Predicate pred);
+	public void addFunctionalDataPropertyAxiom(DataPropertyExpression prop);
+	
+	public void addClassAssertion(ClassAssertion assertion);
 
-	public Set<SubDescriptionAxiom> getByIncluded(Predicate pred);
+	public void addObjectPropertyAssertion(ObjectPropertyAssertion assertion);
 
-	public String getUri();
+	public void addDataPropertyAssertion(DataPropertyAssertion assertion);
 
-	/**
-	 * This will saturate the ontology, i.e. it will make sure that all axioms
-	 * implied by this ontology are asserted in the ontology and accessible
-	 * through the methods of the ontology.
-	 */
-	public void saturate();
-
+	
+	
 	public Ontology clone();
 
-	public void addEntities(Set<Predicate> referencedEntities);
+	
+	public OntologyVocabulary getVocabulary();
+	
+	
+	public List<BinaryAxiom<ClassExpression>> getSubClassAxioms();
 
-	/**
-	 * @return
-	 */
-	public Set<Assertion> getABox();
+	public List<BinaryAxiom<DataRangeExpression>> getSubDataRangeAxioms();
 	
-	public Set<PropertyFunctionalAxiom> getFunctionalPropertyAxioms();
+	public List<BinaryAxiom<ObjectPropertyExpression>> getSubObjectPropertyAxioms();
+
+	public List<BinaryAxiom<DataPropertyExpression>> getSubDataPropertyAxioms();
 	
-	public Set<DisjointDescriptionAxiom> getDisjointDescriptionAxioms();
+	public List<NaryAxiom<ClassExpression>> getDisjointClassesAxioms();
+	
+	public List<NaryAxiom<ObjectPropertyExpression>> getDisjointObjectPropertiesAxioms();
+
+	public List<NaryAxiom<DataPropertyExpression>> getDisjointDataPropertiesAxioms();
+
+	public Set<ObjectPropertyExpression> getFunctionalObjectProperties();
+
+	public Set<DataPropertyExpression> getFunctionalDataProperties();
+	
+	public List<ClassAssertion> getClassAssertions();
+
+	public List<ObjectPropertyAssertion> getObjectPropertyAssertions();
+	
+	public List<DataPropertyAssertion> getDataPropertyAssertions();
+
 }

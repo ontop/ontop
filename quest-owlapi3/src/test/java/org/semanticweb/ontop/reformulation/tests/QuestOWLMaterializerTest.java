@@ -20,6 +20,16 @@ package org.semanticweb.ontop.reformulation.tests;
  * #L%
  */
 
+import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.ontology.Assertion;
+import org.semanticweb.ontop.ontology.ClassAssertion;
+import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
+import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
+import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -40,16 +50,6 @@ import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.mapping.MappingParser;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.ontology.Assertion;
-import org.semanticweb.ontop.ontology.ClassAssertion;
-import org.semanticweb.ontop.ontology.DataPropertyAssertion;
-import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -144,13 +144,14 @@ public class QuestOWLMaterializerTest extends TestCase {
 			int objAss = 0;
 			while (iterator.hasNext()) {
 				Assertion assertion = iterator.next();
-				if (assertion instanceof ClassAssertion) {
+				if (assertion instanceof ClassAssertion) 
 					classAss++;
-				} else if (assertion instanceof DataPropertyAssertion) {
-					propAss++;
-				} else if (assertion instanceof ObjectPropertyAssertion) {
+				
+				else if (assertion instanceof ObjectPropertyAssertion) 
 					objAss++;
-				}
+				
+				else // DataPropertyAssertion
+					propAss++;
 			}
 			Assert.assertEquals(3, classAss); //3 data rows for T1
 			Assert.assertEquals(21, propAss); //7 tables * 3 data rows each T2-T8
@@ -169,8 +170,10 @@ public class QuestOWLMaterializerTest extends TestCase {
 			File fo = new File("src/test/resources/test/materializer/MaterializeTest.owl");
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLOntology owl_onto = manager.loadOntologyFromOntologyDocument(fo);
-			Ontology onto =  new OWLAPI3Translator().translate(owl_onto);
-			System.out.println(onto.getAssertions());
+			Ontology onto =  OWLAPI3TranslatorUtility.translate(owl_onto);
+			System.out.println(onto.getSubClassAxioms());
+			System.out.println(onto.getSubObjectPropertyAxioms());
+			System.out.println(onto.getSubDataPropertyAxioms());
 			
 			QuestMaterializer mat = new QuestMaterializer(model, onto, prefs);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
@@ -179,13 +182,14 @@ public class QuestOWLMaterializerTest extends TestCase {
 			int objAss = 0;
 			while (iterator.hasNext()) {
 				Assertion assertion = iterator.next();
-				if (assertion instanceof ClassAssertion) {
+				if (assertion instanceof ClassAssertion) 
 					classAss++;
-				} else if (assertion instanceof DataPropertyAssertion) {
-					propAss++;
-				} else if (assertion instanceof ObjectPropertyAssertion) {
+	
+				else if (assertion instanceof ObjectPropertyAssertion) 
 					objAss++;
-				}
+				
+				else // DataPropertyAssertion
+					propAss++;
 			}
 			Assert.assertEquals(6, classAss); //3 data rows x2 for subclass prop
 			Assert.assertEquals(42, propAss); //8 tables * 3 data rows each x2 for subclass

@@ -203,10 +203,16 @@ public abstract class QuestDatatypeParent extends TestCase {
 		}
 		int counter = 0;
 		while (tuples.hasNext()) {
-			counter++;
 			BindingSet bs = tuples.next();
-			String msg = String.format("x: %s, y: %s\n", bs.getValue("x"), bs.getValue("y"));
-			logger.info(msg);
+			Set<String> names = bs.getBindingNames();
+			StringBuilder b = new StringBuilder();
+			for (String name: names) {
+				b.append(name + "=" + bs.getValue(name) + ", ");
+			}
+//			String msg = String.format("x: %s, y: %s\n", bs.getValue("x"), bs.getValue("y"));
+			logger.debug(b.toString());
+			counter++;
+			
 		}
 		return counter;
 	}

@@ -20,7 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
-import java.util.EventObject;
+
 
 public interface RepositoryChangedListener {
 

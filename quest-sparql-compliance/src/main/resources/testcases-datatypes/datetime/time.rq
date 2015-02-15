@@ -1,7 +1,8 @@
 PREFIX : <http://ontop.inf.unibz.it/test/datatypes#>
+PREFIX xsd:	<http://www.w3.org/2001/XMLSchema#>
 
 SELECT ?x ?y
 WHERE {
    ?x a :Row; :hasTime ?y
-   FILTER ( ?y = "10:12:10" ) .
+   FILTER ( ?y = "10:12:10"^^xsd:time ) .
 }

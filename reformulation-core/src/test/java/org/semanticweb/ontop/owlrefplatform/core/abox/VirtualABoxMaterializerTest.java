@@ -20,6 +20,15 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
  * #L%
  */
 
+import org.semanticweb.ontop.model.DatatypeFactory;
+import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDADataSource;
+import org.semanticweb.ontop.model.OBDALibConstants;
+import org.semanticweb.ontop.model.OBDAMappingAxiom;
+import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.model.Predicate;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.net.URI;
@@ -36,20 +45,23 @@ import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.injection.OBDAFactoryWithException;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.PrefixManager;
-import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.sql.JDBCConnectionManager;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import junit.framework.TestCase;
 
 public class VirtualABoxMaterializerTest extends TestCase {
 
-    private final OBDADataFactory oldFactory = OBDADataFactoryImpl.getInstance();
+	private final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private final DatatypeFactory dtfac	= OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 	private final NativeQueryLanguageComponentFactory nativeQLFactory;
-    private final OBDAFactoryWithException obdaFactory;
+	private final OBDAFactoryWithException obdaFactory;
 
     public VirtualABoxMaterializerTest() {
         Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
@@ -91,7 +103,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		OBDADataSource source = oldFactory.getDataSource(URI.create("http://www.obda.org/testdb1"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb1"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -120,33 +132,33 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
-		Predicate q = oldFactory.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
+		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
-		headTerms.add(oldFactory.getVariable("fn"));
-		headTerms.add(oldFactory.getVariable("ln"));
-		headTerms.add(oldFactory.getVariable("age"));
-		headTerms.add(oldFactory.getVariable("schooluri"));
+		headTerms.add(fac.getVariable("fn"));
+		headTerms.add(fac.getVariable("ln"));
+		headTerms.add(fac.getVariable("age"));
+		headTerms.add(fac.getVariable("schooluri"));
 
-		Function head = oldFactory.getFunction(q, headTerms);
+		Function head = fac.getFunction(q, headTerms);
 
-		Term objectTerm = oldFactory.getFunction(oldFactory.getPredicate("http://schools.com/persons", 2), oldFactory.getVariable("fn"),
-				oldFactory.getVariable("ln"));
+		Term objectTerm = fac.getFunction(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
+				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-		Predicate person = oldFactory.getPredicate("Person", 1);
-		Predicate fn = oldFactory.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = oldFactory.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = oldFactory.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = oldFactory.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = oldFactory.getPredicate("School", 1);
-		body.add(oldFactory.getFunction(person, objectTerm));
-		body.add(oldFactory.getFunction(fn, objectTerm, oldFactory.getVariable("fn")));
-		body.add(oldFactory.getFunction(ln, objectTerm, oldFactory.getVariable("ln")));
-		body.add(oldFactory.getFunction(age, objectTerm, oldFactory.getVariable("age")));
-		body.add(oldFactory.getFunction(hasschool, objectTerm, oldFactory.getVariable("schooluri")));
-		body.add(oldFactory.getFunction(school, oldFactory.getVariable("schooluri")));
+		Predicate person = fac.getClassPredicate("Person");
+		Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+		Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+		Predicate age = fac.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
+		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
+		Predicate school = fac.getClassPredicate("School");
+		body.add(fac.getFunction(person, objectTerm));
+		body.add(fac.getFunction(fn, objectTerm, fac.getVariable("fn")));
+		body.add(fac.getFunction(ln, objectTerm, fac.getVariable("ln")));
+		body.add(fac.getFunction(age, objectTerm, fac.getVariable("age")));
+		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
+		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = oldFactory.getRDBMSMappingAxiom(sql, oldFactory.getCQIE(head, body));
+		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
 
         Set<OBDADataSource> dataSources = new HashSet<>();
         Map<URI, ImmutableList<OBDAMappingAxiom>> mappings = new HashMap<>();
@@ -186,7 +198,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
             String username = "sa";
             String password = "";
 
-            OBDADataSource source = oldFactory.getDataSource(URI.create("http://www.obda.org/testdb3"));
+            OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb3"));
             source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
             source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
             source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -211,7 +223,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
             dataSources.add(source);
 
-            OBDADataSource source2 = oldFactory.getDataSource(URI.create("http://www.obda.org/testdb2"));
+            OBDADataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb2"));
             source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
             source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
             source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -226,33 +238,33 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
             String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
-            Predicate q = oldFactory.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
+            Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
             List<Term> headTerms = new LinkedList<Term>();
-            headTerms.add(oldFactory.getVariable("fn"));
-            headTerms.add(oldFactory.getVariable("ln"));
-            headTerms.add(oldFactory.getVariable("age"));
-            headTerms.add(oldFactory.getVariable("schooluri"));
+            headTerms.add(fac.getVariable("fn"));
+            headTerms.add(fac.getVariable("ln"));
+            headTerms.add(fac.getVariable("age"));
+            headTerms.add(fac.getVariable("schooluri"));
 
-            Function head = oldFactory.getFunction(q, headTerms);
+            Function head = fac.getFunction(q, headTerms);
 
-            Term objectTerm = oldFactory.getFunction(oldFactory.getPredicate("http://schools.com/persons", 2), oldFactory.getVariable("fn"),
-                    oldFactory.getVariable("ln"));
+            Term objectTerm = fac.getFunction(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
+                    fac.getVariable("ln"));
 
-            List<Function> body = new LinkedList<Function>();
-            Predicate person = oldFactory.getPredicate("Person", 1);
-            Predicate fn = oldFactory.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-            Predicate ln = oldFactory.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-            Predicate age = oldFactory.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-            Predicate hasschool = oldFactory.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-            Predicate school = oldFactory.getPredicate("School", 1);
-            body.add(oldFactory.getFunction(person, objectTerm));
-            body.add(oldFactory.getFunction(fn, objectTerm, oldFactory.getVariable("fn")));
-            body.add(oldFactory.getFunction(ln, objectTerm, oldFactory.getVariable("ln")));
-            body.add(oldFactory.getFunction(age, objectTerm, oldFactory.getVariable("age")));
-            body.add(oldFactory.getFunction(hasschool, objectTerm, oldFactory.getVariable("schooluri")));
-            body.add(oldFactory.getFunction(school, oldFactory.getVariable("schooluri")));
+		List<Function> body = new LinkedList<Function>();
+	Predicate person = fac.getClassPredicate("Person");
+	Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+	Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+		Predicate age = fac.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
+		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
+		Predicate school = fac.getClassPredicate("School");
+		body.add(fac.getFunction(person, objectTerm));
+		body.add(fac.getFunction(fn, objectTerm, fac.getVariable("fn")));
+		body.add(fac.getFunction(ln, objectTerm, fac.getVariable("ln")));
+		body.add(fac.getFunction(age, objectTerm, fac.getVariable("age")));
+		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
+		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-            OBDAMappingAxiom map1 = oldFactory.getRDBMSMappingAxiom(sql, oldFactory.getCQIE(head, body));
+            OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
 
             mappingIndex.put(source.getSourceID(), ImmutableList.of(map1));
             mappingIndex.put(source2.getSourceID(), ImmutableList.of(map1));
@@ -288,7 +300,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		OBDADataSource source = oldFactory.getDataSource(URI.create("http://www.obda.org/testdb4"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb4"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -313,7 +325,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
         dataSources.add(source);
 
-		OBDADataSource source2 = oldFactory.getDataSource(URI.create("http://www.obda.org/testdb5"));
+		OBDADataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb5"));
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -322,7 +334,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source2.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
         dataSources.add(source2);
 
-		OBDADataSource source3 = oldFactory.getDataSource(URI.create("http://www.obda.org/testdb6"));
+		OBDADataSource source3 = fac.getDataSource(URI.create("http://www.obda.org/testdb6"));
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -337,33 +349,33 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
-		Predicate q = oldFactory.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
+		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
-		headTerms.add(oldFactory.getVariable("fn"));
-		headTerms.add(oldFactory.getVariable("ln"));
-		headTerms.add(oldFactory.getVariable("age"));
-		headTerms.add(oldFactory.getVariable("schooluri"));
+		headTerms.add(fac.getVariable("fn"));
+		headTerms.add(fac.getVariable("ln"));
+		headTerms.add(fac.getVariable("age"));
+		headTerms.add(fac.getVariable("schooluri"));
 
-		Function head = oldFactory.getFunction(q, headTerms);
+		Function head = fac.getFunction(q, headTerms);
 
-		Term objectTerm = oldFactory.getFunction(oldFactory.getPredicate("http://schools.com/persons", 2), oldFactory.getVariable("fn"),
-				oldFactory.getVariable("ln"));
+		Term objectTerm = fac.getFunction(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
+				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-		Predicate person = oldFactory.getPredicate("Person", 1);
-		Predicate fn = oldFactory.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = oldFactory.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = oldFactory.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = oldFactory.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = oldFactory.getPredicate("School", 1);
-		body.add(oldFactory.getFunction(person, objectTerm));
-		body.add(oldFactory.getFunction(fn, objectTerm, oldFactory.getVariable("fn")));
-		body.add(oldFactory.getFunction(ln, objectTerm, oldFactory.getVariable("ln")));
-		body.add(oldFactory.getFunction(age, objectTerm, oldFactory.getVariable("age")));
-		body.add(oldFactory.getFunction(hasschool, objectTerm, oldFactory.getVariable("schooluri")));
-		body.add(oldFactory.getFunction(school, oldFactory.getVariable("schooluri")));
+	Predicate person = fac.getClassPredicate("Person");
+	Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+	Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+		Predicate age = fac.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
+		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
+		Predicate school = fac.getClassPredicate("School");
+		body.add(fac.getFunction(person, objectTerm));
+		body.add(fac.getFunction(fn, objectTerm, fac.getVariable("fn")));
+		body.add(fac.getFunction(ln, objectTerm, fac.getVariable("ln")));
+		body.add(fac.getFunction(age, objectTerm, fac.getVariable("age")));
+		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
+		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = oldFactory.getRDBMSMappingAxiom(sql, oldFactory.getCQIE(head, body));
+		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
 
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
         OBDAModel model = obdaFactory.createOBDAModel(dataSources, mappingIndex, prefixManager);
@@ -393,7 +405,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		OBDADataSource source = oldFactory.getDataSource(URI.create("http://www.obda.org/testdb7"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb7"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -418,7 +430,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
         dataSources.add(source);
 
-		OBDADataSource source2 = oldFactory.getDataSource(URI.create("http://www.obda.org/testdb8"));
+		OBDADataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb8"));
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -427,7 +439,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source2.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
         dataSources.add(source2);
 
-		OBDADataSource source3 = oldFactory.getDataSource(URI.create("http://www.obda.org/testdb9"));
+		OBDADataSource source3 = fac.getDataSource(URI.create("http://www.obda.org/testdb9"));
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -463,7 +475,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String username = "sa";
 		String password = "";
 
-		OBDADataSource source = oldFactory.getDataSource(URI.create("http://www.obda.org/testdb11"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb11"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -488,7 +500,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		dataSources.add(source);
 
-		OBDADataSource source2 = oldFactory.getDataSource(URI.create("http://www.obda.org/testdb12"));
+		OBDADataSource source2 = fac.getDataSource(URI.create("http://www.obda.org/testdb12"));
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source2.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -497,7 +509,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		source2.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
         dataSources.add(source2);
 
-		OBDADataSource source3 = oldFactory.getDataSource(URI.create("http://www.obda.org/testdb13"));
+		OBDADataSource source3 = fac.getDataSource(URI.create("http://www.obda.org/testdb13"));
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source3.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -512,33 +524,33 @@ public class VirtualABoxMaterializerTest extends TestCase {
 
 		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
-		Predicate q = oldFactory.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
+		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
-		headTerms.add(oldFactory.getVariable("fn"));
-		headTerms.add(oldFactory.getVariable("ln"));
-		headTerms.add(oldFactory.getVariable("age"));
-		headTerms.add(oldFactory.getVariable("schooluri"));
+		headTerms.add(fac.getVariable("fn"));
+		headTerms.add(fac.getVariable("ln"));
+		headTerms.add(fac.getVariable("age"));
+		headTerms.add(fac.getVariable("schooluri"));
 
-		Function head = oldFactory.getFunction(q, headTerms);
+		Function head = fac.getFunction(q, headTerms);
 
-		Term objectTerm = oldFactory.getFunction(oldFactory.getPredicate("http://schools.com/persons", 2), oldFactory.getVariable("fn"),
-				oldFactory.getVariable("ln"));
+		Term objectTerm = fac.getFunction(fac.getPredicate("http://schools.com/persons", 2), fac.getVariable("fn"),
+				fac.getVariable("ln"));
 
 		List<Function> body = new LinkedList<Function>();
-		Predicate person = oldFactory.getPredicate("Person", 1);
-		Predicate fn = oldFactory.getPredicate("fn", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate ln = oldFactory.getPredicate("ln", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate age = oldFactory.getPredicate("age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL });
-		Predicate hasschool = oldFactory.getPredicate("hasschool", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		Predicate school = oldFactory.getPredicate("School", 1);
-		body.add(oldFactory.getFunction(person, objectTerm));
-		body.add(oldFactory.getFunction(fn, objectTerm, oldFactory.getVariable("fn")));
-		body.add(oldFactory.getFunction(ln, objectTerm, oldFactory.getVariable("ln")));
-		body.add(oldFactory.getFunction(age, objectTerm, oldFactory.getVariable("age")));
-		body.add(oldFactory.getFunction(hasschool, objectTerm, oldFactory.getVariable("schooluri")));
-		body.add(oldFactory.getFunction(school, oldFactory.getVariable("schooluri")));
+	Predicate person = fac.getClassPredicate("Person");
+	Predicate fn = fac.getDataPropertyPredicate("fn", COL_TYPE.LITERAL);
+	Predicate ln = fac.getDataPropertyPredicate("ln", COL_TYPE.LITERAL);
+		Predicate age = fac.getDataPropertyPredicate("age", COL_TYPE.LITERAL);
+		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
+		Predicate school = fac.getClassPredicate("School");
+		body.add(fac.getFunction(person, objectTerm));
+		body.add(fac.getFunction(fn, objectTerm, fac.getVariable("fn")));
+		body.add(fac.getFunction(ln, objectTerm, fac.getVariable("ln")));
+		body.add(fac.getFunction(age, objectTerm, fac.getVariable("age")));
+		body.add(fac.getFunction(hasschool, objectTerm, fac.getVariable("schooluri")));
+		body.add(fac.getFunction(school, fac.getVariable("schooluri")));
 
-		OBDAMappingAxiom map1 = oldFactory.getRDBMSMappingAxiom(sql, oldFactory.getCQIE(head, body));
+		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql, fac.getCQIE(head, body));
 
         mappingIndex.put(source2.getSourceID(), ImmutableList.of(map1));
 
@@ -570,7 +582,7 @@ public class VirtualABoxMaterializerTest extends TestCase {
         final Set<OBDADataSource> dataSources = new HashSet<>();
         final Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex = new HashMap<>();
 
-		OBDADataSource source = oldFactory.getDataSource(URI.create("http://www.obda.org/testdb100"));
+		OBDADataSource source = fac.getDataSource(URI.create("http://www.obda.org/testdb100"));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_DRIVER, driver);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, url);
@@ -604,47 +616,46 @@ public class VirtualABoxMaterializerTest extends TestCase {
 		String sql5 = "SELECT \"fn\", \"ln\", \"schooluri\" FROM \"data\"";
 		String sql6 = "SELECT \"fn\", \"ln\", \"schooluri\" FROM \"data\"";
 
-		Predicate q = oldFactory.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
+		Predicate q = fac.getPredicate(OBDALibConstants.QUERY_HEAD, 4);
 		List<Term> headTerms = new LinkedList<Term>();
 		
-		final Term firstNameVariable = oldFactory.getFunction(oldFactory.getDataTypePredicateString(), oldFactory.getVariable("fn"));
-		final Term lastNameVariable = oldFactory.getFunction(oldFactory.getDataTypePredicateString(), oldFactory.getVariable("ln"));
-		final Term ageVariable = oldFactory.getFunction(oldFactory.getDataTypePredicateInteger(), oldFactory.getVariable("age"));
-		final Term schoolUriVariable = oldFactory.getFunction(oldFactory.getDataTypePredicateString(), oldFactory.getVariable("schooluri"));
+		final Term firstNameVariable = fac.getTypedTerm(fac.getVariable("fn"), COL_TYPE.STRING);
+		final Term lastNameVariable = fac.getTypedTerm(fac.getVariable("ln"), COL_TYPE.STRING);
+		final Term ageVariable = fac.getTypedTerm(fac.getVariable("age"), COL_TYPE.INTEGER);
+		final Term schoolUriVariable = fac.getTypedTerm(fac.getVariable("schooluri"), COL_TYPE.STRING);
 		
 		headTerms.add(firstNameVariable);
 		headTerms.add(lastNameVariable);
 		headTerms.add(ageVariable);
 		headTerms.add(schoolUriVariable);
 
-		Function head = oldFactory.getFunction(q, headTerms);
+		Function head = fac.getFunction(q, headTerms);
 
-		Term objectTerm = oldFactory.getFunction(oldFactory.getUriTemplatePredicate(2),
-				oldFactory.getConstantLiteral("http://schools.com/persons{}{}"),
+		Term objectTerm = fac.getUriTemplate(fac.getConstantLiteral("http://schools.com/persons{}{}"),  // R: was binary -- why?
 				firstNameVariable,
 				lastNameVariable);
 
 //		List<Function> body = new LinkedList<Function>();
-		Predicate person = oldFactory.getClassPredicate("Person");
-		Predicate fn = oldFactory.getDataPropertyPredicate("firstn");
-		Predicate ln = oldFactory.getDataPropertyPredicate("lastn");
-		Predicate age = oldFactory.getDataPropertyPredicate("agee");
-		Predicate hasschool = oldFactory.getDataPropertyPredicate("hasschool");
-		Predicate school = oldFactory.getClassPredicate("School");
-//		body.add(oldFactory.getFunctionalTerm(person, objectTerm));
-//		body.add(oldFactory.getFunctionalTerm(fn, objectTerm, oldFactory.getVariable("fn")));
-//		body.add(oldFactory.getFunctionalTerm(ln, objectTerm, oldFactory.getVariable("ln")));
-//		body.add(oldFactory.getFunctionalTerm(age, objectTerm, oldFactory.getVariable("age")));
-//		body.add(oldFactory.getFunctionalTerm(hasschool, objectTerm, oldFactory.getVariable("schooluri")));
-//		body.add(oldFactory.getFunctionalTerm(school, oldFactory.getVariable("schooluri")));
+		Predicate person = fac.getClassPredicate("Person");
+		Predicate fn = fac.getDataPropertyPredicate("firstn", COL_TYPE.LITERAL);
+		Predicate ln = fac.getDataPropertyPredicate("lastn", COL_TYPE.LITERAL);
+		Predicate age = fac.getDataPropertyPredicate("agee", COL_TYPE.LITERAL);
+		Predicate hasschool = fac.getObjectPropertyPredicate("hasschool");
+		Predicate school = fac.getClassPredicate("School");
+//		body.add(fac.getFunctionalTerm(person, objectTerm));
+//		body.add(fac.getFunctionalTerm(fn, objectTerm, fac.getVariable("fn")));
+//		body.add(fac.getFunctionalTerm(ln, objectTerm, fac.getVariable("ln")));
+//		body.add(fac.getFunctionalTerm(age, objectTerm, fac.getVariable("age")));
+//		body.add(fac.getFunctionalTerm(hasschool, objectTerm, fac.getVariable("schooluri")));
+//		body.add(fac.getFunctionalTerm(school, fac.getVariable("schooluri")));
 
 		
-		OBDAMappingAxiom map1 = oldFactory.getRDBMSMappingAxiom(sql1, oldFactory.getCQIE(head, oldFactory.getFunction(person, objectTerm)));
-		OBDAMappingAxiom map2 = oldFactory.getRDBMSMappingAxiom(sql2, oldFactory.getCQIE(head, oldFactory.getFunction(fn, objectTerm, firstNameVariable)));
-		OBDAMappingAxiom map3 = oldFactory.getRDBMSMappingAxiom(sql3, oldFactory.getCQIE(head, oldFactory.getFunction(ln, objectTerm, lastNameVariable)));
-		OBDAMappingAxiom map4 = oldFactory.getRDBMSMappingAxiom(sql4, oldFactory.getCQIE(head, oldFactory.getFunction(age, objectTerm, ageVariable)));
-		OBDAMappingAxiom map5 = oldFactory.getRDBMSMappingAxiom(sql5, oldFactory.getCQIE(head, oldFactory.getFunction(hasschool, objectTerm, schoolUriVariable)));
-		OBDAMappingAxiom map6 = oldFactory.getRDBMSMappingAxiom(sql6, oldFactory.getCQIE(head, oldFactory.getFunction(school, schoolUriVariable)));
+		OBDAMappingAxiom map1 = fac.getRDBMSMappingAxiom(sql1, fac.getCQIE(head, fac.getFunction(person, objectTerm)));
+		OBDAMappingAxiom map2 = fac.getRDBMSMappingAxiom(sql2, fac.getCQIE(head, fac.getFunction(fn, objectTerm, firstNameVariable)));
+		OBDAMappingAxiom map3 = fac.getRDBMSMappingAxiom(sql3, fac.getCQIE(head, fac.getFunction(ln, objectTerm, lastNameVariable)));
+		OBDAMappingAxiom map4 = fac.getRDBMSMappingAxiom(sql4, fac.getCQIE(head, fac.getFunction(age, objectTerm, ageVariable)));
+		OBDAMappingAxiom map5 = fac.getRDBMSMappingAxiom(sql5, fac.getCQIE(head, fac.getFunction(hasschool, objectTerm, schoolUriVariable)));
+		OBDAMappingAxiom map6 = fac.getRDBMSMappingAxiom(sql6, fac.getCQIE(head, fac.getFunction(school, schoolUriVariable)));
 
         dataSources.add(source);
         mappingIndex.put(source.getSourceID(), ImmutableList.of(map1, map2, map3, map4, map5, map6));

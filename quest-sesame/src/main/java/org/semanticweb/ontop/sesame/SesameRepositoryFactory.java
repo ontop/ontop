@@ -19,64 +19,36 @@ package org.semanticweb.ontop.sesame;
  * limitations under the License.
  * #L%
  */
-import org.openrdf.repository.Repository;
 import org.openrdf.repository.config.RepositoryConfigException;
 import org.openrdf.repository.config.RepositoryFactory;
 import org.openrdf.repository.config.RepositoryImplConfig;
-import org.openrdf.repository.config.RepositoryRegistry;
 
-public class SesameRepositoryFactory implements RepositoryFactory{
+public class SesameRepositoryFactory implements RepositoryFactory {
 
-	public static final String REPOSITORY_TYPE = "obda:OntopRepository";
-   
-	public String getRepositoryType() {
-		return REPOSITORY_TYPE;
-	}
+    public static final String REPOSITORY_TYPE = "obda:OntopRepository";
 
-	public SesameRepositoryConfig getConfig() {
-		return new SesameRepositoryConfig();
-	}
-	
-	
-	public SesameAbstractRepo getRepository(RepositoryImplConfig config)
-			throws RepositoryConfigException {
-		// TODO Auto-generated method stub
-		
-		if (config instanceof SesameRepositoryConfig)
-		{
-			try{
-			if (!config.getType().isEmpty())
-			{
-				config.validate();
-					String name = ((SesameRepositoryConfig) config).getName();
-					String owlfile = ((SesameRepositoryConfig) config).getOwlFile();
-					boolean existential = ((SesameRepositoryConfig) config).getExistential();
-					String rewriting = ((SesameRepositoryConfig) config).getRewriting();
-					
-					if (((SesameRepositoryConfig) config).getQuestType().equals("ontop-inmemory"))
-					{
-						return new SesameClassicInMemoryRepo(name, owlfile, existential, rewriting);
-					}
-					else if (((SesameRepositoryConfig) config).getQuestType().equals("ontop-remote"))
-					{
-						return new SesameClassicJDBCRepo(name, owlfile);
-					}
-					else if (((SesameRepositoryConfig) config).getQuestType().equals("ontop-virtual")) 
-					{
-						String obdafile = ((SesameRepositoryConfig) config).getObdaFile();
-						return new SesameVirtualRepo(name, owlfile, obdafile, existential, rewriting);
-					}
-			}}
-			catch(Exception e)
-			{e.printStackTrace();
-			throw new RepositoryConfigException("Could not create Sesame Repo!");
-			}
-		}
-		else 
-		{
-	        throw new RepositoryConfigException("Invalid configuration class: " + config.getClass());
-		}
-		return null;
-	}
+    public String getRepositoryType() {
+        return REPOSITORY_TYPE;
+    }
 
+    public SesameRepositoryConfig getConfig() {
+        return new SesameRepositoryConfig();
+    }
+
+
+    /**
+     *
+     */
+    public SesameAbstractRepo getRepository(RepositoryImplConfig config)
+            throws RepositoryConfigException {
+        if (!(config instanceof SesameRepositoryConfig)) {
+            throw new RepositoryConfigException("The given repository config is not of the right type " +
+                    "(SesameRepositoryConfig was expected).");
+        }
+        /**
+         * Construction is delegated to the config object (for validation purposes).
+         * See SesameRepositoryConfig for further explanations about this unusual pattern.
+         */
+        return ((SesameRepositoryConfig) config).buildRepository();
+    }
 }

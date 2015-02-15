@@ -38,7 +38,6 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.HSQLSQLDialectAdapter;
-import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.JDBCUtility;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
@@ -90,7 +89,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		Map<Predicate, String> temp = new HashMap<>();
 		
 		temp.put(OBDAVocabulary.ADD, "%s + %s");
-		temp.put(OBDAVocabulary.SUBSTRACT, "%s - %s");
+		temp.put(OBDAVocabulary.SUBTRACT, "%s - %s");
 		temp.put(OBDAVocabulary.MULTIPLY, "%s * %s");
 						
 		arithmeticPredicateToQueryString = ImmutableMap.copyOf(temp);
@@ -189,11 +188,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	//*********************\\
 	// Instance attributes \\
 	//*********************\\
-	
-	/**
-	 * Query independent
-	 */
-	private final JDBCUtility jdbcUtil;
+
 	
 	/**
 	 * Query independent
@@ -259,7 +254,6 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
     	super(metadata);
     	
         String driverURI = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-        this.jdbcUtil = new JDBCUtility(driverURI);
         this.sqlAdapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI, preferences);
 
         this.generateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));

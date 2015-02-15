@@ -27,54 +27,47 @@ import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.ObjectConstant;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.ontology.ClassAssertion;
-import org.semanticweb.ontop.ontology.UnaryAssertion;
+import org.semanticweb.ontop.ontology.OClass;
 
-public class ClassAssertionImpl implements ClassAssertion, UnaryAssertion {
+public class ClassAssertionImpl implements ClassAssertion {
 
 	private static final long serialVersionUID = 5689712345023046811L;
 
-	private ObjectConstant object = null;
+	private final ObjectConstant object;
+	private final OClass concept;
 
-	private Predicate concept = null;
-
-	ClassAssertionImpl(Predicate concept, ObjectConstant object) {
+	ClassAssertionImpl(OClass concept, ObjectConstant object) {
 		this.object = object;
 		this.concept = concept;
 	}
-
+ 
 	@Override
-	public ObjectConstant getObject() {
+	public ObjectConstant getIndividual() {
 		return object;
 	}
 
 	@Override
-	public Predicate getConcept() {
+	public OClass getConcept() {
 		return concept;
 	}
-
+	
+	@Override 
+	public boolean equals(Object obj) {
+		if (obj instanceof ClassAssertionImpl) {
+			ClassAssertionImpl other = (ClassAssertionImpl)obj;
+			return concept.equals(other.concept) && object.equals(other.object);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return concept.hashCode() + object.hashCode();
+	}
+	
+	@Override
 	public String toString() {
 		return concept.toString() + "(" + object.toString() + ")";
 	}
 
-	@Override
-	public Set<Predicate> getReferencedEntities() {
-		Set<Predicate> res = new HashSet<Predicate>();
-		res.add(concept);
-		return res;
-	}
-
-	@Override
-	public int getArity() {
-		return 1;
-	}
-
-	@Override
-	public Constant getValue() {
-		return getObject();
-	}
-
-	@Override
-	public Predicate getPredicate() {
-		return concept;
-	}
 }

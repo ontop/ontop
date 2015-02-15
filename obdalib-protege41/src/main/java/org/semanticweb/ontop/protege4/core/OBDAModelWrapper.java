@@ -12,6 +12,10 @@ import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.OntologyVocabulary;
 import org.semanticweb.ontop.protege4.panels.DatasourceSelector;
 
 import java.io.File;
@@ -97,27 +101,27 @@ public class OBDAModelWrapper {
         prefixManager.addPrefix(prefix, uri);
     }
 
-    public void declareClass(Predicate c) {
+    public void declareClass(OClass c) {
         obdaModel.declareClass(c);
     }
 
-    public void declareObjectProperty(Predicate r) {
+    public void declareObjectProperty(ObjectPropertyExpression r) {
         obdaModel.declareObjectProperty(r);
     }
 
-    public void declareDataProperty(Predicate p) {
+    public void declareDataProperty(DataPropertyExpression p) {
         obdaModel.declareDataProperty(p);
     }
 
-    public void unDeclareClass(Predicate c) {
+    public void unDeclareClass(OClass c) {
         obdaModel.unDeclareClass(c);
     }
 
-    public void unDeclareObjectProperty(Predicate r) {
+    public void unDeclareObjectProperty(ObjectPropertyExpression r) {
         obdaModel.unDeclareObjectProperty(r);
     }
 
-    public void unDeclareDataProperty(Predicate p) {
+    public void unDeclareDataProperty(DataPropertyExpression p) {
         obdaModel.unDeclareDataProperty(p);
     }
 
@@ -296,15 +300,15 @@ public class OBDAModelWrapper {
         fireSourceAdded(ds);
     }
 
-    public Set<Predicate> getDeclaredClasses() {
+    public Set<OClass> getDeclaredClasses() {
         return obdaModel.getDeclaredClasses();
     }
 
-    public Set<Predicate> getDeclaredDataProperties() {
+    public Set<DataPropertyExpression> getDeclaredDataProperties() {
         return obdaModel.getDeclaredDataProperties();
     }
 
-    public Set<Predicate> getDeclaredObjectProperties() {
+    public Set<ObjectPropertyExpression> getDeclaredObjectProperties() {
         return obdaModel.getDeclaredObjectProperties();
     }
 
@@ -426,5 +430,14 @@ public class OBDAModelWrapper {
             throw new RuntimeException("A DuplicateMappingException has been thrown while no mapping has been given." +
                     "What is going on? Message: " + e.getMessage());
         }
+    }
+
+    public void declareAll(OntologyVocabulary vocabulary) {
+        for (OClass p : vocabulary.getClasses())
+            declareClass(p);
+        for (ObjectPropertyExpression p : vocabulary.getObjectProperties())
+            declareObjectProperty(p);
+        for (DataPropertyExpression p : vocabulary.getDataProperties())
+            declareDataProperty(p);
     }
 }

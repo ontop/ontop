@@ -38,16 +38,16 @@ public class QuestConnection implements OBDAConnection {
 
 	protected Connection conn;
 
-	private QuestImpl questinstance;
+	private Quest questinstance;
 	
 	private boolean isClosed;
 
-	public QuestConnection(QuestImpl questisntance, Connection connection) {
+	public QuestConnection(Quest questisntance, Connection connection) {
 		this.questinstance = questisntance;
 		this.conn = connection;
 		isClosed = false;
 	}
-
+	
 	@Override
 	public void close() throws OBDAException {
 		try {
@@ -125,7 +125,7 @@ public class QuestConnection implements OBDAConnection {
 
 	@Override
 	public boolean isReadOnly() throws OBDAException {
-		if (this.questinstance.getDataRepository() == null)
+		if (this.questinstance.getSemanticIndexRepository() == null)
 			return true;
 		try {
 			return conn.isReadOnly();

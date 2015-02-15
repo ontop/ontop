@@ -59,26 +59,26 @@ public class R2RMLImportAction extends ProtegeAction {
 	private OBDAModelWrapper obdaModelController = null;
 
 	private Logger log = LoggerFactory.getLogger(R2RMLImportAction.class);
-    private NativeQueryLanguageComponentFactory nativeQLFactory;
+	private NativeQueryLanguageComponentFactory nativeQLFactory;
 
-    @Override
+	@Override
 	public void initialise() throws Exception {
 		editorKit = (OWLEditorKit) getEditorKit();
 		obdaModelController = ((OBDAModelManager) editorKit.get(OBDAModelImpl.class
 				.getName())).getActiveOBDAModelWrapper();
 
-        /**
-         * OBDA properties for building a R2RML mapping parser
+		/**
+		 * OBDA properties for building a R2RML mapping parser
 		 *
 		 * Data source parameters are missing. --> We use the dataSource object instead.
-         */
-        OBDAProperties r2rmlProperties = new OBDAProperties();
-        r2rmlProperties.setProperty(MappingParser.class.getCanonicalName(),
-                R2RMLMappingParser.class.getCanonicalName());
+		 */
+		OBDAProperties r2rmlProperties = new OBDAProperties();
+		r2rmlProperties.setProperty(MappingParser.class.getCanonicalName(),
+				R2RMLMappingParser.class.getCanonicalName());
 
-        Injector injector = Guice.createInjector(new OBDACoreModule(r2rmlProperties));
-        nativeQLFactory = injector.getInstance(
-                NativeQueryLanguageComponentFactory.class);
+		Injector injector = Guice.createInjector(new OBDACoreModule(r2rmlProperties));
+		nativeQLFactory = injector.getInstance(
+				NativeQueryLanguageComponentFactory.class);
 	}
 
 	@Override
@@ -91,56 +91,60 @@ public class R2RMLImportAction extends ProtegeAction {
 
 		final OWLWorkspace workspace = editorKit.getWorkspace();
 
-		String message = "The imported mappings will be appended to the existing data source. Continue?";
-		int response = JOptionPane.showConfirmDialog(workspace, message,
-				"Confirmation", JOptionPane.YES_NO_OPTION);
+		if (obdaModelController.getSources().isEmpty()) {
+			JOptionPane.showMessageDialog(workspace, "The data source is missing. Create one in ontop Mappings. ");
+		} else {
+			String message = "The imported mappings will be appended to the existing data source. Continue?";
+			int response = JOptionPane.showConfirmDialog(workspace, message,
+					"Confirmation", JOptionPane.YES_NO_OPTION);
 
-		if (response == JOptionPane.YES_OPTION) {
+			if (response == JOptionPane.YES_OPTION) {
 
-			final JFileChooser fc = new JFileChooser();
-			fc.showOpenDialog(workspace);
-			File file = null;
-			try {
-
-				file = (fc.getSelectedFile());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			if (file != null) {
-                Disposable d = editorKit.get(NativeQueryLanguageComponentFactory.class.getName());
-
-				/**
-				 * Uses the predefined data source for creating the OBDAModel.
-				 */
-				OBDADataSource dataSource = obdaModelController.getSources().get(0);
-                MappingParser parser = nativeQLFactory.create(file, dataSource);
-				URI sourceID = dataSource.getSourceID();
-
+				final JFileChooser fc = new JFileChooser();
+				fc.showOpenDialog(workspace);
+				File file = null;
 				try {
-                    OBDAModel parsedModel = parser.getOBDAModel();
 
-                    /**
-                     * TODO: improve this inefficient method (batch processing, not one by one)
-                     */
-					for (OBDAMappingAxiom mapping : parsedModel.getMappings(sourceID)) {
-						if (mapping.getTargetQuery().toString().contains("BNODE")){
-							JOptionPane.showMessageDialog(workspace, "The mapping "+mapping.getId()+" contains BNode. -ontoPro- does not support it yet.");
-						} else{
-							obdaModelController.addMapping(sourceID, mapping);
+					file = (fc.getSelectedFile());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				if (file != null) {
+					Disposable d = editorKit.get(NativeQueryLanguageComponentFactory.class.getName());
+
+					/**
+					 * Uses the predefined data source for creating the OBDAModel.
+					 */
+					OBDADataSource dataSource = obdaModelController.getSources().get(0);
+					MappingParser parser = nativeQLFactory.create(file, dataSource);
+					URI sourceID = dataSource.getSourceID();
+
+					try {
+						OBDAModel parsedModel = parser.getOBDAModel();
+
+						/**
+						 * TODO: improve this inefficient method (batch processing, not one by one)
+						 */
+						for (OBDAMappingAxiom mapping : parsedModel.getMappings(sourceID)) {
+							if (mapping.getTargetQuery().toString().contains("BNODE")) {
+								JOptionPane.showMessageDialog(workspace, "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
+							} else {
+								obdaModelController.addMapping(sourceID, mapping);
+							}
 						}
+					} catch (DuplicateMappingException dm) {
+						JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
+						throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
+					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (InvalidMappingException e) {
+						e.printStackTrace();
+					} catch (InvalidDataSourceException e) {
+						e.printStackTrace();
 					}
-				} catch (DuplicateMappingException dm) {
-					JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: "+dm.getLocalizedMessage());
-					throw new RuntimeException("Duplicate mapping found: "+dm.getMessage());
-				} catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InvalidMappingException e) {
-                    e.printStackTrace();
-                } catch (InvalidDataSourceException e) {
-                    e.printStackTrace();
-                }
-            }
+				}
 
-	}
+			}
+		}
 	}
 }

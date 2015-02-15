@@ -5,6 +5,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.io.PrefixManager;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.OntologyVocabulary;
 
 import java.io.IOException;
 import java.net.URI;
@@ -41,6 +45,9 @@ import java.util.Set;
  *
  * TODO: remove the side-effect methods so that OBDA models can be truly
  * immutable.
+ *
+ * TODO: split the OBDAModel into a SourceModel and an OntologyModel.
+ * The OBDAModel would then remain the aggregate of the two. The three classes should be immutable.
  *
  */
 public interface OBDAModel {
@@ -98,10 +105,9 @@ public interface OBDAModel {
      */
     public OBDAModel newModel(Set<OBDADataSource> dataSources,
                               Map<URI, ImmutableList<OBDAMappingAxiom>> newMappings,
-                              PrefixManager prefixManager, Set<Predicate> declaredClasses,
-                              Set<Predicate> declaredObjectProperties,
-                              Set<Predicate> declaredDataProperties,
-                              Set<Predicate> otherDeclaredPredicates) throws DuplicateMappingException;
+                              PrefixManager prefixManager, Set<OClass> declaredClasses,
+                              Set<ObjectPropertyExpression> declaredObjectProperties,
+                              Set<DataPropertyExpression> declaredDataProperties) throws DuplicateMappingException;
 
     /**
      * Returns the set of all sources defined in this OBDA model. This set
@@ -113,21 +119,17 @@ public interface OBDAModel {
 
     public boolean containsSource(URI sourceURI);
 
-    public Set<Predicate> getDeclaredPredicates();
+    public Set<OClass> getDeclaredClasses();
 
-    public Set<Predicate> getDeclaredClasses();
+    public Set<ObjectPropertyExpression> getDeclaredObjectProperties();
 
-    public Set<Predicate> getDeclaredObjectProperties();
+    public Set<DataPropertyExpression> getDeclaredDataProperties();
 
-    public Set<Predicate> getDeclaredDataProperties();
+    public boolean isDeclaredClass(OClass classname);
 
-    public boolean isDeclaredClass(Predicate classname);
+    public boolean isDeclaredObjectProperty(ObjectPropertyExpression property);
 
-    public boolean isDeclaredObjectProperty(Predicate property);
-
-    public boolean isDeclaredDataProperty(Predicate property);
-
-    public boolean isDeclared(Predicate predicate);
+    public boolean isDeclaredDataProperty(DataPropertyExpression property);
 
 
     //--------------------------------
@@ -135,27 +137,18 @@ public interface OBDAModel {
     // TODO: remove them
     //--------------------------------
 
-    @Deprecated
-    public boolean declarePredicate(Predicate predicate);
 
-    @Deprecated
-    public boolean declareClass(Predicate className);
+    public boolean declareClass(OClass className);
 
-    @Deprecated
-    public boolean declareObjectProperty(Predicate property);
+    public boolean declareObjectProperty(ObjectPropertyExpression property);
 
-    @Deprecated
-    public boolean declareDataProperty(Predicate property);
+    public boolean declareDataProperty(DataPropertyExpression property);
 
-    @Deprecated
-    public boolean unDeclarePredicate(Predicate predicate);
+    public boolean unDeclareClass(OClass className);
 
-    @Deprecated
-    public boolean unDeclareClass(Predicate className);
+    public boolean unDeclareObjectProperty(ObjectPropertyExpression property);
 
-    @Deprecated
-    public boolean unDeclareObjectProperty(Predicate property);
+    public boolean unDeclareDataProperty(DataPropertyExpression property);
 
-    @Deprecated
-    public boolean unDeclareDataProperty(Predicate property);
+    public void declareAll(OntologyVocabulary vocabulary);
 }

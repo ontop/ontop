@@ -20,11 +20,12 @@ package org.semanticweb.ontop.owlrefplatform.core.reformulation;
  * #L%
  */
 
+import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 
 /***
  * A query reformulator that does nothing on the given query. 
@@ -35,18 +36,13 @@ import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 public class DummyReformulator implements QueryRewriter {
 
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 8989177354924893482L;
-
 	@Override
-	public OBDAQuery rewrite(OBDAQuery input) throws OBDAException {
+	public DatalogProgram rewrite(DatalogProgram input) throws OBDAException {
 		return input;
 	}
 
 	@Override
-	public void setTBox(TBoxReasoner ontology, Ontology sigma) {
+	public void setTBox(TBoxReasoner ontology, LinearInclusionDependencies sigma) {
 		// NO-OP		
 	}
 }

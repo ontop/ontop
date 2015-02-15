@@ -28,7 +28,6 @@ package org.semanticweb.ontop.sesame;
 
 import java.io.File;
 
-import org.openrdf.model.BNode;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
@@ -38,13 +37,8 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.util.GraphUtil;
 import org.openrdf.model.util.GraphUtilException;
 import org.openrdf.repository.config.RepositoryConfigException;
-import org.openrdf.repository.config.RepositoryFactory;
-import org.openrdf.repository.config.RepositoryImplConfig;
 import org.openrdf.repository.config.RepositoryImplConfigBase;
-import org.openrdf.repository.config.RepositoryRegistry;
-import org.openrdf.repository.config.RepositoryConfig;
 
-import static org.openrdf.repository.config.RepositoryConfigSchema.REPOSITORYIMPL;
 import static org.openrdf.repository.config.RepositoryConfigSchema.REPOSITORYTYPE;
 
 
@@ -59,15 +53,19 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
     /** <tt>http://inf.unibz.it/krdb/obda/quest#name</tt> */
     public final static URI NAME;
 
-    /** <tt>http://inf.unibz.it/krdb/obda/quest#owlfile/tt> */
+    /** <tt>http://inf.unibz.it/krdb/obda/quest#owlFile/tt> */
     public final static URI OWLFILE;
 
-    /** <tt>http://inf.unibz.it/krdb/obda/quest#obdafile</tt> */
+    /** <tt>http://inf.unibz.it/krdb/obda/quest#obdaFile</tt> */
     public final static URI OBDAFILE;
     
     public final static URI EXISTENTIAL;
     
     public final static URI REWRITING;
+
+    public final static String VIRTUAL_QUEST_TYPE = "ontop-virtual";
+    public final static String REMOTE_QUEST_TYPE = "ontop-remote";
+    public final static String IN_MEMORY_QUEST_TYPE = "ontop-inmemory";
     
     static {
         ValueFactory factory = ValueFactoryImpl.getInstance();
@@ -79,19 +77,26 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
         REWRITING = factory.createURI(NAMESPACE, "rewriting");
     }
     
-    
 	private String quest_type;
     private String name;
-    private String owlfile;
-    private String obdafile;
+    private File owlFile;
+    private File obdaFile;
     private boolean existential;
     private String rewriting;
 
     /**
-     * Create a new RepositoryConfigImpl.
+     * The repository has to be built by this class
+     * so as to fit the validation and repository instantiation
+     * workflow of Sesame.
+     */
+    private SesameAbstractRepo repository;
+
+    /**
+     * Creates a new RepositoryConfigImpl.
      */
     public SesameRepositoryConfig() {
     	super(SesameRepositoryFactory.REPOSITORY_TYPE);
+        repository = null;
     }
 
   
@@ -114,24 +119,24 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
     	this.name = name;
     }
     
-    public String getOwlFile()
+    public File getOwlFile()
     {
-    	return owlfile;
+    	return owlFile;
     }
 
-    public void setOwlFile(String file)
+    public void setOwlFile(String fileName)
     {
-    	this.owlfile = file;
+    	this.owlFile = new File(fileName);
     }
     
-    public String getObdaFile()
+    public File getObdaFile()
     {
-    	return obdafile;
+    	return obdaFile;
     }
     
-    public void setObdaFile(String file)
+    public void setObdaFile(String fileName)
     {
-    	this.obdafile = file;
+    	this.obdaFile = new File(fileName);
     }
 
     public boolean getExistential()
@@ -154,21 +159,121 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
     	this.rewriting = rew;
     }
 
+    /**
+     * In-depth validation that requires building the repository for validating
+     * the OWL and mapping files.
+     */
     @Override
     public void validate()
         throws RepositoryConfigException
     {
+        buildRepository();
+    }
+
+    /**
+     * Checks that the fields are not missing, and that files exist and are accessible.
+     */
+    private void validateFields() throws RepositoryConfigException {
         if (quest_type == null || quest_type.isEmpty()) {
-            throw new RepositoryConfigException("No type specified for repository implementation");
+            throw new RepositoryConfigException("No type specified for repository implementation.");
         }
-        if (owlfile == null || owlfile.isEmpty()){
-        	throw new RepositoryConfigException("No Owl file specified for repository creation!");
+        try {
+            /**
+             * Ontology file
+             */
+            if (owlFile == null) {
+                throw new RepositoryConfigException("No Owl file specified for repository creation!");
+            }
+            if ((!owlFile.exists())) {
+                throw new RepositoryConfigException(String.format("The Owl file %s does not exist!",
+                        owlFile.getAbsolutePath()));
+            }
+            if (!owlFile.canRead()) {
+                throw new RepositoryConfigException(String.format("The Owl file %s is not accessible!",
+                        owlFile.getAbsolutePath()));
+            }
+
+            /**
+             * Mapping file
+             */
+            if (quest_type.equals(VIRTUAL_QUEST_TYPE)) {
+                if (obdaFile == null) {
+                    throw new RepositoryConfigException(String.format("No mapping file specified for repository creation " +
+                            "in %s mode!", quest_type));
+                }
+                if (!obdaFile.exists()) {
+                    throw new RepositoryConfigException(String.format("The mapping file %s does not exist!",
+                            obdaFile.getAbsolutePath()));
+                }
+                if (!obdaFile.canRead()) {
+                    throw new RepositoryConfigException(String.format("The mapping file %s is not accessible!",
+                            obdaFile.getAbsolutePath()));
+                }
+            }
         }
-        if (quest_type.contentEquals("ontop-virtual"))
-        		if (obdafile ==null || obdafile.contentEquals("obdafile") ){
-        	throw new RepositoryConfigException("No OBDA file specified for repository creation!");
+        /**
+         * Sometimes thrown when there is no access right to the files.
+         */
+        catch (SecurityException e) {
+            throw new RepositoryConfigException(e.getMessage());
         }
     }
+
+    /**
+     * This method has two roles:
+     *   - Validating in depth the configuration : basic field validation + consistency of
+     *     the OWL and mapping files (the latter is done when initializing the repository).
+     *   - Building the repository (as an ordinary factory).
+     *
+     * This method is usually called two times:
+     *   - At validation time (see validate() ).
+     *   - At the repository construction time (see SesameRepositoryFactory.getRepository() ).
+     *
+     * However, the repository is only build once and then kept in cache.
+     */
+    public SesameAbstractRepo buildRepository() throws RepositoryConfigException {
+        /**
+         * Cache (computed only once)
+         */
+        if (repository != null)
+            return repository;
+
+        /**
+         * Common validation.
+         * May throw a RepositoryConfigException
+         */
+        validateFields();
+
+        try {
+            /**
+             * Creates the repository according to the Quest type.
+             */
+            switch (quest_type) {
+                case IN_MEMORY_QUEST_TYPE:
+                    repository = new SesameClassicInMemoryRepo(name, owlFile.getAbsolutePath(), existential, rewriting);
+                    break;
+                case REMOTE_QUEST_TYPE:
+                    repository = new SesameClassicJDBCRepo(name, owlFile.getAbsolutePath());
+                    break;
+                case VIRTUAL_QUEST_TYPE:
+                    repository = new SesameVirtualRepo(name, owlFile.getAbsolutePath(), obdaFile.getAbsolutePath(),
+                            existential, rewriting);
+                    break;
+                default:
+                    throw new RepositoryConfigException("Unknown mode: " + quest_type);
+            }
+        }
+        /**
+         * Problem during the repository instantiation.
+         *   --> Exception is re-thrown as a RepositoryConfigException.
+         */
+        catch(Exception e)
+        {   e.printStackTrace();
+            throw new RepositoryConfigException("Could not create Sesame Repo! Reason: " + e.getMessage());
+        }
+        return repository;
+    }
+
 
     @Override
     public Resource export(Graph graph) {
@@ -182,11 +287,11 @@ public class SesameRepositoryConfig extends RepositoryImplConfigBase {
         if (name != null) {
             graph.add(implNode, NAME, vf.createLiteral(name));
         }
-        if (owlfile != null) {
-            graph.add(implNode, OWLFILE, vf.createLiteral(owlfile));
+        if (owlFile != null) {
+            graph.add(implNode, OWLFILE, vf.createLiteral(owlFile.getAbsolutePath()));
         }
-        if (obdafile != null) {
-            graph.add(implNode, OBDAFILE, vf.createLiteral(obdafile));
+        if (obdaFile != null) {
+            graph.add(implNode, OBDAFILE, vf.createLiteral(obdaFile.getAbsolutePath()));
         }
         if (existential == false || existential == true) {
         	graph.add(implNode, EXISTENTIAL, vf.createLiteral(existential));

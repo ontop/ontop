@@ -38,8 +38,9 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 		SqlDatatypes.put(Types.VARCHAR, "VARCHAR(100)");  // for korean, chinese, etc characters we need to use utf8
 		SqlDatatypes.put(Types.DATE, "TIMESTAMP");
 		SqlDatatypes.put(Types.TIME, "TIME");
-		SqlDatatypes.put(Types.TIMESTAMP, "DATETIME");
+		SqlDatatypes.put(Types.TIMESTAMP, "TIMESTAMP");
 		SqlDatatypes.put(Types.BOOLEAN, "BOOLEAN");
+		SqlDatatypes.put(Types.BIGINT, "BIGINT");
 	}
 	@Override
 	public String strconcat(String[] strings) {
@@ -80,7 +81,11 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 	@Override
 	public String sqlCast(String value, int type) {
 		String strType = SqlDatatypes.get(type);
-		
+
+		if (strType == null) {
+			throw new RuntimeException("Unsupported SQL type (not recognized)");
+		}
+
 		boolean noCast = strType.equals("BOOLEAN");
 
 		if (strType != null && !noCast ) {	
@@ -91,13 +96,64 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 		}
 		throw new RuntimeException("Unsupported SQL type");
 	}
-	/*
-		String strType = null;
-		if (type == Types.VARCHAR) {
-			strType = "VARCHAR(500)";
-		} else {
-			throw new RuntimeException("Unsupported SQL type");
+	
+	@Override
+	public String getDummyTable() {
+		return "SELECT 1 from sysibm.sysdummy1";
+	}
+
+	@Override 
+	public String getSQLLexicalFormBoolean(boolean value) {
+		return value ? 	"1" : "0";
+	}
+
+	/***
+	 * Given an XSD dateTime this method will generate a SQL TIMESTAMP value.
+	 * The method will strip any fractional seconds found in the date time
+	 * (since we haven't found a nice way to support them in all databases). It
+	 * will also normalize the use of Z to the timezome +00:00 and last, if the
+	 * database is H2, it will remove all timezone information, since this is
+	 * not supported there.
+	 * 
+	 * @param rdfliteral
+	 * @return
+	 */
+	public String getSQLLexicalFormDatetime(String v) {
+		String datetime = v.replace('T', ' ');
+		int dotlocation = datetime.indexOf('.');
+		int zlocation = datetime.indexOf('Z');
+		int minuslocation = datetime.indexOf('-', 10); // added search from 10th pos, because we need to ignore minuses in date
+		int pluslocation = datetime.indexOf('+');
+		StringBuilder bf = new StringBuilder(datetime);
+		if (zlocation != -1) {
+			/*
+			 * replacing Z by +00:00
+			 */
+			bf.replace(zlocation, bf.length(), "+00:00");
 		}
-		return "CAST(" + value + " AS " + strType + ")";
-	}*/
+
+		if (dotlocation != -1) {
+			/*
+			 * Stripping the string from the presicion that is not supported by
+			 * SQL timestamps.
+			 */
+			// TODO we need to check which databases support fractional
+			// sections (e.g., oracle,db2, postgres)
+			// so that when supported, we use it.
+			int endlocation = Math.max(zlocation, Math.max(minuslocation, pluslocation));
+			if (endlocation == -1) {
+				endlocation = datetime.length();
+			}
+			bf.replace(dotlocation, endlocation, "");
+		}
+		if (bf.length() > 19) {
+			bf.delete(19, bf.length());
+		}
+		bf.insert(0, "'");
+		bf.append("'");
+		
+		return bf.toString();
+	}
+
+	
 }

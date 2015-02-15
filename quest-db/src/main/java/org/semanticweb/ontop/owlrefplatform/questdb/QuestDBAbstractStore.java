@@ -37,7 +37,7 @@ public abstract class QuestDBAbstractStore implements Serializable {
 
 	private static final long serialVersionUID = -8088123404566560283L;
 
-    protected Quest questInstance = null;
+    protected IQuest questInstance = null;
 	protected QuestConnection questConn = null;
 
 	protected String name;

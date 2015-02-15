@@ -41,9 +41,9 @@ public interface OBDADataSource {
 
 	public abstract boolean isEnabled();
 
-	public abstract void setRegistred(boolean registred);
+	public abstract void setRegistered(boolean registered);
 
-	public abstract boolean isRegistred();
+	public abstract boolean isRegistered();
 	
 	public Object clone();
 }

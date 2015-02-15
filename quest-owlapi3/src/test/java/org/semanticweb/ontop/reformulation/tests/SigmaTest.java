@@ -21,48 +21,39 @@ package org.semanticweb.ontop.reformulation.tests;
  */
 
 
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
+import org.semanticweb.ontop.ontology.ClassExpression;
 import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.ObjectSomeValuesFrom;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.PropertySomeRestriction;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
-
+import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.TBoxReasonerToOntology;
 import junit.framework.TestCase;
 
 public class SigmaTest extends TestCase {
 
-    private static final OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    private static final OntologyFactory descFactory = new OntologyFactoryImpl();
+    private static final OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
     public void test_exists_simple() {
-        Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
+        Ontology ontology = descFactory.createOntology();
 
-        Predicate a = predicateFactory.getPredicate("a", 1);
-        Predicate c = predicateFactory.getPredicate("c", 1);
-        Predicate r = predicateFactory.getPredicate("r", 2);
-        OClass ac = descFactory.createClass(a);
-        OClass cc = descFactory.createClass(c);
-        PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
-        ontology.addConcept(ac.getPredicate());
-        ontology.addConcept(cc.getPredicate());
-        ontology.addRole(er.getPredicate());
+        OClass ac = ontology.getVocabulary().createClass("a");
+        OClass cc = ontology.getVocabulary().createClass("c");
+        ObjectPropertyExpression rprop = ontology.getVocabulary().createObjectProperty("r");
+        ObjectSomeValuesFrom er = rprop.getDomain();
+ 
+        ontology.addSubClassOfAxiom(er, ac);
+        ontology.addSubClassOfAxiom(cc, er);
 
-        ontology.addAssertion(descFactory.createSubClassAxiom(er, ac));
-        ontology.addAssertion(descFactory.createSubClassAxiom(cc, er));
-
-        
        
-		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
-		Ontology ontologySigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
-        TBoxReasonerImpl sigma = new TBoxReasonerImpl(ontologySigma);
-        EquivalencesDAG<BasicClassDescription> classes = sigma.getClasses();
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
+		TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(TBoxReasonerToOntology.getOntology(reasoner, true));						
+
+		EquivalencesDAG<ClassExpression> classes = sigmaReasoner.getClassDAG();
 
         assertTrue(classes.getSub(classes.getVertex(ac)).contains(classes.getVertex(er)));
 

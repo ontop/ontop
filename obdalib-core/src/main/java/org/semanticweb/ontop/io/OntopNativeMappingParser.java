@@ -39,7 +39,6 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.parser.TargetQueryParser;
 import org.semanticweb.ontop.parser.TargetQueryParserException;
 import org.semanticweb.ontop.parser.TurtleOBDASyntaxParser;
-import org.semanticweb.ontop.parser.TurtleSyntaxParser;
 import org.semanticweb.ontop.parser.UnparsableTargetQueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -454,7 +453,6 @@ public class OntopNativeMappingParser implements MappingParser {
         List<TargetQueryParser> parsers = new ArrayList<>();
         // TODO: consider using a factory instead.
         parsers.add(new TurtleOBDASyntaxParser(prefixes));
-        parsers.add(new TurtleSyntaxParser(prefixes));
         return ImmutableList.copyOf(parsers);
     }
 }

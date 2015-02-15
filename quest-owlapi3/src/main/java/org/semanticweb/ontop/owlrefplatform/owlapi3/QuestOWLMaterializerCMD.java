@@ -20,8 +20,11 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
  * #L%
  */
 
-import java.io.*;
-import java.util.Properties;
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -31,8 +34,8 @@ import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.owlapi3.OBDAModelSynchronizer;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
+
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import org.semanticweb.ontop.owlapi3.QuestOWLIndividualIterator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
@@ -80,36 +83,33 @@ public class QuestOWLMaterializerCMD {
 			
 			OWLOntology ontology = null;
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			
-			if (owlfile != null) {
-			// Loading the OWL ontology from the file as with normal OWLReasoners
-				ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-			}
-			else {
-				ontology = manager.createOntology();
-			}
+			OWLAPI3Materializer materializer = null;
 
-            /**
-             * Factory initialization
-             */
-            Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
-            NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
+			/**
+			 * Factory initialization
+			 */
+			Injector injector = Guice.createInjector(new OBDACoreModule(new OBDAProperties()));
+			NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
 
             /*
              * Load the OBDA model from an external .obda file
              */
-            MappingParser mappingParser = factory.create(new File(obdafile));
-            OBDAModel obdaModel = mappingParser.getOBDAModel();
-
-			OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
-
-			OWLAPI3Materializer materializer = null;
+			MappingParser mappingParser = factory.create(new File(obdafile));
+			OBDAModel obdaModel = mappingParser.getOBDAModel();
+			
 			if (owlfile != null) {
-				Ontology onto =  new OWLAPI3Translator().translate(ontology);
+			// Loading the OWL ontology from the file as with normal OWLReasoners
+				ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+				Ontology onto =  OWLAPI3TranslatorUtility.translate(ontology);
+				obdaModel.declareAll(onto.getVocabulary());
 				materializer = new OWLAPI3Materializer(obdaModel, onto);
 			}
-			else
+			else {
+				ontology = manager.createOntology();
 				materializer = new OWLAPI3Materializer(obdaModel);
+			}
+			
+
 			QuestOWLIndividualIterator iterator = materializer.getIterator();
 	
 			while(iterator.hasNext()) 

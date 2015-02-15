@@ -76,8 +76,7 @@ public class QuestPreferences extends OBDAProperties {
 	public static final String INIT_POOL_SIZE = "initial_pool_size";
 	public static final String REMOVE_ABANDONED = "remove_abandoned";
 	public static final String ABANDONED_TIMEOUT = "abandoned_timeout";
-	public static final String KEEP_ALIVE = "keep_alive";
-	
+	public static final String KEEP_ALIVE = "keep_alive";	
 	
 	private Logger log = LoggerFactory.getLogger(QuestPreferences.class);
 

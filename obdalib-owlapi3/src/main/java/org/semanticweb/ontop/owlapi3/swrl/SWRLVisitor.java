@@ -1,5 +1,7 @@
 package org.semanticweb.ontop.owlapi3.swrl;
 
+
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -276,33 +278,18 @@ public class SWRLVisitor implements SWRLObjectVisitor {
 
 		OWLLiteral literal=node.getLiteral();
 		
-	if (literal.isBoolean()) {
-		if (literal.parseBoolean()){
-			terms.add(fac.getConstantTrue());
-		}
-		else
-			terms.add(fac.getConstantFalse());
-	}
-	else 
-		if(literal.hasLang()){
+		if (literal.isBoolean()) 
+			terms.add(fac.getBooleanConstant(literal.parseBoolean())); 
+		else if(literal.hasLang())
 			terms.add(fac.getConstantLiteral(literal.getLiteral(), literal.getLang()));
-		}
-		else
-			
-			if(literal.isDouble())
-				terms.add(fac.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.DOUBLE));
-			else
-				if(literal.isFloat())
-					terms.add(fac.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.DECIMAL));
-				else
-					if(literal.isInteger())
-						terms.add(fac.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.INTEGER));
-	
-			 else {
-				fac.getConstantLiteral(literal.getLiteral());
-			 		}
-	
-	
+		else if (literal.isDouble())
+			terms.add(fac.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.DOUBLE));
+		else if (literal.isFloat())
+			terms.add(fac.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.DECIMAL));
+		else if (literal.isInteger())
+			terms.add(fac.getConstantLiteral(literal.getLiteral(), Predicate.COL_TYPE.INTEGER));
+		else 
+			fac.getConstantLiteral(literal.getLiteral());
 	}
 
 //	we do not support swrl same as

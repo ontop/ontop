@@ -44,7 +44,6 @@ import java.util.Properties;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.BufferingMode;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -182,7 +181,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	 * Sets the user-suppplied database constraints, i.e.
 	 * Foreign and primary keys that are not in the databse
 	 * 
-	 * @param apic
+	 * @param userConstraints
 	 */
 	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints) {
 		if(userConstraints == null)
@@ -228,7 +227,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	}
 
 	@Override
-	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology)  {
+	public QuestOWL createNonBufferingReasoner(OWLOntology ontology) {
 		if (obdaModel == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
 			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 			log.warn("You didn't specified mappings, Quest will assume you want to work in 'classic ABox' mode' even though you set the ABox mode to: '"
@@ -256,7 +255,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	}
 
 	@Override
-	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config)
+	public QuestOWL createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config)
 			throws IllegalConfigurationException {
 		if (obdaModel == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
 			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
@@ -282,9 +281,9 @@ public class QuestOWLFactory implements OWLReasonerFactory {
             throw new RuntimeException(e.getMessage());
         }
 	}
-
+	
 	@Override
-	public OWLReasoner createReasoner(OWLOntology ontology) {
+	public QuestOWL createReasoner(OWLOntology ontology) {
 		if (obdaModel == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
 			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 			log.warn("You didn't specified mappings, Quest will assume you want to work in 'classic ABox' mode' even though you set the ABox mode to: '"
@@ -305,7 +304,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	}
 
 	@Override
-	public OWLReasoner createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
+	public QuestOWL createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		if (obdaModel == null && !preferences.get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
 			preferences.put(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 			log.warn("You didn't specified mappings, Quest will assume you want to work in 'classic ABox' mode' even though you set the ABox mode to: '"

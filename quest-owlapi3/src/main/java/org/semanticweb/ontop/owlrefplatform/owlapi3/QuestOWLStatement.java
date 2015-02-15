@@ -26,7 +26,6 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,35 +44,21 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.ClassAssertion;
 import org.semanticweb.ontop.ontology.DataPropertyAssertion;
-import org.semanticweb.ontop.ontology.Description;
 import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
+import org.semanticweb.ontop.owlapi3.OWLAPI3IndividualTranslator;
 import org.semanticweb.ontop.owlapi3.OntopOWLException;
-import org.semanticweb.ontop.owlrefplatform.core.Quest;
-import org.semanticweb.ontop.owlrefplatform.core.QuestImpl;
+import org.semanticweb.ontop.owlrefplatform.core.IQuest;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.ontop.sesame.SesameRDFIterator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-
-//import com.hp.hpl.jena.query.Query;
-//import com.hp.hpl.jena.query.QueryFactory;
 
 /***
  * A Statement to execute queries over a QuestOWLConnection. The logic of this
@@ -120,6 +105,8 @@ public class QuestOWLStatement {
 		try {
 			TupleResultSet executedQuery = (TupleResultSet) st.execute(query);
 			QuestOWLResultSet questOWLResultSet = new QuestOWLResultSet(executedQuery, this);
+
+	 		
 			return questOWLResultSet;
 		} catch (OBDAException e) {
 			throw new OntopOWLException(e);
@@ -173,7 +160,10 @@ public class QuestOWLStatement {
 
 			// Retrieves the ABox from the ontology file.
 
-			aBoxIter = new OWLAPI3ABoxIterator(set, new HashMap<Predicate, Description>());
+			aBoxIter = new OWLAPI3ABoxIterator(set);
+			// TODO: (ROMAN) -- check whether we need to use 
+			// EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
+
 			return st.insertData(aBoxIter, commitSize, batchsize);
 		} else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
 
@@ -386,7 +376,7 @@ public class QuestOWLStatement {
 			//Query jenaquery = QueryFactory.create(query);
 			QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 			ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
-            Quest questInstance = st.getQuestInstance();
+            IQuest questInstance = st.getQuestInstance();
 			SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(questInstance.getUriTemplateMatcher());
 
 			LinkedList<String> signatureContainer = new LinkedList<String>();
@@ -406,60 +396,51 @@ public class QuestOWLStatement {
 	}
 
 	private List<OWLAxiom> createOWLIndividualAxioms(GraphResultSet resultSet) throws Exception {
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLDataFactory factory = manager.getOWLDataFactory();
+		
+		OWLAPI3IndividualTranslator translator = new OWLAPI3IndividualTranslator();
+		
 		List<OWLAxiom> axiomList = new ArrayList<OWLAxiom>();
 		if (resultSet != null) {
 			while (resultSet.hasNext()) {
 				for (Assertion assertion : resultSet.next()) {
 					if (assertion instanceof ClassAssertion) {
-						String subjectIRI = ((ClassAssertion) assertion).getObject().getValue();
-						String classIRI = ((ClassAssertion) assertion).getPredicate().toString();
-						OWLAxiom classAxiom = createOWLClassAssertion(classIRI, subjectIRI, factory);
+						OWLAxiom classAxiom = translator.translate((ClassAssertion) assertion);
 						axiomList.add(classAxiom);
-					} else if (assertion instanceof ObjectPropertyAssertion) {
-						String propertyIRI = ((ObjectPropertyAssertion) assertion).getPredicate().toString();
-						String subjectIRI = ((ObjectPropertyAssertion) assertion).getFirstObject().getValue();
-						String objectIRI = ((ObjectPropertyAssertion) assertion).getSecondObject().getValue();
-						OWLAxiom objectPropertyAxiom = createOWLObjectPropertyAssertion(propertyIRI, subjectIRI, objectIRI, factory);
+					} 
+					else if (assertion instanceof ObjectPropertyAssertion) {
+						OWLAxiom objectPropertyAxiom = translator.translate((ObjectPropertyAssertion) assertion);
 						axiomList.add(objectPropertyAxiom);
-					} else if (assertion instanceof DataPropertyAssertion) {
-						String propertyIRI = ((DataPropertyAssertion) assertion).getPredicate().toString();
-						String subjectIRI = ((DataPropertyAssertion) assertion).getObject().getValue();
-						String objectValue = ((DataPropertyAssertion) assertion).getValue().getValue();
-						OWLAxiom dataPropertyAxiom = createOWLDataPropertyAssertion(propertyIRI, subjectIRI, objectValue, factory);
-						axiomList.add(dataPropertyAxiom);
 					}
+					else if (assertion instanceof DataPropertyAssertion) {
+						OWLAxiom objectPropertyAxiom = translator.translate((DataPropertyAssertion) assertion);
+						axiomList.add(objectPropertyAxiom);							
+					} 
 				}
 			}
 		}
 		return axiomList;
 	}
 
-	private OWLClassAssertionAxiom createOWLClassAssertion(String classIRI, String subjectIRI, OWLDataFactory factory) {
-		OWLClass classExpression = factory.getOWLClass(IRI.create(classIRI));
-		OWLIndividual individual = factory.getOWLNamedIndividual(IRI.create(subjectIRI));
-		return factory.getOWLClassAssertionAxiom(classExpression, individual);
-	}
-
-	private OWLObjectPropertyAssertionAxiom createOWLObjectPropertyAssertion(String propertyIRI, String subjectIRI, String objectIRI,
-			OWLDataFactory factory) {
-		OWLObjectProperty propertyExpression = factory.getOWLObjectProperty(IRI.create(propertyIRI));
-		OWLIndividual individual1 = factory.getOWLNamedIndividual(IRI.create(subjectIRI));
-		OWLIndividual individual2 = factory.getOWLNamedIndividual(IRI.create(objectIRI));
-		return factory.getOWLObjectPropertyAssertionAxiom(propertyExpression, individual1, individual2);
-	}
-
-	private OWLDataPropertyAssertionAxiom createOWLDataPropertyAssertion(String propertyIRI, String subjectIRI, String objectValue,
-			OWLDataFactory factory) {
-		OWLDataProperty propertyExpression = factory.getOWLDataProperty(IRI.create(propertyIRI));
-		OWLIndividual individual1 = factory.getOWLNamedIndividual(IRI.create(subjectIRI));
-		OWLLiteral individual2 = factory.getOWLLiteral(objectValue);
-		return factory.getOWLDataPropertyAssertionAxiom(propertyExpression, individual1, individual2);
-	}
 
 	public void analyze() throws Exception {
 		st.analyze();
 
+	}
+	
+	// Davide> Benchmarking
+	public long getUnfoldingTime(){
+		return st.getUnfoldingTime();
+	}
+
+	public long getRewritingTime(){
+		return st.getRewritingTime();
+	}
+	
+	public int getUCQSizeAfterUnfolding(){
+		return st.getUCQSizeAfterUnfolding();
+	}
+	
+	public int getUCQSizeAfterRewriting(){
+		return st.getUCQSizeAfterRewriting();
 	}
 }
