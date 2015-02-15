@@ -441,6 +441,9 @@ public class OBDAModelManager implements Disposable {
 				if ((!initializing) && (obdamodels != null) && (owlEditorKit != null) && (getActiveOBDAModelWrapper() != null)) {
                     reloadReasonerFactory();
 				}
+				else {
+					log.debug("The reasoner factory has not been reloaded");
+				}
                 break;
 			}
 		}
@@ -598,7 +601,7 @@ public class OBDAModelManager implements Disposable {
 			return;
 		}
 
-		OWLClass newClass = owlmm.getOWLDataFactory().getOWLClass(IRI.create("http://www.unibz.it/krdb/obdaplugin#RandomClass6677841155"));
+		OWLClass newClass = owlmm.getOWLDataFactory().getOWLClass(IRI.create("http://www.unibz.it/krdb/obdaplugin#RandomClass" + UUID.randomUUID()));
 		OWLAxiom axiom = owlmm.getOWLDataFactory().getOWLDeclarationAxiom(newClass);
 
 		try {
@@ -611,6 +614,15 @@ public class OBDAModelManager implements Disposable {
 					newClass.getIRI());
 			log.warn(e.getMessage());
 			log.debug(e.getMessage(), e);
+		}
+		/**
+		 * TODO: this should not be necessary because the above lines do not have the accounted effect.
+		 */
+		finally {
+			/**
+			 * Makes sure the next reasoner will take into account the new OBDAModel.
+			 */
+			reloadReasonerFactory();
 		}
 	}
 
