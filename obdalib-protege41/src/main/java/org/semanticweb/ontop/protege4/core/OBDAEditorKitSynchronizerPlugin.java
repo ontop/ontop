@@ -99,6 +99,11 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 		kit = (OWLEditorKit)getEditorKit();
 //		mmgr = (OWLModelManager)kit.getModelManager();
 //		mmgr.addListener(instance.getModelManagerListener());
+
+		getEditorKit().put(OBDAModelManager.class.getName(), instance);
+		/**
+		 * TODO: Not sound!! remove it!!!
+		 */
 		getEditorKit().put(OBDAModelImpl.class.getName(), instance);
 
 		// getEditorKit().getModelManager().put(APIController.class.getName(),

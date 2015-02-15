@@ -31,8 +31,15 @@ public interface NativeQueryLanguageComponentFactory {
 
     public MappingParser create(Reader reader);
     public MappingParser create(File file);
-
     public MappingParser create(Model mappingGraph);
+
+    /**
+     * Useful for Protege (when the mapping file does not provide
+     * this information, e.g. R2RML mappings).
+     *
+     * If possible, avoid this constructor and use the OBDAProperties instead.
+     */
+    public MappingParser create(File file, OBDADataSource dataSource);
 
     public PrefixManager create(Map<String, String> prefixToURIMap);
 

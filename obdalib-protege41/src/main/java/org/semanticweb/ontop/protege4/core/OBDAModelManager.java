@@ -309,6 +309,8 @@ public class OBDAModelManager implements Disposable {
 	 * a new object. On creation listeners for the datasources, mappings and
 	 * queries are setup so that changes in these trigger and ontology change.
 	 *
+	 * TODO: see if it can be merged with loadOntologyAndMappings
+	 *
 	 */
 	private void setupNewOBDAModel() {
 		OBDAModelWrapper activeOBDAModelWrapper = getActiveOBDAModelWrapper();
@@ -318,6 +320,7 @@ public class OBDAModelManager implements Disposable {
 		}
 
         OWLModelManager mmgr = owlEditorKit.getOWLWorkspace().getOWLModelManager();
+		OWLOntology activeOntology = mmgr.getActiveOntology();
 
         // Setup the prefixes
         PrefixOWLOntologyFormat prefixManager = PrefixUtilities.getPrefixOWLOntologyFormat(mmgr.getActiveOntology());
@@ -329,24 +332,10 @@ public class OBDAModelManager implements Disposable {
 		activeOBDAModelWrapper.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);
 
-		Set<OWLOntology> ontologies = mmgr.getOntologies();
-		for (OWLOntology ontology : ontologies) {
-			// Setup the entity declarations
-			for (OWLClass c : ontology.getClassesInSignature()) {
-				Predicate pred = dfac.getClassPredicate(c.getIRI().toString());
-				activeOBDAModelWrapper.declareClass(pred);
-			}
-			for (OWLObjectProperty r : ontology.getObjectPropertiesInSignature()) {
-				Predicate pred = dfac.getObjectPropertyPredicate(r.getIRI().toString());
-				activeOBDAModelWrapper.declareObjectProperty(pred);
-			}
-			for (OWLDataProperty p : ontology.getDataPropertiesInSignature()) {
-				Predicate pred = dfac.getDataPropertyPredicate(p.getIRI().toString());
-				activeOBDAModelWrapper.declareDataProperty(pred);
-			}
-		}
-
-		OWLOntology activeOntology = mmgr.getActiveOntology();
+		/**
+		 * Property and class declarations.
+		 */
+		OBDAModelSynchronizer.declarePredicates(activeOntology, activeOBDAModelWrapper.getCurrentImmutableOBDAModel());
 
 		String defaultPrefix = prefixManager.getDefaultPrefix();
 		if (defaultPrefix == null) {
@@ -452,6 +441,9 @@ public class OBDAModelManager implements Disposable {
 				if ((!initializing) && (obdamodels != null) && (owlEditorKit != null) && (getActiveOBDAModelWrapper() != null)) {
                     reloadReasonerFactory();
 				}
+				else {
+					log.debug("The reasoner factory has not been reloaded");
+				}
                 break;
 			}
 		}
@@ -513,10 +505,17 @@ public class OBDAModelManager implements Disposable {
                 try {
                     // TODO: May consider updated Quest preferences.
                     activeOBDAModelWrapper.parseMappings(obdaFile);
+
                 }  catch (Exception e) {
                     activeOBDAModelWrapper.reset();
                     throw new Exception("Exception occurred while loading OBDA document: " + obdaFile + "\n\n" + e.getMessage());
                 }
+
+				/**
+				 * Property and class declarations to the new OBDAModel.
+				 */
+				OBDAModelSynchronizer.declarePredicates(activeOntology, activeOBDAModelWrapper.getCurrentImmutableOBDAModel());
+
                 /**
                  * Load the saved queries
                  */
@@ -543,11 +542,6 @@ public class OBDAModelManager implements Disposable {
             OBDAModelValidator validator = new OBDAModelValidator(activeOBDAModelWrapper.getCurrentImmutableOBDAModel(),
                     activeOntology);
             validator.run(); // adding type information to the mapping predicates.
-
-            /**
-             * Property and class declarations
-             */
-            OBDAModelSynchronizer.declarePredicates(activeOntology, activeOBDAModelWrapper.getCurrentImmutableOBDAModel());
 
         } catch (Exception e) {
             OBDAException ex = new OBDAException("An exception has occurred when loading input file.\nMessage: " + e.getMessage());
@@ -607,7 +601,7 @@ public class OBDAModelManager implements Disposable {
 			return;
 		}
 
-		OWLClass newClass = owlmm.getOWLDataFactory().getOWLClass(IRI.create("http://www.unibz.it/krdb/obdaplugin#RandomClass6677841155"));
+		OWLClass newClass = owlmm.getOWLDataFactory().getOWLClass(IRI.create("http://www.unibz.it/krdb/obdaplugin#RandomClass" + UUID.randomUUID()));
 		OWLAxiom axiom = owlmm.getOWLDataFactory().getOWLDeclarationAxiom(newClass);
 
 		try {
@@ -620,6 +614,15 @@ public class OBDAModelManager implements Disposable {
 					newClass.getIRI());
 			log.warn(e.getMessage());
 			log.debug(e.getMessage(), e);
+		}
+		/**
+		 * TODO: this should not be necessary because the above lines do not have the accounted effect.
+		 */
+		finally {
+			/**
+			 * Makes sure the next reasoner will take into account the new OBDAModel.
+			 */
+			reloadReasonerFactory();
 		}
 	}
 

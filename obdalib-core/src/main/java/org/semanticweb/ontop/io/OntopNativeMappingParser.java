@@ -109,6 +109,15 @@ public class OntopNativeMappingParser implements MappingParser {
     }
 
     /**
+     * Not supported.
+     */
+    @AssistedInject
+    private OntopNativeMappingParser(@Assisted File file, @Assisted OBDADataSource dataSource) {
+        throw new IllegalArgumentException("Data sources must be configured instead the mapping file of" +
+                "the Ontop native mapping language, not outside.");
+    }
+
+    /**
      * RDF graph argument is not supported. This constructor is required by the factory.
      */
     @AssistedInject

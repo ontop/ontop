@@ -41,6 +41,7 @@ import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.mapping.MappingParser;
+import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
@@ -68,6 +69,8 @@ public class R2RMLImportAction extends ProtegeAction {
 
         /**
          * OBDA properties for building a R2RML mapping parser
+		 *
+		 * Data source parameters are missing. --> We use the dataSource object instead.
          */
         OBDAProperties r2rmlProperties = new OBDAProperties();
         r2rmlProperties.setProperty(MappingParser.class.getCanonicalName(),
@@ -106,8 +109,12 @@ public class R2RMLImportAction extends ProtegeAction {
 			if (file != null) {
                 Disposable d = editorKit.get(NativeQueryLanguageComponentFactory.class.getName());
 
-                MappingParser parser = nativeQLFactory.create(file);
-				URI sourceID = obdaModelController.getSources().get(0).getSourceID();
+				/**
+				 * Uses the predefined data source for creating the OBDAModel.
+				 */
+				OBDADataSource dataSource = obdaModelController.getSources().get(0);
+                MappingParser parser = nativeQLFactory.create(file, dataSource);
+				URI sourceID = dataSource.getSourceID();
 
 				try {
                     OBDAModel parsedModel = parser.getOBDAModel();
