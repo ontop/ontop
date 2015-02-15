@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
-import java.util.Properties;
 
 /**
  * High-level class that implements the MappingParser interface for R2RML.
@@ -35,6 +34,10 @@ public class R2RMLMappingParser implements MappingParser {
     private final OBDAProperties configuration;
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private final OBDAFactoryWithException obdaFactory;
+    /**
+     * Data source given at construction time, not extracted from the preferences.
+     */
+    private final OBDADataSource predefinedDataSource;
     private OBDAModel obdaModel;
 
     /**
@@ -51,6 +54,7 @@ public class R2RMLMappingParser implements MappingParser {
         this.configuration = configuration;
         this.mappingFile = mappingFile;
         this.mappingGraph = null;
+        this.predefinedDataSource = null;
 
         /**
          * Computed lazily  (when requested for the first time).
@@ -68,17 +72,33 @@ public class R2RMLMappingParser implements MappingParser {
         this.mappingGraph = mappingGraph;
         this.mappingFile = null;
         this.obdaModel = null;
+        this.predefinedDataSource = null;
+    }
 
+    /**
+     * Data source given from outside --> no need to extract it from the OBDA properties.
+     */
+    @AssistedInject
+    private R2RMLMappingParser(@Assisted File mappingFile, @Assisted OBDADataSource dataSource,
+                               NativeQueryLanguageComponentFactory nativeQLFactory,
+                               OBDAFactoryWithException obdaFactory, OBDAProperties configuration) {
+        this.nativeQLFactory = nativeQLFactory;
+        this.obdaFactory = obdaFactory;
+        this.configuration = configuration;
+        this.mappingFile = mappingFile;
+        this.mappingGraph = null;
+        this.predefinedDataSource = dataSource;
     }
 
     @AssistedInject
     private R2RMLMappingParser(@Assisted Reader reader,
                                NativeQueryLanguageComponentFactory nativeQLFactory,
-                               Properties configuration) {
+                               OBDAProperties configuration) {
         // TODO: support this
         throw new IllegalArgumentException("The R2RMLMappingParser does not support" +
                 "yet the Reader interface.");
     }
+
 
     @Override
     public OBDAModel getOBDAModel() throws InvalidMappingException, IOException, InvalidDataSourceException,
@@ -98,11 +118,18 @@ public class R2RMLMappingParser implements MappingParser {
         else
             throw new RuntimeException("Internal inconsistency. A mappingFile or a mappingGraph should be defined.");
 
+
+        OBDADataSource dataSource = this.predefinedDataSource;
+        /**
+         * If the data source is not already defined, extracts it from the preferences.
+         */
+        if (dataSource == null) {
+            OBDADataSourceFromConfigExtractor dataSourceExtractor = new OBDADataSourceFromConfigExtractor(configuration);
+            dataSource = dataSourceExtractor.getDataSource() ;
+        }
+
         //TODO: make the R2RMLManager simpler.
         ImmutableList<OBDAMappingAxiom> sourceMappings = r2rmlManager.getMappings(r2rmlManager.getModel());
-
-        OBDADataSourceFromConfigExtractor dataSourceExtractor = new OBDADataSourceFromConfigExtractor(configuration);
-        OBDADataSource dataSource = dataSourceExtractor.getDataSource() ;
 
         //TODO: try to extract prefixes from the R2RML mappings
         PrefixManager prefixManager = nativeQLFactory.create(new HashMap<String, String>());
