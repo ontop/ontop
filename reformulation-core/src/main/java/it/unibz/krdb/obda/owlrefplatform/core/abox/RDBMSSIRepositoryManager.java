@@ -145,11 +145,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			"\"URI\" INTEGER NOT NULL, \"IDX\"  SMALLINT NOT NULL, ISBNODE BOOLEAN NOT NULL DEFAULT FALSE",
 			"(URI, IDX, ISBNODE) VALUES (?, ?, ?)", "\"URI\" as X");
 	
-	final static TableDescription roleTable = new TableDescription("QUEST_OBJECT_PROPERTY_ASSERTION", 
-			"\"URI1\" INTEGER NOT NULL, \"URI2\" INTEGER NOT NULL, \"IDX\"  SMALLINT NOT NULL, " + 
-			"ISBNODE BOOLEAN NOT NULL DEFAULT FALSE, ISBNODE2 BOOLEAN NOT NULL DEFAULT FALSE",
-			"(URI1, URI2, IDX, ISBNODE, ISBNODE2) VALUES (?, ?, ?, ?, ?)", "\"URI1\" as X, \"URI2\" as Y");
-
     final static Map<COL_TYPE ,TableDescription> attributeTable = new HashMap<>();
 	
 	private static final class AttributeTableDescritpion {
@@ -171,6 +166,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		classTable.indexOn("idxclassfull", "URI, IDX, ISBNODE");
 		classTable.indexOn("idxclassfull2", "URI, IDX");
 		
+		TableDescription roleTable = new TableDescription("QUEST_OBJECT_PROPERTY_ASSERTION", 
+				"\"URI1\" INTEGER NOT NULL, \"URI2\" INTEGER NOT NULL, \"IDX\"  SMALLINT NOT NULL, " + 
+				"ISBNODE BOOLEAN NOT NULL DEFAULT FALSE, ISBNODE2 BOOLEAN NOT NULL DEFAULT FALSE",
+				"(URI1, URI2, IDX, ISBNODE, ISBNODE2) VALUES (?, ?, ?, ?, ?)", "\"URI1\" as X, \"URI2\" as Y");
+		attributeTable.put(COL_TYPE.OBJECT, roleTable);
+
 		roleTable.indexOn("idxrolefull1", "URI1, URI2, IDX, ISBNODE, ISBNODE2");
 		roleTable.indexOn("idxrolefull2",  "URI2, URI1, IDX, ISBNODE2, ISBNODE");
 		roleTable.indexOn("idxrolefull22", "URI1, URI2, IDX");
@@ -291,8 +292,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			st.addBatch(emptinessIndexTable.createCommand);
 
 			st.addBatch(classTable.createCommand);
-			st.addBatch(roleTable.createCommand);
-
 			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
 				st.addBatch(entry.getValue().createCommand);
 			
@@ -306,7 +305,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		
 		try (Statement st = conn.createStatement()) {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", classTable.tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", roleTable.tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.OBJECT).tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.LITERAL).tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.STRING).tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.INTEGER).tableName));
@@ -334,8 +333,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			st.addBatch(emptinessIndexTable.dropCommand);
 
 			st.addBatch(classTable.dropCommand);
-			st.addBatch(roleTable.dropCommand);
-			
 			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
 				st.addBatch(entry.getValue().dropCommand); 
 			
@@ -358,120 +355,101 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		boolean oldAutoCommit = conn.getAutoCommit();
 		conn.setAutoCommit(false);
 
-		// Create the insert statement for all assertions (i.e, concept, role
-		// and attribute)
 		PreparedStatement uriidStm = conn.prepareStatement(uriIdTable.insertCommand);
-		PreparedStatement classStm = conn.prepareStatement(classTable.insertCommand);
-		PreparedStatement roleStm = conn.prepareStatement(roleTable.insertCommand);
-		
-		Map<COL_TYPE, PreparedStatement> attributeStm = new HashMap<>();
-		for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet()) {
-			PreparedStatement stm = conn.prepareStatement(entry.getValue().insertCommand);
-			attributeStm.put(entry.getKey(), stm);
-		}
+		Map<SemanticIndexViewID, PreparedStatement> stmMap = new HashMap<>();
 		
 		// For counting the insertion
-		Integer success = 0;
+		int success = 0;
 		Map<Predicate, Integer> failures = new HashMap<>();
 
 		int batchCount = 0;
 		int commitCount = 0;
 
-		while (data.hasNext()) {
-			Assertion ax = data.next();
+		try {
+			while (data.hasNext()) {
+				Assertion ax = data.next();
 
-			// log.debug("Inserting statement: {}", ax);
-			batchCount++;
-			commitCount++;
+				// log.debug("Inserting statement: {}", ax);
+				batchCount++;
+				commitCount++;
 
+				if (ax instanceof ClassAssertion) {
+					ClassAssertion ca = (ClassAssertion) ax; 
+					try {
+						process(conn, ca, uriidStm, stmMap);
+						success++;
+					}
+					catch (Exception e) {
+						Predicate predicate = ca.getConcept().getPredicate();
+						Integer counter = failures.get(predicate);
+						if (counter == null) 
+							counter = 0;
+						failures.put(predicate, counter + 1);					
+					}
+				} 
+				else if (ax instanceof ObjectPropertyAssertion) {
+					ObjectPropertyAssertion opa = (ObjectPropertyAssertion)ax;
+					try {
+						process(conn, opa, uriidStm, stmMap);	
+						success++;
+					}
+					catch (Exception e) {
+						Predicate predicate = opa.getProperty().getPredicate();
+						Integer counter = failures.get(predicate);
+						if (counter == null) 
+							counter = 0;
+						failures.put(predicate, counter + 1);					
+					}
+				}
+				else /* (ax instanceof DataPropertyAssertion) */ {
+					DataPropertyAssertion dpa = (DataPropertyAssertion)ax;
+					try {
+						process(conn, dpa, uriidStm, stmMap);				
+						success++;					
+					}
+					catch (Exception e) {
+						Predicate predicate = dpa.getProperty().getPredicate();
+						Integer counter = failures.get(predicate);
+						if (counter == null) 
+							counter = 0;
+						failures.put(predicate, counter + 1);					
+					}
+				}
 
-			if (ax instanceof ClassAssertion) {
-				ClassAssertion ca = (ClassAssertion) ax; 
-				try {
-					process(ca, uriidStm, classStm);
-					success++;
+				// Check if the batch count is already in the batch limit
+				if (batchCount == batchLimit) {
+					uriidStm.executeBatch();
+					uriidStm.clearBatch();
+					for (PreparedStatement stm : stmMap.values()) {
+						stm.executeBatch();
+						stm.clearBatch();
+					}
+					batchCount = 0; // reset the counter
 				}
-				catch (Exception e) {
-					Predicate predicate = ca.getConcept().getPredicate();
-					Integer counter = failures.get(predicate);
-					if (counter == null) 
-						counter = 0;
-					failures.put(predicate, counter + 1);					
-				}
-			} 
-			else if (ax instanceof ObjectPropertyAssertion) {
-				ObjectPropertyAssertion opa = (ObjectPropertyAssertion)ax;
-				try {
-					process(opa, uriidStm, roleStm);	
-					success++;
-				}
-				catch (Exception e) {
-					Predicate predicate = opa.getProperty().getPredicate();
-					Integer counter = failures.get(predicate);
-					if (counter == null) 
-						counter = 0;
-					failures.put(predicate, counter + 1);					
+
+				// Check if the commit count is already in the commit limit
+				if (commitCount == commitLimit) {
+					conn.commit();
+					commitCount = 0; // reset the counter
 				}
 			}
-			else /* (ax instanceof DataPropertyAssertion) */ {
-				DataPropertyAssertion dpa = (DataPropertyAssertion)ax;
-				try {
-					process(dpa, uriidStm, attributeStm);				
-					success++;					
-				}
-				catch (Exception e) {
-					Predicate predicate = dpa.getProperty().getPredicate();
-					Integer counter = failures.get(predicate);
-					if (counter == null) 
-						counter = 0;
-					failures.put(predicate, counter + 1);					
-				}
-			}
 
-			// Check if the batch count is already in the batch limit
-			if (batchCount == batchLimit) {
-				uriidStm.executeBatch();
-				uriidStm.clearBatch();
-				roleStm.executeBatch();
-				roleStm.clearBatch();;
-				for (PreparedStatement stm : attributeStm.values()) {
-					stm.executeBatch();
-					stm.clearBatch();
-				}
-				classStm.executeBatch();
-				classStm.clearBatch();
-				batchCount = 0; // reset the counter
+			// Execute the rest of the batch
+			uriidStm.executeBatch();
+			uriidStm.clearBatch();
+			for (PreparedStatement stm : stmMap.values()) {
+				stm.executeBatch();
+				stm.clearBatch();
 			}
-
-			// Check if the commit count is already in the commit limit
-			if (commitCount == commitLimit) {
-				conn.commit();
-				commitCount = 0; // reset the counter
-			}
+			// Commit the rest of the batch insert
+			conn.commit();
 		}
-
-		// Execute the rest of the batch
-		uriidStm.executeBatch();
-		uriidStm.clearBatch();
-		roleStm.executeBatch();
-		roleStm.clearBatch();;
-		for (PreparedStatement stm : attributeStm.values()) {
-			stm.executeBatch();
-			stm.clearBatch();
+		finally {
+			// Close all open statements
+			uriidStm.close();
+			for (PreparedStatement stm : stmMap.values()) 
+				stm.close();
 		}
-		classStm.executeBatch();
-		classStm.clearBatch();
-
-	
-		// Close all open statements
-		uriidStm.close();
-		roleStm.close();
-		for (PreparedStatement stm : attributeStm.values())
-			stm.close();
-		classStm.close();
-
-		// Commit the rest of the batch insert
-		conn.commit();
 
 		conn.setAutoCommit(oldAutoCommit);
 
@@ -491,15 +469,14 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		 * (this is done in order to update T-mappings)
 		 */
 
-		for (RepositoryChangedListener listener : changeList) {
+		for (RepositoryChangedListener listener : changeList) 
 			listener.repositoryChanged();
-		}
 
 		return success;
 	}
 
 
-	private void process(ObjectPropertyAssertion ax, PreparedStatement uriidStm, PreparedStatement roleStm) throws SQLException {
+	private void process(Connection conn, ObjectPropertyAssertion ax, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
 
 		ObjectPropertyExpression ope0 = ax.getProperty();
 		if (ope0.isInverse()) 
@@ -526,53 +503,59 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		int idx = cacheSI.getEntry(ope).getIndex();
 		
+
+		SemanticIndexView view = views.getView(o1.getType(), o2.getType());
+		
+		PreparedStatement stm = stmMap.get(view.getId());
+		if (stm == null) {
+			stm = conn.prepareStatement(view.getINSERT());
+			stmMap.put(view.getId(), stm);
+		}
+		
 		int uri_id = getObjectConstantUriId(o1, uriidStm);
 		int uri2_id = getObjectConstantUriId(o2, uriidStm);
 		
 		// Construct the database INSERT statements		
-		roleStm.setInt(1, uri_id);
-		roleStm.setInt(2, uri2_id);		
-		roleStm.setInt(3, idx);
-		roleStm.setBoolean(4, o1 instanceof BNode);
-		roleStm.setBoolean(5, o2 instanceof BNode);
-		roleStm.addBatch();
+		stm.setInt(1, uri_id);
+		stm.setInt(2, uri2_id);		
+		stm.setInt(3, idx);
+		stm.addBatch();
 		
 		// Register non emptiness
-		SemanticIndexViewID viewId = new SemanticIndexViewID(o1.getType(), o2.getType());
-		views.addIndexToView(viewId, idx);
+		view.addIndex(idx);
 	} 
 
-	private void process(DataPropertyAssertion ax, PreparedStatement uriidStm, Map<COL_TYPE, PreparedStatement> attributeStatement) throws SQLException {
-		
-		ObjectConstant subject = ax.getSubject();
-		int uri_id = getObjectConstantUriId(subject, uriidStm);
-		
+	private void process(Connection conn, DataPropertyAssertion ax, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
+
 		// replace the property by its canonical representative 
 		DataPropertyExpression dpe0 = ax.getProperty();
 		DataPropertyExpression dpe = reasonerDag.getDataPropertyDAG().getVertex(dpe0).getRepresentative();		
 		int idx = cacheSI.getEntry(dpe).getIndex();
-
-		ValueConstant object = ax.getValue();
-		Predicate.COL_TYPE attributeType = object.getType();
-		// special treatment for LITERAL_LANG
-		if (attributeType == COL_TYPE.LITERAL_LANG)
-			attributeType = COL_TYPE.LITERAL;
 		
-		// Construct the database INSERT statements
-		PreparedStatement stm = attributeStatement.get(attributeType);
+		ObjectConstant subject = ax.getSubject();
+		
+		ValueConstant object = ax.getValue();
+		COL_TYPE objectType = object.getType();
+		
+		SemanticIndexView view =  views.getView(subject.getType(), objectType);
+		PreparedStatement stm = stmMap.get(view.getId());
 		if (stm == null) {
-			// UNSUPPORTED DATATYPE
-			log.warn("Ignoring assertion: {}", ax);			
-			return;
+			stm = conn.prepareStatement(view.getINSERT());
+			stmMap.put(view.getId(), stm);
 		}
+
+		int uri_id = getObjectConstantUriId(subject, uriidStm);
 		stm.setInt(1, uri_id);
 		
 		String value = object.getValue();
 		
-		switch (attributeType) {
+		switch (objectType) {
 			case LITERAL:  // 0
 				stm.setString(2, value);
-				stm.setString(3, object.getLanguage());
+				break;  
+			case LITERAL_LANG:  // -3
+				stm.setString(2, value);
+				stm.setString(4, object.getLanguage());
 				break;  
 			case STRING:   // 1
 				stm.setString(2, value);
@@ -618,44 +601,45 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				stm.setBoolean(2, Boolean.parseBoolean(value));
 				break;
 			default:
+				// UNSUPPORTED DATATYPE
+				log.warn("Ignoring assertion: {}", ax);			
+				return;				
 		}
 		
-		if (attributeType == COL_TYPE.LITERAL) {
-			stm.setInt(4, idx);
-			stm.setBoolean(5, subject instanceof BNode);			
-		}
-		else {
-			stm.setInt(3, idx);
-			stm.setBoolean(4, subject instanceof BNode);			
-		}
+		stm.setInt(3, idx);
 		stm.addBatch();
 		
 		// register non-emptiness
-		SemanticIndexViewID viewId = new SemanticIndexViewID(subject.getType(), object.getType());
-		views.addIndexToView(viewId, idx);
+		view.addIndex(idx);
 	}
 	
 		
-	private void process(ClassAssertion ax, PreparedStatement uriidStm, PreparedStatement classStm) throws SQLException {
+	private void process(Connection conn, ClassAssertion ax, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
 		
-		ObjectConstant c1 = ax.getIndividual();
-
-		int uri_id = getObjectConstantUriId(c1, uriidStm); 
-
 		// replace concept by the canonical representative (which must be a concept name)
 		OClass concept0 = ax.getConcept();
 		OClass concept = (OClass)reasonerDag.getClassDAG().getVertex(concept0).getRepresentative();	
 		int conceptIndex = cacheSI.getEntry(concept).getIndex();	
 
+		ObjectConstant c1 = ax.getIndividual();
+
+		SemanticIndexView view =  views.getView(c1.getType());
+	
+		PreparedStatement stm = stmMap.get(view.getId());
+		if (stm == null) {
+			stm = conn.prepareStatement(view.getINSERT());
+			stmMap.put(view.getId(), stm);
+		}
+
+		int uri_id = getObjectConstantUriId(c1, uriidStm); 
+		
 		// Construct the database INSERT statements
-		classStm.setInt(1, uri_id);
-		classStm.setInt(2, conceptIndex);
-		classStm.setBoolean(3, c1 instanceof BNode);
-		classStm.addBatch();
+		stm.setInt(1, uri_id);
+		stm.setInt(2, conceptIndex);
+		stm.addBatch();
 	
 		// Register non emptiness
-		SemanticIndexViewID viewId = new SemanticIndexViewID(c1.getType());
-		views.addIndexToView(viewId, conceptIndex);
+		view.addIndex(conceptIndex);
 	}
 
 	// TODO: big issue -- URI map is incomplete -- it is never read back from the DB
@@ -941,12 +925,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			 * each property can act as an object or data property of any type.
 			 */
 			
-			for (SemanticIndexViewID viewId : views.getPropertyViewIDs()) {
-				if (views.isViewEmpty(viewId, intervals))
+			for (SemanticIndexView view : views.getPropertyViews()) {
+				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
-				String sourceQuery = views.getSqlSource(viewId) + intervalsSqlFilter;
-				CQIE targetQuery = constructTargetQuery(ope.getPredicate(), viewId.getType1(), viewId.getType2());
+				String sourceQuery = view.getSELECT() + intervalsSqlFilter;
+				CQIE targetQuery = constructTargetQuery(ope.getPredicate(), view.getId().getType1(), view.getId().getType2());
 				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 				result.add(basicmapping);		
 			}
@@ -980,12 +964,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			 * each property can act as an object or data property of any type.
 			 */
 			
-			for (SemanticIndexViewID viewId : views.getPropertyViewIDs()) {
-				if (views.isViewEmpty(viewId, intervals))
+			for (SemanticIndexView view : views.getPropertyViews()) {
+				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
-				String sourceQuery = views.getSqlSource(viewId) + intervalsSqlFilter;
-				CQIE targetQuery = constructTargetQuery(dpe.getPredicate(), viewId.getType1(), viewId.getType2());
+				String sourceQuery = view.getSELECT() + intervalsSqlFilter;
+				CQIE targetQuery = constructTargetQuery(dpe.getPredicate(), view.getId().getType1(), view.getId().getType2());
 				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 				result.add(basicmapping);			
 			}
@@ -1012,12 +996,12 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			List<Interval> intervals = range.getIntervals();
 			String intervalsSqlFilter = getIntervalString(intervals);
 
-			for (SemanticIndexViewID viewId : views.getClassViewIDs()) {
-				if (views.isViewEmpty(viewId, intervals))
+			for (SemanticIndexView view : views.getClassViews()) {
+				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
-				String sourceQuery = views.getSqlSource(viewId) + intervalsSqlFilter;
-				CQIE targetQuery = constructTargetQuery(classNode.getPredicate(), viewId.getType1());
+				String sourceQuery = view.getSELECT() + intervalsSqlFilter;
+				CQIE targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
 				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 				result.add(basicmapping);
 			}
@@ -1268,9 +1252,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			for (String s : classTable.createIndexCommands)
 				st.addBatch(s);
 			
-			for (String s : roleTable.createIndexCommands)
-				st.addBatch(s);
-			
 			st.executeBatch();
 			st.clearBatch();
 			
@@ -1292,9 +1273,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		try (Statement st = conn.createStatement()) {
 			for (String s : classTable.dropIndexCommands)
-				st.addBatch(s);	
-
-			for (String s : roleTable.dropIndexCommands)
 				st.addBatch(s);	
 
 			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())

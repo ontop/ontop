@@ -32,15 +32,18 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 public class SemanticIndexViewID {
 	
 	private final COL_TYPE type1, type2;
+	private final int hashCode;
 
 	public SemanticIndexViewID(COL_TYPE type1, COL_TYPE type2) {
 		this.type1 = type1;
 		this.type2 = type2;
+		this.hashCode  = type2.hashCode() ^ (type1.hashCode() << 16);
 	}
 	
 	public SemanticIndexViewID(COL_TYPE type1) {
 		this.type1 = type1;
 		this.type2 = null;
+		this.hashCode  = type1.hashCode();
 	}
 
 	public COL_TYPE getType1() {
@@ -53,7 +56,7 @@ public class SemanticIndexViewID {
 	
 	@Override
 	public int hashCode() {
-		return type1.hashCode() ^ ((type2 != null) ? type2.hashCode() << 16 : 0);
+		return hashCode;
 	}
 	
 	@Override

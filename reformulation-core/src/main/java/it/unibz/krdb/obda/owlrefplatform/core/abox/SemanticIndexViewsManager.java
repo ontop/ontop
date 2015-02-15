@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core.abox;
 
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Interval;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,47 +9,39 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import com.google.common.collect.Lists;
 
 public class SemanticIndexViewsManager {
 
-	private final Map<SemanticIndexViewID, Set<Integer>> nonEmptyEntityRecord = new HashMap<>();
-
+	private final Map<SemanticIndexViewID, SemanticIndexView> views = new HashMap<>();
+	
+	private final List<SemanticIndexView> propertyViews = new LinkedList<>();
+	private final List<SemanticIndexView> classViews = new LinkedList<>();
+	
 	public SemanticIndexViewsManager() {
 		init();
 	}
+
+	public List<SemanticIndexView> getPropertyViews() {
+		return Collections.unmodifiableList(propertyViews);
+	}
 	
-	
-	
-	public boolean isViewEmpty(SemanticIndexViewID viewId, List<Interval> intervals) {
-		
-		Set<Integer> set = nonEmptyEntityRecord.get(viewId);
-		if (set == null) 
-			return true; // the set if empty
-		
-		for (Interval interval : intervals) 
-			for (Integer i = interval.getStart(); i <= interval.getEnd(); i++) 
-				if (set.contains(i)) 
-					return false;
-		
-		return true;
+	public List<SemanticIndexView> getClassViews() {
+		return Collections.unmodifiableList(classViews);
 	}
 
-	public void addIndexToView(SemanticIndexViewID viewId, Integer idx) {
-		Set<Integer> set = nonEmptyEntityRecord.get(viewId);
-		if (set == null) {
-			set = new HashSet<>();
-			nonEmptyEntityRecord.put(viewId, set);
-		}
-		set.add(idx);			
+	public SemanticIndexView getView(COL_TYPE type) {
+		SemanticIndexViewID viewId = new SemanticIndexViewID(type);
+		return views.get(viewId);
 	}
+	
+	public SemanticIndexView getView(COL_TYPE type1, COL_TYPE type2) {
+		SemanticIndexViewID viewId = new SemanticIndexViewID(type1, type2);
+		return views.get(viewId);
+	}
+	
 	
 	
 	private static final COL_TYPE objectTypes[] = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.BNODE };
@@ -62,36 +53,47 @@ public class SemanticIndexViewsManager {
 		COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER, COL_TYPE.FLOAT,  COL_TYPE.LONG, 
 		COL_TYPE.STRING };
 	
-	private final Map<SemanticIndexViewID, String> selectCommand = new HashMap<>();
-	
-	private final List<SemanticIndexViewID> propertyViewIds = new LinkedList<>();
-	private final List<SemanticIndexViewID> classViewIds = new LinkedList<>();
-	
-	public List<SemanticIndexViewID> getPropertyViewIDs() {
-		return Collections.unmodifiableList(propertyViewIds);
-	}
-	
-	public List<SemanticIndexViewID> getClassViewIDs() {
-		return Collections.unmodifiableList(classViewIds);
-	}
-	
 	private final void init() {
 		
 		for (COL_TYPE type1 : objectTypes) {
 			for (COL_TYPE type2 : typesAndObjectTypes) {
-				StringBuilder sql = new StringBuilder();
+				StringBuilder select = new StringBuilder();
+				StringBuilder insert = new StringBuilder();
 				
 				switch (type2) {
 					case OBJECT:
+						select.append(RDBMSSIRepositoryManager.attributeTable.get(type2).selectCommand)
+							  .append("ISBNODE2 = FALSE AND ");
+						insert.append("INSERT INTO ")
+							  .append(RDBMSSIRepositoryManager.attributeTable.get(type2).tableName)
+							  .append("(URI1, URI2, IDX, ISBNODE2, ISBNODE) VALUES (?, ?, ?, FALSE, ");
+						break;
 					case BNODE:
-						sql.append(RDBMSSIRepositoryManager.roleTable.selectCommand);
+						select.append(RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).selectCommand)
+						      .append("ISBNODE2 = TRUE AND ");
+						insert.append("INSERT INTO ")
+						      .append(RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).tableName)
+						      .append("(URI1, URI2, IDX, ISBNODE2, ISBNODE) VALUES (?, ?, ?, TRUE, ");
 						break;
 					case LITERAL:
+						select.append(RDBMSSIRepositoryManager.attributeTable.get(type2).selectCommand)
+							  .append("LANG IS NULL AND ");
+						insert.append("INSERT INTO ")
+					      	  .append(RDBMSSIRepositoryManager.attributeTable.get(type2).tableName)
+					          .append("(URI, VAL, IDX, LANG, ISBNODE) VALUES (?, ?, ?, NULL, ");
+						break;
 					case LITERAL_LANG:
-						sql.append(RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).selectCommand);
+						select.append(RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).selectCommand)
+							  .append("LANG IS NOT NULL AND ");
+						insert.append("INSERT INTO ")
+				      	  	  .append(RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).tableName)
+				      	  	  .append("(URI, VAL, IDX, LANG, ISBNODE) VALUES (?, ?, ?, ?, ");
 						break;
 					default:
-						sql.append(RDBMSSIRepositoryManager.attributeTable.get(type2).selectCommand);
+						select.append(RDBMSSIRepositoryManager.attributeTable.get(type2).selectCommand);
+						insert.append("INSERT INTO ")
+				      	  	  .append(RDBMSSIRepositoryManager.attributeTable.get(type2).tableName)
+				      	  	  .append("(URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ");				
 				}
 
 				/*
@@ -101,33 +103,32 @@ public class SemanticIndexViewsManager {
 				 * NULL for every variable in the head of a mapping.
 				 */
 
-				if (type1 == COL_TYPE.BNODE) 
-					sql.append("ISBNODE = TRUE AND ");
+				if (type1 == COL_TYPE.BNODE) { 
+					select.append("ISBNODE = TRUE AND ");
+					insert.append("TRUE)");
+				}
 				else {
 					assert (type1 == COL_TYPE.OBJECT);
-					sql.append("ISBNODE = FALSE AND ");
+					select.append("ISBNODE = FALSE AND ");
+					insert.append("FALSE)");
 				}
-
-				if (type2 == COL_TYPE.BNODE) 
-					sql.append("ISBNODE2 = TRUE AND ");
-				else if (type2 == COL_TYPE.OBJECT) 
-					sql.append("ISBNODE2 = FALSE AND ");
-				else if (type2 == COL_TYPE.LITERAL) 
-					sql.append("LANG IS NULL AND ");
-				else if (type2 == COL_TYPE.LITERAL_LANG)
-					sql.append("LANG IS NOT NULL AND ");
 				
 				SemanticIndexViewID viewId = new SemanticIndexViewID(type1, type2);
-				selectCommand.put(viewId, sql.toString());		
-				
-				propertyViewIds.add(viewId);
+				SemanticIndexView view = new SemanticIndexView(viewId, select.toString(), insert.toString());
+				views.put(view.getId(), view);					
+				propertyViews.add(view);
 			}
 		}
 
 		for (COL_TYPE type : objectTypes) {
-			StringBuilder sql = new StringBuilder();
+			StringBuilder select = new StringBuilder();
+			StringBuilder insert = new StringBuilder();
 			
-			sql.append(RDBMSSIRepositoryManager.classTable.selectCommand);
+			select.append(RDBMSSIRepositoryManager.classTable.selectCommand);
+			insert.append("INSERT INTO ")
+				.append(RDBMSSIRepositoryManager.classTable.tableName)
+				.append(" (URI, IDX, ISBNODE) VALUES (?, ?, ");
+
 
 			/*
 			 * If the mapping is for something of type Literal we need to add IS
@@ -136,26 +137,24 @@ public class SemanticIndexViewsManager {
 			 * NULL for every variable in the head of a mapping.
 			 */
 
-			if (type == COL_TYPE.BNODE) 
-				sql.append("ISBNODE = TRUE AND ");
+			if (type == COL_TYPE.BNODE) { 
+				select.append("ISBNODE = TRUE AND ");
+				insert.append("TRUE)");
+			}
 			else {
 				assert (type == COL_TYPE.OBJECT);
-				sql.append("ISBNODE = FALSE AND ");
+				select.append("ISBNODE = FALSE AND ");
+				insert.append("FALSE)");
 			}
 			
 			SemanticIndexViewID viewId = new SemanticIndexViewID(type);
-			selectCommand.put(viewId, sql.toString());	
-			
-			classViewIds.add(viewId);			
+			SemanticIndexView view = new SemanticIndexView(viewId, select.toString(), insert.toString());
+			views.put(view.getId(), view);		
+			classViews.add(view);
 		}
 		
 	}
 	
-	
-	public String getSqlSource(SemanticIndexViewID viewId) {
-		return selectCommand.get(viewId);
-	}	
-
 	
 	
 	// view id codes that are stored in DB (starts with 0)
@@ -201,27 +200,25 @@ public class SemanticIndexViewsManager {
 	public void store(Connection conn) throws SQLException {
 		
 		try (PreparedStatement stm = conn.prepareStatement(RDBMSSIRepositoryManager.emptinessIndexTable.insertCommand)) {
-			for (Entry<SemanticIndexViewID, Set<Integer>> record : nonEmptyEntityRecord.entrySet()) {
-				if (record.getValue() != null) {
-					SemanticIndexViewID viewId = record.getKey();
-					for (Integer idx : record.getValue()) {
-						if (viewId.getType2() == null) {
-							// class view (only type1 is relevant)
-							stm.setInt(1, 0); // SITable.CLASS.ordinal()
-							stm.setInt(2, idx);
-							stm.setInt(3, COLTYPEtoInt(viewId.getType1()));
-							stm.setInt(4, OBJ_TYPE_BNode);
-						}
-						else {
-							// property view
-							stm.setInt(1, COLTYPEtoSITable.get(viewId.getType2()));
-							stm.setInt(2, idx);
-							stm.setInt(3, COLTYPEtoInt(viewId.getType1()));
-							stm.setInt(4, COLTYPEtoInt(viewId.getType2()));
-						}
-						
-						stm.addBatch();
+			for (SemanticIndexView view : views.values()) {
+				SemanticIndexViewID viewId = view.getId();
+				for (Integer idx : view.getIndexes()) {
+					if (viewId.getType2() == null) {
+						// class view (only type1 is relevant)
+						stm.setInt(1, 0); // SITable.CLASS.ordinal()
+						stm.setInt(2, idx);
+						stm.setInt(3, COLTYPEtoInt(viewId.getType1()));
+						stm.setInt(4, OBJ_TYPE_BNode);
 					}
+					else {
+						// property view
+						stm.setInt(1, COLTYPEtoSITable.get(viewId.getType2()));
+						stm.setInt(2, idx);
+						stm.setInt(3, COLTYPEtoInt(viewId.getType1()));
+						stm.setInt(4, COLTYPEtoInt(viewId.getType2()));
+					}
+					
+					stm.addBatch();
 				}
 			}
 			stm.executeBatch();
@@ -244,18 +241,18 @@ public class SemanticIndexViewsManager {
 				int idx = res.getInt(2);
 				
 				COL_TYPE coltype = SITableToCOLTYPE[sitable];
+				SemanticIndexView view;
 				if (coltype == null) {
 					// class view
-					SemanticIndexViewID viewId = new SemanticIndexViewID(IntToCOLTYPE(type1), null);
-					addIndexToView(viewId, idx);
+					view = getView(IntToCOLTYPE(type1));
 				}
 				else {
 					// property view
 					if (coltype ==  COL_TYPE.OBJECT)
 						coltype = IntToCOLTYPE(type2);
-					SemanticIndexViewID viewId = new SemanticIndexViewID(IntToCOLTYPE(type1), coltype);
-					addIndexToView(viewId, idx);					
+					view = getView(IntToCOLTYPE(type1), coltype);
 				}
+				view.addIndex(idx);
 			}
 		}
 	}
