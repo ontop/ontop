@@ -20,9 +20,6 @@ package org.semanticweb.ontop.parser;
  * #L%
  */
 
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
@@ -57,11 +54,9 @@ public class MultiSchemaTestH2 extends TestCase {
 	// TODO We need to extend this test to import the contents of the mappings
 	// into OWL and repeat everything taking form OWL
 
-	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
 
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
     final String owlfile =
@@ -78,8 +73,6 @@ public class MultiSchemaTestH2 extends TestCase {
         String url = "jdbc:h2:mem:questrepository;";
         String username = "fish";
         String password = "fish";
-
-        fac = OBDADataFactoryImpl.getInstance();
 
         sqlConnection = DriverManager.getConnection(url, username, password);
         Statement st = sqlConnection.createStatement();

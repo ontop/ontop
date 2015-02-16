@@ -24,19 +24,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.net.URI;
-import java.sql.Connection;
 import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.mapping.MappingParser;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
@@ -58,11 +52,7 @@ import org.slf4j.LoggerFactory;
 
 public class OntologyTypesTest{
 
-	private OBDADataFactory fac;
-	private Connection conn;
-
 	Logger log = LoggerFactory.getLogger(this.getClass());
-	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
 	final String owlFile = "src/test/resources/ontologyType/dataPropertiesOntologyType.owl";
@@ -72,15 +62,10 @@ public class OntologyTypesTest{
 
 	@Before
 	public void setUp() throws Exception {
-
-		fac = OBDADataFactoryImpl.getInstance();
 		
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-
-
-		
 	}
 
 	private void runTests(QuestPreferences p, String query, int numberResults) throws Exception {
@@ -88,7 +73,7 @@ public class OntologyTypesTest{
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), p);
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();
@@ -276,7 +261,7 @@ public class OntologyTypesTest{
 		try {
 			// Creating a new instance of the reasoner
 			QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), p);
-			QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+			factory.createReasoner(ontology, new SimpleConfiguration());
 
 		} catch (Exception e) {
             assertEquals(e.getCause().getClass(), OBDAException.class);
