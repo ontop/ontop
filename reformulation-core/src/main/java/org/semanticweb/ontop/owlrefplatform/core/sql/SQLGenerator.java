@@ -555,7 +555,6 @@ public class SQLGenerator implements NativeQueryGenerator {
 		} else {
 			return dtfac.getTypePredicate(COL_TYPE.STRING);
 		}
-
 	}
 
 	/**
@@ -2334,7 +2333,6 @@ public class SQLGenerator implements NativeQueryGenerator {
 			sql = "'" + constant.getValue() + "'";
 		}
 		return sql;
-
 	}
 
 	/***

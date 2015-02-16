@@ -30,7 +30,6 @@ import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.ClassExpression;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 

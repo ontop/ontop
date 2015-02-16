@@ -11,23 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.ontop.mapping.QueryUtils;
-import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
-import org.semanticweb.ontop.model.BNode;
-import org.semanticweb.ontop.model.BooleanOperationPredicate;
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.DataTypePredicate;
-import org.semanticweb.ontop.model.DatalogProgram;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.NumericalOperationPredicate;
-import org.semanticweb.ontop.model.OBDADataSource;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.model.URIConstant;
-import org.semanticweb.ontop.model.URITemplatePredicate;
-import org.semanticweb.ontop.model.ValueConstant;
-import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
@@ -62,6 +46,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	private static final String INDENT = "    ";
 	
 	static final ImmutableMap<Predicate, String> booleanPredicateToQueryString;
+	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 	static {
 		Map<Predicate, String> temp = new HashMap<>();
 		
@@ -120,27 +105,30 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	private static final Table<Predicate, Predicate, Predicate> dataTypePredicateUnifyTable;
 	static{
 		dataTypePredicateUnifyTable = new ImmutableTable.Builder<Predicate, Predicate, Predicate>()
-			.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
-			.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
-			.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER)
-			.put(OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-			.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
-			.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
-			.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-			.put(OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DECIMAL)
-			.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DOUBLE)
-			.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
-			.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-			.put(OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_DOUBLE)
-			.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.OWL_REAL)
-			.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.OWL_REAL)
-			.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-			.put(OBDAVocabulary.OWL_REAL, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.OWL_REAL)
-			.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
-			.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
-			.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
-			.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER)
-			.build();
+				.put(dtfac.getTypePredicate(COL_TYPE.INTEGER), dtfac.getTypePredicate(COL_TYPE.DOUBLE), dtfac.getTypePredicate(COL_TYPE.DOUBLE))
+				.put(dtfac.getTypePredicate(COL_TYPE.INTEGER), dtfac.getTypePredicate(COL_TYPE.DECIMAL), dtfac.getTypePredicate(COL_TYPE.DECIMAL))
+				.put(dtfac.getTypePredicate(COL_TYPE.INTEGER), dtfac.getTypePredicate(COL_TYPE.INTEGER), dtfac.getTypePredicate(COL_TYPE.INTEGER))
+						//.put(dtfac.getTypePredicate(COL_TYPE.INTEGER), dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.REAL))
+
+				.put(dtfac.getTypePredicate(COL_TYPE.DECIMAL), dtfac.getTypePredicate(COL_TYPE.DECIMAL), dtfac.getTypePredicate(COL_TYPE.DECIMAL))
+				.put(dtfac.getTypePredicate(COL_TYPE.DECIMAL), dtfac.getTypePredicate(COL_TYPE.DOUBLE), dtfac.getTypePredicate(COL_TYPE.DOUBLE))
+						//.put(dtfac.getTypePredicate(COL_TYPE.DECIMAL), dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.REAL))
+				.put(dtfac.getTypePredicate(COL_TYPE.DECIMAL), dtfac.getTypePredicate(COL_TYPE.INTEGER), dtfac.getTypePredicate(COL_TYPE.DECIMAL))
+
+				.put(dtfac.getTypePredicate(COL_TYPE.DOUBLE), dtfac.getTypePredicate(COL_TYPE.DECIMAL), dtfac.getTypePredicate(COL_TYPE.DOUBLE))
+				.put(dtfac.getTypePredicate(COL_TYPE.DOUBLE), dtfac.getTypePredicate(COL_TYPE.DOUBLE), dtfac.getTypePredicate(COL_TYPE.DOUBLE))
+						//.put(dtfac.getTypePredicate(COL_TYPE.DOUBLE), dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.REAL))
+				.put(dtfac.getTypePredicate(COL_TYPE.DOUBLE), dtfac.getTypePredicate(COL_TYPE.INTEGER), dtfac.getTypePredicate(COL_TYPE.DOUBLE))
+				//.put(dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.DECIMAL), dtfac.getTypePredicate(COL_TYPE.REAL))
+				//.put(dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.DOUBLE), dtfac.getTypePredicate(COL_TYPE.REAL))
+				//.put(dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.REAL))
+				//.put(dtfac.getTypePredicate(COL_TYPE.REAL), dtfac.getTypePredicate(COL_TYPE.INTEGER), dtfac.getTypePredicate(COL_TYPE.REAL))
+
+				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DECIMAL, OBDAVocabulary.XSD_DECIMAL)
+				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_DOUBLE, OBDAVocabulary.XSD_DOUBLE)
+				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.OWL_REAL, OBDAVocabulary.OWL_REAL)
+				//.put(OBDAVocabulary.SPARQL_COUNT, OBDAVocabulary.XSD_INTEGER, OBDAVocabulary.XSD_INTEGER)
+				.build();
 	}
 
 	static final Map<String, Integer> predicateCodeTypes;
@@ -314,9 +302,8 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		}
 		//TODO: need a method that would return a new DatalogProgram from rules and modifiers
 		//OBDADataFactoryImpl.getInstance().getDatalogProgram(normalizedRules);
-		DatalogProgram normalizedProgram = program.clone();
-		normalizedProgram.removeAllRules();
-		normalizedProgram.appendRule(normalizedRules);
+		DatalogProgram normalizedProgram = OBDADataFactoryImpl.getInstance().getDatalogProgram(normalizedRules);
+		normalizedProgram.setQueryModifiers(program.getQueryModifiers().clone());
 		return normalizedProgram;
 	}
 
@@ -672,23 +659,36 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
      */
 	private String generateTypeColumnForSELECT(Term projectedTerm, String varName,
 			SQLAliasVariableIndex index) {
+		String typeString = null;
+		COL_TYPE type = null;
 
 		if (projectedTerm instanceof Function) {
-			return getCompositeTermType((Function) projectedTerm, varName);
+			type = getCompositeTermType((Function) projectedTerm);
 		}
-        else if (projectedTerm instanceof URIConstant) {
-			return String.format(TYPE_STR, predicateCodeTypes.get(OBDAVocabulary.QUEST_URI), varName);
+		else if (projectedTerm instanceof URIConstant) {
+			type = COL_TYPE.OBJECT;
 		}
-        else if (projectedTerm == OBDAVocabulary.NULL) {
-			return String.format(TYPE_STR, predicateCodeTypes.get(OBDAVocabulary.NULL.toString()), varName);
+		else if (projectedTerm == OBDAVocabulary.NULL) {
+			type = COL_TYPE.NULL;
 		}
-        else if (projectedTerm instanceof Variable) {
-			return getTypeFromVariable((Variable) projectedTerm, index, varName);
+		else if (projectedTerm instanceof Variable) {
+			typeString = getTypeFromVariable((Variable) projectedTerm, index);
+		}
+		else {
+			// Unusual term
+			throw new RuntimeException("Cannot generate SELECT for term: "
+					+ projectedTerm.toString());
 		}
 
-        // Unusual term
-		throw new RuntimeException("Cannot generate SELECT for term: "
-				+ projectedTerm.toString());
+		if (type != null) {
+			typeString = String.format("%d", type.getQuestCode());
+		}
+		else if (typeString == null) {
+			throw new RuntimeException("Cannot generate SELECT for term: "
+					+ projectedTerm.toString());
+		}
+
+		return String.format(TYPE_STR, typeString, varName);
 	}
 	
     /**
@@ -703,55 +703,65 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
      *   Basically, it tries to infer the type by looking at function symbols.
      *
      */
-    private static String getCompositeTermType(Function compositeTerm, String varName) {
-        
-        int typeCode = UNDEFINED_TYPE_CODE;
+	private COL_TYPE getCompositeTermType(Function compositeTerm) {
+		Predicate mainFunctionSymbol = compositeTerm.getFunctionSymbol();
 
-        Predicate mainFunctionSymbol = compositeTerm.getFunctionSymbol();
-        switch(mainFunctionSymbol.getName()) {
-            /**
-             * Aggregation cases
-             */
-            case OBDAVocabulary.SPARQL_COUNT_URI:
-                typeCode = getCodeTypeFromFunctionSymbol(OBDAVocabulary.XSD_INTEGER);
-                break;
+		COL_TYPE type = null;
 
-            case OBDAVocabulary.SPARQL_SUM_URI:
-            case OBDAVocabulary.SPARQL_AVG_URI:
-            case OBDAVocabulary.SPARQL_MIN_URI:
-            case OBDAVocabulary.SPARQL_MAX_URI:
+		switch(mainFunctionSymbol.getName()) {
+			/**
+			 * Aggregation cases
+			 */
+			case "Count":
+				// Integer
+				return COL_TYPE.INTEGER;
+			case "Sum":
+			case "Avg":
+			case "Min":
+			case "Max":
 
-                // We look at the sub-term
-                Term subTerm = compositeTerm.getTerm(0);
-                if (subTerm instanceof Function) {
-                    Function compositeSubTerm = (Function) subTerm;
-                    typeCode = getCodeTypeFromFunctionSymbol(compositeSubTerm.getFunctionSymbol());
-                }
+				// We look at the sub-term
+				Term subTerm = compositeTerm.getTerm(0);
 
-                /**
-                 * Sometimes we cannot infer the type by looking at the term.
-                 *
-                 * In such a case, we cast the aggregate to a xsd:double
-                 * (any number can be promoted to a double http://www.w3.org/TR/xpath20/#promotion) .
-                 */
-                if (typeCode == UNDEFINED_TYPE_CODE) {
-                    typeCode = getCodeTypeFromFunctionSymbol(OBDAVocabulary.XSD_DOUBLE);
-                }
-                break;
+				if (subTerm instanceof Function) {
+					Function compositeSubTerm = (Function) subTerm;
 
-            /**
-             * Not a (known) aggregation function symbol
-             */
-            default:
-                typeCode = getCodeTypeFromFunctionSymbol(mainFunctionSymbol);
-                if (typeCode == UNDEFINED_TYPE_CODE) {
-                    throw new RuntimeException("Cannot generate the SQL query " +
-                            "because of an untyped term: " + compositeTerm.toString());
-                }
-        }
+					type = dtfac.getDataType(compositeSubTerm.getFunctionSymbol().toString());
+				}
 
-        return String.format(TYPE_STR, typeCode, varName);
-    }
+				/**
+				 * Sometimes we cannot infer the type by looking at the term.
+				 *
+				 * In such a case, we cast the aggregate to a xsd:double
+				 * (any number can be promoted to a double http://www.w3.org/TR/xpath20/#promotion) .
+				 */
+				if (type == null) {
+					return COL_TYPE.DOUBLE;
+				}
+				break;
+
+			/**
+			 * Not a (known) aggregation function symbol
+			 */
+			default:
+				if (mainFunctionSymbol instanceof URITemplatePredicate) {
+					type = COL_TYPE.OBJECT;
+				}
+				else if (mainFunctionSymbol instanceof BNodePredicate) {
+					type = COL_TYPE.BNODE;
+				}
+				else {
+					type = dtfac.getDataType(mainFunctionSymbol.toString());
+				}
+		}
+
+		if (type == null) {
+			throw new RuntimeException("Cannot generate the SQL query " +
+					"because of an untyped term: " + compositeTerm.toString());
+		}
+		return type;
+	}
+
 
     /**
      * Converts a function symbol into a code type (integer).
@@ -770,42 +780,64 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
      * at the database metadata.
      *
      */
-    private String getTypeFromVariable(Variable var, SQLAliasVariableIndex index, String varName) {
-        Collection<String> columnRefs = index.getColumnReferences(var);
+    private String getTypeFromVariable(Variable var, SQLAliasVariableIndex index) {
+		Collection<String> columnRefs = index.getColumnReferences(var);
 
-        /**
-         * By default, we assume that the variable is a URI.
-         *
-         * TODO: why?
-         */
-        String typeCode = predicateCodeTypes.get(OBDAVocabulary.QUEST_URI).toString();
+		if (columnRefs == null || columnRefs.size() == 0) {
+			throw new RuntimeException(
+					"Unbound variable found in WHERE clause: " + var);
+		}
 
-        /**
-         * For each column reference corresponding to the variable.
-         *
-         * For instance, columnRef is `Qans4View`.`v1` .
-         */
-        for (String columnRef : columnRefs) {
-        	String[] tableAndColumn = getTableAndColumn(columnRef);
-            String quotedTable = getQuotedTable(columnRef);
-            
-            DataDefinition definition = findDataDefinition(tableAndColumn[0], index);
-            /**
-             * If the var is defined in a ViewDefinition, then there is a
-             * column for the type and we just need to refer to that column.
-             *
-             * For instance, tableColumnType becomes `Qans4View`.`v1QuestType` .
-             */
-            if (definition instanceof ViewDefinition) {
-            	String columnType = tableAndColumn[1] + QUEST_TYPE;
-            	String tableColumnType = sqlAdapter.sqlQualifiedColumn(quotedTable, columnType);
-                typeCode = tableColumnType;
-                break;
-            }
-        }
+		/**
+		 * By default, we assume that the variable is an IRI.
+		 *
+		 */
+		String typeString = String.format("%d", COL_TYPE.OBJECT.getQuestCode());
 
-        return String.format(TYPE_STR, typeCode, varName);
+		/**
+		 * For each column reference corresponding to the variable.
+		 *
+		 * For instance, columnRef is `Qans4View`.`v1` .
+		 */
+		for (String columnRef : columnRefs) {
+			String columnType, tableColumnType;
+
+			String[] splits = columnRef.split("\\.");
+
+			String quotedTable = splits[0];
+			String table = unquote(splits[0]);
+			String column = unquote(splits[1]);
+
+			DataDefinition definition = metadata.getDefinition(table);
+			/**
+			 * If the var is defined in a ViewDefinition, then there is a
+			 * column for the type and we just need to refer to that column.
+			 *
+			 * For instance, tableColumnType becomes `Qans4View`.`v1QuestType` .
+			 */
+			if (definition instanceof ViewDefinition) {
+				columnType = column + QUEST_TYPE;
+				tableColumnType = sqlAdapter.sqlQualifiedColumn(
+						quotedTable, columnType);
+				typeString = tableColumnType ;
+				break;
+			}
+		}
+
+		return typeString;
     }
+
+	/**
+	 * Reintroduced when merging.
+	 * TODO: check if really needed.
+	 */
+	private static String unquote(String string) {
+		if (string.charAt(0) == '\'' || string.charAt(0) == '\"'
+				|| string.charAt(0) == '`') {
+			return string.substring(1, string.length() - 1);
+		}
+		return string;
+	}
 
 	private static String getQuotedTable(String columnRef) {
 		String[] splits = columnRef.split("\\.");
@@ -903,8 +935,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 			Function atom = (Function) headTerm;
 			Predicate function = atom.getFunctionSymbol();
 
-			if (function.equals(OBDAVocabulary.RDFS_LITERAL) || 
-				function.equals(OBDAVocabulary.RDFS_LITERAL_LANG)) {
+			if (dtfac.isLiteral(function)) {
 				if (atom.getTerms().size() > 1) {
 					/*
 					 * Case for rdf:literal s with a language, we need to select
@@ -998,7 +1029,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 
 		if (isTopLevel) {
 			if (tableDefinitions.isEmpty()) {
-				tableDefinitionsString.append("(" + jdbcUtil.getDummyTable() + ") tdummy ");
+				tableDefinitionsString.append("(" + sqlAdapter.getDummyTable() + ") tdummy ");
 			} else {
 				tableDefinitionsString.append(indent);
 				Joiner.on(",\n" + indent).appendTo(tableDefinitionsString, tableDefinitions);
@@ -1162,7 +1193,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 			Predicate typePred = atom.getFunctionSymbol();
 
 			if (typePred.getName().equals(OBDAVocabulary.QUEST_BNODE)) {
-				ansTypes.set(j, OBDAVocabulary.XSD_STRING);
+				ansTypes.set(j, dtfac.getTypePredicate(COL_TYPE.STRING));
 			} 
 			else if (typePred.getName().equals(OBDAVocabulary.QUEST_URI)) {
 				Predicate unifiedType = unifyTypes(ansTypes.get(j), typePred);
@@ -1181,7 +1212,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 					Predicate unifiedType = unifyTypes(ansTypes.get(j), termTypePred);
 					ansTypes.set(j, unifiedType);
 				} else {
-					Predicate unifiedType = unifyTypes(ansTypes.get(j), OBDAVocabulary.XSD_DECIMAL);
+					Predicate unifiedType = unifyTypes(ansTypes.get(j), dtfac.getTypePredicate(COL_TYPE.DECIMAL));
 					ansTypes.set(j, unifiedType);
 				}
 			} 
@@ -1190,14 +1221,14 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	
 		} else if (term instanceof Variable) {
 			// FIXME: properly handle the types by checking the metadata
-			ansTypes.set(j, OBDAVocabulary.XSD_STRING);
+			ansTypes.set(j, dtfac.getTypePredicate(COL_TYPE.STRING));
 		} else if (term instanceof BNode) {
-			ansTypes.set(j, OBDAVocabulary.XSD_STRING);
+			ansTypes.set(j, dtfac.getTypePredicate(COL_TYPE.STRING));
 		} else if (term instanceof URIConstant) {
-			ansTypes.set(j, OBDAVocabulary.XSD_STRING);
+			ansTypes.set(j, dtfac.getTypePredicate(COL_TYPE.STRING));
 		} else if (term instanceof ValueConstant) {
 			COL_TYPE type = ((ValueConstant) term).getType();
-			Predicate typePredicate = OBDADataFactoryImpl.getInstance().getTypePredicate(type);
+			Predicate typePredicate = dtfac.getTypePredicate(type);
 			Predicate unifiedType = unifyTypes(ansTypes.get(j), typePredicate);
 			ansTypes.set(j, unifiedType);
 		} 
@@ -1211,27 +1242,23 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	 * [int, double] -> double
 	 * [int, varchar] -> varchar
 	 * [int, int] -> int
-	 * 
-	 * @param predicate
-	 * @param typePred
-	 * @return
+	 *
 	 */
 	private Predicate unifyTypes(Predicate type1, Predicate type2) {
 
-		if (type1 == null) {
+		if(type1 == null){
 			return type2;
-		} else if (type1.equals(type2)) {
+		}
+		else if(type1.equals(type2)){
 			return type1;
-		} else if (dataTypePredicateUnifyTable.contains(type1, type2)) {
+		} else if(dataTypePredicateUnifyTable.contains(type1, type2)){
 			return dataTypePredicateUnifyTable.get(type1, type2);
-		} else if (type2 == null) {
+		}else if(type2 == null){
 			throw new NullPointerException("type2 cannot be null");
 		} else {
-			return OBDAVocabulary.XSD_STRING;
+			return dtfac.getTypePredicate(COL_TYPE.STRING);
 		}
 	}
-	
-    
     
 	@Override
 	protected String getAlgebraConditionString(Function atom, QueryVariableIndex index) {
@@ -1406,10 +1433,57 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 		if (isSemanticIndex) {
 			String uri = uc.toString();
 			int id = findUriID(uri);
-			return jdbcUtil.getSQLLexicalForm(String.valueOf(id));
+			return sqlAdapter.getSQLLexicalFormString(String.valueOf(id));
 		}
 		
-		return jdbcUtil.getSQLLexicalForm(uc.getURI());
+		return sqlAdapter.getSQLLexicalFormString(uc.getURI());
+	}
+
+	/***
+	 * Returns the valid SQL lexical form of rdf literals based on the current
+	 * database and the datatype specified in the function predicate.
+	 *
+	 * <p>
+	 * For example, if the function is xsd:boolean, and the current database is
+	 * H2, the SQL lexical form would be for "true" "TRUE" (or any combination
+	 * of lower and upper case) or "1" is always
+	 *
+	 * @param constant
+	 * @return
+	 */
+	private String getSQLLexicalForm(ValueConstant constant) {
+		String sql = null;
+		if (constant.getType() == COL_TYPE.BNODE || constant.getType() == COL_TYPE.LITERAL || constant.getType() == COL_TYPE.OBJECT
+				|| constant.getType() == COL_TYPE.STRING) {
+			sql = "'" + constant.getValue() + "'";
+		}
+		else if (constant.getType() == COL_TYPE.BOOLEAN) {
+			String value = constant.getValue().toLowerCase();
+			if (value.equals("1") || value.equals("true") || value.equals("t")) {
+				sql = sqlAdapter.getSQLLexicalFormBoolean(true);
+			}
+			else if (value.equals("0") || value.equals("false") || value.equals("f")) {
+				sql = sqlAdapter.getSQLLexicalFormBoolean(false);
+			}
+			else {
+				throw new RuntimeException("Invalid lexical form for xsd:boolean. Found: " + value);
+			}
+		}
+		else if (constant.getType() == COL_TYPE.DATETIME) {
+			sql = sqlAdapter.getSQLLexicalFormDatetime(constant.getValue());
+		}
+		else if (constant.getType() == COL_TYPE.DECIMAL || constant.getType() == COL_TYPE.DOUBLE
+				|| constant.getType() == COL_TYPE.INTEGER || constant.getType() == COL_TYPE.LONG
+				|| constant.getType() == COL_TYPE.FLOAT || constant.getType() == COL_TYPE.NON_POSITIVE_INTEGER
+				|| constant.getType() == COL_TYPE.INT || constant.getType() == COL_TYPE.UNSIGNED_INT
+				|| constant.getType() == COL_TYPE.NEGATIVE_INTEGER
+				|| constant.getType() == COL_TYPE.POSITIVE_INTEGER || constant.getType() == COL_TYPE.NON_NEGATIVE_INTEGER) {
+			sql = constant.getValue();
+		}
+		else {
+			sql = "'" + constant.getValue() + "'";
+		}
+		return sql;
 	}
 
 	@Override
@@ -1422,12 +1496,12 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 					return String.valueOf(id);
 				}
 				else {
-					return jdbcUtil.getSQLLexicalForm(ct);
+					return getSQLLexicalForm(ct);
 				}
 			}
 		}
 		
-		return jdbcUtil.getSQLLexicalForm(ct);
+		return getSQLLexicalForm(ct);
 	}
 
 	/***
@@ -1658,13 +1732,12 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 
 		List<String> vex = new ArrayList<String>();
 		if (split.length > 0 && !split[0].isEmpty()) {
-			vex.add(jdbcUtil.getSQLLexicalForm(split[0]));
+			vex.add(sqlAdapter.getSQLLexicalFormString(split[0]));
 		}
 
 		int size = atom.getTerms().size();
 		if (size > 1) {
-			if (atom.getFunctionSymbol().equals(OBDAVocabulary.RDFS_LITERAL) ||
-				atom.getFunctionSymbol().equals(OBDAVocabulary.RDFS_LITERAL_LANG)) {
+			if (dtfac.isLiteral(atom.getFunctionSymbol())) {
 				size--;
 			}
 			for (int termIndex = 1; termIndex < size; termIndex++) {
@@ -1681,7 +1754,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 				}
 				vex.add(repl);
 				if (termIndex < split.length) {
-					vex.add(jdbcUtil.getSQLLexicalForm(split[termIndex]));
+					vex.add(sqlAdapter.getSQLLexicalFormString(split[termIndex]));
 				}
 			}
 		}
