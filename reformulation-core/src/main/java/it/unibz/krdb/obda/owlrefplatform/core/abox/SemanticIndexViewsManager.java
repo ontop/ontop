@@ -44,9 +44,9 @@ public class SemanticIndexViewsManager {
 	
 	
 	
-	private static final COL_TYPE objectTypes[] = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.BNODE };
+	private static final COL_TYPE[] objectTypes = { COL_TYPE.OBJECT, COL_TYPE.BNODE };
 
-	private static final COL_TYPE typesAndObjectTypes[] = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.BNODE, 
+	private static final COL_TYPE[] typesAndObjectTypes = { COL_TYPE.OBJECT, COL_TYPE.BNODE, 
 		COL_TYPE.LITERAL, COL_TYPE.LITERAL_LANG, COL_TYPE.BOOLEAN, 
 		COL_TYPE.DATETIME, COL_TYPE.DATETIME_STAMP, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.INTEGER, COL_TYPE.INT,
 		COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER, 
@@ -56,103 +56,58 @@ public class SemanticIndexViewsManager {
 	private final void init() {
 		
 		for (COL_TYPE type1 : objectTypes) {
+
+			String value =  (type1 == COL_TYPE.BNODE) ? "TRUE" : "FALSE";
+			String filter = "ISBNODE = " + value + " AND ";
+			
+			{
+				String select = RDBMSSIRepositoryManager.classTable.getSELECT(filter);
+				String insert = RDBMSSIRepositoryManager.classTable.getINSERT("?, ?, " + value);
+				
+				SemanticIndexViewID viewId = new SemanticIndexViewID(type1);
+				SemanticIndexView view = new SemanticIndexView(viewId, select, insert);
+				views.put(view.getId(), view);		
+				classViews.add(view);
+			}
+			
+			
 			for (COL_TYPE type2 : typesAndObjectTypes) {
-				StringBuilder select = new StringBuilder();
-				StringBuilder insert = new StringBuilder();
+				String select, insert;
 				
 				switch (type2) {
 					case OBJECT:
-						select.append(RDBMSSIRepositoryManager.attributeTable.get(type2).selectCommand)
-							  .append("ISBNODE2 = FALSE AND ");
-						insert.append("INSERT INTO ")
-							  .append(RDBMSSIRepositoryManager.attributeTable.get(type2).tableName)
-							  .append("(URI1, URI2, IDX, ISBNODE2, ISBNODE) VALUES (?, ?, ?, FALSE, ");
+						select = RDBMSSIRepositoryManager.attributeTable.get(type2).getSELECT(filter + "ISBNODE2 = FALSE AND ");
+						insert = RDBMSSIRepositoryManager.attributeTable.get(type2).getINSERT("?, ?, ?, " + value + ", FALSE");
 						break;
 					case BNODE:
-						select.append(RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).selectCommand)
-						      .append("ISBNODE2 = TRUE AND ");
-						insert.append("INSERT INTO ")
-						      .append(RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).tableName)
-						      .append("(URI1, URI2, IDX, ISBNODE2, ISBNODE) VALUES (?, ?, ?, TRUE, ");
+						select = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).getSELECT(filter + "ISBNODE2 = TRUE AND ");
+						insert = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.OBJECT).getINSERT("?, ?, ?, " + value + ", TRUE");
 						break;
 					case LITERAL:
-						select.append(RDBMSSIRepositoryManager.attributeTable.get(type2).selectCommand)
-							  .append("LANG IS NULL AND ");
-						insert.append("INSERT INTO ")
-					      	  .append(RDBMSSIRepositoryManager.attributeTable.get(type2).tableName)
-					          .append("(URI, VAL, IDX, LANG, ISBNODE) VALUES (?, ?, ?, NULL, ");
+						select = RDBMSSIRepositoryManager.attributeTable.get(type2).getSELECT("LANG IS NULL AND " + filter);
+						insert = RDBMSSIRepositoryManager.attributeTable.get(type2).getINSERT("?, ?, ?, NULL, " + value);
 						break;
 					case LITERAL_LANG:
-						select.append(RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).selectCommand)
-							  .append("LANG IS NOT NULL AND ");
-						insert.append("INSERT INTO ")
-				      	  	  .append(RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).tableName)
-				      	  	  .append("(URI, VAL, IDX, LANG, ISBNODE) VALUES (?, ?, ?, ?, ");
+						/*
+						 * If the mapping is for something of type Literal we need to add IS
+						 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
+						 * redundant since we have another stage in Quest where we add IS NOT
+						 * NULL for every variable in the head of a mapping.
+						 */
+						select = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).getSELECT("LANG IS NOT NULL AND " + filter);
+						insert = RDBMSSIRepositoryManager.attributeTable.get(COL_TYPE.LITERAL).getINSERT("?, ?, ?, ?, " + value);
 						break;
 					default:
-						select.append(RDBMSSIRepositoryManager.attributeTable.get(type2).selectCommand);
-						insert.append("INSERT INTO ")
-				      	  	  .append(RDBMSSIRepositoryManager.attributeTable.get(type2).tableName)
-				      	  	  .append("(URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ");				
+						select = RDBMSSIRepositoryManager.attributeTable.get(type2).getSELECT(filter);
+						insert = RDBMSSIRepositoryManager.attributeTable.get(type2).getINSERT("?, ?, ?, " + value);
 				}
 
-				/*
-				 * If the mapping is for something of type Literal we need to add IS
-				 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
-				 * redundant since we have another stage in Quest where we add IS NOT
-				 * NULL for every variable in the head of a mapping.
-				 */
-
-				if (type1 == COL_TYPE.BNODE) { 
-					select.append("ISBNODE = TRUE AND ");
-					insert.append("TRUE)");
-				}
-				else {
-					assert (type1 == COL_TYPE.OBJECT);
-					select.append("ISBNODE = FALSE AND ");
-					insert.append("FALSE)");
-				}
-				
 				SemanticIndexViewID viewId = new SemanticIndexViewID(type1, type2);
-				SemanticIndexView view = new SemanticIndexView(viewId, select.toString(), insert.toString());
+				SemanticIndexView view = new SemanticIndexView(viewId, select, insert);
 				views.put(view.getId(), view);					
 				propertyViews.add(view);
 			}
-		}
-
-		for (COL_TYPE type : objectTypes) {
-			StringBuilder select = new StringBuilder();
-			StringBuilder insert = new StringBuilder();
-			
-			select.append(RDBMSSIRepositoryManager.classTable.selectCommand);
-			insert.append("INSERT INTO ")
-				.append(RDBMSSIRepositoryManager.classTable.tableName)
-				.append(" (URI, IDX, ISBNODE) VALUES (?, ?, ");
-
-
-			/*
-			 * If the mapping is for something of type Literal we need to add IS
-			 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
-			 * redundant since we have another stage in Quest where we add IS NOT
-			 * NULL for every variable in the head of a mapping.
-			 */
-
-			if (type == COL_TYPE.BNODE) { 
-				select.append("ISBNODE = TRUE AND ");
-				insert.append("TRUE)");
-			}
-			else {
-				assert (type == COL_TYPE.OBJECT);
-				select.append("ISBNODE = FALSE AND ");
-				insert.append("FALSE)");
-			}
-			
-			SemanticIndexViewID viewId = new SemanticIndexViewID(type);
-			SemanticIndexView view = new SemanticIndexView(viewId, select.toString(), insert.toString());
-			views.put(view.getId(), view);		
-			classViews.add(view);
-		}
-		
+		}		
 	}
 	
 	
@@ -199,7 +154,7 @@ public class SemanticIndexViewsManager {
 
 	public void store(Connection conn) throws SQLException {
 		
-		try (PreparedStatement stm = conn.prepareStatement(RDBMSSIRepositoryManager.emptinessIndexTable.insertCommand)) {
+		try (PreparedStatement stm = conn.prepareStatement(RDBMSSIRepositoryManager.emptinessIndexTable.getINSERT("?, ?, ?, ?"))) {
 			for (SemanticIndexView view : views.values()) {
 				SemanticIndexViewID viewId = view.getId();
 				for (Integer idx : view.getIndexes()) {
@@ -233,7 +188,7 @@ public class SemanticIndexViewsManager {
 	public void load(Connection conn) throws SQLException {
 		
 		try (Statement st = conn.createStatement()) {
-			ResultSet res = st.executeQuery("SELECT * FROM " + RDBMSSIRepositoryManager.emptinessIndexTable.tableName);
+			ResultSet res = st.executeQuery(RDBMSSIRepositoryManager.emptinessIndexTable.getSELECT());
 			while (res.next()) {
 				int sitable = res.getInt(1);
 				int type1 = res.getInt(3);

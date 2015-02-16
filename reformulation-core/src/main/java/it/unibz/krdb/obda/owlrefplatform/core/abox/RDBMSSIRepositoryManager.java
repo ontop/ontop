@@ -92,20 +92,32 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	static final class TableDescription {
 		final String tableName;
 		final String createCommand;
-		final String insertCommand;
+		private final String insertCommand;
+		private final String selectCommand;
 		
 		final List<String> createIndexCommands = new ArrayList<>(3);
 		final List<String> dropIndexCommands = new ArrayList<>(3);
 		
-		final String selectCommand;
 		final String dropCommand;
 		
-		TableDescription(String tableName, String columnDefintions, String insertColumns, String select) {
+		TableDescription(String tableName, String columnDefintions, String insertColumns, String selectColumns) {
 			this.tableName = tableName;
 			this.dropCommand = "DROP TABLE " + tableName;
 			this.createCommand = "CREATE TABLE " + tableName + " ( " + columnDefintions + " )";
-			this.insertCommand = "INSERT INTO " + tableName + " " + insertColumns;
-			this.selectCommand = "SELECT " + select + " FROM " + tableName + " WHERE "; // REQUIRES CONDITION
+			this.insertCommand = "INSERT INTO " + tableName + " (" + insertColumns + ") VALUES (";
+			this.selectCommand = "SELECT " + selectColumns + " FROM " + tableName; 
+		}
+		
+		String getINSERT(String values) {
+			return insertCommand + values + ")";
+		}
+		
+		String getSELECT(String filter) {
+			return selectCommand +  " WHERE " + filter;
+		}
+		
+		String getSELECT() {
+			return selectCommand;
 		}
 		
 		void indexOn(String indexName, String columns) {
@@ -120,19 +132,19 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 	private final static TableDescription indexTable = new TableDescription("IDX", 
 			"URI VARCHAR(400), IDX INTEGER, ENTITY_TYPE INTEGER", 
-			"(URI, IDX, ENTITY_TYPE) VALUES(?, ?, ?)", "*");   
+			"URI, IDX, ENTITY_TYPE", "*");   
 
 	private final static TableDescription intervalTable = new TableDescription("IDXINTERVAL",
 			"URI VARCHAR(400), IDX_FROM INTEGER, IDX_TO INTEGER, ENTITY_TYPE INTEGER",
-			"(URI, IDX_FROM, IDX_TO, ENTITY_TYPE) VALUES(?, ?, ?, ?)", "*");
+			"URI, IDX_FROM, IDX_TO, ENTITY_TYPE", "*");
 
 	private final static TableDescription uriIdTable = new TableDescription("URIID",
 			"ID INTEGER, URI VARCHAR(400)",
-			"(ID, URI) VALUES(?, ?)", "*");
+			"ID, URI", "*");
 	
 	final static TableDescription emptinessIndexTable = new TableDescription("NONEMPTYNESSINDEX",
 			"TABLEID INTEGER, IDX INTEGER, TYPE1 INTEGER, TYPE2 INTEGER",
-			"(TABLEID, IDX, TYPE1, TYPE2) VALUES (?, ?, ?, ?)", "*");
+			"TABLEID, IDX, TYPE1, TYPE2", "*");
 	
 	
 	
@@ -143,7 +155,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 	final static TableDescription classTable = new TableDescription("QUEST_CLASS_ASSERTION", 
 			"\"URI\" INTEGER NOT NULL, \"IDX\"  SMALLINT NOT NULL, ISBNODE BOOLEAN NOT NULL DEFAULT FALSE",
-			"(URI, IDX, ISBNODE) VALUES (?, ?, ?)", "\"URI\" as X");
+			"URI, IDX, ISBNODE", "\"URI\" as X");
 	
     final static Map<COL_TYPE ,TableDescription> attributeTable = new HashMap<>();
 	
@@ -169,7 +181,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		TableDescription roleTable = new TableDescription("QUEST_OBJECT_PROPERTY_ASSERTION", 
 				"\"URI1\" INTEGER NOT NULL, \"URI2\" INTEGER NOT NULL, \"IDX\"  SMALLINT NOT NULL, " + 
 				"ISBNODE BOOLEAN NOT NULL DEFAULT FALSE, ISBNODE2 BOOLEAN NOT NULL DEFAULT FALSE",
-				"(URI1, URI2, IDX, ISBNODE, ISBNODE2) VALUES (?, ?, ?, ?, ?)", "\"URI1\" as X, \"URI2\" as Y");
+				"URI1, URI2, IDX, ISBNODE, ISBNODE2", "\"URI1\" as X, \"URI2\" as Y");
 		attributeTable.put(COL_TYPE.OBJECT, roleTable);
 
 		roleTable.indexOn("idxrolefull1", "URI1, URI2, IDX, ISBNODE, ISBNODE2");
@@ -182,7 +194,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		TableDescription attributeTableLiteral = new TableDescription("QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
 				"\"URI\" INTEGER NOT NULL, VAL VARCHAR(1000) NOT NULL, LANG VARCHAR(20), \"IDX\"  SMALLINT NOT NULL, " + 
 				"ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE ",
-				"(URI, VAL, LANG, IDX, ISBNODE) VALUES (?, ?, ?, ?, ?)", "\"URI\" as X, VAL as Y, LANG as Z");
+				"URI, VAL, IDX, LANG, ISBNODE", "\"URI\" as X, VAL as Y, LANG as Z");
 		attributeTable.put(COL_TYPE.LITERAL, attributeTableLiteral);
 			
 		attributeTableLiteral.indexOn("IDX_LITERAL_ATTRIBUTE" + "1", "URI");		
@@ -228,7 +240,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			TableDescription table = new TableDescription(descrtiption.tableName,
 					"\"URI\" INTEGER  NOT NULL, VAL " + descrtiption.sqlTypeName + 
 					", \"IDX\"  SMALLINT  NOT NULL, ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE",
-					"(URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)", "\"URI\" as X, VAL as Y");
+					"URI, VAL, IDX, ISBNODE", "\"URI\" as X, VAL as Y");
 			attributeTable.put(descrtiption.type, table);
 			
 			table.indexOn(descrtiption.indexName + "1", "URI");		
@@ -355,7 +367,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		boolean oldAutoCommit = conn.getAutoCommit();
 		conn.setAutoCommit(false);
 
-		PreparedStatement uriidStm = conn.prepareStatement(uriIdTable.insertCommand);
+		PreparedStatement uriidStm = conn.prepareStatement(uriIdTable.getINSERT("?, ?"));
 		Map<SemanticIndexViewID, PreparedStatement> stmMap = new HashMap<>();
 		
 		// For counting the insertion
@@ -813,7 +825,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		// Fetching the index data 
 		Statement st = conn.createStatement();
-		ResultSet res = st.executeQuery("SELECT * FROM " + indexTable.tableName + " ORDER BY IDX");
+		ResultSet res = st.executeQuery(indexTable.getSELECT() + " ORDER BY IDX");
 		while (res.next()) {
 			String iri = res.getString(1);
 			if (iri.startsWith("file:/"))  // ROMAN: what exactly is this?!
@@ -841,7 +853,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		// intervals row by row until we change URI, at that switch we store the
 		// interval
 
-		res = st.executeQuery("SELECT * FROM " + intervalTable.tableName + " ORDER BY URI, ENTITY_TYPE");
+		res = st.executeQuery(intervalTable.getSELECT() + " ORDER BY URI, ENTITY_TYPE");
 
 		List<Interval> currentSet = null;
 		int previousType = 0;
@@ -929,7 +941,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
-				String sourceQuery = view.getSELECT() + intervalsSqlFilter;
+				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				CQIE targetQuery = constructTargetQuery(ope.getPredicate(), view.getId().getType1(), view.getId().getType2());
 				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 				result.add(basicmapping);		
@@ -968,7 +980,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
-				String sourceQuery = view.getSELECT() + intervalsSqlFilter;
+				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				CQIE targetQuery = constructTargetQuery(dpe.getPredicate(), view.getId().getType1(), view.getId().getType2());
 				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 				result.add(basicmapping);			
@@ -1000,7 +1012,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
-				String sourceQuery = view.getSELECT() + intervalsSqlFilter;
+				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				CQIE targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
 				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 				result.add(basicmapping);
@@ -1171,7 +1183,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			}
 
 			// inserting index data for classes and properties 
-			try (PreparedStatement stm = conn.prepareStatement(indexTable.insertCommand)) {
+			try (PreparedStatement stm = conn.prepareStatement(indexTable.getINSERT("?, ?, ?"))) {
 				for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
 					stm.setString(1, concept.getKey().getPredicate().getName());
 					stm.setInt(2, concept.getValue().getIndex());
@@ -1194,7 +1206,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			}
 
 			// Inserting interval metadata
-			try (PreparedStatement stm = conn.prepareStatement(intervalTable.insertCommand)) {
+			try (PreparedStatement stm = conn.prepareStatement(intervalTable.getINSERT("?, ?, ?, ?"))) {
 				for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
 					for (Interval it : concept.getValue().getIntervals()) {
 						stm.setString(1, concept.getKey().getPredicate().getName());

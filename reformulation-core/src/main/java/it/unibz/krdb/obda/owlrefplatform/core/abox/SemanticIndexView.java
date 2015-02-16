@@ -24,8 +24,8 @@ public class SemanticIndexView {
 		return id;
 	}
 	
-	public String getSELECT() {
-		return selectCommand;
+	public String getSELECT(String filter) {
+		return selectCommand + filter;
 	}
 	
 	public String getINSERT() {
