@@ -21,7 +21,6 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
  */
 
 //import it.unibz.krdb.config.tmappings.parser.TMappingsConfParser;
-import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
@@ -82,14 +81,6 @@ public class QuestOWLExample_OntowisTests {
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
 		/*
-		 * Load the OBDA model from an external .obda file
-		 */
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		OBDAModel obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(obdafile);
-
-		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
 		 */
@@ -100,9 +91,7 @@ public class QuestOWLExample_OntowisTests {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-		factory.setPreferenceHolder(preference);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), preference);
 		
 		/*
 		 * USR CONSTRAINTS !!!!

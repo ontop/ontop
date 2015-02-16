@@ -228,9 +228,8 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 		
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) && bound( ?nick2) ) } }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi7,4);
+
+		runTests(query_multi7,4);
 	}
 	
 	@Test
@@ -238,9 +237,8 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 		
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) ) } }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi7,4);
+
+		runTests(query_multi7,4);
 	}
 
 	@Test
@@ -248,9 +246,8 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 		
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?nick1 ?nick2 WHERE{ { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) ) }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi7,2);
+
+		runTests(query_multi7,2);
 	}
 
 	@Test
@@ -258,9 +255,8 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 		
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?nick1 ?nick2 WHERE{ { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi7,4);
+
+		runTests(query_multi7,4);
 	}
 
 	@Test
@@ -268,9 +264,8 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 		
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { ?person :nick1 ?nick1 . ?person :nick2 ?nick2 . FILTER ( bound( ?nick1 ) && bound( ?nick2) ) } }";
-		
-		QuestPreferences p = new QuestPreferences();
-		runTests(p,query_multi7,4);
+
+		runTests(query_multi7,4);
 	}
 
 }

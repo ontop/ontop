@@ -26,9 +26,12 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
+import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.semanticweb.ontop.injection.OBDAProperties;
+import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAException;
@@ -37,7 +40,7 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
-import org.semanticweb.ontop.r2rml.R2RMLReader;
+import org.semanticweb.ontop.r2rml.R2RMLMappingParser;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -194,55 +197,47 @@ public class OntologyTypesTest{
         String password = "obdaps83";
         String driverclass = "oracle.jdbc.driver.OracleDriver";
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+        Properties p = new Properties();
+        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
-        OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-        // String sourceUrl = "http://example.org/customOBDA";
-        URI obdaURI = new File(r2rmlFile).toURI();
-        String sourceUrl = obdaURI.toString();
-        OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
-                username, password, driverclass);
 
-        log.info("Loading r2rml file");
-        // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory();
+		p.setProperty(OBDAProperties.DB_NAME, jdbcurl);
+		p.setProperty(OBDAProperties.DB_USER, username);
+		p.setProperty(OBDAProperties.DB_PASSWORD, password);
+		p.setProperty(OBDAProperties.JDBC_DRIVER, driverclass);
+		p.setProperty(MappingParser.class.getCanonicalName(), R2RMLMappingParser.class.getCanonicalName());
 
-        factory.setPreferenceHolder(p);
-
-        R2RMLReader reader = new R2RMLReader(r2rmlFile);
-
-        obdaModel = reader.readModel(dataSource);
+		QuestPreferences preferences = new QuestPreferences(p);
 
         //no value in the mapping
         //xsd:long in the ontology, asking for the general case we will not have any result
         String query1 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
-        runTests(p, query1, 0);
+        runTests(preferences, query1, 0);
 //
 //        //no value in the mapping
         //xsd:long in the ontology
         String query1b = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
 
-        runTests(p, query1b, 3);
+        runTests(preferences, query1b, 3);
 
         //no value in the mapping
         //xsd:string in the ontology
         String query2 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :assayName ?y. FILTER(datatype(?y) = xsd:string)}";
 
-        runTests(p, query2, 3);
+        runTests(preferences, query2, 3);
 
         //no value in the ontology
         //rdfs:Literal in the mapping
         String query3 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
 
-        runTests(p, query3, 3);
+        runTests(preferences, query3, 3);
 
         //no value in the ontology
         //no value in the mapping
@@ -250,7 +245,7 @@ public class OntologyTypesTest{
         String query4 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :AssayID ?y. FILTER(datatype(?y) = xsd:decimal)}";
 
-        runTests(p, query4, 3);
+        runTests(preferences, query4, 3);
 
         // no value in the ontology
         //value in the mapping is xsd:long
@@ -258,7 +253,7 @@ public class OntologyTypesTest{
         String query5 = "PREFIX franz: <http://www.franz.com/>" +
                 "select * {?x  franz:solrDocid ?y. FILTER(datatype(?y) = xsd:long)}";
 
-        runTests(p, query5, 3);
+        runTests(preferences, query5, 3);
 
         // no value in the ontology
         //value in the mapping is xsd:positiveInteger
@@ -266,7 +261,7 @@ public class OntologyTypesTest{
         String query6 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :hasSection ?y. FILTER(datatype(?y) = xsd:positiveInteger)}";
 
-        runTests(p, query6, 3);
+        runTests(preferences, query6, 3);
     }
 
 	@Test
