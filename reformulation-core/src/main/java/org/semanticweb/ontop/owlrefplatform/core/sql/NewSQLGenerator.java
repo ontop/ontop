@@ -19,6 +19,7 @@ import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.abox.SemanticIndexURIMap;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.HSQLSQLDialectAdapter;
@@ -201,7 +202,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	 *   maps URIs to their IDs
 	 * TODO: make it immutable (to be done first in Quest.java)
 	 */
-	private final Map<String, Integer> uriRefIds;
+	private final SemanticIndexURIMap uriRefIds;
 
     
     
@@ -238,7 +239,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 
     @AssistedInject
     private NewSQLGenerator(@Assisted DBMetadata metadata, @Assisted OBDADataSource dataSource,
-                         @Assisted Map<String, Integer> uriRefIds, QuestPreferences preferences) {
+                         @Assisted SemanticIndexURIMap uriRefIds, QuestPreferences preferences) {
     	super(metadata);
     	
         String driverURI = dataSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
@@ -1516,7 +1517,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 	 */
 	private int findUriID(String uri) {
 
-		Integer id = uriRefIds.get(uri);
+		Integer id = uriRefIds.getId(uri);
 		if (id != null)
 			return id;
 		return -2;

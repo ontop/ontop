@@ -12,10 +12,6 @@ import java.sql.Statement;
 
 import junit.framework.TestCase;
 
-import org.semanticweb.ontop.io.ModelIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -29,7 +25,6 @@ public class MovieOntologyTest extends TestCase {
 
 	private Connection conn;
 
-	private OBDAModel obdaModel = null;
 	private OWLOntology ontology;
 
 	final String testCase = "movieontology";
@@ -48,13 +43,6 @@ public class MovieOntologyTest extends TestCase {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-		
-		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-		
-		// Loading the OBDA data
-		obdaModel = fac.getOBDAModel();
-		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager.load(new File(obdafile)); 
 	}
 
 	
@@ -79,10 +67,8 @@ public class MovieOntologyTest extends TestCase {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
-		QuestOWLFactory factory = new QuestOWLFactory();
-		factory.setOBDAController(obdaModel);
-		factory.setPreferenceHolder(p);
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
+		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 		
 				
 		//for (Entry<URI, ArrayList<OBDAMappingAxiom>> m: obdaModel.getMappings().entrySet()) {
