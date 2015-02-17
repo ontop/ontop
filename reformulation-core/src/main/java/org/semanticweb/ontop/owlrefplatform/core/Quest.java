@@ -81,7 +81,6 @@ public class Quest implements Serializable, IQuest {
 	private PoolProperties poolProperties;
 	private DataSource tomcatPool;
 
-	private boolean isSemanticIdx = false;
 	// Tomcat pool default properties
 	// These can be changed in the properties file
 	private int maxPoolSize = 20;
@@ -737,7 +736,7 @@ public class Quest implements Serializable, IQuest {
              * but cloned for each QuestStatement.
              * When cloned, metadata is also cloned, so it should be "safe".
              */
-			if (isSemanticIdx) {
+			if (aboxMode.equals(QuestConstants.CLASSIC)) {
 				dataSourceQueryGenerator = questComponentFactory.create(metadata, datasource, dataRepository.getUriMap());
 			}
 			else {

@@ -119,8 +119,6 @@ public class SQLGenerator implements NativeQueryGenerator {
 
 	private static final String typeStrForSELECT = "%s AS \"%sQuestType\"" ;
 
-	private static final int UNDEFINED_TYPE_CODE = -1;
-
 	private final ImmutableTable<Predicate, Predicate, Predicate> dataTypePredicateUnifyTable;
 	
 
@@ -187,13 +185,16 @@ public class SQLGenerator implements NativeQueryGenerator {
 		String aBoxMode = (String) preferences.get(QuestPreferences.ABOX_MODE);
 		this.isSI = aBoxMode.equals(QuestConstants.CLASSIC);
 		this.uriRefIds = uriRefIds;
-	}
+ 	}
 
 	/**
 	 * For clone purposes only
 	 */
 	private SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqlAdapter, boolean generatingReplace,
 						 boolean isSI, SemanticIndexURIMap uriRefIds) {
+		if (isSI && uriRefIds == null) {
+			throw new IllegalArgumentException("A SemanticIndexURIMap must be given in the classic mode.");
+		}
 		this.metadata = metadata;
 		this.sqladapter = sqlAdapter;
 		this.dataTypePredicateUnifyTable = buildPredicateUnifyTable();
