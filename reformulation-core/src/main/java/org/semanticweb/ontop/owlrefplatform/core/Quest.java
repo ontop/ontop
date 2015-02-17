@@ -40,7 +40,6 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.nativeql.DBMetadataExtractor;
 import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.owlrefplatform.core.abox.IRDBMSSIRepositoryManager;
 import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
@@ -294,7 +293,7 @@ public class Quest implements Serializable, IQuest {
 		this.userConstraints = userConstraints;
 	}
 
-	public IRDBMSSIRepositoryManager getDataRepository() {
+	public RDBMSSIRepositoryManager getDataRepository() {
 		return dataRepository;
 	}
 
@@ -353,7 +352,7 @@ public class Quest implements Serializable, IQuest {
 	}
 
 	@Override
-	public IQuestUnfolder getQuestUnfolder() {
+	public QuestUnfolder getQuestUnfolder() {
 		return unfolder;
 	}
 

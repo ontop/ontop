@@ -26,7 +26,6 @@ import org.openrdf.rio.turtle.TurtleParser;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
-import org.semanticweb.ontop.owlrefplatform.core.abox.IRDBMSSIRepositoryManager;
 import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
@@ -55,7 +54,7 @@ public class SemanticIndexManager {
 
 	private TBoxReasoner reasoner;
 
-	private IRDBMSSIRepositoryManager dataRepository = null;
+	private RDBMSSIRepositoryManager dataRepository = null;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 

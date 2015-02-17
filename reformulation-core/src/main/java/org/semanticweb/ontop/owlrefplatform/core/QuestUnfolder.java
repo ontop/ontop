@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class QuestUnfolder implements IQuestUnfolder {
+public class QuestUnfolder {
 
 	/* The active unfolding engine */
 	private UnfoldingMechanism unfolder;
@@ -45,7 +45,7 @@ public class QuestUnfolder implements IQuestUnfolder {
 	private UriTemplateMatcher uriTemplateMatcher = new UriTemplateMatcher();
 
 
-	private static final Logger log = LoggerFactory.getLogger(IQuestUnfolder.class);
+	private static final Logger log = LoggerFactory.getLogger(QuestUnfolder.class);
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
@@ -101,7 +101,6 @@ public class QuestUnfolder implements IQuestUnfolder {
 
 	}
 
-	@Override
 	public void applyTMappings(/*boolean optimizeMap, */ TBoxReasoner reformulationReasoner, boolean full) throws OBDAException  {
 
 		final long startTime = System.currentTimeMillis();
@@ -199,7 +198,6 @@ public class QuestUnfolder implements IQuestUnfolder {
 	/***
 	 * Adding ontology assertions (ABox) as rules (facts, head with no body).
 	 */
-	@Override
 	public void addClassAssertionsAsFacts(Iterable<ClassAssertion> assertions) {
 
 		int count = 0;
@@ -216,7 +214,6 @@ public class QuestUnfolder implements IQuestUnfolder {
 		log.debug("Appended {} ABox assertions as fact rules", count);
 	}
 
-	@Override
 	public void addObjectPropertyAssertionsAsFacts(Iterable<ObjectPropertyAssertion> assertions) {
 
 		int count = 0;
@@ -235,7 +232,6 @@ public class QuestUnfolder implements IQuestUnfolder {
 		log.debug("Appended {} ABox assertions as fact rules", count);
 	}
 
-	@Override
 	public void addDataPropertyAssertionsAsFacts(Iterable<DataPropertyAssertion> assertions) {
 
 //		int count = 0;
@@ -380,18 +376,14 @@ public class QuestUnfolder implements IQuestUnfolder {
 		return newmappings;
 	}
 
-	@Override
 	public UriTemplateMatcher getUriTemplateMatcher() {
 		return uriTemplateMatcher;
 	}
 
-	@Override
 	public DatalogProgram unfold(DatalogProgram query, String targetPredicate) throws OBDAException {
 		return unfolder.unfold(query, targetPredicate);
 	}
 
-
-	@Override
 	public UnfoldingMechanism getDatalogUnfolder(){
 		return unfolder;
 	}

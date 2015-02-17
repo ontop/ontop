@@ -3,9 +3,9 @@ package org.semanticweb.ontop.owlrefplatform.core;
 import com.google.common.collect.Multimap;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
-import org.semanticweb.ontop.owlrefplatform.core.abox.IRDBMSSIRepositoryManager;
 import org.semanticweb.ontop.owlrefplatform.core.abox.RepositoryChangedListener;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -16,8 +16,6 @@ import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -37,7 +35,7 @@ public interface IQuest extends RepositoryChangedListener {
 
     Map<String, Boolean> getIsDescribeCache();
 
-    IQuestUnfolder getQuestUnfolder();
+    QuestUnfolder getQuestUnfolder();
 
     OBDAModel getOBDAModel();
 
@@ -74,7 +72,7 @@ public interface IQuest extends RepositoryChangedListener {
 
 	TBoxReasoner getReasoner();
 
-    IRDBMSSIRepositoryManager getSemanticIndexRepository();
+    RDBMSSIRepositoryManager getSemanticIndexRepository();
 
     DBMetadata getMetaData();
 

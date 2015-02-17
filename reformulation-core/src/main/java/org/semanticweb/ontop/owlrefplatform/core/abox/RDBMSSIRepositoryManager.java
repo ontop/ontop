@@ -90,9 +90,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 
-public class RDBMSSIRepositoryManager implements IRDBMSSIRepositoryManager {
-
-	private static final long serialVersionUID = -6494667662327970606L;
+public class RDBMSSIRepositoryManager {
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
 
@@ -322,27 +320,20 @@ public class RDBMSSIRepositoryManager implements IRDBMSSIRepositoryManager {
 		return this.mergeUniions;
 	}
 
-	@Override
 	public void setConfig(Properties config) {
 	}
 
-	@Override
 	public void setTBox(TBoxReasoner reasonerDag) {
 		this.reasonerDag = reasonerDag;
 		cacheSI = new SemanticIndexCache(reasonerDag);
 	}
 
-	@Override
-	public String getType() {
-		return TYPE_SI;
-	}
 
 	public SemanticIndexURIMap getUriMap() {
 		return uriMap;
 	}
 
 
-	@Override
 	public void getSQLInserts(Iterator<Assertion> data, OutputStream outstream) throws IOException {
 
 		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(outstream));
@@ -525,7 +516,6 @@ public class RDBMSSIRepositoryManager implements IRDBMSSIRepositoryManager {
 	}
 
 
-	@Override
 	public void createDBSchema(Connection conn, boolean dropExisting) throws SQLException {
 
 		log.debug("Creating data tables");
@@ -577,7 +567,6 @@ public class RDBMSSIRepositoryManager implements IRDBMSSIRepositoryManager {
 		st.close();
 	}
 
-	@Override
 	public void createIndexes(Connection conn) throws SQLException {
 		log.debug("Creating indexes");
 		Statement st = conn.createStatement();
@@ -628,7 +617,6 @@ public class RDBMSSIRepositoryManager implements IRDBMSSIRepositoryManager {
 	private static final String attribute_table_literal_drop = "DROP TABLE " + attribute_table_literal;
 
 
-	@Override
 	public void dropDBSchema(Connection conn) throws SQLException {
 
 		Statement st = conn.createStatement();
@@ -650,7 +638,6 @@ public class RDBMSSIRepositoryManager implements IRDBMSSIRepositoryManager {
 		st.close();
 	}
 
-	@Override
 	public int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException {
 		log.debug("Inserting data into DB");
 
@@ -1442,7 +1429,6 @@ public class RDBMSSIRepositoryManager implements IRDBMSSIRepositoryManager {
 		return COL_TYPE.LITERAL;
 	}
 
-	@Override
 	public void loadMetadata(Connection conn) throws SQLException {
 		log.debug("Loading semantic index metadata from the database *");
 
@@ -1536,12 +1522,10 @@ public class RDBMSSIRepositoryManager implements IRDBMSSIRepositoryManager {
 
 	}
 
-	@Override
 	public boolean checkMetadata(Connection conn) throws SQLException {
 		return true;
 	}
 
-	@Override
 	public ImmutableList<OBDAMappingAxiom> getMappings() throws OBDAException {
 
 		Set<Predicate> roleNodes = new HashSet<Predicate>();
@@ -2292,7 +2276,6 @@ public class RDBMSSIRepositoryManager implements IRDBMSSIRepositoryManager {
 		}
 	}
 
-	@Override
 	public void collectStatistics(Connection conn) throws SQLException {
 
 		Statement st = conn.createStatement();
@@ -2310,7 +2293,6 @@ public class RDBMSSIRepositoryManager implements IRDBMSSIRepositoryManager {
 	 * database. The metadata is later used to reconstruct a semantic index
 	 * repository.
 	 */
-	@Override
 	public void insertMetadata(Connection conn) throws SQLException {
 
 		log.debug("Inserting semantic index metadata. This will allow the repository to reconstruct itself afterwards.");
@@ -2442,7 +2424,6 @@ public class RDBMSSIRepositoryManager implements IRDBMSSIRepositoryManager {
 	private static final String dropindexrole3 = "DROP INDEX \"idxrole3\"";
 
 
-	@Override
 	public void dropIndexes(Connection conn) throws SQLException {
 		log.debug("Droping indexes");
 
@@ -2472,12 +2453,10 @@ public class RDBMSSIRepositoryManager implements IRDBMSSIRepositoryManager {
 		isIndexed = false;
 	}
 
-	@Override
 	public boolean isIndexed(Connection conn) {
 		return isIndexed;
 	}
 
-	@Override
 	public boolean isDBSchemaDefined(Connection conn) throws SQLException {
 		Statement st = conn.createStatement();
 		boolean exists = true;
@@ -2505,7 +2484,6 @@ public class RDBMSSIRepositoryManager implements IRDBMSSIRepositoryManager {
 		return exists;
 	}
 
-	@Override
 	public long loadWithFile(Connection conn, final Iterator<Assertion> data) throws SQLException, IOException {
 		//
 		// log.debug("Insert data into schemas using temporary files");
