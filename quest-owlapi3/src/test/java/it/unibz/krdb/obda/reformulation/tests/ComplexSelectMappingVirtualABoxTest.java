@@ -26,13 +26,8 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import junit.framework.TestCase;
-
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
@@ -168,13 +163,14 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 		    while (m.find()){
 		    	num_joins +=1;
 		    }
-		    System.out.println(sql);
+//		    System.out.println(sql);
 			assertEquals(num_joins, 0);
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			OWLLiteral val = rs.getOWLLiteral("z");
 			assertEquals("<http://it.unibz.krdb/obda/test/simple#uri1>", ind1.toString());
+            System.out.println(val.toString());
 			//assertEquals("\"value1\"", val.toString());
 
 		} catch (Exception e) {
@@ -200,6 +196,14 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 		runTests(p);
 	}
 
+    public void testReplaceValue() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U4 ?z . }";
+
+        runTests(p);
+    }
 
 	public void testConcat() throws Exception {
 

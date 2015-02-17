@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import junit.framework.TestCase;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -692,12 +691,6 @@ public class JSQLParserTest extends TestCase {
 		printJSQL("testRegexMySQL", result);
 		assertTrue(result);
 	}
-
-    public void test999(){
-        final boolean result = parseUnquotedJSQL("SELECT TVD(clm) FROM pet");
-        printJSQL("testRegexMySQL", result);
-        assertTrue(result);
-    }
 	
 	public void testRegexBinaryMySQL(){
 		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE name REGEXP BINARY '^b'");
@@ -736,6 +729,12 @@ public class JSQLParserTest extends TestCase {
                 "COALESCE(Region, RAND()), COALESCE(PostalCode, RAND()), COALESCE(Country,\n" +
                 "RAND()) )) AS locationID FROM northwind.Suppliers");
         printJSQL("test_13", result);
+        assertTrue(result);
+    }
+
+    public void test_concatOracle() {
+        final boolean result = parseJSQL("SELECT ('ID-' || student.id || 'type1') \"sid\" FROM student");
+        printJSQL("test_concatOracle()", result);
         assertTrue(result);
     }
 

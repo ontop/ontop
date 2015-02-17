@@ -12,8 +12,7 @@ driverClass	org.h2.Driver
 [MappingDeclaration] @collection [[
 mappingId	mapping1
 target	:{u} :U {val} .
-source	SELECT REPLACE(uri, " ", "%20") AS u, val FROM TABLE1
-
+source	SELECT REPLACE(uri, ' ', '%20') AS u, val FROM TABLE1
 
 mappingId	mapping2
 target	:{uri} :U2 {valcat} .
@@ -22,5 +21,10 @@ source	SELECT uri, 'NO ' || val as valcat FROM TABLE1
 mappingId	mapping3
 target	:{uri} :U3 {valcat} .
 source	SELECT uri, val || 'to' as valcat FROM TABLE1
+
+mappingId	mapping4
+target	:{uri} :U4 {r1} .
+source	SELECT uri, REPLACE(val,'v','u') as r1 FROM TABLE1
+
 ]]
 

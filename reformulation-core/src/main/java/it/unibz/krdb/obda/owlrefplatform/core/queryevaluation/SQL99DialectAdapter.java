@@ -52,6 +52,9 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String strreplace(String str, String oldstr, String newstr) {
+        oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+
+        newstr = newstr.substring(1, newstr.length() - 1);
 		return String.format("REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
 	}
 

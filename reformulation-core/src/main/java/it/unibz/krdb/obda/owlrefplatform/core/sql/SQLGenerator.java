@@ -36,7 +36,6 @@ import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
-
 import org.openrdf.model.Literal;
 
 import java.sql.Types;
@@ -1293,8 +1292,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 				}
 			} else if (functionName.equals(OBDAVocabulary.REPLACE_STR) && size == 3) {
 				String orig = getSQLString(function.getTerm(0), index, false);
-				String out_str = function.getTerm(1).toString();
-				String in_str = function.getTerm(2).toString();
+				String out_str = getSQLString(function.getTerm(1), index, false);
+				String in_str = getSQLString(function.getTerm(2), index, false);
 				String result = sqladapter.strreplace(orig, out_str, in_str);
 				return result;
 			} 

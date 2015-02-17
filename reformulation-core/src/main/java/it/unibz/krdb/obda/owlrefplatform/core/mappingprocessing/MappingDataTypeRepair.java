@@ -30,7 +30,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidato
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxTraversal;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxTraverseListener;
-
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.Attribute;
@@ -160,10 +159,42 @@ public class MappingDataTypeRepair {
 				}
 
 				//TODO: This is a crude hack, just because I did not understand what to do with the sql concatenation here. Dag
-				if (functionSymbol.getName().equals("CONCAT"))
-					continue;
-				
-				if (functionSymbol.isDataTypePredicate()) {
+				if (functionSymbol.isStringPredicate()){
+
+                    //check in the ontology if we have already information about the datatype
+
+                    Function normal = qvv.getNormal(atom);
+                    //Check if a datatype was already assigned in the ontology
+                    Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
+
+                    if (dataType != null) {
+                        //check that no datatype mismatch is present
+                        //if it is a stringPredicate the result has to be a literal
+                        Predicate typePredicate = fac.getDatatypeFactory().getTypePredicate(Predicate.COL_TYPE.LITERAL);
+                        if (!(typePredicate.equals(dataType.getPredicate()))) {
+
+                            throw new OBDAException("Ontology datatype " + dataType + " for " + predicate + "\nhas to be a literal");
+
+                        }
+                    }
+
+                    for(int i=0; i < function.getArity(); i++){
+                        Term stringTerm =  function.getTerm(i);
+
+                        if (stringTerm instanceof Variable) {
+
+                            Variable variable = (Variable) stringTerm;
+
+                            Term newTerm = fac.getTypedTerm(variable, Predicate.COL_TYPE.LITERAL);
+
+                            function.setTerm(i, newTerm);
+                        }
+
+                    }
+
+                }
+
+				else if (functionSymbol.isDataTypePredicate()) {
 
                     Function normal = qvv.getNormal(atom);
                     Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
