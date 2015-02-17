@@ -75,6 +75,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Store ABox assertions in the DB
@@ -87,7 +88,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	private static final long serialVersionUID = -6494667662327970606L;
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
-
 	
 	static final class TableDescription {
 		final String tableName;
@@ -100,11 +100,13 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		
 		final String dropCommand;
 		
-		TableDescription(String tableName, String columnDefintions, String insertColumns, String selectColumns) {
+		TableDescription(String tableName, ImmutableMap<String, String> columnDefintions, String selectColumns) {
 			this.tableName = tableName;
 			this.dropCommand = "DROP TABLE " + tableName;
-			this.createCommand = "CREATE TABLE " + tableName + " ( " + columnDefintions + " )";
-			this.insertCommand = "INSERT INTO " + tableName + " (" + insertColumns + ") VALUES (";
+			this.createCommand = "CREATE TABLE " + tableName + 
+					" ( " + Joiner.on(", ").withKeyValueSeparator(" ").join(columnDefintions) + " )";
+			this.insertCommand = "INSERT INTO " + tableName + 
+					" (" + Joiner.on(", ").join(columnDefintions.keySet()) + ") VALUES (";
 			this.selectCommand = "SELECT " + selectColumns + " FROM " + tableName; 
 		}
 		
@@ -131,20 +133,25 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 */
 	
 	private final static TableDescription indexTable = new TableDescription("IDX", 
-			"URI VARCHAR(400), IDX INTEGER, ENTITY_TYPE INTEGER", 
-			"URI, IDX, ENTITY_TYPE", "*");   
+			ImmutableMap.of("URI", "VARCHAR(400)", 
+					        "IDX", "INTEGER", 
+					        "ENTITY_TYPE", "INTEGER"), "*");   
 
 	private final static TableDescription intervalTable = new TableDescription("IDXINTERVAL",
-			"URI VARCHAR(400), IDX_FROM INTEGER, IDX_TO INTEGER, ENTITY_TYPE INTEGER",
-			"URI, IDX_FROM, IDX_TO, ENTITY_TYPE", "*");
+			ImmutableMap.of("URI", "VARCHAR(400)", 
+					        "IDX_FROM", "INTEGER", 
+					        "IDX_TO", "INTEGER", 
+					        "ENTITY_TYPE", "INTEGER"), "*");
 
 	private final static TableDescription uriIdTable = new TableDescription("URIID",
-			"ID INTEGER, URI VARCHAR(400)",
-			"ID, URI", "*");
+			ImmutableMap.of("ID", "INTEGER", 
+					        "URI", "VARCHAR(400)"), "*");
 	
 	final static TableDescription emptinessIndexTable = new TableDescription("NONEMPTYNESSINDEX",
-			"TABLEID INTEGER, IDX INTEGER, TYPE1 INTEGER, TYPE2 INTEGER",
-			"TABLEID, IDX, TYPE1, TYPE2", "*");
+			ImmutableMap.of("TABLEID", "INTEGER", 
+					        "IDX", "INTEGER",
+					        "TYPE1", "INTEGER", 
+					        "TYPE2", "INTEGER"), "*");
 	
 	
 	
@@ -154,8 +161,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 */
 	
 	final static TableDescription classTable = new TableDescription("QUEST_CLASS_ASSERTION", 
-			"\"URI\" INTEGER NOT NULL, \"IDX\"  SMALLINT NOT NULL, ISBNODE BOOLEAN NOT NULL DEFAULT FALSE",
-			"URI, IDX, ISBNODE", "\"URI\" as X");
+			ImmutableMap.of("\"URI\"", "INTEGER NOT NULL", 
+					        "\"IDX\"", "SMALLINT NOT NULL", 
+					        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X");
 	
     final static Map<COL_TYPE ,TableDescription> attributeTable = new HashMap<>();
 	
@@ -179,9 +187,11 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		classTable.indexOn("idxclassfull2", "URI, IDX");
 		
 		TableDescription roleTable = new TableDescription("QUEST_OBJECT_PROPERTY_ASSERTION", 
-				"\"URI1\" INTEGER NOT NULL, \"URI2\" INTEGER NOT NULL, \"IDX\"  SMALLINT NOT NULL, " + 
-				"ISBNODE BOOLEAN NOT NULL DEFAULT FALSE, ISBNODE2 BOOLEAN NOT NULL DEFAULT FALSE",
-				"URI1, URI2, IDX, ISBNODE, ISBNODE2", "\"URI1\" as X, \"URI2\" as Y");
+				ImmutableMap.of("\"URI1\"", "INTEGER NOT NULL", 
+						        "\"URI2\"", "INTEGER NOT NULL", 
+						        "\"IDX\"", "SMALLINT NOT NULL", 
+						        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE", 
+						        "ISBNODE2", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI1\" as X, \"URI2\" as Y");
 		attributeTable.put(COL_TYPE.OBJECT, roleTable);
 
 		roleTable.indexOn("idxrolefull1", "URI1, URI2, IDX, ISBNODE, ISBNODE2");
@@ -192,9 +202,11 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		// COL_TYPE.LITERAL is special because of one extra attribute (LANG)
 		
 		TableDescription attributeTableLiteral = new TableDescription("QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
-				"\"URI\" INTEGER NOT NULL, VAL VARCHAR(1000) NOT NULL, LANG VARCHAR(20), \"IDX\"  SMALLINT NOT NULL, " + 
-				"ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE ",
-				"URI, VAL, IDX, LANG, ISBNODE", "\"URI\" as X, VAL as Y, LANG as Z");
+				ImmutableMap.of("\"URI\"", "INTEGER NOT NULL", 
+						        "VAL", "VARCHAR(1000) NOT NULL", 
+						        "\"IDX\"", "SMALLINT NOT NULL", 
+						        "LANG", "VARCHAR(20)", 
+						        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X, VAL as Y, LANG as Z");
 		attributeTable.put(COL_TYPE.LITERAL, attributeTableLiteral);
 			
 		attributeTableLiteral.indexOn("IDX_LITERAL_ATTRIBUTE" + "1", "URI");		
@@ -238,9 +250,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		
 		for (AttributeTableDescritpion descrtiption : attributeDescritions) {
 			TableDescription table = new TableDescription(descrtiption.tableName,
-					"\"URI\" INTEGER  NOT NULL, VAL " + descrtiption.sqlTypeName + 
-					", \"IDX\"  SMALLINT  NOT NULL, ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE",
-					"URI, VAL, IDX, ISBNODE", "\"URI\" as X, VAL as Y");
+					ImmutableMap.of("\"URI\"", "INTEGER NOT NULL", 
+							        "VAL", descrtiption.sqlTypeName, 
+							        "\"IDX\"", "SMALLINT  NOT NULL", 
+							        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X, VAL as Y");
 			attributeTable.put(descrtiption.type, table);
 			
 			table.indexOn(descrtiption.indexName + "1", "URI");		

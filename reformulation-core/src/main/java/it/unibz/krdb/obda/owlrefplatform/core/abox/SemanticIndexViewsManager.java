@@ -114,7 +114,7 @@ public class SemanticIndexViewsManager {
 	
 	// view id codes that are stored in DB (starts with 0)
 
-	private static COL_TYPE[] SITableToCOLTYPE = { 
+	private static final COL_TYPE[] SITableToCOLTYPE = { 
 		null, // Class SITable 
 		COL_TYPE.OBJECT, COL_TYPE.LITERAL, COL_TYPE.STRING, COL_TYPE.INTEGER,
 		COL_TYPE.LONG, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.DATETIME, 
@@ -123,7 +123,7 @@ public class SemanticIndexViewsManager {
 		COL_TYPE.FLOAT, COL_TYPE.BOOLEAN, COL_TYPE.DATETIME_STAMP, COL_TYPE.LITERAL_LANG
 	};
 	
-	private static Map<COL_TYPE, Integer> COLTYPEtoSITable = new HashMap<>();
+	private static final Map<COL_TYPE, Integer> COLTYPEtoSITable = new HashMap<>();
 	
 	static {
 		// special case of COL_TYPE.OBJECT and COL_TYPE.BNODE (both are mapped to 1)
