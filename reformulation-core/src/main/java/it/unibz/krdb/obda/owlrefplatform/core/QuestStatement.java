@@ -255,7 +255,7 @@ public class QuestStatement implements OBDAStatement {
 
 						String exceptionClassName = e.getClass().getName();
 
-						// Since the exceptions of MySQL and Postgres are extending SQLTimeoutException,
+						// Since the exceptions of MySQL and Postgres are not extending SQLTimeoutException,
 						// the following hack is needed.
 						// See <http://bugs.mysql.com/bug.php?id=71589>
 						if(exceptionClassName.equals(MySQLTimeoutExceptionClassName)

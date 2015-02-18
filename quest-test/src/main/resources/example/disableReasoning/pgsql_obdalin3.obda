@@ -3,10 +3,10 @@
 
 [SourceDeclaration]
 sourceUri	viewTest
-connectionUrl	jdbc:mysql://localhost/ontowis_10k
-username	root
-password	fish
-driverClass	com.mysql.jdbc.Driver
+connectionUrl	jdbc:postgresql://10.7.20.39/ontowis_100m
+username	postgres
+password	postgres
+driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	MAPID-A1

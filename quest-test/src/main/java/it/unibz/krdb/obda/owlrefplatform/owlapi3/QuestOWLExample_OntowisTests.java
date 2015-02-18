@@ -134,6 +134,7 @@ public class QuestOWLExample_OntowisTests {
 
         runQueries(conn, queryFactory.warmUpQueries);
 
+
         for(int i = 0; i < Constants.NUM_RUNS; i++) {
             List<Long> resultsOne = runQueries(conn, queryFactory.queriesOneSPARQL);
             resultsOne_list.add(resultsOne);
