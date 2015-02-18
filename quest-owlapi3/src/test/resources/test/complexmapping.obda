@@ -26,9 +26,24 @@ mappingId	mapping4
 target	:{uri} :U4 {r1} .
 source	SELECT uri, REPLACE(val,'v','u') as r1 FROM TABLE1
 
-mappingId	mapping4
-target	:{uri} :U4 {r1} .
-source	SELECT uri, REPLACE(val,'v','u') as r1 FROM TABLE1
+mappingId	mapping5
+target	:{uri} :U5 {valcat} .
+source	SELECT uri, CONCAT(val,'test') as valcat FROM TABLE1
+
+mappingId	mapping6
+target	:{uri} :U6 {valcat} .
+source	SELECT uri, CONCAT(val,'te', 'st') as valcat FROM TABLE1
+
+mappingId	mapping7
+target	:{uri} :U7 {valcat} .
+source	SELECT uri, val || 'to' || uri as valcat FROM TABLE1
+
+mappingId	mapping8
+target	:{uri} :U8 {valcat} .
+source	SELECT uri, CONCAT(CONCAT(val,'te'), 'st') as valcat FROM TABLE1
+
+
+
 
 ]]
 

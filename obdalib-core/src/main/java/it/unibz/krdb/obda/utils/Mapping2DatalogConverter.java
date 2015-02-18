@@ -544,10 +544,11 @@ public class Mapping2DatalogConverter {
                     }
                     result = fac.getFunctionRegex(t1, t2, t3);
                 }
-            } else if (func.getName().toLowerCase().endsWith("replace")){
+                throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function Regex");
+            } else if (func.getName().toLowerCase().endsWith("replace")) {
 
-            	List<Expression> expressions = expression.getParameters().getExpressions();
-            	if (expressions.size() == 2 || expressions.size() == 3) {
+                List<Expression> expressions = expression.getParameters().getExpressions();
+                if (expressions.size() == 2 || expressions.size() == 3) {
 
                     Term t1; // first parameter is a function expression
                     Expression first = expressions.get(0);
@@ -557,7 +558,7 @@ public class Mapping2DatalogConverter {
                         throw new RuntimeException("Unable to find source expression: "
                                 + first);
 
-                     // second parameter is a string
+                    // second parameter is a string
                     Term out_string;
                     Expression second = expressions.get(1);
 
@@ -567,15 +568,51 @@ public class Mapping2DatalogConverter {
                      * Term t3 is optional: no string means delete occurrences of second param
 			         */
                     Term in_string;
-                    if(expressions.size() == 3){
+                    if (expressions.size() == 3) {
                         Expression third = expressions.get(2);
                         in_string = visitEx(third);
                     } else {
                         in_string = fac.getConstantLiteral("");
                     }
                     result = fac.getFunctionReplace(t1, out_string, in_string);
-            	} else 
-            		throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");
+                } else
+
+                    throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");
+
+            }  else if (func.getName().toLowerCase().endsWith("concat")){
+
+                List<Expression> expressions = expression.getParameters().getExpressions();
+
+                int nParameters=expressions.size();
+                Function topConcat = null;
+
+
+                for (int i= 0; i<nParameters; i+=2) {
+
+                    Term first_string, second_string;
+
+                    if(topConcat == null){
+
+                        Expression first = expressions.get(i);
+                        first_string = visitEx(first);
+
+                        Expression second = expressions.get(i+1);
+                        second_string = visitEx(second);
+
+                        topConcat = fac.getFunctionConcat(first_string , second_string);
+                    }
+                    else{
+
+                        Expression second = expressions.get(i);
+                        second_string = visitEx(second);
+
+                        topConcat = fac.getFunctionConcat( topConcat, second_string );
+                    }
+
+                }
+
+                result = topConcat;
+
             } else {
                 throw new UnsupportedOperationException("Unsupported expression " + expression);
             }

@@ -226,5 +226,45 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 		
 		runTests(p);
 	}
+
+    public void testConcat2() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+
+        this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U5 ?z. }";
+
+        runTests(p);
+    }
+
+    public void testConcat3() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+
+        this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U6 ?z. }";
+
+        runTests(p);
+    }
+
+    public void testConcat4() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+
+        this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U7 ?z. }";
+
+        runTests(p);
+    }
+
+    public void testConcat5() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+
+        this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U8 ?z. }";
+
+        runTests(p);
+    }
 	
 }

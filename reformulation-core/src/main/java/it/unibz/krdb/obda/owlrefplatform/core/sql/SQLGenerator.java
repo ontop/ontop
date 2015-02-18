@@ -1213,7 +1213,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String op = getSQLString(term1, index, true);
 				return String.format(expressionFormat, op);
 				
-			} else if (functionSymbol.equals(OBDAVocabulary.CONCAT)) {
+			} else if (functionSymbol.getName().equals(OBDAVocabulary.CONCAT.getName())) {
 				String[] strs = new String[2];
 				strs[0] = getSQLString(function.getTerm(0), index, false);
 				strs[1] = getSQLString(function.getTerm(1), index, false);
@@ -1271,7 +1271,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			
 		} else {
 			String functionName = functionSymbol.toString();
-			if (functionName.equals(OBDAVocabulary.QUEST_CAST)) {
+			if (functionName.equals(OBDAVocabulary.QUEST_CAST.getName())) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				String datatype = ((Constant) function.getTerm(1)).getValue();
 				int sqlDatatype = -1;

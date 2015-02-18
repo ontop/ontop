@@ -57,7 +57,7 @@
     <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U2"/>
     
     
-        <!-- http://it.unibz.krdb/obda/test/simple#U3 -->
+    <!-- http://it.unibz.krdb/obda/test/simple#U3 -->
 
     <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U3"/>
 
@@ -67,6 +67,21 @@
         <rdfs:range rdf:resource="&rdfs;Literal"/>
     </owl:DatatypeProperty>
 
+    <!-- http://it.unibz.krdb/obda/test/simple#U5 -->
+
+    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U5" />
+
+     <!-- http://it.unibz.krdb/obda/test/simple#U6 -->
+
+    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U6" />
+
+    <!-- http://it.unibz.krdb/obda/test/simple#U7 -->
+
+    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U7" />
+
+     <!-- http://it.unibz.krdb/obda/test/simple#U8 -->
+
+     <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U8" />
 
 
     <!-- 
