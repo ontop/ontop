@@ -35,10 +35,6 @@ public class StringOperationPredicateImpl extends PredicateImpl implements Strin
 	private static final long serialVersionUID = 5119873524278488136L;
 
 
-    public StringOperationPredicateImpl(int arity){
-        super(OBDAVocabulary.CONCAT_STR, arity, null);
-    }
-
 	protected StringOperationPredicateImpl(String name, int arity, COL_TYPE[] types) {
 		super(name, arity, types);
 	}

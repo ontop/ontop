@@ -61,18 +61,14 @@ public class OBDAVocabulary {
 	public static final BooleanOperationPredicate IS_NOT_NULL = new BooleanOperationPredicateImpl("IS_NOT_NULL", 1);
 	public static final BooleanOperationPredicate IS_TRUE = new BooleanOperationPredicateImpl("IS_TRUE", 1);
 
-	/* String predicate names */
-	
-	public static final String REPLACE_STR = "REPLACE";
-	public static final String CONCAT_STR = "CONCAT";
 	
 	/* String predicates */
 	
 	public static final StringOperationPredicate REPLACE = new StringOperationPredicateImpl(
-			REPLACE_STR, 3, new COL_TYPE[]{COL_TYPE.STRING, COL_TYPE.STRING, COL_TYPE.STRING});  
+            "REPLACE", 3, new COL_TYPE[]{COL_TYPE.STRING, COL_TYPE.STRING, COL_TYPE.STRING});
 	
 	public static final StringOperationPredicate CONCAT = new StringOperationPredicateImpl(
-			CONCAT_STR, 2, new COL_TYPE[]{COL_TYPE.STRING, COL_TYPE.STRING});  
+            "CONCAT", 2, new COL_TYPE[]{COL_TYPE.STRING, COL_TYPE.STRING});
 	
 	
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";

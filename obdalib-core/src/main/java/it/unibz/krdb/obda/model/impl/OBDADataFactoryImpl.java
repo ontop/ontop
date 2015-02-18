@@ -411,9 +411,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
     @Override
-    public Function getFunctionConcat(Term... terms) {
-        Predicate concat = new StringOperationPredicateImpl(terms.length);
-        return getFunction(concat, terms);
+    public Function getFunctionConcat(Term term1, Term term2) {
+        return getFunction(OBDAVocabulary.CONCAT, term1, term2);
     }
 
 	@Override

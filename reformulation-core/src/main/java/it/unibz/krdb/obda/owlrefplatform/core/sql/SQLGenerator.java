@@ -1182,7 +1182,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Term term1 = function.getTerms().get(0);
 		int size = function.getTerms().size();
 
-		if (functionSymbol instanceof DataTypePredicate) {
+		if (functionSymbol.isDataTypePredicate() ) {
 			if (functionSymbol.getType(0) == COL_TYPE.UNSUPPORTED) {
 				throw new RuntimeException("Unsupported type in the query: " + function);
 			}
@@ -1192,7 +1192,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			} else 	{
 				return getSQLStringForTemplateFunction(function, index);
 			}
-		} else if (functionSymbol instanceof BooleanOperationPredicate) {
+		} else if (functionSymbol.isBooleanPredicate() ) {
 			// atoms of the form EQ(x,y)
 			String expressionFormat = getBooleanOperatorString(functionSymbol);
 			if (isUnary(function)) {
@@ -1213,7 +1213,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String op = getSQLString(term1, index, true);
 				return String.format(expressionFormat, op);
 				
-			} else if (functionSymbol.getName().equals(OBDAVocabulary.CONCAT_STR) && size == 2) {
+			} else if (functionSymbol.equals(OBDAVocabulary.CONCAT)) {
 				String[] strs = new String[2];
 				strs[0] = getSQLString(function.getTerm(0), index, false);
 				strs[1] = getSQLString(function.getTerm(1), index, false);
@@ -1271,7 +1271,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			
 		} else {
 			String functionName = functionSymbol.toString();
-			if (functionName.equals(OBDAVocabulary.QUEST_CAST.getName())) {
+			if (functionName.equals(OBDAVocabulary.QUEST_CAST)) {
 				String columnName = getSQLString(function.getTerm(0), index, false);
 				String datatype = ((Constant) function.getTerm(1)).getValue();
 				int sqlDatatype = -1;
@@ -1290,14 +1290,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					return sqladapter.sqlCast(columnName, Types.VARCHAR);
 				}
-			} else if (functionName.equals(OBDAVocabulary.REPLACE_STR) && size == 3) {
+			} else if (functionName.equals(OBDAVocabulary.REPLACE.getName())) {
 				String orig = getSQLString(function.getTerm(0), index, false);
 				String out_str = getSQLString(function.getTerm(1), index, false);
 				String in_str = getSQLString(function.getTerm(2), index, false);
 				String result = sqladapter.strreplace(orig, out_str, in_str);
 				return result;
 			} 
-			 else if (functionName.equals(OBDAVocabulary.CONCAT_STR) && size == 2) {
+			 else if (functionName.equals(OBDAVocabulary.CONCAT.getName())) {
 					String left = getSQLString(function.getTerm(0), index, false);
 					String right = getSQLString(function.getTerm(1), index, false);
 					String result = sqladapter.strconcat(new String[]{left, right});

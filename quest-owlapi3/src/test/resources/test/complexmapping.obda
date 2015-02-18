@@ -26,5 +26,9 @@ mappingId	mapping4
 target	:{uri} :U4 {r1} .
 source	SELECT uri, REPLACE(val,'v','u') as r1 FROM TABLE1
 
+mappingId	mapping4
+target	:{uri} :U4 {r1} .
+source	SELECT uri, REPLACE(val,'v','u') as r1 FROM TABLE1
+
 ]]
 

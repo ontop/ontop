@@ -91,7 +91,7 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/simplemapping-create-h2.sql");
+		FileReader reader = new FileReader("src/test/resources/test/complexmapping-create-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -169,7 +169,7 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
 			OWLLiteral val = rs.getOWLLiteral("z");
-			assertEquals("<http://it.unibz.krdb/obda/test/simple#uri1>", ind1.toString());
+			assertEquals("<http://it.unibz.krdb/obda/test/simple#uri%201>", ind1.toString());
             System.out.println(val.toString());
 			//assertEquals("\"value1\"", val.toString());
 
@@ -191,6 +191,8 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
+
 		this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U ?z. }";
 		
 		runTests(p);
@@ -219,6 +221,7 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+
 		this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U2 ?z; :U3 ?w. }";
 		
 		runTests(p);
