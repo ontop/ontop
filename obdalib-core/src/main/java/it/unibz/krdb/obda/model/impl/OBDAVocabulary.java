@@ -65,10 +65,10 @@ public class OBDAVocabulary {
 	/* String predicates */
 	
 	public static final StringOperationPredicate REPLACE = new StringOperationPredicateImpl(
-            "REPLACE", 3, new COL_TYPE[]{COL_TYPE.STRING, COL_TYPE.STRING, COL_TYPE.STRING});
+            "REPLACE", 3, new COL_TYPE[]{COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL});
 	
 	public static final StringOperationPredicate CONCAT = new StringOperationPredicateImpl(
-            "CONCAT", 2, new COL_TYPE[]{COL_TYPE.STRING, COL_TYPE.STRING});
+            "CONCAT", 2, new COL_TYPE[]{COL_TYPE.LITERAL, COL_TYPE.LITERAL});
 	
 	
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";

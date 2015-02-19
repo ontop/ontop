@@ -887,7 +887,7 @@ public class SQLGenerator implements SQLQueryGenerator {
                 type = COL_TYPE.BNODE;
 			}
 			else if (function instanceof StringOperationPredicate) {
-				type = COL_TYPE.STRING;
+				type = COL_TYPE.LITERAL;
 			}
 			else {
 				String functionString = function.toString();

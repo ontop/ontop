@@ -170,8 +170,9 @@ public class MappingDataTypeRepair {
                     if (dataType != null) {
                         //check that no datatype mismatch is present
                         //if it is a stringPredicate the result has to be a literal
-                        Predicate typePredicate = fac.getDatatypeFactory().getTypePredicate(Predicate.COL_TYPE.LITERAL);
-                        if (!(typePredicate.equals(dataType.getPredicate()))) {
+                        Predicate typePredicateLiteral = fac.getDatatypeFactory().getTypePredicate(Predicate.COL_TYPE.LITERAL);
+                        Predicate typePredicateString = fac.getDatatypeFactory().getTypePredicate(Predicate.COL_TYPE.LITERAL);
+                        if (!((typePredicateLiteral.equals(dataType.getPredicate())) || (typePredicateString.equals(dataType.getPredicate()) ))) {
 
                             throw new OBDAException("Ontology datatype " + dataType + " for " + predicate + "\nhas to be a literal");
 
