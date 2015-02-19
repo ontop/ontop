@@ -5,17 +5,12 @@ package org.semanticweb.ontop.obda;
  */
 
 import org.semanticweb.ontop.io.QueryIOManager;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
 import org.semanticweb.ontop.querymanager.QueryController;
 import org.semanticweb.ontop.querymanager.QueryControllerGroup;
 import org.semanticweb.ontop.querymanager.QueryControllerQuery;
 import org.junit.Before;
 import org.junit.Test;
-import org.semanticweb.ontop.utils.OBDAPreferences;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;

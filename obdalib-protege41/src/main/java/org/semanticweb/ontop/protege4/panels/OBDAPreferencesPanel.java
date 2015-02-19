@@ -40,18 +40,18 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
-import org.semanticweb.ontop.utils.OBDAPreferences;
+import org.semanticweb.ontop.protege4.core.ProtegeOBDAPreferences;
 
 public class OBDAPreferencesPanel extends javax.swing.JPanel {
 	
 	private static final long serialVersionUID = 1L;
-	private OBDAPreferences pref = null;
+	private ProtegeOBDAPreferences pref = null;
 	private HashMap<String, KeyStroke> shortCuts = new HashMap<String, KeyStroke>();
 	
 	/**
 	 * The constructor 
 	 */
-    public OBDAPreferencesPanel(OBDAPreferences preference) {
+    public OBDAPreferencesPanel(ProtegeOBDAPreferences preference) {
     	pref = preference;
         initComponents();
         addListener();
@@ -67,7 +67,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	cmdClassColor.addActionListener(new ActionListener(){
     		@Override
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdClassColor, OBDAPreferences.CLASS_COLOR);
+				ColorChooser cc = new ColorChooser(cmdClassColor, ProtegeOBDAPreferences.CLASS_COLOR);
 				cc.setVisible(true);
 			}
     	});
@@ -75,7 +75,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	cmdDataPropertyColor.addActionListener(new ActionListener(){
     		@Override
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdDataPropertyColor, OBDAPreferences.DATAPROPERTY_COLOR);
+				ColorChooser cc = new ColorChooser(cmdDataPropertyColor, ProtegeOBDAPreferences.DATAPROPERTY_COLOR);
 				cc.setVisible(true);
 			}
     	});
@@ -83,7 +83,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	cmdFunctorColor.addActionListener(new ActionListener(){
     		@Override
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdFunctorColor, OBDAPreferences.FUCNTOR_COLOR);
+				ColorChooser cc = new ColorChooser(cmdFunctorColor, ProtegeOBDAPreferences.FUCNTOR_COLOR);
 				cc.setVisible(true);
 			}
     	});
@@ -91,7 +91,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	cmdObjectPropertyColor.addActionListener(new ActionListener(){
     		@Override
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdObjectPropertyColor, OBDAPreferences.OBJECTPROPTERTY_COLOR);
+				ColorChooser cc = new ColorChooser(cmdObjectPropertyColor, ProtegeOBDAPreferences.OBJECTPROPTERTY_COLOR);
 				cc.setVisible(true);
 			}
     	});
@@ -99,7 +99,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	cmdParameterColor.addActionListener(new ActionListener(){
     		@Override
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdParameterColor, OBDAPreferences.PARAMETER_COLOR);
+				ColorChooser cc = new ColorChooser(cmdParameterColor, ProtegeOBDAPreferences.PARAMETER_COLOR);
 				cc.setVisible(true);
 			}
     	});
@@ -107,12 +107,12 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     	cmdVariableColor.addActionListener(new ActionListener(){
     		@Override
 			public void actionPerformed(ActionEvent arg0) {
-				ColorChooser cc = new ColorChooser(cmdVariableColor, OBDAPreferences.VARIABLE_COLOR);
+				ColorChooser cc = new ColorChooser(cmdVariableColor, ProtegeOBDAPreferences.VARIABLE_COLOR);
 				cc.setVisible(true);
 			}
     	});
     	
-    	String aux = pref.get(OBDAPreferences.ADD_MAPPING).toString();
+    	String aux = pref.get(ProtegeOBDAPreferences.ADD_MAPPING).toString();
     	KeyStroke ks = KeyStroke.getKeyStroke(aux);
     	lblAddMappingKey.setText(KeyEvent.getKeyModifiersText(ks.getModifiers()) + " + "+ KeyEvent.getKeyText(ks.getKeyCode()));
     	lblAddMappingKey.addMouseListener(new MouseListener(){
@@ -151,12 +151,12 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 				}
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
 				if (!isKeyStrokeAlreadyAssigned(stroke)){
-					shortCuts.put(OBDAPreferences.ADD_MAPPING, stroke);
+					shortCuts.put(ProtegeOBDAPreferences.ADD_MAPPING, stroke);
 				    lblAddMappingKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
 					lblAddMappingKey.setToolTipText(stroke.toString());
-					pref.put(OBDAPreferences.ADD_MAPPING, stroke.toString());
+					pref.put(ProtegeOBDAPreferences.ADD_MAPPING, stroke.toString());
 				} else {
-					KeyStroke oldValue = shortCuts.get(OBDAPreferences.ADD_MAPPING);
+					KeyStroke oldValue = shortCuts.get(ProtegeOBDAPreferences.ADD_MAPPING);
 					if(oldValue != null){
 						lblAddMappingKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
 					}
@@ -173,7 +173,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 			}
     	});
     	
-    	String aux2 = pref.get(OBDAPreferences.EDIT_BODY).toString();
+    	String aux2 = pref.get(ProtegeOBDAPreferences.EDIT_BODY).toString();
     	KeyStroke ks2 = KeyStroke.getKeyStroke(aux2);
     	lblEditMappingBodyKey.setText(KeyEvent.getKeyModifiersText(ks2.getModifiers()) + " + "+ KeyEvent.getKeyText(ks2.getKeyCode()));
     	lblEditMappingBodyKey.addMouseListener(new MouseListener(){
@@ -211,12 +211,12 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 				}
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
 				if (!isKeyStrokeAlreadyAssigned(stroke)){
-					shortCuts.put(OBDAPreferences.EDIT_BODY, stroke);
+					shortCuts.put(ProtegeOBDAPreferences.EDIT_BODY, stroke);
 					lblEditMappingBodyKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
 					lblEditMappingBodyKey.setToolTipText(stroke.toString());
-					pref.put(OBDAPreferences.EDIT_BODY, stroke.toString());
+					pref.put(ProtegeOBDAPreferences.EDIT_BODY, stroke.toString());
 				} else {
-					KeyStroke oldValue = shortCuts.get(OBDAPreferences.EDIT_BODY);
+					KeyStroke oldValue = shortCuts.get(ProtegeOBDAPreferences.EDIT_BODY);
 					if(oldValue != null){
 						lblEditMappingBodyKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
 					}
@@ -233,7 +233,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     		}
     	});
     	
-    	String aux3 = pref.get(OBDAPreferences.EDIT_HEAD).toString();
+    	String aux3 = pref.get(ProtegeOBDAPreferences.EDIT_HEAD).toString();
     	KeyStroke ks3 = KeyStroke.getKeyStroke(aux3);
     	lblEditMappingHeadKey.setText(KeyEvent.getKeyModifiersText(ks3.getModifiers()) + " + "+ KeyEvent.getKeyText(ks3.getKeyCode()));
     	lblEditMappingHeadKey.addMouseListener(new MouseListener(){
@@ -271,12 +271,12 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 				}
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
 				if (!isKeyStrokeAlreadyAssigned(stroke)){
-					shortCuts.put(OBDAPreferences.EDIT_HEAD, stroke);
+					shortCuts.put(ProtegeOBDAPreferences.EDIT_HEAD, stroke);
 					lblEditMappingHeadKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
 					lblEditMappingHeadKey.setToolTipText(stroke.toString());
-					pref.put(OBDAPreferences.EDIT_HEAD, stroke.toString());
+					pref.put(ProtegeOBDAPreferences.EDIT_HEAD, stroke.toString());
 				} else {
-					KeyStroke oldValue = shortCuts.get(OBDAPreferences.EDIT_HEAD);
+					KeyStroke oldValue = shortCuts.get(ProtegeOBDAPreferences.EDIT_HEAD);
 					if(oldValue != null){
 						lblEditMappingHeadKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
 					}
@@ -293,7 +293,7 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 			}
     	});
     	
-    	String aux4 = pref.get(OBDAPreferences.EDIT_ID).toString();
+    	String aux4 = pref.get(ProtegeOBDAPreferences.EDIT_ID).toString();
     	KeyStroke ks4 = KeyStroke.getKeyStroke(aux4);
     	lblMappingIdKey.setText(KeyEvent.getKeyModifiersText(ks4.getModifiers()) + " + "+ KeyEvent.getKeyText(ks4.getKeyCode()));
     	lblMappingIdKey.addMouseListener(new MouseListener(){
@@ -332,12 +332,12 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 				}
 				KeyStroke stroke = KeyStroke.getKeyStroke(key, mod);
 				if (!isKeyStrokeAlreadyAssigned(stroke)){
-					shortCuts.put(OBDAPreferences.EDIT_ID, stroke);
+					shortCuts.put(ProtegeOBDAPreferences.EDIT_ID, stroke);
 					lblMappingIdKey.setText(KeyEvent.getKeyModifiersText(stroke.getModifiers()) + " + "+ KeyEvent.getKeyText(stroke.getKeyCode()));
 					lblMappingIdKey.setToolTipText(stroke.toString());
-					pref.put(OBDAPreferences.EDIT_ID, stroke.toString());
+					pref.put(ProtegeOBDAPreferences.EDIT_ID, stroke.toString());
 				} else {
-					KeyStroke oldValue = shortCuts.get(OBDAPreferences.EDIT_ID);
+					KeyStroke oldValue = shortCuts.get(ProtegeOBDAPreferences.EDIT_ID);
 					if(oldValue != null){
 						lblMappingIdKey.setText(KeyEvent.getKeyModifiersText(oldValue.getModifiers()) + " + "+ KeyEvent.getKeyText(oldValue.getKeyCode()));
 					}
@@ -356,42 +356,42 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     }
     
     private void applyPreferences(){
-    	Color clazz = new Color(Integer.parseInt(pref.get(OBDAPreferences.CLASS_COLOR).toString()));
+    	Color clazz = new Color(Integer.parseInt(pref.get(ProtegeOBDAPreferences.CLASS_COLOR).toString()));
     	cmdClassColor.setBackground(clazz);
     	cmdClassColor.setOpaque(true);
     	cmdClassColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	
-    	Color dp = new Color(Integer.parseInt(pref.get(OBDAPreferences.DATAPROPERTY_COLOR).toString()));
+    	Color dp = new Color(Integer.parseInt(pref.get(ProtegeOBDAPreferences.DATAPROPERTY_COLOR).toString()));
     	cmdDataPropertyColor.setBackground(dp);
     	cmdDataPropertyColor.setOpaque(true);
     	cmdDataPropertyColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	
-    	Color op =new Color(Integer.parseInt(pref.get(OBDAPreferences.OBJECTPROPTERTY_COLOR).toString()));
+    	Color op =new Color(Integer.parseInt(pref.get(ProtegeOBDAPreferences.OBJECTPROPTERTY_COLOR).toString()));
     	cmdObjectPropertyColor.setBackground(op);
     	cmdObjectPropertyColor.setOpaque(true);
     	cmdObjectPropertyColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	
-    	Color var = new Color(Integer.parseInt(pref.get(OBDAPreferences.VARIABLE_COLOR).toString()));
+    	Color var = new Color(Integer.parseInt(pref.get(ProtegeOBDAPreferences.VARIABLE_COLOR).toString()));
     	cmdVariableColor.setBackground(var);
     	cmdVariableColor.setOpaque(true);
     	cmdVariableColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	
-    	Color par = new Color(Integer.parseInt(pref.get(OBDAPreferences.PARAMETER_COLOR).toString()));
+    	Color par = new Color(Integer.parseInt(pref.get(ProtegeOBDAPreferences.PARAMETER_COLOR).toString()));
     	cmdParameterColor.setBackground(par);
     	cmdParameterColor.setOpaque(true);
     	cmdParameterColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	
-    	Color fun = new Color(Integer.parseInt(pref.get(OBDAPreferences.FUCNTOR_COLOR).toString()));
+    	Color fun = new Color(Integer.parseInt(pref.get(ProtegeOBDAPreferences.FUCNTOR_COLOR).toString()));
     	cmdFunctorColor.setBackground(fun);
     	cmdFunctorColor.setOpaque(true);
     	cmdFunctorColor.setBorder(javax.swing.BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3));
     	
-    	String fontBody = pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString();
-    	int bodySize = Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
+    	String fontBody = pref.get(ProtegeOBDAPreferences.OBDAPREFS_FONTFAMILY).toString();
+    	int bodySize = Integer.parseInt(pref.get(ProtegeOBDAPreferences.OBDAPREFS_FONTSIZE).toString());
     	cmdFontFamily.setText(fontBody + ", " + bodySize);
     	cmdFontFamily.setToolTipText(fontBody + ", " + bodySize);
     	
-    	jCheckBoxUseDefault.setSelected(new Boolean(pref.get(OBDAPreferences.USE_DEAFAULT).toString()));
+    	jCheckBoxUseDefault.setSelected(new Boolean(pref.get(ProtegeOBDAPreferences.USE_DEAFAULT).toString()));
 		if (jCheckBoxUseDefault.isSelected()) {
 			cmdFontFamily.setEnabled(false);
 		} else {
@@ -848,16 +848,16 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdFontFamilyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdFontFamilyActionPerformed
-    	FontChooser2 fe = new FontChooser2(cmdFontFamily, OBDAPreferences.OBDAPREFS_FONTFAMILY, OBDAPreferences.OBDAPREFS_FONTSIZE, OBDAPreferences.OBDAPREFS_ISBOLD);
+    	FontChooser2 fe = new FontChooser2(cmdFontFamily, ProtegeOBDAPreferences.OBDAPREFS_FONTFAMILY, ProtegeOBDAPreferences.OBDAPREFS_FONTSIZE, ProtegeOBDAPreferences.OBDAPREFS_ISBOLD);
     }//GEN-LAST:event_cmdFontFamilyActionPerformed
 
     private void jCheckBoxUseDefaultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxUseDefaultActionPerformed
         
     	if(jCheckBoxUseDefault.isSelected()){
-    		pref.put(OBDAPreferences.USE_DEAFAULT, "true");
+    		pref.put(ProtegeOBDAPreferences.USE_DEAFAULT, "true");
     		cmdFontFamily.setEnabled(false);
     	}else{
-    		pref.put(OBDAPreferences.USE_DEAFAULT, "false");
+    		pref.put(ProtegeOBDAPreferences.USE_DEAFAULT, "false");
     		cmdFontFamily.setEnabled(true);
     	}
     	
@@ -1122,9 +1122,9 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 
 			pnlDisplayPreferencesTab.setLayout(new java.awt.GridBagLayout());
 
-			String currentFont = pref.get(OBDAPreferences.OBDAPREFS_FONTFAMILY).toString();
-			int currentSize = Integer.parseInt(pref.get(OBDAPreferences.OBDAPREFS_FONTSIZE).toString());
-			Boolean isBold = new Boolean(pref.get(OBDAPreferences.OBDAPREFS_ISBOLD).toString());
+			String currentFont = pref.get(ProtegeOBDAPreferences.OBDAPREFS_FONTFAMILY).toString();
+			int currentSize = Integer.parseInt(pref.get(ProtegeOBDAPreferences.OBDAPREFS_FONTSIZE).toString());
+			Boolean isBold = new Boolean(pref.get(ProtegeOBDAPreferences.OBDAPREFS_ISBOLD).toString());
 			int i = getIndexOfFont(currentFont);
 			int j = getIndexOfSize(String.valueOf(currentSize));
 			fontNameChoice.setSelectedIndex(i);
@@ -1158,9 +1158,9 @@ public class OBDAPreferencesPanel extends javax.swing.JPanel {
 			resultName = (String) fontNameChoice.getSelectedValue();
 			String resultSizeName = (String) fontSizeChoice.getSelectedValue();
 			isBold = bold.isSelected();
-			pref.put(OBDAPreferences.OBDAPREFS_FONTFAMILY, resultName);
-			pref.put(OBDAPreferences.OBDAPREFS_FONTSIZE, resultSizeName);
-			pref.put(OBDAPreferences.OBDAPREFS_ISBOLD, new Boolean(isBold).toString());
+			pref.put(ProtegeOBDAPreferences.OBDAPREFS_FONTFAMILY, resultName);
+			pref.put(ProtegeOBDAPreferences.OBDAPREFS_FONTSIZE, resultSizeName);
+			pref.put(ProtegeOBDAPreferences.OBDAPREFS_ISBOLD, new Boolean(isBold).toString());
 			button.setText(resultName + ", " + resultSizeName);
 			button.setToolTipText(resultName + ", " + resultSizeName);
 		}

@@ -38,7 +38,6 @@ import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentModule;
-import org.semanticweb.ontop.utils.OBDAPreferences;
 
 /***
  * This class is responsible for initializing all base classes for the OBDA
@@ -70,7 +69,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
          * Preferences for the OBDA plugin (gui, etc)
          */
         obdaPref = new ProtegeOBDAPreferences();
-        getEditorKit().put(OBDAPreferences.class.getName(), obdaPref);
+        getEditorKit().put(ProtegeOBDAPreferences.class.getName(), obdaPref);
 
         /***
          * Preferences for Quest
