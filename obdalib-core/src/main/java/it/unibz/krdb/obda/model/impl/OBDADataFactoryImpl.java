@@ -257,7 +257,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	
 	
 	
-	
 
 	
 	@Override
@@ -288,6 +287,19 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		Predicate pred = new BNodePredicateImpl(terms.size());
 		return getFunction(pred, terms);
 	}
+	
+/*	@Override
+	public Function getFunctionConcat(List<Term> terms) {
+		Predicate concat = new StringOperationPredicateImpl(terms.size());
+		return getFunction(concat, terms);
+	}
+*/	
+	@Override
+	public Function getFunctionConcat(Term term1, Term term2) {
+		
+		return getFunction(OBDAVocabulary.CONCAT, term1,term2);
+	}
+
 
 	@Override
 	public Function getFunctionEQ(Term firstTerm, Term secondTerm) {

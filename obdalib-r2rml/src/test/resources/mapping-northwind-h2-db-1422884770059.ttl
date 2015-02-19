@@ -1,0 +1,1428 @@
+@prefix rso: <http://www.fluidops.com/ontologies/RelationalSchemaOntology/> .
+@prefix skosCore04: <http://www.w3.org/2004/02/skos/core#> .
+@prefix patent: <http://patents.data.gov.uk/def/patents/> .
+@prefix Admin: <http://www.fluidops.com/admin/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix Help: <http://www.fluidops.com/help/> .
+@prefix twitter: <http://twitter.com/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix fluidops: <http://www.fluidops.com/> .
+@prefix dbpedia: <http://dbpedia.org/ontology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix Platform: <http://www.fluidops.com/ontologies/platform/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix sp: <http://spinrdf.org/sp#> .
+@prefix Settings: <http://www.fluidops.com/settings/> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix Setup: <http://www.fluidops.com/setup/> .
+@prefix research: <http://research.data.gov.uk/def/project/> .
+@prefix history: <http://www.fluidops.com/history/> .
+@prefix default: <http://www.optique-project.eu/resource/> .
+@prefix rrx: <http://www.fluidops.com/ontologies/r2rmlExtension/> .
+@prefix purl: <http://purl.org/stuff/project/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+
+default:importR2RML00357086467800856704541836328176 a rr:ObjectMap ;
+	rr:column "CITY" .
+
+default:importR2RML00409941071528156033969172933566 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML00431086614488128636296540872116 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE> .
+
+default:importR2RML01438431283738795197359303896160 a rr:BaseTableOrView , rr:LogicalTable ;
+	rr:tableName "NORTHWIND.SHIPPERS" .
+
+default:importR2RML01955187377615880407011050570038 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML43727654848059908464234888534233 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/SHIPVIA> .
+
+default:importR2RML02151826017833126342132004825384 a rr:ObjectMap ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS/{SUPPLIERID}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML02183641259591339059007636793503 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/ADDRESS> .
+
+default:importR2RML02184443223365298313785711247780 a rr:ObjectMap ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/{EMPLOYEEID}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML02456511044250762047647857415793 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML86260523559717962630827599139740 ;
+	rr:predicateMap default:importR2RML24280798927836295230157169134353 .
+
+default:importR2RML02545959522042902955855244709753 a rr:TriplesMap ;
+	rdfs:label "Condiments" ;
+	rr:logicalTable default:logicalTable09966016144548525744703703780044 ;
+	rr:predicateObjectMap default:importR2RML76063084462957504493121560595010 , default:predicateObjectMap50740471929355893955993177961483 ;
+	rr:subjectMap default:subjectMap76582019736175745977144747139630 .
+
+default:importR2RML02700496767248740327191108542964 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML02737569416590107999922666873245 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/BEVERAGES> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/{pid}" .
+
+default:importR2RML03044585985187135976542927176539 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML03393588494539718703291719452437 a rr:ObjectMap ;
+	rr:column "COMPANYNAME" .
+
+default:importR2RML03495932334858286005071903822719 a rr:TriplesMap ;
+	rr:logicalTable default:importR2RML01438431283738795197359303896160 ;
+	rr:predicateObjectMap default:importR2RML17816452380849945916931433081686 , default:importR2RML39612322385011393340394026890839 , default:importR2RML59054399352855830872527763640164 , default:importR2RML66077550653291558935972947021922 , default:importR2RML76286150085022361169555577226308 ;
+	rr:subjectMap default:importR2RML90483161946668351815351620431691 .
+
+default:importR2RML04199920372459964906270898044261 a rr:ObjectMap ;
+	rr:column "COUNTRY" .
+
+default:importR2RML04232447199075657283902728726422 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML12804225061138027352702809283508 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/TITLEOFCOURTESY> .
+
+default:importR2RML04524132109194930156149063892161 a rr:ObjectMap ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/{REPORTSTO}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML04556979842065810160746596482573 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML28406157690085803322634339787185 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/PRODUCTID> .
+
+default:importR2RML04595381964727075082898653887782 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML06996524786436044177726975383211 ;
+	rr:predicateMap default:importR2RML60029431534382469661220451597966 .
+
+default:importR2RML05034396286190587704191193674767 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/DAIRY_PRODUCTS> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/{pid}" .
+
+default:importR2RML05766180017125861939229358235255 a rr:ObjectMap ;
+	rr:template "http://www.optique-project.eu/resource/shippersLocation/{SHIPPERID}" .
+
+default:importR2RML05873788761506912134752929304219 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML87542462625389055310699786328362 ;
+	rr:predicateMap default:importR2RML18193365175978383621295937652188 .
+
+default:importR2RML05884827791202988896368275718107 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML12735425941112756267584242692120 ;
+	rr:predicateMap default:importR2RML52966905976378651270521742770872 .
+
+default:importR2RML06877179076349530403956114890550 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML62166089588861849536565647798826 ;
+	rr:predicateMap default:importR2RML67796738024368031223101813060656 .
+
+default:importR2RML06996524786436044177726975383211 a rr:ObjectMap ;
+	rr:column "pname" .
+
+default:importR2RML07292190762942416846838493932175 a rr:LogicalTable , rr:R2RMLView ;
+	rr:sqlQuery """SELECT * FROM (
+SELECT P.PRODUCTID AS \"pid\", P.PRODUCTNAME AS \"pname\"
+FROM NORTHWIND.PRODUCTS AS P, NORTHWIND.CATEGORIES AS C
+WHERE P.CATEGORYID = C.CATEGORYID 
+AND C.CATEGORYNAME = 'Beverages'
+) AS T""" .
+
+default:importR2RML07333565169760725309659649506388 a rr:ObjectMap ;
+	rr:column "DISCONTINUED" ;
+	rr:termType rr:Literal .
+
+default:importR2RML07500641800297374103262046654659 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML49819701374252699220536263005477 ;
+	rr:predicateMap default:importR2RML23626592597915363175614641087058 .
+
+default:importR2RML07684325907080973913568242464264 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML35910121248145935325026261324197 ;
+	rr:predicateMap default:importR2RML70768686973717605346405125786451 .
+
+default:importR2RML07994830134956292718250698528225 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML32261025676168209502735002424382 ;
+	rr:predicateMap default:importR2RML14046881360499143101871940692222 .
+
+default:importR2RML08158409615252883273884100976790 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML34616796380494439472081785867918 ;
+	rr:predicateMap default:importR2RML30049700698898791931980651320381 .
+
+default:importR2RML08259874358914663437480409888738 a rr:ObjectMap ;
+	rr:column "PRODUCTID" ;
+	rr:datatype xsd:integer ;
+	rr:termType rr:Literal .
+
+default:importR2RML08288764026137757782634655599649 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML35842653751154465479167867663939 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/ORDERDATE> .
+
+default:importR2RML08341038104828882617698880881491 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/FAX> .
+
+default:importR2RML08372759381474573410602955676231 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML16092232586888853698232360235179 ;
+	rr:predicateMap default:importR2RML86849228489787564975484925851384 .
+
+default:importR2RML08525088545143985081064157529324 a rr:ObjectMap ;
+	rr:column "LASTNAME" ;
+	rr:datatype xsd:string ;
+	rr:termType rr:Literal .
+
+default:importR2RML09594505963061632007467105317706 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML08525088545143985081064157529324 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/LASTNAME> .
+
+default:importR2RML09605085610681731099869089580885 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML14484022673894739833478294424214 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES/TERRITORYID> .
+
+default:importR2RML09944602335287965543165799905721 a rr:ObjectMap ;
+	rr:column "REGION" .
+
+default:importR2RML10390668205565334350618380745829 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML48389867886328269325342723924624 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/BIRTHDATE> .
+
+default:importR2RML10436746021161012189020447671704 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/MEAT_AND_POULTRY> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/{pid}" .
+
+default:importR2RML10816500227679408493669696047239 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/NAME> .
+
+default:importR2RML10938354502022158664544842017630 a rr:LogicalTable , rr:R2RMLView ;
+	rr:sqlQuery """SELECT * FROM (
+SELECT P.PRODUCTID AS \"pid\", P.PRODUCTNAME AS \"pname\"
+FROM NORTHWIND.PRODUCTS AS P, NORTHWIND.CATEGORIES AS C
+WHERE P.CATEGORYID = C.CATEGORYID 
+AND C.CATEGORYNAME = 'Dairy Products'
+) AS T""" .
+
+default:importR2RML11146200935306174302549193991262 a rr:ObjectMap ;
+	rr:column "TOTPRICE" ;
+	rr:datatype xsd:decimal .
+
+default:importR2RML11225967841442258685620343112264 a rr:ObjectMap ;
+	rr:column "UNITSONORDER" ;
+	rr:datatype xsd:integer ;
+	rr:termType rr:Literal .
+
+default:importR2RML11450065837364916209090988153055 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML29641698729080401316463750234063 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/FIRSTNAME> .
+
+default:importR2RML11647473165501906478425143589385 a rr:TriplesMap ;
+	rr:logicalTable default:importR2RML12716805718276444344947344603852 ;
+	rr:predicateObjectMap default:importR2RML08372759381474573410602955676231 , default:importR2RML26778452422049427894741534593470 , default:importR2RML84159897870278488527289125747572 ;
+	rr:subjectMap default:importR2RML86077595233858677190180170487889 .
+
+default:importR2RML12056403269075000432092091949318 a rr:ObjectMap ;
+	rr:column "pname" .
+
+default:importR2RML12313410669100232705146415487511 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SHIPPERS/SHIPPERID> .
+
+default:importR2RML12358443065118970338500806047626 a rr:ObjectMap ;
+	rr:column "pname" .
+
+default:importR2RML12716805718276444344947344603852 a rr:BaseTableOrView , rr:LogicalTable ;
+	rr:tableName "NORTHWIND.REGION" .
+
+default:importR2RML12735425941112756267584242692120 a rr:ObjectMap ;
+	rr:column "COMPANYNAME" .
+
+default:importR2RML12796727036548878641478208476996 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/ADDRESS> .
+
+default:importR2RML12804225061138027352702809283508 a rr:ObjectMap ;
+	rr:column "TITLEOFCOURTESY" ;
+	rr:datatype xsd:string ;
+	rr:termType rr:Literal .
+
+default:importR2RML14046881360499143101871940692222 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/COUNTRY> .
+
+default:importR2RML14295584644612690388043524850994 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML42532359889821995783774643668874 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/UNITSINSTOCK> .
+
+default:importR2RML14484022673894739833478294424214 a rr:ObjectMap ;
+	rr:column "TERRITORYID" ;
+	rr:datatype xsd:string ;
+	rr:termType rr:Literal .
+
+default:importR2RML14516893900610382257950084556163 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/COMPANY/LOCATION> .
+
+default:importR2RML14736485051723812654396739233202 a rr:ObjectMap ;
+	rr:column "SUPPLIERID" ;
+	rr:datatype xsd:integer .
+
+default:importR2RML15249239056573876609895972317035 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS/HOMEPAGE> .
+
+default:importR2RML16089268295566713108239578815110 a rr:ObjectMap ;
+	rr:column "SHIPPOSTALCODE" .
+
+default:importR2RML16092232586888853698232360235179 a rr:ObjectMap ;
+	rr:column "REGIONDESCRIPTION" .
+
+default:importR2RML17757612543905313207707054673689 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML94180341155389234943311898180136 ;
+	rr:predicateMap default:importR2RML08341038104828882617698880881491 .
+
+default:importR2RML17773722118482809680511848700821 a rr:TriplesMap ;
+	rr:logicalTable default:importR2RML56835948560008417000418473075464 ;
+	rr:predicateObjectMap default:importR2RML07684325907080973913568242464264 , default:importR2RML14295584644612690388043524850994 , default:importR2RML18546418615264514355906009416140 , default:importR2RML25935253341060699691341668525455 , default:importR2RML47991829437617537028243311740886 , default:importR2RML55483894112797429396485321347371 , default:importR2RML59411882535852608840709599208891 , default:importR2RML80159743944509470053553136349130 , default:importR2RML83915094252473724054906082822660 , default:predicateObjectMap05799869618601240567159273559121 ;
+	rr:subjectMap default:importR2RML81151299405734736718241657389852 .
+
+default:importR2RML17789436555636790889396371969155 a rr:ObjectMap ;
+	rr:column "TITLE" ;
+	rr:datatype xsd:string ;
+	rr:termType rr:Literal .
+
+default:importR2RML17816452380849945916931433081686 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML19169324663173682483489972711276 ;
+	rr:predicateMap default:importR2RML49793115344301538076613766463320 .
+
+default:importR2RML18193365175978383621295937652188 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/REGION> .
+
+default:importR2RML18546418615264514355906009416140 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML73084131626981707747092250948655 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/QUANTITYPERUNIT> .
+
+default:importR2RML19078330267250820695201261662878 a rr:LogicalTable , rr:R2RMLView ;
+	rr:sqlQuery """SELECT * FROM (
+SELECT P.PRODUCTID AS \"pid\", P.PRODUCTNAME AS \"pname\"
+FROM NORTHWIND.PRODUCTS AS P, NORTHWIND.CATEGORIES AS C
+WHERE P.CATEGORYID = C.CATEGORYID 
+AND C.CATEGORYNAME = 'Produce'
+) AS T""" .
+
+default:importR2RML19169324663173682483489972711276 a rr:ObjectMap ;
+	rr:column "PHONE" ;
+	rr:datatype xsd:string .
+
+default:importR2RML20240630895045225457608549831333 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML25889595184424409224886620336124 ;
+	rr:predicateMap default:importR2RML83709020984459614468798736270711 .
+
+default:importR2RML20555450742766138058636362186632 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/REGION> .
+
+default:importR2RML20655201850850392427675523357822 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML46016379695742718580561349810957 ;
+	rr:predicateMap default:importR2RML21624995189444413000698078150940 .
+
+default:importR2RML21282321499177220388837411579575 a rr:TriplesMap ;
+	rdfs:label "Seafood" ;
+	rr:logicalTable default:importR2RML41347001904646739830593943001415 ;
+	rr:predicateObjectMap default:importR2RML20240630895045225457608549831333 ;
+	rr:subjectMap default:importR2RML89467869751581712948037510336022 .
+
+default:importR2RML21543385812518724910759323637137 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCE> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/{pid}" .
+
+default:importR2RML21624995189444413000698078150940 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/PHONE> .
+
+default:importR2RML22682845617575765028348780986898 a rr:TriplesMap ;
+	rdfs:label "customersLocation" ;
+	rr:logicalTable default:importR2RML35129892296065830170840644473325 ;
+	rr:predicateObjectMap default:importR2RML02456511044250762047647857415793 , default:importR2RML33910390792489748149242839039472 , default:importR2RML34410374106825742024597045532546 , default:importR2RML56983859446497536709699523425182 , default:importR2RML67300436350555100241951405775170 , default:importR2RML85291348038382973889195015082314 ;
+	rr:subjectMap default:importR2RML70210582930427621224232214898845 .
+
+default:importR2RML22802753082720045579714225979832 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML22897958117842849910017690023079 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML26795847031767644271050450759905 ;
+	rr:predicateMap default:importR2RML14516893900610382257950084556163 .
+
+default:importR2RML22949248409828281401188933683343 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML17789436555636790889396371969155 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/TITLE> .
+
+default:importR2RML22973132447035452396594412693303 a rr:BaseTableOrView , rr:LogicalTable ;
+	rr:tableName "NORTHWIND.ORDERS" .
+
+default:importR2RML23626592597915363175614641087058 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/LOCATION> .
+
+default:importR2RML23682904154906332951328636520645 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/GRAINS_AND_CEREALS> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/{pid}" .
+
+default:importR2RML23991064188027708487941794115128 a rr:ObjectMap ;
+	rr:column "SHIPCITY" .
+
+default:importR2RML24280798927836295230157169134353 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML24757150147360609483525333411427 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML24853258775018001395966430133205 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/COMPANY/LOCATION> .
+
+default:importR2RML24870474272646197562582825590764 a rr:ObjectMap ;
+	rr:column "PHOTO" ;
+	rr:datatype xsd:base64Binary ;
+	rr:termType rr:Literal .
+
+default:importR2RML25080663747058002587777206180004 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML16089268295566713108239578815110 ;
+	rr:predicateMap default:importR2RML00431086614488128636296540872116 .
+
+default:importR2RML25508239885435649716320991471913 a rr:BaseTableOrView , rr:LogicalTable ;
+	rr:tableName "NORTHWIND.SUPPLIERS" .
+
+default:importR2RML25651988415522470329839362406420 a rr:ObjectMap ;
+	rr:column "CITY" .
+
+default:importR2RML25792407105807180459287814606502 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML30207257645736176327653422548653 ;
+	rr:predicateMap default:importR2RML10816500227679408493669696047239 .
+
+default:importR2RML25889595184424409224886620336124 a rr:ObjectMap ;
+	rr:column "pname" .
+
+default:importR2RML25935253341060699691341668525455 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML86230041439964258573778149910839 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/REORDERLEVEL> .
+
+default:importR2RML26778452422049427894741534593470 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML75596649407289470587153603340041 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION/REGIONID> .
+
+default:importR2RML26795847031767644271050450759905 a rr:ObjectMap ;
+	rr:template "http://www.optique-project.eu/resource/suppliersLocation/{SUPPLIERID}" .
+
+default:importR2RML28406157690085803322634339787185 a rr:ObjectMap ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/{PRODUCTID}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML28675476651540801658702285508664 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/REGION> .
+
+default:importR2RML29292832541395985191185138975992 a rr:TriplesMap ;
+	rdfs:label "MeatPoultry" ;
+	rr:logicalTable default:importR2RML70838560149831303367428281837845 ;
+	rr:predicateObjectMap default:importR2RML35999731551901958370288573855555 ;
+	rr:subjectMap default:importR2RML10436746021161012189020447671704 .
+
+default:importR2RML29373714385872746105458552799066 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML97520616785510873340582743188482 ;
+	rr:predicateMap default:importR2RML89200014774926425372756723035710 .
+
+default:importR2RML29641698729080401316463750234063 a rr:ObjectMap ;
+	rr:column "FIRSTNAME" ;
+	rr:datatype xsd:string ;
+	rr:termType rr:Literal .
+
+default:importR2RML29653934481669181628196040112967 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/COUNTRY> .
+
+default:importR2RML29803463504009613112952089387082 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/CONTACTTITLE> .
+
+default:importR2RML30049700698898791931980651320381 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDER/SHIPLOCATION> .
+
+default:importR2RML30112013067543801766182047543076 a rr:BaseTableOrView , rr:LogicalTable ;
+	rr:tableName "NORTHWIND.TERRITORIES" .
+
+default:importR2RML30146765028901074869231528638314 a rr:TriplesMap ;
+	rdfs:label "Confections" ;
+	rr:logicalTable default:logicalTable47358363329754424369096232656478 ;
+	rr:predicateObjectMap default:importR2RML52805042314506681910894447489190 ;
+	rr:subjectMap default:subjectMap42810235017204551215196626119802 .
+
+default:importR2RML30207257645736176327653422548653 a rr:ObjectMap ;
+	rr:column "COMPANYNAME" ;
+	rr:datatype xsd:string .
+
+default:importR2RML30263291705383114628898674482143 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML52444209687479542003295052654793 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/FREIGHT> .
+
+default:importR2RML31150487141271693258713914157454 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION> ;
+	rr:template "http://www.optique-project.eu/resource/employeesLocation/{EMPLOYEEID}" .
+
+default:importR2RML31312769850325020941248525335987 a rr:ObjectMap ;
+	rr:column "SALARY" ;
+	rr:termType rr:Literal .
+
+default:importR2RML31435184411447127978640353790116 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML31514980485959009899939687144319 a rr:ObjectMap ;
+	rr:column "pname" .
+
+default:importR2RML31733257761816310643845039483454 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML74717428863075392425476415303318 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/PHOTOPATH> .
+
+default:importR2RML31814413278451325763041856238344 a rr:ObjectMap ;
+	rr:column "ADDRESS" .
+
+default:importR2RML32261025676168209502735002424382 a rr:ObjectMap ;
+	rr:column "COUNTRY" .
+
+default:importR2RML33058252020838579925136511333307 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML49184282768685231658455217200596 ;
+	rr:predicateMap default:importR2RML69068377908967769937053616002033 .
+
+default:importR2RML33910390792489748149242839039472 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML04199920372459964906270898044261 ;
+	rr:predicateMap default:importR2RML29653934481669181628196040112967 .
+
+default:importR2RML33957984842616382112088412016730 a rr:ObjectMap ;
+	rr:column "ADDRESS" .
+
+default:importR2RML34410374106825742024597045532546 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML09944602335287965543165799905721 ;
+	rr:predicateMap default:importR2RML28675476651540801658702285508664 .
+
+default:importR2RML34453148300344402154972780343674 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML14736485051723812654396739233202 ;
+	rr:predicateMap default:importR2RML51962579354428568534046987573454 .
+
+default:importR2RML34616796380494439472081785867918 a rr:ObjectMap ;
+	rr:template "http://www.optique-project.eu/resource/ordersShipLocation/{ORDERID}" .
+
+default:importR2RML35129892296065830170840644473325 a rr:BaseTableOrView , rr:LogicalTable ;
+	rr:tableName "NORTHWIND.CUSTOMERS" .
+
+default:importR2RML35296826261268603885606714884213 a rr:ObjectMap ;
+	rr:column "TERRITORYDESCRIPTION" .
+
+default:importR2RML35319003293527397401919148428319 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML60987490930319073080069381845690 ;
+	rr:predicateMap default:importR2RML44623048135182669864101110948147 .
+
+default:importR2RML35654996673176491843870666539704 a rr:ObjectMap ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION/{REGIONID}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML35738356078338475741385704011440 a rr:BaseTableOrView , rr:LogicalTable ;
+	rr:tableName "NORTHWIND.EMPLOYEETERRITORIES" .
+
+default:importR2RML35842653751154465479167867663939 a rr:ObjectMap ;
+	rr:column "ORDERDATE" ;
+	rr:datatype xsd:dateTime ;
+	rr:termType rr:Literal .
+
+default:importR2RML35910121248145935325026261324197 a rr:ObjectMap ;
+	rr:column "PRODUCTNAME" .
+
+default:importR2RML35960486311001166516572040776959 a rr:ObjectMap ;
+	rr:column "DISCOUNT" ;
+	rr:datatype xsd:decimal ;
+	rr:termType rr:Literal .
+
+default:importR2RML35999731551901958370288573855555 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML51038403503900569784301991637854 ;
+	rr:predicateMap default:importR2RML93949717253577504286451743718761 .
+
+default:importR2RML37626037008849597859217101464560 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML97268349330335623245447907493469 ;
+	rr:predicateMap default:importR2RML88675673794067304636763113437046 .
+
+default:importR2RML37994526257789581078226973168307 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/{ORDERID}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML38391179511871506632479998177850 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML25651988415522470329839362406420 ;
+	rr:predicateMap default:importR2RML73952855973683527678991746845004 .
+
+default:importR2RML38911432178471949146627108169362 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML39019411101136630738940039615476 a rr:ObjectMap ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES/{TERRITORYID}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML39221577780676971489424264508245 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML46832910190913073748959372980826 ;
+	rr:predicateMap default:importR2RML92959195153941226101675641247403 .
+
+default:importR2RML39337000392859626133746335283208 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/{ORDERID}/{PRODUCTID}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML39343731023718895541007530466414 a rr:TriplesMap ;
+	rdfs:label "suppliersLocation" ;
+	rr:logicalTable default:importR2RML85567835036007189391401330228031 ;
+	rr:predicateObjectMap default:importR2RML07994830134956292718250698528225 , default:importR2RML60646468448608033144696115013989 , default:importR2RML72764938682757225946474972459703 , default:importR2RML78092311513225487351094803074368 , default:importR2RML86080918129435332099777330101392 , default:predicateObjectMap04487698376501396131965017948660 ;
+	rr:subjectMap default:importR2RML61001127964669146978238843966382 .
+
+default:importR2RML39612322385011393340394026890839 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML41790335419494189427179494820572 ;
+	rr:predicateMap default:importR2RML55654570175257760854348809173872 .
+
+default:importR2RML39724222209932123816897409395001 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML24870474272646197562582825590764 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/PHOTO> .
+
+default:importR2RML39776161556017110590334221000249 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML53482372167358933108377468720421 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/CUSTOMERID> .
+
+default:importR2RML41347001904646739830593943001415 a rr:LogicalTable , rr:R2RMLView ;
+	rr:sqlQuery """SELECT * FROM (
+SELECT P.PRODUCTID AS \"pid\", P.PRODUCTNAME AS \"pname\"
+FROM NORTHWIND.PRODUCTS AS P, NORTHWIND.CATEGORIES AS C
+WHERE P.CATEGORYID = C.CATEGORYID 
+AND C.CATEGORYNAME = 'Seafood'
+) AS T""" .
+
+default:importR2RML41790335419494189427179494820572 a rr:ObjectMap ;
+	rr:column "COMPANYNAME" ;
+	rr:datatype xsd:string .
+
+default:importR2RML41799917483018238338884987096147 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CONTACT/CONTACTNAME> .
+
+default:importR2RML42162698736315910310132641118535 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML04524132109194930156149063892161 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/REPORTSTO> .
+
+default:importR2RML42374783832505950886658417017372 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML82607094501731573004995326596401 ;
+	rr:predicateMap default:importR2RML72366529848934166650054844750493 .
+
+default:importR2RML42532359889821995783774643668874 a rr:ObjectMap ;
+	rr:column "UNITSINSTOCK" ;
+	rr:datatype xsd:integer ;
+	rr:termType rr:Literal .
+
+default:importR2RML42720294886931531605773353404048 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML35654996673176491843870666539704 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES/REGIONID> .
+
+default:importR2RML43048892589694174083999210553838 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE> .
+
+default:importR2RML43109535756043241431296705034469 a rr:TriplesMap ;
+	rr:logicalTable default:importR2RML25508239885435649716320991471913 ;
+	rr:predicateObjectMap default:importR2RML05884827791202988896368275718107 , default:importR2RML17757612543905313207707054673689 , default:importR2RML22897958117842849910017690023079 , default:importR2RML34453148300344402154972780343674 , default:importR2RML42374783832505950886658417017372 , default:importR2RML48579887447952925306196282839043 , default:importR2RML54818733474186006608778142549178 , default:importR2RML68016217287379085408099597162469 , default:importR2RML94685557262130426394509563847005 ;
+	rr:subjectMap default:importR2RML99518840185378898049419013331506 .
+
+default:importR2RML43727654848059908464234888534233 a rr:ObjectMap ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SHIPPERS/{SHIPVIA}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML43736078203260564170881576598859 a rr:ObjectMap ;
+	rr:column "SHIPREGION" .
+
+default:importR2RML44270803835632237013104643806483 a rr:ObjectMap ;
+	rr:column "EMPLOYEEID" ;
+	rr:datatype xsd:integer ;
+	rr:termType rr:Literal .
+
+default:importR2RML44623048135182669864101110948147 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/FAX> .
+
+default:importR2RML44729792666855675933454468837216 a rr:ObjectMap ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/{EMPLOYEEID}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML45375634386923450611095204596133 a rr:BaseTableOrView , rr:LogicalTable ;
+	rr:tableName "NORTHWIND.EMPLOYEES" .
+
+default:importR2RML45541723105331581422525392042235 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML44729792666855675933454468837216 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/EMPLOYEEID> .
+
+default:importR2RML45651710408063273537161094600282 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML03393588494539718703291719452437 ;
+	rr:predicateMap default:importR2RML92412568415445979016504766850744 .
+
+default:importR2RML46016379695742718580561349810957 a rr:ObjectMap ;
+	rr:column "PHONE" ;
+	rr:datatype xsd:string .
+
+default:importR2RML46413285054111686204572061796983 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML11146200935306174302549193991262 ;
+	rr:predicateMap default:importR2RML67761086257167185365620316177051 .
+
+default:importR2RML46702291820979737641850657118260 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML83281382869859340385053180813155 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/HIREDATE> .
+
+default:importR2RML46832910190913073748959372980826 a rr:ObjectMap ;
+	rr:column "PRODUCTID" .
+
+default:importR2RML47991829437617537028243311740886 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML11225967841442258685620343112264 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/UNITSONORDER> .
+
+default:importR2RML48357463196040226003290662103551 a rr:ObjectMap ;
+	rr:column "COMPANYNAME" ;
+	rr:datatype xsd:string .
+
+default:importR2RML48389867886328269325342723924624 a rr:ObjectMap ;
+	rr:column "BIRTHDATE" ;
+	rr:datatype xsd:dateTime ;
+	rr:termType rr:Literal .
+
+default:importR2RML48483419244185322412394601600357 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML35960486311001166516572040776959 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/DISCOUNT> .
+
+default:importR2RML48579887447952925306196282839043 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML70554276433740550727119310177525 ;
+	rr:predicateMap default:importR2RML15249239056573876609895972317035 .
+
+default:importR2RML48712379734489524833948294797950 a rr:BaseTableOrView , rr:LogicalTable ;
+	rr:tableName "NORTHWIND.ORDERS" .
+
+default:importR2RML48780954347285655920737203975347 a rr:ObjectMap ;
+	rr:column "SHIPPERID" ;
+	rr:datatype xsd:integer .
+
+default:importR2RML48852301877948888293173234721154 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML02184443223365298313785711247780 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEETERRITORIES/TERRITORIES_has_EMPLOYEES> .
+
+default:importR2RML49184282768685231658455217200596 a rr:ObjectMap ;
+	rr:column "SHIPCOUNTRY" .
+
+default:importR2RML49657517201123313598250496114832 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML88702612011206410271915329476001 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/REQUIREDDATE> .
+
+default:importR2RML49680142202159981797444708292084 a rr:BaseTableOrView , rr:LogicalTable ;
+	rr:tableName "NORTHWIND.EMPLOYEETERRITORIES" .
+
+default:importR2RML49793115344301538076613766463320 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/PHONE> .
+
+default:importR2RML49819701374252699220536263005477 a rr:ObjectMap ;
+	rr:template "http://www.optique-project.eu/resource/employeesLocation/{EMPLOYEEID}" .
+
+default:importR2RML51038403503900569784301991637854 a rr:ObjectMap ;
+	rr:column "pname" .
+
+default:importR2RML51105523117435923897658302989867 a rr:TriplesMap ;
+	rdfs:label "TotalPricePerOrderDetail" ;
+	rr:logicalTable default:importR2RML86297646837002556754292952208204 ;
+	rr:predicateObjectMap default:importR2RML46413285054111686204572061796983 ;
+	rr:subjectMap default:importR2RML78469276899031607901654809327782 .
+
+default:importR2RML51321177749162698959961593498531 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/{EMPLOYEEID}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML51962579354428568534046987573454 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS/SUPPLIERID> .
+
+default:importR2RML52444209687479542003295052654793 a rr:ObjectMap ;
+	rr:column "FREIGHT" ;
+	rr:datatype xsd:decimal ;
+	rr:termType rr:Literal .
+
+default:importR2RML52509732069367792603086737245193 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML85298725738791870770127177671424 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/NOTES> .
+
+default:importR2RML52805042314506681910894447489190 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML12056403269075000432092091949318 ;
+	rr:predicateMap default:importR2RML74496909909290157376931542435625 .
+
+default:importR2RML52966905976378651270521742770872 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML53094253724503572012224554570934 a rr:ObjectMap ;
+	rr:column "ORDERID" ;
+	rr:datatype xsd:integer ;
+	rr:termType rr:Literal .
+
+default:importR2RML53482372167358933108377468720421 a rr:ObjectMap ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CUSTOMERS/{CUSTOMERID}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML53941060014678635546692153705193 a rr:ObjectMap ;
+	rr:column "COMPANYNAME" .
+
+default:importR2RML53992501422185566178361759725460 a rr:TriplesMap ;
+	rr:logicalTable default:importR2RML22973132447035452396594412693303 ;
+	rr:predicateObjectMap default:importR2RML01955187377615880407011050570038 , default:importR2RML08158409615252883273884100976790 , default:importR2RML08288764026137757782634655599649 , default:importR2RML30263291705383114628898674482143 , default:importR2RML39776161556017110590334221000249 , default:importR2RML45541723105331581422525392042235 , default:importR2RML49657517201123313598250496114832 , default:importR2RML76709063621904569193291781978433 , default:importR2RML84137155148057182373507086969636 , default:importR2RML90562339835563562688001748721398 , default:importR2RML98750798332337986230000632616540 ;
+	rr:subjectMap default:importR2RML37994526257789581078226973168307 .
+
+default:importR2RML54818733474186006608778142549178 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML67358115041614587549902130443263 ;
+	rr:predicateMap default:importR2RML59142360113151748548760844363811 .
+
+default:importR2RML55162134847195497874113086812366 a rr:TriplesMap ;
+	rr:logicalTable default:importR2RML30112013067543801766182047543076 ;
+	rr:predicateObjectMap default:importR2RML09605085610681731099869089580885 , default:importR2RML42720294886931531605773353404048 , default:importR2RML73697305814330827149932338226030 , default:importR2RML83731769038769133249600665680711 ;
+	rr:subjectMap default:importR2RML65235036686571504794962838881133 .
+
+default:importR2RML55483894112797429396485321347371 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML07333565169760725309659649506388 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/DISCONTINUED> .
+
+default:importR2RML55654570175257760854348809173872 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/NAME> .
+
+default:importR2RML56027568600909158143198662331930 a rr:BaseTableOrView , rr:LogicalTable ;
+	rr:tableName "NORTHWIND.CUSTOMERS" .
+
+default:importR2RML56835948560008417000418473075464 a rr:BaseTableOrView , rr:LogicalTable ;
+	rr:tableName "NORTHWIND.PRODUCTS" .
+
+default:importR2RML56844358367879001579242946276813 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML75270039636503767455846953503853 ;
+	rr:predicateMap default:importR2RML24757150147360609483525333411427 .
+
+default:importR2RML56983859446497536709699523425182 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML82760409116048518500176853859503 ;
+	rr:predicateMap default:importR2RML83930452140167065141625567094658 .
+
+default:importR2RML57249219418904477381459342468220 a rr:ObjectMap ;
+	rr:column "CONTACTNAME" ;
+	rr:datatype xsd:string .
+
+default:importR2RML57414861117989840682762010773040 a rr:BaseTableOrView , rr:LogicalTable ;
+	rr:tableName "NORTHWIND.ORDERDETAILS" .
+
+default:importR2RML57479027338733134611548077129703 a rr:ObjectMap ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/{ORDERID}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML58017693246331583461184304281479 a rr:ObjectMap ;
+	rr:column "SHIPPEDDATE" ;
+	rr:datatype xsd:dateTime ;
+	rr:termType rr:Literal .
+
+default:importR2RML59054399352855830872527763640164 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML05766180017125861939229358235255 ;
+	rr:predicateMap default:importR2RML24853258775018001395966430133205 .
+
+default:importR2RML59142360113151748548760844363811 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CONTACT/CONTACTNAME> .
+
+default:importR2RML59411882535852608840709599208891 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML08259874358914663437480409888738 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/PRODUCTID> .
+
+default:importR2RML59848113483226636762010908115866 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML57479027338733134611548077129703 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/ORDERID> .
+
+default:importR2RML59968097072110762584141074501147 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/ADDRESS> .
+
+default:importR2RML60029431534382469661220451597966 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML60378325581222837928480508599058 a rr:LogicalTable , rr:R2RMLView ;
+	rr:sqlQuery """SELECT * FROM (
+SELECT P.PRODUCTID AS \"pid\", P.PRODUCTNAME AS \"pname\"
+FROM NORTHWIND.PRODUCTS AS P, NORTHWIND.CATEGORIES AS C
+WHERE P.CATEGORYID = C.CATEGORYID 
+AND C.CATEGORYNAME = 'Grains/Cereals'
+) AS T""" .
+
+default:importR2RML60646468448608033144696115013989 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML00357086467800856704541836328176 ;
+	rr:predicateMap default:importR2RML70615567267776282475732271553278 .
+
+default:importR2RML60838021843320005837274058080685 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/REGION> .
+
+default:importR2RML60987490930319073080069381845690 a rr:ObjectMap ;
+	rr:column "FAX" ;
+	rr:datatype xsd:string .
+
+default:importR2RML61001127964669146978238843966382 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION> ;
+	rr:template "http://www.optique-project.eu/resource/suppliersLocation/{SUPPLIERID}" .
+
+default:importR2RML61430174037500915172436671940569 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION> ;
+	rr:template "http://www.optique-project.eu/resource/ordersShipLocation/{ORDERID}" .
+
+default:importR2RML61997049734661283579783033480393 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML82230586341373162956031153179275 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/HOMEPHONE> .
+
+default:importR2RML62166089588861849536565647798826 a rr:ObjectMap ;
+	rr:template "http://www.optique-project.eu/resource/customersLocation/{CUSTOMERID}" .
+
+default:importR2RML63157526603261588037355978932874 a rr:TriplesMap ;
+	rdfs:label "GrainsCereals" ;
+	rr:logicalTable default:importR2RML60378325581222837928480508599058 ;
+	rr:predicateObjectMap default:importR2RML56844358367879001579242946276813 ;
+	rr:subjectMap default:importR2RML23682904154906332951328636520645 .
+
+default:importR2RML63361103010982971485411929789420 a rr:BaseTableOrView , rr:LogicalTable ;
+	rr:tableName "NORTHWIND.EMPLOYEES" .
+
+default:importR2RML63827272977790224494380344495691 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML82813842128866674809090398537421 ;
+	rr:predicateMap default:importR2RML03044585985187135976542927176539 .
+
+default:importR2RML63844699810459012487882506494809 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML67781793117636492352628444445623 ;
+	rr:predicateMap default:importR2RML67957586970108770367378759515516 .
+
+default:importR2RML64701041408901066167855295488040 a rr:TriplesMap ;
+	rr:logicalTable default:importR2RML56027568600909158143198662331930 ;
+	rr:predicateObjectMap default:importR2RML06877179076349530403956114890550 , default:importR2RML20655201850850392427675523357822 , default:importR2RML25792407105807180459287814606502 , default:importR2RML29373714385872746105458552799066 , default:importR2RML35319003293527397401919148428319 , default:importR2RML45651710408063273537161094600282 , default:importR2RML88411389877520250754804453651635 , default:importR2RML96670105131597957741803316113790 ;
+	rr:subjectMap default:importR2RML85929869988488233513172190181291 .
+
+default:importR2RML65235036686571504794962838881133 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES/{TERRITORYID}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML65425115117465316993670839721783 a rr:ObjectMap ;
+	rr:column "POSTALCODE" .
+
+default:importR2RML66077550653291558935972947021922 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML53941060014678635546692153705193 ;
+	rr:predicateMap default:importR2RML02700496767248740327191108542964 .
+
+default:importR2RML66117370025582456177507709487844 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/CITY> .
+
+default:importR2RML66724491672049262118550635512413 a rr:ObjectMap ;
+	rr:column "PRODUCTNAME" ;
+	rr:datatype xsd:string .
+
+default:importR2RML67300436350555100241951405775170 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML69775592633659070818324198609229 ;
+	rr:predicateMap default:importR2RML92903967605002499604220921080094 .
+
+default:importR2RML67358115041614587549902130443263 a rr:ObjectMap ;
+	rr:column "CONTACTNAME" ;
+	rr:datatype xsd:string .
+
+default:importR2RML67434347460562650581845055585989 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/CONTACTTITLE> .
+
+default:importR2RML67702474262049825005150352601171 a rr:TriplesMap ;
+	rdfs:label "ordersShipLocation" ;
+	rr:logicalTable default:importR2RML48712379734489524833948294797950 ;
+	rr:predicateObjectMap default:importR2RML25080663747058002587777206180004 , default:importR2RML33058252020838579925136511333307 , default:importR2RML63827272977790224494380344495691 , default:importR2RML74398941973002171942565565642064 , default:importR2RML88077104066831204684810839239303 , default:importR2RML92035326471433316288133295609394 ;
+	rr:subjectMap default:importR2RML61430174037500915172436671940569 .
+
+default:importR2RML67761086257167185365620316177051 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/TOTALPRICE> .
+
+default:importR2RML67781793117636492352628444445623 a rr:ObjectMap ;
+	rr:column "COUNTRY" .
+
+default:importR2RML67796738024368031223101813060656 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/COMPANY/LOCATION> .
+
+default:importR2RML67957586970108770367378759515516 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/COUNTRY> .
+
+default:importR2RML68016217287379085408099597162469 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML73825763638102833905273790996291 ;
+	rr:predicateMap default:importR2RML67434347460562650581845055585989 .
+
+default:importR2RML69068377908967769937053616002033 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/COUNTRY> .
+
+default:importR2RML69775592633659070818324198609229 a rr:ObjectMap ;
+	rr:column "POSTALCODE" .
+
+default:importR2RML70137243020113125666778808289034 a rr:ObjectMap ;
+	rr:column "SHIPADDRESS" .
+
+default:importR2RML70210582930427621224232214898845 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION> ;
+	rr:template "http://www.optique-project.eu/resource/customersLocation/{CUSTOMERID}" .
+
+default:importR2RML70554276433740550727119310177525 a rr:ObjectMap ;
+	rr:column "HOMEPAGE" ;
+	rr:datatype xsd:string .
+
+default:importR2RML70615567267776282475732271553278 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/CITY> .
+
+default:importR2RML70768686973717605346405125786451 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML70838560149831303367428281837845 a rr:LogicalTable , rr:R2RMLView ;
+	rr:sqlQuery """SELECT * FROM (
+SELECT P.PRODUCTID AS \"pid\", P.PRODUCTNAME AS \"pname\"
+FROM NORTHWIND.PRODUCTS AS P, NORTHWIND.CATEGORIES AS C
+WHERE P.CATEGORYID = C.CATEGORYID 
+AND C.CATEGORYNAME = 'Meat/Poultry'
+) AS T""" .
+
+default:importR2RML71559748379427629835904881130694 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/{EMPLOYEEID}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML72261913793229249496053245476858 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/CITY> .
+
+default:importR2RML72366529848934166650054844750493 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/PHONE> .
+
+default:importR2RML72640111827234693598698367162210 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/NAME> .
+
+default:importR2RML72678989393556105679231008723060 a rr:ObjectMap ;
+	rr:column "QUANTITY" ;
+	rr:datatype xsd:integer ;
+	rr:termType rr:Literal .
+
+default:importR2RML72764938682757225946474972459703 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML33957984842616382112088412016730 ;
+	rr:predicateMap default:importR2RML02183641259591339059007636793503 .
+
+default:importR2RML72879338635111196589570049040117 a rr:ObjectMap ;
+	rr:column "LASTNAME" .
+
+default:importR2RML73084131626981707747092250948655 a rr:ObjectMap ;
+	rr:column "QUANTITYPERUNIT" ;
+	rr:datatype xsd:string ;
+	rr:termType rr:Literal .
+
+default:importR2RML73350796008957402668510365132444 a rr:ObjectMap ;
+	rr:column "TERRITORYDESCRIPTION" ;
+	rr:datatype xsd:string ;
+	rr:termType rr:Literal .
+
+default:importR2RML73697305814330827149932338226030 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML73350796008957402668510365132444 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES/TERRITORYDESCRIPTION> .
+
+default:importR2RML73825763638102833905273790996291 a rr:ObjectMap ;
+	rr:column "CONTACTTITLE" ;
+	rr:datatype xsd:string .
+
+default:importR2RML73952855973683527678991746845004 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/CITY> .
+
+default:importR2RML73955534458228969166485525221433 a rr:ObjectMap ;
+	rr:column "CITY" .
+
+default:importR2RML74369512148334191508710923101801 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML31312769850325020941248525335987 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/SALARY> .
+
+default:importR2RML74398941973002171942565565642064 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML23991064188027708487941794115128 ;
+	rr:predicateMap default:importR2RML72261913793229249496053245476858 .
+
+default:importR2RML74496909909290157376931542435625 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML74717428863075392425476415303318 a rr:ObjectMap ;
+	rr:column "PHOTOPATH" ;
+	rr:datatype xsd:string ;
+	rr:termType rr:Literal .
+
+default:importR2RML75270039636503767455846953503853 a rr:ObjectMap ;
+	rr:column "pname" .
+
+default:importR2RML75316506789356701021306839296782 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML75551793021731821671566485233451 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML72678989393556105679231008723060 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/QUANTITY> .
+
+default:importR2RML75596649407289470587153603340041 a rr:ObjectMap ;
+	rr:column "REGIONID" ;
+	rr:datatype xsd:integer ;
+	rr:termType rr:Literal .
+
+default:importR2RML75900873911850398699166310068809 a rr:TriplesMap ;
+	rdfs:label "shippersLocation" .
+
+default:importR2RML76063084462957504493121560595010 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML31514980485959009899939687144319 ;
+	rr:predicateMap default:importR2RML88883035046412838794092134406040 .
+
+default:importR2RML76269349761910201065445663999227 a rr:TriplesMap ;
+	rr:logicalTable default:importR2RML35738356078338475741385704011440 ;
+	rr:predicateObjectMap default:importR2RML94721626905866919044149181802662 ;
+	rr:subjectMap default:importR2RML51321177749162698959961593498531 .
+
+default:importR2RML76286150085022361169555577226308 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML48780954347285655920737203975347 ;
+	rr:predicateMap default:importR2RML12313410669100232705146415487511 .
+
+default:importR2RML76709063621904569193291781978433 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML77521259568556287600328859869900 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/SHIPNAME> .
+
+default:importR2RML77189459208011120093700452024705 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML72879338635111196589570049040117 ;
+	rr:predicateMap default:importR2RML38911432178471949146627108169362 .
+
+default:importR2RML77521259568556287600328859869900 a rr:ObjectMap ;
+	rr:column "SHIPNAME" ;
+	rr:datatype xsd:string ;
+	rr:termType rr:Literal .
+
+default:importR2RML78092311513225487351094803074368 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML95575674258558168957833588606561 ;
+	rr:predicateMap default:importR2RML60838021843320005837274058080685 .
+
+default:importR2RML78263381337428965699583564587493 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML12358443065118970338500806047626 ;
+	rr:predicateMap default:importR2RML31435184411447127978640353790116 .
+
+default:importR2RML78469276899031607901654809327782 a rr:SubjectMap ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/{ORDERID}/{PRODUCTID}" .
+
+default:importR2RML78530529219092977053791581575625 a rr:ObjectMap ;
+	rr:column "CONTACTTITLE" ;
+	rr:datatype xsd:string .
+
+default:importR2RML79129946787733880984208338897834 a rr:ObjectMap ;
+	rr:column "EXTENSION" ;
+	rr:datatype xsd:string ;
+	rr:termType rr:Literal .
+
+default:importR2RML79491667763314456462830038775387 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/PRODUCTNAME> .
+
+default:importR2RML79603926830468619057922692907926 a rr:ObjectMap ;
+	rr:column "REGIONDESCRIPTION" ;
+	rr:datatype xsd:string ;
+	rr:termType rr:Literal .
+
+default:importR2RML80159743944509470053553136349130 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML66724491672049262118550635512413 ;
+	rr:predicateMap default:importR2RML79491667763314456462830038775387 .
+
+default:importR2RML81151299405734736718241657389852 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/{PRODUCTID}" .
+
+default:importR2RML82058271568256084982840961828448 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML79129946787733880984208338897834 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/EXTENSION> .
+
+default:importR2RML82230586341373162956031153179275 a rr:ObjectMap ;
+	rr:column "HOMEPHONE" ;
+	rr:datatype xsd:string ;
+	rr:termType rr:Literal .
+
+default:importR2RML82347659884109973821946349183707 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML98376110973719775975250136314784 ;
+	rr:predicateMap default:importR2RML00409941071528156033969172933566 .
+
+default:importR2RML82607094501731573004995326596401 a rr:ObjectMap ;
+	rr:column "PHONE" ;
+	rr:datatype xsd:string .
+
+default:importR2RML82760409116048518500176853859503 a rr:ObjectMap ;
+	rr:column "ADDRESS" .
+
+default:importR2RML82813842128866674809090398537421 a rr:ObjectMap ;
+	rr:column "SHIPADDRESS" .
+
+default:importR2RML83135413898980853686420109250827 a rr:TriplesMap ;
+	rdfs:label "Beverages" ;
+	rr:logicalTable default:importR2RML07292190762942416846838493932175 ;
+	rr:predicateObjectMap default:importR2RML78263381337428965699583564587493 ;
+	rr:subjectMap default:importR2RML02737569416590107999922666873245 .
+
+default:importR2RML83281382869859340385053180813155 a rr:ObjectMap ;
+	rr:column "HIREDATE" ;
+	rr:datatype xsd:dateTime ;
+	rr:termType rr:Literal .
+
+default:importR2RML83709020984459614468798736270711 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML83731769038769133249600665680711 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML35296826261268603885606714884213 ;
+	rr:predicateMap default:importR2RML75316506789356701021306839296782 .
+
+default:importR2RML83845154217702699568992211957695 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES/{TERRITORYID}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML83915094252473724054906082822660 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML02151826017833126342132004825384 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/SUPPLIERID> .
+
+default:importR2RML83930452140167065141625567094658 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/ADDRESS> .
+
+default:importR2RML83979053494547663172111529483122 a rr:TriplesMap ;
+	rr:logicalTable default:importR2RML63361103010982971485411929789420 ;
+	rr:predicateObjectMap default:importR2RML04232447199075657283902728726422 , default:importR2RML07500641800297374103262046654659 , default:importR2RML09594505963061632007467105317706 , default:importR2RML10390668205565334350618380745829 , default:importR2RML11450065837364916209090988153055 , default:importR2RML22949248409828281401188933683343 , default:importR2RML31733257761816310643845039483454 , default:importR2RML39724222209932123816897409395001 , default:importR2RML42162698736315910310132641118535 , default:importR2RML46702291820979737641850657118260 , default:importR2RML52509732069367792603086737245193 , default:importR2RML61997049734661283579783033480393 , default:importR2RML74369512148334191508710923101801 , default:importR2RML77189459208011120093700452024705 , default:importR2RML82058271568256084982840961828448 , default:importR2RML84023576294495784486005571924857 ;
+	rr:subjectMap default:importR2RML71559748379427629835904881130694 .
+
+default:importR2RML84023576294495784486005571924857 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML44270803835632237013104643806483 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/EMPLOYEEID> .
+
+default:importR2RML84137155148057182373507086969636 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML92416778234826905538652746854437 ;
+	rr:predicateMap default:importR2RML22802753082720045579714225979832 .
+
+default:importR2RML84159897870278488527289125747572 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML79603926830468619057922692907926 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION/REGIONDESCRIPTION> .
+
+default:importR2RML85291348038382973889195015082314 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML73955534458228969166485525221433 ;
+	rr:predicateMap default:importR2RML66117370025582456177507709487844 .
+
+default:importR2RML85298725738791870770127177671424 a rr:ObjectMap ;
+	rr:column "NOTES" ;
+	rr:datatype xsd:string ;
+	rr:termType rr:Literal .
+
+default:importR2RML85383533091909423546806757772809 a rr:TriplesMap ;
+	rr:logicalTable default:importR2RML57414861117989840682762010773040 ;
+	rr:predicateObjectMap default:importR2RML04556979842065810160746596482573 , default:importR2RML39221577780676971489424264508245 , default:importR2RML48483419244185322412394601600357 , default:importR2RML59848113483226636762010908115866 , default:importR2RML75551793021731821671566485233451 , default:predicateObjectMap44357664830646896343967195555070 ;
+	rr:subjectMap default:importR2RML39337000392859626133746335283208 .
+
+default:importR2RML85567835036007189391401330228031 a rr:BaseTableOrView , rr:LogicalTable ;
+	rr:tableName "NORTHWIND.SUPPLIERS" .
+
+default:importR2RML85929869988488233513172190181291 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CUSTOMERS> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CUSTOMERS/{CUSTOMERID}" .
+
+default:importR2RML86077595233858677190180170487889 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION/{REGIONID}" ;
+	rr:termType rr:IRI .
+
+default:importR2RML86080918129435332099777330101392 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML65425115117465316993670839721783 ;
+	rr:predicateMap default:importR2RML43048892589694174083999210553838 .
+
+default:importR2RML86230041439964258573778149910839 a rr:ObjectMap ;
+	rr:column "REORDERLEVEL" ;
+	rr:datatype xsd:integer ;
+	rr:termType rr:Literal .
+
+default:importR2RML86233301523144917821361549938666 a rr:TriplesMap ;
+	rdfs:label "Produce" ;
+	rr:logicalTable default:importR2RML19078330267250820695201261662878 ;
+	rr:predicateObjectMap default:importR2RML04595381964727075082898653887782 ;
+	rr:subjectMap default:importR2RML21543385812518724910759323637137 .
+
+default:importR2RML86260523559717962630827599139740 a rr:ObjectMap ;
+	rr:column "ADDRESS" .
+
+default:importR2RML86297646837002556754292952208204 a rr:LogicalTable , rr:R2RMLView ;
+	rr:sqlQuery "SELECT \"ORDERID\", \"PRODUCTID\", (UNITPRICE * QUANTITY) - DISCOUNT as \"TOTPRICE\" FROM NORTHWIND.ORDERDETAILS" .
+
+default:importR2RML86849228489787564975484925851384 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML87542462625389055310699786328362 a rr:ObjectMap ;
+	rr:column "REGION" .
+
+default:importR2RML88077104066831204684810839239303 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML43736078203260564170881576598859 ;
+	rr:predicateMap default:importR2RML20555450742766138058636362186632 .
+
+default:importR2RML88411389877520250754804453651635 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML78530529219092977053791581575625 ;
+	rr:predicateMap default:importR2RML29803463504009613112952089387082 .
+
+default:importR2RML88675673794067304636763113437046 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE> .
+
+default:importR2RML88702612011206410271915329476001 a rr:ObjectMap ;
+	rr:column "REQUIREDDATE" ;
+	rr:datatype xsd:dateTime ;
+	rr:termType rr:Literal .
+
+default:importR2RML88880401191627680448634143942594 a rr:TriplesMap ;
+	rr:logicalTable default:importR2RML49680142202159981797444708292084 ;
+	rr:predicateObjectMap default:importR2RML48852301877948888293173234721154 ;
+	rr:subjectMap default:importR2RML83845154217702699568992211957695 .
+
+default:importR2RML88883035046412838794092134406040 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML89200014774926425372756723035710 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CUSTOMERS/CUSTOMERID> .
+
+default:importR2RML89467869751581712948037510336022 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SEAFOOD> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/{pid}" .
+
+default:importR2RML90483161946668351815351620431691 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SHIPPERS> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SHIPPERS/{SHIPPERID}" .
+
+default:importR2RML90562339835563562688001748721398 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML58017693246331583461184304281479 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/SHIPPEDDATE> .
+
+default:importR2RML92008883630296842016434057284259 a rr:TriplesMap ;
+	rdfs:label "employeesLocation" ;
+	rr:logicalTable default:importR2RML45375634386923450611095204596133 ;
+	rr:predicateObjectMap default:importR2RML05873788761506912134752929304219 , default:importR2RML37626037008849597859217101464560 , default:importR2RML38391179511871506632479998177850 , default:importR2RML63844699810459012487882506494809 , default:importR2RML98409557145784246623724004439660 , default:predicateObjectMap90307601937924308813804838053901 ;
+	rr:subjectMap default:importR2RML31150487141271693258713914157454 .
+
+default:importR2RML92035326471433316288133295609394 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML70137243020113125666778808289034 ;
+	rr:predicateMap default:importR2RML59968097072110762584141074501147 .
+
+default:importR2RML92412568415445979016504766850744 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML92416778234826905538652746854437 a rr:ObjectMap ;
+	rr:column "ORDERID" .
+
+default:importR2RML92903967605002499604220921080094 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE> .
+
+default:importR2RML92959195153941226101675641247403 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML93949717253577504286451743718761 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:importR2RML94180341155389234943311898180136 a rr:ObjectMap ;
+	rr:column "FAX" ;
+	rr:datatype xsd:string .
+
+default:importR2RML94685557262130426394509563847005 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML48357463196040226003290662103551 ;
+	rr:predicateMap default:importR2RML72640111827234693598698367162210 .
+
+default:importR2RML94721626905866919044149181802662 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML39019411101136630738940039615476 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEETERRITORIES/EMPLOYEES_has_TERRITORIES> .
+
+default:importR2RML95575674258558168957833588606561 a rr:ObjectMap ;
+	rr:column "REGION" .
+
+default:importR2RML96670105131597957741803316113790 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML57249219418904477381459342468220 ;
+	rr:predicateMap default:importR2RML41799917483018238338884987096147 .
+
+default:importR2RML97082122315213632814654233765994 a rr:TriplesMap ;
+	rdfs:label "DairyProducts" ;
+	rr:logicalTable default:importR2RML10938354502022158664544842017630 ;
+	rr:predicateObjectMap default:importR2RML82347659884109973821946349183707 ;
+	rr:subjectMap default:importR2RML05034396286190587704191193674767 .
+
+default:importR2RML97268349330335623245447907493469 a rr:ObjectMap ;
+	rr:column "POSTALCODE" .
+
+default:importR2RML97520616785510873340582743188482 a rr:ObjectMap ;
+	rr:column "CUSTOMERID" ;
+	rr:datatype xsd:string .
+
+default:importR2RML98376110973719775975250136314784 a rr:ObjectMap ;
+	rr:column "pname" .
+
+default:importR2RML98409557145784246623724004439660 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML31814413278451325763041856238344 ;
+	rr:predicateMap default:importR2RML12796727036548878641478208476996 .
+
+default:importR2RML98750798332337986230000632616540 a rr:PredicateObjectMap ;
+	rr:objectMap default:importR2RML53094253724503572012224554570934 ;
+	rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/ORDERID> .
+
+default:importR2RML99518840185378898049419013331506 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS/{SUPPLIERID}" .
+
+default:logicalTable09966016144548525744703703780044 a rr:LogicalTable , rr:R2RMLView ;
+	rr:sqlQuery """SELECT * FROM (
+SELECT P.PRODUCTID AS \"pid\", P.PRODUCTNAME AS \"pname\", C.DESCRIPTION AS \"cdesc\"
+FROM NORTHWIND.PRODUCTS AS P, NORTHWIND.CATEGORIES AS C
+WHERE P.CATEGORYID = C.CATEGORYID 
+AND C.CATEGORYNAME = 'Condiments'
+) AS T""" .
+
+default:logicalTable47358363329754424369096232656478 a rr:LogicalTable , rr:R2RMLView ;
+	rr:sqlQuery """SELECT * FROM (
+SELECT P.PRODUCTID AS \"pid\", P.PRODUCTNAME AS \"pname\"
+FROM NORTHWIND.PRODUCTS AS P, NORTHWIND.CATEGORIES AS C
+WHERE P.CATEGORYID = C.CATEGORYID 
+AND C.CATEGORYNAME = 'Confections'
+) AS T""" .
+
+default:objectMap13876873302434795173670363944646 a rr:ObjectMap ;
+	rr:column "cdesc" .
+
+default:objectMap21739043440600329291623780273910 a rr:ObjectMap ;
+	rr:template "{ADDRESS}" ;
+	rr:termType rr:Literal .
+
+default:objectMap51779766667205980882582003866570 a rr:ObjectMap ;
+	rr:column "UNITPRICE" ;
+	rr:datatype xsd:decimal .
+
+default:objectMap53831248725149476996334159182422 a rr:ObjectMap ;
+	rr:template "{ADDRESS}{CITY}{COUNTRY}" ;
+	rr:termType rr:Literal ;
+	rr:language "en-us".
+
+default:objectMap75825489729302645160866791932206 a rr:ObjectMap ;
+	rr:column "UNITPRICE" ;
+	rr:datatype xsd:decimal .
+
+default:predicateMap13267303247320760876653368133303 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/UNITPRICE> .
+
+default:predicateMap17438787384830967617523351322737 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:predicateMap44234754002843301664904437959989 a rr:PredicateMap ;
+	rr:constant rdfs:label .
+
+default:predicateMap50913888116975592871629694802049 a rr:PredicateMap ;
+	rr:constant rdfs:comment .
+
+default:predicateMap97511502767527179497841606159311 a rr:PredicateMap ;
+	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/super_dProp/decimal/UNITPRICE> .
+
+default:predicateObjectMap04487698376501396131965017948660 a rr:PredicateObjectMap ;
+	rr:objectMap default:objectMap21739043440600329291623780273910 ;
+	rr:predicateMap default:predicateMap17438787384830967617523351322737 .
+
+default:predicateObjectMap05799869618601240567159273559121 a rr:PredicateObjectMap ;
+	rr:objectMap default:objectMap75825489729302645160866791932206 ;
+	rr:predicateMap default:predicateMap97511502767527179497841606159311 .
+
+default:predicateObjectMap44357664830646896343967195555070 a rr:PredicateObjectMap ;
+	rr:objectMap default:objectMap51779766667205980882582003866570 ;
+	rr:predicateMap default:predicateMap13267303247320760876653368133303 .
+
+default:predicateObjectMap50740471929355893955993177961483 a rr:PredicateObjectMap ;
+	rr:objectMap default:objectMap13876873302434795173670363944646 ;
+	rr:predicateMap default:predicateMap50913888116975592871629694802049 .
+
+default:predicateObjectMap90307601937924308813804838053901 a rr:PredicateObjectMap ;
+	rr:objectMap default:objectMap53831248725149476996334159182422 ;
+	rr:predicateMap default:predicateMap44234754002843301664904437959989 .
+
+default:subjectMap42810235017204551215196626119802 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CONFECTIONS> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/{pid}" .
+
+default:subjectMap76582019736175745977144747139630 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CONDIMENTS> ;
+	rr:template "http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/{pid}" .
