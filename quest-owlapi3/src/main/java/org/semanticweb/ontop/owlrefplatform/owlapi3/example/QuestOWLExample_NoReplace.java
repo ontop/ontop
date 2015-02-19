@@ -30,6 +30,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.File;
+import java.util.Properties;
 
 public class QuestOWLExample_NoReplace {
 	
@@ -55,15 +56,16 @@ public class QuestOWLExample_NoReplace {
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
 		 */
-		QuestPreferences preference = new QuestPreferences();
-		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        preference.setCurrentValueOf(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
+		QuestPreferences preference = new QuestPreferences(p);
 
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
 		QuestOWLFactory questOwlFactory = new QuestOWLFactory(new File(obdafile), preference);
-		QuestOWL reasoner = (QuestOWL) questOwlFactory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = questOwlFactory.createReasoner(ontology, new SimpleConfiguration());
 
 		/*
 		 * Prepare the data connection for querying.

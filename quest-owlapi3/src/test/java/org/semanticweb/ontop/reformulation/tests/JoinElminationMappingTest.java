@@ -105,11 +105,11 @@ public class JoinElminationMappingTest extends TestCase {
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 		reasoner.flush();
 
 		// Now we are ready for querying
-		QuestOWLStatement st = (QuestOWLStatement)reasoner.getStatement();
+		QuestOWLStatement st = reasoner.getStatement();
 
 		boolean fail = false;
 
@@ -133,72 +133,72 @@ public class JoinElminationMappingTest extends TestCase {
 	}
 
 	public void testSiEqSig() throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		runTests(p);
+		Properties p  = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		runTests(new QuestPreferences(p));
 	}
 
 	public void testSiEqNoSig() throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		runTests(p);
+		Properties p  = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		runTests(new QuestPreferences(p));
 	}
 
 	public void testSiNoEqSig() throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		runTests(p);
+		Properties p  = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		runTests(new QuestPreferences(p));
 	}
 
 	public void testSiNoEqNoSig() throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		runTests(p);
+		Properties p  = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		runTests(new QuestPreferences(p));
 	}
 
 	/*
 	 * Direct Mapping
 	 */
 	public void disabletestDiEqSig() throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
-		runTests(p);
+		Properties p  = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
+		runTests(new QuestPreferences(p));
 	}
 
 	public void disabletestDiEqNoSig() throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
-		runTests(p);
+		Properties p  = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
+		runTests(new QuestPreferences(p));
 	}
 
 	/**
@@ -207,14 +207,14 @@ public class JoinElminationMappingTest extends TestCase {
 	 * @throws Exception
 	 */
 	public void disabletestDiNoEqSig() throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
-		runTests(p);
+		Properties p  = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
+		runTests(new QuestPreferences(p));
 	}
 
 	/**
@@ -223,51 +223,51 @@ public class JoinElminationMappingTest extends TestCase {
 	 * @throws Exception
 	 */
 	public void disabletestDiNoEqNoSig() throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
-		runTests(p);
+		Properties p  = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.DIRECT);
+		runTests(new QuestPreferences(p));
 	}
 
 	public void testViEqSig() throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		runTests(p);
+		Properties p  = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		runTests(new QuestPreferences(p));
 	}
 
 	public void testViEqNoSig() throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
-		runTests(p);
+		Properties p  = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		runTests(new QuestPreferences(p));
 	}
 
 	/**
 	 * This is a very slow test, disable it if you are doing routine checks.
 	 */
 	public void testViNoEqSig() throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		runTests(p);
+		Properties p  = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		runTests(new QuestPreferences(p));
 	}
 
 	/**
 	 * This is a very slow test, disable it if you are doing routine checks.
 	 */
 	public void testViNoEqNoSig() throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
-		runTests(p);
+		Properties p  = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+		runTests(new QuestPreferences(p));
 	}
 }

@@ -72,8 +72,9 @@ private void setup()  throws Exception {
 	 * Prepare the configuration for the Quest instance. The example below shows the setup for
 	 * "Virtual ABox" mode
 	 */
+	Properties p = new Properties();
+	p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 	QuestPreferences preference = new QuestPreferences();
-	preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 	DBMetadata dbMetadata = getMeta();
 
     QuestComponentFactory componentFactory = injector.getInstance(QuestComponentFactory.class);

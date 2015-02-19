@@ -25,7 +25,7 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
 
     @AssistedInject
     private SQLDBMetadataExtractor(OBDAProperties preferences) {
-        this.obtainFullMetadata = Boolean.valueOf((String) preferences.get(OBDAProperties.OBTAIN_FULL_METADATA));
+        this.obtainFullMetadata = preferences.getBoolean(OBDAProperties.OBTAIN_FULL_METADATA);
     }
 
     @Override

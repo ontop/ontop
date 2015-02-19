@@ -130,10 +130,10 @@ public class ImdbTestPostgres {
         assertEquals(15175, runTestQuery(p, query2));
     }
 
-    private int runTestQuery(Properties p, String query) throws Exception {
+    private int runTestQuery(QuestPreferences preferences, String query) throws Exception {
 
         // Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), new QuestPreferences(p));
+        QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), preferences);
 
         QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 

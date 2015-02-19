@@ -32,7 +32,7 @@ public abstract class AbstractQuestOWLTest {
         QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), preferences);
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-        reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+        reasoner =factory.createReasoner(ontology, new SimpleConfiguration());
     }
 
     protected QuestOWL getReasoner() {

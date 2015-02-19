@@ -4,12 +4,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.io.File;
+import java.util.Properties;
 import java.util.Scanner;
 
 import org.junit.After;
 import org.junit.Test;
 import org.openrdf.model.Model;
 import static org.junit.Assert.*;
+
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
@@ -52,7 +55,6 @@ public class TestSesameImplicitDBConstraints {
 	public void init(boolean applyUserConstraints, boolean provideMetadata)  throws Exception {
 
 		DBMetadata dbMetadata;
-		QuestPreferences preference;
 		OWLOntology ontology;
 		Model model;
 
@@ -91,25 +93,27 @@ public class TestSesameImplicitDBConstraints {
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
 		 */
-		preference = new QuestPreferences();
-		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		preference.setCurrentValueOf(QuestPreferences.DBNAME, "countries");
-		preference.setCurrentValueOf(QuestPreferences.JDBC_URL, "jdbc:h2:mem:countries");
-		preference.setCurrentValueOf(QuestPreferences.DBUSER, "sa");
-		preference.setCurrentValueOf(QuestPreferences.DBPASSWORD, "");
-		preference.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, "org.h2.Driver");
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(OBDAProperties.DB_NAME, "countries");
+		p.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:mem:countries");
+		p.setProperty(OBDAProperties.DB_USER, "sa");
+		p.setProperty(OBDAProperties.DB_PASSWORD, "");
+		p.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
+
+		QuestPreferences preferences = new QuestPreferences(p);
 
 		dbMetadata = getMeta();
 		SesameVirtualRepo qest1;
 		if(provideMetadata){
-			qest1 = new SesameVirtualRepo("", ontology, model, dbMetadata, preference);
+			qest1 = new SesameVirtualRepo("", ontology, model, dbMetadata, preferences);
 			if(applyUserConstraints){
 				// Parsing user constraints
 				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
 				qest1.setImplicitDBConstraints(userConstraints);
 			}
 		} else {
-			qest1 = new SesameVirtualRepo("", ontology, model, preference);
+			qest1 = new SesameVirtualRepo("", ontology, model, preferences);
 			if(applyUserConstraints){
 				// Parsing user constraints
 				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);

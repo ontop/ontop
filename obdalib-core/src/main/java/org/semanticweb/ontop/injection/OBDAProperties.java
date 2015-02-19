@@ -13,8 +13,10 @@ import java.util.Properties;
  * Focuses on implementation class declaration
  * for the core module of Ontop.
  *
+ * Immutable!
+ *
  */
-public class OBDAProperties extends Properties {
+public class OBDAProperties {
 
     public static final String JDBC_URL = "JDBC_URL";
     public static final String DB_NAME = "DB_NAME";
@@ -26,36 +28,112 @@ public class OBDAProperties extends Properties {
 
     public static final String DEFAULT_OBDA_PROPERTIES_FILE = "default_implementations.properties";
     private static Logger LOG = LoggerFactory.getLogger(OBDAProperties.class);
+    private final Properties properties;
 
+    /**
+     * Beware: immutable class!
+     *
+     * --> Only default properties.
+     */
     public OBDAProperties() {
-        super();
+        this(new Properties());
+    }
+
+    /**
+     * Beware: immutable class!
+     *
+     * Recommended constructor.
+     *
+     * Changing the Properties object afterwards will not have any effect
+     * on this OBDAProperties object.
+     */
+    public OBDAProperties(Properties userProperties) {
+        /**
+         * Loads default properties
+         */
+        properties = loadDefaultPropertiesFromFile(DEFAULT_OBDA_PROPERTIES_FILE);
+        /**
+         * Overloads the default properties.
+         */
+        properties.putAll(userProperties);
+    }
+
+    protected static Properties loadDefaultPropertiesFromFile(String fileName) {
+        Properties properties = new Properties();
         try {
-            readPropertiesFile(DEFAULT_OBDA_PROPERTIES_FILE);
+            InputStream in = OBDAProperties.class.getResourceAsStream(fileName);
+            properties.load(in);
         } catch (IOException e1) {
             LOG.error("Error reading default OBDA properties.");
             LOG.debug(e1.getMessage(), e1);
+            //TODO: should we throw a RuntimeException?
         }
+        return properties;
     }
-
-    public OBDAProperties(Properties values) {
-        this();
-        this.putAll(values);
-    }
-
 
     /**
-     * Reads the properties from the input stream and sets them as default.
+     * Returns the value of the given key.
      *
-     * @param in
-     *            The input stream.
+     * Returns null if not available.
      */
-    public void readDefaultPropertiesFile(InputStream in) throws IOException {
-        this.load(in);
+    public Object get(Object key) {
+        return properties.get(key);
     }
 
-    private void readPropertiesFile(String fileName) throws IOException {
-        InputStream in =OBDAProperties.class.getResourceAsStream(fileName);
-        readDefaultPropertiesFile(in);
+    /**
+     * Returns the boolean value of the given key.
+     *
+     * Returns null if not available.
+     */
+    public boolean getBoolean(String key) {
+        String value = (String) get(key);
+        return Boolean.parseBoolean(value);
     }
 
+    /**
+     * Returns the integer value of the given key.
+     *
+     * Returns null if not available.
+     */
+    public int getInteger(String key) {
+        String value = (String) get(key);
+        return Integer.parseInt(value);
+    }
+
+    /**
+     * Returns the string value of the given key.
+     *
+     * Returns null if not available.
+     */
+    public String getProperty(String key) {
+        return (String) get(key);
+    }
+
+    /**
+     * NOT FOR END-USERS
+     */
+    @Deprecated
+    public OBDAProperties newProperties(Object key, Object value) {
+        Properties newProperties = new Properties(properties);
+        newProperties.put(key, value);
+        return new OBDAProperties(newProperties);
+    }
+
+    /**
+     * NOT FOR END-USERS
+     */
+    @Deprecated
+    public OBDAProperties newProperties(Properties newProperties) {
+        Properties properties = new Properties(this.properties);
+        properties.putAll(newProperties);
+        return new OBDAProperties(properties);
+    }
+
+    protected Properties getProperties() {
+        return new Properties(properties);
+    }
+
+    public boolean contains(Object key) {
+        return properties.contains(key);
+    }
 }

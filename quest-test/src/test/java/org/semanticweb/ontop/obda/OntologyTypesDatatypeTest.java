@@ -115,10 +115,10 @@ public class OntologyTypesDatatypeTest {
 	@Test
 	public void testDatatypeDate() throws Exception {
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
         String query1 = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?x ?y\n" +
                 "WHERE {\n" +
@@ -132,10 +132,10 @@ public class OntologyTypesDatatypeTest {
     @Test
     public void testDatatypeTime() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+        Properties p = new Properties();
+        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
         String query1 = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?x ?y\n" +
                 "WHERE {\n" +
@@ -149,10 +149,10 @@ public class OntologyTypesDatatypeTest {
     @Test
     public void testDatatypeYear() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+        Properties p = new Properties();
+        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
         String query1 = "PREFIX : <http://ontop.inf.unibz.it/test/datatypes#> SELECT ?x ?y\n" +
                 "WHERE {\n" +

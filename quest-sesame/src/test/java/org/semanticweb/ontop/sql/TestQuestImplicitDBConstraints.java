@@ -10,6 +10,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Scanner;
 
 import org.junit.After;
@@ -74,12 +75,12 @@ public class TestQuestImplicitDBConstraints {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-			QuestPreferences p = new QuestPreferences();
-			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-			p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
+			Properties p = new Properties();
+			p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+			p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 			
 			// Creating a new instance of the reasoner
-			this.factory = new QuestOWLFactory(new File(obdafile), p);
+			this.factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
 
 		} catch (Exception exc) {
 			try {

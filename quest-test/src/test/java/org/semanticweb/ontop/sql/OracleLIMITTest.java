@@ -24,6 +24,7 @@ package org.semanticweb.ontop.sql;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
@@ -82,14 +83,14 @@ public class OracleLIMITTest  {
 
 	private void runQuery(String obdaFileName) throws OBDAException, OWLException, IOException,
             InvalidMappingException, DuplicateMappingException, InvalidDataSourceException {
-		
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-		// Creating a new instance of the reasoner
-		factory = new QuestOWLFactory(new File(obdaFileName), p);
 
-		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
+		// Creating a new instance of the reasoner
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFileName), new QuestPreferences(p));
+
+		reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

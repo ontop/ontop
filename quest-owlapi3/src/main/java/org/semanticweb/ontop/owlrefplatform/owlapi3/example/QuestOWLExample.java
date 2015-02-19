@@ -21,6 +21,8 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3.example;
  */
 
 import java.io.File;
+import java.util.Properties;
+
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -58,14 +60,15 @@ public class QuestOWLExample {
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
 		 */
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		QuestPreferences preference = new QuestPreferences();
-		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
 		QuestOWLFactory questOWLFactory = new QuestOWLFactory(new File(obdafile), preference);
-		QuestOWL reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = questOWLFactory.createReasoner(ontology, new SimpleConfiguration());
 
 		/*
 		 * Prepare the data connection for querying.

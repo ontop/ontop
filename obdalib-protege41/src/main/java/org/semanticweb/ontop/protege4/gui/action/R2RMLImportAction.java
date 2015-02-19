@@ -45,6 +45,7 @@ import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
+import org.semanticweb.ontop.owlrefplatform.core.R2RMLQuestPreferences;
 import org.semanticweb.ontop.protege4.core.OBDAModelWrapper;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.r2rml.R2RMLMappingParser;
@@ -72,9 +73,7 @@ public class R2RMLImportAction extends ProtegeAction {
 		 *
 		 * Data source parameters are missing. --> We use the dataSource object instead.
 		 */
-		OBDAProperties r2rmlProperties = new OBDAProperties();
-		r2rmlProperties.setProperty(MappingParser.class.getCanonicalName(),
-				R2RMLMappingParser.class.getCanonicalName());
+		OBDAProperties r2rmlProperties = new R2RMLQuestPreferences();
 
 		Injector injector = Guice.createInjector(new OBDACoreModule(r2rmlProperties));
 		nativeQLFactory = injector.getInstance(

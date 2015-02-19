@@ -24,6 +24,7 @@ import java.beans.Statement;
 import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
@@ -142,21 +143,21 @@ public class SemanticIndexManagerLUBMMySQLTest extends TestCase {
 	}
 
 	public void test3InitializingQuest() throws Exception {
-		QuestPreferences pref = new QuestPreferences();
-		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		pref.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.JDBC);
-		pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		pref.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, driver);
-		pref.setCurrentValueOf(QuestPreferences.JDBC_URL, url);
-		pref.setCurrentValueOf(QuestPreferences.DBUSER, username);
-		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, password);
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestPreferences.STORAGE_LOCATION, QuestConstants.JDBC);
+		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestPreferences.JDBC_DRIVER, driver);
+		p.setProperty(QuestPreferences.JDBC_URL, url);
+		p.setProperty(QuestPreferences.DB_USER, username);
+		p.setProperty(QuestPreferences.DB_PASSWORD, password);
 
-        QuestOWLFactory fac = new QuestOWLFactory(pref);
+        QuestOWLFactory fac = new QuestOWLFactory(new QuestPreferences(p));
 
-		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
-		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();
-		QuestOWLStatement st = (QuestOWLStatement) qconn.createStatement();
+		QuestOWL quest = fac.createReasoner(ontology);
+		QuestOWLConnection qconn = quest.getConnection();
+		QuestOWLStatement st = qconn.createStatement();
 
 		QueryController qc = new QueryController();
 		QueryIOManager qman = new QueryIOManager(qc);

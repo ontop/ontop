@@ -20,19 +20,16 @@ package org.semanticweb.ontop.owlrefplatform.core;
  * #L%
  */
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 import org.semanticweb.ontop.injection.OBDAProperties;
-import org.semanticweb.ontop.utils.OBDAPreferences;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * A class that represents the preferences which can be modified by the user.
+ * A class that represents the preferences overwritten by the user.
+ *
+ * Immutable class.
  */
 public class QuestPreferences extends OBDAProperties {
 
@@ -58,16 +55,16 @@ public class QuestPreferences extends OBDAProperties {
 
 	public static final String STORAGE_LOCATION = "STORAGE_LOCATION";
 
-    @Deprecated
-	public static final String JDBC_URL = OBDAProperties.JDBC_URL;
+    //@Deprecated
+	//public static final String JDBC_URL = OBDAProperties.JDBC_URL;
     @Deprecated
 	public static final String DBNAME = OBDAProperties.DB_NAME;
     @Deprecated
 	public static final String DBUSER = OBDAProperties.DB_USER;
     @Deprecated
 	public static final String DBPASSWORD = OBDAProperties.DB_PASSWORD;
-    @Deprecated
-	public static final String JDBC_DRIVER = OBDAProperties.JDBC_DRIVER;
+    //@Deprecated
+	//public static final String JDBC_DRIVER = OBDAProperties.JDBC_DRIVER;
 
 	public static final String PRINT_KEYS = "PRINT_KEYS";
 
@@ -76,80 +73,36 @@ public class QuestPreferences extends OBDAProperties {
 	public static final String INIT_POOL_SIZE = "initial_pool_size";
 	public static final String REMOVE_ABANDONED = "remove_abandoned";
 	public static final String ABANDONED_TIMEOUT = "abandoned_timeout";
-	public static final String KEEP_ALIVE = "keep_alive";	
-	
-	private Logger log = LoggerFactory.getLogger(QuestPreferences.class);
+	public static final String KEEP_ALIVE = "keep_alive";
 
+
+	/**
+	 * Beware: immutable class!
+	 *
+	 * --> Only default properties.
+	 */
 	public QuestPreferences() {
-        super();
-		try {
-			readDefaultQuestPropertiesFile();
-		} catch (IOException e1) {
-			log.error("Error reading default properties for reasoner.");
-			log.debug(e1.getMessage(), e1);
-		}
-	}
-
-	public QuestPreferences(Properties values) {
-		this();
-		this.putAll(values);
-	}
-
-	public void readDefaultQuestPropertiesFile() throws IOException {
-		readPropertiesFile(DEFAULT_QUEST_PROPERTIES_FILE);
-	}
-
-    private void readPropertiesFile(String fileName) throws IOException {
-        InputStream in =QuestPreferences.class.getResourceAsStream(fileName);
-        readDefaultPropertiesFile(in);
-    }
-
-	/**
-	 * Returns the current value for the given parameter.
-	 * 
-	 * @param var
-	 *            The parameter value.
-	 * @return The current value.
-	 */
-	public Object getCurrentValue(String var) {
-		return get(var);
+		this(new Properties());
 	}
 
 	/**
-	 * Returns the current value as boolean for the given parameter.
-	 * 
-	 * @param var
-	 *            The parameter value.
-	 * @return The current value as boolean if possible null otherwise.
+	 * Recommended constructor.
+	 *
+	 * Beware: immutable class!
+	 *
+	 * Changing the Properties object afterwards will not have any effect
+	 * on this OBDAProperties object.
 	 */
-	public boolean getCurrentBooleanValueFor(String var) {
-		String value = (String) getCurrentValue(var);
-		return Boolean.parseBoolean(value);
+	public QuestPreferences(Properties userPreferences) {
+		super(loadQuestPreferences(userPreferences));
 	}
 
-	/**
-	 * Returns the current value as an integer for the given parameter.
-	 * 
-	 * @param var
-	 *            The parameter value.
-	 * @return The current value as an integer if possible null otherwise.
-	 */
-	public int getCurrentIntegerValueFor(String var) {
-		String value = (String) getCurrentValue(var);
-		return Integer.parseInt(value);
+	private static Properties loadQuestPreferences(Properties userPreferences) {
+		Properties properties = loadDefaultPropertiesFromFile(DEFAULT_QUEST_PROPERTIES_FILE);
+		properties.putAll(userPreferences);
+		return properties;
 	}
 
-	/**
-	 * Updates the current value of the given parameter to the given object
-	 * 
-	 * @param var
-	 *            The parameter.
-	 * @param obj
-	 *            The new current value.
-	 */
-	public void setCurrentValueOf(String var, Object obj) {
-		put(var, obj);
-	}
 	
 	public List<String> getReformulationPlatformPreferencesKeys(){
 		ArrayList<String> keys = new ArrayList<String>();
@@ -164,5 +117,31 @@ public class QuestPreferences extends OBDAProperties {
 //		keys.add(CREATE_TEST_MAPPINGS);
 
 		return keys;
+	}
+
+	/**
+	 * NOT FOR END-USERS
+	 *
+	 * Returns a new (immutable) QuestPreferences object
+	 */
+	@Override
+	@Deprecated
+	public QuestPreferences newProperties(Object key, Object value) {
+		Properties newProperties = new Properties(getProperties());
+		newProperties.put(key, value);
+		return new QuestPreferences(newProperties);
+	}
+
+	/**
+	 * NOT FOR END-USERS
+	 *
+	 * Returns a new (immutable) QuestPreferences object
+	 */
+	@Override
+	@Deprecated
+	public QuestPreferences newProperties(Properties newProperties) {
+		Properties properties = new Properties(getProperties());
+		properties.putAll(newProperties);
+		return new QuestPreferences(properties);
 	}
 }

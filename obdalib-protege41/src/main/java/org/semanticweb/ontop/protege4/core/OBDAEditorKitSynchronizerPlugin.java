@@ -140,13 +140,15 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 				// here we ensure that if the abox mode is classic the the data location can only be in memory
 				if (key.equals(QuestPreferences.ABOX_MODE) && value.equals(QuestConstants.CLASSIC)) { 
 //					refplatPref.put(ReformulationPlatformPreferences.DATA_LOCATION, QuestConstants.INMEMORY);
-					refplatPref.put(key, value);
+					refplatPref = refplatPref.newProperties(key, value);
 					isCalssic = true;
 				}else{
-					refplatPref.put(key, value);
+					refplatPref = refplatPref.newProperties(key, value);
 				}
 			}
 		}
+		// Publish the new refplatPref
+		getEditorKit().put(QuestPreferences.class.getName(),refplatPref);
 	}
 	
 	private void storePreferences(){
@@ -161,7 +163,7 @@ public class OBDAEditorKitSynchronizerPlugin extends EditorKitHook {
 			pref.putString(key.toString(), value.toString());
 		}
 		
-		keys = refplatPref.keySet();
+		keys = refplatPref.getKeys();
 		it = keys.iterator();
 		while(it.hasNext()){
 			Object key = it.next();

@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Set;
 
 import org.openrdf.model.Literal;
@@ -126,12 +127,13 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	
 	private void setup(Ontology onto, QuestPreferences config) throws Exception {
 		if (config == null) {
-			config = new QuestPreferences();
+			Properties p = new Properties();
+			p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+			config = new QuestPreferences(p);
 		}
-		config.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 
 		if (!config.getProperty(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
-			throw new Exception("A classic repository must be created with the CLASSIC flag in the configuration.");
+			throw new IllegalArgumentException("A classic repository must be created with the CLASSIC flag in the configuration.");
 		}
 		createInstance(onto, config);
 	}
@@ -141,8 +143,8 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 
 		questInstance.setupRepository();
 		
-		final boolean bObtainFromOntology = config.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
-		final boolean bObtainFromMappings = config.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
+		final boolean bObtainFromOntology = config.getBoolean(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
+		final boolean bObtainFromMappings = config.getBoolean(QuestPreferences.OBTAIN_FROM_MAPPINGS);
 		OBDAConnection conn = questInstance.getNonPoolConnection();
         //TODO: avoid this cast
 		QuestStatement st = (QuestStatement) conn.createStatement();

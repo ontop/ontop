@@ -15,6 +15,7 @@ import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.util.Properties;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -48,10 +49,9 @@ public class InteractiveExample {
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
 		 */
-		QuestPreferences preference = new QuestPreferences();
-		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-
-		
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		QuestPreferences preference = new QuestPreferences(p);
 
 		/*
 		 * Create the instance of Quest OWL reasoner.

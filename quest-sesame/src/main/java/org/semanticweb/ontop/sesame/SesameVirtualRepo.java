@@ -36,6 +36,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Properties;
 
 import org.openrdf.model.Model;
 import org.openrdf.repository.RepositoryException;
@@ -86,15 +87,15 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	private QuestPreferences getPreferencesFromFile(String configFileName) throws FileNotFoundException, IOException {
-		QuestPreferences pref = new QuestPreferences();
+	private QuestPreferences getPreferencesFromFile(String configFileName) throws IOException {
 		if (!configFileName.isEmpty()) {
+			Properties p = new Properties();
 			File configFile = new File(URI.create(configFileName));
-			pref.readDefaultPropertiesFile(new FileInputStream(configFile));
+			p.load(new FileInputStream(configFile));
+			return new QuestPreferences(p);
 		} else {
-			pref.readDefaultQuestPropertiesFile();
+			return new QuestPreferences();
 		}
-		return pref;
 	}
 	
 	/**
@@ -105,17 +106,17 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	 * @return the QuestPreferences object
 	 */
 	private QuestPreferences getPreferencesFromSettings(boolean existential, String rewriting) {
-		QuestPreferences pref = new QuestPreferences();
-		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		if (existential)
-			pref.setCurrentValueOf(QuestPreferences.REWRITE, "true");
+			p.setProperty(QuestPreferences.REWRITE, "true");
 		else
-			pref.setCurrentValueOf(QuestPreferences.REWRITE, "false");
+			p.setProperty(QuestPreferences.REWRITE, "false");
 		if (rewriting.equals("TreeWitness"))
-			pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+			p.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		else if (rewriting.equals("Default"))
-			pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
-		return pref;
+			p.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+		return new QuestPreferences(p);
 	}
 	
 	private void createRepo(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences pref) throws Exception 
@@ -130,12 +131,14 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
     /**
      * If no MappingParser class has been explicitly set, declares R2RMLMappingParser
      * as the expected implementation.
+	 *
+	 * TODO: fix it! Does not work...
      */
     private QuestPreferences favorR2RMLParser(QuestPreferences preferences) {
         String mappingParserName = MappingParser.class.getCanonicalName();
         if (!preferences.contains(mappingParserName)) {
             // TODO: a immutable style would be better.
-            preferences.setProperty(mappingParserName, R2RMLMappingParser.class.getCanonicalName());
+            preferences = preferences.newProperties(mappingParserName, R2RMLMappingParser.class.getCanonicalName());
         }
         return preferences;
     }

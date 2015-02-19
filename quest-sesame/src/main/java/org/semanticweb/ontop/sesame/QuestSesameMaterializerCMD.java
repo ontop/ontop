@@ -22,7 +22,6 @@ package org.semanticweb.ontop.sesame;
 
 import java.io.*;
 import java.net.URI;
-import java.util.Properties;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -32,13 +31,13 @@ import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
-import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.ontology.Ontology;
 
 import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
-import org.semanticweb.ontop.r2rml.R2RMLMappingParser;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.R2RMLQuestPreferences;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -76,14 +75,20 @@ class QuestSesameMaterializerCMD {
 
         URI obdaURI =  new File(obdafile).toURI();
 
-        OBDAProperties preferences = new OBDAProperties();
-        /**
-         * R2RML case (OBDA Ontop format is the default one).
-         */
+
+		QuestPreferences preferences;
+		/**
+		 * R2RML case
+		 */
         if (obdaURI.toString().endsWith(".ttl")) {
-            preferences.setProperty(MappingParser.class.getCanonicalName(),
-                    R2RMLMappingParser.class.getCanonicalName());
+			preferences = new R2RMLQuestPreferences();
         }
+		/**
+		 * Default case: Ontop Native Mapping Language
+		 */
+		else {
+			preferences = new QuestPreferences();
+		}
 
         Injector injector = Guice.createInjector(new OBDACoreModule(preferences));
         NativeQueryLanguageComponentFactory nativeQLFactory = injector.getInstance(
@@ -115,7 +120,6 @@ class QuestSesameMaterializerCMD {
 			else {
 				ontology = manager.createOntology();
 			}
-			//OBDAModelSynchronizer.declarePredicates(ontology, model);
 
 			 //start materializer
 			SesameMaterializer materializer = new SesameMaterializer(model, onto);

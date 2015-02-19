@@ -28,6 +28,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
@@ -61,9 +62,10 @@ public class PropertyCharacteristicTest extends TestCase {
 	
 	private static 	QuestPreferences prefs;
 	static {
-		prefs = new QuestPreferences();
-		prefs.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		prefs.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.REWRITE, QuestConstants.TRUE);
+		prefs = new QuestPreferences(p);
 	}
 	
 	@Override

@@ -23,6 +23,7 @@ package org.semanticweb.ontop.reformulation.tests;
 import java.io.File;
 import java.sql.Connection;
 import java.util.List;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
@@ -81,18 +82,19 @@ public class OWLConstructDescribeTest extends TestCase{
 //
 //			obdaModel = fac.getOBDAModel();
 //			obdaModel.addSource(source);
-			
-			QuestPreferences p = new QuestPreferences();
-			p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-			p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
-			p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-			p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 
-			p.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
-			p.setCurrentValueOf(QuestPreferences.REWRITE, "false");
-			p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-			QuestOWLFactory factory = new QuestOWLFactory(p);
+
+		    Properties p = new Properties();
+			p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+			p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+			p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+			p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
+			p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+			p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+			p.setProperty(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
+		    p.setProperty(QuestPreferences.REWRITE, "false");
+		    p.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		QuestPreferences preferences = new QuestPreferences(p);
+			QuestOWLFactory factory = new QuestOWLFactory(preferences);
 			reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
 			conn = reasoner.getConnection();
 			st = conn.createStatement();

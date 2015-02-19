@@ -16,6 +16,7 @@ import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.Objec
 import static org.semanticweb.owlapi.apibinding.OWLFunctionalSyntaxFactory.ObjectPropertyAssertion;
 
 import java.io.File;
+import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,12 +63,13 @@ public class InconsistencyCheckingVirtualTest {
 	
 	@Before
 	public void setUp() throws Exception {
-
-		p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, QuestConstants.TRUE);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, QuestConstants.TRUE);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, QuestConstants.TRUE);
+		
+		Properties props = new Properties();
+		props.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		props.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, QuestConstants.TRUE);
+		props.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, QuestConstants.TRUE);
+		props.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, QuestConstants.TRUE);
+		p = new QuestPreferences(props);
 		
 		manager = OWLManager.createOWLOntologyManager();
 		try {
@@ -88,7 +90,7 @@ public class InconsistencyCheckingVirtualTest {
 	private void startReasoner(){
         try {
 		    QuestOWLFactory questOWLFactory = new QuestOWLFactory(new File(obdafile), p);
-			reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology);
+			reasoner = questOWLFactory.createReasoner(ontology);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

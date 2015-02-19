@@ -181,7 +181,7 @@ public class Quest implements Serializable, IQuest {
 
 	private OBDADataSource obdaSource;
 
-	private Properties preferences;
+	private QuestPreferences preferences;
 
 	private boolean inmemory;
 
@@ -248,7 +248,7 @@ public class Quest implements Serializable, IQuest {
 	 */
 	@Inject
 	private Quest(@Assisted Ontology tbox, @Assisted @Nullable OBDAModel mappings, @Assisted @Nullable DBMetadata metadata,
-				  @Assisted Properties config, NativeQueryLanguageComponentFactory nativeQLFactory,
+				  @Assisted QuestPreferences config, NativeQueryLanguageComponentFactory nativeQLFactory,
 				  OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory,
 				  MappingVocabularyFixer mappingVocabularyFixer) throws DuplicateMappingException {
 		if (tbox == null)
@@ -401,12 +401,12 @@ public class Quest implements Serializable, IQuest {
 	}
 
 	@Override
-	public Properties getPreferences() {
+	public QuestPreferences getPreferences() {
 		return preferences;
 	}
 
 
-	private void setPreferences(Properties preferences) {
+	private void setPreferences(QuestPreferences preferences) {
 		this.preferences = preferences;
 
 		keepAlive = Boolean.valueOf((String) preferences.get(QuestPreferences.KEEP_ALIVE));
@@ -749,7 +749,7 @@ public class Quest implements Serializable, IQuest {
 					SQLGenerator.class.getCanonicalName());
 			if (isSQL) {
 				String parameter = datasource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-				SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(parameter, (QuestPreferences) preferences);
+				SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(parameter, preferences);
 				preprocessProjection(localConnection, unfoldingOBDAModel.getMappings(sourceId), fac, sqladapter);
 			}
 

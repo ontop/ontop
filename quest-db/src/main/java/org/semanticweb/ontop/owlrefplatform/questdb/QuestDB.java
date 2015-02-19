@@ -140,8 +140,7 @@ public class QuestDB {
 		if (stores.containsKey(name))
 			throw new Exception("A store already exists with the name" + name);
 
-		QuestPreferences config = new QuestPreferences();
-		config.putAll(params);
+		QuestPreferences config = new QuestPreferences(params);
 
 		QuestDBClassicStore store;
 

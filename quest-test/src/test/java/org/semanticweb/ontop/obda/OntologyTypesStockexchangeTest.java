@@ -62,12 +62,12 @@ public class OntologyTypesStockexchangeTest {
 		
 	}
 
-	private void runTests(QuestPreferences p, String query1, int numberResults) throws Exception {
+	private void runTests(Properties p, String query1, int numberResults) throws Exception {
 
 		// Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), p);
+        QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), new QuestPreferences(p));
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();
@@ -110,10 +110,10 @@ public class OntologyTypesStockexchangeTest {
 	@Test //we need xsd:string to work correctly 
 	public void testQuotedLiteral() throws Exception {
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?street WHERE {?x a :Address; :inStreet ?street; :inCity \"Bolzano\".}";
 
@@ -123,10 +123,10 @@ public class OntologyTypesStockexchangeTest {
     @Test
     public void testDatatypeString() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+        Properties p = new Properties();
+        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?street WHERE {?x a :Address; :inStreet ?street; :inCity \"Bolzano\"^^xsd:string .}";
 
@@ -139,10 +139,10 @@ public class OntologyTypesStockexchangeTest {
     @Test //we need xsd:string to work correctly 
     public void testAddressesQuotedLiteral() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+        Properties p = new Properties();
+        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n" +
                 "SELECT DISTINCT * WHERE {      \n" +
@@ -161,10 +161,10 @@ public class OntologyTypesStockexchangeTest {
     @Test //in db2 there is no boolean type we refer to it in the database with a smallint 1 for true and a smallint 0 for false
     public void testBooleanDatatype() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+        Properties p = new Properties();
+        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares \"1\"^^xsd:integer . }";
 
@@ -174,10 +174,10 @@ public class OntologyTypesStockexchangeTest {
     @Test
     public void testBooleanInteger() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+        Properties p = new Properties();
+        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares 1 . }";
 
@@ -188,10 +188,10 @@ public class OntologyTypesStockexchangeTest {
     @Test
     public void testBoolean() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+        Properties p = new Properties();
+        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares TRUE . }";
 
@@ -202,10 +202,10 @@ public class OntologyTypesStockexchangeTest {
     @Test
     public void testBooleanTrueDatatype() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+        Properties p = new Properties();
+        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares \"1\"^^xsd:boolean . }";
 
@@ -216,10 +216,10 @@ public class OntologyTypesStockexchangeTest {
     @Test
     public void testFilterBoolean() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+        Properties p = new Properties();
+        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?amount WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares ?type. FILTER ( ?type = 1 ). }";
 
@@ -229,10 +229,10 @@ public class OntologyTypesStockexchangeTest {
     @Test
     public void testNotFilterBoolean() throws Exception {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+        Properties p = new Properties();
+        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?amount WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares ?type. FILTER ( ?type != 1 ). }";
 
@@ -242,10 +242,10 @@ public class OntologyTypesStockexchangeTest {
     @Test //a quoted integer is treated as a literal
     public void testQuotedInteger() throws Exception {
 
-    	  QuestPreferences p = new QuestPreferences();
-          p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-          p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-          p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+    	  Properties p = new Properties();
+          p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+          p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+          p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
           String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares \"1\" . }";
 

@@ -61,7 +61,6 @@ public class QuestOWLExample_ReasoningDisabled {
 		 * "Virtual ABox" mode
 		 */
         QuestPreferences preference = new QuestPreferences();
-        preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 //		TEST preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
 
 		/*

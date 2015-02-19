@@ -19,6 +19,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Scanner;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
@@ -34,6 +35,7 @@ import org.openrdf.query.GraphQueryResult;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.r2rml.R2RMLManager;
@@ -87,15 +89,17 @@ public class TestSesameBindings {
         R2RMLManager rmanager = new R2RMLManager(r2rmlfile);
         model = rmanager.getModel();
 
-        preference = new QuestPreferences();
-        preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        preference.setCurrentValueOf(QuestPreferences.DBNAME, "countries");
-        preference.setCurrentValueOf(QuestPreferences.JDBC_URL, "jdbc:h2:mem:countries");
-        preference.setCurrentValueOf(QuestPreferences.DBUSER, "sa");
-        preference.setCurrentValueOf(QuestPreferences.DBPASSWORD, "");
-        preference.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, "org.h2.Driver");
+        Properties p = new Properties();
+        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(OBDAProperties.DB_NAME, "countries");
+        p.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:mem:countries");
+        p.setProperty(OBDAProperties.DB_USER, "sa");
+        p.setProperty(OBDAProperties.DB_PASSWORD, "");
+        p.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
 
-        SesameVirtualRepo repo = new SesameVirtualRepo("", ontology, model, preference);
+        QuestPreferences preferences = new QuestPreferences(p);
+
+        SesameVirtualRepo repo = new SesameVirtualRepo("", ontology, model, preferences);
         repo.initialize();
         /*
          * Prepare the data connection for querying.

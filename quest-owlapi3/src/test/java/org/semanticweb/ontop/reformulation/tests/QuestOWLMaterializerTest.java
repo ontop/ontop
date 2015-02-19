@@ -66,9 +66,10 @@ public class QuestOWLMaterializerTest extends TestCase {
 
 	private static QuestPreferences prefs;
 	static {
-		prefs = new QuestPreferences();
-		prefs.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		prefs.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.REWRITE, QuestConstants.TRUE);
+		prefs = new QuestPreferences(p);
 	}
 
     public QuestOWLMaterializerTest() {

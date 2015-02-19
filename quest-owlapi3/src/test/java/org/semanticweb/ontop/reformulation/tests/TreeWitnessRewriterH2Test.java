@@ -317,22 +317,22 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 		prepareTestQueries(tuples);
 		/*
 		 * QuestPreferences p = new QuestPreferences();
-		 * p.setCurrentValueOf(QuestPreferences.ABOX_MODE,
+		 * p.setProperty(QuestPreferences.ABOX_MODE,
 		 * QuestConstants.VIRTUAL);
-		 * p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		 * p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		 * p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		 * p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		 * p.setProperty("rewrite", "true");
 		 */
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		Properties p  = new Properties();
+		p.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setProperty("rewrite", "true");
 
-		runTests(p);
+		runTests(new QuestPreferences(p));
 	}
 
 }

@@ -164,7 +164,7 @@ public class QuestOWL extends OWLReasonerBase {
 
 	private final OBDAModel obdaModel;
 
-	private QuestPreferences preferences = new QuestPreferences();
+	private QuestPreferences preferences;
 
 	private IQuest questInstance = null;
 
@@ -196,15 +196,13 @@ public class QuestOWL extends OWLReasonerBase {
 	 * Initialization code which is called from both of the two constructors.
 	 * 
 	 */
-	private void init(OWLOntology rootOntology, OWLReasonerConfiguration configuration, Properties preferences){
+	private void init(OWLOntology rootOntology, OWLReasonerConfiguration configuration){
 		pm = configuration.getProgressMonitor();
 		if (pm == null) {
 			pm = new NullReasonerProgressMonitor();
 		}
 
 		man = rootOntology.getOWLOntologyManager();
-		
-		this.preferences.putAll(preferences);
 
 		extractVersion();
 		
@@ -218,12 +216,13 @@ public class QuestOWL extends OWLReasonerBase {
      *
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration,
-                    BufferingMode bufferingMode, Properties preferences, QuestComponentFactory componentFactory) {
+                    BufferingMode bufferingMode, QuestPreferences preferences, QuestComponentFactory componentFactory) {
 		super(rootOntology, configuration, bufferingMode);
         this.obdaModel = obdaModel;
         this.componentFactory = componentFactory;
+		this.preferences = preferences;
 
-		this.init(rootOntology, configuration, preferences);
+		this.init(rootOntology, configuration);
 
 	}
 
@@ -233,7 +232,7 @@ public class QuestOWL extends OWLReasonerBase {
 	 * @param userConstraints User-supplied primary and foreign keys
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, ImplicitDBConstraints userConstraints, QuestComponentFactory componentFactory) {
+			QuestPreferences preferences, ImplicitDBConstraints userConstraints, QuestComponentFactory componentFactory) {
 		super(rootOntology, configuration, bufferingMode);
 		
 		this.userConstraints = userConstraints;
@@ -242,8 +241,9 @@ public class QuestOWL extends OWLReasonerBase {
 
         this.obdaModel = obdaModel;
         this.componentFactory = componentFactory;
+		this.preferences = preferences;
 		
-		this.init(rootOntology, configuration, preferences);
+		this.init(rootOntology, configuration);
 	}
 	
 	
@@ -303,9 +303,9 @@ public class QuestOWL extends OWLReasonerBase {
 
 		log.debug("Initializing a new Quest instance...");
 
-		final boolean bObtainFromOntology = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
-		final boolean bObtainFromMappings = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
-		final String unfoldingMode = (String) preferences.getCurrentValue(QuestPreferences.ABOX_MODE);
+		final boolean bObtainFromOntology = preferences.getBoolean(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
+		final boolean bObtainFromMappings = preferences.getBoolean(QuestPreferences.OBTAIN_FROM_MAPPINGS);
+		final String unfoldingMode = (String) preferences.get(QuestPreferences.ABOX_MODE);
 
 		// pm.reasonerTaskStarted("Classifying...");
 		// pm.reasonerTaskBusy();

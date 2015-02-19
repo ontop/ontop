@@ -81,7 +81,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	
 	public QuestDBVirtualStore(String name, QuestPreferences pref) throws Exception {
 		// direct mapping : no tbox, no obda file, repo in-mem h2
-		this(name, (URI)null, null, pref);
+		this(name, null, null, pref);
 	}
 
 	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config) throws Exception {
@@ -136,7 +136,8 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			config = new QuestPreferences();
 		}
 		//we are working in virtual mode
-		config.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		if (!config.getProperty(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL))
+			throw new IllegalArgumentException("Virtual mode was expected in QuestDBVirtualStore!");
 
 		//obtain the ontology
 		Ontology tbox;

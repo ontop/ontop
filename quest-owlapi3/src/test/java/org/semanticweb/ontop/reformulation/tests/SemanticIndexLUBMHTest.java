@@ -21,6 +21,7 @@ package org.semanticweb.ontop.reformulation.tests;
  */
 
 import java.io.File;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
@@ -65,13 +66,13 @@ public class SemanticIndexLUBMHTest extends TestCase {
 	public void test3InitializingQuest() throws Exception {
 		long start = System.nanoTime();
 
-        QuestPreferences pref = new QuestPreferences();
-        pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-        pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+        Properties p = new Properties();
+        p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
 	
-		QuestOWLFactory fac = new QuestOWLFactory(pref);
+		QuestOWLFactory fac = new QuestOWLFactory(new QuestPreferences(p));
 
-		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
+		QuestOWL quest = fac.createReasoner(ontology);
 		QuestOWLConnection qconn = quest.getConnection();
 
 		QuestOWLStatement st = qconn.createStatement();

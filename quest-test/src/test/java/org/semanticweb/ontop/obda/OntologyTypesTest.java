@@ -68,10 +68,10 @@ public class OntologyTypesTest{
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
 	}
 
-	private void runTests(QuestPreferences p, String query, int numberResults) throws Exception {
+	private void runTests(Properties p, String query, int numberResults) throws Exception {
 
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), p);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), new QuestPreferences(p));
 
 		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
@@ -115,10 +115,10 @@ public class OntologyTypesTest{
 
 	@Test
 	public void testOntologyType() throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		
 		//no value in the mapping
 		//xsd:long in the ontology, asking for the general case we will not have any result
@@ -194,35 +194,33 @@ public class OntologyTypesTest{
 		p.setProperty(OBDAProperties.JDBC_DRIVER, driverclass);
 		p.setProperty(MappingParser.class.getCanonicalName(), R2RMLMappingParser.class.getCanonicalName());
 
-		QuestPreferences preferences = new QuestPreferences(p);
-
         //no value in the mapping
         //xsd:long in the ontology, asking for the general case we will not have any result
         String query1 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :number ?y. FILTER(datatype(?y) = xsd:integer)}";
 
-        runTests(preferences, query1, 0);
+        runTests(p, query1, 0);
 //
 //        //no value in the mapping
         //xsd:long in the ontology
         String query1b = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :number ?y. FILTER(datatype(?y) = xsd:long)}";
 
-        runTests(preferences, query1b, 3);
+        runTests(p, query1b, 3);
 
         //no value in the mapping
         //xsd:string in the ontology
         String query2 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :assayName ?y. FILTER(datatype(?y) = xsd:string)}";
 
-        runTests(preferences, query2, 3);
+        runTests(p, query2, 3);
 
         //no value in the ontology
         //rdfs:Literal in the mapping
         String query3 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :hasDepartment ?y. FILTER(datatype(?y) = rdfs:Literal)}";
 
-        runTests(preferences, query3, 3);
+        runTests(p, query3, 3);
 
         //no value in the ontology
         //no value in the mapping
@@ -230,7 +228,7 @@ public class OntologyTypesTest{
         String query4 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :AssayID ?y. FILTER(datatype(?y) = xsd:decimal)}";
 
-        runTests(preferences, query4, 3);
+        runTests(p, query4, 3);
 
         // no value in the ontology
         //value in the mapping is xsd:long
@@ -238,7 +236,7 @@ public class OntologyTypesTest{
         String query5 = "PREFIX franz: <http://www.franz.com/>" +
                 "select * {?x  franz:solrDocid ?y. FILTER(datatype(?y) = xsd:long)}";
 
-        runTests(preferences, query5, 3);
+        runTests(p, query5, 3);
 
         // no value in the ontology
         //value in the mapping is xsd:positiveInteger
@@ -246,21 +244,21 @@ public class OntologyTypesTest{
         String query6 = "PREFIX : <http://www.company.com/ARES#>" +
                 "select * {?x :hasSection ?y. FILTER(datatype(?y) = xsd:positiveInteger)}";
 
-        runTests(preferences, query6, 3);
+        runTests(p, query6, 3);
     }
 
 	@Test
 	// Ontology datatype http://www.w3.org/2001/XMLSchema#integer for http://www.company.com/ARES#hasARESID
 	// does not correspond to datatype http://www.w3.org/2001/XMLSchema#string in mappings
 	public void failedMapping()  throws Exception  {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
 		try {
 			// Creating a new instance of the reasoner
-			QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), p);
+			QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), new QuestPreferences(p));
 			factory.createReasoner(ontology, new SimpleConfiguration());
 
 		} catch (Exception e) {

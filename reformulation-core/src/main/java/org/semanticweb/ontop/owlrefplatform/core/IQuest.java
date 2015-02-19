@@ -43,7 +43,7 @@ public interface IQuest extends RepositoryChangedListener {
 
     void dispose();
 
-    Properties getPreferences();
+    QuestPreferences getPreferences();
 
     void disconnect() throws SQLException;
 
