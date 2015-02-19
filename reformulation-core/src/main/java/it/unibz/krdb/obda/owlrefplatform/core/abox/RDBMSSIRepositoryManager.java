@@ -59,9 +59,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -586,8 +583,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				stm.setString(2, value);
 				break;
 	        case INT:   // 3
-	            if (value.charAt(0) == '+')
-	                value = value.substring(1, value.length());
+	            //if (value.charAt(0) == '+') // ROMAN: not needed in Java 7
+	            //    value = value.substring(1, value.length());
 	        	stm.setInt(2, Integer.parseInt(value));
 	            break;
 	        case UNSIGNED_INT:  // 4
@@ -599,8 +596,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	        case NON_NEGATIVE_INTEGER: // 7
 	        case NON_POSITIVE_INTEGER: // 8
 	        case LONG: // 10
-	            if (value.charAt(0) == '+')
-	                value = value.substring(1, value.length());
+	            //if (value.charAt(0) == '+')  // ROMAN: not needed in Java 7
+	            //    value = value.substring(1, value.length());
 	            stm.setLong(2, Long.parseLong(value));
 	            break;
 	        case FLOAT: // 9
@@ -614,16 +611,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				break;
 			case DATETIME_STAMP: // 15
 			case DATETIME: // 13
-				stm.setTimestamp(2, parseTimestamp(value));
+				stm.setTimestamp(2, XsdDatatypeConverter.parseXsdDateTime(value));
 				break;
-			case BOOLEAN: // 14
-				// PostgreSQL abbreviates the boolean value to 't' and 'f'
-				if (value.equalsIgnoreCase("t") || value.equals("1")) 
-					value = "true";
-				else if (value.equalsIgnoreCase("f") || value.equals("0")) 
-					value= "false";
-			
-				stm.setBoolean(2, Boolean.parseBoolean(value));
+			case BOOLEAN: // 14				
+				stm.setBoolean(2, XsdDatatypeConverter.parseXsdBoolean(value));
 				break;
 			default:
 				// UNSUPPORTED DATATYPE
@@ -694,30 +685,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 
 
-
-
-
-	private static final String[] formatStrings = { 
-				"yyyy-MM-dd HH:mm:ss.SS", 
-				"yyyy-MM-dd HH:mm:ss.S", 
-				"yyyy-MM-dd HH:mm:ss", 
-				"yyyy-MM-dd",
-				"yyyy-MM-dd'T'HH:mm:ssz" };
-	
-	private static Timestamp parseTimestamp(String lit) {
-
-		for (String formatString : formatStrings) {
-			try {
-				long time = new SimpleDateFormat(formatString).parse(lit).getTime();
-				Timestamp ts = new Timestamp(time);
-				return ts;
-			} 
-			catch (ParseException e) {
-			}
-		}
-		return null; // the string can't be parsed to one of the datetime
-						// formats.
-	}
 
 	// Attribute datatype from TBox
 	/*

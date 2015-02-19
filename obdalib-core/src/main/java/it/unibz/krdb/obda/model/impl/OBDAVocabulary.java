@@ -31,8 +31,8 @@ public class OBDAVocabulary {
 	/* Constants */
 
 	public static final ValueConstant NULL = new ValueConstantImpl("null", COL_TYPE.STRING);
-	public static final ValueConstant TRUE = new ValueConstantImpl("t", COL_TYPE.BOOLEAN);
-	public static final ValueConstant FALSE = new ValueConstantImpl("f", COL_TYPE.BOOLEAN);
+	public static final ValueConstant TRUE = new ValueConstantImpl("true", COL_TYPE.BOOLEAN);
+	public static final ValueConstant FALSE = new ValueConstantImpl("false", COL_TYPE.BOOLEAN);
 
 	
 	/* Numeric operation predicates */

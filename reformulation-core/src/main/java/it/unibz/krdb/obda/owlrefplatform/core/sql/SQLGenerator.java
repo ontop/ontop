@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.XsdDatatypeConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
@@ -1313,16 +1314,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			sql = "'" + constant.getValue() + "'";
 		} 
 		else if (constant.getType() == COL_TYPE.BOOLEAN) {
-			String value = constant.getValue().toLowerCase();
-			if (value.equals("1") || value.equals("true") || value.equals("t")) {
-				sql = sqladapter.getSQLLexicalFormBoolean(true);
-			} 
-			else if (value.equals("0") || value.equals("false") || value.equals("f")) {
-				sql = sqladapter.getSQLLexicalFormBoolean(false);
-			} 
-			else {
-				throw new RuntimeException("Invalid lexical form for xsd:boolean. Found: " + value);
-			}
+			String value = constant.getValue();
+			boolean v = XsdDatatypeConverter.parseXsdBoolean(value);
+			sql = sqladapter.getSQLLexicalFormBoolean(v);
 		} 
 		else if (constant.getType() == COL_TYPE.DATETIME ) {
 			sql = sqladapter.getSQLLexicalFormDatetime(constant.getValue());
