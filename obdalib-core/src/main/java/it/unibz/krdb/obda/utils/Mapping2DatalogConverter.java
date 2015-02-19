@@ -543,7 +543,8 @@ public class Mapping2DatalogConverter {
                         t3 = fac.getConstantLiteral("");
                     }
                     result = fac.getFunctionRegex(t1, t2, t3);
-                }
+                } else
+
                 throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function Regex");
             } else if (func.getName().toLowerCase().endsWith("replace")) {
 
