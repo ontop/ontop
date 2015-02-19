@@ -765,16 +765,6 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 
 
     /**
-     * Converts a function symbol into a code type (integer).
-     *
-     * May return an UNDEFINED_TYPE_CODE value.
-     */
-    private static int getCodeTypeFromFunctionSymbol(Predicate predicate) {
-    	String predName = predicate.getName();
-        return predicateCodeTypes.containsKey(predName) ? predicateCodeTypes.get(predName) : UNDEFINED_TYPE_CODE;
-    }
-
-    /**
      * Gets the type of a variable.
      *
      * Such variable does not hold this information, so we have to look
@@ -809,7 +799,7 @@ public class NewSQLGenerator extends AbstractQueryGenerator implements NativeQue
 			String table = unquote(splits[0]);
 			String column = unquote(splits[1]);
 
-			DataDefinition definition = metadata.getDefinition(table);
+			DataDefinition definition = findDataDefinition(table, index);
 			/**
 			 * If the var is defined in a ViewDefinition, then there is a
 			 * column for the type and we just need to refer to that column.
