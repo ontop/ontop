@@ -51,22 +51,22 @@ public class OBDAProperties {
         /**
          * Loads default properties
          */
-        properties = loadDefaultPropertiesFromFile(DEFAULT_OBDA_PROPERTIES_FILE);
+        properties = loadDefaultPropertiesFromFile(OBDAProperties.class, DEFAULT_OBDA_PROPERTIES_FILE);
         /**
          * Overloads the default properties.
          */
         properties.putAll(userProperties);
     }
 
-    protected static Properties loadDefaultPropertiesFromFile(String fileName) {
+    protected static Properties loadDefaultPropertiesFromFile(Class localClass, String fileName) {
         Properties properties = new Properties();
         try {
-            InputStream in = OBDAProperties.class.getResourceAsStream(fileName);
+            InputStream in = localClass.getResourceAsStream(fileName);
             properties.load(in);
         } catch (IOException e1) {
             LOG.error("Error reading default OBDA properties.");
             LOG.debug(e1.getMessage(), e1);
-            //TODO: should we throw a RuntimeException?
+            throw new RuntimeException("Impossible to extract configuration from " + fileName);
         }
         return properties;
     }

@@ -98,7 +98,7 @@ public class QuestPreferences extends OBDAProperties {
 	}
 
 	private static Properties loadQuestPreferences(Properties userPreferences) {
-		Properties properties = loadDefaultPropertiesFromFile(DEFAULT_QUEST_PROPERTIES_FILE);
+		Properties properties = loadDefaultPropertiesFromFile(QuestPreferences.class, DEFAULT_QUEST_PROPERTIES_FILE);
 		properties.putAll(userPreferences);
 		return properties;
 	}
