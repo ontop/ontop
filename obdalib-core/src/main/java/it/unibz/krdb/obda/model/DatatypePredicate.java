@@ -20,6 +20,6 @@ package it.unibz.krdb.obda.model;
  * #L%
  */
 
-public interface DataTypePredicate extends BuiltinPredicate {
+public interface DatatypePredicate extends BuiltinPredicate {
 	// NO-OP
 }

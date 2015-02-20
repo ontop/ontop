@@ -20,22 +20,22 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 
 	
 	// special case of literals with the specified language 
-	private final DataTypePredicateImpl RDFS_LITERAL_LANG = new DataTypePredicateImpl(RDFS.LITERAL.toString(), 
+	private final DatatypePredicateImpl RDFS_LITERAL_LANG = new DatatypePredicateImpl(RDFS.LITERAL.toString(),
 									new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL });
 	
-	private final DataTypePredicateImpl RDFS_LITERAL, XSD_STRING;
-	private final DataTypePredicateImpl XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
-	private final DataTypePredicateImpl XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER;
-	private final DataTypePredicateImpl XSD_INT, XSD_UNSIGNED_INT, XSD_LONG;
-	private final DataTypePredicateImpl XSD_DECIMAL;
-	private final DataTypePredicateImpl XSD_DOUBLE, XSD_FLOAT;
-	private final DataTypePredicateImpl XSD_DATETIME, XSD_DATETIME_STAMP;
-	private final DataTypePredicateImpl XSD_BOOLEAN;
-	private final DataTypePredicateImpl XSD_DATE, XSD_TIME, XSD_YEAR;
+	private final DatatypePredicateImpl RDFS_LITERAL, XSD_STRING;
+	private final DatatypePredicateImpl XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
+	private final DatatypePredicateImpl XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER;
+	private final DatatypePredicateImpl XSD_INT, XSD_UNSIGNED_INT, XSD_LONG;
+	private final DatatypePredicateImpl XSD_DECIMAL;
+	private final DatatypePredicateImpl XSD_DOUBLE, XSD_FLOAT;
+	private final DatatypePredicateImpl XSD_DATETIME, XSD_DATETIME_STAMP;
+	private final DatatypePredicateImpl XSD_BOOLEAN;
+	private final DatatypePredicateImpl XSD_DATE, XSD_TIME, XSD_YEAR;
 	
 	private final Map<String, COL_TYPE> mapURItoCOLTYPE = new HashMap<String, COL_TYPE>();
 	private final Map<COL_TYPE, URI> mapCOLTYPEtoURI = new HashMap<COL_TYPE, URI>();
-	private final Map<COL_TYPE, DataTypePredicateImpl> mapCOLTYPEtoPredicate = new HashMap<COL_TYPE, DataTypePredicateImpl>();
+	private final Map<COL_TYPE, DatatypePredicateImpl> mapCOLTYPEtoPredicate = new HashMap<COL_TYPE, DatatypePredicateImpl>();
 	private final List<Predicate> predicateList = new LinkedList<Predicate>();
 	
 	DatatypeFactoryImpl() {
@@ -69,11 +69,11 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 
 	}
 	
-	private final DataTypePredicateImpl registerType(org.openrdf.model.URI uri, COL_TYPE type) {
+	private final DatatypePredicateImpl registerType(org.openrdf.model.URI uri, COL_TYPE type) {
 		String sURI = uri.toString();
 		mapURItoCOLTYPE.put(sURI, type);  
 		mapCOLTYPEtoURI.put(type, uri); 
-		DataTypePredicateImpl predicate = new DataTypePredicateImpl(sURI, type);
+		DatatypePredicateImpl predicate = new DatatypePredicateImpl(sURI, type);
 		mapCOLTYPEtoPredicate.put(type, predicate);
 		predicateList.add(predicate);
 		return predicate;

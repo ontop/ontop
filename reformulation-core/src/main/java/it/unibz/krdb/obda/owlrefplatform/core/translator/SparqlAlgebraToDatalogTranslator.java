@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
+import it.unibz.krdb.obda.model.DatatypePredicate;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
@@ -46,7 +46,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -1230,7 +1229,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		if (term instanceof Function) {
 			Function f = (Function) term;
 			Predicate functor = f.getFunctionSymbol();
-			if (functor instanceof DataTypePredicate) {
+			if (functor instanceof DatatypePredicate) {
 				Term functionTerm = f.getTerm(0);
 				if (functionTerm instanceof Constant) {
 					Constant c = (Constant) functionTerm;
