@@ -10,7 +10,6 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
@@ -18,7 +17,6 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,13 +37,6 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
-
-
-
-import org.antlr.runtime.*;
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
 
 @SuppressWarnings("all")
 public class TurtleOBDAParser extends Parser {
@@ -1539,7 +1530,7 @@ public class TurtleOBDAParser extends Parser {
 					    } else {
 					        throw new IllegalArgumentException("resource25 should be an URI");
 					    }
-					    Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+					    Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
 					    if (type == null)  
 					 	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
 					    
@@ -2000,7 +1991,7 @@ public class TurtleOBDAParser extends Parser {
 			      if (resource38 instanceof Function){
 				 functionName = ( (ValueConstant) ((Function)resource38).getTerm(0) ).getValue();
 			      }
-			      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+			      Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
 			      if (type == null) {
 			            throw new RuntimeException("Unsupported datatype: " + functionName);
 			      }

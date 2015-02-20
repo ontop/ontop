@@ -743,7 +743,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			} 
 			else if (o instanceof URIImpl) {
 				URI objectUri = (URI)o; 
-				Predicate.COL_TYPE type = dtfac.getDataType(objectUri);
+				Predicate.COL_TYPE type = dtfac.getDatatype(objectUri);
 				if (type != null) {
 					Predicate predicate = dtfac.getTypePredicate(type);
 					atom = ofac.getFunction(predicate, sTerm);
@@ -1013,7 +1013,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		if (typeURI == null) 
 			return COL_TYPE.LITERAL;
 		
-		COL_TYPE dataType = dtfac.getDataType(typeURI);
+		COL_TYPE dataType = dtfac.getDatatype(typeURI);
         if (dataType == null) 
 			throw new RuntimeException("Unsupported datatype: " + typeURI.stringValue());
 		
@@ -1082,7 +1082,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				tp = COL_TYPE.LITERAL;
 			}
 			else {
-				tp = dtfac.getDataType(type);
+				tp = dtfac.getDatatype(type);
 				if (tp == null) {
 					return ofac.getUriTemplateForDatatype(type.stringValue());
 				}				

@@ -683,7 +683,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Function f = (Function) term;
 		if (f.isDataTypeFunction()) {
 			Predicate p = f.getFunctionSymbol();
-			Predicate.COL_TYPE type = dtfac.getDataType(p.toString());			
+			Predicate.COL_TYPE type = dtfac.getDatatype(p.toString());
 			return OBDADataFactoryImpl.getInstance().getJdbcTypeMapper().getSQLType(type);
 		}
 		// Return varchar for unknown
@@ -887,7 +887,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			else {
 				String functionString = function.toString();
-				type = dtfac.getDataType(functionString);
+				type = dtfac.getDatatype(functionString);
 			}
 		} 
 		else if (ht instanceof URIConstant) {

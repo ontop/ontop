@@ -387,7 +387,7 @@ public class ExpressionEvaluator {
 				else {
 					return fac.getTypedTerm(
 							fac.getFunctionCast(fac.getVariable(parameter.toString()),
-									fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.LITERAL).stringValue())), 
+									fac.getConstantLiteral(dtfac.getDatatypeURI(COL_TYPE.LITERAL).stringValue())),
 										COL_TYPE.LITERAL);
 				}
 			} 
@@ -426,12 +426,12 @@ public class ExpressionEvaluator {
 			return null;
 		} 
 		else if (predicate instanceof AlgebraOperatorPredicate){
-			return fac.getUriTemplateForDatatype(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue());
+			return fac.getUriTemplateForDatatype(dtfac.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
 		} 
 		else if (predicate instanceof OperationPredicate){
 			if (predicate instanceof BooleanOperationPredicate) {
 				//return boolean uri
-				return fac.getUriTemplateForDatatype(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue());
+				return fac.getUriTemplateForDatatype(dtfac.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
 			}
 			else if (predicate instanceof NumericalOperationPredicate)
 			{
@@ -491,7 +491,7 @@ public class ExpressionEvaluator {
 	
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
-		Predicate.COL_TYPE type = dtfac.getDataType(constantValue);
+		Predicate.COL_TYPE type = dtfac.getDatatype(constantValue);
 		if (type != null) {
 			Predicate p = dtfac.getTypePredicate(type);
 			return isNumeric(p);

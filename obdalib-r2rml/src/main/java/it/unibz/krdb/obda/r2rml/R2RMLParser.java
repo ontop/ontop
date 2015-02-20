@@ -344,7 +344,7 @@ public class R2RMLParser {
 		//we check if it is a typed literal 
 		if (datatype != null)
 		{
-			Predicate.COL_TYPE type = dtfac.getDataType(datatype.toString());
+			Predicate.COL_TYPE type = dtfac.getDatatype(datatype.toString());
 			if (type == null) {
 //				throw new RuntimeException("Unsupported datatype: " + datatype.toString());
 				logger.warn("Unsupported datatype will not be converted: " + datatype.toString());
