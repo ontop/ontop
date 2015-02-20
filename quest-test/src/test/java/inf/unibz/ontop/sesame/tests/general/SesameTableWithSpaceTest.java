@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-public class TableWithSpaceTest extends TestCase {
+public class SesameTableWithSpaceTest extends TestCase {
 
 	String owlfile = "src/test/resources/northwind/1.4a.owl";
 	String mappingfile = "src/test/resources/northwind/mapping-northwind-1421066727259.ttl";
@@ -39,7 +39,7 @@ public class TableWithSpaceTest extends TestCase {
 	RepositoryConnection con;
 	QuestPreferences pref;
 
-	public TableWithSpaceTest() {
+	public SesameTableWithSpaceTest() {
 		// create owlontology from file
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 		OWLOntologyIRIMapper iriMapper = new AutoIRIMapper(
@@ -137,14 +137,14 @@ public class TableWithSpaceTest extends TestCase {
 	public void test1() {
 
 		//read next query
-		String sparqlQuery = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#> select * {?x a :OrderDetails}" ;
+		String sparqlQuery = "PREFIX : <http://www.optique-project.eu/resource/northwind/northwind/> select * {?x a :OrderDetails}" ;
 		//read expected result
-		//int expectedResult = 14366 ;
-//		int expectedResult = 101;
+//		int expectedResult = 14366 ;
+		int expectedResult = 2155;
 		
 		int obtainedResult = runQuery(sparqlQuery);
 		System.out.println(obtainedResult);
-//		assertEquals(expectedResult, obtainedResult);
+		assertEquals(expectedResult, obtainedResult);
 
 	}
 
