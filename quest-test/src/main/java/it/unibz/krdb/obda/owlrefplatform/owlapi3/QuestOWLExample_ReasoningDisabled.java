@@ -128,7 +128,7 @@ public class QuestOWLExample_ReasoningDisabled {
                                     "?x a :A%d . ?x :R ?y . " +
                                     "?y a :A%d . ?y :R ?z . " +
                                     "?z a :A%d . ?z :S ?w . " +
-                                    "FILTER (?w < %d) }",
+                                    "FILTER (?w < %d)  }",
                             i1, i2, i3, filter);
                     sparqls.add(sparql);
                 }
@@ -139,6 +139,36 @@ public class QuestOWLExample_ReasoningDisabled {
             return sparqls;
         }
 
+        static public List<String> createSPARQLs_three_concepts_opt(DbType dbType){
+            List<String> sparqls = new ArrayList<>();
+
+//            for(int i1 = 1; i1 <= 4; i1++) {
+//                for (int i2 = 1; i2 <= 4; i2++) {
+//                    for (int i3 = 1; i3 <= 4; i3++) {
+            int[][] indexes = {{1, 2, 3}, {1, 3, 4}, {2, 3, 4}, {4, 4, 4}};
+            for(int[] index : indexes){
+                int i1 = index[0];
+                int i2 = index[1];
+                int i3 = index[2];
+                for (int filter : getFilters(dbType)) {
+                    String sparql = String.format(
+                            "PREFIX : <http://www.example.org/> " +
+                                    "SELECT DISTINCT ?x ?y ?z ?w " +
+                                    " WHERE {" +
+                                    "?x a :A%d . OPTIONAL { ?x :R ?y . " +
+                                    "?y a :A%d . OPTIONAL { ?y :R ?z . " +
+                                    "?z a :A%d . OPTIONAL { ?z :S ?w . " +
+                                    "FILTER (?w < %d) } } } }",
+                            i1, i2, i3, filter);
+                    sparqls.add(sparql);
+                }
+//                        }
+//                    }
+//                }
+            }
+            return sparqls;
+        }
+        
         static public List<String> createSPARQLs_two_concepts(DbType dbType){
             List<String> sparqls = new ArrayList<>();
 
@@ -159,8 +189,40 @@ public class QuestOWLExample_ReasoningDisabled {
                                             "SELECT DISTINCT ?x ?y ?z   " +
                                             " WHERE {" +
                                             "?x a :A%d. ?x :R ?y . " +
-                                            "?y a :A%d. ?y :S ?z  .  " +
+                                            "?y a :A%d. ?y :S ?z   .  " +
                                             "FILTER (?z < %d) }",
+                                    i1, i2, filter);
+                            sparqls.add(sparql);
+                        }
+            }
+            //    }
+            //}
+            return sparqls;
+        }
+        
+        static public List<String> createSPARQLs_two_concepts_opt(DbType dbType){
+            List<String> sparqls = new ArrayList<>();
+
+            //for(int i1 = 1; i1 <= 4; i1++) {
+            //    for (int i2 = 1; i2 <= 4; i2++) {
+
+
+            int[][] indexes = {{1, 2}, {2, 3}, {3, 4}, {4, 4}};
+
+
+            for(int[] index : indexes){
+
+                int i1 = index[0];
+                int i2 = index[1];
+                        for (int filter : getFilters(dbType)) {
+                            String sparql = String.format(
+                                    "PREFIX : <http://www.example.org/> " +
+                                            "SELECT DISTINCT ?x ?y ?z   " +
+                                            " WHERE {" +
+                                            "?x a :A%d. "
+                                            + "OPTIONAL { ?x :R ?y . " +
+                                            "?y a :A%d. OPTIONAL { ?y :S ?z   .  " +
+                                            "FILTER (?z < %d) } } }",
                                     i1, i2, filter);
                             sparqls.add(sparql);
                         }
@@ -180,6 +242,26 @@ public class QuestOWLExample_ReasoningDisabled {
                                         " SELECT  DISTINCT ?x  ?y     " +
                                         " WHERE {" +
                                         "?x a :A%d. ?x :S ?y ." +
+                                        "FILTER (?y < %d) }",
+                                i1, filter);
+                        sparqls.add(sparql);
+
+
+                }
+            }
+            return sparqls;
+        }
+        
+        static public List<String> createSPARQLs_one_concepts_opt(DbType dbType){
+            List<String> sparqls = new ArrayList<>();
+
+            for(int i1 = 1; i1 <= 4; i1++) {
+                    for (int filter : getFilters(dbType)) {
+                        String sparql = String.format(
+                                "PREFIX : <http://www.example.org/> " +
+                                        " SELECT  DISTINCT ?x  ?y     " +
+                                        " WHERE {" +
+                                        "?x a :A%d. OPTIONAL{ ?x :S ?y } ." +
                                         "FILTER (?y < %d) }",
                                 i1, filter);
                         sparqls.add(sparql);
@@ -369,21 +451,21 @@ public class QuestOWLExample_ReasoningDisabled {
 
 
         // for testing TIMEOUT ONLY
-        int length = QueryFactory.createSPARQLs_three_concepts(Settings.dbType).size();
-        runQueries(conn, Lists.newArrayList(QueryFactory.createSPARQLs_three_concepts(Settings.dbType).get(length-1)));
+        int length = QueryFactory.createSPARQLs_three_concepts_opt(Settings.dbType).size(); 
+        runQueries(conn, Lists.newArrayList(QueryFactory.createSPARQLs_three_concepts_opt(Settings.dbType).get(length-1)));
 
         System.exit(0);
 
         runQueries(conn, QueryFactory.getWarmUpQueries());
 
         for(int i = 0; i < Constants.NUM_RUNS; i++) {
-            List<Long> resultsOne = runQueries(conn, QueryFactory.createSPARQLs_one_concepts(Settings.dbType));
+            List<Long> resultsOne = runQueries(conn, QueryFactory.createSPARQLs_one_concepts_opt(Settings.dbType));
             resultsOne_list.add(resultsOne);
 
-            List<Long> resultsTwo = runQueries(conn, QueryFactory.createSPARQLs_two_concepts(Settings.dbType));
+            List<Long> resultsTwo = runQueries(conn, QueryFactory.createSPARQLs_two_concepts_opt(Settings.dbType));
             resultsTwo_list.add(resultsTwo);
 
-            List<Long> resultsThree = runQueries(conn, QueryFactory.createSPARQLs_three_concepts(Settings.dbType));
+            List<Long> resultsThree = runQueries(conn, QueryFactory.createSPARQLs_three_concepts_opt(Settings.dbType));
             resultsThree_list.add(resultsThree);
         }
         closeEverything(conn);

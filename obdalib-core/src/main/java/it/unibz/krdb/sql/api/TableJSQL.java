@@ -88,9 +88,12 @@ public class TableJSQL implements Serializable{
 		this.givenName = givenName;
 	}
 	
+	
 	public void setSchema(String schema) {
-		if(schema!=null && ParsedSQLQuery.pQuotes.matcher(schema).matches())
-			this.schema = schema.substring(1, schema.length()-1);
+		if(schema!=null && ParsedSQLQuery.pQuotes.matcher(schema).matches()) {
+			this.schema = schema.substring(1, schema.length() - 1);
+			quotedSchema = true;
+		}
 		else
 			this.schema = schema;
 	}
