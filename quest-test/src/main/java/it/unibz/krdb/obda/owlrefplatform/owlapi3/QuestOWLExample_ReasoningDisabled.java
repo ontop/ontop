@@ -441,7 +441,7 @@ public class QuestOWLExample_ReasoningDisabled {
 
         //	queries[30]="PREFIX :	<http://www.example.org/>  SELECT ?x   WHERE {?x a  :4Tab1 .   } LIMIT 100000  ";
 
-        QuestOWLConnection conn =  createStuff();
+        // QuestOWLConnection conn =  createStuff();
 
         // Results
         List<List<Long>> resultsOne_list = new ArrayList<>();
@@ -451,24 +451,29 @@ public class QuestOWLExample_ReasoningDisabled {
 
 
         // for testing TIMEOUT ONLY
-        int length = QueryFactory.createSPARQLs_three_concepts_opt(Settings.dbType).size(); 
-        runQueries(conn, Lists.newArrayList(QueryFactory.createSPARQLs_three_concepts_opt(Settings.dbType).get(length-1)));
 
-        System.exit(0);
+//        int length = QueryFactory.createSPARQLs_three_concepts(Settings.dbType).size();
+//        runQueries(conn, Lists.newArrayList(QueryFactory.createSPARQLs_three_concepts(Settings.dbType).get(length-1)));
+//        runQueries(conn, Lists.newArrayList(QueryFactory.createSPARQLs_three_concepts(Settings.dbType).get(length-1)));
 
-        runQueries(conn, QueryFactory.getWarmUpQueries());
+        // System.exit(0);
+
+        runQueries(QueryFactory.getWarmUpQueries());
 
         for(int i = 0; i < Constants.NUM_RUNS; i++) {
-            List<Long> resultsOne = runQueries(conn, QueryFactory.createSPARQLs_one_concepts_opt(Settings.dbType));
+            List<Long> resultsOne = runQueries(//conn,
+                    QueryFactory.createSPARQLs_one_concepts_opt(Settings.dbType));
             resultsOne_list.add(resultsOne);
 
-            List<Long> resultsTwo = runQueries(conn, QueryFactory.createSPARQLs_two_concepts_opt(Settings.dbType));
+            List<Long> resultsTwo = runQueries(//conn,
+                    QueryFactory.createSPARQLs_two_concepts_opt(Settings.dbType));
             resultsTwo_list.add(resultsTwo);
 
-            List<Long> resultsThree = runQueries(conn, QueryFactory.createSPARQLs_three_concepts_opt(Settings.dbType));
+            List<Long> resultsThree = runQueries(//conn,
+                    QueryFactory.createSPARQLs_three_concepts_opt(Settings.dbType));
             resultsThree_list.add(resultsThree);
         }
-        closeEverything(conn);
+        //closeEverything(conn);
 
         List<Long> avg_resultsOne = average(resultsOne_list);
         List<Long> avg_resultsTwo = average(resultsTwo_list);
@@ -478,7 +483,8 @@ public class QuestOWLExample_ReasoningDisabled {
 
     }
 
-    private List<Long> runQueries(QuestOWLConnection conn, List<String> queries) throws OWLException {
+    private List<Long> runQueries(//QuestOWLConnection conn,
+                                  List<String> queries) throws OWLException, InvalidPredicateDeclarationException, InvalidMappingException, OBDAException, IOException {
 
         //int nWarmUps = Constants.NUM_WARM_UPS;
         //int nRuns = Constants.NUM_RUNS;
@@ -487,7 +493,9 @@ public class QuestOWLExample_ReasoningDisabled {
 
         for(String sparqlQuery:queries){
             //String sparqlQuery = queries[j];
-            QuestOWLStatement st = conn.createStatement();
+
+            QuestOWLConnection conn;
+            QuestOWLStatement st = null;
             try {
 
                 // Warm ups
@@ -507,6 +515,10 @@ public class QuestOWLExample_ReasoningDisabled {
 
                 long time = 0;
                 int count = 0;
+
+                conn = createStuff();
+
+                st = conn.createStatement();
 
                 //for (int i=0; i<nRuns; ++i){
                 long t1 = System.currentTimeMillis();
@@ -553,6 +565,8 @@ public class QuestOWLExample_ReasoningDisabled {
                 System.out.println("The number of results:");
                 System.out.println("=====================");
                 System.out.println(count);
+
+                closeEverything(conn);
 
             } finally {
                 if (st != null && !st.isClosed()) {

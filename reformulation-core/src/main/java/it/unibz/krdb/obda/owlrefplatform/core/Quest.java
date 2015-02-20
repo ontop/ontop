@@ -1024,6 +1024,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	public void setQueryTimeout(Statement st) throws SQLException {
 
         int timeout = 1200;
+        //int timeout = 30;
 
 		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().getName());
 
