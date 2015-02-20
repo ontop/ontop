@@ -18,6 +18,7 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
 import org.semanticweb.ontop.r2rml.R2RMLManager;
 import org.semanticweb.ontop.sesame.SesameVirtualRepo;
 import org.semanticweb.ontop.sql.api.Attribute;
@@ -101,7 +102,7 @@ public class TestSesameImplicitDBConstraints {
 		p.setProperty(OBDAProperties.DB_PASSWORD, "");
 		p.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
 
-		QuestPreferences preferences = new QuestPreferences(p);
+		QuestPreferences preferences = new R2RMLQuestPreferences(p);
 
 		dbMetadata = getMeta();
 		SesameVirtualRepo qest1;

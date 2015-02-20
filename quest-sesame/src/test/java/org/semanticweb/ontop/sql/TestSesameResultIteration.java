@@ -20,6 +20,7 @@ import org.openrdf.query.TupleQueryResult;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
 import org.semanticweb.ontop.r2rml.R2RMLManager;
 import org.semanticweb.ontop.sesame.RepositoryConnection;
 import org.semanticweb.ontop.sesame.SesameVirtualRepo;
@@ -89,7 +90,7 @@ public class TestSesameResultIteration {
 		p.setProperty(OBDAProperties.DB_PASSWORD, "");
 		p.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
 
-		SesameVirtualRepo repo = new SesameVirtualRepo("", ontology, model, new QuestPreferences(p));
+		SesameVirtualRepo repo = new SesameVirtualRepo("", ontology, model, new R2RMLQuestPreferences(p));
 		repo.initialize();
 		/*
 		 * Prepare the data connection for querying.
