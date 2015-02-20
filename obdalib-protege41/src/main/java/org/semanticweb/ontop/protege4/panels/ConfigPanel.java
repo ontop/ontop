@@ -24,6 +24,7 @@ import java.awt.Dimension;
 
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.protege4.core.ProtegeReformulationPlatformPreferences;
 
 public class ConfigPanel extends javax.swing.JPanel {
 
@@ -31,12 +32,12 @@ public class ConfigPanel extends javax.swing.JPanel {
 	 * 
 	 */
 	private static final long serialVersionUID = 602382682995021070L;
-	private QuestPreferences preference;
+	private ProtegeReformulationPlatformPreferences preference;
 
     /**
      * The constructor.
      */
-    public ConfigPanel(QuestPreferences preference) {
+    public ConfigPanel(ProtegeReformulationPlatformPreferences preference) {
         this.preference = preference;
         initComponents();
         setSelections(preference);

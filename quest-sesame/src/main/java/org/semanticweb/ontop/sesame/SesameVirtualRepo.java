@@ -121,28 +121,8 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	
 	private void createRepo(String name, OWLOntology tbox, Model mappings, DBMetadata metadata, QuestPreferences pref) throws Exception 
 	{
-        /**
-         * R2RML mapping parser by default (if no other parser has been explicitly declared).
-         */
-        pref = favorR2RMLParser(pref);
 		this.virtualStore = new QuestDBVirtualStore(name, tbox, mappings, metadata, pref);
 	}
-
-    /**
-     * If no MappingParser class has been explicitly set, declares R2RMLMappingParser
-     * as the expected implementation.
-	 *
-	 * TODO: fix it! Does not work...
-     */
-    private QuestPreferences favorR2RMLParser(QuestPreferences preferences) {
-        String mappingParserName = MappingParser.class.getCanonicalName();
-        if (!preferences.contains(mappingParserName)) {
-            // TODO: a immutable style would be better.
-            preferences = preferences.newProperties(mappingParserName, R2RMLMappingParser.class.getCanonicalName());
-        }
-        return preferences;
-    }
-	
 	
 	/**
 	 * Sets the implicit db constraints, i.e. primary and foreign keys not in the database
@@ -190,15 +170,6 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 			else
 				 obdaURI = new File(mappingFile).toURI();
 
-            /**
-             * Detects if the R2RML mapping parser should be used.
-             *   -> Looks at the extension and the non-declaration
-             *      of a MappingParser implementation.
-             */
-            if (obdaURI.toString().endsWith(".ttl")) {
-                pref = favorR2RMLParser(pref);
-            }
-		
 			if (tboxFile == null) {
 				//if we have no owl file
 				this.virtualStore = new QuestDBVirtualStore(name, obdaURI, pref);

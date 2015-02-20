@@ -30,6 +30,7 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
+import org.semanticweb.ontop.owlrefplatform.core.Quest;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
@@ -103,7 +104,14 @@ public class JoinElminationMappingTest extends TestCase {
 	
 	private void runTests(QuestPreferences p) throws Exception {
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
+		QuestOWLFactory factory;
+		if (p.getProperty(QuestPreferences.ABOX_MODE).equals(QuestConstants.VIRTUAL) ||
+				p.getBoolean(QuestPreferences.OBTAIN_FROM_MAPPINGS)) {
+			factory = new QuestOWLFactory(new File(obdafile), p);
+		}
+		else {
+			factory = new QuestOWLFactory(p);
+		}
 
 		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 		reasoner.flush();
@@ -132,49 +140,49 @@ public class JoinElminationMappingTest extends TestCase {
 		assertFalse(fail);
 	}
 
-	public void testSiEqSig() throws Exception {
-		Properties p  = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		runTests(new QuestPreferences(p));
-	}
-
-	public void testSiEqNoSig() throws Exception {
-		Properties p  = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		runTests(new QuestPreferences(p));
-	}
-
-	public void testSiNoEqSig() throws Exception {
-		Properties p  = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		runTests(new QuestPreferences(p));
-	}
-
-	public void testSiNoEqNoSig() throws Exception {
-		Properties p  = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		runTests(new QuestPreferences(p));
-	}
+//	public void testSiEqSig() throws Exception {
+//		Properties p  = new Properties();
+//		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+//		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+//		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+//		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+//		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+//		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+//		runTests(new QuestPreferences(p));
+//	}
+//
+//	public void testSiEqNoSig() throws Exception {
+//		Properties p  = new Properties();
+//		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+//		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+//		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+//		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+//		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+//		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+//		runTests(new QuestPreferences(p));
+//	}
+//
+//	public void testSiNoEqSig() throws Exception {
+//		Properties p  = new Properties();
+//		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+//		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+//		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+//		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+//		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+//		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+//		runTests(new QuestPreferences(p));
+//	}
+//
+//	public void testSiNoEqNoSig() throws Exception {
+//		Properties p  = new Properties();
+//		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+//		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+//		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "false");
+//		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+//		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+//		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+//		runTests(new QuestPreferences(p));
+//	}
 
 	/*
 	 * Direct Mapping

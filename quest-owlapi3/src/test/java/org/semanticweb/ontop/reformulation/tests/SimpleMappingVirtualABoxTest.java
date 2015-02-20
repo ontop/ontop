@@ -192,17 +192,6 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 
 		runTests(new QuestPreferences(p));
 	}
-	
-	public void testClassicEqSig() throws Exception {
-
-		Properties p = new Properties();
-		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-
-		runTests(new QuestPreferences(p));
-	}
 
 
 }

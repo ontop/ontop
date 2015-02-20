@@ -60,8 +60,12 @@ public class OBDAProperties {
 
     protected static Properties loadDefaultPropertiesFromFile(Class localClass, String fileName) {
         Properties properties = new Properties();
+        InputStream in = localClass.getResourceAsStream(fileName);
+        if (in == null)
+            throw new RuntimeException("Configuration " + fileName + " not found.");
+
         try {
-            InputStream in = localClass.getResourceAsStream(fileName);
+
             properties.load(in);
         } catch (IOException e1) {
             LOG.error("Error reading default OBDA properties.");
@@ -109,33 +113,13 @@ public class OBDAProperties {
         return (String) get(key);
     }
 
-    /**
-     * NOT FOR END-USERS
-     */
-    @Deprecated
-    public OBDAProperties newProperties(Object key, Object value) {
-        Properties newProperties = new Properties(properties);
-        newProperties.put(key, value);
-        return new OBDAProperties(newProperties);
-    }
-
-    /**
-     * NOT FOR END-USERS
-     */
-    @Deprecated
-    public OBDAProperties newProperties(Properties newProperties) {
-        Properties properties = copyProperties();
-        properties.putAll(newProperties);
-        return new OBDAProperties(properties);
+    public boolean contains(Object key) {
+        return properties.contains(key);
     }
 
     protected Properties copyProperties() {
         Properties p = new Properties();
         p.putAll(properties);
         return p;
-    }
-
-    public boolean contains(Object key) {
-        return properties.contains(key);
     }
 }

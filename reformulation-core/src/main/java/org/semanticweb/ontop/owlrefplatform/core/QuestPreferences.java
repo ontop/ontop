@@ -118,30 +118,4 @@ public class QuestPreferences extends OBDAProperties {
 
 		return keys;
 	}
-
-	/**
-	 * NOT FOR END-USERS
-	 *
-	 * Returns a new (immutable) QuestPreferences object
-	 */
-	@Override
-	@Deprecated
-	public QuestPreferences newProperties(Object key, Object value) {
-		Properties newProperties = copyProperties();
-		newProperties.put(key, value);
-		return new QuestPreferences(newProperties);
-	}
-
-	/**
-	 * NOT FOR END-USERS
-	 *
-	 * Returns a new (immutable) QuestPreferences object
-	 */
-	@Override
-	@Deprecated
-	public QuestPreferences newProperties(Properties newProperties) {
-		Properties properties = copyProperties();
-		properties.putAll(newProperties);
-		return new QuestPreferences(properties);
-	}
 }
