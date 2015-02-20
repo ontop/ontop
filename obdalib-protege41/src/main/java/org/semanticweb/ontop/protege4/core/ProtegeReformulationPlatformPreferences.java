@@ -46,11 +46,11 @@ public class ProtegeReformulationPlatformPreferences extends QuestPreferences im
 	}
 
 	public Set<Object> getKeys() {
-		return getProperties().keySet();
+		return copyProperties().keySet();
 	}
 
 	public ProtegeReformulationPlatformPreferences newProperties(Object key, Object value) {
-		Properties newProperties = new Properties(getProperties());
+		Properties newProperties = copyProperties();
 		newProperties.put(key, value);
 		return new ProtegeReformulationPlatformPreferences(newProperties);
 	}

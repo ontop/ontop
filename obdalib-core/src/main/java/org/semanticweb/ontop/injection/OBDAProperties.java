@@ -124,13 +124,15 @@ public class OBDAProperties {
      */
     @Deprecated
     public OBDAProperties newProperties(Properties newProperties) {
-        Properties properties = new Properties(this.properties);
+        Properties properties = copyProperties();
         properties.putAll(newProperties);
         return new OBDAProperties(properties);
     }
 
-    protected Properties getProperties() {
-        return new Properties(properties);
+    protected Properties copyProperties() {
+        Properties p = new Properties();
+        p.putAll(properties);
+        return p;
     }
 
     public boolean contains(Object key) {

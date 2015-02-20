@@ -127,7 +127,7 @@ public class QuestPreferences extends OBDAProperties {
 	@Override
 	@Deprecated
 	public QuestPreferences newProperties(Object key, Object value) {
-		Properties newProperties = new Properties(getProperties());
+		Properties newProperties = copyProperties();
 		newProperties.put(key, value);
 		return new QuestPreferences(newProperties);
 	}
@@ -140,7 +140,7 @@ public class QuestPreferences extends OBDAProperties {
 	@Override
 	@Deprecated
 	public QuestPreferences newProperties(Properties newProperties) {
-		Properties properties = new Properties(getProperties());
+		Properties properties = copyProperties();
 		properties.putAll(newProperties);
 		return new QuestPreferences(properties);
 	}
