@@ -261,8 +261,8 @@ public class QuestOWLExample_ReasoningDisabled {
                                 "PREFIX : <http://www.example.org/> " +
                                         " SELECT  DISTINCT ?x  ?y     " +
                                         " WHERE {" +
-                                        "?x a :A%d. OPTIONAL{ ?x :S ?y } ." +
-                                        "FILTER (?y < %d) }",
+                                        "?x a :A%d. OPTIONAL{ ?x :S ?y FILTER (?y < %d) } } ." 
+                                        ,
                                 i1, filter);
                         sparqls.add(sparql);
 
