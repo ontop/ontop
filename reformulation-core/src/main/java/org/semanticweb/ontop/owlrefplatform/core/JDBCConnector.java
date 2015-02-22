@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
  */
 public class JDBCConnector implements DBConnector {
 
-    private final Quest questInstance;
+    private final IQuest questInstance;
     private final QuestPreferences questPreferences;
 
     /* The active connection used to get metadata from the DBMS */
@@ -57,7 +57,7 @@ public class JDBCConnector implements DBConnector {
      * TODO: see if we can ignore the questInstance
      */
     @Inject
-    private JDBCConnector(@Assisted OBDADataSource obdaDataSource, @Assisted Quest questInstance,
+    private JDBCConnector(@Assisted OBDADataSource obdaDataSource, @Assisted IQuest questInstance,
                           NativeQueryLanguageComponentFactory nativeQLFactory,
                           QuestPreferences preferences) {
         this.questPreferences = preferences;

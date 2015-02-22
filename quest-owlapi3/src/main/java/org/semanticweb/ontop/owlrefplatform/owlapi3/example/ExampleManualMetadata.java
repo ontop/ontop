@@ -74,7 +74,7 @@ private void setup()  throws Exception {
 	DBMetadata dbMetadata = getMeta();
 
     QuestComponentFactory componentFactory = injector.getInstance(QuestComponentFactory.class);
-	Quest quest = componentFactory.create(getOntologyFromOWLOntology(ontology),
+	IQuest quest = componentFactory.create(getOntologyFromOWLOntology(ontology),
             obdaModel, dbMetadata, preference);
 	quest.setupRepository();
 	

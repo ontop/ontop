@@ -299,7 +299,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * Must be called once after the constructor call and before any queries are run, that is,
 	 * before the call to getQuestConnection.
 	 * 
-	 * Calls {@link org.semanticweb.ontop.owlrefplatform.core.Quest.setupRepository()}
+	 * Calls {@link org.semanticweb.ontop.owlrefplatform.core.IQuest.setupRepository()}
 	 * @throws Exception
 	 */
 	public void initialize() throws Exception {

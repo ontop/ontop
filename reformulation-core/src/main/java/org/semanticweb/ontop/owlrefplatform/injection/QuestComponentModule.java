@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import org.semanticweb.ontop.injection.*;
 import org.semanticweb.ontop.owlrefplatform.core.DBConnector;
-import org.semanticweb.ontop.owlrefplatform.core.Quest;
+import org.semanticweb.ontop.owlrefplatform.core.IQuest;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
@@ -28,7 +28,7 @@ public class QuestComponentModule extends OBDAAbstractModule {
     protected void configure() {
         configurePreferences();
 
-        Module componentFactoryModule = buildFactory(ImmutableList.<Class>of(Quest.class,
+        Module componentFactoryModule = buildFactory(ImmutableList.<Class>of(IQuest.class,
                         NativeQueryGenerator.class, DBConnector.class),
                 QuestComponentFactory.class);
         install(componentFactoryModule);

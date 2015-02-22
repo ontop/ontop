@@ -60,7 +60,7 @@ public class QuestMaterializer {
 
     private final QuestComponentFactory questComponentFactory;
     private OBDAModel model;
-	private Quest questInstance;
+	private IQuest questInstance;
 	private Ontology ontology;
 	
 	private Set<Predicate> vocabulary;
@@ -226,7 +226,7 @@ public class QuestMaterializer {
 		
 		private Logger log = LoggerFactory.getLogger(VirtualTripleIterator.class);
 
-		public VirtualTripleIterator(Quest questInstance, Iterator<Predicate> vocabIter)
+		public VirtualTripleIterator(IQuest questInstance, Iterator<Predicate> vocabIter)
 				throws SQLException {
 			try{
 				questConn = questInstance.getNonPoolConnection();

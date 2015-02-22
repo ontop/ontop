@@ -28,8 +28,8 @@ import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMap;
 import org.semanticweb.ontop.owlrefplatform.core.EquivalenceMapImpl;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
+import org.semanticweb.ontop.owlrefplatform.core.abox.IRDBMSSIRepositoryManager;
 import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
-import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManagerImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.EquivalenceTBoxOptimizer;
@@ -62,7 +62,7 @@ public class SemanticIndexManager {
 
 	private EquivalenceMap equivalenceMaps;
 
-	private RDBMSSIRepositoryManager dataRepository = null;
+	private IRDBMSSIRepositoryManager dataRepository = null;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -76,7 +76,7 @@ public class SemanticIndexManager {
 		// generate a new TBox with a simpler vocabulary
 		optimizedOntology = EquivalenceTBoxOptimizer.getOptimalTBox(reasoner, equivalenceMaps, ontologyClosure.getVocabulary());
 			
-		dataRepository = new RDBMSSIRepositoryManagerImpl(optimizedOntology.getVocabulary());
+		dataRepository = new RDBMSSIRepositoryManager(optimizedOntology.getVocabulary());
 		TBoxReasoner optimizedDag = new TBoxReasonerImpl(optimizedOntology);
 		dataRepository.setTBox(optimizedDag);
 

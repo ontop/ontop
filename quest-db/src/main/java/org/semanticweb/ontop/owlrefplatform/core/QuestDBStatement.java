@@ -105,7 +105,7 @@ public class QuestDBStatement implements OBDAStatement {
 		int dotidx = pathstr.lastIndexOf('.');
 		String ext = pathstr.substring(dotidx);
 
-        Quest questInstance = st.getQuestInstance();
+        IQuest questInstance = st.getQuestInstance();
 
 		int result = -1;
 		try {
@@ -269,7 +269,7 @@ public class QuestDBStatement implements OBDAStatement {
 
 	public String getRewriting(String query) throws Exception {
 
-        Quest questInstance = st.getQuestInstance();
+        IQuest questInstance = st.getQuestInstance();
 		
 		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 		ParsedQuery pq = qp.parseQuery(query, null); // base URI is null

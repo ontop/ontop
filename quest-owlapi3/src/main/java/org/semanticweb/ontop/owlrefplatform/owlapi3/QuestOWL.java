@@ -162,7 +162,7 @@ public class QuestOWL extends OWLReasonerBase {
 
 	private QuestPreferences preferences = new QuestPreferences();
 
-	private Quest questInstance = null;
+	private IQuest questInstance = null;
 
 	private static Logger log = LoggerFactory.getLogger(QuestOWL.class);
 

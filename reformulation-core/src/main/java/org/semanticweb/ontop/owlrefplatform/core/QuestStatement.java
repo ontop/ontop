@@ -98,7 +98,7 @@ public class QuestStatement implements OBDAStatement {
 
 	private QuestConnection conn;
 
-	private final Quest questInstance;
+	private final IQuest questInstance;
 
 	private static Logger log = LoggerFactory.getLogger(QuestStatement.class);
 
@@ -143,7 +143,7 @@ public class QuestStatement implements OBDAStatement {
 
 	private long unfoldingTime = 0;
 
-	public QuestStatement(Quest questinstance, QuestConnection conn, Statement st) {
+	public QuestStatement(IQuest questinstance, QuestConnection conn, Statement st) {
 
 		this.questInstance = questinstance;
 
@@ -165,7 +165,7 @@ public class QuestStatement implements OBDAStatement {
 		this.validator = questinstance.getVocabularyValidator();
 	}
 
-    public Quest getQuestInstance() {
+    public IQuest getQuestInstance() {
         return questInstance;
     }
 
