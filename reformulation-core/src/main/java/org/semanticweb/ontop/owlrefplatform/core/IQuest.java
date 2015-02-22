@@ -1,7 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core;
 
 import com.google.common.collect.Multimap;
-import org.openrdf.query.parser.ParsedQuery;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
@@ -16,8 +15,6 @@ import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 import java.sql.Connection;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Automatically extracted.
@@ -32,8 +29,6 @@ public interface IQuest extends RepositoryChangedListener {
     QueryRewriter getRewriter();
 
     NativeQueryGenerator cloneIfNecessaryNativeQueryGenerator();
-
-    Map<String, Boolean> getIsDescribeCache();
 
     QuestUnfolder getQuestUnfolder();
 
@@ -58,7 +53,7 @@ public interface IQuest extends RepositoryChangedListener {
     Connection getSQLPoolConnection() throws OBDAException;
 
     // get a real (non pool) connection - used for protege plugin
-    OBDAConnection getNonPoolConnection() throws OBDAException;
+    IQuestConnection getNonPoolConnection() throws OBDAException;
 
     OBDAConnection getConnection() throws OBDAException;
 
@@ -77,14 +72,6 @@ public interface IQuest extends RepositoryChangedListener {
     DBMetadata getMetaData();
 
     LinearInclusionDependencies getDataDependencies();
-    
-    Map<String,String> getSQLCache();
 
-    Map<String,List<String>> getSignatureCache();
-
-    Map<String,ParsedQuery> getSesameQueryCache();
-
-    Map<String,Boolean> getIsBooleanCache();
-
-    Map<String,Boolean> getIsConstructCache();
+    QueryCache getQueryCache();
 }

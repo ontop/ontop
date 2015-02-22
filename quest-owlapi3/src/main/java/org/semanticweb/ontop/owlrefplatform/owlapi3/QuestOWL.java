@@ -21,6 +21,8 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
  */
 
 
+import org.semanticweb.ontop.owlrefplatform.core.*;
+import org.semanticweb.ontop.owlrefplatform.core.execution.SIQuestStatement;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.ontology.Assertion;
@@ -31,11 +33,6 @@ import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
-import org.semanticweb.ontop.owlrefplatform.core.IQuest;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.semanticweb.ontop.utils.VersionInfo;
@@ -50,7 +47,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
 
@@ -170,7 +166,7 @@ public class QuestOWL extends OWLReasonerBase {
 
 	private static Logger log = LoggerFactory.getLogger(QuestOWL.class);
 
-	private QuestConnection conn = null;
+	private IQuestConnection conn = null;
 
 	private QuestOWLConnection owlconn = null;
 
@@ -327,14 +323,13 @@ public class QuestOWL extends OWLReasonerBase {
 
 			// Retrives the connection from Quest
 			//conn = questInstance.getConnection();
-			conn = (QuestConnection) questInstance.getNonPoolConnection();
+			conn = questInstance.getNonPoolConnection();
 			owlconn = new QuestOWLConnection(conn);
 			// pm.reasonerTaskProgressChanged(3, 4);
 
 			// Preparing the data source
 			if (unfoldingMode.equals(QuestConstants.CLASSIC)) {
-                //TODO: avoid this cast
-				QuestStatement st = (QuestStatement)conn.createStatement();
+				SIQuestStatement st = conn.createSIStatement();
 				if (bObtainFromOntology) {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
@@ -442,7 +437,7 @@ public class QuestOWL extends OWLReasonerBase {
 	 */
 	public QuestOWLConnection replaceConnection() throws OBDAException {
 		QuestOWLConnection oldconn = this.owlconn;
-		conn = (QuestConnection) questInstance.getNonPoolConnection();
+		conn = questInstance.getNonPoolConnection();
 		owlconn = new QuestOWLConnection(conn);
 		return oldconn;
 	}
@@ -673,7 +668,7 @@ public class QuestOWL extends OWLReasonerBase {
 	}
 	
 	private boolean executeConsistencyQuery(String strQuery) {
-		QuestStatement query;
+		IQuestStatement query;
 		try {
 			query = conn.createStatement();
 			ResultSet rs = query.execute(strQuery);

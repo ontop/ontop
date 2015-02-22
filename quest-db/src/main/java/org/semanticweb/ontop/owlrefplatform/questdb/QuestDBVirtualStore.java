@@ -32,6 +32,7 @@ import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.io.OBDADataSourceFromConfigExtractor;
+import org.semanticweb.ontop.owlrefplatform.core.IQuestConnection;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.*;
@@ -41,7 +42,6 @@ import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import org.semanticweb.ontop.owlapi3.directmapping.DirectMappingEngine;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.sql.DBMetadata;
@@ -311,12 +311,12 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * Get a Quest connection from the Quest instance
 	 * @return the QuestConnection
 	 */
-	public QuestConnection getQuestConnection() {
+	public IQuestConnection getQuestConnection() {
 		if(!this.isinitalized)
 			throw new Error("The QuestDBVirtualStore must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
 		try {
 			// System.out.println("getquestconn..");
-			questConn = (QuestConnection) questInstance.getConnection();
+			questConn = (IQuestConnection) questInstance.getConnection();
 		} catch (OBDAException e) {
 			e.printStackTrace();
 		}

@@ -51,12 +51,10 @@ import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
+import org.semanticweb.ontop.owlrefplatform.core.*;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
+import org.semanticweb.ontop.owlrefplatform.core.execution.SIQuestStatement;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
@@ -145,9 +143,9 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		
 		final boolean bObtainFromOntology = config.getBoolean(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
 		final boolean bObtainFromMappings = config.getBoolean(QuestPreferences.OBTAIN_FROM_MAPPINGS);
-		OBDAConnection conn = questInstance.getNonPoolConnection();
+		IQuestConnection conn = questInstance.getNonPoolConnection();
         //TODO: avoid this cast
-		QuestStatement st = (QuestStatement) conn.createStatement();
+		SIQuestStatement st = conn.createSIStatement();
 		if (bObtainFromOntology) {
 			// Retrieves the ABox from the ontology file.
 			log.debug("Loading data from Ontology into the database");
@@ -188,11 +186,11 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 		return this;
 	}
 	
-	public QuestConnection getQuestConnection() {
-		QuestConnection conn = null;
+	public IQuestConnection getQuestConnection() {
+		IQuestConnection conn = null;
 		try {
             //TODO: avoid this cast
-			conn = (QuestConnection) questInstance.getConnection();
+			conn = (IQuestConnection) questInstance.getConnection();
 		} catch (OBDAException e) {
 			e.printStackTrace();
 		}

@@ -20,9 +20,8 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
  * #L%
  */
 
-import org.semanticweb.ontop.model.OBDAConnection;
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
+import org.semanticweb.ontop.owlrefplatform.core.IQuestConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
 import org.semanticweb.owlapi.model.OWLException;
 
@@ -51,9 +50,9 @@ import org.semanticweb.owlapi.model.OWLException;
  */
 public class QuestOWLConnection {
 
-	private final QuestConnection conn;
+	private final IQuestConnection conn;
 
-	public QuestOWLConnection(QuestConnection conn) {
+	public QuestOWLConnection(IQuestConnection conn) {
 		this.conn = conn;
 	}
 
@@ -74,7 +73,7 @@ public class QuestOWLConnection {
 
 	public QuestOWLStatement createStatement() throws OWLException {
 		try {
-			return new QuestOWLStatement(conn.createStatement(), this);
+			return new QuestOWLStatement(conn.createSIStatement(), this);
 		} catch (OBDAException e) {
 			throw new OWLException(e) {
 			};

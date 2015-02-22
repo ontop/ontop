@@ -5,12 +5,13 @@ import com.google.inject.Module;
 import org.semanticweb.ontop.injection.*;
 import org.semanticweb.ontop.owlrefplatform.core.DBConnector;
 import org.semanticweb.ontop.owlrefplatform.core.IQuest;
+import org.semanticweb.ontop.owlrefplatform.core.QueryCache;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
 
 /**
- *
+ * TODO: describe
  */
 public class QuestComponentModule extends OBDAAbstractModule {
 
@@ -33,5 +34,6 @@ public class QuestComponentModule extends OBDAAbstractModule {
                 QuestComponentFactory.class);
         install(componentFactoryModule);
         bindFromPreferences(MappingVocabularyFixer.class);
+        bindFromPreferences(QueryCache.class);
     }
 }

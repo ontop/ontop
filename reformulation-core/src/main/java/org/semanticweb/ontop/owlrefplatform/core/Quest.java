@@ -28,9 +28,6 @@ import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import org.apache.tomcat.jdbc.pool.DataSource;
-import org.apache.tomcat.jdbc.pool.PoolProperties;
-import org.openrdf.query.parser.ParsedQuery;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDAFactoryWithException;
@@ -38,7 +35,6 @@ import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
-import org.semanticweb.ontop.nativeql.DBMetadataExtractor;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
@@ -46,9 +42,7 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatc
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.*;
 import org.semanticweb.ontop.owlrefplatform.core.reformulation.*;
-import org.semanticweb.ontop.owlrefplatform.core.sql.SQLGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
 import org.semanticweb.ontop.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
 import org.semanticweb.ontop.owlrefplatform.core.translator.MappingVocabularyFixer;
@@ -58,7 +52,6 @@ import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 import org.semanticweb.ontop.sql.TableDefinition;
 import org.semanticweb.ontop.sql.api.Attribute;
 import org.semanticweb.ontop.mapping.MappingSplitter;
-import org.semanticweb.ontop.utils.MetaMappingExpander;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,8 +61,6 @@ import java.net.URI;
 import java.security.InvalidParameterException;
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 
 //import com.hp.hpl.jena.query.Query;
 
@@ -183,17 +174,7 @@ public class Quest implements Serializable, IQuest {
 	 * are used by the statements
 	 */
 
-	private Map<String, String> queryCache = new ConcurrentHashMap<>();
-
-	private Map<String, List<String>> signatureCache = new ConcurrentHashMap<>();
-
-	private Map<String, ParsedQuery> sesameQueryCache = new ConcurrentHashMap<>();
-
-	private Map<String, Boolean> isBooleanCache = new ConcurrentHashMap<>();
-
-	private Map<String, Boolean> isConstructCache = new ConcurrentHashMap<>();
-
-	private Map<String, Boolean> isDescribeCache = new ConcurrentHashMap<>();
+	private QueryCache queryCache;
 
 	private DBMetadata metadata;
 
@@ -237,7 +218,7 @@ public class Quest implements Serializable, IQuest {
 	private Quest(@Assisted Ontology tbox, @Assisted @Nullable OBDAModel mappings, @Assisted @Nullable DBMetadata metadata,
 				  @Assisted QuestPreferences config, NativeQueryLanguageComponentFactory nativeQLFactory,
 				  OBDAFactoryWithException obdaFactory, QuestComponentFactory questComponentFactory,
-				  MappingVocabularyFixer mappingVocabularyFixer) throws DuplicateMappingException {
+				  MappingVocabularyFixer mappingVocabularyFixer, QueryCache queryCache) throws DuplicateMappingException {
 		if (tbox == null)
 			throw new InvalidParameterException("TBox cannot be null");
 
@@ -245,6 +226,7 @@ public class Quest implements Serializable, IQuest {
 		this.obdaFactory = obdaFactory;
 		this.questComponentFactory = questComponentFactory;
 		this.mappingVocabularyFixer = mappingVocabularyFixer;
+		this.queryCache = queryCache;
 
 		inputOntology = tbox;
 
@@ -292,14 +274,6 @@ public class Quest implements Serializable, IQuest {
 		return dataSourceQueryGenerator.cloneIfNecessary();
 	}
 
-	public Map<String, String> getSQLCache() {
-		return queryCache;
-	}
-
-	public Map<String, List<String>> getSignatureCache() {
-		return signatureCache;
-	}
-
 	public TBoxReasoner getReasoner() {
 		return reformulationReasoner;
 	}
@@ -313,6 +287,11 @@ public class Quest implements Serializable, IQuest {
 		return sigma;
 	}
 
+	@Override
+	public QueryCache getQueryCache() {
+		return queryCache;
+	}
+
 	public VocabularyValidator getVocabularyValidator() {
 		return this.vocabularyValidator;
 	}
@@ -320,23 +299,6 @@ public class Quest implements Serializable, IQuest {
 //	protected Map<String, Query> getJenaQueryCache() {
 //		return jenaQueryCache;
 //	}
-
-	public Map<String, ParsedQuery> getSesameQueryCache() {
-		return sesameQueryCache;
-	}
-
-	public Map<String, Boolean> getIsBooleanCache() {
-		return isBooleanCache;
-	}
-
-	public Map<String, Boolean> getIsConstructCache() {
-		return isConstructCache;
-	}
-
-	@Override
-	public Map<String, Boolean> getIsDescribeCache() {
-		return isDescribeCache;
-	}
 
 	@Override
 	public QuestUnfolder getQuestUnfolder() {
@@ -837,7 +799,7 @@ public class Quest implements Serializable, IQuest {
 	}
 
 	@Override
-	public OBDAConnection getNonPoolConnection() throws OBDAException {
+	public IQuestConnection getNonPoolConnection() throws OBDAException {
 		return dbConnector.getNonPoolConnection();
 	}
 

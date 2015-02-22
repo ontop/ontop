@@ -25,9 +25,9 @@ import java.net.URI;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableList;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.QueryParser;
@@ -40,6 +40,7 @@ import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
+import org.semanticweb.ontop.owlrefplatform.core.execution.SIQuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -50,13 +51,13 @@ import org.slf4j.LoggerFactory;
 
 public class QuestDBStatement implements OBDAStatement {
 
-	private final QuestStatement st;
+	private final SIQuestStatement st;
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private Logger log = LoggerFactory.getLogger(QuestDBStatement.class);
 
 	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 
-	public QuestDBStatement(QuestStatement st, NativeQueryLanguageComponentFactory nativeQLFactory) {
+	public QuestDBStatement(SIQuestStatement st, NativeQueryLanguageComponentFactory nativeQLFactory) {
         this.nativeQLFactory = nativeQLFactory;
 		this.st = st;
 	}
@@ -229,7 +230,7 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	@Override
-	public void setQueryTimeout(int seconds) throws OBDAException {
+	public void setQueryTimeout(int seconds) throws Exception {
 		st.setQueryTimeout(seconds);
 	}
 
@@ -266,12 +267,17 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	public String getSQL(String query) throws Exception {
-		return st.getUnfolding(query);
+		return st.unfoldAndGenerateTargetQuery(query).getNativeQueryString();
 	}
 
 	@Override
 	public String getSPARQLRewriting(String query) throws OBDAException {
 		return st.getSPARQLRewriting(query);
+	}
+
+	@Override
+	public int getTupleCount(String query) throws Exception {
+		return st.getTupleCount(query);
 	}
 
 	public String getRewriting(String query) throws Exception {
@@ -281,8 +287,7 @@ public class QuestDBStatement implements OBDAStatement {
 		
 		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.getQuestInstance().getUriTemplateMatcher());
 		
-		LinkedList<String> signatureContainer = new LinkedList<String>();
-		tr.getSignature(pq, signatureContainer);
+		ImmutableList<String> signatureContainer = tr.getSignature(pq);
 		return st.getRewriting(pq, signatureContainer);
 	}
 }

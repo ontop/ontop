@@ -27,10 +27,10 @@ import java.io.Reader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableList;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.QueryParser;
@@ -49,7 +49,9 @@ import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlapi3.OWLAPI3IndividualTranslator;
 import org.semanticweb.ontop.owlapi3.OntopOWLException;
 import org.semanticweb.ontop.owlrefplatform.core.IQuest;
+import org.semanticweb.ontop.owlrefplatform.core.IQuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
+import org.semanticweb.ontop.owlrefplatform.core.execution.SIQuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.ontop.sesame.SesameRDFIterator;
@@ -76,10 +78,10 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  */
 public class QuestOWLStatement {
 
-	private QuestStatement st;
+	private SIQuestStatement st;
 	private QuestOWLConnection conn;
 	
-	public QuestOWLStatement(QuestStatement st, QuestOWLConnection conn) {
+	public QuestOWLStatement(SIQuestStatement st, QuestOWLConnection conn) {
 		this.conn = conn;
 		this.st = st;
 	}
@@ -260,13 +262,13 @@ public class QuestOWLStatement {
 
 	private class Process implements Runnable {
 		private SesameRDFIterator iterator;
-		private QuestStatement questStmt;
+		private SIQuestStatement questStmt;
 
 		int insertCount = -1;
 		private int commitsize;
 		private int batchsize;
 
-		public Process(SesameRDFIterator iterator, QuestStatement qstm, int commitsize, int batchsize) throws OBDAException {
+		public Process(SesameRDFIterator iterator, SIQuestStatement qstm, int commitsize, int batchsize) throws OBDAException {
 			this.iterator = iterator;
 			this.questStmt = qstm;
 			this.commitsize = commitsize;
@@ -379,8 +381,7 @@ public class QuestOWLStatement {
             IQuest questInstance = st.getQuestInstance();
 			SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(questInstance.getUriTemplateMatcher());
 
-			LinkedList<String> signatureContainer = new LinkedList<String>();
-			tr.getSignature(pq, signatureContainer);
+			ImmutableList<String> signatureContainer = tr.getSignature(pq);
 			return st.getRewriting(pq, signatureContainer);
 		} catch (Exception e) {
 			throw new OntopOWLException(e);
@@ -389,7 +390,7 @@ public class QuestOWLStatement {
 
 	public String getUnfolding(String query) throws OWLException {
 		try {
-			return st.getUnfolding(query);
+			return st.unfoldAndGenerateTargetQuery(query).getNativeQueryString();
 		} catch (Exception e) {
 			throw new OntopOWLException(e);
 		}

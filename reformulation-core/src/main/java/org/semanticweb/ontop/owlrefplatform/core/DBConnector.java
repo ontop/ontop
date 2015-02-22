@@ -1,7 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core;
 
 import com.google.common.collect.ImmutableList;
-import org.semanticweb.ontop.model.OBDAConnection;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.OBDAModel;
@@ -36,8 +35,8 @@ public interface DBConnector {
 
     void preprocessProjection(ImmutableList<OBDAMappingAxiom> mappings) throws SQLException;
 
-    OBDAConnection getNonPoolConnection() throws OBDAException;
-    OBDAConnection getConnection() throws OBDAException;
+    IQuestConnection getNonPoolConnection() throws OBDAException;
+    IQuestConnection getConnection() throws OBDAException;
 
     @Deprecated
     Connection getSQLPoolConnection() throws OBDAException;

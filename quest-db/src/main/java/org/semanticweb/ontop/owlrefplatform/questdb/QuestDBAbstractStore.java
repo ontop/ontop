@@ -21,7 +21,6 @@ package org.semanticweb.ontop.owlrefplatform.questdb;
  */
 
 import java.io.Serializable;
-import java.util.Properties;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -38,7 +37,7 @@ public abstract class QuestDBAbstractStore implements Serializable {
 	private static final long serialVersionUID = -8088123404566560283L;
 
     protected IQuest questInstance = null;
-	protected QuestConnection questConn = null;
+	protected IQuestConnection questConn = null;
 
 	protected String name;
 
@@ -85,7 +84,7 @@ public abstract class QuestDBAbstractStore implements Serializable {
 		return new QuestDBConnection(getQuestConnection(), nativeQLFactory);
 	}
 	
-	public abstract QuestConnection getQuestConnection();
+	public abstract IQuestConnection getQuestConnection();
 
     protected QuestComponentFactory getComponentFactory() {
         return componentFactory;

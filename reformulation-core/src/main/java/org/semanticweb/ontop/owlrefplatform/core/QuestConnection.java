@@ -25,18 +25,22 @@ import java.sql.SQLException;
 
 import org.semanticweb.ontop.model.OBDAConnection;
 import org.semanticweb.ontop.model.OBDAException;
+import org.semanticweb.ontop.owlrefplatform.core.execution.SIQuestStatement;
+import org.semanticweb.ontop.owlrefplatform.core.execution.SISQLQuestStatementImpl;
 
 /***
  * Quest connection is responsible for wrapping a JDBC connection to the data
  * source. It will translate calls to OBDAConnection into JDBC Connection calls
  * (in most cases directly).
+ *
+ * SQL-specific implementation!
  * 
  * @author mariano
  * 
  */
-public class QuestConnection implements OBDAConnection {
+public class QuestConnection implements IQuestConnection {
 
-	protected Connection conn;
+	private Connection conn;
 
 	private IQuest questinstance;
 	
@@ -46,6 +50,10 @@ public class QuestConnection implements OBDAConnection {
 		this.questinstance = questInstance;
 		this.conn = connection;
 		isClosed = false;
+	}
+
+	public Connection getSQLConnection() {
+		return conn;
 	}
 	
 	@Override
@@ -58,14 +66,17 @@ public class QuestConnection implements OBDAConnection {
 
 	}
 
+	/**
+	 * ONLY for the virtual mode!
+	 */
 	@Override
-	public QuestStatement createStatement() throws OBDAException {
+	public IQuestStatement createStatement() throws OBDAException {
 		try {
 			if (conn.isClosed()) {
 				// Sometimes it gets dropped, reconnect
 				conn = questinstance.getSQLPoolConnection();
 			}
-			QuestStatement st = new QuestStatement(this.questinstance, this,
+			IQuestStatement st = new SQLQuestStatement(this.questinstance, this,
 					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
 							java.sql.ResultSet.CONCUR_READ_ONLY));
 			//st.setFetchSize(400);
@@ -76,6 +87,30 @@ public class QuestConnection implements OBDAConnection {
 			throw obdaException;
 		}
 	}
+
+
+	/**
+	 * Only for the classic mode!
+	 */
+	@Override
+	public SIQuestStatement createSIStatement() throws OBDAException {
+		try {
+			if (conn.isClosed()) {
+				// Sometimes it gets dropped, reconnect
+				conn = questinstance.getSQLPoolConnection();
+			}
+			SIQuestStatement st = new SISQLQuestStatementImpl(this.questinstance, this,
+					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+							java.sql.ResultSet.CONCUR_READ_ONLY));
+			//st.setFetchSize(400);
+			return st;
+
+		} catch (SQLException e1) {
+			OBDAException obdaException = new OBDAException(e1);
+			throw obdaException;
+		}
+	}
+
 		
 	@Override
 	public void commit() throws OBDAException {
@@ -146,5 +181,4 @@ public class QuestConnection implements OBDAConnection {
 			throw obdaException;
 		}
 	}
-
 }

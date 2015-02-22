@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import com.google.common.collect.ImmutableList;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.datatypes.XMLDatatypeUtil;
@@ -1318,10 +1319,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		 */
 
 		else if (expr instanceof IsLiteral) {
-			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_IS_LITERAL, getBooleanTerm( expr.getArg()));
+			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_IS_LITERAL, getBooleanTerm(expr.getArg()));
 			
 		} else if (expr instanceof IsURI) {
-			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_IS_URI, getBooleanTerm( expr.getArg()));
+			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_IS_URI, getBooleanTerm(expr.getArg()));
 			
 		} else if (expr instanceof Str) {
 			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_STR, getBooleanTerm( expr.getArg()));
@@ -1330,7 +1331,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_DATATYPE, getBooleanTerm( expr.getArg()));
 		
 		} else if (expr instanceof IsBNode) {
-			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_IS_BLANK, getBooleanTerm( expr.getArg()));
+			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_IS_BLANK, getBooleanTerm(expr.getArg()));
 							
 		} else if (expr instanceof Lang) {
 			ValueExpr arg = expr.getArg();
@@ -1434,11 +1435,13 @@ public class SparqlAlgebraToDatalogTranslator {
 		return output;
 	}
 	
-	public void getSignature(ParsedQuery query, List<String> signatureContainer) {
-		signatureContainer.clear();
+	public ImmutableList<String> getSignature(ParsedQuery query) {
 		if (query instanceof ParsedTupleQuery || query instanceof ParsedGraphQuery) {
 			TupleExpr te = query.getTupleExpr();
-			signatureContainer.addAll(te.getBindingNames());
+			return ImmutableList.copyOf(te.getBindingNames());
+		}
+		else {
+			return ImmutableList.of();
 		}
 	}
 	

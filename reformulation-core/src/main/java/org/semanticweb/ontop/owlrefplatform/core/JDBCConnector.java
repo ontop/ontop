@@ -254,7 +254,7 @@ public class JDBCConnector implements DBConnector {
 
     // get a real (non pool) connection - used for protege plugin
     @Override
-    public OBDAConnection getNonPoolConnection() throws OBDAException {
+    public IQuestConnection getNonPoolConnection() throws OBDAException {
 
         return new QuestConnection(questInstance, getSQLConnection());
     }
@@ -276,7 +276,7 @@ public class JDBCConnector implements DBConnector {
      * @throws OBDAException
      */
     @Override
-    public OBDAConnection getConnection() throws OBDAException {
+    public IQuestConnection getConnection() throws OBDAException {
 
         return new QuestConnection(questInstance, getSQLPoolConnection());
     }

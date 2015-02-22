@@ -69,4 +69,6 @@ public interface OBDAStatement {
 	 * @throws OBDAException
 	 */
 	public String getSPARQLRewriting(String query) throws OBDAException;
+
+	public int getTupleCount(String query) throws Exception;
 }
