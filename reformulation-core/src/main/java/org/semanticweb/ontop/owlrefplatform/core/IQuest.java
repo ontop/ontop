@@ -4,19 +4,20 @@ import com.google.common.collect.Multimap;
 import org.openrdf.query.parser.ParsedQuery;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.QueryVocabularyValidator;
+import org.semanticweb.ontop.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UriTemplateMatcher;
-import org.semanticweb.ontop.owlrefplatform.core.abox.IRDBMSSIRepositoryManager;
 import org.semanticweb.ontop.owlrefplatform.core.abox.RepositoryChangedListener;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.VocabularyValidator;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryRewriter;
 import org.semanticweb.ontop.owlrefplatform.core.srcquerygeneration.NativeQueryGenerator;
+import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 import java.sql.Connection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Automatically extracted.
@@ -26,9 +27,7 @@ import java.util.Properties;
 public interface IQuest extends RepositoryChangedListener {
     void setImplicitDBConstraints(ImplicitDBConstraints userConstraints);
 
-    IRDBMSSIRepositoryManager getDataRepository();
-
-    QueryVocabularyValidator getVocabularyValidator();
+    VocabularyValidator getVocabularyValidator();
 
     QueryRewriter getRewriter();
 
@@ -36,19 +35,15 @@ public interface IQuest extends RepositoryChangedListener {
 
     Map<String, Boolean> getIsDescribeCache();
 
-    IQuestUnfolder getQuestUnfolder();
+    QuestUnfolder getQuestUnfolder();
 
     OBDAModel getOBDAModel();
 
     Multimap<Predicate,Integer> copyMultiTypedFunctionSymbolIndex();
 
-    EquivalenceMap getEquivalenceMap();
-
     void dispose();
 
-    Properties getPreferences();
-
-    Map<Predicate, List<CQIE>> getSigmaRulesIndex();
+    QuestPreferences getPreferences();
 
     void setupRepository() throws Exception;
 
@@ -71,20 +66,18 @@ public interface IQuest extends RepositoryChangedListener {
 
     DatalogProgram unfold(DatalogProgram query, String targetPredicate) throws OBDAException;
 
-    void setUriRefIds(Map<String, Integer> uriIds);
-
-    Map<String, Integer> getUriRefIds();
-
-    void setUriMap(LinkedHashMap<Integer, String> uriMap);
-
-    Map<Integer, String> getUriMap();
-
     void repositoryChanged();
-
-    IRDBMSSIRepositoryManager getSIRepo();
 
     boolean isSemIdx();
 
+	TBoxReasoner getReasoner();
+
+    RDBMSSIRepositoryManager getSemanticIndexRepository();
+
+    DBMetadata getMetaData();
+
+    LinearInclusionDependencies getDataDependencies();
+    
     Map<String,String> getSQLCache();
 
     Map<String,List<String>> getSignatureCache();

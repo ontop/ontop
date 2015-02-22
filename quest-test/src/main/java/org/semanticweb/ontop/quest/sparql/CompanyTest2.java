@@ -178,7 +178,7 @@ public class CompanyTest2 extends TestCase {
 //
 //				}
 			assertTrue(rs2.nextRow());
-			OWLObject ind2 = rs2.getOWLNamedIndividual("z");
+			OWLObject ind2 = rs2.getOWLIndividual("z");
 			
 			assertEquals("<http://it.unibz.krdb/obda/test/company#mark>", ind2.toString());
 			
@@ -199,12 +199,12 @@ public class CompanyTest2 extends TestCase {
 
 	public void testViEqSig() throws Exception {
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
-		runTests(p);
+		runTests(new QuestPreferences(p));
 	}
 	
 //	public void testClassicEqSig() throws Exception {

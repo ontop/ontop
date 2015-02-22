@@ -71,7 +71,7 @@ public abstract class QuestDBAbstractStore implements Serializable {
 	}
 
 	/* Move to query time ? */
-	public Properties getPreferences() {
+	public QuestPreferences getPreferences() {
 		return questInstance.getPreferences();
 	}
 

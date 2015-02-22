@@ -48,7 +48,7 @@ public class UnboundVariableIMDbTest {
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFileName), p);
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();
@@ -94,12 +94,12 @@ public class UnboundVariableIMDbTest {
 	@Test
 	public void testIMDBSeries() throws Exception {
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
-		runTests(p);
+		runTests(new QuestPreferences(p));
 	}
 
 }

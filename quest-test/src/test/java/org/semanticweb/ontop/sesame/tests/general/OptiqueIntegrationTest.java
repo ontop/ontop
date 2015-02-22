@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
@@ -71,18 +72,19 @@ public class OptiqueIntegrationTest extends TestCase {
 			assertFalse(false);
 		}
 
-		pref = new QuestPreferences();
-		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE,
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE,
 				QuestConstants.VIRTUAL);
-		pref.setCurrentValueOf(QuestPreferences.REWRITE, "true");
-		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		p.setProperty(QuestPreferences.REWRITE, "true");
+		p.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		// set jdbc params in config
-		pref.setCurrentValueOf(QuestPreferences.DBNAME, "npd");
-		pref.setCurrentValueOf(QuestPreferences.JDBC_URL,
+		p.setProperty(QuestPreferences.DB_NAME, "npd");
+		p.setProperty(QuestPreferences.JDBC_URL,
 				"jdbc:mysql://10.7.20.39/npd?sessionVariables=sql_mode='ANSI'");
-		pref.setCurrentValueOf(QuestPreferences.DBUSER, "fish");
-		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, "fish");
-		pref.setCurrentValueOf(QuestPreferences.JDBC_DRIVER,"com.mysql.jdbc.Driver");
+		p.setProperty(QuestPreferences.DB_USER, "fish");
+		p.setProperty(QuestPreferences.DB_PASSWORD, "fish");
+		p.setProperty(QuestPreferences.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+		pref = new QuestPreferences(p);
 	}
 
 	public void setUp() {

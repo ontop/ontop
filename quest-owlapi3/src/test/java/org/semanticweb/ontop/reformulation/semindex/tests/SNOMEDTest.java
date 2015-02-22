@@ -26,6 +26,7 @@ import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 
 import java.io.File;
+import java.util.Properties;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -50,42 +51,25 @@ public class SNOMEDTest {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
 
-//        /**
-//         * Factory initialization
-//         */
-//        Injector injector = Guice.createInjector(new OntopCoreModule(new Properties()));
-//        NativeQueryLanguageComponentFactory factory = injector.getInstance(NativeQueryLanguageComponentFactory.class);
-//
-//        /*
-//         * Load the OBDA model from an external .obda file
-//         */
-//        PrefixManager prefixManager = factory.create(new HashMap<String, String>());
-//        OBDAModel obdaModel = factory.create(ImmutableSet.<OBDADataSource>of(),
-//                new HashMap<URI, ImmutableList<OBDAMappingAxiom>>(),
-//                prefixManager);
-
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		QuestPreferences preferences = new QuestPreferences(p);
 
 		/*
 		 * Loading the queries (we have 11 queries)
 		 */
 
 		// Creating a new instance of the reasoner
-        // TODO: should we give an OBDA model?
-        //TODO: check if it makes sense
-		QuestOWLFactory questOWLFactory = new QuestOWLFactory(p);
-		//questOWLFactory.setOBDAController(obdaModel);
+		QuestOWLFactory questOWLFactory = new QuestOWLFactory(preferences);
 
 		log.info("Creating the reasoner");
 		
-		QuestOWL reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner =  questOWLFactory.createReasoner(ontology, new SimpleConfiguration());
 		
 		log.info("Done");
 		

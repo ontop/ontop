@@ -32,6 +32,7 @@ import org.semanticweb.ontop.model.OBDAModel;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Properties;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -97,12 +98,13 @@ class MappingConverterCMD {
 						+ " written!");
 			} else if (mapFile.endsWith(".ttl")) {
 
-                OBDAProperties pref = new OBDAProperties();
-                pref.setProperty(OBDAProperties.DB_NAME, "DBName");
-                pref.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");;
-                pref.setProperty(OBDAProperties.DB_USER, "sa");
-                pref.setProperty(OBDAProperties.DB_PASSWORD, "");
-                pref.setProperty(OBDAProperties.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+                Properties p = new Properties();
+                p.setProperty(OBDAProperties.DB_NAME, "DBName");
+                p.setProperty(OBDAProperties.JDBC_URL, "jdbc:h2:tcp://localhost/DBName");;
+                p.setProperty(OBDAProperties.DB_USER, "sa");
+                p.setProperty(OBDAProperties.DB_PASSWORD, "");
+                p.setProperty(OBDAProperties.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+				OBDAProperties pref = new OBDAProperties(p);
 
                 Injector injector = Guice.createInjector(new OBDACoreModule(pref));
                 NativeQueryLanguageComponentFactory factory =

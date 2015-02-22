@@ -45,14 +45,13 @@ public class ADPOntopTest {
 		 * "Virtual ABox" mode
 		 */
 		QuestPreferences preferences = new QuestPreferences();
-		preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
 		
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */
 		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), preferences);
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		/*
 		 * Prepare the data connection for querying.

@@ -22,6 +22,7 @@ package org.semanticweb.ontop.parser;
 
 
 import java.io.File;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
@@ -69,14 +70,14 @@ public class MultiSchemaTest extends TestCase {
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-	
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
-		// Creating a new instance of the reasoner
-        QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), p);
 
-		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
+		// Creating a new instance of the reasoner
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), new QuestPreferences(p));
+
+		reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
 		conn = reasoner.getConnection();

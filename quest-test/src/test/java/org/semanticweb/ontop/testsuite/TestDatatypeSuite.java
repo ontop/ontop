@@ -20,6 +20,7 @@ package org.semanticweb.ontop.testsuite;
  * #L%
  */
 
+import org.semanticweb.ontop.quest.datatypes.MssqlDatatypeTest;
 import org.semanticweb.ontop.quest.datatypes.MysqlDatatypeTest;
 import org.semanticweb.ontop.quest.datatypes.OracleDatatypeTest;
 import org.semanticweb.ontop.quest.datatypes.PgsqlDatatypeTest;
@@ -33,7 +34,7 @@ public class TestDatatypeSuite extends TestSuite {
 		TestSuite suite = new TestSuite("Database Data-type Test Suite");
 		suite.addTest(MysqlDatatypeTest.suite());
 		suite.addTest(PgsqlDatatypeTest.suite());
-//		suite.addTest(MssqlDatatypeTest.suite());
+		suite.addTest(MssqlDatatypeTest.suite());
 		suite.addTest(OracleDatatypeTest.suite());
 //		suite.addTest(Db2DatatypeTest.suite());
 		return suite;

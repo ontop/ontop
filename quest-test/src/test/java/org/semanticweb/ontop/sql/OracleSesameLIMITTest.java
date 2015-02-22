@@ -34,6 +34,7 @@ import org.semanticweb.ontop.sql.TableDefinition;
 import org.semanticweb.ontop.sql.api.Attribute;
 
 import java.io.File;
+import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Test;
@@ -65,7 +66,6 @@ public class OracleSesameLIMITTest  {
 	public void init(String jdbc_driver_class)  throws Exception {
 
 		DBMetadata dbMetadata;
-		QuestPreferences preference;
 		OWLOntology ontology;
 		Model model;
 
@@ -90,23 +90,23 @@ public class OracleSesameLIMITTest  {
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
 		 */
-		preference = new QuestPreferences();
-		preference.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		preference.setCurrentValueOf(QuestPreferences.REWRITE, "true");
-		preference.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
-		preference.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE,
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.REWRITE, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "false");
+		p.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE,
 				QuestConstants.TW);
 
-		preference.setCurrentValueOf(QuestPreferences.DBNAME, "db");
-		preference.setCurrentValueOf(QuestPreferences.JDBC_URL, "jdbc:oracle:thin:@//10.7.20.91:1521/xe");
-		preference.setCurrentValueOf(QuestPreferences.DBUSER, "system");
-		preference.setCurrentValueOf(QuestPreferences.DBPASSWORD, "obdaps83");
-		preference.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, jdbc_driver_class);
+		p.setProperty(QuestPreferences.DB_NAME, "db");
+		p.setProperty(QuestPreferences.JDBC_URL, "jdbc:oracle:thin:@//10.7.20.91:1521/xe");
+		p.setProperty(QuestPreferences.DB_USER, "system");
+		p.setProperty(QuestPreferences.DB_PASSWORD, "obdaps83");
+		p.setProperty(QuestPreferences.JDBC_DRIVER, jdbc_driver_class);
 
 		dbMetadata = getMeta(jdbc_driver_class);
 		SesameVirtualRepo qest1;
 
-		qest1 = new SesameVirtualRepo("dbname", ontology, model, dbMetadata, preference);
+		qest1 = new SesameVirtualRepo("dbname", ontology, model, dbMetadata, new QuestPreferences(p));
 		qest1.initialize();
 		/*
 		 * Prepare the data connection for querying.

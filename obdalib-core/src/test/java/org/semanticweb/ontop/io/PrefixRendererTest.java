@@ -64,7 +64,7 @@ public class PrefixRendererTest extends TestCase {
 		List<Term> terms = new LinkedList<Term>();
 		terms.add(tfac.getFunction(pfac.getPredicate("http://obda.org/onto.owl#person-individual", 1), innerterms));
 
-		Function body = tfac.getFunction(pfac.getPredicate("http://obda.org/onto.owl#Person", 1), terms);
+		Function body = tfac.getFunction(pfac.getClassPredicate("http://obda.org/onto.owl#Person"), terms);
 
 		terms = new LinkedList<Term>();
 		terms.add(tfac.getVariable("id"));

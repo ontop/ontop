@@ -162,159 +162,159 @@
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Personnel">
         <rdfs:range rdf:resource="&xsd;int"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Prename -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Prename"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_StaffPhoto -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_StaffPhoto"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Street -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Street"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Surname -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Surname"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_WebPage -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_WebPage"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Year -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/collaborators_Year"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_ComName -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_ComName"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_Language -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_Language"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_NameType -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/comnames_NameType"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countref_Factbook -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countref_Factbook"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countref_PAESE -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/countref_PAESE"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Aquaculture -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Aquaculture"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Brackish -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Brackish"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Freshwater -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Freshwater"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Game -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Game">
-        <rdfs:range rdf:resource="&xsd;int"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
     </owl:DatatypeProperty>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Importance -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Importance"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_LiveExport -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_LiveExport"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Saltwater -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Saltwater"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Status -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/country_Status"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Activity -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Activity"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Aquarium -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Aquarium"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Brackish -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Brackish"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Class -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Class"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Division -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_Division"/>
-    
+
 
 
     <!-- http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_FamiliesRefNo -->
 
     <owl:DatatypeProperty rdf:about="http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/families_FamiliesRefNo">
-        <rdfs:range rdf:resource="&xsd;int"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
     </owl:DatatypeProperty>
     
 

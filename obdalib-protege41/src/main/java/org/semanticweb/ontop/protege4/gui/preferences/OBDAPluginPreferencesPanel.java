@@ -27,7 +27,7 @@ import javax.swing.JLabel;
 import org.protege.editor.core.prefs.PreferencesManager;
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
 import org.semanticweb.ontop.protege4.panels.OBDAPreferencesPanel;
-import org.semanticweb.ontop.utils.OBDAPreferences;
+import org.semanticweb.ontop.protege4.core.ProtegeOBDAPreferences;
 
 /***
  * This class is deprecated
@@ -41,7 +41,7 @@ public class OBDAPluginPreferencesPanel extends OWLPreferencesPanel {
 	 * 
 	 */
 	private static final long serialVersionUID = -238263730527609043L;
-	private OBDAPreferences obdaPreference = null;
+	private ProtegeOBDAPreferences obdaPreference = null;
 
 	@Override
 	public void applyChanges() {
@@ -54,7 +54,7 @@ public class OBDAPluginPreferencesPanel extends OWLPreferencesPanel {
 		PreferencesManager man = PreferencesManager.getInstance();
 
 		// Preference settings using the OBDA API framework
-		obdaPreference = (OBDAPreferences) getEditorKit().get(OBDAPreferences.class.getName());
+		obdaPreference = (ProtegeOBDAPreferences) getEditorKit().get(ProtegeOBDAPreferences.class.getName());
 		OBDAPreferencesPanel panel = new OBDAPreferencesPanel(obdaPreference);
 
 		setLayout(new java.awt.GridBagLayout());

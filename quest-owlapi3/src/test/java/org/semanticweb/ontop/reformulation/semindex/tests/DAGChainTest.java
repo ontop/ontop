@@ -27,23 +27,24 @@ import java.util.Set;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
+import org.semanticweb.ontop.ontology.ClassExpression;
 import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.ObjectSomeValuesFrom;
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.PropertySomeRestriction;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.*;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import junit.framework.TestCase;
 
+import org.semanticweb.ontop.quest.dag.TestTBoxReasonerImpl_OnGraph;
+
 
 public class DAGChainTest extends TestCase {
-
-	SemanticIndexHelper						helper				= new SemanticIndexHelper();
-
-	private static final OBDADataFactory	predicateFactory	= OBDADataFactoryImpl.getInstance();
-	private static final OntologyFactory	descFactory			= new OntologyFactoryImpl();
 
 	private static <T> int sizeOf(Set<Equivalences<T>> set) {
 		int size = 0;
@@ -54,30 +55,22 @@ public class DAGChainTest extends TestCase {
 	}
 	
 	public void test_simple_isa() {
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
-		Predicate a = predicateFactory.getPredicate("a", 1);
-		Predicate b = predicateFactory.getPredicate("b", 1);
-		Predicate c = predicateFactory.getPredicate("c", 1);
+		OClass ac = ontology.getVocabulary().createClass("a");
+		OClass bc = ontology.getVocabulary().createClass("b");
+		OClass cc = ontology.getVocabulary().createClass("c");
 
-		OClass ac = descFactory.createClass(a);
-		OClass bc = descFactory.createClass(b);
-		OClass cc = descFactory.createClass(c);
-
-		ontology.addConcept(ac.getPredicate());
-		ontology.addConcept(bc.getPredicate());
-		ontology.addConcept(cc.getPredicate());
-
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, ac));
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, bc));
+		ontology.addSubClassOfAxiom(bc, ac);
+		ontology.addSubClassOfAxiom(cc, bc);
 
 		TBoxReasonerImpl reasoner0 = new TBoxReasonerImpl(ontology);
 		TBoxReasoner reasoner = TBoxReasonerImpl.getChainReasoner(reasoner0);
-		EquivalencesDAG<BasicClassDescription> classes = reasoner.getClasses();
+		EquivalencesDAG<ClassExpression> classes = reasoner.getClassDAG();
 		
-		Equivalences<BasicClassDescription> ac0 = classes.getVertex(ac);
-		Equivalences<BasicClassDescription> bc0 = classes.getVertex(bc);
-		Equivalences<BasicClassDescription> cc0 = classes.getVertex(cc);
+		Equivalences<ClassExpression> ac0 = classes.getVertex(ac);
+		Equivalences<ClassExpression> bc0 = classes.getVertex(bc);
+		Equivalences<ClassExpression> cc0 = classes.getVertex(cc);
 		
 		assertTrue(classes.getSub(ac0).contains(bc0));
 		assertTrue(classes.getSub(ac0).contains(cc0));
@@ -89,29 +82,17 @@ public class DAGChainTest extends TestCase {
 	}
 
 	public void test_exists_simple() {
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
-		Predicate a = predicateFactory.getClassPredicate("a");
-		Predicate r = predicateFactory.getObjectPropertyPredicate("r");
-		Predicate c = predicateFactory.getClassPredicate("c");
-		OClass ac = descFactory.createClass(a);
-		PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
-		PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
-		OClass cc = descFactory.createClass(c);
+		ObjectPropertyExpression rprop = ontology.getVocabulary().createObjectProperty("r");
+		ObjectPropertyExpression riprop = rprop.getInverse();
+		OClass ac = ontology.getVocabulary().createClass("a");
+		ObjectSomeValuesFrom er = rprop.getDomain();
+		ObjectSomeValuesFrom ier = riprop.getDomain();
+		OClass cc = ontology.getVocabulary().createClass("c");
 
-		ontology.addConcept(ac.getPredicate());
-		ontology.addConcept(cc.getPredicate());
-
-		ontology.addRole(er.getPredicate());
-		ontology.addRole(ier.getPredicate());
-		
-		//System.out.println(er);
-		//System.out.println(ac);
-		//System.out.println(cc);
-		//System.out.println(ier);
-
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
+		ontology.addSubClassOfAxiom(er, ac);
+		ontology.addSubClassOfAxiom(cc, ier);
 		
 		//generate Graph
 		TBoxReasonerImpl res0 = new  TBoxReasonerImpl(ontology);
@@ -123,15 +104,15 @@ public class DAGChainTest extends TestCase {
 //			System.out.println("---- " + nodes);
 //		}
 		
-		Test_TBoxReasonerImplOnGraph reasoner = new Test_TBoxReasonerImplOnGraph(res0);
+		TestTBoxReasonerImpl_OnGraph reasoner = new TestTBoxReasonerImpl_OnGraph(res0);
 		reasoner.convertIntoChainDAG();
 
-		EquivalencesDAG<BasicClassDescription> classes = reasoner.getClasses();
+		EquivalencesDAG<ClassExpression> classes = reasoner.getClassDAG();
 
-		Equivalences<BasicClassDescription> ac0 = classes.getVertex(ac);
-		Equivalences<BasicClassDescription> cc0 = classes.getVertex(cc);
-		Equivalences<BasicClassDescription> er0 = classes.getVertex(er);
-		Equivalences<BasicClassDescription> ier0 = classes.getVertex(ier);
+		Equivalences<ClassExpression> ac0 = classes.getVertex(ac);
+		Equivalences<ClassExpression> cc0 = classes.getVertex(cc);
+		Equivalences<ClassExpression> er0 = classes.getVertex(er);
+		Equivalences<ClassExpression> ier0 = classes.getVertex(ier);
 		
 		
 		assertTrue(classes.getSub(ac0).contains(er0));
@@ -149,33 +130,22 @@ public class DAGChainTest extends TestCase {
 
 	public void test_exists_complex() {
 
-		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology("");
+		Ontology ontology = OntologyFactoryImpl.getInstance().createOntology();
 
-		Predicate a = predicateFactory.getPredicate("a", 1);
-		Predicate r = predicateFactory.getPredicate("r", 2);
-		Predicate c = predicateFactory.getPredicate("c", 1);
-		Predicate b = predicateFactory.getPredicate("b", 1);
-		Predicate d = predicateFactory.getPredicate("d", 1);
+		ObjectPropertyExpression rprop = ontology.getVocabulary().createObjectProperty("r");
+		ObjectPropertyExpression riprop = rprop.getInverse();
 
-		OClass ac = descFactory.createClass(a);
-		PropertySomeRestriction er = descFactory.getPropertySomeRestriction(r, false);
-		PropertySomeRestriction ier = descFactory.getPropertySomeRestriction(r, true);
-		OClass cc = descFactory.createClass(c);
-		OClass bc = descFactory.createClass(b);
-		OClass dc = descFactory.createClass(d);
+		OClass ac = ontology.getVocabulary().createClass("a");
+		ObjectSomeValuesFrom er = rprop.getDomain();
+		ObjectSomeValuesFrom ier = riprop.getDomain();
+		OClass cc = ontology.getVocabulary().createClass("c");
+		OClass bc = ontology.getVocabulary().createClass("b");
+		OClass dc = ontology.getVocabulary().createClass("d");
 
-		ontology.addConcept(ac.getPredicate());
-		ontology.addConcept(cc.getPredicate());
-		ontology.addConcept(bc.getPredicate());
-		ontology.addConcept(dc.getPredicate());
-
-		ontology.addRole(er.getPredicate());
-		ontology.addRole(ier.getPredicate());
-
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(er, ac));
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(cc, ier));
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(bc, er));
-		ontology.addAssertion(OntologyFactoryImpl.getInstance().createSubClassAxiom(ier, dc));
+		ontology.addSubClassOfAxiom(er, ac);
+		ontology.addSubClassOfAxiom(cc, ier);
+		ontology.addSubClassOfAxiom(bc, er);
+		ontology.addSubClassOfAxiom(ier, dc);
 
 		//DAGImpl dag221 = DAGBuilder.getDAG(ontology);
 		//TBoxReasonerImpl reasoner221 = new TBoxReasonerImpl(dag221);
@@ -183,14 +153,14 @@ public class DAGChainTest extends TestCase {
 		TBoxReasonerImpl resoner0 = new TBoxReasonerImpl(ontology);
 		TBoxReasoner reasoner = TBoxReasonerImpl.getChainReasoner(resoner0);
 
-		EquivalencesDAG<BasicClassDescription> classes = reasoner.getClasses();
+		EquivalencesDAG<ClassExpression> classes = reasoner.getClassDAG();
 		
-		Equivalences<BasicClassDescription> ac0 = classes.getVertex(ac);
-		Equivalences<BasicClassDescription> bc0 = classes.getVertex(bc);
-		Equivalences<BasicClassDescription> cc0 = classes.getVertex(cc);
-		Equivalences<BasicClassDescription> dc0 = classes.getVertex(dc);
-		Equivalences<BasicClassDescription> er0 = classes.getVertex(er);
-		Equivalences<BasicClassDescription> ier0 = classes.getVertex(ier);
+		Equivalences<ClassExpression> ac0 = classes.getVertex(ac);
+		Equivalences<ClassExpression> bc0 = classes.getVertex(bc);
+		Equivalences<ClassExpression> cc0 = classes.getVertex(cc);
+		Equivalences<ClassExpression> dc0 = classes.getVertex(dc);
+		Equivalences<ClassExpression> er0 = classes.getVertex(er);
+		Equivalences<ClassExpression> ier0 = classes.getVertex(ier);
 		
 		assertTrue(classes.getSub(ac0).contains(er0));
 		assertTrue(classes.getSub(ac0).contains(ier0));

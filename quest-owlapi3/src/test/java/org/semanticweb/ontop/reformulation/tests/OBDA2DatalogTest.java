@@ -35,6 +35,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
@@ -109,15 +110,15 @@ public class OBDA2DatalogTest extends TestCase {
 	}
 
 	private void runTests(String obdaFileName) throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		
 		// Creating a new instance of the reasoner
-		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFileName), p);
+		QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFileName), new QuestPreferences(p));
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Get ready for querying
 		reasoner.getStatement();

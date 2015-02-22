@@ -8,10 +8,10 @@ import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.io.OntopNativeMappingSerializer;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 
 import java.io.*;
@@ -38,7 +38,7 @@ public class OntopOWLFactory extends QuestOWLFactory {
 	}
 			
 	@Override
-	public OWLReasoner createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
+	public QuestOWL createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		try { 
 			return super.createReasoner(ontology, config);
 		} catch (Exception e){
@@ -47,7 +47,7 @@ public class OntopOWLFactory extends QuestOWLFactory {
 		}
 	}
 	@Override
-	public OWLReasoner createReasoner(OWLOntology ontology) throws IllegalConfigurationException {
+	public QuestOWL createReasoner(OWLOntology ontology) throws IllegalConfigurationException {
 		try { 
 			return super.createReasoner(ontology);
 		} catch (Exception e){
@@ -57,7 +57,7 @@ public class OntopOWLFactory extends QuestOWLFactory {
 	}
 	
 	@Override
-	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
+	public QuestOWL createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		try { 
 			return super.createNonBufferingReasoner(ontology, config);
 		} catch (Exception e){
@@ -66,7 +66,7 @@ public class OntopOWLFactory extends QuestOWLFactory {
 		}
 	}
 	@Override
-	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology) throws IllegalConfigurationException {
+	public QuestOWL createNonBufferingReasoner(OWLOntology ontology) throws IllegalConfigurationException {
 		try { 
 			return super.createNonBufferingReasoner(ontology);
 		} catch (Exception e){

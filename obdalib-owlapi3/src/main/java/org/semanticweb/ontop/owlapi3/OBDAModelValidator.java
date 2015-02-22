@@ -32,7 +32,7 @@ import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 /***
- * Validates an OBDAModel (mappings) againts the vacabulary of an ontology. Used
+ * Validates an OBDAModel (mappings) against the vocabulary of an ontology. Used
  * by the Protege 4 plugin in
  * OBDAModelManager.OBDAPluginOWLModelManagerListener.handleChange
  * 
@@ -43,8 +43,8 @@ import org.semanticweb.owlapi.model.OWLOntology;
  */
 public class OBDAModelValidator {
 
-	private OBDAModel obdaModel;
-	private TargetQueryVocabularyValidator validator;
+	private final OBDAModel obdaModel;
+	private final TargetQueryVocabularyValidator validator;
 
 	// TODO We should reduce the dependency to OWL-API to define the ontology.
 	public OBDAModelValidator(OBDAModel obdaModel, OWLOntology ontology) {

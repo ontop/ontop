@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
+import java.util.Properties;
 
 import org.openrdf.model.Model;
 import org.openrdf.model.Value;
@@ -148,18 +149,18 @@ public class QuestSesameVirtualExample {
 		parser.setRDFHandler(collector);
 		parser.parse(in, documentUrl.toString());
 		
-		QuestPreferences pref = new QuestPreferences();
-		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		pref.setCurrentValueOf(QuestPreferences.REWRITE, "true");
-		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.REWRITE, "true");
+		p.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		//set jdbc params in config
-		pref.setCurrentValueOf(QuestPreferences.DBNAME, "books");
-		pref.setCurrentValueOf(QuestPreferences.JDBC_URL, "jdbc:mysql://10.7.20.39/books?sessionVariables=sql_mode='ANSI'");
-		pref.setCurrentValueOf(QuestPreferences.DBUSER, "fish");
-		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, "fish");
-		pref.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, "com.mysql.jdbc.Driver");
+		p.setProperty(QuestPreferences.DB_NAME, "books");
+		p.setProperty(QuestPreferences.JDBC_URL, "jdbc:mysql://10.7.20.39/books?sessionVariables=sql_mode='ANSI'");
+		p.setProperty(QuestPreferences.DB_USER, "fish");
+		p.setProperty(QuestPreferences.DB_PASSWORD, "fish");
+		p.setProperty(QuestPreferences.JDBC_DRIVER, "com.mysql.jdbc.Driver");
 		
-		Repository repo = new SesameVirtualRepo("virtualExample2", owlontology, myModel, pref);
+		Repository repo = new SesameVirtualRepo("virtualExample2", owlontology, myModel, new QuestPreferences(p));
 
 		System.out.println(myModel);
 		/*

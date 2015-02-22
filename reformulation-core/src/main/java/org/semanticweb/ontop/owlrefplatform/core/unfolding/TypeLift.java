@@ -7,15 +7,17 @@ import fj.*;
 import fj.data.*;
 import fj.data.HashMap;
 import fj.data.List;
-import fj.data.TreeMap;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Unifier;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypePropagatingSubstitution;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.TypePropagatingSubstitution.forceVariableReuse;
 
 /**
  * Type lifting consists in:
@@ -33,22 +35,16 @@ import java.util.*;
 public class TypeLift {
 
     /**
-     * Happens when unification of proposals and rules
-     * is not possible.
-     */
-    private static class UnificationException extends Exception {
-    }
-
-    /**
-     * Thrown after receiving an UnificationException.
-     * This indicates that the predicate for which the unification
+     * Thrown after receiving an SubstitutionException.
+     *
+     * This indicates that the predicate for which the type propagation
      * has been tried should be considered as multi-typed.
      */
     private static class MultiTypeException extends Exception {
     }
 
     /**
-     * Thrown when an UnificationException happens when trying
+     * Thrown when a SubstitutionUnionException happens when trying
      * to apply a type proposal to a set of rules.
      *
      * This error should not be expected (as such).
@@ -272,7 +268,6 @@ public class TypeLift {
          * Special case: if the proposal is not supported for type lifting, applies it directly to the parent node.
          * It will then not appear as a proposal to the grand-parent node.
          *
-         * TODO: discuss about it to make sure it is sound.
          */
         if (!isSupportedProposal(parentProposal.some())) {
             newTreeZipper = applyTypeFunction.f(newTreeZipper);
@@ -300,7 +295,7 @@ public class TypeLift {
         final HashMap<Predicate, Function> childProposalIndex = retrieveChildrenProposals(parentZipper);
 
         /**
-         * If there is no child proposal, no need to unify.
+         * If there is no child proposal, no need to aggregate.
          * Builds and returns a proposal just by looking at the rules defining the parent predicate.
          */
         if (childProposalIndex.isEmpty()) {
@@ -308,14 +303,20 @@ public class TypeLift {
         }
 
         /**
-         * Unifies all these proposals according to the rules defining the parent predicate.
+         * Aggregates all these proposals according to the rules defining the parent predicate.
          *
-         * If such unification is not possible, a MultiTypeException will be thrown.
+         * If such aggregation is not possible, a MultiTypeException will be thrown.
          *
-         * Returns the unified proposal.
+         * Returns the resulting proposal.
+         *
          */
         final List<CQIE> parentRules = parentZipper.getLabel()._2();
-        final Function newProposal = unifyChildrenProposalsAndRules(Option.<Function>none(), parentRules, childProposalIndex);
+        final Substitution proposedSubstitutionFct = aggregateChildrenProposalsAndRules(
+                Option.<Substitution>none(), parentRules, childProposalIndex);
+
+        Function newProposal = (Function) parentRules.head().getHead().clone();
+        // Side-effect!
+        SubstitutionUtilities.applySubstitution(newProposal, proposedSubstitutionFct);
 
         return Option.some(newProposal);
     }
@@ -324,105 +325,110 @@ public class TypeLift {
      * Tail-recursive method "iterating" over the rules defining the parent predicate.
      * In most case, there is just one of these rules.
      *
-     * Returns a type proposal by unifying:
-     *   - the current rule,
-     *   - the children proposals,
-     *   - the proposal coming from the "iteration" over the previous rules.
+     * It brings a substitution function that is "updated" (new object)
+     * for each rule.
+     *
+     * Returns the final substitution function.
+     * May raises a MultiTypedException.
+     *
      */
-    private static Function unifyChildrenProposalsAndRules(Option<Function> optionalProposal, List<CQIE> remainingRules,
-                                                           HashMap<Predicate, Function> childProposalIndex)
+    private static Substitution aggregateChildrenProposalsAndRules(Option<Substitution> optionalSubstitutionFct,
+                                                              List<CQIE> remainingRules, HashMap<Predicate, Function> childProposalIndex)
             throws MultiTypeException {
         /**
          * Stop condition (no more rule to consider).
          */
         if (remainingRules.isEmpty()) {
-            if (optionalProposal.isNone()) {
+            if (optionalSubstitutionFct.isNone()) {
                 throw new IllegalArgumentException("Do not give a None head with an empty list of rules");
             }
             /**
-             * Returns the proposal obtained from the previous rules.
+             * Returns the proposed substitutions obtained from the previous rules.
              */
-            return optionalProposal.some();
+            return optionalSubstitutionFct.some();
         }
 
         /**
-         * Main operation: builds a proposal from the current rule and the children proposals.
+         * Main operation: updates the substitution function according to the current rule and the children proposals.
          * May throw a MultipleTypeException.
          */
         CQIE rule = remainingRules.head();
-        Function proposedHead = unifyRule(rule.getHead(), extractBodyAtoms(rule), childProposalIndex);
-
-        /**
-         * Checks if this fresh proposal should be unified with the proposal from the previous rules
-         * or not.
-         */
-        Function newHead;
-
-        /**
-         * Not already existing proposal (no previous rule). Most common case.
-         */
-        if (optionalProposal.isNone()) {
-            newHead = proposedHead;
-        }
-        /**
-         * Otherwise, tries to unify with the previous proposal.
-         */
-        else {
-            Function currentHead = optionalProposal.some();
-            try {
-                newHead = unifyTypes(currentHead, currentHead, proposedHead);
-            }
-            /**
-             * Impossibility to unify here denotes multi-typing.
-             *
-             * Throws an exception.
-             */
-            catch(UnificationException e) {
-                throw new MultiTypeException();
-            }
-        }
+        Substitution proposedSubstitutionFct = aggregateRuleAndProposals(optionalSubstitutionFct, extractBodyAtoms(rule),
+                childProposalIndex);
 
         /**
          * Tail recursion.
          */
-        return unifyChildrenProposalsAndRules(Option.some(newHead), remainingRules.tail(), childProposalIndex);
+        return aggregateChildrenProposalsAndRules(Option.some(proposedSubstitutionFct), remainingRules.tail(), childProposalIndex);
     }
 
     /**
      * Tail-recursive method that "iterates" over the body atoms of a given rule defining the parent predicate.
      *
-     * For a given body atom, tries to extract a type by unification with the corresponding child proposal.
-     * The unifier is then used to update the current proposed head.
+     * For a given body atom, tries to make the *union* (NOT composition) of the current substitution function with
+     * the one deduced from the child proposal corresponding to the current atom.
      *
-     * If unification is impossible, throws a MultiTypeException.
+     * If some problems with a substitution function occur, throws a MultiTypeException.
      *
      */
-    private static Function unifyRule(final Function currentProposedHead, final List<Function> remainingBodyAtoms,
-                                      final HashMap<Predicate,Function> childProposalIndex) throws MultiTypeException {
+    private static Substitution aggregateRuleAndProposals(final Option<Substitution> optionalSubstitutionFunction,
+                                                                         final List<Function> remainingBodyAtoms,
+                                                                         final HashMap<Predicate, Function> childProposalIndex) throws MultiTypeException {
         /**
          * Stop condition (no further body atom).
          */
         if (remainingBodyAtoms.isEmpty()) {
-            return currentProposedHead;
+            if (optionalSubstitutionFunction.isNone()) {
+                throw new IllegalArgumentException("Do not give a None substitution function with an empty list of rules");
+            }
+            return optionalSubstitutionFunction.some();
         }
 
         Function bodyAtom = remainingBodyAtoms.head();
         Option<Function> optionalChildProposal = childProposalIndex.get(bodyAtom.getFunctionSymbol());
 
-        Function newHead;
+        Option<Substitution> newOptionalSubstitutionFct;
+
         /**
          * If there is a child proposal corresponding to the current body atom,
-         * use these atoms to update the current proposed head.
+         * computes a substitution function that propagates types.
+         *
+         * Then, makes the union of this substitution function with the previous one.
+         *
          */
         if (optionalChildProposal.isSome()) {
             try {
-                newHead = unifyTypes(currentProposedHead, bodyAtom, optionalChildProposal.some());
+                Substitution proposedSubstitutionFunction = computeTypePropagatingSubstitution(
+                        bodyAtom, optionalChildProposal.some());
+
+                if (optionalSubstitutionFunction.isNone()) {
+                    newOptionalSubstitutionFct = Option.some(proposedSubstitutionFunction);
+                }
+                /**
+                 * We do NOT consider the composition of the substitution functions (like during unification)
+                 * BUT THEIR UNION.
+                 *
+                 * Why? Because we want to apply a type only once, not multiple times.
+                 *
+                 * By composition "{ x/int(x) } o { x/int(x) } = { x/int(int(x) }" which is not what we want.
+                 * With unions, "{ x/int(x) } U { x/int(x) } = { x/int(x) }".
+                 *
+                 * Throw a type propagation exception if the substitutions are conflicting.
+                 * For example, this "union" does not a produce a function.
+                 *
+                 * " {x/int(x) } U { x/str(x) } "
+                 *
+                 */
+                else {
+                    newOptionalSubstitutionFct = Option.some(SubstitutionUtilities.union(optionalSubstitutionFunction.some(),
+                            proposedSubstitutionFunction));
+                }
             }
             /**
-             * Impossible to unify.
+             * Impossible to propagate type.
              * This happens when multiple types are proposed for this predicate.
              */
-            catch(UnificationException e) {
+            catch(SubstitutionUtilities.SubstitutionException e) {
                 throw new MultiTypeException();
             }
         }
@@ -430,59 +436,55 @@ public class TypeLift {
          * Otherwise, keeps the same proposed head.
          */
         else {
-            newHead = currentProposedHead;
+            newOptionalSubstitutionFct = optionalSubstitutionFunction;
         }
 
         /**
          * Tail recursion
          */
-        return unifyRule(newHead, remainingBodyAtoms.tail(), childProposalIndex);
+        return aggregateRuleAndProposals(newOptionalSubstitutionFct, remainingBodyAtoms.tail(), childProposalIndex);
     }
 
     /**
      * Low-level function.
      *
-     * The goal to transfer proposed types (given by the proposedAtom)
-     * to the localHead.
+     * The goal is to build a substitution function
+     * that would be able to transfer the proposed types (given by the proposedAtom)
+     * to the local atom.
      *
-     * Like the localHead, the localAtom belongs to the local rule.
-     * It should have the same predicate than the proposedAtom (which usually
-     * differs from the one of the localHead).
      *
      * One sensitive constraint here is to propagate types without changing the
      * variable names.
      *
-     * If the unification could not be achieved, throws a UnificationException.
+     * If such a substitution function does not exist, throws a SubstitutionException.
+     *
      */
-    private static Function unifyTypes(Function localHead, Function localAtom, Function proposedAtom)
-            throws UnificationException{
+    private static Substitution computeTypePropagatingSubstitution(Function localAtom, Function proposedAtom)
+            throws SubstitutionUtilities.SubstitutionException {
         /**
-         * Most General Unifier between the proposedAtom and the localAtom.
+         * Type propagating substitution function between the proposedAtom and the localAtom.
+         *
+         * TODO: make the latter function throw the exception.
          */
-        Map<Variable, Term> directMGU = Unifier.getMGU(proposedAtom, localAtom, true, ImmutableMultimap.<Predicate,Integer>of());
+        Substitution typePropagatingSubstitutionFunction = TypePropagatingSubstitution.createTypePropagatingSubstitution(
+                proposedAtom, localAtom, ImmutableMultimap.<Predicate, Integer>of());
 
         /**
          * Impossible to unify the multiple types proposed for this predicate.
          */
-        if (directMGU == null) {
-            throw new UnificationException();
+        if (typePropagatingSubstitutionFunction == null) {
+            throw new SubstitutionUtilities.SubstitutionException();
         }
 
         /**
-         * The current MGU may change variable names because they were not the same in the two atoms.
+         * The current substitution function may change variable names because they were not the same in the two atoms.
          *
          * Here, we are just interested in the types but we do not want to change the variable names.
          * Thus, we force variable reuse.
          */
-        //TODO: re-implement this method without side effect.
-        Map<Variable, Term> typingMGU = forceVariableReuse(directMGU);
+        Substitution renamedSubstitutions = forceVariableReuse(typePropagatingSubstitutionFunction);
 
-        //Mutable!!
-        Function newHead = (Function)localHead.clone();
-        // Side-effect (newHead is updated)
-        Unifier.applySelectiveUnifier(newHead, typingMGU);
-
-        return newHead;
+        return renamedSubstitutions;
     }
 
     /**
@@ -497,23 +499,38 @@ public class TypeLift {
             public CQIE f(CQIE initialRule) {
                 Function currentHead = initialRule.getHead();
                 try {
-                    Function newHead = unifyTypes(currentHead, currentHead, typeProposal);
+                    Function newHead = applyTypeProposal(currentHead, typeProposal);
+
                     // Mutable object
                     CQIE newRule = initialRule.clone();
                     newRule.updateHead(newHead);
                     return newRule;
                     /**
-                     * Unification exception should not appear at this level.
+                     * A SubstitutionException exception should not appear at this level.
                      * There is an inconsistency somewhere.
                      *
                      * Throws a runtime exception (TypeApplicationError)
                      * that should not be expected.
                      */
-                } catch(UnificationException e) {
+                } catch(SubstitutionUtilities.SubstitutionException e) {
                     throw new TypeApplicationError();
                 }
             }
         });
+    }
+
+    /**
+     * Propagates type from a typeProposal to one head atom.
+     */
+    private static Function applyTypeProposal(Function headAtom, Function typeProposal) throws SubstitutionUtilities.SubstitutionException {
+        Substitution substitutionFunction = computeTypePropagatingSubstitution(headAtom, typeProposal);
+
+        // Mutable object
+        Function newHead = (Function) headAtom.clone();
+        // Limited side-effect
+        SubstitutionUtilities.applySubstitution(newHead, substitutionFunction);
+
+        return newHead;
     }
 
     /**
@@ -895,79 +912,6 @@ public class TypeLift {
     }
 
     /**
-     * Derives a new most general unifier (MGU) that makes sure the replacing term use the replaced variable
-     * when this term is functional.
-     *
-     * Functional terms with 0 or more than 1 variable are not added to the new MGU.
-     *
-     * Returns the new MGU.
-     */
-    private static Map<Variable, Term> forceVariableReuse(Map<Variable, Term> initialMGU) {
-        Stream<P2<Variable, Term>> unifierEntries = Stream.iterableStream(TreeMap.fromMutableMap(Ord.<Variable>hashOrd(),
-                initialMGU));
-
-        Stream<P2<Variable, Term>> newUnifierEntries = unifierEntries.filter(
-                /**
-                 * Filters (removes) functional terms with 0 or more than 1 variable
-                 */
-                new F<P2<Variable, Term>, Boolean>() {
-            @Override
-            public Boolean f(P2<Variable, Term> entry) {
-                Term term = entry._2();
-                if (term instanceof Function) {
-                    if (term.getReferencedVariables().size() != 1)
-                        return false;
-                }
-                return true;
-            }
-        }).map(
-                /**
-                 * Transforms the unary functional terms so that they reuse
-                 * the same variable.
-                 *
-                 * Others remain the same.
-                 */
-                new F<P2<Variable, Term>, P2<Variable, Term>>() {
-            @Override
-            public P2<Variable, Term> f(P2<Variable, Term> entry) {
-                Variable variableToKeep = entry._1();
-                Term term = entry._2();
-
-                /**
-                 * Transformation only concerns some functional terms.
-                 */
-                if (term instanceof Function) {
-                    Variable variableToChange = term.getReferencedVariables().iterator().next();
-
-                    /**
-                     * When the two variables are not the same,
-                     * makes a unification to update the functional term.
-                     */
-                    if (!variableToChange.equals(variableToKeep)) {
-                        Map<Variable, Term> miniMGU = new java.util.HashMap<>();
-                        miniMGU.put(variableToChange, variableToKeep);
-
-                        Function translatedFunctionalTerm = (Function) term.clone();
-                        //Side-effect update
-                        Unifier.applyUnifier(translatedFunctionalTerm, miniMGU, false);
-
-                        return P.p(variableToKeep, (Term) translatedFunctionalTerm);
-                    }
-                }
-                /**
-                 * No transformation.
-                 */
-                return entry;
-            }
-        });
-
-        Map<Variable, Term> newMGU = HashMap.from(newUnifierEntries).toMap();
-        return newMGU;
-    }
-    
-
-
-    /**
      * Removes the type for a given term.
      * This method also deals with special cases that should not be untyped.
      *
@@ -1080,13 +1024,14 @@ public class TypeLift {
 
         Function ruleHead = remainingRules.head().getHead();
         try {
-            Function newType = unifyTypes(ruleHead, ruleHead, currentType);
+            Function newType = applyTypeProposal(ruleHead, currentType);
+
             // Tail recursion
             return isMultiTypedPredicate(newType, remainingRules.tail());
             /**
              * Multi-type problem detected
              */
-        } catch (UnificationException e) {
+        } catch (SubstitutionUtilities.SubstitutionException e) {
             return true;
         }
     }

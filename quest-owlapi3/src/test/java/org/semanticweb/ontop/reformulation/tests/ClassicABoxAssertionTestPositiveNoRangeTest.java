@@ -21,6 +21,7 @@ package org.semanticweb.ontop.reformulation.tests;
  */
 
 import java.io.File;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
@@ -51,13 +52,13 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 	private QuestOWLStatement st;
 
 	public ClassicABoxAssertionTestPositiveNoRangeTest() throws Exception {
-		QuestPreferences pref = new QuestPreferences();
-		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
-		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
-		pref.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
 		String owlfile = "src/test/resources/test/owl-types-simple-split.owl";
 
@@ -65,9 +66,9 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
 		
-		QuestOWLFactory fac = new QuestOWLFactory(pref);
+		QuestOWLFactory fac = new QuestOWLFactory(new QuestPreferences(p));
 
-		reasoner = (QuestOWL) fac.createReasoner(ontology);
+		reasoner = fac.createReasoner(ontology);
 		reasoner.flush();
 
 		conn = reasoner.getConnection();

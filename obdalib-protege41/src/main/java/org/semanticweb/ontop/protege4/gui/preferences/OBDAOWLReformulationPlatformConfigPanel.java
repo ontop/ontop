@@ -25,6 +25,7 @@ import java.awt.BorderLayout;
 
 import org.protege.editor.owl.ui.preferences.OWLPreferencesPanel;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.protege4.core.ProtegeReformulationPlatformPreferences;
 import org.semanticweb.ontop.protege4.panels.ConfigPanel;
 
 public class OBDAOWLReformulationPlatformConfigPanel extends OWLPreferencesPanel {
@@ -33,7 +34,7 @@ public class OBDAOWLReformulationPlatformConfigPanel extends OWLPreferencesPanel
 	 * 
 	 */
 	private static final long	serialVersionUID	= 2017399622537704497L;
-	private QuestPreferences preference = null;
+	private ProtegeReformulationPlatformPreferences preference = null;
 	private ConfigPanel configPanel = null;
 	
 	@Override
@@ -43,7 +44,7 @@ public class OBDAOWLReformulationPlatformConfigPanel extends OWLPreferencesPanel
 
 	@Override
 	public void initialise() throws Exception {
-		preference = (QuestPreferences)
+		preference = (ProtegeReformulationPlatformPreferences)
 			getEditorKit().get(QuestPreferences.class.getName());
 		
 		this.setLayout(new BorderLayout());

@@ -20,6 +20,15 @@ package org.semanticweb.ontop.sesame.repository.test;
  * #L%
  */
 
+import org.semanticweb.ontop.exception.InvalidMappingException;
+import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
+import org.semanticweb.ontop.owlapi3.QuestOWLIndividualIterator;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import org.semanticweb.ontop.sesame.SesameMaterializer;
+import org.semanticweb.ontop.sesame.SesameStatementIterator;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -27,7 +36,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.Properties;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -38,20 +46,11 @@ import org.openrdf.rio.n3.N3Writer;
 import org.openrdf.rio.rdfxml.RDFXMLWriter;
 import org.openrdf.rio.turtle.TurtleWriter;
 import org.semanticweb.ontop.exception.DuplicateMappingException;
-import org.semanticweb.ontop.exception.InvalidMappingException;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.InvalidDataSourceException;
 import org.semanticweb.ontop.mapping.MappingParser;
-import org.semanticweb.ontop.model.OBDAModel;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.impl.PunningException;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
-import org.semanticweb.ontop.owlapi3.QuestOWLIndividualIterator;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
-import org.semanticweb.ontop.sesame.SesameMaterializer;
-import org.semanticweb.ontop.sesame.SesameStatementIterator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
@@ -59,6 +58,7 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+
 
 public class SesameMaterializerCmdTest extends TestCase {
 
@@ -76,14 +76,14 @@ public class SesameMaterializerCmdTest extends TestCase {
         model = mappingParser.getOBDAModel();
     }
 	
-	public void setUpOnto() throws OWLOntologyCreationException, PunningException {
+	public void setUpOnto() throws OWLOntologyCreationException {
 		//create onto
 		
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		File f = new File("src/test/resources/materializer/MaterializeTest.owl");
 		// Loading the OWL ontology from the file as with normal OWLReasoners
 		ontology = manager.loadOntologyFromOntologyDocument(f);
-		onto =  new OWLAPI3Translator().translate(ontology);
+		onto =  new OWLAPI3TranslatorUtility().translate(ontology);
 	}
 	
 	public void testModelN3() throws Exception {

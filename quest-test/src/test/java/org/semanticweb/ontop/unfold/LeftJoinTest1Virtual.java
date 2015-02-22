@@ -204,6 +204,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 
 		runTests(query_multi3,4);
 	}		
+	
 	@Test
 	public void testLeftJoin14() throws Exception {
 		
@@ -212,6 +213,7 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 
 		runTests(query_multi4,4);
 	}		
+	
 	@Test
 	public void testLeftJoin15() throws Exception {
 		
@@ -220,6 +222,50 @@ public class LeftJoinTest1Virtual extends AbstractQuestOWLTest {
 
 		runTests(query_multi5,4);
 	}	
+	
+	@Test
+	public void testLeftJoin16() throws Exception {
+		
 
+		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) && bound( ?nick2) ) } }";
+
+		runTests(query_multi7,4);
+	}
+	
+	@Test
+	public void testLeftJoin17() throws Exception {
+		
+
+		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) ) } }";
+
+		runTests(query_multi7,4);
+	}
+
+	@Test
+	public void testUnion1() throws Exception {
+		
+
+		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?nick1 ?nick2 WHERE{ { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) ) }";
+
+		runTests(query_multi7,2);
+	}
+
+	@Test
+	public void testUnion2() throws Exception {
+		
+
+		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?nick1 ?nick2 WHERE{ { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } }";
+
+		runTests(query_multi7,4);
+	}
+
+	@Test
+	public void testLeftJoin19() throws Exception {
+		
+
+		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { ?person :nick1 ?nick1 . ?person :nick2 ?nick2 . FILTER ( bound( ?nick1 ) && bound( ?nick2) ) } }";
+
+		runTests(query_multi7,4);
+	}
 
 }

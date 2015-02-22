@@ -20,15 +20,18 @@ package org.semanticweb.ontop.reformulation.tests;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.VariableImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SingletonSubstitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionImpl;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /***
@@ -55,7 +58,7 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param unifier2
 	 * @return
 	 */
-	public boolean compareUnifiers(List<Substitution> unifier1, List<Substitution> unifier2) {
+	public boolean compareUnifiers(List<SingletonSubstitution> unifier1, List<SingletonSubstitution> unifier2) {
 		if (unifier1.size() != unifier2.size())
 			return false;
 
@@ -86,7 +89,7 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param s2
 	 * @return
 	 */
-	public boolean compareSubstitutions(Substitution s1, Substitution s2) {
+	public boolean compareSubstitutions(SingletonSubstitution s1, SingletonSubstitution s2) {
 		boolean equalVars = s1.getVariable().toString().equals(s2.getVariable().toString());
 		boolean equalTerms = s1.getTerm().toString().equals(s2.getTerm().toString());
 
@@ -100,20 +103,20 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param mgustr
 	 * @return
 	 */
-	public List<Substitution> getMGU(String mgustr) {
+	public List<SingletonSubstitution> getMGU(String mgustr) {
 		if (mgustr.trim().equals("NULL"))
 			return null;
 
 		mgustr = mgustr.substring(1, mgustr.length() - 1);
 		String[] mguStrings = mgustr.split(" ");
 
-		List<Substitution> mgu = new ArrayList<Substitution>();
+		List<SingletonSubstitution> mgu = new ArrayList<>();
 		for (int i = 0; i < mguStrings.length; i++) {
 			String string = mguStrings[i];
 			if (string.equals(""))
 				continue;
 			String[] elements = string.split("/");
-			Substitution s = new Substitution(getTerm(elements[0]), getTerm(elements[1]));
+			SingletonSubstitution s = new SingletonSubstitution((VariableImpl)getTerm(elements[0]), getTerm(elements[1]));
 			mgu.add(s);
 		}
 		return mgu;

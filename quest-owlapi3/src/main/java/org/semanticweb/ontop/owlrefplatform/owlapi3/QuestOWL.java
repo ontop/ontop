@@ -24,15 +24,19 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.ontology.Assertion;
-import org.semanticweb.ontop.ontology.Axiom;
-import org.semanticweb.ontop.ontology.DisjointClassAxiom;
-import org.semanticweb.ontop.ontology.DisjointDescriptionAxiom;
-import org.semanticweb.ontop.ontology.DisjointPropertyAxiom;
+import org.semanticweb.ontop.ontology.ClassExpression;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.NaryAxiom;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
 import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.PropertyFunctionalAxiom;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
-import org.semanticweb.ontop.owlrefplatform.core.*;
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
+import org.semanticweb.ontop.owlrefplatform.core.IQuest;
+import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
+import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
+import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
+import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.semanticweb.ontop.utils.VersionInfo;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
@@ -142,7 +146,7 @@ public class QuestOWL extends OWLReasonerBase {
 
 	private boolean questready = false;
 	
-	private Axiom inconsistent = null;
+	private Object inconsistent = null;
 
 	// / holds the error that quest had when initializing
 	private String errorMessage = "";
@@ -160,7 +164,7 @@ public class QuestOWL extends OWLReasonerBase {
 
 	private final OBDAModel obdaModel;
 
-	private QuestPreferences preferences = new QuestPreferences();
+	private QuestPreferences preferences;
 
 	private IQuest questInstance = null;
 
@@ -192,15 +196,13 @@ public class QuestOWL extends OWLReasonerBase {
 	 * Initialization code which is called from both of the two constructors.
 	 * 
 	 */
-	private void init(OWLOntology rootOntology, OWLReasonerConfiguration configuration, Properties preferences){
+	private void init(OWLOntology rootOntology, OWLReasonerConfiguration configuration){
 		pm = configuration.getProgressMonitor();
 		if (pm == null) {
 			pm = new NullReasonerProgressMonitor();
 		}
 
 		man = rootOntology.getOWLOntologyManager();
-		
-		this.preferences.putAll(preferences);
 
 		extractVersion();
 		
@@ -214,22 +216,23 @@ public class QuestOWL extends OWLReasonerBase {
      *
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration,
-                    BufferingMode bufferingMode, Properties preferences, QuestComponentFactory componentFactory) {
+                    BufferingMode bufferingMode, QuestPreferences preferences, QuestComponentFactory componentFactory) {
 		super(rootOntology, configuration, bufferingMode);
         this.obdaModel = obdaModel;
         this.componentFactory = componentFactory;
+		this.preferences = preferences;
 
-		this.init(rootOntology, configuration, preferences);
+		this.init(rootOntology, configuration);
 
 	}
 
-	
-	 /** This constructor is the same as the default constructor, except that extra constraints (i.e. primary and foreign keys) may be
+	/**
+	 * This constructor is the same as the default constructor, except that extra constraints (i.e. primary and foreign keys) may be
 	 * supplied 
 	 * @param userConstraints User-supplied primary and foreign keys
 	 */
 	public QuestOWL(OWLOntology rootOntology, OBDAModel obdaModel, OWLReasonerConfiguration configuration, BufferingMode bufferingMode,
-			Properties preferences, ImplicitDBConstraints userConstraints, QuestComponentFactory componentFactory) {
+			QuestPreferences preferences, ImplicitDBConstraints userConstraints, QuestComponentFactory componentFactory) {
 		super(rootOntology, configuration, bufferingMode);
 		
 		this.userConstraints = userConstraints;
@@ -238,10 +241,12 @@ public class QuestOWL extends OWLReasonerBase {
 
         this.obdaModel = obdaModel;
         this.componentFactory = componentFactory;
+		this.preferences = preferences;
 		
-		this.init(rootOntology, configuration, preferences);
+		this.init(rootOntology, configuration);
 	}
-	 
+	
+	
 	 /**
 	 * extract version from {@link org.semanticweb.ontop.utils.VersionInfo}, which is from the file {@code version.properties}
 	 */
@@ -298,9 +303,9 @@ public class QuestOWL extends OWLReasonerBase {
 
 		log.debug("Initializing a new Quest instance...");
 
-		final boolean bObtainFromOntology = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
-		final boolean bObtainFromMappings = preferences.getCurrentBooleanValueFor(QuestPreferences.OBTAIN_FROM_MAPPINGS);
-		final String unfoldingMode = (String) preferences.getCurrentValue(QuestPreferences.ABOX_MODE);
+		final boolean bObtainFromOntology = preferences.getBoolean(QuestPreferences.OBTAIN_FROM_ONTOLOGY);
+		final boolean bObtainFromMappings = preferences.getBoolean(QuestPreferences.OBTAIN_FROM_MAPPINGS);
+		final String unfoldingMode = (String) preferences.get(QuestPreferences.ABOX_MODE);
 
 		// pm.reasonerTaskStarted("Classifying...");
 		// pm.reasonerTaskBusy();
@@ -309,7 +314,7 @@ public class QuestOWL extends OWLReasonerBase {
 
 		if(this.applyUserConstraints)
 			questInstance.setImplicitDBConstraints(userConstraints);
-		
+				
 		Set<OWLOntology> importsClosure = man.getImportsClosure(getRootOntology());
 		
 
@@ -333,9 +338,11 @@ public class QuestOWL extends OWLReasonerBase {
 				if (bObtainFromOntology) {
 					// Retrieves the ABox from the ontology file.
 					log.debug("Loading data from Ontology into the database");
-					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure,
-							questInstance.getEquivalenceMap().getInternalMap());
-					int count = st.insertData(aBoxIter, 5000, 500);
+					OWLAPI3ABoxIterator aBoxIter = new OWLAPI3ABoxIterator(importsClosure);
+					EquivalentTriplePredicateIterator aBoxNormalIter =
+							new EquivalentTriplePredicateIterator(aBoxIter, questInstance.getReasoner());
+					
+					int count = st.insertData(aBoxNormalIter, 5000, 500);
 					log.debug("Inserted {} triples from the ontology.", count);
 				}
 				if (bObtainFromMappings) {
@@ -343,9 +350,8 @@ public class QuestOWL extends OWLReasonerBase {
 					log.debug("Loading data from Mappings into the database");
 
 					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
-					for (Predicate p: translatedOntologyMerge.getVocabulary()) {
-						obdaModelForMaterialization.declarePredicate(p);
-					}
+					obdaModelForMaterialization.declareAll(translatedOntologyMerge.getVocabulary());
+					
 					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
 					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
 					int count = st.insertData(assertionIter, 5000, 500);
@@ -408,7 +414,7 @@ public class QuestOWL extends OWLReasonerBase {
 		 */
 		log.debug("Load ontologies called. Translating ontologies.");
 
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 
 		try {
 
@@ -555,12 +561,12 @@ public class QuestOWL extends OWLReasonerBase {
 
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public boolean isConsistent(){
+	public boolean isConsistent() {
 		return true;
 	}
 	
 	//info to return which axiom was inconsistent during the check
-	public Axiom getInconsistentAxiom() {
+	public Object getInconsistentAxiom() {
 		return inconsistent;
 	}
 	
@@ -569,89 +575,122 @@ public class QuestOWL extends OWLReasonerBase {
 	}
 	
 	private boolean isDisjointAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
-		boolean isConsistent = true;
-		
+
 		//deal with disjoint classes
-		Set<DisjointDescriptionAxiom> disjointAxioms = translatedOntologyMerge.getDisjointDescriptionAxioms();
-		Iterator<DisjointDescriptionAxiom> it = disjointAxioms.iterator();
-		
-		//create ask query
-		String strQueryClass = "ASK {?x a <%s>; a <%s> }";
-		String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
-		String strQuery = "";
-		
-		while (isConsistent && it.hasNext()) {		
+		{
+			final String strQueryClass = "ASK {?x a <%s>; a <%s> }";
 			
-			DisjointDescriptionAxiom dda = it.next();
-			if (dda instanceof DisjointClassAxiom) {
-				DisjointClassAxiom dc = (DisjointClassAxiom)dda;
-				strQuery = String.format(strQueryClass, dc.getFirst(), dc.getSecond());
-			} else if (dda instanceof DisjointPropertyAxiom) {
-				DisjointPropertyAxiom dp = (DisjointPropertyAxiom) dda;
-				strQuery = String.format(strQueryProp, dp.getFirst(), dp.getSecond());
-			}
-			
-			QuestStatement query;
-			try {
-				query = conn.createStatement();
-				ResultSet rs = query.execute(strQuery);
-				TupleResultSet trs = ((TupleResultSet)rs);
-				if (trs!= null && trs.nextRow()){
-					String value = trs.getConstant(0).getValue();
-					boolean b = Boolean.parseBoolean(value);
-					isConsistent = !b;
-					if (!isConsistent) {
-						inconsistent = dda;
-					}
-					trs.close();
-				}
+			for (NaryAxiom<ClassExpression> dda : translatedOntologyMerge.getDisjointClassesAxioms()) {		
+				// TODO: handle complex class expressions and many pairs of disjoint classes
+				Set<ClassExpression> disj = dda.getComponents();
+				Iterator<ClassExpression> classIterator = disj.iterator();
+				ClassExpression s1 = classIterator.next();
+				ClassExpression s2 = classIterator.next();
+				String strQuery = String.format(strQueryClass, s1, s2);
 				
-			} catch (OBDAException e) {
-				e.printStackTrace();
+				boolean isConsistent = executeConsistencyQuery(strQuery);
+				if (!isConsistent) {
+					inconsistent = dda;
+					return false;
+				}
 			}
 		}
 		
-		return isConsistent;
+		//deal with disjoint properties
+		{
+			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
+
+			for(NaryAxiom<ObjectPropertyExpression> dda 
+						: translatedOntologyMerge.getDisjointObjectPropertiesAxioms()) {		
+				// TODO: handle role inverses and multiple arguments			
+				Set<ObjectPropertyExpression> props = dda.getComponents();
+				Iterator<ObjectPropertyExpression> iterator = props.iterator();
+				ObjectPropertyExpression p1 = iterator.next();
+				ObjectPropertyExpression p2 = iterator.next();
+				String strQuery = String.format(strQueryProp, p1, p2);
+				
+				boolean isConsistent = executeConsistencyQuery(strQuery);
+				if (!isConsistent) {
+					inconsistent = dda;
+					return false;
+				}
+			}
+		}
+		
+		{
+			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
+
+			for(NaryAxiom<DataPropertyExpression> dda 
+						: translatedOntologyMerge.getDisjointDataPropertiesAxioms()) {		
+				// TODO: handle role inverses and multiple arguments			
+				Set<DataPropertyExpression> props = dda.getComponents();
+				Iterator<DataPropertyExpression> iterator = props.iterator();
+				DataPropertyExpression p1 = iterator.next();
+				DataPropertyExpression p2 = iterator.next();
+				String strQuery = String.format(strQueryProp, p1, p2);
+				
+				boolean isConsistent = executeConsistencyQuery(strQuery);
+				if (!isConsistent) {
+					inconsistent = dda;
+					return false;
+				}
+			}
+		}
+		
+		return true;
 	}
 	
 	private boolean isFunctionalPropertyAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
-		boolean isConsistent = true;
 		
 		//deal with functional properties
-		Set<PropertyFunctionalAxiom> funcPropAxioms = translatedOntologyMerge.getFunctionalPropertyAxioms();
-		Iterator<PropertyFunctionalAxiom> itf = funcPropAxioms.iterator();
+
+		final String strQueryFunc = "ASK { ?x <%s> ?y; <%s> ?z. FILTER (?z != ?y) }";
 		
-		String strQueryFunc = "ASK { ?x <%s> ?y; <%s> ?z. FILTER (?z != ?y) }";
-		String strQuery = "";
-		
-		while (isConsistent && itf.hasNext()) {
+		for (ObjectPropertyExpression pfa : translatedOntologyMerge.getFunctionalObjectProperties()) {
+			// TODO: handle inverses
+			String propFunc = pfa.getPredicate().getName();
+			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
-			PropertyFunctionalAxiom pfa = itf.next();
-			String propFunc = pfa.getReferencedEntities().iterator().next().getName();
-			strQuery = String.format(strQueryFunc, propFunc, propFunc);
-			
-			QuestStatement query;
-			try {
-				query = conn.createStatement();
-				ResultSet rs = query.execute(strQuery);
-				TupleResultSet trs = ((TupleResultSet)rs);
-				if (trs!= null && trs.nextRow()){
-					String value = trs.getConstant(0).getValue();
-					boolean b = Boolean.parseBoolean(value);
-					isConsistent = !b;
-					if (!isConsistent) {
-						inconsistent = pfa;
-					}
-					trs.close();
-				}
-			} catch (OBDAException e) {
-				e.printStackTrace();
+			boolean isConsistent = executeConsistencyQuery(strQuery);
+			if (!isConsistent) {
+				inconsistent = pfa;
+				return false;
 			}
 		}
 		
-		return isConsistent;
+		for (DataPropertyExpression pfa : translatedOntologyMerge.getFunctionalDataProperties()) {
+			String propFunc = pfa.getPredicate().getName();
+			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
+			
+			boolean isConsistent = executeConsistencyQuery(strQuery);
+			if (!isConsistent) {
+				inconsistent = pfa;
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
+	private boolean executeConsistencyQuery(String strQuery) {
+		QuestStatement query;
+		try {
+			query = conn.createStatement();
+			ResultSet rs = query.execute(strQuery);
+			TupleResultSet trs = ((TupleResultSet)rs);
+			if (trs!= null && trs.nextRow()){
+				String value = trs.getConstant(0).getValue();
+				boolean b = Boolean.parseBoolean(value);				
+				trs.close();
+				if (b) 
+					return false;
+			}
+			
+		} catch (OBDAException e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
 
 	public boolean isSatisfiable(OWLClassExpression classExpression) throws ReasonerInterruptedException, TimeOutException,
 			ClassExpressionNotInProfileException, FreshEntitiesException, InconsistentOntologyException {

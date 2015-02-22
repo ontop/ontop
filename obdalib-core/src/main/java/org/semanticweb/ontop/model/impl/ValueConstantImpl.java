@@ -21,25 +21,25 @@ package org.semanticweb.ontop.model.impl;
  */
 
 import java.util.HashMap;
+
+
+import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.model.Variable;
 
-public class ValueConstantImpl extends AbstractLiteral implements ValueConstant {
+public class ValueConstantImpl implements ValueConstant {
 
 	private static final long serialVersionUID = 8031338451909170400L;
 
 	private final String value;
-
 	private final String language;
-
 	private final Predicate.COL_TYPE type;
-	
-	private int hashcode = -1;
+	private final String string;
 
 	/**
 	 * The default constructor.
@@ -50,22 +50,55 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 	 *            the constant type.
 	 */
 	protected ValueConstantImpl(String value, Predicate.COL_TYPE type) {
-		this(value, null, type);
+		this.value = value;
+		this.language = null;
+		this.type = type;
+		this.string = getStringRepresentation();
 	}
 
-	protected ValueConstantImpl(String value, String language, Predicate.COL_TYPE type) {
+	protected ValueConstantImpl(String value, String language) {
 		this.value = value;
 		this.language = language;
-		this.type = type;
-		this.hashcode = toString().hashCode();
+		this.type = COL_TYPE.LITERAL_LANG;
+		this.string = getStringRepresentation();
+	}
+	
+	private final String getStringRepresentation() {
+		StringBuilder sb = new StringBuilder();
+		
+		switch (type) {
+			case STRING:
+            case DATE:
+            case TIME:
+            case YEAR:
+			case DATETIME: 
+				sb.append("\"").append(value).append("\""); 
+				break;
+			case INTEGER:
+            case LONG:
+			case DECIMAL:
+			case DOUBLE:
+			case BOOLEAN: 
+				sb.append(value); 
+				break;
+			case LITERAL:
+			case LITERAL_LANG:
+				sb.append("\"").append(value);
+				if (language != null && !language.isEmpty()) {
+					sb.append("@").append(language);
+				}
+				sb.append("\""); 
+				break;
+			default:
+				sb.append(value);
+		}
+		return sb.toString();	
 	}
 
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof ValueConstantImpl)) {
-			return false;
-		}
-		if (this == OBDAVocabulary.NULL) {
 			return false;
 		}
 		ValueConstantImpl value2 = (ValueConstantImpl) obj;
@@ -74,7 +107,7 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 
 	@Override
 	public int hashCode() {		
-		return hashcode;
+		return string.hashCode();
 	}
 
 	@Override
@@ -99,17 +132,11 @@ public class ValueConstantImpl extends AbstractLiteral implements ValueConstant 
 
 	@Override
 	public String toString() {
-		return TermUtil.toString(this);
+		return string;
 	}
 
 	@Override
 	public Set<Variable> getReferencedVariables() {
-		return new LinkedHashSet<Variable>();
+		return Collections.emptySet();
 	}
-
-	@Override
-	public Map<Variable, Integer> getVariableCount() {
-		return new HashMap<Variable, Integer>();
-	}
-
 }

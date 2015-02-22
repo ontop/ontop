@@ -23,6 +23,7 @@ package org.semanticweb.ontop.sesame;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URI;
+import java.util.Properties;
 
 import org.openrdf.query.Dataset;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
@@ -34,35 +35,40 @@ public class SesameClassicInMemoryRepo extends SesameClassicRepo {
 
 	public SesameClassicInMemoryRepo(String name, String tboxFile, boolean existential, String rewriting) throws Exception {
 		super();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 
-		p.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
+		Properties props = new Properties();
+		props.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		props.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		props.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		props.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
+		props.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		props.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 
+		props.setProperty(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
 		if (existential) {
-			p.setCurrentValueOf(QuestPreferences.REWRITE, "true");
+			props.setProperty(QuestPreferences.REWRITE, "true");
 		} else {
-			p.setCurrentValueOf(QuestPreferences.REWRITE, "false");
+			props.setProperty(QuestPreferences.REWRITE, "false");
 		}
 		if (rewriting.equals("TreeWitness")) {
-			p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+			props.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
 		} else if (rewriting.equals("Default")) {
-			p.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
+			props.setProperty(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.UCQBASED);
 		}
+		p = new QuestPreferences(props);
 		createStore(name, tboxFile, p); 
 	}
 	
 	public SesameClassicInMemoryRepo(String name, Dataset data) throws Exception {
 		super();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
-		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		p.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 
-		p.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
+		Properties props = new Properties();
+		props.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		props.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		props.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		props.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "false");
+		props.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		props.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX); 
+		props.setProperty(QuestPreferences.STORAGE_LOCATION, QuestConstants.INMEMORY);
+
+		p = new QuestPreferences(props);
 		
 		createStore(name, data, p); 
 	}
@@ -70,7 +76,10 @@ public class SesameClassicInMemoryRepo extends SesameClassicRepo {
 	public SesameClassicInMemoryRepo(String name, String tboxFilePath, String configFilePath) throws Exception {
 		super();
 		File configFile = new File(URI.create(configFilePath));
-		p.readDefaultPropertiesFile(new FileInputStream(configFile));
+		Properties props = new Properties();
+		props.load(new FileInputStream(configFile));
+
+		p = new QuestPreferences(props);
 		createStore(name, tboxFilePath, p);
 	}
 }

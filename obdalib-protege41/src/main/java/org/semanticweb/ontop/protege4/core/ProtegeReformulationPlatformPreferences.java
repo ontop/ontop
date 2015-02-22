@@ -23,6 +23,9 @@ package org.semanticweb.ontop.protege4.core;
 import org.protege.editor.core.Disposable;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 
+import java.util.Properties;
+import java.util.Set;
+
 public class ProtegeReformulationPlatformPreferences extends QuestPreferences implements Disposable {
 
 	/**
@@ -30,7 +33,25 @@ public class ProtegeReformulationPlatformPreferences extends QuestPreferences im
 	 */
 	private static final long	serialVersionUID	= -1699795366967423089L;
 
+	public ProtegeReformulationPlatformPreferences() {
+		super();
+	}
+
+	public ProtegeReformulationPlatformPreferences(Properties p) {
+		super(p);
+	}
+
 	public void dispose() {
 		// Do nothing.
+	}
+
+	public Set<Object> getKeys() {
+		return copyProperties().keySet();
+	}
+
+	public ProtegeReformulationPlatformPreferences newProperties(Object key, Object value) {
+		Properties newProperties = copyProperties();
+		newProperties.put(key, value);
+		return new ProtegeReformulationPlatformPreferences(newProperties);
 	}
 }

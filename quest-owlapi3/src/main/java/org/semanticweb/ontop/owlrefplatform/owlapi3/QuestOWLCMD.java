@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Properties;
 
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
@@ -160,8 +161,9 @@ public class QuestOWLCMD {
 		 * Preparing the configuration for the new Quest instance, we need to
 		 * make sure it will be setup for "virtual ABox mode"
 		 */
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		QuestPreferences questPreferences = new QuestPreferences(p);
 
 		/*
 		 * Creating the instance of the reasoner using the FACTORY. Remember
@@ -169,7 +171,7 @@ public class QuestOWLCMD {
 		 * accepting connections. The HelloWorld and Books tutorials at our wiki
 		 * show you how to do this.
 		 */
-		QuestOWLFactory questOWLFactory = new QuestOWLFactory(new File(obdafile), p);
+		QuestOWLFactory questOWLFactory = new QuestOWLFactory(new File(obdafile), questPreferences);
 		reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology, new SimpleConfiguration());
 
 		/*

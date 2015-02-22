@@ -37,11 +37,6 @@ import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.model.impl.TermUtil;
-import org.semanticweb.ontop.owlrefplatform.core.translator.DatalogToSparqlTranslator;
-import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlKeyword;
-import org.semanticweb.ontop.owlrefplatform.core.translator.UnknownArithmeticSymbolException;
-import org.semanticweb.ontop.owlrefplatform.core.translator.UnknownBooleanSymbolException;
 
 /**
  * This class provides the translation service from Datalog Program to SPARQL string.
@@ -109,13 +104,16 @@ public class DatalogToSparqlTranslator {
 
 	protected String toSparql(Term term) {
 		if (term instanceof Variable) {
-			return "?" + TermUtil.toString(term);
-		} else if (term instanceof URIConstant) {
-			return shortenName(TermUtil.toString(term));
-		} else if (term instanceof Function) {
+			return "?" + term;
+		} 
+		else if (term instanceof URIConstant) {
+			return shortenName(term.toString());
+		} 
+		else if (term instanceof Function) {
 			return toSparql((Function) term);
 		}
-		return TermUtil.toString(term); // for the other types of term
+		else
+			return term.toString(); // for the other types of term
 	}
 
 	// TODO: The current OBDA model should be refactored. The current API design prevents 
@@ -176,8 +174,8 @@ public class DatalogToSparqlTranslator {
 	private String getArithmeticSymbol(Predicate functionSymbol) {
 		if (functionSymbol.equals(OBDAVocabulary.ADD)) {
 			return SparqlKeyword.ADD;
-		} else if (functionSymbol.equals(OBDAVocabulary.SUBSTRACT)) {
-			return SparqlKeyword.SUBSTRACT;
+		} else if (functionSymbol.equals(OBDAVocabulary.SUBTRACT)) {
+			return SparqlKeyword.SUBTRACT;
 		} else if (functionSymbol.equals(OBDAVocabulary.MULTIPLY)) {
 			return SparqlKeyword.MULTIPLY;
 		}
@@ -306,10 +304,11 @@ public class DatalogToSparqlTranslator {
 
 	private void printJoinExpression(Function expression, DatalogProgram datalog, StringBuilder sb, int indentLevel) {
 		Predicate joinPredicate = expression.getFunctionSymbol();
-		if (joinPredicate.equals(OBDAVocabulary.SPARQL_JOIN)) {
+		if (joinPredicate == OBDAVocabulary.SPARQL_JOIN) {
 			printGraph((Function) expression.getTerm(0), datalog, sb, indentLevel);
 			printGraph((Function) expression.getTerm(1), datalog, sb, indentLevel);
-		} else if (joinPredicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN)) {
+		} 
+		else if (joinPredicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
 			printGraph((Function) expression.getTerm(0), datalog, sb, indentLevel);
 			sb.append(indent(indentLevel));
 			sb.append(SparqlKeyword.OPTIONAL + " {\n");

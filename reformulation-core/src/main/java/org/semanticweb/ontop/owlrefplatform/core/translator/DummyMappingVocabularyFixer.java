@@ -2,6 +2,7 @@ package org.semanticweb.ontop.owlrefplatform.core.translator;
 
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.ontology.OntologyVocabulary;
 
 import java.util.Set;
 
@@ -15,7 +16,7 @@ public class DummyMappingVocabularyFixer implements MappingVocabularyFixer {
      *
      */
     @Override
-    public OBDAModel fixOBDAModel(OBDAModel model, Set<Predicate> vocabulary) {
+    public OBDAModel fixOBDAModel(OBDAModel model, OntologyVocabulary vocabulary) {
         return model;
     }
 }

@@ -60,6 +60,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 
 import java.io.IOException;
+import java.util.Properties;
 
 public class InconsistencyCheckingTest extends TestCase{
 
@@ -95,13 +96,14 @@ public class InconsistencyCheckingTest extends TestCase{
 	}
 	
 	private void startReasoner() throws Exception {
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		QuestPreferences preferences = new QuestPreferences(p);
 
-		QuestOWLFactory questOWLFactory = new QuestOWLFactory(p);
-		reasoner = (QuestOWL) questOWLFactory.createReasoner(ontology);
+		QuestOWLFactory questOWLFactory = new QuestOWLFactory(preferences);
+		reasoner = questOWLFactory.createReasoner(ontology);
 	}
 	
 	@Test

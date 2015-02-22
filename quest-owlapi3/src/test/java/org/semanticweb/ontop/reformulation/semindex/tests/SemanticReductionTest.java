@@ -23,7 +23,7 @@ package org.semanticweb.ontop.reformulation.semindex.tests;
 
 import java.util.Set;
 
-import org.semanticweb.ontop.ontology.Axiom;
+
 import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -36,48 +36,44 @@ public class SemanticReductionTest extends TestCase {
 	
 	SemanticIndexHelper	helper	= new SemanticIndexHelper();
 
+	private static int getSize(Ontology ont) {
+		return ont.getSubClassAxioms().size() + ont.getSubObjectPropertyAxioms().size() + ont.getSubDataPropertyAxioms().size();
+	}
+	
 	public void test_2_0_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_0_0");
-		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
-		Ontology sigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
-		TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(sigma);
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
-		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner, ontology.getVocabulary(), sigmaReasoner);
-		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
-		assertEquals(0, rv.size());
+		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
+		Ontology reduced = reduction.getReducedOntology();
+		assertEquals(0, getSize(reduced));
 	}
 
 	public void test_2_0_1() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_0_1");
-		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
-		Ontology sigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
-		TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(sigma);
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
-		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner, ontology.getVocabulary(), sigmaReasoner);
-		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
-		assertEquals(0, rv.size());
+		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
+		Ontology reduced = reduction.getReducedOntology();
+		assertEquals(0, getSize(reduced));
 	}
 
 	public void test_2_1_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_1_0");
-		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
-		Ontology sigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
-		TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(sigma);
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
-		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner, ontology.getVocabulary(), sigmaReasoner);
-		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
-		assertEquals(1, rv.size());
+		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
+		Ontology reduced = reduction.getReducedOntology();
+		assertEquals(1, getSize(reduced));
 	}
 
 	public void test_1_2_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_1_2_0");
-		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
-		Ontology sigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
-		TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(sigma);
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
-		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner, ontology.getVocabulary(), sigmaReasoner);
-		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
-		assertEquals(0, rv.size());
+		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
+		Ontology reduced = reduction.getReducedOntology();
+		assertEquals(0, getSize(reduced));
 	}
 
 	public void test_equivalence() throws Exception {
@@ -90,12 +86,10 @@ public class SemanticReductionTest extends TestCase {
 		 */
 
 		Ontology ontology = helper.load_onto("equivalence-test");
-		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
-		TBoxReasoner sigmaReasoner = new TBoxReasonerImpl(OntologyFactoryImpl.getInstance().createOntology());
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
-		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner, ontology.getVocabulary(), sigmaReasoner);
-		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
-		//System.out.println(rv);
-		assertEquals(45, rv.size());
+		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner, null);
+		Ontology reduced = reduction.getReducedOntology();
+		assertEquals(45, getSize(reduced));
 	}
 }

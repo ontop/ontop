@@ -135,7 +135,7 @@ public class PredicateImpl implements Predicate {
 
 	@Override
 	public boolean isTriplePredicate() {
-		if (arity == 3 && name.equals(OBDAVocabulary.QUEST_TRIPLE_STR)) {
+		if (arity == 3 && name.equals(OBDAVocabulary.QUEST_TRIPLE_PRED.getName())) {
 			return true;
 		}
 		return false;

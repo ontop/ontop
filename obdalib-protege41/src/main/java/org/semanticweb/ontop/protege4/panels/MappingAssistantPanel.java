@@ -20,6 +20,8 @@ package org.semanticweb.ontop.protege4.panels;
  * #L%
  */
 
+
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.KeyEvent;
@@ -54,6 +56,7 @@ import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.ontology.OClass;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
@@ -301,7 +304,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
         pnlClassSeachComboBox.setLayout(new java.awt.BorderLayout());
         Vector<Object> v = new Vector<Object>();
-        for (Predicate pred : obdaModel.getDeclaredClasses()) {
+        for (OClass c : obdaModel.getDeclaredClasses()) {
+        	Predicate pred = c.getPredicate(); 
             v.addElement(new PredicateItem(pred, prefixManager));
         }
         cboClassAutoSuggest = new AutoSuggestComboBox(v);
@@ -552,7 +556,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 		// Create the head
 		int arity = distinguishVariables.size();
-		Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
+		Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
 		
 		// Create and return the conjunctive query
 		return dfac.getCQIE(head, body);
@@ -639,7 +643,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 		ValueConstant uriTemplate = dfac.getConstantLiteral(sb.toString()); // complete URI template
 		terms.add(0, uriTemplate);
-		return dfac.getFunction(dfac.getUriTemplatePredicate(terms.size()), terms);
+		return dfac.getUriTemplate(terms);
 	}
 
 	// Column placeholder pattern

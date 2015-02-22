@@ -104,7 +104,7 @@
    </extension>
 	
   <extension id="menu.obda.materializemappings" point="org.protege.editor.core.application.EditorKitMenuAction">
-		<name value="Import data from mappings..."/> 
+		<name value="Materialize triples..."/>
 		<toolTip value="Import OWL Assertions (ABox/Triples) from the mappings..."/>
 		<class value="org.semanticweb.ontop.protege4.gui.action.AboxMaterializationAction"/>
 		<path value="org.semanticweb.ontop.protege4.menu.obda/SlotA-A"></path>

@@ -22,6 +22,11 @@ package org.semanticweb.ontop.quest.dag;
 
 
 
+import org.semanticweb.ontop.ontology.ClassExpression;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
+
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -29,12 +34,6 @@ import junit.framework.TestCase;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.Property;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Equivalences;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesImpl;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Test_TBoxReasonerImplOnGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,10 +104,10 @@ public class S_TestTransitiveReduction extends TestCase {
 			String fileInput=input.get(i);
 
 			TBoxReasonerImpl dag2 = new TBoxReasonerImpl(S_InputOWL.createOWL(fileInput));
-			Test_TBoxReasonerImplOnGraph reasonerd1 = new Test_TBoxReasonerImplOnGraph(dag2);
+			TestTBoxReasonerImpl_OnGraph reasonerd1 = new TestTBoxReasonerImpl_OnGraph(dag2);
 
 			log.debug("Input number {}", i+1 );
-			log.info("First graph {}", dag2.getPropertyGraph());
+			log.info("First graph {}", dag2.getObjectPropertyGraph());
 			log.info("First graph {}", dag2.getClassGraph());
 			log.info("Second dag {}", dag2);
 						
@@ -119,7 +118,7 @@ public class S_TestTransitiveReduction extends TestCase {
 	}
 
 
-	private boolean testRedundantEdges(Test_TBoxReasonerImplOnGraph reasonerd1, TBoxReasonerImpl d2){
+	private boolean testRedundantEdges(TestTBoxReasonerImpl_OnGraph reasonerd1, TBoxReasonerImpl d2){
 		//number of edges in the graph
 		int  numberEdgesD1= reasonerd1.edgeSetSize();
 		//number of edges in the dag
@@ -131,37 +130,37 @@ public class S_TestTransitiveReduction extends TestCase {
 		//number of redundant edges 
 		int numberRedundants=0;
 
-		for(Equivalences<Property> equivalents: d2.getProperties())
+		for (Equivalences<ObjectPropertyExpression> equivalents: d2.getObjectPropertyDAG())
 			if(equivalents.size()>=2)
 				numberEquivalents += equivalents.size();
-			
-		for(Equivalences<BasicClassDescription> equivalents: d2.getClasses())
+		
+		for (Equivalences<ClassExpression> equivalents: d2.getClassDAG())
 			if(equivalents.size()>=2)
 				numberEquivalents += equivalents.size();
 
 
 		{
-			DefaultDirectedGraph<Property,DefaultEdge> g1 = 	reasonerd1.getPropertyGraph();	
-			for (Equivalences<Property> equivalents: reasonerd1.getProperties()) {
+			DefaultDirectedGraph<ObjectPropertyExpression,DefaultEdge> g1 = 	reasonerd1.getObjectPropertyGraph();	
+			for (Equivalences<ObjectPropertyExpression> equivalents: reasonerd1.getObjectPropertyDAG()) {
 				
 				log.info("equivalents {} ", equivalents);
 				
 				//check if there are redundant edges
-				for (Property vertex: equivalents) {
+				for (ObjectPropertyExpression vertex: equivalents) {
 					if(g1.incomingEdgesOf(vertex).size()!= g1.inDegreeOf(vertex)) //check that there anren't two edges pointing twice to the same nodes
 						numberRedundants +=g1.inDegreeOf(vertex)- g1.incomingEdgesOf(vertex).size();
 				
 					
 					//descendants of the vertex
-					Set<Equivalences<Property>> descendants = d2.getProperties().getSub(equivalents);
-					Set<Equivalences<Property>> children = d2.getProperties().getDirectSub(equivalents);
+					Set<Equivalences<ObjectPropertyExpression>> descendants = d2.getObjectPropertyDAG().getSub(equivalents);
+					Set<Equivalences<ObjectPropertyExpression>> children = d2.getObjectPropertyDAG().getDirectSub(equivalents);
 
 					log.info("descendants{} ", descendants);
 					log.info("children {} ", children);
 
 					for(DefaultEdge edge: g1.incomingEdgesOf(vertex)) {
-						Property source=g1.getEdgeSource(edge);
-						for(Equivalences<Property> descendant:descendants) {
+						ObjectPropertyExpression source=g1.getEdgeSource(edge);
+						for(Equivalences<ObjectPropertyExpression> descendant:descendants) {
 							if (!children.contains(descendant) & ! equivalents.contains(descendant.iterator().next()) &descendant.contains(source))
 								numberRedundants +=1;	
 						}
@@ -170,28 +169,28 @@ public class S_TestTransitiveReduction extends TestCase {
 			}
 		}
 		{
-			DefaultDirectedGraph<BasicClassDescription,DefaultEdge> g1 = 	reasonerd1.getClassGraph();	
+			DefaultDirectedGraph<ClassExpression,DefaultEdge> g1 =	reasonerd1.getClassGraph();	
 
-			for (Equivalences<BasicClassDescription> equivalents : reasonerd1.getClasses()) {
+			for (Equivalences<ClassExpression> equivalents : reasonerd1.getClassDAG()) {
 				
 				log.info("equivalents {} ", equivalents);
 				
 				//check if there are redundant edges
-				for (BasicClassDescription vertex: equivalents) {
+				for (ClassExpression vertex: equivalents) {
 					if(g1.incomingEdgesOf(vertex).size()!= g1.inDegreeOf(vertex)) //check that there anren't two edges pointing twice to the same nodes
 						numberRedundants +=g1.inDegreeOf(vertex)- g1.incomingEdgesOf(vertex).size();
 				
 					
 					//descendants of the vertex
-					Set<Equivalences<BasicClassDescription>> descendants = d2.getClasses().getSub(equivalents);
-					Set<Equivalences<BasicClassDescription>> children = d2.getClasses().getDirectSub(equivalents);
+					Set<Equivalences<ClassExpression>> descendants = d2.getClassDAG().getSub(equivalents);
+					Set<Equivalences<ClassExpression>> children = d2.getClassDAG().getDirectSub(equivalents);
 
 					log.info("descendants{} ", descendants);
 					log.info("children {} ", children);
 
 					for(DefaultEdge edge: g1.incomingEdgesOf(vertex)) {
-						BasicClassDescription source=g1.getEdgeSource(edge);
-						for(Equivalences<BasicClassDescription> descendant:descendants) {
+						ClassExpression source = g1.getEdgeSource(edge);
+						for(Equivalences<ClassExpression> descendant : descendants) {
 							if (!children.contains(descendant) & ! equivalents.contains(descendant.iterator().next()) &descendant.contains(source))
 								numberRedundants +=1;	
 						}

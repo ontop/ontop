@@ -84,8 +84,7 @@ public class DatalogProgramSyntaxFactory {
 	}
 	
 	public static Function rdfsLiteral(Term term){
-		Predicate rdfsLiteralPredicate = termFactory.getDataTypePredicateLiteral();
-		return termFactory.getFunction(rdfsLiteralPredicate, term);
+		return termFactory.getTypedTerm(term, Predicate.COL_TYPE.LITERAL);
 	}
 	
 	public static Function and(Term... terms){

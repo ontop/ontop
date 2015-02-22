@@ -20,6 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.core.reformulation;
  * #L%
  */
 
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,22 +30,21 @@ import java.util.Set;
 
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Term;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
-import org.semanticweb.ontop.ontology.Property;
+import org.semanticweb.ontop.ontology.ClassExpression;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.Intersection;
 import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Edge;
 import org.semanticweb.ontop.owlrefplatform.core.reformulation.QueryConnectedComponent.Loop;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessReasonerLite.IntersectionOfConceptSets;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessReasonerLite.IntersectionOfProperties;
-import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessSet.PropertiesCache;
+import org.semanticweb.ontop.owlrefplatform.core.reformulation.TreeWitnessSet.QueryConnectedComponentCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class QueryFolding {
-	private final PropertiesCache propertiesCache;
+	private final QueryConnectedComponentCache cache;
 	
-	private IntersectionOfProperties properties; 
+	private Intersection<ObjectPropertyExpression> properties;
 	private Set<Loop> roots; 
-	private IntersectionOfConceptSets internalRootConcepts;
+	private Intersection<ClassExpression> internalRootConcepts;
 	private Set<Term> internalRoots;
 	private Set<Term> internalDomain;
 	private List<TreeWitness> interior;
@@ -58,24 +58,24 @@ public class QueryFolding {
 		return "Query Folding: " + roots + ", internal roots " + internalRoots + " and domain: " + internalDomain + " with properties: " + properties; 
 	}
 	
-	public QueryFolding(PropertiesCache propertiesCache) {
-		this.propertiesCache = propertiesCache;
-		properties = new IntersectionOfProperties(); 
+	public QueryFolding(QueryConnectedComponentCache cache) {
+		this.cache = cache;
+		properties = cache.getTopProperty(); 
 		roots = new HashSet<Loop>(); 
-		internalRootConcepts = new IntersectionOfConceptSets(); 
+		internalRootConcepts = cache.getTopClass(); 
 		internalRoots = new HashSet<Term>();
 		internalDomain = new HashSet<Term>();
-		interior = Collections.EMPTY_LIST; // in-place QueryFolding for one-step TreeWitnesses, 
+		interior = Collections.emptyList(); // in-place QueryFolding for one-step TreeWitnesses, 
 		                                   //             which have no interior TreeWitnesses
 		status = true;
 	}
 	
 	public QueryFolding(QueryFolding qf) {
-		this.propertiesCache = qf.propertiesCache;
+		this.cache = qf.cache;
 
-		properties = new IntersectionOfProperties(qf.properties.get()); 
+		properties = new Intersection<ObjectPropertyExpression>(qf.properties); 
 		roots = new HashSet<Loop>(qf.roots); 
-		internalRootConcepts = new IntersectionOfConceptSets(qf.internalRootConcepts.get()); 
+		internalRootConcepts = new Intersection<ClassExpression>(qf.internalRootConcepts); 
 		internalRoots = new HashSet<Term>(qf.internalRoots);
 		internalDomain = new HashSet<Term>(qf.internalDomain);
 		interior = new LinkedList<TreeWitness>(qf.interior);
@@ -89,7 +89,8 @@ public class QueryFolding {
 		c.internalRoots.addAll(tw.getRoots());
 		c.internalDomain.addAll(tw.getDomain());
 		c.interior.add(tw);
-		if (!c.internalRootConcepts.intersect(tw.getRootConcepts()))
+		c.internalRootConcepts.intersectWith(tw.getRootConcepts());
+		if (c.internalRootConcepts.isBottom())
 			c.status = false;
 		return c;
 	}
@@ -97,29 +98,33 @@ public class QueryFolding {
 	public boolean extend(Loop root, Edge edge, Loop internalRoot) {
 		assert(status);
 
-		if (properties.intersect(propertiesCache.getEdgeProperties(edge, root.getTerm(), internalRoot.getTerm()))) 
-			if (internalRootConcepts.intersect(propertiesCache.getLoopConcepts(internalRoot))) {
+		properties.intersectWith(cache.getEdgeProperties(edge, root.getTerm(), internalRoot.getTerm()));
+		
+		if (!properties.isBottom()) {
+			internalRootConcepts.intersectWith(cache.getLoopConcepts(internalRoot));
+			if (!internalRootConcepts.isBottom()) {
 				roots.add(root);
 				return true;
 			}
-			
+		}
+		
 		status = false;
 		return false;
 	}
 	
 	public void newOneStepFolding(Term t) {
-		properties.clear();
+		properties.setToTop();
 		roots.clear();
-		internalRootConcepts.clear(); 
+		internalRootConcepts.setToTop(); 
 		internalDomain = Collections.singleton(t);
 		terms = null;
 		status = true;		
 	}
 
 	public void newQueryFolding(TreeWitness tw) {
-		properties.clear(); 
+		properties.setToTop(); 
 		roots.clear(); 
-		internalRootConcepts = new IntersectionOfConceptSets(tw.getRootConcepts()); 
+		internalRootConcepts = new Intersection<ClassExpression>(tw.getRootConcepts()); 
 		internalRoots = new HashSet<Term>(tw.getRoots());
 		internalDomain = new HashSet<Term>(tw.getDomain());
 		interior = new LinkedList<TreeWitness>();
@@ -129,8 +134,8 @@ public class QueryFolding {
 	}
 
 	
-	public Set<Property> getProperties() {
-		return properties.get();
+	public Intersection<ObjectPropertyExpression> getProperties() {
+		return properties;
 	}
 	
 	public boolean isValid() {
@@ -149,8 +154,8 @@ public class QueryFolding {
 		return internalRoots.contains(t0.getTerm()) && !internalDomain.contains(t1.getTerm()); // && !roots.contains(t1);
 	}
 	
-	public Set<BasicClassDescription> getInternalRootConcepts() {
-		return internalRootConcepts.get();
+	public Intersection<ClassExpression> getInternalRootConcepts() {
+		return internalRootConcepts;
 	}
 	
 	public Collection<TreeWitness> getInteriorTreeWitnesses() {
@@ -175,13 +180,13 @@ public class QueryFolding {
 		log.debug("  PROPERTIES {}", properties);
 		log.debug("  ENDTYPE {}", internalRootConcepts);
 
-		IntersectionOfConceptSets rootType = new IntersectionOfConceptSets();
+		Intersection<ClassExpression> rootType = cache.getTopClass();
 
 		Set<Function> rootAtoms = new HashSet<Function>();
 		for (Loop root : roots) {
 			rootAtoms.addAll(root.getAtoms());
 			if (!root.isExistentialVariable()) { // if the variable is not quantified -- not mergeable
-				rootType = IntersectionOfConceptSets.EMPTY;
+				rootType.setToBottom();
 				log.debug("  NOT MERGEABLE: {} IS NOT QUANTIFIED", root);				
 			}
 		}
@@ -190,17 +195,18 @@ public class QueryFolding {
 		for (Edge edge : edges) {
 			if (roots.contains(edge.getLoop0()) && roots.contains(edge.getLoop1())) {
 				rootAtoms.addAll(edge.getBAtoms());
-				rootType = IntersectionOfConceptSets.EMPTY;
+				rootType.setToBottom();
 				log.debug("  NOT MERGEABLE: {} IS WITHIN THE ROOTS", edge);				
 			}
 		}
 		
 		log.debug("  ROOTTYPE {}", rootAtoms);
 
-		if (rootType.get() == null) // not empty 
+		if (!rootType.isBottom()) // not empty 
 			for (Loop root : roots) {
-				if (!rootType.intersect(propertiesCache.getLoopConcepts(root))) { // empty intersection -- not mergeable
-					log.debug("  NOT MERGEABLE: EMPTY ROOT CONCEPT");
+				rootType.intersectWith(cache.getLoopConcepts(root));
+				if (rootType.isBottom()) { // empty intersection -- not mergeable
+					log.debug("  NOT MERGEABLE: BOTTOM ROOT CONCEPT");
 					break;
 				}
 			}

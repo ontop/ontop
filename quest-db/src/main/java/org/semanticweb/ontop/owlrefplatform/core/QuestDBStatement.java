@@ -37,6 +37,7 @@ import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
+import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
@@ -112,13 +113,19 @@ public class QuestDBStatement implements OBDAStatement {
 			if (ext.toLowerCase().equals(".owl")) {
 				OWLOntology owlontology = man.loadOntologyFromOntologyDocument(IRI.create(rdffile));
 				Set<OWLOntology> ontos = man.getImportsClosure(owlontology);
-				OWLAPI3ABoxIterator aBoxIter = 
-					new OWLAPI3ABoxIterator(ontos, questInstance.getEquivalenceMap().getInternalMap());
-				result = st.insertData(aBoxIter, useFile, commit, batch);
-			} else if (ext.toLowerCase().equals(".nt")) {
-				NTripleAssertionIterator it = 
-					new NTripleAssertionIterator(rdffile, questInstance.getEquivalenceMap());
-				result = st.insertData(it, useFile, commit, batch);
+				
+				EquivalentTriplePredicateIterator aBoxNormalIter = 
+						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos), 
+								questInstance.getReasoner());
+				
+				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
+			} 
+			else if (ext.toLowerCase().equals(".nt")) {				
+				NTripleAssertionIterator it = new NTripleAssertionIterator(rdffile);
+				EquivalentTriplePredicateIterator aBoxNormalIter = 
+						new EquivalentTriplePredicateIterator(it, questInstance.getReasoner());
+				
+				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
 			}
 			return result;
 		} catch (Exception e) {
@@ -268,14 +275,11 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	public String getRewriting(String query) throws Exception {
-
-        IQuest questInstance = st.getQuestInstance();
 		
 		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 		ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
 		
-		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(
-                questInstance.getUriTemplateMatcher());
+		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.getQuestInstance().getUriTemplateMatcher());
 		
 		LinkedList<String> signatureContainer = new LinkedList<String>();
 		tr.getSignature(pq, signatureContainer);

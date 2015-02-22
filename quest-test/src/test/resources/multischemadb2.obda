@@ -22,7 +22,7 @@ target		:Worker-{worker} a :Worker .
 source		select "broker"."name" as worker  FROM DB2INST2."broker"
 
 mappingId	Client
-target		:Client-{NameOfClient} :isBroker :Broker-{brokerName} . 
+target		:Client-{NameOfClient} :isBroker :Broker-{brokerName} .
 source		SELECT "broker".name as brokerName, "client".name as NameOfClient, "broker".id FROM DB2INST2."client", DB2INST2."broker" WHERE "broker"."id" = "client"."id"
 
 mappingId	Mix

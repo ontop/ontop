@@ -28,7 +28,9 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.net.URI;
 import java.sql.Connection;
+import java.util.Properties;
 
+import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.QueryIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
@@ -176,19 +178,19 @@ public class LUBM50Tests {
 	}
 
 	public void test3InitializingQuest() throws Exception {
-		QuestPreferences pref = new QuestPreferences();
-		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
-		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-		pref.setCurrentValueOf(QuestPreferences.STORAGE_LOCATION, QuestConstants.JDBC);
-		pref.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
-		pref.setCurrentValueOf(QuestPreferences.JDBC_DRIVER, driver);
-		pref.setCurrentValueOf(QuestPreferences.JDBC_URL, url);
-		pref.setCurrentValueOf(QuestPreferences.DBUSER, username);
-		pref.setCurrentValueOf(QuestPreferences.DBPASSWORD, password);
-		pref.setCurrentValueOf(QuestPreferences.REWRITE, "true");
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		p.setProperty(QuestPreferences.STORAGE_LOCATION, QuestConstants.JDBC);
+		p.setProperty(QuestPreferences.OBTAIN_FROM_ONTOLOGY, "false");
+		p.setProperty(OBDAProperties.JDBC_DRIVER, driver);
+		p.setProperty(OBDAProperties.JDBC_URL, url);
+		p.setProperty(OBDAProperties.DB_USER, username);
+		p.setProperty(OBDAProperties.DB_PASSWORD, password);
+		p.setProperty(QuestPreferences.REWRITE, "true");
 
-        QuestOWLFactory fac = new QuestOWLFactory(pref);
-		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
+        QuestOWLFactory fac = new QuestOWLFactory(new QuestPreferences(p));
+		QuestOWL quest = fac.createReasoner(ontology);
 
 		QuestOWLConnection qconn = quest.getConnection();
 

@@ -13,8 +13,10 @@ import java.util.Properties;
  * Focuses on implementation class declaration
  * for the core module of Ontop.
  *
+ * Immutable!
+ *
  */
-public class OBDAProperties extends Properties {
+public class OBDAProperties {
 
     public static final String JDBC_URL = "JDBC_URL";
     public static final String DB_NAME = "DB_NAME";
@@ -26,36 +28,98 @@ public class OBDAProperties extends Properties {
 
     public static final String DEFAULT_OBDA_PROPERTIES_FILE = "default_implementations.properties";
     private static Logger LOG = LoggerFactory.getLogger(OBDAProperties.class);
+    private final Properties properties;
 
+    /**
+     * Beware: immutable class!
+     *
+     * --> Only default properties.
+     */
     public OBDAProperties() {
-        super();
+        this(new Properties());
+    }
+
+    /**
+     * Beware: immutable class!
+     *
+     * Recommended constructor.
+     *
+     * Changing the Properties object afterwards will not have any effect
+     * on this OBDAProperties object.
+     */
+    public OBDAProperties(Properties userProperties) {
+        /**
+         * Loads default properties
+         */
+        properties = loadDefaultPropertiesFromFile(OBDAProperties.class, DEFAULT_OBDA_PROPERTIES_FILE);
+        /**
+         * Overloads the default properties.
+         */
+        properties.putAll(userProperties);
+    }
+
+    protected static Properties loadDefaultPropertiesFromFile(Class localClass, String fileName) {
+        Properties properties = new Properties();
+        InputStream in = localClass.getResourceAsStream(fileName);
+        if (in == null)
+            throw new RuntimeException("Configuration " + fileName + " not found.");
+
         try {
-            readPropertiesFile(DEFAULT_OBDA_PROPERTIES_FILE);
+
+            properties.load(in);
         } catch (IOException e1) {
             LOG.error("Error reading default OBDA properties.");
             LOG.debug(e1.getMessage(), e1);
+            throw new RuntimeException("Impossible to extract configuration from " + fileName);
         }
+        return properties;
     }
-
-    public OBDAProperties(Properties values) {
-        this();
-        this.putAll(values);
-    }
-
 
     /**
-     * Reads the properties from the input stream and sets them as default.
+     * Returns the value of the given key.
      *
-     * @param in
-     *            The input stream.
+     * Returns null if not available.
      */
-    public void readDefaultPropertiesFile(InputStream in) throws IOException {
-        this.load(in);
+    public Object get(Object key) {
+        return properties.get(key);
     }
 
-    private void readPropertiesFile(String fileName) throws IOException {
-        InputStream in =OBDAProperties.class.getResourceAsStream(fileName);
-        readDefaultPropertiesFile(in);
+    /**
+     * Returns the boolean value of the given key.
+     *
+     * Returns null if not available.
+     */
+    public boolean getBoolean(String key) {
+        String value = (String) get(key);
+        return Boolean.parseBoolean(value);
     }
 
+    /**
+     * Returns the integer value of the given key.
+     *
+     * Returns null if not available.
+     */
+    public int getInteger(String key) {
+        String value = (String) get(key);
+        return Integer.parseInt(value);
+    }
+
+    /**
+     * Returns the string value of the given key.
+     *
+     * Returns null if not available.
+     */
+    public String getProperty(String key) {
+        return (String) get(key);
+    }
+
+    public boolean contains(Object key) {
+        return properties.contains(key);
+    }
+
+    protected Properties copyProperties() {
+        Properties p = new Properties();
+        p.putAll(properties);
+        return p;
+    }
 }

@@ -28,12 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -125,8 +120,10 @@ public abstract class CompletenessParent extends TestCase {
 	}
 
 	protected void loadReasonerParameters(String path) throws IOException {
-		preferences = new QuestPreferences();
-		preferences.load(new URL(path).openStream());
+		Properties p = new Properties();
+		p.load(new URL(path).openStream());
+		preferences = new QuestPreferences(p);
+
 	}
 
 	protected void loadOntology(String path) throws OWLOntologyCreationException, IOException {

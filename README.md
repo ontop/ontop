@@ -33,7 +33,7 @@ Links
 
 official website and documentations: http://ontop.inf.unibz.it/
 
-Mail list: ontop4obda AT googlegroups DOT com
+Google Group: https://groups.google.com/forum/#!forum/ontop4obda
 
 Blog: http://ontop-obda.blogspot.it/
 

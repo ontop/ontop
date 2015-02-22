@@ -27,7 +27,6 @@ import org.semanticweb.ontop.injection.OBDACoreModule;
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAMappingAxiom;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
@@ -40,7 +39,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -94,8 +93,8 @@ public class Mapping2DatalogConverterTest extends TestCase {
 		ArrayList<OBDAMappingAxiom> mappingList = new ArrayList<OBDAMappingAxiom>();
 		mappingList.add(mappingAxiom);
 		
-		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(mappingList, md);
-		DatalogProgram dp = analyzer.constructDatalogProgram();
+		Mapping2DatalogConverter analyzer = new Mapping2DatalogConverter(md);
+		List<CQIE> dp = analyzer.constructDatalogProgram(mappingList);
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());

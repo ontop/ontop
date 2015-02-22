@@ -23,6 +23,9 @@ package org.semanticweb.ontop.owlapi3;
 import java.util.Iterator;
 
 import org.semanticweb.ontop.ontology.Assertion;
+import org.semanticweb.ontop.ontology.ClassAssertion;
+import org.semanticweb.ontop.ontology.DataPropertyAssertion;
+import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
 public class QuestOWLIndividualIterator  implements Iterator<OWLIndividualAxiom> {
@@ -43,10 +46,21 @@ public class QuestOWLIndividualIterator  implements Iterator<OWLIndividualAxiom>
 	@Override
 	public OWLIndividualAxiom next() {
 		Assertion assertion = assertions.next();
-		OWLIndividualAxiom individual = translator.translate(assertion);
+		OWLIndividualAxiom individual = translate(assertion);
 		return individual;
 	}
 
+	private OWLIndividualAxiom translate(Assertion a) {
+		if (a instanceof ClassAssertion) 
+			return translator.translate((ClassAssertion) a);
+		else if (a instanceof ObjectPropertyAssertion) 
+			return translator.translate((ObjectPropertyAssertion) a);
+		else
+			return translator.translate((DataPropertyAssertion) a);
+	}
+	
+	
+	
 	@Override
 	public void remove() {
 		throw new UnsupportedOperationException("This iterator is read-only");

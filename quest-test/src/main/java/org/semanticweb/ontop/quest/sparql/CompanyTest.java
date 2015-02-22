@@ -180,8 +180,8 @@ public class CompanyTest extends TestCase {
 //
 //				}
 			assertTrue(rs2.nextRow());
-			OWLObject ind1 = rs2.getOWLNamedIndividual("y");
-			OWLObject ind2 = rs2.getOWLNamedIndividual("z");
+			OWLObject ind1 = rs2.getOWLIndividual("y");
+			OWLObject ind2 = rs2.getOWLIndividual("z");
 			
 			assertEquals("<http://it.unibz.krdb/obda/test/company#HR>", ind1.toString());
 			assertEquals("<http://it.unibz.krdb/obda/test/company#mark>", ind2.toString());
@@ -203,21 +203,21 @@ public class CompanyTest extends TestCase {
 
 	public void testViEqSig() throws Exception {
 
-		QuestPreferences p = new QuestPreferences();
-		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		Properties p = new Properties();
+		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
-		runTests(p);
+		runTests(new QuestPreferences(p));
 	}
 	
 //	public void testClassicEqSig() throws Exception {
 //
-//		QuestPreferences p = new QuestPreferences();
-//		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
-//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-//		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-//		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
+//		Properties p = new Properties();
+//		p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+//		p.setProperty(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+//		p.setProperty(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+//		p.setProperty(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");
 //
 //		runTests(p);
 //	}

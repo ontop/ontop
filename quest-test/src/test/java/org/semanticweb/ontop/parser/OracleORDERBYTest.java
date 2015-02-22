@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 
 import static org.junit.Assert.assertTrue;
 
@@ -79,13 +80,13 @@ public class OracleORDERBYTest {
     private void runQuery(String query) throws OBDAException, OWLException, IOException, InvalidMappingException,
             DuplicateMappingException, InvalidDataSourceException {
 
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
+        Properties p = new Properties();
+        p.setProperty(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
         // Creating a new instance of the reasoner
-        factory = new QuestOWLFactory(new File(obdaFile), p);
+        QuestOWLFactory factory = new QuestOWLFactory(new File(obdaFile), new QuestPreferences(p));
 
-        reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+        reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
         // Now we are ready for querying
         conn = reasoner.getConnection();
