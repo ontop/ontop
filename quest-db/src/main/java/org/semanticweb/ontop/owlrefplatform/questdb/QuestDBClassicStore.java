@@ -189,8 +189,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 	public IQuestConnection getQuestConnection() {
 		IQuestConnection conn = null;
 		try {
-            //TODO: avoid this cast
-			conn = (IQuestConnection) questInstance.getConnection();
+			conn = questInstance.getConnection();
 		} catch (OBDAException e) {
 			e.printStackTrace();
 		}

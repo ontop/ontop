@@ -788,15 +788,6 @@ public class Quest implements Serializable, IQuest {
 		dbConnector.close();
 	}
 
-	@Override
-	public void releaseSQLPoolConnection(Connection co) {
-		dbConnector.releaseSQLPoolConnection(co);
-	}
-
-	@Override
-	public synchronized Connection getSQLPoolConnection() throws OBDAException {
-		return dbConnector.getSQLPoolConnection();
-	}
 
 	@Override
 	public IQuestConnection getNonPoolConnection() throws OBDAException {
@@ -804,7 +795,7 @@ public class Quest implements Serializable, IQuest {
 	}
 
 	@Override
-	public OBDAConnection getConnection() throws OBDAException {
+	public IQuestConnection getConnection() throws OBDAException {
 		return dbConnector.getConnection();
 	}
 

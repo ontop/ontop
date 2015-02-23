@@ -82,30 +82,34 @@ public class JDBCConnector implements DBConnector {
      * @return
      * @throws SQLException
      */
-    public boolean connect() throws SQLException {
-        if (localConnection != null && !localConnection.isClosed()) {
-            return true;
-        }
-        String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
-        String username = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
-        String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
-        String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-
+    public boolean connect() throws OBDAException {
         try {
-            Class.forName(driver);
-        } catch (ClassNotFoundException e1) {
-            // Does nothing because the SQLException handles this problem also.
-        }
-        localConnection = DriverManager.getConnection(url, username, password);
+            if (localConnection != null && !localConnection.isClosed()) {
+                return true;
+            }
+            String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);
+            String username = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_USERNAME);
+            String password = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD);
+            String driver = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
 
-        if (localConnection != null) {
-            return true;
+            try {
+                Class.forName(driver);
+            } catch (ClassNotFoundException e1) {
+                // Does nothing because the SQLException handles this problem also.
+            }
+            localConnection = DriverManager.getConnection(url, username, password);
+
+            if (localConnection != null) {
+                return true;
+            }
+            return false;
+        } catch (SQLException e) {
+            throw new OBDAException(e);
         }
-        return false;
     }
 
     @Override
-    public void disconnect() throws SQLException {
+    public void disconnect() throws OBDAException {
         try {
             localConnection.close();
         } catch (Exception e) {
@@ -137,13 +141,13 @@ public class JDBCConnector implements DBConnector {
     }
 
     @Override
-    public OBDAModel expandMetaMappings(OBDAModel unfoldingOBDAModel, URI sourceId) throws Exception {
+    public OBDAModel expandMetaMappings(OBDAModel unfoldingOBDAModel, URI sourceId) throws OBDAException {
         MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
         return metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
     }
 
     @Override
-    public void preprocessProjection(ImmutableList<OBDAMappingAxiom> mappings) throws SQLException {
+    public void preprocessProjection(ImmutableList<OBDAMappingAxiom> mappings) throws OBDAException {
         String parameter = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
         SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(parameter, questPreferences);
         preprocessProjection(localConnection, mappings, OBDADataFactoryImpl.getInstance(), sqladapter);
@@ -198,15 +202,6 @@ public class JDBCConnector implements DBConnector {
         tomcatPool.close();
     }
 
-    public void releaseSQLPoolConnection(Connection co) {
-        try {
-            co.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
     public synchronized Connection getSQLPoolConnection() throws OBDAException {
         Connection conn = null;
         try {
@@ -245,9 +240,9 @@ public class JDBCConnector implements DBConnector {
         try {
             conn = DriverManager.getConnection(url, username, password);
         } catch (SQLException e) {
-            throw new OBDAException(e.getMessage());
+            throw new OBDAException(e);
         } catch (Exception e) {
-            throw new OBDAException(e.getMessage());
+            throw new OBDAException(e);
         }
         return conn;
     }
@@ -256,7 +251,7 @@ public class JDBCConnector implements DBConnector {
     @Override
     public IQuestConnection getNonPoolConnection() throws OBDAException {
 
-        return new QuestConnection(questInstance, getSQLConnection(), questPreferences);
+        return new QuestConnection(this, questInstance, getSQLConnection(), questPreferences);
     }
 
     /***
@@ -278,7 +273,7 @@ public class JDBCConnector implements DBConnector {
     @Override
     public IQuestConnection getConnection() throws OBDAException {
 
-        return new QuestConnection(questInstance, getSQLPoolConnection(), questPreferences);
+        return new QuestConnection(this, questInstance, getSQLPoolConnection(), questPreferences);
     }
 
     /***
@@ -291,102 +286,107 @@ public class JDBCConnector implements DBConnector {
      */
     private static void preprocessProjection(Connection localConnection, List<OBDAMappingAxiom> mappings,
                                              OBDADataFactory factory, SQLDialectAdapter adapter)
-            throws SQLException {
+            throws OBDAException {
 
-        // TODO this code seems buggy, it will probably break easily (check the
-        // part with
-        // parenthesis in the beginning of the for loop.
-
-        Statement st = null;
         try {
-            st = localConnection.createStatement();
-            for (OBDAMappingAxiom axiom : mappings) {
-                String sourceString = axiom.getSourceQuery().toString();
+
+            // TODO this code seems buggy, it will probably break easily (check the
+            // part with
+            // parenthesis in the beginning of the for loop.
+
+            Statement st = null;
+            try {
+                st = localConnection.createStatement();
+                for (OBDAMappingAxiom axiom : mappings) {
+                    String sourceString = axiom.getSourceQuery().toString();
 
 				/*
 				 * Check if the projection contains select all keyword, i.e.,
 				 * 'SELECT * [...]'.
 				 */
-                if (containSelectAll(sourceString)) {
-                    StringBuilder sb = new StringBuilder();
+                    if (containSelectAll(sourceString)) {
+                        StringBuilder sb = new StringBuilder();
 
-                    // If the SQL string has sub-queries in its statement
-                    if (containChildParentSubQueries(sourceString)) {
-                        int childquery1 = sourceString.indexOf("(");
-                        int childquery2 = sourceString.indexOf(") AS child");
-                        String childquery = sourceString.substring(childquery1 + 1, childquery2);
+                        // If the SQL string has sub-queries in its statement
+                        if (containChildParentSubQueries(sourceString)) {
+                            int childquery1 = sourceString.indexOf("(");
+                            int childquery2 = sourceString.indexOf(") AS child");
+                            String childquery = sourceString.substring(childquery1 + 1, childquery2);
 
-                        String copySourceQuery = createDummyQueryToFetchColumns(childquery, adapter);
-                        if (st.execute(copySourceQuery)) {
-                            ResultSetMetaData rsm = st.getResultSet().getMetaData();
-                            boolean needComma = false;
-                            for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
-                                if (needComma) {
-                                    sb.append(", ");
+                            String copySourceQuery = createDummyQueryToFetchColumns(childquery, adapter);
+                            if (st.execute(copySourceQuery)) {
+                                ResultSetMetaData rsm = st.getResultSet().getMetaData();
+                                boolean needComma = false;
+                                for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
+                                    if (needComma) {
+                                        sb.append(", ");
+                                    }
+                                    String col = rsm.getColumnName(pos);
+                                    //sb.append("CHILD." + col );
+                                    sb.append("child.\"" + col + "\" AS \"child_" + (col) + "\"");
+                                    needComma = true;
                                 }
-                                String col = rsm.getColumnName(pos);
-                                //sb.append("CHILD." + col );
-                                sb.append("child.\"" + col + "\" AS \"child_" + (col)+"\"");
-                                needComma = true;
+                            }
+                            sb.append(", ");
+
+                            int parentquery1 = sourceString.indexOf(", (", childquery2);
+                            int parentquery2 = sourceString.indexOf(") AS parent");
+                            String parentquery = sourceString.substring(parentquery1 + 3, parentquery2);
+
+                            copySourceQuery = createDummyQueryToFetchColumns(parentquery, adapter);
+                            if (st.execute(copySourceQuery)) {
+                                ResultSetMetaData rsm = st.getResultSet().getMetaData();
+                                boolean needComma = false;
+                                for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
+                                    if (needComma) {
+                                        sb.append(", ");
+                                    }
+                                    String col = rsm.getColumnName(pos);
+                                    //sb.append("PARENT." + col);
+                                    sb.append("parent.\"" + col + "\" AS \"parent_" + (col) + "\"");
+                                    needComma = true;
+                                }
+                            }
+
+                            //If the SQL string doesn't have sub-queries
+                        } else
+
+                        {
+                            String copySourceQuery = createDummyQueryToFetchColumns(sourceString, adapter);
+                            boolean execute = st.execute(copySourceQuery);
+                            if (execute) {
+                                ResultSetMetaData rsm = st.getResultSet().getMetaData();
+                                boolean needComma = false;
+                                for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
+                                    if (needComma) {
+                                        sb.append(", ");
+                                    }
+                                    sb.append("\"" + rsm.getColumnName(pos) + "\"");
+                                    needComma = true;
+                                }
                             }
                         }
-                        sb.append(", ");
-
-                        int parentquery1 = sourceString.indexOf(", (", childquery2);
-                        int parentquery2 = sourceString.indexOf(") AS parent");
-                        String parentquery = sourceString.substring(parentquery1 + 3, parentquery2);
-
-                        copySourceQuery = createDummyQueryToFetchColumns(parentquery, adapter);
-                        if (st.execute(copySourceQuery)) {
-                            ResultSetMetaData rsm = st.getResultSet().getMetaData();
-                            boolean needComma = false;
-                            for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
-                                if (needComma) {
-                                    sb.append(", ");
-                                }
-                                String col = rsm.getColumnName(pos);
-                                //sb.append("PARENT." + col);
-                                sb.append("parent.\"" + col + "\" AS \"parent_" + (col)+"\"");
-                                needComma = true;
-                            }
-                        }
-
-                        //If the SQL string doesn't have sub-queries
-                    } else
-
-                    {
-                        String copySourceQuery = createDummyQueryToFetchColumns(sourceString, adapter);
-                        boolean execute = st.execute(copySourceQuery);
-                        if (execute) {
-                            ResultSetMetaData rsm = st.getResultSet().getMetaData();
-                            boolean needComma = false;
-                            for (int pos = 1; pos <= rsm.getColumnCount(); pos++) {
-                                if (needComma) {
-                                    sb.append(", ");
-                                }
-                                sb.append("\"" + rsm.getColumnName(pos) + "\"");
-                                needComma = true;
-                            }
-                        }
-                    }
 
 					/*
 					 * Replace the asterisk with the proper column names
 					 */
-                    String columnProjection = sb.toString();
-                    String tmp = axiom.getSourceQuery().toString();
-                    int fromPosition = tmp.toLowerCase().indexOf("from");
-                    int asteriskPosition = tmp.indexOf('*');
-                    if (asteriskPosition != -1 && asteriskPosition < fromPosition) {
-                        String str = sourceString.replaceFirst("\\*", columnProjection);
-                        axiom.setSourceQuery(factory.getSQLQuery(str));
+                        String columnProjection = sb.toString();
+                        String tmp = axiom.getSourceQuery().toString();
+                        int fromPosition = tmp.toLowerCase().indexOf("from");
+                        int asteriskPosition = tmp.indexOf('*');
+                        if (asteriskPosition != -1 && asteriskPosition < fromPosition) {
+                            String str = sourceString.replaceFirst("\\*", columnProjection);
+                            axiom.setSourceQuery(factory.getSQLQuery(str));
+                        }
                     }
                 }
+            } finally {
+                if (st != null) {
+                    st.close();
+                }
             }
-        } finally {
-            if (st != null) {
-                st.close();
-            }
+        } catch (SQLException e) {
+            throw new OBDAException(e);
         }
     }
 

@@ -23,7 +23,6 @@ package org.semanticweb.ontop.owlrefplatform.core;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.semanticweb.ontop.model.OBDAConnection;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.execution.SIQuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.execution.SISQLQuestStatementImpl;
@@ -33,7 +32,7 @@ import org.semanticweb.ontop.owlrefplatform.core.execution.SISQLQuestStatementIm
  * source. It will translate calls to OBDAConnection into JDBC Connection calls
  * (in most cases directly).
  *
- * SQL-specific implementation!
+ * SQL-specific implementation (specific to the JDBCConnector)!
  *
  * TODO: rename it SQLQuestConnection
  * 
@@ -46,10 +45,12 @@ public class QuestConnection implements IQuestConnection {
 	private Connection conn;
 
 	private IQuest questinstance;
-	
+	private final JDBCConnector jdbcConnector;
 	private boolean isClosed;
 
-	public QuestConnection(IQuest questInstance, Connection connection, QuestPreferences questPreferences) {
+
+	public QuestConnection(JDBCConnector jdbcConnector, IQuest questInstance, Connection connection, QuestPreferences questPreferences) {
+		this.jdbcConnector = jdbcConnector;
 		this.questinstance = questInstance;
 		this.conn = connection;
 		this.isClosed = false;
@@ -63,11 +64,11 @@ public class QuestConnection implements IQuestConnection {
 	@Override
 	public void close() throws OBDAException {
 		try {
-			questinstance.releaseSQLPoolConnection(conn);		
-		} catch (Exception e) {
-			throw new OBDAException(e);
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			//throw new OBDAException(e);
 		}
-
 	}
 
 	/**
@@ -90,7 +91,7 @@ public class QuestConnection implements IQuestConnection {
 		try {
 			if (conn.isClosed()) {
 				// Sometimes it gets dropped, reconnect
-				conn = questinstance.getSQLPoolConnection();
+				conn = jdbcConnector.getSQLPoolConnection();
 			}
 			IQuestStatement st = new SQLQuestStatement(this.questinstance, this,
 					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
@@ -113,7 +114,7 @@ public class QuestConnection implements IQuestConnection {
 		try {
 			if (conn.isClosed()) {
 				// Sometimes it gets dropped, reconnect
-				conn = questinstance.getSQLPoolConnection();
+				conn = jdbcConnector.getSQLPoolConnection();
 			}
 			SIQuestStatement st = new SISQLQuestStatementImpl(this.questinstance, this,
 					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY,
@@ -176,7 +177,10 @@ public class QuestConnection implements IQuestConnection {
 
 	@Override
 	public boolean isReadOnly() throws OBDAException {
-		if (this.questinstance.getSemanticIndexRepository() == null)
+		/**
+		 * Write is currently supported by the classic mode.
+		 */
+		if (!this.questinstance.isSemIdx())
 			return true;
 		try {
 			return conn.isReadOnly();

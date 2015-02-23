@@ -316,7 +316,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			throw new Error("The QuestDBVirtualStore must be initialized before getQuestConnection can be run. See https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
 		try {
 			// System.out.println("getquestconn..");
-			questConn = (IQuestConnection) questInstance.getConnection();
+			questConn = questInstance.getConnection();
 		} catch (OBDAException e) {
 			e.printStackTrace();
 		}

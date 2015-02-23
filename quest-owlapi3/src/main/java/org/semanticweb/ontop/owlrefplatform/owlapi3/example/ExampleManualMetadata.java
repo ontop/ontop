@@ -77,7 +77,7 @@ private void setup()  throws Exception {
 	 * Prepare the data connection for querying.
 	 */
 	
-	IQuestConnection conn = (IQuestConnection) quest.getConnection();
+	IQuestConnection conn = quest.getConnection();
 	QuestOWLConnection connOWL = new QuestOWLConnection(conn);
 	qst = connOWL.createStatement();
 }

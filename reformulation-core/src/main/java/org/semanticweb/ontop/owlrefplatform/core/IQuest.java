@@ -46,16 +46,10 @@ public interface IQuest extends RepositoryChangedListener {
 
     void close();
 
-    @Deprecated
-    void releaseSQLPoolConnection(Connection co);
-
-    @Deprecated
-    Connection getSQLPoolConnection() throws OBDAException;
-
     // get a real (non pool) connection - used for protege plugin
     IQuestConnection getNonPoolConnection() throws OBDAException;
 
-    OBDAConnection getConnection() throws OBDAException;
+    IQuestConnection getConnection() throws OBDAException;
 
     UriTemplateMatcher getUriTemplateMatcher();
 

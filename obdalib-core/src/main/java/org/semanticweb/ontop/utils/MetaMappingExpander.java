@@ -40,6 +40,7 @@ import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
+import org.semanticweb.ontop.exception.DuplicateMappingException;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
@@ -455,13 +456,20 @@ public class MetaMappingExpander {
 	 * This method expands the input mappings, which may include meta mappings, to the concrete mappings
 	 *
 	 */
-	public OBDAModel expand(OBDAModel obdaModel, URI sourceURI) throws Exception {
-		ImmutableList<OBDAMappingAxiom> expandedMappings = expand(obdaModel.getMappings(sourceURI));
+	public OBDAModel expand(OBDAModel obdaModel, URI sourceURI) throws OBDAException {
+		try {
+			ImmutableList<OBDAMappingAxiom> expandedMappings = expand(obdaModel.getMappings(sourceURI));
 
-        Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex = new HashMap<>(obdaModel.getMappings());
-        mappingIndex.put(sourceURI, expandedMappings);
-        return obdaModel.newModel(obdaModel.getSources(), mappingIndex);
-		
+			Map<URI, ImmutableList<OBDAMappingAxiom>> mappingIndex = new HashMap<>(obdaModel.getMappings());
+			mappingIndex.put(sourceURI, expandedMappings);
+			return obdaModel.newModel(obdaModel.getSources(), mappingIndex);
+		} catch (SQLException e) {
+			throw new OBDAException(e);
+		} catch (JSQLParserException e) {
+			throw new OBDAException(e);
+		} catch (DuplicateMappingException e) {
+			throw new OBDAException(e);
+		}
 	}
 	
 	

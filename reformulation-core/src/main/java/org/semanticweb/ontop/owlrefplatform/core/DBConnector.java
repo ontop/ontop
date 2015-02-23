@@ -22,8 +22,8 @@ public interface DBConnector {
     /**
      * TODO: keep it public?
      */
-    boolean connect() throws SQLException;
-    void disconnect() throws SQLException;
+    boolean connect() throws OBDAException;
+    void disconnect() throws OBDAException;
     void dispose();
     void close();
 
@@ -31,15 +31,10 @@ public interface DBConnector {
     DBMetadata extractDBMetadata(OBDAModel obdaModel, @Nullable ImplicitDBConstraints userConstraints)
             throws DBMetadataException;
 
-    OBDAModel expandMetaMappings(OBDAModel unfoldingOBDAModel, URI sourceId) throws Exception;
+    OBDAModel expandMetaMappings(OBDAModel unfoldingOBDAModel, URI sourceId) throws OBDAException;
 
-    void preprocessProjection(ImmutableList<OBDAMappingAxiom> mappings) throws SQLException;
+    void preprocessProjection(ImmutableList<OBDAMappingAxiom> mappings) throws OBDAException;
 
     IQuestConnection getNonPoolConnection() throws OBDAException;
     IQuestConnection getConnection() throws OBDAException;
-
-    @Deprecated
-    Connection getSQLPoolConnection() throws OBDAException;
-
-    void releaseSQLPoolConnection(Connection connection);
 }
