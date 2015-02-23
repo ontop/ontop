@@ -1029,10 +1029,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().getName());
 
 		if(connClass == null){
-			// TODO: set a proper timeout value
-			//st.setQueryTimeout(10);
-			return;
-		}
+            st.setQueryTimeout(timeout);
+            return;
+        }
 
 
 		switch(connClass){
