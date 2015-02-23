@@ -158,7 +158,7 @@ public class QuestOWLExample_ReasoningDisabled {
                                     "?x a :A%d . OPTIONAL { ?x :R ?y . " +
                                     "?y a :A%d . OPTIONAL { ?y :R ?z . " +
                                     "?z a :A%d . OPTIONAL { ?z :S ?w . " +
-                                    "FILTER (?w < %d) } } } }",
+                                    " } } } FILTER (?w < %d) }",
                             i1, i2, i3, filter);
                     sparqls.add(sparql);
                 }
@@ -222,7 +222,7 @@ public class QuestOWLExample_ReasoningDisabled {
                                             "?x a :A%d. "
                                             + "OPTIONAL { ?x :R ?y . " +
                                             "?y a :A%d. OPTIONAL { ?y :S ?z   .  " +
-                                            "FILTER (?z < %d) } } }",
+                                            " } } FILTER (?z < %d) }",
                                     i1, i2, filter);
                             sparqls.add(sparql);
                         }
@@ -261,8 +261,8 @@ public class QuestOWLExample_ReasoningDisabled {
                                 "PREFIX : <http://www.example.org/> " +
                                         " SELECT  DISTINCT ?x  ?y     " +
                                         " WHERE {" +
-                                        "?x a :A%d. OPTIONAL{ ?x :S ?y } ." +
-                                        "FILTER (?y < %d) }",
+                                        "?x a :A%d. OPTIONAL{ ?x :S ?y } FILTER (?y < %d) } " 
+                                        ,
                                 i1, filter);
                         sparqls.add(sparql);
 
