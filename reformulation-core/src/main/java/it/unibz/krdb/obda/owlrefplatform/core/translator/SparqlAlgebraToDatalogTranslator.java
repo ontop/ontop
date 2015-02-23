@@ -20,34 +20,15 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.DatatypeFactory;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
-
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
-
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.datatypes.XMLDatatypeUtil;
@@ -55,49 +36,16 @@ import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.And;
-import org.openrdf.query.algebra.BinaryTupleOperator;
-import org.openrdf.query.algebra.BinaryValueOperator;
-import org.openrdf.query.algebra.Bound;
-import org.openrdf.query.algebra.Compare;
+import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.Compare.CompareOp;
-import org.openrdf.query.algebra.Datatype;
-import org.openrdf.query.algebra.Distinct;
-import org.openrdf.query.algebra.Extension;
-import org.openrdf.query.algebra.ExtensionElem;
-import org.openrdf.query.algebra.Filter;
-import org.openrdf.query.algebra.IsBNode;
-import org.openrdf.query.algebra.IsLiteral;
-import org.openrdf.query.algebra.IsURI;
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.Lang;
-import org.openrdf.query.algebra.LangMatches;
-import org.openrdf.query.algebra.LeftJoin;
-import org.openrdf.query.algebra.MathExpr;
 import org.openrdf.query.algebra.MathExpr.MathOp;
-import org.openrdf.query.algebra.Not;
-import org.openrdf.query.algebra.Or;
-import org.openrdf.query.algebra.Order;
-import org.openrdf.query.algebra.OrderElem;
-import org.openrdf.query.algebra.Projection;
-import org.openrdf.query.algebra.ProjectionElem;
-import org.openrdf.query.algebra.Reduced;
-import org.openrdf.query.algebra.Regex;
-import org.openrdf.query.algebra.SameTerm;
-import org.openrdf.query.algebra.Slice;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.Str;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.UnaryTupleOperator;
-import org.openrdf.query.algebra.UnaryValueOperator;
-import org.openrdf.query.algebra.Union;
-import org.openrdf.query.algebra.ValueExpr;
-import org.openrdf.query.algebra.Var;
 import org.openrdf.query.parser.ParsedGraphQuery;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /***
  * Translate a SPARQL algebra expression into a Datalog program that has the
@@ -233,8 +181,13 @@ public class SparqlAlgebraToDatalogTranslator {
 		} else if (te instanceof Extension) { 
 			Extension extend = (Extension) te;
 			translate(vars, extend, pr, i, varcount);
-			
-		} else {
+
+        } else if (te instanceof FunctionCall) {
+            FunctionCall function = (FunctionCall) te;
+            translate(vars, function, pr, i, varcount);
+
+        } else {
+
 			try {
 				throw new QueryEvaluationException("Operation not supported: "
 						+ te.toString());
@@ -340,7 +293,12 @@ public class SparqlAlgebraToDatalogTranslator {
 //		      translate(vars1, subop, pr, 2 * i, varcount);
 //		    }
 
-	
+    private void translate(List<Variable> vars, FunctionCall function,
+                           DatalogProgram pr, long i, int[] varcount) {
+        List<ValueExpr> subte = function.getArgs();
+
+
+    }
 	private void translate(List<Variable> vars, Union union,
 			DatalogProgram pr, long i, int[] varcount) {
 		TupleExpr left = union.getLeftArg();
@@ -1057,9 +1015,83 @@ public class SparqlAlgebraToDatalogTranslator {
 			// TODO Change the method name because ExprFunction2 is not only for
 			// boolean functions
 			return getBooleanFunction(function, term1, term2);
-		} else if (expr instanceof Bound){
-			
-			return ofac.getFunctionIsNotNull(getVariableTerm(((Bound) expr).getArg()));
+		} else if (expr instanceof Bound) {
+
+            return ofac.getFunctionIsNotNull(getVariableTerm(((Bound) expr).getArg()));
+        } else if (expr instanceof FunctionCall){
+
+            switch(((FunctionCall) expr).getURI()){
+                case "http://www.w3.org/2005/xpath-functions#concat":
+
+                    List<ValueExpr> values = ((FunctionCall) expr).getArgs();
+
+                    Function topConcat = null;
+                    for (int i= 0; i<values.size(); i+=2) {
+
+                        Term first_string, second_string;
+
+                        if(topConcat == null){
+
+                            ValueExpr first = values.get(i);
+                            first_string = getBooleanTerm(first);
+
+                            ValueExpr second = values.get(i+1);
+                            second_string = getBooleanTerm(second);
+
+                            topConcat = ofac.getFunctionConcat(first_string , second_string);
+                        }
+                        else{
+
+                            ValueExpr second = values.get(i);
+                            second_string = getBooleanTerm(second);
+
+                            topConcat = ofac.getFunctionConcat( topConcat, second_string );
+                        }
+
+                    }
+                    return topConcat;
+
+
+
+                case "http://www.w3.org/2005/xpath-functions#replace":
+                    List<ValueExpr> expressions = ((FunctionCall) expr).getArgs();
+                    if (expressions.size() == 2 || expressions.size() == 3) {
+
+                        Term t1; // first parameter is a function expression
+                        ValueExpr first = expressions.get(0);
+                        t1 = getBooleanTerm(first);
+
+
+                        // second parameter is a string
+                        Term out_string;
+                        ValueExpr second = expressions.get(1);
+                        out_string = getBooleanTerm(second);
+
+
+                    /*
+                     * Term t3 is optional: no string means delete occurrences of second param
+			         */
+                        Term in_string;
+                        if (expressions.size() == 3) {
+                            ValueExpr third = expressions.get(2);
+                            in_string = getBooleanTerm(third);
+                        } else {
+                            in_string = ofac.getConstantLiteral("");
+                        }
+
+                        return ofac.getFunctionReplace(t1, out_string, in_string);
+                    } else
+
+                        throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");
+
+
+
+                default:
+                    throw new RuntimeException("The builtin function "
+                            + ((FunctionCall) expr).getURI().toString() + " is not supported yet!");
+                    }
+
+
 		} else {
 			throw new RuntimeException("The builtin function "
 					+ expr.toString() + " is not supported yet!");
