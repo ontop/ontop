@@ -4,7 +4,7 @@ import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.execution.SIQuestStatement;
 
 /**
- * Implementation of a IQuestOWLStatement for managing a Semantic Index repository.
+ * Implementation of a QuestOWLStatement for managing a Semantic Index repository.
  */
 public class SIQuestOWLStatementImpl extends QuestOWLStatement implements SIQuestOWLStatement  {
 

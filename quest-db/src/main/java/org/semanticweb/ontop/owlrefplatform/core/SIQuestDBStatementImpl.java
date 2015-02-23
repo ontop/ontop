@@ -5,7 +5,7 @@ import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.execution.SIQuestStatement;
 
 /**
- * IQuestDBStatement for Semantic Index repositories.
+ * QuestDBStatement for Semantic Index repositories.
  */
 public class SIQuestDBStatementImpl extends QuestDBStatement implements SIQuestDBStatement {
 

@@ -34,7 +34,6 @@ import java.util.regex.Pattern;
 
 import org.semanticweb.ontop.model.BooleanOperationPredicate;
 import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.parser.SQLQueryParser;

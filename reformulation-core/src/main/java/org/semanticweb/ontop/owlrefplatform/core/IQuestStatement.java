@@ -10,7 +10,13 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * TODO: describe.
+ * OBDAStatement specific to Quest.
+ *
+ * This interface gives access to inner steps of the SPARQL answering process for analytical purposes.
+ * Also provides some benchmarking information.
+ *
+ * May also support data insertion (usually in classic mode but maybe (in the future) also in virtual mode).
+ *
  */
 public interface IQuestStatement extends OBDAStatement {
     IQuest getQuestInstance();
@@ -21,9 +27,9 @@ public interface IQuestStatement extends OBDAStatement {
 
     boolean isCanceled();
 
-    /**
-     * Methods for getting the benchmark parameters
-     */
+    //------------------
+    // Methods for getting the benchmark parameters
+    //------------------
 
     long getQueryProcessingTime();
 
@@ -54,8 +60,7 @@ public interface IQuestStatement extends OBDAStatement {
      *            inserting the tuples and recreated afterwards. Note, if no
      *            index existed before the insert no drop will be done and no
      *            new index will be created.
-
-     * @throws java.sql.SQLException
+     *
      */
     public int insertData(Iterator<Assertion> data, boolean useFile, int commit, int batch) throws OBDAException;
 }

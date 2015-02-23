@@ -10,6 +10,11 @@ import org.semanticweb.ontop.owlrefplatform.core.IQuestStatement;
  */
 public interface SIQuestStatement extends IQuestStatement {
 
+    /***
+     * In an ABox store (classic) this methods triggers the generation of the
+     * schema and the insertion of the metadata.
+     *
+     */
     void createIndexes() throws OBDAException;
 
     void dropIndexes() throws OBDAException;
@@ -19,5 +24,6 @@ public interface SIQuestStatement extends IQuestStatement {
     void dropRepository() throws OBDAException;
 
     public void createDB() throws OBDAException;
+
     public void analyze() throws OBDAException;
 }

@@ -10,31 +10,47 @@ import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 import javax.annotation.Nullable;
 import java.net.URI;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
- * TODO: describe
- * TODO: find a better name?
+ * High-level component in charge of abstracting the interaction with the DB.
+ * This interface is agnostic regarding the native query language.
+ *
+ * Guice-enabled interface (see the QuestComponentFactory).
+ *
  */
 public interface DBConnector {
 
     /**
-     * TODO: keep it public?
+     * TODO: keep them public?
      */
     boolean connect() throws OBDAException;
     void disconnect() throws OBDAException;
     void dispose();
     void close();
 
-
+    /**
+     * Extracts the schema from the DB and/or the mappings.
+     */
     DBMetadata extractDBMetadata(OBDAModel obdaModel, @Nullable ImplicitDBConstraints userConstraints)
             throws DBMetadataException;
 
+    /**
+     * May expand the mappings by querying the DB.
+     */
     OBDAModel expandMetaMappings(OBDAModel unfoldingOBDAModel, URI sourceId) throws OBDAException;
 
+    /**
+     * Prepares the DB according to the mappings.
+     */
     void preprocessProjection(ImmutableList<OBDAMappingAxiom> mappings) throws OBDAException;
 
+    /**
+     * Gets a direct QuestConnection.
+     */
     IQuestConnection getNonPoolConnection() throws OBDAException;
+
+    /**
+     * Gets a QuestConnection usually coming from a connection pool.
+     */
     IQuestConnection getConnection() throws OBDAException;
 }

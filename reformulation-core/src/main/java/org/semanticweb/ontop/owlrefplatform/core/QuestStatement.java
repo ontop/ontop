@@ -59,8 +59,9 @@ import javax.annotation.Nullable;
 
 
 /**
- * The obda statement provides the implementations necessary to query the
- * reformulation platform reasoner from outside, i.e. Protege
+ * Abstract class for QuestStatement.
+ *
+ * TODO: rename it (not now) AbstractQuestStatement.
  */
 public abstract class QuestStatement implements IQuestStatement {
 

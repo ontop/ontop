@@ -8,7 +8,7 @@ import java.net.URI;
 import java.util.Iterator;
 
 /**
- * TODO: describe
+ * High-level OBDAStatement class used by Sesame.
  *
  * TODO: Rename it (not now) QuestDBStatement.
  */

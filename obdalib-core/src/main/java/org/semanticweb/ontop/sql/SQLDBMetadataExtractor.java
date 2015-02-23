@@ -17,6 +17,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * DBMetadataExtractor for JDBC-enabled DBs.
+ */
 public class SQLDBMetadataExtractor implements DBMetadataExtractor {
 
     /**
@@ -30,7 +33,7 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
     }
 
     /**
-     * Expects the DBConnection to be a JDBCConnection
+     * Expects the DBConnectionWrapper to wrap a JDBC connection.
      */
     @Override
     public DBMetadata extract(OBDADataSource dataSource, OBDAModel obdaModel, DBConnectionWrapper dbConnection,

@@ -35,16 +35,6 @@ public class SISQLQuestStatementImpl extends SQLQuestStatement implements SIQues
         }
     }
 
-    /***
-     * As before, but using recreateIndexes = false.
-     *
-     * @param data
-     * @throws java.sql.SQLException
-     */
-    public int insertData(Iterator<Assertion> data, int commit, int batch) throws OBDAException {
-        return insertData(data, false, commit, batch);
-    }
-
     public void createIndexes() throws OBDAException {
         try {
             siRepository.createIndexes(sqlConnection);
@@ -77,7 +67,6 @@ public class SISQLQuestStatementImpl extends SQLQuestStatement implements SIQues
      * In an ABox store (classic) this methods triggers the generation of the
      * schema and the insertion of the metadata.
      *
-     * @throws SQLException
      */
     public void createDB() throws OBDAException {
         try {
@@ -105,8 +94,7 @@ public class SISQLQuestStatementImpl extends SQLQuestStatement implements SIQues
      *            inserting the tuples and recreated afterwards. Note, if no
      *            index existed before the insert no drop will be done and no
      *            new index will be created.
-
-     * @throws SQLException
+     *
      */
     public int insertData(Iterator<Assertion> data, boolean useFile, int commit, int batch) throws OBDAException {
         int result = -1;
@@ -143,5 +131,12 @@ public class SISQLQuestStatementImpl extends SQLQuestStatement implements SIQues
         }
 
         return result;
+    }
+
+    /***
+     * As before, but using recreateIndexes = false.
+     */
+    public int insertData(Iterator<Assertion> data, int commit, int batch) throws OBDAException {
+        return insertData(data, false, commit, batch);
     }
 }

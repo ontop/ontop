@@ -5,7 +5,7 @@ import org.semanticweb.ontop.model.OBDAException;
 import java.sql.SQLException;
 
 /**
- * TODO: describe
+ * Special QuestDBStatement for a Semantic Index repository.
  */
 public interface SIQuestDBStatement extends IQuestDBStatement {
 

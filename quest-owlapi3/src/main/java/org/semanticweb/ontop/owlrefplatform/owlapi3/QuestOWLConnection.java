@@ -29,7 +29,7 @@ import org.semanticweb.owlapi.model.OWLException;
  * Handler for a connection. Note that as with JDBC, executing queries in
  * parallels over a single connection is inefficient, since JDBC drivers will
  * serialize each query execution and you get a bottle neck (even if using
- * multiple {@link QuestOWLStatment}) . Having explicit QuestOWLConnections
+ * multiple {@link QuestOWLStatement}) . Having explicit QuestOWLConnections
  * allows to initialize a single QuestOWLReasoner and make multiple queries in
  * parallel with good performance (as with JDBC).
  * 
@@ -71,6 +71,9 @@ public class QuestOWLConnection {
 
 	}
 
+	/**
+	 * For the virtual and classic mode.
+	 */
 	public QuestOWLStatement createStatement() throws OWLException {
 		try {
 			return new QuestOWLStatement(conn.createStatement(), this);
@@ -80,6 +83,9 @@ public class QuestOWLConnection {
 		}
 	}
 
+	/**
+	 * For the classic mode only (manages a Semantic Index repository).
+	 */
 	public SIQuestOWLStatement createSIStatement() throws OWLException {
 		try {
 			return new SIQuestOWLStatementImpl(conn.createSIStatement(), this);

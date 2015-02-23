@@ -24,7 +24,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.Reader;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -50,8 +49,6 @@ import org.semanticweb.ontop.owlapi3.OWLAPI3IndividualTranslator;
 import org.semanticweb.ontop.owlapi3.OntopOWLException;
 import org.semanticweb.ontop.owlrefplatform.core.IQuest;
 import org.semanticweb.ontop.owlrefplatform.core.IQuestStatement;
-import org.semanticweb.ontop.owlrefplatform.core.QuestStatement;
-import org.semanticweb.ontop.owlrefplatform.core.execution.SIQuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.ontop.sesame.SesameRDFIterator;
@@ -74,6 +71,8 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * allow to implement transactions in the same way as JDBC Statements).
  * 
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
+ *
+ * Used by the OWLAPI.
  *
  * TODO: rename it (not now) QuestOWLStatementImpl.
  * 

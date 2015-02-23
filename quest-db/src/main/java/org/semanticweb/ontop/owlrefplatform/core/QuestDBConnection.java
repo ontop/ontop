@@ -24,6 +24,9 @@ import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;
 import org.semanticweb.ontop.model.OBDAConnection;
 import org.semanticweb.ontop.model.OBDAException;
 
+/**
+ * High-level OBDAConnection used by Sesame.
+ */
 public class QuestDBConnection implements OBDAConnection {
 
 	private final IQuestConnection conn;
@@ -38,14 +41,19 @@ public class QuestDBConnection implements OBDAConnection {
 	@Override
 	public void close() throws OBDAException {
 		conn.close();
-
 	}
 
+	/**
+	 * For the virtual and classic mode.
+	 */
 	@Override
 	public QuestDBStatement createStatement() throws OBDAException {
 		return new QuestDBStatement(conn.createStatement(), nativeQLFactory);
 	}
 
+	/**
+	 * For the classic mode only (usage of a Semantic Index repository).
+	 */
 	public SIQuestDBStatement createSIStatement() throws OBDAException {
 		return new SIQuestDBStatementImpl(conn.createSIStatement(), nativeQLFactory);
 	}
@@ -53,13 +61,11 @@ public class QuestDBConnection implements OBDAConnection {
 	@Override
 	public void commit() throws OBDAException {
 		conn.commit();
-
 	}
 
 	@Override
 	public void setAutoCommit(boolean autocommit) throws OBDAException {
 		conn.setAutoCommit(autocommit);
-
 	}
 
 	@Override

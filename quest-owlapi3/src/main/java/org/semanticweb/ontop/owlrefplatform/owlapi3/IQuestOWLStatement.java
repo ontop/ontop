@@ -19,6 +19,8 @@ import java.util.List;
  *
  * Initial @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
  *
+ * Used by the OWLAPI.
+ *
  * TODO: rename it (not now) QuestOWLStatement
  *
  */
