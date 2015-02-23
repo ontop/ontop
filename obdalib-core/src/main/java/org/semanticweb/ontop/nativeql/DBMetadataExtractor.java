@@ -6,7 +6,6 @@ import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 import javax.annotation.Nullable;
-import java.sql.Connection;
 
 /**
  * Extracts the metadata of the database by:
@@ -16,10 +15,9 @@ import java.sql.Connection;
  *
  * This interface aims at being generic regarding the native query language.
  *
- * TODO: See if having SQL connection is not a problem.
  */
 public interface DBMetadataExtractor {
 
-    DBMetadata extract(OBDADataSource dataSource, Connection dbConnection, OBDAModel model,
+    DBMetadata extract(OBDADataSource dataSource, OBDAModel model, @Nullable DBConnectionWrapper dbConnection,
                        @Nullable ImplicitDBConstraints userConstraints) throws DBMetadataException;
 }

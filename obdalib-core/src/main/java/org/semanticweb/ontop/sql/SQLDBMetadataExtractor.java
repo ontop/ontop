@@ -7,6 +7,7 @@ import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.mapping.sql.SQLTableNameExtractor;
 import org.semanticweb.ontop.model.OBDADataSource;
 import org.semanticweb.ontop.model.OBDAModel;
+import org.semanticweb.ontop.nativeql.DBConnectionWrapper;
 import org.semanticweb.ontop.nativeql.DBMetadataException;
 import org.semanticweb.ontop.nativeql.DBMetadataExtractor;
 import org.semanticweb.ontop.sql.api.RelationJSQL;
@@ -28,21 +29,35 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
         this.obtainFullMetadata = preferences.getBoolean(OBDAProperties.OBTAIN_FULL_METADATA);
     }
 
+    /**
+     * Expects the DBConnection to be a JDBCConnection
+     */
     @Override
-    public DBMetadata extract(OBDADataSource dataSource, Connection dbConnection, OBDAModel obdaModel,
+    public DBMetadata extract(OBDADataSource dataSource, OBDAModel obdaModel, DBConnectionWrapper dbConnection,
                               @Nullable ImplicitDBConstraints userConstraints) throws DBMetadataException {
         boolean applyUserConstraints = (userConstraints != null);
+
+        if (dbConnection == null) {
+            throw new IllegalArgumentException("dbConnection is required by " + getClass().getCanonicalName());
+        }
+
+        Object abstractConnection = dbConnection.getConnection();
+
+        if (!(abstractConnection instanceof Connection)) {
+            throw new IllegalArgumentException("The connection must correspond to a java.sql.connection (" + getClass().getCanonicalName() + ")");
+        }
+        Connection connection = (Connection) abstractConnection;
 
         try {
             DBMetadata metadata;
             if (obtainFullMetadata) {
-                 metadata = JDBCConnectionManager.getMetaData(dbConnection);
+                 metadata = JDBCConnectionManager.getMetaData(connection);
             } else {
                 // This is the NEW way of obtaining part of the metadata
                 // (the schema.table names) by parsing the mappings
 
                 // Parse mappings. Just to get the table names in use
-                SQLTableNameExtractor mParser = new SQLTableNameExtractor(dbConnection, obdaModel.getMappings(dataSource.getSourceID()));
+                SQLTableNameExtractor mParser = new SQLTableNameExtractor(connection, obdaModel.getMappings(dataSource.getSourceID()));
 
                 List<RelationJSQL> realTables = mParser.getRealTables();
 
@@ -51,7 +66,7 @@ public class SQLDBMetadataExtractor implements DBMetadataExtractor {
                     userConstraints.addReferredTables(realTables);
                 }
 
-                metadata = JDBCConnectionManager.getMetaData(dbConnection, realTables);
+                metadata = JDBCConnectionManager.getMetaData(connection, realTables);
             }
 
             //Adds keys from the text file

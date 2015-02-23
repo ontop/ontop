@@ -11,6 +11,7 @@ import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.nativeql.DBMetadataException;
 import org.semanticweb.ontop.nativeql.DBMetadataExtractor;
+import org.semanticweb.ontop.nativeql.JDBCConnectionWrapper;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLAdapterFactory;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SQLServerSQLDialectAdapter;
@@ -137,7 +138,7 @@ public class JDBCConnector implements DBConnector {
     @Override
     public DBMetadata extractDBMetadata(OBDAModel obdaModel, @Nullable ImplicitDBConstraints userConstraints) throws DBMetadataException {
         DBMetadataExtractor dbMetadataExtractor = nativeQLFactory.create();
-        return dbMetadataExtractor.extract(obdaSource, localConnection, obdaModel, userConstraints);
+        return dbMetadataExtractor.extract(obdaSource, obdaModel, new JDBCConnectionWrapper(localConnection), userConstraints);
     }
 
     @Override
