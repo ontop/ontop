@@ -4,6 +4,7 @@ import org.semanticweb.ontop.model.OBDAConnection;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.ResultSet;
 import org.semanticweb.ontop.model.TupleResultSet;
+import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlrefplatform.core.execution.TargetQueryExecutionException;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.EmptyQueryResultSet;
@@ -12,6 +13,7 @@ import org.semanticweb.ontop.owlrefplatform.core.resultset.QuestResultset;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Iterator;
 
 /**
  * SQL-specific implementation of OBDAStatement.
@@ -107,19 +109,25 @@ public class SQLQuestStatement extends QuestStatement {
      * Returns the number of tuples returned by the query
      */
     @Override
-    public int getTupleCount(String query) throws Exception {
+    public int getTupleCount(String query) throws OBDAException {
 
         String unf = unfoldAndGenerateTargetQuery(query).getNativeQueryString();
         String newsql = "SELECT count(*) FROM (" + unf + ") t1";
         if (!isCanceled()) {
-            java.sql.ResultSet set = sqlStatement.executeQuery(newsql);
-            if (set.next()) {
-                return set.getInt(1);
-            } else {
-                throw new Exception("Tuple count faild due to empty result set.");
+            try {
+
+                java.sql.ResultSet set = sqlStatement.executeQuery(newsql);
+                if (set.next()) {
+                    return set.getInt(1);
+                } else {
+                    throw new OBDAException("Tuple count failed due to empty result set.");
+                }
+            } catch (SQLException e) {
+                throw new OBDAException(e.getMessage());
             }
-        } else {
-            throw new Exception("Action canceled.");
+        }
+        else {
+            throw new OBDAException("Action canceled.");
         }
     }
 
@@ -157,7 +165,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected ResultSet executeSelectQuery(TargetQuery targetQuery) throws TargetQueryExecutionException, OBDAException {
+    protected ResultSet executeSelectQuery(TargetQuery targetQuery) throws OBDAException {
         String sqlQuery = targetQuery.getNativeQueryString();
         if (sqlQuery.equals("") ) {
             return new EmptyQueryResultSet(targetQuery.getSignature(), this);
@@ -171,7 +179,7 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     @Override
-    protected ResultSet executeGraphQuery(TargetQuery targetQuery, boolean collectResults) throws TargetQueryExecutionException, OBDAException {
+    protected ResultSet executeGraphQuery(TargetQuery targetQuery, boolean collectResults) throws  OBDAException {
         String sqlQuery = targetQuery.getNativeQueryString();
         if (sqlQuery.equals("") ) {
             return new EmptyQueryResultSet(targetQuery.getSignature(), this);
@@ -187,5 +195,21 @@ public class SQLQuestStatement extends QuestStatement {
 
     protected Statement getSQLStatement() {
         return sqlStatement;
+    }
+
+    /**
+     * Not implemented by default (in the virtual mode)
+     */
+    @Override
+    public int insertData(Iterator<Assertion> data, int commit, int batch) throws OBDAException {
+        throw new OBDAException("Data insertion not supported by default.");
+    }
+
+    /**
+     * Not implemented by default (in the virtual mode)
+     */
+    @Override
+    public int insertData(Iterator<Assertion> data, boolean useFile, int commit, int batch) throws OBDAException {
+        throw new OBDAException("Data insertion not supported by default.");
     }
 }

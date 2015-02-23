@@ -21,14 +21,9 @@ package org.semanticweb.ontop.protege4.views;
  */
 
 import org.semanticweb.ontop.io.PrefixManager;
-import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.owlapi3.OWLResultSetWriter;
-import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.core.OBDAModelManagerListener;
 import org.semanticweb.ontop.protege4.gui.OWLResultSetTableModel;
@@ -52,7 +47,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
@@ -65,7 +59,6 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

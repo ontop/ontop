@@ -34,22 +34,26 @@ import org.semanticweb.ontop.owlrefplatform.core.execution.SISQLQuestStatementIm
  * (in most cases directly).
  *
  * SQL-specific implementation!
+ *
+ * TODO: rename it SQLQuestConnection
  * 
  * @author mariano
  * 
  */
 public class QuestConnection implements IQuestConnection {
 
+	private final QuestPreferences questPreferences;
 	private Connection conn;
 
 	private IQuest questinstance;
 	
 	private boolean isClosed;
 
-	public QuestConnection(IQuest questInstance, Connection connection) {
+	public QuestConnection(IQuest questInstance, Connection connection, QuestPreferences questPreferences) {
 		this.questinstance = questInstance;
 		this.conn = connection;
-		isClosed = false;
+		this.isClosed = false;
+		this.questPreferences = questPreferences;
 	}
 
 	public Connection getSQLConnection() {
@@ -67,10 +71,22 @@ public class QuestConnection implements IQuestConnection {
 	}
 
 	/**
-	 * ONLY for the virtual mode!
+	 * For both the virtual and classic modes.
 	 */
 	@Override
 	public IQuestStatement createStatement() throws OBDAException {
+		/**
+		 * If in the classic mode, creates a SIQuestStatement.
+		 * Why? Because the insertData method is not implemented by SQLQuestStatement while
+		 * it is by SISQLQuestStatementImpl.
+		 */
+		if (questPreferences.getProperty(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC)) {
+			return createSIStatement();
+		}
+
+		/**
+		 * Virtual mode.
+		 */
 		try {
 			if (conn.isClosed()) {
 				// Sometimes it gets dropped, reconnect

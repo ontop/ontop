@@ -20,13 +20,11 @@ package org.semanticweb.ontop.sesame;
  * #L%
  */
 
-import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.questdb.QuestDBVirtualStore;
-import org.semanticweb.ontop.r2rml.R2RMLMappingParser;
 import org.semanticweb.ontop.sql.DBMetadata;
 import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 

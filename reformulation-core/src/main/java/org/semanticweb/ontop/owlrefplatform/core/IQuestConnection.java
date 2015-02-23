@@ -8,11 +8,13 @@ import java.sql.Connection;
 
 /**
  * Creates IQuestStatement (mandatory) and SIQuestStatement (optional).
+ *
+ * TODO: rename it (in the future) QuestConnection.
  */
 public interface IQuestConnection extends OBDAConnection {
 
 	/**
-	 * For the virtual mode.
+	 * For both modes.
 	 */
 	@Override
 	IQuestStatement createStatement() throws OBDAException;

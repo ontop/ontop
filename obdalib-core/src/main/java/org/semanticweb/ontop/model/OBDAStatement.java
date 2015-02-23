@@ -57,7 +57,7 @@ public interface OBDAStatement {
 	 *            the new query timeout limit in seconds; zero means no limit.
 	 * @throws Exception
 	 */
-	public void setQueryTimeout(int seconds) throws Exception;
+	public void setQueryTimeout(int seconds) throws OBDAException;
 	
 	/**
 	 * Produces an expanded SPARQL string given the initial <code>query</code> input.
@@ -70,5 +70,5 @@ public interface OBDAStatement {
 	 */
 	public String getSPARQLRewriting(String query) throws OBDAException;
 
-	public int getTupleCount(String query) throws Exception;
+	public int getTupleCount(String query) throws OBDAException;
 }

@@ -22,11 +22,7 @@ package org.semanticweb.ontop.reformulation.tests;
 
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
 
 import java.io.BufferedReader;
 import java.io.File;

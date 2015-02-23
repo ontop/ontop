@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.TupleResultSet;
+import org.semanticweb.ontop.owlrefplatform.core.IQuestDBStatement;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
 import org.semanticweb.ontop.owlrefplatform.questdb.QuestDB.StoreStatus;
 import org.slf4j.Logger;

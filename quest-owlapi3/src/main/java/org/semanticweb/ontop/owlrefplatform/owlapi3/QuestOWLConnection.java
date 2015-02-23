@@ -73,7 +73,16 @@ public class QuestOWLConnection {
 
 	public QuestOWLStatement createStatement() throws OWLException {
 		try {
-			return new QuestOWLStatement(conn.createSIStatement(), this);
+			return new QuestOWLStatement(conn.createStatement(), this);
+		} catch (OBDAException e) {
+			throw new OWLException(e) {
+			};
+		}
+	}
+
+	public SIQuestOWLStatement createSIStatement() throws OWLException {
+		try {
+			return new SIQuestOWLStatementImpl(conn.createSIStatement(), this);
 		} catch (OBDAException e) {
 			throw new OWLException(e) {
 			};

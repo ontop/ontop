@@ -99,7 +99,7 @@ public class QuestOWLExample_NoReplace {
 			/*
 			 * Print the query summary
 			 */
-			QuestOWLStatement qst = (QuestOWLStatement) st;
+			QuestOWLStatement qst = st;
 			String sqlQuery = qst.getUnfolding(sparqlQuery);
 
 			System.out.println();

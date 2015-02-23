@@ -30,10 +30,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
-import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -199,7 +196,7 @@ public class QuestDB {
 		// QuestDBAbstractStore dbstore = stores.get(storename);
 		try {
 			QuestDBConnection conn = connections.get(storename);
-			QuestDBStatement st = conn.createStatement();
+			SIQuestDBStatement st = conn.createSIStatement();
 			st.dropRepository();
 			st.close();
 			conn.commit();
@@ -228,7 +225,7 @@ public class QuestDB {
 			boolean classic = dbstore.getPreferences().get(QuestPreferences.ABOX_MODE).equals(QuestConstants.CLASSIC);
 			boolean inmemory = dbstore.getPreferences().get(QuestPreferences.STORAGE_LOCATION).equals(QuestConstants.INMEMORY);
 			if (classic && inmemory) {
-				QuestDBStatement st = conn.createStatement();
+				SIQuestDBStatement st = conn.createSIStatement();
 				st.createDB();
 				st.close();
 				conn.commit();
@@ -323,7 +320,7 @@ public class QuestDB {
 			throw new Exception("Unsupported request");
 		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
 		QuestDBConnection conn = connections.get(storename);
-		QuestDBStatement st = conn.createStatement();
+		SIQuestDBStatement st = conn.createSIStatement();
 		st.createIndexes();
 		st.close();
 	}
@@ -336,7 +333,7 @@ public class QuestDB {
 			throw new Exception("Unsupported request");
 		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
 		QuestDBConnection conn = connections.get(storename);
-		QuestDBStatement st = conn.createStatement();
+		SIQuestDBStatement st = conn.createSIStatement();
 		st.analyze();
 		st.close();
 
@@ -350,7 +347,7 @@ public class QuestDB {
 			throw new Exception("Unsupported request");
 		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
 		QuestDBConnection conn = connections.get(storename);
-		QuestDBStatement st = conn.createStatement();
+		SIQuestDBStatement st = conn.createSIStatement();
 		st.dropIndexes();
 		st.close();
 	}
@@ -363,7 +360,7 @@ public class QuestDB {
 			throw new Exception("Unsupported request");
 		QuestDBClassicStore cstore = (QuestDBClassicStore) dbstore;
 		QuestDBConnection conn = connections.get(storename);
-		QuestDBStatement st = conn.createStatement();
+		SIQuestDBStatement st = conn.createSIStatement();
 		boolean response = st.isIndexed();
 		st.close();
 		return response;
@@ -376,7 +373,7 @@ public class QuestDB {
 		if (!(dbstore instanceof QuestDBClassicStore))
 			throw new Exception("Unsupported request");
 		QuestDBConnection conn = connections.get(storename);
-		QuestDBStatement st = conn.createStatement();
+		SIQuestDBStatement st = conn.createSIStatement();
 		int result = st.addFromOBDA(obdamodelURI);
 		st.close();
 		return result;
@@ -389,7 +386,7 @@ public class QuestDB {
 		if (!(dbstore instanceof QuestDBClassicStore))
 			throw new Exception("Unsupported request");
 		QuestDBConnection conn = connections.get(storename);
-		QuestDBStatement st = conn.createStatement();
+		SIQuestDBStatement st = conn.createSIStatement();
 		if (useFile) {
 			int result = st.addWithTempFile(dataURI);
 			st.close();
@@ -411,9 +408,9 @@ public class QuestDB {
 		return stores.containsKey(storename);
 	}
 
-	public QuestDBStatement getStatement(String storename) throws Exception {
+	public QuestDBStatement getStatement(String storename) throws OBDAException {
 		if (!stores.containsKey(storename))
-			throw new Exception(String.format("The store \"%s\" does not exists.", storename));
+			throw new OBDAException(String.format("The store \"%s\" does not exists.", storename));
 		QuestDBAbstractStore dbstore = stores.get(storename);
 		QuestDBConnection conn = connections.get(storename);
 		return conn.createStatement();

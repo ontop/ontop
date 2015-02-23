@@ -256,7 +256,7 @@ public class JDBCConnector implements DBConnector {
     @Override
     public IQuestConnection getNonPoolConnection() throws OBDAException {
 
-        return new QuestConnection(questInstance, getSQLConnection());
+        return new QuestConnection(questInstance, getSQLConnection(), questPreferences);
     }
 
     /***
@@ -278,7 +278,7 @@ public class JDBCConnector implements DBConnector {
     @Override
     public IQuestConnection getConnection() throws OBDAException {
 
-        return new QuestConnection(questInstance, getSQLPoolConnection());
+        return new QuestConnection(questInstance, getSQLPoolConnection(), questPreferences);
     }
 
     /***

@@ -74,18 +74,21 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * allow to implement transactions in the same way as JDBC Statements).
  * 
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
+ *
+ * TODO: rename it (not now) QuestOWLStatementImpl.
  * 
  */
+// DISABLED TEMPORARILY FOR MERGING PURPOSES (NOT BREAKING CLIENTS WITH this ugly name IQquestOWLStatement)
+//public class QuestOWLStatement implements IQuestOWLStatement {
 public class QuestOWLStatement {
-
-	private SIQuestStatement st;
+	private IQuestStatement st;
 	private QuestOWLConnection conn;
-	
-	public QuestOWLStatement(SIQuestStatement st, QuestOWLConnection conn) {
+
+	public QuestOWLStatement(IQuestStatement st, QuestOWLConnection conn) {
 		this.conn = conn;
 		this.st = st;
 	}
-	
+
 	public void cancel() throws OWLException {
 		try {
 			st.cancel();
@@ -115,15 +118,6 @@ public class QuestOWLStatement {
 		}} else {
 			throw new RuntimeException("Query is not tuple query (SELECT / ASK).");
 		}
-	}
-
-	public void createIndexes() throws Exception {
-		st.createIndexes();
-	}
-
-	public void dropIndexes() throws Exception {
-		st.dropIndexes();
-
 	}
 
 	public List<OWLAxiom> executeGraph(String query) throws OWLException {
@@ -262,13 +256,13 @@ public class QuestOWLStatement {
 
 	private class Process implements Runnable {
 		private SesameRDFIterator iterator;
-		private SIQuestStatement questStmt;
+		private IQuestStatement questStmt;
 
 		int insertCount = -1;
 		private int commitsize;
 		private int batchsize;
 
-		public Process(SesameRDFIterator iterator, SIQuestStatement qstm, int commitsize, int batchsize) throws OBDAException {
+		public Process(SesameRDFIterator iterator, IQuestStatement qstm, int commitsize, int batchsize) throws OBDAException {
 			this.iterator = iterator;
 			this.questStmt = qstm;
 			this.commitsize = commitsize;
@@ -279,7 +273,7 @@ public class QuestOWLStatement {
 		public void run() {
 			try {
 				insertCount = questStmt.insertData(iterator, commitsize, batchsize);
-			} catch (SQLException e) {
+			} catch (OBDAException e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -421,12 +415,6 @@ public class QuestOWLStatement {
 		}
 		return axiomList;
 	}
-
-
-	public void analyze() throws Exception {
-		st.analyze();
-
-	}
 	
 	// Davide> Benchmarking
 	public long getUnfoldingTime(){
@@ -436,11 +424,11 @@ public class QuestOWLStatement {
 	public long getRewritingTime(){
 		return st.getRewritingTime();
 	}
-	
+
 	public int getUCQSizeAfterUnfolding(){
 		return st.getUCQSizeAfterUnfolding();
 	}
-	
+
 	public int getUCQSizeAfterRewriting(){
 		return st.getUCQSizeAfterRewriting();
 	}

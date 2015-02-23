@@ -43,7 +43,11 @@ public class QuestDBConnection implements OBDAConnection {
 
 	@Override
 	public QuestDBStatement createStatement() throws OBDAException {
-		return new QuestDBStatement(conn.createSIStatement(), nativeQLFactory);
+		return new QuestDBStatement(conn.createStatement(), nativeQLFactory);
+	}
+
+	public SIQuestDBStatement createSIStatement() throws OBDAException {
+		return new SIQuestDBStatementImpl(conn.createSIStatement(), nativeQLFactory);
 	}
 
 	@Override

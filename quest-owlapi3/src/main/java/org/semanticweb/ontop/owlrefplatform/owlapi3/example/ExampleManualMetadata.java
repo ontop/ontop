@@ -1,12 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.owlapi3.example;
 
 
-
-
-
-
-
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.semanticweb.ontop.injection.NativeQueryLanguageComponentFactory;

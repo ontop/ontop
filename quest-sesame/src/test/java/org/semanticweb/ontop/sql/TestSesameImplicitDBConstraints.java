@@ -14,10 +14,7 @@ import static org.junit.Assert.*;
 
 import org.semanticweb.ontop.injection.OBDAProperties;
 import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
-import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
-import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
-import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
-import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
+import org.semanticweb.ontop.owlrefplatform.core.*;
 import org.semanticweb.ontop.owlrefplatform.questdb.R2RMLQuestPreferences;
 import org.semanticweb.ontop.r2rml.R2RMLManager;
 import org.semanticweb.ontop.sesame.SesameVirtualRepo;

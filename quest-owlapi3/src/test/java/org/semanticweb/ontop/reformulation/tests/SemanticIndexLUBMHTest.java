@@ -30,11 +30,7 @@ import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
 import org.semanticweb.ontop.querymanager.QueryController;
 import org.semanticweb.ontop.querymanager.QueryControllerEntity;
 import org.semanticweb.ontop.querymanager.QueryControllerQuery;
@@ -75,7 +71,7 @@ public class SemanticIndexLUBMHTest extends TestCase {
 		QuestOWL quest = fac.createReasoner(ontology);
 		QuestOWLConnection qconn = quest.getConnection();
 
-		QuestOWLStatement st = qconn.createStatement();
+		SIQuestOWLStatement st = qconn.createSIStatement();
 		long end = System.nanoTime();
 		double init_time = (end - start) / 1000000;
 		start = System.nanoTime();

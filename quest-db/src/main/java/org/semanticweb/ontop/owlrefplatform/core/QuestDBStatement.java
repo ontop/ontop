@@ -22,12 +22,12 @@ package org.semanticweb.ontop.owlrefplatform.core;
 
 import java.io.File;
 import java.net.URI;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
+import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.QueryParser;
@@ -40,7 +40,6 @@ import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.NTripleAssertionIterator;
 import org.semanticweb.ontop.owlrefplatform.core.abox.QuestMaterializer;
-import org.semanticweb.ontop.owlrefplatform.core.execution.SIQuestStatement;
 import org.semanticweb.ontop.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -49,31 +48,38 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * TODO: motivate this class.
+ *
+ * TODO: rename it QuestDBStatementImpl.
+ */
+// DISABLED TEMPORARILY FOR MERGING PURPOSES (NOT BREAKING CLIENTS WITH this ugly name IQquestOWLStatement)
+//public class QuestDBStatement implements IQuestDBStatement {
 public class QuestDBStatement implements OBDAStatement {
 
-	private final SIQuestStatement st;
+	private final IQuestStatement st;
     private final NativeQueryLanguageComponentFactory nativeQLFactory;
     private Logger log = LoggerFactory.getLogger(QuestDBStatement.class);
 
 	protected transient OWLOntologyManager man = OWLManager.createOWLOntologyManager();
 
-	public QuestDBStatement(SIQuestStatement st, NativeQueryLanguageComponentFactory nativeQLFactory) {
+	public QuestDBStatement(IQuestStatement st, NativeQueryLanguageComponentFactory nativeQLFactory) {
         this.nativeQLFactory = nativeQLFactory;
 		this.st = st;
 	}
 
-	public int add(Assertion data) throws SQLException {
+	public int add(Assertion data) throws OBDAException {
 		return st.insertData(Collections.singleton(data).iterator(), false, -1, -1);
 	}
 
-	public int add(Iterator<Assertion> data) throws SQLException {
+	public int add(Iterator<Assertion> data) throws OBDAException {
 		return st.insertData(data, false, -1, -1);
 	}
 
 	/***
 	 * As before, but using recreateIndexes = false.
 	 */
-	public int add(Iterator<Assertion> data, int commit, int batch) throws SQLException {
+	public int add(Iterator<Assertion> data, int commit, int batch) throws OBDAException {
 		return st.insertData(data, false, commit, batch);
 	}
 
@@ -114,18 +120,18 @@ public class QuestDBStatement implements OBDAStatement {
 			if (ext.toLowerCase().equals(".owl")) {
 				OWLOntology owlontology = man.loadOntologyFromOntologyDocument(IRI.create(rdffile));
 				Set<OWLOntology> ontos = man.getImportsClosure(owlontology);
-				
-				EquivalentTriplePredicateIterator aBoxNormalIter = 
-						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos), 
+
+				EquivalentTriplePredicateIterator aBoxNormalIter =
+						new EquivalentTriplePredicateIterator(new OWLAPI3ABoxIterator(ontos),
 								questInstance.getReasoner());
-				
+
 				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
-			} 
-			else if (ext.toLowerCase().equals(".nt")) {				
+			}
+			else if (ext.toLowerCase().equals(".nt")) {
 				NTripleAssertionIterator it = new NTripleAssertionIterator(rdffile);
-				EquivalentTriplePredicateIterator aBoxNormalIter = 
+				EquivalentTriplePredicateIterator aBoxNormalIter =
 						new EquivalentTriplePredicateIterator(it, questInstance.getReasoner());
-				
+
 				result = st.insertData(aBoxNormalIter, useFile, commit, batch);
 			}
 			return result;
@@ -230,44 +236,23 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	@Override
-	public void setQueryTimeout(int seconds) throws Exception {
+	public void setQueryTimeout(int seconds) throws OBDAException {
 		st.setQueryTimeout(seconds);
 	}
 
-	/*
-	 * QuestSpecific
+
+	/**
+	 * Ontop is not SQL-specific anymore.
+	 *
+	 * Use getTargetQuery instead.
 	 */
-
-	public void createIndexes() throws Exception {
-		st.createIndexes();
-	}
-
-	public void dropIndexes() throws Exception {
-		st.dropIndexes();
-	}
-
-	public boolean isIndexed() {
-		return st.isIndexed();
-	}
-
-	public void dropRepository() throws SQLException {
-		st.dropRepository();
-	}
-
-	/***
-	 * In an ABox store (classic) this methods triggers the generation of the
-	 * schema and the insertion of the metadata.
-	 */
-	public void createDB() throws SQLException {
-		st.createDB();
-	}
-
-	public void analyze() throws Exception {
-		st.analyze();
-	}
-
-	public String getSQL(String query) throws Exception {
+	@Deprecated
+	public String getSQL(String query) throws OBDAException {
 		return st.unfoldAndGenerateTargetQuery(query).getNativeQueryString();
+	}
+
+	public TargetQuery getTargetQuery(String query) throws OBDAException {
+		return st.unfoldAndGenerateTargetQuery(query);
 	}
 
 	@Override
@@ -276,15 +261,20 @@ public class QuestDBStatement implements OBDAStatement {
 	}
 
 	@Override
-	public int getTupleCount(String query) throws Exception {
+	public int getTupleCount(String query) throws OBDAException {
 		return st.getTupleCount(query);
 	}
 
-	public String getRewriting(String query) throws Exception {
+	public String getRewriting(String query) throws OBDAException {
 		
 		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
-		ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
-		
+		ParsedQuery pq = null; // base URI is null
+		try {
+			pq = qp.parseQuery(query, null);
+		} catch (MalformedQueryException e) {
+			throw new OBDAException(e);
+		}
+
 		SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.getQuestInstance().getUriTemplateMatcher());
 		
 		ImmutableList<String> signatureContainer = tr.getSignature(pq);

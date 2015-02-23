@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.owlrefplatform.core.execution;
 
+import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlrefplatform.core.IQuest;
 import org.semanticweb.ontop.owlrefplatform.core.IQuestConnection;
@@ -40,24 +41,36 @@ public class SISQLQuestStatementImpl extends SQLQuestStatement implements SIQues
      * @param data
      * @throws java.sql.SQLException
      */
-    public int insertData(Iterator<Assertion> data, int commit, int batch) throws SQLException {
+    public int insertData(Iterator<Assertion> data, int commit, int batch) throws OBDAException {
         return insertData(data, false, commit, batch);
     }
 
-    public void createIndexes() throws Exception {
-        siRepository.createIndexes(sqlConnection);
+    public void createIndexes() throws OBDAException {
+        try {
+            siRepository.createIndexes(sqlConnection);
+        } catch (SQLException e) {
+            throw new OBDAException(e);
+        }
     }
 
-    public void dropIndexes() throws Exception {
-        siRepository.dropIndexes(sqlConnection);
+    public void dropIndexes() throws OBDAException {
+        try {
+            siRepository.dropIndexes(sqlConnection);
+        } catch (SQLException e) {
+            throw new OBDAException(e);
+        }
     }
 
     public boolean isIndexed() {
         return siRepository.isIndexed(sqlConnection);
     }
 
-    public void dropRepository() throws SQLException {
-        siRepository.dropDBSchema(sqlConnection);
+    public void dropRepository() throws OBDAException {
+        try {
+            siRepository.dropDBSchema(sqlConnection);
+        } catch (SQLException e) {
+            throw new OBDAException(e);
+        }
     }
 
     /***
@@ -66,13 +79,21 @@ public class SISQLQuestStatementImpl extends SQLQuestStatement implements SIQues
      *
      * @throws SQLException
      */
-    public void createDB() throws SQLException {
-        siRepository.createDBSchema(sqlConnection, false);
-        siRepository.insertMetadata(sqlConnection);
+    public void createDB() throws OBDAException {
+        try {
+            siRepository.createDBSchema(sqlConnection, false);
+            siRepository.insertMetadata(sqlConnection);
+        } catch (SQLException e) {
+            throw new OBDAException(e);
+        }
     }
 
-    public void analyze() throws Exception {
-        siRepository.collectStatistics(sqlConnection);
+    public void analyze() throws OBDAException {
+        try {
+            siRepository.collectStatistics(sqlConnection);
+        } catch (SQLException e) {
+            throw new OBDAException(e);
+        }
     }
 
     /***
@@ -87,14 +108,18 @@ public class SISQLQuestStatementImpl extends SQLQuestStatement implements SIQues
 
      * @throws SQLException
      */
-    public int insertData(Iterator<Assertion> data, boolean useFile, int commit, int batch) throws SQLException {
+    public int insertData(Iterator<Assertion> data, boolean useFile, int commit, int batch) throws OBDAException {
         int result = -1;
 
         EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(data, getQuestInstance().getReasoner());
 
         if (!useFile) {
 
-            result = siRepository.insertData(sqlConnection, newData, commit, batch);
+            try {
+                result = siRepository.insertData(sqlConnection, newData, commit, batch);
+            } catch (SQLException e) {
+                throw new OBDAException(e);
+            }
         } else {
             try {
                 // File temporalFile = new File("quest-copy.tmp");
@@ -104,6 +129,8 @@ public class SISQLQuestStatementImpl extends SQLQuestStatement implements SIQues
 
             } catch (IOException e) {
                 log.error(e.getMessage());
+            } catch (SQLException e) {
+                throw new OBDAException(e);
             }
         }
 

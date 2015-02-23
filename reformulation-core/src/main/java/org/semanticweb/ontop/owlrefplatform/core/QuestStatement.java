@@ -661,7 +661,7 @@ public abstract class QuestStatement implements IQuestStatement {
 	 * Returns the final rewriting of the given query
 	 */
 	@Override
-	public String getRewriting(ParsedQuery query, List<String> signature) throws Exception {
+	public String getRewriting(ParsedQuery query, List<String> signature) throws OBDAException {
 		// TODO FIX to limit to SPARQL input and output
 
 		DatalogProgram program = translateAndPreProcess(query, signature);
@@ -677,11 +677,11 @@ public abstract class QuestStatement implements IQuestStatement {
 	 *
 	 */
 	@Override
-	public TargetQuery unfoldAndGenerateTargetQuery(String sparqlQuery) throws Exception {
+	public TargetQuery unfoldAndGenerateTargetQuery(String sparqlQuery) throws OBDAException {
 		return unfoldAndGenerateTargetQuery(sparqlQuery, null);
 	}
 
-	protected TargetQuery unfoldAndGenerateTargetQuery(String sparqlQuery, @Nullable SesameConstructTemplate constructTemplate) throws Exception {
+	protected TargetQuery unfoldAndGenerateTargetQuery(String sparqlQuery, @Nullable SesameConstructTemplate constructTemplate) throws OBDAException {
 
 		/**
 		 * Looks for the target query in the cache.
@@ -699,7 +699,11 @@ public abstract class QuestStatement implements IQuestStatement {
 
 		if (!queryIsParsed){
 			QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
-			sparqlTree = qp.parseQuery(sparqlQuery, null); // base URI is null
+			try {
+				sparqlTree = qp.parseQuery(sparqlQuery, null); // base URI is null
+			} catch (MalformedQueryException e) {
+				throw new OBDAException(e.getMessage());
+			}
 			//queryIsParsed = true;
 		} else {
 			sparqlTree = parsedQ;

@@ -26,6 +26,8 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.questdb.QuestDBClassicStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class SesameClassicRepo extends SesameAbstractRepo {
 
