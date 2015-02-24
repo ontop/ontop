@@ -84,9 +84,6 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 		this(name, null, null, pref);
 	}
 
-	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config) throws Exception {
-		this(name, tboxFile, obdaUri, config, null);
-	}
 	/**
 	 * The method generates the OBDAModel according to the MappingParser
      * implementation deduced from the preferences.
@@ -112,11 +109,9 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 	 * @param tboxFile - the owl file URI
 	 * @param obdaUri - the obda or ttl file URI
 	 * @param config - QuestPreferences
-	 * @param userConstraints - User-supplied database constraints (or null)
 	 * @throws Exception
 	 */
-	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config,
-                               ImplicitDBConstraints userConstraints) throws Exception {
+	public QuestDBVirtualStore(String name, URI tboxFile, URI obdaUri, QuestPreferences config) throws Exception {
 
 		super(name, config);
 
@@ -147,7 +142,7 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			//get transformation from owlontology into ontology
 			 tbox = getOntologyFromOWLOntology(owlontology);
 
-		} else { 
+		} else {
 			// create empty ontology
 			//owlontology = man.createOntology();
 			tbox = OntologyFactoryImpl.getInstance().createOntology();
@@ -231,20 +226,6 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 
 		//start Quest with the given ontology and model and preferences
 		questInstance = factory.create(tbox, obdaModel, metadata, pref);
-	}
-	
-	/**
-	 * Sets the implicit db constraints, i.e. primary and foreign keys not in the database
-	 * Must be called before the call to initialize
-	 * 
-	 * @param userConstraints
-	 */
-	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
-		if(userConstraints == null)
-			throw new NullPointerException();
-		if(this.isinitalized)
-			throw new Error("Implicit DB Constraints must be given before the call to initialize to have effect. See https://github.com/ontop/ontop/wiki/Implicit-database-constraints and https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
-		questInstance.setImplicitDBConstraints(userConstraints);
 	}
 
 	/**

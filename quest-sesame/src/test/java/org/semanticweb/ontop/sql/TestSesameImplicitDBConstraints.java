@@ -102,25 +102,20 @@ public class TestSesameImplicitDBConstraints {
 		p.setProperty(OBDAProperties.DB_PASSWORD, "");
 		p.setProperty(OBDAProperties.JDBC_DRIVER, "org.h2.Driver");
 
+		if(applyUserConstraints){
+			// Parsing user constraints
+			ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
+			p.put(QuestPreferences.DB_CONSTRAINTS, userConstraints);
+		}
+
 		QuestPreferences preferences = new R2RMLQuestPreferences(p);
 
 		dbMetadata = getMeta();
 		SesameVirtualRepo qest1;
 		if(provideMetadata){
 			qest1 = new SesameVirtualRepo("", ontology, model, dbMetadata, preferences);
-			if(applyUserConstraints){
-				// Parsing user constraints
-				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
-				qest1.setImplicitDBConstraints(userConstraints);
-			}
 		} else {
 			qest1 = new SesameVirtualRepo("", ontology, model, preferences);
-			if(applyUserConstraints){
-				// Parsing user constraints
-				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
-
-				qest1.setImplicitDBConstraints(userConstraints);
-			}
 		}
 		qest1.initialize();
 		/*

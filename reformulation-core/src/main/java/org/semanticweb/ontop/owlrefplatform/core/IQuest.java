@@ -25,7 +25,6 @@ import java.util.Properties;
  * TODO: clean it.
  */
 public interface IQuest extends RepositoryChangedListener {
-    void setImplicitDBConstraints(ImplicitDBConstraints userConstraints);
 
     VocabularyValidator getVocabularyValidator();
 

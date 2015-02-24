@@ -14,8 +14,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 import java.io.File;
-
-
+import java.util.Properties;
 
 
 public class QuestOWLExample_ReasoningDisabled {
@@ -59,8 +58,13 @@ public class QuestOWLExample_ReasoningDisabled {
 		/*
 		 * Prepare the configuration for the Quest instance. The example below shows the setup for
 		 * "Virtual ABox" mode
+		 *
 		 */
-        QuestPreferences preference = new QuestPreferences();
+        Properties p = new Properties();
+        ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
+        p.put(QuestPreferences.DB_CONSTRAINTS, constr);
+
+        QuestPreferences preference = new QuestPreferences(p);
 //		TEST preference.setCurrentValueOf(QuestPreferences.T_MAPPINGS, QuestConstants.FALSE); // Disable T_Mappings
 
 		/*
@@ -68,19 +72,13 @@ public class QuestOWLExample_ReasoningDisabled {
 		 */
         QuestOWLFactory factory = new QuestOWLFactory(new File(obdafile), preference);
 
-		/*
-		 * USR CONSTRAINTS !!!!
-		 */
-        ImplicitDBConstraints constr = new ImplicitDBConstraints(usrConstrinFile);
-        factory.setImplicitDBConstraints(constr);
-
 //		/*
 //		 * T-Mappings Handling!!
 //		 */
 //        TMappingsConfParser tMapParser = new TMappingsConfParser(tMappingsConfFile);
 //        factory.setExcludeFromTMappingsPredicates(tMapParser.parsePredicates());
 
-        QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+        QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		/*
 		 * Prepare the data connection for querying.

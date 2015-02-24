@@ -20,15 +20,12 @@ package org.semanticweb.ontop.sesame;
  * #L%
  */
 
-import org.semanticweb.ontop.mapping.MappingParser;
 import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.questdb.QuestDBVirtualStore;
-import org.semanticweb.ontop.r2rml.R2RMLMappingParser;
 import org.semanticweb.ontop.sql.DBMetadata;
-import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 
 import java.io.File;
@@ -58,12 +55,12 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, boolean existential, String rewriting)
 			throws Exception {
 		super();
-		createRepo(name, tboxFile, obdaFile, getPreferencesFromSettings(existential, rewriting), null);
+		createRepo(name, tboxFile, obdaFile, getPreferencesFromSettings(existential, rewriting));
 	}	
 	
 	public SesameVirtualRepo(String name, String tboxFile, String obdaFile, String configFileName) throws Exception {
 		super();
-		createRepo(name, tboxFile, obdaFile, getPreferencesFromFile(configFileName), null);
+		createRepo(name, tboxFile, obdaFile, getPreferencesFromFile(configFileName));
 	}
 	
 	public SesameVirtualRepo(String name, OWLOntology tbox, Model mappings, String configFileName) throws Exception {
@@ -123,20 +120,6 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 	{
 		this.virtualStore = new QuestDBVirtualStore(name, tbox, mappings, metadata, pref);
 	}
-	
-	/**
-	 * Sets the implicit db constraints, i.e. primary and foreign keys not in the database
-	 * Must be called before the call to initialize
-	 * 
-	 * @param userConstraints
-	 */
-	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints){
-		if(userConstraints == null)
-			throw new NullPointerException();
-		if(this.isinitialized)
-			throw new Error("Implicit DB Constraints must be given before the call to initialize to have effect. See https://github.com/ontop/ontop/wiki/Implicit-database-constraints and https://github.com/ontop/ontop/wiki/API-change-in-SesameVirtualRepo-and-QuestDBVirtualStore");
-		this.virtualStore.setImplicitDBConstraints(userConstraints);
-	}
 
 	/**
 	 * This method leads to the reasoner being initalized, which includes the call to {@link Quest.setupRepository}: connecting to the database, 
@@ -155,7 +138,7 @@ public class SesameVirtualRepo extends SesameAbstractRepo {
 		}
 	}
 	
-	private void createRepo(String name, String tboxFile, String mappingFile, QuestPreferences pref, ImplicitDBConstraints userConstraints) throws Exception
+	private void createRepo(String name, String tboxFile, String mappingFile, QuestPreferences pref) throws Exception
 	{
 		if (mappingFile == null) {
 			//if we have no mappings 

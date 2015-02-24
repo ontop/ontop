@@ -33,7 +33,6 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentFactory;
 import org.semanticweb.ontop.owlrefplatform.injection.QuestComponentModule;
-import org.semanticweb.ontop.sql.ImplicitDBConstraints;
 
 
 import java.io.File;
@@ -69,13 +68,6 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	private QuestPreferences preferences;
     private QuestComponentFactory componentFactory;
     private File mappingFile;
-
-    /**
-	 * The user can supply information about keys that are not in the
-	 * database metadata. 
-	 */
-	private ImplicitDBConstraints userConstraints = null;
-	private boolean applyUserConstraints = false;
 	
 	private String name = "Quest";
 
@@ -176,19 +168,6 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 //		this.mappingManager = apic;
 //	}
 
-	/***
-	 * Sets the user-suppplied database constraints, i.e.
-	 * Foreign and primary keys that are not in the databse
-	 * 
-	 * @param userConstraints
-	 */
-	public void setImplicitDBConstraints(ImplicitDBConstraints userConstraints) {
-		if(userConstraints == null)
-			throw new NullPointerException();
-		this.userConstraints = userConstraints;
-		this.applyUserConstraints = true;
-	}
-
 //    @Deprecated
 //	public void setPreferenceHolder(Properties preference) {
 //		this.preferences = preference;
@@ -229,11 +208,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	public QuestOWL createNonBufferingReasoner(OWLOntology ontology) {
         checkAboxMode();
         try {
-            if (this.applyUserConstraints)
-                return new QuestOWL(ontology, obdaModel, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, userConstraints,
-                        componentFactory);
-            else
-                return new QuestOWL(ontology, obdaModel, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences,
+            return new QuestOWL(ontology, obdaModel, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences,
                         componentFactory);
         } catch (Exception e) {
             /**
@@ -267,11 +242,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 			throws IllegalConfigurationException {
         checkAboxMode();
         try {
-            if (this.applyUserConstraints)
-                return new QuestOWL(ontology, obdaModel, config, BufferingMode.NON_BUFFERING, preferences, userConstraints,
-                        componentFactory);
-            else
-                return new QuestOWL(ontology, obdaModel, config, BufferingMode.NON_BUFFERING, preferences, componentFactory);
+            return new QuestOWL(ontology, obdaModel, config, BufferingMode.NON_BUFFERING, preferences, componentFactory);
         } catch (Exception e) {
             /**
              * Unfortunately this OWLAPI interface does not allow exception declaration.
@@ -283,21 +254,14 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	@Override
 	public QuestOWL createReasoner(OWLOntology ontology) {
         checkAboxMode();
-		if(this.applyUserConstraints)
-			return new QuestOWL(ontology, obdaModel, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences, userConstraints,
-                    componentFactory);
-		else
-			return new QuestOWL(ontology, obdaModel, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences,
+		return new QuestOWL(ontology, obdaModel, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences,
                     componentFactory);
 	}
 
 	@Override
 	public QuestOWL createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
 		checkAboxMode();
-		if(this.applyUserConstraints)
-			return new QuestOWL(ontology, obdaModel, config, BufferingMode.BUFFERING, preferences, userConstraints, componentFactory);
-		else
-			return new QuestOWL(ontology, obdaModel, config, BufferingMode.BUFFERING, preferences, componentFactory);
+		return new QuestOWL(ontology, obdaModel, config, BufferingMode.BUFFERING, preferences, componentFactory);
 	}
 
 }
