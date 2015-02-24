@@ -99,9 +99,6 @@ public class OBDAModelManager implements Disposable {
 
 	private static final OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
-
-	private boolean applyUserConstraints = false;
-	private ImplicitDBConstraints userConstraints;
 	
 	private static final Logger log = LoggerFactory.getLogger(OBDAModelManager.class);
 
@@ -577,12 +574,18 @@ public class OBDAModelManager implements Disposable {
                     queryController.reset();
                     throw new Exception("Exception occurred while loading Query document: " + queryFile + "\n\n" + ex.getMessage());
                 }
-                applyUserConstraints = false;
                 if (dbprefsFile.exists()){
                     try {
                         // Load user-supplied constraints
-                        userConstraints = new ImplicitDBConstraints(dbprefsFile);
-                        applyUserConstraints = true;
+						ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(dbprefsFile);
+
+						// Stores these constraints into the Quest preferences
+						String preferencesKey = QuestPreferences.class.getName();
+						ProtegeReformulationPlatformPreferences preferences = (ProtegeReformulationPlatformPreferences) owlEditorKit.get(preferencesKey);
+						preferences = preferences.newProperties(QuestPreferences.DB_CONSTRAINTS, userConstraints);
+						// Makes these QuestPreferences global.
+						owlEditorKit.put(preferencesKey, preferences);
+
                     } catch (Exception ex) {
                         throw new Exception("Exception occurred while loading database preference file : " + dbprefsFile + "\n\n" + ex.getMessage());
                     }
@@ -617,8 +620,6 @@ public class OBDAModelManager implements Disposable {
 
             OBDAModel currentOBDAModel = getActiveOBDAModelWrapper().getCurrentImmutableOBDAModel();
             questFactory.load(currentOBDAModel, reasonerPreference);
-            if(applyUserConstraints)
-                questFactory.setImplicitDBConstraints(userConstraints);
         }
     }
 
