@@ -82,7 +82,7 @@ public class TestQuestImplicitDBConstraints {
 			p.setProperty(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 			if (dbContraintsFile != null) {
 				// Parsing user constraints
-				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(uc_keyfile);
+				ImplicitDBConstraints userConstraints = new ImplicitDBConstraints(dbContraintsFile);
 				p.put(QuestPreferences.DB_CONSTRAINTS, userConstraints);
 			}
 			
