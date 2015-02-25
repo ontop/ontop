@@ -31,15 +31,14 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	public String strconcat(String[] strings) {
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
-
 		if (strings.length == 1)
 			return strings[0];
 
 		StringBuilder sql = new StringBuilder();
 
-		sql.append(String.format("(%s", strings[0]));
+		sql.append(String.format("CONCAT(%s", strings[0]));
 		for (int i = 1; i < strings.length; i++) {
-			sql.append(String.format(" || %s", strings[i]));
+			sql.append(String.format(", %s", strings[i]));
 		}
 		sql.append(")");
 		return sql.toString();
@@ -264,5 +263,14 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		return bf.toString();
 	}
 
-	
+	@Override
+	public String sqlNull() {
+		return "NULL";
+	}
+
+	@Override
+	public String sqlTypeCode(int code) {
+		return String.format("%d", code);
+	}
+
 }

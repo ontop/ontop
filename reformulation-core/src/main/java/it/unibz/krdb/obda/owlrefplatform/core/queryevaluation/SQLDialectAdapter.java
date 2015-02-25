@@ -75,6 +75,9 @@ public interface SQLDialectAdapter {
 	public String getSQLLexicalFormDatetime(String value);
 
 	public String getSQLLexicalFormDatetimeStamp(String v);
-	
-	
+
+
+	public String sqlNull();
+
+	public String sqlTypeCode(int code);
 }

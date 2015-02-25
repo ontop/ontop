@@ -847,7 +847,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				int last = ov.getTerms().size()-1;
 				Term langTerm = ov.getTerms().get(last);
 				if (langTerm == OBDAVocabulary.NULL) {
-					lang = "NULL";
+					lang = sqladapter.sqlNull();
 				} else if (langTerm instanceof ValueConstant) {
 					lang = getSQLLexicalForm((ValueConstant) langTerm);
 				} else {
@@ -856,7 +856,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				return (String.format(langStrForSELECT, lang, signature.get(hpos)));
 			}
 		}
-		return (String.format(langStrForSELECT, "NULL", signature.get(hpos)));
+		return (String.format(langStrForSELECT, sqladapter.sqlNull(), signature.get(hpos)));
 
 	}
 
@@ -899,7 +899,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
 		
 		int code = type.getQuestCode();
-		return String.format(typeStrForSELECT, code, signature.get(hpos));
+		return String.format(typeStrForSELECT, sqladapter.sqlTypeCode(code), signature.get(hpos));
 	}
 
 	public String getSQLStringForTemplateFunction(Function ov, QueryAliasIndex index) {
