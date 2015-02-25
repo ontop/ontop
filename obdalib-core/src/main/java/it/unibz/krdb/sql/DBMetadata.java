@@ -296,7 +296,6 @@ public class DBMetadata implements Serializable {
 	}
 
 	public void setDriverVersion(String driverVersion) {
-
 		this.driverVersion = driverVersion;
 	}
 
@@ -381,7 +380,6 @@ public class DBMetadata implements Serializable {
 	 * info in the metadata.
 	 * 
 	 * @param metadata
-	 * @param pkeys
 	 * @param program
 	 */
 	public static Map<Predicate, List<Integer>> extractPKs(DBMetadata metadata,
