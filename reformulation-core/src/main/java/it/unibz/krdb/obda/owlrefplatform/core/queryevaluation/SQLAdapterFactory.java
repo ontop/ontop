@@ -50,6 +50,9 @@ public class SQLAdapterFactory {
 				return new SQLServerSQLDialectAdapter();
 			case "madgik.adp.federatedjdbc.AdpDriver":
 				return new AdpSQLDialectAdapter();
+			//TODO: find a better way to discriminate 4D from ODBC
+			case "sun.jdbc.odbc.JdbcOdbcDriver":
+				return new FourDSQLDialectAdapter();
 			default:
 				log.warn("WARNING: the specified driver doesn't correspond to any of the drivers officially supported by Ontop.");
 				log.warn("WARNING: Contact the authors for further support.");
