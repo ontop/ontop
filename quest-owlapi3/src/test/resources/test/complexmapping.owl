@@ -69,7 +69,9 @@
 
     <!-- http://it.unibz.krdb/obda/test/simple#U5 -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U5" />
+    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U5" >
+         <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
 
      <!-- http://it.unibz.krdb/obda/test/simple#U6 -->
 
@@ -77,11 +79,21 @@
 
     <!-- http://it.unibz.krdb/obda/test/simple#U7 -->
 
-    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U7" />
-
+    <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U7" >
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
      <!-- http://it.unibz.krdb/obda/test/simple#U8 -->
 
      <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U8" />
+
+     <!-- http://it.unibz.krdb/obda/test/simple#U9 -->
+
+     <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U9" />
+
+
+     <!-- http://it.unibz.krdb/obda/test/simple#U10 -->
+
+     <owl:DatatypeProperty rdf:about="http://it.unibz.krdb/obda/test/simple#U10" />
 
 
     <!-- 

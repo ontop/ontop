@@ -182,11 +182,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			Extension extend = (Extension) te;
 			translate(vars, extend, pr, i, varcount);
 
-        } else if (te instanceof FunctionCall) {
-            FunctionCall function = (FunctionCall) te;
-            translate(vars, function, pr, i, varcount);
-
-        } else {
+       } else {
 
 			try {
 				throw new QueryEvaluationException("Operation not supported: "
@@ -295,12 +291,6 @@ public class SparqlAlgebraToDatalogTranslator {
 //		      translate(vars1, subop, pr, 2 * i, varcount);
 //		    }
 
-    private void translate(List<Variable> vars, FunctionCall function,
-                           DatalogProgram pr, long i, int[] varcount) {
-        List<ValueExpr> subte = function.getArgs();
-
-
-    }
 	private void translate(List<Variable> vars, Union union,
 			DatalogProgram pr, long i, int[] varcount) {
 		TupleExpr left = union.getLeftArg();
@@ -678,19 +668,21 @@ public class SparqlAlgebraToDatalogTranslator {
 	 */
 	private void translate(List<Variable> vars, StatementPattern triple,
 			DatalogProgram pr, long i, int[] varcount) {
-		
-		Var pred = triple.getPredicateVar();		
-		Value p = pred.getValue();
+
+        Var obj = triple.getObjectVar();
+		Var pred = triple.getPredicateVar();
+        Var subj = triple.getSubjectVar();
+
+        Value o = obj.getValue();
+        Value p = pred.getValue();
+        Value s = subj.getValue();
 		
 		if (!(p instanceof URIImpl || (p == null))) {
 			// if predicate is a variable or literal
 			throw new RuntimeException("Unsupported query syntax");
 		}
 
-		Var subj = triple.getSubjectVar();
-		Value s = subj.getValue();
-		Var obj = triple.getObjectVar();
-		Value o = obj.getValue();
+
 		
 		// / Instantiate the atom components: predicate and terms.
 		Function atom = null;
@@ -1026,85 +1018,94 @@ public class SparqlAlgebraToDatalogTranslator {
             return ofac.getFunctionIsNotNull(getVariableTerm(((Bound) expr).getArg()));
         } else if (expr instanceof FunctionCall){
 
-            switch(((FunctionCall) expr).getURI()){
-                case "http://www.w3.org/2005/xpath-functions#concat":
-
-                    List<ValueExpr> values = ((FunctionCall) expr).getArgs();
-
-                    Function topConcat = null;
-                    for (int i= 0; i<values.size(); i+=2) {
-
-                        Term first_string, second_string;
-
-                        if(topConcat == null){
-
-                            ValueExpr first = values.get(i);
-                            first_string = getBooleanTerm(first);
-
-                            ValueExpr second = values.get(i+1);
-                            second_string = getBooleanTerm(second);
-
-                            topConcat = ofac.getFunctionConcat(first_string , second_string);
-                        }
-                        else{
-
-                            ValueExpr second = values.get(i);
-                            second_string = getBooleanTerm(second);
-
-                            topConcat = ofac.getFunctionConcat( topConcat, second_string );
-                        }
-
-                    }
-                    return topConcat;
-
-
-
-                case "http://www.w3.org/2005/xpath-functions#replace":
-                    List<ValueExpr> expressions = ((FunctionCall) expr).getArgs();
-                    if (expressions.size() == 2 || expressions.size() == 3) {
-
-                        Term t1; // first parameter is a function expression
-                        ValueExpr first = expressions.get(0);
-                        t1 = getBooleanTerm(first);
-
-
-                        // second parameter is a string
-                        Term out_string;
-                        ValueExpr second = expressions.get(1);
-                        out_string = getBooleanTerm(second);
-
-
-                    /*
-                     * Term t3 is optional: no string means delete occurrences of second param
-			         */
-                        Term in_string;
-                        if (expressions.size() == 3) {
-                            ValueExpr third = expressions.get(2);
-                            in_string = getBooleanTerm(third);
-                        } else {
-                            in_string = ofac.getConstantLiteral("");
-                        }
-
-                        return ofac.getFunctionReplace(t1, out_string, in_string);
-                    } else
-
-                        throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");
-
-
-
-                default:
-                    throw new RuntimeException("The builtin function "
-                            + ((FunctionCall) expr).getURI().toString() + " is not supported yet!");
-                    }
-
+            return getFunctionCallTerm(expr);
 
 		} else {
 			throw new RuntimeException("The builtin function "
 					+ expr.toString() + " is not supported yet!");
 		}
 	}
-	
-	private Term getVariableTerm(Var expr) {
+
+    /** Return the Functions supported at the moment only
+     * concat and replace
+     * @param expr
+     * @return
+     */
+    private Term getFunctionCallTerm(ValueExpr expr) {
+
+        switch(((FunctionCall) expr).getURI()){
+            case "http://www.w3.org/2005/xpath-functions#concat":
+
+                List<ValueExpr> values = ((FunctionCall) expr).getArgs();
+
+                Function topConcat = null;
+                for (int i= 0; i<values.size(); i+=2) {
+
+                    Term first_string, second_string;
+
+                    if(topConcat == null){
+
+                        ValueExpr first = values.get(i);
+                        first_string = getBooleanTerm(first);
+
+                        ValueExpr second = values.get(i+1);
+                        second_string = getBooleanTerm(second);
+
+                        topConcat = ofac.getFunctionSPARQLConcat(first_string, second_string);
+                    }
+                    else{
+
+                        ValueExpr second = values.get(i);
+                        second_string = getBooleanTerm(second);
+
+                        topConcat = ofac.getFunctionSPARQLConcat(topConcat, second_string);
+                    }
+
+                }
+                return topConcat;
+
+
+
+            case "http://www.w3.org/2005/xpath-functions#replace":
+                List<ValueExpr> expressions = ((FunctionCall) expr).getArgs();
+                if (expressions.size() == 2 || expressions.size() == 3) {
+
+                    Term t1; // first parameter is a function expression
+                    ValueExpr first = expressions.get(0);
+                    t1 = getBooleanTerm(first);
+
+
+                    // second parameter is a string
+                    Term out_string;
+                    ValueExpr second = expressions.get(1);
+                    out_string = getBooleanTerm(second);
+
+
+                    /*
+                     * Term t3 is optional: no string means delete occurrences of second param
+			         */
+                    Term in_string;
+                    if (expressions.size() == 3) {
+                        ValueExpr third = expressions.get(2);
+                        in_string = getBooleanTerm(third);
+                    } else {
+                        in_string = ofac.getConstantLiteral("");
+                    }
+
+                    return ofac.getFunctionReplace(t1, out_string, in_string);
+                } else
+
+                    throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");
+
+
+
+            default:
+                throw new RuntimeException("The builtin function "
+                        + ((FunctionCall) expr).getURI().toString() + " is not supported yet!");
+        }
+    }
+
+    private Term getVariableTerm(Var expr) {
 		return getOntopTerm(expr, expr.getValue());
 		
 	}

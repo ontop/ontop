@@ -67,8 +67,8 @@ public class OBDAVocabulary {
 	public static final StringOperationPredicate REPLACE = new StringOperationPredicateImpl(
             "REPLACE", 3, new COL_TYPE[]{COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL});
 	
-	public static final StringOperationPredicate CONCAT = new StringOperationPredicateImpl(
-            "CONCAT", 2, new COL_TYPE[]{COL_TYPE.LITERAL, COL_TYPE.LITERAL});
+	public static final StringOperationPredicate QUEST_CONCAT = new StringOperationPredicateImpl(
+            "Q_CONCAT", 2, new COL_TYPE[]{COL_TYPE.LITERAL, COL_TYPE.LITERAL});
 	
 	
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
@@ -124,4 +124,6 @@ public class OBDAVocabulary {
 	public static final BooleanOperationPredicate SPARQL_LANGMATCHES = new BooleanOperationPredicateImpl("LangMatches", 2);
 	public static final BooleanOperationPredicate SPARQL_REGEX = new BooleanOperationPredicateImpl("regex", 3);
 	public static final BooleanOperationPredicate SPARQL_LIKE = new BooleanOperationPredicateImpl("like", 2);
+
+    public static final StringOperationPredicate  SPARQL_CONCAT = new StringOperationPredicateImpl("S_CONCAT", 2, new COL_TYPE[]{COL_TYPE.LITERAL, COL_TYPE.LITERAL});
 }

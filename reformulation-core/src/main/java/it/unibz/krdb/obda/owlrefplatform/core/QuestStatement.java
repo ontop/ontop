@@ -20,17 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.BuiltinPredicate;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.GraphResultSet;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAStatement;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.TupleResultSet;
-import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
@@ -46,17 +36,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogT
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.renderer.DatalogProgramRenderer;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
@@ -64,6 +43,15 @@ import org.openrdf.query.parser.QueryParser;
 import org.openrdf.query.parser.QueryParserUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 
 /**
@@ -204,7 +192,12 @@ public class QuestStatement implements OBDAStatement {
 				} 
 				else {
 					try {
-
+                        // FOR debugging H2 in-memory database
+//                        try {
+//                            org.h2.tools.Server.startWebServer(conn.getConnection());
+//                        } catch (SQLException e) {
+//                            e.printStackTrace();
+//                        }
 						// Execute the SQL query string
 						executingSQL = true;
 						ResultSet set = null;
@@ -260,7 +253,9 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	@Override
 	public it.unibz.krdb.obda.model.ResultSet execute(String strquery) throws OBDAException {
-		if (strquery.isEmpty()) {
+
+
+        if (strquery.isEmpty()) {
 			throw new OBDAException("Cannot execute an empty query");
 		}
 		ParsedQuery pq = null;

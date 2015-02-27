@@ -266,5 +266,17 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 
         runTests(p);
     }
+
+    public void testConcatAndReplaceUri() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+
+        this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U9 ?z. }";
+
+        runTests(p);
+    }
+
+
 	
 }

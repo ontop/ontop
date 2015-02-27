@@ -332,5 +332,30 @@ public class BindTest {
 
     }
 
+    @Test
+    public void testBindWithConcat() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?price WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount\n"
+                + "   BIND (CONCAT(xsd:string(?p*(1-?discount)), xsd:string(?p)) AS ?price)\n"
+                + "   FILTER(?price < 20)\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+        OWLObject price = runTests(p, queryBind);
+
+        assertEquals("\"17.25\"", price.toString());
+
+
+    }
+
 
 }

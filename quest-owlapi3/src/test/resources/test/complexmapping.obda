@@ -27,7 +27,7 @@ target	:{uri} :U4 {r1} .
 source	SELECT uri, REPLACE(val,'v','u') as r1 FROM TABLE1
 
 mappingId	mapping5
-target	:{uri} :U5 {valcat} .
+target	:{uri} :U5 {valcat}^^xsd:string .
 source	SELECT uri, CONCAT(val,'test') as valcat FROM TABLE1
 
 mappingId	mapping6
@@ -41,6 +41,12 @@ source	SELECT uri, val || 'to' || uri as valcat FROM TABLE1
 mappingId	mapping8
 target	:{uri} :U8 {valcat} .
 source	SELECT uri, CONCAT(CONCAT(val,'te'), 'st') as valcat FROM TABLE1
+
+mappingId	mapping9
+target	:{u} :U9 {val} .
+source	SELECT REPLACE(CONCAT(uri,'se'), 'se', '') as u,  val FROM TABLE1
+
+
 
 
 

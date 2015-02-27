@@ -158,40 +158,18 @@ public class MappingDataTypeRepair {
 					continue;
 				}
 
-				//TODO: This is a crude hack, just because I did not understand what to do with the sql concatenation here. Dag
+
+                /** If it is a concat or replace function, can have a datatype assigned to its alias (function with datatype predicate)
+                 *  or if no information about the datatype is assigned we will assign the value from the ontology
+                 if present or the information from the database will be used.
+                 */
+
 				if (functionSymbol.isStringPredicate()){
 
-                    //check in the ontology if we have already information about the datatype
 
-                    Function normal = qvv.getNormal(atom);
-                    //Check if a datatype was already assigned in the ontology
-                    Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
+                    insertDataTypingStringPredicate(atom, function, termOccurenceIndex, qvv, dataTypesMap);
 
-                    if (dataType != null) {
-                        //check that no datatype mismatch is present
-                        //if it is a stringPredicate the result has to be a literal
-                        Predicate typePredicateLiteral = fac.getDatatypeFactory().getTypePredicate(Predicate.COL_TYPE.LITERAL);
-                        Predicate typePredicateString = fac.getDatatypeFactory().getTypePredicate(Predicate.COL_TYPE.LITERAL);
-                        if (!((typePredicateLiteral.equals(dataType.getPredicate())) || (typePredicateString.equals(dataType.getPredicate()) ))) {
 
-                            throw new OBDAException("Ontology datatype " + dataType + " for " + predicate + "\nhas to be a literal");
-
-                        }
-                    }
-
-                    for(int i=0; i < function.getArity(); i++){
-                        Term stringTerm =  function.getTerm(i);
-
-                        if (stringTerm instanceof Variable) {
-
-                            Variable variable = (Variable) stringTerm;
-
-                            Term newTerm = fac.getTypedTerm(variable, Predicate.COL_TYPE.LITERAL);
-
-                            function.setTerm(i, newTerm);
-                        }
-
-                    }
 
                 }
 
@@ -254,6 +232,28 @@ public class MappingDataTypeRepair {
 			}
 		}
 	}
+
+    private void insertDataTypingStringPredicate(Function atom, Function function, Map<String, List<Object[]>> termOccurenceIndex, VocabularyValidator qvv,  Map<Predicate, Datatype> dataTypesMap) throws OBDAException {
+
+        //check in the ontology if we have already information about the datatype
+
+        Function normal = qvv.getNormal(atom);
+        //Check if a datatype was already assigned in the ontology
+        Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
+
+        //assign the datatype of the ontology
+        if (dataType != null ) {
+            if (!isBooleanDB2(dataType.getPredicate())) {
+                Term newTerm;
+
+                Predicate replacement = dataType.getPredicate();
+                newTerm = fac.getFunction(replacement, function);
+
+                atom.setTerm(1, newTerm);
+            }
+        }
+
+    }
 
     /**
      * Private method, since DB2 does not support boolean value, we use the database metadata value

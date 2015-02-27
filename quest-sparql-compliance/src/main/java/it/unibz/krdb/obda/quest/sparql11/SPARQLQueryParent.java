@@ -397,6 +397,9 @@ public abstract class SPARQLQueryParent extends TestCase {
 				// Map bNodes in bs1 to bNodes in bs2
 				Map<BNode, BNode> newBNodeMapping = new HashMap<BNode, BNode>(bNodeMapping);
 
+                if(bs1.size() ==0){
+                    break;
+                }
 				for (Binding binding : bs1) {
 					if (binding.getValue() instanceof BNode) {
 						newBNodeMapping.put((BNode)binding.getValue(), (BNode)bs2.getValue(binding.getName()));
