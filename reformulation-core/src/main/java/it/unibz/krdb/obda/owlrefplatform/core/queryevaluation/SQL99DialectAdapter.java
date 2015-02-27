@@ -266,7 +266,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String nameTopVariable(String signatureVariableName, String proposedSuffix, Set<String> sqlVariableNames) {
-		return String.format("\"%s%s\"", signatureVariableName, proposedSuffix);
+		return sqlQuote(signatureVariableName + proposedSuffix);
 	}
 
 
