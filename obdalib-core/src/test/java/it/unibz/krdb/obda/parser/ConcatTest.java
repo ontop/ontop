@@ -19,8 +19,9 @@ public class ConcatTest {
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		OBDAModel obdaModel = fac.getOBDAModel();
 		ModelIOManager ioManager = new ModelIOManager(obdaModel);
-		ioManager
-				.load("src/test/resources/format/obda/mapping-northwind.obda");
+		//ioManager.load("src/test/resources/format/obda/mapping-northwind.obda");
+		ioManager.load("src/test/resources/format/obda/mapping-northwind-h2-db-1422884770059.obda");
+		//ioManager.save("src/test/resources/format/obda/mapping-northwind-h2-db-1422884770059.obda");
 	}
 
 }

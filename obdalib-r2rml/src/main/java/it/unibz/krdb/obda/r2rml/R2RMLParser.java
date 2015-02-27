@@ -248,13 +248,12 @@ public class R2RMLParser {
 		return getObjectAtom(pom, "");
 	}
 
-	public boolean isConcat(Template t) {
-		String st = t.toString();
+	public boolean isConcat(String st) {
 		int i, j;
 		if ((i = st.indexOf("{")) > -1) {
 			if ((j = st.lastIndexOf("{")) > i) {
 				return true;
-			} else if ((i > 0) || (j < (st.length() - 1))) {
+			} else if ((i > 0) || ((j > 0) & (j < (st.length() - 1)))) {
 				return true;
 			}
 		}
@@ -325,11 +324,13 @@ public class R2RMLParser {
 		// a blank node)
 		Template t = om.getTemplate();
 		if (t != null) {
-			boolean concat = isConcat(t);
-
-			if (concat) {
+			//we check if the template is a literal
+			//then we check if the template includes concat
+			Object typ = om.getTermType(Object.class); 
+			boolean concat = isConcat(t.toString());
+			if (typ.equals(R2RMLVocabulary.literal) && (concat)){
 				objectAtom = getTypedFunction(t.toString(), 4, joinCond);
-			} else {
+			}else {
 
 				// a template can be a rr:IRI, a
 				// rr:Literal or rr:BlankNode
@@ -345,7 +346,6 @@ public class R2RMLParser {
 					}
 					objectAtom = fac.getVariable(value);
 				} else {
-
 					Object type = om.getTermType(Object.class);
 
 					// we check if the template is a IRI a simple literal or a
@@ -443,7 +443,6 @@ public class R2RMLParser {
 			return getTypedFunction(string, 2, joinCond);
 
 		} else if (type.equals(R2RMLVocabulary.literal)) {
-
 			return getTypedFunction(trim(string), 3, joinCond);
 		}
 		return null;

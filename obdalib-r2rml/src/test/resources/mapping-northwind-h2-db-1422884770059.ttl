@@ -1378,7 +1378,7 @@ default:objectMap51779766667205980882582003866570 a rr:ObjectMap ;
 default:objectMap53831248725149476996334159182422 a rr:ObjectMap ;
 	rr:template "{ADDRESS}{CITY}{COUNTRY}" ;
 	rr:termType rr:Literal ;
-	rr:language "en-us".
+	rr:language "en-us" .
 
 default:objectMap75825489729302645160866791932206 a rr:ObjectMap ;
 	rr:column "UNITPRICE" ;
