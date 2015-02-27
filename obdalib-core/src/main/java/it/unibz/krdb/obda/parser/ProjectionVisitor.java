@@ -186,7 +186,13 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 			
 			else{
 			plainSelect.getSelectItems().clear();
-			plainSelect.getSelectItems().addAll(projection.getColumnList());
+				List<SelectExpressionItem> columnList = projection.getColumnList();
+				if (!columnList.isEmpty()) {
+					plainSelect.getSelectItems().addAll(columnList);
+				}
+				else{
+					plainSelect.getSelectItems().add(new AllColumns());
+				}
 			}
 			
 			}

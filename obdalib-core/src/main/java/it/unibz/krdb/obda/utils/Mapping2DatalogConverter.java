@@ -45,7 +45,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-
 public class Mapping2DatalogConverter {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
@@ -166,7 +165,6 @@ public class Mapping2DatalogConverter {
         }
     }
 
-    
     /**
      * For each function application in the select clause, create an atom and add it to the body
      * @param bodyAtoms
@@ -280,6 +278,7 @@ public class Mapping2DatalogConverter {
      * Creates a lookupTable:
      * (1) Collects all the possible column names from the tables mentioned in the query, and aliases.
      * (2) Assigns new variables to them
+     * in case of two table with the same column, the first table column processed will be assigned
       */
     private static LookupTable createLookupTable(ParsedSQLQuery queryParsed, DBMetadata dbMetadata) throws JSQLParserException {
 		LookupTable lookupTable = new LookupTable();
