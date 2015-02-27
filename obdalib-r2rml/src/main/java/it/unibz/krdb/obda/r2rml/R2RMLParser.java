@@ -323,11 +323,12 @@ public class R2RMLParser {
 		// we check if the object map is a template (can be a iri, a literal or
 		// a blank node)
 		Template t = om.getTemplate();
+		boolean concat = false;
 		if (t != null) {
 			//we check if the template is a literal
 			//then we check if the template includes concat
 			Object typ = om.getTermType(Object.class); 
-			boolean concat = isConcat(t.toString());
+			concat = isConcat(t.toString());
 			if (typ.equals(R2RMLVocabulary.literal) && (concat)){
 				objectAtom = getTypedFunction(t.toString(), 4, joinCond);
 			}else {
@@ -361,6 +362,8 @@ public class R2RMLParser {
 		if (lan != null) {
 			Term langAtom = fac.getTypedTerm(objectAtom, lan);
 			objectAtom = langAtom;
+		}else if (concat){
+			objectAtom = fac.getTypedTerm(objectAtom, COL_TYPE.LITERAL);
 		}
 
 		// we check if it is a typed literal
@@ -559,8 +562,7 @@ public class R2RMLParser {
 			// the URI template is always on the first position in the term list
 			// terms.add(0, uriTemplate);
 			return fac.getTypedTerm(uriTemplate, COL_TYPE.LITERAL);
-		//concat
-		case 4:
+		case 4://concat
 			Function f = fac.getFunctionConcat(terms.get(0),terms.get(1));
             for(int j=2;j<terms.size();j++){
                 f = fac.getFunctionConcat(f,terms.get(j));

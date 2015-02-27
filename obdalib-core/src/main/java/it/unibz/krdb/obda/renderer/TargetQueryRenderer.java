@@ -145,9 +145,9 @@ public class TargetQueryRenderer {
 			 if (term2 instanceof Function){
 				 Function f = (Function) term2;
 				 getNestedConcats(stb, f.getTerms().get(0), f.getTerms().get(1));
-				 }else{
-					 stb.append(appendTerms(term2));
-					 }
+			 }else{
+				 stb.append(appendTerms(term2));
+			 }
     }
 
 	/**
@@ -221,7 +221,7 @@ public class TargetQueryRenderer {
 				sb.append("\"");
 				getNestedConcats(sb, terms.get(0),terms.get(1));
 				sb.append("\"");
-				sb.append("^^rdfs:Literal");
+				//sb.append("^^rdfs:Literal");
 			} else { // for any ordinary function symbol
 				sb.append(fname);
 				sb.append("(");
