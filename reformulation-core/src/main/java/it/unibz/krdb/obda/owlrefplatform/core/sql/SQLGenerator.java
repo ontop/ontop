@@ -811,7 +811,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			} 
 
             else if (function.isArithmeticPredicate()){
-                // For numerical operators, e.g., MUTIPLY, SUBTRACT, ADDITION
+                // For numerical operators, e.g., MULTIPLY, SUBTRACT, ADDITION
                 String expressionFormat = getNumericalOperatorString(function);
                 Term left = ov.getTerm(0);
                 Term right = ov.getTerm(1);
@@ -850,41 +850,64 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 
 		if (ht instanceof Function) {
-			Function ov = (Function) ht;
-			Predicate function = ov.getFunctionSymbol();
+            Function ov = (Function) ht;
+            Predicate function = ov.getFunctionSymbol();
 
-			if (dtfac.isLiteral(function)) {
-                if (ov.getTerms().size() > 1) {
-				/*
-				 * Case for rdf:literal s with a language, we need to select 2
-				 * terms from ".., rdf:literal(?x,"en"),
-				 * 
-				 * and signature "name" * we will generate a select with the
-				 * projection of 2 columns
-				 * 
-				 * , 'en' as nameqlang, view.colforx as name,
-				 */
-                    String lang = null;
-                    int last = ov.getTerms().size() - 1;
-                    Term langTerm = ov.getTerms().get(last);
-                    if (langTerm == OBDAVocabulary.NULL) {
-                        lang = "NULL";
-                    } else if (langTerm instanceof ValueConstant) {
-                        lang = getSQLLexicalForm((ValueConstant) langTerm);
-                    } else {
-                        lang = getSQLString(langTerm, index, false);
-                    }
-                    return (String.format(langStrForSELECT, lang, signature.get(hpos)));
-                }
-            }
+            String lang = getLangType(ov, index);
 //
 
-		}
-		return (String.format(langStrForSELECT, "NULL", signature.get(hpos)));
+            return (String.format(langStrForSELECT, lang, signature.get(hpos)));
+        }
+
+        return  (String.format(langStrForSELECT, "NULL", signature.get(hpos)));
 
 	}
 
-	private static final String typeStrForSELECT = "%s AS \"%sQuestType\"";
+    private String getLangType(Function func1, QueryAliasIndex index) {
+
+        Predicate pred1 = func1.getFunctionSymbol();
+
+        if (dtfac.isLiteral(pred1) && isBinary(func1)) {
+
+
+            Term langTerm = func1.getTerm(1);
+            if (langTerm == OBDAVocabulary.NULL) {
+                return  "NULL";
+            } else if (langTerm instanceof ValueConstant) {
+                return getSQLLexicalForm((ValueConstant) langTerm);
+            } else {
+                return getSQLString(langTerm, index, false);
+            }
+
+        }
+        else if (pred1.isStringOperationPredicate()) {
+
+            if(pred1.equals(OBDAVocabulary.SPARQL_CONCAT)) {
+                Term concat1 = func1.getTerm(0);
+                Term concat2 = func1.getTerm(1);
+
+                if (concat1 instanceof Function && concat2 instanceof Function) {
+                    Function concatFunc1 = (Function) concat1;
+                    Function concatFunc2 = (Function) concat2;
+
+                    String lang1 = getLangType(concatFunc1, index);
+
+                    String lang2 = getLangType(concatFunc2, index);
+
+                    if (lang1.equals(lang2)) {
+
+                        return lang1;
+
+                    } else return "NULL";
+
+                }
+            }
+            return "NULL";
+        }
+        else return "NULL";
+    }
+
+    private static final String typeStrForSELECT = "%s AS \"%sQuestType\"";
 	
 
 	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
@@ -916,7 +939,7 @@ public class SQLGenerator implements SQLQueryGenerator {
             else if (function instanceof BNodePredicate) {
                 type = COL_TYPE.BNODE;
             }
-            else if (function.isStringPredicate()) {
+            else if (function.isStringOperationPredicate()) {
 
 
                 if (function.equals(OBDAVocabulary.SPARQL_CONCAT)) {

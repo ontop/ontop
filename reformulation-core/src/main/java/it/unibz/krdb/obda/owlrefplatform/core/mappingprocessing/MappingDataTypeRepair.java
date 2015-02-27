@@ -164,7 +164,7 @@ public class MappingDataTypeRepair {
                  if present or the information from the database will be used.
                  */
 
-				if (functionSymbol.isStringPredicate()){
+				if (functionSymbol.isStringOperationPredicate()){
 
 
                     insertDataTypingStringPredicate(atom, function, termOccurenceIndex, qvv, dataTypesMap);

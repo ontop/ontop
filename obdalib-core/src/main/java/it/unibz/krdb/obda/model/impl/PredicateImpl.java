@@ -132,7 +132,7 @@ public class PredicateImpl implements Predicate {
 	}
 
     @Override
-    public boolean isStringPredicate() {
+    public boolean isStringOperationPredicate() {
         return this instanceof StringOperationPredicate;
     }
 
