@@ -21,6 +21,7 @@ package org.semanticweb.ontop.owlrefplatform.core.sql;
  */
 
 
+import com.google.common.collect.*;
 import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
 import org.semanticweb.ontop.model.BNode;
 import org.semanticweb.ontop.model.BooleanOperationPredicate;
@@ -74,10 +75,6 @@ import org.semanticweb.ontop.utils.QueryUtils;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 
 /**
  * This class generates a SQL string from the datalog program coming from the
@@ -132,7 +129,11 @@ public class SQLGenerator implements SQLQueryGenerator {
     private final SQLDialectAdapter sqladapter;
     private final String QUEST_TYPE = "QuestType";
 
-    private static final String TYPE_STR = "%s AS \"%sQuestType\"" ;
+    private static final String TYPE_STR = "%s AS %s" ;
+    private static final String TYPE_SUFFIX = "QuestType";
+    private static final String LANG_STR = "%s AS %s";
+    private static final String LANG_SUFFIX = "Lang";
+    private static final String MAIN_COLUMN_SUFFIX = "";
 
     private static final int UNDEFINED_TYPE_CODE = -1;
 
@@ -363,6 +364,12 @@ public class SQLGenerator implements SQLQueryGenerator {
         int i = 0;
 
         /**
+         * Remembers view names so as to avoid conflicts due to the possible DB engine
+         * restrictions.
+         */
+        Set<String> viewNames = new HashSet<>();
+
+        /**
          * ANS i > 1
          */
 
@@ -376,7 +383,7 @@ public class SQLGenerator implements SQLQueryGenerator {
             } else {
                 boolean isAns1 = false;
                 createViewFrom(pred, metadata, ruleIndex,
-                        ruleIndexByBodyPredicate, query, signature, isAns1);
+                        ruleIndexByBodyPredicate, query, signature, isAns1, viewNames);
             }
             i++;
         }
@@ -734,7 +741,8 @@ public class SQLGenerator implements SQLQueryGenerator {
     private void createViewFrom(Predicate pred, DBMetadata metadata,
                                 Multimap<Predicate, CQIE> ruleIndex,
                                 Multimap<Predicate, CQIE> ruleIndexByBodyPredicate,
-                                DatalogProgram query, List<String> signature, boolean isAns1)
+                                DatalogProgram query, List<String> signature, boolean isAns1,
+                                Set<String> viewNames)
             throws OBDAException {
 
 		/* Creates BODY of the view query */
@@ -773,8 +781,10 @@ public class SQLGenerator implements SQLQueryGenerator {
             unionView = "(" + Joiner.on(")\n UNION \n (").join(sqls) + ")";
         }
 
-        String viewname = String.format(VIEW_ANS_NAME, pred);
+        //String viewname = String.format(VIEW_ANS_NAME, pred);
         // String viewname = "Q" + pred + "View";
+        String viewname = sqladapter.nameView(VIEW_PREFIX, pred.getName(), VIEW_SUFFIX, viewNames);
+        viewNames.add(viewname);
 		/* Creates the View itself */
 
         List<String> columns = Lists
@@ -1375,6 +1385,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 
         Iterator<Predicate> headDataTypeIter = headDataTypes.iterator();
 
+        /**
+         * Set that contains all the variable names created on the top query.
+         * It helps the dialect adapter to generate variable names according to its possible restrictions.
+         * Currently, this is needed for the Oracle adapter (max. length of 30 characters).
+         */
+         Set<String> sqlVariableNames = new HashSet<>();
+
         while (hit.hasNext()) {
             Term ht = hit.next();
 
@@ -1392,10 +1409,9 @@ public class SQLGenerator implements SQLQueryGenerator {
                 varName = "v" + hpos;
             }
 
-            String typeColumn = getTypeColumnForSELECT(ht, varName, index);
-
-            String mainColumn = getMainColumnForSELECT(ht, varName, index, headDataTtype);
-            String langColumn = getLangColumnForSELECT(ht, varName, index);
+            String typeColumn = getTypeColumnForSELECT(ht, varName, index, sqlVariableNames);
+            String mainColumn = getMainColumnForSELECT(ht, varName, index, headDataTtype, sqlVariableNames);
+            String langColumn = getLangColumnForSELECT(ht, varName, index, sqlVariableNames);
 
             sb.append("\n   ");
             sb.append(typeColumn);
@@ -1411,8 +1427,12 @@ public class SQLGenerator implements SQLQueryGenerator {
         return sb.toString();
     }
 
-    private String getMainColumnForSELECT(Term ht, String varName,
-                                          QueryAliasIndex index, Predicate typePredicate) {
+    private String getMainColumnForSELECT(Term ht, String signatureVarName,
+                                          QueryAliasIndex index, Predicate typePredicate,
+                                          Set<String> sqlVariableNames) {
+
+        final String varName = sqladapter.nameTopVariable(signatureVarName, MAIN_COLUMN_SUFFIX, sqlVariableNames);
+        sqlVariableNames.add(varName);
 
         String mainColumn = null;
 
@@ -1520,8 +1540,7 @@ public class SQLGenerator implements SQLQueryGenerator {
         }
 
 
-        String format = String.format(mainTemplate, mainColumn,
-                sqladapter.sqlQuote(varName));
+        String format = String.format(mainTemplate, mainColumn,varName);
 
         return format;
     }
@@ -1530,12 +1549,13 @@ public class SQLGenerator implements SQLQueryGenerator {
      * Adding the ColType column to the projection (used in the result
      * set to know the type of constant)
      */
-    private String getLangColumnForSELECT(Term ht, String varName,
-                                          QueryAliasIndex index) {
+    private String getLangColumnForSELECT(Term ht, String signatureVarName,
+                                          QueryAliasIndex index,
+                                          Set<String> sqlVariableNames) {
 
-        String langStr = "%s AS \"%sLang\"";
+        final String varName = sqladapter.nameTopVariable(signatureVarName, LANG_SUFFIX, sqlVariableNames);
+        sqlVariableNames.add(varName);
 
-        // String varName = signature.get(hpos);
         if (ht instanceof Function) {
             Function ov = (Function) ht;
             Predicate function = ov.getFunctionSymbol();
@@ -1569,15 +1589,15 @@ public class SQLGenerator implements SQLQueryGenerator {
                     } else {
                         lang = getSQLString(langTerm, index, false);
                     }
-                    return (String.format(langStr, lang, varName));
+                    return (String.format(LANG_STR, lang, varName));
                 }
         }
 
 
         if (sqladapter instanceof HSQLSQLDialectAdapter) {
-            return (String.format(langStr, "CAST(NULL AS VARCHAR(3))", varName));
+            return (String.format(LANG_STR, "CAST(NULL AS VARCHAR(3))", varName));
         }
-        return (String.format(langStr,  "NULL", varName));
+        return (String.format(LANG_STR,  "NULL", varName));
 
 
 
@@ -1587,12 +1607,15 @@ public class SQLGenerator implements SQLQueryGenerator {
      * Infers the type of a projected term.
      *
      * @param projectedTerm
-     * @param varName Name of the variable
+     * @param signatureVarName Name of the variable
      * @param index Used when the term correspond to a column name
      * @return A string like "5 AS ageQuestType"
      */
-    private String getTypeColumnForSELECT(Term projectedTerm, String varName,
-                                          QueryAliasIndex index) {
+    private String getTypeColumnForSELECT(Term projectedTerm, String signatureVarName,
+                                          QueryAliasIndex index, Set<String> sqlVariableNames) {
+
+        final String varName = sqladapter.nameTopVariable(signatureVarName, TYPE_SUFFIX, sqlVariableNames);
+        sqlVariableNames.add(varName);
 
         if (projectedTerm instanceof Function) {
             return getCompositeTermType((Function) projectedTerm, varName);
@@ -2568,8 +2591,7 @@ public class SQLGenerator implements SQLQueryGenerator {
         private void indexVariables(Function atom) {
             DataDefinition def = dataDefinitions.get(atom);
             Predicate atomName = atom.getFunctionSymbol();
-            String viewName = viewNames.get(atom);
-            viewName = sqladapter.sqlQuote(viewName);
+            final String viewName = viewNames.get(atom);
             for (int index = 0; index < atom.getTerms().size(); index++) {
                 Term term = atom.getTerms().get(index);
 
@@ -2614,31 +2636,45 @@ public class SQLGenerator implements SQLQueryGenerator {
          * Generates the view definition, i.e., "tablename viewname".
          */
         public String getViewDefinition(Function atom) {
-            DataDefinition def = dataDefinitions.get(atom);
-            final String viewname = viewNames.get(atom);
-            //viewname = sqladapter.sqlQuote(viewname);
 
-            if (def instanceof TableDefinition) {
-                return sqladapter.sqlTableName(tableNames.get(atom), viewname);
-            } else if (def instanceof ViewDefinition) {
-                String viewdef = ((ViewDefinition) def).getStatement();
-                String formatView = String.format("(%s) %s", viewdef, viewname);
-                return formatView;
+            /**
+             * Normal case
+             */
+            DataDefinition def = dataDefinitions.get(atom);
+            if (def != null) {
+                final String viewName = viewNames.get(atom);
+
+                if (def instanceof TableDefinition) {
+                    return sqladapter.sqlTableName(tableNames.get(atom), viewName);
+                } else if (def instanceof ViewDefinition) {
+                    String viewdef = ((ViewDefinition) def).getStatement();
+                    String formatView = String.format("(%s) %s", viewdef, viewName);
+                    return formatView;
+                }
+                else {
+                    throw new RuntimeException("Unsupported data definition");
+                }
             }
             /**
-             * Constraint: the view/table must have already been defined.
+             * Special case.
+             * For atoms nested in a LJ . TODO: check this reverse-engineered assertion.
+             *
+             * TODO: unify with the normal case?
              */
             else {
 //                // Should be an ans atom.
-//                Predicate pred = atom.getFunctionSymbol();
-//                String view = sqlAnsViewMap.get(pred);
-//                final String locallyBuildViewName = sqladapter.sqlQuote("Q" + pred + "View");
-//
-//                if (view != null) {
-//                    String formatView = String.format("(%s) %s", view, locallyBuildViewName);
-//                    return formatView;
-//
-//                }
+                Predicate pred = atom.getFunctionSymbol();
+                String view = sqlAnsViewMap.get(pred);
+
+                if (view != null) {
+                    // TODO: check if it is correct not to consider other view names.
+                    final String viewName = sqladapter.nameView(VIEW_PREFIX, pred.getName(), VIEW_SUFFIX,
+                            ImmutableSet.<String>of());
+
+                    String formatView = String.format("(%s) %s", view, viewName);
+                    return formatView;
+
+                }
                 throw new RuntimeException(
                         "Impossible to get data definition for: " + atom
                                 + ", type: " + def);
