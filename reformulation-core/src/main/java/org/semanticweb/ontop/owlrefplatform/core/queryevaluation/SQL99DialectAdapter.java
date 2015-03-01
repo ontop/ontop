@@ -22,7 +22,9 @@ package org.semanticweb.ontop.owlrefplatform.core.queryevaluation;
 
 
 import java.sql.Types;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
 import org.semanticweb.ontop.model.Variable;
@@ -267,5 +269,23 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 			boolean caseinSensitive) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String nameTopVariable(String signatureVariableName, String proposedSuffix, Set<String> sqlVariableNames) {
+		return buildDefaultName("", signatureVariableName, proposedSuffix);
+	}
+
+	@Override
+	public String nameView(String prefix, String tableName, String suffix, Collection<String> viewNames) {
+		return buildDefaultName(prefix, tableName, suffix);
+	}
+
+	/**
+	 * Concatenates the string and puts some quotes around.
+	 * Default way to name a variable or a view.
+	 */
+	protected final String buildDefaultName(String prefix, String intermediateName, String suffix) {
+		return sqlQuote(prefix + intermediateName + suffix);
 	}
 }

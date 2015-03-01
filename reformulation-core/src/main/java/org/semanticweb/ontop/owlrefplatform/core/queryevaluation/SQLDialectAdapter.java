@@ -22,7 +22,9 @@ package org.semanticweb.ontop.owlrefplatform.core.queryevaluation;
 
 
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
 import org.semanticweb.ontop.model.Variable;
@@ -73,4 +75,13 @@ public interface SQLDialectAdapter {
 
 	public String sqlGroupBy(List<Variable> groupby, String viewname);
 
+	/**
+	 * Allows the SQL dialect adapter to put restrict on the name (e.g. name length).
+	 */
+	public String nameTopVariable(String signatureVariable, String proposedSuffix, Set<String> sqlVariableNames);
+
+	/**
+	 * Returns a quoted view name.
+	 */
+	String nameView(String prefix, String tableName, String suffix, Collection<String> viewNames);
 }

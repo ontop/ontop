@@ -122,8 +122,10 @@ public class SQLGenerator implements SQLQueryGenerator {
     /**
      * Formatting template
      */
-    private static final String VIEW_NAME = "Q%sVIEW%s";
-    private static final String VIEW_ANS_NAME = "Q%sView";
+    //private static final String VIEW_NAME = "Q%sVIEW%s";
+    //private static final String VIEW_ANS_NAME = "Q%sView";
+    private static final String VIEW_PREFIX = "Q";
+    private static final String VIEW_SUFFIX = "View";
 
     private final DBMetadata metadata;
     private final JDBCUtility jdbcutil;
@@ -2524,7 +2526,7 @@ public class SQLGenerator implements SQLQueryGenerator {
             }
 
             Predicate tablePredicate = atom.getFunctionSymbol();
-            String tableName = tablePredicate.getName();
+            final String tableName = tablePredicate.getName();
             DataDefinition def = metadata.getDefinition(tableName);
 
             if (def == null) {
@@ -2534,18 +2536,24 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 * view:
 				 */
                 // tableName = "Q"+tableName+"View";
-                tableName = String.format(VIEW_ANS_NAME, tableName);
-                def = metadata.getDefinition(tableName);
+                //tableName = String.format(VIEW_ANS_NAME, tableName);
+                final String viewName = sqladapter.nameView(VIEW_PREFIX, tableName, VIEW_SUFFIX, viewNames.values());
+                /**
+                 * TODO: understand this.
+                 */
+                def = metadata.getDefinition(viewName);
                 if (def == null) {
                     isEmpty = true;
                     return;
                 } else {
-                    viewNames.put(atom, tableName);
+                    viewNames.put(atom, viewName);
                 }
             } else {
 
-                String simpleTableViewName = String.format(VIEW_NAME,
-                        tableName, String.valueOf(dataTableCount));
+                //String simpleTableViewName = String.format(VIEW_NAME,
+                //        tableName, String.valueOf(dataTableCount));
+                String suffix = VIEW_SUFFIX + String.valueOf(dataTableCount);
+                final String simpleTableViewName = sqladapter.nameView(VIEW_PREFIX, tableName, suffix, viewNames.values());
                 viewNames.put(atom, simpleTableViewName);
             }
             dataTableCount += 1;
@@ -2607,8 +2615,8 @@ public class SQLGenerator implements SQLQueryGenerator {
          */
         public String getViewDefinition(Function atom) {
             DataDefinition def = dataDefinitions.get(atom);
-            String viewname = viewNames.get(atom);
-            viewname = sqladapter.sqlQuote(viewname);
+            final String viewname = viewNames.get(atom);
+            //viewname = sqladapter.sqlQuote(viewname);
 
             if (def instanceof TableDefinition) {
                 return sqladapter.sqlTableName(tableNames.get(atom), viewname);
@@ -2617,22 +2625,24 @@ public class SQLGenerator implements SQLQueryGenerator {
                 String formatView = String.format("(%s) %s", viewdef, viewname);
                 return formatView;
             }
-
-            // Should be an ans atom.
-            Predicate pred = atom.getFunctionSymbol();
-            String view = sqlAnsViewMap.get(pred);
-            viewname = "Q" + pred + "View";
-            viewname = sqladapter.sqlQuote(viewname);
-
-            if (view != null) {
-                String formatView = String.format("(%s) %s", view, viewname);
-                return formatView;
-
+            /**
+             * Constraint: the view/table must have already been defined.
+             */
+            else {
+//                // Should be an ans atom.
+//                Predicate pred = atom.getFunctionSymbol();
+//                String view = sqlAnsViewMap.get(pred);
+//                final String locallyBuildViewName = sqladapter.sqlQuote("Q" + pred + "View");
+//
+//                if (view != null) {
+//                    String formatView = String.format("(%s) %s", view, locallyBuildViewName);
+//                    return formatView;
+//
+//                }
+                throw new RuntimeException(
+                        "Impossible to get data definition for: " + atom
+                                + ", type: " + def);
             }
-
-            throw new RuntimeException(
-                    "Impossible to get data definition for: " + atom
-                            + ", type: " + def);
         }
 
         public String getView(Function atom) {
