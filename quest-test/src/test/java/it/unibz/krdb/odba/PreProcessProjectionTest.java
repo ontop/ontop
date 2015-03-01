@@ -2,18 +2,11 @@ package it.unibz.krdb.odba;
 
 
 import it.unibz.krdb.obda.io.ModelIOManager;
-import it.unibz.krdb.obda.io.QueryIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-import it.unibz.krdb.obda.querymanager.QueryController;
-import it.unibz.krdb.obda.querymanager.QueryControllerGroup;
-import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
-import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -24,11 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.net.URI;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class PreProcessProjectionTest {
@@ -97,21 +88,18 @@ public class PreProcessProjectionTest {
         int count = 0;
         while (rs.nextRow()) {
             count++;
-            for (int i = 1; i <= rs.getColumnCount(); i++) {
-                System.out.print(rs.getSignature().get(i-1));
-                System.out.print("=" + rs.getOWLObject(i));
-                System.out.print(" ");
-            }
-            System.out.println();
+//            for (int i = 1; i <= rs.getColumnCount(); i++) {
+//
+//                log.debug(rs.getSignature().get(i-1) + "=" + rs.getOWLObject(i));
+//
+//            }
+
         }
         rs.close();
 
         return count;
 
     }
-
-
-
 
 
 
@@ -167,9 +155,30 @@ public class PreProcessProjectionTest {
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x a :Location}";
         int nResults = runTests(p, query);
-        assertEquals(72, nResults);
+        assertEquals(91, nResults);
     }
 
+    @Test
+    public void testjoinWithSameName() throws Exception {
+
+
+        QuestPreferences p = new QuestPreferences();
+        String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
+                " select * {?x a :OrderDetail}";
+        int nResults = runTests(p, query);
+        assertEquals(4310, nResults);
+    }
+
+    @Test
+    public void testjoinWithAliasInSubQuery() throws Exception {
+
+
+        QuestPreferences p = new QuestPreferences();
+        String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
+                " select * {?x :locationAddress ?y}";
+        int nResults = runTests(p, query);
+        assertEquals(19, nResults);
+    }
 
 
 

@@ -1,5 +1,5 @@
 [PrefixDeclaration]
-:		http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#
+:		http://www.optique-project.eu/resource/northwind/northwind/
 
 [SourceDeclaration]
 sourceUri	northwind
