@@ -122,7 +122,8 @@ public class SQLGenerator implements SQLQueryGenerator {
     //private static final String VIEW_NAME = "Q%sVIEW%s";
     //private static final String VIEW_ANS_NAME = "Q%sView";
     private static final String VIEW_PREFIX = "Q";
-    private static final String VIEW_SUFFIX = "View";
+    private static final String VIEW_SUFFIX = "VIEW";
+    private static final String VIEW_ANS_SUFFIX = "View";
 
     private final DBMetadata metadata;
     private final JDBCUtility jdbcutil;
@@ -583,7 +584,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
         String SELECT = getSelectClause(signature, cq, index, innerdistincts, isAns1, headDataTypes);
         String GROUP = getGroupBy(cq.getBody(), index);
-        String HAVING = getHaving(cq.getBody(), index);;
+        String HAVING = getHaving(cq.getBody(), index);
 
         String querystr = SELECT + FROM + WHERE + GROUP + HAVING;
         return querystr;
@@ -783,7 +784,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
         //String viewname = String.format(VIEW_ANS_NAME, pred);
         // String viewname = "Q" + pred + "View";
-        String viewname = sqladapter.nameView(VIEW_PREFIX, pred.getName(), VIEW_SUFFIX, viewNames);
+        String viewname = sqladapter.nameView(VIEW_PREFIX, pred.getName(), VIEW_ANS_SUFFIX, viewNames);
         viewNames.add(viewname);
 		/* Creates the View itself */
 
@@ -2560,7 +2561,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 */
                 // tableName = "Q"+tableName+"View";
                 //tableName = String.format(VIEW_ANS_NAME, tableName);
-                final String viewName = sqladapter.nameView(VIEW_PREFIX, tableName, VIEW_SUFFIX, viewNames.values());
+                final String viewName = sqladapter.nameView(VIEW_PREFIX, tableName, VIEW_ANS_SUFFIX, viewNames.values());
                 /**
                  * TODO: understand this.
                  */
@@ -2668,7 +2669,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
                 if (view != null) {
                     // TODO: check if it is correct not to consider other view names.
-                    final String viewName = sqladapter.nameView(VIEW_PREFIX, pred.getName(), VIEW_SUFFIX,
+                    final String viewName = sqladapter.nameView(VIEW_PREFIX, pred.getName(), VIEW_ANS_SUFFIX,
                             ImmutableSet.<String>of());
 
                     String formatView = String.format("(%s) %s", view, viewName);
