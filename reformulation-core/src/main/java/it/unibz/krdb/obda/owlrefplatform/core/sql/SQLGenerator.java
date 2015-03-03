@@ -73,6 +73,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String INDENT = "    ";
 
 	private static final String IS_TRUE_OPERATOR = "%s IS TRUE";
+
+	private static final String typeStrForSELECT = "%s AS %s";
+	private static final String typeSuffix = "QuestType";
+	private static final String langStrForSELECT = "%s AS %s";
+	private static final String langSuffix = "Lang";
 	
 	/**
 	 * Formatting template
@@ -727,13 +732,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return sb.toString();
 		}
 
+		/**
+		 * Set that contains all the variable names created on the top query.
+		 * It helps the dialect adapter to generate variable names according to its possible restrictions.
+		 * Currently, this is needed for the Oracle adapter (max. length of 30 characters).
+		 */
+		Set<String> sqlVariableNames = new HashSet<>();
+
 		Iterator<Term> hit = headterms.iterator();
 		int hpos = 0;
 		while (hit.hasNext()) {
 			Term ht = hit.next();
-			String typeColumn = getTypeColumnForSELECT(ht, signature, hpos);
-			String langColumn = getLangColumnForSELECT(ht, signature, hpos,	index);
-			String mainColumn = getMainColumnForSELECT(ht, signature, hpos, index);
+			String typeColumn = getTypeColumnForSELECT(ht, signature, hpos, sqlVariableNames);
+			String langColumn = getLangColumnForSELECT(ht, signature, hpos,	index, sqlVariableNames);
+			String mainColumn = getMainColumnForSELECT(ht, signature, hpos, index, sqlVariableNames);
 
 			sb.append("\n   ");
 			sb.append(typeColumn);
@@ -750,7 +762,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	private String getMainColumnForSELECT(Term ht,
-			List<String> signature, int hpos, QueryAliasIndex index) {
+			List<String> signature, int hpos, QueryAliasIndex index, Set<String> sqlVariableNames) {
+
+		/**
+		 * Creates a variable name that fits to the restrictions of the SQL dialect.
+		 */
+		String variableName = sqladapter.nameTopVariable(signature.get(hpos), "", sqlVariableNames);
+		sqlVariableNames.add(variableName);
 
 		String mainColumn = null;
 
@@ -820,13 +838,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 				mainColumn = sqladapter.sqlCast(mainColumn, Types.VARCHAR);
 			}
 		}
-		return String.format(mainTemplate, mainColumn, sqladapter.sqlQuote(signature.get(hpos)));
+		return String.format(mainTemplate, mainColumn, variableName);
 	}
+	
+	private String getLangColumnForSELECT(Term ht, List<String> signature, int hpos, QueryAliasIndex index,
+										  Set<String> sqlVariableNames) {
 
-	
-	private static final String langStrForSELECT = "%s AS \"%sLang\"";
-	
-	private String getLangColumnForSELECT(Term ht, List<String> signature, int hpos, QueryAliasIndex index) {
+		/**
+		 * Creates a variable name that fits to the restrictions of the SQL dialect.
+		 */
+		String langVariableName = sqladapter.nameTopVariable(signature.get(hpos), langSuffix, sqlVariableNames);
+		sqlVariableNames.add(langVariableName);
 
 
 		if (ht instanceof Function) {
@@ -838,10 +860,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 				/*
 				 * Case for rdf:literal s with a language, we need to select 2
 				 * terms from ".., rdf:literal(?x,"en"),
-				 * 
+				 *
 				 * and signature "name" * we will generate a select with the
 				 * projection of 2 columns
-				 * 
+				 *
 				 * , 'en' as nameqlang, view.colforx as name,
 				 */
 				String lang = null;
@@ -854,17 +876,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					lang = getSQLString(langTerm, index, false);
 				}
-				return (String.format(langStrForSELECT, lang, signature.get(hpos)));
+				return (String.format(langStrForSELECT, lang, langVariableName));
 			}
 		}
-		return (String.format(langStrForSELECT, "NULL", signature.get(hpos)));
+		return (String.format(langStrForSELECT, "NULL", langVariableName));
 
 	}
 
-	private static final String typeStrForSELECT = "%s AS \"%sQuestType\"";
-	
-
-	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
+	/**
+	 * Beware: a new entry will be added to sqlVariableNames (is thus mutable).
+	 */
+	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos,
+										  Set<String> sqlVariableNames) {
 		COL_TYPE type;
 
 		if (ht instanceof Function) {
@@ -874,14 +897,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 			/*
 			 * Adding the ColType column to the projection (used in the result
 			 * set to know the type of constant)
-			 * 
-			 * NOTE NULL is IDENTIFIER 0 in QuestResultSet do not USE for any 
+			 *
+			 * NOTE NULL is IDENTIFIER 0 in QuestResultSet do not USE for any
 			 * type
 			 */
-			
+
 			if (function instanceof URITemplatePredicate) {
                 type = COL_TYPE.OBJECT;
-			} 
+			}
 			else if (function instanceof BNodePredicate) {
                 type = COL_TYPE.BNODE;
 			}
@@ -889,18 +912,24 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String functionString = function.toString();
 				type = dtfac.getDatatype(functionString);
 			}
-		} 
+		}
 		else if (ht instanceof URIConstant) {
             type = COL_TYPE.OBJECT;
-		} 
+		}
 		else if (ht == OBDAVocabulary.NULL) {  // NULL is an instance of ValueConstant
             type = COL_TYPE.NULL;
 		}
 		else
 			throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
-		
+
 		int code = type.getQuestCode();
-		return String.format(typeStrForSELECT, code, signature.get(hpos));
+
+		/**
+		 * Creates a variable name that fits to the restrictions of the SQL dialect.
+		 */
+		String typeVariableName = sqladapter.nameTopVariable(signature.get(hpos), typeSuffix, sqlVariableNames);
+		sqlVariableNames.add(typeVariableName);
+		return String.format(typeStrForSELECT, code, typeVariableName);
 	}
 
 	public String getSQLStringForTemplateFunction(Function ov, QueryAliasIndex index) {
