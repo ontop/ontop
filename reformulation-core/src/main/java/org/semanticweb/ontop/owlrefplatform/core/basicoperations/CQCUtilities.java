@@ -20,10 +20,16 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  * #L%
  */
 
-import java.util.*;
 
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQContainmentCheck;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQContainmentCheckSyntactic;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.UnifierUtilities;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Function;
+
+import java.util.*;
 
 /***
  * A class that allows you to perform different operations related to query
@@ -95,10 +101,7 @@ public class CQCUtilities {
 			}
 		}
 	}
-	
-	/**
-	 * 
-	 */
+
 	public static void optimizeQueryWithSigmaRules(List<Function> atoms, LinearInclusionDependencies sigma) {
 				
 		// for each atom in query body
@@ -111,13 +114,13 @@ public class CQCUtilities {
 				// try to unify current query body atom with tbox rule body atom
 				// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule				
 				Function ruleBody = rule.getBody().get(0);
-				Unifier theta = Unifier.getMGU(ruleBody, atom);
+				Substitution theta = UnifierUtilities.getMGU(ruleBody, atom);
 				if (theta == null || theta.isEmpty()) {
 					continue;
 				}
 				// if unifiable, apply to head of tbox rule
 				Function copyRuleHead = (Function) rule.getHead().clone();
-				UnifierUtilities.applyUnifier(copyRuleHead, theta);
+				SubstitutionUtilities.applySubstitution(copyRuleHead, theta);
 
 				derivedAtoms.add(copyRuleHead);
 			}
@@ -148,7 +151,7 @@ public class CQCUtilities {
 			Function currentAtom = result.getBody().get(i);
 			for (int j = i + 1; j < result.getBody().size(); j++) {
 				Function nextAtom = result.getBody().get(j);
-				Unifier map = Unifier.getMGU(currentAtom, nextAtom);
+				Substitution map = UnifierUtilities.getMGU(currentAtom, nextAtom);
 				if (map != null && map.isEmpty()) {
 					result = UnifierUtilities.unify(result, i, j);
 				}

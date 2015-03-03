@@ -20,6 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.core.translator;
  * #L%
  */
 
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -65,7 +66,7 @@ public class MappingVocabularyRepair {
 
 	/***
 	 * Makes sure that the mappings given are correctly typed w.r.t. the given
-	 * vocabualry.
+	 * vocabulary.
 	 * 
 	 * @param originalMappings
 	 * @param vocabulary
@@ -74,13 +75,13 @@ public class MappingVocabularyRepair {
 	public Collection<OBDAMappingAxiom> fixMappingPredicates(Collection<OBDAMappingAxiom> originalMappings, OntologyVocabulary vocabulary) {
 		//		log.debug("Reparing/validating {} mappings", originalMappings.size());
 		HashMap<String, Predicate> urimap = new HashMap<String, Predicate>();
-		for (OClass p : vocabulary.getClasses())
+		for (OClass p : vocabulary.getClasses()) 
 			urimap.put(p.getPredicate().getName(), p.getPredicate());
 
-		for (ObjectPropertyExpression p : vocabulary.getObjectProperties())
+		for (ObjectPropertyExpression p : vocabulary.getObjectProperties()) 
 			urimap.put(p.getPredicate().getName(), p.getPredicate());
 		
-		for (DataPropertyExpression p : vocabulary.getDataProperties())
+		for (DataPropertyExpression p : vocabulary.getDataProperties()) 
 			urimap.put(p.getPredicate().getName(), p.getPredicate());
 
 		Collection<OBDAMappingAxiom> result = new LinkedList<OBDAMappingAxiom>();
@@ -90,7 +91,7 @@ public class MappingVocabularyRepair {
 			List<Function> newbody = new LinkedList<Function>();
 
 			for (Function atom : body) {
-				Predicate p = atom.getPredicate();
+				Predicate p = atom.getFunctionSymbol();
 
 				Function newatom = null;
 				Predicate predicate = urimap.get(p.getName());
@@ -127,8 +128,7 @@ public class MappingVocabularyRepair {
 
                                     Function ft1 = (Function) t1;
                                     Function ft2 = (Function) t2;
-
-                                    boolean t1uri = ft1.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI);
+						            boolean t1uri = ft1.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI);
                                     boolean t2uri = ft2.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI);
 
                                     if (t1uri && t2uri){
@@ -160,10 +160,10 @@ public class MappingVocabularyRepair {
 				 */
 				Term t0 = newTerms.get(0);
 				if (!(t0 instanceof Function)){
-					newTerms.set(0, dfac.getFunction(dfac.getUriTemplatePredicate(1), t0));
+					newTerms.set(0, dfac.getUriTemplate(t0));
 				}
 				if (predicate.isObjectProperty() && !(newTerms.get(1) instanceof Function)) {
-					newTerms.set(1, dfac.getFunction(dfac.getUriTemplatePredicate(1), newTerms.get(1)));
+					newTerms.set(1, dfac.getUriTemplate(newTerms.get(1)));
 				}
 				newatom = dfac.getFunction(predicate, newTerms);
 				newbody.add(newatom);
@@ -204,14 +204,12 @@ public class MappingVocabularyRepair {
 			// no fix nexessary
 			return term;
 		}
-		if (predicate.getName().toString().equals(OBDAVocabulary.QUEST_URI)) {
+		if (predicate instanceof URITemplatePredicate) {
 			// no fix necessary
 			return term;
 		}
 		// We have a function that is not a built-in, hence its an old-style uri
 		// template function(parm1,parm2,...)
-		Predicate uriFunction = dfac.getUriTemplatePredicate(term.getArity() + 1);
-
 		StringBuilder newTemplate = new StringBuilder();
 		newTemplate.append(predicate.getName().toString());
 		for (int i = 0; i < term.getArity(); i++) {
@@ -222,6 +220,6 @@ public class MappingVocabularyRepair {
 		newTerms.add(dfac.getConstantLiteral(newTemplate.toString()));
 		newTerms.addAll(term.getTerms());
 
-		return dfac.getFunction(uriFunction, newTerms);
+		return dfac.getUriTemplate(newTerms);
 	}
 }

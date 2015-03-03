@@ -33,6 +33,10 @@ import javax.swing.table.TableModel;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyleContext;
 
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
@@ -149,7 +153,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 //        });
 //        sparqlPopupMenu.add(getSPARQLExpansion);
 
-        getSPARQLSQLExpansion.setText("Get expanded/unfolded query for this UCQ...");
+        getSPARQLSQLExpansion.setText("Get SQL translation...");
         getSPARQLSQLExpansion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 getSPARQLSQLExpansionActionPerformed(evt);

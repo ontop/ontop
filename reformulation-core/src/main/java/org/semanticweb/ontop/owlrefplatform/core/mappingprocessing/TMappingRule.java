@@ -1,7 +1,12 @@
 package org.semanticweb.ontop.owlrefplatform.core.mappingprocessing;
 
-import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.BuiltinPredicate;
+import org.semanticweb.ontop.model.CQIE;
+import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
 
 import java.util.ArrayList;
@@ -28,7 +33,7 @@ public class TMappingRule {
 		List<Function> newbody = new LinkedList<Function>();
 		for (Function atom : body) {
 			Function clone = (Function)atom.clone();
-			if (clone.getPredicate() instanceof BuiltinPredicate) 
+			if (clone.getFunctionSymbol() instanceof BuiltinPredicate) 
 				conditions.add(clone);
 			else 
 				newbody.add(clone);			

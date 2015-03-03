@@ -1,5 +1,4 @@
 package org.semanticweb.ontop.obda;
-
 /**
  * Test case for the IMDB database see wiki Example_MovieOntology
  * Created by Sarah on 30/07/14.
@@ -11,15 +10,7 @@ import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestPreferences;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLFactory;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
-import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
-
-import java.io.File;
-import java.util.Properties;
-
+import org.semanticweb.ontop.owlrefplatform.owlapi3.*;
 import org.semanticweb.ontop.querymanager.QueryController;
 import org.semanticweb.ontop.querymanager.QueryControllerGroup;
 import org.semanticweb.ontop.querymanager.QueryControllerQuery;
@@ -32,7 +23,11 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
+import java.io.File;
+import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class ImdbTestPostgres {
     private OBDADataFactory fac;

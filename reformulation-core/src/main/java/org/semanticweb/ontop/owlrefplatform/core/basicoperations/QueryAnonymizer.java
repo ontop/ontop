@@ -20,21 +20,19 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  * #L%
  */
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.semanticweb.ontop.model.CQIE;
-import org.semanticweb.ontop.model.DatalogProgram;
 import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.AnonymousVariable;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.VariableImpl;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 // TODO This class needs to be restructured
 
@@ -58,7 +56,7 @@ public class QueryAnonymizer {
 		List<Function> body = q.getBody();
 		Function atom = (Function) body.get(focusatomIndex);
 		int bodysize = body.size();
-		int arity = atom.getPredicate().getArity();
+		int arity = atom.getFunctionSymbol().getArity();
 
 		for (int i = 0; i < arity; i++) {
 			Term term = atom.getTerms().get(i);
@@ -135,7 +133,7 @@ public class QueryAnonymizer {
 					vex.add(t);
 				}
 			}
-			Function newatom = fac.getFunction(atom.getPredicate().clone(), vex);
+			Function newatom = fac.getFunction(atom.getFunctionSymbol().clone(), vex);
 			newBody.add(newatom);
 		}
 		CQIE query = fac.getCQIE(q.getHead(), newBody);

@@ -22,12 +22,15 @@ package org.semanticweb.ontop.protege4.gui.component;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.util.List;
 
 import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
+import org.semanticweb.ontop.model.DatatypeFactory;
 import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.protege4.gui.IconLoader;
 
@@ -45,10 +48,14 @@ public class DataTypeComboBox extends JComboBox {
 	}
 	
 	private static Predicate[] getQuestDataTypePredicates() {
-		int length = OBDAVocabulary.QUEST_DATATYPE_PREDICATES.length + 1;
+		DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory(); 
+		
+		List<Predicate> prediacteList = dtfac.getDatatypePredicates();
+		
+		int length = prediacteList.size() + 1;
 		Predicate[] dataTypes = new Predicate[length];
 		dataTypes[0] = null;
-		System.arraycopy(OBDAVocabulary.QUEST_DATATYPE_PREDICATES, 0, dataTypes, 1, OBDAVocabulary.QUEST_DATATYPE_PREDICATES.length);
+		System.arraycopy(prediacteList.toArray(), 0, dataTypes, 1, prediacteList.size());
 		return dataTypes;
 	}
 

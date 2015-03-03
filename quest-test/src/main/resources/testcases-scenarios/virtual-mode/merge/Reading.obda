@@ -12,19 +12,19 @@ driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Book
-target		<"&book;book/{$id}"> a book:Novel; book:title $title; book:author $author . 
+target		book:book/{id} a book:Novel; book:title {title}; book:author {author} .
 source		select id, title, author from BOOK
 
 mappingId	Person
-target		<"&person;person/{$id}"> a person:Person; person:name $name . 
+target		person:person/{id} a person:Person; person:name {name} .
 source		select id, name from PERSON
 
 mappingId	Reads
-target		<"&person;person/{$personid}"> book:isReading <"&book;book/{$bookid}"> . 
+target		person:person/{personid} book:isReading book:book/{bookid} .
 source		select personid, bookid from LENDING where owns = false
 
 mappingId	Owns
-target		<"&person;person/{$personid}"> person:owns <"&book;book/{$bookid}"> . 
+target		person:person/{personid} person:owns book:book/{bookid} .
 source		select personid, bookid from LENDING where owns = true
 ]]
 

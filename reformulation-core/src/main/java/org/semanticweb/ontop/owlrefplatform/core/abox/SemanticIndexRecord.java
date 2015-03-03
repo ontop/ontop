@@ -23,7 +23,9 @@ package org.semanticweb.ontop.owlrefplatform.core.abox;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.ontology.ClassAssertion;
-import org.semanticweb.ontop.ontology.PropertyAssertion;
+import org.semanticweb.ontop.ontology.DataPropertyAssertion;
+import org.semanticweb.ontop.ontology.ObjectPropertyAssertion;
+
 
 /***
  * A record to keep track of which tables in the semantic index tables have rows
@@ -139,16 +141,24 @@ public class SemanticIndexRecord {
 			}
 
 		} else {
-			PropertyAssertion ba = (PropertyAssertion) assertion;
-			COL_TYPE atype1 = ba.getSubject().getType();
-
+			COL_TYPE atype1, atype2;
+			if (assertion instanceof ObjectPropertyAssertion) {
+				ObjectPropertyAssertion ba = (ObjectPropertyAssertion) assertion;
+				atype1 = ba.getSubject().getType();
+				atype2 = ba.getObject().getType();		
+			}
+			else {
+				DataPropertyAssertion ba = (DataPropertyAssertion) assertion;
+				atype1 = ba.getSubject().getType();
+				atype2 = ba.getValue().getType();						
+			}
+				
 			if (atype1 == COL_TYPE.BNODE) {
 				t1 = OBJType.BNode;
 			} else {
 				t1 = OBJType.URI;
 			}
 
-			COL_TYPE atype2 = ba.getValue2().getType();
 			switch (atype2) {
 			case OBJECT:
 				t2 = OBJType.URI;
@@ -159,8 +169,6 @@ public class SemanticIndexRecord {
 				table = SITable.OPROP;
 				break;
 			case LITERAL:
-				table = SITable.DPROPLite;
-				break;
 			case LITERAL_LANG:
 				table = SITable.DPROPLite;
 				break;

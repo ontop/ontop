@@ -69,7 +69,7 @@ public interface UnfoldingMechanism extends Serializable {
 			throws OBDAException;
 
 	public Multimap<Predicate,Integer>   processMultipleTemplatePredicates(
-			List<CQIE> rules);
+			List<CQIE> unfoldingProgram);
 
 
 

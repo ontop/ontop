@@ -88,7 +88,7 @@ public class DatalogNormalizer {
 		/* Collecting all necessary conditions */
 		for (int i = 0; i < body.size(); i++) {
 			Function currentAtom = body.get(i);
-			if (currentAtom.getPredicate() == OBDAVocabulary.AND) {
+			if (currentAtom.getFunctionSymbol() == OBDAVocabulary.AND) {
 				body.remove(i);
 				body.addAll(getUnfolderAtomList(currentAtom));
 			}
@@ -202,7 +202,7 @@ public class DatalogNormalizer {
 		 * generated. It always merges from the left to the right.
 		 */
 		while (dataAtoms.size() > 2) {
-			Function joinAtom = fac.getFunction(OBDAVocabulary.SPARQL_JOIN, dataAtoms.remove(0), dataAtoms.remove(0));
+			Function joinAtom = fac.getSPARQLJoin(dataAtoms.remove(0), dataAtoms.remove(0));
 			joinAtom.getTerms().addAll(booleanAtoms);
 			booleanAtoms.clear();
 
@@ -236,14 +236,13 @@ public class DatalogNormalizer {
 	 * equalities to account for JOIN operations. This method is called before
 	 * generating SQL queries and allows to avoid cross refrences in nested
 	 * JOINs, which generate wrong ON or WHERE conditions.
-	 * 
-	 * 
-	 * @param query
+	 *
 	 */
 	public static CQIE pullOutEqualities(CQIE query) {
-		Unifier substitutions = new Unifier();
+		Substitution substitutions = new SubstitutionImpl();
 		int[] newVarCounter = { 1 };
 
+		//Set<Function> booleanAtoms = new HashSet<Function>();		//Set<Function> booleanAtoms = new HashSet<Function>();
 		List<Function> equalities = new LinkedList<Function>();
 		pullOutEqualities(query.getBody(), substitutions, equalities, newVarCounter, false);
 		List<Function> body = query.getBody();
@@ -255,8 +254,8 @@ public class DatalogNormalizer {
 		 * query.
 		 */
 
-		UnifierUtilities.applyUnifier(query, substitutions, false);
-        return query;
+		SubstitutionUtilities.applySubstitution(query, substitutions, false);
+		return query;
 	}
 
 //	private static BranchDepthSorter sorter = new BranchDepthSorter();
@@ -345,20 +344,14 @@ public class DatalogNormalizer {
 	 * @param currentTerms
 	 * @param substitutions
 	 */
-	@SuppressWarnings("unchecked")
-	private static List<Function> pullOutEqualities(List currentTerms, Unifier substitutions, List<Function> eqList, int[] newVarCounter,
-			boolean isLeftJoin) {
+	private static  List<Function> pullOutEqualities(List currentTerms, Substitution substitutions, List<Function> eqList,
+										  int[] newVarCounter, boolean isLeftJoin) {
 
-
-		//Multimap<Variable, Function> mapVarAtom =  HashMultimap.create();
-		
-		List<Function> eqGoOutside = new LinkedList<Function>();
-
+		List<Function> eqGoOutside = new ArrayList<>();
 		
 		for (int i = 0; i < currentTerms.size(); i++) {
 
 			Term term = (Term) currentTerms.get(i);
-		
 
 			/*
 			 * We don't expect any functions as terms, data atoms will only have
@@ -435,7 +428,7 @@ public class DatalogNormalizer {
 						// Right now we support only unary functions!!
 						for (Variable var : subtermsset) {
 							renameTerm(substitutions, eqList, newVarCounter,
-									atom, subterms, j, (Function) subTerm, (VariableImpl)var);
+									atom, subterms, j, (Function) subTerm, var);
 						}
 					}
 				}
@@ -488,10 +481,10 @@ public class DatalogNormalizer {
 		}
 	}
 
-	private static void renameTerm(Unifier substitutions, List<Function> eqList, int[] newVarCounter, Function atom,
-			List<Term> subterms, int j, Function subTerm, VariableImpl var1) {
+	private static void renameTerm(Substitution substitutions, List<Function> eqList, int[] newVarCounter, Function atom,
+			List<Term> subterms, int j, Function subTerm, Variable var1) {
 		Predicate head = subTerm.getFunctionSymbol();
-		Variable var2 = (Variable) substitutions.get(var1);
+		Variable var2 = (Variable) substitutions.get((VariableImpl) var1);
 
 		if (var2 == null) {
 			/*
@@ -533,9 +526,9 @@ public class DatalogNormalizer {
 
 	}
 
-	private static void renameVariable(Unifier substitutions, List<Function> eqList, int[] newVarCounter, Function atom,
+	private static void renameVariable(Substitution substitutions, List<Function> eqList, int[] newVarCounter, Function atom,
 			List<Term> subterms, int j, Term subTerm) {
-        VariableImpl var1 = (VariableImpl) subTerm;
+		VariableImpl var1 = (VariableImpl) subTerm;
 		VariableImpl var2 = (VariableImpl) substitutions.get(var1);
 
 
@@ -560,8 +553,12 @@ public class DatalogNormalizer {
 			 * current value, and add an equality between the substitution and
 			 * the new value.
 			 */
-			
-			while (substitutions.get(var2) != null){
+			//FIXME: very suspicious
+//			while (substitutions.containsKey(var2)){
+//				VariableImpl variable = (VariableImpl) substitutions.get(var2);
+//				var2=variable;
+//			}
+			if (substitutions.get(var2) != null){
 				VariableImpl variable = (VariableImpl) substitutions.get(var2);
 				var2=variable;
 			}
@@ -901,7 +898,7 @@ public class DatalogNormalizer {
 	 * @return
 	 */
 	public static List<Function> getUnfolderAtomList(Function atom) {
-		if (atom.getPredicate() != OBDAVocabulary.AND) {
+		if (atom.getFunctionSymbol() != OBDAVocabulary.AND) {
 			throw new InvalidParameterException();
 		}
 		List<Term> innerFunctionalTerms = new LinkedList<Term>();
@@ -1063,6 +1060,4 @@ public class DatalogNormalizer {
 		currentBooleans.addAll(tempConditionBooleans);
 
 	}
-				
-
 }

@@ -20,10 +20,10 @@ package org.semanticweb.ontop.sql.api;
  * #L%
  */
 
-import java.io.Serializable;
-
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Table;
+
+import java.io.Serializable;
 
 
 public class TableJSQL implements Serializable{
@@ -89,8 +89,10 @@ public class TableJSQL implements Serializable{
 	}
 	
 	public void setSchema(String schema) {
-		if(schema!=null && ParsedSQLQuery.pQuotes.matcher(schema).matches())
-			this.schema = schema.substring(1, schema.length()-1);
+		if(schema!=null && ParsedSQLQuery.pQuotes.matcher(schema).matches()) {
+            this.schema = schema.substring(1, schema.length() - 1);
+            quotedSchema = true;
+        }
 		else
 			this.schema = schema;
 	}

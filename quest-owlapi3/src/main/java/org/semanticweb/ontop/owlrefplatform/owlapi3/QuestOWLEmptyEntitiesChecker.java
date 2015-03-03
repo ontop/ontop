@@ -26,10 +26,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
 import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
 import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.PropertyExpression;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,7 @@ public class QuestOWLEmptyEntitiesChecker {
 	 * @throws Exception
 	 */
 	public QuestOWLEmptyEntitiesChecker(OWLOntology onto, QuestOWLConnection conn) throws Exception {
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 
 		this.onto = translator.translate(onto);
 		this.conn = conn;
@@ -127,7 +128,7 @@ public class QuestOWLEmptyEntitiesChecker {
 		}
 		log.debug(emptyConcepts.size() + " Empty concept/s: " + emptyConcepts);
 
-		for (PropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
+		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
 			Predicate role = prop.getPredicate();
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
 				emptyRoles.add(role);
@@ -135,7 +136,7 @@ public class QuestOWLEmptyEntitiesChecker {
 		}
 		log.debug(emptyRoles.size() + " Empty role/s: " + emptyRoles);
 
-		for (PropertyExpression prop : onto.getVocabulary().getDataProperties()) {
+		for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
 			Predicate role = prop.getPredicate();
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
 				emptyRoles.add(role);

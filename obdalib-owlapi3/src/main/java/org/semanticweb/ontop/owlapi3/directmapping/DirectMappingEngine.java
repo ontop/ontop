@@ -20,6 +20,7 @@ package org.semanticweb.ontop.owlapi3.directmapping;
  * #L%
  */
 
+
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.ArrayList;
