@@ -126,7 +126,9 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		 * If the length limit is not reached, processes as usual.
 		 */
 		if (signatureVarLength + borderLength <= NAME_MAX_LENGTH) {
-			return sqlQuote(buildDefaultName(prefix, intermediateName, suffix));
+			String unquotedName = buildDefaultName(prefix, intermediateName, suffix);
+			String name = putQuote ? sqlQuote(unquotedName) : unquotedName;
+			return name;
 		}
 
 		String shortenIntermediateNamePrefix = intermediateName.substring(0, NAME_MAX_LENGTH - borderLength
