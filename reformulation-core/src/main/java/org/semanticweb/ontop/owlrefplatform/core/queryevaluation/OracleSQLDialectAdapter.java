@@ -95,12 +95,12 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String nameTopVariable(String signatureVariableName, String suffix, Set<String> sqlVariableNames) {
-		return sqlQuote(nameViewOrVariable("", signatureVariableName, suffix, sqlVariableNames));
+		return nameViewOrVariable("", signatureVariableName, suffix, sqlVariableNames, true);
 	}
 
 	@Override
 	public String nameView(String prefix, String tableName, String suffix, Collection<String> viewNames) {
-		return nameViewOrVariable(prefix, tableName, suffix, viewNames);
+		return nameViewOrVariable(prefix, tableName, suffix, viewNames, false);
 	}
 
 	/**
@@ -112,7 +112,8 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	private String nameViewOrVariable(final String prefix,
 									  final String intermediateName,
 									  final String suffix,
-									  final Collection<String> alreadyDefinedNames) {
+									  final Collection<String> alreadyDefinedNames,
+									  boolean putQuote) {
 		int borderLength = prefix.length() + suffix.length();
 		int signatureVarLength = intermediateName.length();
 
@@ -125,7 +126,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		 * If the length limit is not reached, processes as usual.
 		 */
 		if (signatureVarLength + borderLength <= NAME_MAX_LENGTH) {
-			return buildDefaultName(prefix, intermediateName, suffix);
+			return sqlQuote(buildDefaultName(prefix, intermediateName, suffix));
 		}
 
 		String shortenIntermediateNamePrefix = intermediateName.substring(0, NAME_MAX_LENGTH - borderLength
@@ -135,7 +136,8 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		 * Naive implementation
 		 */
 		for (int i = 0; i < Math.pow(10, NAME_NUMBER_LENGTH); i++) {
-			String mainVarName = buildDefaultName(prefix, shortenIntermediateNamePrefix + i, suffix);
+			String unquotedVarName = buildDefaultName(prefix, shortenIntermediateNamePrefix + i, suffix);
+			String mainVarName = putQuote ? sqlQuote(unquotedVarName) : unquotedVarName;
 			if (!alreadyDefinedNames.contains(mainVarName)) {
 				return mainVarName;
 			}
