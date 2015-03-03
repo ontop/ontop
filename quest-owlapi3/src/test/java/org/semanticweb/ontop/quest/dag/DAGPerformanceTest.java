@@ -26,7 +26,7 @@ import java.util.Random;
 import junit.framework.TestCase;
 
 import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -131,7 +131,7 @@ public class DAGPerformanceTest extends TestCase {
 		
 
 		log.debug("Translating into quest API");
-		OWLAPI3Translator t = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
 		Ontology o = t.translate(ont);
 
 		long start = System.nanoTime();
@@ -222,7 +222,7 @@ public class DAGPerformanceTest extends TestCase {
     		
     	}
 		log.debug("Translating into quest API");
-		OWLAPI3Translator t = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
 		Ontology o = t.translate(ont);
 
 		log.debug("Creating a DAG out of it");
@@ -319,7 +319,7 @@ public class DAGPerformanceTest extends TestCase {
 		
 
 		log.debug("Translating into quest API");
-		OWLAPI3Translator t = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility t = new OWLAPI3TranslatorUtility();
 		Ontology o = t.translate(ont);
 
 		log.debug("Creating a DAG out of it");

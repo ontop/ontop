@@ -26,9 +26,15 @@ import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.Predicate;
 import org.semanticweb.ontop.model.ResultSet;
 import org.semanticweb.ontop.model.TupleResultSet;
+import org.semanticweb.ontop.ontology.Assertion;
+import org.semanticweb.ontop.ontology.ClassExpression;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.NaryAxiom;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.Ontology;
 import org.semanticweb.ontop.ontology.*;
 import org.semanticweb.ontop.owlapi3.OWLAPI3ABoxIterator;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import org.semanticweb.ontop.owlrefplatform.core.Quest;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConnection;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
@@ -144,7 +150,7 @@ public class QuestOWL extends OWLReasonerBase {
 
 	private boolean questready = false;
 	
-	private Axiom inconsistent = null;
+	private Object inconsistent = null;
 
 	// / holds the error that quest had when initializing
 	private String errorMessage = "";
@@ -237,8 +243,8 @@ public class QuestOWL extends OWLReasonerBase {
 	}
 	
 	
-	/**
-	 * extract version from VersionInfo, which is from the file {@code version.properties}
+	 /**
+	 * extract version from {@link org.semanticweb.ontop.utils.VersionInfo}, which is from the file {@code version.properties}
 	 */
 	private void extractVersion() {
 		VersionInfo versionInfo = VersionInfo.getVersionInfo();
@@ -403,7 +409,7 @@ public class QuestOWL extends OWLReasonerBase {
 		 */
 		log.debug("Load ontologies called. Translating ontologies.");
 
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 
 		try {
 
@@ -550,12 +556,12 @@ public class QuestOWL extends OWLReasonerBase {
 
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public boolean isConsistent(){
+	public boolean isConsistent() {
 		return true;
 	}
 	
 	//info to return which axiom was inconsistent during the check
-	public Axiom getInconsistentAxiom() {
+	public Object getInconsistentAxiom() {
 		return inconsistent;
 	}
 	
@@ -564,27 +570,24 @@ public class QuestOWL extends OWLReasonerBase {
 	}
 	
 	private boolean isDisjointAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
-		boolean isConsistent = true;
 
 		//deal with disjoint classes
 		{
 			final String strQueryClass = "ASK {?x a <%s>; a <%s> }";
 			
-			Set<DisjointClassesAxiom> disjointAxioms = translatedOntologyMerge.getDisjointClassesAxioms();
-			Iterator<DisjointClassesAxiom> it = disjointAxioms.iterator();
-			
-			while (isConsistent && it.hasNext()) {		
+			for (NaryAxiom<ClassExpression> dda : translatedOntologyMerge.getDisjointClassesAxioms()) {		
 				// TODO: handle complex class expressions and many pairs of disjoint classes
-				DisjointClassesAxiom dda = it.next();
-				Set<ClassExpression> disj = dda.getClasses();
+				Set<ClassExpression> disj = dda.getComponents();
 				Iterator<ClassExpression> classIterator = disj.iterator();
 				ClassExpression s1 = classIterator.next();
 				ClassExpression s2 = classIterator.next();
 				String strQuery = String.format(strQueryClass, s1, s2);
 				
-				isConsistent = executeConsistencyQuery(strQuery);
-				if (!isConsistent) 
+				boolean isConsistent = executeConsistencyQuery(strQuery);
+				if (!isConsistent) {
 					inconsistent = dda;
+					return false;
+				}
 			}
 		}
 		
@@ -592,49 +595,76 @@ public class QuestOWL extends OWLReasonerBase {
 		{
 			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
 
-			Set<DisjointPropertiesAxiom> disjointAxioms = translatedOntologyMerge.getDisjointPropertiesAxioms();
-			Iterator<DisjointPropertiesAxiom> it = disjointAxioms.iterator();
-			
-			while (isConsistent && it.hasNext()) {		
+			for(NaryAxiom<ObjectPropertyExpression> dda 
+						: translatedOntologyMerge.getDisjointObjectPropertiesAxioms()) {		
 				// TODO: handle role inverses and multiple arguments			
-				DisjointPropertiesAxiom dda = it.next();
-				Set<PropertyExpression> props = dda.getProperties();
-				Iterator<PropertyExpression> iterator = props.iterator();
-				PropertyExpression p1 = iterator.next();
-				PropertyExpression p2 = iterator.next();
+				Set<ObjectPropertyExpression> props = dda.getComponents();
+				Iterator<ObjectPropertyExpression> iterator = props.iterator();
+				ObjectPropertyExpression p1 = iterator.next();
+				ObjectPropertyExpression p2 = iterator.next();
 				String strQuery = String.format(strQueryProp, p1, p2);
 				
-				isConsistent = executeConsistencyQuery(strQuery);
-				if (!isConsistent) 
+				boolean isConsistent = executeConsistencyQuery(strQuery);
+				if (!isConsistent) {
 					inconsistent = dda;
+					return false;
+				}
 			}
 		}
 		
-		return isConsistent;
+		{
+			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
+
+			for(NaryAxiom<DataPropertyExpression> dda 
+						: translatedOntologyMerge.getDisjointDataPropertiesAxioms()) {		
+				// TODO: handle role inverses and multiple arguments			
+				Set<DataPropertyExpression> props = dda.getComponents();
+				Iterator<DataPropertyExpression> iterator = props.iterator();
+				DataPropertyExpression p1 = iterator.next();
+				DataPropertyExpression p2 = iterator.next();
+				String strQuery = String.format(strQueryProp, p1, p2);
+				
+				boolean isConsistent = executeConsistencyQuery(strQuery);
+				if (!isConsistent) {
+					inconsistent = dda;
+					return false;
+				}
+			}
+		}
+		
+		return true;
 	}
 	
 	private boolean isFunctionalPropertyAxiomsConsistent() throws ReasonerInterruptedException, TimeOutException {
-		boolean isConsistent = true;
 		
 		//deal with functional properties
-		Set<FunctionalPropertyAxiom> funcPropAxioms = translatedOntologyMerge.getFunctionalPropertyAxioms();
-		Iterator<FunctionalPropertyAxiom> itf = funcPropAxioms.iterator();
+
+		final String strQueryFunc = "ASK { ?x <%s> ?y; <%s> ?z. FILTER (?z != ?y) }";
 		
-		String strQueryFunc = "ASK { ?x <%s> ?y; <%s> ?z. FILTER (?z != ?y) }";
-		
-		while (isConsistent && itf.hasNext()) {
-			
-			FunctionalPropertyAxiom pfa = itf.next();
+		for (ObjectPropertyExpression pfa : translatedOntologyMerge.getFunctionalObjectProperties()) {
 			// TODO: handle inverses
-			String propFunc = pfa.getProperty().getPredicate().getName();
+			String propFunc = pfa.getPredicate().getName();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
-			isConsistent = executeConsistencyQuery(strQuery);
-			if (!isConsistent) 
+			boolean isConsistent = executeConsistencyQuery(strQuery);
+			if (!isConsistent) {
 				inconsistent = pfa;
+				return false;
+			}
 		}
 		
-		return isConsistent;
+		for (DataPropertyExpression pfa : translatedOntologyMerge.getFunctionalDataProperties()) {
+			String propFunc = pfa.getPredicate().getName();
+			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
+			
+			boolean isConsistent = executeConsistencyQuery(strQuery);
+			if (!isConsistent) {
+				inconsistent = pfa;
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	private boolean executeConsistencyQuery(String strQuery) {

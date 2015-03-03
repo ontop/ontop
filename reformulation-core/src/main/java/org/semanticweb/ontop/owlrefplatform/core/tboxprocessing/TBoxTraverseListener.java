@@ -1,10 +1,9 @@
 package org.semanticweb.ontop.owlrefplatform.core.tboxprocessing;
 
-
-import org.semanticweb.ontop.ontology.ClassExpression;
 import org.semanticweb.ontop.ontology.DataPropertyExpression;
 import org.semanticweb.ontop.ontology.DataRangeExpression;
 import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.ClassExpression;
 
 public interface TBoxTraverseListener {
 	

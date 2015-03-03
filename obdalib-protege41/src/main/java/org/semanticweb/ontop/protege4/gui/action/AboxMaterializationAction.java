@@ -53,8 +53,7 @@ import org.protege.editor.owl.model.OWLWorkspace;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.owlapi3.OBDAModelSynchronizer;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.OWLAPI3Materializer;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
 import org.semanticweb.ontop.protege4.utils.OBDAProgessMonitor;
@@ -197,10 +196,10 @@ public class AboxMaterializationAction extends ProtegeAction {
 						new OutputStreamWriter(out, "UTF-8"));
 
 				OWLOntology ontology = modelManager.getActiveOntology();
-				OWLOntologyManager manager = modelManager
-						.getOWLOntologyManager();
-				OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
-				Ontology onto = new OWLAPI3Translator().translate(ontology);
+				OWLOntologyManager manager = modelManager.getOWLOntologyManager();
+				//OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
+				Ontology onto = OWLAPI3TranslatorUtility.translate(ontology);
+				obdaModel.declareAll(onto.getVocabulary());
 				
 				final long startTime = System.currentTimeMillis();
 				if (format != 3) {

@@ -84,11 +84,11 @@
 					<source>1.7</source>
 					<target>1.7</target>
 					<testExcludes>
-						<exclude>**/SNOMEDTestJGraphT.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
-						<exclude>**/DAGCreationFromOntologyTest.java</exclude> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
-						<exclude>**/RDBMSDirect*.java</exclude>
-						<exclude>**/SemanticIndexTestSuite.java</exclude>
-						<exclude>**/SNOMEDTest.java</exclude>
+						<!-- <exclude>**/DAGCreationFromOntologyTest.java</exclude> --> <!-- JGraph related test, to be enabled when JGraphT is integrated -->
+						<!-- <exclude>**/RDBMSDirect*.java</exclude> -->
+						<!-- <exclude>**/OWLAPI2ABox*.java</exclude> -->
+						<!-- <exclude>**/SemanticIndexTestSuite.java</exclude> -->
+						<!-- <exclude>**/SNOMEDTest.java</exclude>  -->
 					</testExcludes>
 				</configuration>
 			</plugin>

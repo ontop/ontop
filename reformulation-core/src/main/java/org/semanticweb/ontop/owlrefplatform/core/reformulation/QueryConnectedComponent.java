@@ -20,6 +20,7 @@ package org.semanticweb.ontop.owlrefplatform.core.reformulation;
  * #L%
  */
 
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -53,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * 
  * Constant: NULL (string), TRUE, FALSE (boolean)
  * 
- * NumericalOperationPredicate: MINUS, ADD, SUBSTRACT, MULTIPLY
+ * NumericalOperationPredicate: MINUS, ADD, SUBTRACT, MULTIPLY
  * BooleanOperationPredicate: AND, NOT, OR, EQ, NEQ, GTE, GT, LTE, LT, IS_NULL, IS_NOT_NULL, IS_TRUE, 
  *                            SPARQL_IS_LITERAL_URI, SPARQL_IS_URI, SPARQL_IS_IRI, SPARQL_IS_BLANK, SPARQL_LANGMATCHES, 
  *                            SPARQL_REGEX, SPARQL_LIKE

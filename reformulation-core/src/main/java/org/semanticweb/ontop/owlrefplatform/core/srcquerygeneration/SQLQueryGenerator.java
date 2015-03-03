@@ -43,11 +43,12 @@ public interface SQLQueryGenerator extends Serializable {
 	 * 
 	 * @param query
 	 *            the datalog program
-	 * @return the souce query
-	 * @throws OBDAException
+	 * @return the source query
+	 * @throws Exception
 	 */
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException;
 
+	
 
     public SQLQueryGenerator cloneGenerator();
     

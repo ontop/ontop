@@ -19,21 +19,21 @@
 grammar Turtle;
 
 @header {
-package it.unibz.krdb.obda.parser;
+package org.semanticweb.ontop.parser;
 
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDALibConstants;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.CQIE;
+import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDALibConstants;
+import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.Predicate.COL_TYPE;
+import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.URIConstant;
+import org.semanticweb.ontop.model.Variable;
+import org.semanticweb.ontop.model.ValueConstant;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
+import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 
 //import java.net.URI;
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ import org.openrdf.model.impl.URIImpl;
 }
 
 @lexer::header {
-package it.unibz.krdb.obda.parser;
+package org.semanticweb.ontop.parser;
 
 import java.util.List;
 import java.util.Vector;
@@ -176,7 +176,7 @@ parse returns [CQIE value]
     t1=triplesStatement {
       int arity = variableSet.size();
       List<Term> distinguishVariables = new ArrayList<Term>(variableSet);
-      Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity, null), distinguishVariables);
+      Function head = dfac.getFunction(dfac.getPredicate(OBDALibConstants.QUERY_HEAD, arity), distinguishVariables);
       
       // Create a new rule
       List<Function> triples = $t1.value;
@@ -237,7 +237,7 @@ predicateObjectList returns [List<Function> value]
           Predicate predicate = dfac.getClassPredicate(c.getURI());
           atom = dfac.getFunction(predicate, subject);
         } else {
-          Predicate predicate = dfac.getPredicate($v1.value.toString(), 2, null); // the data type cannot be determined here!
+          Predicate predicate = dfac.getPredicate($v1.value.toString(), 2); // the data type cannot be determined here!
           atom = dfac.getFunction(predicate, subject, object);
         }
         $value.add(atom);
@@ -251,7 +251,7 @@ predicateObjectList returns [List<Function> value]
           Predicate predicate = dfac.getClassPredicate(c.getURI());
           atom = dfac.getFunction(predicate, subject);
         } else {
-          Predicate predicate = dfac.getPredicate($v2.value.toString(), 2, null); // the data type cannot be determined here!
+          Predicate predicate = dfac.getPredicate($v2.value.toString(), 2); // the data type cannot be determined here!
           atom = dfac.getFunction(predicate, subject, object);
         }
         $value.add(atom);

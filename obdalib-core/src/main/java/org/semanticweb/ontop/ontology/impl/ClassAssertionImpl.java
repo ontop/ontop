@@ -30,7 +30,7 @@ import org.semanticweb.ontop.ontology.ClassAssertion;
 import org.semanticweb.ontop.ontology.OClass;
 
 public class ClassAssertionImpl implements ClassAssertion {
-    
+
 	private static final long serialVersionUID = 5689712345023046811L;
 
 	private final ObjectConstant object;

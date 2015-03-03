@@ -21,11 +21,12 @@ package org.semanticweb.ontop.owlrefplatform.core.dagjgrapht;
  */
 
 
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
+import org.semanticweb.ontop.ontology.ClassExpression;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.DataRangeExpression;
 import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.PropertyExpression;
-
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
 
 /**
  *  This is the interface for the class TBoxReasoner where we are able to retrieve all the connection built in our DAG 
@@ -38,24 +39,42 @@ public interface TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<PropertyExpression> getProperties();
+	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG();
 	
+	/**
+	 * Return the DAG of properties
+	 * 
+	 * @return DAG 
+	 */
+
+	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG();
+
 	/**
 	 * Return the DAG of classes
 	 * 
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<BasicClassDescription> getClasses();
+	public EquivalencesDAG<ClassExpression> getClassDAG();
+	
+	/**
+	 * Return the DAG of datatypes and data property ranges
+	 * 
+	 * @return DAG 
+	 */
+
+	public EquivalencesDAG<DataRangeExpression> getDataRanges();
 	
 	/**
 	 * 
-	 * @param v: a description
-	 * @return null if v is the representative of its own class **or v is not part of the graph**
+	 * @param p: a description
+	 * @return null if p is the representative of its own class **or p is not part of the graph**
 	 *         the representative of the equivalence class otherwise  
 	 */
 
-	public OClass getClassRepresentative(Predicate p);
+	public OClass getClassRepresentative(OClass p);
 	
-	public PropertyExpression getPropertyRepresentative(Predicate p);
+	public ObjectPropertyExpression getObjectPropertyRepresentative(ObjectPropertyExpression p);
+	
+	public DataPropertyExpression getDataPropertyRepresentative(DataPropertyExpression p);
 }

@@ -1,5 +1,7 @@
 package org.semanticweb.ontop.protege4.gui.action;
 
+
+import java.awt.Component;
 import java.awt.*;
 import java.util.concurrent.CountDownLatch;
 

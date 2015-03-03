@@ -20,11 +20,20 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  * #L%
  */
 
-import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.CQIE;
+import org.semanticweb.ontop.model.DatalogProgram;
+import org.semanticweb.ontop.model.OBDADataFactory;
+import org.semanticweb.ontop.model.OBDAMappingAxiom;
+import org.semanticweb.ontop.model.OBDASQLQuery;
+import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.model.impl.OBDAVocabulary;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
 import org.semanticweb.ontop.ontology.OClass;
-import org.semanticweb.ontop.ontology.PropertyExpression;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.OntologyFactory;
+import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Collection;
@@ -115,9 +124,7 @@ public class VocabularyValidator {
 				 * Calling recursively for nested expressions
 				 */
 				if (atom.isAlgebraFunction()) {
-                    if (!atom.getFunctionSymbol().equals(OBDAVocabulary.SPARQL_GROUP)){
-                        replaceEquivalences(atom.getTerms());
-                    }
+					replaceEquivalences(atom.getTerms());
 					continue;
 				}
 				
@@ -131,21 +138,32 @@ public class VocabularyValidator {
 		}
 	}
 	
+	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	
 	public Function getNormal(Function atom) {
-		Predicate p = atom.getPredicate();
+		Predicate p = atom.getFunctionSymbol();
 		
 		if (p.getArity() == 1) {
-			OClass equivalent = reasoner.getClassRepresentative(p);
+			OClass c = ofac.createClass(p.getName());
+			OClass equivalent = reasoner.getClassRepresentative(c);
 			if (equivalent != null)
 				return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 		} 
 		else {
-			PropertyExpression equivalent = reasoner.getPropertyRepresentative(p);
+			ObjectPropertyExpression op = ofac.createObjectProperty(p.getName());
+			ObjectPropertyExpression equivalent = reasoner.getObjectPropertyRepresentative(op);
 			if (equivalent != null) {
 				if (!equivalent.isInverse()) 
 					return dfac.getFunction(equivalent.getPredicate(), atom.getTerms());
 				else 
 					return dfac.getFunction(equivalent.getPredicate(), atom.getTerm(1), atom.getTerm(0));
+			}
+			else {
+				DataPropertyExpression dp = ofac.createDataProperty(p.getName());
+				DataPropertyExpression equiv2 = reasoner.getDataPropertyRepresentative(dp);
+				if (equiv2 != null) {
+					return dfac.getFunction(equiv2.getPredicate(), atom.getTerms());
+				}				
 			}
 		}
 		return atom;
@@ -180,7 +198,7 @@ public class VocabularyValidator {
 			CQIE targetQuery = (CQIE) mapping.getTargetQuery();
 			
 			CQIE newTargetQuery = replaceEquivalences(targetQuery, false);
-			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(),((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
+			result.add(dfac.getRDBMSMappingAxiom(mapping.getId(), mapping.getSourceQuery().toString(), newTargetQuery));
 
 		}
 		return result;

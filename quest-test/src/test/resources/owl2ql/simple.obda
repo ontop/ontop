@@ -1,5 +1,5 @@
 [PrefixDeclaration]
-:		http://www.owl-ontologies.com/Ontology1207768242.owl#
+:		http://www.semanticweb.org/roman/ontologies/2014/9/untitled-ontology-123/
 dc:		http://purl.org/dc/elements/1.1/
 owl:		http://www.w3.org/2002/07/owl#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
@@ -20,5 +20,8 @@ password	imdb
 driverClass	org.postgresql.Driver
 
 [MappingDeclaration] @collection [[
+mappingId	production-year
+target		:title/{id} :DP {production_year}^^xsd:double . 
+source		select id, production_year FROM title
 ]]
 

@@ -20,6 +20,8 @@ package org.semanticweb.ontop.owlrefplatform.owlapi3;
  * #L%
  */
 
+
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -31,8 +33,8 @@ import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.owlapi3.OBDAModelSynchronizer;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
+
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import org.semanticweb.ontop.owlapi3.QuestOWLIndividualIterator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
@@ -78,31 +80,30 @@ public class QuestOWLMaterializerCMD {
 			}
 			writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
 			
-			OWLOntology ontology = null;
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			
-			if (owlfile != null) {
-			// Loading the OWL ontology from the file as with normal OWLReasoners
-				ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-			}
-			else {
-				ontology = manager.createOntology();
-			}
 			
 			OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 			OBDAModel obdaModel = fac.getOBDAModel();
 			ModelIOManager ioManager = new ModelIOManager(obdaModel);
 			ioManager.load(obdafile);
 
-			OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
-
+			OWLOntology ontology = null;
+			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLAPI3Materializer materializer = null;
+			
 			if (owlfile != null) {
-				Ontology onto =  new OWLAPI3Translator().translate(ontology);
+			// Loading the OWL ontology from the file as with normal OWLReasoners
+				ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
+				Ontology onto =  OWLAPI3TranslatorUtility.translate(ontology);
+				obdaModel.declareAll(onto.getVocabulary());
 				materializer = new OWLAPI3Materializer(obdaModel, onto);
 			}
-			else
+			else {
+				ontology = manager.createOntology();
 				materializer = new OWLAPI3Materializer(obdaModel);
+			}
+			
+			//OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
+
 			QuestOWLIndividualIterator iterator = materializer.getIterator();
 	
 			while(iterator.hasNext()) 

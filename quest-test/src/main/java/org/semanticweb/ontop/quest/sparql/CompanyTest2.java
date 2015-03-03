@@ -199,7 +199,7 @@ public class CompanyTest2 extends TestCase {
 //
 //				}
 			assertTrue(rs2.nextRow());
-			OWLObject ind2 = rs2.getOWLNamedIndividual("z");
+			OWLObject ind2 = rs2.getOWLIndividual("z");
 			
 			assertEquals("<http://it.unibz.krdb/obda/test/company#mark>", ind2.toString());
 			
