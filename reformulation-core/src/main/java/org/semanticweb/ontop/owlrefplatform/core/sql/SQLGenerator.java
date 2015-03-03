@@ -2592,7 +2592,7 @@ public class SQLGenerator implements SQLQueryGenerator {
         private void indexVariables(Function atom) {
             DataDefinition def = dataDefinitions.get(atom);
             Predicate atomName = atom.getFunctionSymbol();
-            final String viewName = viewNames.get(atom);
+            final String quotedViewName = sqladapter.sqlQuote(viewNames.get(atom));
             for (int index = 0; index < atom.getTerms().size(); index++) {
                 Term term = atom.getTerms().get(index);
 
@@ -2613,7 +2613,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
                     columnName = trim(columnName);
 
-                    String reference = sqladapter.sqlQualifiedColumn(viewName,
+                    String reference = sqladapter.sqlQualifiedColumn(quotedViewName,
                             columnName);
                     columnReferences.put((Variable) term, reference);
                 }
@@ -2643,7 +2643,7 @@ public class SQLGenerator implements SQLQueryGenerator {
              */
             DataDefinition def = dataDefinitions.get(atom);
             if (def != null) {
-                final String viewName = viewNames.get(atom);
+                final String viewName = sqladapter.sqlQuote(viewNames.get(atom));
 
                 if (def instanceof TableDefinition) {
                     return sqladapter.sqlTableName(tableNames.get(atom), viewName);
@@ -2669,8 +2669,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 
                 if (view != null) {
                     // TODO: check if it is correct not to consider other view names.
-                    final String viewName = sqladapter.nameView(VIEW_PREFIX, pred.getName(), VIEW_ANS_SUFFIX,
-                            ImmutableSet.<String>of());
+                    final String viewName = sqladapter.sqlQuote(sqladapter.nameView(VIEW_PREFIX, pred.getName(), VIEW_ANS_SUFFIX,
+                            ImmutableSet.<String>of()));
 
                     String formatView = String.format("(%s) %s", view, viewName);
                     return formatView;

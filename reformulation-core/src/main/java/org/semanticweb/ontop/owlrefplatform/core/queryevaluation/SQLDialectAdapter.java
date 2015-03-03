@@ -81,7 +81,7 @@ public interface SQLDialectAdapter {
 	public String nameTopVariable(String signatureVariable, String proposedSuffix, Set<String> sqlVariableNames);
 
 	/**
-	 * Returns a quoted view name.
+	 * Returns an UNQUOTED view name.
 	 */
 	String nameView(String prefix, String tableName, String suffix, Collection<String> viewNames);
 }

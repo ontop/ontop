@@ -95,7 +95,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String nameTopVariable(String signatureVariableName, String suffix, Set<String> sqlVariableNames) {
-		return nameViewOrVariable("", signatureVariableName, suffix, sqlVariableNames);
+		return sqlQuote(nameViewOrVariable("", signatureVariableName, suffix, sqlVariableNames));
 	}
 
 	@Override

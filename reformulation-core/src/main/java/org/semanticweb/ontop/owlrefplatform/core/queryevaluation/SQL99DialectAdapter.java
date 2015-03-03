@@ -273,7 +273,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String nameTopVariable(String signatureVariableName, String proposedSuffix, Set<String> sqlVariableNames) {
-		return buildDefaultName("", signatureVariableName, proposedSuffix);
+		return sqlQuote(buildDefaultName("", signatureVariableName, proposedSuffix));
 	}
 
 	@Override
@@ -282,10 +282,12 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	}
 
 	/**
-	 * Concatenates the string and puts some quotes around.
+	 * Concatenates the strings.
 	 * Default way to name a variable or a view.
+	 *
+	 * Returns an UNQUOTED string.
 	 */
 	protected final String buildDefaultName(String prefix, String intermediateName, String suffix) {
-		return sqlQuote(prefix + intermediateName + suffix);
+		return prefix + intermediateName + suffix;
 	}
 }
