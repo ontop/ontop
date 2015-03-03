@@ -22,7 +22,7 @@
 	# :floor01
 	# :round01
 	 :concat01
-	 :concat02
+	# :concat02
 	# :substring01
 	# :substring02
 	# :length01
@@ -64,9 +64,9 @@
 	# :coalesce01
 	# :strbefore01
 	# :strafter01
-	 :replace01
+	# :replace01
 	 :replace02
-	 :replace03
+	# :replace03
  ) .
 
 

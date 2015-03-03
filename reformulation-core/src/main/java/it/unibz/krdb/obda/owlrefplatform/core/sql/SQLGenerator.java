@@ -36,6 +36,7 @@ import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import org.openrdf.model.Literal;
 
 import java.sql.Types;
@@ -324,7 +325,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String rightOp = getSQLString(right, index, true);
 				return String.format("(" + expressionFormat + ")", leftOp, rightOp);
 			} else if (atom.isArithmeticFunction()) {
-				// For numerical operators, e.g., MUTLIPLY, SUBTRACT, ADDITION
+				// For numerical operators, e.g., MULTIPLY, SUBTRACT, ADDITION
 				String expressionFormat = getNumericalOperatorString(functionSymbol);
 				Term left = atom.getTerm(0);
 				Term right = atom.getTerm(1);
@@ -1140,6 +1141,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 				return !isSI;
 			} else {
 				if (isUnary(function)) {
+
+                    if (dtfac.isLiteral(functionSymbol)) {
+                        return true;
+                    }
 					/*
 					 * Update the term with the parent term's first parameter.
 					 * Note: this method is confusing :(
@@ -1150,8 +1155,7 @@ public class SQLGenerator implements SQLQueryGenerator {
                 else{ //can be a literal with lang type
 
                     if (dtfac.isLiteral(functionSymbol)) {
-                        term = function.getTerm(0);
-                        return isStringColType(term, index);
+                        return true;
                     }
 
                 }
@@ -1197,7 +1201,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	private String trim(String string) {
-		while (string.startsWith("\"") && string.endsWith("\"")) {
+		while (ParsedSQLQuery.pQuotes.matcher(string).matches()) {
 			string = string.substring(1, string.length() - 1);
 		}
 		return string;

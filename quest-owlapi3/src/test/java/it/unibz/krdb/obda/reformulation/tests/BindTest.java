@@ -45,9 +45,12 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Class to test if bind in SPARQL is working properly.
@@ -188,17 +191,17 @@ public class BindTest {
 
         assertEquals("\"17.25\"^^xsd:decimal", price.toString());
 
-        //complex case
-        String querySelect1 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
-                "PREFIX  ns:  <http://example.org/ns#>\n" +
-                "SELECT  ?title (?p*(1-?discount) AS ?price)\n" +
-                "{ ?x ns:price ?p .\n" +
-                "  ?x dc:title ?title . \n" +
-                "  ?x ns:discount ?discount . \n" +
-                "}";
-        OWLObject price1 = runTests(p, querySelect1);
-
-        assertEquals("\"33.6\"", price1.toString());
+//        //complex case
+//        String querySelect1 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
+//                "PREFIX  ns:  <http://example.org/ns#>\n" +
+//                "SELECT  ?title (?p*(1-?discount) AS ?price)\n" +
+//                "{ ?x ns:price ?p .\n" +
+//                "  ?x dc:title ?title . \n" +
+//                "  ?x ns:discount ?discount . \n" +
+//                "}";
+//        OWLObject price1 = runTests(p, querySelect1);
+//
+//        assertEquals("\"33.6\"", price1.toString());
 
 
 
@@ -216,17 +219,23 @@ public class BindTest {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?price WHERE \n"
+                + "SELECT  ?title ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount\n"
-                + "   BIND (?p*(1-?discount) AS ?price)\n"
-                + "   FILTER(?price < 20)\n"
+                + "   BIND (?p*(1-?discount) AS ?w)\n"
+                + "   FILTER(?w < 20)\n"
                 + "   ?x dc:title ?title .\n"
                 + "}";
 
-        OWLObject price = runTests(p, queryBind);
 
-        assertEquals("\"17.25\"", price.toString());
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"17.25\"");
+
+
+        checkReturnedValues(p, queryBind, expectedValues);
+//        OWLObject price = runTests(p, queryBind);
+//
+//        assertEquals("\"17.25\"", price.toString());
 
 
     }
@@ -340,20 +349,71 @@ public class BindTest {
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
+//        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+//                + "PREFIX  ns:  <http://example.org/ns#>\n"
+//                + "SELECT  ?title ?price WHERE \n"
+//                + "{  ?x ns:price ?p .\n"
+//                + "   ?x ns:discount ?discount\n"
+//                + "   BIND (CONCAT(xsd:string(?p*(1-?discount)), xsd:string(?p)) AS ?price)\n"
+//                + "   FILTER(?price < 20)\n"
+//                + "   ?x dc:title ?title .\n"
+//                + "}";
+
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?price WHERE \n"
+                + "SELECT  ?title ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount\n"
-                + "   BIND (CONCAT(xsd:string(?p*(1-?discount)), xsd:string(?p)) AS ?price)\n"
-                + "   FILTER(?price < 20)\n"
+                + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "}";
+                + "   BIND (CONCAT((?title), \" title\") AS ?w)\n"
+             + "}";
 
-        OWLObject price = runTests(p, queryBind);
 
-        assertEquals("\"17.25\"", price.toString());
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"SPARQL Tutorial title\"");
+        expectedValues.add("\"The Semantic Web title\"");
+        checkReturnedValues(p, queryBind, expectedValues);
 
+
+
+    }
+
+    private void checkReturnedValues(QuestPreferences p, String query, List<String> expectedValues) throws Exception {
+
+        // Creating a new instance of the reasoner
+        QuestOWLFactory factory = new QuestOWLFactory();
+        factory.setOBDAController(obdaModel);
+
+        factory.setPreferenceHolder(p);
+
+        QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+
+        // Now we are ready for querying
+        QuestOWLConnection conn = reasoner.getConnection();
+        QuestOWLStatement st = conn.createStatement();
+
+
+
+            int i = 0;
+            List<String> returnedValues = new ArrayList<>();
+            try {
+                QuestOWLResultSet rs = st.executeTuple(query);
+                while (rs.nextRow()) {
+                    OWLObject ind1 = rs.getOWLObject("w");
+                    // log.debug(ind1.toString());
+                    returnedValues.add(ind1.toString());
+                    java.lang.System.out.println(ind1);
+                    i++;
+                }
+            } catch (Exception e) {
+                throw e;
+            } finally {
+                conn.close();
+                reasoner.dispose();
+            }
+            assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
+                    returnedValues.equals(expectedValues));
+            assertTrue(String.format("Wrong size: %d (expected %d)", i, expectedValues.size()), expectedValues.size() == i);
 
     }
 

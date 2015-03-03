@@ -70,25 +70,38 @@ public class AssignmentTest {
                 "BIND (\"123\" AS ?price) \n" +
                 "}";
 
-//        String query = "PREFIX : <http://myproject.org/odbs#> \n" +
-//                "\n" +
-//                "SELECT DISTINCT ?f ?d " +
-//                " ?price \n" +
-//                "WHERE {?f a :Film; :hasDirector ?d . \n" +
-//                "BIND (CONCAT(\"123\", \"456\")  as ?price  )    " +
-////                "BIND  \n" +
-//                "}";
 
-                String querySelect = "PREFIX : <http://myproject.org/odbs#> \n" +
 
-                "SELECT DISTINCT ?f ?d (\"123\" AS ?price)  \n" +
-                "WHERE {?f a :Film; :hasDirector ?d .  \n" +
+        int results = runTestQuery(p, queryBind);
+        assertEquals(500, results);
+    }
+    @Test
+    public void testBindAndConcatQuery() throws Exception {
 
+        QuestPreferences p = new QuestPreferences();
+
+//
+
+
+        String queryConcat1 = "PREFIX : <http://myproject.org/odbs#> \n" +
+                "\n" +
+                "SELECT DISTINCT ?f ?d " +
+                " ?price \n" +
+                "WHERE {?f a :Film; :title ?t; :hasDirector ?d . \n" +
+                "BIND (CONCAT(\"123\", \"456\")  as ?price  )    " +
+                "}";
+
+        String queryConcat2 = "PREFIX : <http://myproject.org/odbs#> \n" +
+                "\n" +
+                "SELECT DISTINCT ?f ?d " +
+                " ?price \n" +
+                "WHERE {?f a :Film; :title ?t; :hasDirector ?d . \n" +
+                "BIND (CONCAT(?t, ?t)  as ?price  )    " +
                 "}";
 
 
 
-        int results = runTestQuery(p, queryBind);
+        int results = runTestQuery(p, queryConcat2);
         assertEquals(500, results);
     }
 
@@ -107,6 +120,24 @@ public class AssignmentTest {
 
 
         int results = runTestQuery(p, querySelect);
+        assertEquals(500, results);
+    }
+
+    @Test
+    public void testSelectWithConcatQuery() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+
+
+        String querySelConcat = "PREFIX : <http://myproject.org/odbs#> \n" +
+
+                "SELECT DISTINCT ?f ?d (CONCAT(\"123\", \"456\") AS ?price)  \n" +
+                "WHERE {?f a :Film; :hasDirector ?d .  \n" +
+                "}";
+
+
+
+        int results = runTestQuery(p, querySelConcat);
         assertEquals(500, results);
     }
 
