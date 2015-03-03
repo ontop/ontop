@@ -27,7 +27,7 @@ import it.unibz.krdb.obda.model.BNodePredicate;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
+import it.unibz.krdb.obda.model.DatatypePredicate;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.NonBooleanOperationPredicate;
@@ -146,7 +146,7 @@ public class ExpressionEvaluator {
 			return evalNonBoolean(expr);
 		} else if (p instanceof NumericalOperationPredicate) {
 			return evalNumericalOperation(expr);
-		} else if (p instanceof DataTypePredicate) {
+		} else if (p instanceof DatatypePredicate) {
 			if (dtfac.isBoolean(p)) { // OBDAVocabulary.XSD_BOOLEAN
 				if (expr.getTerm(0) instanceof Constant) {
 					ValueConstant value = (ValueConstant) expr.getTerm(0);
@@ -320,7 +320,7 @@ public class ExpressionEvaluator {
 		if (innerTerm instanceof Function) {
 			Function function = (Function) innerTerm;
 			Predicate predicate = function.getFunctionSymbol();
-			return fac.getBooleanConstant(predicate instanceof DataTypePredicate);
+			return fac.getBooleanConstant(predicate instanceof DatatypePredicate);
 		} 
 		else {
 			return term;
@@ -375,7 +375,7 @@ public class ExpressionEvaluator {
 			Function function = (Function) innerTerm;
 			Predicate predicate = function.getFunctionSymbol();
 			Term parameter = function.getTerm(0);
-			if (predicate instanceof DataTypePredicate) {
+			if (predicate instanceof DatatypePredicate) {
 				if (dtfac.isLiteral(predicate)) { // R: was datatype.equals(OBDAVocabulary.RDFS_LITERAL_URI)
 					return fac.getTypedTerm(
 							fac.getVariable(parameter.toString()), COL_TYPE.LITERAL);
@@ -387,7 +387,7 @@ public class ExpressionEvaluator {
 				else {
 					return fac.getTypedTerm(
 							fac.getFunctionCast(fac.getVariable(parameter.toString()),
-									fac.getConstantLiteral(dtfac.getDataTypeURI(COL_TYPE.LITERAL).stringValue())), 
+									fac.getConstantLiteral(dtfac.getDatatypeURI(COL_TYPE.LITERAL).stringValue())),
 										COL_TYPE.LITERAL);
 				}
 			} 
@@ -416,7 +416,7 @@ public class ExpressionEvaluator {
 	
 	private Term getDatatype(Predicate predicate, Term lit)
 	{
-		if (predicate instanceof DataTypePredicate) {
+		if (predicate instanceof DatatypePredicate) {
 			return fac.getUriTemplateForDatatype(predicate.toString());
 		} 
 		else if (predicate instanceof BNodePredicate) {
@@ -426,12 +426,12 @@ public class ExpressionEvaluator {
 			return null;
 		} 
 		else if (predicate instanceof AlgebraOperatorPredicate){
-			return fac.getUriTemplateForDatatype(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue());
+			return fac.getUriTemplateForDatatype(dtfac.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
 		} 
 		else if (predicate instanceof OperationPredicate){
 			if (predicate instanceof BooleanOperationPredicate) {
 				//return boolean uri
-				return fac.getUriTemplateForDatatype(dtfac.getDataTypeURI(COL_TYPE.BOOLEAN).stringValue());
+				return fac.getUriTemplateForDatatype(dtfac.getDatatypeURI(COL_TYPE.BOOLEAN).stringValue());
 			}
 			else if (predicate instanceof NumericalOperationPredicate)
 			{
@@ -491,7 +491,7 @@ public class ExpressionEvaluator {
 	
 	private boolean isNumeric(ValueConstant constant) {
 		String constantValue = constant.getValue();
-		Predicate.COL_TYPE type = dtfac.getDataType(constantValue);
+		Predicate.COL_TYPE type = dtfac.getDatatype(constantValue);
 		if (type != null) {
 			Predicate p = dtfac.getTypePredicate(type);
 			return isNumeric(p);
@@ -514,7 +514,7 @@ public class ExpressionEvaluator {
 		Function function = (Function) innerTerm;
 		Predicate predicate = function.getFunctionSymbol();
 
-		if (!(predicate instanceof DataTypePredicate)) {
+		if (!(predicate instanceof DatatypePredicate)) {
 			return null;
 		}
 
@@ -689,7 +689,7 @@ public class ExpressionEvaluator {
 		if (term.getTerm(0) instanceof Function) {
 			Function t1 = (Function) term.getTerm(0);
 			Predicate p1 = t1.getFunctionSymbol();
-			if (!(p1 instanceof DataTypePredicate)) {
+			if (!(p1 instanceof DatatypePredicate)) {
 				teval1 = eval(term.getTerm(0));
 				if (teval1 == null) {
 					return OBDAVocabulary.FALSE;
@@ -708,7 +708,7 @@ public class ExpressionEvaluator {
 		if (term.getTerm(1) instanceof Function) {
 			Function t2 = (Function) term.getTerm(1);
 			Predicate p2 = t2.getFunctionSymbol();
-			if (!(p2 instanceof DataTypePredicate)) {
+			if (!(p2 instanceof DatatypePredicate)) {
 				teval2 = eval(term.getTerm(1));
 				if (teval2 == null) {
 					return OBDAVocabulary.FALSE;
@@ -740,7 +740,7 @@ public class ExpressionEvaluator {
 			Function f1 = (Function) eval1;
 			Predicate pred1 = f1.getFunctionSymbol();
 			
-			if (pred1 instanceof DataTypePredicate) {
+			if (pred1 instanceof DatatypePredicate) {
 				if (pred1.getType(0) == COL_TYPE.UNSUPPORTED) {
 					throw new RuntimeException("Unsupported type: " + pred1);
 				}

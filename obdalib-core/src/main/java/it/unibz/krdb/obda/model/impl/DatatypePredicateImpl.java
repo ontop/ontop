@@ -20,11 +20,11 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.DataTypePredicate;
+import it.unibz.krdb.obda.model.DatatypePredicate;
 
 //import com.hp.hpl.jena.iri.IRI;
 
-public class DataTypePredicateImpl extends PredicateImpl implements DataTypePredicate {
+public class DatatypePredicateImpl extends PredicateImpl implements DatatypePredicate {
 
 	private static final long serialVersionUID = -6678449661465775977L;
 
@@ -37,7 +37,7 @@ public class DataTypePredicateImpl extends PredicateImpl implements DataTypePred
 	 * @param type
 	 * 			The datatype that the term holds.
 	 */
-	public DataTypePredicateImpl(String name, COL_TYPE type) {
+	public DatatypePredicateImpl(String name, COL_TYPE type) {
 		super(name, 1, new COL_TYPE[] { type });
 	}
 	
@@ -52,12 +52,12 @@ public class DataTypePredicateImpl extends PredicateImpl implements DataTypePred
 	 * @param types
 	 * 			The datatypes that each term holds.
 	 */
-	public DataTypePredicateImpl(String name, COL_TYPE[] types) {
+	public DatatypePredicateImpl(String name, COL_TYPE[] types) {
 		super(name, types.length, types);
 	}
 	
 	@Override
-	public DataTypePredicateImpl clone() {
+	public DatatypePredicateImpl clone() {
 		return this;
 	}
 }

@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.XsdDatatypeConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
@@ -501,7 +502,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Predicate predicate = atom.getFunctionSymbol();
 		if (predicate instanceof BooleanOperationPredicate
 				|| predicate instanceof NumericalOperationPredicate
-				|| predicate instanceof DataTypePredicate) {
+				|| predicate instanceof DatatypePredicate) {
 			// These don't participate in the FROM clause
 			return "";
 		} else if (predicate instanceof AlgebraOperatorPredicate) {
@@ -687,7 +688,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Function f = (Function) term;
 		if (f.isDataTypeFunction()) {
 			Predicate p = f.getFunctionSymbol();
-			Predicate.COL_TYPE type = dtfac.getDataType(p.toString());			
+			Predicate.COL_TYPE type = dtfac.getDatatype(p.toString());
 			return OBDADataFactoryImpl.getInstance().getJdbcTypeMapper().getSQLType(type);
 		}
 		// Return varchar for unknown
@@ -789,7 +790,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			/*
 			 * Adding the column(s) with the actual value(s)
 			 */
-			if (function instanceof DataTypePredicate) {
+			if (function instanceof DatatypePredicate) {
 				/*
 				 * Case where we have a typing function in the head (this is the
 				 * case for all literal columns
@@ -909,7 +910,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			else {
 				String functionString = function.toString();
-				type = dtfac.getDataType(functionString);
+				type = dtfac.getDatatype(functionString);
 			}
 		}
 		else if (ht instanceof URIConstant) {
@@ -1206,7 +1207,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Term term1 = function.getTerms().get(0);
 		int size = function.getTerms().size();
 
-		if (functionSymbol instanceof DataTypePredicate) {
+		if (functionSymbol instanceof DatatypePredicate) {
 			if (functionSymbol.getType(0) == COL_TYPE.UNSUPPORTED) {
 				throw new RuntimeException("Unsupported type in the query: " + function);
 			}
@@ -1342,16 +1343,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			sql = "'" + constant.getValue() + "'";
 		} 
 		else if (constant.getType() == COL_TYPE.BOOLEAN) {
-			String value = constant.getValue().toLowerCase();
-			if (value.equals("1") || value.equals("true") || value.equals("t")) {
-				sql = sqladapter.getSQLLexicalFormBoolean(true);
-			} 
-			else if (value.equals("0") || value.equals("false") || value.equals("f")) {
-				sql = sqladapter.getSQLLexicalFormBoolean(false);
-			} 
-			else {
-				throw new RuntimeException("Invalid lexical form for xsd:boolean. Found: " + value);
-			}
+			String value = constant.getValue();
+			boolean v = XsdDatatypeConverter.parseXsdBoolean(value);
+			sql = sqladapter.getSQLLexicalFormBoolean(v);
 		} 
 		else if (constant.getType() == COL_TYPE.DATETIME ) {
 			sql = sqladapter.getSQLLexicalFormDatetime(constant.getValue());

@@ -22,10 +22,9 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
-import it.unibz.krdb.obda.model.DataTypePredicate;
+import it.unibz.krdb.obda.model.DatatypePredicate;
 import it.unibz.krdb.obda.model.NumericalOperationPredicate;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 
 public class PredicateImpl implements Predicate {
 
@@ -133,7 +132,7 @@ public class PredicateImpl implements Predicate {
 
 	@Override
 	public boolean isDataTypePredicate() {
-		return this instanceof DataTypePredicate;
+		return this instanceof DatatypePredicate;
 	}
 
 	@Override

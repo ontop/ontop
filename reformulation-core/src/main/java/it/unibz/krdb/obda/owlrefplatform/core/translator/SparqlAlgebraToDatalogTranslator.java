@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
 
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DataTypePredicate;
+import it.unibz.krdb.obda.model.DatatypePredicate;
 import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
@@ -46,7 +46,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -744,7 +743,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			} 
 			else if (o instanceof URIImpl) {
 				URI objectUri = (URI)o; 
-				Predicate.COL_TYPE type = dtfac.getDataType(objectUri);
+				Predicate.COL_TYPE type = dtfac.getDatatype(objectUri);
 				if (type != null) {
 					Predicate predicate = dtfac.getTypePredicate(type);
 					atom = ofac.getFunction(predicate, sTerm);
@@ -1014,7 +1013,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		if (typeURI == null) 
 			return COL_TYPE.LITERAL;
 		
-		COL_TYPE dataType = dtfac.getDataType(typeURI);
+		COL_TYPE dataType = dtfac.getDatatype(typeURI);
         if (dataType == null) 
 			throw new RuntimeException("Unsupported datatype: " + typeURI.stringValue());
 		
@@ -1083,7 +1082,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				tp = COL_TYPE.LITERAL;
 			}
 			else {
-				tp = dtfac.getDataType(type);
+				tp = dtfac.getDatatype(type);
 				if (tp == null) {
 					return ofac.getUriTemplateForDatatype(type.stringValue());
 				}				
@@ -1230,7 +1229,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		if (term instanceof Function) {
 			Function f = (Function) term;
 			Predicate functor = f.getFunctionSymbol();
-			if (functor instanceof DataTypePredicate) {
+			if (functor instanceof DatatypePredicate) {
 				Term functionTerm = f.getTerm(0);
 				if (functionTerm instanceof Constant) {
 					Constant c = (Constant) functionTerm;
