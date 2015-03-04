@@ -184,6 +184,7 @@ public class TableNameVisitor implements SelectVisitor, FromItemVisitor, Express
         switch(function.getName().toLowerCase()){
 
             case "regexp_like" :
+            case "regexp_replace" :
             case "replace" :
             case "concat" :
 

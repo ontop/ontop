@@ -76,6 +76,14 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 		return columnname + " ~" + ((caseinSensitive)? "* " : " ") + "'"+ ((multiLine && dotAllMode)? "(?n)" : flags) + pattern + "'";
 	}
 
+    @Override
+    public String strreplace(String str, String oldstr, String newstr) {
+        oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+
+        newstr = newstr.substring(1, newstr.length() - 1);
+        return String.format("REGEXP_REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
+    }
+
 	@Override
 	public String getDummyTable() {
 		return "SELECT 1";

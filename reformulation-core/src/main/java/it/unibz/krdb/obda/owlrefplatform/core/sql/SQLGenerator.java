@@ -829,9 +829,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
 		}
 
-        if (mainColumn==null){
-            return String.format(mainTemplate, "NULL", sqladapter.sqlQuote(signature.get(hpos)));
-        }
+//        if (mainColumn==null){
+//            return String.format(mainTemplate, "NULL", sqladapter.sqlQuote(signature.get(hpos)));
+//        }
 		/*
 		 * If we have a column we need to still CAST to VARCHAR
 		 */
@@ -903,6 +903,23 @@ public class SQLGenerator implements SQLQueryGenerator {
 
                 }
             }
+            else if(pred1.equals(OBDAVocabulary.REPLACE)){
+                Term rep1 = func1.getTerm(0);
+
+
+                if (rep1 instanceof Function) {
+                    Function replFunc1 = (Function) rep1;
+
+
+                    String lang1 = getLangType(replFunc1, index);
+
+                    return lang1;
+
+
+
+                }
+
+            }
             return "NULL";
         }
         else return "NULL";
@@ -956,6 +973,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 
                     } else{
 
+                        type = COL_TYPE.LITERAL;
+                    }
+
+                } else if (function.equals(OBDAVocabulary.REPLACE)){
+                    COL_TYPE type1;
+                    type1 = getTypeColumn( ov.getTerm(0));
+
+                    if(type1.equals(COL_TYPE.STRING)) {
+                        type = type1;
+                    }
+                    else{
                         type = COL_TYPE.LITERAL;
                     }
 
@@ -1399,18 +1427,18 @@ public class SQLGenerator implements SQLQueryGenerator {
             else if (functionName.equals(OBDAVocabulary.SPARQL_CONCAT.getName())) {
 
 
-                boolean stringColType = isStringColType(function.getTerm(0), index);
-                boolean stringColType1 = isStringColType(function.getTerm(1), index);
-                if(stringColType && stringColType1) {
+//                boolean stringColType = isStringColType(function.getTerm(0), index);
+//                boolean stringColType1 = isStringColType(function.getTerm(1), index);
+//                if(stringColType && stringColType1) {
 
                     String left = getSQLString(function.getTerm(0), index, false);
                     String right = getSQLString(function.getTerm(1), index, false);
                     String result = sqladapter.strconcat(new String[]{left, right});
                     return result;
-                }
-                else{
-                    return null;
-                }
+//                }
+//                else{
+//                    return null;
+//                }
 
             }
         }

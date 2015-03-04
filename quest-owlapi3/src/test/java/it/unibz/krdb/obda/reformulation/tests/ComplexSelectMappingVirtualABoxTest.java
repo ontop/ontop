@@ -27,7 +27,9 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
@@ -49,18 +51,14 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/***
- * A simple test that check if the system is able to handle Mappings for
- * classes/roles and attributes even if there are no URI templates. i.e., the
- * database stores URI's directly.
- * 
- * We are going to create an H2 DB, the .sql file is fixed. We will map directly
- * there and then query on top.
- */
-public class ComplexSelectMappingVirtualABoxTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-	// TODO We need to extend this test to import the contents of the mappings
-	// into OWL and repeat everything taking form OWL
+/**
+ * Test for CONCAT and REPLACE in SQL query
+ */
+
+public class ComplexSelectMappingVirtualABoxTest  {
 
 	private OBDADataFactory fac;
 	private Connection conn;
@@ -74,7 +72,7 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 	final String owlfile = "src/test/resources/test/complexmapping.owl";
 	final String obdafile = "src/test/resources/test/complexmapping.obda";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 		
 		
@@ -115,7 +113,7 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 		
 	}
 
-	@Override
+	@After
 	public void tearDown() throws Exception {
 	
 			dropTables();
@@ -141,7 +139,8 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 		conn.commit();
 	}
 
-	private void runTests(Properties p) throws Exception {
+//   test for self join count the number of occurrences
+	private String runTests(Properties p) throws Exception {
 
 		// Creating a new instance of the reasoner
 		QuestOWLFactory factory = new QuestOWLFactory();
@@ -155,6 +154,7 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 		QuestOWLConnection conn = reasoner.getConnection();
 		QuestOWLStatement st = conn.createStatement();
 
+        OWLLiteral val;
 		try {
 			String sql = st.getUnfolding(this.query);
 			Pattern pat = Pattern.compile("TABLE1");
@@ -168,9 +168,9 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 			QuestOWLResultSet rs = st.executeTuple(query);
 			assertTrue(rs.nextRow());
 			OWLIndividual ind1 = rs.getOWLIndividual("x");
-			OWLLiteral val = rs.getOWLLiteral("z");
+			val = rs.getOWLLiteral("z");
 			assertEquals("<http://it.unibz.krdb/obda/test/simple#uri%201>", ind1.toString());
-            System.out.println(val.toString());
+
 			//assertEquals("\"value1\"", val.toString());
 
 		} catch (Exception e) {
@@ -185,8 +185,10 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 			conn.close();
 			reasoner.dispose();
 		}
+        return val.toString();
 	}
 
+    @Test
 	public void testReplace() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -194,39 +196,47 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
         p.setCurrentValueOf(QuestPreferences.SQL_GENERATE_REPLACE, QuestConstants.FALSE);
 
 		this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U ?z. }";
-		
-		runTests(p);
+
+        String val = runTests(p);
+        assertEquals("\"value1\"", val);
+
 	}
 
+    @Test
     public void testReplaceValue() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
         this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U4 ?z . }";
 
-        runTests(p);
+        String val = runTests(p);
+        assertEquals("\"ualue1\"", val);
     }
 
+    @Test
 	public void testConcat() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U2 ?z. }";
-		
-		runTests(p);
+
+        String val = runTests(p);
+        assertEquals("\"NO value1\"", val);
 	}
 
-	
+    @Test
 	public void testDoubleConcat() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
 		this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U2 ?z; :U3 ?w. }";
-		
-		runTests(p);
+
+        String val = runTests(p);
+        assertEquals("\"NO value1\"", val);
 	}
 
+    @Test
     public void testConcat2() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -234,9 +244,11 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 
         this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U5 ?z. }";
 
-        runTests(p);
+        String val = runTests(p);
+        assertEquals("\"value1test\"^^xsd:string", val);
     }
 
+    @Test
     public void testConcat3() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -244,9 +256,11 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 
         this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U6 ?z. }";
 
-        runTests(p);
+        String val = runTests(p);
+        assertEquals("\"value1test\"", val);
     }
 
+    @Test
     public void testConcat4() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -254,9 +268,11 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 
         this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U7 ?z. }";
 
-        runTests(p);
+        String val = runTests(p);
+        assertEquals("\"value1touri 1\"^^xsd:string", val);
     }
 
+    @Test
     public void testConcat5() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -264,9 +280,11 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 
         this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U8 ?z. }";
 
-        runTests(p);
+        String val = runTests(p);
+        assertEquals("\"value1test\"", val);
     }
 
+    @Test
     public void testConcatAndReplaceUri() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -274,7 +292,8 @@ public class ComplexSelectMappingVirtualABoxTest extends TestCase {
 
         this.query = "PREFIX : <http://it.unibz.krdb/obda/test/simple#> SELECT * WHERE { ?x :U9 ?z. }";
 
-        runTests(p);
+        String val = runTests(p);
+        assertEquals("\"value1\"^^xsd:string", val);
     }
 
 

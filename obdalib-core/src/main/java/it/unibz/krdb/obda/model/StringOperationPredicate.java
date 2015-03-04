@@ -12,6 +12,7 @@ package it.unibz.krdb.obda.model;
  * 
  *      http://www.apache.org/licenses/LICENSE-2.0
  * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +24,9 @@ package it.unibz.krdb.obda.model;
 /**
  * Made for string functions in the select part of the source sql of mappings. 
  * Presently only CONCAT and REPLACE
+ *
+ * See test {@link it.unibz.krdb.obda.reformulation.tests.ComplexSelectMappingVirtualABoxTest}
+ * See test {@link it.unibz.krdb.obda.reformulation.tests.ComplexWhereMappingTest}
  * 
  * @author Dag Hovland
  *

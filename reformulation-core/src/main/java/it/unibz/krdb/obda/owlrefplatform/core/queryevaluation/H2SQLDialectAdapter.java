@@ -59,6 +59,14 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 		return columnname + " ~" + ((caseinSensitive) ? "* " : " ") + "'"+ ((multiLine || dotAllMode) ? pflags : "") + pattern + "'";
 	}
 
+    @Override
+    public String strreplace(String str, String oldstr, String newstr) {
+        oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+
+        newstr = newstr.substring(1, newstr.length() - 1);
+        return String.format("REGEXP_REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
+    }
+
 	@Override
 	public String getDummyTable() {
 		return "SELECT 1";
@@ -77,7 +85,7 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
 	 * 
-	 * @param rdfliteral
+	 * @param
 	 * @return
 	 */
 	@Override

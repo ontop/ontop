@@ -249,7 +249,7 @@ public class BindTest {
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
         //complex case
-        //variable should be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable in FILTER
+        //variable should be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable
         String querySelect1 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
                 "PREFIX  ns:  <http://example.org/ns#>\n" +
                 "SELECT  ?title (?p AS ?fullPrice) (?fullPrice*(1-?discount) AS ?customerPrice)\n" +

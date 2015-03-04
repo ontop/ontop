@@ -26,11 +26,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
@@ -52,17 +48,10 @@ import java.sql.Statement;
 import java.util.Properties;
 
 /***
- * A simple test that check if the system is able to handle Mappings for
- * classes/roles and attributes even if there are no URI templates. i.e., the
- * database stores URI's directly.
- * 
- * We are going to create an H2 DB, the .sql file is fixed. We will map directly
- * there and then query on top.
+ * Test use of REPLACE in where clause
  */
 public class ComplexWhereMappingTest extends TestCase {
 
-	// TODO We need to extend this test to import the contents of the mappings
-	// into OWL and repeat everything taking form OWL
 
 	private OBDADataFactory fac;
 	private Connection conn;
@@ -79,7 +68,7 @@ public class ComplexWhereMappingTest extends TestCase {
 		
 		
 		/*
-		 * Initializing and H2 database with the stock exchange data
+		 * Initializing and H2 database
 		 */
 		// String driver = "org.h2.Driver";
 		String url = "jdbc:h2:mem:questjunitdb";

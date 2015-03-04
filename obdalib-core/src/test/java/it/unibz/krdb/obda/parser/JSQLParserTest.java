@@ -738,6 +738,12 @@ public class JSQLParserTest extends TestCase {
         assertTrue(result);
     }
 
+    public void test_RegexpReplace() {
+        final boolean result = parseJSQL("SELECT REGEXP_REPLACE('Hello World', ' +', ' ') as reg FROM student");
+        printJSQL("test_RegexpReplace()", result);
+        assertTrue(result);
+    }
+
 	private String queryText;
 
 	ParsedSQLQuery queryP;

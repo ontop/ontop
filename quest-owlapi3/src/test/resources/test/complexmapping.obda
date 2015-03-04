@@ -43,7 +43,7 @@ target	:{uri} :U8 {valcat} .
 source	SELECT uri, CONCAT(CONCAT(val,'te'), 'st') as valcat FROM TABLE1
 
 mappingId	mapping9
-target	:{u} :U9 {val} .
+target	:{u} :U9 {val}^^xsd:string .
 source	SELECT REPLACE(CONCAT(uri,'se'), 'se', '') as u,  val FROM TABLE1
 
 

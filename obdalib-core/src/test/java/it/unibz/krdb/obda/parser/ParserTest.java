@@ -661,6 +661,13 @@ public class ParserTest extends TestCase {
 
 	}
 
+    public void test_13() {
+        final boolean result = parseJSQL("select REGEXP_REPLACE(name, ' +', ' ') as reg from student ");
+        printJSQL("test_13", result);
+        assertTrue(result);
+
+    }
+
 	private String queryText;
 
 	ParsedSQLQuery queryP;
