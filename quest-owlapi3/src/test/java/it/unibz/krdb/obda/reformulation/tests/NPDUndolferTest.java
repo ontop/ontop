@@ -1,16 +1,11 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
-import it.unibz.krdb.obda.io.QueryIOManager;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
-import it.unibz.krdb.obda.querymanager.QueryController;
-import it.unibz.krdb.obda.querymanager.QueryControllerEntity;
-import it.unibz.krdb.obda.querymanager.QueryControllerQuery;
 
 import java.io.File;
 
@@ -19,25 +14,20 @@ import junit.framework.TestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class NPDUndolferTest extends TestCase {
-
 	
 	private final String owlfile = "src/test/resources/npd-v2-ql_a.owl";
 
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
-
 	public NPDUndolferTest() throws Exception {
 		manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 	}
 
-	public void test3InitializingQuest() throws Exception {
+	public void testNpdQ6() throws Exception {
 	
 		QuestOWLFactory fac = new QuestOWLFactory();
 
@@ -89,20 +79,10 @@ public class NPDUndolferTest extends TestCase {
 "  )" +
 "} ORDER BY ?wellbore";
 
-		long start = System.nanoTime();
-		QuestOWLResultSet res = (QuestOWLResultSet) st.executeTuple(query);
-		long end = System.nanoTime();
-
-		double time = (end - start) / 1000000;
-
-		int count = 0;
-		while (res.nextRow()) {
-			count += 1;
-		}
-		log.debug("Total result: {}", count);
-		log.debug("Query execution time: {} ms", time);
-
+		String unfolding = st.getRewriting(query);
+		assertFalse(unfolding.contains("GTE(company,"));
 		st.close();
+		
 		quest.dispose();
 	}
 
