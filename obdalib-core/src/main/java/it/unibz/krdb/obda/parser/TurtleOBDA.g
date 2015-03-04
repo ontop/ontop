@@ -242,15 +242,31 @@ private class ColumnString implements FormatString {
    @Override public String toString() { return s; }
 }
 
+	//this function distinguishes curly bracket with 
+	//back slash "\{" from curly bracket "{" 
+	private int getIndexOfCurlyB(String str){
+	   int i;
+	   int j;
+	   i = str.indexOf("{");
+	   j = str.indexOf("\\{");
+	      while((i-1 == j) &&(j != -1)){		
+		i = str.indexOf("{",i+1);
+		j = str.indexOf("\\{",j+1);		
+	      }	
+	  return i;
+	}
+	
+	//in case of concat this function parses the literal 
+	//and adds parsed constant literals and template literal to terms list
 	private ArrayList<Term> addToTermsList(String str){
 	   ArrayList<Term> terms = new ArrayList<Term>();
 	   int i,j;
 	   str = str.substring(1, str.length()-1);
 	   while(str.contains("{")){
-	      i = str.indexOf("{");
+	      i = getIndexOfCurlyB(str);
 	      if (i > 0){
 	         terms.add(dfac.getConstantLiteral(str.substring(0,i)));
-	         str = str.substring(i,str.length());
+	         str = str.substring(str.indexOf("}", i)+1, str.length());
 	      }else{
 	         j = str.indexOf("}");
 	         terms.add(dfac.getVariable(str.substring(1,j)));
@@ -263,6 +279,8 @@ private class ColumnString implements FormatString {
 	   return terms;
 	}
 	
+	//this function returns nested concats 
+	//in case of more than two terms need to be concatted
 	private Function getNestedConcat(String str){
 	   ArrayList<Term> terms = new ArrayList<Term>();
 	   terms = addToTermsList(str);

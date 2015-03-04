@@ -82,7 +82,7 @@ default:importR2RML98409557145784246623724004439660 a rr:PredicateObjectMap ;
 	rr:predicateMap default:importR2RML12796727036548878641478208476996 .
 
 default:objectMap53831248725149476996334159182422 a rr:ObjectMap ;
-	rr:template "adres: {ADDRESS}city: {CITY}country: {COUNTRY}something" ;
+	rr:template "{ADDRESS}\\{city\\}{CITY}{COUNTRY}" ;
 	rr:termType rr:Literal ;
 	rr:language "en-us" .
 

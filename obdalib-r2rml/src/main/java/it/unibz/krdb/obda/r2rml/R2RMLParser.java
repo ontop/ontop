@@ -462,6 +462,21 @@ public class R2RMLParser {
 	public Function getTypedFunction(String parsedString, int type) {
 		return getTypedFunction(parsedString, type, "");
 	}
+	
+	
+	//this function distinguishes curly bracket with back slash "\{" from curly bracket "{" 
+	private int getIndexOfCurlyB(String str){
+		int i;
+		int j;
+		i = str.indexOf("{");
+		j = str.indexOf("\\{");
+		
+		while((i-1 == j) && (j != -1)){		
+			i = str.indexOf("{",i+1);
+			j = str.indexOf("\\{",j+1);		
+		}	
+		return i;
+	}
 
 	/**
 	 * get a typed atom
@@ -495,10 +510,11 @@ public class R2RMLParser {
 			string = R2RMLVocabulary.baseuri + string;
 		}
 
+		String str = string; //str for concat of constant literal
+		
 		string = string.replace("\\{", "[");
 		string = string.replace("\\}", "]");
 		
-		String str = string; //str for concat of constant literal
 		String cons;
 		int i;
 		while (string.contains("{")) {
@@ -507,10 +523,10 @@ public class R2RMLParser {
 			
 			// (Concat) if there is constant literal in template, adds it to terms list 
 			if (type == 4){
-				if ((i = str.indexOf("{")) > 0){
+				if ((i = getIndexOfCurlyB(str)) > 0){
 					cons = str.substring(0, i);
-					str = str.substring(str.indexOf("}")+1, str.length());
-					terms.add(fac.getConstantLiteral(cons));
+					str = str.substring(str.indexOf("}", i)+1, str.length());
+					terms.add(fac.getConstantLiteral(cons));	
 				}else{
 					str = str.substring(str.indexOf("}")+1);
 				}
@@ -526,8 +542,8 @@ public class R2RMLParser {
 			
 		}
 		if(type == 4){
-			if((i = str.lastIndexOf("}")) < (str.length())){
-				cons = str.substring(i+1,str.length());
+			if (!str.equals("")){
+				cons = str;
 				terms.add(fac.getConstantLiteral(cons));
 			}
 		}
