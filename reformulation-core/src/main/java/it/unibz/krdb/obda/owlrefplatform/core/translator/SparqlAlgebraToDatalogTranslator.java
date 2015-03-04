@@ -153,9 +153,8 @@ public class SparqlAlgebraToDatalogTranslator {
 		for (String vs : signature) {
 			vars.add(ofac.getVariable(vs));
 		}
-		int[] freshvarcount = { 1 };
 
-		translate(vars, te, result, 1, freshvarcount);
+		translateTupleExpr(vars, te, result, 1);
 		return result;
 	}
 
@@ -165,15 +164,13 @@ public class SparqlAlgebraToDatalogTranslator {
 	 * @param te
 	 * @param pr
 	 * @param i
-	 * @param varcount
 	 */
 	
-	private void translateWithTermList(List<Term> vars, TupleExpr te,
-			DatalogProgram pr, long i, int[] varcount) {
+	private void translateWithTermList(List<Term> vars, TupleExpr te, DatalogProgram pr, long i) {
 		List<Variable> vars1 = new LinkedList<>();
 		for (Term var : vars)
 			vars1.add((Variable) var);
-		translate(vars1, te, pr, i, varcount);
+		translateTupleExpr(vars1, te, pr, i);
 	}
 
 	/**
@@ -186,44 +183,43 @@ public class SparqlAlgebraToDatalogTranslator {
 	 * @param varcount
 	 */
 	
-	private void translate(List<Variable> vars, TupleExpr te,
-			DatalogProgram pr, long i, int[] varcount) {
+	private void translateTupleExpr(List<Variable> vars, TupleExpr te, DatalogProgram pr, long i) {
 		if (te instanceof Slice) {
 			// Add LIMIT and OFFSET modifiers, if any
-			translate(vars, (Slice) te, pr, i, varcount);
+			translate(vars, (Slice) te, pr, i);
 		} 
 		else if (te instanceof Distinct) {
 			// Add DISTINCT modifier, if any
-			translate(vars, (Distinct) te, pr, i, varcount);
+			translate(vars, (Distinct) te, pr, i);
 		} 
 		else if (te instanceof Projection) {
 			// Add PROJECTION modifier, if any
-			translate(vars, (Projection) te, pr, i, varcount);
+			translate(vars, (Projection) te, pr, i);
 		} 
 		else if (te instanceof Order) {
 			// Add ORDER BY modifier, if any
-			translate(vars, (Order) te, pr, i, varcount);
+			translate(vars, (Order) te, pr, i);
 		} 
 		else if (te instanceof Filter) {
-			translate(vars, (Filter) te, pr, i, varcount);
+			translate(vars, (Filter) te, pr, i);
 		} 
 		else if (te instanceof StatementPattern) {
-			translate(vars, (StatementPattern) te, pr, i, varcount);
+			translate(vars, (StatementPattern) te, pr, i);
 		} 
 		else if (te instanceof Join) {
-			translate(vars, (Join) te, pr, i, varcount);
+			translate(vars, (Join) te, pr, i);
 		} 
 		else if (te instanceof Union) {
-			translate(vars, (Union) te, pr, i, varcount);
+			translate(vars, (Union) te, pr, i);
 		} 
 		else if (te instanceof LeftJoin) {
-			translate(vars, (LeftJoin) te, pr, i, varcount);
+			translate(vars, (LeftJoin) te, pr, i);
 		} 
 		else if (te instanceof Reduced) {
-			translate(vars, ((Reduced) te).getArg(), pr, i, varcount);
+			translateTupleExpr(vars, ((Reduced) te).getArg(), pr, i);
 		} 
 		else if (te instanceof Extension) { 
-			translate(vars, (Extension) te, pr, i, varcount);
+			translate(vars, (Extension) te, pr, i);
 		} 
 		else {
 			try {
@@ -256,8 +252,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		return head;
 	}
 	
-	private void translate(List<Variable> vars, Extension extend,
-			DatalogProgram pr, long i, int[] varcount) {
+	private void translate(List<Variable> vars, Extension extend, DatalogProgram pr, long i) {
 		TupleExpr subte = extend.getArg();
 		Function rightAtom = null;
 		List<ExtensionElem> elements = extend.getElements();
@@ -287,7 +282,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 		
 		// Translating the rest
-		translateWithTermList(rightAtom.getTerms(), subte, pr, 2 * i, varcount);
+		translateWithTermList(rightAtom.getTerms(), subte, pr, 2 * i);
 	}		    
 //		    VarExprList extendExpr = extend.getVarExprList();
 //		    Map<Var, Expr> varmap = extendExpr.getExprs();
@@ -338,8 +333,7 @@ public class SparqlAlgebraToDatalogTranslator {
 //		    }
 
 	
-	private void translate(List<Variable> vars, Union union,
-			DatalogProgram pr, long i, int[] varcount) {
+	private void translate(List<Variable> vars, Union union, DatalogProgram pr, long i) {
 		TupleExpr left = union.getLeftArg();
 		TupleExpr right = union.getRightArg();
 
@@ -385,11 +379,11 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 			
 		// Translating the rest
-		translateWithTermList(leftAtom.getTerms(), left, pr, 2 * i, varcount);
-		translateWithTermList(rightAtom.getTerms(), right, pr, 2 * i + 1, varcount);
+		translateWithTermList(leftAtom.getTerms(), left, pr, 2 * i);
+		translateWithTermList(rightAtom.getTerms(), right, pr, 2 * i + 1);
 	}
 
-	private void translate(List<Variable> vars, Join join, DatalogProgram pr, long i, int[] varcount) {
+	private void translate(List<Variable> vars, Join join, DatalogProgram pr, long i) {
 		TupleExpr left = join.getLeftArg();
 		TupleExpr right = join.getRightArg();
 
@@ -404,12 +398,11 @@ public class SparqlAlgebraToDatalogTranslator {
 		pr.appendRule(newrule);
 
 		// Translating the rest
-		translateWithTermList(leftAtom.getTerms(), left, pr, 2 * i, varcount);
-		translateWithTermList(rightAtom.getTerms(), right, pr, 2 * i + 1, varcount);
+		translateWithTermList(leftAtom.getTerms(), left, pr, 2 * i);
+		translateWithTermList(rightAtom.getTerms(), right, pr, 2 * i + 1);
 	}
 
-	private void translate(List<Variable> vars, LeftJoin join,
-			DatalogProgram pr, long i, int[] varcount) {
+	private void translate(List<Variable> vars, LeftJoin join, DatalogProgram pr, long i) {
 		TupleExpr left = join.getLeftArg();
 		TupleExpr right = join.getRightArg();
 		ValueExpr filter = join.getCondition();
@@ -437,12 +430,11 @@ public class SparqlAlgebraToDatalogTranslator {
 		pr.appendRule(newrule);
 
 		// Translating the rest
-		translateWithTermList(leftAtom.getTerms(), left, pr, 2 * i, varcount);
-		translateWithTermList(rightAtom.getTerms(), right, pr, 2 * i + 1, varcount);
+		translateWithTermList(leftAtom.getTerms(), left, pr, 2 * i);
+		translateWithTermList(rightAtom.getTerms(), right, pr, 2 * i + 1);
 	}
 
-	private void translate(List<Variable> vars, Projection project,
-			DatalogProgram pr, long i, int[] varcount) {
+	private void translate(List<Variable> vars, Projection project, DatalogProgram pr, long i) {
 
 		TupleExpr te = project.getArg();
 		Set<Variable> nestedVars = getVariables(te);
@@ -468,24 +460,21 @@ public class SparqlAlgebraToDatalogTranslator {
 		pr.appendRule(cq);
 
 		/* Continue the nested tree */
-		translateWithTermList(bodyatomVarsList, te, pr, i + 1, varcount);
+		translateWithTermList(bodyatomVarsList, te, pr, i + 1);
 	}
 
-	private void translate(List<Variable> vars, Slice slice,
-			DatalogProgram pr, long i, int[] varcount) {
+	private void translate(List<Variable> vars, Slice slice, DatalogProgram pr, long i) {
 		pr.getQueryModifiers().setOffset(slice.getOffset());
 		pr.getQueryModifiers().setLimit(slice.getLimit());
-		translate(vars, slice.getArg(), pr, i, varcount); // narrow down the query
+		translateTupleExpr(vars, slice.getArg(), pr, i); // narrow down the query
 	}
 
-	private void translate(List<Variable> vars, Distinct distinct,
-			DatalogProgram pr, long i, int[] varcount) {
+	private void translate(List<Variable> vars, Distinct distinct, DatalogProgram pr, long i) {
 		pr.getQueryModifiers().setDistinct();
-		translate(vars, distinct.getArg(), pr, i, varcount); // narrow down the query
+		translateTupleExpr(vars, distinct.getArg(), pr, i); // narrow down the query
 	}
 
-	private void translate(List<Variable> vars, Order order,
-			DatalogProgram pr, long i, int[] varcount) {
+	private void translate(List<Variable> vars, Order order, DatalogProgram pr, long i) {
 		
 		for (OrderElem c : order.getElements()) {
 			
@@ -502,11 +491,10 @@ public class SparqlAlgebraToDatalogTranslator {
             	direction = 2;
 			pr.getQueryModifiers().addOrderCondition(var, direction);
 		}
-		translate(vars, order.getArg(), pr, i, varcount); // narrow down the query
+		translateTupleExpr(vars, order.getArg(), pr, i); // narrow down the query
 	}
 
-	public void translate(List<Variable> var, Filter filter, DatalogProgram pr,
-			long i, int varcount[]) {
+	public void translate(List<Variable> var, Filter filter, DatalogProgram pr, long i) {
 		ValueExpr condition = filter.getCondition();
 		List<Function> filterAtoms = new LinkedList<Function>();
 		Set<Variable> filteredVariables = new LinkedHashSet<Variable>();
@@ -563,9 +551,9 @@ public class SparqlAlgebraToDatalogTranslator {
 		pr.appendRule(cq);
 
 		if (var.size() == 0 && filteredVariables.size() > 0) 
-			translateWithTermList(innerProjection, filter.getArg(), pr, (i * 2), varcount);
+			translateWithTermList(innerProjection, filter.getArg(), pr, (i * 2));
 		else
-			translate(var, filter.getArg(), pr, (i * 2), varcount);
+			translateTupleExpr(var, filter.getArg(), pr, (i * 2));
 
 	}
 
@@ -578,7 +566,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	 * @return
 	 */
 	private void translate(List<Variable> vars, StatementPattern triple,
-			DatalogProgram pr, long i, int[] varcount) {
+			DatalogProgram pr, long i) {
 		
 		Var pred = triple.getPredicateVar();		
 		Value p = pred.getValue();
@@ -659,7 +647,6 @@ public class SparqlAlgebraToDatalogTranslator {
 			// v1.7: We extend the syntax such that the data type of a
 			// constant
 			// is defined using a functional symbol.
-			Function dataTypeFunction = null;
 			if (objectType == COL_TYPE.LITERAL) {
 				// If the object has type LITERAL, check any language
 				// tag!
@@ -673,8 +660,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			} 
 			else {
 				// For other supported data-types
-				dataTypeFunction = ofac.getTypedTerm(constant, objectType);
-				result= dataTypeFunction;
+				result = ofac.getTypedTerm(constant, objectType);
 			}
 		} 
 		else if (s instanceof URIImpl) {
