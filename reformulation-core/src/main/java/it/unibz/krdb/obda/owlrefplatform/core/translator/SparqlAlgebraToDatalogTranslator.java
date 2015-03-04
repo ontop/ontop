@@ -182,61 +182,45 @@ public class SparqlAlgebraToDatalogTranslator {
 	private void translate(List<Variable> vars, TupleExpr te,
 			DatalogProgram pr, long i, int[] varcount) {
 		if (te instanceof Slice) {
-
 			// Add LIMIT and OFFSET modifiers, if any
-			Slice slice = (Slice) te;
-			translate(vars, slice, pr, i, varcount);
-
-		} else if (te instanceof Distinct) {
-
+			translate(vars, (Slice) te, pr, i, varcount);
+		} 
+		else if (te instanceof Distinct) {
 			// Add DISTINCT modifier, if any
-			Distinct distinct = (Distinct) te;
-			translate(vars, distinct, pr, i, varcount);
-
-		} else if (te instanceof Projection) {
-
+			translate(vars, (Distinct) te, pr, i, varcount);
+		} 
+		else if (te instanceof Projection) {
 			// Add PROJECTION modifier, if any
-			Projection project = (Projection) te;
-			translate(vars, project, pr, i, varcount);
-
-		} else if (te instanceof Order) {
-
+			translate(vars, (Projection) te, pr, i, varcount);
+		} 
+		else if (te instanceof Order) {
 			// Add ORDER BY modifier, if any
-			Order order = (Order) te;
-			translate(vars, order, pr, i, varcount);
-
-		} else if (te instanceof Filter) {
-			Filter filter = (Filter) te;
-			translate(vars, filter, pr, i, varcount);
-
-		} else if (te instanceof StatementPattern) {
-
-			StatementPattern stmp = (StatementPattern) te;
-			translate(vars, stmp, pr, i, varcount);
-
-		} else if (te instanceof Join) {
-			Join join = (Join) te;
-			translate(vars, join, pr, i, varcount);
-
-		} else if (te instanceof Union) {
-			Union union = (Union) te;
-			translate(vars, union, pr, i, varcount);
-
-		} else if (te instanceof LeftJoin) {
-			LeftJoin join = (LeftJoin) te;
-			translate(vars, join, pr, i, varcount);
-		
-		} else if (te instanceof Reduced) {
+			translate(vars, (Order) te, pr, i, varcount);
+		} 
+		else if (te instanceof Filter) {
+			translate(vars, (Filter) te, pr, i, varcount);
+		} 
+		else if (te instanceof StatementPattern) {
+			translate(vars, (StatementPattern) te, pr, i, varcount);
+		} 
+		else if (te instanceof Join) {
+			translate(vars, (Join) te, pr, i, varcount);
+		} 
+		else if (te instanceof Union) {
+			translate(vars, (Union) te, pr, i, varcount);
+		} 
+		else if (te instanceof LeftJoin) {
+			translate(vars, (LeftJoin) te, pr, i, varcount);
+		} 
+		else if (te instanceof Reduced) {
 			translate(vars, ((Reduced) te).getArg(), pr, i, varcount);
-		
-		} else if (te instanceof Extension) { 
-			Extension extend = (Extension) te;
-			translate(vars, extend, pr, i, varcount);
-			
-		} else {
+		} 
+		else if (te instanceof Extension) { 
+			translate(vars, (Extension) te, pr, i, varcount);
+		} 
+		else {
 			try {
-				throw new QueryEvaluationException("Operation not supported: "
-						+ te.toString());
+				throw new QueryEvaluationException("Operation not supported: " + te);
 			} catch (QueryEvaluationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
