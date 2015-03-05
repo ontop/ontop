@@ -51,11 +51,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.datatypes.XMLDatatypeUtil;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.And;
@@ -170,7 +169,6 @@ public class SparqlAlgebraToDatalogTranslator {
 	 * @param te
 	 * @param pr
 	 * @param i
-	 * @param varcount
 	 */
 	
 	private void translateTupleExpr(Function headAtom, TupleExpr te, DatalogProgram pr, long i) {
@@ -479,7 +477,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Var pred = triple.getPredicateVar();		
 		Value p = pred.getValue();
 		
-		if (!(p instanceof URIImpl || (p == null))) {
+		if (!(p instanceof URI || (p == null))) {
 			// if predicate is a variable or literal
 			throw new RuntimeException("Unsupported query syntax");
 		}
@@ -502,7 +500,7 @@ public class SparqlAlgebraToDatalogTranslator {
 				Function rdfTypeConstant = ofac.getUriTemplate(ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
 				atom = ofac.getTripleAtom(sTerm, rdfTypeConstant, ofac.getVariable(obj.getName()));
 			} 
-			else if (o instanceof URIImpl) {
+			else if (o instanceof URI) {
 				URI objectUri = (URI)o; 
 				Predicate.COL_TYPE type = dtfac.getDatatype(objectUri);
 				if (type != null) {
@@ -545,8 +543,8 @@ public class SparqlAlgebraToDatalogTranslator {
 		Term result = null;
 		if (s == null) {
 			result = ofac.getVariable(subj.getName());
-		} else if (s instanceof LiteralImpl) {
-			LiteralImpl object = (LiteralImpl) s;
+		} else if (s instanceof Literal) {
+			Literal object = (Literal) s;
 			COL_TYPE objectType = getDataType(object);
 			ValueConstant constant = getConstant(object);
 
@@ -569,8 +567,8 @@ public class SparqlAlgebraToDatalogTranslator {
 				result = ofac.getTypedTerm(constant, objectType);
 			}
 		} 
-		else if (s instanceof URIImpl) {
-			URIImpl subject = (URIImpl) s;
+		else if (s instanceof URI) {
+			URI subject = (URI) s;
 			//COL_TYPE subjectType = COL_TYPE.OBJECT;
 			
 			String subject_URI = subject.stringValue();
@@ -729,7 +727,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		return result;
 	}
 	
-	private ValueConstant getConstant(LiteralImpl literal) {
+	private ValueConstant getConstant(Literal literal) {
 		URI type = literal.getDatatype();
 		COL_TYPE objectType = getDataType(literal);
 		String value = literal.getLabel();
@@ -751,7 +749,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 
 
-	private COL_TYPE getDataType(LiteralImpl node) {
+	private COL_TYPE getDataType(Literal node) {
 
 		URI typeURI = node.getDatatype();
 		// if null return literal, and avoid exception
@@ -819,8 +817,8 @@ public class SparqlAlgebraToDatalogTranslator {
 		Function constantFunction = null;
 		Value v = expr.getValue();
 
-		if (v instanceof LiteralImpl) {
-			LiteralImpl lit = (LiteralImpl)v;
+		if (v instanceof Literal) {
+			Literal lit = (Literal)v;
 			URI type = lit.getDatatype();
 			COL_TYPE tp;
 			if (type == null) {
@@ -878,10 +876,10 @@ public class SparqlAlgebraToDatalogTranslator {
 			ValueConstant constant = ofac.getConstantLiteral(constantString, tp);
 			constantFunction = ofac.getTypedTerm(constant, tp);	
 		} 
-		else if (v instanceof URIImpl) {
+		else if (v instanceof URI) {
             constantFunction = uriTemplateMatcher.generateURIFunction(v.stringValue());
             if (constantFunction.getArity() == 1)
-                constantFunction = ofac.getUriTemplateForDatatype(((URIImpl) v).stringValue());
+                constantFunction = ofac.getUriTemplateForDatatype(v.stringValue());
 		}
 		
 		return constantFunction;
