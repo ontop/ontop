@@ -599,14 +599,14 @@ public class Mapping2DatalogConverter {
                         Expression second = expressions.get(i+1);
                         second_string = visitEx(second);
 
-                        topConcat = fac.getFunctionQuestConcat(first_string, second_string);
+                        topConcat = fac.getFunctionConcat(first_string, second_string);
                     }
                     else{
 
                         Expression second = expressions.get(i);
                         second_string = visitEx(second);
 
-                        topConcat = fac.getFunctionQuestConcat(topConcat, second_string);
+                        topConcat = fac.getFunctionConcat(topConcat, second_string);
                     }
 
                 }
@@ -869,7 +869,7 @@ public class Mapping2DatalogConverter {
         	Expression right = concat.getRightExpression();
         	Term l = visitEx(left);
         	Term r = visitEx(right);
-        	result = fac.getFunction(OBDAVocabulary.QUEST_CONCAT, l, r);
+        	result = fac.getFunction(OBDAVocabulary.CONCAT, l, r);
         }
 
         @Override

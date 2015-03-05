@@ -883,7 +883,7 @@ public class SQLGenerator implements SQLQueryGenerator {
         }
         else if (pred1.isStringOperationPredicate()) {
 
-            if(pred1.equals(OBDAVocabulary.SPARQL_CONCAT)) {
+            if(pred1.equals(OBDAVocabulary.CONCAT)) {
                 Term concat1 = func1.getTerm(0);
                 Term concat2 = func1.getTerm(1);
 
@@ -960,7 +960,7 @@ public class SQLGenerator implements SQLQueryGenerator {
             else if (function.isStringOperationPredicate()) {
 
 
-                if (function.equals(OBDAVocabulary.SPARQL_CONCAT)) {
+                if (function.equals(OBDAVocabulary.CONCAT)) {
 
                     COL_TYPE type1, type2;
 
@@ -1334,7 +1334,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String op = getSQLString(term1, index, true);
 				return String.format(expressionFormat, op);
 				
-//			} else if (functionSymbol.getName().equals(OBDAVocabulary.QUEST_CONCAT.getName())) {
+//			} else if (functionSymbol.getName().equals(OBDAVocabulary.CONCAT.getName())) {
 //				String[] strs = new String[2];
 //				strs[0] = getSQLString(function.getTerm(0), index, false);
 //				strs[1] = getSQLString(function.getTerm(1), index, false);
@@ -1418,27 +1418,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String result = sqladapter.strreplace(orig, out_str, in_str);
 				return result;
 			} 
-			 else if (functionName.equals(OBDAVocabulary.QUEST_CONCAT.getName())) {
+			 else if (functionName.equals(OBDAVocabulary.CONCAT.getName())) {
 					String left = getSQLString(function.getTerm(0), index, false);
 					String right = getSQLString(function.getTerm(1), index, false);
 					String result = sqladapter.strconcat(new String[]{left, right});
 					return result;
 			}
-            else if (functionName.equals(OBDAVocabulary.SPARQL_CONCAT.getName())) {
-
-
-//                boolean stringColType = isStringColType(function.getTerm(0), index);
-//                boolean stringColType1 = isStringColType(function.getTerm(1), index);
-//                if(stringColType && stringColType1) {
+            else if (functionName.equals(OBDAVocabulary.CONCAT.getName())) {
 
                     String left = getSQLString(function.getTerm(0), index, false);
                     String right = getSQLString(function.getTerm(1), index, false);
                     String result = sqladapter.strconcat(new String[]{left, right});
                     return result;
-//                }
-//                else{
-//                    return null;
-//                }
 
             }
         }

@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.model.impl;
 
 
 /**
- * For supporting sql string functions, presently only QUEST_CONCAT and REPLACE
+ * For supporting sql string functions, presently only CONCAT and REPLACE
  * 
  * @author Dag Hovland
  */

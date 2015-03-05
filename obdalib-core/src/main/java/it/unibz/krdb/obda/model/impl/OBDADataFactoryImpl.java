@@ -411,13 +411,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
     @Override
-    public Function getFunctionQuestConcat(Term term1, Term term2) {
-        return getFunction(OBDAVocabulary.QUEST_CONCAT, term1, term2);
-    }
-
-    @Override
-    public Function getFunctionSPARQLConcat(Term term1, Term term2) {
-        return getFunction(OBDAVocabulary.SPARQL_CONCAT, term1, term2);
+    public Function getFunctionConcat(Term term1, Term term2) {
+        return getFunction(OBDAVocabulary.CONCAT, term1, term2);
     }
 
 	@Override

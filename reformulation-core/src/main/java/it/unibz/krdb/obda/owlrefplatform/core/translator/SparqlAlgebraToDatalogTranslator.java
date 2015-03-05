@@ -1051,14 +1051,14 @@ public class SparqlAlgebraToDatalogTranslator {
                         ValueExpr second = values.get(i+1);
                         second_string = getBooleanTerm(second);
 
-                        topConcat = ofac.getFunctionSPARQLConcat(first_string, second_string);
+                        topConcat = ofac.getFunctionConcat(first_string, second_string);
                     }
                     else{
 
                         ValueExpr second = values.get(i);
                         second_string = getBooleanTerm(second);
 
-                        topConcat = ofac.getFunctionSPARQLConcat(topConcat, second_string);
+                        topConcat = ofac.getFunctionConcat(topConcat, second_string);
                     }
 
                 }
