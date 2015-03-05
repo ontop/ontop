@@ -21,8 +21,11 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  */
 
 import java.sql.Types;
+import java.util.regex.Pattern;
 
 public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
+
+    private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 
 	@Override
 	public String sqlSlice(long limit, long offset) {
@@ -61,9 +64,12 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 	 */
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-																// enclosing
-																// quotes
+
+        if(quotes.matcher(pattern).matches() ) {
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
+        }
 		//An ARE can begin with embedded options: a sequence (?n)  specifies options affecting the rest of the RE. 
 		//n is newline-sensitive matching
 		String flags = "";
@@ -78,9 +84,14 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 
     @Override
     public String strreplace(String str, String oldstr, String newstr) {
-        oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
 
-        newstr = newstr.substring(1, newstr.length() - 1);
+        if(quotes.matcher(oldstr).matches() ) {
+            oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+        }
+
+        if(quotes.matcher(newstr).matches() ) {
+            newstr = newstr.substring(1, newstr.length() - 1);
+        }
         return String.format("REGEXP_REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
     }
 

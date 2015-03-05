@@ -24,6 +24,8 @@ import static org.junit.Assert.assertFalse;
 
 /**
  * Class to test if bind in SPARQL is working properly.
+ * Some tests check everything is working in combination with CONCAT
+ * {@link it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator}
 
  */
 public class AssignmentTest {
@@ -99,6 +101,15 @@ public class AssignmentTest {
                 "BIND (CONCAT(?t, ?t)  as ?price  )    " +
                 "}";
 
+//        String queryConcat3 = "PREFIX : <http://myproject.org/odbs#> \n" +
+//                "\n" +
+//                "SELECT DISTINCT ?f ?d " +
+//                " ?price \n" +
+//                "WHERE {?f a :Film; :title ?t; :hasDirector ?d . \n" +
+//                "BIND (CONCAT(\"123\", \"456\")  as ?price  ) " +
+//                "FILTER (REGEX(?price, 6, \"i\"))   " +
+//                "}";
+
 
 
         int results = runTestQuery(p, queryConcat2);
@@ -132,6 +143,25 @@ public class AssignmentTest {
         String querySelConcat = "PREFIX : <http://myproject.org/odbs#> \n" +
 
                 "SELECT DISTINCT ?f ?d (CONCAT(\"123\", \"456\") AS ?price)  \n" +
+                "WHERE {?f a :Film; :hasDirector ?d .  \n" +
+                "}";
+
+
+
+        int results = runTestQuery(p, querySelConcat);
+        assertEquals(500, results);
+    }
+
+    @Test
+    public void testConcatWithIntegerQuery() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+
+
+        String querySelConcat = "PREFIX : <http://myproject.org/odbs#> \n" +
+                "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n" +
+
+                "SELECT DISTINCT ?f ?d (CONCAT(\"123\"^^xsd:integer, 456) AS ?price)  \n" +
                 "WHERE {?f a :Film; :hasDirector ?d .  \n" +
                 "}";
 

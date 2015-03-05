@@ -24,8 +24,11 @@ import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 
 import java.sql.Types;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
+
+    private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 
 	@Override
 	public String strconcat(String[] strings) {
@@ -36,6 +39,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 			return strings[0];
 
 		StringBuilder sql = new StringBuilder();
+
 
 		sql.append(String.format("(%s", strings[0]));
 		for (int i = 1; i < strings.length; i++) {
@@ -52,9 +56,13 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String strreplace(String str, String oldstr, String newstr) {
-        oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+        if(quotes.matcher(oldstr).matches() ) {
+            oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+        }
 
-        newstr = newstr.substring(1, newstr.length() - 1);
+        if(quotes.matcher(newstr).matches() ) {
+            newstr = newstr.substring(1, newstr.length() - 1);
+        }
 		return String.format("REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
 	}
 
@@ -154,9 +162,12 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-																// enclosing
-																// quotes
+
+        if(quotes.matcher(pattern).matches() ) {
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
+        }
 		//we use % wildcards to search for a string that contains and not only match the pattern
 		if (caseinSensitive) {
 			return " LOWER(" + columnname + ") LIKE " + "'%"

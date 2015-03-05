@@ -69,8 +69,8 @@ public class BindTest {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/test/sparqlBind.owl";
-	final String obdafile = "src/test/resources/test/sparqlBind.obda";
+	final String owlfile = "src/test/resources/test/bind/sparqlBind.owl";
+	final String obdafile = "src/test/resources/test/bind/sparqlBind.obda";
 
     @Before
 	public void setUp() throws Exception {
@@ -87,7 +87,7 @@ public class BindTest {
 		conn = DriverManager.getConnection(url, username, password);
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/sparqlBind-create-h2.sql");
+		FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBind-create-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -122,7 +122,7 @@ public class BindTest {
 
 		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/test/sparqlBind-drop-h2.sql");
+		FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBind-drop-h2.sql");
 		BufferedReader in = new BufferedReader(reader);
 		StringBuilder bf = new StringBuilder();
 		String line = in.readLine();
@@ -191,17 +191,17 @@ public class BindTest {
 
         assertEquals("\"17.25\"^^xsd:decimal", price.toString());
 
-//        //complex case
-//        String querySelect1 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
-//                "PREFIX  ns:  <http://example.org/ns#>\n" +
-//                "SELECT  ?title (?p*(1-?discount) AS ?price)\n" +
-//                "{ ?x ns:price ?p .\n" +
-//                "  ?x dc:title ?title . \n" +
-//                "  ?x ns:discount ?discount . \n" +
-//                "}";
-//        OWLObject price1 = runTests(p, querySelect1);
-//
-//        assertEquals("\"33.6\"", price1.toString());
+        //complex case
+        String querySelect1 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
+                "PREFIX  ns:  <http://example.org/ns#>\n" +
+                "SELECT  ?title (?p*(1-?discount) AS ?price)\n" +
+                "{ ?x ns:price ?p .\n" +
+                "  ?x dc:title ?title . \n" +
+                "  ?x ns:discount ?discount . \n" +
+                "}";
+        OWLObject price1 = runTests(p, querySelect1);
+
+        assertEquals("\"33.6\"", price1.toString());
 
 
 
@@ -241,6 +241,61 @@ public class BindTest {
     }
 
     @Test
+    public void testDoubleBind() throws Exception{
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        // double bind
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n" +
+                "SELECT  ?title  ?w WHERE \n" +
+                "{  ?x ns:discount ?discount .\n" +
+                "   ?x dc:title ?title .\n" +
+                "   BIND (?p AS ?fullPrice) \n" +
+                "   BIND (?fullPrice  - ?discount AS ?w) \n" +
+                "   ?x ns:price ?fullPrice .\n" +
+                "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"41.8\"");
+        expectedValues.add("\"22.75\"");
+
+
+        checkReturnedValues(p, queryBind, expectedValues);
+    }
+
+
+    @Test
+    public void testBindWithSelect() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+
+        //error in DataFactoryImpl to handle  nested functional terms getFreshCQIECopy
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n" +
+                "SELECT  ?title  (?fullPrice * ?discount AS ?w) WHERE \n" +
+                "{  ?x ns:discount ?discount .\n" +
+                "   ?x dc:title ?title .\n" +
+                "   BIND (?p AS ?fullPrice) \n" +
+                "  ?x ns:price ?fullPrice .\n" +
+                "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"8.4\"");
+        expectedValues.add("\"5.75\"");
+
+
+        checkReturnedValues(p, queryBind, expectedValues);
+    }
+
+    @Test
     public void testFailingSelect()  throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -252,7 +307,7 @@ public class BindTest {
         //variable should be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable
         String querySelect1 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
                 "PREFIX  ns:  <http://example.org/ns#>\n" +
-                "SELECT  ?title (?p AS ?fullPrice) (?fullPrice*(1-?discount) AS ?customerPrice)\n" +
+                "SELECT  ?title (?p AS ?fullPrice) (?fullPrice-?discount AS ?customerPrice)\n" +
                 "{ ?x ns:price ?p .\n" +
                 "   ?x dc:title ?title . \n" +
                 "   ?x ns:discount ?discount \n" +
@@ -271,7 +326,7 @@ public class BindTest {
         //variable cannot be assigned again in the same SELECT clause. SELECT Expressions, reuse the same variable in FILTER
         String querySelect2 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n" +
                 "PREFIX  ns:  <http://example.org/ns#>\n" +
-                "SELECT  ?title (?p*(1-?discount) AS ?price)\n" +
+                "SELECT  ?title (?p -?discount AS ?price)\n" +
                 "{ ?x ns:price ?p .\n" +
                 "  ?x dc:title ?title . \n" +
                 "  ?x ns:discount ?discount . \n" +
@@ -320,10 +375,11 @@ public class BindTest {
             assertEquals("Operator not supported: SingletonSet", e.getCause().getLocalizedMessage().trim());
         }
 
-        //error double bind and select
+        //error in DataFactoryImpl to handle  nested functional terms getFreshCQIECopy
+//        (?fullPrice * ?discount AS ?customerPrice)
         String queryBind1 = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n" +
-                "SELECT  ?title  (?fullPrice * (1 - ?discount) AS ?customerPrice) WHERE \n" +
+                "SELECT  ?title  (?fullPrice * (1- ?discount) AS ?customerPrice) WHERE \n" +
                 "{  ?x ns:discount ?discount .\n" +
                 "   ?x dc:title ?title .\n" +
                 "   BIND (?p AS ?fullPrice) \n" +
@@ -339,6 +395,9 @@ public class BindTest {
 
         }
 
+
+
+
     }
 
     @Test
@@ -349,15 +408,6 @@ public class BindTest {
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
         p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 
-//        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-//                + "PREFIX  ns:  <http://example.org/ns#>\n"
-//                + "SELECT  ?title ?price WHERE \n"
-//                + "{  ?x ns:price ?p .\n"
-//                + "   ?x ns:discount ?discount\n"
-//                + "   BIND (CONCAT(xsd:string(?p*(1-?discount)), xsd:string(?p)) AS ?price)\n"
-//                + "   FILTER(?price < 20)\n"
-//                + "   ?x dc:title ?title .\n"
-//                + "}";
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -365,7 +415,7 @@ public class BindTest {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (CONCAT((?title), \" title\") AS ?w)\n"
+                + "   BIND (CONCAT(?title, \" title\") AS ?w)\n"
              + "}";
 
 
@@ -378,7 +428,101 @@ public class BindTest {
 
     }
 
-    private void checkReturnedValues(QuestPreferences p, String query, List<String> expectedValues) throws Exception {
+    @Test
+    public void testBindWithConcatLanguage() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND (CONCAT(?title, ?title) AS ?w)\n"
+                + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"SPARQL TutorialSPARQL Tutorial\"@en");
+        expectedValues.add("\"The Semantic WebThe Semantic Web\"@en");
+        checkReturnedValues(p, queryBind, expectedValues);
+
+
+
+    }
+
+    //language tag are not supported when they are stored in different columns or
+    // when one of the two is stored in the database
+    //the correct results would have been with "@en" language tag
+    @Test
+    public void testBindWithConcatLanguageinDatabase() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x dc:description ?desc .\n"
+                + "   BIND (CONCAT(?desc, ?title) AS ?w)\n"
+                + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"goodSPARQL Tutorial\"");
+        expectedValues.add("\"badThe Semantic Web\"");
+        checkReturnedValues(p, queryBind, expectedValues);
+
+
+
+    }
+
+
+    //CAST function not supported
+    //The builtin function http://www.w3.org/2001/XMLSchema#string is not supported yet!
+    @Test
+    public void testBindWithCast() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
+                + "SELECT  ?title ?price WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount\n"
+                + "   BIND (CONCAT(xsd:string(?p*(1-?discount)), xsd:string(?p)) AS ?price)\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+        try {
+            OWLObject price = runTests(p, queryBind);
+
+        } catch (OntopOWLException e) {
+
+            assertEquals("it.unibz.krdb.obda.model.OBDAException", e.getCause().getClass().getName());
+
+        }
+
+    }
+
+
+        private void checkReturnedValues(QuestPreferences p, String query, List<String> expectedValues) throws Exception {
 
         // Creating a new instance of the reasoner
         QuestOWLFactory factory = new QuestOWLFactory();

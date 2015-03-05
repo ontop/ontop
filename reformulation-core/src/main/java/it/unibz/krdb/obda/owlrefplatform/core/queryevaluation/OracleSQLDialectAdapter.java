@@ -23,10 +23,12 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 	private static Map<Integer, String> SqlDatatypes;
+    private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 	static {
 		SqlDatatypes = new HashMap<Integer, String>();
 		SqlDatatypes.put(Types.DECIMAL, "NUMBER");
@@ -53,9 +55,12 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-																// enclosing
-																// quotes
+
+        if(quotes.matcher(pattern).matches() ) {
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
+        }
 		String flags = "";
 		if(caseinSensitive)
 			flags += "i";
@@ -72,9 +77,13 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
     @Override
     public String strreplace(String str, String oldstr, String newstr) {
-        oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+        if(quotes.matcher(oldstr).matches() ) {
+            oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+        }
 
-        newstr = newstr.substring(1, newstr.length() - 1);
+        if(quotes.matcher(newstr).matches() ) {
+            newstr = newstr.substring(1, newstr.length() - 1);
+        }
         return String.format("REGEXP_REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
     }
 

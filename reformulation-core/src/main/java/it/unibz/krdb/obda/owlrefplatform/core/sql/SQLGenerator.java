@@ -933,7 +933,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		COL_TYPE type = getTypeColumn(ht);
 
 		int code = type.getQuestCode();
-		return String.format(typeStrForSELECT, code, signature.get(hpos));
+
+        return String.format(typeStrForSELECT, code, signature.get(hpos));
 	}
 
     private COL_TYPE getTypeColumn(Term ht) {

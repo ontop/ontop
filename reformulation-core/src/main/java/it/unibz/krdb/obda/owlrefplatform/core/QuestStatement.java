@@ -192,7 +192,7 @@ public class QuestStatement implements OBDAStatement {
 				} 
 				else {
 					try {
-                        // FOR debugging H2 in-memory database
+//                        FOR debugging H2 in-memory database
 //                        try {
 //                            org.h2.tools.Server.startWebServer(conn.getConnection());
 //                        } catch (SQLException e) {

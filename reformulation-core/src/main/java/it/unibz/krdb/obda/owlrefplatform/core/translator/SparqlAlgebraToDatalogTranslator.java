@@ -1168,7 +1168,7 @@ public class SparqlAlgebraToDatalogTranslator {
 					constantString = lit.stringValue() + "";
 					break;
 				default:
-					throw new RuntimeException("Undefiend datatype: " + tp);
+					throw new RuntimeException("Undefined datatype: " + tp);
 			}
 			ValueConstant constant = ofac.getConstantLiteral(constantString, tp);
 			constantFunction = ofac.getTypedTerm(constant, tp);	
