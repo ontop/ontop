@@ -128,14 +128,19 @@ public class TargetQueryRenderer {
 	
 	private static String appendTerms(Term term){
         if (term instanceof Constant){
-            return ((Constant) term).getValue();
+        	String st = ((Constant) term).getValue();
+        	if (st.contains("{")){
+        		st = st.replace("{", "\\{");
+        		st = st.replace("}", "\\}");
+        	}
+            return st;
         }else{
             return "{"+((Variable) term).getName()+"}";
         }
     }
 
     //Appends nested concats
-	private static void getNestedConcats(StringBuilder stb, Term term1, Term term2){
+	public static void getNestedConcats(StringBuilder stb, Term term1, Term term2){
 		if (term1 instanceof Function){
 			Function f = (Function) term1;
 			getNestedConcats(stb, f.getTerms().get(0), f.getTerms().get(1));

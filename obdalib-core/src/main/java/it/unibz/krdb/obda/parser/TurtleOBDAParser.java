@@ -1,4 +1,4 @@
-// $ANTLR 3.5.1 /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g 2015-03-04 16:46:21
+// $ANTLR 3.5.1 /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g 2015-03-06 09:48:51
 
 package it.unibz.krdb.obda.parser;
 
@@ -313,19 +313,25 @@ public class TurtleOBDAParser extends Parser {
 		private ArrayList<Term> addToTermsList(String str){
 		   ArrayList<Term> terms = new ArrayList<Term>();
 		   int i,j;
+		   String st;
 		   str = str.substring(1, str.length()-1);
 		   while(str.contains("{")){
 		      i = getIndexOfCurlyB(str);
 		      if (i > 0){
-		         terms.add(dfac.getConstantLiteral(str.substring(0,i)));
-		         str = str.substring(str.indexOf("}", i)+1, str.length());
-		      }else{
+		    	 st = str.substring(0,i);
+		    	 st = st.replace("\\\\", "");
+		         terms.add(dfac.getConstantLiteral(st));
+		         str = str.substring(str.indexOf("{", i), str.length());
+		      }else if (i == 0){
 		         j = str.indexOf("}");
 		         terms.add(dfac.getVariable(str.substring(1,j)));
 		         str = str.substring(j+1,str.length());
+		      } else {
+		    	  break;
 		      }
 		   }
 		   if(!str.equals("")){
+		      str = str.replace("\\\\", "");
 		      terms.add(dfac.getConstantLiteral(str));
 		   }
 		   return terms;
@@ -406,7 +412,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "parse"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:360:1: parse returns [CQIE value] : ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:366:1: parse returns [CQIE value] : ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF ;
 	public final CQIE parse() throws RecognitionException {
 		CQIE value = null;
 
@@ -415,10 +421,10 @@ public class TurtleOBDAParser extends Parser {
 		List<Function> t2 =null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:361:3: ( ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:361:5: ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:367:3: ( ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:367:5: ( directiveStatement )* t1= triplesStatement (t2= triplesStatement )* EOF
 			{
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:361:5: ( directiveStatement )*
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:367:5: ( directiveStatement )*
 			loop1:
 			while (true) {
 				int alt1=2;
@@ -429,7 +435,7 @@ public class TurtleOBDAParser extends Parser {
 
 				switch (alt1) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:361:5: directiveStatement
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:367:5: directiveStatement
 					{
 					pushFollow(FOLLOW_directiveStatement_in_parse54);
 					directiveStatement();
@@ -456,7 +462,7 @@ public class TurtleOBDAParser extends Parser {
 			      List<Function> triples = t1;
 			      value = dfac.getCQIE(head, triples);
 			    
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:371:5: (t2= triplesStatement )*
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:377:5: (t2= triplesStatement )*
 			loop2:
 			while (true) {
 				int alt2=2;
@@ -467,7 +473,7 @@ public class TurtleOBDAParser extends Parser {
 
 				switch (alt2) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:371:6: t2= triplesStatement
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:377:6: t2= triplesStatement
 					{
 					pushFollow(FOLLOW_triplesStatement_in_parse74);
 					t2=triplesStatement();
@@ -507,11 +513,11 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "directiveStatement"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:381:1: directiveStatement : directive PERIOD ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:387:1: directiveStatement : directive PERIOD ;
 	public final void directiveStatement() throws RecognitionException {
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:382:3: ( directive PERIOD )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:382:5: directive PERIOD
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:388:3: ( directive PERIOD )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:388:5: directive PERIOD
 			{
 			pushFollow(FOLLOW_directive_in_directiveStatement93);
 			directive();
@@ -534,7 +540,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "triplesStatement"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:385:1: triplesStatement returns [List<Function> value] : triples ( WS )* PERIOD ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:391:1: triplesStatement returns [List<Function> value] : triples ( WS )* PERIOD ;
 	public final List<Function> triplesStatement() throws RecognitionException {
 		List<Function> value = null;
 
@@ -542,14 +548,14 @@ public class TurtleOBDAParser extends Parser {
 		List<Function> triples1 =null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:386:3: ( triples ( WS )* PERIOD )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:386:5: triples ( WS )* PERIOD
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:392:3: ( triples ( WS )* PERIOD )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:392:5: triples ( WS )* PERIOD
 			{
 			pushFollow(FOLLOW_triples_in_triplesStatement112);
 			triples1=triples();
 			state._fsp--;
 
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:386:13: ( WS )*
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:392:13: ( WS )*
 			loop3:
 			while (true) {
 				int alt3=2;
@@ -560,7 +566,7 @@ public class TurtleOBDAParser extends Parser {
 
 				switch (alt3) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:386:13: WS
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:392:13: WS
 					{
 					match(input,WS,FOLLOW_WS_in_triplesStatement114); 
 					}
@@ -590,10 +596,10 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "directive"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:389:1: directive : ( base | prefixID );
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:395:1: directive : ( base | prefixID );
 	public final void directive() throws RecognitionException {
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:390:3: ( base | prefixID )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:396:3: ( base | prefixID )
 			int alt4=2;
 			int LA4_0 = input.LA(1);
 			if ( (LA4_0==AT) ) {
@@ -627,7 +633,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt4) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:390:5: base
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:396:5: base
 					{
 					pushFollow(FOLLOW_base_in_directive132);
 					base();
@@ -636,7 +642,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:391:5: prefixID
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:397:5: prefixID
 					{
 					pushFollow(FOLLOW_prefixID_in_directive138);
 					prefixID();
@@ -660,11 +666,11 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "base"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:394:1: base : AT BASE uriref ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:400:1: base : AT BASE uriref ;
 	public final void base() throws RecognitionException {
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:395:3: ( AT BASE uriref )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:395:5: AT BASE uriref
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:401:3: ( AT BASE uriref )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:401:5: AT BASE uriref
 			{
 			match(input,AT,FOLLOW_AT_in_base151); 
 			match(input,BASE,FOLLOW_BASE_in_base153); 
@@ -688,7 +694,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "prefixID"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:398:1: prefixID : AT PREFIX ( namespace | defaultNamespace ) uriref ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:404:1: prefixID : AT PREFIX ( namespace | defaultNamespace ) uriref ;
 	public final void prefixID() throws RecognitionException {
 		ParserRuleReturnScope namespace2 =null;
 		ParserRuleReturnScope defaultNamespace3 =null;
@@ -698,12 +704,12 @@ public class TurtleOBDAParser extends Parser {
 		  String prefix = "";
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:402:3: ( AT PREFIX ( namespace | defaultNamespace ) uriref )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:402:5: AT PREFIX ( namespace | defaultNamespace ) uriref
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:408:3: ( AT PREFIX ( namespace | defaultNamespace ) uriref )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:408:5: AT PREFIX ( namespace | defaultNamespace ) uriref
 			{
 			match(input,AT,FOLLOW_AT_in_prefixID173); 
 			match(input,PREFIX,FOLLOW_PREFIX_in_prefixID175); 
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:402:15: ( namespace | defaultNamespace )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:408:15: ( namespace | defaultNamespace )
 			int alt5=2;
 			int LA5_0 = input.LA(1);
 			if ( (LA5_0==NAMESPACE) ) {
@@ -721,7 +727,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt5) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:402:16: namespace
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:408:16: namespace
 					{
 					pushFollow(FOLLOW_namespace_in_prefixID178);
 					namespace2=namespace();
@@ -731,7 +737,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:402:58: defaultNamespace
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:408:58: defaultNamespace
 					{
 					pushFollow(FOLLOW_defaultNamespace_in_prefixID184);
 					defaultNamespace3=defaultNamespace();
@@ -767,7 +773,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "triples"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:408:1: triples returns [List<Function> value] : subject predicateObjectList ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:414:1: triples returns [List<Function> value] : subject predicateObjectList ;
 	public final List<Function> triples() throws RecognitionException {
 		List<Function> value = null;
 
@@ -776,8 +782,8 @@ public class TurtleOBDAParser extends Parser {
 		List<Function> predicateObjectList6 =null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:409:3: ( subject predicateObjectList )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:409:5: subject predicateObjectList
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:415:3: ( subject predicateObjectList )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:415:5: subject predicateObjectList
 			{
 			pushFollow(FOLLOW_subject_in_triples208);
 			subject5=subject();
@@ -808,7 +814,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "predicateObjectList"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:414:1: predicateObjectList returns [List<Function> value] : v1= verb l1= objectList ( SEMI v2= verb l2= objectList )* ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:420:1: predicateObjectList returns [List<Function> value] : v1= verb l1= objectList ( SEMI v2= verb l2= objectList )* ;
 	public final List<Function> predicateObjectList() throws RecognitionException {
 		List<Function> value = null;
 
@@ -822,8 +828,8 @@ public class TurtleOBDAParser extends Parser {
 		   value = new LinkedList<Function>();
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:418:3: (v1= verb l1= objectList ( SEMI v2= verb l2= objectList )* )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:418:5: v1= verb l1= objectList ( SEMI v2= verb l2= objectList )*
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:424:3: (v1= verb l1= objectList ( SEMI v2= verb l2= objectList )* )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:424:5: v1= verb l1= objectList ( SEMI v2= verb l2= objectList )*
 			{
 			pushFollow(FOLLOW_verb_in_predicateObjectList238);
 			v1=verb();
@@ -839,7 +845,7 @@ public class TurtleOBDAParser extends Parser {
 			        value.add(atom);
 			      }
 			    
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:424:5: ( SEMI v2= verb l2= objectList )*
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:430:5: ( SEMI v2= verb l2= objectList )*
 			loop6:
 			while (true) {
 				int alt6=2;
@@ -850,7 +856,7 @@ public class TurtleOBDAParser extends Parser {
 
 				switch (alt6) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:424:6: SEMI v2= verb l2= objectList
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:430:6: SEMI v2= verb l2= objectList
 					{
 					match(input,SEMI,FOLLOW_SEMI_in_predicateObjectList253); 
 					pushFollow(FOLLOW_verb_in_predicateObjectList257);
@@ -892,7 +898,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "verb"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:433:1: verb returns [Term value] : ( predicate | 'a' );
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:439:1: verb returns [Term value] : ( predicate | 'a' );
 	public final Term verb() throws RecognitionException {
 		Term value = null;
 
@@ -900,7 +906,7 @@ public class TurtleOBDAParser extends Parser {
 		Term predicate7 =null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:434:3: ( predicate | 'a' )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:440:3: ( predicate | 'a' )
 			int alt7=2;
 			int LA7_0 = input.LA(1);
 			if ( (LA7_0==PREFIXED_NAME||LA7_0==STRING_WITH_BRACKET) ) {
@@ -918,7 +924,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt7) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:434:5: predicate
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:440:5: predicate
 					{
 					pushFollow(FOLLOW_predicate_in_verb285);
 					predicate7=predicate();
@@ -928,7 +934,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:435:5: 'a'
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:441:5: 'a'
 					{
 					match(input,77,FOLLOW_77_in_verb293); 
 
@@ -954,7 +960,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "objectList"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:441:1: objectList returns [List<Term> value] : o1= object ( COMMA o2= object )* ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:447:1: objectList returns [List<Term> value] : o1= object ( COMMA o2= object )* ;
 	public final List<Term> objectList() throws RecognitionException {
 		List<Term> value = null;
 
@@ -966,15 +972,15 @@ public class TurtleOBDAParser extends Parser {
 		  value = new ArrayList<Term>();
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:445:3: (o1= object ( COMMA o2= object )* )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:445:5: o1= object ( COMMA o2= object )*
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:451:3: (o1= object ( COMMA o2= object )* )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:451:5: o1= object ( COMMA o2= object )*
 			{
 			pushFollow(FOLLOW_object_in_objectList319);
 			o1=object();
 			state._fsp--;
 
 			 value.add(o1); 
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:445:42: ( COMMA o2= object )*
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:451:42: ( COMMA o2= object )*
 			loop8:
 			while (true) {
 				int alt8=2;
@@ -985,7 +991,7 @@ public class TurtleOBDAParser extends Parser {
 
 				switch (alt8) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:445:43: COMMA o2= object
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:451:43: COMMA o2= object
 					{
 					match(input,COMMA,FOLLOW_COMMA_in_objectList324); 
 					pushFollow(FOLLOW_object_in_objectList328);
@@ -1018,7 +1024,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "subject"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:448:1: subject returns [Term value] : ( resource | variable );
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:454:1: subject returns [Term value] : ( resource | variable );
 	public final Term subject() throws RecognitionException {
 		Term value = null;
 
@@ -1027,7 +1033,7 @@ public class TurtleOBDAParser extends Parser {
 		Variable variable9 =null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:449:3: ( resource | variable )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:455:3: ( resource | variable )
 			int alt9=2;
 			int LA9_0 = input.LA(1);
 			if ( (LA9_0==PREFIXED_NAME||LA9_0==STRING_WITH_BRACKET) ) {
@@ -1045,7 +1051,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt9) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:449:5: resource
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:455:5: resource
 					{
 					pushFollow(FOLLOW_resource_in_subject350);
 					resource8=resource();
@@ -1055,7 +1061,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:450:5: variable
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:456:5: variable
 					{
 					pushFollow(FOLLOW_variable_in_subject358);
 					variable9=variable();
@@ -1081,7 +1087,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "predicate"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:455:1: predicate returns [Term value] : resource ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:461:1: predicate returns [Term value] : resource ;
 	public final Term predicate() throws RecognitionException {
 		Term value = null;
 
@@ -1089,8 +1095,8 @@ public class TurtleOBDAParser extends Parser {
 		Term resource10 =null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:456:3: ( resource )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:456:5: resource
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:462:3: ( resource )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:462:5: resource
 			{
 			pushFollow(FOLLOW_resource_in_predicate379);
 			resource10=resource();
@@ -1123,7 +1129,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "object"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:468:1: object returns [Term value] : ( resource | literal | typedLiteral | variable );
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:474:1: object returns [Term value] : ( resource | literal | typedLiteral | variable );
 	public final Term object() throws RecognitionException {
 		Term value = null;
 
@@ -1134,7 +1140,7 @@ public class TurtleOBDAParser extends Parser {
 		Variable variable14 =null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:469:3: ( resource | literal | typedLiteral | variable )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:475:3: ( resource | literal | typedLiteral | variable )
 			int alt10=4;
 			switch ( input.LA(1) ) {
 			case PREFIXED_NAME:
@@ -1190,7 +1196,7 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt10) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:469:5: resource
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:475:5: resource
 					{
 					pushFollow(FOLLOW_resource_in_object398);
 					resource11=resource();
@@ -1200,7 +1206,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:470:5: literal
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:476:5: literal
 					{
 					pushFollow(FOLLOW_literal_in_object406);
 					literal12=literal();
@@ -1210,7 +1216,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 3 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:471:5: typedLiteral
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:477:5: typedLiteral
 					{
 					pushFollow(FOLLOW_typedLiteral_in_object415);
 					typedLiteral13=typedLiteral();
@@ -1220,7 +1226,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 4 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:472:5: variable
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:478:5: variable
 					{
 					pushFollow(FOLLOW_variable_in_object423);
 					variable14=variable();
@@ -1246,7 +1252,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "resource"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:476:1: resource returns [Term value] : ( uriref | qname );
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:482:1: resource returns [Term value] : ( uriref | qname );
 	public final Term resource() throws RecognitionException {
 		Term value = null;
 
@@ -1255,7 +1261,7 @@ public class TurtleOBDAParser extends Parser {
 		String qname16 =null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:477:4: ( uriref | qname )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:483:4: ( uriref | qname )
 			int alt11=2;
 			int LA11_0 = input.LA(1);
 			if ( (LA11_0==STRING_WITH_BRACKET) ) {
@@ -1273,7 +1279,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt11) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:477:6: uriref
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:483:6: uriref
 					{
 					pushFollow(FOLLOW_uriref_in_resource444);
 					uriref15=uriref();
@@ -1283,7 +1289,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:478:6: qname
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:484:6: qname
 					{
 					pushFollow(FOLLOW_qname_in_resource453);
 					qname16=qname();
@@ -1309,7 +1315,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "uriref"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:483:1: uriref returns [String value] : STRING_WITH_BRACKET ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:489:1: uriref returns [String value] : STRING_WITH_BRACKET ;
 	public final String uriref() throws RecognitionException {
 		String value = null;
 
@@ -1317,8 +1323,8 @@ public class TurtleOBDAParser extends Parser {
 		Token STRING_WITH_BRACKET17=null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:484:3: ( STRING_WITH_BRACKET )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:484:5: STRING_WITH_BRACKET
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:490:3: ( STRING_WITH_BRACKET )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:490:5: STRING_WITH_BRACKET
 			{
 			STRING_WITH_BRACKET17=(Token)match(input,STRING_WITH_BRACKET,FOLLOW_STRING_WITH_BRACKET_in_uriref478); 
 			 value = removeBrackets((STRING_WITH_BRACKET17!=null?STRING_WITH_BRACKET17.getText():null)); 
@@ -1339,7 +1345,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "qname"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:487:1: qname returns [String value] : PREFIXED_NAME ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:493:1: qname returns [String value] : PREFIXED_NAME ;
 	public final String qname() throws RecognitionException {
 		String value = null;
 
@@ -1347,8 +1353,8 @@ public class TurtleOBDAParser extends Parser {
 		Token PREFIXED_NAME18=null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:488:3: ( PREFIXED_NAME )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:488:5: PREFIXED_NAME
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:494:3: ( PREFIXED_NAME )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:494:5: PREFIXED_NAME
 			{
 			PREFIXED_NAME18=(Token)match(input,PREFIXED_NAME,FOLLOW_PREFIXED_NAME_in_qname497); 
 
@@ -1373,10 +1379,10 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "blank"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:495:1: blank : ( nodeID | BLANK );
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:501:1: blank : ( nodeID | BLANK );
 	public final void blank() throws RecognitionException {
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:496:3: ( nodeID | BLANK )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:502:3: ( nodeID | BLANK )
 			int alt12=2;
 			int LA12_0 = input.LA(1);
 			if ( (LA12_0==BLANK_PREFIX) ) {
@@ -1394,7 +1400,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt12) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:496:5: nodeID
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:502:5: nodeID
 					{
 					pushFollow(FOLLOW_nodeID_in_blank512);
 					nodeID();
@@ -1403,7 +1409,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:497:5: BLANK
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:503:5: BLANK
 					{
 					match(input,BLANK,FOLLOW_BLANK_in_blank518); 
 					}
@@ -1424,7 +1430,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "variable"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:500:1: variable returns [Variable value] : STRING_WITH_CURLY_BRACKET ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:506:1: variable returns [Variable value] : STRING_WITH_CURLY_BRACKET ;
 	public final Variable variable() throws RecognitionException {
 		Variable value = null;
 
@@ -1432,8 +1438,8 @@ public class TurtleOBDAParser extends Parser {
 		Token STRING_WITH_CURLY_BRACKET19=null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:501:3: ( STRING_WITH_CURLY_BRACKET )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:501:5: STRING_WITH_CURLY_BRACKET
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:507:3: ( STRING_WITH_CURLY_BRACKET )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:507:5: STRING_WITH_CURLY_BRACKET
 			{
 			STRING_WITH_CURLY_BRACKET19=(Token)match(input,STRING_WITH_CURLY_BRACKET,FOLLOW_STRING_WITH_CURLY_BRACKET_in_variable535); 
 
@@ -1457,7 +1463,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "function"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:507:1: function returns [Function value] : resource LPAREN terms RPAREN ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:513:1: function returns [Function value] : resource LPAREN terms RPAREN ;
 	public final Function function() throws RecognitionException {
 		Function value = null;
 
@@ -1466,8 +1472,8 @@ public class TurtleOBDAParser extends Parser {
 		Vector<Term> terms21 =null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:508:3: ( resource LPAREN terms RPAREN )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:508:5: resource LPAREN terms RPAREN
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:514:3: ( resource LPAREN terms RPAREN )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:514:5: resource LPAREN terms RPAREN
 			{
 			pushFollow(FOLLOW_resource_in_function556);
 			resource20=resource();
@@ -1502,7 +1508,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "typedLiteral"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:516:1: typedLiteral returns [Function value] : ( variable AT language | variable REFERENCE resource );
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:522:1: typedLiteral returns [Function value] : ( variable AT language | variable REFERENCE resource );
 	public final Function typedLiteral() throws RecognitionException {
 		Function value = null;
 
@@ -1513,7 +1519,7 @@ public class TurtleOBDAParser extends Parser {
 		Term resource25 =null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:517:3: ( variable AT language | variable REFERENCE resource )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:523:3: ( variable AT language | variable REFERENCE resource )
 			int alt13=2;
 			int LA13_0 = input.LA(1);
 			if ( (LA13_0==STRING_WITH_CURLY_BRACKET) ) {
@@ -1547,7 +1553,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt13) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:517:5: variable AT language
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:523:5: variable AT language
 					{
 					pushFollow(FOLLOW_variable_in_typedLiteral581);
 					variable22=variable();
@@ -1567,7 +1573,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:523:5: variable REFERENCE resource
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:529:5: variable REFERENCE resource
 					{
 					pushFollow(FOLLOW_variable_in_typedLiteral593);
 					variable24=variable();
@@ -1615,7 +1621,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "language"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:543:1: language returns [Term value] : ( languageTag | variable );
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:549:1: language returns [Term value] : ( languageTag | variable );
 	public final Term language() throws RecognitionException {
 		Term value = null;
 
@@ -1624,7 +1630,7 @@ public class TurtleOBDAParser extends Parser {
 		Variable variable27 =null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:544:3: ( languageTag | variable )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:550:3: ( languageTag | variable )
 			int alt14=2;
 			int LA14_0 = input.LA(1);
 			if ( (LA14_0==VARNAME) ) {
@@ -1642,7 +1648,7 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt14) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:544:5: languageTag
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:550:5: languageTag
 					{
 					pushFollow(FOLLOW_languageTag_in_language616);
 					languageTag26=languageTag();
@@ -1654,7 +1660,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:547:5: variable
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:553:5: variable
 					{
 					pushFollow(FOLLOW_variable_in_language624);
 					variable27=variable();
@@ -1682,7 +1688,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "terms"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:552:1: terms returns [Vector<Term> value] : t1= term ( COMMA t2= term )* ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:558:1: terms returns [Vector<Term> value] : t1= term ( COMMA t2= term )* ;
 	public final Vector<Term> terms() throws RecognitionException {
 		Vector<Term> value = null;
 
@@ -1694,15 +1700,15 @@ public class TurtleOBDAParser extends Parser {
 		  value = new Vector<Term>();
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:556:3: (t1= term ( COMMA t2= term )* )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:556:5: t1= term ( COMMA t2= term )*
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:562:3: (t1= term ( COMMA t2= term )* )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:562:5: t1= term ( COMMA t2= term )*
 			{
 			pushFollow(FOLLOW_term_in_terms650);
 			t1=term();
 			state._fsp--;
 
 			 value.add(t1); 
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:556:40: ( COMMA t2= term )*
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:562:40: ( COMMA t2= term )*
 			loop15:
 			while (true) {
 				int alt15=2;
@@ -1713,7 +1719,7 @@ public class TurtleOBDAParser extends Parser {
 
 				switch (alt15) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:556:41: COMMA t2= term
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:562:41: COMMA t2= term
 					{
 					match(input,COMMA,FOLLOW_COMMA_in_terms655); 
 					pushFollow(FOLLOW_term_in_terms659);
@@ -1746,7 +1752,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "term"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:559:1: term returns [Term value] : ( function | variable | literal );
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:565:1: term returns [Term value] : ( function | variable | literal );
 	public final Term term() throws RecognitionException {
 		Term value = null;
 
@@ -1756,7 +1762,7 @@ public class TurtleOBDAParser extends Parser {
 		Term literal30 =null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:560:3: ( function | variable | literal )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:566:3: ( function | variable | literal )
 			int alt16=3;
 			switch ( input.LA(1) ) {
 			case PREFIXED_NAME:
@@ -1793,7 +1799,7 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt16) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:560:5: function
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:566:5: function
 					{
 					pushFollow(FOLLOW_function_in_term680);
 					function28=function();
@@ -1803,7 +1809,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:561:5: variable
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:567:5: variable
 					{
 					pushFollow(FOLLOW_variable_in_term688);
 					variable29=variable();
@@ -1813,7 +1819,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 3 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:562:5: literal
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:568:5: literal
 					{
 					pushFollow(FOLLOW_literal_in_term696);
 					literal30=literal();
@@ -1839,7 +1845,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "literal"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:571:1: literal returns [Term value] : ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral );
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:577:1: literal returns [Term value] : ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral );
 	public final Term literal() throws RecognitionException {
 		Term value = null;
 
@@ -1851,7 +1857,7 @@ public class TurtleOBDAParser extends Parser {
 		ValueConstant booleanLiteral35 =null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:572:3: ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:578:3: ( stringLiteral ( AT language )? | dataTypeString | numericLiteral | booleanLiteral )
 			int alt18=4;
 			switch ( input.LA(1) ) {
 			case STRING_WITH_QUOTE_DOUBLE:
@@ -1904,13 +1910,13 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt18) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:572:5: stringLiteral ( AT language )?
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:578:5: stringLiteral ( AT language )?
 					{
 					pushFollow(FOLLOW_stringLiteral_in_literal716);
 					stringLiteral32=stringLiteral();
 					state._fsp--;
 
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:572:19: ( AT language )?
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:578:19: ( AT language )?
 					int alt17=2;
 					int LA17_0 = input.LA(1);
 					if ( (LA17_0==AT) ) {
@@ -1918,7 +1924,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					switch (alt17) {
 						case 1 :
-							// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:572:20: AT language
+							// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:578:20: AT language
 							{
 							match(input,AT,FOLLOW_AT_in_literal719); 
 							pushFollow(FOLLOW_language_in_literal721);
@@ -1951,7 +1957,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:590:5: dataTypeString
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:596:5: dataTypeString
 					{
 					pushFollow(FOLLOW_dataTypeString_in_literal731);
 					dataTypeString33=dataTypeString();
@@ -1961,7 +1967,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 3 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:591:5: numericLiteral
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:597:5: numericLiteral
 					{
 					pushFollow(FOLLOW_numericLiteral_in_literal739);
 					numericLiteral34=numericLiteral();
@@ -1971,7 +1977,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 4 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:592:5: booleanLiteral
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:598:5: booleanLiteral
 					{
 					pushFollow(FOLLOW_booleanLiteral_in_literal747);
 					booleanLiteral35=booleanLiteral();
@@ -1997,7 +2003,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "stringLiteral"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:595:1: stringLiteral returns [Term value] : STRING_WITH_QUOTE_DOUBLE ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:601:1: stringLiteral returns [Term value] : STRING_WITH_QUOTE_DOUBLE ;
 	public final Term stringLiteral() throws RecognitionException {
 		Term value = null;
 
@@ -2005,8 +2011,8 @@ public class TurtleOBDAParser extends Parser {
 		Token STRING_WITH_QUOTE_DOUBLE36=null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:596:3: ( STRING_WITH_QUOTE_DOUBLE )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:596:5: STRING_WITH_QUOTE_DOUBLE
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:602:3: ( STRING_WITH_QUOTE_DOUBLE )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:602:5: STRING_WITH_QUOTE_DOUBLE
 			{
 			STRING_WITH_QUOTE_DOUBLE36=(Token)match(input,STRING_WITH_QUOTE_DOUBLE,FOLLOW_STRING_WITH_QUOTE_DOUBLE_in_stringLiteral766); 
 
@@ -2034,7 +2040,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "dataTypeString"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:606:1: dataTypeString returns [Term value] : stringLiteral REFERENCE resource ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:612:1: dataTypeString returns [Term value] : stringLiteral REFERENCE resource ;
 	public final Term dataTypeString() throws RecognitionException {
 		Term value = null;
 
@@ -2043,8 +2049,8 @@ public class TurtleOBDAParser extends Parser {
 		Term resource38 =null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:607:3: ( stringLiteral REFERENCE resource )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:607:6: stringLiteral REFERENCE resource
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:613:3: ( stringLiteral REFERENCE resource )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:613:6: stringLiteral REFERENCE resource
 			{
 			pushFollow(FOLLOW_stringLiteral_in_dataTypeString786);
 			stringLiteral37=stringLiteral();
@@ -2090,7 +2096,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "numericLiteral"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:626:1: numericLiteral returns [ValueConstant value] : ( numericUnsigned | numericPositive | numericNegative );
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:632:1: numericLiteral returns [ValueConstant value] : ( numericUnsigned | numericPositive | numericNegative );
 	public final ValueConstant numericLiteral() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2100,7 +2106,7 @@ public class TurtleOBDAParser extends Parser {
 		ValueConstant numericNegative41 =null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:627:3: ( numericUnsigned | numericPositive | numericNegative )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:633:3: ( numericUnsigned | numericPositive | numericNegative )
 			int alt19=3;
 			switch ( input.LA(1) ) {
 			case DECIMAL:
@@ -2131,7 +2137,7 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt19) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:627:5: numericUnsigned
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:633:5: numericUnsigned
 					{
 					pushFollow(FOLLOW_numericUnsigned_in_numericLiteral806);
 					numericUnsigned39=numericUnsigned();
@@ -2141,7 +2147,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:628:5: numericPositive
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:634:5: numericPositive
 					{
 					pushFollow(FOLLOW_numericPositive_in_numericLiteral814);
 					numericPositive40=numericPositive();
@@ -2151,7 +2157,7 @@ public class TurtleOBDAParser extends Parser {
 					}
 					break;
 				case 3 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:629:5: numericNegative
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:635:5: numericNegative
 					{
 					pushFollow(FOLLOW_numericNegative_in_numericLiteral822);
 					numericNegative41=numericNegative();
@@ -2177,11 +2183,11 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "nodeID"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:632:1: nodeID : BLANK_PREFIX name ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:638:1: nodeID : BLANK_PREFIX name ;
 	public final void nodeID() throws RecognitionException {
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:633:3: ( BLANK_PREFIX name )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:633:5: BLANK_PREFIX name
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:639:3: ( BLANK_PREFIX name )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:639:5: BLANK_PREFIX name
 			{
 			match(input,BLANK_PREFIX,FOLLOW_BLANK_PREFIX_in_nodeID837); 
 			pushFollow(FOLLOW_name_in_nodeID839);
@@ -2204,11 +2210,11 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "relativeURI"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:636:1: relativeURI : STRING_URI ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:642:1: relativeURI : STRING_URI ;
 	public final void relativeURI() throws RecognitionException {
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:637:3: ( STRING_URI )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:637:5: STRING_URI
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:643:3: ( STRING_URI )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:643:5: STRING_URI
 			{
 			match(input,STRING_URI,FOLLOW_STRING_URI_in_relativeURI853); 
 			}
@@ -2230,14 +2236,14 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "namespace"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:640:1: namespace : NAMESPACE ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:646:1: namespace : NAMESPACE ;
 	public final TurtleOBDAParser.namespace_return namespace() throws RecognitionException {
 		TurtleOBDAParser.namespace_return retval = new TurtleOBDAParser.namespace_return();
 		retval.start = input.LT(1);
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:641:3: ( NAMESPACE )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:641:5: NAMESPACE
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:647:3: ( NAMESPACE )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:647:5: NAMESPACE
 			{
 			match(input,NAMESPACE,FOLLOW_NAMESPACE_in_namespace866); 
 			}
@@ -2262,14 +2268,14 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "defaultNamespace"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:644:1: defaultNamespace : COLON ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:650:1: defaultNamespace : COLON ;
 	public final TurtleOBDAParser.defaultNamespace_return defaultNamespace() throws RecognitionException {
 		TurtleOBDAParser.defaultNamespace_return retval = new TurtleOBDAParser.defaultNamespace_return();
 		retval.start = input.LT(1);
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:645:3: ( COLON )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:645:5: COLON
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:651:3: ( COLON )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:651:5: COLON
 			{
 			match(input,COLON,FOLLOW_COLON_in_defaultNamespace881); 
 			}
@@ -2291,11 +2297,11 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "name"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:648:1: name : VARNAME ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:654:1: name : VARNAME ;
 	public final void name() throws RecognitionException {
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:649:3: ( VARNAME )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:649:5: VARNAME
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:655:3: ( VARNAME )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:655:5: VARNAME
 			{
 			match(input,VARNAME,FOLLOW_VARNAME_in_name894); 
 			}
@@ -2317,14 +2323,14 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "languageTag"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:652:1: languageTag : VARNAME ;
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:658:1: languageTag : VARNAME ;
 	public final TurtleOBDAParser.languageTag_return languageTag() throws RecognitionException {
 		TurtleOBDAParser.languageTag_return retval = new TurtleOBDAParser.languageTag_return();
 		retval.start = input.LT(1);
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:653:3: ( VARNAME )
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:653:5: VARNAME
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:659:3: ( VARNAME )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:659:5: VARNAME
 			{
 			match(input,VARNAME,FOLLOW_VARNAME_in_languageTag907); 
 			}
@@ -2346,7 +2352,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "booleanLiteral"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:656:1: booleanLiteral returns [ValueConstant value] : ( TRUE | FALSE );
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:662:1: booleanLiteral returns [ValueConstant value] : ( TRUE | FALSE );
 	public final ValueConstant booleanLiteral() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2355,7 +2361,7 @@ public class TurtleOBDAParser extends Parser {
 		Token FALSE43=null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:657:3: ( TRUE | FALSE )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:663:3: ( TRUE | FALSE )
 			int alt20=2;
 			int LA20_0 = input.LA(1);
 			if ( (LA20_0==TRUE) ) {
@@ -2373,14 +2379,14 @@ public class TurtleOBDAParser extends Parser {
 
 			switch (alt20) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:657:5: TRUE
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:663:5: TRUE
 					{
 					TRUE42=(Token)match(input,TRUE,FOLLOW_TRUE_in_booleanLiteral924); 
 					 value = dfac.getConstantLiteral((TRUE42!=null?TRUE42.getText():null), COL_TYPE.BOOLEAN); 
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:658:5: FALSE
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:664:5: FALSE
 					{
 					FALSE43=(Token)match(input,FALSE,FOLLOW_FALSE_in_booleanLiteral933); 
 					 value = dfac.getConstantLiteral((FALSE43!=null?FALSE43.getText():null), COL_TYPE.BOOLEAN); 
@@ -2403,7 +2409,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "numericUnsigned"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:661:1: numericUnsigned returns [ValueConstant value] : ( INTEGER | DOUBLE | DECIMAL );
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:667:1: numericUnsigned returns [ValueConstant value] : ( INTEGER | DOUBLE | DECIMAL );
 	public final ValueConstant numericUnsigned() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2413,7 +2419,7 @@ public class TurtleOBDAParser extends Parser {
 		Token DECIMAL46=null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:662:3: ( INTEGER | DOUBLE | DECIMAL )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:668:3: ( INTEGER | DOUBLE | DECIMAL )
 			int alt21=3;
 			switch ( input.LA(1) ) {
 			case INTEGER:
@@ -2438,21 +2444,21 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt21) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:662:5: INTEGER
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:668:5: INTEGER
 					{
 					INTEGER44=(Token)match(input,INTEGER,FOLLOW_INTEGER_in_numericUnsigned952); 
 					 value = dfac.getConstantLiteral((INTEGER44!=null?INTEGER44.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:663:5: DOUBLE
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:669:5: DOUBLE
 					{
 					DOUBLE45=(Token)match(input,DOUBLE,FOLLOW_DOUBLE_in_numericUnsigned960); 
 					 value = dfac.getConstantLiteral((DOUBLE45!=null?DOUBLE45.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:664:5: DECIMAL
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:670:5: DECIMAL
 					{
 					DECIMAL46=(Token)match(input,DECIMAL,FOLLOW_DECIMAL_in_numericUnsigned969); 
 					 value = dfac.getConstantLiteral((DECIMAL46!=null?DECIMAL46.getText():null), COL_TYPE.DECIMAL); 
@@ -2475,7 +2481,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "numericPositive"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:667:1: numericPositive returns [ValueConstant value] : ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE );
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:673:1: numericPositive returns [ValueConstant value] : ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE );
 	public final ValueConstant numericPositive() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2485,7 +2491,7 @@ public class TurtleOBDAParser extends Parser {
 		Token DECIMAL_POSITIVE49=null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:668:3: ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:674:3: ( INTEGER_POSITIVE | DOUBLE_POSITIVE | DECIMAL_POSITIVE )
 			int alt22=3;
 			switch ( input.LA(1) ) {
 			case INTEGER_POSITIVE:
@@ -2510,21 +2516,21 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt22) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:668:5: INTEGER_POSITIVE
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:674:5: INTEGER_POSITIVE
 					{
 					INTEGER_POSITIVE47=(Token)match(input,INTEGER_POSITIVE,FOLLOW_INTEGER_POSITIVE_in_numericPositive988); 
 					 value = dfac.getConstantLiteral((INTEGER_POSITIVE47!=null?INTEGER_POSITIVE47.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:669:5: DOUBLE_POSITIVE
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:675:5: DOUBLE_POSITIVE
 					{
 					DOUBLE_POSITIVE48=(Token)match(input,DOUBLE_POSITIVE,FOLLOW_DOUBLE_POSITIVE_in_numericPositive996); 
 					 value = dfac.getConstantLiteral((DOUBLE_POSITIVE48!=null?DOUBLE_POSITIVE48.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:670:5: DECIMAL_POSITIVE
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:676:5: DECIMAL_POSITIVE
 					{
 					DECIMAL_POSITIVE49=(Token)match(input,DECIMAL_POSITIVE,FOLLOW_DECIMAL_POSITIVE_in_numericPositive1005); 
 					 value = dfac.getConstantLiteral((DECIMAL_POSITIVE49!=null?DECIMAL_POSITIVE49.getText():null), COL_TYPE.DECIMAL); 
@@ -2547,7 +2553,7 @@ public class TurtleOBDAParser extends Parser {
 
 
 	// $ANTLR start "numericNegative"
-	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:673:1: numericNegative returns [ValueConstant value] : ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE );
+	// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:679:1: numericNegative returns [ValueConstant value] : ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE );
 	public final ValueConstant numericNegative() throws RecognitionException {
 		ValueConstant value = null;
 
@@ -2557,7 +2563,7 @@ public class TurtleOBDAParser extends Parser {
 		Token DECIMAL_NEGATIVE52=null;
 
 		try {
-			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:674:3: ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE )
+			// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:680:3: ( INTEGER_NEGATIVE | DOUBLE_NEGATIVE | DECIMAL_NEGATIVE )
 			int alt23=3;
 			switch ( input.LA(1) ) {
 			case INTEGER_NEGATIVE:
@@ -2582,21 +2588,21 @@ public class TurtleOBDAParser extends Parser {
 			}
 			switch (alt23) {
 				case 1 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:674:5: INTEGER_NEGATIVE
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:680:5: INTEGER_NEGATIVE
 					{
 					INTEGER_NEGATIVE50=(Token)match(input,INTEGER_NEGATIVE,FOLLOW_INTEGER_NEGATIVE_in_numericNegative1024); 
 					 value = dfac.getConstantLiteral((INTEGER_NEGATIVE50!=null?INTEGER_NEGATIVE50.getText():null), COL_TYPE.INTEGER); 
 					}
 					break;
 				case 2 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:675:5: DOUBLE_NEGATIVE
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:681:5: DOUBLE_NEGATIVE
 					{
 					DOUBLE_NEGATIVE51=(Token)match(input,DOUBLE_NEGATIVE,FOLLOW_DOUBLE_NEGATIVE_in_numericNegative1032); 
 					 value = dfac.getConstantLiteral((DOUBLE_NEGATIVE51!=null?DOUBLE_NEGATIVE51.getText():null), COL_TYPE.DOUBLE); 
 					}
 					break;
 				case 3 :
-					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:676:5: DECIMAL_NEGATIVE
+					// /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g:682:5: DECIMAL_NEGATIVE
 					{
 					DECIMAL_NEGATIVE52=(Token)match(input,DECIMAL_NEGATIVE,FOLLOW_DECIMAL_NEGATIVE_in_numericNegative1041); 
 					 value = dfac.getConstantLiteral((DECIMAL_NEGATIVE52!=null?DECIMAL_NEGATIVE52.getText():null), COL_TYPE.DECIMAL); 

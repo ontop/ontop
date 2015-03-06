@@ -261,19 +261,25 @@ private class ColumnString implements FormatString {
 	private ArrayList<Term> addToTermsList(String str){
 	   ArrayList<Term> terms = new ArrayList<Term>();
 	   int i,j;
+	   String st;
 	   str = str.substring(1, str.length()-1);
 	   while(str.contains("{")){
 	      i = getIndexOfCurlyB(str);
 	      if (i > 0){
-	         terms.add(dfac.getConstantLiteral(str.substring(0,i)));
-	         str = str.substring(str.indexOf("}", i)+1, str.length());
-	      }else{
+	    	 st = str.substring(0,i);
+	    	 st = st.replace("\\\\", "");
+	         terms.add(dfac.getConstantLiteral(st));
+	         str = str.substring(str.indexOf("{", i), str.length());
+	      }else if (i == 0){
 	         j = str.indexOf("}");
 	         terms.add(dfac.getVariable(str.substring(1,j)));
 	         str = str.substring(j+1,str.length());
+	      } else {
+	    	  break;
 	      }
 	   }
 	   if(!str.equals("")){
+	      str = str.replace("\\\\", "");
 	      terms.add(dfac.getConstantLiteral(str));
 	   }
 	   return terms;

@@ -1,104 +1,124 @@
-@prefix rso: <http://www.fluidops.com/ontologies/RelationalSchemaOntology/> .
-@prefix skosCore04: <http://www.w3.org/2004/02/skos/core#> .
-@prefix patent: <http://patents.data.gov.uk/def/patents/> .
-@prefix Admin: <http://www.fluidops.com/admin/> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix Help: <http://www.fluidops.com/help/> .
-@prefix twitter: <http://twitter.com/> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix dcat: <http://www.w3.org/ns/dcat#> .
-@prefix fluidops: <http://www.fluidops.com/> .
-@prefix dbpedia: <http://dbpedia.org/ontology/> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix Platform: <http://www.fluidops.com/ontologies/platform/> .
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
-@prefix sp: <http://spinrdf.org/sp#> .
-@prefix Settings: <http://www.fluidops.com/settings/> .
-@prefix void: <http://rdfs.org/ns/void#> .
-@prefix Setup: <http://www.fluidops.com/setup/> .
-@prefix research: <http://research.data.gov.uk/def/project/> .
-@prefix history: <http://www.fluidops.com/history/> .
-@prefix default: <http://www.optique-project.eu/resource/> .
-@prefix rrx: <http://www.fluidops.com/ontologies/r2rmlExtension/> .
-@prefix purl: <http://purl.org/stuff/project/> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rr: <http://www.w3.org/ns/r2rml#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
 
+_:node19fn4oeocx18 a rr:PredicateObjectMap .
 
-default:importR2RML45375634386923450611095204596133 a rr:BaseTableOrView , rr:LogicalTable ;
-	rr:tableName "NORTHWIND.EMPLOYEES" .
+_:node19fn4oeocx2 rr:termType rr:IRI .
 
-default:importR2RML87542462625389055310699786328362 a rr:ObjectMap ;
-	rr:column "REGION" .
+_:node19fn4oeocx20 rr:column "POSTALCODE" .
 
-default:importR2RML18193365175978383621295937652188 a rr:PredicateMap ;
-	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/REGION> .
+_:node19fn4oeocx8 a rr:ObjectMap .
 
-default:importR2RML05873788761506912134752929304219 a rr:PredicateObjectMap ;
-	rr:objectMap default:importR2RML87542462625389055310699786328362 ;
-	rr:predicateMap default:importR2RML18193365175978383621295937652188 .
+_:node19fn4oeocx20 a rr:TermMap .
 
+_:node19fn4oeocx9 a rr:PredicateObjectMap .
 
-default:importR2RML97268349330335623245447907493469 a rr:ObjectMap ;
-	rr:column "POSTALCODE" .
+_:node19fn4oeocx2 a rr:TermMap .
 
-default:importR2RML88675673794067304636763113437046 a rr:PredicateMap ;
-	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE> .
+_:node19fn4oeocx15 rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/ADDRESS> .
 
-default:importR2RML37626037008849597859217101464560 a rr:PredicateObjectMap ;
-	rr:objectMap default:importR2RML97268349330335623245447907493469 ;
-	rr:predicateMap default:importR2RML88675673794067304636763113437046 .
+_:node19fn4oeocx3 rr:logicalTable _:node19fn4oeocx1 .
 
-default:importR2RML25651988415522470329839362406420 a rr:ObjectMap ;
-	rr:column "CITY" .
+_:node19fn4oeocx17 rr:column "REGION" .
 
-default:importR2RML73952855973683527678991746845004 a rr:PredicateMap ;
-	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/CITY> .
+_:node19fn4oeocx21 rr:objectMap _:node19fn4oeocx20 .
 
-default:importR2RML38391179511871506632479998177850 a rr:PredicateObjectMap ;
-	rr:objectMap default:importR2RML25651988415522470329839362406420 ;
-	rr:predicateMap default:importR2RML73952855973683527678991746845004 .
+_:node19fn4oeocx11 a rr:ObjectMap .
 
-default:importR2RML67781793117636492352628444445623 a rr:ObjectMap ;
-	rr:column "COUNTRY" .
+_:node19fn4oeocx6 rr:objectMap _:node19fn4oeocx5 .
 
-default:importR2RML67957586970108770367378759515516 a rr:PredicateMap ;
-	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/COUNTRY> .
+_:node19fn4oeocx11 rr:datatype <http://www.w3.org/2001/XMLSchema#string> .
 
-default:importR2RML63844699810459012487882506494809 a rr:PredicateObjectMap ;
-	rr:objectMap default:importR2RML67781793117636492352628444445623 ;
-	rr:predicateMap default:importR2RML67957586970108770367378759515516 .
+_:node19fn4oeocx1 a rr:R2RMLView .
 
-default:importR2RML31814413278451325763041856238344 a rr:ObjectMap ;
-	rr:column "ADDRESS" .
+_:node19fn4oeocx14 a rr:TermMap .
 
-default:importR2RML12796727036548878641478208476996 a rr:PredicateMap ;
-	rr:constant <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/ADDRESS> .
+_:node19fn4oeocx20 rr:datatype <http://www.w3.org/2001/XMLSchema#string> .
 
-default:importR2RML98409557145784246623724004439660 a rr:PredicateObjectMap ;
-	rr:objectMap default:importR2RML31814413278451325763041856238344 ;
-	rr:predicateMap default:importR2RML12796727036548878641478208476996 .
+_:node19fn4oeocx9 rr:predicate <http://www.w3.org/2000/01/rdf-schema#label> .
 
-default:objectMap53831248725149476996334159182422 a rr:ObjectMap ;
-	rr:template "{ADDRESS}\\{city\\}{CITY}{COUNTRY}" ;
-	rr:termType rr:Literal ;
-	rr:language "en-us" .
+_:node19fn4oeocx15 a rr:PredicateObjectMap .
 
-default:predicateMap44234754002843301664904437959989 a rr:PredicateMap ;
-	rr:constant rdfs:label .
+_:node19fn4oeocx21 rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE> ;
+	a rr:PredicateObjectMap .
 
-default:predicateObjectMap90307601937924308813804838053901 a rr:PredicateObjectMap ;
-	rr:objectMap default:objectMap53831248725149476996334159182422 ;
-	rr:predicateMap default:predicateMap44234754002843301664904437959989 .
+_:node19fn4oeocx18 rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/REGION> .
 
-default:importR2RML31150487141271693258713914157454 a rr:SubjectMap ;
-	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION> ;
-	rr:template "http://www.optique-project.eu/resource/employeesLocation/{EMPLOYEEID}" .
+_:node19fn4oeocx3 a rr:TriplesMap .
 
-default:importR2RML92008883630296842016434057284259 a rr:TriplesMap ;
-	rdfs:label "employeesLocation" ;
-	rr:logicalTable default:importR2RML45375634386923450611095204596133 ;
-	rr:predicateObjectMap default:importR2RML05873788761506912134752929304219 , default:importR2RML37626037008849597859217101464560 , default:importR2RML38391179511871506632479998177850 , default:importR2RML63844699810459012487882506494809 , default:importR2RML98409557145784246623724004439660 , default:predicateObjectMap90307601937924308813804838053901 ;
-	rr:subjectMap default:importR2RML31150487141271693258713914157454 .
+_:node19fn4oeocx2 rr:template "http://www.optique-project.eu/resource/employeesLocation/{EMPLOYEEID}" .
+
+_:node19fn4oeocx17 a rr:ObjectMap .
+
+_:node19fn4oeocx5 a rr:ObjectMap , rr:TermMap .
+
+_:node19fn4oeocx3 rr:predicateObjectMap _:node19fn4oeocx21 .
+
+_:node19fn4oeocx9 rr:objectMap _:node19fn4oeocx8 .
+
+_:node19fn4oeocx14 rr:termType rr:Literal .
+
+_:node19fn4oeocx17 rr:termType rr:Literal .
+
+_:node19fn4oeocx12 a rr:PredicateObjectMap .
+
+_:node19fn4oeocx20 a rr:ObjectMap .
+
+_:node19fn4oeocx5 rr:termType rr:Literal .
+
+_:node19fn4oeocx11 rr:column "COUNTRY" .
+
+_:node19fn4oeocx2 a rr:SubjectMap ;
+	rr:class <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION> .
+
+_:node19fn4oeocx8 rr:template "adres : {ADDRESS} \\{city:\\} {CITY}{COUNTRY}something" .
+
+_:node19fn4oeocx3 rr:predicateObjectMap _:node19fn4oeocx15 .
+
+_:node19fn4oeocx14 a rr:ObjectMap .
+
+_:node19fn4oeocx3 rr:subjectMap _:node19fn4oeocx2 ;
+	rr:predicateObjectMap _:node19fn4oeocx18 .
+
+_:node19fn4oeocx8 a rr:TermMap .
+
+_:node19fn4oeocx6 a rr:PredicateObjectMap .
+
+_:node19fn4oeocx3 rr:predicateObjectMap _:node19fn4oeocx12 .
+
+_:node19fn4oeocx17 a rr:TermMap .
+
+_:node19fn4oeocx3 rr:predicateObjectMap _:node19fn4oeocx9 .
+
+_:node19fn4oeocx14 rr:datatype <http://www.w3.org/2001/XMLSchema#string> .
+
+_:node19fn4oeocx3 rr:predicateObjectMap _:node19fn4oeocx6 .
+
+_:node19fn4oeocx20 rr:termType rr:Literal .
+
+_:node19fn4oeocx18 rr:objectMap _:node19fn4oeocx17 .
+
+_:node19fn4oeocx11 rr:termType rr:Literal .
+
+_:node19fn4oeocx14 rr:column "ADDRESS" .
+
+_:node19fn4oeocx17 rr:datatype <http://www.w3.org/2001/XMLSchema#string> .
+
+_:node19fn4oeocx6 rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/CITY> .
+
+_:node19fn4oeocx5 rr:column "CITY" .
+
+_:node19fn4oeocx12 rr:objectMap _:node19fn4oeocx11 .
+
+_:node19fn4oeocx15 rr:objectMap _:node19fn4oeocx14 .
+
+_:node19fn4oeocx12 rr:predicate <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/COUNTRY> .
+
+_:node19fn4oeocx5 rr:datatype <http://www.w3.org/2001/XMLSchema#string> .
+
+_:node19fn4oeocx8 rr:language "en-us" .
+
+_:node19fn4oeocx1 rr:sqlQuery "SELECT * FROM NORTHWIND.EMPLOYEES" .
+
+_:node19fn4oeocx11 a rr:TermMap .
+
+_:node19fn4oeocx8 rr:termType rr:Literal .
