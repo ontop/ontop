@@ -13,8 +13,8 @@ password
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
-mappingId	mapping--1054394285
-target		<http://www.optique-project.eu/resource/employeesLocation/{EMPLOYEEID}> a <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION> ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/CITY> {CITY} ; rdfs:label "adres : {ADDRESS} \\{city:\\} {CITY}{COUNTRY}something"@en-us ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/COUNTRY> {COUNTRY} ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/ADDRESS> {ADDRESS} ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/REGION> {REGION} ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE> {POSTALCODE} . 
+mappingId	mapping-1308227722
+target		<http://www.optique-project.eu/resource/employeesLocation/{EMPLOYEEID}> a <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION> ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE> {POSTALCODE}^^xsd:string ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/COUNTRY> {COUNTRY}^^xsd:string ; rdfs:label "adres : {ADDRESS} \\{city:\\} {CITY}{COUNTRY}something"@en-us ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/ADDRESS> {ADDRESS}^^xsd:string ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/REGION> {REGION}^^xsd:string ; <http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/CITY> {CITY}^^xsd:string . 
 source		SELECT * FROM NORTHWIND.EMPLOYEES
 ]]
 

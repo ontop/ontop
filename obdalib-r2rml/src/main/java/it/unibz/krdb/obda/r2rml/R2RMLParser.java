@@ -253,7 +253,7 @@ public class R2RMLParser {
 		if ((i = st.indexOf("{")) > -1) {
 			if ((j = st.lastIndexOf("{")) > i) {
 				return true;
-			} else if ((i > 0) || ((j > 0) & (j < (st.length() - 1)))) {
+			} else if ((i > 0) || ((j > 0) && (j < (st.length() - 1)))) {
 				return true;
 			}
 		}
@@ -323,11 +323,11 @@ public class R2RMLParser {
 		// we check if the object map is a template (can be a iri, a literal or
 		// a blank node)
 		Template t = om.getTemplate();
+		Object typ = om.getTermType(Object.class);
 		boolean concat = false;
 		if (t != null) {
 			//we check if the template is a literal
-			//then we check if the template includes concat
-			Object typ = om.getTermType(Object.class); 
+			//then we check if the template includes concat 
 			concat = isConcat(t.toString());
 			if (typ.equals(R2RMLVocabulary.literal) && (concat)){
 				objectAtom = getTypedFunction(t.toString(), 4, joinCond);
@@ -362,7 +362,7 @@ public class R2RMLParser {
 		if (lan != null) {
 			Term langAtom = fac.getTypedTerm(objectAtom, lan);
 			objectAtom = langAtom;
-		}else if (concat){
+		}else if ((typ.equals(R2RMLVocabulary.literal)) && (concat)){
 			objectAtom = fac.getTypedTerm(objectAtom, COL_TYPE.LITERAL);
 		}
 
