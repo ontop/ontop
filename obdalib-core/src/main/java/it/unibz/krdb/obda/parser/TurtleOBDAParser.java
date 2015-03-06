@@ -1,4 +1,4 @@
-// $ANTLR 3.5.1 /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g 2015-03-06 09:48:51
+// $ANTLR 3.5.1 /Users/elem/git/ontop/obdalib-core/src/main/java/it/unibz/krdb/obda/parser/TurtleOBDA.g 2015-03-06 13:27:20
 
 package it.unibz.krdb.obda.parser;
 
@@ -1594,7 +1594,7 @@ public class TurtleOBDAParser extends Parser {
 					    } else {
 					        throw new IllegalArgumentException("resource25 should be an URI");
 					    }
-					    Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+					    Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
 					    if (type == null)  
 					 	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
 					    
@@ -2072,7 +2072,7 @@ public class TurtleOBDAParser extends Parser {
 			          if (resource38 instanceof Function){
 				    functionName = ( (ValueConstant) ((Function)resource38).getTerm(0) ).getValue();
 			          }
-			          Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+			          Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
 			          if (type == null) {
 			            throw new RuntimeException("Unsupported datatype: " + functionName);
 			          }

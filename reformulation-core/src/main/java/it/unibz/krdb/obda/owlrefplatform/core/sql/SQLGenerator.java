@@ -26,6 +26,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
+import it.unibz.krdb.obda.owlrefplatform.core.abox.XsdDatatypeConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
@@ -72,6 +73,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String INDENT = "    ";
 
 	private static final String IS_TRUE_OPERATOR = "%s IS TRUE";
+
+	private static final String typeStrForSELECT = "%s AS %s";
+	private static final String typeSuffix = "QuestType";
+	private static final String langStrForSELECT = "%s AS %s";
+	private static final String langSuffix = "Lang";
 	
 	/**
 	 * Formatting template
@@ -496,7 +502,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Predicate predicate = atom.getFunctionSymbol();
 		if (predicate instanceof BooleanOperationPredicate
 				|| predicate instanceof NumericalOperationPredicate
-				|| predicate instanceof DataTypePredicate) {
+				|| predicate instanceof DatatypePredicate) {
 			// These don't participate in the FROM clause
 			return "";
 		} else if (predicate instanceof AlgebraOperatorPredicate) {
@@ -682,7 +688,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Function f = (Function) term;
 		if (f.isDataTypeFunction()) {
 			Predicate p = f.getFunctionSymbol();
-			Predicate.COL_TYPE type = dtfac.getDataType(p.toString());			
+			Predicate.COL_TYPE type = dtfac.getDatatype(p.toString());
 			return OBDADataFactoryImpl.getInstance().getJdbcTypeMapper().getSQLType(type);
 		}
 		// Return varchar for unknown
@@ -726,13 +732,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return sb.toString();
 		}
 
+		/**
+		 * Set that contains all the variable names created on the top query.
+		 * It helps the dialect adapter to generate variable names according to its possible restrictions.
+		 * Currently, this is needed for the Oracle adapter (max. length of 30 characters).
+		 */
+		Set<String> sqlVariableNames = new HashSet<>();
+
 		Iterator<Term> hit = headterms.iterator();
 		int hpos = 0;
 		while (hit.hasNext()) {
 			Term ht = hit.next();
-			String typeColumn = getTypeColumnForSELECT(ht, signature, hpos);
-			String langColumn = getLangColumnForSELECT(ht, signature, hpos,	index);
-			String mainColumn = getMainColumnForSELECT(ht, signature, hpos, index);
+			String typeColumn = getTypeColumnForSELECT(ht, signature, hpos, sqlVariableNames);
+			String langColumn = getLangColumnForSELECT(ht, signature, hpos,	index, sqlVariableNames);
+			String mainColumn = getMainColumnForSELECT(ht, signature, hpos, index, sqlVariableNames);
 
 			sb.append("\n   ");
 			sb.append(typeColumn);
@@ -749,7 +762,13 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
 	private String getMainColumnForSELECT(Term ht,
-			List<String> signature, int hpos, QueryAliasIndex index) {
+			List<String> signature, int hpos, QueryAliasIndex index, Set<String> sqlVariableNames) {
+
+		/**
+		 * Creates a variable name that fits to the restrictions of the SQL dialect.
+		 */
+		String variableName = sqladapter.nameTopVariable(signature.get(hpos), "", sqlVariableNames);
+		sqlVariableNames.add(variableName);
 
 		String mainColumn = null;
 
@@ -771,7 +790,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			/*
 			 * Adding the column(s) with the actual value(s)
 			 */
-			if (function instanceof DataTypePredicate) {
+			if (function instanceof DatatypePredicate) {
 				/*
 				 * Case where we have a typing function in the head (this is the
 				 * case for all literal columns
@@ -819,13 +838,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 				mainColumn = sqladapter.sqlCast(mainColumn, Types.VARCHAR);
 			}
 		}
-		return String.format(mainTemplate, mainColumn, sqladapter.sqlQuote(signature.get(hpos)));
+		return String.format(mainTemplate, mainColumn, variableName);
 	}
+	
+	private String getLangColumnForSELECT(Term ht, List<String> signature, int hpos, QueryAliasIndex index,
+										  Set<String> sqlVariableNames) {
 
-	
-	private static final String langStrForSELECT = "%s AS \"%sLang\"";
-	
-	private String getLangColumnForSELECT(Term ht, List<String> signature, int hpos, QueryAliasIndex index) {
+		/**
+		 * Creates a variable name that fits to the restrictions of the SQL dialect.
+		 */
+		String langVariableName = sqladapter.nameTopVariable(signature.get(hpos), langSuffix, sqlVariableNames);
+		sqlVariableNames.add(langVariableName);
 
 
 		if (ht instanceof Function) {
@@ -837,10 +860,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 				/*
 				 * Case for rdf:literal s with a language, we need to select 2
 				 * terms from ".., rdf:literal(?x,"en"),
-				 * 
+				 *
 				 * and signature "name" * we will generate a select with the
 				 * projection of 2 columns
-				 * 
+				 *
 				 * , 'en' as nameqlang, view.colforx as name,
 				 */
 				String lang = null;
@@ -853,17 +876,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 				} else {
 					lang = getSQLString(langTerm, index, false);
 				}
-				return (String.format(langStrForSELECT, lang, signature.get(hpos)));
+				return (String.format(langStrForSELECT, lang, langVariableName));
 			}
 		}
-		return (String.format(langStrForSELECT, "NULL", signature.get(hpos)));
+		return (String.format(langStrForSELECT, "NULL", langVariableName));
 
 	}
 
-	private static final String typeStrForSELECT = "%s AS \"%sQuestType\"";
-	
-
-	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos) {
+	/**
+	 * Beware: a new entry will be added to sqlVariableNames (is thus mutable).
+	 */
+	private String getTypeColumnForSELECT(Term ht, List<String> signature, int hpos,
+										  Set<String> sqlVariableNames) {
 		COL_TYPE type;
 
 		if (ht instanceof Function) {
@@ -873,33 +897,39 @@ public class SQLGenerator implements SQLQueryGenerator {
 			/*
 			 * Adding the ColType column to the projection (used in the result
 			 * set to know the type of constant)
-			 * 
-			 * NOTE NULL is IDENTIFIER 0 in QuestResultSet do not USE for any 
+			 *
+			 * NOTE NULL is IDENTIFIER 0 in QuestResultSet do not USE for any
 			 * type
 			 */
-			
+
 			if (function instanceof URITemplatePredicate) {
                 type = COL_TYPE.OBJECT;
-			} 
+			}
 			else if (function instanceof BNodePredicate) {
                 type = COL_TYPE.BNODE;
 			}
 			else {
 				String functionString = function.toString();
-				type = dtfac.getDataType(functionString);
+				type = dtfac.getDatatype(functionString);
 			}
-		} 
+		}
 		else if (ht instanceof URIConstant) {
             type = COL_TYPE.OBJECT;
-		} 
+		}
 		else if (ht == OBDAVocabulary.NULL) {  // NULL is an instance of ValueConstant
             type = COL_TYPE.NULL;
 		}
 		else
 			throw new RuntimeException("Cannot generate SELECT for term: " + ht.toString());
-		
+
 		int code = type.getQuestCode();
-		return String.format(typeStrForSELECT, code, signature.get(hpos));
+
+		/**
+		 * Creates a variable name that fits to the restrictions of the SQL dialect.
+		 */
+		String typeVariableName = sqladapter.nameTopVariable(signature.get(hpos), typeSuffix, sqlVariableNames);
+		sqlVariableNames.add(typeVariableName);
+		return String.format(typeStrForSELECT, code, typeVariableName);
 	}
 
 	public String getSQLStringForTemplateFunction(Function ov, QueryAliasIndex index) {
@@ -1177,7 +1207,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		Term term1 = function.getTerms().get(0);
 		int size = function.getTerms().size();
 
-		if (functionSymbol instanceof DataTypePredicate) {
+		if (functionSymbol instanceof DatatypePredicate) {
 			if (functionSymbol.getType(0) == COL_TYPE.UNSUPPORTED) {
 				throw new RuntimeException("Unsupported type in the query: " + function);
 			}
@@ -1313,16 +1343,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 			sql = "'" + constant.getValue() + "'";
 		} 
 		else if (constant.getType() == COL_TYPE.BOOLEAN) {
-			String value = constant.getValue().toLowerCase();
-			if (value.equals("1") || value.equals("true") || value.equals("t")) {
-				sql = sqladapter.getSQLLexicalFormBoolean(true);
-			} 
-			else if (value.equals("0") || value.equals("false") || value.equals("f")) {
-				sql = sqladapter.getSQLLexicalFormBoolean(false);
-			} 
-			else {
-				throw new RuntimeException("Invalid lexical form for xsd:boolean. Found: " + value);
-			}
+			String value = constant.getValue();
+			boolean v = XsdDatatypeConverter.parseXsdBoolean(value);
+			sql = sqladapter.getSQLLexicalFormBoolean(v);
 		} 
 		else if (constant.getType() == COL_TYPE.DATETIME ) {
 			sql = sqladapter.getSQLLexicalFormDatetime(constant.getValue());

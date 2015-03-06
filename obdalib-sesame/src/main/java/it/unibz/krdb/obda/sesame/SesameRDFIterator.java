@@ -194,7 +194,7 @@ public class SesameRDFIterator extends RDFHandlerBase implements Iterator<Assert
 						type = Predicate.COL_TYPE.LITERAL;
 					} 
 					else {
-						type = dtfac.getDataType(datatype);
+						type = dtfac.getDatatype(datatype);
 						if (type == null)
 							type = Predicate.COL_TYPE.UNSUPPORTED;
 					}			

@@ -23,8 +23,16 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
+
+	public static final int VARIABLE_NAME_MAX_LENGTH = 30;
+	/**
+	 * If the variable needs to be shortcut, length of the number
+	 * introduced.
+	 */
+	public static final int VARIABLE_NUMBER_LENGTH = 3;
 
 	private static Map<Integer, String> SqlDatatypes;
 	static {
@@ -87,9 +95,6 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	 * will also normalize the use of Z to the timezome +00:00 and last, if the
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
-	 * 
-	 * @param rdfliteral
-	 * @return
 	 */
 	@Override
 	public String getSQLLexicalFormDatetime(String v) {
@@ -178,5 +183,40 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 		return bf.toString();
 	}
-	
+
+	@Override
+	public String nameTopVariable(String signatureVariableName, String suffix, Set<String> sqlVariableNames) {
+		int suffixLength = suffix.length();
+		int signatureVarLength = signatureVariableName.length();
+
+		if (suffixLength >= (VARIABLE_NAME_MAX_LENGTH - VARIABLE_NUMBER_LENGTH))  {
+			throw new IllegalArgumentException("The suffix is too long (must be less than " +
+					(VARIABLE_NAME_MAX_LENGTH - VARIABLE_NUMBER_LENGTH) + ")");
+		}
+
+		/**
+		 * If the length limit is not reached, processes as usual.
+		 */
+		if (signatureVarLength + suffixLength <= VARIABLE_NAME_MAX_LENGTH) {
+			return super.nameTopVariable(signatureVariableName, suffix, sqlVariableNames);
+		}
+
+		String varPrefix = signatureVariableName.substring(0, VARIABLE_NAME_MAX_LENGTH - suffixLength
+				- VARIABLE_NUMBER_LENGTH);
+
+
+		/**
+		 * Naive implementation
+		 */
+		for (int i = 0; i < Math.pow(10, VARIABLE_NUMBER_LENGTH); i++) {
+			String mainVarName = super.nameTopVariable(varPrefix + i, suffix, sqlVariableNames);
+			if (!sqlVariableNames.contains(mainVarName)) {
+				return mainVarName;
+			}
+		}
+
+		// TODO: find a better exception
+		throw new RuntimeException("Impossible to create a new variable " + varPrefix + "???" + suffix + " : already " +
+				Math.pow(10, VARIABLE_NUMBER_LENGTH) + " of them.");
+	}
 }

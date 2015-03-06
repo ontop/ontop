@@ -706,9 +706,13 @@ public class Mapping2DatalogConverter {
                 // Constructs constant
                 // if the columns contains a boolean value
                 String columnName = expression.getColumnName();
-                if (columnName.toLowerCase().equals("true")
-                        || columnName.toLowerCase().equals("false")) {
-                    result = fac.getConstantLiteral(columnName, COL_TYPE.BOOLEAN);
+                // check whether it is an SQL boolean value
+                String lowerCase = columnName.toLowerCase();
+                if (lowerCase.equals("true")) {
+                    result = fac.getBooleanConstant(true);
+                }
+                else if (lowerCase.equals("false")) {
+                	result = fac.getBooleanConstant(false);
                 }
                 else
                     throw new RuntimeException(
