@@ -1171,9 +1171,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 			} else {
 				if (isUnary(function)) {
 
-                    if (dtfac.isLiteral(functionSymbol)) {
-                        return true;
-                    }
 					/*
 					 * Update the term with the parent term's first parameter.
 					 * Note: this method is confusing :(
@@ -1181,13 +1178,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					 term = function.getTerm(0);
 					 return isStringColType(term, index);
 				}
-                else{ //can be a literal with lang type
 
-                    if (dtfac.isLiteral(functionSymbol)) {
-                        return true;
-                    }
-
-                }
 			}
 		} else if (term instanceof Variable) {
 			Set<String> viewdef = index.getColumnReferences((Variable) term);
@@ -1425,14 +1416,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					String result = sqladapter.strconcat(new String[]{left, right});
 					return result;
 			}
-            else if (functionName.equals(OBDAVocabulary.CONCAT.getName())) {
 
-                    String left = getSQLString(function.getTerm(0), index, false);
-                    String right = getSQLString(function.getTerm(1), index, false);
-                    String result = sqladapter.strconcat(new String[]{left, right});
-                    return result;
-
-            }
         }
 
 		/*

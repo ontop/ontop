@@ -191,7 +191,7 @@ public class Mapping2DatalogConverter {
     			String var = lookupTable.lookup(alias_name);
     			Term datalog_alias = fac.getVariable(var);
     			Function equalityTerm = fac.getFunctionEQ(datalog_alias, atom);
-    			// TODO create equality atom
+
     			bodyAtoms.add(equalityTerm);
     		}
     	}
