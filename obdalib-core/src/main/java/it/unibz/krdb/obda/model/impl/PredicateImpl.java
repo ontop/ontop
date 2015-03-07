@@ -128,7 +128,7 @@ public class PredicateImpl implements Predicate {
 
 	@Override
 	public boolean isDataTypePredicate() {
-		return this instanceof DataTypePredicate;
+		return this instanceof DatatypePredicate;
 	}
 
     @Override

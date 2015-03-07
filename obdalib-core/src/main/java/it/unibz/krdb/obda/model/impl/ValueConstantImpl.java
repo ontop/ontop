@@ -60,7 +60,7 @@ public class ValueConstantImpl implements ValueConstant {
 		this.string = getStringRepresentation();
 	}
 	
-	private final String getStringRepresentation() {
+	private String getStringRepresentation() {
 		StringBuilder sb = new StringBuilder();
 		
 		switch (type) {

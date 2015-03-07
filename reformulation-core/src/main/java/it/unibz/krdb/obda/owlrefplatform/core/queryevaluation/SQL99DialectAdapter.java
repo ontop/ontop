@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import java.sql.Types;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.Set;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
 
@@ -39,7 +40,6 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 			return strings[0];
 
 		StringBuilder sql = new StringBuilder();
-
 
 		sql.append(String.format("(%s", strings[0]));
 		for (int i = 1; i < strings.length; i++) {
@@ -276,5 +276,10 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		return bf.toString();
 	}
 
-	
+	@Override
+	public String nameTopVariable(String signatureVariableName, String proposedSuffix, Set<String> sqlVariableNames) {
+		return sqlQuote(signatureVariableName + proposedSuffix);
+	}
+
+
 }

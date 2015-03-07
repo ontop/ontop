@@ -31,7 +31,7 @@ import eu.optique.api.mapping.impl.InvalidR2RMLMappingException;
 import eu.optique.api.mapping.impl.SubjectMapImpl;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.impl.DataTypePredicateImpl;
+import it.unibz.krdb.obda.model.impl.DatatypePredicateImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
@@ -344,7 +344,7 @@ public class R2RMLParser {
 		//we check if it is a typed literal 
 		if (datatype != null)
 		{
-			Predicate.COL_TYPE type = dtfac.getDataType(datatype.toString());
+			Predicate.COL_TYPE type = dtfac.getDatatype(datatype.toString());
 			if (type == null) {
 //				throw new RuntimeException("Unsupported datatype: " + datatype.toString());
 				logger.warn("Unsupported datatype will not be converted: " + datatype.toString());
@@ -386,7 +386,7 @@ public class R2RMLParser {
 			if (type.endsWith(">"))
 				type = type.substring(0, type.length() - 1);
 
-			DataTypePredicate predicate = new DataTypePredicateImpl(type, COL_TYPE.OBJECT);
+			DatatypePredicate predicate = new DatatypePredicateImpl(type, COL_TYPE.OBJECT);
 			Term constant = fac.getConstantLiteral(consts);
 			typedObject = fac.getFunction(predicate, constant);
 		}

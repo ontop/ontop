@@ -193,11 +193,7 @@ public class QuestResultset implements TupleResultSet {
 						}
 					} else if (type == COL_TYPE.BOOLEAN) {
 						boolean value = set.getBoolean(column);
-						if (value) {
-							result = fac.getConstantLiteral("true", COL_TYPE.BOOLEAN);
-						} else {
-							result = fac.getConstantLiteral("false", COL_TYPE.BOOLEAN);
-						}
+						result = fac.getBooleanConstant(value);
 					} else if (type == COL_TYPE.DOUBLE) {
 						double d = set.getDouble(column);
 						// format name into correct double representation

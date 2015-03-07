@@ -481,7 +481,7 @@ typedLiteral returns [Function value]
     } else {
         throw new IllegalArgumentException("$resource.value should be an URI");
     }
-    Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+    Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
     if (type == null)  
  	  throw new RuntimeException("ERROR. A mapping involves an unsupported datatype. \nOffending datatype:" + functionName);
     
@@ -543,7 +543,7 @@ dataTypeString returns [Term value]
       if ($resource.value instanceof Function){
 	 functionName = ( (ValueConstant) ((Function)$resource.value).getTerm(0) ).getValue();
       }
-      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+      Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
       if (type == null) {
             throw new RuntimeException("Unsupported datatype: " + functionName);
       }
