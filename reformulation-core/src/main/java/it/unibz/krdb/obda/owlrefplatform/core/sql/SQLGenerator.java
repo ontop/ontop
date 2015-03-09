@@ -959,7 +959,7 @@ public class SQLGenerator implements SQLQueryGenerator {
             String typeVariableName = sqladapter.nameTopVariable(signature.get(hpos), typeSuffix, sqlVariableNames);
             sqlVariableNames.add(typeVariableName);    
 
-        return String.format(typeStrForSELECT, code, signature.get(hpos));
+        return String.format(typeStrForSELECT, code, typeVariableName);
 	}
 
     private COL_TYPE getTypeColumn(Term ht) {
