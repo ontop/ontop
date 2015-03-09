@@ -6,7 +6,7 @@ public class FromOBDAConverterTest {
 
 	@Test
 	public void testWithOntology() {
-		MappingConverterCMD.main(new String[]{"src/test/resources/mapping-northwind.obda", "src/test/resources/northwind.owl"});
+		MappingConverterCMD.main(new String[]{"src/test/resources/mapping-northwind.obda", "src/test/resources/mapping-northwind.owl"});
 	}
 
 }

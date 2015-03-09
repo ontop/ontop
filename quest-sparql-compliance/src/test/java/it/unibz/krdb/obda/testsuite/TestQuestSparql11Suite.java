@@ -1,8 +1,8 @@
-package it.unibz.krdb.obda.model.impl;
+package it.unibz.krdb.obda.testsuite;
 
 /*
  * #%L
- * ontop-obdalib-core
+ * ontop-sparql-compliance
  * %%
  * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
  * %%
@@ -20,28 +20,15 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
+import it.unibz.krdb.obda.quest.sparql11.QuestMemorySPARQLQueryTest;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
-/**
- * For supporting sql string functions, presently only CONCAT and REPLACE
- * 
- * @author Dag Hovland
- */
-import it.unibz.krdb.obda.model.StringOperationPredicate;
+public class TestQuestSparql11Suite extends TestSuite {
 
-
-public class StringOperationPredicateImpl extends PredicateImpl implements StringOperationPredicate {
-
-	
-	private static final long serialVersionUID = 5119873524278488136L;
-
-
-	protected StringOperationPredicateImpl(String name, int arity, COL_TYPE[] types) {
-		super(name, arity, types);
-	}
-
-
-	@Override
-	public StringOperationPredicate clone() {
-		return this;
+	public static Test suite() throws Exception {
+		TestSuite suite = new TestSuite("SPARQL Compliance Tests for Quest");
+		suite.addTest(QuestMemorySPARQLQueryTest.suite());
+		return suite;
 	}
 }
