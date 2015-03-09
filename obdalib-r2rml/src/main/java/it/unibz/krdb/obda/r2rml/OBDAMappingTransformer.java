@@ -27,6 +27,7 @@ import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.SQLQueryImpl;
+import it.unibz.krdb.obda.renderer.TargetQueryRenderer;
 import it.unibz.krdb.obda.utils.IDGenerator;
 import it.unibz.krdb.obda.utils.URITemplates;
 
@@ -405,6 +406,26 @@ public class OBDAMappingTransformer {
 							//statements.add(vf.createStatement(objNode, R2RMLVocabulary.constant, vf.createLiteral(((Constant) objectTerm).getValue())));
 							//obm.setConstant(vf.createLiteral(((Constant) objectTerm).getValue()).stringValue());
 							obm = mfact.createObjectMap(TermMapType.CONSTANT_VALUED, vf.createLiteral(((Constant) objectTerm).getValue()).stringValue());
+							
+						} else if(objectTerm instanceof Function){
+							
+							StringBuilder sb = new StringBuilder();
+							Predicate functionSymbol = ((Function) objectTerm).getFunctionSymbol();
+							
+							if (functionSymbol instanceof StringOperationPredicate){ //concat
+								
+								List<Term> terms = ((Function)objectTerm).getTerms();
+								TargetQueryRenderer.getNestedConcats(sb, terms.get(0),terms.get(1));
+								obm = mfact.createObjectMap(mfact.createTemplate(sb.toString()));
+								obm.setTermType(R2RMLVocabulary.literal);
+								
+								if(objectPred.getArity()==2){
+									Term langTerm = ((Function) object).getTerm(1);
+                                    if(langTerm instanceof Constant) {
+                                        obm.setLanguageTag(((Constant) langTerm).getValue());
+                                    }
+								}
+							}
 						}
 						
 					}
