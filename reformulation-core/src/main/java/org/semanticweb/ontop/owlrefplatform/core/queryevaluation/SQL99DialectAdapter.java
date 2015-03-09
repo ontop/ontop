@@ -22,7 +22,9 @@ package org.semanticweb.ontop.owlrefplatform.core.queryevaluation;
 
 
 import java.sql.Types;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.semanticweb.ontop.model.OBDAQueryModifiers.OrderCondition;
 import org.semanticweb.ontop.model.Variable;
@@ -102,10 +104,27 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 //		return name;
 	}
 
+	/**
+	 * There is no standard for this part.
+	 *
+	 * Arbitrary default implementation proposed
+	 * (may not work with many DB engines).
+	 */
 	@Override
 	public String sqlSlice(long limit, long offset) {
-		// TODO Auto-generated method stub
-		return null;
+		if ((limit < 0) && (offset < 0)) {
+			return "";
+		}
+		else if ((limit >= 0) && (offset >= 0)) {
+			return String.format("LIMIT %d, %d", offset, limit);
+		}
+		else if (offset < 0) {
+			return String.format("LIMIT %d", limit);
+		}
+		// Else -> (limit < 0)
+		else {
+			return String.format("OFFSET %d", offset);
+		}
 	}
 
 	@Override
@@ -247,6 +266,26 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 			boolean caseinSensitive) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String nameTopVariable(String signatureVariableName, String proposedSuffix, Set<String> sqlVariableNames) {
+		return sqlQuote(buildDefaultName("", signatureVariableName, proposedSuffix));
+	}
+
+	@Override
+	public String nameView(String prefix, String tableName, String suffix, Collection<String> viewNames) {
+		return buildDefaultName(prefix, tableName, suffix);
+	}
+
+	/**
+	 * Concatenates the strings.
+	 * Default way to name a variable or a view.
+	 *
+	 * Returns an UNQUOTED string.
+	 */
+	protected final String buildDefaultName(String prefix, String intermediateName, String suffix) {
+		return prefix + intermediateName + suffix;
 	}
 	
 	@Override
