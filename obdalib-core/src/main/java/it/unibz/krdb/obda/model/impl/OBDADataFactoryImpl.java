@@ -238,11 +238,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	
-	
-	
-	
-
-	
 	@Override
 	public Function getUriTemplate(Term... terms) {
 		Predicate uriPred = new URITemplatePredicateImpl(terms.length);
@@ -270,18 +265,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getBNodeTemplate(List<Term> terms) {
 		Predicate pred = new BNodePredicateImpl(terms.size());
 		return getFunction(pred, terms);
-	}
-	
-/*	@Override
-	public Function getFunctionConcat(List<Term> terms) {
-		Predicate concat = new StringOperationPredicateImpl(terms.size());
-		return getFunction(concat, terms);
-	}
-*/	
-	@Override
-	public Function getFunctionConcat(Term term1, Term term2) {
-		
-		return getFunction(OBDAVocabulary.CONCAT, term1,term2);
 	}
 
 

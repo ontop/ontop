@@ -29,7 +29,7 @@ public class PreProcessProjectionTest {
     private OBDAModel obdaModel;
     private OWLOntology ontology;
 
-    final String owlFile = "src/test/resources/northwind/northwind.owl";
+    final String owlFile = "src/test/resources/northwind/mapping-northwind.owl";
     final String obdaFile = "src/test/resources/mappingStars.obda";
 
     @Before
