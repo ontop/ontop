@@ -102,6 +102,7 @@ public class OBDAVocabulary {
 
 
 	
+	
 	/* SPARQL algebra operations */
 
 	public static final Predicate SPARQL_JOIN = new AlgebraOperatorPredicateImpl("Join");
@@ -124,5 +125,4 @@ public class OBDAVocabulary {
 	public static final BooleanOperationPredicate SPARQL_LANGMATCHES = new BooleanOperationPredicateImpl("LangMatches", 2);
 	public static final BooleanOperationPredicate SPARQL_REGEX = new BooleanOperationPredicateImpl("regex", 3);
 	public static final BooleanOperationPredicate SPARQL_LIKE = new BooleanOperationPredicateImpl("like", 2);
-
 }
