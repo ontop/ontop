@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.StringOperationPredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 
 public class OBDAVocabulary {
@@ -31,8 +32,8 @@ public class OBDAVocabulary {
 	/* Constants */
 
 	public static final ValueConstant NULL = new ValueConstantImpl("null", COL_TYPE.STRING);
-	public static final ValueConstant TRUE = new ValueConstantImpl("t", COL_TYPE.BOOLEAN);
-	public static final ValueConstant FALSE = new ValueConstantImpl("f", COL_TYPE.BOOLEAN);
+	public static final ValueConstant TRUE = new ValueConstantImpl("true", COL_TYPE.BOOLEAN);
+	public static final ValueConstant FALSE = new ValueConstantImpl("false", COL_TYPE.BOOLEAN);
 
 	
 	/* Numeric operation predicates */
@@ -61,6 +62,14 @@ public class OBDAVocabulary {
 	public static final BooleanOperationPredicate IS_TRUE = new BooleanOperationPredicateImpl("IS_TRUE", 1);
 
 	
+	/* String predicates */
+	
+	public static final StringOperationPredicate REPLACE = new StringOperationPredicateImpl(
+            "REPLACE", 3, new COL_TYPE[]{COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL});
+	
+	public static final StringOperationPredicate CONCAT = new StringOperationPredicateImpl(
+            "CONCAT", 2, new COL_TYPE[]{COL_TYPE.LITERAL, COL_TYPE.LITERAL});
+	
 	
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
@@ -86,8 +95,6 @@ public class OBDAVocabulary {
 
 	// The name of the function that creates URI's in Quest
 	public static final String QUEST_URI = "URI";
-
-	public static final Predicate QUEST_TRIPLE_PRED = new PredicateImpl("triple", 3, new COL_TYPE[3]);
 
 	public static final Predicate QUEST_CAST = new PredicateImpl("cast", 2, new COL_TYPE[2]);
 	

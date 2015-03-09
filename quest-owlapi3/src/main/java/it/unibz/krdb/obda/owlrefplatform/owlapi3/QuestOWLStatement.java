@@ -42,7 +42,6 @@ import java.io.Reader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -50,13 +49,11 @@ import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.QueryParser;
 import org.openrdf.query.parser.QueryParserUtil;
-
 import org.openrdf.rio.ParserConfig;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.BasicParserSettings;
-
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLException;
@@ -80,10 +77,10 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  */
 public class QuestOWLStatement implements AutoCloseable {
 
-	private QuestStatement st;
-	private QuestOWLConnection conn;
+	private final QuestStatement st;
+	private final QuestOWLConnection conn;
 	
-	public QuestOWLStatement(QuestStatement st, QuestOWLConnection conn) {
+	protected  QuestOWLStatement(QuestStatement st, QuestOWLConnection conn) {
 		this.conn = conn;
 		this.st = st;
 	}
@@ -124,15 +121,6 @@ public class QuestOWLStatement implements AutoCloseable {
 		}
 	}
 
-	public void createIndexes() throws Exception {
-		st.createIndexes();
-	}
-
-	public void dropIndexes() throws Exception {
-		st.dropIndexes();
-
-	}
-
 	public List<OWLAxiom> executeGraph(String query) throws OWLException {
 		if (SPARQLQueryUtility.isConstructQuery(query) || SPARQLQueryUtility.isDescribeQuery(query)) {
 		try {
@@ -153,11 +141,6 @@ public class QuestOWLStatement implements AutoCloseable {
 		}
 	}
 
-	public int insertData(File owlFile, int commitSize, int batchsize) throws Exception {
-		int ins = insertData(owlFile, commitSize, batchsize, null);
-		return ins;
-	}
-
 	public int insertData(File owlFile, int commitSize, int batchsize, String baseURI) throws Exception {
 
 		Iterator<Assertion> aBoxIter = null;
@@ -174,7 +157,8 @@ public class QuestOWLStatement implements AutoCloseable {
 			// EquivalentTriplePredicateIterator newData = new EquivalentTriplePredicateIterator(aBoxIter, equivalenceMaps);
 
 			return st.insertData(aBoxIter, commitSize, batchsize);
-		} else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
+		} 
+		else if (owlFile.getName().toLowerCase().endsWith(".ttl") || owlFile.getName().toLowerCase().endsWith(".nt")) {
 
 			RDFParser rdfParser = null;
 
@@ -385,12 +369,13 @@ public class QuestOWLStatement implements AutoCloseable {
 			//Query jenaquery = QueryFactory.create(query);
 			QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 			ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
-			SparqlAlgebraToDatalogTranslator tr = new SparqlAlgebraToDatalogTranslator(this.st.questInstance.getUriTemplateMatcher());
-
-			LinkedList<String> signatureContainer = new LinkedList<String>();
-			tr.getSignature(pq, signatureContainer);
+			
+			SparqlAlgebraToDatalogTranslator tr = st.questInstance.getSparqlAlgebraToDatalogTranslator();	
+			List<String> signatureContainer = tr.getSignature(pq);
+			
 			return st.getRewriting(pq, signatureContainer);
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			throw new OntopOWLException(e);
 		}
 	}
@@ -430,10 +415,6 @@ public class QuestOWLStatement implements AutoCloseable {
 	}
 
 
-	public void analyze() throws Exception {
-		st.analyze();
-
-	}
 	
 	// Davide> Benchmarking
 	public long getUnfoldingTime(){
@@ -451,4 +432,5 @@ public class QuestOWLStatement implements AutoCloseable {
 	public int getUCQSizeAfterRewriting(){
 		return st.getUCQSizeAfterRewriting();
 	}
+
 }

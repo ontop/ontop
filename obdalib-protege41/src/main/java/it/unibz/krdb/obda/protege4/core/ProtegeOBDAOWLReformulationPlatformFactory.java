@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.protege4.core;
  */
 
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.util.Properties;

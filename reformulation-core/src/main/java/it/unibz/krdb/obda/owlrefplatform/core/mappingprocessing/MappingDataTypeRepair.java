@@ -30,7 +30,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidato
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxTraversal;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.TBoxTraverseListener;
-
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.Attribute;
@@ -138,26 +137,67 @@ public class MappingDataTypeRepair {
 		VocabularyValidator qvv = new VocabularyValidator(reasoner);
 
 		for (CQIE rule : mappingRules) {
-			Map<String, List<Object[]>> termOccurenceIndex = createIndex(rule);
-			Function atom = rule.getHead();
-			Predicate predicate = atom.getFunctionSymbol();
-			if (!(predicate.getArity() == 2)) { // we check both for data and object property
-				continue;
-			}
+            Map<String, List<Object[]>> termOccurenceIndex = createIndex(rule);
+            Function atom = rule.getHead();
 
-			// If the predicate is a data property
-			Term term = atom.getTerm(1);
+            Predicate predicate = atom.getFunctionSymbol();
+            if (predicate.getArity() == 2) { // we check both for data and object property
 
-			if (term instanceof Function) {
-				Function function = (Function) term;
-				Predicate functionSymbol = function.getFunctionSymbol();
+                // If the predicate is a data property
+                Term term = atom.getTerm(1);
+                insertDataTyping(term, atom, 1, termOccurenceIndex, qvv, dataTypesMap);
+            }
 
-				if (functionSymbol instanceof URITemplatePredicate || functionSymbol instanceof BNodePredicate) {
-					// NO-OP for object properties
-					continue;
-				}
+        }
 
-				if (functionSymbol.isDataTypePredicate()) {
+	}
+
+    private void insertDataTyping(Term term, Function atom, int position, Map<String, List<Object[]>> termOccurenceIndex, VocabularyValidator qvv,  Map<Predicate, Datatype> dataTypesMap) throws OBDAException {
+        Predicate predicate = atom.getFunctionSymbol();
+
+            if (term instanceof Function) {
+                Function function = (Function) term;
+                Predicate functionSymbol = function.getFunctionSymbol();
+
+                if (functionSymbol instanceof URITemplatePredicate || functionSymbol instanceof BNodePredicate) {
+                    // NO-OP for object properties
+
+                }
+
+
+                /** If it is a concat or replace function, can have a datatype assigned to its alias (function with datatype predicate)
+                 *  or if no information about the datatype is assigned we will assign the value from the ontology
+                 if present or the information from the database will be used.
+                 */
+
+                else if (functionSymbol.isStringOperationPredicate()) {
+
+
+                    //check in the ontology if we have already information about the datatype
+
+                    Function normal = qvv.getNormal(atom);
+                    //Check if a datatype was already assigned in the ontology
+                    Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
+
+                    //assign the datatype of the ontology
+                    if (dataType != null) {
+                        if (!isBooleanDB2(dataType.getPredicate())) {
+                            Term newTerm;
+
+                            Predicate replacement = dataType.getPredicate();
+                            newTerm = fac.getFunction(replacement, function);
+
+                            atom.setTerm(position, newTerm);
+                        }
+                    } else {
+                        for (int i = 0; i < function.getArity(); i++) {
+
+                            insertDataTyping(function.getTerm(i), function, i, termOccurenceIndex,  qvv, dataTypesMap );
+                        }
+                    }
+
+
+                } else if (functionSymbol.isDataTypePredicate()) {
 
                     Function normal = qvv.getNormal(atom);
                     Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
@@ -166,37 +206,35 @@ public class MappingDataTypeRepair {
                     if (dataType != null) {
 
                         //check that no datatype mismatch is present
-                        if(!functionSymbol.equals(dataType.getPredicate())){
+                        if (!functionSymbol.equals(dataType.getPredicate())) {
 
-                                throw new OBDAException("Ontology datatype " + dataType + " for " + predicate + "\ndoes not correspond to datatype " + functionSymbol + " in mappings");
+                            throw new OBDAException("Ontology datatype " + dataType + " for " + predicate + "\ndoes not correspond to datatype " + functionSymbol + " in mappings");
 
                         }
-                        
-                        if(isBooleanDB2(dataType.getPredicate())) {
 
-                            Variable variable = (Variable)  normal.getTerm(1);
+                        if (isBooleanDB2(dataType.getPredicate())) {
+
+                            Variable variable = (Variable) normal.getTerm(1);
 
                             //No Boolean datatype in DB2 database, the value in the database is used
                             Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
-                            Term newTerm = fac.getTypedTerm(variable, type); 
-                            atom.setTerm(1, newTerm);
+                            Term newTerm = fac.getTypedTerm(variable, type);
+                            atom.setTerm(position, newTerm);
                         }
                     }
-				} 
-				else {
-					throw new OBDAException("Unknown data type predicate: " + functionSymbol.getName());
-				}
+                } else {
+                    throw new OBDAException("Unknown data type predicate: " + functionSymbol.getName());
+                }
 
-			} else if (term instanceof Variable) {
+            } else if (term instanceof Variable) {
 
                 Variable variable = (Variable) term;
 
                 //check in the ontology if we have already information about the datatype
 
                 Function normal = qvv.getNormal(atom);
-                    //Check if a datatype was already assigned in the ontology
+                //Check if a datatype was already assigned in the ontology
                 Datatype dataType = dataTypesMap.get(normal.getFunctionSymbol());
-
 
 
                 // If the term has no data-type predicate then by default the
@@ -204,18 +242,26 @@ public class MappingDataTypeRepair {
                 // column type.
                 Term newTerm;
                 if (dataType == null || isBooleanDB2(dataType.getPredicate())) {
-                	Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
-                	newTerm = fac.getTypedTerm(variable, type);
-                }
-                else {
-                	Predicate replacement = dataType.getPredicate();
-                	newTerm = fac.getFunction(replacement, variable);
+                    Predicate.COL_TYPE type = getDataType(termOccurenceIndex, variable);
+                    newTerm = fac.getTypedTerm(variable, type);
+                } else {
+                    Predicate replacement = dataType.getPredicate();
+                    newTerm = fac.getFunction(replacement, variable);
                 }
 
-				atom.setTerm(1, newTerm);
-			}
-		}
-	}
+                atom.setTerm(position, newTerm);
+            } else if (term instanceof ValueConstant) {
+
+                Term newTerm;
+                newTerm = fac.getTypedTerm( term, Predicate.COL_TYPE.LITERAL );
+                atom.setTerm(position, newTerm);
+
+            }
+
+
+
+
+    }
 
     /**
      * Private method, since DB2 does not support boolean value, we use the database metadata value

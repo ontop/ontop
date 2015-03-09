@@ -27,8 +27,6 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SingletonSubstitution;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SubstitutionImpl;
 
 import java.util.ArrayList;
 import java.util.List;

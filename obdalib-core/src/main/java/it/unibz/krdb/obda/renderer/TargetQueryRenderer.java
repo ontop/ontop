@@ -20,14 +20,17 @@ package it.unibz.krdb.obda.renderer;
  * #L%
  */
 
+import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.io.SimplePrefixManager;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DataTypePredicate;
+import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.DatatypePredicate;
 import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.StringOperationPredicate;
+import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
@@ -35,7 +38,6 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.io.PrefixManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,6 +125,35 @@ public class TargetQueryRenderer {
 		}
 		return prefManClone.getShortForm(uri, insideQuotes);
 	}
+	
+	private static String appendTerms(Term term){
+        if (term instanceof Constant){
+        	String st = ((Constant) term).getValue();
+        	if (st.contains("{")){
+        		st = st.replace("{", "\\{");
+        		st = st.replace("}", "\\}");
+        	}
+            return st;
+        }else{
+            return "{"+((Variable) term).getName()+"}";
+        }
+    }
+
+    //Appends nested concats
+	public static void getNestedConcats(StringBuilder stb, Term term1, Term term2){
+		if (term1 instanceof Function){
+			Function f = (Function) term1;
+			getNestedConcats(stb, f.getTerms().get(0), f.getTerms().get(1));
+			}else{
+				stb.append(appendTerms(term1));
+				}
+			 if (term2 instanceof Function){
+				 Function f = (Function) term2;
+				 getNestedConcats(stb, f.getTerms().get(0), f.getTerms().get(1));
+			 }else{
+				 stb.append(appendTerms(term2));
+			 }
+    }
 
 	/**
 	 * Prints the text representation of different terms.
@@ -133,7 +164,7 @@ public class TargetQueryRenderer {
 			FunctionalTermImpl function = (FunctionalTermImpl) term;
 			Predicate functionSymbol = function.getFunctionSymbol();
 			String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
-			if (functionSymbol instanceof DataTypePredicate) {
+			if (functionSymbol instanceof DatatypePredicate) {
 				// if the function symbol is a data type predicate
 				if (dtfac.isLiteral(functionSymbol)) {
 					// if it is rdfs:Literal
@@ -190,6 +221,12 @@ public class TargetQueryRenderer {
 					sb.append(">");
 				}		
 				}
+			} else if (functionSymbol instanceof StringOperationPredicate) { //Concat
+				List<Term> terms = function.getTerms();
+				sb.append("\"");
+				getNestedConcats(sb, terms.get(0),terms.get(1));
+				sb.append("\"");
+				//sb.append("^^rdfs:Literal");
 			} else { // for any ordinary function symbol
 				sb.append(fname);
 				sb.append("(");

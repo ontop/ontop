@@ -37,6 +37,9 @@ public interface OBDADataFactory extends Serializable {
 	public CQIE getCQIE(Function head, Function... body );
 	
 	public CQIE getCQIE(Function head, List<Function> body);
+	
+	public CQIE getFreshCQIECopy(CQIE rule);	
+	
 
 	public OBDADataSource getDataSource(URI id);
 
@@ -147,6 +150,8 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getFunctionRegex(Term term1, Term term2, Term term3);
 	
+	public Function getFunctionReplace(Term term1, Term term2, Term term3);
+	
 
 	/*
 	 * Numerical arithmethic functions
@@ -159,6 +164,8 @@ public interface OBDADataFactory extends Serializable {
 	public Function getFunctionSubstract(Term term1, Term term2);
 
 	public Function getFunctionMultiply(Term term1, Term term2);
+
+    public Function getFunctionConcat(Term term1, Term term2);
 	
 	/*
 	 * Casting values cast(source-value AS destination-type)
@@ -296,5 +303,5 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getSPARQLJoin(Term t1, Term t2);
 
-	public Function getSPARQLLeftJoin(Term t1, Term t2);	
+	public Function getSPARQLLeftJoin(Term t1, Term t2);
 }

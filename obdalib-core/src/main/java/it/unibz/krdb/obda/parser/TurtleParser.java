@@ -5,7 +5,6 @@ package it.unibz.krdb.obda.parser;
 import it.unibz.krdb.obda.model.DatatypeFactory;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.Predicate;
@@ -15,7 +14,6 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 
 //import java.net.URI;
@@ -45,10 +43,6 @@ import org.openrdf.model.impl.URIImpl;
 
 
 import org.antlr.runtime.*;
-
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
 
 @SuppressWarnings("all")
 public class TurtleParser extends Parser {
@@ -1663,7 +1657,7 @@ public class TurtleParser extends Parser {
 
 					      Variable var = variable28;
 					      String functionName = resource29.toString();
-					      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+					      Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
 					      // R: not sute why such a transformation is needed -- there was nothing like this below
 					      if (type == COL_TYPE.INT)
 					    	  type = COL_TYPE.INTEGER;
@@ -2216,7 +2210,7 @@ public class TurtleParser extends Parser {
 			      ValueConstant constant = stringLiteral42;
 			      String functionName = resource43.toString();
 			      
-			      Predicate.COL_TYPE type = dtfac.getDataType(functionName);
+			      Predicate.COL_TYPE type = dtfac.getDatatype(functionName);
 			      
 			      // R: these are the only types that were listed
 			      if (type == COL_TYPE.LITERAL || type == COL_TYPE.STRING || type == COL_TYPE.INTEGER ||

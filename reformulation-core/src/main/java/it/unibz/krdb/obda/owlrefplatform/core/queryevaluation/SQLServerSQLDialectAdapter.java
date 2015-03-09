@@ -137,6 +137,6 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 		
 		return bf.toString();
 	}
-	
+
 
 }

@@ -21,6 +21,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
  * #L%
  */
 
+import java.util.regex.Pattern;
+
 public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
@@ -45,9 +47,12 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 	
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-																// enclosing
-																// quotes
+        Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
+        if(quotes.matcher(pattern).matches() ) {
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
+        }
 		// embedded options: 
 		
 		String pflags = "(?";
@@ -58,6 +63,14 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 		pflags +=")";
 		return columnname + " ~" + ((caseinSensitive) ? "* " : " ") + "'"+ ((multiLine || dotAllMode) ? pflags : "") + pattern + "'";
 	}
+
+    @Override
+    public String strreplace(String str, String oldstr, String newstr) {
+        oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+
+        newstr = newstr.substring(1, newstr.length() - 1);
+        return String.format("REGEXP_REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
+    }
 
 	@Override
 	public String getDummyTable() {
@@ -77,7 +90,7 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
 	 * 
-	 * @param rdfliteral
+	 * @param
 	 * @return
 	 */
 	@Override

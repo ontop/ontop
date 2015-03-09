@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.Variable;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -77,13 +78,13 @@ public class URIConstantImpl implements URIConstant {
 	}
 
 	@Override
-	public COL_TYPE getType() {
-		return COL_TYPE.OBJECT;
+	public List<Variable> getReferencedVariablesList() {
+		return Collections.emptyList();
 	}
 
 	@Override
-	public String getName() {
-		return iristr;
+	public COL_TYPE getType() {
+		return COL_TYPE.OBJECT;
 	}
 
 	@Deprecated
