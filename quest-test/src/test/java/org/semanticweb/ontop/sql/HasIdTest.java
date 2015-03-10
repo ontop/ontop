@@ -1,6 +1,5 @@
 package org.semanticweb.ontop.sql;
 
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,9 +25,9 @@ import java.util.Properties;
 import static org.junit.Assert.assertEquals;
 
 /**
- * TODO: describe
+ * When the ID is both used for creating the URI and as the literal of a datatype property.
  */
-public class LeftJoinPullOutEqualityTest {
+public class HasIdTest {
 
     Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -83,38 +82,12 @@ public class LeftJoinPullOutEqualityTest {
     }
 
     @Test
-    public void testFlatLeftJoins() throws OBDAException, OWLException {
-        runQuery("PREFIX : <http://example.com/vocab#>" +
-                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
-                        "SELECT ?p ?firstName ?lastName " +
-                        "WHERE { " +
-                        "    ?p :age \"33\"^^xsd:int . " +
-                        "    OPTIONAL { ?p :firstName ?firstName }" +
-                        "    OPTIONAL { ?p :lastName ?lastName }" +
-                        "}", 1);
-    }
-
-    @Test
-    public void testNestedLeftJoins() throws OBDAException, OWLException {
+    public void test() throws OBDAException, OWLException {
         runQuery("PREFIX : <http://example.com/vocab#>" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
                 "SELECT ?p ?firstName ?lastName " +
                 "WHERE { " +
-                "    ?p :age \"33\"^^xsd:int . " +
-                "    OPTIONAL { ?p :firstName ?firstName " +
-                "               OPTIONAL { ?p :lastName ?lastName }" +
-                "    }" +
-                "}", 0);
-    }
-
-    @Test
-    public void testJoinAndFlatLeftJoins() throws OBDAException, OWLException {
-        runQuery("PREFIX : <http://example.com/vocab#>" +
-                "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
-                "SELECT ?p ?firstName ?lastName " +
-                "WHERE { " +
-                "    ?p a :Person . " +
-                "    ?p :age \"3\"^^xsd:int . " +
+                "    ?p :hasId \"3\"^^xsd:int . " +
                 "    OPTIONAL { ?p :firstName ?firstName }" +
                 "    OPTIONAL { ?p :lastName ?lastName }" +
                 "}", 1);
