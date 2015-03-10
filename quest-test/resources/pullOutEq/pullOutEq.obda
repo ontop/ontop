@@ -1,0 +1,15 @@
+[PrefixDeclaration]
+:		http://example.com/vocab#
+
+[SourceDeclaration]
+sourceUri	pullOutEqMysql
+connectionUrl	jdbc:mysql://10.7.20.39/pullOutEq
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	Person
+target		<http://example.com/persons/{idperson}> a :Person ; :hasId {idperson} ; :firstName {firstname} ; :lastName {lastname} .
+source		select personid, firstname, lastname from person
+]]
