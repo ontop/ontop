@@ -43,11 +43,13 @@ public class QuestDistinctResultset implements TupleResultSet {
 
 
 
-    private Set<List<Object>> distinctKeys = new HashSet<List<Object>>();
+    private Set<List<Object>> distinctKeys;
 
     public QuestDistinctResultset(ResultSet set, List<String> signature, QuestStatement st) throws OBDAException {
 
         questResultset = new QuestResultset(set, signature, st);
+
+        distinctKeys = new HashSet<List<Object>>();
 
     }
 
@@ -70,6 +72,7 @@ public class QuestDistinctResultset implements TupleResultSet {
     @Override
     public void close() throws OBDAException {
         questResultset.close();
+        distinctKeys.clear();
     }
 
     @Override
