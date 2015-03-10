@@ -1,5 +1,6 @@
 [PrefixDeclaration]
 :		http://example.com/vocab#
+xsd:    http://www.w3.org/2001/XMLSchema#
 
 [SourceDeclaration]
 sourceUri	pullOutEqMysql
@@ -10,6 +11,6 @@ driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Person
-target		<http://example.com/persons/{idperson}> a :Person ; :hasId {idperson} ; :firstName {firstname} ; :lastName {lastname} ; :age {age} .
+target		<http://example.com/persons/{idperson}> a :Person ; :hasId {idperson}^^xsd:int ; :firstName {firstname} ; :lastName {lastname} ; :age {age}^^xsd:int .
 source		select personid, firstname, lastname, age from person
 ]]

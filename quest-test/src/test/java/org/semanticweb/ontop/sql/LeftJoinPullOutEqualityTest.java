@@ -72,14 +72,18 @@ public class LeftJoinPullOutEqualityTest {
     }
 
 
-    private void runQuery(String query, int count) throws OBDAException, OWLException {
+    private void runQuery(String query, int expectedCount) throws OBDAException, OWLException {
 
         // Now we are ready for querying
         conn = reasoner.getConnection();
 
         QuestOWLStatement st = conn.createStatement();
         QuestOWLResultSet results = st.executeTuple(query);
-        assertEquals(results.getCount(), count);
+        int count = 0;
+        while (results.nextRow()) {
+            count++;
+        }
+        assertEquals(expectedCount, count);
     }
 
     @Test
@@ -104,7 +108,7 @@ public class LeftJoinPullOutEqualityTest {
                 "    OPTIONAL { ?p :firstName ?firstName " +
                 "               OPTIONAL { ?p :lastName ?lastName }" +
                 "    }" +
-                "}", 0);
+                "}", 1);
     }
 
     @Test
@@ -114,9 +118,19 @@ public class LeftJoinPullOutEqualityTest {
                 "SELECT ?p ?firstName ?lastName " +
                 "WHERE { " +
                 "    ?p a :Person . " +
-                "    ?p :age \"3\"^^xsd:int . " +
+                "    ?p :age \"33\"^^xsd:int . " +
                 "    OPTIONAL { ?p :firstName ?firstName }" +
                 "    OPTIONAL { ?p :lastName ?lastName }" +
+                "}", 1);
+    }
+
+    @Test
+    public void testBasic() throws OBDAException, OWLException {
+        runQuery("PREFIX : <http://example.com/vocab#>" +
+                "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
+                "SELECT ?p " +
+                "WHERE { " +
+                "    ?p :age \"33\"^^xsd:int . " +
                 "}", 1);
     }
 }
