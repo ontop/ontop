@@ -306,8 +306,8 @@ public class QuestStatement implements OBDAStatement {
 				it.unibz.krdb.obda.model.ResultSet resultSet = (it.unibz.krdb.obda.model.ResultSet) this.executeTupleQuery(sel, 1);
 				if (resultSet instanceof EmptyQueryResultSet)
 					return null;
-				else if (resultSet instanceof QuestResultset) {
-					QuestResultset res = (QuestResultset) resultSet;
+				else if (resultSet instanceof QuestResultset || resultSet instanceof QuestDistinctResultset) {
+                    TupleResultSet res = (TupleResultSet) resultSet;
 					while (res.nextRow()) {
 						Constant constant = res.getConstant(1);
 						if (constant instanceof URIConstant) {
