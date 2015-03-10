@@ -154,7 +154,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return generateQuery(query, signature, "");
 		}
 	}
-	
+
 	private boolean hasSelectDistinctStatement(DatalogProgram query) {
 		boolean toReturn = false;
 		if (query.getQueryModifiers().hasModifiers()) {
@@ -226,14 +226,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			QueryAliasIndex index = new QueryAliasIndex(cq);
 
-			boolean innerdistincts = false;
-			if (isDistinct && numberOfQueries == 1) {
-				innerdistincts = true;
-			}
-
 			String FROM = getFROM(cq, index);
 			String WHERE = getWHERE(cq, index);
-			String SELECT = getSelectClause(signature, cq, index, innerdistincts);
+			String SELECT = getSelectClause(signature, cq, index);
 
 			String querystr = SELECT + FROM + WHERE;
 			queriesStrings.add(querystr);
@@ -245,12 +240,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			result.append(queryStringIterator.next());
 		}
 
-		String UNION = null;
-		if (isDistinct) {
-			UNION = "UNION";
-		} else {
-			UNION = "UNION ALL";
-		}
+		String UNION = "UNION ALL";
+
 		while (queryStringIterator.hasNext()) {
 			result.append("\n");
 			result.append(UNION);
@@ -715,7 +706,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return the sql select clause
 	 */
 	private String getSelectClause(List<String> signature, CQIE query,
-			QueryAliasIndex index, boolean distinct) throws OBDAException {
+			QueryAliasIndex index) throws OBDAException {
 		/*
 		 * If the head has size 0 this is a boolean query.
 		 */
@@ -723,9 +714,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("SELECT ");
-		if (distinct) {
-			sb.append("DISTINCT ");
-		}
+
 		//Only for ASK
 		if (headterms.size() == 0) {
 			sb.append("'true' as x");
@@ -1176,7 +1165,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * A work around to handle DB2 (>9.1) issue SQL0134N: Improper use of a string column, host variable, constant, or function name.
 			 * http://publib.boulder.ibm.com/infocenter/db2luw/v9r5/index.jsp?topic=%2Fcom.ibm.db2.luw.messages.sql.doc%2Fdoc%2Fmsql00134n.html
 			 */
-			if (isDistinct || isOrderBy) {
+			if (isOrderBy) {
 				return adapter.sqlCast(toReturn, Types.VARCHAR);
 			}
 		}
