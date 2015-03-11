@@ -155,7 +155,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 	}
 
-	private boolean hasSelectDistinctStatement(DatalogProgram query) {
+    @Override
+    public boolean isDistinct() {
+        return isDistinct;
+    }
+
+    private boolean hasSelectDistinctStatement(DatalogProgram query) {
 		boolean toReturn = false;
 		if (query.getQueryModifiers().hasModifiers()) {
 			toReturn = query.getQueryModifiers().isDistinct();

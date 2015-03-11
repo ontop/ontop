@@ -210,7 +210,7 @@ public class QuestStatement implements OBDAStatement {
 						// Store the SQL result to application result set.
 						if (isSelect) { // is tuple-based results
 
-                            if(programAfterUnfolding.getQueryModifiers().isDistinct()) {
+                            if(questInstance.getDatasourceQueryGenerator().isDistinct()) {
 
                                 tupleResult = new QuestDistinctResultset(set, signature, QuestStatement.this );
                             }
@@ -463,6 +463,7 @@ public class QuestStatement implements OBDAStatement {
 
 		// query = DatalogNormalizer.normalizeDatalogProgram(query);
 		String sql = questInstance.getDatasourceQueryGenerator().generateSourceQuery(query, signature);
+
 
 		log.debug("Resulting SQL: \n{}", sql);
 		return sql;
