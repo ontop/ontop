@@ -89,11 +89,12 @@ public class QuestDistinctResultset implements TupleResultSet {
         if (next) {
 
             List<Object> row = new ArrayList<>();
-            for (int i = 1; i <= getSignature().size(); i = i * 3) {
+            for (int i = 1; i <= getSignature().size();  i ++ ) {
 
-                row.add(questResultset.getRawObject(i));  //type
-                row.add(questResultset.getRawObject(i+1)); //lang
-                row.add(questResultset.getRawObject(i+2)); //value
+                int column = i * 3;
+                row.add(questResultset.getRawObject(column-2));  //type
+                row.add(questResultset.getRawObject(column-1)); //lang
+                row.add(questResultset.getRawObject(column)); //value
 
             }
             if (!distinctKeys.add(row)) {
