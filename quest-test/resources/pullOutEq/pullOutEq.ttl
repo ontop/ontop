@@ -12,3 +12,5 @@
 :hasId a owl:DatatypeProperty ; rdfs:domain :Person ; rdfs:range xsd:int .
 
 :age a owl:DatatypeProperty ; rdfs:domain :Person ; rdfs:range xsd:int .
+
+:gender a owl:DatatypeProperty ; rdfs:domain :Person ; rdfs:range xsd:string .

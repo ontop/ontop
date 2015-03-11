@@ -11,6 +11,6 @@ driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Person
-target		<http://example.com/persons/{idperson}> a :Person ; :hasId {idperson}^^xsd:int ; :firstName {firstname} ; :lastName {lastname} ; :age {age}^^xsd:int .
-source		select personid, firstname, lastname, age from person
+target		<http://example.com/persons/{idperson}> a :Person ; :hasId {idperson}^^xsd:int ; :firstName {firstname} ; :lastName {lastname} ; :age {age}^^xsd:int ; :gender {gender} .
+source		select personid, firstname, lastname, age, gender from person
 ]]

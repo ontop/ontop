@@ -465,6 +465,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
+	public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition) {
+		return getFunction(OBDAVocabulary.SPARQL_JOIN, t1, t2, joinCondition);
+	}
+
+	@Override
 	public Function getSPARQLLeftJoin(Term t1, Term t2) {
 		return getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, t1, t2);
 	}

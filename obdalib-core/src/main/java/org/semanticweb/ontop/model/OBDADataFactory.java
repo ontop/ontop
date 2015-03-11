@@ -298,7 +298,12 @@ public interface OBDADataFactory extends Serializable {
 
 	//public Predicate getTypePredicate(Predicate.COL_TYPE type);
 
+	/**
+	 * TODO: deprecate it?
+	 */
 	public Function getSPARQLJoin(Term t1, Term t2);
+
+	public Function getSPARQLJoin(Function t1, Function t2, Function joinCondition);
 
 	public Function getSPARQLLeftJoin(Term t1, Term t2);	
 }

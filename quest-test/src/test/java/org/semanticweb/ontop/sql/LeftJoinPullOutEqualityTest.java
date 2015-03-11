@@ -62,7 +62,7 @@ public class LeftJoinPullOutEqualityTest {
         factory.setOBDAController(obdaModel);
         factory.setPreferenceHolder(preferences);
 
-        reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
+        reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
     }
 
     @After
@@ -89,13 +89,13 @@ public class LeftJoinPullOutEqualityTest {
     @Test
     public void testFlatLeftJoins() throws OBDAException, OWLException {
         runQuery("PREFIX : <http://example.com/vocab#>" +
-                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
-                        "SELECT ?p ?firstName ?lastName " +
-                        "WHERE { " +
-                        "    ?p :age \"33\"^^xsd:int . " +
-                        "    OPTIONAL { ?p :firstName ?firstName }" +
-                        "    OPTIONAL { ?p :lastName ?lastName }" +
-                        "}", 1);
+                "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
+                "SELECT ?p ?firstName ?lastName " +
+                "WHERE { " +
+                "    ?p :age \"33\"^^xsd:int . " +
+                "    OPTIONAL { ?p :firstName ?firstName }" +
+                "    OPTIONAL { ?p :lastName ?lastName }" +
+                "}", 1);
     }
 
     @Test
@@ -117,8 +117,9 @@ public class LeftJoinPullOutEqualityTest {
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
                 "SELECT ?p ?firstName ?lastName " +
                 "WHERE { " +
-                "    ?p a :Person . " +
+                "    ?p :gender ?g . " +
                 "    ?p :age \"33\"^^xsd:int . " +
+                "    FILTER (str(?g) = \"F\") " +
                 "    OPTIONAL { ?p :firstName ?firstName }" +
                 "    OPTIONAL { ?p :lastName ?lastName }" +
                 "}", 1);
