@@ -98,6 +98,29 @@ public class NPDUndolferTest extends TestCase {
 
 		String rewriting = getRewriting(query);
 	}
+
+	@Test
+	public void testNpdQ0() throws Exception {
+		
+		String query =
+"PREFIX : <http://sws.ifi.uio.no/vocab/npd-v2#>" +
+"PREFIX nlxv: <http://sws.ifi.uio.no/vocab/norlex#>" +
+"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+"PREFIX npd: <http://sws.ifi.uio.no/data/npd-v2/>" +
+"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
+"PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+"PREFIX nlx: <http://sws.ifi.uio.no/data/norlex/>" +
+"PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#>" +
+"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+"SELECT DISTINCT ?wc " + 
+"		   WHERE { " +
+"		      ?wc npdv:coreForWellbore [ rdf:type <http://sws.ifi.uio.no/vocab/npd-v2#A%20A>; " +
+"                                        rdf:type npdv:B%20B; " +
+"                                       npdv:name  \"\\\\\" ]. " + 
+"		   }";
+
+		String rewriting = getRewriting(query);
+	}
 	
 	/**
 	 * constructs a rewriting

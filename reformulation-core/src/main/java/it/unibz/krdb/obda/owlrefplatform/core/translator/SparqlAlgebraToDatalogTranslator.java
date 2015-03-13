@@ -406,7 +406,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
 		Function a = null;
 		if (condition instanceof Var) {
-			a = ofac.getFunctionIsTrue(getVariableTerm((Var) condition));
+			a = ofac.getFunctionIsTrue(getOntopTerm((Var) condition));
 		} 
 		else {
 			a = (Function) getBooleanTerm(condition);
@@ -480,18 +480,17 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 
 		Var subj = triple.getSubjectVar();
-		Value s = subj.getValue();
 		Var obj = triple.getObjectVar();
-		Value o = obj.getValue();
 		
 		// / Instantiate the atom components: predicate and terms.
 		Function atom = null;
 
 		// Subject node		
-		Term sTerm = getOntopTerm(subj, s);
+		Term sTerm = getOntopTerm(subj);
 		
 		if ((p != null) && p.toString().equals(RDF.TYPE.stringValue())) {
 
+			Value o = obj.getValue();
 			// Object node
 			if (o == null) {
 				Function rdfTypeConstant = ofac.getUriTemplate(ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
@@ -519,7 +518,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			 * The predicate is NOT rdf:type
 			 */
 
-			Term oTerm = getOntopTerm(obj, o); 
+			Term oTerm = getOntopTerm(obj); 
 			
 			if (p != null) {
         		COL_TYPE subjectType = null; // are never changed
@@ -536,48 +535,67 @@ public class SparqlAlgebraToDatalogTranslator {
 		pr.appendRule(newrule);
 	}
 	
-	private Term getOntopTerm(Var subj, Value s) {
+	private Term getOntopTerm(Var subj) {
+		Value s = subj.getValue();
 		Term result = null;
 		if (s == null) {
 			result = ofac.getVariable(subj.getName());
-		} else if (s instanceof Literal) {
+		} 
+		else if (s instanceof Literal) {
 			Literal object = (Literal) s;
-			COL_TYPE objectType = getDataType(object);
-			ValueConstant constant = getConstant(object);
+			URI type = object.getDatatype();
+			String value = object.getLabel();
+
+			
+			// Validating that the value is correct (lexically) with respect to the
+			// specified datatype
+			if (type != null) {
+				boolean valid = XMLDatatypeUtil.isValidValue(value, type);
+				if (!valid)
+					throw new RuntimeException("Invalid lexical form for datatype. Found: " + value);
+			}
+			
+			COL_TYPE objectType; 			
+			if (type == null) 
+				objectType = COL_TYPE.LITERAL;
+			else {
+				objectType = dtfac.getDatatype(type);
+		        if (objectType == null) 
+					throw new RuntimeException("Unsupported datatype: " + type.stringValue());
+			}
+			
+			// special case for decimal
+	        if ((objectType == COL_TYPE.DECIMAL) && !value.contains("."))  { 
+				// put the type as integer (decimal without fractions)
+				objectType = COL_TYPE.INTEGER;
+			} 
+	        
+			ValueConstant constant = ofac.getConstantLiteral(value, objectType);
 
 			// v1.7: We extend the syntax such that the data type of a
-			// constant
-			// is defined using a functional symbol.
+			// constant is defined using a functional symbol.
 			if (objectType == COL_TYPE.LITERAL) {
-				// If the object has type LITERAL, check any language
-				// tag!
+				// if the object has type LITERAL, check any language tag!
 				String lang = object.getLanguage();
 				if (lang != null && !lang.equals("")) {
 					result = ofac.getTypedTerm(constant, lang.toLowerCase());
 				} 
 				else {
-					result =  ofac.getTypedTerm(constant, COL_TYPE.LITERAL);
+					result =  ofac.getTypedTerm(constant, objectType);
 				}
 			} 
 			else {
-				// For other supported data-types
 				result = ofac.getTypedTerm(constant, objectType);
 			}
 		} 
 		else if (s instanceof URI) {
-			URI subject = (URI) s;
-			//COL_TYPE subjectType = COL_TYPE.OBJECT;
-			
-			String subject_URI = subject.stringValue();
-			subject_URI = decodeURIEscapeCodes(subject_URI);
-			
-
 			if (uriRef != null) {
-				/* if in the Semantic Index mode */
+				// if in the Semantic Index mode 
 				int id = uriRef.getId(s.stringValue());
-				
 				result = ofac.getUriTemplate(ofac.getConstantLiteral(String.valueOf(id), COL_TYPE.INTEGER));
-			} else {
+			} 
+			else {
+				String subject_URI = decodeURIEscapeCodes(s.stringValue());
 				result = uriTemplateMatcher.generateURIFunction(subject_URI);
 			}
 		}
@@ -586,11 +604,15 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	/***
-	 * Given a string representing a URI, this method will return a new String in which all percent encoded characters (e.g., %20) will
-	 * be restored to their original characters (e.g., ' '). This is necessary to transform some URIs into the original dtabase values.
+	 * Given a string representing a URI, this method will return a new String 
+	 * in which all percent encoded characters (e.g., %20) will
+	 * be restored to their original characters (e.g., ' '). 
+	 * This is necessary to transform some URIs into the original database values.
+	 * 
 	 * @param encodedURI
 	 * @return
 	 */
+	
 	private String decodeURIEscapeCodes(String encodedURI) {
 		int length = encodedURI.length();
 		StringBuilder strBuilder = new StringBuilder(length+20);
@@ -618,7 +640,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			codeBuffer[0] = encodedURI.charAt(ci + 1);
 			codeBuffer[1] = encodedURI.charAt(ci + 2);
 
-			// now we check if they match any of our escape wodes, if
+			// now we check if they match any of our escape codes, if
 			// they do the char to be inserted is put in codeBuffer
 			// otherwise
 			String code = String.copyValueOf(codeBuffer);
@@ -681,32 +703,16 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	}
 
-	private Set<Variable> getVariables(List<org.openrdf.query.algebra.Var> list) {
-		Set<Variable> vars = new HashSet<Variable>();
-		for (org.openrdf.query.algebra.Var variable : list) {
-			if (!variable.hasValue()) { // if it has value, then its a constant
-				String name = variable.getName();
-				Variable var = ofac.getVariable(name);
-				vars.add(var);
-			}
-		}
-		return vars;
-	}
-	
-	private Set<Variable> getBindVariables(List<ExtensionElem> elements) {
-		Set<Variable> vars = new HashSet<>();
-		for (ExtensionElem el : elements) {
-				String name = el.getName();
-				Variable var = ofac.getVariable(name);
-				vars.add(var);
-			}
-		return vars;
-	}
-	
 	private Set<Variable> getVariables(TupleExpr te) {
 		Set<Variable> result = new LinkedHashSet<>();
 		if (te instanceof StatementPattern) {
-			result.addAll(getVariables(((StatementPattern) te).getVarList()));
+			for (org.openrdf.query.algebra.Var variable : ((StatementPattern) te).getVarList()) {
+				if (!variable.hasValue()) { // if it has a value, then it's a constant
+					String name = variable.getName();
+					Variable var = ofac.getVariable(name);
+					result.add(var);
+				}
+			}
 		} 
 		else if (te instanceof BinaryTupleOperator) {
 			result.addAll(getVariables(((BinaryTupleOperator) te).getLeftArg()));
@@ -714,7 +720,11 @@ public class SparqlAlgebraToDatalogTranslator {
 		} 
 		else if (te instanceof UnaryTupleOperator) {
 			if (te instanceof Extension) {
-				result.addAll(getBindVariables(((Extension) te).getElements()));
+				for (ExtensionElem el : ((Extension) te).getElements()) {
+					String name = el.getName();
+					Variable var = ofac.getVariable(name);
+					result.add(var);
+				}
 			}
 			result.addAll(getVariables(((UnaryTupleOperator) te).getArg()));
 		} 
@@ -724,58 +734,20 @@ public class SparqlAlgebraToDatalogTranslator {
 		return result;
 	}
 	
-	private ValueConstant getConstant(Literal literal) {
-		URI type = literal.getDatatype();
-		COL_TYPE objectType = getDataType(literal);
-		String value = literal.getLabel();
-		ValueConstant constant = ofac.getConstantLiteral(value, objectType);
-
-		/*
-		 * Validating that the value is correct (lexically) with respect to the
-		 * specified datatype
-		 */
-		
-		if (type != null) {
-			boolean valid = XMLDatatypeUtil.isValidValue(value, type);
-			if (!valid)
-				throw new RuntimeException(
-						"Invalid lexical form for datatype. Found: " + value);
-		}
-		return constant;
-
-	}
 
 
-	private COL_TYPE getDataType(Literal node) {
-
-		URI typeURI = node.getDatatype();
-		// if null return literal, and avoid exception
-		if (typeURI == null) 
-			return COL_TYPE.LITERAL;
-		
-		COL_TYPE dataType = dtfac.getDatatype(typeURI);
-        if (dataType == null) 
-			throw new RuntimeException("Unsupported datatype: " + typeURI.stringValue());
-		
-        if (dataType == COL_TYPE.DECIMAL) { 
-			// special case for decimal
-			String value = node.getLabel().toString();
-			if (!value.contains(".")) {
-				// Put the type as integer (decimal without fractions).
-				dataType = COL_TYPE.INTEGER;
-			}
-		} 
-		return dataType;
-	}
 
 	private Term getBooleanTerm(ValueExpr expr) {
 		if (expr instanceof Var) {
-			return getVariableTerm((Var) expr);
-		} else if (expr instanceof org.openrdf.query.algebra.ValueConstant) {
+			return getOntopTerm((Var) expr);
+		} 
+		else if (expr instanceof org.openrdf.query.algebra.ValueConstant) {
 			return getConstantFunctionTerm((org.openrdf.query.algebra.ValueConstant) expr);
-		} else if (expr instanceof UnaryValueOperator) {
+		} 
+		else if (expr instanceof UnaryValueOperator) {
 			return getBuiltinFunctionTerm((UnaryValueOperator) expr);
-		} else if (expr instanceof BinaryValueOperator) {
+		} 
+		else if (expr instanceof BinaryValueOperator) {
 			if (expr instanceof Regex) { // sesame regex is Binary, Jena N-ary
 				Regex reg = (Regex) expr;
 				ValueExpr arg1 = reg.getLeftArg(); 
@@ -796,19 +768,16 @@ public class SparqlAlgebraToDatalogTranslator {
 			// TODO Change the method name because ExprFunction2 is not only for
 			// boolean functions
 			return getBooleanFunction(function, term1, term2);
-		} else if (expr instanceof Bound){
-			
-			return ofac.getFunctionIsNotNull(getVariableTerm(((Bound) expr).getArg()));
-		} else {
+		} 
+		else if (expr instanceof Bound){	
+			return ofac.getFunctionIsNotNull(getOntopTerm(((Bound) expr).getArg()));
+		} 
+		else {
 			throw new RuntimeException("The builtin function "
 					+ expr.toString() + " is not supported yet!");
 		}
 	}
 	
-	private Term getVariableTerm(Var expr) {
-		return getOntopTerm(expr, expr.getValue());
-		
-	}
 
 	private Function getConstantFunctionTerm(org.openrdf.query.algebra.ValueConstant expr) {
 		Function constantFunction = null;
@@ -913,7 +882,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			if (arg instanceof Var) {
 				builtInFunction = ofac.getFunction(
 						OBDAVocabulary.SPARQL_LANG,
-						getVariableTerm((Var) arg));
+						getOntopTerm((Var) arg));
 			}
 		} else {
 			throw new RuntimeException("The builtin function "
