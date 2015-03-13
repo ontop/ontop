@@ -11,6 +11,9 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -22,11 +25,13 @@ public class NPDUndolferTest extends TestCase {
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 
-	public NPDUndolferTest() throws Exception {
+
+	@Before
+    public void setUp() throws Exception {
 		manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-	}
-
+    }
+	
 	/**
 	 * Query 6 from the NPD benchmark 
 	 * (this query was an indicator for incorrect variable order in SPAQRL Extend)
@@ -34,6 +39,7 @@ public class NPDUndolferTest extends TestCase {
 	 * @throws Exception
 	 */
 	
+	@Test
 	public void testNpdQ6() throws Exception {
 	
 		String query =
@@ -62,6 +68,7 @@ public class NPDUndolferTest extends TestCase {
 
 		String rewriting = getRewriting(query);
 		assertFalse(rewriting.contains("GTE(company,"));
+		assertTrue(rewriting.contains("GTE(year,"));
 	}
 
 	/**
@@ -71,6 +78,7 @@ public class NPDUndolferTest extends TestCase {
 	 * @throws Exception
 	 */
 	
+	@Test
 	public void testNpdQD() throws Exception {
 		
 		String query =
@@ -83,13 +91,12 @@ public class NPDUndolferTest extends TestCase {
 "PREFIX nlx: <http://sws.ifi.uio.no/data/norlex/>" +
 "PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#>" +
 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-"SELECT DISTINCT ?wellbore " + 
+"SELECT DISTINCT ?wc " + 
 "		   WHERE { " +
 "		      ?wc npdv:coreForWellbore [ rdf:type npdv:Wellbore ]. " + 
 "		   }";
 
 		String rewriting = getRewriting(query);
-		assertFalse(rewriting.contains("GTE(company,"));
 	}
 	
 	/**
@@ -123,5 +130,10 @@ public class NPDUndolferTest extends TestCase {
 		
 		return rewriting;
 	}
-	
+
+    @After
+    public void tearDown() throws Exception {
+    	ontology = null;
+    	manager = null;
+    }	
 }
