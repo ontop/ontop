@@ -199,7 +199,6 @@ public class SparqlAlgebraToDatalogTranslator {
 			translateTupleExpr(headAtom, order.getArg(), pr, i); // narrow down the query
 		} 
 		else if (te instanceof Projection) {
-			// Add PROJECTION modifier, if any
 			translate(headAtom, (Projection) te, pr, i);
 		} 
 		else if (te instanceof Filter) {
@@ -783,37 +782,23 @@ public class SparqlAlgebraToDatalogTranslator {
 			return getOntopTerm((Var) expr);
 		} 
 		else if (expr instanceof org.openrdf.query.algebra.ValueConstant) {
-			return getConstantExpr((org.openrdf.query.algebra.ValueConstant) expr);
+			return getConstantExpression(((org.openrdf.query.algebra.ValueConstant) expr).getValue());
 		} 
 		else if (expr instanceof UnaryValueOperator) {
 			return getUnaryExpression((UnaryValueOperator) expr);
 		} 
 		else if (expr instanceof BinaryValueOperator) {
-			if (expr instanceof Regex) { // sesame regex is Binary, Jena N-ary
-				Regex reg = (Regex) expr;
-				ValueExpr arg1 = reg.getLeftArg(); 
-				ValueExpr arg2 = reg.getRightArg(); 
-				ValueExpr flags = reg.getFlagsArg();
-				Term term1 = getExpression(arg1);
-				Term term2 = getExpression(arg2);
-				Term term3 = (flags != null) ? getExpression(flags) : OBDAVocabulary.NULL;
-				return ofac.getFunction(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3);
-			}
-			BinaryValueOperator function = (BinaryValueOperator) expr;
-			return getBinaryExpression(function);
+			return getBinaryExpression((BinaryValueOperator) expr);
 		} 
 		else if (expr instanceof Bound) {	
 			return ofac.getFunctionIsNotNull(getOntopTerm(((Bound) expr).getArg()));
 		} 
-		else {
-			throw new RuntimeException("The builtin function "
-					+ expr.toString() + " is not supported yet!");
-		}
+		
+		throw new RuntimeException("The expression " + expr + " is not supported yet!");
 	}
 	
 
-	private Function getConstantExpr(org.openrdf.query.algebra.ValueConstant expr) {
-		Value v = expr.getValue();
+	private Term getConstantExpression(Value v) {
 
 		if (v instanceof Literal) {
 			Literal lit = (Literal)v;
@@ -881,47 +866,43 @@ public class SparqlAlgebraToDatalogTranslator {
             return constantFunction;
 		}
 		
-		return null;
+		throw new RuntimeException("The value " + v + " is not supported yet!");
 	}
 
-	private Function getUnaryExpression(UnaryValueOperator expr) {
+	private Term getUnaryExpression(UnaryValueOperator expr) {
+
+		Term term = getExpression(expr.getArg());
 
 		if (expr instanceof Not) {
-			Term term = getExpression(expr.getArg());
 			return ofac.getFunctionNOT(term);
 		}
-		/*
-		 * The following expressions only accept variable as the parameter
-		 */
-
 		else if (expr instanceof IsLiteral) {
-			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_LITERAL, getExpression(expr.getArg()));	
+			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_LITERAL, term);	
 		} 
 		else if (expr instanceof IsURI) {
-			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_URI, getExpression(expr.getArg()));
+			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_URI, term);
 		} 
 		else if (expr instanceof Str) {
-			return ofac.getFunction(OBDAVocabulary.SPARQL_STR, getExpression(expr.getArg()));
+			return ofac.getFunction(OBDAVocabulary.SPARQL_STR, term);
 		} 
 		else if (expr instanceof Datatype) {
-			return ofac.getFunction(OBDAVocabulary.SPARQL_DATATYPE, getExpression(expr.getArg()));
+			return ofac.getFunction(OBDAVocabulary.SPARQL_DATATYPE, term);
 		} 
 		else if (expr instanceof IsBNode) {
-			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_BLANK, getExpression(expr.getArg()));
+			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_BLANK, term);
 		} 
 		else if (expr instanceof Lang) {
 			ValueExpr arg = expr.getArg();
-			if (arg instanceof Var) {
-				return ofac.getFunction(OBDAVocabulary.SPARQL_LANG, getOntopTerm((Var) arg));
-			}
+			if (arg instanceof Var) 
+				return ofac.getFunction(OBDAVocabulary.SPARQL_LANG, term);
 			else
-				return null;
+				throw new RuntimeException("A variable or a value is expected in " + expr);
 		}
 		
-		throw new RuntimeException("The builtin function " + expr.toString() + " is not supported yet!");
+		throw new RuntimeException("The expression " + expr + " is not supported yet!");
 	}
 
-	private Function getBinaryExpression(BinaryValueOperator expr) {
+	private Term getBinaryExpression(BinaryValueOperator expr) {
 		
 		ValueExpr arg1 = expr.getLeftArg(); // get the first argument
 		Term term1 = getExpression(arg1);
@@ -929,17 +910,21 @@ public class SparqlAlgebraToDatalogTranslator {
 		ValueExpr arg2 = expr.getRightArg(); // get the second argument
 		Term term2 = getExpression(arg2);
 		
-		// The AND and OR expression
 		if (expr instanceof And) {
 			return ofac.getFunctionAND(term1, term2);
 		} 
 		else if (expr instanceof Or) {
 			return ofac.getFunctionOR(term1, term2);
 		}
-		// The other expressions
-		else if (expr instanceof SameTerm){
+		else if (expr instanceof SameTerm) {
 			return ofac.getFunctionEQ(term1, term2);
 		} 
+		else if (expr instanceof Regex) { // sesame regex is Binary, Jena N-ary
+			Regex reg = (Regex) expr;
+			ValueExpr flags = reg.getFlagsArg();
+			Term term3 = (flags != null) ? getExpression(flags) : OBDAVocabulary.NULL;
+			return ofac.getFunction(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3);
+		}
 		else if (expr instanceof Compare) {
 			switch (((Compare) expr).getOperator()) {
 				case EQ:
@@ -973,7 +958,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			return ofac.getLANGMATCHESFunction(term1, toLowerCase(term2));
 		} 
 		
-		throw new IllegalStateException("getBinaryExpression does not understand the expression " + expr);
+		throw new RuntimeException("The expression " + expr + " is not supported yet!");
 	}
 
 	private Term toLowerCase(Term term) {
