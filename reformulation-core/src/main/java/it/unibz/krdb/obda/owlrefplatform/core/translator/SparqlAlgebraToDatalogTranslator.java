@@ -140,12 +140,13 @@ public class SparqlAlgebraToDatalogTranslator {
 	 *         query.
 	 */
 
-	public DatalogProgram translate(ParsedQuery pq, List<String> signature) {
+	public DatalogProgram translate(ParsedQuery pq) {
 		TupleExpr te = pq.getTupleExpr();
 
 		log.debug("SPARQL algebra: \n{}", te);
 		DatalogProgram result = ofac.getDatalogProgram();
 
+		List<String> signature = getSignature(pq);
 		// Render the variable names in the signature into Variable object
 		List<Term> vars = new LinkedList<>();
 		for (String vs : signature) 
@@ -271,7 +272,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			int indexOfvar = headTerms.indexOf(var);
 			
 			ValueExpr vexp = el.getExpr();
-			Term term = getBooleanTerm(vexp);			
+			Term term = getExpression(vexp);			
 			atom2VarList.set(indexOfvar,term);
 		}
 		Function newHeadAtom = ofac.getFunction(headAtom.getFunctionSymbol(), atom2VarList);
@@ -405,7 +406,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		if (filter != null) {
 		
 			List<Term> joinTerms = joinAtom.getTerms();
-			joinTerms.add(((Function) getBooleanTerm(filter)));
+			joinTerms.add(((Function) getExpression(filter)));
 //			for (Expr expr : filter.getList()) {
 //				joinTerms.add(((Function) getBooleanTerm(expr)));
 //			}		
@@ -462,7 +463,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			a = ofac.getFunctionIsTrue(getOntopTerm((Var) condition));
 		} 
 		else {
-			a = (Function) getBooleanTerm(condition);
+			a = (Function) getExpression(condition);
 		}
 		if (a != null) {
 			Function filterAtom = ofac.getFunction(a.getFunctionSymbol(),
@@ -777,15 +778,15 @@ public class SparqlAlgebraToDatalogTranslator {
 
 
 
-	private Term getBooleanTerm(ValueExpr expr) {
+	private Term getExpression(ValueExpr expr) {
 		if (expr instanceof Var) {
 			return getOntopTerm((Var) expr);
 		} 
 		else if (expr instanceof org.openrdf.query.algebra.ValueConstant) {
-			return getConstantFunctionTerm((org.openrdf.query.algebra.ValueConstant) expr);
+			return getConstantExpr((org.openrdf.query.algebra.ValueConstant) expr);
 		} 
 		else if (expr instanceof UnaryValueOperator) {
-			return getBuiltinFunctionTerm((UnaryValueOperator) expr);
+			return getUnaryExpression((UnaryValueOperator) expr);
 		} 
 		else if (expr instanceof BinaryValueOperator) {
 			if (expr instanceof Regex) { // sesame regex is Binary, Jena N-ary
@@ -793,23 +794,15 @@ public class SparqlAlgebraToDatalogTranslator {
 				ValueExpr arg1 = reg.getLeftArg(); 
 				ValueExpr arg2 = reg.getRightArg(); 
 				ValueExpr flags = reg.getFlagsArg();
-				Term term1 = getBooleanTerm(arg1);
-				Term term2 = getBooleanTerm(arg2);
-				Term term3 = (flags != null) ? getBooleanTerm(flags) : OBDAVocabulary.NULL;
-				return ofac.getFunction(
-						OBDAVocabulary.SPARQL_REGEX, term1, term2, term3);
+				Term term1 = getExpression(arg1);
+				Term term2 = getExpression(arg2);
+				Term term3 = (flags != null) ? getExpression(flags) : OBDAVocabulary.NULL;
+				return ofac.getFunction(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3);
 			}
 			BinaryValueOperator function = (BinaryValueOperator) expr;
-			ValueExpr arg1 = function.getLeftArg(); // get the first argument
-			ValueExpr arg2 = function.getRightArg(); // get the second argument
-			Term term1 = getBooleanTerm(arg1);
-			Term term2 = getBooleanTerm(arg2);
-			// Construct the boolean function
-			// TODO Change the method name because ExprFunction2 is not only for
-			// boolean functions
-			return getBooleanFunction(function, term1, term2);
+			return getBinaryExpression(function);
 		} 
-		else if (expr instanceof Bound){	
+		else if (expr instanceof Bound) {	
 			return ofac.getFunctionIsNotNull(getOntopTerm(((Bound) expr).getArg()));
 		} 
 		else {
@@ -819,8 +812,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 
-	private Function getConstantFunctionTerm(org.openrdf.query.algebra.ValueConstant expr) {
-		Function constantFunction = null;
+	private Function getConstantExpr(org.openrdf.query.algebra.ValueConstant expr) {
 		Value v = expr.getValue();
 
 		if (v instanceof Literal) {
@@ -880,58 +872,63 @@ public class SparqlAlgebraToDatalogTranslator {
 					throw new RuntimeException("Undefiend datatype: " + tp);
 			}
 			ValueConstant constant = ofac.getConstantLiteral(constantString, tp);
-			constantFunction = ofac.getTypedTerm(constant, tp);	
+			return ofac.getTypedTerm(constant, tp);	
 		} 
 		else if (v instanceof URI) {
-            constantFunction = uriTemplateMatcher.generateURIFunction(v.stringValue());
+            Function constantFunction = uriTemplateMatcher.generateURIFunction(v.stringValue());
             if (constantFunction.getArity() == 1)
                 constantFunction = ofac.getUriTemplateForDatatype(v.stringValue());
+            return constantFunction;
 		}
 		
-		return constantFunction;
+		return null;
 	}
 
-	private Function getBuiltinFunctionTerm(UnaryValueOperator expr) {
-		Function builtInFunction = null;
+	private Function getUnaryExpression(UnaryValueOperator expr) {
+
 		if (expr instanceof Not) {
-			ValueExpr arg = expr.getArg();
-			Term term = getBooleanTerm(arg);
-			builtInFunction = ofac.getFunctionNOT(term);
+			Term term = getExpression(expr.getArg());
+			return ofac.getFunctionNOT(term);
 		}
 		/*
 		 * The following expressions only accept variable as the parameter
 		 */
 
 		else if (expr instanceof IsLiteral) {
-			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_IS_LITERAL, getBooleanTerm( expr.getArg()));
-			
-		} else if (expr instanceof IsURI) {
-			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_IS_URI, getBooleanTerm( expr.getArg()));
-			
-		} else if (expr instanceof Str) {
-			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_STR, getBooleanTerm( expr.getArg()));
-			
-		} else if (expr instanceof Datatype) {
-			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_DATATYPE, getBooleanTerm( expr.getArg()));
-		
-		} else if (expr instanceof IsBNode) {
-			builtInFunction = ofac.getFunction(OBDAVocabulary.SPARQL_IS_BLANK, getBooleanTerm( expr.getArg()));
-							
-		} else if (expr instanceof Lang) {
+			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_LITERAL, getExpression(expr.getArg()));	
+		} 
+		else if (expr instanceof IsURI) {
+			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_URI, getExpression(expr.getArg()));
+		} 
+		else if (expr instanceof Str) {
+			return ofac.getFunction(OBDAVocabulary.SPARQL_STR, getExpression(expr.getArg()));
+		} 
+		else if (expr instanceof Datatype) {
+			return ofac.getFunction(OBDAVocabulary.SPARQL_DATATYPE, getExpression(expr.getArg()));
+		} 
+		else if (expr instanceof IsBNode) {
+			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_BLANK, getExpression(expr.getArg()));
+		} 
+		else if (expr instanceof Lang) {
 			ValueExpr arg = expr.getArg();
 			if (arg instanceof Var) {
-				builtInFunction = ofac.getFunction(
-						OBDAVocabulary.SPARQL_LANG,
-						getOntopTerm((Var) arg));
+				return ofac.getFunction(OBDAVocabulary.SPARQL_LANG, getOntopTerm((Var) arg));
 			}
-		} else {
-			throw new RuntimeException("The builtin function "
-					+ expr.toString() + " is not supported yet!");
+			else
+				return null;
 		}
-		return builtInFunction;
+		
+		throw new RuntimeException("The builtin function " + expr.toString() + " is not supported yet!");
 	}
 
-	private Function getBooleanFunction(BinaryValueOperator expr, Term term1, Term term2) {
+	private Function getBinaryExpression(BinaryValueOperator expr) {
+		
+		ValueExpr arg1 = expr.getLeftArg(); // get the first argument
+		Term term1 = getExpression(arg1);
+		
+		ValueExpr arg2 = expr.getRightArg(); // get the second argument
+		Term term2 = getExpression(arg2);
+		
 		// The AND and OR expression
 		if (expr instanceof And) {
 			return ofac.getFunctionAND(term1, term2);
@@ -976,7 +973,7 @@ public class SparqlAlgebraToDatalogTranslator {
 			return ofac.getLANGMATCHESFunction(term1, toLowerCase(term2));
 		} 
 		
-		throw new IllegalStateException("getBooleanFunction does not understand the expression " + expr);
+		throw new IllegalStateException("getBinaryExpression does not understand the expression " + expr);
 	}
 
 	private Term toLowerCase(Term term) {
@@ -996,6 +993,15 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 		return output;
 	}
+	
+	/**
+	 * Used only in QuestStatement (and internally)
+	 *  
+	 * TODO: to be removed
+	 * 
+	 * @param query
+	 * @return
+	 */
 	
 	public List<String> getSignature(ParsedQuery query) {
 		List<String> signatureContainer = new LinkedList<>();

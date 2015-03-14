@@ -391,11 +391,11 @@ public class QuestStatement implements OBDAStatement {
 	 * @return
 	 */
 	
-	private DatalogProgram translateAndPreProcess(ParsedQuery pq, List<String> signature) {
+	private DatalogProgram translateAndPreProcess(ParsedQuery pq) {
 		DatalogProgram program = null;
 		try {
 			SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();
-			program = translator.translate(pq, signature);
+			program = translator.translate(pq);
 
 			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
@@ -557,12 +557,12 @@ public class QuestStatement implements OBDAStatement {
 		}
 		
 		// Obtain the query signature
-		SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();		
-		List<String> signatureContainer = translator.getSignature(query);
+		//SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();		
+		//List<String> signatureContainer = translator.getSignature(query);
 		
 		
 		// Translate the SPARQL algebra to datalog program
-		DatalogProgram initialProgram = translateAndPreProcess(query, signatureContainer);
+		DatalogProgram initialProgram = translateAndPreProcess(query/*, signatureContainer*/);
 		
 		// Perform the query rewriting
 		DatalogProgram programAfterRewriting = questInstance.getRewriting(initialProgram);
@@ -577,10 +577,10 @@ public class QuestStatement implements OBDAStatement {
 	/**
 	 * Returns the final rewriting of the given query
 	 */
-	public String getRewriting(ParsedQuery query, List<String> signature) throws Exception {
+	public String getRewriting(ParsedQuery query) throws Exception {
 		// TODO FIX to limit to SPARQL input and output
 
-		DatalogProgram program = translateAndPreProcess(query, signature);
+		DatalogProgram program = translateAndPreProcess(query);
 
 		DatalogProgram rewriting = questInstance.getRewriting(program);
 		return DatalogProgramRenderer.encode(rewriting);
@@ -634,7 +634,7 @@ public class QuestStatement implements OBDAStatement {
 			questInstance.getSesameQueryCache().put(strquery, query);
 			questInstance.getSignatureCache().put(strquery, signatureContainer);
 
-			DatalogProgram program = translateAndPreProcess(query, signatureContainer);
+			DatalogProgram program = translateAndPreProcess(query/*, signatureContainer*/);
 			try {
 				// log.debug("Input query:\n{}", strquery);
 
