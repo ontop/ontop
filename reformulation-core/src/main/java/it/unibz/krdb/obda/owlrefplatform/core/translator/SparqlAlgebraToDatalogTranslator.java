@@ -182,19 +182,32 @@ public class SparqlAlgebraToDatalogTranslator {
 			pr.getQueryModifiers().setDistinct();
 			translateTupleExpr(headAtom, distinct.getArg(), pr, i); // narrow down the query
 		} 
+		else if (te instanceof Order) {
+			// Add ORDER BY modifier, if any
+			Order order = (Order) te;
+			for (OrderElem c : order.getElements()) {	
+				ValueExpr expression = c.getExpr();
+				if (!(expression instanceof Var)) {
+					throw new IllegalArgumentException("Error translating ORDER BY. The current implementation can only sort by variables, this query has a more complex expression. Offending expression: '"+expression+"'");
+				}
+				Var v = (Var) expression;
+				Variable var = ofac.getVariable(v.getName());
+				int direction =  c.isAscending() ? OrderCondition.ORDER_ASCENDING : OrderCondition.ORDER_DESCENDING; 
+				pr.getQueryModifiers().addOrderCondition(var, direction);
+			}
+			translateTupleExpr(headAtom, order.getArg(), pr, i); // narrow down the query
+		} 
 		else if (te instanceof Projection) {
 			// Add PROJECTION modifier, if any
 			translate(headAtom, (Projection) te, pr, i);
-		} 
-		else if (te instanceof Order) {
-			// Add ORDER BY modifier, if any
-			translate(headAtom, (Order) te, pr, i);
 		} 
 		else if (te instanceof Filter) {
 			translate(headAtom, (Filter) te, pr, i);
 		} 
 		else if (te instanceof StatementPattern) {
-			translate(headAtom, (StatementPattern) te, pr, i);
+			Function atom = translate((StatementPattern) te);		
+			CQIE newrule = ofac.getCQIE(headAtom, atom);
+			pr.appendRule(newrule);
 		} 
 		else if (te instanceof Join) {
 			translate(headAtom, (Join) te, pr, i);
@@ -232,6 +245,21 @@ public class SparqlAlgebraToDatalogTranslator {
 		return atom;
 	}
 	
+	/**
+	 * EXTEND { (T_j AS V_j) } EXPR
+	 * 
+	 * where the T_j are built from the variables X of EXPR,
+	 *   
+	 * adds the following rule:
+	 * 
+	 *   ans_i(X, T) :- ans_{2i}(X)
+	 * 
+	 * @param headAtom
+	 * @param extend
+	 * @param pr
+	 * @param i
+	 */
+	
 	private void translate(Function headAtom, Extension extend, DatalogProgram pr, long i) {
 		
 		List<Term> headTerms = headAtom.getTerms();
@@ -258,6 +286,19 @@ public class SparqlAlgebraToDatalogTranslator {
 		translateTupleExpr(atom, subte, pr, 2 * i);
 	}		    
 
+	/**
+	 * EXPR_1 UNION EXPR_2
+	 * 
+	 * adds the following rules
+	 * 
+	 * ans_i(X * NULL_1) :- ans_{2i}(X_1)
+	 * ans_i(X * NULL_2) :- ans_{2i_1}(X_2)
+	 * 
+	 * @param headAtom
+	 * @param union
+	 * @param pr
+	 * @param i
+	 */
 	
 	private void translate(Function headAtom, Union union, DatalogProgram pr, long i) {
 		TupleExpr left = union.getLeftArg();
@@ -306,6 +347,19 @@ public class SparqlAlgebraToDatalogTranslator {
 		return nullifier;
 	}
 	
+	/**
+	 * EXPR_1 JOIN EXPR_2
+	 * 
+	 * adds the following rule 
+	 * 
+	 * ans_i(X_1 U X_2) :- ans_{2i}(X_1), ans_{2i+1}(X_2)
+	 * 
+	 * @param headAtom
+	 * @param join
+	 * @param pr
+	 * @param i
+	 */
+	
 	private void translate(Function headAtom, Join join, DatalogProgram pr, long i) {
 		TupleExpr left = join.getLeftArg();
 		TupleExpr right = join.getRightArg();
@@ -323,6 +377,17 @@ public class SparqlAlgebraToDatalogTranslator {
 		translateTupleExpr(leftAtom, left, pr, 2 * i);
 		translateTupleExpr(rightAtom, right, pr, 2 * i + 1);
 	}
+	
+	/**
+	 * EXPR_1 OPT EXPR_2 FILTER F
+	 * 
+	 * ans_i(X_1 U X_2) :- LEFTJOIN(ans_{2i}(X_1), ans_{2i+1}(X_2), F(X_1 U X_2))
+	 * 
+	 * @param headAtom
+	 * @param join
+	 * @param pr
+	 * @param i
+	 */
 
 	private void translate(Function headAtom, LeftJoin join, DatalogProgram pr, long i) {
 		TupleExpr left = join.getLeftArg();
@@ -336,7 +401,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		// The join 
 		Function joinAtom = ofac.getSPARQLLeftJoin(leftAtom, rightAtom);
 
-		/* adding the conditions of the filter for the LeftJoin */
+		// adding the conditions of the filter for the LeftJoin 
 		if (filter != null) {
 		
 			List<Term> joinTerms = joinAtom.getTerms();
@@ -354,49 +419,37 @@ public class SparqlAlgebraToDatalogTranslator {
 		translateTupleExpr(leftAtom, left, pr, 2 * i);
 		translateTupleExpr(rightAtom, right, pr, 2 * i + 1);
 	}
+	
+	/**
+	 * PROJECT { V_j } EXPR
+	 * 
+	 * adds the following rule
+	 * 
+	 * ans_i(V) :- ans_{i+1}(X)
+	 * 
+	 * @param headAtom
+	 * @param project
+	 * @param pr
+	 * @param i
+	 */
 
 	private void translate(Function headAtom, Projection project, DatalogProgram pr, long i) {
-
-		TupleExpr te = project.getArg();
-		Set<Variable> nestedVars = getVariables(te);
 
 		List<Term> projectedVariables = new LinkedList<>();
 		for (ProjectionElem var : project.getProjectionElemList().getElements()) {
 			projectedVariables.add(ofac.getVariable(var.getSourceName()));
 		}
 
-		Predicate predicate = ofac.getPredicate("ans" + i,
-				projectedVariables.size());
+		Predicate predicate = ofac.getPredicate("ans" + i, projectedVariables.size());
 		Function head = ofac.getFunction(predicate, projectedVariables);
 
-		Predicate pbody = ofac.getPredicate("ans" + (i + 1), nestedVars.size());
-
-		Set<Variable> bodyatomVarsSet = getVariables(te);
-		List<Term> bodyatomVarsList = new LinkedList<>();
-		bodyatomVarsList.addAll(bodyatomVarsSet);
-		Collections.sort(bodyatomVarsList, comparator);
-
-		Function bodyAtom = ofac.getFunction(pbody, bodyatomVarsList);
+		TupleExpr te = project.getArg();
+		Function bodyAtom = getAnsAtom(te, i + 1);
 		CQIE cq = ofac.getCQIE(head, bodyAtom);
 		pr.appendRule(cq);
 
 		// Continue the nested tree
 		translateTupleExpr(bodyAtom, te, pr, i + 1);
-	}
-
-	private void translate(Function headAtom, Order order, DatalogProgram pr, long i) {
-		
-		for (OrderElem c : order.getElements()) {	
-			ValueExpr expression = c.getExpr();
-			if (!(expression instanceof Var)) {
-				throw new IllegalArgumentException("Error translating ORDER BY. The current implementation can only sort by variables, this query has a more complex expression. Offending expression: '"+expression+"'");
-			}
-			Var v = (Var) expression;
-			Variable var = ofac.getVariable(v.getName());
-			int direction =  c.isAscending() ? OrderCondition.ORDER_ASCENDING : OrderCondition.ORDER_DESCENDING; 
-			pr.getQueryModifiers().addOrderCondition(var, direction);
-		}
-		translateTupleExpr(headAtom, order.getArg(), pr, i); // narrow down the query
 	}
 
 	private void translate(Function headAtom, Filter filter, DatalogProgram pr, long i) {
@@ -462,14 +515,12 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 
 	/***
-	 * This translates a single triple. In most cases it will generate one
-	 * single atom, however, if URI's are present, it will generate also
-	 * equality atoms.
+	 * This translates a single triple. 
 	 * 
 	 * @param triple
 	 * @return
 	 */
-	private void translate(Function headAtom, StatementPattern triple, DatalogProgram pr, long i) {
+	private Function translate(StatementPattern triple) {
 		
 		Var pred = triple.getPredicateVar();		
 		Value p = pred.getValue();
@@ -482,9 +533,6 @@ public class SparqlAlgebraToDatalogTranslator {
 		Var subj = triple.getSubjectVar();
 		Var obj = triple.getObjectVar();
 		
-		// / Instantiate the atom components: predicate and terms.
-		Function atom = null;
-
 		// Subject node		
 		Term sTerm = getOntopTerm(subj);
 		
@@ -494,45 +542,37 @@ public class SparqlAlgebraToDatalogTranslator {
 			// Object node
 			if (o == null) {
 				Function rdfTypeConstant = ofac.getUriTemplate(ofac.getConstantLiteral(OBDAVocabulary.RDF_TYPE));
-				atom = ofac.getTripleAtom(sTerm, rdfTypeConstant, ofac.getVariable(obj.getName()));
+				return ofac.getTripleAtom(sTerm, rdfTypeConstant, ofac.getVariable(obj.getName()));
 			} 
 			else if (o instanceof URI) {
 				URI objectUri = (URI)o; 
 				Predicate.COL_TYPE type = dtfac.getDatatype(objectUri);
 				if (type != null) {
 					Predicate predicate = dtfac.getTypePredicate(type);
-					atom = ofac.getFunction(predicate, sTerm);
+					return ofac.getFunction(predicate, sTerm);
 				}
 	            else {
 	        		COL_TYPE subjectType = null; // are never changed
 					Predicate predicate = ofac.getPredicate(objectUri.stringValue(), new COL_TYPE[] { subjectType });
-					atom = ofac.getFunction(predicate, sTerm);
+					return ofac.getFunction(predicate, sTerm);
 				}
 			}
-			else /* if (o instanceof LiteralImpl)*/ {
+			else  
 				throw new RuntimeException("Unsupported query syntax");
-			} 
 		} 
-		else {
-			/*
-			 * The predicate is NOT rdf:type
-			 */
-
+		else {			
+			// The predicate is NOT rdf:type
 			Term oTerm = getOntopTerm(obj); 
 			
 			if (p != null) {
         		COL_TYPE subjectType = null; // are never changed
 				COL_TYPE objectType = null;
 				Predicate predicate = ofac.getPredicate(p.stringValue(), new COL_TYPE[] { subjectType, objectType });
-				atom = ofac.getFunction(predicate, sTerm, oTerm);
+				return ofac.getFunction(predicate, sTerm, oTerm);
 			} 
-			else {
-				atom = ofac.getTripleAtom(sTerm, ofac.getVariable(pred.getName()), oTerm);
-			}
+			else 
+				return ofac.getTripleAtom(sTerm, ofac.getVariable(pred.getName()), oTerm);
 		}
-		
-		CQIE newrule = ofac.getCQIE(headAtom, atom);
-		pr.appendRule(newrule);
 	}
 	
 	private Term getOntopTerm(Var subj) {
