@@ -68,7 +68,7 @@ public class NPDUndolferTest extends TestCase {
 
 		String rewriting = getRewriting(query);
 		assertFalse(rewriting.contains("GTE(company,"));
-		assertTrue(rewriting.contains("GTE(year,"));
+		assertTrue(rewriting.contains("GTE(year_1,"));
 	}
 
 	/**
@@ -121,6 +121,22 @@ public class NPDUndolferTest extends TestCase {
 		String rewriting = getRewriting(query);
 	}
 	
+	@Test
+	public void testDD() throws Exception {
+		
+		String query =
+"PREFIX t: <http://www.w3.org/2001/sw/DataAccess/tests/data/TypePromotion/tP-0#> " +
+"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " + 
+"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> " + 
+"ASK " + 
+" WHERE { t:double1 rdf:value ?l . " + 
+"         t:double1 rdf:value ?r . " + 
+"         FILTER ( datatype(?l + ?r) = xsd:double ) }"; 
+
+		String rewriting = getRewriting(query);
+	}
+	
+	 
 	
 	@Test
 	public void testNpdQ0() throws Exception {
