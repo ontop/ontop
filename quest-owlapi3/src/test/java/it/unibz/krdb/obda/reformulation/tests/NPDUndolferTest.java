@@ -68,7 +68,7 @@ public class NPDUndolferTest extends TestCase {
 
 		String rewriting = getRewriting(query);
 		assertFalse(rewriting.contains("GTE(company,"));
-		assertTrue(rewriting.contains("GTE(year_1,"));
+		assertTrue(rewriting.contains("GTE(year"));
 	}
 
 	/**
