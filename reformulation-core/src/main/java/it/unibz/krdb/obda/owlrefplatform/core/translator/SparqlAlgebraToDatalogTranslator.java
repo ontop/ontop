@@ -117,9 +117,13 @@ public class SparqlAlgebraToDatalogTranslator {
 	/**
 	 * main translation method -- a recursive switch over all possible types of subexpressions
 	 * 
+<<<<<<< HEAD
 	 * @param te
 	 * @param pr
 	 * @param newHeadName
+=======
+
+>>>>>>> develop
 	 */
 	
 	private Function translateTupleExpr(TupleExpr te, DatalogProgram pr, String newHeadName) {
