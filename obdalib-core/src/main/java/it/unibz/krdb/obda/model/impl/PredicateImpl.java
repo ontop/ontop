@@ -20,11 +20,7 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
-import it.unibz.krdb.obda.model.BooleanOperationPredicate;
-import it.unibz.krdb.obda.model.DatatypePredicate;
-import it.unibz.krdb.obda.model.NumericalOperationPredicate;
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.*;
 
 public class PredicateImpl implements Predicate {
 
@@ -135,7 +131,13 @@ public class PredicateImpl implements Predicate {
 		return this instanceof DatatypePredicate;
 	}
 
-	@Override
+    @Override
+    public boolean isStringOperationPredicate() {
+        return this instanceof StringOperationPredicate;
+    }
+
+
+    @Override
 	public boolean isTriplePredicate() {
 		if (arity == 3 && name.equals(QUEST_TRIPLE_PRED.getName())) {
 			return true;

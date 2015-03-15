@@ -30,10 +30,10 @@ import it.unibz.krdb.sql.DBMetadata;
 
 import java.net.URISyntaxException;
 import java.sql.*;
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.text.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
 
 public class QuestResultset implements TupleResultSet {
 
@@ -161,7 +161,7 @@ public class QuestResultset implements TupleResultSet {
 						} catch (NumberFormatException e) {
 							/*
 							 * If its not a number, then it has to be a URI, so
-							 * we leave realValue as is.
+							 * we leave realValue as it is.
 							 */
 						}
 					}

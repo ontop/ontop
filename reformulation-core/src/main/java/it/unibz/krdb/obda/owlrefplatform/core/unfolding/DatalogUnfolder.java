@@ -20,34 +20,15 @@ package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.AlgebraOperatorPredicate;
-import it.unibz.krdb.obda.model.BooleanOperationPredicate;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
 import it.unibz.krdb.obda.utils.QueryUtils;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * Generates partial evaluations of rules (the queries), with respect to a set
@@ -1146,7 +1127,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					return result;
 			} else {
 				throw new IllegalArgumentException(
-						"Error during unfolding, trying to unfold a non-algrbra/non-data function. Offending atom: "
+						"Error during unfolding, trying to unfold a non-algebra/non-data function. Offending atom: "
 								+ focusLiteral.toString());
 			}
 			termidx.pop();

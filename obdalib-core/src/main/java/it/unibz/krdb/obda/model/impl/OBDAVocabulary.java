@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.model.BooleanOperationPredicate;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.StringOperationPredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 
 public class OBDAVocabulary {
@@ -60,6 +61,14 @@ public class OBDAVocabulary {
 	public static final BooleanOperationPredicate IS_NOT_NULL = new BooleanOperationPredicateImpl("IS_NOT_NULL", 1);
 	public static final BooleanOperationPredicate IS_TRUE = new BooleanOperationPredicateImpl("IS_TRUE", 1);
 
+	
+	/* String predicates */
+	
+	public static final StringOperationPredicate REPLACE = new StringOperationPredicateImpl(
+            "REPLACE", 3, new COL_TYPE[]{COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL});
+	
+	public static final StringOperationPredicate CONCAT = new StringOperationPredicateImpl(
+            "CONCAT", 2, new COL_TYPE[]{COL_TYPE.LITERAL, COL_TYPE.LITERAL});
 	
 	
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
