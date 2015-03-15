@@ -32,6 +32,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -200,6 +201,8 @@ public class SparqlAlgebraToDatalogTranslator {
 		Set<Term> vars = new HashSet<>();
 		vars.addAll(s1);
 		vars.addAll(s2);
+		// order is chosen arbitrarily but this is not a problem
+		// because it is chosen once and for all
 		List<Term> varList = new ArrayList<>(vars);
 		return varList;
 	}
@@ -213,6 +216,8 @@ public class SparqlAlgebraToDatalogTranslator {
 		for (Term t : a2.getTerms())
 			if (t instanceof Variable)
 				vars.add(t);
+		// order is chosen arbitrarily but this is not a problem
+		// because it is chosen once and for all
 		List<Term> varList = new ArrayList<>(vars);
 		return varList;
 	}
@@ -672,6 +677,55 @@ public class SparqlAlgebraToDatalogTranslator {
 		throw new RuntimeException("The expression " + expr + " is not supported yet!");
 	}
 
+	private Term getConcat(List<ValueExpr> values) {
+        Iterator<ValueExpr> iterator = values.iterator();
+
+        ValueExpr first = iterator.next();
+        Term topConcat = getExpression(first);
+        
+        if (!iterator.hasNext())
+            throw new UnsupportedOperationException("Wrong number of arguments (found " + values.size() + 
+            					", at least 1) of SQL function CONCAT");
+ 	  	
+        while (iterator.hasNext()) {
+            ValueExpr second = iterator.next();
+            Term second_string = getExpression(second);
+
+            topConcat = ofac.getFunctionConcat(topConcat, second_string);                	
+        }
+        
+        return topConcat;		
+	}
+	
+	private Term getReplace(List<ValueExpr> expressions) {
+        if (expressions.size() == 2 || expressions.size() == 3) {
+
+            // first parameter is a function expression
+            ValueExpr first = expressions.get(0);
+            Term t1 = getExpression(first);
+
+            // second parameter is a string
+            ValueExpr second = expressions.get(1);
+            Term out_string = getExpression(second);
+
+            /*
+             * Term t3 is optional: no string means delete occurrences of second param
+	         */
+            Term in_string;
+            if (expressions.size() == 3) {
+                ValueExpr third = expressions.get(2);
+                in_string = getExpression(third);
+            } 
+            else {
+                in_string = ofac.getConstantLiteral("");
+            }
+
+            return ofac.getFunctionReplace(t1, out_string, in_string);
+        } 
+        else
+            throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");		
+	}
+	
     /** Return the Functions supported at the moment only
      * concat and replace
      * @param expr
@@ -681,61 +735,11 @@ public class SparqlAlgebraToDatalogTranslator {
     	
         switch(expr.getURI()){
             case "http://www.w3.org/2005/xpath-functions#concat":
-
-                List<ValueExpr> values = expr.getArgs();
-
-                Function topConcat = null;
-                for (int i= 0; i<values.size(); i+=2) {
-
-                    if (topConcat == null) {
-                        ValueExpr first = values.get(i);
-                        Term first_string = getExpression(first);
-
-                        ValueExpr second = values.get(i+1);
-                        Term second_string = getExpression(second);
-
-                        topConcat = ofac.getFunctionConcat(first_string, second_string);
-                    }
-                    else {
-                        ValueExpr second = values.get(i);
-                        Term second_string = getExpression(second);
-
-                        topConcat = ofac.getFunctionConcat(topConcat, second_string);
-                    }
-                }
-                return topConcat;
-
-
+                return getConcat(expr.getArgs());
 
             case "http://www.w3.org/2005/xpath-functions#replace":
-                List<ValueExpr> expressions = expr.getArgs();
-                if (expressions.size() == 2 || expressions.size() == 3) {
-
-                    // first parameter is a function expression
-                    ValueExpr first = expressions.get(0);
-                    Term t1 = getExpression(first);
-
-                    // second parameter is a string
-                    ValueExpr second = expressions.get(1);
-                    Term out_string = getExpression(second);
-
-                    /*
-                     * Term t3 is optional: no string means delete occurrences of second param
-			         */
-                    Term in_string;
-                    if (expressions.size() == 3) {
-                        ValueExpr third = expressions.get(2);
-                        in_string = getExpression(third);
-                    } 
-                    else {
-                        in_string = ofac.getConstantLiteral("");
-                    }
-
-                    return ofac.getFunctionReplace(t1, out_string, in_string);
-                } 
-                else
-                    throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");
-
+                return getReplace(expr.getArgs());
+                
             default:
                 throw new RuntimeException("The builtin function " + expr.getURI() + " is not supported yet!");
         }
