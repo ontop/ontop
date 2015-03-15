@@ -117,13 +117,9 @@ public class SparqlAlgebraToDatalogTranslator {
 	/**
 	 * main translation method -- a recursive switch over all possible types of subexpressions
 	 * 
-<<<<<<< HEAD
 	 * @param te
 	 * @param pr
 	 * @param newHeadName
-=======
-
->>>>>>> develop
 	 */
 	
 	private Function translateTupleExpr(TupleExpr te, DatalogProgram pr, String newHeadName) {
@@ -691,26 +687,21 @@ public class SparqlAlgebraToDatalogTranslator {
                 Function topConcat = null;
                 for (int i= 0; i<values.size(); i+=2) {
 
-                    Term first_string, second_string;
-
-                    if(topConcat == null){
-
+                    if (topConcat == null) {
                         ValueExpr first = values.get(i);
-                        first_string = getExpression(first);
+                        Term first_string = getExpression(first);
 
                         ValueExpr second = values.get(i+1);
-                        second_string = getExpression(second);
+                        Term second_string = getExpression(second);
 
                         topConcat = ofac.getFunctionConcat(first_string, second_string);
                     }
                     else {
-
                         ValueExpr second = values.get(i);
-                        second_string = getExpression(second);
+                        Term second_string = getExpression(second);
 
                         topConcat = ofac.getFunctionConcat(topConcat, second_string);
                     }
-
                 }
                 return topConcat;
 
@@ -720,16 +711,13 @@ public class SparqlAlgebraToDatalogTranslator {
                 List<ValueExpr> expressions = expr.getArgs();
                 if (expressions.size() == 2 || expressions.size() == 3) {
 
-                    Term t1; // first parameter is a function expression
+                    // first parameter is a function expression
                     ValueExpr first = expressions.get(0);
-                    t1 = getExpression(first);
-
+                    Term t1 = getExpression(first);
 
                     // second parameter is a string
-                    Term out_string;
                     ValueExpr second = expressions.get(1);
-                    out_string = getExpression(second);
-
+                    Term out_string = getExpression(second);
 
                     /*
                      * Term t3 is optional: no string means delete occurrences of second param
@@ -738,15 +726,15 @@ public class SparqlAlgebraToDatalogTranslator {
                     if (expressions.size() == 3) {
                         ValueExpr third = expressions.get(2);
                         in_string = getExpression(third);
-                    } else {
+                    } 
+                    else {
                         in_string = ofac.getConstantLiteral("");
                     }
 
                     return ofac.getFunctionReplace(t1, out_string, in_string);
-                } else
-
+                } 
+                else
                     throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");
-
 
             default:
                 throw new RuntimeException("The builtin function " + expr.getURI() + " is not supported yet!");
