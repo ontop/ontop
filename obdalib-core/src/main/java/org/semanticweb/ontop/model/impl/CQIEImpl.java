@@ -194,7 +194,7 @@ public class CQIEImpl implements CQIE, ListListener {
 		
 		CQIEImpl newquery = new CQIEImpl(copyHead, copyBody);
 		newquery.rehash = this.rehash;
-		newquery.string = this.string;
+		newquery.string = null;
 		newquery.hash = this.hash;
 
 		return newquery;
