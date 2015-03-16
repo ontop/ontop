@@ -36,6 +36,8 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
 
         /**
          * Computes the RuleLevelProposals and the global substitution.
+         *
+         * TODO: see if this global substitution makes sense.
          */
         P2<List<RuleLevelProposal>, Substitution> results = computeRuleProposalsAndSubstitution(parentRules, childProposalIndex);
         ruleProposals = results._1();
@@ -94,6 +96,9 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
      * Creates RuleLevelProposals and computes the global substitution as the union of the substitutions they propose.
      *
      * Tail-recursive function.
+     *
+     * TODO: Make sure the notion of global substitution makes sense.
+     * What if definitions of the same ans() atom use different variables?
      */
     private static P2<List<RuleLevelProposal>, Substitution> computeRuleProposalsAndSubstitution(Option<Substitution> optionalSubstitution,
                                                                                             List<CQIE> remainingRules,
@@ -152,8 +157,15 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
 
     /**
      * Makes a type proposal out of the head of one definition rule.
+     *
+     * TODO: Currently weak: What if the globalSubstitution differs from the one of the first rule?
+     *
      */
     private static TypeProposal makeTypeProposal(List<RuleLevelProposal> ruleProposals, Substitution globalSubstitution) {
-        return TypeLiftTools.makeTypeProposal(ruleProposals.head().getTypedRule(), globalSubstitution);
+        /**
+         * TODO: test if this would work with URI templates
+         */
+        //return TypeLiftTools.makeTypeProposal(ruleProposals.head().getDetypedRule(), globalSubstitution);
+        return TypeLiftTools.constructTypeProposal(ruleProposals.head().getTypedRule().getHead());
     }
 }

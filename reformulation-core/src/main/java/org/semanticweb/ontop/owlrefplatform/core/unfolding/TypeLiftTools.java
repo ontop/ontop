@@ -361,10 +361,10 @@ public class TypeLiftTools {
     /**
      * Makes a TypeProposal by applying the substitution to the head of the rule.
      */
-    public static TypeProposal makeTypeProposal(CQIE rule, Substitution substitution) {
-        final Function unextendedTypeAtom = (Function) rule.getHead().clone();
+    public static TypeProposal makeTypeProposal(CQIE untypedRule, Substitution typePropagationSubstitution) {
+        final Function unextendedTypeAtom = (Function) untypedRule.getHead().clone();
         // Side-effect!
-        SubstitutionUtilities.applySubstitution(unextendedTypeAtom, substitution);
+        SubstitutionUtilities.applySubstitution(unextendedTypeAtom, typePropagationSubstitution);
         final TypeProposal newProposal = constructTypeProposal(unextendedTypeAtom);
 
         return newProposal;

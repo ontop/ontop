@@ -88,7 +88,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
         /**
          * Derives the type proposal
          */
-        typeProposal = makeTypeProposal(typedRule, typingSubstitution);
+        typeProposal = constructTypeProposal(typedRule.getHead());
 
     }
 
