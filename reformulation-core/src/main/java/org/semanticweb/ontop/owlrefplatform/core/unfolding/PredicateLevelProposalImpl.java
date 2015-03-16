@@ -11,11 +11,16 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities;
 
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities.union;
+import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.makeTypeProposal;
 
 /**
  * From a high-level point of view, this proposal is done by looking at (i) the children proposals and (ii) the rules defining the parent predicate.
  *
  * Its implementation relies on RuleLevelProposals.
+ *
+ * Fundamental assumption: definition rules (parent rules) USE THE SAME VARIABLE NAMES.
+ * It seems to be OK with the way the SPARQL-to-Datalog works (in March 2015).
+ * ---> the predicate-level substitution makes sense (union of rule-level ones).
  *
  */
 public class PredicateLevelProposalImpl implements PredicateLevelProposal {
@@ -37,16 +42,15 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
         /**
          * Computes the RuleLevelProposals and the global substitution.
          *
-         * TODO: see if this global substitution makes sense.
          */
         P2<List<RuleLevelProposal>, Substitution> results = computeRuleProposalsAndSubstitution(parentRules, childProposalIndex);
         ruleProposals = results._1();
         Substitution globalSubstitution = results._2();
 
         /**
-         * Derives the type proposal from these RuleLevelProposals and the global substitution.
+         * Derives the type proposal from the first untyped definition rule and the global substitution.
          */
-        typeProposal = makeTypeProposal(ruleProposals, globalSubstitution);
+        typeProposal = makeTypeProposal(parentRules.head(), globalSubstitution);
     }
 
     @Override
@@ -153,19 +157,5 @@ public class PredicateLevelProposalImpl implements PredicateLevelProposal {
          */
         return computeRuleProposalsAndSubstitution(proposedSubstitution, remainingRules.tail(),
                 newRuleProposalList, childProposalIndex);
-    }
-
-    /**
-     * Makes a type proposal out of the head of one definition rule.
-     *
-     * TODO: Currently weak: What if the globalSubstitution differs from the one of the first rule?
-     *
-     */
-    private static TypeProposal makeTypeProposal(List<RuleLevelProposal> ruleProposals, Substitution globalSubstitution) {
-        /**
-         * TODO: test if this would work with URI templates
-         */
-        //return TypeLiftTools.makeTypeProposal(ruleProposals.head().getDetypedRule(), globalSubstitution);
-        return TypeLiftTools.constructTypeProposal(ruleProposals.head().getTypedRule().getHead());
     }
 }
