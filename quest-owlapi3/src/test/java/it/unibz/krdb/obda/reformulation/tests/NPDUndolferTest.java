@@ -73,37 +73,6 @@ public class NPDUndolferTest extends TestCase {
 	}
 	
 	
-	@Test
-	public void testNpdQ6_1() throws Exception {
-	
-		String query =
-"PREFIX : <http://sws.ifi.uio.no/vocab/npd-v2#>" +
-"PREFIX nlxv: <http://sws.ifi.uio.no/vocab/norlex#>" +
-"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-"PREFIX npd: <http://sws.ifi.uio.no/data/npd-v2/>" +
-"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
-"PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-"PREFIX nlx: <http://sws.ifi.uio.no/data/norlex/>" +
-"PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#>" +
-"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-"SELECT DISTINCT ?wellbore (?length AS ?lenghtM) ?company ?year " +
-"WHERE {" +
-"  ?wc npdv:coreForWellbore" +
-"        [ rdf:type                      npdv:Wellbore ;" +
-"          npdv:name                     ?wellbore ;" +
-"          npdv:wellboreCompletionYear   ?year ;" +
-"          npdv:drillingOperatorCompany  [ npdv:name ?company ] " +
-"        ] ." +
-"  { ?wc npdv:coresTotalLength ?length } " +
-"  " +
-"  FILTER(?year >= \"2008\"^^xsd:integer && ?length > 50 " +
-"  )" +
-"} ORDER BY ?wellbore";
-
-		String rewriting = getRewriting(query);
-		assertFalse(rewriting.contains("GTE(company,"));
-		assertTrue(rewriting.contains("GTE(year"));
-	}
 
 	/**
 	 * Davide's query
