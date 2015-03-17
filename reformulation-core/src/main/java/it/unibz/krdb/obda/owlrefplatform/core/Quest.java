@@ -883,7 +883,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 // Davide> TODO: Test
 	public void setQueryTimeout(Statement st) throws SQLException {
 
-        int timeout = 2; // 2 hours
+        int timeout = 1200; //7200; // 2 hours
         //int timeout = 30;
 
 		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().getName());
