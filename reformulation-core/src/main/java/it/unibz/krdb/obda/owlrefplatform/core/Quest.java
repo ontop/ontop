@@ -85,6 +85,47 @@ import org.openrdf.query.parser.ParsedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
+
+enum ConnClasses{
+	
+	MYSQL("com.mysql.jdbc.JDBC4Connection"),
+	POSTGRES("org.postgresql.jdbc4.Jdbc4Connection"),
+    DB2("com.ibm.db2.jcc.DB2Connection", "com.ibm.db2.jcc.t4.b");
+
+	private final List<String> connClasses;
+	
+	ConnClasses(String... connClasses){
+		this.connClasses = Lists.newArrayList(connClasses);
+	}
+	
+	public static ConnClasses fromString(String connectionClassName) {
+		
+		ConnClasses result = null;
+		
+	    if (connectionClassName != null) {
+	      for (ConnClasses b : ConnClasses.values()) {
+
+              if(b.connClasses.indexOf(connectionClassName) != -1){
+                  result = b;
+              }
+
+//	        if (connectionClassName.equals(b.connClass)) {
+//	          result = b;
+//	        }
+	      }
+	    }
+	    else
+            throw new IllegalArgumentException("No constant with text " + connectionClassName + " found");
+	    return result;
+	}
+	
+	@Override
+	public String toString(){
+		return this.connClasses.toString();
+	}
+	
+}
 
 public class Quest implements Serializable, RepositoryChangedListener {
 
@@ -839,7 +880,58 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	}
 
 
+// Davide> TODO: Test
+	public void setQueryTimeout(Statement st) throws SQLException {
 
+        int timeout = 7200; // 2 hours
+        //int timeout = 30;
+
+		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().getName());
+
+		if(connClass == null){
+            st.setQueryTimeout(timeout);
+            return;
+        }
+
+
+		switch(connClass){
+        case DB2:
+		case MYSQL:
+            st.setQueryTimeout(timeout);
+			break;
+		case POSTGRES:
+		{
+			String query = String.format("SET statement_timeout TO %d", timeout*1000); // 1000ms = one second
+			st.execute(query);
+			break;
+		}
+		default:
+            st.setQueryTimeout(timeout);
+            break;
+		}
+	}
+	
+	public void resetTimeouts(Statement st) throws SQLException {
+		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().toString());
+
+		if(connClass == null){
+			// TODO: check
+			return;
+		}
+
+		switch(connClass){
+		case MYSQL:
+        case DB2:
+			// Do nothing
+			break;
+		case POSTGRES:
+		{
+			String query = "RESET statement_timeout;";
+			st.execute(query);
+			break;
+		}		
+		}		
+	}
 
 
 	private void setupConnectionPool() {
