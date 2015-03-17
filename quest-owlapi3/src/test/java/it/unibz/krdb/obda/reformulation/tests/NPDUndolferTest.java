@@ -52,7 +52,7 @@ public class NPDUndolferTest extends TestCase {
 "PREFIX nlx: <http://sws.ifi.uio.no/data/norlex/>" +
 "PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#>" +
 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-"SELECT DISTINCT ?wellbore (?length * 0.30 AS ?lenghtM) ?company (?year + 2 AS ?YearB) " +
+"SELECT DISTINCT ?wellbore (?length * 0.30 AS ?lenghtM) (?length AS ?lenghtS) ?company (?year + 2 AS ?YearB) " +
 "WHERE {" +
 "  ?wc npdv:coreForWellbore" +
 "        [ rdf:type                      npdv:Wellbore ;" +
@@ -69,7 +69,10 @@ public class NPDUndolferTest extends TestCase {
 		String rewriting = getRewriting(query);
 		assertFalse(rewriting.contains("GTE(company,"));
 		assertTrue(rewriting.contains("GTE(year"));
+		assertTrue(rewriting.contains("GT(lenghtS"));
 	}
+	
+	
 
 	/**
 	 * Davide's query

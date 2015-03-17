@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-
 /***
  * Translate a SPARQL algebra expression into a Datalog program that has the
  * same semantics. We use the built-in predicates Join and Left join. The rules
@@ -392,8 +391,22 @@ public class SparqlAlgebraToDatalogTranslator {
 		
 		List<ProjectionElem> projectionElements = project.getProjectionElemList().getElements();
 		List<Term> varList = new  ArrayList<>(projectionElements.size());
-		for (ProjectionElem var : projectionElements) 
+		for (ProjectionElem var : projectionElements)  {
+			// we assume here that the target name is "introduced" as one of the arguments of atom
+			// (this is normally done by an EXTEND inside the PROJECTION)
+			// first, we check whether this assumption can be made
+			if (!var.getSourceName().equals(var.getTargetName())) {
+				boolean found = false;
+				for (Term a : atom.getTerms())
+					if ((a instanceof Variable) && ((Variable)a).getName().equals(var.getSourceName())) {
+						found = true;
+						break;
+					}
+				if (!found)
+					throw new RuntimeException("Projection target of " + var + " not found in " + project.getArg());
+			}
 			varList.add(ofac.getVariable(var.getTargetName()));
+		}
 
 		CQIE rule = createRule(pr, newHeadName, varList, atom);
 		return rule.getHead();
