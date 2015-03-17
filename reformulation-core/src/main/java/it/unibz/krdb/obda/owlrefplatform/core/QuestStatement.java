@@ -190,18 +190,12 @@ public class QuestStatement implements OBDAStatement {
 				} 
 				else if (sql.equals("")) {
 					tupleResult = new BooleanOWLOBDARefResultSet(false, QuestStatement.this);
-				} 
-				else {
+				} else {
+					ResultSet set = null;
 					try {
-//                        FOR debugging H2 in-memory database
-//                        try {
-//                            org.h2.tools.Server.startWebServer(conn.getConnection());
-//                        } catch (SQLException e) {
-//                            e.printStackTrace();
-//                        }
+
 						// Execute the SQL query string
 						executingSQL = true;
-						ResultSet set = null;
 
 						setQueryTimeout(sqlstatement);
 
