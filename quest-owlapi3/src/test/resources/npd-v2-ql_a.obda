@@ -20,9 +20,9 @@ diskosv:		http://sws.ifi.uio.no/vocab/diskos#
 
 [SourceDeclaration]
 sourceUri	x
-connectionUrl	jdbc:mysql://localhost/provaNpdOriginal
-username	tir
-password	gr3g4r10
+connectionUrl	jdbc:mysql://10.7.23.39/npd
+username	fish
+password	fish
 driverClass	com.mysql.jdbc.Driver
 
 [MappingDeclaration] @collection [[
