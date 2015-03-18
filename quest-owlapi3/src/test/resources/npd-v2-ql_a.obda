@@ -20,7 +20,7 @@ diskosv:		http://sws.ifi.uio.no/vocab/diskos#
 
 [SourceDeclaration]
 sourceUri	x
-connectionUrl	jdbc:mysql://10.7.23.39/npd
+connectionUrl	jdbc:mysql://10.7.20.39/npd
 username	fish
 password	fish
 driverClass	com.mysql.jdbc.Driver
