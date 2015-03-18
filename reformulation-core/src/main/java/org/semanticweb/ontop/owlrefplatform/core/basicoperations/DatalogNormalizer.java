@@ -244,7 +244,7 @@ public class DatalogNormalizer {
 	 *
 	 */
 	public static CQIE pullOutEqualities(CQIE query) {
-		Substitution substitutions = new SubstitutionImpl();
+		AppendableSubstitution substitution = new SubstitutionImpl();
 		int[] newVarCounter = { 1 };
 
 		firstArgChecked = false;
@@ -253,7 +253,7 @@ public class DatalogNormalizer {
 		eqGoOutsideSameLevel = new ArrayList<>();
 
 		List<Function> equalities = new ArrayList<>();
-		pullOutEqualities(query.getBody(), substitutions, equalities, newVarCounter, false);
+		pullOutEqualities(query.getBody(), substitution, equalities, newVarCounter, false);
 		List<Function> body = query.getBody();
 		body.addAll(equalities);
 		body.addAll(eqGoAllwayUp);
@@ -264,7 +264,7 @@ public class DatalogNormalizer {
 		 * query.
 		 */
 
-		SubstitutionUtilities.applySubstitution(query, substitutions, false);
+		SubstitutionUtilities.applySubstitution(query, substitution, false);
 		return query;
 	}
 
@@ -352,9 +352,9 @@ public class DatalogNormalizer {
 	 * 
 	 * 
 	 * @param currentAtoms
-	 * @param substitutions
+	 * @param substitution
 	 */
-	private static void pullOutEqualities(List<Function> currentAtoms, Substitution substitutions, List<Function> eqList,
+	private static void pullOutEqualities(List<Function> currentAtoms, AppendableSubstitution substitution, List<Function> eqList,
 										  int[] newVarCounter, boolean isLeftJoin) {
 
 		boolean secondLJArg = false ;
@@ -371,7 +371,7 @@ public class DatalogNormalizer {
 			if (atom.isAlgebraFunction()) {
 				if (atom.getFunctionSymbol() == OBDAVocabulary.SPARQL_LEFTJOIN){
 					//eqGoOutsideSameLevel.addAll(
-					pullOutEqualities((List<Function>)(List<?>)subterms, substitutions, eqList, newVarCounter, true);
+					pullOutEqualities((List<Function>)(List<?>)subterms, substitution, eqList, newVarCounter, true);
 					if (isLeftJoin && !secondLJArg) {
 						secondLJArg = true;
 					}
@@ -396,7 +396,7 @@ public class DatalogNormalizer {
 					continue;
 				}else{
 					//eqGoOutside.addAll(
-					pullOutEqualities((List<Function>)(List<?>)subterms, substitutions, eqList, newVarCounter, false);
+					pullOutEqualities((List<Function>)(List<?>)subterms, substitution, eqList, newVarCounter, false);
 				}
 
 			} else if (atom.isBooleanFunction()) {
@@ -404,7 +404,7 @@ public class DatalogNormalizer {
 
 			}
 
-			renameVariables(substitutions, eqList, newVarCounter, atom, subterms);
+			renameVariables(substitution, eqList, newVarCounter, atom, subterms);
 
 
 			//TODO: WHat about the JOIN????
@@ -447,7 +447,7 @@ public class DatalogNormalizer {
 	 * Do not access to sub-terms through the atom BUT through the separated subterms list.
 	 *
 	 */
-	private static void renameVariables(Substitution substitution, List<Function> eqList, int[] newVarCounter, Function atom, List<Term> subterms) {
+	private static void renameVariables(AppendableSubstitution substitution, List<Function> eqList, int[] newVarCounter, Function atom, List<Term> subterms) {
 		/**
 		 * For each sub-term (of the current atom).
 		 */
@@ -579,7 +579,7 @@ public class DatalogNormalizer {
 	 *  - subterms (change j-th entry)
 	 *
 	 */
-	protected static void renameVariable(Substitution substitution, List<Function> eqList, int[] newVarCounter, Function atom,
+	protected static void renameVariable(AppendableSubstitution substitution, List<Function> eqList, int[] newVarCounter, Function atom,
 			List<Term> subterms, int j, Term subTerm) {
 		VariableImpl var1 = (VariableImpl) subTerm;
 		VariableImpl var2 = (VariableImpl) substitution.get(var1);

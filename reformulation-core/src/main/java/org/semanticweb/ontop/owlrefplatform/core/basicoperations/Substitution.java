@@ -85,8 +85,5 @@ public interface Substitution {
     boolean compose(Term term1, Term term2);
 
     @Deprecated
-    void put(VariableImpl var, Term term);
-
-    @Deprecated
     Set<VariableImpl> keySet();
 }

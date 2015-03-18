@@ -30,7 +30,7 @@ import java.util.*;
 /**
  * Mutable reference implementation of a Substitution.
  */
-public class SubstitutionImpl implements Substitution {
+public class SubstitutionImpl implements AppendableSubstitution {
 
     private final Map<VariableImpl, Term> map;
 
