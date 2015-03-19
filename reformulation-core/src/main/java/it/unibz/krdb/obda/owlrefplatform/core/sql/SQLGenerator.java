@@ -198,7 +198,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 //			log.debug("Before folding Joins: \n{}", cq);
 
-			DatalogNormalizer.foldJoinTrees(cq, false);
+			DatalogNormalizer.foldJoinTrees(cq);
 
 //			log.debug("Before pulling out equalities: \n{}", cq);
 			
@@ -210,7 +210,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			
 //			log.debug("Before pulling up nested references: \n{}", cq);
 
-			DatalogNormalizer.pullUpNestedReferences(cq, false);
+			DatalogNormalizer.pullUpNestedReferences(cq);
 
 //			log.debug("Before adding trivial equalities: \n{}, cq);", cq);
 

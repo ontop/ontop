@@ -1527,7 +1527,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		if (dataAtoms == 1) {
 			// Eliminates Join atoms when they only have one data atom, i.e., they are
 			// not really JOINs
-			DatalogNormalizer.unfoldJoinTrees(partialEvalution, false);
+			DatalogNormalizer.unfoldJoinTrees(partialEvalution);
 		}
 	}
 
@@ -1600,7 +1600,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param rule
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	private static List<Function> getNestedList(Stack<Integer> termidx, CQIE rule) {
 
 		if (termidx.size() > 1) {

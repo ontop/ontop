@@ -629,14 +629,12 @@ public class QuestStatement implements OBDAStatement {
 			questInstance.getSesameQueryCache().put(strquery, query);
 			questInstance.getSignatureCache().put(strquery, signatureContainer);
 
-			DatalogProgram program = translateAndPreProcess(query/*, signatureContainer*/);
+			DatalogProgram program = translateAndPreProcess(query);
 			try {
 				// log.debug("Input query:\n{}", strquery);
 
-				for (CQIE q : program.getRules()) {
-					// ROMAN: unfoldJoinTrees clones the query, so the statement below does not change anything
-					DatalogNormalizer.unfoldJoinTrees(q, false);
-				}
+				for (CQIE q : program.getRules()) 
+					DatalogNormalizer.unfoldJoinTrees(q);
 
  				log.debug("Normalized program: \n{}", program);
 
