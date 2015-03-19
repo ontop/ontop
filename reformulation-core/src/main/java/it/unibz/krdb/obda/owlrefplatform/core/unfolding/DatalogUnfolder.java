@@ -1083,7 +1083,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param atomindx
 	 *            The location of the focustAtom in the currentlist
 	 * @return <ul>
-	 *         <li>null if there is no s whos head unifies with a, we return
+	 *         <li>null if there is no s whose head unifies with a, we return
 	 *         null. </li><li>An empty list if the atom a is <strong>extensional
 	 *         predicate (those that have no defining rules)</strong> or the
 	 *         second data atom in a left join </li><li>a list with one ore more
@@ -1163,57 +1163,46 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * m(x,y) :- Join(R(x,y), Join(R(y,z), R(z,m))
 	 * </pre>
 	 * 
-	 * @param mapping
-	 *            <bold>null</bold> if the body contains 0 or 1 data atoms,
-	 *            otherwhise returns a new query with the nested joins.
-	 * @return
+	 * @param rule 
+	 * @return a new query with the nested joins.
 	 */
-	private CQIE foldJOIN(CQIE mapping) {
+	private CQIE foldJOIN(CQIE rule) {
 		// Checking if the rule has more that 1 data atom, otherwise we do
 		// nothing. Now we count, and at the same time collect the atoms we
 		// will need to manipulate in 2 temporal lists.
 
 		// Data atoms in the list will be folded, boolean atoms will be
-		// added to the bod in the end
+		// added to the body in the end
 
-		int dataAtoms = 0;
+		List<Function> dataAtomsList = new LinkedList<>();
+		List<Function> otherAtomsList = new LinkedList<>();
 
-		List<Function> body = mapping.getBody();
-
-		List<Function> dataAtomsList = new LinkedList<Function>();
-		List<Function> otherAtomsList = new ArrayList<Function>(body.size() * 2);
-
-		for (Function subAtom : body) {
-			if (subAtom.isDataFunction() || subAtom.isAlgebraFunction()) {
-				dataAtoms += 1;
+		for (Function subAtom : rule.getBody()) {
+			if (subAtom.isDataFunction() || subAtom.isAlgebraFunction()) 
 				dataAtomsList.add(subAtom);
-			} else {
+			else 
 				otherAtomsList.add(subAtom);
-			}
-		}
-		if (dataAtoms == 1) {
-			return null;
 		}
 
-		/*
-		 * This mapping can be transformed into a normal join with ON
-		 * conditions. Doing so.
-		 */
+		// This mapping can be transformed into a normal join with ON
+		// conditions. Doing so.
+		
 		Function foldedJoinAtom = null;
 
 		while (dataAtomsList.size() > 1) {
-			foldedJoinAtom = termFactory.getSPARQLJoin(dataAtomsList.remove(0), dataAtomsList.remove(0));
+			Function atom0 = dataAtomsList.remove(0);
+			Function atom1 = dataAtomsList.remove(0);
+			foldedJoinAtom = termFactory.getSPARQLJoin(atom0, atom1);
 			dataAtomsList.add(0, foldedJoinAtom);
 		}
 
-		List<Function> newBodyMapping = new LinkedList<Function>();
-		newBodyMapping.add(foldedJoinAtom);
-		newBodyMapping.addAll(otherAtomsList);
-
-		CQIE newrule = termFactory.getCQIE(mapping.getHead(), newBodyMapping);
-
+		if (foldedJoinAtom == null) 
+			return rule;
+		
+		otherAtomsList.add(0, foldedJoinAtom);
+		
+		CQIE newrule = termFactory.getCQIE(rule.getHead(), otherAtomsList);
 		return newrule;
-
 	}
 	
 	/***
@@ -1264,9 +1253,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			// if we are in a left join, we need to make sure the fresh rule
 			// has only one data atom
 			if (isLeftJoin) {
-			CQIE foldedJoinsRule = foldJOIN(freshRule);
-			if (foldedJoinsRule != null)
-				freshRule = foldedJoinsRule;
+				freshRule = foldJOIN(freshRule);
 			}
 
 			/*
@@ -1280,7 +1267,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			 * the matching rule.
 			 */
 
-			List innerAtoms = getNestedList(termidx, partialEvalution);
+			List<Function> innerAtoms = getNestedList(termidx, partialEvalution);
 
 			innerAtoms.remove((int) termidx.peek());
 			innerAtoms.addAll((int) termidx.peek(), freshRule.getBody());
@@ -1330,50 +1317,43 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		log.debug("Empty evaluation - Data Function {}", focusLiteral);
 
 		CQIE freshRule = originalRuleWithLeftJoin.clone();
-		// List<Function> body = freshRule.getBody();
 
-		Stack<Integer> termidx1 = new Stack<Integer>();
+		Stack<Integer> termidx1 = new Stack<>();
 		termidx1.addAll(termidx);
 
 		termidx1.pop();
 		termidx1.add(0);
-		List<Function> innerAtoms = (List<Function>) getNestedList(termidx1, freshRule);
+		List<Function> innerAtoms = getNestedList(termidx1, freshRule);
 
-		int ArgumentAtoms = 0;
+		int argumentAtoms = 0;
 		List<Function> newbody = new LinkedList<>();
-		HashSet<Variable> variablesArg1 = new LinkedHashSet<>();
-		HashSet<Variable> variablesArg2 = new LinkedHashSet<>();
+		Set<Variable> variablesArg1 = Collections.emptySet();
+		Set<Variable> variablesArg2 = Collections.emptySet();
 
 		// Here we build the new LJ body where we remove the 2nd
 		// data atom
 		for (Function atom : innerAtoms) {
 			if (atom.isDataFunction() || atom.isAlgebraFunction()) {
-				ArgumentAtoms++;
+				argumentAtoms++;
 				// we found the first argument of the LJ, we need
 				// the variables
-				if (ArgumentAtoms == 1) {
-					variablesArg1 = (HashSet<Variable>) atom.getReferencedVariables();
+				if (argumentAtoms == 1) {
+					variablesArg1 = atom.getReferencedVariables();
 					newbody.add(atom);
-				} else if (ArgumentAtoms != 2) {
-					newbody.add(atom);
-				} else {
+				} 
+				else if (argumentAtoms == 2) {
 					// Here we keep the variables of the second LJ
 					// data argument
-					variablesArg2 = (HashSet<Variable>) atom.getReferencedVariables();
+					variablesArg2 = atom.getReferencedVariables();
 
-					// and we remove the variables that are in both
-					// arguments
-					for (Variable var : variablesArg1) {
-						if (variablesArg2.contains(var)) {
-							variablesArg2.remove(var);
-						}
-					} // end for removing variables
-					continue;
-				}
-			} else {
+					// and we remove the variables that are in both arguments
+					variablesArg2.removeAll(variablesArg1);
+				} 
+				else 
+					newbody.add(atom);
+			} 
+			else 
 				newbody.add(atom);
-			}
-
 		}// end for rule body
 
 		//freshRule.updateBody(newbody);
@@ -1383,14 +1363,14 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		// Now I need to add the null to the variables of the second
 		// LJ data argument
-		freshRule = SubstitutionUtilities.applySubstitution(freshRule, unifier, false);
+		SubstitutionUtilities.applySubstitution(freshRule, unifier, false); // in-place unification
 		
 		List<CQIE> result = new LinkedList<CQIE>();
 		result.add(freshRule);
 		return result;
 	}
 	
-	private void replaceInnerLJ(CQIE rule, List<Function> replacementTerms,
+	private static void replaceInnerLJ(CQIE rule, List<Function> replacementTerms,
 			Stack<Integer> termidx) {
 		Function parentFunction = null;
 		if (termidx.size() > 1) {
@@ -1452,7 +1432,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 */
 	private void joinEliminationPKBased(Stack<Integer> termidx, int newatomcount, CQIE partialEvalution) {
 
-		List innerAtoms = getNestedList(termidx, partialEvalution);
+		List<Function> innerAtoms = getNestedList(termidx, partialEvalution);
 
 		Function currentAtom = getTerm(termidx, partialEvalution);
 		
@@ -1471,7 +1451,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		}
 		for (int newatomidx = newatomsfirstIndex; newatomidx < newatomsfirstIndex + newatomcount; newatomidx++) {
 
-			Function newatom = (Function) innerAtoms.get(newatomidx);
+			Function newatom = innerAtoms.get(newatomidx);
 			if (!newatom.isDataFunction())
 				continue;
 
@@ -1490,7 +1470,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			Substitution mgu1 = null;
 			for (int idx2 = 0; idx2 < termidx.peek(); idx2++) {
-				Function tempatom = (Function) innerAtoms.get(idx2);
+				Function tempatom =  innerAtoms.get(idx2);
 
 				if (!tempatom.getFunctionSymbol().equals(newatom.getFunctionSymbol())) {
 					/*
@@ -1544,9 +1524,11 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		 */
 
 		int dataAtoms = DatalogNormalizer.countDataItems(innerAtoms);
-		if (dataAtoms == 1)
-			cleanJoins(partialEvalution);
-
+		if (dataAtoms == 1) {
+			// Eliminates Join atoms when they only have one data atom, i.e., they are
+			// not really JOINs
+			DatalogNormalizer.unfoldJoinTrees(partialEvalution, false);
+		}
 	}
 
 	/***
@@ -1557,8 +1539,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param partialEvalution
 	 */
 	private static void eliminateRedundantISNOTNULL(Stack<Integer> termidx, CQIE partialEvalution) {
-		{
-			List innerAtoms = getNestedList(termidx, partialEvalution);
+			List<Function> innerAtoms = getNestedList(termidx, partialEvalution);
 			Function currentAtom = getTerm(termidx, partialEvalution);
 
 			int newatomsfirstIndex = termidx.peek();
@@ -1567,7 +1548,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			}
 			for (int newatomidx = 0; newatomidx < innerAtoms.size(); newatomidx++) {
 
-				Function newatom = (Function) innerAtoms.get(newatomidx);
+				Function newatom = innerAtoms.get(newatomidx);
 				if (!newatom.isBooleanFunction())
 					continue;
 
@@ -1577,7 +1558,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				Function replacement = null;
 
 				for (int idx2 = 0; idx2 < termidx.peek(); idx2++) {
-					Function tempatom = (Function) innerAtoms.get(idx2);
+					Function tempatom = innerAtoms.get(idx2);
 					if (!tempatom.equals(newatom))
 						continue;
 
@@ -1592,17 +1573,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				innerAtoms.remove(newatomidx);
 				newatomidx -= 1;
 			}
-		}
-
 	}
 
-	/***
-	 * Eliminates Join atoms when they only have one data atom, i.e., they are
-	 * not really JOINs
-	 */
-	private void cleanJoins(CQIE query) {
-		DatalogNormalizer.unfoldJoinTrees(query, false);
-	}
 
 	/***
 	 * Returns the list of terms contained in the nested atom indicated by term
@@ -1628,31 +1600,25 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * @param rule
 	 * @return
 	 */
-	private static List getNestedList(Stack<Integer> termidx, CQIE rule) {
-		List innerTerms = null;
+	@SuppressWarnings("unchecked")
+	private static List<Function> getNestedList(Stack<Integer> termidx, CQIE rule) {
 
 		if (termidx.size() > 1) {
-			/*
-			 * Its a nested term
-			 */
-			Term nestedTerm = null;
-			for (int y = 0; y < termidx.size() - 1; y++) {
+			// it's a nested term
+			int i0 = termidx.get(0);
+			Function newfocusFunction = rule.getBody().get(i0);
+			
+			for (int y = 1; y < termidx.size() - 1; y++) {
 				int i = termidx.get(y);
-				if (nestedTerm == null)
-					nestedTerm = (Function) rule.getBody().get(i);
-				else
-					nestedTerm = ((Function) nestedTerm).getTerm(i);
+				newfocusFunction = (Function)newfocusFunction.getTerm(i);
 			}
-			Function newfocusFunction = (Function) nestedTerm;
 
-			innerTerms = newfocusFunction.getTerms();
-		} else {
-			/*
-			 * Its directly on the body of the query
-			 */
-			innerTerms = rule.getBody();
+			return (List<Function>)(List)newfocusFunction.getTerms();
+		} 
+		else {
+			// it's the body of the query
+			return rule.getBody();
 		}
-		return innerTerms;
 	}
 
 	private static Function getTerm(Stack<Integer> termidx, CQIE rule) {
@@ -1660,15 +1626,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		if (termidx.size() > 1) {
 			Stack<Integer> stack = new Stack<>();
 			stack.addAll(termidx.subList(0, termidx.size() - 1));
-			List innerTerms = getNestedList(stack, rule);
-			atom = (Function) innerTerms.get(stack.peek());
-		} else {
+			List<Function> innerTerms = getNestedList(stack, rule);
+			atom = innerTerms.get(stack.peek());
+		} 
+		else {
 			List<Function> body = rule.getBody();
 			Integer peek = termidx.peek();
-			if (body.size() == 0 || peek >= body.size()) 
-				return null;
-			
-			atom = (Function) body.get(peek);
+			atom = body.get(peek);
 		}
 		return atom;
 	}

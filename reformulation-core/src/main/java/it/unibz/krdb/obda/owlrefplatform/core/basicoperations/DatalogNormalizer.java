@@ -219,10 +219,10 @@ public class DatalogNormalizer {
 	 * @param terms
 	 * @return
 	 */
-	public static int countDataItems(List<Term> terms) {
+	public static int countDataItems(List<?extends Term> terms) {
 		int count = 0;
-		for (Term lit : terms) {
-			Function currentAtom = (Function) lit;
+		for (Term currentTerm : terms) {
+			Function currentAtom = (Function)currentTerm;
 			if (!currentAtom.isBooleanFunction())
 				count += 1;
 		}
