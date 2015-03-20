@@ -49,7 +49,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
 	@Override
 	public void setUp() {
-		metadata = new DBMetadata();
+		metadata = new DBMetadata("dummy class");
 		TableDefinition table = new TableDefinition("TABLE");
 		table.setAttribute(1, new Attribute("col1", Types.INTEGER, true, false));
 		table.setAttribute(2, new Attribute("col2", Types.INTEGER, false, false));

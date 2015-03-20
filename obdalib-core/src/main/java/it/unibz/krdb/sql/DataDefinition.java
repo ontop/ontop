@@ -24,25 +24,19 @@ import it.unibz.krdb.sql.api.Attribute;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 public abstract class DataDefinition implements Serializable {
 
 	private static final long serialVersionUID = 212770563440334334L;
 
-	protected String name;
+	private String name;
 
-	protected HashMap<Integer, Attribute> attributes = new HashMap<Integer, Attribute>();
+	protected final Map<Integer, Attribute> attributes = new HashMap<>();
 
-	public DataDefinition() { // TODO Remove later! The attribute name should be mandatory and cannot be changed!
-		// NO-OP
-	}
-	
-	public DataDefinition(String name) {
-		this.name = name;
-	}
-
-	public void setName(String name) { // TODO Remove later! The attribute name should be mandatory and cannot be changed!
+	protected DataDefinition(String name) {
 		this.name = name;
 	}
 
@@ -64,12 +58,8 @@ public abstract class DataDefinition implements Serializable {
 		return attribute;
 	}
 
-	public ArrayList<Attribute> getAttributes() {
-		ArrayList<Attribute> list = new ArrayList<Attribute>();
-		for (Attribute value : attributes.values()) {
-			list.add(value);
-		}
-		return list;
+	public Collection<Attribute> getAttributes() {
+		return attributes.values();
 	}
 	
 	/**
@@ -87,26 +77,6 @@ public abstract class DataDefinition implements Serializable {
         return -1;
     }
 	
-	/**
-	 * Returns the position of the attribute in the .values of the underlying hashmap (Or -1)
-	 * Note that this is not necessarily compatible with the argument {@link #getAttribute(int) getAttribute} and {@link #setAttribute(int, Attribute) setAttribute}
-	 * For that purpose, {@link #getAttributeKey(String) getAttributeKey} above should be used instead
-	 * 
-	 * 
-	 * @param attributeName The name of an attribute, correctly spelled and cased. 
-	 * @return If there is an attribute, return its position in the values() list, otherwise -1
-	 */
-	@Deprecated
-	public int getAttributePosition(String attributeName) {
-		int index = 0;
-		for (Attribute value : attributes.values()) {
-			if (value.hasName(attributeName)) {
-				return index;
-			}
-			index++;
-		}
-		return -1;
-	}
 
 	public int getNumOfAttributes() {
 		return attributes.size();

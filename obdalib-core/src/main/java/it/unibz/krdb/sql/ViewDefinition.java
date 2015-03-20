@@ -25,6 +25,10 @@ public class ViewDefinition extends DataDefinition {
 	private static final long serialVersionUID = 3312336193514797486L;
 
 	private String statement;
+	
+	public ViewDefinition(String name) {
+		super(name);
+	}
 
 	public void copy(String statement) {
 		this.statement = statement;
@@ -37,7 +41,7 @@ public class ViewDefinition extends DataDefinition {
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
-		bf.append(name);
+		bf.append(getName());
 		bf.append("[");
 		boolean comma = false;
 		for (Integer i : attributes.keySet()) {

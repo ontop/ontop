@@ -39,7 +39,7 @@ public class Mapping2DatalogConverterTest extends TestCase {
 
 	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 	
-	private DBMetadata md = new DBMetadata();
+	private DBMetadata md = new DBMetadata("dummy class");
 	private SimplePrefixManager pm = new SimplePrefixManager();
 	
 	public void setUp() {

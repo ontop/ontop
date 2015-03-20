@@ -216,8 +216,7 @@ public class SQLQueryParser {
 	private ViewDefinition createViewDefinition(String viewName, String query) {
 
 
-        ViewDefinition viewDefinition = new ViewDefinition();
-        viewDefinition.setName(viewName);
+        ViewDefinition viewDefinition = new ViewDefinition(viewName);
         viewDefinition.copy(query);
 
         ParsedSQLQuery queryParser = null;

@@ -64,7 +64,7 @@ public class TableDefinition extends DataDefinition {
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
-		bf.append(name);
+		bf.append(getName());
 		bf.append("[");
 		boolean comma = false;
 		for (Integer i : attributes.keySet()) {

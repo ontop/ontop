@@ -128,10 +128,9 @@ public class OracleSesameLIMITTest  {
 		return tableDefinition;
 	}
 	private DBMetadata getMeta(String driver_class){
-		DBMetadata dbMetadata = new DBMetadata();
+		DBMetadata dbMetadata = new DBMetadata(driver_class);
 		dbMetadata.add(defTable("hr.countries"));
 		dbMetadata.add(defTable("HR.countries"));
-		dbMetadata.setDriverName(driver_class);
 		return dbMetadata;
 	}
 

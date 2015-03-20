@@ -16,7 +16,7 @@ public class TestImplicitDBConstraints {
 	
 	@Before
 	public void setupMetadata(){
-		this.md = new DBMetadata();
+		this.md = new DBMetadata("dummy class");
 		TableDefinition td = new TableDefinition("TABLENAME");
 		td.setAttribute(0, new Attribute("KEYNAME"));
 		md.add(td);

@@ -31,6 +31,7 @@ import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,7 @@ public class DBMetadataUtil {
 	public static LinearInclusionDependencies generateFKRules(DBMetadata metadata) {
 		LinearInclusionDependencies dependencies = new LinearInclusionDependencies();
 		
-		List<TableDefinition> tableDefs = metadata.getTableList();
+		Collection<TableDefinition> tableDefs = metadata.getTables();
 		for (TableDefinition def : tableDefs) {
 			Map<String, List<Attribute>> foreignKeys = def.getForeignKeys();
 			for (Entry<String, List<Attribute>> fks : foreignKeys.entrySet()) {
@@ -81,15 +82,15 @@ public class DBMetadataUtil {
 							throw new BrokenForeignKeyException(reference, "Missing table: " + table2);
 						}
 						// Get positions of referenced attribute
-						int pos1 = def.getAttributePosition(column1);
+						int pos1 = def.getAttributeKey(column1);
 						if (pos1 == -1) {
 							throw new BrokenForeignKeyException(reference, "Missing column: " + column1);
 						}
-						int pos2 = def2.getAttributePosition(column2);
+						int pos2 = def2.getAttributeKey(column2);
 						if (pos2 == -1) {
 							throw new BrokenForeignKeyException(reference, "Missing column: " + column2);
 						}
-						positionMatch.put(pos1, pos2);
+						positionMatch.put(pos1 - 1, pos2 - 1); // keys start at 1
 					}
 					// Construct CQIE
 					Predicate p1 = fac.getPredicate(table1, def.getNumOfAttributes());					

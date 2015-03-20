@@ -1219,10 +1219,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 				}
 			}
-			List<TableDefinition> tables = metadata.getTableList();
+			Collection<TableDefinition> tables = metadata.getTables();
 			for (TableDefinition tabledef: tables) {
 				if (tabledef.getName().equals(table)) {
-					List<Attribute> attr = tabledef.getAttributes();
+					Collection<Attribute> attr = tabledef.getAttributes();
 					for (Attribute a : attr) {
 						if (a.getName().equals(col)) {
 							switch (a.getType()) {

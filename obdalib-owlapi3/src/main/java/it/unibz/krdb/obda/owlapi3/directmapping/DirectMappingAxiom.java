@@ -127,7 +127,7 @@ public class DirectMappingAxiom {
 				Condition += " AND ";
 			}
 		}
-		for (TableDefinition tdef : metadata.getTableList()) {
+		for (TableDefinition tdef : metadata.getTables()) {
 			if (tdef.getName().equals(tableRef)) {
 				int pknumber = tdef.getPrimaryKeys().size();
 				if (pknumber > 0) {
@@ -244,7 +244,7 @@ public class DirectMappingAxiom {
 	}
 
 	// Generate an URI for object property from a string(name of column)
-	private String generateOPURI(String table, ArrayList<Attribute> columns) {
+	private String generateOPURI(String table, Collection<Attribute> columns) {
 		String column = "";
 		for (Attribute a : columns)
 			if (a.isForeignKey())
