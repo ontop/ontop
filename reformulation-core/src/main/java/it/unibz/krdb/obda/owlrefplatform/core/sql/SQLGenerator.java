@@ -1638,7 +1638,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					references = new LinkedHashSet<>();
 					columnReferences.put((Variable) term, references);
 				}
-				String columnName = def.getAttributeName(index + 1);
+				String columnName = def.getAttribute(index + 1).getName();   // indexes from 1
 				String reference = sqladapter.sqlQualifiedColumn(viewName, columnName);
 				references.add(reference);
 			}
@@ -1676,7 +1676,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		public String getColumnReference(Function atom, int column) {
 			String viewName = getView(atom);
 			DataDefinition def = dataDefinitions.get(atom);
-			String columnname = def.getAttributeName(column + 1);
+			String columnname = def.getAttribute(column + 1).getName(); // indexes from 1
 			return sqladapter.sqlQualifiedColumn(viewName, columnname);
 		}
 	}

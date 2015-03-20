@@ -81,7 +81,7 @@ public class ImplicitDBConstraints {
 		this.parseConstraints();
 	}
 
-	private void parseConstraints() {
+	private final void parseConstraints() {
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new FileReader(file));
@@ -159,7 +159,7 @@ public class ImplicitDBConstraints {
 	 * @return True if there is a RelationJSQL with the getGivenName method
 	 *         equals the parameter tableGivenName
 	 */
-	public boolean tableIsInList(List<RelationJSQL> tables,
+	public static boolean tableIsInList(List<RelationJSQL> tables,
 			String tableGivenName) {
 		for (RelationJSQL table : tables) {
 			if (table.getGivenName().equals(tableGivenName))

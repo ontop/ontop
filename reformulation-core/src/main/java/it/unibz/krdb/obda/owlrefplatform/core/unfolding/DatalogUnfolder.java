@@ -1365,7 +1365,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		// LJ data argument
 		SubstitutionUtilities.applySubstitution(freshRule, unifier, false); // in-place unification
 		
-		List<CQIE> result = new LinkedList<CQIE>();
+		List<CQIE> result = new LinkedList<>();
 		result.add(freshRule);
 		return result;
 	}
@@ -1381,7 +1381,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			for (int y = 0; y < termidx.size() - 1; y++) {
 				int i = termidx.get(y);
 				if (nestedTerm == null)
-					nestedTerm = (Function) rule.getBody().get(i);
+					nestedTerm = rule.getBody().get(i);
 				else
 				{
 					parentFunction = (Function) nestedTerm;
@@ -1631,6 +1631,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		else {
 			List<Function> body = rule.getBody();
 			Integer peek = termidx.peek();
+			if (peek >= body.size()) 
+				return null;
 			atom = body.get(peek);
 		}
 		return atom;

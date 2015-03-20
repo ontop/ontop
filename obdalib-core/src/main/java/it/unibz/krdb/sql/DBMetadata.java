@@ -31,6 +31,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class DBMetadata implements Serializable {
 
 	private final Map<String, DataDefinition> schema = new HashMap<>();
 
-	private String driverName;
+	private final String driverName;
 	private String driverVersion;
 	private String databaseProductName;
 
@@ -149,7 +150,7 @@ public class DBMetadata implements Serializable {
 	 * metadata.
 	 */
 	public Collection<DataDefinition> getRelations() {
-		return schema.values();
+		return Collections.unmodifiableCollection(schema.values());
 	}
 
 	/**
@@ -174,12 +175,12 @@ public class DBMetadata implements Serializable {
 	 *            The index position.
 	 * @return
 	 */
-	public String getAttributeName(String tableName, int pos) {
+	private String getAttributeName(String tableName, int pos) {
 		DataDefinition dd = getDefinition(tableName);
-		if (dd == null) {
+		if (dd == null) 
 			throw new RuntimeException("Unknown table definition: " + tableName);
-		}
-		return dd.getAttributeName(pos);
+		
+		return dd.getAttribute(pos).getName();
 	}
 
 
@@ -296,7 +297,7 @@ public class DBMetadata implements Serializable {
 				DataDefinition def = metadata.getDefinition(newAtomName);
 				if (def != null) {
 					List<Integer> pkeyIdx = new LinkedList<>();
-					for (int columnidx = 1; columnidx <= def.getNumOfAttributes(); columnidx++) {
+					for (int columnidx = 1; columnidx <= def.getAttributes().size(); columnidx++) {
 						Attribute column = def.getAttribute(columnidx);
 						if (column.isPrimaryKey()) 
 							pkeyIdx.add(columnidx);

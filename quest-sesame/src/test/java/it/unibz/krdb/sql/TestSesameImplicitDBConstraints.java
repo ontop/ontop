@@ -156,9 +156,9 @@ public class TestSesameImplicitDBConstraints {
 		Attribute attribute = null;
 		//It starts from 1 !!!
 		attribute = new Attribute("COL1", java.sql.Types.INTEGER, false, null);
-		tableDefinition.setAttribute(1, attribute);
+		tableDefinition.addAttribute(attribute);
 		attribute = new Attribute("COL2", java.sql.Types.INTEGER, false, null);
-		tableDefinition.setAttribute(2, attribute);
+		tableDefinition.addAttribute(attribute);
 		return tableDefinition;
 	}
 	private DBMetadata getMeta(){

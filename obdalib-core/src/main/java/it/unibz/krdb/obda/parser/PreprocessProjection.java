@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
+import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
@@ -276,41 +277,33 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
         }
         DataDefinition tableDefinition = metadata.getDefinition(tableFullName);
 
-        if (tableDefinition == null) {
+        if (tableDefinition == null) 
             throw new RuntimeException("Definition not found for table '" + table + "'.");
-        }
-
-        int size = tableDefinition.getNumOfAttributes();
-
-
+   
         Table tableName;
-        if(aliasSubselect != null){
+        if (aliasSubselect != null) {
             tableName= new Table(aliasSubselect);
         }
+        else if (table.getAlias() != null) { //use the alias if present
+        	tableName = new Table(table.getAlias().getName());
+        } 
         else {
-            //use the alias if present
-            if (table.getAlias() != null) {
-                tableName = new Table(table.getAlias().getName());
-            } else {
-                tableName = table;
-            }
+        	tableName = table;
         }
 
-        for (int pos = 1; pos <= size; pos++) {
-
-
-            String columnFromMetadata= metadata.getAttributeName(tableFullName, pos);
+        for (Attribute att : tableDefinition.getAttributes()) {
+            String columnFromMetadata = att.getName();
             SelectExpressionItem columnName = new SelectExpressionItem(new Column(tableName, columnFromMetadata));
             //construct a column as table.column
-            if (variables.contains(fac.getVariable(columnFromMetadata)) || variables.contains(fac.getVariable(columnFromMetadata.toLowerCase()))
-                    || variables.contains(fac.getVariable(columnName.toString())) || variables.contains(fac.getVariable(columnName.toString().toLowerCase()))){
+            if (variables.contains(fac.getVariable(columnFromMetadata)) 
+            		|| variables.contains(fac.getVariable(columnFromMetadata.toLowerCase()))
+                    || variables.contains(fac.getVariable(columnName.toString())) 
+                    || variables.contains(fac.getVariable(columnName.toString().toLowerCase()))) {
 
                     columns.add(columnName);
 
             }
         }
-
-
     }
 
 
