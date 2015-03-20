@@ -34,8 +34,6 @@ public class QuestUnfolder {
 
 	/* The active unfolding engine */
 	private UnfoldingMechanism unfolder;
-	
-	private CQContainmentCheckUnderLIDs foreignKeyCQC;
 
 	/* As unfolding OBDAModel, but experimental */
 	private List<CQIE> unfoldingProgram;
@@ -68,11 +66,6 @@ public class QuestUnfolder {
 
 		List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
 		unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
-
-		
-		// for eliminating redundancy from the unfolding program
-		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);	
-		foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);		
 	}
 
 
@@ -107,16 +100,16 @@ public class QuestUnfolder {
 //			log.debug("{}", rule);
 //		}
 
-		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);			
+		unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);	
 	}
 
-	public CQContainmentCheck getCQContainmentCheck() {
-		return foreignKeyCQC;
-	}
-	
-	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full) throws OBDAException  {
+	public void applyTMappings(TBoxReasoner reformulationReasoner, boolean full, DBMetadata metadata) throws OBDAException  {
 		
 		final long startTime = System.currentTimeMillis();
+
+		// for eliminating redundancy from the unfolding program
+		LinearInclusionDependencies foreignKeyRules = DBMetadataUtil.generateFKRules(metadata);	
+		CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules);
 		
 		unfoldingProgram = TMappingProcessor.getTMappings(unfoldingProgram, reformulationReasoner, full, foreignKeyCQC);
 
@@ -331,7 +324,7 @@ public class QuestUnfolder {
 
 		// this call is required to complete the T-mappings by rules taking account of 
 		// existential quantifiers and inverse roles
-		applyTMappings(reformulationReasoner, false);
+		applyTMappings(reformulationReasoner, false, metadata);
 		
 		setupUnfolder(metadata);
 

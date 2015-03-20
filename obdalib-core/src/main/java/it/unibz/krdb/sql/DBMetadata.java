@@ -390,25 +390,23 @@ public class DBMetadata implements Serializable {
 				Predicate newAtomPredicate = newatom.getFunctionSymbol();
 				if (newAtomPredicate instanceof BooleanOperationPredicate) 
 					continue;
-					
-				if (pkeys.containsKey(newatom.getFunctionSymbol()))
-					continue;   // this table has been processed
+				
+				if (pkeys.containsKey(newAtomPredicate))
+					continue;
 				
 				// TODO Check this: somehow the new atom name is "Join" instead
 				// of table name.
 				String newAtomName = newAtomPredicate.toString();
 				DataDefinition def = metadata.getDefinition(newAtomName);
 				if (def != null) {
-					List<Integer> pkeyIdx = new LinkedList<Integer>();
+					List<Integer> pkeyIdx = new LinkedList<>();
 					for (int columnidx = 1; columnidx <= def.getNumOfAttributes(); columnidx++) {
 						Attribute column = def.getAttribute(columnidx);
-						if (column.isPrimaryKey()) {
+						if (column.isPrimaryKey()) 
 							pkeyIdx.add(columnidx);
-						}
 					}
-					if (!pkeyIdx.isEmpty()) {
-						pkeys.put(newatom.getFunctionSymbol(), pkeyIdx);
-					}
+					if (!pkeyIdx.isEmpty()) 
+						pkeys.put(newAtomPredicate, pkeyIdx);
 				}
 			}
 		}
