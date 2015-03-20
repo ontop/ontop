@@ -173,7 +173,7 @@ public class NPDUndolferTest extends TestCase {
 	}
 
 	//@Test
-	public void non_testNpdQ09() throws Exception {
+	public void notestNpdQ09() throws Exception {
 		String q09 = 	"PREFIX : <http://sws.ifi.uio.no/vocab/npd-v2#>" +
 						"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
 						"PREFIX npd: <http://sws.ifi.uio.no/data/npd-v2/>" +
@@ -197,7 +197,7 @@ public class NPDUndolferTest extends TestCase {
 	}
 	
 	//@Test
-	public void non_testNpdQ10() throws Exception {
+	public void notestNpdQ10() throws Exception {
 		String q10 = 	"PREFIX : <http://sws.ifi.uio.no/vocab/npd-v2#>" +
 						"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
 						"PREFIX npd: <http://sws.ifi.uio.no/data/npd-v2/>" +

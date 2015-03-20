@@ -748,7 +748,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfolder.normalizeEqualities();
 				
 				// Apply TMappings
-				unfolder.applyTMappings(reformulationReasoner, true, metadata);
+				unfolder.applyTMappings(reformulationReasoner, true);
 				
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
                 unfolder.addClassAssertionsAsFacts(inputOntology.getClassAssertions());

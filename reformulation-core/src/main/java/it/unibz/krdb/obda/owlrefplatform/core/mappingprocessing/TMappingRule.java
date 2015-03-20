@@ -8,7 +8,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheck;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +34,7 @@ public class TMappingRule {
 	private final CQIE stripped;
 	// an OR-connected list of AND-connected atomic filters
 	private final List<List<Function>> filterAtoms;	  
-	private final CQContainmentCheckUnderLIDs cqc;   
+	private final CQContainmentCheck cqc;   
 
 	
 	/***
@@ -57,7 +56,7 @@ public class TMappingRule {
 	 * 
 	 */
 	
-	public TMappingRule(Function head, List<Function> body, CQContainmentCheckUnderLIDs cqc) {
+	public TMappingRule(Function head, List<Function> body, CQContainmentCheck cqc) {
 		this.databaseAtoms = new ArrayList<>(body.size()); // we estimate the size
 		
 		List<Function> filters = new ArrayList<>(body.size());

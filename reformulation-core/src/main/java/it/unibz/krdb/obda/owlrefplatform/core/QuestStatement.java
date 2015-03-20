@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.UnionOfSqlQueries;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 import it.unibz.krdb.obda.owlrefplatform.core.resultset.EmptyQueryResultSet;
@@ -36,6 +37,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogT
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.renderer.DatalogProgramRenderer;
+
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
@@ -422,17 +424,30 @@ public class QuestStatement implements OBDAStatement {
 
 		DatalogProgram unfolding = questInstance.getUnfolder().unfold(query);
 		//log.debug("Partial evaluation: \n{}", unfolding);
-		log.debug("Data atoms evaluated: \n{}", unfolding);
+		log.debug("Data atoms evaluated ({} rules): \n{}", unfolding.getRules().size(), unfolding);
 
 		removeNonAnswerQueries(unfolding);
 
 		//log.debug("After target rules removed: \n{}", unfolding);
-		log.debug("Irrelevant rules removed: \n{}", unfolding);
+		log.debug("Irrelevant rules removed ({} rules): \n{}", unfolding.getRules().size(), unfolding);
 
 		ExpressionEvaluator evaluator = questInstance.getExpressionEvaluator();
 		evaluator.evaluateExpressions(unfolding);
 
-		log.debug("Boolean expression evaluated: \n{}", unfolding);
+		log.debug("Boolean expression evaluated ({} rules): \n{}", unfolding.getRules().size(), unfolding);
+		
+		UnionOfSqlQueries ucq = new UnionOfSqlQueries(questInstance.getUnfolder().getCQContainmentCheck());
+		for (CQIE cq : unfolding.getRules())
+			ucq.add(cq);
+		
+		List<CQIE> rules = new ArrayList<>(unfolding.getRules());
+		unfolding.removeRules(rules); 
+		
+		for (CQIE cq : ucq.asCQIE()) {
+			unfolding.appendRule(cq);
+		}
+		log.debug("CQC performed ({} rules): \n{}", unfolding.getRules().size(), unfolding);
+		
 		log.debug("Partial evaluation ended.");
 
 		return unfolding;

@@ -388,9 +388,12 @@ public class DBMetadata implements Serializable {
 		for (CQIE mapping : program) {
 			for (Function newatom : mapping.getBody()) {
 				Predicate newAtomPredicate = newatom.getFunctionSymbol();
-				if (newAtomPredicate instanceof BooleanOperationPredicate) {
+				if (newAtomPredicate instanceof BooleanOperationPredicate) 
 					continue;
-				}
+					
+				if (pkeys.containsKey(newatom.getFunctionSymbol()))
+					continue;   // this table has been processed
+				
 				// TODO Check this: somehow the new atom name is "Join" instead
 				// of table name.
 				String newAtomName = newAtomPredicate.toString();
