@@ -195,7 +195,7 @@ public class NPDUndolferTest extends TestCase {
 		assertEquals(countUnions(unf),countUnions(unf_rew));
 		
 	}
-	
+	 
 	//@Test
 	public void notestNpdQ10() throws Exception {
 		String q10 = 	"PREFIX : <http://sws.ifi.uio.no/vocab/npd-v2#>" +
