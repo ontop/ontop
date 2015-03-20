@@ -1,26 +1,31 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import fj.*;
-import fj.data.List;
-import fj.data.Option;
+import fj.data.*;
 import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * Pulls out equalities.
  *
  * Limit: JOIN meta-predicates are not considered (--> no possibility to have specific ON conditions at the proper level).
+ *
+ * TODO: explain.
  */
 public class ExtractEqualityNormalizer {
 
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
+    private final static Ord<VariableImpl> VARIABLE_ORD = Ord.hashEqualsOrd();
+    //private final static TreeMap<VariableImpl,List<VariableImpl>> EMPTY_VARIABLE_MAP = TreeMap.empty(VARIABLE_ORD);
+    //private final static TreeMap<VariableImpl, Constant> EMPTY_VARIABLE_CONSTANT_MAP = TreeMap.empty(VARIABLE_ORD);
+    private final static List<P2<VariableImpl, Constant>> EMPTY_VARIABLE_CONSTANT_LIST = List.nil();
+    private final static List<P2<VariableImpl, VariableImpl>> EMPTY_VARIABLE_RENAMING_LIST = List.nil();
+    private final static List<Function> EMPTY_ATOM_LIST = List.nil();
 
     /**
      * TODO: explain
@@ -34,9 +39,9 @@ public class ExtractEqualityNormalizer {
         /**
          * Mutable object.
          */
-        final VariableGenerator variableGenerator = new VariableGenerator(initialRule);
+        final VariableDispatcher variableDispatcher = new VariableDispatcher(initialRule);
 
-        ExtractEqNormResult result = normalizeSameLevelAtoms(List.iterableList(newRule.getBody()), new SubstitutionImpl(), variableGenerator);
+        ExtractEqNormResult result = normalizeSameLevelAtoms(List.iterableList(newRule.getBody()), variableDispatcher);
 
         newRule.updateBody(new ArrayList(result.getAllAtoms().toCollection()));
         return newRule;
@@ -47,151 +52,270 @@ public class ExtractEqualityNormalizer {
      *
      * The initialSubstitution is "updated" by each atom of this list. It maps
      * the old and new names of the variables  "pull out into equalities".
+     *
+     * TODO: update this comment.
      */
     private static ExtractEqNormResult normalizeSameLevelAtoms(final List<Function> initialAtoms,
-                                                               final Substitution initialSubstitution,
-                                                               final VariableGenerator variableGenerator) {
+                                                               final VariableDispatcher variableDispatcher) {
+
+
+        ExtractEqNormResult mainAtomsResult = normalizeDataOrCompositeAtoms(initialAtoms, variableDispatcher);
+
+        final Substitution substitution = mainAtomsResult.getSubstitution();
+
+
         /**
-         * Normalizes all the atoms while updating a "common" substitution.
-         * Because this substitution, a foldLeft approach had to be adopted (instead of a simple map).
-         *
-         * Accumulates a list of result (initially null).
-         *
-         * TODO: replace by a map thanks to the mutable substitution?
+         * Applies the substitution to the other atoms (filter, group atoms)
          */
-        List<ExtractEqNormResult> initialAccumulatedResults = null;
-        List<ExtractEqNormResult> results = initialAtoms.foldLeft(new F2<List<ExtractEqNormResult>, Function,
-                List<ExtractEqNormResult>>() {
+        List<Function> otherAtoms = initialAtoms.filter(new F<Function, Boolean>() {
             @Override
-            public List<ExtractEqNormResult> f(List<ExtractEqNormResult> accumulatedResults, Function atom) {
-                Substitution currentSubstitution;
-                /**
-                 * First atom: uses the initial substitution
-                 */
-                if (accumulatedResults == null) {
-                    currentSubstitution = initialSubstitution;
-                }
-                /**
-                 * Non-first atom: takes the substitution related to the previous atom.
-                 */
-                else {
-                    currentSubstitution = accumulatedResults.head().getCurrentSubstitution();
-                }
-                ExtractEqNormResult atomResult = normalizeAtom(atom, currentSubstitution, variableGenerator);
-                // Appends to the HEAD of the list
-                return List.cons(atomResult, accumulatedResults);
+            public Boolean f(Function atom) {
+                return !isDataOrLeftJoinOrJoinAtom(atom);
             }
-        }, initialAccumulatedResults)
-                /**
-                 * Because new results were added at the head, the list as to
-                 * be reversed to follow the atom order.
-                 */
-                .reverse();
+        }).map(new F<Function, Function>() {
+                    @Override
+                    public Function f(Function atom) {
+                        Function newAtom = (Function) atom.clone();
+                        // SIDE-EFFECT on the newly created object
+                        SubstitutionUtilities.applySubstitution(newAtom, substitution);
+                        return newAtom;
+            }
+        });
+
+        /**
+         * TODO: explain
+         *
+         */
+        P2<List<Function>, List<Function>> otherAtomsP2 = splitPushableAtoms(otherAtoms);
+
+        List<Function> nonPushableAtoms = mainAtomsResult.getNonPushableAtoms().append(otherAtomsP2._1());
+        List<Function> pushableAtoms = mainAtomsResult.getPushableAtoms().append(otherAtomsP2._2());
+
+        return new ExtractEqNormResult(nonPushableAtoms, pushableAtoms, substitution);
+    }
+
+    /**
+     * TODO: explain
+     *
+     */
+    private static P2<List<Function>,List<Function>> splitPushableAtoms(List<Function> atoms) {
+        List<Function> nonPushableAtoms = atoms.filter(new F<Function, Boolean>() {
+            @Override
+            public Boolean f(Function atom) {
+                return !isPushable(atom);
+            }
+        });
+        List<Function> pushableAtoms = atoms.filter(new F<Function, Boolean>() {
+            @Override
+            public Boolean f(Function atom) {
+                return isPushable(atom);
+            }
+        });
+
+        return P.p(nonPushableAtoms, pushableAtoms);
+    }
+
+    /**
+     * TODO: explain
+     *
+     */
+    private static boolean isPushable(Function atom) {
+        if (atom.isBooleanFunction())
+            return true;
+
+        return false;
+    }
+
+
+    /**
+     * TODO: describe
+     */
+    private static ExtractEqNormResult normalizeDataOrCompositeAtoms(final List<Function> sameLevelAtoms, final VariableDispatcher variableDispatcher) {
+
+        /**
+         * TODO: retrieves the result
+         */
+        normalizeDataAtoms(sameLevelAtoms, variableDispatcher);
+
+        List<Function> compositeAtoms = sameLevelAtoms.filter(new F<Function, Boolean>() {
+            @Override
+            public Boolean f(Function atom) {
+                return isLeftJoinOrJoinAtom(atom);
+            }
+        });
+
+
+        List<ExtractEqNormResult> compositeAtomResults = compositeAtoms.map(new F<Function, ExtractEqNormResult>() {
+            @Override
+            public ExtractEqNormResult f(Function atom) {
+                return normalizeCompositeAtom(atom, variableDispatcher);
+            }
+        });
+
 
         /**
          * Aggregates the extracted results into one ExtractEqNormResult.
          *
          * Extracts the last substitution, all the non-pushable and pushable atoms.
+         *
+         * TODO: update this comment
          */
-        // Last substitution
-        Substitution lastSubstitution = results.last().getCurrentSubstitution();
-        // All non pushable atoms
-        List<Function> allNonPushableAtoms = results.bind(new F<ExtractEqNormResult, List<Function>>() {
+        List<Function> firstNonPushableAtoms = compositeAtomResults.bind(new F<ExtractEqNormResult, List<Function>>() {
             @Override
             public List<Function> f(ExtractEqNormResult result) {
                 return result.getNonPushableAtoms();
             }
         });
-        // All pushable atoms
-        List<Function> allPushableAtoms = results.bind(new F<ExtractEqNormResult, List<Function>>() {
+        List<Function> firstPushableAtoms = compositeAtomResults.bind(new F<ExtractEqNormResult, List<Function>>() {
             @Override
             public List<Function> f(ExtractEqNormResult result) {
                 return result.getPushableAtoms();
             }
         });
 
-        return new ExtractEqNormResult(allNonPushableAtoms, allPushableAtoms, lastSubstitution);
+        /**
+         * TODO: also consider non pushable and pushable atoms of data atoms
+         */
+
+        /**
+         * TODO: refactor. Consider both results for data atoms and substitution functions
+         * from composite atoms.
+         */
+        List<P2<VariableImpl,VariableImpl>> variableRenamings = compositeAtomResults.bind(new F<ExtractEqNormResult, List<P2<VariableImpl, VariableImpl>>>() {
+            @Override
+            public List<P2<VariableImpl, VariableImpl>> f(ExtractEqNormResult result) {
+                return result.getVariableRenamings();
+            }
+        });
+        TreeMap<VariableImpl, List<VariableImpl>> variableRenamingMap = variableRenamings.groupBy(new F<P2<VariableImpl, VariableImpl>, VariableImpl>() {
+            @Override
+            public VariableImpl f(P2<VariableImpl, VariableImpl> pair) {
+                return pair._1();
+            }
+        }, new F<P2<VariableImpl, VariableImpl>, VariableImpl>() {
+            @Override
+            public VariableImpl f(P2<VariableImpl, VariableImpl> pair) {
+                return pair._2();
+            }
+        });
+
+        /**
+         * Variable-Variable equalities
+         */
+        List<Function> var2VarEqualities = generateVariableEqualities(variableRenamingMap);
+
+
+        /**
+         * TODO: refactor
+         */
+        List<Function> pushableAtoms = firstPushableAtoms.append(var2VarEqualities).append(varConstantEqualities);
+
+        /**
+         * TODO: complete
+         */
+        List<Function> nonPushableAtoms = firstNonPushableAtoms;
+
+        return new ExtractEqNormResult(nonPushableAtoms, pushableAtoms, aggregatedSubstitution);
     }
 
     /**
-     * Applies the "pull out equalities" normalization to an atom according to its type.
+     * TODO: find the type to return
      */
-    private static ExtractEqNormResult normalizeAtom(Function atom, Substitution currentSubstitution,
-                                                     VariableGenerator variableGenerator) {
+    private static void normalizeDataAtoms(final List<Function> sameLevelAtoms, final VariableDispatcher variableDispatcher) {
+
+        List<Function> dataAtoms = sameLevelAtoms.filter(new F<Function, Boolean>() {
+            @Override
+            public Boolean f(Function atom) {
+                return atom.isDataFunction()
+            }
+        });
+
+        /**
+         * Variable-Constant equalities
+         */
+        List<P2<VariableImpl,Constant>> varConstantPairs  = dataAndCompositeAtomResults.bind(new F<ExtractEqNormResult, List<P2<VariableImpl, Constant>>>() {
+            @Override
+            public List<P2<VariableImpl, Constant>> f(ExtractEqNormResult result) {
+                return result.getVariableConstantPairs();
+            }
+        });
+        List<Function> varConstantEqualities = generateVariableConstantEqualities(varConstantPairs);
+
+    }
+
+
+
+    private static List<Function> generateVariableConstantEqualities(List<P2<VariableImpl, Constant>> varConstantPairs) {
+        return varConstantPairs.map(new F<P2<VariableImpl, Constant>, Function>() {
+            @Override
+            public Function f(P2<VariableImpl, Constant> pair) {
+                return DATA_FACTORY.getFunctionEQ(pair._1(), pair._2());
+            }
+        });
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static List<Function> generateVariableEqualities(TreeMap<VariableImpl, List<VariableImpl>> variableRenamingMap) {
+
+        List<Function> equalities = variableRenamingMap.toStream().bind(new F<P2<VariableImpl, List<VariableImpl>>, Stream<Function>>() {
+            @Override
+            public Stream<Function> f(P2<VariableImpl, List<VariableImpl>> variableRenamings) {
+                VariableImpl initialVariable = variableRenamings._1();
+                Set<VariableImpl> usedVariables = Set.iterableSet(VARIABLE_ORD, variableRenamings._2());
+
+                /**
+                 * Used variables and initial variables (that may still also used "locally").
+                 */
+                List<VariableImpl> allVariables = usedVariables.insert(initialVariable).toList();
+
+                /**
+                 * Pairs for equalities [(0,1), (1,2), (2,3), ...]
+                 * Generates a EQ atom for each pair.
+                 */
+                List<P2<VariableImpl, VariableImpl>> variablePairs = allVariables.zip(allVariables.tail());
+                return variablePairs.map(new F<P2<VariableImpl, VariableImpl>, Function>() {
+                    @Override
+                    public Function f(P2<VariableImpl, VariableImpl> pair) {
+                        return DATA_FACTORY.getFunctionEQ(pair._1(), pair._2());
+                    }
+                }).toStream();
+            }
+        }).toList();
+
+        return equalities;
+    }
+
+    private static Boolean isDataOrLeftJoinOrJoinAtom(Function atom) {
+        return atom.isDataFunction() || isLeftJoinOrJoinAtom(atom);
+    }
+
+    private static Boolean isLeftJoinOrJoinAtom(Function atom) {
+        Predicate predicate = atom.getFunctionSymbol();
+        return predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN) ||
+                predicate.equals(OBDAVocabulary.SPARQL_JOIN);
+    }
+
+    /**
+     * Applies the "pull out equalities" normalization to a left-join or join atom.
+     *
+     */
+    private static ExtractEqNormResult normalizeCompositeAtom(Function atom, VariableDispatcher variableDispatcher) {
         /**
          * Meta-atoms (algebra)
          */
         if (atom.isAlgebraFunction()) {
             Predicate functionSymbol = atom.getFunctionSymbol();
             if (functionSymbol.equals(OBDAVocabulary.SPARQL_LEFTJOIN)) {
-                return normalizeLeftJoin(atom, currentSubstitution, variableGenerator);
-            }
-            else if (functionSymbol.equals(OBDAVocabulary.SPARQL_JOIN)) {
+                return normalizeLeftJoin(atom, variableDispatcher);
+            } else if (functionSymbol.equals(OBDAVocabulary.SPARQL_JOIN)) {
                 throw new RuntimeException("Not implemented (yet). We do not expect JOIN meta-predicates at " +
                         "the pull-out equalities level.");
             }
         }
-        /**
-         * Data atom
-         */
-        else if (atom.isDataFunction()) {
-            return normalizeDataAtom(atom, currentSubstitution, variableGenerator);
-        }
-        /**
-         * Filter atom (boolean)
-         */
-        else if (atom.isBooleanFunction()) {
-            return normalizeFilterAtom(atom, currentSubstitution);
-        }
-        /**
-         * Other atom type: treat it as non-pushable.
-         */
-        return ExtractEqNormResult.constructFromNonPushableAtom(atom, currentSubstitution);
-    }
 
-    /**
-     * TODO: implement it.
-     */
-    private static ExtractEqNormResult normalizeDataAtom(Function atom, AppendableSubstitution currentSubstitution,
-                                                         final VariableGenerator variableGenerator) {
-
-        //TODO: change it
-        P3<List<Term>, List<Option<Function>>, Substitution> initialDecomposition = null;
-
-        /**
-         * TODO: Create a MutableSubstitution class and use map instead of fold.
-         */
-        P3<List<Term>, List<Option<Function>>, Substitution> decomposition = List.iterableList(atom.getTerms()).foldLeft(new F2<P3<List<Term>, List<Option<Function>>, Substitution>, Term, P3<List<Term>, List<Option<Function>>, Substitution>>() {
-            @Override
-            public P3<List<Term>, List<Option<Function>>, Substitution> f(P3<List<Term>, List<Option<Function>>, Substitution> accumulatedDecomposition, Term term) {
-                P3<Term, Option<Function>, Substitution> termTriple = normalizeTerm(term, accumulatedDecomposition._3(), variableGenerator);
-
-                /**
-                 * Converts
-                 * TODO: explain
-                 **
-                 *
-                 */
-                List<Term> inversedTerms = List.cons(termTriple._1(), accumulatedDecomposition._1());
-                List<Option<Function>> inversedEqAtoms = List.cons(termTriple._2(), accumulatedDecomposition._2());
-                return P.p(inversedTerms, inversedEqAtoms, termTriple._3());
-            }
-        }, initialDecomposition);
-
-        java.util.List<Term> newSubTerms = new ArrayList<>(decomposition._1().reverse().toCollection());
-        Function newDataAtom = DATA_FACTORY.getFunction(atom.getFunctionSymbol(), newSubTerms);
-        List<Function> nonPushableAtoms = List.cons(newDataAtom, List.<Function>nil());
-
-        List<Function> eqAtoms = Option.somes(decomposition._2().reverse());
-
-        return new ExtractEqNormResult(nonPushableAtoms, eqAtoms, decomposition._3());
-    }
-
-    /**
-     * Filter (boolean) atom: --> proposed it as pushable.
-     */
-    private static ExtractEqNormResult normalizeFilterAtom(Function atom, Substitution currentSubstitution) {
-        return ExtractEqNormResult.constructFromPushableAtom(atom, currentSubstitution);
+        throw new IllegalArgumentException("A data or composite (join, left join) atom was expected, not " + atom);
     }
 
 
@@ -200,8 +324,7 @@ public class ExtractEqualityNormalizer {
      *
      */
     private static ExtractEqNormResult normalizeLeftJoin(final Function leftJoinMetaAtom,
-                                                         final Substitution initialSubstitution,
-                                                         final VariableGenerator variableGenerator) {
+                                                         final VariableDispatcher variableDispatcher) {
 
         /**
          * TODO: may change with JOIN meta-predicates
@@ -211,17 +334,14 @@ public class ExtractEqualityNormalizer {
         final List<Function> initialLeftAtoms = splittedAtoms._1();
         final List<Function> initialRightAtoms = splittedAtoms._2();
 
-        ExtractEqNormResult leftNormalizationResults = normalizeSameLevelAtoms(initialLeftAtoms, initialSubstitution, variableGenerator);
-
-        ExtractEqNormResult rightNormalizationResults = normalizeSameLevelAtoms(initialRightAtoms,
-                leftNormalizationResults.getCurrentSubstitution(), variableGenerator);
+        ExtractEqNormResult leftNormalizationResults = normalizeSameLevelAtoms(initialLeftAtoms, variableDispatcher);
+        ExtractEqNormResult rightNormalizationResults = normalizeSameLevelAtoms(initialRightAtoms, variableDispatcher);
 
         /**
          * TODO: explain. "Blocking" criteria.
          */
         List<Function> remainingLJAtoms = leftNormalizationResults.getNonPushableAtoms().append(rightNormalizationResults.getAllAtoms());
         List<Function> pushedUpAtoms = leftNormalizationResults.getPushableAtoms();
-        Substitution lastSubstitution = rightNormalizationResults.getCurrentSubstitution();
 
         return new ExtractEqNormResult(remainingLJAtoms, pushedUpAtoms, lastSubstitution);
     }
@@ -235,283 +355,88 @@ public class ExtractEqualityNormalizer {
     }
 
     /**
-     * TODO: implement it
+     * TODO: implement
      *
+     * TODO: this would be much nice with as a Visitor.
      */
-    private static P3<Term, Option<Function>, Substitution> normalizeTerm(Term term, AppendableSubstitution mutableSubstitution,
-                                                                          VariableGenerator variableGenerator, boolean inDataAtom) {
-        /**
-         * Variable: rename it and adds equalities (if needed for a JOIN or LEFT-JOIN).
-         */
+    private static  P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> normalizeDataAtomTerm(Term term, VariableDispatcher variableDispatcher) {
         if (term instanceof VariableImpl) {
-            return normalizeVariable((VariableImpl) term, mutableSubstitution, variableGenerator);
+            return normalizeDataAtomVariable((VariableImpl) term, variableDispatcher);
         }
-        /**
-         * Constant: replaces it by a variable in the atom and creates a equality.
-         */
         else if (term instanceof Constant) {
-                /*
-                 * This case was necessary for query 7 in BSBM
-                 */
-            /**
-             * A('c') Replacing the constant with a fresh variable x and
-             * adding an quality atom ,e.g., A(x), x = 'c'
-             */
-            // only relevant if in data function?
-            if (inDataAtom) {
-                Variable var = variableGenerator.generateNewVariable();
-                Function equality = DATA_FACTORY.getFunctionEQ(var, term);
-                return P.p((Term) var, Option.some(equality), (Substitution) mutableSubstitution);
-            }
+            return normalizeDataAtomConstant((Constant) term, variableDispatcher);
         }
-        /**
-         * Functional term
-         */
         else if (term instanceof Function) {
-            Predicate head = ((Function) term).getFunctionSymbol();
-
-            if (head.isDataTypePredicate()) {
-
-                // This case is for the ans atoms that might have
-                // functions in the head. Check if it is needed.
-                Set<Variable> subtermsset = term.getReferencedVariables();
-
-                // Right now we support only unary functions!!
-                /**
-                 * TODO: continue refactoring!
-                 */
-                for (Variable var : subtermsset) {
-                    renameTerm(substitution, eqList, atom, subterms, j, (Function) subTerm, var, variableGenerator);
-                }
-            }
+            return normalizeDataAtomFunctionalTerm((Function) term, variableDispatcher);
         }
-        /**
-         * By default
-         */
-        return P.p(term, Option.<Function>none(), (Substitution) mutableSubstitution);
-    }
-
-    private static P3<Term, Option<Function>, Substitution> normalizeVariable(VariableImpl variable,
-                                                                              AppendableSubstitution mutableSubstitution,
-                                                                              VariableGenerator variableGenerator) {
-        return null;
+        else {
+            throw new IllegalArgumentException("Unexpected term inside a data atom: " + term);
+        }
     }
 
     /**
-     * SIDE-EFFECT function!
-     *
-     * Renames variables and adds the corresponding equalities to the eqList.
-     *
-     * Do not access to sub-terms through the atom BUT through the separated subterms list.
-     *
-     * TODO: refactor!!!!
-     *
-     *
+     * TODO: explain
      */
-    private static void renameVariables(AppendableSubstitution substitution, java.util.List<Function> eqList, Function atom, java.util.List<Term> subterms,
-                                        VariableGenerator variableGenerator) {
+    private static P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> normalizeDataAtomVariable(VariableImpl previousVariable,
+                                                                                                                               VariableDispatcher variableDispatcher) {
         /**
-         * For each sub-term (of the current atom).
+         * TODO: explain the magic here.
          */
-        for (int j = 0; j < subterms.size(); j++) {
-            Term subTerm = subterms.get(j);
-            /**
-             * Variable: rename it and adds equalities (if needed for a JOIN or LEFT-JOIN).
-             */
-            if (subTerm instanceof Variable) {
+        VariableImpl newVariable = variableDispatcher.renameDataAtomVariable(previousVariable);
+        List<P2<VariableImpl, VariableImpl>> variableRenamings = List.cons(P.p(previousVariable, newVariable), EMPTY_VARIABLE_RENAMING_LIST);
 
-                //mapVarAtom.put((Variable)subTerm, atom);
-                renameVariable(substitution, eqList, atom,	subterms, j, subTerm, variableGenerator);
-
-            }
-            /**
-             * Constant: replaces it by a variable in the atom and creates a equality.
-             */
-            else if (subTerm instanceof Constant) {
-                /*
-                 * This case was necessary for query 7 in BSBM
-                 */
-                /**
-                 * A('c') Replacing the constant with a fresh variable x and
-                 * adding an quality atom ,e.g., A(x), x = 'c'
-                 */
-                // only relevant if in data function?
-                if (atom.isDataFunction()) {
-                    Variable var = variableGenerator.generateNewVariable();
-                    Function equality = DATA_FACTORY.getFunctionEQ(var, subTerm);
-                    subterms.set(j, var);
-                    eqList.add(equality);
-                }
-
-            }
-            /**
-             * Functional term
-             */
-            else if (subTerm instanceof Function) {
-                Predicate head = ((Function) subTerm).getFunctionSymbol();
-
-                if (head.isDataTypePredicate()) {
-
-                    // This case is for the ans atoms that might have
-                    // functions in the head. Check if it is needed.
-                    Set<Variable> subtermsset = subTerm
-                            .getReferencedVariables();
-
-                    // Right now we support only unary functions!!
-                    for (Variable var : subtermsset) {
-                        renameTerm(substitution, eqList, atom, subterms, j, (Function) subTerm, var, variableGenerator);
-                    }
-                }
-            }
-        } // end for subterms
+        return P.p((Term) newVariable, variableRenamings, EMPTY_VARIABLE_CONSTANT_LIST);
     }
-
 
     /**
-     * TODO: What is the difference with renameVariable ???
-     *
+     * TODO: explain
      */
-    private static void renameTerm(Substitution substitution, java.util.List<Function> eqList, Function atom,
-                                   java.util.List<Term> subterms, int j, Function subTerm, VariableImpl var1,
-                                   VariableGenerator variableGenerator) {
-        Predicate head = subTerm.getFunctionSymbol();
-        Variable var2 = (Variable) substitution.get(var1);
+    private static P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> normalizeDataAtomConstant(Constant constant, VariableDispatcher variableDispatcher) {
+        VariableImpl newVariable = variableDispatcher.generateNewVariable();
 
-        if (var2 == null) {
-			/*
-			 * No substitution exists, hence, no action but generate a new
-			 * variable and register in the substitutions, and replace the
-			 * current value with a fresh one.
-			 */
-            var2 = variableGenerator.generateNewVariableFromVar(var1);
+        List<P2<VariableImpl, Constant>> variableConstantPairs = List.cons(P.p(newVariable, constant), EMPTY_VARIABLE_CONSTANT_LIST);
 
-            FunctionalTermImpl newFuncTerm = (FunctionalTermImpl) DATA_FACTORY.getFunction(head, var1);
-            subterms.set(j, var2);
-
-            Function equality = DATA_FACTORY.getFunctionEQ(var2, newFuncTerm);
-            eqList.add(equality);
-
-        } else {
-
-			/*
-			 * There already exists one, so we generate a fresh, replace the
-			 * current value, and add an equality between the substitution and
-			 * the new value.
-			 */
-
-            if (atom.isDataFunction()) {
-                Variable newVariable = variableGenerator.generateNewVariableFromVar(var1);
-
-                subterms.set(j, newVariable);
-                FunctionalTermImpl newFuncTerm = (FunctionalTermImpl) DATA_FACTORY.getFunction(head, var2);
-
-                Function equality = DATA_FACTORY.getFunctionEQ(newVariable, newFuncTerm);
-                eqList.add(equality);
-
-            } else { // if its not data function, just replace
-                // variable
-                subterms.set(j, var2);
-            }
-        }
+        return  P.p((Term) newVariable, EMPTY_VARIABLE_RENAMING_LIST, variableConstantPairs);
     }
+
 
     /**
      * TODO: explain
-     *
-     * Seems to rely on the ordering of atoms (data atoms first, filter atoms later).
-     *
-     *
-     * Side-effects:
-     *  - eqList (append-only)
-     *  - newVarCounter (increment)
-     *  - subterms (change j-th entry)
-     *
      */
-    private static void renameVariable(AppendableSubstitution substitution, java.util.List<Function> eqList, Function atom,
-                                         java.util.List<Term> subterms, int j,   Term subTerm, VariableGenerator variableGenerator) {
-        VariableImpl var1 = (VariableImpl) subTerm;
-        VariableImpl var2 = (VariableImpl) substitution.get(var1);
+    private static P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> normalizeDataAtomFunctionalTerm(Function functionalTerm,
+                                                                                                                                    final VariableDispatcher variableDispatcher) {
+        List<P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>> subTermResults =
+                List.iterableList(functionalTerm.getTerms()).map(new F<Term, P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>>() {
+                    @Override
+                    public P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> f(Term term) {
+                        return normalizeDataAtomTerm(term, variableDispatcher);
+                    }
+                });
 
-
-        /**
-         * No substitution for var1 --> creates a new one.
-         *
-         * No equality created.
-         *
-         */
-        if (var2 == null) {
-			/*
-			 * No substitution exists, hence, no action but generate a new
-			 * variable and register in the substitutions, and replace the
-			 * current value with a fresh one.
-			 */
-//			int randomNum = rand.nextInt(20) + 1;
-            //+ randomNum
-            var2 = variableGenerator.generateNewVariableFromVar(var1);
-
-            /**
-             * TODO: build a new substitution (immutable style) and returns it.
-             */
-            substitution.put(var1, var2);
-            //substitutionsTotal.put(var1, var2);
-            subterms.set(j, var2);
-
-        }
-        /**
-         * Existing substitution(s) (for var1 and also maybe for var2).
-         * Does NOT create a substitution.
-         *
-         * Sets an equality between var2 and a newly created variable IF THE ATOM
-         * IS A DATA ONE.
-         */
-        else {
-
-			/*
-			 * There already exists one, so we generate a fresh, replace the
-			 * current value, and add an equality between the substitution and
-			 * the new value.
-			 */
-            //FIXME: very suspicious
-//			while (substitutions.containsKey(var2)){
-//				VariableImpl variable = (VariableImpl) substitutions.get(var2);
-//				var2=variable;
-//			}
-            /**
-             * If a substitution also exists for var2, substitutes it.
-             * TODO: explain why it is that needed.
-             */
-            if (substitution.get(var2) != null){
-                VariableImpl variable = (VariableImpl) substitution.get(var2);
-                var2=variable;
+        List<Term> newSubTerms = subTermResults.map(new F<P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>, Term>() {
+            @Override
+            public Term f(P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> p3) {
+                return p3._1();
             }
+        });
+        Function newFunctionalTerm = constructNewFunction(functionalTerm.getFunctionSymbol(), newSubTerms);
 
-            /**
-             * If is in a data atom, sets an equality between var2 and a newly created variable.
-             * Replaces in the subTerms list with the new one.
-             */
-            if (atom.isDataFunction()) {
-
-                Variable newVariable = variableGenerator.generateNewVariableFromVar(var1);
-
-                //replace the variable name
-                subterms.set(j, newVariable);
-
-                //record the change
-                //substitutionsTotal.put(var2, newVariable);
-
-                //create the equality
-                Function equality = DATA_FACTORY.getFunctionEQ(var2, newVariable);
-                eqList.add(equality);
-
+        List<P2<VariableImpl, VariableImpl>> variableRenamings = subTermResults.bind(new F<P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>, List<P2<VariableImpl, VariableImpl>>>() {
+            @Override
+            public List<P2<VariableImpl, VariableImpl>> f(P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> p3) { return p3._2();
             }
-
-            /**
-             * If its not data function, just replace the variable
-             */
-            else {
-                subterms.set(j, var2);
+        });
+        List<P2<VariableImpl, Constant>> variableConstantPairs = subTermResults.bind(new F<P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>, List<P2<VariableImpl, Constant>>>() {
+            @Override
+            public List<P2<VariableImpl, Constant>> f(P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> p3) { return p3._3();
             }
-        }
+        });
+
+
+        return P.p((Term) newFunctionalTerm, variableRenamings, variableConstantPairs);
     }
 
+    private static Function constructNewFunction(Predicate functionSymbol, List<Term> subTerms) {
+        return DATA_FACTORY.getFunction(functionSymbol, new ArrayList<>(subTerms.toCollection()));
+    }
 }

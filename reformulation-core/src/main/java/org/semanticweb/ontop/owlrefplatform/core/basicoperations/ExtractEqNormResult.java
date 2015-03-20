@@ -1,7 +1,10 @@
 package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
+import fj.P2;
 import fj.data.List;
+import org.semanticweb.ontop.model.Constant;
 import org.semanticweb.ontop.model.Function;
+import org.semanticweb.ontop.model.impl.VariableImpl;
 
 /**
  * TODO: explain
@@ -12,13 +15,18 @@ import org.semanticweb.ontop.model.Function;
 public class ExtractEqNormResult {
     private final List<Function> nonPushableAtoms;
     private final List<Function> pushableAtoms;
-    private final Substitution currentSubstitution;
+    private final Substitution substitution;
 
+    /**
+     *
+     * TODO: construct a substitution??
+     */
     public ExtractEqNormResult(List<Function> nonPushableAtoms, List<Function> pushableAtoms, Substitution substitution) {
         this.nonPushableAtoms = nonPushableAtoms;
         this.pushableAtoms = pushableAtoms;
-        this.currentSubstitution = substitution;
+        this.substitution = substitution;
     }
+
 
     public List<Function> getNonPushableAtoms() {
         return nonPushableAtoms;
@@ -28,21 +36,27 @@ public class ExtractEqNormResult {
         return pushableAtoms;
     }
 
-    public Substitution getCurrentSubstitution() {
-        return currentSubstitution;
-    }
-
     public List<Function> getAllAtoms() {
         return pushableAtoms.append(nonPushableAtoms);
     }
 
-    public static ExtractEqNormResult constructFromNonPushableAtom(Function nonPushableAtom, Substitution substitution) {
-        List<Function> nonPushableAtoms = List.cons(nonPushableAtom, List.<Function>nil());
-        return new ExtractEqNormResult(nonPushableAtoms, List.<Function>nil(), substitution);
+    public Substitution getSubstitution() {
+        return substitution;
     }
 
-    public static ExtractEqNormResult constructFromPushableAtom(Function pushableAtom, Substitution substitution) {
-        List<Function> pushableAtoms = List.cons(pushableAtom, List.<Function>nil());
-        return new ExtractEqNormResult(List.<Function>nil(), pushableAtoms, substitution);
-    }
+//    /**
+//     * TODO: update
+//     */
+//    public static ExtractEqNormResult constructFromNonPushableAtom(Function nonPushableAtom, Substitution substitution) {
+//        List<Function> nonPushableAtoms = List.cons(nonPushableAtom, List.<Function>nil());
+//        return new ExtractEqNormResult(nonPushableAtoms, List.<Function>nil(), substitution);
+//    }
+//
+//    /**
+//     * TODO: update
+//     */
+//    public static ExtractEqNormResult constructFromPushableAtom(Function pushableAtom, Substitution substitution) {
+//        List<Function> pushableAtoms = List.cons(pushableAtom, List.<Function>nil());
+//        return new ExtractEqNormResult(List.<Function>nil(), pushableAtoms, substitution);
+//    }
 }
