@@ -1,5 +1,9 @@
 package it.unibz.krdb.sql;
 
+import it.unibz.krdb.sql.api.Attribute;
+
+import java.util.Map.Entry;
+
 /*
  * #%L
  * ontop-obdalib-core
@@ -24,9 +28,10 @@ public class ViewDefinition extends DataDefinition {
 
 	private static final long serialVersionUID = 3312336193514797486L;
 
-	private String statement;
-
-	public void copy(String statement) {
+	private final String statement;
+	
+	public ViewDefinition(String name, String statement) {
+		super(name);
 		this.statement = statement;
 	}
 
@@ -37,14 +42,14 @@ public class ViewDefinition extends DataDefinition {
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
-		bf.append(name);
+		bf.append(getName());
 		bf.append("[");
 		boolean comma = false;
-		for (Integer i : attributes.keySet()) {
-			if (comma) {
+		for (Attribute att : getAttributes()) {
+			if (comma) 
 				bf.append(",");
-			}
-			bf.append(attributes.get(i));
+			
+			bf.append(att);
 			comma = true;
 		}
 		bf.append("]");

@@ -701,7 +701,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 			if (printKeys) { 
 				// Prints all primary keys
 				System.out.println("\n====== Primary keys ==========");
-				List<TableDefinition> table_list = metadata.getTableList();
+				Collection<TableDefinition> table_list = metadata.getTables();
 				for(TableDefinition dd : table_list){
 					System.out.print("\n" + dd.getName() + ":");
 					for(Attribute attr : dd.getPrimaryKeys() ){
