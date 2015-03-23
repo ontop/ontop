@@ -34,10 +34,37 @@
 
     <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#hasName"/>
 
-     <!-- http://ontop.inf.unibz.it/test/wellbore#hasValue -->
+    <!-- http://ontop.inf.unibz.it/test/wellbore#inWell -->
 
-     <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#hasValue"/>
+    <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#inWell"/>
 
+    <!-- http://ontop.inf.unibz.it/test/wellbore#isHappy -->
+
+    <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#isHappy"/>
+
+    <!-- http://ontop.inf.unibz.it/test/wellbore#hasDepth -->
+
+    <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#hasDepth"/>
+
+    <!-- http://ontop.inf.unibz.it/test/wellbore#isActive -->
+
+    <owl:DatatypeProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#isActive"/>
+
+
+ <!--
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+
+
+    <!-- http://ontop.inf.unibz.it/test/wellbore#hasOwner -->
+
+   <owl:ObjectProperty rdf:about="http://ontop.inf.unibz.it/test/wellbore#hasOwner"/>
 
 
 

@@ -1,0 +1,42 @@
+[PrefixDeclaration]
+:		http://ontop.inf.unibz.it/test/wellbore#
+owl:    http://www.w3.org/2002/07/owl#
+xsd:    http://www.w3.org/2001/XMLSchema#
+
+[SourceDeclaration]
+sourceUri	WellboreDataset
+connectionUrl	jdbc:h2:mem:wellboresComplex
+username	sa
+password	
+driverClass	org.h2.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	mappingDS1
+target		:uri1-{wid} a :Wellbore ; :hasName {WellboreName} ; :isActive {Active} ;  :hasOwner :uri9-{OwnerId} .
+source		select wid, WellboreName, Active, OwnerId from DS1
+
+mappingId	mappingDS2
+target		:uri2-{wid} a :Wellbore ; :hasName {WellboreName} ; :isActive {Active} ; :inWell {Well} .
+source		select wid, WellboreName, Active, Well from DS2
+
+mappingId	mappingDS3
+target		:uri3-{wid} a :Wellbore ; :hasName {WellboreName} ; :hasDepth {Depth} ; :isHappy {Happy} .
+source		select wid, WellboreName, Depth, Happy from DS3
+
+mappingId	sameAs12
+target		:uri1-{wid1} owl:sameAs :uri2-{wid2} .
+source		select wid1, wid2 from TsameAs12
+
+mappingId	sameAs23
+target		:uri2-{wid2} owl:sameAs :uri3-{wid3} .
+source		select wid2, wid3 from TsameAs23
+
+mappingId	sameAs13
+target		:uri1-{wid1} owl:sameAs :uri3-{wid3} .
+source		select wid1, wid3 from TsameAs12 JOIN TsameAs23 on TsameAs12.wid2 = TsameAs23.wid2
+
+mappingId	sameAs89
+target		:uri8-{oid1} owl:sameAs :uri9-{oid4} .
+source		select oid1, oid4 from TsameAs14
+
+]]

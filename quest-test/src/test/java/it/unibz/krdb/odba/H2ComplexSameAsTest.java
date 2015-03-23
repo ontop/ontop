@@ -48,7 +48,7 @@ import static org.junit.Assert.assertTrue;
 /***
  * Test same as using h2 simple database on wellbores
  */
-public class H2SameAsTest {
+public class H2ComplexSameAsTest {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -57,21 +57,21 @@ public class H2SameAsTest {
 	private OBDAModel obdaModel;
 	private OWLOntology ontology;
 
-	final String owlfile = "src/test/resources/sameAs/wellbores.owl";
-	final String obdafile = "src/test/resources/sameAs/wellbores.obda";
+	final String owlfile = "src/test/resources/sameAs/wellbores-complex.owl";
+	final String obdafile = "src/test/resources/sameAs/wellbores-complex.obda";
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
 
 	@Before
 	public void setUp() throws Exception {
 
-			 sqlConnection= DriverManager.getConnection("jdbc:h2:mem:wellbores","sa", "");
+			 sqlConnection= DriverManager.getConnection("jdbc:h2:mem:wellboresComplex","sa", "");
 			    java.sql.Statement s = sqlConnection.createStatement();
 			  
 //			    try {
-			    	String text = new Scanner( new File("src/test/resources/sameAs/wellbore-h2.sql") ).useDelimiter("\\A").next();
+			    	String text = new Scanner( new File("src/test/resources/sameAs/wellbore-complex-h2.sql") ).useDelimiter("\\A").next();
 			    	s.execute(text);
-			    	//Server.startWebServer(sqlConnection);
+//			    	Server.startWebServer(sqlConnection);
 			    	 
 //			    } catch(SQLException sqle) {
 //			        System.out.println("Exception in creating db from script");
@@ -157,23 +157,22 @@ public class H2SameAsTest {
 	}
 
 
+    @Test
+    public void testSameAs1() throws Exception {
+        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x\n" +
+                "WHERE {\n" +
+                "   ?x  a :Wellbore . \n" +
+                "}";
 
-    /**
-	 * Test use of sameAs
-     * the expected results
-     * 911 'Amerigo'
-     * 911 Aleksi
-     * 1 Aleksi
-     * 1 'Amerigo'
-     * 992 'Luis'
-     * 993 'Sagrada Familia'
-     * 2 'Eljas'
-	 * @throws Exception
-	 */
+        runTests(query);
+
+    }
+
 	@Test
-	public void testSameAs1() throws Exception {
+	public void testSameAs2() throws Exception {
 		String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x ?y\n" +
                 "WHERE {\n" +
+                "   ?x  a :Wellbore . \n" +
                 "   ?x  :hasName ?y . \n" +
                 "}";
 
@@ -181,77 +180,36 @@ public class H2SameAsTest {
 
 	}
 
-    /**
-     * Test use of sameAs
-     * the expected results
-     * 911 'Amerigo' 13
-     * 911 Aleksi 13
-     * 1 Aleksi 13
-     * 1 'Amerigo' 13
-     * @throws Exception
-     */
-
     @Test
-    public void testSameAs2() throws Exception {
-        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x ?y ?z\n" +
-                "WHERE {\n" +
-                "   ?x  :hasName ?y . \n" +
-                "   ?x  :hasValue ?z . \n " +
-
-                "}";
-
-         runTests(query);
-
-    }
-
-    @Test
-    public void testSameAs2b() throws Exception {
-        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x ?y\n" +
-                "WHERE {\n" +
-                "   ?x  a :Wellbore . \n" +
-                "   ?x  :hasName ?y . \n" +
-                "   ?x  :hasValue ?z . \n " +
-
-                "}";
+    public void testSameAs3() throws Exception {
+        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
+                "SELECT * WHERE { ?x a :Wellbore .\n" +
+                " ?x :hasName ?y .\n" +
+                " ?x :isActive ?z .}\n";
 
         runTests(query);
 
     }
 
     @Test
-    public void testSameAs3() throws Exception {
-        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>" +
-                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                " SELECT ?x ?y \n" +
-                "WHERE {{\n" +
-                "   ?x  a :Wellbore. \n" +
-                "   ?x  :hasName ?y . }\n" +
-                "   UNION {\n" +
-                "   ?x  owl:sameAs [:hasName ?y] . " +
+    public void testSameAs4() throws Exception {
+        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
+                "SELECT * WHERE { ?x a :Wellbore .\n" +
+                " ?x :isHappy ?z .}\n";
 
-                "}}";
-
-
-         runTests(query);
+        runTests(query);
 
     }
 
     @Test
-    public void testSameAs4() throws Exception {
-        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>" +
-                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                " SELECT ?x ?y ?z \n" +
-                "WHERE {\n" +
-                "   ?x  :hasName ?y . \n" +
-                "   ?x  owl:sameAs ?z . " +
+    public void testSameAs5() throws Exception {
+        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
+                "SELECT * WHERE { ?x a :Wellbore .\n" +
+                " ?x :hasOwner ?z .}\n";
 
-                "}";
-
-        // Bind (?n ?y)
-         runTests(query);
+        runTests(query);
 
     }
-
 
 
 

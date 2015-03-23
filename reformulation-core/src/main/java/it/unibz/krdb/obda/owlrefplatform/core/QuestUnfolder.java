@@ -10,6 +10,7 @@ import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingSameAs;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
@@ -47,7 +48,10 @@ public class QuestUnfolder {
 	private static final Logger log = LoggerFactory.getLogger(QuestUnfolder.class);
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-	
+
+    private Set<Predicate> dataPropertiesMapped;
+    private Set<Function> objectPropertiesMapped;
+
 	public QuestUnfolder(OBDAModel unfoldingOBDAModel, DBMetadata metadata,  Connection localConnection, URI sourceId) throws Exception{
 
 		/** Substitute select * with column names **/
@@ -260,7 +264,7 @@ public class QuestUnfolder {
 		
 
 	
-	
+
 	private static UriTemplateMatcher createURITemplateMatcher(List<CQIE> unfoldingProgram) {
 
 		HashSet<String> templateStrings = new HashSet<String>();
@@ -413,6 +417,32 @@ public class QuestUnfolder {
 //
 		}
 	}
+
+
+    /**
+     * Store information about owl:sameAs
+     */
+    public void addSameAsMapping() throws OBDAException{
+
+
+        MappingSameAs msa = new MappingSameAs(unfoldingProgram);
+
+        dataPropertiesMapped = msa.getDataPropertiesWithSameAs();
+        objectPropertiesMapped =  msa.getObjectPropertiesWithSameAs();
+
+
+    }
+
+    public Set<Predicate> getSameAsDataPredicates(){
+
+        return dataPropertiesMapped;
+    }
+
+    public Set<Function> getSameAsObjectPredicates(){
+
+        return objectPropertiesMapped;
+    }
+
 
 
 

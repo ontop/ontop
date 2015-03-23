@@ -28,14 +28,6 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -48,6 +40,8 @@ import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 
 /***
@@ -68,7 +62,10 @@ public class SparqlAlgebraToDatalogTranslator {
 	private final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 
 	private final UriTemplateMatcher uriTemplateMatcher;
-	private final SemanticIndexURIMap uriRef;  
+	private final SemanticIndexURIMap uriRef;
+
+    private final Set<Predicate> dataPropertiesSameAs;
+    private final Set<Function> objectPropertiesSameAs;
 	
 	private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
 	
@@ -78,9 +75,11 @@ public class SparqlAlgebraToDatalogTranslator {
 	 * @param uriRef is used only in the Semantic Index mode
 	 */
 	
-	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher, SemanticIndexURIMap uriRef) {
+	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher, SemanticIndexURIMap uriRef, Set<Predicate> dataPropertiesSameAs, Set<Function> objectPropertiesSameAs ) {
 		uriTemplateMatcher = templateMatcher;
 		this.uriRef = uriRef;
+        this.dataPropertiesSameAs = dataPropertiesSameAs;
+        this.objectPropertiesSameAs = objectPropertiesSameAs;
 	}
 	
 	/**
@@ -159,7 +158,8 @@ public class SparqlAlgebraToDatalogTranslator {
 			return translate((Filter) te, pr, newHeadName);
 		} 
 		else if (te instanceof StatementPattern) {
-			return translate((StatementPattern) te);		
+//            return addSameAs(translate((StatementPattern) te), pr, newHeadName);
+			return translate((StatementPattern) te);
 		} 
 		else if (te instanceof Join) {
 			return translate((Join) te, pr, newHeadName);
@@ -455,6 +455,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		
 		// Subject node		
 		Term sTerm = getOntopTerm(subj);
+
 		
 		if ((p != null) && p.toString().equals(RDF.TYPE.stringValue())) {
 
@@ -944,4 +945,62 @@ public class SparqlAlgebraToDatalogTranslator {
 		}
 		return Collections.emptyList();
 	}
+
+    private Function addSameAs(Function leftAtom, DatalogProgram pr, String newHeadName){
+
+        if (!dataPropertiesSameAs.contains(leftAtom.getFunctionSymbol())){
+
+            return leftAtom;
+        }
+
+       if ( !objectPropertiesSameAs.contains(leftAtom.getFunctionSymbol())) {
+
+
+       }
+        //create statement pattern for same as
+        Predicate predicate = ofac.getPredicate("http://www.w3.org/2002/07/owl#sameAs", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+        Term sTerm = leftAtom.getTerm(0);
+        Term oTerm = ofac.getVariable("anon-"+leftAtom.getTerm(0));
+        Function rightAtomJoin = ofac.getFunction(predicate, sTerm, oTerm);
+
+
+        //create join between the statement and same as
+        Function leftAtomJoin =  ofac.getFunction(leftAtom.getFunctionSymbol());
+        leftAtomJoin.updateTerms(leftAtom.getTerms());
+
+        leftAtomJoin.setTerm(0, ofac.getVariable("anon-"+leftAtom.getTerm(0)));
+
+        List<Term> varListJoin = getUnionOfVariables(leftAtomJoin, rightAtomJoin);
+        CQIE joinRule = createRule(pr, newHeadName + "1" , varListJoin, leftAtomJoin, rightAtomJoin);
+        Function rightAtomUnion = joinRule.getHead();
+
+
+        //create union between the first statement and join
+
+        Set<Variable> leftVars = getVariables(leftAtom);
+        Set<Variable> rightVars = getVariables(rightAtomUnion);
+        List<Term> varListUnion = getUnion(leftVars, rightVars  );
+
+        // left atom rule
+        List<Term> leftTermList = new ArrayList<>(varListUnion.size());
+        for (Term t : varListUnion) {
+            Term lt =  (leftVars.contains(t)) ? t : OBDAVocabulary.NULL;
+            leftTermList.add(lt);
+        }
+        CQIE leftRule = createRule(pr, newHeadName, leftTermList, leftAtom);
+
+        // right atom rule
+        List<Term> rightTermList = new ArrayList<>(varListUnion.size());
+        for (Term t : varListUnion) {
+            Term lt =  (rightVars.contains(t)) ? t : OBDAVocabulary.NULL;
+            rightTermList.add(lt);
+        }
+        CQIE rightRule = createRule(pr, newHeadName, rightTermList, rightAtomUnion);
+
+        Function atom = ofac.getFunction(rightRule.getHead().getFunctionSymbol(), varListUnion);
+
+        return atom;
+
+
+    }
 }

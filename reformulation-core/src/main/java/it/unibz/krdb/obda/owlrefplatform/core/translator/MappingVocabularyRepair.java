@@ -20,31 +20,16 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatatypePredicate;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDASQLQuery;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.URITemplatePredicate;
+import it.unibz.krdb.obda.model.*;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyVocabulary;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /***
  * This is a hack class that helps fix and OBDA model in which the mappings
@@ -137,6 +122,12 @@ public class MappingVocabularyRepair {
 								if (t1uri && t2uri) {
 									Predicate pred = dfac.getObjectPropertyPredicate(p.getName());
 									newatom = dfac.getFunction(pred, getNormalTerm(t1), getNormalTerm(t2));
+
+                                    if(p.getName().equals("http://www.w3.org/2002/07/owl#sameAs")){
+                                    //need to add also the inverse
+                                        Function inverseAtom = dfac.getFunction(pred, getNormalTerm(t2), getNormalTerm(t1));
+                                        newbody.add(inverseAtom);
+                                    }
 								}
 								else {
 									Predicate pred = dfac.getDataPropertyPredicate(p.getName());

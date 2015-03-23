@@ -1,6 +1,7 @@
 [PrefixDeclaration]
 :		http://ontop.inf.unibz.it/test/wellbore#
 owl:    http://www.w3.org/2002/07/owl#
+xsd:    http://www.w3.org/2001/XMLSchema#
 
 [SourceDeclaration]
 sourceUri	WellboreDataset
@@ -11,7 +12,7 @@ driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	mappingNameSpain
-target		:spain-{ids} a :Wellbore ; :hasName {name} .
+target		:spain-{ids} a :Wellbore ; :hasName {name}^^xsd:string .
 source		select ids, name from wellboreSpain
 
 mappingId	mappingNameFinland
