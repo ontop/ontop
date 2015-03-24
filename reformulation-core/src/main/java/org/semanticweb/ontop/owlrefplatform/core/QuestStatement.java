@@ -40,11 +40,13 @@ import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.QueryParser;
 import org.openrdf.query.parser.QueryParserUtil;
 import org.semanticweb.ontop.model.*;
+import org.semanticweb.ontop.model.impl.DatalogProgramImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ExtractEqualityNormalizer;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.EmptyQueryResultSet;
@@ -496,10 +498,27 @@ public class QuestStatement implements OBDAStatement {
 
 
 		log.debug("Pulling out equalities...");
-		for (CQIE rule: unfolding.getRules()){
-			DatalogNormalizer.pullOutEqualities(rule);
-			//System.out.println(rule);
+		boolean useExtractEqualityNormalizer = true;
+		if (useExtractEqualityNormalizer) {
+			List<CQIE> normalizedRules = new ArrayList<>();
+
+			for (CQIE rule: unfolding.getRules()) {
+				normalizedRules.add(ExtractEqualityNormalizer.extractEqualitiesAndNormalize(rule));
+			}
+
+			OBDAQueryModifiers queryModifiers = unfolding.getQueryModifiers();
+
+			unfolding = ofac.getDatalogProgram(normalizedRules);
+			// OMG!!!!! Why don't we have a proper constructor??
+			unfolding.setQueryModifiers(queryModifiers);
 		}
+		else {
+			for (CQIE rule: unfolding.getRules()) {
+				DatalogNormalizer.pullOutEqualities(rule);
+				//System.out.println(rule);
+			}
+		}
+
 
 		log.debug("\n Partial evaluation ended.\n{}", unfolding);
 

@@ -58,7 +58,6 @@ public class SubstitutionImpl implements AppendableSubstitution {
     }
 
     @Override
-    @Deprecated
     public void put(VariableImpl var, Term term) {
         map.put(var, term);
     }

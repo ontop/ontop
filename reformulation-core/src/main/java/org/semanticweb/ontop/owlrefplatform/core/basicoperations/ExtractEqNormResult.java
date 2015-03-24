@@ -15,16 +15,12 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 public class ExtractEqNormResult {
     private final List<Function> nonPushableAtoms;
     private final List<Function> pushableAtoms;
-    private final Substitution substitution;
+    private final Var2VarSubstitution substitution;
 
-    /**
-     *
-     * TODO: construct a substitution??
-     */
-    public ExtractEqNormResult(List<Function> nonPushableAtoms, List<Function> pushableAtoms, Substitution substitution) {
+    public ExtractEqNormResult(List<Function> nonPushableAtoms, List<Function> pushableAtoms, Var2VarSubstitution var2VarSubstitution) {
         this.nonPushableAtoms = nonPushableAtoms;
         this.pushableAtoms = pushableAtoms;
-        this.substitution = substitution;
+        this.substitution = var2VarSubstitution;
     }
 
 
@@ -40,7 +36,7 @@ public class ExtractEqNormResult {
         return pushableAtoms.append(nonPushableAtoms);
     }
 
-    public Substitution getSubstitution() {
+    public Var2VarSubstitution getVar2VarSubstitution() {
         return substitution;
     }
 

@@ -21,11 +21,8 @@ public class ExtractEqualityNormalizer {
 
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Ord<VariableImpl> VARIABLE_ORD = Ord.hashEqualsOrd();
-    //private final static TreeMap<VariableImpl,List<VariableImpl>> EMPTY_VARIABLE_MAP = TreeMap.empty(VARIABLE_ORD);
-    //private final static TreeMap<VariableImpl, Constant> EMPTY_VARIABLE_CONSTANT_MAP = TreeMap.empty(VARIABLE_ORD);
     private final static List<P2<VariableImpl, Constant>> EMPTY_VARIABLE_CONSTANT_LIST = List.nil();
     private final static List<P2<VariableImpl, VariableImpl>> EMPTY_VARIABLE_RENAMING_LIST = List.nil();
-    private final static List<Function> EMPTY_ATOM_LIST = List.nil();
 
     /**
      * TODO: explain
@@ -59,9 +56,9 @@ public class ExtractEqualityNormalizer {
                                                                final VariableDispatcher variableDispatcher) {
 
 
-        ExtractEqNormResult mainAtomsResult = normalizeDataOrCompositeAtoms(initialAtoms, variableDispatcher);
+        ExtractEqNormResult mainAtomsResult = normalizeDataAndCompositeAtoms(initialAtoms, variableDispatcher);
 
-        final Substitution substitution = mainAtomsResult.getSubstitution();
+        final Var2VarSubstitution substitution = mainAtomsResult.getVar2VarSubstitution();
 
 
         /**
@@ -130,12 +127,15 @@ public class ExtractEqualityNormalizer {
     /**
      * TODO: describe
      */
-    private static ExtractEqNormResult normalizeDataOrCompositeAtoms(final List<Function> sameLevelAtoms, final VariableDispatcher variableDispatcher) {
+    private static ExtractEqNormResult normalizeDataAndCompositeAtoms(final List<Function> sameLevelAtoms, final VariableDispatcher variableDispatcher) {
 
         /**
-         * TODO: retrieves the result
+         * TODO: describe
          */
-        normalizeDataAtoms(sameLevelAtoms, variableDispatcher);
+        P3<List<Function>, List<Function>, Var2VarSubstitution> dataAtomResults = normalizeDataAtoms(sameLevelAtoms, variableDispatcher);
+        List<Function> firstNonPushableAtoms = dataAtomResults._1();
+        List<Function> firstPushableAtoms = dataAtomResults._2();
+        Var2VarSubstitution dataAtomSubstitution = dataAtomResults._3();
 
         List<Function> compositeAtoms = sameLevelAtoms.filter(new F<Function, Boolean>() {
             @Override
@@ -160,13 +160,13 @@ public class ExtractEqualityNormalizer {
          *
          * TODO: update this comment
          */
-        List<Function> firstNonPushableAtoms = compositeAtomResults.bind(new F<ExtractEqNormResult, List<Function>>() {
+        List<Function> secondNonPushableAtoms = compositeAtomResults.bind(new F<ExtractEqNormResult, List<Function>>() {
             @Override
             public List<Function> f(ExtractEqNormResult result) {
                 return result.getNonPushableAtoms();
             }
         });
-        List<Function> firstPushableAtoms = compositeAtomResults.bind(new F<ExtractEqNormResult, List<Function>>() {
+        List<Function> secondPushableAtoms = compositeAtomResults.bind(new F<ExtractEqNormResult, List<Function>>() {
             @Override
             public List<Function> f(ExtractEqNormResult result) {
                 return result.getPushableAtoms();
@@ -174,75 +174,150 @@ public class ExtractEqualityNormalizer {
         });
 
         /**
-         * TODO: also consider non pushable and pushable atoms of data atoms
+         * TODO: describe!!!
          */
+        List<Var2VarSubstitution> substitutionsToMerge = compositeAtomResults.map(new F<ExtractEqNormResult, Var2VarSubstitution>() {
+            @Override
+            public Var2VarSubstitution f(ExtractEqNormResult result) {
+                return result.getVar2VarSubstitution();
+            }
+        }).snoc(dataAtomSubstitution);
+
+        P2<Var2VarSubstitution, List<Function>> substitutionResult = mergeSubstitutions(substitutionsToMerge);
+        Var2VarSubstitution mergedSubstitution = substitutionResult._1();
+        List<Function> additionalEqualities = substitutionResult._2();
+
 
         /**
-         * TODO: refactor. Consider both results for data atoms and substitution functions
-         * from composite atoms.
+         * TODO: describe
          */
-        List<P2<VariableImpl,VariableImpl>> variableRenamings = compositeAtomResults.bind(new F<ExtractEqNormResult, List<P2<VariableImpl, VariableImpl>>>() {
+        List<Function> pushableAtoms = firstPushableAtoms.append(secondPushableAtoms).append(additionalEqualities);
+
+        /**
+         * TODO: describe
+         */
+        List<Function> nonPushableAtoms = firstNonPushableAtoms.append(secondNonPushableAtoms);
+
+        return new ExtractEqNormResult(nonPushableAtoms, pushableAtoms, mergedSubstitution);
+    }
+
+    /**
+     * TODO: describe
+     */
+    private static P3<List<Function>, List<Function>, Var2VarSubstitution> normalizeDataAtoms(final List<Function> sameLevelAtoms,
+                                                                                       final VariableDispatcher variableDispatcher) {
+
+        List<Function> dataAtoms = sameLevelAtoms.filter(new F<Function, Boolean>() {
             @Override
-            public List<P2<VariableImpl, VariableImpl>> f(ExtractEqNormResult result) {
-                return result.getVariableRenamings();
+            public Boolean f(Function atom) {
+                return atom.isDataFunction();
             }
         });
-        TreeMap<VariableImpl, List<VariableImpl>> variableRenamingMap = variableRenamings.groupBy(new F<P2<VariableImpl, VariableImpl>, VariableImpl>() {
+
+        /**
+         * TODO: describe
+         */
+        List<P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>> atomResults = dataAtoms.map(
+                new F<Function, P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>>() {
+                    @Override
+                    public P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> f(Function atom) {
+                        // Uses the fact atoms are encoded as functional terms
+                        return normalizeDataAtomFunctionalTerm(atom, variableDispatcher);
+                    }
+                });
+
+        /**
+         * Normalized atoms
+         */
+        List<Function> normalizedDataAtoms = atomResults.map(new F<P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>, Function>() {
             @Override
-            public VariableImpl f(P2<VariableImpl, VariableImpl> pair) {
-                return pair._1();
-            }
-        }, new F<P2<VariableImpl, VariableImpl>, VariableImpl>() {
-            @Override
-            public VariableImpl f(P2<VariableImpl, VariableImpl> pair) {
-                return pair._2();
+            public Function f(P3<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>> triple) {
+                return (Function) triple._1();
             }
         });
 
         /**
          * Variable-Variable equalities
          */
-        List<Function> var2VarEqualities = generateVariableEqualities(variableRenamingMap);
-
-
-        /**
-         * TODO: refactor
-         */
-        List<Function> pushableAtoms = firstPushableAtoms.append(var2VarEqualities).append(varConstantEqualities);
+        List<P2<VariableImpl, VariableImpl>> variableRenamings = atomResults.bind(
+                P3.<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>__2());
 
         /**
-         * TODO: complete
+         * TODO: describe
          */
-        List<Function> nonPushableAtoms = firstNonPushableAtoms;
-
-        return new ExtractEqNormResult(nonPushableAtoms, pushableAtoms, aggregatedSubstitution);
-    }
-
-    /**
-     * TODO: find the type to return
-     */
-    private static void normalizeDataAtoms(final List<Function> sameLevelAtoms, final VariableDispatcher variableDispatcher) {
-
-        List<Function> dataAtoms = sameLevelAtoms.filter(new F<Function, Boolean>() {
-            @Override
-            public Boolean f(Function atom) {
-                return atom.isDataFunction()
-            }
-        });
+        P2<Var2VarSubstitution, List<Function>> renamingResult = mergeVariableRenamings(variableRenamings);
+        Var2VarSubstitution substitution = renamingResult._1() ;
+        List<Function> var2varEqualities = renamingResult._2();
 
         /**
          * Variable-Constant equalities
          */
-        List<P2<VariableImpl,Constant>> varConstantPairs  = dataAndCompositeAtomResults.bind(new F<ExtractEqNormResult, List<P2<VariableImpl, Constant>>>() {
-            @Override
-            public List<P2<VariableImpl, Constant>> f(ExtractEqNormResult result) {
-                return result.getVariableConstantPairs();
-            }
-        });
+        List<P2<VariableImpl,Constant>> varConstantPairs  = atomResults.bind(
+                P3.<Term, List<P2<VariableImpl, VariableImpl>>, List<P2<VariableImpl, Constant>>>__3());
+
         List<Function> varConstantEqualities = generateVariableConstantEqualities(varConstantPairs);
 
+
+        /**
+         * TODO: describe
+         */
+        List<Function> pushableAtoms = var2varEqualities.append(varConstantEqualities);
+
+        return P.p(normalizedDataAtoms, pushableAtoms, substitution);
     }
 
+    /**
+     * TODO: describe
+     */
+    private static P2<Var2VarSubstitution, List<Function>> mergeSubstitutions(List<Var2VarSubstitution> substitutionsToMerge) {
+        List<P2<VariableImpl, VariableImpl>> renamingPairs = substitutionsToMerge.bind(new F<Var2VarSubstitution, List<P2<VariableImpl, VariableImpl>>>() {
+            @Override
+            public List<P2<VariableImpl, VariableImpl>> f(Var2VarSubstitution substitution) {
+                // Transforms the map of the substitution in a list of pairs
+                return TreeMap.fromMutableMap(VARIABLE_ORD, substitution.getVar2VarMap()).toStream().toList();
+            }
+        });
+
+        return mergeVariableRenamings(renamingPairs);
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static P2<Var2VarSubstitution, List<Function>> mergeVariableRenamings( List<P2<VariableImpl, VariableImpl>> renamingPairs) {
+        TreeMap<VariableImpl, Set<VariableImpl>> commonMap = renamingPairs.groupBy(P2.<VariableImpl, VariableImpl>__1(),
+                P2.<VariableImpl, VariableImpl>__2()).
+                /**
+                 * TODO: describe
+                 */
+                map(new F<List<VariableImpl>, Set<VariableImpl>>() {
+            @Override
+            public Set<VariableImpl> f(List<VariableImpl> equivalentVariables) {
+                return Set.iterableSet(VARIABLE_ORD, equivalentVariables);
+            }
+        });
+
+        List<Function> newEqualities = commonMap.values().bind(new F<Set<VariableImpl>, List<Function>>() {
+            @Override
+            public List<Function> f(Set<VariableImpl> equivalentVariables) {
+                return generateVariableEqualities(equivalentVariables);
+            }
+        });
+
+        /**
+         * TODO: describe the variable selection strategy.
+         */
+        TreeMap<VariableImpl, VariableImpl> mergedMap = commonMap.map(new F<Set<VariableImpl>, VariableImpl>() {
+            @Override
+            public VariableImpl f(Set<VariableImpl> variables) {
+                return variables.toList().head();
+            }
+        });
+
+        Var2VarSubstitution mergedSubstitution = new Var2VarSubstitutionImpl(mergedMap);
+
+        return P.p(mergedSubstitution, newEqualities);
+    }
 
 
     private static List<Function> generateVariableConstantEqualities(List<P2<VariableImpl, Constant>> varConstantPairs) {
@@ -255,36 +330,17 @@ public class ExtractEqualityNormalizer {
     }
 
     /**
-     * TODO: explain
+     * TODO: describe
      */
-    private static List<Function> generateVariableEqualities(TreeMap<VariableImpl, List<VariableImpl>> variableRenamingMap) {
-
-        List<Function> equalities = variableRenamingMap.toStream().bind(new F<P2<VariableImpl, List<VariableImpl>>, Stream<Function>>() {
+    private static List<Function> generateVariableEqualities(Set<VariableImpl> equivalentVariables) {
+        List<VariableImpl> variableList = equivalentVariables.toList();
+        List<P2<VariableImpl, VariableImpl>> variablePairs = variableList.zip(variableList.tail());
+        return variablePairs.map(new F<P2<VariableImpl, VariableImpl>, Function>() {
             @Override
-            public Stream<Function> f(P2<VariableImpl, List<VariableImpl>> variableRenamings) {
-                VariableImpl initialVariable = variableRenamings._1();
-                Set<VariableImpl> usedVariables = Set.iterableSet(VARIABLE_ORD, variableRenamings._2());
-
-                /**
-                 * Used variables and initial variables (that may still also used "locally").
-                 */
-                List<VariableImpl> allVariables = usedVariables.insert(initialVariable).toList();
-
-                /**
-                 * Pairs for equalities [(0,1), (1,2), (2,3), ...]
-                 * Generates a EQ atom for each pair.
-                 */
-                List<P2<VariableImpl, VariableImpl>> variablePairs = allVariables.zip(allVariables.tail());
-                return variablePairs.map(new F<P2<VariableImpl, VariableImpl>, Function>() {
-                    @Override
-                    public Function f(P2<VariableImpl, VariableImpl> pair) {
-                        return DATA_FACTORY.getFunctionEQ(pair._1(), pair._2());
-                    }
-                }).toStream();
+            public Function f(P2<VariableImpl, VariableImpl> pair) {
+                return DATA_FACTORY.getFunctionEQ(pair._1(), pair._2());
             }
-        }).toList();
-
-        return equalities;
+        });
     }
 
     private static Boolean isDataOrLeftJoinOrJoinAtom(Function atom) {
@@ -338,24 +394,52 @@ public class ExtractEqualityNormalizer {
         ExtractEqNormResult rightNormalizationResults = normalizeSameLevelAtoms(initialRightAtoms, variableDispatcher);
 
         /**
+         * TODO: explain
+         */
+        List<Var2VarSubstitution> substitutionsToMerge = List.cons(leftNormalizationResults.getVar2VarSubstitution(),
+                List.cons(rightNormalizationResults.getVar2VarSubstitution(), List.<Var2VarSubstitution>nil()));
+        P2<Var2VarSubstitution, List<Function>> substitutionResult = mergeSubstitutions(substitutionsToMerge);
+        Var2VarSubstitution mergedSubstitution = substitutionResult._1();
+        List<Function> joiningEqualities = substitutionResult._2();
+
+        /**
          * TODO: explain. "Blocking" criteria.
          */
-        List<Function> remainingLJAtoms = leftNormalizationResults.getNonPushableAtoms().append(rightNormalizationResults.getAllAtoms());
+        List<Function> remainingLJAtoms = leftNormalizationResults.getNonPushableAtoms().append(rightNormalizationResults.getAllAtoms()).append(joiningEqualities);
         List<Function> pushedUpAtoms = leftNormalizationResults.getPushableAtoms();
 
-        return new ExtractEqNormResult(remainingLJAtoms, pushedUpAtoms, lastSubstitution);
+
+        return new ExtractEqNormResult(remainingLJAtoms, pushedUpAtoms, mergedSubstitution);
     }
 
 
     /**
-     * TODO: implement it
+     * Split the left join sub atoms.
+     *
+     * Left: left of the SECOND data atom.
+     * Right: the rest.
      */
     private static P2<List<Function>, List<Function>> splitLeftJoinSubAtoms(Function leftJoinMetaAtom) {
-        return null;
+        List<Function> subAtoms = List.iterableList((java.util.List<Function>)(java.util.List<?>) leftJoinMetaAtom.getTerms());
+
+        F<Function, Boolean> isNotDataAtomFct = new F<Function, Boolean>() {
+            @Override
+            public Boolean f(Function atom) {
+                return !atom.isDataFunction();
+            }
+        };
+
+        P2<List<Function>, List<Function>> firstDataAtomSplit = subAtoms.span(isNotDataAtomFct);
+        P2<List<Function>, List<Function>> secondDataAtomSplit = firstDataAtomSplit._2().span(isNotDataAtomFct);
+
+        List<Function> leftAtoms = firstDataAtomSplit._1().append(secondDataAtomSplit._1());
+        List<Function> rightAtoms = secondDataAtomSplit._2();
+
+        return P.p(leftAtoms, rightAtoms);
     }
 
     /**
-     * TODO: implement
+     * TODO: explain
      *
      * TODO: this would be much nice with as a Visitor.
      */
@@ -436,6 +520,9 @@ public class ExtractEqualityNormalizer {
         return P.p((Term) newFunctionalTerm, variableRenamings, variableConstantPairs);
     }
 
+    /**
+     * TODO: explain
+     */
     private static Function constructNewFunction(Predicate functionSymbol, List<Term> subTerms) {
         return DATA_FACTORY.getFunction(functionSymbol, new ArrayList<>(subTerms.toCollection()));
     }

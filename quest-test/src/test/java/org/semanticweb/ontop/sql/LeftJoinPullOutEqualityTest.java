@@ -62,7 +62,7 @@ public class LeftJoinPullOutEqualityTest {
         factory.setOBDAController(obdaModel);
         factory.setPreferenceHolder(preferences);
 
-        reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+        reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
     }
 
     @After
