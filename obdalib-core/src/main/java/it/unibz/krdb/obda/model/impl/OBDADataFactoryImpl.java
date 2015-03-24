@@ -20,26 +20,10 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.BNode;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.DatatypeFactory;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.IDGenerator;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
-
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
@@ -254,12 +238,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	
-	
-	
-	
-	
-
-	
 	@Override
 	public Function getUriTemplate(Term... terms) {
 		Predicate uriPred = new URITemplatePredicateImpl(terms.length);
@@ -288,6 +266,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		Predicate pred = new BNodePredicateImpl(terms.size());
 		return getFunction(pred, terms);
 	}
+
 
 	@Override
 	public Function getFunctionEQ(Term firstTerm, Term secondTerm) {
@@ -402,6 +381,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 	
 	@Override
+	public Function getFunctionReplace(Term term1, Term term2, Term term3) {
+		return getFunction(OBDAVocabulary.REPLACE, term1, term2, term3 );
+	}
+	
+	@Override
 	public Function getFunctionMinus(Term term1) {
 		return getFunction(OBDAVocabulary.MINUS, term1);
 	}
@@ -420,6 +404,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getFunctionMultiply(Term term1, Term term2) {
 		return getFunction(OBDAVocabulary.MULTIPLY, term1, term2);
 	}
+
+    @Override
+    public Function getFunctionConcat(Term term1, Term term2) {
+        return getFunction(OBDAVocabulary.CONCAT, term1, term2);
+    }
 
 	@Override
 	public Function getFunctionCast(Term term1, Term term2) {

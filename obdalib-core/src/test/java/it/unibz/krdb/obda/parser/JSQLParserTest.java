@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import junit.framework.TestCase;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -724,7 +723,26 @@ public class JSQLParserTest extends TestCase {
 		printJSQL("testRegexNotMySQL", result);
 		assertFalse(result);
 	}
-	
+
+    public void test_md5() {
+        final boolean result = parseJSQL("SELECT MD5(CONCAT(COALESCE(Address, RAND()), COALESCE(City, RAND()),\n" +
+                "COALESCE(Region, RAND()), COALESCE(PostalCode, RAND()), COALESCE(Country,\n" +
+                "RAND()) )) AS locationID FROM northwind.Suppliers");
+        printJSQL("test_13", result);
+        assertTrue(result);
+    }
+
+    public void test_concatOracle() {
+        final boolean result = parseJSQL("SELECT ('ID-' || student.id || 'type1') \"sid\" FROM student");
+        printJSQL("test_concatOracle()", result);
+        assertTrue(result);
+    }
+
+    public void test_RegexpReplace() {
+        final boolean result = parseJSQL("SELECT REGEXP_REPLACE('Hello World', ' +', ' ') as reg FROM student");
+        printJSQL("test_RegexpReplace()", result);
+        assertTrue(result);
+    }
 
 	private String queryText;
 

@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 
@@ -116,9 +117,12 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	 */
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-		// enclosing
-		// quotes
+        Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
+		if(quotes.matcher(pattern).matches() ) {
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
+        }
 		String sql = columnname + " REGEXP ";
 		if (!caseinSensitive) 
 			sql += "BINARY ";
@@ -144,7 +148,7 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
 	 * 
-	 * @param rdfliteral
+	 *
 	 * @return
 	 */
 	@Override

@@ -333,7 +333,7 @@ function returns [Function value]
 
 dataTypeFunction returns [Function value]
   : variable AT language {
-      Predicate functionSymbol = dfac.getDataTypePredicateLiteralLang();
+      Predicate functionSymbol = dfac.getDatatypePredicateLiteralLang();
       Variable var = $variable.value;
       Term lang = $language.value;   
       $value = dfac.getFunction(functionSymbol, var, lang);
@@ -343,21 +343,21 @@ dataTypeFunction returns [Function value]
       String functionName = $resource.value.toString();
       Predicate functionSymbol = null;
       if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateLiteral();
+    	functionSymbol = dfac.getDatatypePredicateLiteral();
       } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateString();
+    	functionSymbol = dfac.getDatatypePredicateString();
       } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI) || functionName.equals(OBDAVocabulary.XSD_INT_URI)) {
-     	functionSymbol = dfac.getDataTypePredicateInteger();
+     	functionSymbol = dfac.getDatatypePredicateInteger();
       } else if (functionName.equals(OBDAVocabulary.XSD_LONG)) {
-            	functionSymbol = dfac.getDataTypePredicateLong();
+            	functionSymbol = dfac.getDatatypePredicateLong();
       } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateDecimal();
+    	functionSymbol = dfac.getDatatypePredicateDecimal();
       } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateDouble();
+    	functionSymbol = dfac.getDatatypePredicateDouble();
       } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateDateTime();
+    	functionSymbol = dfac.getDatatypePredicateDateTime();
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateBoolean();
+    	functionSymbol = dfac.getDatatypePredicateBoolean();
       } else {
         throw new RecognitionException();
       }
@@ -453,9 +453,9 @@ literal returns [Term value]
        ValueConstant constant = $stringLiteral.value;
        Term lang = $language.value;
        if (lang != null) {
-         $value = dfac.getFunction(dfac.getDataTypePredicateLiteralLang(), constant, lang);
+         $value = dfac.getFunction(dfac.getDatatypePredicateLiteralLang(), constant, lang);
        } else {
-       	 $value = dfac.getFunction(dfac.getDataTypePredicateLiteral(), constant);
+       	 $value = dfac.getFunction(dfac.getDatatypePredicateLiteral(), constant);
        }
     }
   | dataTypeString { $value = $dataTypeString.value; }
@@ -476,21 +476,21 @@ dataTypeString returns [Term value]
       String functionName = $resource.value.toString();
       Predicate functionSymbol = null;
       if (functionName.equals(OBDAVocabulary.RDFS_LITERAL_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateLiteral();
+    	functionSymbol = dfac.getDatatypePredicateLiteral();
       } else if (functionName.equals(OBDAVocabulary.XSD_STRING_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateString();
+    	functionSymbol = dfac.getDatatypePredicateString();
       } else if (functionName.equals(OBDAVocabulary.XSD_INTEGER_URI)) {
-     	functionSymbol = dfac.getDataTypePredicateInteger();
+     	functionSymbol = dfac.getDatatypePredicateInteger();
       } else if (functionName.equals(OBDAVocabulary.XSD_LONG_URI)) {
-     	functionSymbol = dfac.getDataTypePredicateLong();
+     	functionSymbol = dfac.getDatatypePredicateLong();
       } else if (functionName.equals(OBDAVocabulary.XSD_DECIMAL_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateDecimal();
+    	functionSymbol = dfac.getDatatypePredicateDecimal();
       } else if (functionName.equals(OBDAVocabulary.XSD_DOUBLE_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateDouble();
+    	functionSymbol = dfac.getDatatypePredicateDouble();
       } else if (functionName.equals(OBDAVocabulary.XSD_DATETIME_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateDateTime();
+    	functionSymbol = dfac.getDatatypePredicateDateTime();
       } else if (functionName.equals(OBDAVocabulary.XSD_BOOLEAN_URI)) {
-    	functionSymbol = dfac.getDataTypePredicateBoolean();
+    	functionSymbol = dfac.getDatatypePredicateBoolean();
       } else {
         throw new RuntimeException("Unknown datatype: " + functionName);
       }

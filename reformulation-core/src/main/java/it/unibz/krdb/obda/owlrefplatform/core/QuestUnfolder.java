@@ -1,48 +1,34 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-
 import com.google.common.base.Joiner;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.URITemplatePredicate;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQContainmentCheckUnderLIDs;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DBMetadataUtil;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
+import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
+import it.unibz.krdb.obda.parser.PreprocessProjection;
 import it.unibz.krdb.obda.utils.Mapping2DatalogConverter;
+import it.unibz.krdb.obda.utils.MappingSplitter;
+import it.unibz.krdb.obda.utils.MetaMappingExpander;
 import it.unibz.krdb.sql.DBMetadata;
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.select.Select;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.URI;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class QuestUnfolder {
 
@@ -62,10 +48,28 @@ public class QuestUnfolder {
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
-	public QuestUnfolder(List<OBDAMappingAxiom> mappings, DBMetadata metadata) {
+	public QuestUnfolder(OBDAModel unfoldingOBDAModel, DBMetadata metadata,  Connection localConnection, URI sourceId) throws Exception{
+
+		/** Substitute select * with column names **/
+		preprocessProjection(unfoldingOBDAModel, sourceId, metadata);
+
+		/**
+		 * Split the mapping
+		 */
+		MappingSplitter.splitMappings(unfoldingOBDAModel, sourceId);
+
+		/**
+		 * Expand the meta mapping
+		 */
+		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
+		metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
+
+		List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
 		unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
 	}
-		
+
+
+
 	public int getRulesSize() {
 		return unfoldingProgram.size();
 	}
@@ -375,6 +379,41 @@ public class QuestUnfolder {
 	public DatalogProgram unfold(DatalogProgram query) throws OBDAException {
 		return unfolder.unfold(query, OBDAVocabulary.QUEST_QUERY);
 	}
+
+
+	/***
+	 * Expands a SELECT * into a SELECT with all columns implicit in the *
+	 *
+	 * @throws java.sql.SQLException
+	 */
+	private void preprocessProjection(OBDAModel unfoldingOBDAModel, URI sourceId, DBMetadata metadata) throws SQLException {
+
+		List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
+
+
+		for (OBDAMappingAxiom axiom : mappings) {
+			String sourceString = axiom.getSourceQuery().toString();
+
+			OBDAQuery targetQuery= axiom.getTargetQuery();
+
+			Select select = null;
+			try {
+				select = (Select) CCJSqlParserUtil.parse(sourceString);
+
+				Set<Variable> variables = ((CQIE) targetQuery).getReferencedVariables();
+				PreprocessProjection ps = new PreprocessProjection(metadata);
+				String query = ps.getMappingQuery(select, variables);
+				axiom.setSourceQuery(fac.getSQLQuery(query));
+
+			} catch (JSQLParserException e) {
+				log.debug("SQL Query cannot be preprocessed by the parser");
+
+
+			}
+//
+		}
+	}
+
 
 
 

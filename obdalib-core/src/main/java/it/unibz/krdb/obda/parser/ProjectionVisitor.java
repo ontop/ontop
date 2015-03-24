@@ -20,79 +20,21 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.ProjectionJSQL;
 import it.unibz.krdb.sql.api.TableJSQL;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.AllComparisonExpression;
-import net.sf.jsqlparser.expression.AnalyticExpression;
-import net.sf.jsqlparser.expression.AnyComparisonExpression;
-import net.sf.jsqlparser.expression.CaseExpression;
-import net.sf.jsqlparser.expression.CastExpression;
-import net.sf.jsqlparser.expression.DateValue;
-import net.sf.jsqlparser.expression.DoubleValue;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.expression.ExtractExpression;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.IntervalExpression;
-import net.sf.jsqlparser.expression.JdbcNamedParameter;
-import net.sf.jsqlparser.expression.JdbcParameter;
-import net.sf.jsqlparser.expression.JsonExpression;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.NullValue;
-import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
-import net.sf.jsqlparser.expression.Parenthesis;
-import net.sf.jsqlparser.expression.SignedExpression;
-import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.TimeValue;
-import net.sf.jsqlparser.expression.TimestampValue;
-import net.sf.jsqlparser.expression.WhenClause;
-import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseAnd;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseOr;
-import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseXor;
-import net.sf.jsqlparser.expression.operators.arithmetic.Concat;
-import net.sf.jsqlparser.expression.operators.arithmetic.Division;
-import net.sf.jsqlparser.expression.operators.arithmetic.Modulo;
-import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
-import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
+import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
-import net.sf.jsqlparser.expression.operators.relational.Between;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExistsExpression;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
-import net.sf.jsqlparser.expression.operators.relational.ItemsList;
-import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
-import net.sf.jsqlparser.expression.operators.relational.Matches;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
-import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.RegExpMatchOperator;
-import net.sf.jsqlparser.expression.operators.relational.RegExpMySQLOperator;
+import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.AllColumns;
-import net.sf.jsqlparser.statement.select.AllTableColumns;
-import net.sf.jsqlparser.statement.select.Distinct;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SelectItem;
-import net.sf.jsqlparser.statement.select.SelectItemVisitor;
-import net.sf.jsqlparser.statement.select.SelectVisitor;
-import net.sf.jsqlparser.statement.select.SetOperationList;
-import net.sf.jsqlparser.statement.select.SubSelect;
-import net.sf.jsqlparser.statement.select.WithItem;
+import net.sf.jsqlparser.statement.select.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Visitor to retrieve the projection of the given select statement. (SELECT... FROM).
@@ -108,7 +50,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	boolean bdistinctOn = false; // true when a SELECT distinct is present
 	boolean setProj = false; // true when we are using the method setProjection
 	boolean notSupported = false; 
-	boolean unquote=false; //remove quotes from columns 
+
 	
 	
 	/**
@@ -118,10 +60,10 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	 * @throws JSQLParserException 
 	 */
 	
-	public ProjectionJSQL getProjection(Select select, boolean unquote) throws JSQLParserException {
+	public ProjectionJSQL getProjection(Select select, boolean deepParsing) throws JSQLParserException {
 		
 //		projections = new ArrayList<ProjectionJSQL>(); //used if we want to consider UNION
-		this.unquote=unquote;
+
 		
 		if (select.getWithItemsList() != null) {
 			for (WithItem withItem : select.getWithItemsList()) {
@@ -130,7 +72,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 		}
 		select.getSelectBody().accept(this);
 		
-		if(notSupported && unquote) // used to throw exception for the currently unsupported methods
+		if(notSupported && deepParsing) // used to throw exception for the currently unsupported methods
 				throw new JSQLParserException("Query not yet supported");
 		
 		return projection;	
@@ -186,7 +128,13 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 			
 			else{
 			plainSelect.getSelectItems().clear();
-			plainSelect.getSelectItems().addAll(projection.getColumnList());
+				List<SelectExpressionItem> columnList = projection.getColumnList();
+				if (!columnList.isEmpty()) {
+					plainSelect.getSelectItems().addAll(columnList);
+				}
+				else{
+					plainSelect.getSelectItems().add(new AllColumns());
+				}
 			}
 			
 			}
@@ -296,7 +244,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	 */
 	@Override
 	public void visit(Function function) {
-		notSupported=true;
+		//notSupported=true;
 		
 	}
 
@@ -490,11 +438,11 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	@Override
 	public void visit(Column tableColumn) {
 		String columnName= tableColumn.getColumnName();
-		if(unquote && ParsedSQLQuery.pQuotes.matcher(columnName).matches())
+		if(ParsedSQLQuery.pQuotes.matcher(columnName).matches())
 			tableColumn.setColumnName(columnName.substring(1, columnName.length()-1));
 				
 		Table table= tableColumn.getTable();
-		if(table.getName()!=null && unquote){
+		if(table.getName()!=null){
 			
 			TableJSQL fixTable = new TableJSQL(table); //create a tablejsql that recognized between quoted and unquoted tables
 			table.setAlias(fixTable.getAlias());
@@ -559,9 +507,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(Concat concat) {
-		notSupported = true;
-		// TODO Auto-generated method stub
-		
+		//TODO In work, Dag 16.12.2014
 	}
 
 	@Override

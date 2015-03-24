@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.translator;
  */
 
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DataTypePredicate;
+import it.unibz.krdb.obda.model.DatatypePredicate;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -209,7 +209,7 @@ public class MappingVocabularyRepair {
 		if (term instanceof Function) {
 			Function fterm = (Function)term;
 			Predicate predicate = fterm.getFunctionSymbol();
-			if (predicate instanceof DataTypePredicate) {
+			if (predicate instanceof DatatypePredicate) {
 				// no fix necessary
 				return term;
 			}

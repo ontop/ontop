@@ -28,11 +28,9 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 
 // TODO This class needs to be restructured
 
@@ -40,72 +38,6 @@ public class QueryAnonymizer {
 
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	/**
-	 * Anonymizes the terms of an atom in a query, if they are anonymizable.
-	 * Note that this will actually change the query terms by calling
-	 * body.getTerms().set(i, new UndisintguishedVariable()) for each position i
-	 * in the atom that can be anonymized.
-	 * 
-	 * Used only in DLRPerfectReformulator
-	 * 
-	 * @param q
-	 * @param focusatomIndex
-	 */
-	public static void anonymize(CQIE q, int focusatomIndex) {
-
-		List<Function> body = q.getBody();
-		Function atom = (Function) body.get(focusatomIndex);
-		int bodysize = body.size();
-		int arity = atom.getFunctionSymbol().getArity();
-
-		for (int i = 0; i < arity; i++) {
-			Term term = atom.getTerms().get(i);
-			if (term instanceof VariableImpl) {
-				if (isVariableInHead(q, term))
-					continue;
-				/*
-				 * Not in the head, it could be anonymizable, checking if the
-				 * term appears in any other position in the query
-				 */
-				boolean isSharedTerm = false;
-				for (int atomindex = 0; atomindex < bodysize; atomindex++) {
-					Function currentAtom = (Function) body.get(atomindex);
-					int currentarity = currentAtom.getArity();
-					List<Term> currentTerms = currentAtom.getTerms();
-					for (int termidx = 0; termidx < currentarity; termidx++) {
-						Term comparisonTerm = currentTerms.get(termidx);
-						/*
-						 * If the terms is a variable that is not in the same
-						 * atom or in the same position in the atom then we
-						 * compare to check if they are equal, if they are equal
-						 * then isShared will be set to true
-						 */
-						if ((comparisonTerm instanceof VariableImpl)
-								&& ((atomindex != focusatomIndex) || (i != termidx))) {
-							isSharedTerm = term.equals(comparisonTerm);
-
-						} else if (comparisonTerm instanceof Function) {
-							isSharedTerm = comparisonTerm
-									.getReferencedVariables().contains(term);
-						}
-						if (isSharedTerm) {
-							break;
-						}
-					}
-					if (isSharedTerm)
-						break;
-				}
-				/*
-				 * If we never found the term in any other position, then we
-				 * anonymize it
-				 */
-				if (!isSharedTerm) {
-					atom.getTerms().set(i,
-							fac.getVariableNondistinguished());
-				}
-			}
-		}
-	}
 
 	public static CQIE anonymize(CQIE q) {
 

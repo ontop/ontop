@@ -23,26 +23,18 @@ package it.unibz.krdb.sql;
 import it.unibz.krdb.sql.api.Attribute;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public abstract class DataDefinition implements Serializable {
 
 	private static final long serialVersionUID = 212770563440334334L;
 
-	protected String name;
+	private final String name;
+	private final List<Attribute> attributes = new LinkedList<>();
 
-	protected HashMap<Integer, Attribute> attributes = new HashMap<Integer, Attribute>();
-
-	public DataDefinition() { // TODO Remove later! The attribute name should be mandatory and cannot be changed!
-		// NO-OP
-	}
-	
-	public DataDefinition(String name) {
-		this.name = name;
-	}
-
-	public void setName(String name) { // TODO Remove later! The attribute name should be mandatory and cannot be changed!
+	protected DataDefinition(String name) {
 		this.name = name;
 	}
 
@@ -50,26 +42,32 @@ public abstract class DataDefinition implements Serializable {
 		return name;
 	}
 
+	public void addAttribute(Attribute value) {
+		attributes.add(value);
+	}
+
+	// TODO: remove from ImplicitDBConstraints
+	@Deprecated
 	public void setAttribute(int pos, Attribute value) {
-		attributes.put(pos, value);
+		// indexes start at 1
+		attributes.set(pos - 1, value);
 	}
-
-	public String getAttributeName(int pos) {
-		Attribute attribute = attributes.get(pos);
-		return attribute.getName();
-	}
-
+	
+	/**
+	 * gets attribute with the specified position
+	 * 
+	 * @param pos is position <em>staring at 1</em>
+	 * @return attribute at the position
+	 */
+	
 	public Attribute getAttribute(int pos) {
-		Attribute attribute = attributes.get(pos);
+		// positions start at 1
+		Attribute attribute = attributes.get(pos - 1);
 		return attribute;
 	}
 
-	public ArrayList<Attribute> getAttributes() {
-		ArrayList<Attribute> list = new ArrayList<Attribute>();
-		for (Attribute value : attributes.values()) {
-			list.add(value);
-		}
-		return list;
+	public List<Attribute> getAttributes() {
+		return Collections.unmodifiableList(attributes);
 	}
 	
 	/**
@@ -79,36 +77,12 @@ public abstract class DataDefinition implements Serializable {
 	 * @return The key in the hashmap
 	 */
 	public int getAttributeKey(String attributeName) {
-        for (int idx : attributes.keySet()) {
-            if (attributes.get(idx).hasName(attributeName)) {
+		int idx = 1; // start at 1
+        for (Attribute att : attributes) {
+            if (att.getName().equals(attributeName)) 
                 return idx;
-            }
+            idx++;
         }
         return -1;
-    }
-	
-	/**
-	 * Returns the position of the attribute in the .values of the underlying hashmap (Or -1)
-	 * Note that this is not necessarily compatible with the argument {@link #getAttribute(int) getAttribute} and {@link #setAttribute(int, Attribute) setAttribute}
-	 * For that purpose, {@link #getAttributeKey(String) getAttributeKey} above should be used instead
-	 * 
-	 * 
-	 * @param attributeName The name of an attribute, correctly spelled and cased. 
-	 * @return If there is an attribute, return its position in the values() list, otherwise -1
-	 */
-	@Deprecated
-	public int getAttributePosition(String attributeName) {
-		int index = 0;
-		for (Attribute value : attributes.values()) {
-			if (value.hasName(attributeName)) {
-				return index;
-			}
-			index++;
-		}
-		return -1;
-	}
-
-	public int getNumOfAttributes() {
-		return attributes.size();
-	}
+    }	
 }
