@@ -20,15 +20,20 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
+import jdk.nashorn.internal.ir.annotations.Immutable;
 
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
-public class OWLAPI3Materializer {
+public class OWLAPI3Materializer implements AutoCloseable{
 
 	private final Iterator<Assertion> assertions;
 	private final QuestMaterializer materializer;
@@ -36,13 +41,26 @@ public class OWLAPI3Materializer {
 	public OWLAPI3Materializer(OBDAModel model) throws Exception {
 		 this(model, null);
 	}
+
 	
 	public OWLAPI3Materializer(OBDAModel model, Ontology onto) throws Exception {
 		 materializer = new QuestMaterializer(model, onto);
 		 assertions = materializer.getAssertionIterator();
 	}
-	
-	public QuestOWLIndividualIterator getIterator() {
+
+    /*
+     * only materialize the predicates in  `predicates`
+     */
+    public OWLAPI3Materializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates) throws Exception {
+        materializer = new QuestMaterializer(model, onto, predicates);
+        assertions = materializer.getAssertionIterator();
+    }
+
+    public OWLAPI3Materializer(OBDAModel obdaModel, Ontology onto, Predicate predicate)  throws Exception{
+        this(obdaModel, onto, ImmutableSet.of(predicate));
+    }
+
+    public QuestOWLIndividualIterator getIterator() {
 		return new QuestOWLIndividualIterator(assertions);
 	}
 	
@@ -63,4 +81,9 @@ public class OWLAPI3Materializer {
 	public int getVocabularySize() {
 		return materializer.getVocabSize();
 	}
+
+    @Override
+    public void close() throws Exception {
+        disconnect();
+    }
 }

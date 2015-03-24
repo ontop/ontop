@@ -43,11 +43,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 
 import java.net.URI;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,17 +86,21 @@ public class QuestMaterializer {
 	 * @throws Exception
 	 */
 	public QuestMaterializer(OBDAModel model) throws Exception {
-		this(model, null, getDefaultPreferences());
+		this(model, null, null, getDefaultPreferences());
 	}
 	
 	public QuestMaterializer(OBDAModel model, QuestPreferences pref) throws Exception {
-		this(model, null, pref);
+		this(model, null, null, pref);
 		
 	}
 	
 	public QuestMaterializer(OBDAModel model, Ontology onto) throws Exception {
-		this(model, onto, getDefaultPreferences());
+		this(model, onto, null, getDefaultPreferences());
 	}
+
+    public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates) throws Exception {
+        this(model, onto, predicates, getDefaultPreferences());
+    }
 	
 	/***
 	 * 
@@ -108,71 +108,22 @@ public class QuestMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences preferences) throws Exception {
+	public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, QuestPreferences preferences) throws Exception {
 		this.model = model;
 		this.ontology = onto;
-		this.vocabulary = new HashSet<Predicate>();
-		
+
+        if(predicates != null || !predicates.isEmpty()){
+            this.vocabulary = new HashSet<>(predicates);
+        } else {
+           this.vocabulary = extractVocabulary(model, onto);
+        }
+
 		if (this.model.getSources()!= null && this.model.getSources().size() > 1)
 			throw new Exception("Cannot materialize with multiple data sources!");
-		
-		//add all class/data/object predicates to vocabulary
-		//add declared predicates in model
-		for (OClass cl : model.getDeclaredClasses()) {
-			Predicate p = cl.getPredicate();
-			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
-				vocabulary.add(p);
-		}
-		for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) {
-			Predicate p = prop.getPredicate();
-			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
-				vocabulary.add(p);
-		}
-		for (DataPropertyExpression prop : model.getDeclaredDataProperties()) {
-			Predicate p = prop.getPredicate();
-			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
-				vocabulary.add(p);
-		}
-		if (onto != null) {
-			//from ontology
-			for (OClass cl : onto.getVocabulary().getClasses()) {
-				Predicate p = cl.getPredicate(); 
-				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
-						&& !vocabulary.contains(p))
-					vocabulary.add(p);
-			}
-			for (ObjectPropertyExpression role : onto.getVocabulary().getObjectProperties()) {
-				Predicate p = role.getPredicate();
-				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
-						&& !vocabulary.contains(p))
-					vocabulary.add(p);
-			}
-			for (DataPropertyExpression role : onto.getVocabulary().getDataProperties()) {
-				Predicate p = role.getPredicate();
-				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
-						&& !vocabulary.contains(p))
-					vocabulary.add(p);
-			}
-		} 
-		else {
-			//from mapping undeclared predicates (can happen)
-			for (URI uri : this.model.getMappings().keySet()){
-				for (OBDAMappingAxiom axiom : this.model.getMappings(uri))
-				{
-					if (axiom.getTargetQuery() instanceof CQIE)
-					{
-						CQIE rule = (CQIE)axiom.getTargetQuery();
-						for (Function f: rule.getBody())
-						{
-							vocabulary.add(f.getFunctionSymbol());
-						}
-					}
-					
-				}
-			
-			}
-		}
-		//start a quest instance
+        extractVocabulary(model, onto);
+
+
+        //start a quest instance
 		if (ontology == null) {
 			ontology = ofac.createOntology();
 			
@@ -195,9 +146,79 @@ public class QuestMaterializer {
 					
 		questInstance.setupRepository();
 	}
-	
 
-	private static QuestPreferences getDefaultPreferences() {
+    public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences prefs) throws Exception {
+        this(model, onto, null, prefs);
+    }
+
+    private Set<Predicate> extractVocabulary(OBDAModel model, Ontology onto) {
+        Set<Predicate> vocabulary = new HashSet<Predicate>();
+
+        //add all class/data/object predicates to vocabulary
+        //add declared predicates in model
+        for (OClass cl : model.getDeclaredClasses()) {
+            Predicate p = cl.getPredicate();
+            if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+                vocabulary.add(p);
+        }
+        for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) {
+            Predicate p = prop.getPredicate();
+            if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+                vocabulary.add(p);
+        }
+        for (DataPropertyExpression prop : model.getDeclaredDataProperties()) {
+            Predicate p = prop.getPredicate();
+            if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+                vocabulary.add(p);
+        }
+        if (onto != null) {
+            //from ontology
+            for (OClass cl : onto.getVocabulary().getClasses()) {
+                Predicate p = cl.getPredicate();
+                if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+                        && !vocabulary.contains(p))
+                    vocabulary.add(p);
+            }
+            for (ObjectPropertyExpression role : onto.getVocabulary().getObjectProperties()) {
+                Predicate p = role.getPredicate();
+                if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+                        && !vocabulary.contains(p))
+                    vocabulary.add(p);
+            }
+            for (DataPropertyExpression role : onto.getVocabulary().getDataProperties()) {
+                Predicate p = role.getPredicate();
+                if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+                        && !vocabulary.contains(p))
+                    vocabulary.add(p);
+            }
+        }
+        else {
+            //from mapping undeclared predicates (can happen)
+            for (URI uri : this.model.getMappings().keySet()){
+                for (OBDAMappingAxiom axiom : this.model.getMappings(uri))
+                {
+                    if (axiom.getTargetQuery() instanceof CQIE)
+                    {
+                        CQIE rule = (CQIE)axiom.getTargetQuery();
+                        for (Function f: rule.getBody())
+                        {
+                            vocabulary.add(f.getFunctionSymbol());
+                        }
+                    }
+
+                }
+
+            }
+        }
+
+        return vocabulary;
+    }
+
+/*    public QuestMaterializer(OBDAModel model, Ontology onto, List<Predicate> predicates, QuestPreferences defaultPreferences) {
+    }
+*/
+
+    private static QuestPreferences getDefaultPreferences() {
 		QuestPreferences p = new QuestPreferences();
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FROM_MAPPINGS, "true");

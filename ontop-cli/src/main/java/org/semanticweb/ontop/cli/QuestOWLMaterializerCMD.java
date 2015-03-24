@@ -23,6 +23,7 @@ package org.semanticweb.ontop.cli;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
@@ -33,11 +34,13 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyFormat;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class QuestOWLMaterializerCMD {
 
@@ -45,6 +48,7 @@ public class QuestOWLMaterializerCMD {
 	private static String obdaFile;
 	private static String format;
 	private static String outputFile;
+    private static boolean separate = false;
 
 	public static void main(String args[]) {
 
@@ -53,74 +57,169 @@ public class QuestOWLMaterializerCMD {
 			System.exit(1);
 		}
 
-		BufferedOutputStream output = null;
-		BufferedWriter writer = null;
-
-		try {
-			final long startTime = System.currentTimeMillis();
-			
-			if (outputFile != null) {
-				output = new BufferedOutputStream(new FileOutputStream(outputFile)); 
-			} else {
-				output = new BufferedOutputStream(System.out);
-			}
-			writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
-			
-			
-			OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-			OBDAModel obdaModel = fac.getOBDAModel();
-			ModelIOManager ioManager = new ModelIOManager(obdaModel);
-			ioManager.load(obdaFile);
-
-			OWLOntology ontology = null;
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			OWLAPI3Materializer materializer = null;
-			
-			if (owlFile != null) {
-			// Loading the OWL ontology from the file as with normal OWLReasoners
-				ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
-				Ontology onto =  OWLAPI3TranslatorUtility.translate(ontology);
-				obdaModel.declareAll(onto.getVocabulary());
-				materializer = new OWLAPI3Materializer(obdaModel, onto);
-			}
-			else {
-				ontology = manager.createOntology();
-				materializer = new OWLAPI3Materializer(obdaModel);
-			}
-
-
-			// OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
-
-
-			QuestOWLIndividualIterator iterator = materializer.getIterator();
-	
-			while(iterator.hasNext()) 
-				manager.addAxiom(ontology, iterator.next());
-			
-			
-			OWLOntologyFormat ontologyFormat = getOntologyFormat(format);
-			
-			manager.saveOntology(ontology, ontologyFormat, new WriterDocumentTarget(writer));	
-			
-			System.out.println("NR of TRIPLES: " + materializer.getTriplesCount());
-			System.out.println("VOCABULARY SIZE (NR of QUERIES): " + materializer.getVocabularySize());
-			
-			materializer.disconnect();
-			if (outputFile!=null)
-				output.close();
-			
-			final long endTime = System.currentTimeMillis();
-			final long time = endTime - startTime;
-			System.out.println("Elapsed time to materialize: "+time + " {ms}");
-			
-		} catch (Exception e) {
-			System.out.println("Error materializing ontology:");
-			e.printStackTrace();
-		} 
-
+        if (!separate){
+            run();
+        } else {
+            runWithSeparateFiles();
+        }
 	}
 
-	private static OWLOntologyFormat getOntologyFormat(String format) throws Exception {
+    private static void runWithSeparateFiles() {
+
+
+        if (owlFile == null) {
+            throw new NullPointerException("You have to specify an ontology file!");
+        }
+        // Loading the OWL ontology from the file as with normal OWLReasoners
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        OWLOntology ontology = null;
+        OBDADataFactory obdaDataFactory =  OBDADataFactoryImpl.getInstance();
+        try {
+            ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
+
+
+            Collection<Predicate> predicates = new ArrayList<>();
+
+            for (OWLClass owlClass : ontology.getClassesInSignature()) {
+                Predicate predicate = obdaDataFactory.getClassPredicate(owlClass.getIRI().toString());
+                predicates.add(predicate);
+            }
+            for (OWLDataProperty owlDataProperty : ontology.getDataPropertiesInSignature()) {
+                Predicate predicate = obdaDataFactory.getDataPropertyPredicate(owlDataProperty.getIRI().toString());
+                predicates.add(predicate);
+            }
+            for(OWLObjectProperty owlObjectProperty: ontology.getObjectPropertiesInSignature()){
+                Predicate predicate = obdaDataFactory.getObjectPropertyPredicate(owlObjectProperty.getIRI().toString());
+                predicates.add(predicate);
+            }
+
+
+            Ontology inputOntology = OWLAPI3TranslatorUtility.translate(ontology);
+            OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+            OBDAModel obdaModel = fac.getOBDAModel();
+            obdaModel.declareAll(inputOntology.getVocabulary());
+            ModelIOManager ioManager = new ModelIOManager(obdaModel);
+            ioManager.load(obdaFile);
+
+            int numPredicates = predicates.size();
+
+            OWLOntologyFormat ontologyFormat = getOntologyFormat(format);
+
+            int i = 1;
+            for (Predicate predicate : predicates) {
+
+
+                final long startTime = System.currentTimeMillis();
+
+                String outputDir = outputFile;
+
+                String fileName = predicate.getName().replaceAll("[^a-zA-Z0-9]", "_") + ".owl";
+
+                Path outputPath = Paths.get(outputDir, fileName);
+
+                try (
+                    BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(outputPath.toFile()));
+                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
+                    OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, inputOntology, predicate);
+                ){
+
+                    System.err.println(String.format("Materializing %s (%d/%d)", predicate, i, numPredicates));
+
+                    QuestOWLIndividualIterator iterator = materializer.getIterator();
+
+                    while (iterator.hasNext())
+                        manager.addAxiom(ontology, iterator.next());
+
+
+                    manager.saveOntology(ontology, ontologyFormat, new WriterDocumentTarget(writer));
+
+                    System.out.println("NR of TRIPLES: " + materializer.getTriplesCount());
+                    System.out.println("VOCABULARY SIZE (NR of QUERIES): " + materializer.getVocabularySize());
+
+                    final long endTime = System.currentTimeMillis();
+                    final long time = endTime - startTime;
+                    System.out.println("Elapsed time to materialize: " + time + " {ms}");
+                    i++;
+                }
+
+            }
+
+        } catch (OWLOntologyCreationException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void run() {
+        BufferedOutputStream output = null;
+        BufferedWriter writer = null;
+
+        try {
+            final long startTime = System.currentTimeMillis();
+
+            if (outputFile != null) {
+                output = new BufferedOutputStream(new FileOutputStream(outputFile));
+            } else {
+                output = new BufferedOutputStream(System.out);
+            }
+            writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
+
+
+            OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+            OBDAModel obdaModel = fac.getOBDAModel();
+            ModelIOManager ioManager = new ModelIOManager(obdaModel);
+            ioManager.load(obdaFile);
+
+            OWLOntology ontology = null;
+            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+            OWLAPI3Materializer materializer = null;
+
+            if (owlFile != null) {
+            // Loading the OWL ontology from the file as with normal OWLReasoners
+                ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
+                Ontology onto =  OWLAPI3TranslatorUtility.translate(ontology);
+                obdaModel.declareAll(onto.getVocabulary());
+                materializer = new OWLAPI3Materializer(obdaModel, onto);
+            }
+            else {
+                ontology = manager.createOntology();
+                materializer = new OWLAPI3Materializer(obdaModel);
+            }
+
+
+            // OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
+
+
+            QuestOWLIndividualIterator iterator = materializer.getIterator();
+
+            while(iterator.hasNext())
+                manager.addAxiom(ontology, iterator.next());
+
+
+            OWLOntologyFormat ontologyFormat = getOntologyFormat(format);
+
+            manager.saveOntology(ontology, ontologyFormat, new WriterDocumentTarget(writer));
+
+            System.out.println("NR of TRIPLES: " + materializer.getTriplesCount());
+            System.out.println("VOCABULARY SIZE (NR of QUERIES): " + materializer.getVocabularySize());
+
+            materializer.disconnect();
+            if (outputFile!=null)
+                output.close();
+
+            final long endTime = System.currentTimeMillis();
+            final long time = endTime - startTime;
+            System.out.println("Elapsed time to materialize: "+time + " {ms}");
+
+        } catch (Exception e) {
+            System.out.println("Error materializing ontology:");
+            e.printStackTrace();
+        }
+    }
+
+    private static OWLOntologyFormat getOntologyFormat(String format) throws Exception {
 		OWLOntologyFormat ontoFormat;
 		
 		if(format == null){
@@ -155,44 +254,49 @@ public class QuestOWLMaterializerCMD {
 		System.out.println(" -out outputFile       [OPTIONAL] The full path to the output file. If not specified, the output will be stdout");
 		System.out.println(" --enable-reasoning    [OPTIONAL] enable the OWL reasoning (default)");
 		System.out.println(" --disable-reasoning   [OPTIONAL] disable the OWL reasoning (not implemented yet) ");
+        System.out.println(" --separate-files      [OPTIONAL] generating separate files for different classes/properties. ");
+        System.out.println("                          In this case, `-out` will be used as the output directory");
 		System.out.println("");
 	}
 
-	
-	public static boolean parseArgs(String[] args) {
-		int i = 0;
-		while (i < args.length) {
-			switch (args[i]) {
-			case "-obda":
-				obdaFile = args[i + 1];
-				i += 2;
-				break;
-			case "-onto":
-				owlFile = args[i + 1];
-				i += 2;
-				break;
-			case "-format":
-				format = args[i + 1];
-				i += 2;
-				break;
-			case "-out":
-				outputFile = args[i + 1];
-				i += 2;
-				break;
-			default:
-				System.err.println("Unknown option " + args[i]);
-				System.err.println();
-				return false;
-			}
-		}
 
-		if (obdaFile == null) {
-			System.err.println("Please specify the ontology file\n");
-			return false;
-		}
+    public static boolean parseArgs(String[] args) {
+        int i = 0;
+        while (i < args.length) {
+            switch (args[i]) {
+                case "-obda":
+                    obdaFile = args[i + 1];
+                    i += 2;
+                    break;
+                case "-onto":
+                    owlFile = args[i + 1];
+                    i += 2;
+                    break;
+                case "-format":
+                    format = args[i + 1];
+                    i += 2;
+                    break;
+                case "-out":
+                    outputFile = args[i + 1];
+                    i += 2;
+                    break;
+                case "--separate--files":
+                    separate = true;
+                    i += 1;
+                    break;
+                default:
+                    System.err.println("Unknown option " + args[i]);
+                    System.err.println();
+                    return false;
+            }
+        }
 
-		return true;
+        if (obdaFile == null) {
+            System.err.println("Please specify the ontology file\n");
+            return false;
+        }
 
+        return true;
 	}
 
 }
