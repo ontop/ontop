@@ -280,7 +280,7 @@ public class QuestOWLMaterializerCMD {
                     outputFile = args[i + 1];
                     i += 2;
                     break;
-                case "--separate--files":
+                case "--separate-files":
                     separate = true;
                     i += 1;
                     break;

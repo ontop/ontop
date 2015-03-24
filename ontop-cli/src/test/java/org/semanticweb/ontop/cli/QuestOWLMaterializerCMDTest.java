@@ -19,7 +19,7 @@ public class QuestOWLMaterializerCMDTest {
         //String[] argv = {"-obda", "../obdalib-r2rml/src/test/resources/npd-v2-ql_a.obda", "-format", "turtle", "-output", "npd-v2.ttl"};
         String[] argv = {"-obda", "/Users/xiao/Projects/npd-benchmark/mappings/postgres/no-spatial/npd-v2-ql_a_postgres.obda",
                 "-onto", "/Users/xiao/Projects/npd-benchmark/ontology/vocabulary.owl",
-                "-format", "turtle", "-out", "/tmp/npd", "--separate--files"};
+                "-format", "turtle", "-out", "/tmp/npd", "--separate-files"};
         QuestOWLMaterializerCMD.main(argv);
     }
 
