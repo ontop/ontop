@@ -23,7 +23,7 @@ public class ExtractEqualityNormalizer {
     private final static Ord<VariableImpl> VARIABLE_ORD = Ord.hashEqualsOrd();
     private final static List<P2<VariableImpl, Constant>> EMPTY_VARIABLE_CONSTANT_LIST = List.nil();
     private final static List<P2<VariableImpl, VariableImpl>> EMPTY_VARIABLE_RENAMING_LIST = List.nil();
-
+    private final static List<Function> EMPTY_ATOM_LIST = List.nil();
     /**
      * TODO: explain
      *
@@ -408,8 +408,10 @@ public class ExtractEqualityNormalizer {
         List<Function> remainingLJAtoms = leftNormalizationResults.getNonPushableAtoms().append(rightNormalizationResults.getAllAtoms()).append(joiningEqualities);
         List<Function> pushedUpAtoms = leftNormalizationResults.getPushableAtoms();
 
+        // TODO: add a proper method in the data factory
+        Function normalizedLeftJoinAtom = DATA_FACTORY.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, new ArrayList<Term>(remainingLJAtoms.toCollection()));
 
-        return new ExtractEqNormResult(remainingLJAtoms, pushedUpAtoms, mergedSubstitution);
+        return new ExtractEqNormResult(List.cons(normalizedLeftJoinAtom, EMPTY_ATOM_LIST), pushedUpAtoms, mergedSubstitution);
     }
 
 
@@ -429,10 +431,14 @@ public class ExtractEqualityNormalizer {
             }
         };
 
+        /**
+         * TODO: explain!!!!!!!!!
+         */
         P2<List<Function>, List<Function>> firstDataAtomSplit = subAtoms.span(isNotDataAtomFct);
-        P2<List<Function>, List<Function>> secondDataAtomSplit = firstDataAtomSplit._2().span(isNotDataAtomFct);
+        Function firstDataAtom = firstDataAtomSplit._2().head();
+        P2<List<Function>, List<Function>> secondDataAtomSplit = firstDataAtomSplit._2().tail().span(isNotDataAtomFct);
 
-        List<Function> leftAtoms = firstDataAtomSplit._1().append(secondDataAtomSplit._1());
+        List<Function> leftAtoms = firstDataAtomSplit._1().snoc(firstDataAtom).append(secondDataAtomSplit._1());
         List<Function> rightAtoms = secondDataAtomSplit._2();
 
         return P.p(leftAtoms, rightAtoms);
