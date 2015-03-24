@@ -27,7 +27,6 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
-import jdk.nashorn.internal.ir.annotations.Immutable;
 
 import java.util.Collection;
 import java.util.Iterator;
