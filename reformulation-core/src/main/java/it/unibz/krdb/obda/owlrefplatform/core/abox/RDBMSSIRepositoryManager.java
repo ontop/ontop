@@ -53,18 +53,15 @@ import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,6 +72,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Store ABox assertions in the DB
@@ -87,25 +85,38 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	private static final long serialVersionUID = -6494667662327970606L;
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
-
 	
-	private static final class TableDescription {
+	static final class TableDescription {
 		final String tableName;
 		final String createCommand;
-		final String insertCommand;
+		private final String insertCommand;
+		private final String selectCommand;
 		
-		final List<String> createIndexCommands = new ArrayList<String>(3);
-		final List<String> dropIndexCommands = new ArrayList<String>(3);
+		final List<String> createIndexCommands = new ArrayList<>(3);
+		final List<String> dropIndexCommands = new ArrayList<>(3);
 		
-		final String selectCommand;
 		final String dropCommand;
 		
-		TableDescription(String tableName, String columnDefintions, String insertColumns, String select) {
+		TableDescription(String tableName, ImmutableMap<String, String> columnDefintions, String selectColumns) {
 			this.tableName = tableName;
 			this.dropCommand = "DROP TABLE " + tableName;
-			this.createCommand = "CREATE TABLE " + tableName + " ( " + columnDefintions + " )";
-			this.insertCommand = "INSERT INTO " + tableName + " " + insertColumns;
-			this.selectCommand = "SELECT " + select + " FROM " + tableName + " WHERE "; // REQUIRES CONDITION
+			this.createCommand = "CREATE TABLE " + tableName + 
+					" ( " + Joiner.on(", ").withKeyValueSeparator(" ").join(columnDefintions) + " )";
+			this.insertCommand = "INSERT INTO " + tableName + 
+					" (" + Joiner.on(", ").join(columnDefintions.keySet()) + ") VALUES (";
+			this.selectCommand = "SELECT " + selectColumns + " FROM " + tableName; 
+		}
+		
+		String getINSERT(String values) {
+			return insertCommand + values + ")";
+		}
+		
+		String getSELECT(String filter) {
+			return selectCommand +  " WHERE " + filter;
+		}
+		
+		String getSELECT() {
+			return selectCommand;
 		}
 		
 		void indexOn(String indexName, String columns) {
@@ -119,20 +130,25 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 */
 	
 	private final static TableDescription indexTable = new TableDescription("IDX", 
-			"URI VARCHAR(400), IDX INTEGER, ENTITY_TYPE INTEGER", 
-			"(URI, IDX, ENTITY_TYPE) VALUES(?, ?, ?)", "*");   
+			ImmutableMap.of("URI", "VARCHAR(400)", 
+					        "IDX", "INTEGER", 
+					        "ENTITY_TYPE", "INTEGER"), "*");   
 
 	private final static TableDescription intervalTable = new TableDescription("IDXINTERVAL",
-			"URI VARCHAR(400), IDX_FROM INTEGER, IDX_TO INTEGER, ENTITY_TYPE INTEGER",
-			"(URI, IDX_FROM, IDX_TO, ENTITY_TYPE) VALUES(?, ?, ?, ?)", "*");
+			ImmutableMap.of("URI", "VARCHAR(400)", 
+					        "IDX_FROM", "INTEGER", 
+					        "IDX_TO", "INTEGER", 
+					        "ENTITY_TYPE", "INTEGER"), "*");
 
 	private final static TableDescription uriIdTable = new TableDescription("URIID",
-			"ID INTEGER, URI VARCHAR(400)",
-			"(ID, URI) VALUES(?, ?)", "*");
+			ImmutableMap.of("ID", "INTEGER", 
+					        "URI", "VARCHAR(400)"), "*");
 	
-	private final static TableDescription emptinessIndexTable = new TableDescription("NONEMPTYNESSINDEX",
-			"TABLEID INTEGER, IDX INTEGER, TYPE1 INTEGER, TYPE2 INTEGER",
-			"(TABLEID, IDX, TYPE1, TYPE2) VALUES (?, ?, ?, ?)", "*");
+	final static TableDescription emptinessIndexTable = new TableDescription("NONEMPTYNESSINDEX",
+			ImmutableMap.of("TABLEID", "INTEGER", 
+					        "IDX", "INTEGER",
+					        "TYPE1", "INTEGER", 
+					        "TYPE2", "INTEGER"), "*");
 	
 	
 	
@@ -141,23 +157,40 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	 *  Data tables
 	 */
 	
-	private final static TableDescription classTable = new TableDescription("QUEST_CLASS_ASSERTION", 
-			"\"URI\" INTEGER NOT NULL, \"IDX\"  SMALLINT NOT NULL, ISBNODE BOOLEAN NOT NULL DEFAULT FALSE",
-			"(URI, IDX, ISBNODE) VALUES (?, ?, ?)", "\"URI\" as X");
+	final static TableDescription classTable = new TableDescription("QUEST_CLASS_ASSERTION", 
+			ImmutableMap.of("\"URI\"", "INTEGER NOT NULL", 
+					        "\"IDX\"", "SMALLINT NOT NULL", 
+					        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X");
 	
-	private final static TableDescription roleTable = new TableDescription("QUEST_OBJECT_PROPERTY_ASSERTION", 
-			"\"URI1\" INTEGER NOT NULL, \"URI2\" INTEGER NOT NULL, \"IDX\"  SMALLINT NOT NULL, " + 
-			"ISBNODE BOOLEAN NOT NULL DEFAULT FALSE, ISBNODE2 BOOLEAN NOT NULL DEFAULT FALSE",
-			"(URI1, URI2, IDX, ISBNODE, ISBNODE2) VALUES (?, ?, ?, ?, ?)", "\"URI1\" as X, \"URI2\" as Y");
-
-	private final static Map<COL_TYPE ,TableDescription> attributeTable = new HashMap<>();
+    final static Map<COL_TYPE ,TableDescription> attributeTable = new HashMap<>();
 	
+	private static final class AttributeTableDescritpion {
+		final COL_TYPE type;
+		final String tableName;
+		final String sqlTypeName;
+		final String indexName;
+		
+		public AttributeTableDescritpion(COL_TYPE type, String tableName, String sqlTypeName, String indexName) {
+			this.type = type;
+			this.tableName = tableName;
+			this.sqlTypeName = sqlTypeName;
+			this.indexName = indexName;
+		}
+	}
 	
 	static {
 				
 		classTable.indexOn("idxclassfull", "URI, IDX, ISBNODE");
 		classTable.indexOn("idxclassfull2", "URI, IDX");
 		
+		TableDescription roleTable = new TableDescription("QUEST_OBJECT_PROPERTY_ASSERTION", 
+				ImmutableMap.of("\"URI1\"", "INTEGER NOT NULL", 
+						        "\"URI2\"", "INTEGER NOT NULL", 
+						        "\"IDX\"", "SMALLINT NOT NULL", 
+						        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE", 
+						        "ISBNODE2", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI1\" as X, \"URI2\" as Y");
+		attributeTable.put(COL_TYPE.OBJECT, roleTable);
+
 		roleTable.indexOn("idxrolefull1", "URI1, URI2, IDX, ISBNODE, ISBNODE2");
 		roleTable.indexOn("idxrolefull2",  "URI2, URI1, IDX, ISBNODE2, ISBNODE");
 		roleTable.indexOn("idxrolefull22", "URI1, URI2, IDX");
@@ -166,9 +199,11 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		// COL_TYPE.LITERAL is special because of one extra attribute (LANG)
 		
 		TableDescription attributeTableLiteral = new TableDescription("QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
-				"\"URI\" INTEGER NOT NULL, VAL VARCHAR(1000) NOT NULL, LANG VARCHAR(20), \"IDX\"  SMALLINT NOT NULL, " + 
-				"ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE ",
-				"(URI, VAL, LANG, IDX, ISBNODE) VALUES (?, ?, ?, ?, ?)", "\"URI\" as X, VAL as Y, LANG as Z");
+				ImmutableMap.of("\"URI\"", "INTEGER NOT NULL", 
+						        "VAL", "VARCHAR(1000) NOT NULL", 
+						        "\"IDX\"", "SMALLINT NOT NULL", 
+						        "LANG", "VARCHAR(20)", 
+						        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X, VAL as Y, LANG as Z");
 		attributeTable.put(COL_TYPE.LITERAL, attributeTableLiteral);
 			
 		attributeTableLiteral.indexOn("IDX_LITERAL_ATTRIBUTE" + "1", "URI");		
@@ -178,66 +213,49 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		
 		// all other datatypes from COL_TYPE are treated similarly
 		
-		Map<COL_TYPE, String> attribute_table = new HashMap<>();
-		attribute_table.put(COL_TYPE.STRING, "QUEST_DATA_PROPERTY_STRING_ASSERTION");    // 1
-		attribute_table.put(COL_TYPE.INTEGER, "QUEST_DATA_PROPERTY_INTEGER_ASSERTION");   // 2
-		attribute_table.put(COL_TYPE.INT, "QUEST_DATA_PROPERTY_INT_ASSERTION");   // 3
-		attribute_table.put(COL_TYPE.UNSIGNED_INT, "QUEST_DATA_PROPERTY_UNSIGNED_INT_ASSERTION");   // 4
-		attribute_table.put(COL_TYPE.NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NEGATIVE_INTEGER_ASSERTION");  // 5
-		attribute_table.put(COL_TYPE.NON_NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_NEGATIVE_INTEGER_ASSERTION"); // 6
-		attribute_table.put(COL_TYPE.POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_POSITIVE_INTEGER_ASSERTION");  // 7
-		attribute_table.put(COL_TYPE.NON_POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_POSITIVE_INTEGER_ASSERTION");  // 8
-		attribute_table.put(COL_TYPE.LONG, "QUEST_DATA_PROPERTY_LONG_ASSERTION");  // 9
-		attribute_table.put(COL_TYPE.DECIMAL, "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION"); // 10
-		attribute_table.put(COL_TYPE.FLOAT, "QUEST_DATA_PROPERTY_FLOAT_ASSERTION");  // 11
-		attribute_table.put(COL_TYPE.DOUBLE, "QUEST_DATA_PROPERTY_DOUBLE_ASSERTION"); // 12
-		attribute_table.put(COL_TYPE.DATETIME, "QUEST_DATA_PROPERTY_DATETIME_ASSERTION"); // 13
-		attribute_table.put(COL_TYPE.BOOLEAN,  "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION");  // 14
+		List<AttributeTableDescritpion> attributeDescritions = new ArrayList<>();
+		attributeDescritions.add(new AttributeTableDescritpion(   // 1
+				COL_TYPE.STRING, "QUEST_DATA_PROPERTY_STRING_ASSERTION", "VARCHAR(1000)", "IDX_STRING_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 2
+				COL_TYPE.INTEGER, "QUEST_DATA_PROPERTY_INTEGER_ASSERTION", "BIGINT", "IDX_INTEGER_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 3
+				COL_TYPE.INT, "QUEST_DATA_PROPERTY_INT_ASSERTION", "INTEGER", "XSD_INT_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 4
+				COL_TYPE.UNSIGNED_INT, "QUEST_DATA_PROPERTY_UNSIGNED_INT_ASSERTION", "INTEGER", "XSD_UNSIGNED_INT_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 5
+				COL_TYPE.NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NEGATIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NEGATIVE_INTEGER_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 6
+				COL_TYPE.NON_NEGATIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_NEGATIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NON_NEGATIVE_INTEGER_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 7
+				COL_TYPE.POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_POSITIVE_INTEGER_ASSERTION", "BIGINT", "XSD_POSITIVE_INTEGER_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 8
+				COL_TYPE.NON_POSITIVE_INTEGER, "QUEST_DATA_PROPERTY_NON_POSITIVE_INTEGER_ASSERTION", "BIGINT", "XSD_NON_POSITIVE_INTEGER_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 9
+				COL_TYPE.LONG, "QUEST_DATA_PROPERTY_LONG_ASSERTION", "BIGINT", "IDX_LONG_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 10
+				COL_TYPE.DECIMAL, "QUEST_DATA_PROPERTY_DECIMAL_ASSERTION", "DECIMAL", "IDX_DECIMAL_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 11
+				COL_TYPE.FLOAT, "QUEST_DATA_PROPERTY_FLOAT_ASSERTION", "DOUBLE PRECISION", "XSD_FLOAT_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 12
+				COL_TYPE.DOUBLE, "QUEST_DATA_PROPERTY_DOUBLE_ASSERTION", "DOUBLE PRECISION", "IDX_DOUBLE_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 13
+				COL_TYPE.DATETIME, "QUEST_DATA_PROPERTY_DATETIME_ASSERTION", "TIMESTAMP", "IDX_DATETIME_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 14
+				COL_TYPE.BOOLEAN,  "QUEST_DATA_PROPERTY_BOOLEAN_ASSERTION", "BOOLEAN", "IDX_BOOLEAN_ATTRIBUTE"));
+		attributeDescritions.add(new AttributeTableDescritpion(   // 15
+				COL_TYPE.DATETIME_STAMP, "QUEST_DATA_PROPERTY_DATETIMESTAMP_ASSERTION", "TIMESTAMP", "IDX_DATETIMESTAMP_ATTRIBUTE"));
 		
-		
-		Map<COL_TYPE, String> attribute_type = new HashMap<>();
-		attribute_type.put(COL_TYPE.STRING, "VARCHAR(1000)");
-		attribute_type.put(COL_TYPE.INTEGER, "BIGINT");
-		attribute_type.put(COL_TYPE.INT, "INTEGER");
-		attribute_type.put(COL_TYPE.NEGATIVE_INTEGER, "BIGINT");
-		attribute_type.put(COL_TYPE.POSITIVE_INTEGER, "BIGINT");
-		attribute_type.put(COL_TYPE.UNSIGNED_INT, "INTEGER");
-		attribute_type.put(COL_TYPE.NON_POSITIVE_INTEGER, "BIGINT");
-		attribute_type.put(COL_TYPE.NON_NEGATIVE_INTEGER, "BIGINT");
-		attribute_type.put(COL_TYPE.LONG, "BIGINT");
-		attribute_type.put(COL_TYPE.DECIMAL, "DECIMAL");
-		attribute_type.put(COL_TYPE.DOUBLE, "DOUBLE PRECISION");
-		attribute_type.put(COL_TYPE.FLOAT, "DOUBLE PRECISION");
-		attribute_type.put(COL_TYPE.DATETIME, "TIMESTAMP");
-		attribute_type.put(COL_TYPE.BOOLEAN, "BOOLEAN");
-
-		Map<COL_TYPE, String> attribute_index = new HashMap<>();
-		attribute_index.put(COL_TYPE.STRING, "IDX_STRING_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.INTEGER, "IDX_INTEGER_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.INT,  "XSD_INT_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.UNSIGNED_INT, "XSD_UNSIGNED_INT_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.NEGATIVE_INTEGER, "XSD_NEGATIVE_INTEGER_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.NON_NEGATIVE_INTEGER, "XSD_NON_NEGATIVE_INTEGER_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.POSITIVE_INTEGER, "XSD_POSITIVE_INTEGER_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.NON_POSITIVE_INTEGER, "XSD_NON_POSITIVE_INTEGER_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.FLOAT, "XSD_FLOAT_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.LONG, "IDX_LONG_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.DECIMAL, "IDX_DECIMAL_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.DOUBLE, "IDX_DOUBLE_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.DATETIME, "IDX_DATETIME_ATTRIBUTE");
-		attribute_index.put(COL_TYPE.BOOLEAN, "IDX_BOOLEAN_ATTRIBUTE");
-
-		
-		for (COL_TYPE datatype : attribute_table.keySet()) {
-			TableDescription table = new TableDescription(attribute_table.get(datatype),
-					"\"URI\" INTEGER  NOT NULL, VAL " + attribute_type.get(datatype) + 
-					", \"IDX\"  SMALLINT  NOT NULL, ISBNODE BOOLEAN  NOT NULL DEFAULT FALSE",
-					"(URI, VAL, IDX, ISBNODE) VALUES (?, ?, ?, ?)", "\"URI\" as X, VAL as Y");
-			attributeTable.put(datatype, table);
+		for (AttributeTableDescritpion descrtiption : attributeDescritions) {
+			TableDescription table = new TableDescription(descrtiption.tableName,
+					ImmutableMap.of("\"URI\"", "INTEGER NOT NULL", 
+							        "VAL", descrtiption.sqlTypeName, 
+							        "\"IDX\"", "SMALLINT  NOT NULL", 
+							        "ISBNODE", "BOOLEAN NOT NULL DEFAULT FALSE"), "\"URI\" as X, VAL as Y");
+			attributeTable.put(descrtiption.type, table);
 			
-			table.indexOn(attribute_index.get(datatype) + "1", "URI");		
-			table.indexOn(attribute_index.get(datatype) + "2", "IDX");
-			table.indexOn(attribute_index.get(datatype) + "3", "VAL");
+			table.indexOn(descrtiption.indexName + "1", "URI");		
+			table.indexOn(descrtiption.indexName + "2", "IDX");
+			table.indexOn(descrtiption.indexName + "3", "VAL");
 		}
 	}
 	
@@ -253,8 +271,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 	private boolean isIndexed;  // database index created
 
-	private final HashSet<SemanticIndexRecord> nonEmptyEntityRecord = new HashSet<>();
-
+	private SemanticIndexViewsManager views = new SemanticIndexViewsManager();
+	
 	private final List<RepositoryChangedListener> changeList = new LinkedList<>();
 
 	public RDBMSSIRepositoryManager(TBoxReasoner reasonerDag) {
@@ -296,8 +314,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			st.addBatch(emptinessIndexTable.createCommand);
 
 			st.addBatch(classTable.createCommand);
-			st.addBatch(roleTable.createCommand);
-
 			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
 				st.addBatch(entry.getValue().createCommand);
 			
@@ -309,11 +325,9 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 	private boolean isDBSchemaDefined(Connection conn) throws SQLException {
 		
-		boolean exists = false; // initially pessimistic
-		
 		try (Statement st = conn.createStatement()) {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", classTable.tableName));
-			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", roleTable.tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.OBJECT).tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.LITERAL).tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.STRING).tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.INTEGER).tableName));
@@ -322,13 +336,14 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DOUBLE).tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DATETIME).tableName));
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.BOOLEAN).tableName));
+			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", attributeTable.get(COL_TYPE.DATETIME_STAMP).tableName));
 
-			exists = true; // everything is fine if we get to this point
+			return true; // everything is fine if we get to this point
 		} 
 		catch (Exception e) {
 			// ignore all exceptions
 		}
-		return exists;
+		return false; // there was an exception if we have got here
 	}
 	
 	
@@ -340,14 +355,15 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			st.addBatch(emptinessIndexTable.dropCommand);
 
 			st.addBatch(classTable.dropCommand);
-			st.addBatch(roleTable.dropCommand);
-			
 			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())
 				st.addBatch(entry.getValue().dropCommand); 
 			
 			st.addBatch(uriIdTable.dropCommand);
 
 			st.executeBatch();
+		}
+		catch (BatchUpdateException e) {
+			// no-op: ignore all exceptions here
 		}
 	}
 
@@ -361,149 +377,128 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		boolean oldAutoCommit = conn.getAutoCommit();
 		conn.setAutoCommit(false);
 
-		// Create the insert statement for all assertions (i.e, concept, role
-		// and attribute)
-		PreparedStatement uriidStm = conn.prepareStatement(uriIdTable.insertCommand);
-		PreparedStatement classStm = conn.prepareStatement(classTable.insertCommand);
-		PreparedStatement roleStm = conn.prepareStatement(roleTable.insertCommand);
-		
-		Map<COL_TYPE, PreparedStatement> attributeStm = new HashMap<COL_TYPE, PreparedStatement>();
-		for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet()) {
-			PreparedStatement stm = conn.prepareStatement(entry.getValue().insertCommand);
-			attributeStm.put(entry.getKey(), stm);
-		}
+		PreparedStatement uriidStm = conn.prepareStatement(uriIdTable.getINSERT("?, ?"));
+		Map<SemanticIndexViewID, PreparedStatement> stmMap = new HashMap<>();
 		
 		// For counting the insertion
 		int success = 0;
-		Map<Predicate, Integer> failures = new HashMap<Predicate, Integer>();
+		Map<Predicate, Integer> failures = new HashMap<>();
 
 		int batchCount = 0;
 		int commitCount = 0;
 
-		while (data.hasNext()) {
-			Assertion ax = data.next();
+		try {
+			while (data.hasNext()) {
+				Assertion ax = data.next();
 
-			// log.debug("Inserting statement: {}", ax);
-			batchCount++;
-			commitCount++;
+				// log.debug("Inserting statement: {}", ax);
+				batchCount++;
+				commitCount++;
 
+				if (ax instanceof ClassAssertion) {
+					ClassAssertion ca = (ClassAssertion) ax; 
+					try {
+						process(conn, ca, uriidStm, stmMap);
+						success++;
+					}
+					catch (Exception e) {
+						Predicate predicate = ca.getConcept().getPredicate();
+						Integer counter = failures.get(predicate);
+						if (counter == null) 
+							counter = 0;
+						failures.put(predicate, counter + 1);					
+					}
+				} 
+				else if (ax instanceof ObjectPropertyAssertion) {
+					ObjectPropertyAssertion opa = (ObjectPropertyAssertion)ax;
+					try {
+						process(conn, opa, uriidStm, stmMap);	
+						success++;
+					}
+					catch (Exception e) {
+						Predicate predicate = opa.getProperty().getPredicate();
+						Integer counter = failures.get(predicate);
+						if (counter == null) 
+							counter = 0;
+						failures.put(predicate, counter + 1);					
+					}
+				}
+				else /* (ax instanceof DataPropertyAssertion) */ {
+					DataPropertyAssertion dpa = (DataPropertyAssertion)ax;
+					try {
+						process(conn, dpa, uriidStm, stmMap);				
+						success++;					
+					}
+					catch (Exception e) {
+						Predicate predicate = dpa.getProperty().getPredicate();
+						Integer counter = failures.get(predicate);
+						if (counter == null) 
+							counter = 0;
+						failures.put(predicate, counter + 1);					
+					}
+				}
 
-			if (ax instanceof ClassAssertion) {
-				ClassAssertion ca = (ClassAssertion) ax; 
-				try {
-					process(ca, uriidStm, classStm);
+				// Check if the batch count is already in the batch limit
+				if (batchCount == batchLimit) {
+					uriidStm.executeBatch();
+					uriidStm.clearBatch();
+					for (PreparedStatement stm : stmMap.values()) {
+						stm.executeBatch();
+						stm.clearBatch();
+					}
+					batchCount = 0; // reset the counter
 				}
-				catch (Exception e) {
-					Predicate predicate = ca.getConcept().getPredicate();
-					Integer counter = failures.get(predicate);
-					if (counter == null) 
-						counter = 0;
-					failures.put(predicate, counter + 1);					
-				}
-			} 
-			else if (ax instanceof ObjectPropertyAssertion) {
-				ObjectPropertyAssertion opa = (ObjectPropertyAssertion)ax;
-				try {
-					process(opa, uriidStm, roleStm);	
-				}
-				catch (Exception e) {
-					Predicate predicate = opa.getProperty().getPredicate();
-					Integer counter = failures.get(predicate);
-					if (counter == null) 
-						counter = 0;
-					failures.put(predicate, counter + 1);					
+
+				// Check if the commit count is already in the commit limit
+				if (commitCount == commitLimit) {
+					conn.commit();
+					commitCount = 0; // reset the counter
 				}
 			}
-			else /* (ax instanceof DataPropertyAssertion) */ {
-				DataPropertyAssertion dpa = (DataPropertyAssertion)ax;
-				try {
-					process(dpa, uriidStm, attributeStm);										
-				}
-				catch (Exception e) {
-					Predicate predicate = dpa.getProperty().getPredicate();
-					Integer counter = failures.get(predicate);
-					if (counter == null) 
-						counter = 0;
-					failures.put(predicate, counter + 1);					
-				}
-			}
 
-			// Check if the batch count is already in the batch limit
-			if (batchCount == batchLimit) {
-				uriidStm.executeBatch();
-				uriidStm.clearBatch();
-				roleStm.executeBatch();
-				roleStm.clearBatch();;
-				for (PreparedStatement stm : attributeStm.values()) {
-					stm.executeBatch();
-					stm.clearBatch();
-				}
-				classStm.executeBatch();
-				classStm.clearBatch();
-				batchCount = 0; // reset the counter
+			// Execute the rest of the batch
+			uriidStm.executeBatch();
+			uriidStm.clearBatch();
+			for (PreparedStatement stm : stmMap.values()) {
+				stm.executeBatch();
+				stm.clearBatch();
 			}
-
-			// Check if the commit count is already in the commit limit
-			if (commitCount == commitLimit) {
-				conn.commit();
-				commitCount = 0; // reset the counter
-			}
+			// Commit the rest of the batch insert
+			conn.commit();
 		}
-
-		// Execute the rest of the batch
-		uriidStm.executeBatch();
-		uriidStm.clearBatch();
-		roleStm.executeBatch();
-		roleStm.clearBatch();;
-		for (PreparedStatement stm : attributeStm.values()) {
-			stm.executeBatch();
-			stm.clearBatch();
+		finally {
+			// Close all open statements
+			uriidStm.close();
+			for (PreparedStatement stm : stmMap.values()) 
+				stm.close();
 		}
-		classStm.executeBatch();
-		classStm.clearBatch();
-
-	
-		// Close all open statements
-		uriidStm.close();
-		roleStm.close();
-		for (PreparedStatement stm : attributeStm.values())
-			stm.close();
-		classStm.close();
-
-		// Commit the rest of the batch insert
-		conn.commit();
 
 		conn.setAutoCommit(oldAutoCommit);
 
 		// Print the monitoring log
 		log.debug("Total successful insertions: " + success + ".");
 		int totalFailures = 0;
-		for (Predicate predicate : failures.keySet()) {
-			int failure = failures.get(predicate);
-			log.warn("Failed to insert data for predicate {} ({} tuples).", predicate, failure);
-			totalFailures += failure;
+		for (Map.Entry<Predicate, Integer> entry : failures.entrySet()) {
+			log.warn("Failed to insert data for predicate {} ({} tuples).", entry.getKey(), entry.getValue());
+			totalFailures += entry.getValue();
 		}
 		if (totalFailures > 0) {
 			log.warn("Total failed insertions: " + totalFailures + ". (REASON: datatype mismatch between the ontology and database).");
 		}
 
-		fireRepositoryChanged();
+		/*
+		 * fired ONLY when new data is inserted and emptiness index is updated
+		 * (this is done in order to update T-mappings)
+		 */
+
+		for (RepositoryChangedListener listener : changeList) 
+			listener.repositoryChanged();
 
 		return success;
 	}
 
-	/*
-	 * fired ONLY when new data is inserted and emptiness index is updated
-	 * (this is done in order to update T-mappings)
-	 */
-	
-	private void fireRepositoryChanged() {
-		for (RepositoryChangedListener listener : changeList) {
-			listener.repositoryChanged();
-		}
-	}
 
-	private void process(ObjectPropertyAssertion ax, PreparedStatement uriidStm, PreparedStatement roleStm) throws SQLException {
+	private void process(Connection conn, ObjectPropertyAssertion ax, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
 
 		ObjectPropertyExpression ope0 = ax.getProperty();
 		if (ope0.isInverse()) 
@@ -530,62 +525,66 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		int idx = cacheSI.getEntry(ope).getIndex();
 		
+
+		SemanticIndexView view = views.getView(o1.getType(), o2.getType());
+		
+		PreparedStatement stm = stmMap.get(view.getId());
+		if (stm == null) {
+			stm = conn.prepareStatement(view.getINSERT());
+			stmMap.put(view.getId(), stm);
+		}
+		
 		int uri_id = getObjectConstantUriId(o1, uriidStm);
 		int uri2_id = getObjectConstantUriId(o2, uriidStm);
 		
 		// Construct the database INSERT statements		
-		roleStm.setInt(1, uri_id);
-		roleStm.setInt(2, uri2_id);		
-		roleStm.setInt(3, idx);
-		roleStm.setBoolean(4, o1 instanceof BNode);
-		roleStm.setBoolean(5, o2 instanceof BNode);
-		roleStm.addBatch();
+		stm.setInt(1, uri_id);
+		stm.setInt(2, uri2_id);		
+		stm.setInt(3, idx);
+		stm.addBatch();
 		
 		// Register non emptiness
-		COL_TYPE t1 = o1.getType();
-		COL_TYPE t2 = o2.getType();		
-		SemanticIndexRecord record = new SemanticIndexRecord(t1, t2, idx);
-		nonEmptyEntityRecord.add(record);
+		view.addIndex(idx);
 	} 
 
-	private void process(DataPropertyAssertion ax, PreparedStatement uriidStm, Map<COL_TYPE, PreparedStatement> attributeStatement) throws SQLException {
-		
-		ObjectConstant subject = ax.getSubject();
-		int uri_id = getObjectConstantUriId(subject, uriidStm);
-		
+	private void process(Connection conn, DataPropertyAssertion ax, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
+
 		// replace the property by its canonical representative 
 		DataPropertyExpression dpe0 = ax.getProperty();
 		DataPropertyExpression dpe = reasonerDag.getDataPropertyDAG().getVertex(dpe0).getRepresentative();		
 		int idx = cacheSI.getEntry(dpe).getIndex();
-
-		ValueConstant object = ax.getValue();
-		Predicate.COL_TYPE attributeType = object.getType();
-		// special treatment for LITERAL_LANG
-		if (attributeType == COL_TYPE.LITERAL_LANG)
-			attributeType = COL_TYPE.LITERAL;
 		
-		// Construct the database INSERT statements
-		PreparedStatement stm = attributeStatement.get(attributeType);
+		ObjectConstant subject = ax.getSubject();
+		
+		ValueConstant object = ax.getValue();
+		COL_TYPE objectType = object.getType();
+		
+		SemanticIndexView view =  views.getView(subject.getType(), objectType);
+		PreparedStatement stm = stmMap.get(view.getId());
 		if (stm == null) {
-			// UNSUPPORTED DATATYPE
-			log.warn("Ignoring assertion: {}", ax);			
-			return;
+			stm = conn.prepareStatement(view.getINSERT());
+			stmMap.put(view.getId(), stm);
 		}
+
+		int uri_id = getObjectConstantUriId(subject, uriidStm);
 		stm.setInt(1, uri_id);
 		
 		String value = object.getValue();
 		
-		switch (attributeType) {
+		switch (objectType) {
 			case LITERAL:  // 0
 				stm.setString(2, value);
-				stm.setString(3, object.getLanguage());
+				break;  
+			case LITERAL_LANG:  // -3
+				stm.setString(2, value);
+				stm.setString(4, object.getLanguage());
 				break;  
 			case STRING:   // 1
 				stm.setString(2, value);
 				break;
 	        case INT:   // 3
-	            if (value.charAt(0) == '+')
-	                value = value.substring(1, value.length());
+	            //if (value.charAt(0) == '+') // ROMAN: not needed in Java 7
+	            //    value = value.substring(1, value.length());
 	        	stm.setInt(2, Integer.parseInt(value));
 	            break;
 	        case UNSIGNED_INT:  // 4
@@ -597,8 +596,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	        case NON_NEGATIVE_INTEGER: // 7
 	        case NON_POSITIVE_INTEGER: // 8
 	        case LONG: // 10
-	            if (value.charAt(0) == '+')
-	                value = value.substring(1, value.length());
+	            //if (value.charAt(0) == '+')  // ROMAN: not needed in Java 7
+	            //    value = value.substring(1, value.length());
 	            stm.setLong(2, Long.parseLong(value));
 	            break;
 	        case FLOAT: // 9
@@ -610,61 +609,53 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			case DECIMAL: // 11
 				stm.setBigDecimal(2, new BigDecimal(value));
 				break;
+			case DATETIME_STAMP: // 15
 			case DATETIME: // 13
-				stm.setTimestamp(2, parseTimestamp(value));
+				stm.setTimestamp(2, XsdDatatypeConverter.parseXsdDateTime(value));
 				break;
-			case BOOLEAN: // 14
-				// PostgreSQL abbreviates the boolean value to 't' and 'f'
-				if (value.equalsIgnoreCase("t") || value.equals("1")) 
-					value = "true";
-				else if (value.equalsIgnoreCase("f") || value.equals("0")) 
-					value= "false";
-			
-				stm.setBoolean(2, Boolean.parseBoolean(value));
+			case BOOLEAN: // 14				
+				stm.setBoolean(2, XsdDatatypeConverter.parseXsdBoolean(value));
 				break;
 			default:
+				// UNSUPPORTED DATATYPE
+				log.warn("Ignoring assertion: {}", ax);			
+				return;				
 		}
 		
-		boolean c1isBNode = subject instanceof BNode;
-		if (attributeType == COL_TYPE.LITERAL) {
-			stm.setInt(4, idx);
-			stm.setBoolean(5, c1isBNode);			
-		}
-		else {
-			stm.setInt(3, idx);
-			stm.setBoolean(4, c1isBNode);			
-		}
+		stm.setInt(3, idx);
 		stm.addBatch();
 		
 		// register non-emptiness
-		COL_TYPE t1 = subject.getType();
-		COL_TYPE t2 = object.getType();		
-		SemanticIndexRecord record = new SemanticIndexRecord(t1, t2, idx);
-		nonEmptyEntityRecord.add(record);
+		view.addIndex(idx);
 	}
 	
 		
-	private void process(ClassAssertion ax, PreparedStatement uriidStm, PreparedStatement classStm) throws SQLException {
+	private void process(Connection conn, ClassAssertion ax, PreparedStatement uriidStm, Map<SemanticIndexViewID, PreparedStatement> stmMap) throws SQLException {
 		
-		ObjectConstant c1 = ax.getIndividual();
-
-		int uri_id = getObjectConstantUriId(c1, uriidStm); 
-
 		// replace concept by the canonical representative (which must be a concept name)
 		OClass concept0 = ax.getConcept();
 		OClass concept = (OClass)reasonerDag.getClassDAG().getVertex(concept0).getRepresentative();	
 		int conceptIndex = cacheSI.getEntry(concept).getIndex();	
 
+		ObjectConstant c1 = ax.getIndividual();
+
+		SemanticIndexView view =  views.getView(c1.getType());
+	
+		PreparedStatement stm = stmMap.get(view.getId());
+		if (stm == null) {
+			stm = conn.prepareStatement(view.getINSERT());
+			stmMap.put(view.getId(), stm);
+		}
+
+		int uri_id = getObjectConstantUriId(c1, uriidStm); 
+		
 		// Construct the database INSERT statements
-		classStm.setInt(1, uri_id);
-		classStm.setInt(2, conceptIndex);
-		classStm.setBoolean(3, c1 instanceof BNode);
-		classStm.addBatch();
+		stm.setInt(1, uri_id);
+		stm.setInt(2, conceptIndex);
+		stm.addBatch();
 	
 		// Register non emptiness
-		COL_TYPE t1 = c1.getType();
-		SemanticIndexRecord record = new SemanticIndexRecord(t1, conceptIndex);
-		nonEmptyEntityRecord.add(record);
+		view.addIndex(conceptIndex);
 	}
 
 	// TODO: big issue -- URI map is incomplete -- it is never read back from the DB
@@ -694,30 +685,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 	
 
 
-
-
-
-	private static final String[] formatStrings = { 
-				"yyyy-MM-dd HH:mm:ss.SS", 
-				"yyyy-MM-dd HH:mm:ss.S", 
-				"yyyy-MM-dd HH:mm:ss", 
-				"yyyy-MM-dd",
-				"yyyy-MM-dd'T'HH:mm:ssz" };
-	
-	private static Timestamp parseTimestamp(String lit) {
-
-		for (String formatString : formatStrings) {
-			try {
-				long time = new SimpleDateFormat(formatString).parse(lit).getTime();
-				Timestamp ts = new Timestamp(time);
-				return ts;
-			} 
-			catch (ParseException e) {
-			}
-		}
-		return null; // the string can't be parsed to one of the datetime
-						// formats.
-	}
 
 	// Attribute datatype from TBox
 	/*
@@ -834,11 +801,11 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		log.debug("Loading semantic index metadata from the database *");
 
 		cacheSI = new SemanticIndexCache(reasonerDag);	
-		nonEmptyEntityRecord.clear();
+		views = new SemanticIndexViewsManager();
 
 		// Fetching the index data 
 		Statement st = conn.createStatement();
-		ResultSet res = st.executeQuery("SELECT * FROM " + indexTable.tableName + " ORDER BY IDX");
+		ResultSet res = st.executeQuery(indexTable.getSELECT() + " ORDER BY IDX");
 		while (res.next()) {
 			String iri = res.getString(1);
 			if (iri.startsWith("file:/"))  // ROMAN: what exactly is this?!
@@ -859,14 +826,14 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		}
 		
 		
-		// fetching the intervals data, note that a given String can have one ore
+		// Fetching the intervals data, note that a given String can have one or
 		// more intervals (a set) hence we need to go through several rows to
 		// collect all of them. To do this we sort the table by URI (to get all
 		// the intervals for a given String in sequence), then we collect all the
 		// intervals row by row until we change URI, at that switch we store the
 		// interval
 
-		res = st.executeQuery("SELECT * FROM " + intervalTable.tableName + " ORDER BY URI, ENTITY_TYPE");
+		res = st.executeQuery(intervalTable.getSELECT() + " ORDER BY URI, ENTITY_TYPE");
 
 		List<Interval> currentSet = null;
 		int previousType = 0;
@@ -879,7 +846,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			int type = res.getInt(4);
 
 			if (previousString == null) { // very first row
-				currentSet = new LinkedList<Interval>();
+				currentSet = new LinkedList<>();
 				previousType = type;
 				previousString = iri;
 			}
@@ -889,7 +856,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				 // intervals and clear the set
 				setIntervals(previousString, previousType, currentSet, maxObjectPropertyIndex);
 
-				currentSet = new LinkedList<Interval>();
+				currentSet = new LinkedList<>();
 				previousType = type;
 				previousString = iri;
 			}
@@ -903,36 +870,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		res.close();
 
-		/**
-		 * Restoring the emptiness index
-		 */
-		res = st.executeQuery("SELECT * FROM " + emptinessIndexTable.tableName);
-		while (res.next()) {
-			int sitable = res.getInt(1);
-			int type1 = res.getInt(3);
-			int type2 = res.getInt(4);
-			int idx = res.getInt(2);
-			
-			SemanticIndexRecord.checkTypeValue(type1);
-			SemanticIndexRecord.checkTypeValue(type2);
-			SemanticIndexRecord.checkSITableValue(sitable);
-			
-			SemanticIndexRecord r = new SemanticIndexRecord(sitable, type1, type2, idx);
-			nonEmptyEntityRecord.add(r);
-		}
-
-		res.close();
-
+		views.load(conn);
 	}
-
-	private static final COL_TYPE objectTypes[] = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.BNODE };
-
-	private static final COL_TYPE types[] = new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL_LANG, COL_TYPE.BOOLEAN, 
-		COL_TYPE.DATETIME, COL_TYPE.DECIMAL, COL_TYPE.DOUBLE, COL_TYPE.INTEGER, COL_TYPE.INT,
-		COL_TYPE.UNSIGNED_INT, COL_TYPE.NEGATIVE_INTEGER, COL_TYPE.NON_NEGATIVE_INTEGER, 
-		COL_TYPE.POSITIVE_INTEGER, COL_TYPE.NON_POSITIVE_INTEGER, COL_TYPE.FLOAT,  COL_TYPE.LONG, 
-		COL_TYPE.STRING };
-
 
 	
 	public Collection<OBDAMappingAxiom> getMappings() throws OBDAException {
@@ -949,15 +888,24 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 		for (Equivalences<ObjectPropertyExpression> set: reasonerDag.getObjectPropertyDAG()) {
 
-			ObjectPropertyExpression node = set.getRepresentative();
+			ObjectPropertyExpression ope = set.getRepresentative();
 			// only named roles are mapped
-			if (node.isInverse()) 
+			if (ope.isInverse()) 
 				continue;
 			
 			// We need to make sure we make no mappings for Auxiliary roles
 			// introduced by the Ontology translation process.
-			if (OntologyVocabularyImpl.isAuxiliaryProperty(node)) 
+			if (OntologyVocabularyImpl.isAuxiliaryProperty(ope)) 
 				continue;
+
+			SemanticIndexRange range = cacheSI.getEntry(ope);
+			if (range == null) {
+				log.debug("Object property " + ope + " has no SemanticIndexRange");
+				return null;
+			}
+			List<Interval> intervals = range.getIntervals();	
+			String intervalsSqlFilter = getIntervalString(intervals);
+			
 			
 			/***
 			 * Generating one mapping for each supported cases, i.e., the second
@@ -969,43 +917,35 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			 * each property can act as an object or data property of any type.
 			 */
 			
-			for (COL_TYPE obType1 : objectTypes) {
-				for (COL_TYPE obType2 : objectTypes) {
-					if (!isMappingEmpty(node, obType1, obType2)) {
-						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, obType2);
-						String sourceQuery = constructSourceQuery(node, obType1, obType2);
-						if (sourceQuery == null)
-							continue;
-						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-						result.add(basicmapping);		
-					}
-				}
-			}
-
-			for (COL_TYPE obType1 : objectTypes) {
-				for (COL_TYPE type2 : types) {			
-					if (!isMappingEmpty(node, obType1, type2)) {
-						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, type2);
-						String sourceQuery = constructSourceQuery(node, obType1, type2);
-						if (sourceQuery == null)
-							continue;
-						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-						result.add(basicmapping);
-					}
-				}	
+			for (SemanticIndexView view : views.getPropertyViews()) {
+				if (view.isEmptyForIntervals(intervals))
+					continue;
+				
+				String sourceQuery = view.getSELECT(intervalsSqlFilter);
+				CQIE targetQuery = constructTargetQuery(ope.getPredicate(), view.getId().getType1(), view.getId().getType2());
+				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+				result.add(basicmapping);		
 			}
 		}
 
 		for (Equivalences<DataPropertyExpression> set: reasonerDag.getDataPropertyDAG()) {
 
-			DataPropertyExpression node = set.getRepresentative();
+			DataPropertyExpression dpe = set.getRepresentative();
 			
 			// We need to make sure we make no mappings for Auxiliary roles
 			// introduced by the Ontology translation process.
-			if (OntologyVocabularyImpl.isAuxiliaryProperty(node)) 
+			if (OntologyVocabularyImpl.isAuxiliaryProperty(dpe)) 
 				continue;
 			
-
+			SemanticIndexRange range = cacheSI.getEntry(dpe);
+			if (range == null) {
+				log.debug("Data property " + dpe + " has no SemanticIndexRange");
+				return null;
+			}
+			List<Interval> intervals = range.getIntervals();
+			String intervalsSqlFilter = getIntervalString(intervals);
+			
+		
 			/***
 			 * Generating one mapping for each supported cases, i.e., the second
 			 * component is an object, or one of the supported datatypes. For
@@ -1016,30 +956,14 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			 * each property can act as an object or data property of any type.
 			 */
 			
-			for (COL_TYPE obType1 : objectTypes) {
-				for (COL_TYPE obType2 : objectTypes) {
-					if (!isMappingEmpty(node, obType1, obType2)) {
-						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, obType2);
-						String sourceQuery = constructSourceQuery(node, obType1, obType2);
-						if (sourceQuery == null)
-							continue;
-						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-						result.add(basicmapping);			
-					}
-				}
-			}
-
-			for (COL_TYPE obType1 : objectTypes) {
-				for (COL_TYPE type2 : types) {			
-					if (!isMappingEmpty(node, obType1, type2)) {
-						CQIE targetQuery = constructTargetQuery(node.getPredicate(), obType1, type2);
-						String sourceQuery = constructSourceQuery(node, obType1, type2);
-						if (sourceQuery == null)
-							continue;
-						OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
-						result.add(basicmapping);
-					}
-				}	
+			for (SemanticIndexView view : views.getPropertyViews()) {
+				if (view.isEmptyForIntervals(intervals))
+					continue;
+				
+				String sourceQuery = view.getSELECT(intervalsSqlFilter);
+				CQIE targetQuery = constructTargetQuery(dpe.getPredicate(), view.getId().getType1(), view.getId().getType2());
+				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
+				result.add(basicmapping);			
 			}
 		}
 		
@@ -1062,36 +986,15 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				continue;
 			}
 			List<Interval> intervals = range.getIntervals();
+			String intervalsSqlFilter = getIntervalString(intervals);
 
-			// Mapping head
-			Predicate predicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
-			Function head = dfac.getFunction(predicate, dfac.getVariable("X"));
-			
-			if (!isMappingEmpty(classNode, COL_TYPE.OBJECT)) {
-				/* FOR URI */
-				Function body1 = dfac.getFunction(classNode.getPredicate(), dfac.getUriTemplate(dfac.getVariable("X")));
-				CQIE targetQuery1 = dfac.getCQIE(head, body1);
-
-				StringBuilder sql1 = new StringBuilder();
-				sql1.append(classTable.selectCommand);
-				sql1.append(" ISBNODE = FALSE AND ");
-				appendIntervalString(sql1, intervals);
-
-				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sql1.toString(), targetQuery1);
-				result.add(basicmapping);
-			}
-			if (!isMappingEmpty(classNode, COL_TYPE.BNODE)) {
-				/* FOR BNODE */
+			for (SemanticIndexView view : views.getClassViews()) {
+				if (view.isEmptyForIntervals(intervals))
+					continue;
 				
-				Function body2 = dfac.getFunction(classNode.getPredicate(), dfac.getBNodeTemplate(dfac.getVariable("X")));
-				CQIE targetQuery2 = dfac.getCQIE(head, body2);
-				
-				StringBuilder sql2 = new StringBuilder();
-				sql2.append(classTable.selectCommand);
-				sql2.append(" ISBNODE = TRUE AND ");
-				appendIntervalString(sql2, intervals);
-
-				OBDAMappingAxiom  basicmapping = dfac.getRDBMSMappingAxiom(sql2.toString(), targetQuery2);
+				String sourceQuery = view.getSELECT(intervalsSqlFilter);
+				CQIE targetQuery = constructTargetQuery(classNode.getPredicate(), view.getId().getType1());
+				OBDAMappingAxiom basicmapping = dfac.getRDBMSMappingAxiom(sourceQuery, targetQuery);
 				result.add(basicmapping);
 			}
 		}
@@ -1130,60 +1033,24 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		return result;
 	}
 
-	/***
-	 * @param iri
-	 * @param type1
-	 * @return
-	 * @throws OBDAException 
-	 */
-	private boolean isMappingEmpty(OClass concept, COL_TYPE type1)  {
+	
+	private CQIE constructTargetQuery(Predicate predicate, COL_TYPE type) {
+
+		Variable X = dfac.getVariable("X");
+
+		Predicate headPredicate = dfac.getPredicate("m", new COL_TYPE[] { COL_TYPE.OBJECT });
+		Function head = dfac.getFunction(headPredicate, X);
+
+		Function subjectTerm;
+		if (type == COL_TYPE.OBJECT) 
+			subjectTerm = dfac.getUriTemplate(X);
+		else {
+			assert (type == COL_TYPE.BNODE); 
+			subjectTerm = dfac.getBNodeTemplate(X);
+		}
 		
-		for (Interval interval : cacheSI.getEntry(concept).getIntervals()) 
-			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
-				SemanticIndexRecord record = new SemanticIndexRecord(type1, i);
-				if (nonEmptyEntityRecord.contains(record))
-					return false;
-			}
-		
-		return true;
-	}
-
-	/***
-	 * @param iri
-	 * @param type1
-	 * @param type2
-	 * @return
-	 * @throws OBDAException 
-	 */
-	private boolean isMappingEmpty(ObjectPropertyExpression ope, COL_TYPE type1, COL_TYPE type2)  {
-
-		for (Interval interval : cacheSI.getEntry(ope).getIntervals()) 
-			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
-				SemanticIndexRecord record = new SemanticIndexRecord(type1, type2, i);
-				if (nonEmptyEntityRecord.contains(record)) 
-					return false;
-			}
-
-		return true;
-	}
-
-	/***
-	 * @param iri
-	 * @param type1
-	 * @param type2
-	 * @return
-	 * @throws OBDAException 
-	 */
-	private boolean isMappingEmpty(DataPropertyExpression dpe, COL_TYPE type1, COL_TYPE type2)  {
-
-		for (Interval interval : cacheSI.getEntry(dpe).getIntervals()) 
-			for (int i = interval.getStart(); i <= interval.getEnd(); i++) {
-				SemanticIndexRecord record = new SemanticIndexRecord(type1, type2, i);
-				if (nonEmptyEntityRecord.contains(record))
-					return false;
-			}
-
-		return true;
+		Function body = dfac.getFunction(predicate, subjectTerm);
+		return dfac.getCQIE(head, body);
 	}
 	
 	
@@ -1229,144 +1096,50 @@ public class RDBMSSIRepositoryManager implements Serializable {
 
 	
 	
-	private String constructSourceQuery(ObjectPropertyExpression ope, COL_TYPE type1, COL_TYPE type2)  {
-		StringBuilder sql = new StringBuilder();
-		switch (type2) {
-			case OBJECT:
-			case BNODE:
-				sql.append(roleTable.selectCommand);
-				break;
-			case LITERAL:
-			case LITERAL_LANG:
-				sql.append(attributeTable.get(COL_TYPE.LITERAL).selectCommand);
-				break;
-			default:
-				sql.append(attributeTable.get(type2).selectCommand);
-		}
-
-		/*
-		 * If the mapping is for something of type Literal we need to add IS
-		 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
-		 * redundant since we have another stage in Quest where we add IS NOT
-		 * NULL for every variable in the head of a mapping.
-		 */
-
-		if (type1 == COL_TYPE.BNODE) 
-			sql.append("ISBNODE = TRUE AND ");
-		else {
-			assert (type1 == COL_TYPE.OBJECT);
-			sql.append("ISBNODE = FALSE AND ");
-		}
-
-		if (type2 == COL_TYPE.BNODE) 
-			sql.append("ISBNODE2 = TRUE AND ");
-		else if (type2 == COL_TYPE.OBJECT) 
-			sql.append("ISBNODE2 = FALSE AND ");
-		else if (type2 == COL_TYPE.LITERAL) 
-			sql.append("LANG IS NULL AND ");
-		else if (type2 == COL_TYPE.LITERAL_LANG)
-			sql.append("LANG IS NOT NULL AND ");
-		
-
-		/*
-		 * Generating the interval conditions for semantic index
-		 */
-
-		SemanticIndexRange range = cacheSI.getEntry(ope);
-		if (range == null) {
-			log.debug("Object property " + ope + " has no SemanticIndexRange");
-			return null;
-		}
-		List<Interval> intervals = range.getIntervals();	
-		appendIntervalString(sql, intervals);
-
-		return sql.toString();
-	}
+	/**
+	 * Generating the interval conditions for semantic index
+	 */
 	
-	private String constructSourceQuery(DataPropertyExpression dpe, COL_TYPE type1, COL_TYPE type2)  {
-		StringBuilder sql = new StringBuilder();
-		switch (type2) {
-			case OBJECT:
-			case BNODE:
-				sql.append(roleTable.selectCommand);
-				break;
-			case LITERAL:
-			case LITERAL_LANG:
-				sql.append(attributeTable.get(COL_TYPE.LITERAL).selectCommand);
-				break;
-			default:
-				sql.append(attributeTable.get(type2).selectCommand);
-		}
-
-		/*
-		 * If the mapping is for something of type Literal we need to add IS
-		 * NULL or IS NOT NULL to the language column. IS NOT NULL might be
-		 * redundant since we have another stage in Quest where we add IS NOT
-		 * NULL for every variable in the head of a mapping.
-		 */
-
-		if (type1 == COL_TYPE.BNODE) 
-			sql.append("ISBNODE = TRUE AND ");
-		else {
-			assert (type1 == COL_TYPE.OBJECT);
-			sql.append("ISBNODE = FALSE AND ");
-		}
-
-		if (type2 == COL_TYPE.BNODE) 
-			sql.append("ISBNODE2 = TRUE AND ");
-		else if (type2 == COL_TYPE.OBJECT) 
-			sql.append("ISBNODE2 = FALSE AND ");
-		else if (type2 == COL_TYPE.LITERAL) 
-			sql.append("LANG IS NULL AND ");
-		else if (type2 == COL_TYPE.LITERAL_LANG)
-			sql.append("LANG IS NOT NULL AND ");
+	private static String getIntervalString(final List<Interval> intervals) {
 		
-
-		/*
-		 * Generating the interval conditions for semantic index
-		 */
-
-		SemanticIndexRange range = cacheSI.getEntry(dpe);
-		if (range == null) {
-			log.debug("Data property " + dpe + " has no SemanticIndexRange");
-			return null;
-		}
-		List<Interval> intervals = range.getIntervals();	
-		appendIntervalString(sql, intervals);
-
-		return sql.toString();
-	}
-	
-
-	private void appendIntervalString(StringBuilder sql, final List<Interval> intervals) {
+		if (intervals.size() == 1)
+			return getIntervalString(intervals.iterator().next());
 		
-		Joiner.on(" OR ").appendTo(sql, new Iterator<String>() {		
-			private final Iterator<Interval> it = intervals.iterator();
+		else if (intervals.size() > 1) { 
+			StringBuilder sql = new StringBuilder();
+			
+			sql.append("(");
+			Joiner.on(" OR ").appendTo(sql, new Iterator<String>() {		
+				private final Iterator<Interval> it = intervals.iterator();
 
-			@Override
-			public boolean hasNext() { return it.hasNext(); }
+				@Override
+				public boolean hasNext() { return it.hasNext(); }
 
-			@Override
-			public String next() {
-				Interval interval = it.next();
-				if (interval.getStart() == interval.getEnd()) 
-					return String.format("IDX = %d", interval.getStart());
-				else 
-					return String.format("IDX >= %d AND IDX <= %d", interval.getStart(), interval.getEnd());
+				@Override
+				public String next() {
+					Interval interval = it.next();
+					return getIntervalString(interval);
+				}
 
-			}
-
-			@Override
-			public void remove() { }
-		});
-		
-		if (intervals.size() > 1) {
-			sql.insert(0, "(");
+				@Override
+				public void remove() { }
+			});
 			sql.append(")");
+			
+			return sql.toString();
 		}
+		else // if the size is 0
+			return "";
 	}
 	
 
+	private static String getIntervalString(Interval interval) {
+		if (interval.getStart() == interval.getEnd()) 
+			return String.format("IDX = %d", interval.getStart());
+		else 
+			return String.format("IDX >= %d AND IDX <= %d", interval.getStart(), interval.getEnd());		
+	}
+	
 
 	/***
 	 * Inserts the metadata about semantic indexes and intervals into the
@@ -1390,7 +1163,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			}
 
 			// inserting index data for classes and properties 
-			try (PreparedStatement stm = conn.prepareStatement(indexTable.insertCommand)) {
+			try (PreparedStatement stm = conn.prepareStatement(indexTable.getINSERT("?, ?, ?"))) {
 				for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
 					stm.setString(1, concept.getKey().getPredicate().getName());
 					stm.setInt(2, concept.getValue().getIndex());
@@ -1413,7 +1186,7 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			}
 
 			// Inserting interval metadata
-			try (PreparedStatement stm = conn.prepareStatement(intervalTable.insertCommand)) {
+			try (PreparedStatement stm = conn.prepareStatement(intervalTable.getINSERT("?, ?, ?, ?"))) {
 				for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
 					for (Interval it : concept.getValue().getIntervals()) {
 						stm.setString(1, concept.getKey().getPredicate().getName());
@@ -1444,18 +1217,8 @@ public class RDBMSSIRepositoryManager implements Serializable {
 				stm.executeBatch();
 			}
 
-			// Inserting emptiness index metadata 
-			try (PreparedStatement stm = conn.prepareStatement(emptinessIndexTable.insertCommand)) {
-				for (SemanticIndexRecord record : nonEmptyEntityRecord) {
-					stm.setInt(1, record.getTable());
-					stm.setInt(2, record.getIndex());
-					stm.setInt(3, record.getType1());
-					stm.setInt(4, record.getType2());
-					stm.addBatch();
-				}
-				stm.executeBatch();
-			}
-
+			views.store(conn);
+			
 			conn.commit();
 		} 
 		catch (SQLException e) {
@@ -1481,9 +1244,6 @@ public class RDBMSSIRepositoryManager implements Serializable {
 			for (String s : classTable.createIndexCommands)
 				st.addBatch(s);
 			
-			for (String s : roleTable.createIndexCommands)
-				st.addBatch(s);
-			
 			st.executeBatch();
 			st.clearBatch();
 			
@@ -1501,13 +1261,10 @@ public class RDBMSSIRepositoryManager implements Serializable {
 		
 
 	public void dropIndexes(Connection conn) throws SQLException {
-		log.debug("Droping indexes");
+		log.debug("Dropping indexes");
 
 		try (Statement st = conn.createStatement()) {
 			for (String s : classTable.dropIndexCommands)
-				st.addBatch(s);	
-
-			for (String s : roleTable.dropIndexCommands)
 				st.addBatch(s);	
 
 			for (Entry<COL_TYPE, TableDescription> entry : attributeTable.entrySet())

@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
@@ -77,8 +78,8 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 	}
 
 	/***
-	 * Sets the user-suppplied database constraints, i.e.
-	 * Foreign and primary keys that are not in the databse
+	 * Sets the user-supplied database constraints, i.e.
+	 * Foreign and primary keys that are not in the database
 	 * 
 	 * @param userConstraints
 	 */

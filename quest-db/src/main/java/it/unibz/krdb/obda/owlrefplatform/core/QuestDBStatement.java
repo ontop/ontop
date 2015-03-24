@@ -227,9 +227,9 @@ public class QuestDBStatement implements OBDAStatement {
 		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 		ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
 		
-		SparqlAlgebraToDatalogTranslator tr = st.questInstance.getSparqlAlgebraToDatalogTranslator();	
-		List<String> signatureContainer = tr.getSignature(pq);
+		//SparqlAlgebraToDatalogTranslator tr = st.questInstance.getSparqlAlgebraToDatalogTranslator();	
+		//List<String> signatureContainer = tr.getSignature(pq);
 		
-		return st.getRewriting(pq, signatureContainer);
+		return st.getRewriting(pq/*, signatureContainer*/);
 	}
 }

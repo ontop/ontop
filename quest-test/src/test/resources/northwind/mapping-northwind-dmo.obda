@@ -1,0 +1,76 @@
+[PrefixDeclaration]
+xsd:		http://www.w3.org/2001/XMLSchema#
+owl:		http://www.w3.org/2002/07/owl#
+quest:		http://obda.org/quest#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[SourceDeclaration]
+sourceUri	northwind-dmo
+connectionUrl	jdbc:mysql://10.7.20.39/northwind
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	mapping--824228387
+target		<http://www.optique-project.eu/resource/northwind/northwind/Shippers/{ShipperID}> a <http://www.optique-project.eu/resource/northwind/northwind/Shippers> ; <http://www.optique-project.eu/resource/northwind/northwind/Shippers/Phone> {Phone}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Shippers/ShipperID> {ShipperID}^^xsd:integer ; <http://www.optique-project.eu/resource/northwind/northwind/Shippers/CompanyName> {CompanyName}^^xsd:string . 
+source		SELECT * FROM northwind.Shippers
+
+mappingId	mapping--1020423011
+target		<http://www.optique-project.eu/resource/northwind/northwind/Customers/{CustomerID}> a <http://www.optique-project.eu/resource/northwind/northwind/Customers> ; <http://www.optique-project.eu/resource/northwind/northwind/Customers/Phone> {Phone}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Customers/Country> {Country}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Customers/PostalCode> {PostalCode}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Customers/City> {City}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Customers/ContactTitle> {ContactTitle}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Customers/ContactName> {ContactName}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Customers/CompanyName> {CompanyName}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Customers/Address> {Address}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Customers/Fax> {Fax}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Customers/Region> {Region}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Customers/CustomerID> {CustomerID}^^xsd:string . 
+source		SELECT * FROM northwind.Customers
+
+mappingId	mapping-741079715
+target		<http://www.optique-project.eu/resource/northwind/northwind/Employees/{EmployeeID}> a <http://www.optique-project.eu/resource/northwind/northwind/Employees> ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/PostalCode> {PostalCode}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/Address> {Address}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/FirstName> {FirstName}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/LastName> {LastName}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/HomePhone> {HomePhone}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/TitleOfCourtesy> {TitleOfCourtesy}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/Country> {Country}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/Extension> {Extension}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/PhotoPath> {PhotoPath}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/City> {City}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/Title> {Title}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/Region> {Region}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/Salary> {Salary} ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/BirthDate> {BirthDate}^^xsd:dateTimeStamp ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/Notes> {Notes}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/HireDate> {HireDate}^^xsd:dateTimeStamp ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/EmployeeID> {EmployeeID}^^xsd:integer ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/Photo> {Photo} ; <http://www.optique-project.eu/resource/northwind/northwind/Employees/ReportsTo> <http://www.optique-project.eu/resource/northwind/northwind/Employees/{ReportsTo}> .
+source		SELECT * FROM northwind.Employees
+
+mappingId	mapping-590530055
+target		<http://www.optique-project.eu/resource/northwind/northwind/Products/{ProductID}> a <http://www.optique-project.eu/resource/northwind/northwind/Products> ; <http://www.optique-project.eu/resource/northwind/northwind/Products/UnitsInStock> {UnitsInStock}^^xsd:integer ; <http://www.optique-project.eu/resource/northwind/northwind/Products/Discontinued> {Discontinued}^^xsd:integer ; <http://www.optique-project.eu/resource/northwind/northwind/Products/SupplierID> <http://www.optique-project.eu/resource/northwind/northwind/Suppliers/{SupplierID}> ; <http://www.optique-project.eu/resource/northwind/northwind/Products/ReorderLevel> {ReorderLevel}^^xsd:integer ; <http://www.optique-project.eu/resource/northwind/northwind/Products/UnitsOnOrder> {UnitsOnOrder}^^xsd:integer ; <http://www.optique-project.eu/resource/northwind/northwind/Products/UnitPrice> {UnitPrice}^^xsd:decimal ; <http://www.optique-project.eu/resource/northwind/northwind/Products/ProductName> {ProductName}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Products/ProductID> {ProductID}^^xsd:integer ; <http://www.optique-project.eu/resource/northwind/northwind/Products/QuantityPerUnit> {QuantityPerUnit}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Products/CategoryID> <http://www.optique-project.eu/resource/northwind/northwind/Categories/{CategoryID}> . 
+source		SELECT * FROM northwind.Products
+
+mappingId	mapping--392293047
+target		<http://www.optique-project.eu/resource/northwind/northwind/Orders/{OrderID}> a <http://www.optique-project.eu/resource/northwind/northwind/Orders> ; <http://www.optique-project.eu/resource/northwind/northwind/Orders/ShipRegion> {ShipRegion}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Orders/OrderID> {OrderID}^^xsd:integer ; <http://www.optique-project.eu/resource/northwind/northwind/Orders/ShippedDate> {ShippedDate}^^xsd:dateTimeStamp ; <http://www.optique-project.eu/resource/northwind/northwind/Orders/ShipAddress> {ShipAddress}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Orders/ShipName> {ShipName}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Orders/ShipVia> <http://www.optique-project.eu/resource/northwind/northwind/Shippers/{ShipVia}> ; <http://www.optique-project.eu/resource/northwind/northwind/Orders/ShipCity> {ShipCity}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Orders/RequiredDate> {RequiredDate}^^xsd:dateTimeStamp ; <http://www.optique-project.eu/resource/northwind/northwind/Orders/OrderDate> {OrderDate}^^xsd:dateTimeStamp ; <http://www.optique-project.eu/resource/northwind/northwind/Orders/Freight> {Freight}^^xsd:decimal ; <http://www.optique-project.eu/resource/northwind/northwind/Orders/EmployeeID> <http://www.optique-project.eu/resource/northwind/northwind/Employees/{EmployeeID}> ; <http://www.optique-project.eu/resource/northwind/northwind/Orders/CustomerID> <http://www.optique-project.eu/resource/northwind/northwind/Customers/{CustomerID}> ; <http://www.optique-project.eu/resource/northwind/northwind/Orders/ShipPostalCode> {ShipPostalCode}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Orders/ShipCountry> {ShipCountry}^^xsd:string . 
+source		SELECT * FROM northwind.Orders
+
+mappingId	mapping--313127105
+target		<http://www.optique-project.eu/resource/northwind/northwind/Region/{RegionID}> a <http://www.optique-project.eu/resource/northwind/northwind/Region> ; <http://www.optique-project.eu/resource/northwind/northwind/Region/RegionID> {RegionID}^^xsd:integer ; <http://www.optique-project.eu/resource/northwind/northwind/Region/RegionDescription> {RegionDescription}^^xsd:string . 
+source		SELECT * FROM northwind.Region
+
+mappingId	mapping--1292100546
+target		<http://www.optique-project.eu/resource/northwind/northwind/Territories/{TerritoryID}> a <http://www.optique-project.eu/resource/northwind/northwind/Territories> ; <http://www.optique-project.eu/resource/northwind/northwind/EmployeeTerritories/Territories_has_Employees> <http://www.optique-project.eu/resource/northwind/northwind/Employees/{EmployeeID}> . 
+source		SELECT * FROM northwind.EmployeeTerritories
+
+mappingId	mapping--637341938
+target		<http://www.optique-project.eu/resource/northwind/northwind/Customers/{CustomerID}> a <http://www.optique-project.eu/resource/northwind/northwind/Customers> ; <http://www.optique-project.eu/resource/northwind/northwind/CustomerCustomerDemo/Customers_has_CustomerDemographics> <http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics/{CustomerTypeID}> . 
+source		SELECT * FROM northwind.CustomerCustomerDemo
+
+mappingId	mapping-1317394907
+target		<http://www.optique-project.eu/resource/northwind/northwind/Territories/{TerritoryID}> a <http://www.optique-project.eu/resource/northwind/northwind/Territories> ; <http://www.optique-project.eu/resource/northwind/northwind/Territories/RegionID> <http://www.optique-project.eu/resource/northwind/northwind/Region/{RegionID}> ; <http://www.optique-project.eu/resource/northwind/northwind/Territories/TerritoryDescription> {TerritoryDescription}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Territories/TerritoryID> {TerritoryID}^^xsd:string . 
+source		SELECT * FROM northwind.Territories
+
+mappingId	mapping--1381005143
+target		<http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics/{CustomerTypeID}> a <http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics> ; <http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics/CustomerTypeID> {CustomerTypeID}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics/CustomerDesc> {CustomerDesc}^^xsd:string . 
+source		SELECT * FROM northwind.CustomerDemographics
+
+mappingId	mapping--1175700584
+target		<http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/{OrderID}/{ProductID}> a <http://www.optique-project.eu/resource/northwind/northwind/OrderDetails> ; <http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/ProductID> <http://www.optique-project.eu/resource/northwind/northwind/Products/{ProductID}> ; <http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/UnitPrice> {UnitPrice}^^xsd:decimal ; <http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/Quantity> {Quantity}^^xsd:integer ; <http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/Discount> {Discount} ; <http://www.optique-project.eu/resource/northwind/northwind/OrderDetails/OrderID> <http://www.optique-project.eu/resource/northwind/northwind/Orders/{OrderID}> . 
+source		SELECT * FROM northwind.OrderDetails
+
+mappingId	mapping-635183086
+target		<http://www.optique-project.eu/resource/northwind/northwind/Categories/{CategoryID}> a <http://www.optique-project.eu/resource/northwind/northwind/Categories> ; <http://www.optique-project.eu/resource/northwind/northwind/Categories/Description> {Description}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Categories/CategoryName> {CategoryName}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Categories/CategoryID> {CategoryID}^^xsd:integer ; <http://www.optique-project.eu/resource/northwind/northwind/Categories/Picture> {Picture} .
+source		SELECT * FROM northwind.Categories
+
+mappingId	mapping-770677499
+target		<http://www.optique-project.eu/resource/northwind/northwind/Employees/{EmployeeID}> a <http://www.optique-project.eu/resource/northwind/northwind/Employees> ; <http://www.optique-project.eu/resource/northwind/northwind/EmployeeTerritories/Employees_has_Territories> <http://www.optique-project.eu/resource/northwind/northwind/Territories/{TerritoryID}> . 
+source		SELECT * FROM northwind.EmployeeTerritories
+
+mappingId	mapping-1612803371
+target		<http://www.optique-project.eu/resource/northwind/northwind/Suppliers/{SupplierID}> a <http://www.optique-project.eu/resource/northwind/northwind/Suppliers> ; <http://www.optique-project.eu/resource/northwind/northwind/Suppliers/Region> {Region}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Suppliers/Fax> {Fax}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Suppliers/Country> {Country}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Suppliers/HomePage> {HomePage}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Suppliers/CompanyName> {CompanyName}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Suppliers/ContactName> {ContactName}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Suppliers/PostalCode> {PostalCode}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Suppliers/SupplierID> {SupplierID}^^xsd:integer ; <http://www.optique-project.eu/resource/northwind/northwind/Suppliers/Phone> {Phone}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Suppliers/Address> {Address}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Suppliers/ContactTitle> {ContactTitle}^^xsd:string ; <http://www.optique-project.eu/resource/northwind/northwind/Suppliers/City> {City}^^xsd:string . 
+source		SELECT * FROM northwind.Suppliers
+
+mappingId	mapping-1137311202
+target		<http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics/{CustomerTypeID}> a <http://www.optique-project.eu/resource/northwind/northwind/CustomerDemographics> ; <http://www.optique-project.eu/resource/northwind/northwind/CustomerCustomerDemo/CustomerDemographics_has_Customers> <http://www.optique-project.eu/resource/northwind/northwind/Customers/{CustomerID}> . 
+source		SELECT * FROM northwind.CustomerCustomerDemo
+]]
+

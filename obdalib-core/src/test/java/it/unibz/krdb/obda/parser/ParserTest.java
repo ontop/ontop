@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.parser;
 
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import junit.framework.TestCase;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -514,13 +513,20 @@ public class ParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for concat
+
 	public void test_7_1() {
 		final boolean result = parseJSQL("SELECT ('ID-' || student.id) as sid FROM student");
 		printJSQL("test_7_1", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
+
+    public void test_7_1_b() {
+        final boolean result = parseJSQL("SELECT CONCAT('ID-', student.id, 'b') as sid FROM student");
+        printJSQL("test_7_1", result);
+        assertTrue(result);
+
+    }
 
 	// NO SUPPORT OLD SQL ADDED EXCEPTION IN JSQL for operation
 	public void test_7_2() {
@@ -654,6 +660,13 @@ public class ParserTest extends TestCase {
 		assertTrue(result);
 
 	}
+
+    public void test_13() {
+        final boolean result = parseJSQL("select REGEXP_REPLACE(name, ' +', ' ') as reg from student ");
+        printJSQL("test_13", result);
+        assertTrue(result);
+
+    }
 
 	private String queryText;
 

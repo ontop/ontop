@@ -1,0 +1,42 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#
+
+[SourceDeclaration]
+sourceUri	northwind
+connectionUrl	jdbc:mysql://10.7.20.39/northwind
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-simplestar
+target		:{CategoryID} a :Category .
+source		Select * from Categories
+
+mappingId	MAPID-simplejoin
+target		:{CustomerID} a :Customer .
+source		Select * from Orders as t1  join OrderDetails  ON Orders.OrderID= OrderDetails.OrderID
+
+mappingId	MAPID-simplejoinAlias
+target		:{location} :locationRegion {RegionDescription} .
+source		Select *, Territories.RegionID as location from Territories  join Region  ON Territories.RegionID= Region.RegionID
+
+mappingId	MAPID-createView
+target		:{idorder} :orderDetailDiscount {randomdiscount} .
+source		select *, MD5(Discount) as randomdiscount from OrderDetails as t1, (SELECT OrderID as idorder , OrderDate from Orders) as t2 where t1.OrderID =  t2.idorder
+
+mappingId	MAPID-createComplex
+target		:{locationID} a :Location .
+source		SELECT *, child.RegionID as locationID  FROM (SELECT * FROM Territories) AS child, (select RegionID, RegionDescription FROM Region  WHERE RegionDescription='Eastern' ) AS parent WHERE child.RegionID=parent.RegionID
+
+mappingId	MAPID-joinWithSameName
+target		:{OrderID} a :OrderDetail .
+source		Select * from Orders as t1  join OrderDetails  ON Orders.OrderID= OrderDetails.OrderID
+
+mappingId	MAPID-aliasinSubQuery
+target		:{locationID} :locationAddress {address} .
+source		SELECT *, child.RegionID as locationID FROM (SELECT * FROM Territories) AS child, (select RegionID, RegionDescription as address FROM Region  WHERE RegionDescription='Eastern' ) AS parent WHERE child.RegionID=parent.RegionID
+
+
+]]
+

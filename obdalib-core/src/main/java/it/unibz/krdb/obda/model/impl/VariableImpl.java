@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.model.impl;
 import it.unibz.krdb.obda.model.Variable;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 public class VariableImpl implements Variable {
@@ -75,5 +76,10 @@ public class VariableImpl implements Variable {
 	@Override
 	public Set<Variable> getReferencedVariables() {
 		return Collections.<Variable>singleton(this);
+	}
+
+	@Override
+	public List<Variable> getReferencedVariablesList() {
+		return Collections.<Variable>singletonList(this);
 	}
 }

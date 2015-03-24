@@ -24,8 +24,9 @@ import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 
 import java.sql.Types;
 import java.util.List;
+import java.util.regex.Pattern;
 
-public class HSQLDBDialectAdapter implements SQLDialectAdapter {
+public class HSQLDBDialectAdapter extends SQL99DialectAdapter {
 
 
 	@Override
@@ -52,11 +53,6 @@ public class HSQLDBDialectAdapter implements SQLDialectAdapter {
 		return null;
 	}
 
-	@Override
-	public String strreplace(String str, String oldstr, String newstr) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public String strreplace(String str, int start, int end, String with) {
@@ -137,9 +133,12 @@ public class HSQLDBDialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-																// enclosing
-																// quotes
+        Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
+        if(quotes.matcher(pattern).matches() ) {
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
+        }
 		//we use % wildcards to search for a string that contains and not only match the pattern
 		if (caseinSensitive) {
 			return " LOWER(" + columnname + ") LIKE " + "'%"
@@ -176,6 +175,7 @@ public class HSQLDBDialectAdapter implements SQLDialectAdapter {
 	 * @param rdfliteral
 	 * @return
 	 */
+	@Override
 	public String getSQLLexicalFormDatetime(String v) {
 		// TODO: check whether this inherited implementation is OK
 		

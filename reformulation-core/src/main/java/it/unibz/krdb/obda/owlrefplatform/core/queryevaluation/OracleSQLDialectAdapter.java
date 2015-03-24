@@ -23,10 +23,20 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.Set;
 
 public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
+	public static final int VARIABLE_NAME_MAX_LENGTH = 30;
+	/**
+	 * If the variable needs to be shortcut, length of the number
+	 * introduced.
+	 */
+	public static final int VARIABLE_NUMBER_LENGTH = 3;
+
 	private static Map<Integer, String> SqlDatatypes;
+    private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 	static {
 		SqlDatatypes = new HashMap<Integer, String>();
 		SqlDatatypes.put(Types.DECIMAL, "NUMBER");
@@ -53,9 +63,12 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-																// enclosing
-																// quotes
+
+        if(quotes.matcher(pattern).matches() ) {
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
+        }
 		String flags = "";
 		if(caseinSensitive)
 			flags += "i";
@@ -69,6 +82,18 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		String sql = " REGEXP_LIKE " + "( " + columnname + " , '" + pattern + "' , '" + flags  + "' )";
 		return sql;
 	}
+
+    @Override
+    public String strreplace(String str, String oldstr, String newstr) {
+        if(quotes.matcher(oldstr).matches() ) {
+            oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+        }
+
+        if(quotes.matcher(newstr).matches() ) {
+            newstr = newstr.substring(1, newstr.length() - 1);
+        }
+        return String.format("REGEXP_REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
+    }
 
 	@Override
 	public String getDummyTable() {
@@ -87,9 +112,6 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	 * will also normalize the use of Z to the timezome +00:00 and last, if the
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
-	 * 
-	 * @param rdfliteral
-	 * @return
 	 */
 	@Override
 	public String getSQLLexicalFormDatetime(String v) {
@@ -136,5 +158,82 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 			
 		return bf.toString();
 	}
-	
+
+	@Override
+	public String getSQLLexicalFormDatetimeStamp(String v) {
+		String datetime = v.replace('T', ' ');
+		int dotlocation = datetime.indexOf('.');
+		int zlocation = datetime.indexOf('Z');
+		int minuslocation = datetime.indexOf('-', 10); // added search from 10th pos, because we need to ignore minuses in date
+		int pluslocation = datetime.indexOf('+');
+		StringBuilder bf = new StringBuilder(datetime);
+		if (zlocation != -1) {
+			/*
+			 * replacing Z by +00:00
+			 */
+			bf.replace(zlocation, bf.length(), "+00:00");
+		}
+
+		if (dotlocation != -1) {
+			/*
+			 * Stripping the string from the presicion that is not supported by
+			 * SQL timestamps.
+			 */
+			// TODO we need to check which databases support fractional
+			// sections (e.g., oracle,db2, postgres)
+			// so that when supported, we use it.
+			int endlocation = Math.max(zlocation, Math.max(minuslocation, pluslocation));
+			if (endlocation == -1) {
+				endlocation = datetime.length();
+			}
+			bf.replace(dotlocation, endlocation, "");
+		}
+		bf.insert(0, "'");
+		bf.append("'");
+
+		/*
+		 * Oracle has a special treatment for datetime datatype such that it requires a default
+		 * datetime format. To have time zone as required by datetimestamp we can use to_timestamp_tz
+		 */
+		bf.insert(0, "to_timestamp_tz(");
+		bf.append(",'YYYY-MM-DD HH24:MI:SSTZH:TZM')");
+
+		return bf.toString();
+	}
+
+	@Override
+	public String nameTopVariable(String signatureVariableName, String suffix, Set<String> sqlVariableNames) {
+		int suffixLength = suffix.length();
+		int signatureVarLength = signatureVariableName.length();
+
+		if (suffixLength >= (VARIABLE_NAME_MAX_LENGTH - VARIABLE_NUMBER_LENGTH))  {
+			throw new IllegalArgumentException("The suffix is too long (must be less than " +
+					(VARIABLE_NAME_MAX_LENGTH - VARIABLE_NUMBER_LENGTH) + ")");
+		}
+
+		/**
+		 * If the length limit is not reached, processes as usual.
+		 */
+		if (signatureVarLength + suffixLength <= VARIABLE_NAME_MAX_LENGTH) {
+			return super.nameTopVariable(signatureVariableName, suffix, sqlVariableNames);
+		}
+
+		String varPrefix = signatureVariableName.substring(0, VARIABLE_NAME_MAX_LENGTH - suffixLength
+				- VARIABLE_NUMBER_LENGTH);
+
+
+		/**
+		 * Naive implementation
+		 */
+		for (int i = 0; i < Math.pow(10, VARIABLE_NUMBER_LENGTH); i++) {
+			String mainVarName = super.nameTopVariable(varPrefix + i, suffix, sqlVariableNames);
+			if (!sqlVariableNames.contains(mainVarName)) {
+				return mainVarName;
+			}
+		}
+
+		// TODO: find a better exception
+		throw new RuntimeException("Impossible to create a new variable " + varPrefix + "???" + suffix + " : already " +
+				Math.pow(10, VARIABLE_NUMBER_LENGTH) + " of them.");
+	}
 }
