@@ -24,6 +24,7 @@ import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.utils.IDGenerator;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
+
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
@@ -203,18 +204,27 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public DatalogProgram getDatalogProgram(CQIE rule) {
+	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers) {
 		DatalogProgram p = new DatalogProgramImpl();
-		p.appendRule(rule);
+		p.getQueryModifiers().copy(modifiers);
 		return p;
 	}
-
+	
 	@Override
 	public DatalogProgram getDatalogProgram(Collection<CQIE> rules) {
 		DatalogProgram p = new DatalogProgramImpl();
 		p.appendRule(rules);
 		return p;
 	}
+	
+	@Override
+	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers, Collection<CQIE> rules) {
+		DatalogProgram p = new DatalogProgramImpl();
+		p.appendRule(rules);
+		p.getQueryModifiers().copy(modifiers);
+		return p;
+	}
+	
 
 	@Override
 	public RDBMSMappingAxiomImpl getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery) {

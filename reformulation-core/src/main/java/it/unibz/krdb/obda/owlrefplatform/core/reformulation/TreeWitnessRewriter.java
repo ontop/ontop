@@ -135,7 +135,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	
 	private List<CQIE> rewriteCC(QueryConnectedComponent cc, Function headAtom,  DatalogProgram edgeDP) {
 		
-		List<CQIE> outputRules = new LinkedList<CQIE>();	
+		List<CQIE> outputRules = new LinkedList<>();	
 		String headURI = headAtom.getFunctionSymbol().getName();
 		
 		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, generators);
@@ -271,7 +271,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		
 		double startime = System.currentTimeMillis();
 		
-		List<CQIE> outputRules = new LinkedList<CQIE>();
+		List<CQIE> outputRules = new LinkedList<>();
 		DatalogProgram ccDP = null;
 		DatalogProgram edgeDP = fac.getDatalogProgram();
 
@@ -321,8 +321,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		if (outputRules.size() > 1) 
 			CQCUtilities.removeContainedQueries(outputRules, dataDependenciesCQC);
 		
-		DatalogProgram output = fac.getDatalogProgram(outputRules);
-		QueryUtils.copyQueryModifiers(dp, output);
+		DatalogProgram output = fac.getDatalogProgram(dp.getQueryModifiers(), outputRules);
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;

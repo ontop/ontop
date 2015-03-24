@@ -197,8 +197,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		for (CQIE query : workingSet)
 			EQNormalizer.enforceEqualities(query);
 
-		DatalogProgram result = termFactory.getDatalogProgram();
-		QueryUtils.copyQueryModifiers(inputquery, result);
+		DatalogProgram result = termFactory.getDatalogProgram(inputquery.getQueryModifiers());
 		result.appendRule(workingSet);
 
 		return result;
