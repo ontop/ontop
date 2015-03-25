@@ -75,7 +75,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
  * 
  */
-public class QuestOWLStatement {
+public class QuestOWLStatement implements AutoCloseable {
 
 	private final QuestStatement st;
 	private final QuestOWLConnection conn;
@@ -97,6 +97,7 @@ public class QuestOWLStatement {
 		}
 	}
 
+	@Override
 	public void close() throws OWLException {
 		try {
 			st.close();
