@@ -120,7 +120,6 @@ public class QuestMaterializer {
 
 		if (this.model.getSources()!= null && this.model.getSources().size() > 1)
 			throw new Exception("Cannot materialize with multiple data sources!");
-        extractVocabulary(model, onto);
 
 
         //start a quest instance

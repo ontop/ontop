@@ -101,8 +101,9 @@ public class QuestOWLMaterializerCMD {
             ioManager.load(obdaFile);
 
             // TESTING !!!!
-            // predicates = ImmutableSet.of(obdaDataFactory.getClassPredicate("http://www.opengis.net/ont/sf#Point"));
-
+            // predicates = ImmutableSet.of(obdaDataFactory.getClassPredicate("http://www.opengis.net/ont/sf#Geometry"));
+            //predicates = ImmutableSet.of(obdaDataFactory.getClassPredicate("http://sws.ifi.uio.no/vocab/npd-v2#Award"));
+            //predicates = ImmutableSet.of(obdaDataFactory.getClassPredicate("http://www.opengis.net/ont/gml#ArcByBulge"));
             int numPredicates = predicates.size();
 
             OWLOntologyFormat ontologyFormat = getOntologyFormat(format);
@@ -128,11 +129,19 @@ public class QuestOWLMaterializerCMD {
 
                     QuestOWLIndividualIterator iterator = materializer.getIterator();
 
+
+                    OWLOntology newOnto = manager.createOntology(IRI.create(predicate.getName()));
+
+                    // add the signatures
+                    for (OWLDeclarationAxiom axiom : ontology.getAxioms(AxiomType.DECLARATION)) {
+                        manager.addAxiom(newOnto, axiom);
+                    }
+
                     while (iterator.hasNext())
-                        manager.addAxiom(ontology, iterator.next());
+                        manager.addAxiom(newOnto, iterator.next());
 
 
-                    manager.saveOntology(ontology, ontologyFormat, new WriterDocumentTarget(writer));
+                    manager.saveOntology(newOnto, ontologyFormat, new WriterDocumentTarget(writer));
 
                     System.out.println("NR of TRIPLES: " + materializer.getTriplesCount());
                     System.out.println("VOCABULARY SIZE (NR of QUERIES): " + materializer.getVocabularySize());
