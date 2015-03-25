@@ -168,10 +168,10 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return new VariableImpl(name);
 	}
 
-	@Override
-	public Variable getVariableNondistinguished() {
-		return new AnonymousVariable();
-	}
+//	@Override
+//	public Variable getVariableNondistinguished() {
+//		return new AnonymousVariable();
+//	}
 
 	@Override
 	public Function getFunction(Predicate functor, Term... arguments) {

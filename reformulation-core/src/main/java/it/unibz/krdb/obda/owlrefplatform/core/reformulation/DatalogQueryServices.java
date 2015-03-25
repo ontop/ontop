@@ -124,7 +124,7 @@ public class DatalogQueryServices {
 						// REDUCE
 						EQNormalizer.enforceEqualities(newquery);
 						//makeSingleOccurrencesAnonymous(q.getBody(), q.getHead().getTerms());
-						newquery = QueryAnonymizer.anonymize(newquery); // TODO: make it in place
+						// newquery = QueryAnonymizer.anonymize(newquery); // TODO: make it in place
 						CQCUtilities.removeRundantAtoms(newquery);
 						
 						queue.add(newquery);

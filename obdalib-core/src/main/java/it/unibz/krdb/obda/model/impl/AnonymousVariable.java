@@ -33,7 +33,7 @@ public class AnonymousVariable implements Variable {
 	private static final String DEFAULT_NAME = "_";
 	private static final int identifier = -4000;
 
-	protected AnonymousVariable() {
+	private AnonymousVariable() {
 		// NO-OP
 	}
 

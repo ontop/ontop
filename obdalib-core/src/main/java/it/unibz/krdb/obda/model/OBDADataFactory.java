@@ -291,7 +291,7 @@ public interface OBDADataFactory extends Serializable {
 	 * 
 	 * @return the variable object.
 	 */
-	public Variable getVariableNondistinguished();
+//	public Variable getVariableNondistinguished();
 
 	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery);
 

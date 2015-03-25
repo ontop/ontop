@@ -39,7 +39,7 @@ public class QueryAnonymizer {
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 
-	public static CQIE anonymize(CQIE q) {
+	public static CQIE anonymize0(CQIE q) {
 
 		// Collecting number of occurrences of all variables
 		 
@@ -60,7 +60,7 @@ public class QueryAnonymizer {
 					list = auxmap.get(((Variable) t));
 				}
 				if (list != null && list < 2 && !isVariableInHead(q, t)) {
-					vex.add(fac.getVariableNondistinguished());
+//					vex.add(fac.getVariableNondistinguished());
 				} else {
 					vex.add(t);
 				}

@@ -171,8 +171,8 @@ public class AutomaticMGUTestDataGenerator {
 			return termFac.getConstantLiteral(termstr.substring(1, termstr.length() - 1));
 		} else if (termstr.charAt(0) == '<') {
 			return termFac.getConstantURI(termstr.substring(1, termstr.length() - 1));
-		} else if (termstr.equals("#")) {
-			return termFac.getVariableNondistinguished();
+//		} else if (termstr.equals("#")) {
+//			return termFac.getVariableNondistinguished();
 		} else {
 			return termFac.getVariable(termstr);
 			/* variable */
