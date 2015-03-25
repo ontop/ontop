@@ -507,10 +507,7 @@ public class QuestStatement implements OBDAStatement {
 			}
 
 			OBDAQueryModifiers queryModifiers = unfolding.getQueryModifiers();
-
-			unfolding = ofac.getDatalogProgram(normalizedRules);
-			// OMG!!!!! Why don't we have a proper constructor??
-			unfolding.setQueryModifiers(queryModifiers);
+			unfolding = ofac.getDatalogProgram(queryModifiers, normalizedRules);
 		}
 		else {
 			for (CQIE rule: unfolding.getRules()) {

@@ -45,9 +45,14 @@ public interface OBDADataFactory extends Serializable {
 
 	public DatalogProgram getDatalogProgram();
 
+	@Deprecated
 	public DatalogProgram getDatalogProgram(CQIE rule);
 
+	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers);
+
 	public DatalogProgram getDatalogProgram(Collection<CQIE> rules);
+
+	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers, Collection<CQIE> rules);
 
 
 
