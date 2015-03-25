@@ -14,7 +14,7 @@ public class QuestOWLMaterializerCMDTest {
     }
 
     @Ignore("too expensive to run")
-    @Test
+    //@Test
     public void testMaterializerCMD_SeparateFiles (){
         //String[] argv = {"-obda", "../obdalib-r2rml/src/test/resources/npd-v2-ql_a.obda", "-format", "turtle", "-output", "npd-v2.ttl"};
         String[] argv = {"-obda", "/Users/xiao/Dropbox/Optique/NPD-Benchmark/edbt/npd-v2-ql_a_postgres_scale50.obda",
