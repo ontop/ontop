@@ -143,6 +143,8 @@ public class QuestOWLMaterializerCMD {
 
                     manager.saveOntology(newOnto, ontologyFormat, new WriterDocumentTarget(writer));
 
+                    newOnto = null;
+
                     System.out.println("NR of TRIPLES: " + materializer.getTriplesCount());
                     System.out.println("VOCABULARY SIZE (NR of QUERIES): " + materializer.getVocabularySize());
 
