@@ -112,7 +112,7 @@ public class QuestMaterializer {
 		this.model = model;
 		this.ontology = onto;
 
-        if(predicates != null || !predicates.isEmpty()){
+        if(predicates != null && !predicates.isEmpty()){
             this.vocabulary = new HashSet<>(predicates);
         } else {
            this.vocabulary = extractVocabulary(model, onto);

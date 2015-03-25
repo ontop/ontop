@@ -20,6 +20,7 @@ package org.semanticweb.ontop.cli;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -77,7 +78,6 @@ public class QuestOWLMaterializerCMD {
         try {
             ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
 
-
             Collection<Predicate> predicates = new ArrayList<>();
 
             for (OWLClass owlClass : ontology.getClassesInSignature()) {
@@ -93,7 +93,6 @@ public class QuestOWLMaterializerCMD {
                 predicates.add(predicate);
             }
 
-
             Ontology inputOntology = OWLAPI3TranslatorUtility.translate(ontology);
             OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
             OBDAModel obdaModel = fac.getOBDAModel();
@@ -101,13 +100,15 @@ public class QuestOWLMaterializerCMD {
             ModelIOManager ioManager = new ModelIOManager(obdaModel);
             ioManager.load(obdaFile);
 
+            // TESTING !!!!
+            // predicates = ImmutableSet.of(obdaDataFactory.getClassPredicate("http://www.opengis.net/ont/sf#Point"));
+
             int numPredicates = predicates.size();
 
             OWLOntologyFormat ontologyFormat = getOntologyFormat(format);
 
             int i = 1;
             for (Predicate predicate : predicates) {
-
 
                 final long startTime = System.currentTimeMillis();
 
