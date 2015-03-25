@@ -386,11 +386,11 @@ public class QuestStatement implements OBDAStatement {
 	 * @return
 	 */
 	
-	private DatalogProgram translateAndPreProcess(ParsedQuery pq, List<String> signature) {
+	private DatalogProgram translateAndPreProcess(ParsedQuery pq) {
 		DatalogProgram program = null;
 		try {
 			SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();
-			program = translator.translate(pq, signature);
+			program = translator.translate(pq);
 
 			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
@@ -431,6 +431,21 @@ public class QuestStatement implements OBDAStatement {
 
 		ExpressionEvaluator evaluator = questInstance.getExpressionEvaluator();
 		evaluator.evaluateExpressions(unfolding);
+		
+		/*
+			UnionOfSqlQueries ucq = new UnionOfSqlQueries(questInstance.getUnfolder().getCQContainmentCheck());
+			for (CQIE cq : unfolding.getRules())
+				ucq.add(cq);
+			
+			List<CQIE> rules = new ArrayList<>(unfolding.getRules());
+			unfolding.removeRules(rules); 
+			
+			for (CQIE cq : ucq.asCQIE()) {
+				unfolding.appendRule(cq);
+			}
+			log.debug("CQC performed ({} rules): \n{}", unfolding.getRules().size(), unfolding);
+		 
+		 */
 
 		log.debug("Boolean expression evaluated: \n{}", unfolding);
 		log.debug("Partial evaluation ended.");
@@ -552,12 +567,12 @@ public class QuestStatement implements OBDAStatement {
 		}
 		
 		// Obtain the query signature
-		SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();		
-		List<String> signatureContainer = translator.getSignature(query);
+		//SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();		
+		//List<String> signatureContainer = translator.getSignature(query);
 		
 		
 		// Translate the SPARQL algebra to datalog program
-		DatalogProgram initialProgram = translateAndPreProcess(query, signatureContainer);
+		DatalogProgram initialProgram = translateAndPreProcess(query/*, signatureContainer*/);
 		
 		// Perform the query rewriting
 		DatalogProgram programAfterRewriting = questInstance.getRewriting(initialProgram);
@@ -572,10 +587,10 @@ public class QuestStatement implements OBDAStatement {
 	/**
 	 * Returns the final rewriting of the given query
 	 */
-	public String getRewriting(ParsedQuery query, List<String> signature) throws Exception {
+	public String getRewriting(ParsedQuery query) throws Exception {
 		// TODO FIX to limit to SPARQL input and output
 
-		DatalogProgram program = translateAndPreProcess(query, signature);
+		DatalogProgram program = translateAndPreProcess(query);
 
 		DatalogProgram rewriting = questInstance.getRewriting(program);
 		return DatalogProgramRenderer.encode(rewriting);
@@ -629,14 +644,12 @@ public class QuestStatement implements OBDAStatement {
 			questInstance.getSesameQueryCache().put(strquery, query);
 			questInstance.getSignatureCache().put(strquery, signatureContainer);
 
-			DatalogProgram program = translateAndPreProcess(query, signatureContainer);
+			DatalogProgram program = translateAndPreProcess(query);
 			try {
 				// log.debug("Input query:\n{}", strquery);
 
-				for (CQIE q : program.getRules()) {
-					// ROMAN: unfoldJoinTrees clones the query, so the statement below does not change anything
-					DatalogNormalizer.unfoldJoinTrees(q, false);
-				}
+				for (CQIE q : program.getRules()) 
+					DatalogNormalizer.unfoldJoinTrees(q);
 
  				log.debug("Normalized program: \n{}", program);
 
