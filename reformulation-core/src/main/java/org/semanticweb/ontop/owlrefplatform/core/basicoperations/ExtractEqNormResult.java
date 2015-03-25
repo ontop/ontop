@@ -33,7 +33,7 @@ public class ExtractEqNormResult {
     }
 
     public List<Function> getAllAtoms() {
-        return pushableAtoms.append(nonPushableAtoms);
+        return nonPushableAtoms.append(pushableAtoms);
     }
 
     public Var2VarSubstitution getVar2VarSubstitution() {

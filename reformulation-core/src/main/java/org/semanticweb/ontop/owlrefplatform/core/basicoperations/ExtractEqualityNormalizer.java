@@ -24,6 +24,7 @@ public class ExtractEqualityNormalizer {
     private final static List<P2<VariableImpl, Constant>> EMPTY_VARIABLE_CONSTANT_LIST = List.nil();
     private final static List<P2<VariableImpl, VariableImpl>> EMPTY_VARIABLE_RENAMING_LIST = List.nil();
     private final static List<Function> EMPTY_ATOM_LIST = List.nil();
+    private final static Function TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
     /**
      * TODO: explain
      *
@@ -200,7 +201,6 @@ public class ExtractEqualityNormalizer {
 
         return new ExtractEqNormResult(nonPushableAtoms, pushableAtoms, mergedSubstitution);
     }
-
     /**
      * TODO: describe
      */
@@ -405,7 +405,8 @@ public class ExtractEqualityNormalizer {
         /**
          * TODO: explain. "Blocking" criteria.
          */
-        List<Function> remainingLJAtoms = leftNormalizationResults.getNonPushableAtoms().append(rightNormalizationResults.getAllAtoms()).append(joiningEqualities);
+        List<Function> remainingLJAtoms = leftNormalizationResults.getNonPushableAtoms().snoc(TRUE_EQ).
+                append(rightNormalizationResults.getAllAtoms()).append(joiningEqualities);
         List<Function> pushedUpAtoms = leftNormalizationResults.getPushableAtoms();
 
         // TODO: add a proper method in the data factory
@@ -424,19 +425,19 @@ public class ExtractEqualityNormalizer {
     private static P2<List<Function>, List<Function>> splitLeftJoinSubAtoms(Function leftJoinMetaAtom) {
         List<Function> subAtoms = List.iterableList((java.util.List<Function>)(java.util.List<?>) leftJoinMetaAtom.getTerms());
 
-        F<Function, Boolean> isNotDataAtomFct = new F<Function, Boolean>() {
+        F<Function, Boolean> isNotDataOrCompositeAtomFct = new F<Function, Boolean>() {
             @Override
             public Boolean f(Function atom) {
-                return !atom.isDataFunction();
+                return !(isDataOrLeftJoinOrJoinAtom(atom));
             }
         };
 
         /**
          * TODO: explain!!!!!!!!!
          */
-        P2<List<Function>, List<Function>> firstDataAtomSplit = subAtoms.span(isNotDataAtomFct);
+        P2<List<Function>, List<Function>> firstDataAtomSplit = subAtoms.span(isNotDataOrCompositeAtomFct);
         Function firstDataAtom = firstDataAtomSplit._2().head();
-        P2<List<Function>, List<Function>> secondDataAtomSplit = firstDataAtomSplit._2().tail().span(isNotDataAtomFct);
+        P2<List<Function>, List<Function>> secondDataAtomSplit = firstDataAtomSplit._2().tail().span(isNotDataOrCompositeAtomFct);
 
         List<Function> leftAtoms = firstDataAtomSplit._1().snoc(firstDataAtom).append(secondDataAtomSplit._1());
         List<Function> rightAtoms = secondDataAtomSplit._2();
