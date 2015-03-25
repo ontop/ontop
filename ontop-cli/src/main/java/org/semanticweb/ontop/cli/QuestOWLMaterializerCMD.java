@@ -132,6 +132,11 @@ public class QuestOWLMaterializerCMD {
 
                     OWLOntology newOnto = manager.createOntology(IRI.create(predicate.getName()));
 
+                    // add the signatures
+                    for (OWLDeclarationAxiom axiom : ontology.getAxioms(AxiomType.DECLARATION)) {
+                        manager.addAxiom(newOnto, axiom);
+                    }
+
                     while (iterator.hasNext())
                         manager.addAxiom(newOnto, iterator.next());
 
