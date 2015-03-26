@@ -116,7 +116,7 @@ public class QuestStatement implements OBDAStatement {
 
 	/**
 	 * Index function symbols (predicate) that have multiple types.
-	 * Such predicates should be managed carefully. See DatalogUnfolder.pushTypes() for more details.
+	 * Such predicates should be managed carefully. See DatalogUnfolder.liftTypes() for more details.
 	 *
 	 * Not that this index may be modified by the DatalogUnfolder.
 	 */
@@ -492,7 +492,7 @@ public class QuestStatement implements OBDAStatement {
 
 		// PUSH TYPE HERE
 		log.debug("Pushing types...");
-		unfolding = pushTypes(unfolding, unfolder, multiTypedFunctionSymbolIndex);
+		unfolding = liftTypes(unfolding, multiTypedFunctionSymbolIndex);
 
 
 		log.debug("Pulling out equalities...");
@@ -524,52 +524,21 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 	/**
-	 * Tests if the conditions are met to push types into the Datalog program.
-	 * If it ok, pushes them.
-	 *
-	 * @param datalogProgram
-	 * @param unfolder
-	 * @return the updated Datalog program
+	 * Lift types of the Datalog program.
+	 * Returns a new one.
 	 */
-	private DatalogProgram pushTypes(DatalogProgram datalogProgram, DatalogUnfolder unfolder,
-									 Multimap<Predicate,Integer> multiTypedFunctionSymbolMap) {
-		boolean canPush = true;
+	private DatalogProgram liftTypes(DatalogProgram datalogProgram,
+									 Multimap<Predicate, Integer> multiTypedFunctionSymbolMap) {
 
-		/**
-		 * Disables type pushing if a functionSymbol of the Datalog program is known as
-		 * being multi-typed.
-		 *
-		 * TODO: explain what we mean by multi-typed .
-		 * Happens for instance with URI templates.
-		 *
-		 * TODO: See if this protection is still needed for the new TypeLift.
-		 *
-		 * (former explanation :  "See LeftJoin3Virtual. Problems with the Join.")
-		 */
-		if (!multiTypedFunctionSymbolMap.isEmpty()) {
-			DatalogDependencyGraphGenerator dependencyGraph = new DatalogDependencyGraphGenerator(datalogProgram.getRules());
+		List<CQIE> newTypedRules = TypeLift.liftTypes(datalogProgram.getRules(), multiTypedFunctionSymbolMap);
 
-			for (Predicate functionSymbol : multiTypedFunctionSymbolMap.keys()) {
-				if (dependencyGraph.getRuleIndex().containsKey(functionSymbol)) {
-					canPush = false;
-					log.debug(String.format("The Datalog program is using at least one multi-typed function symbol" +
-							" (%s) so type pushing is disabled.", functionSymbol.getName()));
-					break;
-				}
-			}
-		}
-
-		if (canPush) {
-			List<CQIE> newTypedRules = TypeLift.liftTypes(datalogProgram.getRules(), multiTypedFunctionSymbolMap);
-
-			OBDAQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
-			//TODO: can we avoid using this intermediate variable???
-			//datalogProgram.removeAllRules();
-			datalogProgram = ofac.getDatalogProgram();
-			datalogProgram.appendRule(newTypedRules);
-			datalogProgram.setQueryModifiers(queryModifiers);
-			log.debug("Types Pushed: \n{}",datalogProgram);
-		}
+		OBDAQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
+		//TODO: can we avoid using this intermediate variable???
+		//datalogProgram.removeAllRules();
+		datalogProgram = ofac.getDatalogProgram();
+		datalogProgram.appendRule(newTypedRules);
+		datalogProgram.setQueryModifiers(queryModifiers);
+		log.debug("Types Pushed: \n{}",datalogProgram);
 
 		return datalogProgram;
 	}
