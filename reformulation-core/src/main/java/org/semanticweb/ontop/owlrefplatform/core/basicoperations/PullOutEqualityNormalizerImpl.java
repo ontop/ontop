@@ -11,16 +11,23 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 import java.util.ArrayList;
 
 /**
- * Pulls out equalities.
+ * Default implementation of PullOutEqualityNormalizer. Is Left-Join aware.
  *
- * Limit: JOIN meta-predicates are not considered (--> no possibility to have specific ON conditions at the proper level).
- *
- *
- * Normalization in the direction of from relational calculus to relational algebra.
+ * Limit: JOIN meta-predicates are not yet supported (--> no possibility to have specific ON conditions at the proper level).
+ * TODO: support them !
  *
  * Immutable class (instances have no attribute).
  *
- * TODO: explain.
+ * Main challenge: putting the equalities at the "right" (good) place.
+ * Rules for accepting/rejecting to move up boolean conditions:
+ *   - Left of the LJ: ACCEPT. Why? If they appeared as ON conditions of the LJ, they would "filter" ONLY the right part,
+ *                             NOT THE LEFT.
+ *   - Right of the LJ: REJECT. Boolean conditions have to be used as ON conditions of the LOCAL LJ.
+ *   - "Real" JOIN (joins between two tables): REJECT. Local ON conditions are (roughly) equivalent to the "global" WHERE
+ *     conditions.
+ *   - "Fake" JOIN (one data atoms and filter conditions). ACCEPT. Need a JOIN/LJ for being used as ON conditions.
+ *                  If not blocked later, they will finish as WHERE conditions (atoms not embedded in a META-one).
+ *
  */
 public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer {
 
@@ -38,7 +45,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
      * Entry point
      */
     @Override
-    public CQIE extractEqualitiesAndNormalize(final CQIE initialRule) {
+    public CQIE normalizeByPullingOutEqualities(final CQIE initialRule) {
         CQIE newRule = initialRule.clone();
 
 

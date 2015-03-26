@@ -59,7 +59,6 @@ import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift;
 import org.semanticweb.ontop.renderer.DatalogProgramRenderer;
-import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -505,7 +504,7 @@ public class QuestStatement implements OBDAStatement {
 			PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
 
 			for (CQIE rule: unfolding.getRules()) {
-				normalizedRules.add(normalizer.extractEqualitiesAndNormalize(rule));
+				normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
 			}
 
 			OBDAQueryModifiers queryModifiers = unfolding.getQueryModifiers();
