@@ -12,12 +12,12 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
  *
  * Beware: immutable data structures (from the Functional Java library).
  */
-public class ExtractEqNormResult {
+public class PullOutEqLocalNormResult {
     private final List<Function> nonPushableAtoms;
     private final List<Function> pushableAtoms;
     private final Var2VarSubstitution substitution;
 
-    public ExtractEqNormResult(List<Function> nonPushableAtoms, List<Function> pushableAtoms, Var2VarSubstitution var2VarSubstitution) {
+    public PullOutEqLocalNormResult(List<Function> nonPushableAtoms, List<Function> pushableAtoms, Var2VarSubstitution var2VarSubstitution) {
         this.nonPushableAtoms = nonPushableAtoms;
         this.pushableAtoms = pushableAtoms;
         this.substitution = var2VarSubstitution;

@@ -15,9 +15,14 @@ import java.util.ArrayList;
  *
  * Limit: JOIN meta-predicates are not considered (--> no possibility to have specific ON conditions at the proper level).
  *
+ *
+ * Normalization in the direction of from relational calculus to relational algebra.
+ *
+ * Immutable class (instances have no attribute).
+ *
  * TODO: explain.
  */
-public class ExtractEqualityNormalizer {
+public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer {
 
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Ord<VariableImpl> VARIABLE_ORD = Ord.hashEqualsOrd();
@@ -25,12 +30,15 @@ public class ExtractEqualityNormalizer {
     private final static List<P2<VariableImpl, VariableImpl>> EMPTY_VARIABLE_RENAMING_LIST = List.nil();
     private final static List<Function> EMPTY_ATOM_LIST = List.nil();
     private final static Function TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
+
+
     /**
-     * TODO: explain
+     * High-level method.
      *
      * Entry point
      */
-    public static CQIE extractEqualitiesAndNormalize(final CQIE initialRule) {
+    @Override
+    public CQIE extractEqualitiesAndNormalize(final CQIE initialRule) {
         CQIE newRule = initialRule.clone();
 
 
@@ -39,7 +47,7 @@ public class ExtractEqualityNormalizer {
          */
         final VariableDispatcher variableDispatcher = new VariableDispatcher(initialRule);
 
-        ExtractEqNormResult result = normalizeSameLevelAtoms(List.iterableList(newRule.getBody()), variableDispatcher);
+        PullOutEqLocalNormResult result = normalizeSameLevelAtoms(List.iterableList(newRule.getBody()), variableDispatcher);
 
         newRule.updateBody(new ArrayList(result.getAllAtoms().toCollection()));
         return newRule;
@@ -53,11 +61,11 @@ public class ExtractEqualityNormalizer {
      *
      * TODO: update this comment.
      */
-    private static ExtractEqNormResult normalizeSameLevelAtoms(final List<Function> initialAtoms,
+    private static PullOutEqLocalNormResult normalizeSameLevelAtoms(final List<Function> initialAtoms,
                                                                final VariableDispatcher variableDispatcher) {
 
 
-        ExtractEqNormResult mainAtomsResult = normalizeDataAndCompositeAtoms(initialAtoms, variableDispatcher);
+        PullOutEqLocalNormResult mainAtomsResult = normalizeDataAndCompositeAtoms(initialAtoms, variableDispatcher);
 
         final Var2VarSubstitution substitution = mainAtomsResult.getVar2VarSubstitution();
 
@@ -89,7 +97,7 @@ public class ExtractEqualityNormalizer {
         List<Function> nonPushableAtoms = mainAtomsResult.getNonPushableAtoms().append(otherAtomsP2._1());
         List<Function> pushableAtoms = mainAtomsResult.getPushableAtoms().append(otherAtomsP2._2());
 
-        return new ExtractEqNormResult(nonPushableAtoms, pushableAtoms, substitution);
+        return new PullOutEqLocalNormResult(nonPushableAtoms, pushableAtoms, substitution);
     }
 
     /**
@@ -128,7 +136,7 @@ public class ExtractEqualityNormalizer {
     /**
      * TODO: describe
      */
-    private static ExtractEqNormResult normalizeDataAndCompositeAtoms(final List<Function> sameLevelAtoms, final VariableDispatcher variableDispatcher) {
+    private static PullOutEqLocalNormResult normalizeDataAndCompositeAtoms(final List<Function> sameLevelAtoms, final VariableDispatcher variableDispatcher) {
 
         /**
          * TODO: describe
@@ -146,9 +154,9 @@ public class ExtractEqualityNormalizer {
         });
 
 
-        List<ExtractEqNormResult> compositeAtomResults = compositeAtoms.map(new F<Function, ExtractEqNormResult>() {
+        List<PullOutEqLocalNormResult> compositeAtomResults = compositeAtoms.map(new F<Function, PullOutEqLocalNormResult>() {
             @Override
-            public ExtractEqNormResult f(Function atom) {
+            public PullOutEqLocalNormResult f(Function atom) {
                 return normalizeCompositeAtom(atom, variableDispatcher);
             }
         });
@@ -161,15 +169,15 @@ public class ExtractEqualityNormalizer {
          *
          * TODO: update this comment
          */
-        List<Function> secondNonPushableAtoms = compositeAtomResults.bind(new F<ExtractEqNormResult, List<Function>>() {
+        List<Function> secondNonPushableAtoms = compositeAtomResults.bind(new F<PullOutEqLocalNormResult, List<Function>>() {
             @Override
-            public List<Function> f(ExtractEqNormResult result) {
+            public List<Function> f(PullOutEqLocalNormResult result) {
                 return result.getNonPushableAtoms();
             }
         });
-        List<Function> secondPushableAtoms = compositeAtomResults.bind(new F<ExtractEqNormResult, List<Function>>() {
+        List<Function> secondPushableAtoms = compositeAtomResults.bind(new F<PullOutEqLocalNormResult, List<Function>>() {
             @Override
-            public List<Function> f(ExtractEqNormResult result) {
+            public List<Function> f(PullOutEqLocalNormResult result) {
                 return result.getPushableAtoms();
             }
         });
@@ -177,9 +185,9 @@ public class ExtractEqualityNormalizer {
         /**
          * TODO: describe!!!
          */
-        List<Var2VarSubstitution> substitutionsToMerge = compositeAtomResults.map(new F<ExtractEqNormResult, Var2VarSubstitution>() {
+        List<Var2VarSubstitution> substitutionsToMerge = compositeAtomResults.map(new F<PullOutEqLocalNormResult, Var2VarSubstitution>() {
             @Override
-            public Var2VarSubstitution f(ExtractEqNormResult result) {
+            public Var2VarSubstitution f(PullOutEqLocalNormResult result) {
                 return result.getVar2VarSubstitution();
             }
         }).snoc(dataAtomSubstitution);
@@ -199,7 +207,7 @@ public class ExtractEqualityNormalizer {
          */
         List<Function> nonPushableAtoms = firstNonPushableAtoms.append(secondNonPushableAtoms);
 
-        return new ExtractEqNormResult(nonPushableAtoms, pushableAtoms, mergedSubstitution);
+        return new PullOutEqLocalNormResult(nonPushableAtoms, pushableAtoms, mergedSubstitution);
     }
     /**
      * TODO: describe
@@ -357,7 +365,7 @@ public class ExtractEqualityNormalizer {
      * Applies the "pull out equalities" normalization to a left-join or join atom.
      *
      */
-    private static ExtractEqNormResult normalizeCompositeAtom(Function atom, VariableDispatcher variableDispatcher) {
+    private static PullOutEqLocalNormResult normalizeCompositeAtom(Function atom, VariableDispatcher variableDispatcher) {
         /**
          * Meta-atoms (algebra)
          */
@@ -379,7 +387,7 @@ public class ExtractEqualityNormalizer {
      * TODO: explain it
      *
      */
-    private static ExtractEqNormResult normalizeLeftJoin(final Function leftJoinMetaAtom,
+    private static PullOutEqLocalNormResult normalizeLeftJoin(final Function leftJoinMetaAtom,
                                                          final VariableDispatcher variableDispatcher) {
 
         /**
@@ -390,8 +398,8 @@ public class ExtractEqualityNormalizer {
         final List<Function> initialLeftAtoms = splittedAtoms._1();
         final List<Function> initialRightAtoms = splittedAtoms._2();
 
-        ExtractEqNormResult leftNormalizationResults = normalizeSameLevelAtoms(initialLeftAtoms, variableDispatcher);
-        ExtractEqNormResult rightNormalizationResults = normalizeSameLevelAtoms(initialRightAtoms, variableDispatcher);
+        PullOutEqLocalNormResult leftNormalizationResults = normalizeSameLevelAtoms(initialLeftAtoms, variableDispatcher);
+        PullOutEqLocalNormResult rightNormalizationResults = normalizeSameLevelAtoms(initialRightAtoms, variableDispatcher);
 
         /**
          * TODO: explain
@@ -412,7 +420,7 @@ public class ExtractEqualityNormalizer {
         // TODO: add a proper method in the data factory
         Function normalizedLeftJoinAtom = DATA_FACTORY.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, new ArrayList<Term>(remainingLJAtoms.toCollection()));
 
-        return new ExtractEqNormResult(List.cons(normalizedLeftJoinAtom, EMPTY_ATOM_LIST), pushedUpAtoms, mergedSubstitution);
+        return new PullOutEqLocalNormResult(List.cons(normalizedLeftJoinAtom, EMPTY_ATOM_LIST), pushedUpAtoms, mergedSubstitution);
     }
 
 

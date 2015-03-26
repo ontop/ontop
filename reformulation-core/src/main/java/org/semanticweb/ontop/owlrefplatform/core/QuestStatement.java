@@ -33,20 +33,19 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import com.google.common.collect.ArrayListMultimap;
-import org.h2.tools.Server;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.QueryParser;
 import org.openrdf.query.parser.QueryParserUtil;
 import org.semanticweb.ontop.model.*;
-import org.semanticweb.ontop.model.impl.DatalogProgramImpl;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
-import org.semanticweb.ontop.owlrefplatform.core.basicoperations.ExtractEqualityNormalizer;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizer;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.EmptyQueryResultSet;
@@ -502,8 +501,11 @@ public class QuestStatement implements OBDAStatement {
 		if (useExtractEqualityNormalizer) {
 			List<CQIE> normalizedRules = new ArrayList<>();
 
+			//TODO: use Guice instead
+			PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
+
 			for (CQIE rule: unfolding.getRules()) {
-				normalizedRules.add(ExtractEqualityNormalizer.extractEqualitiesAndNormalize(rule));
+				normalizedRules.add(normalizer.extractEqualitiesAndNormalize(rule));
 			}
 
 			OBDAQueryModifiers queryModifiers = unfolding.getQueryModifiers();
