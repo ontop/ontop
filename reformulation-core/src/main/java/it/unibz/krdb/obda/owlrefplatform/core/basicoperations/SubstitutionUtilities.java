@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -106,8 +105,8 @@ public class SubstitutionUtilities {
 
             // unifiers only apply to variables, simple or inside functional terms
 
-            if (t instanceof VariableImpl) {
-                Term replacement = unifier.get((VariableImpl) t);
+            if (t instanceof Variable) {
+                Term replacement = unifier.get((Variable) t);
                 if (replacement != null)
                     terms.set(i, replacement);
             } 
@@ -126,10 +125,10 @@ public class SubstitutionUtilities {
      */
 
     public static Substitution getNullifier(Collection<Variable> vars) {
-        Map<VariableImpl, Term> entries = new HashMap<>();
+        Map<Variable, Term> entries = new HashMap<>();
 
         for (Variable var : vars) {
-            entries.put((VariableImpl) var, OBDAVocabulary.NULL);
+            entries.put(var, OBDAVocabulary.NULL);
         }
         Substitution substitution = new SubstitutionImpl(entries);
         return substitution;
@@ -146,10 +145,10 @@ public class SubstitutionUtilities {
      */
     public static Substitution union(Substitution substitution1, Substitution substitution2)
             throws SubstitutionUnionException {
-        Map<VariableImpl, Term> substitutionMap = new HashMap<>();
+        Map<Variable, Term> substitutionMap = new HashMap<>();
         substitutionMap.putAll(substitution1.getMap());
 
-        for (Map.Entry<VariableImpl, Term> newEntry : substitution2.getMap().entrySet()) {
+        for (Map.Entry<Variable, Term> newEntry : substitution2.getMap().entrySet()) {
 
             /**
              * Checks if the variable is part of the domain

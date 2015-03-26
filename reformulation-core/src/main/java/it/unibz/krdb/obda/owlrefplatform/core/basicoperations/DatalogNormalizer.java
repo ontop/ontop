@@ -31,7 +31,6 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -293,7 +292,7 @@ public class DatalogNormalizer {
 				Term subTerm = subterms.get(j);
 				if (subTerm instanceof Variable) {
 
-					VariableImpl var1 = (VariableImpl) subTerm;
+					Variable var1 = (Variable) subTerm;
 					Variable var2 = (Variable) substitutions.get(var1);
 
 					if (var2 == null) {

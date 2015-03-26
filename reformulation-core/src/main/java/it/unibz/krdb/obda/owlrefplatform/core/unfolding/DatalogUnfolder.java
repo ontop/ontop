@@ -173,27 +173,17 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	@Override
 	public DatalogProgram unfold(DatalogProgram inputquery, String targetPredicate) {
 
-		/*
-		 * Needed because the rewriter might generate query bodies like this
-		 * B(x,_), R(x,_), underscores represent unique anonymous variables.
-		 * However, the SQL generator needs them to be explicitly unique.
-		 * replacing B(x,newvar1), R(x,newvar2)
-		 */
-		
 		List<CQIE> workingSet = new LinkedList<>();
 		for (CQIE query : inputquery.getRules()) 
-			workingSet.add(QueryAnonymizer.deAnonymize(query));
+			workingSet.add(query.clone());
 				
 		for (CQIE query : workingSet)
 			EQNormalizer.enforceEqualities(query);
 
 		computePartialEvaluation(workingSet);	
 		
-		/**
-		 * We need to enforce equality again, because at this point it is 
-		 *  possible that there is still some EQ(...) in the Program resultdp
-		 * 
-		 */
+		// We need to enforce equality again, because at this point it is 
+		//  possible that there is still some EQ(...) 
 		for (CQIE query : workingSet)
 			EQNormalizer.enforceEqualities(query);
 

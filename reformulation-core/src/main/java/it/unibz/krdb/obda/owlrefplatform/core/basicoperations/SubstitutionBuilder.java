@@ -1,16 +1,15 @@
 package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
-
+import it.unibz.krdb.obda.model.Variable;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SubstitutionBuilder implements Cloneable {
 
-	private Map<VariableImpl, Term> map = new HashMap<>();
+	private Map<Variable, Term> map = new HashMap<>();
 	
-	public boolean extend(VariableImpl var, Term term) {
+	public boolean extend(Variable var, Term term) {
 		Term t = map.get(var);
 		// add if there is no value yet
 		if (t == null) {
@@ -36,7 +35,7 @@ public class SubstitutionBuilder implements Cloneable {
 		SubstitutionBuilder sb;
 		try {
 			sb = (SubstitutionBuilder) super.clone();
-			sb.map = (Map<VariableImpl, Term>) ((HashMap<VariableImpl, Term>)map).clone();
+			sb.map = (Map<Variable, Term>) ((HashMap<Variable, Term>)map).clone();
 			return sb;
 		} 
 		catch (CloneNotSupportedException e) {

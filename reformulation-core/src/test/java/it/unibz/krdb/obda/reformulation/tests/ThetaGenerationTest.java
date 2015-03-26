@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SingletonSubstitution;
@@ -53,7 +52,7 @@ public class ThetaGenerationTest extends TestCase {
 		if (mgu == null) {
 			computedmgu = null;
 		} else {
-			for (Map.Entry<VariableImpl,Term> m : mgu.getMap().entrySet()) {
+			for (Map.Entry<Variable,Term> m : mgu.getMap().entrySet()) {
 				computedmgu.add(new SingletonSubstitution(m.getKey(), m.getValue()));
 			}
 		}

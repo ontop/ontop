@@ -168,11 +168,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return new VariableImpl(name);
 	}
 
-//	@Override
-//	public Variable getVariableNondistinguished() {
-//		return new AnonymousVariable();
-//	}
-
 	@Override
 	public Function getFunction(Predicate functor, Term... arguments) {
 		return new FunctionalTermImpl(functor, arguments);
@@ -529,8 +524,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	private Term getFreshTerm(Term term, int suff) {
 		Term newTerm;
-		if (term instanceof VariableImpl) {
-			VariableImpl variable = (VariableImpl) term;
+		if (term instanceof Variable) {
+			Variable variable = (Variable) term;
 			newTerm = getVariable(variable.getName() + "_" + suff);
 		} 
 		else if (term instanceof Function) {
