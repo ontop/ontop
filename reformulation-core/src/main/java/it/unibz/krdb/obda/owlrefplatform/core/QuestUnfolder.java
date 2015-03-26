@@ -50,7 +50,7 @@ public class QuestUnfolder {
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
     private Set<Predicate> dataPropertiesMapped;
-    private Set<Function> objectPropertiesMapped;
+    private Set<Predicate> objectPropertiesMapped;
 
 	public QuestUnfolder(OBDAModel unfoldingOBDAModel, DBMetadata metadata,  Connection localConnection, URI sourceId) throws Exception{
 
@@ -438,7 +438,7 @@ public class QuestUnfolder {
         return dataPropertiesMapped;
     }
 
-    public Set<Function> getSameAsObjectPredicates(){
+    public Set<Predicate> getSameAsObjectPredicates(){
 
         return objectPropertiesMapped;
     }

@@ -35,7 +35,7 @@ public class MappingSameAs {
 
     private Set<Predicate> dataPropertiesMapped;
 
-    private Set<Function> objectPropertiesMapped;
+    private Set<Predicate> objectPropertiesMapped;
     /**
      * Constructs a mapping containing the URI of owl:sameAs
      *
@@ -45,7 +45,7 @@ public class MappingSameAs {
         this.rules =  rules;
 
         dataPropertiesMapped = new HashSet<Predicate>();
-        objectPropertiesMapped = new HashSet<Function>();
+        objectPropertiesMapped = new HashSet<Predicate>();
 
         getSameAs();
 
@@ -124,25 +124,16 @@ public class MappingSameAs {
                     if(!functionSymbol.getName().equals("http://www.w3.org/2002/07/owl#sameAs")){
 
                         Term prefix1 = term1.getTerm(0);
-
-                        if (sameAsMap.containsKey(prefix1)) {
-
-                            //TODO use constants
-                            prefix1 =  fac.getVariable("anon");
-
-                        }
-
                         Term prefix2 =  term2.getTerm(0);
 
-                        if (sameAsMap.containsKey(prefix2)) {
+                        if (sameAsMap.containsKey(prefix1) ||  (sameAsMap.containsKey(prefix2))) {
 
-                            //TODO use constants
-                            prefix2 =  fac.getVariable("anon");
+                            objectPropertiesMapped.add(functionSymbol);
 
                         }
 
-                        Function objectProperty = fac.getFunction(functionSymbol,prefix1, prefix2);
-                        objectPropertiesMapped.add(objectProperty);
+
+
                     }
 
 
@@ -191,7 +182,7 @@ public class MappingSameAs {
         return dataPropertiesMapped;
     }
 
-    public Set<Function> getObjectPropertiesWithSameAs(){
+    public Set<Predicate> getObjectPropertiesWithSameAs(){
 
         return objectPropertiesMapped;
     }

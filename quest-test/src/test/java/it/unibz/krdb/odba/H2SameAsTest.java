@@ -206,13 +206,8 @@ public class H2SameAsTest {
 
     @Test
     public void testSameAs2b() throws Exception {
-        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> SELECT ?x ?y\n" +
-                "WHERE {\n" +
-                "   ?x  a :Wellbore . \n" +
-                "   ?x  :hasName ?y . \n" +
-                "   ?x  :hasValue ?z . \n " +
-
-                "}";
+        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>  \n" +
+                "SELECT ?x ?y WHERE { ?x a :Wellbore. {{ ?x :hasOwner ?y . } UNION {?x :hasOwner [owl:samesAs ?y]} UNION{?x owl:sameAs [:hasOwner ?y] } }}";
 
         runTests(query);
 
@@ -222,14 +217,7 @@ public class H2SameAsTest {
     public void testSameAs3() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>" +
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                " SELECT ?x ?y \n" +
-                "WHERE {{\n" +
-                "   ?x  a :Wellbore. \n" +
-                "   ?x  :hasName ?y . }\n" +
-                "   UNION {\n" +
-                "   ?x  owl:sameAs [:hasName ?y] . " +
-
-                "}}";
+                "SELECT ?x ?y ?z WHERE { ?x a :Wellbore. { ?x :hasName ?y . } UNION {?x owl:sameAs [  :hasName ?y]  } {?x:isActive ?z .} UNION {?x owl:sameAs [   :isActive ?z ] } }\n";
 
 
          runTests(query);
@@ -240,27 +228,35 @@ public class H2SameAsTest {
     public void testSameAs4() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>" +
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                " SELECT ?x ?y ?z \n" +
-                "WHERE {\n" +
-                "   ?x  :hasName ?y . \n" +
-                "   ?x  owl:sameAs ?z . " +
-
-                "}";
+                "SELECT ?x ?y WHERE { {?x a :Wellbore .  ?x :hasName ?y .} UNION {?x owl:sameAs [ a :Wellbore; :hasName ?y]} }\n";
 
         // Bind (?n ?y)
          runTests(query);
 
     }
 
+    @Test
+    public void testSameAs5() throws Exception {
+        String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>" +
+                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                "SELECT ?x ?y WHERE { ?x a :Wellbore . { ?x :hasName ?y . } UNION {\n" +
+                "?x owl:sameAs [ :hasName ?y ] .\n" +
+                "} }\n";
 
-
-
-
-
-
-
-
-
+        // Bind (?n ?y)
+        runTests(query);
 
     }
+
+
+
+
+
+
+
+
+
+
+
+}
 
