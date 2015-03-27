@@ -49,20 +49,20 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
 	@Override
 	public void setUp() {
-		metadata = new DBMetadata();
+		metadata = new DBMetadata("dummy class");
 		TableDefinition table = new TableDefinition("TABLE");
-		table.setAttribute(1, new Attribute("col1", Types.INTEGER, true, false));
-		table.setAttribute(2, new Attribute("col2", Types.INTEGER, false, false));
-		table.setAttribute(3, new Attribute("col3", Types.INTEGER, false, false));
-		table.setAttribute(4, new Attribute("col4", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col1", Types.INTEGER, true, false));
+		table.addAttribute(new Attribute("col2", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col3", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col4", Types.INTEGER, false, false));
 		metadata.add(table);
 		
 		
 		table = new TableDefinition("TABLE2");
-		table.setAttribute(1, new Attribute("col1", Types.INTEGER, true, false));
-		table.setAttribute(2, new Attribute("col2", Types.INTEGER, false, false));
-		table.setAttribute(3, new Attribute("col3", Types.INTEGER, false, false));
-		table.setAttribute(4, new Attribute("col4", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col1", Types.INTEGER, true, false));
+		table.addAttribute(new Attribute("col2", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col3", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col4", Types.INTEGER, false, false));
 		metadata.add(table);
 
 		unfoldingProgram = fac.getDatalogProgram();

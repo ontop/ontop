@@ -28,14 +28,6 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -49,6 +41,7 @@ import org.openrdf.query.parser.ParsedTupleQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.*;
 
 /***
  * Translate a SPARQL algebra expression into a Datalog program that has the
@@ -398,8 +391,22 @@ public class SparqlAlgebraToDatalogTranslator {
 		
 		List<ProjectionElem> projectionElements = project.getProjectionElemList().getElements();
 		List<Term> varList = new  ArrayList<>(projectionElements.size());
-		for (ProjectionElem var : projectionElements) 
-			varList.add(ofac.getVariable(var.getSourceName()));
+		for (ProjectionElem var : projectionElements)  {
+			// we assume here that the target name is "introduced" as one of the arguments of atom
+			// (this is normally done by an EXTEND inside the PROJECTION)
+			// first, we check whether this assumption can be made
+			if (!var.getSourceName().equals(var.getTargetName())) {
+				boolean found = false;
+				for (Term a : atom.getTerms())
+					if ((a instanceof Variable) && ((Variable)a).getName().equals(var.getSourceName())) {
+						found = true;
+						break;
+					}
+				if (!found)
+					throw new RuntimeException("Projection target of " + var + " not found in " + project.getArg());
+			}
+			varList.add(ofac.getVariable(var.getTargetName()));
+		}
 
 		CQIE rule = createRule(pr, newHeadName, varList, atom);
 		return rule.getHead();
