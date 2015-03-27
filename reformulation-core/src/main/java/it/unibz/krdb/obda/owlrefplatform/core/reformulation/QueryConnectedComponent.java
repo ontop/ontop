@@ -91,7 +91,7 @@ public class QueryConnectedComponent {
 		this.edges = edges;
 		this.nonDLAtoms = nonDLAtoms;
 
-		this.loop = isDegenerate() ? terms.get(0) : null; 
+		this.loop = isDegenerate() && !terms.isEmpty() ? terms.get(0) : null; 
 				
 		quantifiedVariables = new ArrayList<Loop>(terms.size());
 		variables = new ArrayList<Term>(terms.size());
@@ -245,7 +245,7 @@ public class QueryConnectedComponent {
 		}	
 
 		
-		List<QueryConnectedComponent> ccs = new LinkedList<QueryConnectedComponent>();
+		List<QueryConnectedComponent> ccs = new LinkedList<>();
 		
 		// form the list of connected components from the list of edges
 		while (!pairs.isEmpty()) {

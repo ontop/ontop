@@ -150,9 +150,10 @@ public class TreeWitnessRewriter implements QueryRewriter {
 		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, generators);
 
 		if (cc.hasNoFreeTerms()) {  
-			for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), getFreshVariable())) {
-				outputRules.add(fac.getCQIE(headAtom, a)); 
-			}
+			if (!cc.isDegenerate() || cc.getLoop() != null) 
+				for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), getFreshVariable())) {
+					outputRules.add(fac.getCQIE(headAtom, a)); 
+				}
 		}
 
 		// COMPUTE AND STORE TREE WITNESS FORMULAS
