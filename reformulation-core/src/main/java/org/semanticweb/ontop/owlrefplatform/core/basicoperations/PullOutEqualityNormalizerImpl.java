@@ -13,9 +13,6 @@ import java.util.ArrayList;
 /**
  * Default implementation of PullOutEqualityNormalizer. Is Left-Join aware.
  *
- * Limit: JOIN meta-predicates are not yet supported (--> no possibility to have specific ON conditions at the proper level).
- * TODO: support them !
- *
  * Immutable class (instances have no attribute).
  *
  * Main challenge: putting the equalities at the "right" (good) place.
@@ -102,7 +99,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         P2<List<Function>, List<Function>> otherAtomsP2 = splitPushableAtoms(otherAtoms);
 
         List<Function> nonPushableAtoms = mainAtomsResult.getNonPushableAtoms().append(otherAtomsP2._1());
-        List<Function> pushableAtoms = mainAtomsResult.getPushableAtoms().append(otherAtomsP2._2());
+        List<Function> pushableAtoms = mainAtomsResult.getPushableBoolAtoms().append(otherAtomsP2._2());
 
         return new PullOutEqLocalNormResult(nonPushableAtoms, pushableAtoms, substitution);
     }
@@ -185,7 +182,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         List<Function> secondPushableAtoms = compositeAtomResults.bind(new F<PullOutEqLocalNormResult, List<Function>>() {
             @Override
             public List<Function> f(PullOutEqLocalNormResult result) {
-                return result.getPushableAtoms();
+                return result.getPushableBoolAtoms();
             }
         });
 
@@ -381,8 +378,7 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
             if (functionSymbol.equals(OBDAVocabulary.SPARQL_LEFTJOIN)) {
                 return normalizeLeftJoin(atom, variableDispatcher);
             } else if (functionSymbol.equals(OBDAVocabulary.SPARQL_JOIN)) {
-                throw new RuntimeException("Not implemented (yet). We do not expect JOIN meta-predicates at " +
-                        "the pull-out equalities level.");
+                return normalizeJoin(atom, variableDispatcher);
             }
         }
 
@@ -422,12 +418,116 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
          */
         List<Function> remainingLJAtoms = leftNormalizationResults.getNonPushableAtoms().snoc(TRUE_EQ).
                 append(rightNormalizationResults.getAllAtoms()).append(joiningEqualities);
-        List<Function> pushedUpAtoms = leftNormalizationResults.getPushableAtoms();
+        List<Function> pushedUpAtoms = leftNormalizationResults.getPushableBoolAtoms();
 
         // TODO: add a proper method in the data factory
         Function normalizedLeftJoinAtom = DATA_FACTORY.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, new ArrayList<Term>(remainingLJAtoms.toCollection()));
 
         return new PullOutEqLocalNormResult(List.cons(normalizedLeftJoinAtom, EMPTY_ATOM_LIST), pushedUpAtoms, mergedSubstitution);
+    }
+
+    /**
+     * TODO: explain it
+     *
+     *
+     */
+    private static PullOutEqLocalNormResult normalizeJoin(final Function joinMetaAtom,
+                                                          final VariableDispatcher variableDispatcher) {
+        List<Function> subAtoms = List.iterableList((java.util.List<Function>)(java.util.List<?>) joinMetaAtom.getTerms());
+        PullOutEqLocalNormResult normalizationResult = normalizeSameLevelAtoms(subAtoms, variableDispatcher);
+
+        /**
+         * If is a real join
+         */
+        if (isRealJoin(subAtoms)) {
+
+            Function joiningCondition = foldBooleanConditions(normalizationResult.getPushableBoolAtoms());
+            Function normalizedJoinAtom = foldJoin(normalizationResult.getNonPushableAtoms(),joiningCondition);
+
+            /**
+             * A real JOIN is blocking --> no pushable boolean atom.
+             */
+            return new PullOutEqLocalNormResult(List.cons(normalizedJoinAtom, EMPTY_ATOM_LIST), EMPTY_ATOM_LIST,
+                    normalizationResult.getVar2VarSubstitution());
+        }
+        /**
+         * Fake join: no need to create a new result
+         * because only have one data/join/LJ atom that will remain (filter conditions are pushed)
+         *
+         */
+        else {
+            return normalizationResult;
+        }
+    }
+
+    private static Function foldBooleanConditions(List<Function> booleanAtoms) {
+        if (booleanAtoms.length() == 0)
+            return TRUE_EQ;
+
+        Function firstBooleanAtom = booleanAtoms.head();
+        return booleanAtoms.tail().foldLeft(new F2<Function, Function, Function>() {
+            @Override
+            public Function f(Function previousAtom, Function currentAtom) {
+                return DATA_FACTORY.getFunctionAND(previousAtom, currentAtom);
+            }
+        }, firstBooleanAtom);
+    }
+
+    /**
+     *
+     * TODO: explain
+     *
+     */
+    private static Function foldJoin(List<Function> dataOrCompositeAtoms, Function joiningCondition) {
+        int length = dataOrCompositeAtoms.length();
+        if (length < 2) {
+            throw new IllegalArgumentException("At least two atoms should be given");
+        }
+
+        Function firstAtom = dataOrCompositeAtoms.head();
+        Function secondAtom = foldJoin(dataOrCompositeAtoms.tail());
+
+        return DATA_FACTORY.getSPARQLJoin(firstAtom, secondAtom, joiningCondition);
+    }
+
+    /**
+     * TODO: explain
+     */
+    private static Function foldJoin(List<Function> dataOrCompositeAtoms) {
+        int length = dataOrCompositeAtoms.length();
+        if (length == 1)
+            return dataOrCompositeAtoms.head();
+        else if (length == 0)
+            throw new IllegalArgumentException("At least one atom should be given.");
+        else {
+            Function firstAtom = dataOrCompositeAtoms.head();
+            //Function secondAtom = foldJoin(dataOrCompositeAtoms.tail());
+            //return DATA_FACTORY.getSPARQLJoin(firstAtom, secondAtom, TRUE_EQ);
+            return dataOrCompositeAtoms.tail().foldLeft(new F2<Function, Function, Function>() {
+                @Override
+                public Function f(Function firstAtom, Function secondAtom) {
+                    return DATA_FACTORY.getSPARQLJoin(firstAtom, secondAtom, TRUE_EQ);
+                }
+            }, firstAtom);
+        }
+    }
+
+    /**
+     * TODO: explain
+     * TODO: check if this work with a JOIN tree.
+     */
+    private static boolean isRealJoin(List<Function> subAtoms) {
+        /**
+         * TODO: reuse a shared static filter fct object.
+         */
+        List<Function> dataAndCompositeAtoms = subAtoms.filter(new F<Function, Boolean>() {
+            @Override
+            public Boolean f(Function atom) {
+                return isDataOrLeftJoinOrJoinAtom(atom);
+            }
+        });
+
+        return dataAndCompositeAtoms.length() > 1;
     }
 
 
