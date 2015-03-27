@@ -1118,8 +1118,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			if (predicate == OBDAVocabulary.SPARQL_JOIN) {
 				String indent2 = indent + INDENT;
-				String tableDefinitions = getTableDefinitions(innerTerms,
-						index, false, false, indent2);
+				String tableDefinitions = "(" + getTableDefinitions(innerTerms,
+						index, false, false, indent2) + ")";
 				return tableDefinitions;
 			} else if (predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
 
