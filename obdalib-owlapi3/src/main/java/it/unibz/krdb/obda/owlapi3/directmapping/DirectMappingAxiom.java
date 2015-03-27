@@ -22,6 +22,7 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
 
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
@@ -210,8 +211,11 @@ public class DirectMappingAxiom {
 							sub, obj));
 
 					// construct the head
+					Set<Variable> headTermsSet = new HashSet<>();
+					TermUtils.addReferencedVariablesTo(headTermsSet, atom);
+					
 					List<Term> headTerms = new ArrayList<>();
-					headTerms.addAll(atom.getReferencedVariables());
+					headTerms.addAll(headTermsSet);
 
 					Predicate headPredicate = df.getPredicate(
 							"http://obda.inf.unibz.it/quest/vocabulary#q",

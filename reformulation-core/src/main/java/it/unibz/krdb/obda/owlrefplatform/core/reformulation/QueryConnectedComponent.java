@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Variable;
+import it.unibz.krdb.obda.model.impl.TermUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -173,7 +174,8 @@ public class QueryConnectedComponent {
 			while (ni.hasNext()) {
 				Function atom = ni.next();
 				boolean intersects = false;
-				Set<Variable> atomVars = atom.getReferencedVariables();
+				Set<Variable> atomVars = new HashSet<>();
+				TermUtils.addReferencedVariablesTo(atomVars, atom);
 				for (Variable t : atomVars) 
 					if (ccTerms.contains(t)) {
 						intersects = true;
@@ -254,7 +256,8 @@ public class QueryConnectedComponent {
 		while (!nonDLAtoms.isEmpty()) {
 			//log.debug("NON-DL ATOMS ARE NOT EMPTY: {}", nonDLAtoms);
 			Function f = nonDLAtoms.iterator().next(); 
-			Set<Variable> vars = f.getReferencedVariables();
+			Set<Variable> vars = new HashSet<>();
+			TermUtils.addReferencedVariablesTo(vars, f);
 			Variable v = vars.iterator().next();
 			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, v));			
 		}

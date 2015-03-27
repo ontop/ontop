@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.model;
  */
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * This class defines a type of {@link Term} in which it denotes a mapping
@@ -68,10 +67,6 @@ public interface Function extends Term {
 	public Term getTerm(int index);
 
 	public void setTerm(int index, Term term);
-
-	public Set<Variable> getVariables();
-
-	public List<Variable> getVariablesList();
 
 	public void updateTerms(List<Term> literals);
 

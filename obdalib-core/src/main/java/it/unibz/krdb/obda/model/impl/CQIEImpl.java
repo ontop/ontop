@@ -221,11 +221,9 @@ public class CQIEImpl implements CQIE, ListListener {
 	@Override
 	public Set<Variable> getReferencedVariables() {
 		Set<Variable> vars = new LinkedHashSet<Variable>();
-		for (Function atom : body)
-			for (Term t : atom.getTerms()) {
-				for (Variable v : t.getReferencedVariables())
-					vars.add(v);
-			}
+		for (Function atom : body) {
+			TermUtils.addReferencedVariablesTo(vars, atom);
+		}
 		return vars;
 	}
 
