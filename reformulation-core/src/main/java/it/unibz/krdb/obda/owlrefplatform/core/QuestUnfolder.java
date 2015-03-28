@@ -49,8 +49,8 @@ public class QuestUnfolder {
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-    private Set<Predicate> dataPropertiesMapped;
-    private Set<Predicate> objectPropertiesMapped;
+    private Set<Predicate> dataPropertiesMapped = new HashSet<>();
+    private Set<Predicate> objectPropertiesMapped = new HashSet<>();;
 
 	public QuestUnfolder(OBDAModel unfoldingOBDAModel, DBMetadata metadata,  Connection localConnection, URI sourceId) throws Exception{
 
