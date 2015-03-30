@@ -8,15 +8,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * TODO: explain
- * TODO: find a better name
+ * Renames the variables in the scope of a rule.
+ * For any given variable, always generates a different renaming.
+ *
+ * Note that the first renaming of a variable returns the same variable.
+ *
+ * Also generates new variables that are guaranteed not to conflict
+ * with already existing variables in the body of the rule.
  *
  */
 public class VariableDispatcher {
 
     private final VariableGenerator variableGenerator;
     /**
-     * TODO: explain
+     * Keeps track of allocated variables to not allocate them twice.
      */
     private final Set<VariableImpl> allocatedVariables;
 
@@ -26,7 +31,7 @@ public class VariableDispatcher {
     }
 
     /**
-     * TODO: explain
+     * Always generates a different renaming for a given variable.
      */
     public synchronized VariableImpl renameDataAtomVariable(VariableImpl previousVariable) {
         /**

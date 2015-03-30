@@ -242,7 +242,10 @@ public class DatalogNormalizer {
 	 * generating SQL queries and allows to avoid cross references in nested
 	 * JOINs, which generate wrong ON or WHERE conditions.
 	 *
+	 * DEPRECATED. See PullOutEqualityNormalizer for new implementation(s).
+	 *
 	 */
+	@Deprecated
 	public static CQIE pullOutEqualities(CQIE query) {
 		AppendableSubstitution substitution = new SubstitutionImpl();
 		int[] newVarCounter = { 1 };

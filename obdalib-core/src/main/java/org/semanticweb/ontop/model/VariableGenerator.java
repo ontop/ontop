@@ -7,7 +7,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * TODO: describe
+ * Generates new variables that are guaranteed to not conflict with
+ * already variables in a given scope.
+ *
+ * The typical scope for variables is the body of a rule.
  */
 public class VariableGenerator {
 
@@ -34,7 +37,8 @@ public class VariableGenerator {
     }
 
     /**
-     * TODO: explain
+     * Generates a new non-conflicting variable from a previous one.
+     * It will reuse its name.
      */
     public VariableImpl generateNewVariableFromVar(Variable previousVariable) {
         Variable newVariable;
@@ -47,7 +51,7 @@ public class VariableGenerator {
     }
 
     /**
-     * TODO: explain
+     * Generates a new non-conflicting variable.
      */
     public VariableImpl generateNewVariable() {
         Variable newVariable;

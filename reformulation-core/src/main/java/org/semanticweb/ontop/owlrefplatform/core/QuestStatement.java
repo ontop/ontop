@@ -496,27 +496,17 @@ public class QuestStatement implements OBDAStatement {
 
 
 		log.debug("Pulling out equalities...");
-		boolean useExtractEqualityNormalizer = true;
-		if (useExtractEqualityNormalizer) {
-			List<CQIE> normalizedRules = new ArrayList<>();
 
-			//TODO: use Guice instead
-			PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
+		//TODO: use Guice instead
+		PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
 
-			for (CQIE rule: unfolding.getRules()) {
-				normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
-			}
-
-			OBDAQueryModifiers queryModifiers = unfolding.getQueryModifiers();
-			unfolding = ofac.getDatalogProgram(queryModifiers, normalizedRules);
-		}
-		else {
-			for (CQIE rule: unfolding.getRules()) {
-				DatalogNormalizer.pullOutEqualities(rule);
-				//System.out.println(rule);
-			}
+		List<CQIE> normalizedRules = new ArrayList<>();
+		for (CQIE rule: unfolding.getRules()) {
+			normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
 		}
 
+		OBDAQueryModifiers queryModifiers = unfolding.getQueryModifiers();
+		unfolding = ofac.getDatalogProgram(queryModifiers, normalizedRules);
 
 		log.debug("\n Partial evaluation ended.\n{}", unfolding);
 

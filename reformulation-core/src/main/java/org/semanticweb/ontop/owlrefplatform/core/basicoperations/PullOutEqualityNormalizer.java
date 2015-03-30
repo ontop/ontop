@@ -15,13 +15,13 @@ import org.semanticweb.ontop.model.CQIE;
  *       is transformed into
  *    ans(x,y) :- Table1(x,x1,y,z),Table2(x2),EQ(x,x1),EQ(x,x2),EQ(z,2)
  *
- * These new equalities typically serve in WHERE and ON conditions if the target language is SQL.
+ * These new equalities typically serve in WHERE and ON conditions when the target language is SQL.
  *
- * The challenge appears when we have to deal with left joins. With LJs, some equalities
- * should be applied to LOCAL ON clause (the "joining" condition and "filtering" conditions for the right part
+ * This normalization becomes a little bit challenging when we have to deal with left joins. With LJs, some equalities
+ * should be applied to the LOCAL ON clause (the "joining" condition and "filtering" conditions for the right part
  * ONLY).
- * --> Local scope of left joins should be considered.
- * NB: Recall that ONE query can only have ONE WHERE clause but multiple ONs.
+ *
+ * NB: Recall that ONE query can only have one WHERE clause but multiple ONs.
  * WHERE and ON semantics differ significantly for LJs but not for Joins.
  *
  */
