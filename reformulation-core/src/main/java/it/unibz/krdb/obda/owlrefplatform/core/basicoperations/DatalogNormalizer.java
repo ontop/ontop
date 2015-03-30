@@ -31,7 +31,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.model.impl.TermUtils;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -293,7 +293,7 @@ public class DatalogNormalizer {
 				Term subTerm = subterms.get(j);
 				if (subTerm instanceof Variable) {
 
-					VariableImpl var1 = (VariableImpl) subTerm;
+					Variable var1 = (Variable) subTerm;
 					Variable var2 = (Variable) substitutions.get(var1);
 
 					if (var2 == null) {
@@ -422,7 +422,7 @@ public class DatalogNormalizer {
 			} else if (atom.isAlgebraFunction()) {
 				currentLevelVariables.addAll(getDefinedVariables(atom.getTerms()));
 			} else {
-				currentLevelVariables.addAll(atom.getReferencedVariables());
+				TermUtils.addReferencedVariablesTo(currentLevelVariables, atom);
 			}
 		}
 		return currentLevelVariables;
@@ -445,13 +445,13 @@ public class DatalogNormalizer {
 	 * @return
 	 */
 	private static Set<Variable> getProblemVariablesForBranchN(List<Term> atoms, int focusBranch) {
-		Set<Variable> currentLevelVariables = new HashSet<Variable>();
+		Set<Variable> currentLevelVariables = new HashSet<>();
 		for (int i = 0; i < atoms.size(); i++) {
 			if (i == focusBranch)
 				continue;
 			Function atom = (Function) atoms.get(i);
 			if (atom.isDataFunction()) {
-				currentLevelVariables.addAll(atom.getReferencedVariables());
+				TermUtils.addReferencedVariablesTo(currentLevelVariables, atom);
 			} else if (atom.isAlgebraFunction()) {
 				currentLevelVariables.addAll(getDefinedVariables(atom.getTerms()));
 			} else {
@@ -531,7 +531,8 @@ public class DatalogNormalizer {
 		// System.out.println("Checking boolean conditions: "
 		// + booleanConditions.size());
 		for (Function equality : booleanConditions) {
-			Set<Variable> atomVariables = equality.getReferencedVariables();
+			Set<Variable> atomVariables = new HashSet<>();
+			TermUtils.addReferencedVariablesTo(atomVariables, equality); 
 
 			boolean belongsToThisLevel = true;
 			for (Variable var : atomVariables) {
@@ -577,7 +578,8 @@ public class DatalogNormalizer {
 			// .println(atom.getFunctionSymbol().getClass() + " " + atom);
 			if (!(atom.getFunctionSymbol() instanceof BooleanOperationPredicate))
 				continue;
-			Set<Variable> variables = atom.getReferencedVariables();
+			Set<Variable> variables = new HashSet<>();
+			TermUtils.addReferencedVariablesTo(variables, atom); 
 			boolean belongsUp = false;
 
 			search: for (Variable var : variables) {

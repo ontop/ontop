@@ -1,9 +1,11 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import com.google.common.base.Joiner;
+
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
@@ -21,6 +23,7 @@ import it.unibz.krdb.sql.DBMetadata;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.Select;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,7 +147,8 @@ public class QuestUnfolder {
 	public void addNOTNULLToMappings() {
 
 		for (CQIE mapping : unfoldingProgram) {
-			Set<Variable> headvars = mapping.getHead().getReferencedVariables();
+			Set<Variable> headvars = new HashSet<>();
+			TermUtils.addReferencedVariablesTo(headvars, mapping.getHead());
 			for (Variable var : headvars) {
 				Function notnull = fac.getFunctionIsNotNull(var);
 				   List<Function> body = mapping.getBody();

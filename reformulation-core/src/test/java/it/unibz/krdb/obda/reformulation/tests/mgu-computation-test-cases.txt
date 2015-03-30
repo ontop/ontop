@@ -31,20 +31,20 @@ A(x) | A(f(y,z,m)) = {x/f(y,z,m)}
 A(x) | A(f(x,y,z)) = NULL
 A(x) | A(f(y,x,z)) = NULL
 A(x) | A(f(y,z,x)) = NULL
-A(x) | A(#) = {}
+%A(x) | A(#) = {}
 
-A(#) | A(x) = {}
-A(#) | A(x y) = NULL
-A(#) | A("test") = {}
-A(#) | A(f(x)) = {}
-A(#) | A(f(x,y)) = {}
-A(#) | A(f(x,x)) = {}
-A(#) | A(#) = {}
-A(#) | B(#) = NULL
-A(# #) | A(x y) = {}
-A(# x) | A(x y) = {x/y}
-A(# # #) | A(x "test" f(x,y)) = {}
-A(# # x y) | A(x y z x) = {x/z y/z}
+%A(#) | A(x) = {}
+%A(#) | A(x y) = NULL
+%A(#) | A("test") = {}
+%A(#) | A(f(x)) = {}
+%A(#) | A(f(x,y)) = {}
+%A(#) | A(f(x,x)) = {}
+%A(#) | A(#) = {}
+%A(#) | B(#) = NULL
+%A(# #) | A(x y) = {}
+%A(# x) | A(x y) = {x/y}
+%A(# # #) | A(x "test" f(x,y)) = {}
+%A(# # x y) | A(x y z x) = {x/z y/z}
 % Checking if the previous case makes sense even without Undistinguished Variables
 A(m n x y) | A(x y z x) = {m/z n/z x/z y/z}
 
