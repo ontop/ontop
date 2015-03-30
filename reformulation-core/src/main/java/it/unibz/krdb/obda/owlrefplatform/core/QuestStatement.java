@@ -81,6 +81,8 @@ public class QuestStatement implements OBDAStatement {
 	private DatalogProgram programAfterRewriting;
 
 	private DatalogProgram programAfterUnfolding;
+	
+	private String sqlProduced;
 
 	private SesameConstructTemplate templ;
 
@@ -196,9 +198,9 @@ public class QuestStatement implements OBDAStatement {
 
 						// Execute the SQL query string
 						executingSQL = true;
-
+						
 						setQueryTimeout(sqlstatement);
-
+						
 						set = sqlstatement.executeQuery(sql);
 
 //						resetTimeouts(sqlstatement);
@@ -685,6 +687,7 @@ public class QuestStatement implements OBDAStatement {
 
 				
 				sql = getSQL(programAfterUnfolding, signatureContainer);
+				this.sqlProduced = sql;
 				// cacheQueryAndProperties(strquery, sql);
 				questInstance.cacheSQL(strquery, sql);
 			} 
@@ -958,6 +961,10 @@ public class QuestStatement implements OBDAStatement {
 		}
 
 		return result;
+	}
+
+	public int getCharsNumber() {
+		return this.sqlProduced.length();
 	}
 	
 }

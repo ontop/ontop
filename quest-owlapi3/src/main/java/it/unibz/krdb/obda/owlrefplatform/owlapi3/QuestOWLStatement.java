@@ -432,4 +432,8 @@ public class QuestOWLStatement {
 		return st.getUCQSizeAfterRewriting();
 	}
 
+	public int getSQLCharsNumber() {
+		return st.getCharsNumber();
+	}
+
 }
