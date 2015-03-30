@@ -62,8 +62,8 @@ public class CQCUtilitiesTest {
 	Term c1 = tfac.getConstantURI("URI1");
 	Term c2 = tfac.getConstantLiteral("m");
 
-	Term u1 = tfac.getVariableNondistinguished();
-	Term u2 = tfac.getVariableNondistinguished();
+//	Term u1 = tfac.getVariableNondistinguished();
+//	Term u2 = tfac.getVariableNondistinguished();
 
     @Before
 	public void setUp() throws Exception {
@@ -230,7 +230,7 @@ public class CQCUtilitiesTest {
 
 		head = pfac.getFunction(pfac.getPredicate("q", new COL_TYPE[] {}), new LinkedList<Term>());
 		body = new LinkedList<Function>();
-		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("S"), pfac.getVariableNondistinguished(), pfac.getVariableNondistinguished()));
+		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("S"), pfac.getVariable("w1"), pfac.getVariable("w2")));
 
 		CQIE q6 = pfac.getCQIE(head, body);
 
@@ -242,7 +242,7 @@ public class CQCUtilitiesTest {
 		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("R"),
 				pfac.getVariable("x"), pfac.getVariable("y")));
 		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("P"),
-				pfac.getVariable("y"), pfac.getVariableNondistinguished()));
+				pfac.getVariable("y"), pfac.getVariable("w1")));
 
 		CQIE q7 = pfac.getCQIE(head, body);
 
@@ -254,7 +254,7 @@ public class CQCUtilitiesTest {
 		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("R"),
 				pfac.getVariable("x"), pfac.getVariable("y")));
 		body.add(pfac.getFunction(pfac.getObjectPropertyPredicate("P"),
-				pfac.getVariableNondistinguished(), pfac.getVariableNondistinguished()));
+				pfac.getVariable("w1"), pfac.getVariable("w2")));
 
 		CQIE q8 = pfac.getCQIE(head, body);
 

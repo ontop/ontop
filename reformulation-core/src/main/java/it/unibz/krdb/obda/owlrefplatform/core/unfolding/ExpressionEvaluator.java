@@ -41,7 +41,7 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
+
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
@@ -891,9 +891,9 @@ public class ExpressionEvaluator {
 			} 
 			else {
 				Function result = null;
-				List<Function> temp = new ArrayList<Function>();
-				Set<VariableImpl> keys = theta.getMap().keySet();
-				for (VariableImpl var : keys) {
+				List<Function> temp = new ArrayList<>();
+				Set<Variable> keys = theta.getMap().keySet();
+				for (Variable var : keys) {
 					result = createEqNeqFilter(var, theta.get(var), isEqual);
 					temp.add(result);
 					if (temp.size() == 2) {

@@ -1,5 +1,9 @@
 package it.unibz.krdb.obda.reformulation.tests;
 
+import it.unibz.krdb.obda.io.ModelIOManager;
+import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
@@ -8,6 +12,8 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
 import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import junit.framework.TestCase;
 
@@ -17,10 +23,12 @@ import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 public class NPDUndolferTest extends TestCase {
 	
 	private final String owlfile = "src/test/resources/npd-v2-ql_a.owl";
+	private final String obdafile = "src/test/resources/npd-v2-ql_a.obda";
 
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
@@ -52,7 +60,7 @@ public class NPDUndolferTest extends TestCase {
 "PREFIX nlx: <http://sws.ifi.uio.no/data/norlex/>" +
 "PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#>" +
 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-"SELECT DISTINCT ?wellbore (?length * 0.30 AS ?lenghtM) ?company (?year + 2 AS ?YearB) " +
+"SELECT DISTINCT ?wellbore (?length * 0.30 AS ?lenghtM) (?length AS ?lenghtS) ?company (?year + 2 AS ?YearB) " +
 "WHERE {" +
 "  ?wc npdv:coreForWellbore" +
 "        [ rdf:type                      npdv:Wellbore ;" +
@@ -69,7 +77,10 @@ public class NPDUndolferTest extends TestCase {
 		String rewriting = getRewriting(query);
 		assertFalse(rewriting.contains("GTE(company,"));
 		assertTrue(rewriting.contains("GTE(year"));
+		assertTrue(rewriting.contains("GT(lenghtS"));
 	}
+	
+	
 
 	/**
 	 * Davide's query
@@ -159,6 +170,152 @@ public class NPDUndolferTest extends TestCase {
 "		   }";
 
 		String rewriting = getRewriting(query);
+	}
+
+	//@Test
+	public void notestNpdQ09() throws Exception {
+		String q09 = 	"PREFIX : <http://sws.ifi.uio.no/vocab/npd-v2#>" +
+						"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+						"PREFIX npd: <http://sws.ifi.uio.no/data/npd-v2/>" +
+						"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
+						"PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#>" +
+						"SELECT *"+
+						"WHERE {"+
+						"[ ] a npdv:Facility ;" +
+						"npdv:name ?facility ;" +
+						"npdv:registeredInCountry ?country;" +
+						"npdv:idNPD ?id ." +
+						"FILTER (?id > \"400000\"^^xsd:integer)"+
+						"}" +
+						"ORDER BY ?facility";
+		
+		String unf = getNPDUnfolding(q09);
+		String unf_rew = getNPDUnfoldingThroughRewriting(q09);
+		
+		assertEquals(countUnions(unf),countUnions(unf_rew));
+		
+	}
+	 
+	//@Test
+	public void notestNpdQ10() throws Exception {
+		String q10 = 	"PREFIX : <http://sws.ifi.uio.no/vocab/npd-v2#>" +
+						"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+						"PREFIX npd: <http://sws.ifi.uio.no/data/npd-v2/>" +
+						"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
+						"PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#>" +
+						"SELECT DISTINCT * " +
+						"WHERE {" +
+						"[] a npdv:DiscoveryWellbore ;" +
+						"npdv:name ?wellbore;" +
+						"npdv:dateUpdated ?date ." +
+						"FILTER (?date > \"2013-01-01T00:00:00.0\"^^xsd:dateTime)" +
+						"}" +
+						"ORDER BY ?wellbore";
+		
+		String unf = getNPDUnfolding(q10);
+		String unf_rew = getNPDUnfoldingThroughRewriting(q10);
+		
+		assertEquals(countUnions(unf),countUnions(unf_rew));
+		
+	}
+	
+	private int countUnions(String query){
+		int cnt = 1;
+		Pattern p = Pattern.compile("UNION");
+		Matcher m = p.matcher(query);
+		
+		while( m.find() ) ++cnt;
+		
+		return cnt;
+	}
+	
+	/**
+	 * constructs the unfolding passing by rewriting
+	 * 
+	 * @param query
+	 * @return
+	 * @throws Exception
+	 */
+	
+	private String getNPDUnfoldingThroughRewriting(String query) throws Exception {
+		
+		/*
+		 * Load the ontology from an external .owl file.
+		 */
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+				
+		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+		OBDAModel obdaModel = fac.getOBDAModel();
+		ModelIOManager ioManager = new ModelIOManager(obdaModel);
+		ioManager.load(obdafile);
+
+		QuestPreferences pref = new QuestPreferences();
+		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		pref.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
+
+		QuestOWLFactory factory = new QuestOWLFactory();
+		factory.setOBDAController(obdaModel);
+		factory.setPreferenceHolder(pref);
+		
+		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		
+		QuestOWLConnection qconn =  reasoner.getConnection();
+		QuestOWLStatement st = qconn.createStatement();
+		
+		String unfolding = st.getUnfolding(query);
+		st.close();
+		
+		reasoner.dispose();
+		
+		return unfolding;
+	}
+	
+	/**
+	 * constructs directly the unfolding
+	 * 
+	 * @param query
+	 * @return
+	 * @throws Exception
+	 */
+	
+	private String getNPDUnfolding(String query) throws Exception {
+		
+		/*
+		 * Load the ontology from an external .owl file.
+		 */
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
+				
+		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+		OBDAModel obdaModel = fac.getOBDAModel();
+		ModelIOManager ioManager = new ModelIOManager(obdaModel);
+		ioManager.load(obdafile);
+
+		QuestPreferences pref = new QuestPreferences();
+		pref.setCurrentValueOf(QuestPreferences.DBTYPE, QuestConstants.SEMANTIC_INDEX);
+		pref.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.CLASSIC);
+		// pref.setCurrentValueOf(QuestPreferences.REFORMULATION_TECHNIQUE, QuestConstants.TW);
+		// pref.setCurrentValueOf(QuestPreferences.REWRITE, QuestConstants.TRUE);
+
+		QuestOWLFactory factory = new QuestOWLFactory();
+		factory.setOBDAController(obdaModel);
+		factory.setPreferenceHolder(pref);
+		
+		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		
+		QuestOWLConnection qconn =  reasoner.getConnection();
+		QuestOWLStatement st = qconn.createStatement();
+		
+//		String rewriting = st.getRewriting(query);
+		String unfolding = st.getUnfolding(query);
+		st.close();
+		
+		reasoner.dispose();
+		
+		return unfolding;
 	}
 	
 	/**

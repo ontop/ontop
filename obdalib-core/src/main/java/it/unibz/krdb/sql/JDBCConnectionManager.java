@@ -259,7 +259,7 @@ public class JDBCConnectionManager {
 					if (rsColumns == null) {
 						continue;
 					}
-					for (int pos = 1; rsColumns.next(); pos++) {
+					while (rsColumns.next()) {
 						final String columnName = rsColumns.getString("COLUMN_NAME");
 						int dataType = rsColumns.getInt("DATA_TYPE");
 						final boolean isPrimaryKey = primaryKeys.contains(columnName);
@@ -272,7 +272,7 @@ public class JDBCConnectionManager {
 							dataType = -10000;
 						}
 						
-						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+						td.addAttribute(new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
 
 						// Check if the columns are unique regardless their letter cases
 						if (!tableColumns.add(columnName.toLowerCase())) {
@@ -351,7 +351,7 @@ public class JDBCConnectionManager {
 				if (rsColumns == null) {
 					continue;
 				}
-				for (int pos = 1; rsColumns.next(); pos++) {
+				while (rsColumns.next()) {
 		
 					/**
 					 * Print JDBC metadata returned by the driver, enabled in debug mode
@@ -375,7 +375,7 @@ public class JDBCConnectionManager {
 					}
 					
 					
-					td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, typeName));
+					td.addAttribute(new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, typeName));
 				
 					// Check if the columns are unique regardless their letter cases
 					if (!tableColumns.add(columnName.toLowerCase())) {
@@ -414,13 +414,13 @@ public class JDBCConnectionManager {
 
 					TableDefinition td = new TableDefinition(tblName);
 					try (ResultSet rsColumns = md.getColumns(tblCatalog, tblSchema, tblName, null)) {
-						for (int pos = 1; rsColumns.next(); pos++) {
+						while (rsColumns.next()) {
 							final String columnName = rsColumns.getString("COLUMN_NAME");
 							final int dataType = rsColumns.getInt("DATA_TYPE");
 							final boolean isPrimaryKey = primaryKeys.contains(columnName);
 							final Reference reference = foreignKeys.get(columnName);
 							final int isNullable = rsColumns.getInt("NULLABLE");
-							td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+							td.addAttribute(new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
 						}
 						// Add this information to the DBMetadata
 						metadata.add(td);
@@ -457,13 +457,13 @@ public class JDBCConnectionManager {
 					TableDefinition td = new TableDefinition(tblName);
 					try (ResultSet rsColumns = md.getColumns(null, tblSchema, tblName, null)) {
 						
-						for (int pos = 1; rsColumns.next(); pos++) {
+						while (rsColumns.next()) {
 							final String columnName = rsColumns.getString("COLUMN_NAME");
 							final int dataType = rsColumns.getInt("DATA_TYPE");
 							final boolean isPrimaryKey = primaryKeys.contains(columnName);
 							final Reference reference = foreignKeys.get(columnName);
 							final int isNullable = rsColumns.getInt("NULLABLE");
-							td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+							td.addAttribute(new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
 						}
 						// Add this information to the DBMetadata
 						metadata.add(td);
@@ -519,7 +519,7 @@ public class JDBCConnectionManager {
 					
 					try (ResultSet rsColumns = md.getColumns(null, tableOwner, tblName, null)) {
 						
-						for (int pos = 1; rsColumns.next(); pos++) {
+						while (rsColumns.next()) {
 							log.debug("=============== COLUMN METADATA ========================");
 							// Print JDBC metadata returned by the driver, enable for debugging
 							int metadataCount = rsColumns.getMetaData().getColumnCount();
@@ -536,7 +536,7 @@ public class JDBCConnectionManager {
 							final int isNullable = rsColumns.getInt("NULLABLE");
 							
 							/***
-							 * To fix bug in Oracle 11 and up driver retruning wrong datatype
+							 * To fix bug in Oracle 11 and up driver returning wrong datatype
 							 */
 							final String typeName = rsColumns.getString("TYPE_NAME");
 							
@@ -544,7 +544,7 @@ public class JDBCConnectionManager {
 								dataType = 91;
 							}
 							
-							td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
+							td.addAttribute(new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable));
 						}
 						// Add this information to the DBMetadata
 						metadata.add(td);
@@ -620,7 +620,7 @@ public class JDBCConnectionManager {
 //				TableDefinition td = new TableDefinition(tblName);
 				try (ResultSet rsColumns = md.getColumns(null, tableOwner, tblName, null)) {
 			
-					for (int pos = 1; rsColumns.next(); pos++) {
+					while (rsColumns.next()) {
 						
 						log.debug("=============== COLUMN METADATA ========================");
 
@@ -654,7 +654,7 @@ public class JDBCConnectionManager {
 							dataType = 91;
 						}			
 						
-						td.setAttribute(pos, new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, typeName));
+						td.addAttribute(new Attribute(columnName, dataType, isPrimaryKey, reference, isNullable, typeName));
 					}
 					// Add this information to the DBMetadata
 					metadata.add(td);

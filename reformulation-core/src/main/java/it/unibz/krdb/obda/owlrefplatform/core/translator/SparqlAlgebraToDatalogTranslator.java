@@ -26,8 +26,10 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
+
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -42,7 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-
 
 /***
  * Translate a SPARQL algebra expression into a Datalog program that has the
@@ -392,8 +393,22 @@ public class SparqlAlgebraToDatalogTranslator {
 		
 		List<ProjectionElem> projectionElements = project.getProjectionElemList().getElements();
 		List<Term> varList = new  ArrayList<>(projectionElements.size());
-		for (ProjectionElem var : projectionElements) 
+		for (ProjectionElem var : projectionElements)  {
+			// we assume here that the target name is "introduced" as one of the arguments of atom
+			// (this is normally done by an EXTEND inside the PROJECTION)
+			// first, we check whether this assumption can be made
+			if (!var.getSourceName().equals(var.getTargetName())) {
+				boolean found = false;
+				for (Term a : atom.getTerms())
+					if ((a instanceof Variable) && ((Variable)a).getName().equals(var.getSourceName())) {
+						found = true;
+						break;
+					}
+				if (!found)
+					throw new RuntimeException("Projection target of " + var + " not found in " + project.getArg());
+			}
 			varList.add(ofac.getVariable(var.getTargetName()));
+		}
 
 		CQIE rule = createRule(pr, newHeadName, varList, atom);
 		return rule.getHead();
@@ -423,7 +438,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		else 
 			filterAtom = (Function) getExpression(condition);
 		
-		List<Term> vars = getUnion(atomVars, filterAtom.getReferencedVariables());	
+		Set<Variable> filterVars = new HashSet<>();
+		TermUtils.addReferencedVariablesTo(filterVars, filterAtom);
+		
+		List<Term> vars = getUnion(atomVars, filterVars);	
 		CQIE rule = createRule(pr, newHeadName, vars, atom, filterAtom);
 		return rule.getHead();
 	}

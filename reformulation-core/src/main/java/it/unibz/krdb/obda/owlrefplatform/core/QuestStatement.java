@@ -460,6 +460,21 @@ public class QuestStatement implements OBDAStatement {
 
 		ExpressionEvaluator evaluator = questInstance.getExpressionEvaluator();
 		evaluator.evaluateExpressions(unfolding);
+		
+		/*
+			UnionOfSqlQueries ucq = new UnionOfSqlQueries(questInstance.getUnfolder().getCQContainmentCheck());
+			for (CQIE cq : unfolding.getRules())
+				ucq.add(cq);
+			
+			List<CQIE> rules = new ArrayList<>(unfolding.getRules());
+			unfolding.removeRules(rules); 
+			
+			for (CQIE cq : ucq.asCQIE()) {
+				unfolding.appendRule(cq);
+			}
+			log.debug("CQC performed ({} rules): \n{}", unfolding.getRules().size(), unfolding);
+		 
+		 */
 
 		log.debug("Boolean expression evaluated: \n{}", unfolding);
 		log.debug("Partial evaluation ended.");
@@ -658,14 +673,12 @@ public class QuestStatement implements OBDAStatement {
 			questInstance.getSesameQueryCache().put(strquery, query);
 			questInstance.getSignatureCache().put(strquery, signatureContainer);
 
-			DatalogProgram program = translateAndPreProcess(query/*, signatureContainer*/);
+			DatalogProgram program = translateAndPreProcess(query);
 			try {
 				// log.debug("Input query:\n{}", strquery);
 
-				for (CQIE q : program.getRules()) {
-					// ROMAN: unfoldJoinTrees clones the query, so the statement below does not change anything
-					DatalogNormalizer.unfoldJoinTrees(q, false);
-				}
+				for (CQIE q : program.getRules()) 
+					DatalogNormalizer.unfoldJoinTrees(q);
 
  				log.debug("Normalized program: \n{}", program);
 

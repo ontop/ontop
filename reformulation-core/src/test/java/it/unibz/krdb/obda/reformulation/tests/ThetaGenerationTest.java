@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SingletonSubstitution;
@@ -53,7 +52,7 @@ public class ThetaGenerationTest extends TestCase {
 		if (mgu == null) {
 			computedmgu = null;
 		} else {
-			for (Map.Entry<VariableImpl,Term> m : mgu.getMap().entrySet()) {
+			for (Map.Entry<Variable,Term> m : mgu.getMap().entrySet()) {
 				computedmgu.add(new SingletonSubstitution(m.getKey(), m.getValue()));
 			}
 		}
@@ -899,11 +898,12 @@ public class ThetaGenerationTest extends TestCase {
 	}
 
 	//A(#),A(#)
-	public void test_32(){
+	// ROMAN: removed the test which does not make any sense without anonymous variables
+	public void non_test_32(){
 
 		try {
-			Term t1 = termFactory.getVariableNondistinguished();
-			Term t2 = termFactory.getVariableNondistinguished();
+			Term t1 = termFactory.getVariable("w1");
+			Term t2 = termFactory.getVariable("w2");
 
 			Predicate pred1 = predFactory.getClassPredicate("A");
 			List<Term> terms1 = new Vector<Term>();
@@ -924,12 +924,13 @@ public class ThetaGenerationTest extends TestCase {
 
 	}
 
-	//A(x),A(#)
-	public void test_33(){
+	//A(x),A(#) 
+	// ROMAN: removed the test which does not make any sense without anonymous variables
+	public void non_test_33(){
 
 		try {
 			Term t1 = termFactory.getVariable("x");
-			Term t2 = termFactory.getVariableNondistinguished();
+			Term t2 = termFactory.getVariable("w1");
 
 			Predicate pred1 = predFactory.getClassPredicate("A");
 			List<Term> terms1 = new Vector<Term>();
