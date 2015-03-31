@@ -89,7 +89,6 @@ public class OBDAMappingTransformer {
 		
 		//process source query
 		String sqlquery = squery.getSQLQuery();
-		OBDAQueryModifiers modifiers = squery.getQueryModifiers();
 		if (sqlquery.startsWith("SELECT * FROM") &&
 			 !sqlquery.contains("WHERE") && !sqlquery.contains(",")) {
 				//tableName -> need small parser

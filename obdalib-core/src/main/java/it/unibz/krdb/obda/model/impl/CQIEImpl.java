@@ -214,21 +214,11 @@ public class CQIEImpl implements CQIE, ListListener {
 	}
 
 	@Override
-	public OBDAQueryModifiers getQueryModifiers() {
-		return new OBDAQueryModifiers();
-	}
-
-	@Override
 	public Set<Variable> getReferencedVariables() {
 		Set<Variable> vars = new LinkedHashSet<Variable>();
 		for (Function atom : body) {
 			TermUtils.addReferencedVariablesTo(vars, atom);
 		}
 		return vars;
-	}
-
-	@Override
-	public boolean hasModifiers() {
-		return false;
 	}
 }

@@ -26,16 +26,18 @@ public abstract class AbstractOBDAMappingAxiom implements OBDAMappingAxiom {
 
 	private static final long serialVersionUID = 5512895151633505075L;
 
-	private String id = "";
+	private String id;
 	
 	public AbstractOBDAMappingAxiom(String id) {
 		this.id = id;
 	}
 	
+	@Override
 	public void setId(String id) {
 		this.id = id;
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}
@@ -45,5 +47,5 @@ public abstract class AbstractOBDAMappingAxiom implements OBDAMappingAxiom {
 		return id.hashCode();
 	}
 	
-	public abstract Object clone();
+	public abstract OBDAMappingAxiom clone();
 }

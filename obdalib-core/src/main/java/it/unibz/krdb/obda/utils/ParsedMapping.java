@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.utils;
  
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.parser.SQLQueryParser;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
@@ -64,7 +63,7 @@ public class ParsedMapping {
 	 * This returns the source query
 	 * @return
 	 */
-	public OBDAQuery getSourceQuery(){
+	public OBDASQLQuery getSourceQuery(){
 		return axiom.getSourceQuery();
 	}
 	
@@ -73,7 +72,7 @@ public class ParsedMapping {
 	 * @return
 	 */
 	public CQIE getTargetQuery(){
-		return (CQIE) axiom.getTargetQuery();
+		return axiom.getTargetQuery();
 	}
 	
 	/**
@@ -89,6 +88,4 @@ public class ParsedMapping {
 	public String toString(){
 		return axiom.toString();
 	}
-	
-
 }

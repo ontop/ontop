@@ -398,13 +398,13 @@ public class QuestUnfolder {
 		for (OBDAMappingAxiom axiom : mappings) {
 			String sourceString = axiom.getSourceQuery().toString();
 
-			OBDAQuery targetQuery= axiom.getTargetQuery();
+			CQIE targetQuery= axiom.getTargetQuery();
 
 			Select select = null;
 			try {
 				select = (Select) CCJSqlParserUtil.parse(sourceString);
 
-				Set<Variable> variables = ((CQIE) targetQuery).getReferencedVariables();
+				Set<Variable> variables = targetQuery.getReferencedVariables();
 				PreprocessProjection ps = new PreprocessProjection(metadata);
 				String query = ps.getMappingQuery(select, variables);
 				axiom.setSourceQuery(fac.getSQLQuery(query));

@@ -20,39 +20,31 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
-
-import java.security.InvalidParameterException;
 
 public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements OBDARDBMappingAxiom {
 
 	private static final long serialVersionUID = 5793656631843898419L;
 	
-	private OBDASQLQuery sourceQuery = null;
-	private CQIEImpl targetQuery = null;
+	private OBDASQLQuery sourceQuery;
+	private CQIE targetQuery;
 
-	protected RDBMSMappingAxiomImpl(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery) {
+	protected RDBMSMappingAxiomImpl(String id, OBDASQLQuery sourceQuery, CQIE targetQuery) {
 		super(id);
 		setSourceQuery(sourceQuery);
 		setTargetQuery(targetQuery);
 	}
 
 	@Override
-	public void setSourceQuery(OBDAQuery query) {
-		if (!(query instanceof OBDASQLQuery)) {
-			throw new InvalidParameterException("RDBMSDataSourceMapping must receive a RDBMSSQLQuery as source query");
-		}
-		this.sourceQuery = (OBDASQLQuery) query;
+	public void setSourceQuery(OBDASQLQuery query) {
+		this.sourceQuery = query;
 	}
 
 	@Override
-	public void setTargetQuery(OBDAQuery query) {
-		if (!(query instanceof CQIEImpl)) {
-			throw new InvalidParameterException("RDBMSDataSourceMapping must receive a OntologyQuery as target query");
-		}
-		this.targetQuery = (CQIEImpl) query;
+	public void setTargetQuery(CQIE query) {
+		this.targetQuery = query;
 	}
 
 	@Override
@@ -61,7 +53,7 @@ public class RDBMSMappingAxiomImpl extends AbstractOBDAMappingAxiom implements O
 	}
 
 	@Override
-	public CQIEImpl getTargetQuery() {
+	public CQIE getTargetQuery() {
 		return targetQuery;
 	}
 

@@ -171,12 +171,12 @@ public interface OBDAModel extends Cloneable, Serializable {
 	/**
 	 * Replaces the old target query with the new one given its id.
 	 */
-	public void updateTargetQueryMapping(URI datasource_uri, String mapping_id, OBDAQuery targetQuery);
+	public void updateTargetQueryMapping(URI datasource_uri, String mapping_id, CQIE targetQuery);
 
 	/**
 	 * Replaces the old source query with the new one given its id.
 	 */
-	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, OBDAQuery sourceQuery);
+	public void updateMappingsSourceQuery(URI datasource_uri, String mapping_id, OBDASQLQuery sourceQuery);
 
 	/**
 	 * Refactors every mapping in this OBDA model by modifying each mapping of

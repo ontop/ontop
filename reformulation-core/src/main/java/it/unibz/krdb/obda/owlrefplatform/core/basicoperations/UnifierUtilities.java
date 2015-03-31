@@ -20,20 +20,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  * #L%
  */
 
-/*
- * Note: The the unifier does not distinguish between undistinguished variables
- * i.e.when we have an atom A(#,#) which should be unified with B(b,c) the
- * unifier willreturn two thetas #/b, #/c. So far so good but this will lead to
- * problems whenapplying the thetas because there is no distinction between
- * #-variables, sothe first theta is applied to all #-variables and the rest is
- * ignored.In order to avoid problems one can enumerate the undistinguished
- * variables ie. A(#1,#2)
- */
-
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.*;
 
 /**
  * A Class that provides general utilities related to unification, of terms and
@@ -47,45 +35,10 @@ import it.unibz.krdb.obda.model.impl.*;
 public class UnifierUtilities {
 
     /**
-     * Unifies two atoms in a conjunctive query returning a new conjunctive
-     * query. To to this we calculate the MGU for atoms, duplicate the query q
-     * into q', remove i and j from q', apply the mgu to q', and
-     *
-     * @param q
-     * @param i
-     * @param j (j > i)
-     * @return null if the two atoms are not unifiable, else a new conjunctive
-     * query produced by the unification of j and i
-     * @throws Exception
-     */
-    public static CQIE unify(CQIE q, int i, int j) {
-
-        Function atom1 = q.getBody().get(i);
-        Function atom2 = q.getBody().get(j);
-        
-        Substitution mgu = getMGU(atom1, atom2);
-        if (mgu == null)
-            return null;
-
-        CQIE unifiedQ = SubstitutionUtilities.applySubstitution(q, mgu);
-        unifiedQ.getBody().remove(i);
-        unifiedQ.getBody().remove(j - 1);
-
-        Function newatom = (Function) atom1.clone();
-        SubstitutionUtilities.applySubstitution(newatom, mgu);
-        unifiedQ.getBody().add(i, newatom);
-
-        return unifiedQ;
-    }
-
-
-    /**
      * Computes the Most General Unifier (MGU) for two n-ary atoms.
      * <p/>
      * IMPORTANT: Function terms are supported as long as they are not nested.
      * <p/>
-     * IMPORTANT: handling of AnonymousVariables is questionable --
-     * much is left to UnifierUtilities.apply (and only one version handles them)
      *
      * @param first
      * @param second
@@ -120,16 +73,14 @@ public class UnifierUtilities {
 
             // We have two cases, unifying 'simple' terms, and unifying function terms.
             if (!(term1 instanceof Function) || !(term2 instanceof Function)) {
-
                 if (!mgu.compose(term1, term2))
                     return null;
 
                 changed = true;
-            } else {
-
+            } 
+            else {
                 // if both of them are function terms then we need to do some
                 // check in the inner terms
-
                 Function fterm1 = (Function) term1;
                 Function fterm2 = (Function) term2;
 

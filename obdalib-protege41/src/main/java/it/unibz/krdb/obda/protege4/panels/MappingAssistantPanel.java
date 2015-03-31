@@ -30,7 +30,6 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDALibConstants;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
@@ -516,7 +515,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			
 			// Prepare the mapping target
 			predicateObjectMapsList = pnlPropertyEditorList.getPredicateObjectMapsList();
-			OBDAQuery target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
+			CQIE target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
 			
 			// Create the mapping axiom
 			OBDAMappingAxiom mappingAxiom = dfac.getRDBMSMappingAxiom(source, target);

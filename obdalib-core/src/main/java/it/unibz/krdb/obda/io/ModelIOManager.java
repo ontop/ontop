@@ -30,7 +30,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.parser.TargetQueryParser;
 import it.unibz.krdb.obda.parser.TargetQueryParserException;
@@ -282,10 +282,10 @@ public class ModelIOManager {
             }
             writer.write(Label.mappingId.name() + "\t" + mapping.getId() + "\n");
             
-            OBDAQuery targetQuery = mapping.getTargetQuery();
+            CQIE targetQuery = mapping.getTargetQuery();
             writer.write(Label.target.name() + "\t\t" + printTargetQuery(targetQuery) + "\n");
             
-            OBDAQuery sourceQuery = mapping.getSourceQuery();
+            OBDASQLQuery sourceQuery = mapping.getSourceQuery();
             writer.write(Label.source.name() + "\t\t" + printSourceQuery(sourceQuery) + "\n");
             needLineBreak = true;
         }
@@ -293,11 +293,11 @@ public class ModelIOManager {
         writer.write("\n\n");
     }
 
-    private String printTargetQuery(OBDAQuery query) {
+    private String printTargetQuery(CQIE query) {
     	return TargetQueryRenderer.encode(query, prefixManager);
     }
     
-    private String printSourceQuery(OBDAQuery query) {
+    private String printSourceQuery(OBDASQLQuery query) {
     	String sourceString = SourceQueryRenderer.encode(query);
     	String toReturn = convertTabToSpaces(sourceString);
     	return toReturn.replaceAll("\n", "\n\t\t\t");

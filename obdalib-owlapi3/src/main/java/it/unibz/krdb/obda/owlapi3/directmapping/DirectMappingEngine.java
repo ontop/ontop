@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
@@ -234,8 +233,7 @@ public class DirectMappingEngine {
 		model.addMappings(sourceUri, mappingAxioms);
 		for (URI uri : model.getMappings().keySet()) {
 			for (OBDAMappingAxiom mapping : model.getMappings().get(uri)) {
-				OBDAQuery q = mapping.getTargetQuery();
-				CQIE rule = (CQIE) q;
+				CQIE rule = mapping.getTargetQuery();
 				for (Function f : rule.getBody()) {
 					if (f.getArity() == 1)
 						model.declareClass(ofac.createClass(f.getFunctionSymbol().getName()));
