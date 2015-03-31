@@ -10,6 +10,8 @@ import org.semanticweb.ontop.model.impl.VariableImpl;
 
 import java.util.ArrayList;
 
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogTools.*;
+
 /**
  * Default implementation of PullOutEqualityNormalizer. Is Left-Join aware.
  *
@@ -575,88 +577,6 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         });
     }
 
-    private static Boolean isDataOrLeftJoinOrJoinAtom(Function atom) {
-        return atom.isDataFunction() || isLeftJoinOrJoinAtom(atom);
-    }
-
-    private static Boolean isLeftJoinOrJoinAtom(Function atom) {
-        Predicate predicate = atom.getFunctionSymbol();
-        return predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN) ||
-                predicate.equals(OBDAVocabulary.SPARQL_JOIN);
-    }
-
-    /**
-     * Folds a list of boolean atoms into one AND(AND(...)) boolean atom.
-     */
-    private static Function foldBooleanConditions(List<Function> booleanAtoms) {
-        if (booleanAtoms.length() == 0)
-            return TRUE_EQ;
-
-        Function firstBooleanAtom = booleanAtoms.head();
-        return booleanAtoms.tail().foldLeft(new F2<Function, Function, Function>() {
-            @Override
-            public Function f(Function previousAtom, Function currentAtom) {
-                return DATA_FACTORY.getFunctionAND(previousAtom, currentAtom);
-            }
-        }, firstBooleanAtom);
-    }
-
-    /**
-     * Folds a list of data/composite atoms and joining conditions into a JOIN(...) with a 3-arity.
-     *
-     */
-    private static Function foldJoin(List<Function> dataOrCompositeAtoms, Function joiningCondition) {
-        int length = dataOrCompositeAtoms.length();
-        if (length < 2) {
-            throw new IllegalArgumentException("At least two atoms should be given");
-        }
-
-        Function firstAtom = dataOrCompositeAtoms.head();
-        Function secondAtom = foldJoin(dataOrCompositeAtoms.tail());
-
-        return DATA_FACTORY.getSPARQLJoin(firstAtom, secondAtom, joiningCondition);
-    }
-
-    /**
-     * Folds a list of data/composite atoms into a JOIN (if necessary)
-     * by adding EQ(t,t) as a joining condition.
-     */
-    private static Function foldJoin(List<Function> dataOrCompositeAtoms) {
-        int length = dataOrCompositeAtoms.length();
-        if (length == 1)
-            return dataOrCompositeAtoms.head();
-        else if (length == 0)
-            throw new IllegalArgumentException("At least one atom should be given.");
-        else {
-            Function firstAtom = dataOrCompositeAtoms.head();
-            /**
-             * Folds the data/composite atom list into a JOIN(JOIN(...)) meta-atom.
-             */
-            return dataOrCompositeAtoms.tail().foldLeft(new F2<Function, Function, Function>() {
-                @Override
-                public Function f(Function firstAtom, Function secondAtom) {
-                    return DATA_FACTORY.getSPARQLJoin(firstAtom, secondAtom, TRUE_EQ);
-                }
-            }, firstAtom);
-        }
-    }
-
-    /**
-     * Practical criterion for detecting a real join: having more data/composite atoms.
-     *
-     * May produces some false negatives for crazy abusive nested joins of boolean atoms (using JOIN instead of AND).
-     */
-    private static boolean isRealJoin(List<Function> subAtoms) {
-        //TODO: reuse a shared static filter fct object.
-        List<Function> dataAndCompositeAtoms = subAtoms.filter(new F<Function, Boolean>() {
-            @Override
-            public Boolean f(Function atom) {
-                return isDataOrLeftJoinOrJoinAtom(atom);
-            }
-        });
-
-        return dataAndCompositeAtoms.length() > 1;
-    }
 
     /**
      * HEURISTIC for split the left join sub atoms.
@@ -729,9 +649,5 @@ public class PullOutEqualityNormalizerImpl implements PullOutEqualityNormalizer 
         if (atom.isBooleanFunction())
             return true;
         return false;
-    }
-
-    private static Function constructNewFunction(Predicate functionSymbol, List<Term> subTerms) {
-        return DATA_FACTORY.getFunction(functionSymbol, new ArrayList<>(subTerms.toCollection()));
     }
 }
