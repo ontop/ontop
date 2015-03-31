@@ -103,6 +103,11 @@ public class DatalogTools {
         return dataAndCompositeAtoms.length() > 1;
     }
 
+    public static Function constructNewFunction(List<Function> subAtoms, Predicate functionSymbol) {
+        List<Term> subTerms = (List<Term>)(List<?>) subAtoms;
+        return constructNewFunction(functionSymbol, subTerms);
+    }
+
     public static Function constructNewFunction(Predicate functionSymbol, List<Term> subTerms) {
         return DATA_FACTORY.getFunction(functionSymbol, new ArrayList<>(subTerms.toCollection()));
     }

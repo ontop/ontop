@@ -123,13 +123,6 @@ public class TypeLiftTools {
 
         CQIE currentRule = predicateDefinitionRules.head();
 
-        /**
-         * Checks restriction for the current rule:
-         *  --> interpreted (abusively) as multi-typed
-         */
-        if (!isRuleSupportedForTypeLift(currentRule))
-            return true;
-
         Function headFirstRule = currentRule.getHead();
 
         return isMultiTypedPredicate(constructTypeProposal(headFirstRule), predicateDefinitionRules.tail());
@@ -144,13 +137,6 @@ public class TypeLiftTools {
 
         CQIE currentRule = remainingRules.head();
 
-        /**
-         * Checks restriction for the current rule
-         * --> interpreted (abusively) as multi-typed
-         */
-        if (!isRuleSupportedForTypeLift(currentRule))
-            return true;
-
         Function ruleHead = currentRule.getHead();
         try {
             Function newType = applyTypeProposal(ruleHead, currentTypeProposal);
@@ -163,30 +149,6 @@ public class TypeLiftTools {
         } catch (SubstitutionUtilities.SubstitutionException e) {
             return true;
         }
-    }
-
-    /**
-     * Current restriction: Use of meta-atoms (left-joins, etc.)
-     */
-    private static boolean isRuleSupportedForTypeLift(CQIE rule) {
-
-        /**
-         * Checks the body atoms
-         */
-        boolean validBodyAtoms = Stream.iterableStream(rule.getBody()).forall(new F<Function, Boolean>() {
-            @Override
-            public Boolean f(Function atom) {
-                /**
-                 * Join and Left join meta-predicates are not supported here (but group is...)
-                 * (joins must have been unfolded so that its meta-predicate is not needed.).
-                 */
-                Predicate predicate = atom.getFunctionSymbol();
-                if (predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN) || predicate.equals(OBDAVocabulary.SPARQL_JOIN))
-                    return false;
-                return true;
-            }
-        });
-        return validBodyAtoms;
     }
 
     /**
