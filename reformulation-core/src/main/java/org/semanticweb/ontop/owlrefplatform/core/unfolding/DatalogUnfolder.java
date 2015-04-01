@@ -48,6 +48,8 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogTools.isLeftJoinOrJoinAtom;
+
 /**
  * Generates partial evaluations of rules (the queries), with respect to a set
  * of (partial) facts (set of rules). The procedure uses extended resolution
@@ -2299,6 +2301,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			if (atom.getFunctionSymbol().equals(bodyPred))
 			{
 				focusAtom = atom;
+			}
+			else if (isLeftJoinOrJoinAtom(atom)) {
+				focusAtom = getAtomFromBody(bodyPred, (List<Function>)(List<?>)atom.getTerms());
 			}
 		}
 		return focusAtom;
