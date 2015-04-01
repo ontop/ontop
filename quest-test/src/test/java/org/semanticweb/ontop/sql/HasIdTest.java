@@ -20,9 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.List;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * When the ID is both used for creating the URI and as the literal of a datatype property.
@@ -71,25 +74,30 @@ public class HasIdTest {
     }
 
 
-    private void runQuery(String query, int count) throws OBDAException, OWLException {
+    private QuestOWLResultSet runQuery(String query) throws OBDAException, OWLException {
 
         // Now we are ready for querying
         conn = reasoner.getConnection();
 
         QuestOWLStatement st = conn.createStatement();
-        QuestOWLResultSet results = st.executeTuple(query);
-        assertEquals(results.getCount(), count);
+        return st.executeTuple(query);
     }
 
     @Test
     public void test() throws OBDAException, OWLException {
-        runQuery("PREFIX : <http://example.com/vocab#>" +
+        QuestOWLResultSet results = runQuery("PREFIX : <http://example.com/vocab#>" +
                 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
                 "SELECT ?p ?firstName ?lastName " +
                 "WHERE { " +
                 "    ?p :hasId \"3\"^^xsd:int . " +
                 "    OPTIONAL { ?p :firstName ?firstName }" +
                 "    OPTIONAL { ?p :lastName ?lastName }" +
-                "}", 1);
+                "}");
+        // At least one result
+        assertTrue(results.nextRow());
+        assertEquals(results.getOWLIndividual(1).toString(), "<http://example.com/persons/3>");
+        assertEquals(results.getOWLLiteral(2), null);
+        assertEquals(results.getOWLLiteral(3), null);
+        assertFalse(results.nextRow());
     }
 }
