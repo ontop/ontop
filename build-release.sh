@@ -27,7 +27,7 @@ export JDBC_PLUGINS_PATH=$ONTOP_DEP_HOME
 # location for protege clean folder (Protege 4.3)
 export PROTEGE_COPY_PATH=$ONTOP_DEP_HOME
 export PROTEGE_COPY_FILENAME=protege-4.3.0-304
-export PROTEGE_MAIN_FOLDER_NAME=Protege_4.3
+export PROTEGE_MAIN_FOLDER_NAME=Protege_5
 export PROTEGE_MAIN_PLUGIN=ontopro-plugin
 
 # location and name for jetty distribution (should be ZIP)
@@ -49,7 +49,7 @@ export QUEST_SESAME_DIST=QuestSesame
 export QUEST_JETTY_DIST=QuestJetty
 export OWL_API_DIST=QuestOWL
 
-export VERSION=1.14
+export VERSION=1.15
 export REVISION=0
 
 
