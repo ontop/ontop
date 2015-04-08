@@ -950,157 +950,190 @@ public class SparqlAlgebraToDatalogTranslator {
 
         if (dataPropertiesSameAs.contains(leftAtom.getFunctionSymbol()) ){
 
-            //given a data property ex hasProperty (x, y)
-            //create statement pattern for same as create owl:sameAs(x, anon-x)
-            //it will be the right atom of the join
-            Predicate predicate = ofac.getPredicate("http://www.w3.org/2002/07/owl#sameAs", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-            Term sTerm = leftAtom.getTerm(0);
-            Term oTerm = ofac.getVariable("anon-"+leftAtom.getTerm(0));
-            Function leftAtomJoin = ofac.getFunction(predicate, sTerm, oTerm);
-
-
-            //create left atom of the join between the data property and same as
-            //given a data property as hasProperty (x, y)
-            //create the left atom hasProperty (anon-x, y)
-
-            Function rightAtomJoin =  ofac.getFunction(leftAtom.getFunctionSymbol());
-            leftAtomJoin.updateTerms(leftAtom.getTerms());
-            leftAtomJoin.setTerm(0, ofac.getVariable("anon-"+leftAtom.getTerm(0)));
-
-            //create join rule
-            List<Term> varListJoin = getUnionOfVariables(leftAtomJoin, rightAtomJoin);
-            CQIE joinRule = createRule(pr, newHeadName + "1" , varListJoin, leftAtomJoin, rightAtomJoin);
-            Function rightAtomUnion = joinRule.getHead();
+            Function rightAtomUnion = createJoinWithSameAsOnLeft(leftAtom, pr, newHeadName + "1");
 
 
             //create union between the first statement and join
             //between hasProperty(x,y) and owl:sameAs(x, anon-x) hasProperty (anon-x, y)
 
-            Set<Variable> leftVars = getVariables(leftAtom);
-            Set<Variable> rightVars = getVariables(rightAtomUnion);
-            List<Term> varListUnion = getUnion(leftVars, rightVars  );
+            Function atom = createUnion(leftAtom, rightAtomUnion, pr, newHeadName);
 
-            // left atom rule
-            List<Term> leftTermList = new ArrayList<>(varListUnion.size());
-            for (Term t : varListUnion) {
-                Term lt =  (leftVars.contains(t)) ? t : OBDAVocabulary.NULL;
-                leftTermList.add(lt);
-            }
-            CQIE leftRule = createRule(pr, newHeadName, leftTermList, leftAtom);
-
-            // right atom rule
-            List<Term> rightTermList = new ArrayList<>(varListUnion.size());
-            for (Term t : varListUnion) {
-                Term lt =  (rightVars.contains(t)) ? t : OBDAVocabulary.NULL;
-                rightTermList.add(lt);
-            }
-            CQIE rightRule = createRule(pr, newHeadName, rightTermList, rightAtomUnion);
-
-            Function atom = ofac.getFunction(rightRule.getHead().getFunctionSymbol(), varListUnion);
             return atom;
         }
         else if (objectPropertiesSameAs.contains(leftAtom.getFunctionSymbol())){
 
-            //given a data property ex hasProperty (x, y)
-            //create statement pattern for same as create owl:sameAs(x, anon-x)
-            //it will be the left atom of the join
-            Predicate predicate = ofac.getPredicate("http://www.w3.org/2002/07/owl#sameAs", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-            Term sTerm = leftAtom.getTerm(0);
-            Term oTerm = ofac.getVariable("anon-"+leftAtom.getTerm(0));
-            Function leftAtomJoin = ofac.getFunction(predicate, sTerm, oTerm);
+
+            //create union between the first join on the left and join on the right
+
+            Function union2 = createUnionObject(leftAtom, pr, newHeadName + "1");
 
 
-            //create left atom of the join between the data property and same as
-            //given a data property as hasProperty (x, y)
-            //create the right atom hasProperty (anon-x, y)
+            //create union between the first statement  and the union
 
-            Function rightAtomJoin =  ofac.getFunction(leftAtom.getFunctionSymbol());
-            rightAtomJoin.updateTerms(leftAtom.getTerms());
-            rightAtomJoin.setTerm(0, ofac.getVariable("anon-"+leftAtom.getTerm(0)));
+            Function atom = createUnion(leftAtom, union2, pr, newHeadName);
 
-            //create join rule
-            List<Term> varListJoin = getUnionOfVariables(leftAtomJoin, rightAtomJoin);
-            CQIE joinRule = createRule(pr, newHeadName + "1" , varListJoin, leftAtomJoin, rightAtomJoin);
-            Function leftAtomUnion = joinRule.getHead();
-
-
-
-            //create right atom of the join between the data property and same as
-            //given a data property as hasProperty (x, y)
-            //create the left atom hasProperty (x, anon-y)
-
-            Function leftAtomJoin2 =  ofac.getFunction(leftAtom.getFunctionSymbol());
-            leftAtomJoin2.updateTerms(leftAtom.getTerms());
-            leftAtomJoin2.setTerm(1, ofac.getVariable("anon-"+leftAtom.getTerm(1)));
-
-            //create statement pattern for same as create owl:sameAs(anon-y, y)
-            //it will be the left atom of the join
-
-
-            Term sTerm2 = ofac.getVariable("anon-"+leftAtom.getTerm(1));
-            Term oTerm2 = leftAtom.getTerm(1);
-            Function rightAtomJoin2 = ofac.getFunction(predicate, sTerm2, oTerm2);
-
-            //create join rule
-            List<Term> varListJoin2 = getUnionOfVariables(leftAtomJoin2, rightAtomJoin2);
-            CQIE joinRule2 = createRule(pr, newHeadName + "0" , varListJoin2, leftAtomJoin2, rightAtomJoin2);
-            Function rightAtomUnion2 = joinRule2.getHead();
-
-
-            //create union between the first statement and join
-            //between hasProperty(x,y) and owl:sameAs(x, anon-x) hasProperty (anon-x, y)
-
-            Set<Variable> leftVars = getVariables(leftAtomUnion);
-            Set<Variable> rightVars = getVariables(rightAtomUnion2);
-            List<Term> varListUnion = getUnion(leftVars, rightVars  );
-
-            // left atom rule
-            List<Term> leftTermList = new ArrayList<>(varListUnion.size());
-            for (Term t : varListUnion) {
-                Term lt =  (leftVars.contains(t)) ? t : OBDAVocabulary.NULL;
-                leftTermList.add(lt);
-            }
-            CQIE leftRule = createRule(pr, newHeadName  + "1" , leftTermList, leftAtomUnion);
-
-            // right atom rule
-            List<Term> rightTermList = new ArrayList<>(varListUnion.size());
-            for (Term t : varListUnion) {
-                Term lt =  (rightVars.contains(t)) ? t : OBDAVocabulary.NULL;
-                rightTermList.add(lt);
-            }
-            CQIE rightRule = createRule(pr, newHeadName  + "1" , rightTermList, rightAtomUnion2);
-
-            Function union1 = ofac.getFunction(rightRule.getHead().getFunctionSymbol(), varListUnion);
-
-            Set<Variable> leftVars2 = getVariables(leftAtom);
-            Set<Variable> rightVars2 = getVariables(union1);
-            List<Term> varListUnion2 = getUnion(leftVars2, rightVars2  );
-
-            // left atom rule
-            List<Term> leftTermList2 = new ArrayList<>(varListUnion2.size());
-            for (Term t : varListUnion2) {
-                Term lt =  (leftVars2.contains(t)) ? t : OBDAVocabulary.NULL;
-                leftTermList2.add(lt);
-            }
-            CQIE leftRule2= createRule(pr, newHeadName  , leftTermList2, leftAtom);
-
-            // right atom rule
-            List<Term> rightTermList2 = new ArrayList<>(varListUnion2.size());
-            for (Term t : varListUnion2) {
-                Term lt =  (rightVars2.contains(t)) ? t : OBDAVocabulary.NULL;
-                rightTermList2.add(lt);
-            }
-            CQIE rightRule2 = createRule(pr, newHeadName, rightTermList2, union1);
-
-            Function atom = ofac.getFunction(rightRule2.getHead().getFunctionSymbol(), varListUnion2);
             return atom;
 
         }
+        //case of class
+            if(leftAtom.getArity() == 1){
+                Function rightAtomUnion = createJoinWithSameAsOnLeft(leftAtom, pr, newHeadName);
+
+                //between Class(x) and owl:sameAs(x, anon-x) Class (anon-x)
+                Function atom = createUnion(leftAtom, rightAtomUnion, pr, newHeadName);
+                return atom;
+            }
             return leftAtom;
 
 
 
 
+
+    }
+
+    private Function createUnionObject (Function leftAtom, DatalogProgram pr, String newHeadName){
+
+        Function union1 = createUnionUnbound (leftAtom, pr, newHeadName + "1");
+
+        Function leftAtomUnion2 = createJoinWithSameAsOnRight(leftAtom, pr, newHeadName + "0");
+
+        return createUnion(leftAtomUnion2, union1 ,pr, newHeadName );
+
+
+    }
+
+    private Function createUnionUnbound(Function leftAtom, DatalogProgram pr, String newHeadName){
+
+        Function rightAtomUnionDouble = createJoinWithSameAsOnLeftAndRight(leftAtom, pr, newHeadName + "1");
+
+        Function leftAtomUnion1 = createJoinWithSameAsOnLeft(leftAtom, pr, newHeadName + "0");
+
+
+        return createUnion(leftAtomUnion1, rightAtomUnionDouble, pr, newHeadName );
+    }
+
+    private Function createJoinWithSameAsOnLeftAndRight(Function leftAtom, DatalogProgram pr, String newHeadName) {
+
+
+        //ON THE RIGHT
+
+        //create right atom of the join between the data property and same as
+        //given a data property as hasProperty (x, y)
+
+        //create an unbound  hasProperty (anon-x1, anon-y1)
+
+        Function unboundleftAtom = ofac.getFunction(leftAtom.getFunctionSymbol());
+        unboundleftAtom.updateTerms(leftAtom.getTerms());
+        unboundleftAtom.setTerm(0, ofac.getVariable("anon-"+leftAtom.getTerm(0)+"1"));
+        unboundleftAtom.setTerm(1, ofac.getVariable("anon-"+leftAtom.getTerm(1)+"1"));
+
+
+        //create statement pattern for same as create owl:sameAs(anon-y1, y)
+        //it will be the right atom of the join
+
+        Predicate sameAs = ofac.getPredicate("http://www.w3.org/2002/07/owl#sameAs", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+        Term sTerm2 = unboundleftAtom.getTerm(1);
+        Term oTerm2 = leftAtom.getTerm(1);
+        Function rightAtomJoin2 = ofac.getFunction(sameAs, sTerm2, oTerm2);
+
+        //create join rule
+        List<Term> varListJoin2 = getUnionOfVariables(unboundleftAtom, rightAtomJoin2);
+        CQIE joinRule2 = createRule(pr, newHeadName + "0" , varListJoin2, unboundleftAtom, rightAtomJoin2);
+
+        Function joinRight = joinRule2.getHead();
+
+        //ON THE LEFT
+
+        //given a data property ex hasProperty (x, y)
+        //create statement pattern for same as create owl:sameAs( x, anon-x1)
+        //it will be the left atom of the join
+
+        Term sTerm = leftAtom.getTerm(0);
+        Term oTerm = unboundleftAtom.getTerm(0);
+        Function leftAtomJoin = ofac.getFunction(sameAs, sTerm, oTerm);
+
+        //create join rule
+        List<Term> varListJoin = getUnionOfVariables(leftAtomJoin, joinRight);
+        CQIE joinRule = createRule(pr, newHeadName , varListJoin, leftAtomJoin, joinRight);
+
+        return joinRule.getHead();
+
+    }
+
+
+    private Function createUnion(Function leftAtom, Function rightAtom, DatalogProgram pr, String newHeadName) {
+
+        Set<Variable> leftVars = getVariables(leftAtom);
+        Set<Variable> rightVars = getVariables(rightAtom);
+        List<Term> varListUnion = getUnion(leftVars, rightVars  );
+
+        // left atom rule
+        List<Term> leftTermList = new ArrayList<>(varListUnion.size());
+        for (Term t : varListUnion) {
+            Term lt =  (leftVars.contains(t)) ? t : OBDAVocabulary.NULL;
+            leftTermList.add(lt);
+        }
+        CQIE leftRule = createRule(pr, newHeadName, leftTermList, leftAtom);
+
+        // right atom rule
+        List<Term> rightTermList = new ArrayList<>(varListUnion.size());
+        for (Term t : varListUnion) {
+            Term lt =  (rightVars.contains(t)) ? t : OBDAVocabulary.NULL;
+            rightTermList.add(lt);
+        }
+        CQIE rightRule = createRule(pr, newHeadName, rightTermList, rightAtom);
+
+        return ofac.getFunction(rightRule.getHead().getFunctionSymbol(), varListUnion);
+    }
+
+    private Function createJoinWithSameAsOnLeft(Function leftAtom, DatalogProgram pr, String newHeadName) {
+        //given a data property ex hasProperty (x, y)
+        //create statement pattern for same as create owl:sameAs( anon-x, y)
+        //it will be the left atom of the join
+        Predicate predicate = ofac.getPredicate("http://www.w3.org/2002/07/owl#sameAs", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+        Term sTerm = leftAtom.getTerm(0);
+        Term oTerm = ofac.getVariable("anon-"+leftAtom.getTerm(0));
+        Function leftAtomJoin = ofac.getFunction(predicate, sTerm, oTerm);
+
+
+        //create left atom of the join between the data property and same as
+        //given a data property as hasProperty (x, y)
+        //create the right atom hasProperty (anon-x, y)
+
+        Function rightAtomJoin =  ofac.getFunction(leftAtom.getFunctionSymbol());
+        rightAtomJoin.updateTerms(leftAtom.getTerms());
+        rightAtomJoin.setTerm(0, ofac.getVariable("anon-"+leftAtom.getTerm(0)));
+
+        //create join rule
+        List<Term> varListJoin = getUnionOfVariables(leftAtomJoin, rightAtomJoin);
+        CQIE joinRule = createRule(pr, newHeadName  , varListJoin, leftAtomJoin, rightAtomJoin);
+
+        return joinRule.getHead();
+    }
+
+    private Function createJoinWithSameAsOnRight(Function leftAtom, DatalogProgram pr, String newHeadName) {
+
+        //create right atom of the join between the data property and same as
+        //given a data property as hasProperty (x, y)
+        //create the left atom hasProperty (x, anon-y)
+
+        Function leftAtomJoin2 =  ofac.getFunction(leftAtom.getFunctionSymbol());
+        leftAtomJoin2.updateTerms(leftAtom.getTerms());
+        leftAtomJoin2.setTerm(1, ofac.getVariable("anon-"+leftAtom.getTerm(1)));
+
+        //create statement pattern for same as create owl:sameAs(anon-y, y)
+        //it will be the right atom of the join
+
+        Predicate predicate = ofac.getPredicate("http://www.w3.org/2002/07/owl#sameAs", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+        Term sTerm2 = ofac.getVariable("anon-"+leftAtom.getTerm(1));
+        Term oTerm2 = leftAtom.getTerm(1);
+        Function rightAtomJoin2 = ofac.getFunction(predicate, sTerm2, oTerm2);
+
+        //create join rule
+        List<Term> varListJoin2 = getUnionOfVariables(leftAtomJoin2, rightAtomJoin2);
+        CQIE joinRule2 = createRule(pr, newHeadName , varListJoin2, leftAtomJoin2, rightAtomJoin2);
+
+        return joinRule2.getHead();
 
     }
 }
