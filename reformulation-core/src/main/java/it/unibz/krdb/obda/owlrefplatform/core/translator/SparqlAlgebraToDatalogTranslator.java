@@ -977,7 +977,7 @@ public class SparqlAlgebraToDatalogTranslator {
         }
         //case of class
             if(leftAtom.getArity() == 1){
-                Function rightAtomUnion = createJoinWithSameAsOnLeft(leftAtom, pr, newHeadName);
+                Function rightAtomUnion = createJoinWithSameAsOnLeft(leftAtom, pr, newHeadName +"1");
 
                 //between Class(x) and owl:sameAs(x, anon-x) Class (anon-x)
                 Function atom = createUnion(leftAtom, rightAtomUnion, pr, newHeadName);

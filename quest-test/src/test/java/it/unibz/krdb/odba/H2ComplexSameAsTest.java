@@ -204,7 +204,8 @@ public class H2ComplexSameAsTest {
     @Test
     public void testSameAs5() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#> \n" +
-                "SELECT * WHERE { ?x a :Wellbore .\n" +
+                "SELECT * WHERE { " +
+                "?x a :Wellbore .\n" +
                 " ?x :hasOwner ?y .}\n";
 
         runTests(query);

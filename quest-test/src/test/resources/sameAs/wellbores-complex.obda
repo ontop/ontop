@@ -36,7 +36,7 @@ target		:uri1-{wid1} owl:sameAs :uri3-{wid3} .
 source		select wid1, wid3 from TsameAs12 JOIN TsameAs23 on TsameAs12.wid2 = TsameAs23.wid2
 
 mappingId	sameAs89
-target		:uri8-{oid1} owl:sameAs :uri9-{oid4} .
+target		:uri9-{oid1} owl:sameAs :uri8-{oid4} .
 source		select oid1, oid4 from TsameAs14
 
 ]]
