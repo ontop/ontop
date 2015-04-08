@@ -948,6 +948,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
     private Function addSameAs(Function leftAtom, DatalogProgram pr, String newHeadName){
 
+        //case of class and data properties
         if (dataPropertiesSameAs.contains(leftAtom.getFunctionSymbol()) ){
 
             Function rightAtomUnion = createJoinWithSameAsOnLeft(leftAtom, pr, newHeadName + "1");
@@ -975,14 +976,8 @@ public class SparqlAlgebraToDatalogTranslator {
             return atom;
 
         }
-        //case of class
-            if(leftAtom.getArity() == 1){
-                Function rightAtomUnion = createJoinWithSameAsOnLeft(leftAtom, pr, newHeadName +"1");
 
-                //between Class(x) and owl:sameAs(x, anon-x) Class (anon-x)
-                Function atom = createUnion(leftAtom, rightAtomUnion, pr, newHeadName);
-                return atom;
-            }
+
             return leftAtom;
 
 

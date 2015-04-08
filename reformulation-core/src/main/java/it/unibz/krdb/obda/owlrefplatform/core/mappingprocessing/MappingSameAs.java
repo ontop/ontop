@@ -33,7 +33,7 @@ public class MappingSameAs {
 
     private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-    private Set<Predicate> dataPropertiesMapped;
+    private Set<Predicate> dataPropertiesAndClassesMapped;
 
     private Set<Predicate> objectPropertiesMapped;
     /**
@@ -44,7 +44,7 @@ public class MappingSameAs {
 
         this.rules =  rules;
 
-        dataPropertiesMapped = new HashSet<Predicate>();
+        dataPropertiesAndClassesMapped = new HashSet<Predicate>();
         objectPropertiesMapped = new HashSet<Predicate>();
 
         getSameAs();
@@ -146,30 +146,30 @@ public class MappingSameAs {
 
                     if (sameAsMap.containsKey(prefix1)) {
 //                        Function dataProperty = fac.getFunction(functionSymbol,prefix1, term2);
-                        dataPropertiesMapped.add(functionSymbol);
+                        dataPropertiesAndClassesMapped.add(functionSymbol);
                     }
 
 
                 }
 
             }
-//            else{
-//
-//                Function term1 = (Function) atom.getTerm(0);
-//                if (term1.getFunctionSymbol() instanceof URITemplatePredicate){
-//
-//
-//                    ValueConstant prefix1 = (ValueConstant) term1.getTerm(0);
-//
-//
-//                    if (sameAsMap.containsKey(prefix1)) {
-//                        dataPropertiesMapped.add(functionSymbol);
-//                    }
-//                }
-//
-//            }
-//                else
-//                    throw new OBDAException("error finding owl:sameAs related to " + atom);
+            else if (atom.getArity() == 1) { //case of class
+
+                Function term1 = (Function) atom.getTerm(0);
+                if (term1.getFunctionSymbol() instanceof URITemplatePredicate){
+
+
+                    Term prefix1 = term1.getTerm(0);
+
+
+                    if (sameAsMap.containsKey(prefix1)) {
+                        dataPropertiesAndClassesMapped.add(functionSymbol);
+                    }
+                }
+
+            }
+                else
+                    throw new OBDAException("error finding owl:sameAs related to " + atom);
 
         }
 
@@ -179,7 +179,7 @@ public class MappingSameAs {
 
     public Set<Predicate> getDataPropertiesWithSameAs(){
 
-        return dataPropertiesMapped;
+        return dataPropertiesAndClassesMapped;
     }
 
     public Set<Predicate> getObjectPropertiesWithSameAs(){
