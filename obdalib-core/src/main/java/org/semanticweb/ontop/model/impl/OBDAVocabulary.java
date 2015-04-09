@@ -20,11 +20,8 @@ package org.semanticweb.ontop.model.impl;
  * #L%
  */
 
-import org.semanticweb.ontop.model.BooleanOperationPredicate;
-import org.semanticweb.ontop.model.Constant;
-import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.*;
 import org.semanticweb.ontop.model.Predicate.COL_TYPE;
-import org.semanticweb.ontop.model.ValueConstant;
 
 public class OBDAVocabulary {
 
@@ -37,8 +34,9 @@ public class OBDAVocabulary {
 	
 
 	/* Constants */
+	
+	public static final ValueConstant NULL = new ValueConstantImpl("NULL", COL_TYPE.NULL);
 
-	public static final ValueConstant NULL = new ValueConstantImpl("null", COL_TYPE.STRING);
 	public static final ValueConstant TRUE = new ValueConstantImpl("t", COL_TYPE.BOOLEAN);
 	public static final ValueConstant FALSE = new ValueConstantImpl("f", COL_TYPE.BOOLEAN);
 
