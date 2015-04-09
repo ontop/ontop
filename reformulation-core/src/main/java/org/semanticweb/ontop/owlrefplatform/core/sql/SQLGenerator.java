@@ -524,7 +524,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if(dataTypePredicateUnifyTable.contains(type1, type2)){
 			return dataTypePredicateUnifyTable.get(type1, type2);
 		}else if(type2 == null){
-			throw new NullPointerException("type2 cannot be null");
+			return type1;
+			//throw new NullPointerException("type2 cannot be null");
 		} else {
 			return dtfac.getTypePredicate(COL_TYPE.STRING);
 		}
