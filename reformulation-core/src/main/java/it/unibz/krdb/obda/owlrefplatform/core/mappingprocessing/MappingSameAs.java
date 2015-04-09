@@ -155,15 +155,16 @@ public class MappingSameAs {
             }
             else if (atom.getArity() == 1) { //case of class
 
-                Function term1 = (Function) atom.getTerm(0);
-                if (term1.getFunctionSymbol() instanceof URITemplatePredicate){
+                Term term1 =  atom.getTerm(0);
+                if(term1 instanceof Function) {
+                    Function uri1 = (Function) term1;
+                    if (uri1.getFunctionSymbol() instanceof URITemplatePredicate) {
 
+                        Term prefix1 = uri1.getTerm(0);
 
-                    Term prefix1 = term1.getTerm(0);
-
-
-                    if (sameAsMap.containsKey(prefix1)) {
-                        dataPropertiesAndClassesMapped.add(functionSymbol);
+                        if (sameAsMap.containsKey(prefix1)) {
+                            dataPropertiesAndClassesMapped.add(functionSymbol);
+                        }
                     }
                 }
 
