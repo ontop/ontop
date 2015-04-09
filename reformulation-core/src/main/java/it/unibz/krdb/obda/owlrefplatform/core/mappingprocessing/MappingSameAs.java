@@ -178,7 +178,7 @@ public class MappingSameAs {
 
 
 
-    public Set<Predicate> getDataPropertiesWithSameAs(){
+    public Set<Predicate> getDataPropertiesAndClassesWithSameAs(){
 
         return dataPropertiesAndClassesMapped;
     }

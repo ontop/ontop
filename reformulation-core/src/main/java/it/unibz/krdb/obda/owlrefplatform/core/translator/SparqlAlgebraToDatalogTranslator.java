@@ -64,7 +64,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	private final UriTemplateMatcher uriTemplateMatcher;
 	private final SemanticIndexURIMap uriRef;
 
-    private final Set<Predicate> dataPropertiesSameAs;
+    private final Set<Predicate> dataPropertiesAndClassesSameAs;
     private final Set<Predicate> objectPropertiesSameAs;
 	
 	private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
@@ -75,10 +75,10 @@ public class SparqlAlgebraToDatalogTranslator {
 	 * @param uriRef is used only in the Semantic Index mode
 	 */
 	
-	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher, SemanticIndexURIMap uriRef, Set<Predicate> dataPropertiesSameAs, Set<Predicate> objectPropertiesSameAs ) {
+	public SparqlAlgebraToDatalogTranslator(UriTemplateMatcher templateMatcher, SemanticIndexURIMap uriRef, Set<Predicate> dataPropertiesAndClassesSameAs, Set<Predicate> objectPropertiesSameAs ) {
 		uriTemplateMatcher = templateMatcher;
 		this.uriRef = uriRef;
-        this.dataPropertiesSameAs = dataPropertiesSameAs;
+        this.dataPropertiesAndClassesSameAs = dataPropertiesAndClassesSameAs;
         this.objectPropertiesSameAs = objectPropertiesSameAs;
 	}
 	
@@ -949,7 +949,7 @@ public class SparqlAlgebraToDatalogTranslator {
     private Function addSameAs(Function leftAtom, DatalogProgram pr, String newHeadName){
 
         //case of class and data properties
-        if (dataPropertiesSameAs.contains(leftAtom.getFunctionSymbol()) ){
+        if (dataPropertiesAndClassesSameAs.contains(leftAtom.getFunctionSymbol()) ){
 
             Function rightAtomUnion = createJoinWithSameAsOnLeft(leftAtom, pr, newHeadName + "1");
 

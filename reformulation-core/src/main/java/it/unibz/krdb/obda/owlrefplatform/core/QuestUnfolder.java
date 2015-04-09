@@ -49,7 +49,7 @@ public class QuestUnfolder {
 	
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-    private Set<Predicate> dataPropertiesMapped = new HashSet<>();
+    private Set<Predicate> dataPropertiesAndClassesMapped = new HashSet<>();
     private Set<Predicate> objectPropertiesMapped = new HashSet<>();;
 
 	public QuestUnfolder(OBDAModel unfoldingOBDAModel, DBMetadata metadata,  Connection localConnection, URI sourceId) throws Exception{
@@ -427,15 +427,15 @@ public class QuestUnfolder {
 
         MappingSameAs msa = new MappingSameAs(unfoldingProgram);
 
-        dataPropertiesMapped = msa.getDataPropertiesWithSameAs();
+        dataPropertiesAndClassesMapped = msa.getDataPropertiesAndClassesWithSameAs();
         objectPropertiesMapped =  msa.getObjectPropertiesWithSameAs();
 
 
     }
 
-    public Set<Predicate> getSameAsDataPredicates(){
+    public Set<Predicate> getSameAsDataPredicatesAndClasses(){
 
-        return dataPropertiesMapped;
+        return dataPropertiesAndClassesMapped;
     }
 
     public Set<Predicate> getSameAsObjectPredicates(){
