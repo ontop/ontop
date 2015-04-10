@@ -388,7 +388,7 @@ public class JDBCConnectionManager {
 					/**
 					 * Print JDBC metadata returned by the driver, enabled in debug mode
 					 */
-					displayColumnNames(md, conn, rsColumns, tableSchema, tblName);
+					//displayColumnNames(md, conn, rsColumns, tableSchema, tblName);
 					
 					
 					final String columnName = rsColumns.getString("COLUMN_NAME");

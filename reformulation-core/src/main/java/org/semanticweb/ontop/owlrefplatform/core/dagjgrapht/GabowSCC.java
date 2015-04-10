@@ -110,7 +110,7 @@ public class GabowSCC<V, E>
     {
         if (stronglyConnectedSets == null) {
             
-            stronglyConnectedSets = new Vector<Equivalences<V>>();
+            stronglyConnectedSets = new Vector<>();
 
             // create VertexData objects for all vertices, store them
             createVertexNumber();
@@ -139,14 +139,14 @@ public class GabowSCC<V, E>
     private void createVertexNumber()
     {
     	c = graph.vertexSet().size();
-        vertexToVertexNumber = new HashMap<V, VertexNumber<V>>(c);
+        vertexToVertexNumber = new HashMap<>(c);
 
         for (V vertex : graph.vertexSet()) {
             vertexToVertexNumber.put(vertex, new VertexNumber<V>(vertex, 0));            
         }
         
-        stack = new ArrayDeque<VertexNumber<V>>(c);
-        B = new ArrayDeque<Integer>(c);
+        stack = new ArrayDeque<>(c);
+        B = new ArrayDeque<>(c);
     }
 
     /*

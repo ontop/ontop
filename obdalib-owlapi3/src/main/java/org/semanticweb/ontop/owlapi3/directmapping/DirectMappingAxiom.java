@@ -30,6 +30,7 @@ import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.Predicate.COL_TYPE;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
@@ -38,7 +39,9 @@ import org.semanticweb.ontop.sql.DataDefinition;
 import org.semanticweb.ontop.sql.Reference;
 import org.semanticweb.ontop.sql.TableDefinition;
 import org.semanticweb.ontop.sql.api.Attribute;
-import org.semanticweb.ontop.utils.TypeMapper;
+import org.semanticweb.ontop.utils.JdbcTypeMapper;
+
+import java.util.*;
 
 public class DirectMappingAxiom {
 	protected DBMetadata metadata;
@@ -46,7 +49,7 @@ public class DirectMappingAxiom {
 	protected String SQLString;
 	protected String baseuri;
 	private OBDADataFactory df;
-
+	
 	public DirectMappingAxiom() {
 	}
 
@@ -169,18 +172,18 @@ public class DirectMappingAxiom {
 		
 		
 		//DataType Atoms
-		TypeMapper typeMapper = TypeMapper.getInstance();
+		JdbcTypeMapper typeMapper = df.getJdbcTypeMapper();
 		for(int i=0;i<table.getNumOfAttributes();i++){
 			Attribute att = table.getAttribute(i+1);
-			Predicate type = typeMapper.getPredicate(att.getType());
-			if (type.equals(OBDAVocabulary.RDFS_LITERAL)) {
+			Predicate.COL_TYPE type = typeMapper.getPredicate(att.getType());
+			if (type == COL_TYPE.LITERAL) {
 				Variable objV = df.getVariable(att.getName());
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, objV));
-			} else {
-				Function obj = df.getFunction(type,
-						df.getVariable(att.getName()));
+			} 
+			else {
+				Function obj = df.getTypedTerm(df.getVariable(att.getName()), type);
 				atoms.add(df.getFunction(
 						df.getDataPropertyPredicate(generateDPURI(
 								table.getName(), att.getName())), sub, obj));
@@ -276,8 +279,6 @@ public class DirectMappingAxiom {
 			tableName = percentEncode(td.getName()) + "_";
 
 		if (td.getPrimaryKeys().size() > 0) {
-			Predicate uritemple = df.getUriTemplatePredicate(td
-					.getPrimaryKeys().size() + 1);
 			List<Term> terms = new ArrayList<Term>();
 			terms.add(df.getConstantLiteral(subjectTemple(td, td.getPrimaryKeys()
 					.size())));
@@ -285,7 +286,7 @@ public class DirectMappingAxiom {
 				terms.add(df.getVariable(tableName
 						+ td.getPrimaryKeys().get(i).getName()));
 			}
-			return df.getFunction(uritemple, terms);
+			return df.getUriTemplate(terms);
 
 		} else {
 			List<Term> vars = new ArrayList<Term>();
@@ -293,8 +294,7 @@ public class DirectMappingAxiom {
 				vars.add(df.getVariable(tableName + td.getAttributeName(i + 1)));
 			}
 
-			Predicate bNode = df.getBNodeTemplatePredicate(1);
-			return df.getFunction(bNode, vars);
+			return df.getBNodeTemplate(vars);
 		}
 	}
 

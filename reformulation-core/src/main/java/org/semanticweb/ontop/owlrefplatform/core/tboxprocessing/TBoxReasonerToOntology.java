@@ -1,7 +1,13 @@
 package org.semanticweb.ontop.owlrefplatform.core.tboxprocessing;
 
-
-import org.semanticweb.ontop.ontology.*;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.DataRangeExpression;
+import org.semanticweb.ontop.ontology.DataSomeValuesFrom;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.ObjectSomeValuesFrom;
+import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.ontology.OntologyFactory;
+import org.semanticweb.ontop.ontology.ClassExpression;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
@@ -30,7 +36,7 @@ public class TBoxReasonerToOntology {
 			@Override
 			public void onInclusion(ClassExpression sub, ClassExpression sup) {
 				if (sub != sup) {
-					if (!excludeExistentials || !(sup instanceof SomeValuesFrom)) {
+					if (!excludeExistentials || (!(sup instanceof ObjectSomeValuesFrom) && !(sup instanceof DataSomeValuesFrom))) {
 						sigma.addSubClassOfAxiomWithReferencedEntities(sub, sup);
 					}
 				}
@@ -38,7 +44,8 @@ public class TBoxReasonerToOntology {
 			@Override
 			public void onInclusion(DataRangeExpression sub, DataRangeExpression sup) {
 				if (sub != sup) {
-					if (!excludeExistentials || !(sup instanceof SomeValuesFrom)) {
+					// TODO: to be cleaned
+					if (!excludeExistentials || (!(sup instanceof ObjectSomeValuesFrom) && !(sup instanceof DataSomeValuesFrom))) {
 						sigma.addSubClassOfAxiomWithReferencedEntities(sub, sup);
 					}
 				}

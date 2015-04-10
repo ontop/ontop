@@ -70,6 +70,8 @@ public abstract class DataDefinition implements Serializable {
 
 	public String getAttributeName(int pos) {
 		Attribute attribute = attributes.get(pos);
+		if (attribute == null)
+			throw new IllegalArgumentException("No attribute at this position: " + pos + " " + attributes);
 		return attribute.getName();
 	}
 

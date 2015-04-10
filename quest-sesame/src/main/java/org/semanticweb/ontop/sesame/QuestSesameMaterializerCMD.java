@@ -20,6 +20,7 @@ package org.semanticweb.ontop.sesame;
  * #L%
  */
 
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -37,8 +38,8 @@ import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.owlapi3.OBDAModelSynchronizer;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
+
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
 import org.semanticweb.ontop.r2rml.R2RMLReader;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -113,12 +114,13 @@ class QuestSesameMaterializerCMD {
 			if (owlfile != null) {
 			// Loading the OWL ontology from the file as with normal OWLReasoners
 				ontology = manager.loadOntologyFromOntologyDocument((new File(owlfile)));
-				 onto =  new OWLAPI3Translator().translate(ontology);
+				 onto =  OWLAPI3TranslatorUtility.translate(ontology);
+				 model.declareAll(onto.getVocabulary());
 			}
 			else {
 				ontology = manager.createOntology();
 			}
-			OBDAModelSynchronizer.declarePredicates(ontology, model);
+			//OBDAModelSynchronizer.declarePredicates(ontology, model);
 
 			 //start materializer
 			SesameMaterializer materializer = new SesameMaterializer(model, onto);

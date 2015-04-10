@@ -13,9 +13,10 @@ import org.jgrapht.event.VertexTraversalEvent;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
-import org.semanticweb.ontop.ontology.BasicClassDescription;
+import org.semanticweb.ontop.ontology.ClassExpression;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
 import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.PropertyExpression;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
 
 
 /** 
@@ -76,8 +77,18 @@ public class SemanticIndexBuilder  {
 		 * */
 		private void mergeRangeNode(Description d) {
 
-			if (d instanceof PropertyExpression) {
-				for (Description ch : namedDAG.getPredecessors((PropertyExpression)d)) { 
+			if (d instanceof ObjectPropertyExpression) {
+				for (Description ch : namedDAG.getPredecessors((ObjectPropertyExpression)d)) { 
+					if (!ch.equals(d)) { // Roman: was !=
+						mergeRangeNode(ch);
+
+						//merge the index of the node with the index of his child
+						ranges.get(d).addRange(ranges.get(ch));
+					}
+				}
+			}
+			else if (d instanceof DataPropertyExpression) {
+				for (Description ch : namedDAG.getPredecessors((DataPropertyExpression)d)) { 
 					if (!ch.equals(d)) { // Roman: was !=
 						mergeRangeNode(ch);
 
@@ -87,7 +98,7 @@ public class SemanticIndexBuilder  {
 				}
 			}
 			else {
-				for (Description ch : namedDAG.getPredecessors((BasicClassDescription)d)) { 
+				for (Description ch : namedDAG.getPredecessors((ClassExpression)d)) {
 					if (!ch.equals(d)) { // Roman: was !=
 						mergeRangeNode(ch);
 
@@ -152,10 +163,12 @@ public class SemanticIndexBuilder  {
 	public List<Interval> getIntervals(Description d) {
 
 		Description node;
-		if (d instanceof PropertyExpression)
-			node = reasoner.getProperties().getVertex((PropertyExpression)d).getRepresentative();
+		if (d instanceof ObjectPropertyExpression)
+			node = reasoner.getObjectPropertyDAG().getVertex((ObjectPropertyExpression)d).getRepresentative();
+		else if (d instanceof DataPropertyExpression)
+			node = reasoner.getDataPropertyDAG().getVertex((DataPropertyExpression)d).getRepresentative();
 		else
-			node = reasoner.getClasses().getVertex((BasicClassDescription)d).getRepresentative();
+			node = reasoner.getClassDAG().getVertex((ClassExpression)d).getRepresentative();
 		
 		SemanticIndexRange range = ranges.get(node);
 		if (range == null)

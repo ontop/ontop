@@ -20,6 +20,8 @@ package org.semanticweb.ontop.protege4.panels;
  * #L%
  */
 
+
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -561,15 +563,15 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			@Override
 			public void run() {
 				canceled = false;
-				final Object[] path = mappingList.getSelectedValues();
+				final List path = mappingList.getSelectedValuesList();
 				if (path == null) {
 					JOptionPane.showMessageDialog(MappingManagerPanel.this, "Select at least one mapping");
 					return;
 				}
-				outputField.addText("Validating " + path.length + " SQL queries.\n", outputField.NORMAL);
-				for (int i = 0; i < path.length; i++) {
+				outputField.addText("Validating " + path.size() + " SQL queries.\n", outputField.NORMAL);
+				for (int i = 0; i < path.size(); i++) {
 					final int index = i;
-					OBDAMappingAxiom o = (OBDAMappingAxiom) path[index];
+					OBDAMappingAxiom o = (OBDAMappingAxiom) path.get(index);
 					String id = o.getId();
 					outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
 					validator = new SourceQueryValidator(selectedSource, o.getSourceQuery());

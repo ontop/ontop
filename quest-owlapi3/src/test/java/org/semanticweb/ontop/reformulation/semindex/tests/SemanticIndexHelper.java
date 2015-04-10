@@ -21,13 +21,20 @@ package org.semanticweb.ontop.reformulation.semindex.tests;
  */
 
 
-
+import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.ontology.Description;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.Ontology;
+import org.semanticweb.ontop.ontology.OntologyFactory;
+import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
+import org.semanticweb.ontop.owlapi3.OWLAPI3TranslatorUtility;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
+import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
@@ -41,18 +48,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.h2.jdbcx.JdbcDataSource;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
-import org.semanticweb.ontop.ontology.Description;
-import org.semanticweb.ontop.ontology.Ontology;
-import org.semanticweb.ontop.ontology.OntologyFactory;
-import org.semanticweb.ontop.ontology.PropertyExpression;
-import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
-import org.semanticweb.ontop.owlapi3.OWLAPI3Translator;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.SemanticIndexRange;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasoner;
-import org.semanticweb.ontop.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -69,21 +64,19 @@ import org.xml.sax.SAXException;
  *
  * @author Sergejs Pugac
  */
+
+// USED IN TWO TESTS ONLY
+
 public class SemanticIndexHelper {
     public final static Logger log = LoggerFactory.getLogger(SemanticIndexHelper.class);
 
-
-
     public OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-   
-    
-    public String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
+       
+    public static final String owlloc = "src/test/resources/test/semanticIndex_ontologies/";
     
     public transient Connection conn;
 
-    private  OBDADataFactory predicateFactory = OBDADataFactoryImpl.getInstance();
-    
-    private  OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
+    private final  OntologyFactory descFactory = OntologyFactoryImpl.getInstance();
 
     private String owl_exists = "::__exists__::";
     private String owl_inverse_exists = "::__inverse__exists__::";
@@ -103,11 +96,9 @@ public class SemanticIndexHelper {
     public Ontology load_onto(String ontoname) throws Exception {
         String owlfile = owlloc + ontoname + ".owl";
         OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
-        OWLAPI3Translator translator = new OWLAPI3Translator();
-
-        Ontology ontology = translator.translate(owlOntology);
+ 
+        Ontology ontology = OWLAPI3TranslatorUtility.translate(owlOntology);
         return ontology;
-
     }
 
     public TBoxReasoner load_dag(String ontoname) throws Exception {
@@ -185,15 +176,17 @@ public class SemanticIndexHelper {
 
                 if (type.equals("classes")) {
                     if (exists) {
-                    	PropertyExpression prop = descFactory.createProperty(uri);
+                    	// TODO: check whether object properties are enough
+                    	ObjectPropertyExpression prop = descFactory.createObjectProperty(uri);
                     	if (inverse)
                     		prop = prop.getInverse();
-                        description = descFactory.createPropertySomeRestriction(prop);
+                        description = prop.getDomain();
                     }
                     else
                         description = descFactory.createClass(uri);
                 } else {
-                	PropertyExpression prop = descFactory.createProperty(uri);
+                	// TODO: check whether object properties are enough
+                	ObjectPropertyExpression prop = descFactory.createObjectProperty(uri);
                     if (inverse)
                     	description = prop.getInverse();
                     else

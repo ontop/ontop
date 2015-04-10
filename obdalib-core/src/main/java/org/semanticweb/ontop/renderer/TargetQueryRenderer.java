@@ -20,6 +20,7 @@ package org.semanticweb.ontop.renderer;
  * #L%
  */
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.io.SimplePrefixManager;
 import org.semanticweb.ontop.model.CQIE;
 import org.semanticweb.ontop.model.DataTypePredicate;
+import org.semanticweb.ontop.model.DatatypeFactory;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.OBDAQuery;
 import org.semanticweb.ontop.model.Predicate;
@@ -37,6 +39,7 @@ import org.semanticweb.ontop.model.URITemplatePredicate;
 import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.model.Variable;
 import org.semanticweb.ontop.model.impl.FunctionalTermImpl;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 
 /**
@@ -45,6 +48,8 @@ import org.semanticweb.ontop.model.impl.OBDAVocabulary;
  */
 public class TargetQueryRenderer {
 
+	private static final DatatypeFactory dtfac = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
+	
 	/**
 	 * Transforms the given <code>OBDAQuery</code> into a string. The method requires
 	 * a prefix manager to shorten full IRI name.
@@ -131,7 +136,7 @@ public class TargetQueryRenderer {
 			String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
 			if (functionSymbol instanceof DataTypePredicate) {
 				// if the function symbol is a data type predicate
-				if (isLiteralDataType(functionSymbol)) {
+				if (dtfac.isLiteral(functionSymbol)) {
 					// if it is rdfs:Literal
 					int arity = function.getArity();
 					if (arity == 1) {
@@ -222,10 +227,6 @@ public class TargetQueryRenderer {
 			sb.append("\"");
 		}
 		return sb.toString();
-	}
-
-	private static boolean isLiteralDataType(Predicate predicate) {
-		return predicate.equals(OBDAVocabulary.RDFS_LITERAL) || predicate.equals(OBDAVocabulary.RDFS_LITERAL_LANG);
 	}
 
 	private TargetQueryRenderer() {

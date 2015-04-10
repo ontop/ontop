@@ -40,6 +40,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * 
@@ -83,7 +86,7 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 */
 	
 	private static Function getHeadAtom(String base, String suffix, List<Term> arguments) {
-		Predicate predicate = fac.getPredicate(base + suffix, arguments.size(), null);
+		Predicate predicate = fac.getPredicate(base + suffix, arguments.size());
 		return fac.getFunction(predicate, arguments);
 	}
 	
@@ -93,18 +96,18 @@ public class TreeWitnessRewriter implements QueryRewriter {
 	 */
 
 	private List<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0)  {
-		Collection<BasicClassDescription> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner);		
+		Collection<ClassExpression> concepts = TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner);		
 		List<Function> genAtoms = new ArrayList<Function>(concepts.size());
 		Term x = fac.getVariableNondistinguished(); 
 		
-		for (BasicClassDescription con : concepts) {
+		for (ClassExpression con : concepts) {
 			log.debug("  BASIC CONCEPT: {}", con);
 			Function atom; 
 			if (con instanceof OClass) {
 				atom = fac.getFunction(((OClass)con).getPredicate(), r0);
 			}
 			else {
-				PropertyExpression some = ((SomeValuesFrom)con).getProperty();
+				ObjectPropertyExpression some = ((ObjectSomeValuesFrom)con).getProperty();
 				atom = (!some.isInverse()) ?  fac.getFunction(some.getPredicate(), r0, x) : fac.getFunction(some.getPredicate(), x, r0);  						 
 			}
 			genAtoms.add(atom);

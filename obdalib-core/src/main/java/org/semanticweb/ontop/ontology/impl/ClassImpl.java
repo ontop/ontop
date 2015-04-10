@@ -20,7 +20,9 @@ package org.semanticweb.ontop.ontology.impl;
  * #L%
  */
 
+import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.Predicate;
+import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.ontology.OClass;
 
 public class ClassImpl implements OClass {
@@ -29,10 +31,26 @@ public class ClassImpl implements OClass {
 
 	private final Predicate predicate;
 	private final String string;
+	private final boolean isNothing, isThing;
 
+	public static final String owlThingIRI = "http://www.w3.org/2002/07/owl#Thing";
+	public static final String owlNothingIRI  = "http://www.w3.org/2002/07/owl#Nothing";
+	
+    static final OClass owlThing = initialize(owlThingIRI); 
+    static final OClass owlNothing = initialize(owlNothingIRI); 
+    
+    private static OClass initialize(String uri) {
+    	final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+		Predicate prop = ofac.getClassPredicate(uri);
+		return new ClassImpl(prop);  	
+    }
+	
+	
 	ClassImpl(Predicate p) {
 		this.predicate = p;
 		string = predicate.toString();
+		isNothing = predicate.getName().equals(owlNothingIRI);
+		isThing = predicate.getName().equals(owlThingIRI);
 	}
 
 	@Override
@@ -57,5 +75,17 @@ public class ClassImpl implements OClass {
 	@Override
 	public String toString() {
 		return string;
+	}
+
+
+	@Override
+	public boolean isNothing() {
+		return isNothing;
+	}
+
+
+	@Override
+	public boolean isThing() {
+		return isThing;
 	}
 }

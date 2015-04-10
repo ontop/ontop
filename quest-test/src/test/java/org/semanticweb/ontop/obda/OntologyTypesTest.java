@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.semanticweb.ontop.io.ModelIOManager;
 import org.semanticweb.ontop.model.OBDADataFactory;
 import org.semanticweb.ontop.model.OBDADataSource;
+import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.OBDAModel;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.owlrefplatform.core.QuestConstants;
@@ -279,7 +280,7 @@ public class OntologyTypesTest{
         runTests(p, query6, 3);
     }
 
-	@Test	
+	@Test
 	// Ontology datatype http://www.w3.org/2001/XMLSchema#integer for http://www.company.com/ARES#hasARESID
 	// does not correspond to datatype http://www.w3.org/2001/XMLSchema#string in mappings
 	public void failedMapping()  throws Exception  {
@@ -292,7 +293,7 @@ public class OntologyTypesTest{
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-		
+
 		try {
 			// Creating a new instance of the reasoner
 			QuestOWLFactory factory = new QuestOWLFactory();
@@ -301,14 +302,10 @@ public class OntologyTypesTest{
 			factory.setPreferenceHolder(p);
 
 			QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
-			
+
 		} catch (Exception e) {
-           
-            
-            assertEquals(e.getCause().getClass().getCanonicalName(), "it.unibz.krdb.obda.model.OBDAException" );
-
-
-		} 
+            assertEquals(e.getCause().getClass(), OBDAException.class);
+		}
 	}
 
 }

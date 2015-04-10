@@ -1,20 +1,5 @@
 package org.semanticweb.ontop.sesame;
 
-import java.util.List;
-
-import org.openrdf.model.Value;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.TupleQueryResultHandler;
-import org.openrdf.query.TupleQueryResultHandlerException;
-import org.semanticweb.ontop.model.OBDAException;
-import org.semanticweb.ontop.model.TupleResultSet;
-import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
-import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
 
 /*
  * #%L
@@ -37,20 +22,22 @@ import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
  */
 
 
-
-import org.openrdf.model.Value;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.TupleQueryResultHandler;
 import org.openrdf.query.TupleQueryResultHandlerException;
+import org.semanticweb.ontop.model.OBDAException;
+import org.semanticweb.ontop.model.TupleResultSet;
+import org.semanticweb.ontop.owlrefplatform.core.QuestDBConnection;
+import org.semanticweb.ontop.owlrefplatform.core.QuestDBStatement;
+
+import java.util.List;
 
 public class SesameTupleQuery extends SesameAbstractQuery implements TupleQuery {
-	
-	public SesameTupleQuery(String queryString, String baseURI, QuestDBConnection conn) 
+
+	public SesameTupleQuery(String queryString, String baseURI, QuestDBConnection conn)
 			throws MalformedQueryException {
         super(queryString, conn);
 	}

@@ -26,7 +26,11 @@ import org.semanticweb.ontop.model.URIConstant;
 import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
-import org.semanticweb.ontop.ontology.*;
+import org.semanticweb.ontop.ontology.Assertion;
+import org.semanticweb.ontop.ontology.DataPropertyExpression;
+import org.semanticweb.ontop.ontology.OClass;
+import org.semanticweb.ontop.ontology.ObjectPropertyExpression;
+import org.semanticweb.ontop.ontology.OntologyFactory;
 import org.semanticweb.ontop.ontology.impl.OntologyFactoryImpl;
 
 import java.io.BufferedReader;
@@ -38,16 +42,13 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 
+
 public class NTripleAssertionIterator implements Iterator<Assertion> {
 
 	private final OBDADataFactory obdafac = OBDADataFactoryImpl.getInstance();
 	private final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
-	private String RDF_TYPE_STRING = OBDAVocabulary.RDF_TYPE;
-
-	private int rdftype_hash = RDF_TYPE_STRING.hashCode();
-
-	private Predicate RDF_TYPE_PREDICATE = obdafac.getObjectPropertyPredicate(RDF_TYPE_STRING);
+	private final int rdftype_hash = OBDAVocabulary.RDF_TYPE.hashCode();
 
 	private String currSubject = null;
 	private String currPredicate = null;
@@ -77,14 +78,14 @@ public class NTripleAssertionIterator implements Iterator<Assertion> {
 		else if (currentPredicate.getType(1) == Predicate.COL_TYPE.OBJECT) {
 			URIConstant c1 = obdafac.getConstantURI(currSubject);
 			URIConstant c2 = obdafac.getConstantURI(currObject);
-			PropertyExpression prop = ofac.createObjectProperty(currentPredicate.getName());
-			assertion = ofac.createPropertyAssertion(prop, c1, c2);
+			ObjectPropertyExpression prop = ofac.createObjectProperty(currentPredicate.getName());
+			assertion = ofac.createObjectPropertyAssertion(prop, c1, c2);
 		} 
 		else if (currentPredicate.getType(1) == Predicate.COL_TYPE.LITERAL) {
 			URIConstant c1 = obdafac.getConstantURI(currSubject);
 			ValueConstant c2 = obdafac.getConstantLiteral(currObject);
-			PropertyExpression prop = ofac.createDataProperty(currentPredicate.getName());
-			assertion = ofac.createPropertyAssertion(prop, c1, c2);
+			DataPropertyExpression prop = ofac.createDataProperty(currentPredicate.getName());
+			assertion = ofac.createDataPropertyAssertion(prop, c1, c2);
 		} 
 		else {
 			throw new RuntimeException("ERROR, Wrongly type predicate: " + currentPredicate.toString());

@@ -20,27 +20,13 @@ package org.semanticweb.ontop.protege4.views;
  * #L%
  */
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.SwingUtilities;
-import javax.swing.table.DefaultTableModel;
-
-import org.protege.editor.core.ProtegeManager;
-import org.protege.editor.owl.OWLEditorKit;
-import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.ontop.io.PrefixManager;
+import org.semanticweb.ontop.model.OBDAException;
 import org.semanticweb.ontop.model.impl.OBDAModelImpl;
 import org.semanticweb.ontop.owlapi3.OWLResultSetWriter;
+import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWL;
+import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLConnection;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLResultSet;
 import org.semanticweb.ontop.owlrefplatform.owlapi3.QuestOWLStatement;
 import org.semanticweb.ontop.protege4.core.OBDAModelManager;
@@ -55,10 +41,31 @@ import org.semanticweb.ontop.protege4.utils.DialogUtils;
 import org.semanticweb.ontop.protege4.utils.OBDAProgessMonitor;
 import org.semanticweb.ontop.protege4.utils.OBDAProgressListener;
 import org.semanticweb.ontop.protege4.utils.TextMessageFrame;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
+
+import org.protege.editor.core.ProtegeManager;
+import org.protege.editor.owl.OWLEditorKit;
+import org.protege.editor.owl.ui.view.AbstractOWLViewComponent;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,6 +86,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	private OWLResultSetTableModel tableModel;
 
 	private static final Logger log = LoggerFactory.getLogger(QueryInterfaceView.class);
+
+	private static String QUEST_START_MESSAGE = "Quest must be started before using this feature. To proceed \n * select Quest in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
 
 	@Override
 	protected void disposeOWLView() {
@@ -159,7 +168,8 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 			public void handleResult(Integer result){
 				updateTablePanelStatus(result);	
 			}
-			
+
+
 			@Override
 			public Integer executeQuery(QuestOWLStatement st, String query) throws OWLException {
 				return st.getTupleCount(query);
@@ -189,7 +199,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 				removeResultTable();
 				super.run(query);
 			}
-			
 			@Override
 			public int getNumberOfRows() {
 				OWLResultSetTableModel tm = getTableModel();
@@ -197,7 +206,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 					return 0;
 				return getTableModel().getRowCount();
 			}
-			
 			public boolean isRunning(){
 				OWLResultSetTableModel tm = getTableModel();
 				if (tm == null)
@@ -299,7 +307,7 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 				return false;
 			}
 		});
-		
+
 		resultTablePanel.setOBDASaveQueryToFileAction(new OBDASaveQueryResultToFileAction() {
 			@Override
 			public void run(String fileLocation) {
@@ -449,9 +457,9 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 		} catch (Exception e) {
 			DialogUtils.showQuickErrorDialog(QueryInterfaceView.this, e);
 		}
-		
+
 	}
-	
+
 	private void populateResultUsingVisitor(List<OWLAxiom> result, OWLAxiomToTurtleVisitor visitor) {
 		if (result != null) {
 			for (OWLAxiom axiom : result) {
@@ -470,17 +478,17 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
 	 * to the selection of all other query selectors in the views.
 	 */
 	public void setupListeners() {
-		
+
 		// Getting the list of views
 		QueryInterfaceViewsList queryInterfaceViews = (QueryInterfaceViewsList) this.getOWLEditorKit().get(QueryInterfaceViewsList.class.getName());
 		if ((queryInterfaceViews == null)) {
 			queryInterfaceViews = new QueryInterfaceViewsList();
 			getOWLEditorKit().put(QueryInterfaceViewsList.class.getName(), queryInterfaceViews);
 		}
-		
+
 		// Adding the new instance (this)
 		queryInterfaceViews.add(this);
-		
+
 		// Registring the current query view with all existing query manager views
 		QueryManagerViewsList queryManagerViews = (QueryManagerViewsList) this.getOWLEditorKit().get(QueryManagerViewsList.class.getName());
 		if ((queryManagerViews != null) && (!queryManagerViews.isEmpty())) {

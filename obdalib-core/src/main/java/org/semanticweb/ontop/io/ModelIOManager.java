@@ -50,7 +50,7 @@ import org.semanticweb.ontop.model.impl.RDBMSourceParameterConstants;
 import org.semanticweb.ontop.parser.TargetQueryParser;
 import org.semanticweb.ontop.parser.TargetQueryParserException;
 import org.semanticweb.ontop.parser.TurtleOBDASyntaxParser;
-import org.semanticweb.ontop.parser.TurtleSyntaxParser;
+//import org.semanticweb.ontop.parser.TurtleSyntaxParser;
 import org.semanticweb.ontop.parser.UnparsableTargetQueryException;
 import org.semanticweb.ontop.renderer.SourceQueryRenderer;
 import org.semanticweb.ontop.renderer.TargetQueryRenderer;
@@ -101,7 +101,7 @@ public class ModelIOManager {
 
         // Register available parsers for target query
         register(new TurtleOBDASyntaxParser(prefixManager));
-        register(new TurtleSyntaxParser(prefixManager));
+     //   register(new TurtleSyntaxParser(prefixManager));
     }
     
     private void register(TargetQueryParser parser) {

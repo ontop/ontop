@@ -187,11 +187,11 @@ target		imdb:genre/{title_id} a mo:Old_Action .
 source		select movie_info.movie_id as title_id from movie_info where movie_info.info_type_id = 3 and movie_info.info='Western'
 
 mappingId	Movie has production Budget
-target		imdb:title/{movie_id} dbpedia:budget {budget}^^xsd:string . 
+target		imdb:title/{movie_id} dbpedia:budget {budget}^^xsd:string .
 source		select movie_id, info as budget from movie_info where movie_info.info_type_id = 105
 
 mappingId	Movie gets Gross revenue
-target		imdb:title/{movie_id} dbpedia:gross {gross}^^xsd:string . 
+target		imdb:title/{movie_id} dbpedia:gross {gross}^^xsd:string .
 source		select movie_id, info as gross from movie_info where movie_info.info_type_id = 107
 
 mappingId	Movie has Actor
@@ -291,7 +291,7 @@ target		imdb:company/{company_id} mo2:companyName {company_name} .
 source		select company_name.id as company_id, company_name.name as company_name from company_name
 
 mappingId	Movie has title and production year
-target		imdb:title/{id} mo:title {title} ; dbpedia:productionStartYear {production_year}^^xsd:int . 
+target		imdb:title/{id} mo:title {title} ; dbpedia:productionStartYear {production_year}^^xsd:int .
 source		select id, title, production_year from title
 
 mappingId	Company has country code
