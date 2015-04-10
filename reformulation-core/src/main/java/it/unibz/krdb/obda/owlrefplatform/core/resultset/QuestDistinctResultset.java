@@ -71,8 +71,9 @@ public class QuestDistinctResultset implements TupleResultSet {
 
     @Override
     public void close() throws OBDAException {
-        questResultset.close();
         distinctKeys.clear();
+        questResultset.close();
+
     }
 
     @Override
@@ -103,6 +104,10 @@ public class QuestDistinctResultset implements TupleResultSet {
                 return nextRow();
             }
 
+        }
+        else{
+
+            distinctKeys.clear();
         }
         return next;
     }
