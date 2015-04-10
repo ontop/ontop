@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -20,7 +21,7 @@ public interface QueryNode {
      *
      * TODO: check if visitor is the proper name.
      */
-    public LocalOptimizationProposal acceptOptimizer(QueryOptimizer optimizer);
+    public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer);
 
     public BooleanExpression getFilterExpression();
     public boolean hasFilterExpression();

@@ -6,9 +6,8 @@ import org.semanticweb.ontop.pivotalrepr.*;
 /**
  * TODO: continue
  *
- * TODO: make it abstract
  */
-public class QueryNodeImpl implements QueryNode {
+public abstract class QueryNodeImpl implements QueryNode {
 
     private final IntermediateQuery query;
 
