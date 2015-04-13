@@ -1850,6 +1850,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						break;
 					}
 				}
+				//TODO: how do we know that we can put it at the same level? What about a complex structure?
+				newbody.add(atom);
 			}
 
 		}// end for rule body
