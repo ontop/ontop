@@ -2481,6 +2481,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			Predicate tablePredicate = atom.getFunctionSymbol();
 			String tableName = tablePredicate.getName();
+			String safeTableName = tableName.replace('.', '_');
 			DataDefinition def = metadata.getDefinition(tableName);
 
 			if (def == null) {
@@ -2491,7 +2492,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 */
 				// tableName = "Q"+tableName+"View";
 				//tableName = String.format(VIEW_ANS_NAME, tableName);
-				final String viewName = sqladapter.nameView(VIEW_PREFIX, tableName, VIEW_ANS_SUFFIX, viewNames.values());
+				final String viewName = sqladapter.nameView(VIEW_PREFIX, safeTableName, VIEW_ANS_SUFFIX, viewNames.values());
 				/**
 				 * TODO: understand this.
 				 */
@@ -2506,7 +2507,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				//String simpleTableViewName = String.format(VIEW_NAME,
 				// tableName, String.valueOf(dataTableCount));
 				String suffix = VIEW_SUFFIX + String.valueOf(dataTableCount);
-				final String simpleTableViewName = sqladapter.nameView(VIEW_PREFIX, tableName, suffix, viewNames.values());
+				final String simpleTableViewName = sqladapter.nameView(VIEW_PREFIX, safeTableName, suffix, viewNames.values());
 				viewNames.put(atom, simpleTableViewName);
 			}
 			dataTableCount += 1;
