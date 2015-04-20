@@ -85,30 +85,28 @@ public class QuestDistinctResultset implements TupleResultSet {
     public boolean nextRow() throws OBDAException {
         // return the row only if it is not a duplicate
 
-        boolean next = questResultset.nextRow();
-
-        if (next) {
-
-            List<Object> row = new ArrayList<>();
-            for (int i = 1; i <= getSignature().size();  i ++ ) {
-
-                int column = i * 3;
-                row.add(questResultset.getRawObject(column-2));  //type
-                row.add(questResultset.getRawObject(column-1)); //lang
-                row.add(questResultset.getRawObject(column)); //value
-
+        boolean next = false;
+        
+        List<Object> row = null; 
+        do{
+            next = questResultset.nextRow();
+            if (next) {
+                row = new ArrayList<>();
+                for (int i = 1; i <= getSignature().size();  i ++ ) {
+                    
+                    int column = i * 3;
+                    row.add(questResultset.getRawObject(column-2));  //type
+                    row.add(questResultset.getRawObject(column-1)); //lang
+                    row.add(questResultset.getRawObject(column)); //value
+                    
+                }
             }
-            if (!distinctKeys.add(row)) {
-
-                //serch for the next value since the current one is a duplicate
-                return nextRow();
+            else{
+                distinctKeys.clear();
+                break;
             }
-
-        }
-        else{
-
-            distinctKeys.clear();
-        }
+        }while( !distinctKeys.add(row) );
+        
         return next;
     }
 
