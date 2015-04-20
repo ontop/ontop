@@ -66,6 +66,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
     private final Set<Predicate> dataPropertiesAndClassesSameAs;
     private final Set<Predicate> objectPropertiesSameAs;
+    private int bnode; //count for bnode created in sameAsmap
 	
 	private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
 	
@@ -80,6 +81,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		this.uriRef = uriRef;
         this.dataPropertiesAndClassesSameAs = dataPropertiesAndClassesSameAs;
         this.objectPropertiesSameAs = objectPropertiesSameAs;
+        bnode = 0;
 	}
 	
 	/**
@@ -1019,8 +1021,8 @@ public class SparqlAlgebraToDatalogTranslator {
 
         Function unboundleftAtom = ofac.getFunction(leftAtom.getFunctionSymbol());
         unboundleftAtom.updateTerms(leftAtom.getTerms());
-        unboundleftAtom.setTerm(0, ofac.getVariable("anon-"+leftAtom.getTerm(0)+"1"));
-        unboundleftAtom.setTerm(1, ofac.getVariable("anon-"+leftAtom.getTerm(1)+"1"));
+        unboundleftAtom.setTerm(0, ofac.getVariable("anon-"+bnode+ leftAtom.getTerm(0)));
+        unboundleftAtom.setTerm(1, ofac.getVariable("anon-"+bnode +leftAtom.getTerm(1)));
 
 
         //create statement pattern for same as create owl:sameAs(anon-y1, y)
@@ -1087,7 +1089,7 @@ public class SparqlAlgebraToDatalogTranslator {
         //it will be the left atom of the join
         Predicate predicate = ofac.getPredicate("http://www.w3.org/2002/07/owl#sameAs", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
         Term sTerm = leftAtom.getTerm(0);
-        Term oTerm = ofac.getVariable("anon-"+leftAtom.getTerm(0));
+        Term oTerm = ofac.getVariable("anon-"+ bnode +leftAtom.getTerm(0));
         Function leftAtomJoin = ofac.getFunction(predicate, sTerm, oTerm);
 
 
@@ -1097,12 +1099,13 @@ public class SparqlAlgebraToDatalogTranslator {
 
         Function rightAtomJoin =  ofac.getFunction(leftAtom.getFunctionSymbol());
         rightAtomJoin.updateTerms(leftAtom.getTerms());
-        rightAtomJoin.setTerm(0, ofac.getVariable("anon-"+leftAtom.getTerm(0)));
+        rightAtomJoin.setTerm(0, ofac.getVariable("anon-" +bnode +leftAtom.getTerm(0)));
 
         //create join rule
         List<Term> varListJoin = getUnionOfVariables(leftAtomJoin, rightAtomJoin);
         CQIE joinRule = createRule(pr, newHeadName  , varListJoin, leftAtomJoin, rightAtomJoin);
 
+        bnode++;
         return joinRule.getHead();
     }
 
@@ -1114,13 +1117,13 @@ public class SparqlAlgebraToDatalogTranslator {
 
         Function leftAtomJoin2 =  ofac.getFunction(leftAtom.getFunctionSymbol());
         leftAtomJoin2.updateTerms(leftAtom.getTerms());
-        leftAtomJoin2.setTerm(1, ofac.getVariable("anon-"+leftAtom.getTerm(1)));
+        leftAtomJoin2.setTerm(1, ofac.getVariable("anon-"+bnode +leftAtom.getTerm(1)));
 
         //create statement pattern for same as create owl:sameAs(anon-y, y)
         //it will be the right atom of the join
 
         Predicate predicate = ofac.getPredicate("http://www.w3.org/2002/07/owl#sameAs", new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-        Term sTerm2 = ofac.getVariable("anon-"+leftAtom.getTerm(1));
+        Term sTerm2 = ofac.getVariable("anon-"+ bnode +leftAtom.getTerm(1));
         Term oTerm2 = leftAtom.getTerm(1);
         Function rightAtomJoin2 = ofac.getFunction(predicate, sTerm2, oTerm2);
 
@@ -1128,6 +1131,7 @@ public class SparqlAlgebraToDatalogTranslator {
         List<Term> varListJoin2 = getUnionOfVariables(leftAtomJoin2, rightAtomJoin2);
         CQIE joinRule2 = createRule(pr, newHeadName , varListJoin2, leftAtomJoin2, rightAtomJoin2);
 
+        bnode++;
         return joinRule2.getHead();
 
     }

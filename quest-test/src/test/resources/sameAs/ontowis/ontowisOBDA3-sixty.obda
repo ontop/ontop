@@ -1,0 +1,74 @@
+[PrefixDeclaration]
+:		http://www.example.org/
+owl:    http://www.w3.org/2002/07/owl#
+xsd:    http://www.w3.org/2001/XMLSchema#
+
+[SourceDeclaration]
+sourceUri	viewTest
+connectionUrl	jdbc:postgresql://10.7.20.39/ontowis_100m
+username	postgres
+password	postgres
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-A1
+target		:A1/{unique2Tab1} a :A1 . 
+source		SELECT unique2Tab1 FROM Tab1 
+
+mappingId	MAPID-A2
+target		:A2/{unique2Tab2} a :A2 . 
+source		SELECT unique2Tab2 FROM Tab2
+
+mappingId	MAPID-A3
+target		:A3/{unique2Tab3} a :A3 .
+source		SELECT unique2Tab3 FROM Tab3
+
+mappingId	MAPID-A4
+target		:A4/{unique2Tab4} a :A4 .
+source		SELECT unique2Tab3 FROM Tab3
+
+mappingId	MAPID-R1
+target		:A1/{unique2Tab1} :R1 :A1/{unique2Tab1} .
+source		SELECT unique2Tab1 FROM Tab1
+
+mappingId	MAPID-R2
+target		:A2/{unique2Tab2} :R2 :A2/{unique2Tab2} .
+source		SELECT unique2Tab2 FROM Tab2
+
+mappingId	MAPID-R3
+target		:A3/{unique2Tab3} :R3 :A3/{unique2Tab3} .
+source		SELECT unique2Tab3 FROM Tab3
+
+mappingId	MAPID-R4
+target		:A3/{unique2Tab4} :R3 :A3/{unique2Tab4} .
+source		SELECT unique2Tab4 FROM Tab4
+
+mappingId	MAPID-S1
+target		:A1/{unique2Tab1} :S1 {unique1Tab1}^^xsd:integer .
+source		SELECT unique2Tab1, unique1Tab1 FROM Tab1
+
+mappingId	MAPID-S2
+target		:A2/{unique2Tab2} :S2 {unique1Tab2}^^xsd:integer .
+source		SELECT unique2Tab2, unique1Tab2 FROM Tab2
+
+mappingId	MAPID-S3
+target		:A3/{unique2Tab3} :S3 {unique1Tab3}^^xsd:integer .
+source		SELECT unique2Tab3, unique1Tab3 FROM Tab3
+
+mappingId	MAPID-S4
+target		:A4/{unique2Tab4} :S4 {unique1Tab4}^^xsd:integer .
+source		SELECT unique2Tab4, unique1Tab4 FROM Tab4
+
+mappingId	MAPID-EqualTable12
+target		:A1/{unique21} owl:sameAs :A2/{unique22} . 
+source		SELECT unique21, unique22 FROM te12sixty
+
+mappingId	MAPID-EqualTable23
+target		:A1/{unique22} owl:sameAs :A2/{unique23} .
+source		SELECT unique23, unique23 FROM te23sixty
+
+mappingId	MAPID-EqualTable13
+target		:A1/{unique21} owl:sameAs :A3/{unique23} .
+source		SELECT unique21, unique23 FROM te12sixty as t1 JOIN te23sixty as t2 ON t1.unique22 = t2.unique22
+
+]]

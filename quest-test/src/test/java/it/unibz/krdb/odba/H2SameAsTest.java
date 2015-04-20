@@ -217,7 +217,7 @@ public class H2SameAsTest {
     public void testSameAs3() throws Exception {
         String query =  "PREFIX : <http://ontop.inf.unibz.it/test/wellbore#>" +
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                "SELECT ?x ?y ?z WHERE { ?x a :Wellbore. { ?x :hasName ?y . } UNION {?x owl:sameAs [  :hasName ?y]  } {?x:isActive ?z .} UNION {?x owl:sameAs [   :isActive ?z ] } }\n";
+                "SELECT ?x ?y  WHERE { {?x a :Wellbore. }UNION {?x owl:sameAs [ a :Wellbore] } { ?x :hasName ?y . } UNION {?x owl:sameAs [  :hasName ?y]  } }\n";
 
 
          runTests(query);
