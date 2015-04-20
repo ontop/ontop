@@ -478,16 +478,26 @@ public class SameAsOntowisTest {
 
         static private String dataSparqlTemplate(int n) {
             String templ ="";
-            for (int i = 1; i<=n; i ++) {
-                templ += "?x :S" + i + " ?y"+i+" . ";
+            if(n >0) {
+                int previous = n - 1;
+                if (previous > 0) {
+                    templ += "?x :S" + previous + " ?y" + previous + " . ";
+                }
+                templ += "?x :S" + n + " ?y" + n + " . ";
+
             }
+
             return templ;
         }
 
         static private String objectSparqlTemplate(int n) {
             String templ ="";
-            for (int i = 1; i<=n; i ++) {
-                templ += "?x :R" + i + " ?w"+i+" . ";
+            if(n >0) {
+                int previous = n - 1;
+                if (previous > 0) {
+                    templ += "?x :R" + previous + " ?w" + previous + " . ";
+                }
+                templ += "?x :R" + n + " ?w" + n + " . ";
             }
             return templ;
         }
@@ -547,12 +557,12 @@ public class SameAsOntowisTest {
 
             // 1 SPARQL limit 100
             fillLimit1000();
-//
-//            fillLimit10000();
-//
-//            fillLimit100000();
-//
-//            fillNoLimit();
+
+            fillLimit10000();
+
+            fillLimit100000();
+
+            fillNoLimit();
 
             fillSparqlQueries();
 
