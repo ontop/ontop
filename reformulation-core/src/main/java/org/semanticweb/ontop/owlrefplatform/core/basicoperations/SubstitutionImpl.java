@@ -107,6 +107,13 @@ public class SubstitutionImpl implements Substitution {
     @Override
     public boolean composeTerms(Term term1, Term term2) {
 
+        /**
+         * Special case: unification of two functional terms (possibly recursive)
+         */
+        if ((term1 instanceof Function) && (term2 instanceof Function)) {
+            return composeFunctions((Function) term1, (Function) term2);
+        }
+
         Substitution s = createUnifier(term1, term2);
 
         // Rejected substitution (conflicts)
