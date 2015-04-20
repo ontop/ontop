@@ -22,6 +22,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.VariableImpl;
 
@@ -50,7 +51,12 @@ public class SingletonSubstitution implements Substitution {
     }
 
     @Override
-    public boolean compose(Term term1, Term term2) {
+    public boolean composeTerms(Term term1, Term term2) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean composeFunctions(Function term1, Function term2) {
         throw new UnsupportedOperationException();
     }
 
