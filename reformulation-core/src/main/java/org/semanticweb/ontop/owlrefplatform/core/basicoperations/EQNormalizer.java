@@ -36,7 +36,7 @@ public class EQNormalizer {
 			SubstitutionUtilities.applySubstitution(atom, mgu);
 
             if (atom.getFunctionSymbol() == OBDAVocabulary.EQ) {
-                if (!mgu.compose(atom.getTerm(0), atom.getTerm(1)))
+                if (!mgu.composeTerms(atom.getTerm(0), atom.getTerm(1)))
                     continue;
 
                 body.remove(i);
@@ -66,7 +66,7 @@ public class EQNormalizer {
     /**
      * We search for equalities in conjunctions. This recursive methods explore AND functions 
      * and removes EQ functions, substituting the values using the class
-     * {@link org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution#compose(org.semanticweb.ontop.model.Term, org.semanticweb.ontop.model.Term)}
+     * {@link org.semanticweb.ontop.owlrefplatform.core.basicoperations.Substitution#composeTerms(org.semanticweb.ontop.model.Term, org.semanticweb.ontop.model.Term)}
      * 
      * @param atom the atom that can contain equalities
      * @param mgu mapping between a variable and a term
@@ -83,7 +83,7 @@ public class EQNormalizer {
 
                 //in case of equalities do the substitution and remove the term
                 if (t2.getFunctionSymbol() == OBDAVocabulary.EQ) {
-                    if (!mgu.compose(t2.getTerm(0), t2.getTerm(1)))
+                    if (!mgu.composeTerms(t2.getTerm(0), t2.getTerm(1)))
                         continue;
                     
                     terms.remove(i);
