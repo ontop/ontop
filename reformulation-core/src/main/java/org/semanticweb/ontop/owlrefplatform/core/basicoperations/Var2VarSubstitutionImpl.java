@@ -3,6 +3,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import fj.data.TreeMap;
+import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.*;
 
@@ -72,10 +73,18 @@ public class Var2VarSubstitutionImpl implements Var2VarSubstitution {
     }
 
     /***
-     * Not implement
+     * Not implemented.
      */
     @Override
-    public boolean compose(Term term1, Term term2) {
+    public boolean composeTerms(Term term1, Term term2) {
+        throw new UnsupportedOperationException("Not implemented (yet)!");
+    }
+
+    /***
+     * Not implemented.
+     */
+    @Override
+    public boolean composeFunctions(Function term1, Function term2) {
         throw new UnsupportedOperationException("Not implemented (yet)!");
     }
 }
