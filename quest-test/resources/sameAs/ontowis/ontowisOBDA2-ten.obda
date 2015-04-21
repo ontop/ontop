@@ -29,7 +29,7 @@ source		SELECT unique2Tab1 FROM Tab1
 
 mappingId	MAPID-R2
 target		:A2/{unique2Tab2} :R2 :A2/{unique2Tab2} .
-source		SELECT unique2Tab3 FROM Tab2
+source		SELECT unique2Tab2 FROM Tab2
 
 mappingId	MAPID-R3
 target		:A3/{unique2Tab3} :R3 :A3/{unique2Tab3} .
@@ -49,6 +49,6 @@ source		SELECT unique2Tab3, unique1Tab3 FROM Tab3
 
 mappingId	MAPID-EqualTable12
 target		:A1/{unique21} owl:sameAs :A2/{unique22} . 
-source		SELECT unique21, unique22 FROM te12sixty
+source		SELECT unique21, unique22 FROM te12ten 
 
 ]]

@@ -58,12 +58,7 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
-    
 
-
-    <!-- http://www.example.org/S -->
-
-    <owl:DatatypeProperty rdf:about="http://www.example.org/S"/>
     
 
 
