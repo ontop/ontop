@@ -69,8 +69,12 @@ public class SameAsOntowisTest {
 
     public void runQuery() throws Exception {
 
+        long t1 = System.currentTimeMillis();
         QuestOWLConnection conn =  createStuff();
+        long t2 = System.currentTimeMillis();
 
+        long time =  (t2-t1);
+        System.out.println("offline time: " + time);
 
         // Create Queries to be run
         QueryFactory queryFactory = new QueryFactory();
@@ -113,7 +117,7 @@ public class SameAsOntowisTest {
 
         List<Long> avg_selectivityHigh = average(selectivityHigh_list);
 
-        generateFile(avg_selectivityLow, avg_selectivityMiddle, avg_selectivityHigh, queryFactory.filter0SPARQL );
+        generateFile(avg_selectivityLow, avg_selectivityMiddle, avg_selectivityHigh, queryFactory.filter0SPARQL, time);
 
 //        runQueries(conn, queryFactory.queriesTest);
 
@@ -171,13 +175,14 @@ public class SameAsOntowisTest {
      * @throws UnsupportedEncodingException
      * @throws FileNotFoundException
      */
-    private void generateFile( List<Long> resultsLow, List<Long> resultsMiddle, List<Long> resultsHigh, List<String> queries) throws FileNotFoundException, UnsupportedEncodingException {
+    private void generateFile( List<Long> resultsLow, List<Long> resultsMiddle, List<Long> resultsHigh, List<String> queries, long time) throws FileNotFoundException, UnsupportedEncodingException {
 		/*
 		 * Generate File !
 		 */
         PrintWriter writer = new PrintWriter("resources/results/"+Settings.resultFileName+"table.txt", "UTF-8");
         PrintWriter writerQ = new PrintWriter("resources/results/"+Settings.resultFileName+"queries.txt", "UTF-8");
 
+        writer.println("offline time: " + time);
 
         int j=0;
 
