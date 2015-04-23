@@ -181,11 +181,40 @@ public class SameAsOntowisTest {
 		 */
         PrintWriter writer = new PrintWriter("resources/results/"+Settings.resultFileName+"table.txt", "UTF-8");
         PrintWriter writerQ = new PrintWriter("resources/results/"+Settings.resultFileName+"queries.txt", "UTF-8");
+        PrintWriter writerG = new PrintWriter("resources/results/"+Settings.resultFileName+"graph.txt", "UTF-8");
 
         writer.println("offline time: " + time);
 
-        int j=0;
+        for(int i = 0; i< 3; i++) { //number of limit
 
+            switch (i) {
+                case 0:
+                    for (int j=0; j < resultsLow.size(); j++) {
+
+                        writerG.print("" + j + 1 + ", " + resultsLow.get(j) + ")");
+                    }
+                    writerG.println("");
+                    break;
+                case 1:
+                    for (int j=0; j < resultsMiddle.size(); j++){
+
+                        writerG.print("" + j + 1 + ", " + resultsMiddle.get(j) + ")");
+                    }
+                    writerG.println("");
+                    break;
+                case 2:
+                    for (int j=0; j < resultsHigh.size(); j++){
+
+                        writerG.print("" + j + 1 + ", " + resultsHigh.get(j) + ")");
+                    }
+                    writerG.println("");
+                    break;
+
+            }
+
+        }
+        writerG.close();
+        int j=0;
         while (j<resultsLow.size()){
             writer.println(j + " & "+ resultsLow.get(j) + " & " + resultsMiddle.get(j) + " & " + resultsHigh.get(j)); // table
             writerQ.println(j + " & " +queries.get(j));
