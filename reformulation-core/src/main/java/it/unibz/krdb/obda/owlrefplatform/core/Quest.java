@@ -20,6 +20,7 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -65,12 +66,52 @@ import java.security.InvalidParameterException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+enum ConnClasses{
+
+	MYSQL("com.mysql.jdbc.JDBC4Connection"),
+	POSTGRES("org.postgresql.jdbc4.Jdbc4Connection"),
+    DB2("com.ibm.db2.jcc.DB2Connection", "com.ibm.db2.jcc.t4.b");
+
+	private final List<String> connClasses;
+
+	ConnClasses(String... connClasses){
+		this.connClasses = Lists.newArrayList(connClasses);
+	}
+
+	public static ConnClasses fromString(String connectionClassName) {
+
+		ConnClasses result = null;
+
+	    if (connectionClassName != null) {
+	      for (ConnClasses b : ConnClasses.values()) {
+
+              if(b.connClasses.indexOf(connectionClassName) != -1){
+                  result = b;
+              }
+
+//	        if (connectionClassName.equals(b.connClass)) {
+//	          result = b;
+//	        }
+	      }
+	    }
+	    else
+            throw new IllegalArgumentException("No constant with text " + connectionClassName + " found");
+	    return result;
+	}
+
+	@Override
+	public String toString(){
+		return this.connClasses.toString();
+	}
+
+}
 
 public class Quest implements Serializable, RepositoryChangedListener {
 
@@ -199,6 +240,9 @@ public class Quest implements Serializable, RepositoryChangedListener {
 //	private final Map<String, Boolean> isdescribecache = new ConcurrentHashMap<String, Boolean>();
 
 	private DBMetadata metadata;
+
+	// TODO Remove this
+	private static boolean timeoutSet = false;
 
 
     /***
@@ -828,7 +872,62 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
 
 
+	// Davide> TODO: Test
+	public void setQueryTimeout(Statement st) throws SQLException {
 
+		int timeout = 1200;
+		//int timeout = 30;
+
+		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().getName());
+
+		if(connClass == null){
+			st.setQueryTimeout(timeout);
+			return;
+		}
+
+
+		switch(connClass){
+			case DB2:
+			case MYSQL:
+				st.setQueryTimeout(timeout);
+				break;
+			case POSTGRES:
+			{
+				if( !timeoutSet ){
+					String query = String.format("SET statement_timeout TO %d", timeout*1000); // 1000ms = one second
+					st.execute(query);
+					timeoutSet = true;
+				}
+				break;
+			}
+
+			default:
+				st.setQueryTimeout(timeout);
+				break;
+		}
+	}
+
+	public void resetTimeouts(Statement st) throws SQLException {
+		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().toString());
+
+		if(connClass == null){
+			// TODO: check
+			return;
+		}
+
+		switch(connClass){
+			case MYSQL:
+			case DB2:
+				// Do nothing
+				break;
+			case POSTGRES:
+			{
+				String query = "RESET statement_timeout;";
+				st.execute(query);
+				break;
+			}
+		}
+	}
 
 	private void setupConnectionPool() {
 		String url = obdaSource.getParameter(RDBMSourceParameterConstants.DATABASE_URL);

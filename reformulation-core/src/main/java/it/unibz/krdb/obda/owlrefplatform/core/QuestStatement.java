@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -189,8 +190,8 @@ public class QuestStatement implements OBDAStatement {
 				} 
 				else if (sql.equals("")) {
 					tupleResult = new BooleanOWLOBDARefResultSet(false, QuestStatement.this);
-				} 
-				else {
+				} else {
+					ResultSet set = null;
 					try {
 //                        FOR debugging H2 in-memory database
 //                        try {
@@ -200,16 +201,44 @@ public class QuestStatement implements OBDAStatement {
 //                        }
 						// Execute the SQL query string
 						executingSQL = true;
-						ResultSet set = null;
-						// try {
+
+						setQueryTimeout(sqlstatement);
 
 						set = sqlstatement.executeQuery(sql);
 
-						// }
-						// catch(SQLException e)
-						// {
-						//
-						// Store the SQL result to application result set.
+//						resetTimeouts(sqlstatement);
+					}
+					catch (SQLTimeoutException e) {
+						log.warn("SQL execution is time out");
+					}
+					catch (SQLException e){
+
+						final String MySQLTimeoutExceptionClassName = "com.mysql.jdbc.exceptions.MySQLTimeoutException";
+						final String PSQLExceptionClassName = "org.postgresql.util.PSQLException";
+
+						String exceptionClassName = e.getClass().getName();
+
+						// Since the exceptions of MySQL and Postgres are not extending SQLTimeoutException,
+						// the following hack is needed.
+						// See <http://bugs.mysql.com/bug.php?id=71589>
+						if(exceptionClassName.equals(MySQLTimeoutExceptionClassName)
+								|| exceptionClassName.equals(PSQLExceptionClassName)){
+							log.warn("SQL execution is time out");
+						} else {
+							exception = e;
+
+							error = true;
+							log.error(e.getMessage(), e);
+							throw new OBDAException("Error executing SQL query: \n" + e.getMessage() + "\nSQL query:\n " + sql, e);
+						}
+
+					}
+					if( set == null ){ // Exception SQLTimeout
+						tupleResult = new EmptyQueryResultSet(signature, QuestStatement.this);
+					}
+					//
+					// Store the SQL result to application result set.
+					else{
 						if (isSelect) { // is tuple-based results
 
 							tupleResult = new QuestResultset(set, signature, QuestStatement.this);
@@ -227,12 +256,6 @@ public class QuestStatement implements OBDAStatement {
 							tuples = new QuestResultset(set, signature, QuestStatement.this);
 							graphResult = new QuestGraphResultSet(tuples, templ, collectResults);
 						}
-					} catch (SQLException e) {
-						exception = e;
-						error = true;
-						log.error(e.getMessage(), e);
-
-						throw new OBDAException("Error executing SQL query: \n" + e.getMessage() + "\nSQL query:\n " + sql, e);
 					}
 				}
 				log.debug("Execution finished.\n");
@@ -244,6 +267,15 @@ public class QuestStatement implements OBDAStatement {
 			} finally {
 				monitor.countDown();
 			}
+		}
+
+		private void resetTimeouts(Statement sqlstatement) throws SQLException {
+			questInstance.resetTimeouts(sqlstatement);
+		}
+
+		// Davide> TODO Tests, and all that.
+		private void setQueryTimeout(Statement sqlstatement) throws SQLException {
+			questInstance.setQueryTimeout(sqlstatement);
 		}
 	}
 
