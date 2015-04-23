@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.XsdDatatypeConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
@@ -38,6 +39,7 @@ import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
+
 import org.openrdf.model.Literal;
 
 import java.sql.Types;
@@ -198,7 +200,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 //			log.debug("Before folding Joins: \n{}", cq);
 
-			DatalogNormalizer.foldJoinTrees(cq, false);
+			DatalogNormalizer.foldJoinTrees(cq);
 
 //			log.debug("Before pulling out equalities: \n{}", cq);
 			
@@ -210,7 +212,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			
 //			log.debug("Before pulling up nested references: \n{}", cq);
 
-			DatalogNormalizer.pullUpNestedReferences(cq, false);
+			DatalogNormalizer.pullUpNestedReferences(cq);
 
 //			log.debug("Before adding trivial equalities: \n{}, cq);", cq);
 
@@ -583,14 +585,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 */
 	private Set<Variable> getVariableReferencesWithLeftJoin(Function atom) {
+		
 		if (atom.isDataFunction()) {
-			return atom.getVariables();
+			Set<Variable> variables = new LinkedHashSet<>();
+			TermUtils.addReferencedVariablesTo(variables, atom);
+			return variables;
 		}
-		if (atom.isBooleanFunction()) {
-			return new HashSet<Variable>();
+		else if (atom.isBooleanFunction()) {
+			return Collections.emptySet();
 		}
-		if (atom.isDataTypeFunction()) {
-			return new HashSet<Variable>();
+		else if (atom.isDataTypeFunction()) {
+			return Collections.emptySet();
 		}
 		/*
 		 * we have an alebra opertaor (join or left join) if its a join, we need
@@ -1219,10 +1224,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 					}
 				}
 			}
-			List<TableDefinition> tables = metadata.getTableList();
+			Collection<TableDefinition> tables = metadata.getTables();
 			for (TableDefinition tabledef: tables) {
 				if (tabledef.getName().equals(table)) {
-					List<Attribute> attr = tabledef.getAttributes();
+					Collection<Attribute> attr = tabledef.getAttributes();
 					for (Attribute a : attr) {
 						if (a.getName().equals(col)) {
 							switch (a.getType()) {
@@ -1638,7 +1643,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					references = new LinkedHashSet<>();
 					columnReferences.put((Variable) term, references);
 				}
-				String columnName = def.getAttributeName(index + 1);
+				String columnName = def.getAttribute(index + 1).getName();   // indexes from 1
 				String reference = sqladapter.sqlQualifiedColumn(viewName, columnName);
 				references.add(reference);
 			}
@@ -1676,7 +1681,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		public String getColumnReference(Function atom, int column) {
 			String viewName = getView(atom);
 			DataDefinition def = dataDefinitions.get(atom);
-			String columnname = def.getAttributeName(column + 1);
+			String columnname = def.getAttribute(column + 1).getName(); // indexes from 1
 			return sqladapter.sqlQualifiedColumn(viewName, columnname);
 		}
 	}

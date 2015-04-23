@@ -124,14 +124,13 @@ public class OracleSesameLIMITTest  {
 		Attribute attribute = null;
 		//It starts from 1 !!!
 		attribute = new Attribute("country_name", java.sql.Types.VARCHAR, false, null);
-		tableDefinition.setAttribute(1, attribute);
+		tableDefinition.addAttribute(attribute);
 		return tableDefinition;
 	}
 	private DBMetadata getMeta(String driver_class){
-		DBMetadata dbMetadata = new DBMetadata();
+		DBMetadata dbMetadata = new DBMetadata(driver_class);
 		dbMetadata.add(defTable("hr.countries"));
 		dbMetadata.add(defTable("HR.countries"));
-		dbMetadata.setDriverName(driver_class);
 		return dbMetadata;
 	}
 

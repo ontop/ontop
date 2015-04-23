@@ -22,10 +22,6 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Variable;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 public class VariableImpl implements Variable {
 
 	private static final long serialVersionUID = 5723075311798541659L;
@@ -71,15 +67,5 @@ public class VariableImpl implements Variable {
 	@Override
 	public Variable clone() {
 		return this;
-	}
-
-	@Override
-	public Set<Variable> getReferencedVariables() {
-		return Collections.<Variable>singleton(this);
-	}
-
-	@Override
-	public List<Variable> getReferencedVariablesList() {
-		return Collections.<Variable>singletonList(this);
 	}
 }

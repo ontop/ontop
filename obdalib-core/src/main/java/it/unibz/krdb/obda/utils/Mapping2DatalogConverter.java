@@ -214,7 +214,7 @@ public class Mapping2DatalogConverter {
             String tableName = table.getFullName();
 
             // Construct the predicate using the table name
-            int arity = dbMetadata.getDefinition(tableName).getNumOfAttributes();
+            int arity = dbMetadata.getDefinition(tableName).getAttributes().size();
             Predicate predicate = fac.getPredicate(tableName, arity);
 
             // Swap the column name with a new variable from the lookup table
@@ -301,14 +301,14 @@ public class Mapping2DatalogConverter {
                 throw new RuntimeException("Definition not found for table '" + tableGivenName + "'.");
             }
 
-            int size = tableDefinition.getNumOfAttributes();
+            int size = tableDefinition.getAttributes().size();
 
 			for (int i = 1; i <= size; i++) {
 				// assigned index number
 				int index = i + offset;
 				
 				// simple attribute name
-				String columnName = dbMetadata.getAttributeName(fullName, i);
+				String columnName = tableDefinition.getAttribute(i).getName();
 				
 				lookupTable.add(columnName, index);
 

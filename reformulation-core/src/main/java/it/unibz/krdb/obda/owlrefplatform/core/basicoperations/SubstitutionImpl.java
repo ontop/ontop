@@ -21,7 +21,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  */
 
 import com.google.common.base.Joiner;
+
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.*;
 
 import java.util.*;
@@ -32,23 +35,23 @@ import java.util.*;
  */
 public class SubstitutionImpl implements Substitution {
 
-    private final Map<VariableImpl, Term> map;
+    private final Map<Variable, Term> map;
 
     public SubstitutionImpl() {
         this.map = new HashMap<>();
     }
 
-    public SubstitutionImpl(Map<VariableImpl, Term> substitutionMap) {
+    public SubstitutionImpl(Map<Variable, Term> substitutionMap) {
         this.map = substitutionMap;
     }
 
     @Override
-    public Term get(VariableImpl var) {
+    public Term get(Variable var) {
         return map.get(var);
     }
 
     @Override
-    public Map<VariableImpl, Term> getMap() {
+    public Map<Variable, Term> getMap() {
         return map;
     }
 
@@ -59,7 +62,7 @@ public class SubstitutionImpl implements Substitution {
 
     @Override
     @Deprecated
-    public void put(VariableImpl var, Term term) {
+    public void put(Variable var, Term term) {
         map.put(var, term);
     }
 
@@ -98,7 +101,14 @@ public class SubstitutionImpl implements Substitution {
      * @return true if the substitution exists (false if it does not)
      */
     @Override
-    public boolean compose(Term term1, Term term2) {
+    public boolean composeTerms(Term term1, Term term2) {
+
+        /**
+         * Special case: unification of two functional terms (possibly recursive)
+         */
+        if ((term1 instanceof Function) && (term2 instanceof Function)) {
+                return composeFunctions((Function) term1, (Function) term2);
+        }
 
         Substitution s = createUnifier(term1, term2);
 
@@ -114,9 +124,9 @@ public class SubstitutionImpl implements Substitution {
         SingletonSubstitution substitution = (SingletonSubstitution) s;
 
 
-        List<VariableImpl> forRemoval = new ArrayList<>();
-        for (Map.Entry<VariableImpl,Term> entry : map.entrySet()) {
-            VariableImpl v = entry.getKey();
+        List<Variable> forRemoval = new ArrayList<>();
+        for (Map.Entry<Variable,Term> entry : map.entrySet()) {
+            Variable v = entry.getKey();
             Term t = entry.getValue();
             if (substitution.getVariable().equals(t)) { // ROMAN: no need in isEqual(t, s.getVariable())
                 if (v.equals(substitution.getTerm())) {  // ROMAN: no need in isEqual(v, s.getTerm())
@@ -152,6 +162,42 @@ public class SubstitutionImpl implements Substitution {
         return true;
     }
 
+    @Override
+    public boolean composeFunctions(Function first, Function second) {
+        // Basic case: if predicates are different or their arity is different,
+        // then no unifier
+        if ((first.getArity() != second.getArity()
+                || !first.getFunctionSymbol().equals(second.getFunctionSymbol()))) {
+            return false;
+        }
+
+        Function firstAtom = (Function) first.clone();
+        Function secondAtom = (Function) second.clone();
+
+        int arity = first.getArity();
+
+        // Computing the disagreement set
+        for (int termidx = 0; termidx < arity; termidx++) {
+
+            // Checking if there are already substitutions calculated for the
+            // current terms. If there are any, then we have to take the
+            // substituted terms instead of the original ones.
+
+            Term term1 = firstAtom.getTerm(termidx);
+            Term term2 = secondAtom.getTerm(termidx);
+
+            if (!composeTerms(term1, term2))
+                return false;
+
+            // Applying the newly computed substitution to the 'replacement' of
+            // the existing substitutions
+            SubstitutionUtilities.applySubstitution(firstAtom, this, termidx + 1);
+            SubstitutionUtilities.applySubstitution(secondAtom, this, termidx + 1);
+        }
+
+        return true;
+    }
+
     /***
      * Computes the unifier that makes two terms equal.
      *
@@ -163,16 +209,12 @@ public class SubstitutionImpl implements Substitution {
      */
     private static Substitution createUnifier(Term term1, Term term2) {
 
-        if (!(term1 instanceof VariableImpl) && !(term2 instanceof VariableImpl)) {
+        if (!(term1 instanceof Variable) && !(term2 instanceof Variable)) {
 
             // neither is a variable, impossible to unify unless the two terms are
             // equal, in which case there the substitution is empty
-            if ((term1 instanceof AnonymousVariable) || (term2 instanceof AnonymousVariable)) {
-                // this is questionable -- consider R(_,_) and R(c,c)
-                return new NeutralSubstitution();
-            }
 
-            if ((term1 instanceof VariableImpl) || (term1 instanceof FunctionalTermImpl)
+            if (/*(term1 instanceof VariableImpl) ||*/ (term1 instanceof FunctionalTermImpl)
                     || (term1 instanceof ValueConstantImpl) || (term1 instanceof URIConstantImpl)) {
 
                 // ROMAN: why is BNodeConstantImpl not mentioned?
@@ -188,22 +230,19 @@ public class SubstitutionImpl implements Substitution {
         }
 
         // arranging the terms so that the first is always a variable
-        VariableImpl t1;
+        Variable t1;
         Term t2;
-        if (term1 instanceof VariableImpl) {
-            t1 = (VariableImpl)term1;
+        if (term1 instanceof Variable) {
+            t1 = (Variable)term1;
             t2 = term2;
         } else {
-            t1 = (VariableImpl)term2;
+            t1 = (Variable)term2;
             t2 = term1;
         }
 
         // Undistinguished variables do not need a substitution,
         // the unifier knows about this
-        if (t2 instanceof AnonymousVariable) { // ROMAN: no need in (t1 instanceof AnonymousVariable)
-            return new NeutralSubstitution();
-        }
-        else if (t2 instanceof VariableImpl) {
+        if  (t2 instanceof Variable) {
             if (t1.equals(t2))   // ROMAN: no need in isEqual(t1, t2) -- both are proper variables
                 return new NeutralSubstitution();
             else

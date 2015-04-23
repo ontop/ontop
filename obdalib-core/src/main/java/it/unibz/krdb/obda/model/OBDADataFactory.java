@@ -44,11 +44,12 @@ public interface OBDADataFactory extends Serializable {
 	public OBDADataSource getDataSource(URI id);
 
 	public DatalogProgram getDatalogProgram();
-
-	public DatalogProgram getDatalogProgram(CQIE rule);
+	
+	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers);
 
 	public DatalogProgram getDatalogProgram(Collection<CQIE> rules);
 
+	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers, Collection<CQIE> rules);
 
 
 	public Function getTripleAtom(Term subject, Term predicate, Term object);
@@ -290,7 +291,7 @@ public interface OBDADataFactory extends Serializable {
 	 * 
 	 * @return the variable object.
 	 */
-	public Variable getVariableNondistinguished();
+//	public Variable getVariableNondistinguished();
 
 	public OBDARDBMappingAxiom getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery);
 

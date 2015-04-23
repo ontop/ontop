@@ -23,8 +23,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.model.Variable;
 
 import java.util.Map;
 import java.util.Set;
@@ -35,12 +37,12 @@ import java.util.Set;
 public class NeutralSubstitution implements Substitution {
 
     @Override
-    public Term get(VariableImpl var) {
+    public Term get(Variable var) {
         return null;
     }
 
     @Override
-    public Map<VariableImpl, Term> getMap() {
+    public Map<Variable, Term> getMap() {
         return ImmutableMap.of();
     }
 
@@ -50,7 +52,12 @@ public class NeutralSubstitution implements Substitution {
     }
 
     @Override
-    public void put(VariableImpl var, Term term) {
+    public void put(Variable var, Term term) {
+        throw new UnsupportedOperationException("Every SingletonSubstitution is immutable.");
+    }
+
+    @Override
+    public boolean composeFunctions(Function term1, Function term2) {
         throw new UnsupportedOperationException("Every SingletonSubstitution is immutable.");
     }
 
@@ -65,7 +72,7 @@ public class NeutralSubstitution implements Substitution {
     }
 
     @Override
-    public boolean compose(Term term1, Term term2) {
+    public boolean composeTerms(Term term1, Term term2) {
         throw new UnsupportedOperationException();
     }
 

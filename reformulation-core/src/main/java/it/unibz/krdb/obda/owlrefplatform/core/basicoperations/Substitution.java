@@ -20,8 +20,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.model.Variable;
 
 import java.util.Map;
 import java.util.Set;
@@ -42,15 +43,12 @@ import java.util.Set;
  */
 public interface Substitution {
 
-    /**
-     * TODO: replace VariableImpl by Variable
-     */
-    Term get(VariableImpl var);
+    Term get(Variable var);
 
     /**
      * Map representation of this function.
      */
-    Map<VariableImpl, Term> getMap();
+    Map<Variable, Term> getMap();
 
     boolean isEmpty();
 
@@ -82,11 +80,16 @@ public interface Substitution {
      * @param term2
      * @return true if the substitution exists (false if it does not)
      */
-    boolean compose(Term term1, Term term2);
+    boolean composeTerms(Term term1, Term term2);
+
+    /**
+     * Composes two functional terms. Can be recursive.
+     *
+     * Side-effect method: might add to new entries to the substitution.
+     *
+     */
+    boolean composeFunctions(Function term1, Function term2);
 
     @Deprecated
-    void put(VariableImpl var, Term term);
-
-//    @Deprecated
-//    Set<VariableImpl> keySet();
+    void put(Variable var, Term term);
 }

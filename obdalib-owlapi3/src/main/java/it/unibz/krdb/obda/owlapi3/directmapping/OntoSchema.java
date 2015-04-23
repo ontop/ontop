@@ -24,6 +24,7 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.semanticweb.owlapi.model.IRI;
@@ -41,7 +42,7 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 public class OntoSchema {
 	
 	private String tablename;
-	private List<Attribute> attrList;
+	private Collection<Attribute> attrList;
 	private String baseURI;
 	
 	//The template IRIs of class, datatype property and objecttype property
@@ -75,10 +76,8 @@ public class OntoSchema {
 	//Existing class/property (Class/Property sharing same name in database and ontology) won't be added
 	public void enrichOntology(OWLOntology rootOntology) throws OWLOntologyStorageException{
 		addClass(rootOntology);
-		for(int i=0;i<this.attrList.size();i++){
-			Attribute att = this.attrList.get(i);
+		for(Attribute att : attrList)
 			addProperty(rootOntology, att);
-		}
 	}
 	
 	
