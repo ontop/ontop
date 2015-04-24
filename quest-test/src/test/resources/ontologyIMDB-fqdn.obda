@@ -15,15 +15,14 @@ driverClass	org.postgresql.Driver
 [MappingDeclaration] @collection [[
 
 mappingId	Series + Series_Title + Production_Year (for Series)
-target		:series-{t.id} a :Series ; :Series_Title {t.title} ; :Production_Year {t.production_year} . 
+target		:series-{t.id} a :Series ; :Series_Title {t.title} ; :Production_Year {t.production_year} .
 source		SELECT t.id, t.title, t.production_year
 			FROM title t
 			WHERE t.kind_id = 2
 
 mappingId	hasSeason
-target		:series-{fid} :hasSeason :series-{fid}-season-{fseason_nr} .
-source		SELECT DISTINCT se.id AS fid, te.season_nr AS fseason_nr
+target		:series-{se.id} :hasSeason :series-{se.id}-season-{te.season_nr} .
+source		SELECT DISTINCT se.id, te.season_nr
 			FROM title se, title te
 			WHERE se.kind_id=2 AND se.id = te.episode_of_id AND te.season_nr IS NOT NULL
 ]]
-
