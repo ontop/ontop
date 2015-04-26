@@ -36,7 +36,7 @@ import static org.junit.Assert.assertTrue;
  * Use the class {@link it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestDistinctResultset}
  */
 
-public class DistinctResultSetTest {
+public class DistinctResultSetTest { //
 
     private OBDADataFactory fac;
     Logger log = LoggerFactory.getLogger(this.getClass());
