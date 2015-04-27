@@ -120,8 +120,8 @@ public class QuestOWLMaterializerCMD {
                 Path outputPath = Paths.get(outputDir, fileName);
 
                 try (
-                    BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(outputPath.toFile()));
-                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
+                    //BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(outputPath.toFile()));
+                    //BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
                     OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, inputOntology, predicate);
                 ){
 
