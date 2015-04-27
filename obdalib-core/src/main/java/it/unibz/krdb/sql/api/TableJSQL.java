@@ -36,7 +36,6 @@ public class TableJSQL implements Serializable{
 	
 	private String schema;
 	private String tableName;
-	private String aliasName;
 	private Alias alias;
 	
 	
@@ -144,22 +143,12 @@ public class TableJSQL implements Serializable{
 		if (alias == null) {
 			return;
 		}
+		alias.setName(unquote(alias.getName()));
 		this.alias = alias;
-		this.aliasName = alias.getName();
-	}
-
-	public void setAliasName(String alias) {
-		this.aliasName = alias;
-		if (alias != null)
-			this.alias.setName(alias);
 	}
 	
 	public Alias getAlias() {
 		return alias;
-	}
-	
-	public String getAliasName() { 
-		return this.aliasName;
 	}
 	
 	/**
@@ -199,5 +188,14 @@ public class TableJSQL implements Serializable{
 		return false;
 	}
 
+	/**
+	 * Idempotent method.
+	 */
+	public static String unquote(String name) {
+		if(ParsedSQLQuery.pQuotes.matcher(name).matches()) {
+			return name.substring(1, name.length()-1);
+		}
+		return name;
+	}
 	
 }
