@@ -45,7 +45,8 @@ import java.util.Collection;
 
 public class QuestOWLMaterializerCMD {
 
-	private static String owlFile;
+    private static final int TRIPLE_LIMIT_PER_FILE = 500000;
+    private static String owlFile;
 	private static String obdaFile;
 	private static String format;
 	private static String outputFile;
@@ -106,54 +107,11 @@ public class QuestOWLMaterializerCMD {
             //predicates = ImmutableSet.of(obdaDataFactory.getClassPredicate("http://www.opengis.net/ont/gml#ArcByBulge"));
             int numPredicates = predicates.size();
 
-            OWLOntologyFormat ontologyFormat = getOntologyFormat(format);
-
             int i = 1;
             for (Predicate predicate : predicates) {
-
-                final long startTime = System.currentTimeMillis();
-
-                String outputDir = outputFile;
-
-                String fileName = predicate.getName().replaceAll("[^a-zA-Z0-9]", "_") + ".owl";
-
-                Path outputPath = Paths.get(outputDir, fileName);
-
-                try (
-                    //BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(outputPath.toFile()));
-                    //BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
-                    OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, inputOntology, predicate);
-                ){
-
-                    System.err.println(String.format("Materializing %s (%d/%d)", predicate, i, numPredicates));
-
-                    QuestOWLIndividualIterator iterator = materializer.getIterator();
-
-
-                    OWLOntology newOnto = manager.createOntology(IRI.create(predicate.getName()));
-
-                    // add the signatures
-                    for (OWLDeclarationAxiom axiom : ontology.getAxioms(AxiomType.DECLARATION)) {
-                        manager.addAxiom(newOnto, axiom);
-                    }
-
-                    while (iterator.hasNext())
-                        manager.addAxiom(newOnto, iterator.next());
-
-
-                    manager.saveOntology(newOnto, ontologyFormat, new WriterDocumentTarget(writer));
-
-                    newOnto = null;
-
-                    System.out.println("NR of TRIPLES: " + materializer.getTriplesCount());
-                    System.out.println("VOCABULARY SIZE (NR of QUERIES): " + materializer.getVocabularySize());
-
-                    final long endTime = System.currentTimeMillis();
-                    final long time = endTime - startTime;
-                    System.out.println("Elapsed time to materialize: " + time + " {ms}");
-                    i++;
-                }
-
+                System.err.println(String.format("Materializing %s (%d/%d)", predicate, i, numPredicates));
+                serializePredicate(ontology, inputOntology, obdaModel, predicate);
+                i++;
             }
 
         } catch (OWLOntologyCreationException e) {
@@ -162,6 +120,67 @@ public class QuestOWLMaterializerCMD {
             e.printStackTrace();
         }
 
+    }
+
+    /**
+     * Serializes the A-box corresponding to a predicate into one or multiple file.
+     */
+    private static void serializePredicate(OWLOntology ontology, Ontology inputOntology, OBDAModel obdaModel, Predicate predicate) throws Exception {
+        final long startTime = System.currentTimeMillis();
+
+        OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, inputOntology, predicate);
+        QuestOWLIndividualIterator iterator = materializer.getIterator();
+
+
+        int tripleCount = 0;
+        int fileCount = 0;
+
+        String outputDir = outputFile;
+        String filePrefix = Paths.get(outputDir, predicate.getName().replaceAll("[^a-zA-Z0-9]", "_") + "_").toString();
+
+        while(iterator.hasNext()) {
+            tripleCount += serializeTripleBatch(ontology, iterator, filePrefix, predicate.getName(), fileCount);
+            fileCount++;
+        }
+
+        System.out.println("NR of TRIPLES: " + tripleCount);
+        System.out.println("VOCABULARY SIZE (NR of QUERIES): " + materializer.getVocabularySize());
+
+        final long endTime = System.currentTimeMillis();
+        final long time = endTime - startTime;
+        System.out.println("Elapsed time to materialize: " + time + " {ms}");
+    }
+
+    /**
+     * Serializes a batch of triples corresponding to a predicate into one file.
+     * Upper bound: TRIPLE_LIMIT_PER_FILE.
+     *
+     */
+    private static int serializeTripleBatch(OWLOntology ontology, QuestOWLIndividualIterator iterator, String filePrefix, String predicateName, int fileCount) throws Exception {
+        String fileName = filePrefix + fileCount + ".owl";
+
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+
+        // Main buffer
+        OWLOntology aBox = manager.createOntology(IRI.create(predicateName));
+
+        // Add the signatures
+        for (OWLDeclarationAxiom axiom : ontology.getAxioms(AxiomType.DECLARATION)) {
+            manager.addAxiom(aBox, axiom);
+        }
+
+        int tripleCount = 0;
+        while (iterator.hasNext() && (tripleCount < TRIPLE_LIMIT_PER_FILE )) {
+            manager.addAxiom(aBox, iterator.next());
+            tripleCount++;
+        }
+
+        //BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(outputPath.toFile()));
+        //BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+        manager.saveOntology(aBox, getOntologyFormat(format), new WriterDocumentTarget(writer));
+
+        return tripleCount;
     }
 
     private static void run() {
