@@ -33,12 +33,12 @@ public class SesameMaterializer {
     private Iterator<Assertion> assertions = null;
     private QuestMaterializer materializer;
 
-    public SesameMaterializer(OBDAModel model) throws Exception {
-        this(model, null);
+    public SesameMaterializer(OBDAModel model, boolean doStreamResults) throws Exception {
+        this(model, null, doStreamResults);
     }
 
-    public SesameMaterializer(OBDAModel model, Ontology onto) throws Exception {
-        materializer = new QuestMaterializer(model, onto);
+    public SesameMaterializer(OBDAModel model, Ontology onto, boolean doStreamResults) throws Exception {
+        materializer = new QuestMaterializer(model, onto, doStreamResults);
         assertions = materializer.getAssertionIterator();
     }
 

@@ -171,7 +171,7 @@ public class QuestDBClassicStore extends QuestDBAbstractStore {
 			OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
 			obdaModelForMaterialization.declareAll(tbox.getVocabulary());
 			
-			QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
+			QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization, false);
 			Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
 			int count = st.insertData(assertionIter, 5000, 500);
 			materializer.disconnect();

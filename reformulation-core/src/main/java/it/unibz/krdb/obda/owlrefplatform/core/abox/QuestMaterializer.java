@@ -71,6 +71,11 @@ public class QuestMaterializer {
 	private final OBDAModel model;
 	private final Quest questInstance;
 	private Ontology ontology;
+
+	/**
+	 * Puts the JDBC connection in streaming mode.
+	 */
+	private final boolean doStreamResults;
 	
 	private final Set<Predicate> vocabulary;
 
@@ -78,6 +83,7 @@ public class QuestMaterializer {
 	private VirtualTripleIterator iterator;
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
+	private static int FETCH_SIZE = 50000;
 
 	/***
 	 * 
@@ -85,21 +91,21 @@ public class QuestMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public QuestMaterializer(OBDAModel model) throws Exception {
-		this(model, null, null, getDefaultPreferences());
+	public QuestMaterializer(OBDAModel model, boolean doStreamResults) throws Exception {
+		this(model, null, null, getDefaultPreferences(), doStreamResults);
 	}
 	
-	public QuestMaterializer(OBDAModel model, QuestPreferences pref) throws Exception {
-		this(model, null, null, pref);
+	public QuestMaterializer(OBDAModel model, QuestPreferences pref, boolean doStreamResults) throws Exception {
+		this(model, null, null, pref, doStreamResults);
 		
 	}
 	
-	public QuestMaterializer(OBDAModel model, Ontology onto) throws Exception {
-		this(model, onto, null, getDefaultPreferences());
+	public QuestMaterializer(OBDAModel model, Ontology onto, boolean doStreamResults) throws Exception {
+		this(model, onto, null, getDefaultPreferences(), doStreamResults);
 	}
 
-    public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates) throws Exception {
-        this(model, onto, predicates, getDefaultPreferences());
+    public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults) throws Exception {
+        this(model, onto, predicates, getDefaultPreferences(), doStreamResults);
     }
 	
 	/***
@@ -108,7 +114,9 @@ public class QuestMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, QuestPreferences preferences) throws Exception {
+	public QuestMaterializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, QuestPreferences preferences,
+							 boolean doStreamResults) throws Exception {
+		this.doStreamResults = doStreamResults;
 		this.model = model;
 		this.ontology = onto;
 
@@ -146,8 +154,8 @@ public class QuestMaterializer {
 		questInstance.setupRepository();
 	}
 
-    public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences prefs) throws Exception {
-        this(model, onto, null, prefs);
+    public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences prefs, boolean doStreamResults) throws Exception {
+        this(model, onto, null, prefs, doStreamResults);
     }
 
     private Set<Predicate> extractVocabulary(OBDAModel model, Ontology onto) {
@@ -275,6 +283,7 @@ public class QuestMaterializer {
 	 */
 	private class VirtualTripleIterator implements Iterator<Assertion> {
 
+
 		private String query1 = "CONSTRUCT {?s <%s> ?o} WHERE {?s <%s> ?o}";
 		private String query2 = "CONSTRUCT {?s a <%s>} WHERE {?s a <%s>}";
 
@@ -293,10 +302,21 @@ public class QuestMaterializer {
 				throws SQLException {
 			try{
 				questConn = questInstance.getNonPoolConnection();
+
+				if (doStreamResults) {
+					// Autocommit must be OFF (needed for autocommit)
+					questConn.setAutoCommit(false);
+				}
+
 				vocabularyIterator = vocabIter;
 				//execute first query to start the process
 				counter = 0;
 				stm = questConn.createStatement();
+
+				if (doStreamResults) {
+					// Fetch 50 000 lines at the same time
+					stm.setFetchSize(FETCH_SIZE);
+				}
 				if (!vocabularyIterator.hasNext())
 					throw new NullPointerException("Vocabulary is empty!");
 				while (results == null) {
@@ -347,6 +367,9 @@ public class QuestMaterializer {
 
 						//execute next query
 						stm = questConn.createStatement();
+						if (doStreamResults) {
+							stm.setFetchSize(FETCH_SIZE);
+						}
 						Predicate next = vocabularyIterator.next();
 						String query = getQuery(next);
 						ResultSet execute = stm.execute(query);
@@ -364,6 +387,8 @@ public class QuestMaterializer {
 			}
 			} catch(Exception e)
 			{e.printStackTrace();}
+
+
 			return hasNext;
 		}
 

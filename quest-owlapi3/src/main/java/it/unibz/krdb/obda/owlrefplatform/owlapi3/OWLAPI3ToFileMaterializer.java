@@ -73,7 +73,7 @@ public class OWLAPI3ToFileMaterializer {
 	}
 
 	public static int materializeN3(Writer bf, OBDAModel model) throws Exception {
-		return materializeN3(bf, (new OWLAPI3Materializer(model)).getIterator());
+		return materializeN3(bf, (new OWLAPI3Materializer(model, false)).getIterator());
 	}
 	
 	public static int materializeN3(Writer bf, QuestOWLIndividualIterator iterator) throws Exception {

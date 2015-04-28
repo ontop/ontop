@@ -51,6 +51,13 @@ public class QuestOWLMaterializerCMD {
 	private static String format;
 	private static String outputFile;
     private static boolean separate = false;
+    /**
+     * Necessary for materialize large RDF graphs without
+     * storing all the SQL results of one big query in memory.
+     *
+     * TODO: add an option to disable it.
+     */
+    private static boolean DO_STREAM_RESULTS = true;
 
 	public static void main(String args[]) {
 
@@ -125,12 +132,14 @@ public class QuestOWLMaterializerCMD {
     /**
      * Serializes the A-box corresponding to a predicate into one or multiple file.
      */
-    private static void serializePredicate(OWLOntology ontology, Ontology inputOntology, OBDAModel obdaModel, Predicate predicate) throws Exception {
+    private static void serializePredicate(OWLOntology ontology, Ontology inputOntology, OBDAModel obdaModel,
+                                           Predicate predicate) throws Exception {
         final long startTime = System.currentTimeMillis();
 
-        OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, inputOntology, predicate);
+        OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, inputOntology, predicate, DO_STREAM_RESULTS);
         QuestOWLIndividualIterator iterator = materializer.getIterator();
 
+        System.err.println("Starts writing triples into files.");
 
         int tripleCount = 0;
         int fileCount = 0;
@@ -212,11 +221,11 @@ public class QuestOWLMaterializerCMD {
                 ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
                 Ontology onto =  OWLAPI3TranslatorUtility.translate(ontology);
                 obdaModel.declareAll(onto.getVocabulary());
-                materializer = new OWLAPI3Materializer(obdaModel, onto);
+                materializer = new OWLAPI3Materializer(obdaModel, onto, DO_STREAM_RESULTS);
             }
             else {
                 ontology = manager.createOntology();
-                materializer = new OWLAPI3Materializer(obdaModel);
+                materializer = new OWLAPI3Materializer(obdaModel, DO_STREAM_RESULTS);
             }
 
 
