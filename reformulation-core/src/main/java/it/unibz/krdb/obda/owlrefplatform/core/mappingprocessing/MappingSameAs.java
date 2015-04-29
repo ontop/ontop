@@ -22,7 +22,9 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
 
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.utils.IDGenerator;
 
+import java.net.URI;
 import java.util.*;
 
 public class MappingSameAs {
@@ -189,5 +191,37 @@ public class MappingSameAs {
     }
 
 
+
+    public static Collection<OBDAMappingAxiom> addSameAsInverse(OBDAModel model) {
+        OBDADataSource datasource = model.getSources().get(0);
+        URI sourceId = datasource.getSourceID();
+        Collection<OBDAMappingAxiom> mappings = new LinkedList<>(model.getMappings(sourceId));
+
+        Collection<OBDAMappingAxiom> results = new LinkedList<>();
+        for (OBDAMappingAxiom mapping : mappings) {
+            CQIE targetQuery = (CQIE) mapping.getTargetQuery();
+            List<Function> newbody = new LinkedList<>();
+
+
+            for (Function atom : targetQuery.getBody()) {
+                Predicate p = atom.getFunctionSymbol();
+
+                if(p.getName().equals("http://www.w3.org/2002/07/owl#sameAs")){
+                    Predicate pred = fac.getObjectPropertyPredicate(p.getName());
+                    //need to add also the inverse
+                    Function inverseAtom = fac.getFunction(pred, atom.getTerm(1), atom.getTerm(0));
+                    newbody.add(inverseAtom);
+
+
+
+                }
+
+            }
+            String newId = IDGenerator.getNextUniqueID(mapping.getId() + "#");
+            CQIE newTargetQuery = fac.getCQIE(targetQuery.getHead(), newbody);
+            results.add(fac.getRDBMSMappingAxiom(newId, ((OBDASQLQuery) mapping.getSourceQuery()).toString(), newTargetQuery));
+        }
+        return results;
+    }
 }
 

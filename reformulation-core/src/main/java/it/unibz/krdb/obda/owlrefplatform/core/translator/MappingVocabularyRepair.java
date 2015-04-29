@@ -122,12 +122,12 @@ public class MappingVocabularyRepair {
 								if (t1uri && t2uri) {
 									Predicate pred = dfac.getObjectPropertyPredicate(p.getName());
 									newatom = dfac.getFunction(pred, getNormalTerm(t1), getNormalTerm(t2));
-
-                                    if(p.getName().equals("http://www.w3.org/2002/07/owl#sameAs")){
-                                    //need to add also the inverse
-                                        Function inverseAtom = dfac.getFunction(pred, getNormalTerm(t2), getNormalTerm(t1));
-                                        newbody.add(inverseAtom);
-                                    }
+//
+//                                    if(p.getName().equals("http://www.w3.org/2002/07/owl#sameAs")){
+//                                    //need to add also the inverse
+//                                        Function inverseAtom = dfac.getFunction(pred, getNormalTerm(t2), getNormalTerm(t1));
+//                                        newbody.add(inverseAtom);
+//                                    }
 								}
 								else {
 									Predicate pred = dfac.getDataPropertyPredicate(p.getName());

@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import com.google.common.base.Joiner;
-
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -24,7 +23,6 @@ import it.unibz.krdb.sql.DBMetadata;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.Select;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +55,12 @@ public class QuestUnfolder {
 
 	public QuestUnfolder(OBDAModel unfoldingOBDAModel, DBMetadata metadata,  Connection localConnection, URI sourceId) throws Exception{
 
+
+		/**
+		 * add sameAsInverse
+		 */
+		unfoldingOBDAModel.addMappings(sourceId, MappingSameAs.addSameAsInverse(unfoldingOBDAModel));
+
 		/** Substitute select * with column names **/
 		preprocessProjection(unfoldingOBDAModel, sourceId, metadata);
 
@@ -71,7 +75,9 @@ public class QuestUnfolder {
 		MetaMappingExpander metaMappingExpander = new MetaMappingExpander(localConnection);
 		metaMappingExpander.expand(unfoldingOBDAModel, sourceId);
 
+
 		List<OBDAMappingAxiom> mappings = unfoldingOBDAModel.getMappings(sourceId);
+
 		unfoldingProgram = Mapping2DatalogConverter.constructDatalogProgram(mappings, metadata);
 	}
 

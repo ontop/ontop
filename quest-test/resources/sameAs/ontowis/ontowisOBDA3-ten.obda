@@ -13,10 +13,10 @@ driverClass	org.postgresql.Driver
 [MappingDeclaration] @collection [[
 mappingId	MAPID-A1
 target		:A1/{unique2Tab1} a :A1 . 
-source		SELECT unique2Tab1 FROM Tab1 
+source		SELECT unique2Tab1 FROM Tab1
 
 mappingId	MAPID-A2
-target		:A2/{unique2Tab2} a :A2 . 
+target		:A2/{unique2Tab2} a :A2 .
 source		SELECT unique2Tab2 FROM Tab2
 
 mappingId	MAPID-A3
