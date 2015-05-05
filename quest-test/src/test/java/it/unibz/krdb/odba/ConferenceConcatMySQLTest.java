@@ -41,11 +41,11 @@ import java.io.File;
 import java.sql.Connection;
 import java.util.Properties;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Test mysql case
+ * Test mysql case. CONCAT with table.columnName and string values.
  *
  */
 
@@ -112,19 +112,23 @@ public class ConferenceConcatMySQLTest {
 	private void executeQueryAssertResults(String query, QuestOWLStatement st) throws Exception {
 		QuestOWLResultSet rs = st.executeTuple(query);
 
-        OWLObject answer = null;
-		assertFalse(rs.nextRow());
+		OWLObject answer, answer2=null;
+		rs.nextRow();
 
-//			for (int i = 1; i <= rs.getColumnCount(); i++) {
-//				System.out.print(rs.getSignature().get(i-1));
-//                answer= rs.getOWLObject(i);
-//				System.out.print("=" + answer);
-//				System.out.print(" ");
-//			}
-//			System.out.println();
-//		}
-//		rs.close();
-//		assertEquals(expectedAnswer, answer.toString());
+
+
+		answer= rs.getOWLObject("x");
+		System.out.print("x =" + answer);
+		System.out.print(" ");
+		answer2= rs.getOWLObject("y");
+
+		System.out.print("y =" + answer2);
+		System.out.print(" ");
+
+
+		rs.close();
+		assertEquals("<http://myproject.org/odbs#tracepaper1>", answer.toString());
+		assertEquals("<http://myproject.org/odbs#eventpaper1>", answer2.toString());
 	}
 
 
@@ -139,7 +143,7 @@ public class ConferenceConcatMySQLTest {
         String query1 = "PREFIX : <http://myproject.org/odbs#> SELECT ?x ?y\n" +
                 "WHERE {\n" +
                 "   ?x :TcontainsE ?y\n" +
-                "}";
+				"}";
 
 		runTests(p, query1);
 	}

@@ -172,15 +172,14 @@ public class Mapping2DatalogConverter {
      * @param parsedSQLQuery
      * @param lookupTable
      * @author Dag Hovland
-     * 
-     * TODO: Not finished! Will break anything
+     *
      */
     private static void addFunctionAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
     	ProjectionJSQL proj = parsedSQLQuery.getProjection();
     	List<SelectExpressionItem> selects = proj.getColumnList();
     	for(SelectExpressionItem select : selects){
     		Expression select_expr = select.getExpression();
-    		if(select_expr instanceof net.sf.jsqlparser.expression.Function  || select_expr instanceof Concat){
+    		if(select_expr instanceof net.sf.jsqlparser.expression.Function  || select_expr instanceof Concat || select_expr instanceof StringValue ){
     			Alias alias = select.getAlias();
     			if(alias == null){
     				throw new JSQLParserException("The expression" + select + " does not have an alias. This is not supported by ontop. Add an alias.");

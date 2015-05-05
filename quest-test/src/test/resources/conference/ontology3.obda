@@ -22,32 +22,32 @@ source		select *
 mappingId	upload_accepted
 target		:accpaper{Paper} :correspondsto :paper{Paper} ; :has2 :uplacc{ID} . :uplacc{ID} a :UploadAccepted ; :uploadAcceptedTime {UploadTime} ; :uploadby2 :user{User} . 
 source		select *
-			from acceptance
+			from Acceptance
 
 mappingId	conference
 target		:conf{ID} a :Conference ; :confName {Name} ; :confTime {Time} . :user{Organizer} :organizerof :conf{ID} . 
 source		select *
-			from conference
+			from Conference
 
 mappingId	decision
 target		:dec{ID} a :Decision ; :decisionTime {DecisionTime} ; :outcome {Outcome} . 
 source		select *
-			from decision
+			from Decision
 
 mappingId	review
-target		:revreq{IDrr} a :Review , :ReviewRequest , :Review , :ReviewRequest ; :has4 :rev{ID} . :rev{ID} a :Review , :ReviewRequest , :Review , :ReviewRequest ; :submissionTime {SubmissionTime} . 
+target		:revreq{IDrr} a :ReviewRequest ; :has4 :rev{ID} . :rev{ID} a :Review ; :submissionTime {SubmissionTime} .
 source		select *
-			from review
+			from Review
 
 mappingId	review-request
 target		:user{Reviewer} :reviewer :revreq{ID} . :revreq{ID} a :ReviewRequest ; :invitationTime {InvitationTime} ; :for :paper{Paper} . 
 source		select *
-			from reviewrequest as q
+			from ReviewRequest
 
 mappingId	paper
 target		:paper{ID} a :Paper ; :title {Title} ; :paperCT {CT} ; :has3 :dec{Status} ; :submittedto :conf{Conf} . :user{User} :creator :paper{ID} . 
 source		select *
-			from paper
+			from Paper
 
 mappingId	user-ct
 target		:user{User} a :User ; :userCT {CT} . 

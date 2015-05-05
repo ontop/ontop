@@ -20,18 +20,12 @@ package it.unibz.krdb.sql;
  * #L%
  */
 
-import static org.junit.Assert.assertTrue;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.r2rml.R2RMLManager;
-import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.api.Attribute;
-
-import java.io.File;
-
 import org.junit.After;
 import org.junit.Test;
 import org.openrdf.model.Model;
@@ -40,8 +34,11 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import sesameWrapper.SesameVirtualRepo;
+
+import java.io.File;
+
+import static org.junit.Assert.assertTrue;
 
 /***
  * Tests that the SPARQL LIMIT statement is correctly translated to WHERE ROWNUM <= x in oracle
@@ -131,6 +128,7 @@ public class OracleSesameLIMITTest  {
 		DBMetadata dbMetadata = new DBMetadata(driver_class);
 		dbMetadata.add(defTable("hr.countries"));
 		dbMetadata.add(defTable("HR.countries"));
+		dbMetadata.add(defTable("dual"));
 		return dbMetadata;
 	}
 

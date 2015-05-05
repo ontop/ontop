@@ -28,12 +28,9 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
@@ -47,7 +44,7 @@ import java.util.Properties;
 import static org.junit.Assert.assertFalse;
 
 /**
- * Test mysql case
+ * Test mysql case. The mapping do not corresponds to the table in the database (uppercase difference) an error should be returned by the system.
  *
  */
 
@@ -93,44 +90,10 @@ public class ConferenceMySQLTest {
 		} catch (Exception ne) {
 			assertFalse(false);
 		}
-//		// Now we are ready for querying
-//		QuestOWLConnection conn = reasoner.getConnection();
-//		QuestOWLStatement st = conn.createStatement();
-//
-//
-//		try {
-//			executeQueryAssertResults(query1, st);
-//
-//		} catch (Exception e) {
-//            st.close();
-//            e.printStackTrace();
-//
-//
-//
-//		} finally {
-//
-//			conn.close();
-//			reasoner.dispose();
-//		}
+
 	}
 	
-	private void executeQueryAssertResults(String query, QuestOWLStatement st) throws Exception {
-		QuestOWLResultSet rs = st.executeTuple(query);
 
-        OWLObject answer = null;
-		assertFalse(rs.nextRow());
-
-//			for (int i = 1; i <= rs.getColumnCount(); i++) {
-//				System.out.print(rs.getSignature().get(i-1));
-//                answer= rs.getOWLObject(i);
-//				System.out.print("=" + answer);
-//				System.out.print(" ");
-//			}
-//			System.out.println();
-//		}
-//		rs.close();
-//		assertEquals(expectedAnswer, answer.toString());
-	}
 
 
 	@Test

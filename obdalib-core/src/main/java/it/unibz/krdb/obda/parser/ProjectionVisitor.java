@@ -259,7 +259,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 				break;
 
 			default:
-				unsupported = true;
+//				unsupported = true;
 
 				break;
 		}

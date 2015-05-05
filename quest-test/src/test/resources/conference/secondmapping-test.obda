@@ -11,7 +11,7 @@ driverClass	com.mysql.jdbc.Driver
 [MappingDeclaration] @collection [[
 mappingId	event
 target		:trace{e} :TcontainsE :event{e} .
-source		 select concat('par', Submission.`paper` ) as `e`, Submission.`uploadtime`  from Submission
+source		 select concat('paper', Submission.`paper` ) as `e`, Submission.`uploadtime`  from Submission
 
 ]]
 
