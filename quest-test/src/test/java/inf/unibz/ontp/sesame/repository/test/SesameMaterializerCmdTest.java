@@ -26,7 +26,7 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
-import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualIterator;
+import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualAxiomIterator;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
 import it.unibz.krdb.obda.sesame.SesameStatementIterator;
 
@@ -263,7 +263,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		OWLAPI3Materializer materializer = new OWLAPI3Materializer(model, DO_STREAM_RESULTS);
 
 		
-		QuestOWLIndividualIterator iterator = materializer.getIterator();
+		QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();
 		
 		while(iterator.hasNext()) 
 			manager.addAxiom(ontology, iterator.next());
@@ -295,7 +295,7 @@ public class SesameMaterializerCmdTest extends TestCase {
 		OWLAPI3Materializer	materializer = new OWLAPI3Materializer(model, onto, DO_STREAM_RESULTS);
 		BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(out)); 
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
-		QuestOWLIndividualIterator iterator = materializer.getIterator();
+		QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();
 
 		while(iterator.hasNext()) 
 			manager.addAxiom(ontology, iterator.next());

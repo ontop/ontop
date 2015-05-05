@@ -20,7 +20,6 @@ package org.semanticweb.ontop.cli;
  * #L%
  */
 
-import com.google.common.collect.ImmutableSet;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -28,7 +27,7 @@ import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
-import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualIterator;
+import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualAxiomIterator;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -38,18 +37,19 @@ import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.*;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 
-public class QuestOWLMaterializerCMD {
+public class OntopMaterializerCMD {
 
     private static final int TRIPLE_LIMIT_PER_FILE = 500000;
     private static String owlFile;
 	private static String obdaFile;
 	private static String format;
 	private static String outputFile;
+    private static boolean disableReasoning = false;
     private static boolean separate = false;
     /**
      * Necessary for materialize large RDF graphs without
@@ -59,7 +59,7 @@ public class QuestOWLMaterializerCMD {
      */
     private static boolean DO_STREAM_RESULTS = true;
 
-	public static void main(String args[]) {
+	public static void main(String... args) {
 
 		if (!parseArgs(args)) {
 			printUsage();
@@ -86,6 +86,13 @@ public class QuestOWLMaterializerCMD {
         try {
             ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
 
+            if (disableReasoning) {
+                /*
+                 * when reasoning is disabled, we extract only the declaration assertions for the vocabulary
+                 */
+                ontology = extractDeclarations(manager, ontology);
+            }
+
             Collection<Predicate> predicates = new ArrayList<>();
 
             for (OWLClass owlClass : ontology.getClassesInSignature()) {
@@ -108,10 +115,6 @@ public class QuestOWLMaterializerCMD {
             ModelIOManager ioManager = new ModelIOManager(obdaModel);
             ioManager.load(obdaFile);
 
-            // TESTING !!!!
-            // predicates = ImmutableSet.of(obdaDataFactory.getClassPredicate("http://www.opengis.net/ont/sf#Geometry"));
-            //predicates = ImmutableSet.of(obdaDataFactory.getClassPredicate("http://sws.ifi.uio.no/vocab/npd-v2#Award"));
-            //predicates = ImmutableSet.of(obdaDataFactory.getClassPredicate("http://www.opengis.net/ont/gml#ArcByBulge"));
             int numPredicates = predicates.size();
 
             int i = 1;
@@ -137,7 +140,7 @@ public class QuestOWLMaterializerCMD {
         final long startTime = System.currentTimeMillis();
 
         OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, inputOntology, predicate, DO_STREAM_RESULTS);
-        QuestOWLIndividualIterator iterator = materializer.getIterator();
+        QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();
 
         System.err.println("Starts writing triples into files.");
 
@@ -165,7 +168,7 @@ public class QuestOWLMaterializerCMD {
      * Upper bound: TRIPLE_LIMIT_PER_FILE.
      *
      */
-    private static int serializeTripleBatch(OWLOntology ontology, QuestOWLIndividualIterator iterator, String filePrefix, String predicateName, int fileCount) throws Exception {
+    private static int serializeTripleBatch(OWLOntology ontology, QuestOWLIndividualAxiomIterator iterator, String filePrefix, String predicateName, int fileCount) throws Exception {
         String fileName = filePrefix + fileCount + ".owl";
 
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -219,6 +222,14 @@ public class QuestOWLMaterializerCMD {
             if (owlFile != null) {
             // Loading the OWL ontology from the file as with normal OWLReasoners
                 ontology = manager.loadOntologyFromOntologyDocument((new File(owlFile)));
+
+                if (disableReasoning) {
+                /*
+                 * when reasoning is disabled, we extract only the declaration assertions for the vocabulary
+                 */
+                    ontology = extractDeclarations(manager, ontology);
+                }
+
                 Ontology onto =  OWLAPI3TranslatorUtility.translate(ontology);
                 obdaModel.declareAll(onto.getVocabulary());
                 materializer = new OWLAPI3Materializer(obdaModel, onto, DO_STREAM_RESULTS);
@@ -232,7 +243,7 @@ public class QuestOWLMaterializerCMD {
             // OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
 
 
-            QuestOWLIndividualIterator iterator = materializer.getIterator();
+            QuestOWLIndividualAxiomIterator iterator = materializer.getIterator();
 
             while(iterator.hasNext())
                 manager.addAxiom(ontology, iterator.next());
@@ -285,43 +296,56 @@ public class QuestOWLMaterializerCMD {
 
 	private static void printUsage() {
 		System.out.println("Usage");
-		System.out.println(" QuestOWLMaterializerCMD -obda mapping.obda [-onto ontology.owl] [-format format] [-out outputFile] [--enable-reasoning | --disable-reasoning]");
+		System.out.println(" ontop-materialize -obda mapping.obda [-onto ontology.owl] [-format format] [-out outputFile] [--enable-reasoning | --disable-reasoning]");
 		System.out.println("");
 		System.out.println(" -obda mapping.obda    The full path to the OBDA file");
 		System.out.println(" -onto ontology.owl    [OPTIONAL] The full path to the OWL file");
 		System.out.println(" -format format        [OPTIONAL] The format of the materialized ontology: ");
 		System.out.println("                          Options: rdfxml, owlxml, turtle. Default: rdfxml");
 		System.out.println(" -out outputFile       [OPTIONAL] The full path to the output file. If not specified, the output will be stdout");
-		System.out.println(" --enable-reasoning    [OPTIONAL] enable the OWL reasoning (default)");
-		System.out.println(" --disable-reasoning   [OPTIONAL] disable the OWL reasoning (not implemented yet) ");
+		System.out.println(" --enable-reasoning    [OPTIONAL] enables OWL reasoning (default)");
+		System.out.println(" --disable-reasoning   [OPTIONAL] disables  OWL reasoning ");
         System.out.println(" --separate-files      [OPTIONAL] generating separate files for different classes/properties. ");
         System.out.println("                          In this case, `-out` will be used as the output directory");
 		System.out.println("");
 	}
 
 
-    public static boolean parseArgs(String[] args) {
+
+    private static boolean parseArgs(String[] args) {
         int i = 0;
         while (i < args.length) {
             switch (args[i]) {
                 case "-obda":
+                case "--obda":
                     obdaFile = args[i + 1];
                     i += 2;
                     break;
                 case "-onto":
+                case "--onto":
                     owlFile = args[i + 1];
                     i += 2;
                     break;
                 case "-format":
+                case "--format":
                     format = args[i + 1];
                     i += 2;
                     break;
                 case "-out":
+                case "--out":
                     outputFile = args[i + 1];
                     i += 2;
                     break;
                 case "--separate-files":
                     separate = true;
+                    i += 1;
+                    break;
+                case "--enable-reasoning":
+                    disableReasoning = false;
+                    i += 1;
+                    break;
+                case "--disable-reasoning":
+                    disableReasoning = true;
                     i += 1;
                     break;
                 default:
@@ -338,5 +362,24 @@ public class QuestOWLMaterializerCMD {
 
         return true;
 	}
+
+    private static OWLOntology extractDeclarations(OWLOntologyManager manager, OWLOntology ontology) throws OWLOntologyCreationException {
+//        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+//        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
+
+
+        IRI ontologyIRI = ontology.getOntologyID().getOntologyIRI();
+        System.err.println("Ontology " + ontologyIRI);
+
+        Set<OWLDeclarationAxiom> declarationAxioms = ontology.getAxioms(AxiomType.DECLARATION);
+
+        manager.removeOntology(ontology);
+
+        OWLOntology newOntology = manager.createOntology(ontologyIRI);
+
+        manager.addAxioms(newOntology, declarationAxioms);
+
+        return newOntology;
+    }
 
 }

@@ -46,6 +46,11 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import sesameWrapper.SesameMaterializer;
 
+/**
+ * @deprecated Use {@code QuestOWLMaterialzerCMD}  instead
+ */
+
+@Deprecated
 class QuestSesameMaterializerCMD {
 
 	private static String owlFile;

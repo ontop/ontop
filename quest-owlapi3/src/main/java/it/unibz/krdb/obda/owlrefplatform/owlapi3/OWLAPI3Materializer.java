@@ -25,12 +25,11 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualIterator;
+import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualAxiomIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 public class OWLAPI3Materializer implements AutoCloseable{
 
@@ -59,8 +58,8 @@ public class OWLAPI3Materializer implements AutoCloseable{
         this(obdaModel, onto, ImmutableSet.of(predicate), doStreamResults);
     }
 
-    public QuestOWLIndividualIterator getIterator() {
-		return new QuestOWLIndividualIterator(assertions);
+    public QuestOWLIndividualAxiomIterator getIterator() {
+		return new QuestOWLIndividualAxiomIterator(assertions);
 	}
 	
 	public void disconnect() {
