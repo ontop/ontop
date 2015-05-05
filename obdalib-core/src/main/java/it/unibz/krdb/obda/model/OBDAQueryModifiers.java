@@ -36,7 +36,7 @@ public class OBDAQueryModifiers {
 		isDistinct = false;
 		limit = -1;
 		offset = -1;
-		orderConditions = new ArrayList<OrderCondition>();
+		orderConditions = new ArrayList<>();
 	}
 
 	public OBDAQueryModifiers clone() {
@@ -54,11 +54,12 @@ public class OBDAQueryModifiers {
 		return clone;
 	}
 
+	@Deprecated
 	public void copy(OBDAQueryModifiers other) {
 		isDistinct = other.isDistinct;
 		limit = other.limit;
 		offset = other.offset;
-		orderConditions.addAll(other.orderConditions);
+		orderConditions.addAll(other.orderConditions); // ROMAN: this extends, not "copies"
 	}
 
 	public void setDistinct() {

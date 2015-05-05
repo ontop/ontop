@@ -25,6 +25,7 @@ import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.XsdDatatypeConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
@@ -38,6 +39,7 @@ import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
+
 import org.openrdf.model.Literal;
 
 import java.sql.Types;
@@ -583,14 +585,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return
 	 */
 	private Set<Variable> getVariableReferencesWithLeftJoin(Function atom) {
+		
 		if (atom.isDataFunction()) {
-			return atom.getVariables();
+			Set<Variable> variables = new LinkedHashSet<>();
+			TermUtils.addReferencedVariablesTo(variables, atom);
+			return variables;
 		}
-		if (atom.isBooleanFunction()) {
-			return new HashSet<Variable>();
+		else if (atom.isBooleanFunction()) {
+			return Collections.emptySet();
 		}
-		if (atom.isDataTypeFunction()) {
-			return new HashSet<Variable>();
+		else if (atom.isDataTypeFunction()) {
+			return Collections.emptySet();
 		}
 		/*
 		 * we have an alebra opertaor (join or left join) if its a join, we need

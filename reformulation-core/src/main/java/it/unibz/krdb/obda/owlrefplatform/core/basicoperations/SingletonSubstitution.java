@@ -21,8 +21,10 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  */
 
 import com.google.common.collect.ImmutableMap;
+
+import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.model.Variable;
 
 import java.util.Map;
 
@@ -31,10 +33,10 @@ import java.util.Map;
  */
 public class SingletonSubstitution implements Substitution {
 
-    private final VariableImpl variable;
+    private final Variable variable;
     private final Term term;
 
-    public SingletonSubstitution(VariableImpl var, Term term) {
+    public SingletonSubstitution(Variable var, Term term) {
         this.variable = var;
         this.term = term;
     }
@@ -43,12 +45,17 @@ public class SingletonSubstitution implements Substitution {
         return term;
     }
 
-    public VariableImpl getVariable() {
+    public Variable getVariable() {
         return variable;
     }
 
     @Override
-    public boolean compose(Term term1, Term term2) {
+    public boolean composeTerms(Term term1, Term term2) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean composeFunctions(Function term1, Function term2) {
         throw new UnsupportedOperationException();
     }
 
@@ -58,14 +65,14 @@ public class SingletonSubstitution implements Substitution {
     }
 
     @Override
-    public Term get(VariableImpl var) {
+    public Term get(Variable var) {
         if (var.equals(variable))
             return term;
         return null;
     }
 
     @Override
-    public Map<VariableImpl, Term> getMap() {
+    public Map<Variable, Term> getMap() {
         return ImmutableMap.of(variable, term);
     }
 
@@ -75,7 +82,7 @@ public class SingletonSubstitution implements Substitution {
     }
 
     @Override
-    public void put(VariableImpl var, Term term) {
+    public void put(Variable var, Term term) {
         throw new UnsupportedOperationException("Every SingletonSubstitution is immutable.");
     }
 

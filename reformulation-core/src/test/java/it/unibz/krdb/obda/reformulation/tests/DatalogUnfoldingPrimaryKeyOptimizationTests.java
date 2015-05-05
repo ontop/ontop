@@ -33,6 +33,7 @@ import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 
 import java.sql.Types;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -145,7 +146,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		body.add(fac.getFunction(fac.getDataPropertyPredicate("id"), fac.getVariable("m"), fac.getVariable("p")));
 		CQIE query = fac.getCQIE(head, body);
 
-		DatalogProgram input = fac.getDatalogProgram(query);
+		DatalogProgram input = fac.getDatalogProgram(Collections.singletonList(query));
 		DatalogProgram output = unfolder.unfold(input, "q");
 		System.out.println("input " + input);
 
@@ -174,7 +175,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		body.add(fac.getFunction(fac.getDataPropertyPredicate("lastname"), fac.getVariable("s2"), fac.getVariable("o")));
 		query = fac.getCQIE(head, body);
 
-		input = fac.getDatalogProgram(query);
+		input = fac.getDatalogProgram(Collections.singletonList(query));
 		output = unfolder.unfold(input, "q");
 		System.out.println("input " + input);
 

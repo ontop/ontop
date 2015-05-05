@@ -26,7 +26,6 @@ import it.unibz.krdb.obda.model.DatalogProgram;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
 
@@ -50,10 +49,10 @@ public class DatalogQueryServices {
 	// to be taken from it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder
 	
 	private static Function getFreshAtom(Function a, String suffix) {
-		List<Term> termscopy = new ArrayList<Term>(a.getArity());
+		List<Term> termscopy = new ArrayList<>(a.getArity());
 		
 		for (Term t : a.getTerms()) {
-			if ((t instanceof Variable) && !(t instanceof AnonymousVariable)) {
+			if (t instanceof Variable) {
 				Variable v = (Variable)t;
 				termscopy.add(fac.getVariable(v.getName() + suffix));
 			}
@@ -124,7 +123,7 @@ public class DatalogQueryServices {
 						// REDUCE
 						EQNormalizer.enforceEqualities(newquery);
 						//makeSingleOccurrencesAnonymous(q.getBody(), q.getHead().getTerms());
-						newquery = QueryAnonymizer.anonymize(newquery); // TODO: make it in place
+						// newquery = QueryAnonymizer.anonymize(newquery); // TODO: make it in place
 						CQCUtilities.removeRundantAtoms(newquery);
 						
 						queue.add(newquery);

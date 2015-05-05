@@ -26,8 +26,10 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
+
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -436,7 +438,10 @@ public class SparqlAlgebraToDatalogTranslator {
 		else 
 			filterAtom = (Function) getExpression(condition);
 		
-		List<Term> vars = getUnion(atomVars, filterAtom.getReferencedVariables());	
+		Set<Variable> filterVars = new HashSet<>();
+		TermUtils.addReferencedVariablesTo(filterVars, filterAtom);
+		
+		List<Term> vars = getUnion(atomVars, filterVars);	
 		CQIE rule = createRule(pr, newHeadName, vars, atom, filterAtom);
 		return rule.getHead();
 	}

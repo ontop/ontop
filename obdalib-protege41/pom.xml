@@ -10,6 +10,11 @@
 	<artifactId>ontop-protege4</artifactId>
 	<name>ontop-protege4</name>
 
+
+    <properties>
+        <protege.version>5.0.0-beta-16</protege.version>
+    </properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -141,13 +146,13 @@
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
 			<artifactId>org.protege.editor.core.application</artifactId>
-			<version>4.3.0</version>
+			<version>${protege.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
 			<artifactId>org.protege.editor.owl</artifactId>
-			<version>4.3.0</version>
+			<version>${protege.version}</version>
 			<scope>provided</scope>
 		</dependency>
 

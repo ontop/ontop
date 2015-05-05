@@ -36,6 +36,7 @@ import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.model.impl.TermUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -233,9 +234,9 @@ public class R2RMLManager {
 	 * @return
 	 */
 	private Function getHeadAtom(List<Function> body) {
-		Set<Variable> vars = new HashSet<Variable>();
+		Set<Variable> vars = new HashSet<>();
 		for (Function bodyAtom : body) {
-			 vars.addAll(bodyAtom.getReferencedVariables());
+			TermUtils.addReferencedVariablesTo(vars, bodyAtom);
 		}
 		int arity = vars.size();
 		List<Term> dvars = new ArrayList<Term>(vars);
@@ -290,7 +291,9 @@ public class R2RMLManager {
 				if (bodyPred.toString().equals(OBDAVocabulary.RDF_TYPE)) {
 					//create term triple(subjAtom, URI("...rdf_type"), objAtom)
 					// if object is a predicate
-					if (objectAtom.getReferencedVariables().isEmpty()) { 	
+					Set<Variable> vars = new HashSet<>();
+					TermUtils.addReferencedVariablesTo(vars, objectAtom);
+					if (vars.isEmpty()) { 	
 						Function funcObjectAtom = (Function) objectAtom;
 						Term term0 = funcObjectAtom.getTerm(0);
 						if (term0 instanceof Function) {

@@ -21,10 +21,8 @@ package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
  */
 
 import it.unibz.krdb.obda.model.*;
-import it.unibz.krdb.obda.model.impl.AnonymousVariable;
 import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
 import it.unibz.krdb.obda.ontology.*;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -325,20 +323,17 @@ public class MappingDataTypeRepair {
 			List<Term> terms = a.getTerms();
 			int i = 1; // position index
 			for (Term t : terms) {
-				if (t instanceof AnonymousVariable) {
-					i++; // increase the position index to evaluate the next
-							// variable
-				} else if (t instanceof VariableImpl) {
+				if (t instanceof Variable) {
+					Variable var = (Variable) t;
 					Object[] o = new Object[2];
 					o[0] = a; // atom
 					o[1] = i; // position index
-					List<Object[]> aux = termOccurenceIndex
-							.get(((VariableImpl) t).getName());
+					List<Object[]> aux = termOccurenceIndex.get(var.getName());
 					if (aux == null) {
-						aux = new LinkedList<Object[]>();
+						aux = new LinkedList<>();
 					}
 					aux.add(o);
-					termOccurenceIndex.put(((VariableImpl) t).getName(), aux);
+					termOccurenceIndex.put(var.getName(), aux);
 					i++; // increase the position index to evaluate the next
 							// variable
 				} else if (t instanceof FunctionalTermImpl) {

@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
+import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
 import it.unibz.krdb.obda.utils.QueryUtils;
 
@@ -173,32 +174,21 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	@Override
 	public DatalogProgram unfold(DatalogProgram inputquery, String targetPredicate) {
 
-		/*
-		 * Needed because the rewriter might generate query bodies like this
-		 * B(x,_), R(x,_), underscores represent unique anonymous variables.
-		 * However, the SQL generator needs them to be explicitly unique.
-		 * replacing B(x,newvar1), R(x,newvar2)
-		 */
-		
 		List<CQIE> workingSet = new LinkedList<>();
 		for (CQIE query : inputquery.getRules()) 
-			workingSet.add(QueryAnonymizer.deAnonymize(query));
+			workingSet.add(query.clone());
 				
 		for (CQIE query : workingSet)
 			EQNormalizer.enforceEqualities(query);
 
 		computePartialEvaluation(workingSet);	
 		
-		/**
-		 * We need to enforce equality again, because at this point it is 
-		 *  possible that there is still some EQ(...) in the Program resultdp
-		 * 
-		 */
+		// We need to enforce equality again, because at this point it is 
+		//  possible that there is still some EQ(...) 
 		for (CQIE query : workingSet)
 			EQNormalizer.enforceEqualities(query);
 
-		DatalogProgram result = termFactory.getDatalogProgram();
-		QueryUtils.copyQueryModifiers(inputquery, result);
+		DatalogProgram result = termFactory.getDatalogProgram(inputquery.getQueryModifiers());
 		result.appendRule(workingSet);
 
 		return result;
@@ -1327,8 +1317,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 		int argumentAtoms = 0;
 		List<Function> newbody = new LinkedList<>();
-		Set<Variable> variablesArg1 = Collections.emptySet();
-		Set<Variable> variablesArg2 = Collections.emptySet();
+		Set<Variable> variablesArg1 = new HashSet<>();
+		Set<Variable> variablesArg2 = new HashSet<>();
 
 		// Here we build the new LJ body where we remove the 2nd
 		// data atom
@@ -1338,13 +1328,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 				// we found the first argument of the LJ, we need
 				// the variables
 				if (argumentAtoms == 1) {
-					variablesArg1 = atom.getReferencedVariables();
+					TermUtils.addReferencedVariablesTo(variablesArg1, atom);
 					newbody.add(atom);
 				} 
 				else if (argumentAtoms == 2) {
 					// Here we keep the variables of the second LJ
 					// data argument
-					variablesArg2 = atom.getReferencedVariables();
+					TermUtils.addReferencedVariablesTo(variablesArg2, atom);
 
 					// and we remove the variables that are in both arguments
 					variablesArg2.removeAll(variablesArg1);
