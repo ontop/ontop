@@ -49,7 +49,7 @@ import static org.junit.Assert.assertTrue;
  * Class to test that quotes from table names are removed correctly.
  * We use the npd database.
  */
-public class NpdCheckerTest {
+public class QuotedAliasTableTest {
 
 	private OBDADataFactory fac;
 	private QuestOWLConnection conn;
@@ -108,17 +108,16 @@ public class NpdCheckerTest {
 
 
 	/**
-	 * Compare numbers of result given by the obda file and the r2rml file over an npd query 
-	 * 
+	 * Test OBDA table
 	 * @throws Exception
 	 */
 	@Test
-	public void testComparesNpdQuery() throws Exception {
+	public void test() throws Exception {
 		
 		// Now we are ready for querying obda
 		// npd query 1
 		int obdaResult = npdQuery(reasonerOBDA.getConnection());
-		// reasoner.dispose();
+		assertEquals(52668, obdaResult);
 
 
 
@@ -144,7 +143,7 @@ public class NpdCheckerTest {
 				n++;
 			}
 			log.debug("number of results of q1: " + n);
-			assertEquals(52668, n);
+
 
 		} catch (Exception e) {
 			throw e;
