@@ -318,7 +318,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 
 	@Override
 	public void visit(StringValue stringValue) {
-		unsupported =true;
+
 		
 	}
 
