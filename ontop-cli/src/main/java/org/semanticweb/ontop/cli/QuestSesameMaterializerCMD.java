@@ -53,6 +53,14 @@ class QuestSesameMaterializerCMD {
 	private static String format;
 	private static String outputFile;
 
+	/**
+	 * Necessary for materialize large RDF graphs without
+	 * storing all the SQL results of one big query in memory.
+	 *
+	 * TODO: add an option to disable it.
+	 */
+	private static boolean DO_STREAM_RESULTS = true;
+
 	public static void main(String[] args) {
 		// check argument correctness
 		if (!parseArgs(args)) {
@@ -111,7 +119,7 @@ class QuestSesameMaterializerCMD {
 			//OBDAModelSynchronizer.declarePredicates(ontology, model);
 
 			 //start materializer
-			SesameMaterializer materializer = new SesameMaterializer(model, onto);
+			SesameMaterializer materializer = new SesameMaterializer(model, onto, DO_STREAM_RESULTS);
 			SesameStatementIterator iterator = materializer.getIterator();
 			RDFHandler handler;
 

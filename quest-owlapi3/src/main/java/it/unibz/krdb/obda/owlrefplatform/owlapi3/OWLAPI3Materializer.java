@@ -37,26 +37,26 @@ public class OWLAPI3Materializer implements AutoCloseable{
 	private final Iterator<Assertion> assertions;
 	private final QuestMaterializer materializer;
 	
-	public OWLAPI3Materializer(OBDAModel model) throws Exception {
-		 this(model, null);
+	public OWLAPI3Materializer(OBDAModel model, boolean doStreamResults) throws Exception {
+		 this(model, null, doStreamResults);
 	}
 
 	
-	public OWLAPI3Materializer(OBDAModel model, Ontology onto) throws Exception {
-		 materializer = new QuestMaterializer(model, onto);
+	public OWLAPI3Materializer(OBDAModel model, Ontology onto, boolean doStreamResults) throws Exception {
+		 materializer = new QuestMaterializer(model, onto, doStreamResults);
 		 assertions = materializer.getAssertionIterator();
 	}
 
     /*
      * only materialize the predicates in  `predicates`
      */
-    public OWLAPI3Materializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates) throws Exception {
-        materializer = new QuestMaterializer(model, onto, predicates);
+    public OWLAPI3Materializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults) throws Exception {
+        materializer = new QuestMaterializer(model, onto, predicates, doStreamResults);
         assertions = materializer.getAssertionIterator();
     }
 
-    public OWLAPI3Materializer(OBDAModel obdaModel, Ontology onto, Predicate predicate)  throws Exception{
-        this(obdaModel, onto, ImmutableSet.of(predicate));
+    public OWLAPI3Materializer(OBDAModel obdaModel, Ontology onto, Predicate predicate, boolean doStreamResults)  throws Exception{
+        this(obdaModel, onto, ImmutableSet.of(predicate), doStreamResults);
     }
 
     public QuestOWLIndividualIterator getIterator() {

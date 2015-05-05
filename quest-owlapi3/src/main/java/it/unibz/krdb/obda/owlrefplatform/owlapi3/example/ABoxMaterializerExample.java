@@ -64,7 +64,8 @@ public class ABoxMaterializerExample {
 		 * Start materializing data from database to triples.
 		 */
 
-		OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel);
+		// TODO: try the streaming mode.
+		OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, false);
 		
 		long numberOfTriples = materializer.getTriplesCount();
 		System.out.println("Generated triples: " + numberOfTriples);
