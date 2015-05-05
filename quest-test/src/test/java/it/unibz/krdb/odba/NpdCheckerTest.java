@@ -42,10 +42,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Class to test that the r2rml file with the mappings give the same results of the corresponding obda file.
+ * Class to test that quotes from table names are removed correctly.
  * We use the npd database.
  */
 public class NpdCheckerTest {
@@ -59,7 +60,7 @@ public class NpdCheckerTest {
 	private Ontology onto;
 
 	final String owlfile = "src/test/resources/new/extended-npd-v2-ql_a_postgres.owl";
-    final String obdafile = "src/test/resources/new/extended-npd-v2-ql_a_postgres.obda";
+    final String obdafile = "src/test/resources/new/npd-v2.obda";
 
 
 	private QuestOWL reasonerOBDA;
@@ -132,12 +133,9 @@ public class NpdCheckerTest {
 	 * @return 
 	 */
 	private int npdQuery(QuestOWLConnection questOWLConnection) throws OWLException {
-		String query = "PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#> SELECT DISTINCT ?licenceURI WHERE { ?licenceURI a npdv:ProductionLicence ."
-				+ "[ ] a npdv:ProductionLicenceLicensee ; "
-				+ "npdv:dateLicenseeValidFrom ?date ;"
-				+ "npdv:licenseeInterest ?interest ;"
-				+ "npdv:licenseeForLicence ?licenceURI . "
-				+ "FILTER(?date > '1979-12-31T00:00:00')	}";
+		String query = "PREFIX npdv: <http://sws.ifi.uio.no/vocab/npd-v2#> SELECT DISTINCT ?x WHERE {"
+				+ "?x a npdv:CompanyReserve . "
+				+	" }";
 		QuestOWLStatement st = questOWLConnection.createStatement();
 		int n = 0;
 		try {
@@ -146,6 +144,7 @@ public class NpdCheckerTest {
 				n++;
 			}
 			log.debug("number of results of q1: " + n);
+			assertEquals(52668, n);
 
 		} catch (Exception e) {
 			throw e;

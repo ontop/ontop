@@ -1,0 +1,39 @@
+[PrefixDeclaration]
+owl:		http://www.w3.org/2002/07/owl#
+geos:		http://www.opengis.net/ont/geosparql#
+npdv:		http://sws.ifi.uio.no/vocab/npd-v2#
+ex:		http://example.org/ex#
+ptl:		http://sws.ifi.uio.no/vocab/npd-v2-ptl#
+xsd:		http://www.w3.org/2001/XMLSchema#
+npd:		http://sws.ifi.uio.no/data/npd-v2/
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+isc:		http://resource.geosciml.org/classifier/ics/ischart/
+nlx:		http://sws.ifi.uio.no/data/norlex/
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+void:		http://rdfs.org/ns/void#
+sql:		http://sws.ifi.uio.no/vocab/sql#
+:		http://sws.ifi.uio.no/vocab/npd-v2#
+dc:		http://purl.org/dc/elements/1.1/
+diskos:		http://sws.ifi.uio.no/data/diskos/
+diskosv:		http://sws.ifi.uio.no/vocab/diskos#
+nlxv:		http://sws.ifi.uio.no/vocab/norlex#
+
+[SourceDeclaration]
+sourceUri	x
+connectionUrl	jdbc:postgresql://obdalin3.inf.unibz.it/npd_no_spatial
+username	postgres
+password	postgres
+driverClass	org.postgresql.Driver
+
+[MappingDeclaration] @collection [[
+
+mappingId	MAPID-d8748d92351e47978f9367d0b38e4106
+target		npd:company/{t22_1}/reserve/{t15_1} a :CompanyReserve .
+source		SELECT
+			   "QcompanyTMP1"."cmpNpdidCompany" AS "t22_1",
+			   "Qcompany_reservesTMP0"."fldNpdidField" AS "t15_1"
+			 FROM
+			company_reserves "Qcompany_reservesTMP0",
+			company "QcompanyTMP1"
+
+]]
