@@ -35,10 +35,6 @@
 
 	<developers>
 		<developer>
-			<id>marianormuro</id>
-			<name>Mariano Rodriguez-Muro</name>
-		</developer>
-		<developer>
 			<id>ghxiao</id>
 			<name>Guohui Xiao</name>
 		</developer>
@@ -47,21 +43,17 @@
 			<name>Martin Rezk</name>
 		</developer>
 		<developer>
-			<id>johardi</id>
-			<name>Josef Hardi</name>
-		</developer>
-		<developer>
-			<id>tibagosi</id>
-			<name>Timea Bagosi</name>
-		</developer>
-		<developer>
-			<id>mislusnys</id>
-			<name>Mindaugas Slusnys</name>
-		</developer>
-		<developer>
 			<id>skomlaebri</id>
 			<name>Sarah Komla-Ebri</name>
 		</developer>
+        <developer>
+            <id>bcogrel</id>
+            <name>Benjamin Cogrel</name>
+        </developer>
+        <developer>
+            <id>elemguzel</id>
+            <name>Elem Güzel</name>
+        </developer>
 	</developers>
 
 	<dependencies>
@@ -121,6 +113,7 @@
 		<!-- for org.codehaus.mojo:license-maven-plugin -->
 		<license.licenseName>apache_v2</license.licenseName>
 		<license.roots>src/main/java,src/test/java</license.roots>
+        <seasame.version>2.7.10</seasame.version>
 	</properties>
 
 
