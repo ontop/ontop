@@ -51,6 +51,7 @@ public class OntopMaterializerCMD {
 	private static String outputFile;
     private static boolean disableReasoning = false;
     private static boolean separate = false;
+
     /**
      * Necessary for materialize large RDF graphs without
      * storing all the SQL results of one big query in memory.
@@ -74,8 +75,6 @@ public class OntopMaterializerCMD {
 	}
 
     private static void runWithSeparateFiles() {
-
-
         if (owlFile == null) {
             throw new NullPointerException("You have to specify an ontology file!");
         }

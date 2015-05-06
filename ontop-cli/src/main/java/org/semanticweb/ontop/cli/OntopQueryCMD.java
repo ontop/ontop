@@ -1,4 +1,4 @@
-package it.unibz.krdb.obda.owlrefplatform.owlapi3;
+package org.semanticweb.ontop.cli;
 
 /*
  * #%L
@@ -35,49 +35,45 @@ import java.io.FileReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
-public class QuestOWLCMD {
+public class OntopQueryCMD {
 
-	private static QuestOWL reasoner;
+    private static String owlFile;
+    private static String obdaFile;
+    private static String format;
+    private static String outputFile;
+    private static String sparqlFile;
+
+    private static QuestOWL reasoner;
 	private static QuestOWLConnection conn;
 	private static QuestOWLStatement st;
 
-	public static void main(String args[]) {
 
-		if (args.length != 3 && args.length != 4) {
-			System.out.println("Usage");
-			System.out.println(" QuestOWLCMD owlfile obdafile queryile [outputfile]");
-			System.out.println("");
-			System.out.println(" owlfile    The full path to the OWL file");
-			System.out.println(" obdafile   The full path to the OBDA file");
-			System.out.println(" queryfile  The full path to the file with the SPARQL query");
-			System.out.println(" outputfile [OPTIONAL] The full path to the file with the SPARQL query");
-			System.out.println("");
-			return;
-		}
+    public static void main(String args[]) {
 
-		String owlfile = args[0].trim();
-		String obdafile = args[1].trim();
-		String queryfie = args[2].trim();
-		String outputfile = null;
-
-		if (args.length == 4) {
-			outputfile = args[3].trim();
-		}
+        if (!parseArgs(args)) {
+            printUsage();
+            System.exit(1);
+        }
 
 		try {
-			initQuest(owlfile, obdafile);
+			initQuest(owlFile, obdaFile);
 
 			/*
 			 * Reading query file:
 			 */
 			StringBuilder query = new StringBuilder();
-			BufferedReader reader = new BufferedReader(new FileReader(queryfie));
+			BufferedReader reader = new BufferedReader(new FileReader(sparqlFile));
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				query.append(line + "\n");
@@ -86,10 +82,10 @@ public class QuestOWLCMD {
 			QuestOWLResultSet result = executeQuery(query.toString());
 
 			OutputStream out = null;
-			if (outputfile == null) {
+			if (outputFile == null) {
 				out = System.out;
 			} else {
-				out = new FileOutputStream(new File(outputfile));
+				out = new FileOutputStream(new File(outputFile));
 			}
 			printResult(out, result);
 
@@ -128,7 +124,7 @@ public class QuestOWLCMD {
 			String value = result.getSignature().get(c);
 			wr.append(value);
 			if (c + 1 < columns)
-				wr.append("\t");
+				wr.append(",");
 		}
 		wr.newLine();
 		/*
@@ -186,7 +182,7 @@ public class QuestOWLCMD {
 		QuestOWLFactory factory = new QuestOWLFactory();
 		factory.setOBDAController(obdaModel);
 		factory.setPreferenceHolder(p);
-		reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		/*
 		 * Now we are ready to query. Querying is done as with JDBC. First we
@@ -197,4 +193,62 @@ public class QuestOWLCMD {
 
 		st = conn.createStatement();
 	}
+
+    private static void printUsage() {
+        System.out.println("Usage");
+        System.out.println(" ontop-query -obda mapping.obda [-onto ontology.owl] [-out outputFile] -query sparql.rq");
+        System.out.println("");
+        System.out.println(" -obda mapping.obda    The full path to the OBDA file");
+        System.out.println(" -onto ontology.owl    [OPTIONAL] The full path to the OWL file");
+        System.out.println(" -out outputFile       [OPTIONAL] The full path to the output file. If not specified, the output will be stdout");
+        System.out.println(" -sparql sparql.rq     The full path to the SPARQL file");
+        System.out.println("");
+    }
+
+
+
+    private static boolean parseArgs(String[] args) {
+        int i = 0;
+        while (i < args.length) {
+            switch (args[i]) {
+                case "-obda":
+                case "--obda":
+                    obdaFile = args[i + 1];
+                    i += 2;
+                    break;
+                case "-onto":
+                case "--onto":
+                    owlFile = args[i + 1];
+                    i += 2;
+                    break;
+                case "-format":
+                case "--format":
+                    format = args[i + 1];
+                    i += 2;
+                    break;
+                case "-out":
+                case "--out":
+                    outputFile = args[i + 1];
+                    i += 2;
+                    break;
+                case "-q":
+                case "--query":
+                    sparqlFile = args[i + 1];
+                    i += 2;
+                    break;
+                default:
+                    System.err.println("Unknown option " + args[i]);
+                    System.err.println();
+                    return false;
+            }
+        }
+
+        if (obdaFile == null) {
+            System.err.println("Please specify the ontology file\n");
+            return false;
+        }
+
+        return true;
+    }
+
 }
