@@ -121,7 +121,9 @@ public class AliasMapVisitor implements SelectVisitor, SelectItemVisitor, FromIt
 			e.accept(this);
 			//remove alias quotes if present
 			if(ParsedSQLQuery.pQuotes.matcher(alias).matches()){
-				aliasMap.put(e.toString().toLowerCase(), alias.substring(1, alias.length()-1));
+				String unquotedAlias =  alias.substring(1, alias.length() - 1);
+				aliasMap.put(e.toString().toLowerCase(), unquotedAlias );
+				selectExpr.getAlias().setName(unquotedAlias);
 			}
 			else
 				aliasMap.put(e.toString().toLowerCase(), alias);
