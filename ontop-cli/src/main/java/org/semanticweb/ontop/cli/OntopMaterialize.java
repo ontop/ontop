@@ -20,6 +20,9 @@ package org.semanticweb.ontop.cli;
  * #L%
  */
 
+import io.airlift.airline.Command;
+import io.airlift.airline.Option;
+import io.airlift.airline.OptionType;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
@@ -42,15 +45,32 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 
-public class OntopMaterializerCMD {
+@Command(name = "materialize", description = "Materialize the RDF graph exposed by the mapping and the OWL ontology")
+public class OntopMaterialize extends OntopCommand {
 
     private static final int TRIPLE_LIMIT_PER_FILE = 500000;
-    private static String owlFile;
-	private static String obdaFile;
-	private static String format;
-	private static String outputFile;
-    private static boolean disableReasoning = false;
-    private static boolean separate = false;
+
+    @Option(type = OptionType.COMMAND, name = {"-t", "--ontology"}, title = "ontologyFile", description = "OWL ontology file")
+    public String owlFile;
+
+    @Option(type = OptionType.COMMAND, name = {"-m", "--mapping"}, title = "mappingFile",
+            description = "Mapping file in R2RML (.ttl) or in Ontop native format (.obda)", required = true)
+    public String obdaFile;
+
+    @Option(type = OptionType.COMMAND, name = {"-f", "--format"}, title = "outputFormat",
+            allowedValues = {"rdfxml", "owlxml", "turtle"},
+            description = "The format of the materialized ontology. Options: rdfxml, owlxml, turtle. Default: rdfxml")
+    public String format;
+
+    @Option(type = OptionType.COMMAND, name = {"-o", "--output"}, title = "output", description = "outputFile or directory")
+    public String outputFile;
+
+    @Option(type = OptionType.COMMAND, name = {"--disable-reasoning"}, description = "disable OWL reasoning. Default: false")
+    public boolean disableReasoning = false;
+
+    @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "separate files",
+            description = "generating separate files for different classes/properties. Default: false.")
+    public boolean separate = false;
 
     /**
      * Necessary for materialize large RDF graphs without
@@ -62,19 +82,37 @@ public class OntopMaterializerCMD {
 
 	public static void main(String... args) {
 
-		if (!parseArgs(args)) {
-			printUsage();
-			System.exit(1);
-		}
-
-        if (!separate){
-            run();
-        } else {
-            runWithSeparateFiles();
-        }
+//		if (!parseArgs(args)) {
+//			printUsage();
+//			System.exit(1);
+//		}
+//
+//        if (!separate){
+//            run();
+//        } else {
+//            runWithSeparateFiles();
+//        }
 	}
 
-    private static void runWithSeparateFiles() {
+    public OntopMaterialize(String owlFile, String obdaFile, String format, String outputFile, boolean disableReasoning, boolean separate) {
+        this.owlFile = owlFile;
+        this.obdaFile = obdaFile;
+        this.format = format;
+        this.outputFile = outputFile;
+        this.disableReasoning = disableReasoning;
+        this.separate = separate;
+    }
+
+    @Override
+    public void run(){
+        if(separate) {
+            runWithSeparateFiles();
+        } else {
+            runWithSingleFile();
+        }
+    }
+
+    private void runWithSeparateFiles() {
         if (owlFile == null) {
             throw new NullPointerException("You have to specify an ontology file!");
         }
@@ -119,7 +157,7 @@ public class OntopMaterializerCMD {
             int i = 1;
             for (Predicate predicate : predicates) {
                 System.err.println(String.format("Materializing %s (%d/%d)", predicate, i, numPredicates));
-                serializePredicate(ontology, inputOntology, obdaModel, predicate);
+                serializePredicate(ontology, inputOntology, obdaModel, predicate, outputFile, format);
                 i++;
             }
 
@@ -128,14 +166,13 @@ public class OntopMaterializerCMD {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     /**
      * Serializes the A-box corresponding to a predicate into one or multiple file.
      */
     private static void serializePredicate(OWLOntology ontology, Ontology inputOntology, OBDAModel obdaModel,
-                                           Predicate predicate) throws Exception {
+                                           Predicate predicate, String outputFile, String format) throws Exception {
         final long startTime = System.currentTimeMillis();
 
         OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, inputOntology, predicate, DO_STREAM_RESULTS);
@@ -150,7 +187,7 @@ public class OntopMaterializerCMD {
         String filePrefix = Paths.get(outputDir, predicate.getName().replaceAll("[^a-zA-Z0-9]", "_") + "_").toString();
 
         while(iterator.hasNext()) {
-            tripleCount += serializeTripleBatch(ontology, iterator, filePrefix, predicate.getName(), fileCount);
+            tripleCount += serializeTripleBatch(ontology, iterator, filePrefix, predicate.getName(), fileCount, format);
             fileCount++;
         }
 
@@ -167,7 +204,8 @@ public class OntopMaterializerCMD {
      * Upper bound: TRIPLE_LIMIT_PER_FILE.
      *
      */
-    private static int serializeTripleBatch(OWLOntology ontology, QuestOWLIndividualAxiomIterator iterator, String filePrefix, String predicateName, int fileCount) throws Exception {
+    private static int serializeTripleBatch(OWLOntology ontology, QuestOWLIndividualAxiomIterator iterator,
+                                            String filePrefix, String predicateName, int fileCount, String format) throws Exception {
         String fileName = filePrefix + fileCount + ".owl";
 
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -194,7 +232,10 @@ public class OntopMaterializerCMD {
         return tripleCount;
     }
 
-    private static void run() {
+
+
+
+    public void runWithSingleFile() {
         BufferedOutputStream output = null;
         BufferedWriter writer = null;
 
@@ -311,56 +352,56 @@ public class OntopMaterializerCMD {
 
 
 
-    private static boolean parseArgs(String[] args) {
-        int i = 0;
-        while (i < args.length) {
-            switch (args[i]) {
-                case "-obda":
-                case "--obda":
-                    obdaFile = args[i + 1];
-                    i += 2;
-                    break;
-                case "-onto":
-                case "--onto":
-                    owlFile = args[i + 1];
-                    i += 2;
-                    break;
-                case "-format":
-                case "--format":
-                    format = args[i + 1];
-                    i += 2;
-                    break;
-                case "-out":
-                case "--out":
-                    outputFile = args[i + 1];
-                    i += 2;
-                    break;
-                case "--separate-files":
-                    separate = true;
-                    i += 1;
-                    break;
-                case "--enable-reasoning":
-                    disableReasoning = false;
-                    i += 1;
-                    break;
-                case "--disable-reasoning":
-                    disableReasoning = true;
-                    i += 1;
-                    break;
-                default:
-                    System.err.println("Unknown option " + args[i]);
-                    System.err.println();
-                    return false;
-            }
-        }
-
-        if (obdaFile == null) {
-            System.err.println("Please specify the ontology file\n");
-            return false;
-        }
-
-        return true;
-	}
+//    private static boolean parseArgs(String[] args) {
+//        int i = 0;
+//        while (i < args.length) {
+//            switch (args[i]) {
+//                case "-obda":
+//                case "--obda":
+//                    obdaFile = args[i + 1];
+//                    i += 2;
+//                    break;
+//                case "-onto":
+//                case "--onto":
+//                    owlFile = args[i + 1];
+//                    i += 2;
+//                    break;
+//                case "-format":
+//                case "--format":
+//                    format = args[i + 1];
+//                    i += 2;
+//                    break;
+//                case "-out":
+//                case "--out":
+//                    outputFile = args[i + 1];
+//                    i += 2;
+//                    break;
+//                case "--separate-files":
+//                    separate = true;
+//                    i += 1;
+//                    break;
+//                case "--enable-reasoning":
+//                    disableReasoning = false;
+//                    i += 1;
+//                    break;
+//                case "--disable-reasoning":
+//                    disableReasoning = true;
+//                    i += 1;
+//                    break;
+//                default:
+//                    System.err.println("Unknown option " + args[i]);
+//                    System.err.println();
+//                    return false;
+//            }
+//        }
+//
+//        if (obdaFile == null) {
+//            System.err.println("Please specify the ontology file\n");
+//            return false;
+//        }
+//
+//        return true;
+//	}
 
     private static OWLOntology extractDeclarations(OWLOntologyManager manager, OWLOntology ontology) throws OWLOntologyCreationException {
 //        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
