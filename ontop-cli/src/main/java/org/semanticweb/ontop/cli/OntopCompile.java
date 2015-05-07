@@ -20,6 +20,14 @@ package org.semanticweb.ontop.cli;
  * #L%
  */
 
-public class OntopTMappingExporterCMD {
-    //TODO
+import io.airlift.airline.Command;
+
+@Command(name = "compile",
+        description = "compile the ontology axioms to the mappings")
+public class OntopCompile implements OntopCommand {
+
+    @Override
+    public void run() {
+
+    }
 }
