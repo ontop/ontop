@@ -34,7 +34,7 @@ import java.io.OutputStream;
 /**
  * Command line tool for making R2RML file pretty using Jena
  */
-public class R2RMLPrettify {
+public class OntopR2RMLPrettify {
 
     public static void main(String[] args) throws FileNotFoundException {
 
