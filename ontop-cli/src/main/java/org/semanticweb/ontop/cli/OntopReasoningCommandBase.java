@@ -34,6 +34,7 @@ public abstract class OntopReasoningCommandBase implements OntopCommand{
     @Option(type = OptionType.COMMAND, name = {"--disable-reasoning"},
             description = "disable OWL reasoning. Default: false")
     public boolean disableReasoning = false;
+
     @Option(type = OptionType.COMMAND, name = {"-t", "--ontology"}, title = "ontologyFile",
             description = "OWL ontology file")
     protected String owlFile;
@@ -58,7 +59,7 @@ public abstract class OntopReasoningCommandBase implements OntopCommand{
             description = "jdbcUrl for the jdbc connection  (only for R2RML mapping)")
     protected String jdbcUrl;
 
-    @Option(type = OptionType.COMMAND, name = {"-c", "--driver-class"}, title = "jdbcUrl",
+    @Option(type = OptionType.COMMAND, name = {"-d", "--driver-class"}, title = "jdbcUrl",
             description = "class name of the jdbc Driver (only for R2RML mapping)")
     protected String jdbcDriverClass;
 

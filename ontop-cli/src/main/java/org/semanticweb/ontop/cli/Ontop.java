@@ -14,7 +14,7 @@ public class Ontop {
         CliBuilder<OntopCommand> builder = Cli.<OntopCommand>builder("ontop")
                 .withDescription("Ontop system for Ontology based Data Access")
                 //.withDefaultCommand(Help.class)
-                .withCommands(OntopHelp.class, OntopMaterialize.class, OntopQuery.class);
+                .withCommands(OntopHelp.class, OntopQuery.class, OntopMaterialize.class, OntopBootstrap.class);
 
 
         Cli<OntopCommand> ontopParser = builder.build();
