@@ -20,11 +20,15 @@ package org.semanticweb.ontop.cli;
  * #L%
  */
 
+import com.google.common.base.Preconditions;
 import io.airlift.airline.Command;
 import io.airlift.airline.Option;
 import io.airlift.airline.OptionType;
+import it.unibz.krdb.obda.exception.InvalidMappingException;
+import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
 import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
+import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -32,6 +36,7 @@ import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualAxiomIterator;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
+import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
@@ -40,37 +45,62 @@ import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.*;
+import java.net.URI;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 
-@Command(name = "materialize", description = "Materialize the RDF graph exposed by the mapping and the OWL ontology")
-public class OntopMaterialize extends OntopCommand {
+@Command(name = "materialize",
+        description = "Materialize the RDF graph exposed by the mapping and the OWL ontology")
+public class OntopMaterialize implements OntopCommand {
 
     private static final int TRIPLE_LIMIT_PER_FILE = 500000;
 
-    @Option(type = OptionType.COMMAND, name = {"-t", "--ontology"}, title = "ontologyFile", description = "OWL ontology file")
+    @Option(type = OptionType.COMMAND, name = {"-t", "--ontology"}, title = "ontologyFile",
+            description = "OWL ontology file")
     public String owlFile;
 
     @Option(type = OptionType.COMMAND, name = {"-m", "--mapping"}, title = "mappingFile",
             description = "Mapping file in R2RML (.ttl) or in Ontop native format (.obda)", required = true)
-    public String obdaFile;
+    public String mappingFile;
 
     @Option(type = OptionType.COMMAND, name = {"-f", "--format"}, title = "outputFormat",
             allowedValues = {"rdfxml", "owlxml", "turtle"},
-            description = "The format of the materialized ontology. Options: rdfxml, owlxml, turtle. Default: rdfxml")
+            description = "The format of the materialized ontology. " +
+                    //" Options: rdfxml, owlxml, turtle. " +
+                    "Default: rdfxml")
     public String format;
 
-    @Option(type = OptionType.COMMAND, name = {"-o", "--output"}, title = "output", description = "outputFile or directory")
+    @Option(type = OptionType.COMMAND, name = {"-o", "--output"},
+            title = "output", description = "output file (default) or directory (for --separate-files")
     public String outputFile;
 
-    @Option(type = OptionType.COMMAND, name = {"--disable-reasoning"}, description = "disable OWL reasoning. Default: false")
+    @Option(type = OptionType.COMMAND, name = {"--disable-reasoning"},
+            description = "disable OWL reasoning. Default: false")
     public boolean disableReasoning = false;
 
-    @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "separate files",
-            description = "generating separate files for different classes/properties. Default: false.")
+    @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",
+            description = "generating separate files for different classes/properties. This is useful for" +
+                    " materializing large OBDA setting. Default: false.")
     public boolean separate = false;
+
+    @Option(type = OptionType.COMMAND, name = {"-u", "--username"}, title = "jdbcUserName",
+            description = "user name for the jdbc connection (only for R2RML mapping)")
+    public String jdbcUserName;
+
+    @Option(type = OptionType.COMMAND, name = {"-p", "--password"}, title = "jdbcPassword",
+            description = "password for the jdbc connection  (only for R2RML mapping)")
+    public String jdbcPassword;
+
+    @Option(type = OptionType.COMMAND, name = {"-l", "--url"}, title = "jdbcUrl",
+            description = "jdbcUrl for the jdbc connection  (only for R2RML mapping)")
+    public String jdbcUrl;
+
+    @Option(type = OptionType.COMMAND, name = {"-c", "--driver-class"}, title = "jdbcUrl",
+            description = "class name of the jdbc Driver (only for R2RML mapping)")
+    public String jdbcDriverClass;
+
 
     /**
      * Necessary for materialize large RDF graphs without
@@ -82,26 +112,9 @@ public class OntopMaterialize extends OntopCommand {
 
 	public static void main(String... args) {
 
-//		if (!parseArgs(args)) {
-//			printUsage();
-//			System.exit(1);
-//		}
-//
-//        if (!separate){
-//            run();
-//        } else {
-//            runWithSeparateFiles();
-//        }
 	}
 
-    public OntopMaterialize(String owlFile, String obdaFile, String format, String outputFile, boolean disableReasoning, boolean separate) {
-        this.owlFile = owlFile;
-        this.obdaFile = obdaFile;
-        this.format = format;
-        this.outputFile = outputFile;
-        this.disableReasoning = disableReasoning;
-        this.separate = separate;
-    }
+    public OntopMaterialize(){}
 
     @Override
     public void run(){
@@ -145,12 +158,13 @@ public class OntopMaterialize extends OntopCommand {
                 predicates.add(predicate);
             }
 
+
+            OBDAModel obdaModel = loadMappingFile(mappingFile);
+
             Ontology inputOntology = OWLAPI3TranslatorUtility.translate(ontology);
-            OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-            OBDAModel obdaModel = fac.getOBDAModel();
+
             obdaModel.declareAll(inputOntology.getVocabulary());
-            ModelIOManager ioManager = new ModelIOManager(obdaModel);
-            ioManager.load(obdaFile);
+
 
             int numPredicates = predicates.size();
 
@@ -233,8 +247,6 @@ public class OntopMaterialize extends OntopCommand {
     }
 
 
-
-
     public void runWithSingleFile() {
         BufferedOutputStream output = null;
         BufferedWriter writer = null;
@@ -250,10 +262,12 @@ public class OntopMaterialize extends OntopCommand {
             writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
 
 
-            OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
-            OBDAModel obdaModel = fac.getOBDAModel();
-            ModelIOManager ioManager = new ModelIOManager(obdaModel);
-            ioManager.load(obdaFile);
+//            OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+//            OBDAModel obdaModel = fac.getOBDAModel();
+//            ModelIOManager ioManager = new ModelIOManager(obdaModel);
+//            ioManager.load(mappingFile);
+
+            OBDAModel obdaModel = loadMappingFile(mappingFile);
 
             OWLOntology ontology = null;
             OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -293,8 +307,8 @@ public class OntopMaterialize extends OntopCommand {
 
             manager.saveOntology(ontology, ontologyFormat, new WriterDocumentTarget(writer));
 
-            System.out.println("NR of TRIPLES: " + materializer.getTriplesCount());
-            System.out.println("VOCABULARY SIZE (NR of QUERIES): " + materializer.getVocabularySize());
+            System.err.println("NR of TRIPLES: " + materializer.getTriplesCount());
+            System.err.println("VOCABULARY SIZE (NR of QUERIES): " + materializer.getVocabularySize());
 
             materializer.disconnect();
             if (outputFile!=null)
@@ -334,79 +348,45 @@ public class OntopMaterialize extends OntopCommand {
 		return ontoFormat;
 	}
 
-	private static void printUsage() {
-		System.out.println("Usage");
-		System.out.println(" ontop-materialize -obda mapping.obda [-onto ontology.owl] [-format format] [-out outputFile] [--enable-reasoning | --disable-reasoning]");
-		System.out.println("");
-		System.out.println(" -obda mapping.obda    The full path to the OBDA file");
-		System.out.println(" -onto ontology.owl    [OPTIONAL] The full path to the OWL file");
-		System.out.println(" -format format        [OPTIONAL] The format of the materialized ontology: ");
-		System.out.println("                          Options: rdfxml, owlxml, turtle. Default: rdfxml");
-		System.out.println(" -out outputFile       [OPTIONAL] The full path to the output file. If not specified, the output will be stdout");
-		System.out.println(" --enable-reasoning    [OPTIONAL] enables OWL reasoning (default)");
-		System.out.println(" --disable-reasoning   [OPTIONAL] disables  OWL reasoning ");
-        System.out.println(" --separate-files      [OPTIONAL] generating separate files for different classes/properties. ");
-        System.out.println("                          In this case, `-out` will be used as the output directory");
-		System.out.println("");
-	}
+    private OBDAModel loadMappingFile(String mappingFile) throws InvalidPredicateDeclarationException, IOException, InvalidMappingException {
+        OBDAModel obdaModel;
+        if(mappingFile.endsWith(".obda")){
+            obdaModel = loadOBDA(mappingFile);
+        } else {
+            obdaModel = loadR2RML(mappingFile, jdbcUrl, jdbcUserName, jdbcPassword, jdbcDriverClass);
+        }
+        return obdaModel;
+    }
 
+    private OBDAModel loadOBDA(String obdaFile) throws InvalidMappingException, IOException, InvalidPredicateDeclarationException {
+        OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+        OBDAModel obdaModel = fac.getOBDAModel();
+        ModelIOManager ioManager = new ModelIOManager(obdaModel);
+        ioManager.load(obdaFile);
+        return obdaModel;
+    }
 
+    private OBDAModel loadR2RML(String r2rmlFile, String jdbcUrl, String username, String password, String driverClass) {
 
-//    private static boolean parseArgs(String[] args) {
-//        int i = 0;
-//        while (i < args.length) {
-//            switch (args[i]) {
-//                case "-obda":
-//                case "--obda":
-//                    obdaFile = args[i + 1];
-//                    i += 2;
-//                    break;
-//                case "-onto":
-//                case "--onto":
-//                    owlFile = args[i + 1];
-//                    i += 2;
-//                    break;
-//                case "-format":
-//                case "--format":
-//                    format = args[i + 1];
-//                    i += 2;
-//                    break;
-//                case "-out":
-//                case "--out":
-//                    outputFile = args[i + 1];
-//                    i += 2;
-//                    break;
-//                case "--separate-files":
-//                    separate = true;
-//                    i += 1;
-//                    break;
-//                case "--enable-reasoning":
-//                    disableReasoning = false;
-//                    i += 1;
-//                    break;
-//                case "--disable-reasoning":
-//                    disableReasoning = true;
-//                    i += 1;
-//                    break;
-//                default:
-//                    System.err.println("Unknown option " + args[i]);
-//                    System.err.println();
-//                    return false;
-//            }
-//        }
-//
-//        if (obdaFile == null) {
-//            System.err.println("Please specify the ontology file\n");
-//            return false;
-//        }
-//
-//        return true;
-//	}
+        Preconditions.checkNotNull(jdbcUrl, "jdbcUrl is null");
+        Preconditions.checkNotNull(password, "password is null");
+        Preconditions.checkNotNull(username, "username is null");
+        Preconditions.checkNotNull(driverClass, "driverClass is null");
+
+        OBDADataFactory f = OBDADataFactoryImpl.getInstance();
+
+        URI obdaURI = new File(r2rmlFile).toURI();
+
+        String sourceUrl = obdaURI.toString();
+        OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcUrl,
+                username, password, driverClass);
+
+        R2RMLReader reader = new R2RMLReader(r2rmlFile);
+
+        return reader.readModel(dataSource);
+    }
 
     private static OWLOntology extractDeclarations(OWLOntologyManager manager, OWLOntology ontology) throws OWLOntologyCreationException {
-//        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-//        OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlFile));
-
 
         IRI ontologyIRI = ontology.getOntologyID().getOntologyIRI();
         System.err.println("Ontology " + ontologyIRI);

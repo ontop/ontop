@@ -38,12 +38,17 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!--
         <dependency>
             <groupId>io.airlift</groupId>
             <artifactId>airline</artifactId>
         </dependency>
-
-
+-->
+        <dependency>
+            <groupId>com.github.rvesse</groupId>
+            <artifactId>airline</artifactId>
+            <version>0.9.1</version>
+        </dependency>
 
         <dependency>
             <groupId>mysql</groupId>

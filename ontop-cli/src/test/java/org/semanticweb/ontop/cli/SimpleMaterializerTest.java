@@ -109,8 +109,8 @@ public class SimpleMaterializerTest {
         String outFile = "src/test/resources/test/out.owl";
         String ontoFile = "src/test/resources/test/simplemapping.owl";
         String mappingFile = "src/test/resources/test/simplemapping.obda";
-        OntopMaterialize.main("-obda", mappingFile, "-onto", ontoFile,
-                "--out", outFile, "--enable-reasoning");
+        Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile,
+                "-o", outFile);
         assertEquals(5, numOfClassAssertions(outFile));
         assertEquals(0, numOfObjectPropertyAssertions(outFile));
     }
@@ -120,8 +120,8 @@ public class SimpleMaterializerTest {
         String outFile = "src/test/resources/test/out.owl";
         String ontoFile = "src/test/resources/test/simplemapping.owl";
         String mappingFile = "src/test/resources/test/simplemapping.obda";
-        OntopMaterialize.main("-obda", mappingFile, "-onto", ontoFile,
-                "--out", outFile, "--disable-reasoning");
+        Ontop.main("materialize", "-m", mappingFile, "-t", ontoFile,
+                "-o", outFile, "--disable-reasoning");
         assertEquals(3, numOfClassAssertions(outFile));
         assertEquals(0, numOfObjectPropertyAssertions(outFile));
     }
