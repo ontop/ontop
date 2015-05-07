@@ -29,21 +29,12 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public abstract class AbstractDbMetadataInfoTest extends TestCase {
 	
 	private DBMetadata metadata;
 	
-	private static Logger log = LoggerFactory.getLogger(AbstractDbMetadataInfoTest.class);
-	
 	@Override
 	public void setUp() {
-		try {
-			Class.forName(getDriverName());
-		} 
-		catch (ClassNotFoundException e) { /* NO-OP */ }
 		
 		try {
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());

@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 
 import java.util.List;
+import java.util.Set;
 
 public interface SQLDialectAdapter {
 
@@ -64,4 +65,21 @@ public interface SQLDialectAdapter {
 	public String sqlCast(String value, int type);
 	
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode);
+	
+	public String getDummyTable();
+	
+
+	public String getSQLLexicalFormString(String constant);
+	
+	public String getSQLLexicalFormBoolean(boolean value);
+	
+	public String getSQLLexicalFormDatetime(String value);
+
+	public String getSQLLexicalFormDatetimeStamp(String v);
+
+
+	/**
+	 * Allows the SQL dialect adapter to put restrict on the name (e.g. name length).
+	 */
+	public String nameTopVariable(String signatureVariable, String proposedSuffix, Set<String> sqlVariableNames);
 }

@@ -29,16 +29,16 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
 import it.unibz.krdb.obda.model.OBDASQLQuery;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.URITemplatePredicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.parser.SQLQueryTranslator;
+import it.unibz.krdb.obda.parser.SQLQueryParser;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import it.unibz.krdb.sql.api.ProjectionJSQL;
 import it.unibz.krdb.sql.api.SelectionJSQL;
-import it.unibz.krdb.sql.api.VisitedQuery;
 
 import java.net.URI;
 import java.sql.Connection;
@@ -67,22 +67,21 @@ import org.slf4j.LoggerFactory;
  */
 public class MetaMappingExpander {
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
-	private Connection connection;
-	private SQLQueryTranslator translator;
-	private List<OBDAMappingAxiom> expandedMappings;
-	private OBDADataFactory dfac;
+	private final Connection connection;
+	private final SQLQueryParser translator;
+	private final List<OBDAMappingAxiom> expandedMappings;
+	private final OBDADataFactory dfac;
 
 	/**
-	 * TODO
+	 *
 	 * 
-	 * @param connection
-	 * @param metadata
+	 * @param connection a JDBC connection
 	 */
 	public MetaMappingExpander(Connection connection) {
 		this.connection = connection;
-		translator = new SQLQueryTranslator();
+		translator = new SQLQueryParser();
 		expandedMappings = new ArrayList<OBDAMappingAxiom>();
 		dfac = OBDADataFactoryImpl.getInstance();
 	}
@@ -94,8 +93,10 @@ public class MetaMappingExpander {
 	 * 		a list of mappings, which may include meta mappings
 	 * @return
 	 * 		expanded normal mappings
+	 * @throws SQLException 
+	 * @throws JSQLParserException 
 	 */
-	private List<OBDAMappingAxiom> expand(ArrayList<OBDAMappingAxiom> mappings) {
+	private List<OBDAMappingAxiom> expand(ArrayList<OBDAMappingAxiom> mappings) throws SQLException, JSQLParserException {
 		
 		for (OBDAMappingAxiom mapping : mappings) {
 
@@ -108,7 +109,7 @@ public class MetaMappingExpander {
 			Function firstBodyAtom = body.get(0);
 			
 			Predicate pred = firstBodyAtom.getFunctionSymbol();
-			if (!pred.equals(OBDAVocabulary.QUEST_TRIPLE_PRED)){
+			if (!pred.isTriplePredicate()){
 				/**
 				 * for normal mappings, we do not need to expand it.
 				 */
@@ -135,7 +136,7 @@ public class MetaMappingExpander {
 				}
 				
 				// Construct the SQL query tree from the source query we do not work with views 
-				VisitedQuery sourceQueryParsed = translator.constructParserNoView(sourceQuery.toString());
+				ParsedSQLQuery sourceQueryParsed = translator.parseShallowly(sourceQuery.toString());
 //				Select selectQuery;
 //				
 //				try {
@@ -167,13 +168,13 @@ public class MetaMappingExpander {
 				 * we only need to distinct project the columns needed for the template expansion 
 				 */
 				
-				VisitedQuery distinctParsedQuery = null;
+				ParsedSQLQuery distinctParsedQuery = null;
 				try {
-					distinctParsedQuery = new VisitedQuery(sourceQueryParsed.getStatement(), false);
+					distinctParsedQuery = new ParsedSQLQuery(sourceQueryParsed.getStatement(), false);
 					
 				} catch (JSQLParserException e1) {
-					
-					continue;
+					throw new IllegalArgumentException(e1);
+					//continue;
 				}
 
 				distinctParsedQuery.setProjection(distinctParamsProjection);
@@ -182,23 +183,19 @@ public class MetaMappingExpander {
 				List<List<String>> paramsForClassTemplate = new ArrayList<List<String>>();
 				
 				
-				Statement st;
-				try {
-					st = connection.createStatement();
-					ResultSet rs = st.executeQuery(distinctParamsSQL);
-					while(rs.next()){
-						ArrayList<String> params = new ArrayList<String>(varsInTemplate.size());
-						for(int i = 1 ; i <= varsInTemplate.size(); i++){
-							 params.add(rs.getString(i));
+				try(Statement st = connection.createStatement()) {
+					try(ResultSet rs = st.executeQuery(distinctParamsSQL)) {
+						while (rs.next()) {
+							ArrayList<String> params = new ArrayList<>(varsInTemplate.size());
+							for (int i = 1; i <= varsInTemplate.size(); i++) {
+								params.add(rs.getString(i));
+							}
+							paramsForClassTemplate.add(params);
 						}
-						paramsForClassTemplate.add(params);
-						
 					}
-				} catch (SQLException e) {
-					e.printStackTrace();
 				}
-				
-				List<SelectExpressionItem>  columnsForValues = new ArrayList<SelectExpressionItem>(columnList);
+
+				List<SelectExpressionItem>  columnsForValues = new ArrayList<>(columnList);
 				columnsForValues.removeAll(columnsForTemplate);
 				
 				String id = mapping.getId();
@@ -234,7 +231,7 @@ public class MetaMappingExpander {
 			if (func.getArity() != 1){
 				result =false;
 			} else {
-				result  = result && func.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI);
+				result  = result && (func.getFunctionSymbol() instanceof URITemplatePredicate);
 				result  = result && (func.getTerm(0) instanceof ValueConstant) &&
 						((ValueConstant) func.getTerm(0)).getValue(). equals(OBDAVocabulary.RDF_TYPE);
 			}
@@ -254,12 +251,13 @@ public class MetaMappingExpander {
 	 * @param columnsForValues
 	 * @param params
 	 * @return
+	 * @throws JSQLParserException 
 	 */
 	private OBDARDBMappingAxiom instantiateMapping(String id, CQIE targetQuery,
-			Function bodyAtom, VisitedQuery sourceParsedQuery,
+			Function bodyAtom, ParsedSQLQuery sourceParsedQuery,
 			List<SelectExpressionItem> columnsForTemplate,
 			List<SelectExpressionItem> columnsForValues,
-			List<String> params, int arity) {
+			List<String> params, int arity) throws JSQLParserException {
 		
 		/*
 		 * First construct new Target Query 
@@ -277,7 +275,7 @@ public class MetaMappingExpander {
 		 */
 		SelectionJSQL selection = null;
 		try {
-			selection = sourceParsedQuery.getSelection();
+			selection = sourceParsedQuery.getWhereClause();
 			
 		} catch (JSQLParserException e1) {
 			
@@ -324,16 +322,11 @@ public class MetaMappingExpander {
 		 * we create a new statement with the changed projection and selection
 		 */
 		
-		VisitedQuery newSourceParsedQuery = null;
-		try {
-			newSourceParsedQuery = new VisitedQuery(sourceParsedQuery.getStatement(),false);
+		ParsedSQLQuery newSourceParsedQuery = null;
+
+			newSourceParsedQuery = new ParsedSQLQuery(sourceParsedQuery.getStatement(),false);
 			newSourceParsedQuery.setProjection(newProjection);
-			newSourceParsedQuery.setSelection(newSelection);
-			
-		} catch (JSQLParserException e) {
-			
-			e.printStackTrace();
-		}
+			newSourceParsedQuery.setWhereClause(newSelection);
 		
 		
 		String newSourceQuerySQL = newSourceParsedQuery.toString();
@@ -358,8 +351,6 @@ public class MetaMappingExpander {
 			boolean found = false;
 			for (SelectExpressionItem column : columnList) {
 				String expression=column.getExpression().toString();
-				if(VisitedQuery.pQuotes.matcher(expression).matches()) //remove the quotes when present to compare with var
-					expression= expression.substring(1, expression.length()-1);
 									
 				if ((column.getAlias()==null && expression.equals(var.getName())) ||
 						(column.getAlias()!=null && column.getAlias().getName().equals(var.getName()))) {
@@ -406,7 +397,9 @@ public class MetaMappingExpander {
 		Function uriTermForPredicate = findTemplatePredicateTerm(atom, arity);
 		
 		List<Variable> vars = new ArrayList<Variable>();
-		for(int i = 1; i < uriTermForPredicate.getArity(); i++){
+		//for(int i = 1; i < uriTermForPredicate.getArity(); i++){
+		// TODO: check when getTerms().size() != getArity() 
+		for(int i = 1; i < uriTermForPredicate.getTerms().size(); i++){
 			vars.add((Variable) uriTermForPredicate.getTerm(i));
 		}
 		return vars;
@@ -440,10 +433,10 @@ public class MetaMappingExpander {
 		Function result = null;
 		Predicate p; 
 		if(arity == 1){
-			p = dfac.getPredicate(predName, arity, new COL_TYPE[]{COL_TYPE.OBJECT});
+			p = dfac.getClassPredicate(predName);
 			result = dfac.getFunction(p, atom.getTerm(0));
 		} else if (arity == 2){
-			p = dfac.getPredicate(predName, arity, new COL_TYPE[]{COL_TYPE.OBJECT, COL_TYPE.OBJECT});
+			p = dfac.getObjectPropertyPredicate(predName);
 			result = dfac.getFunction(p, atom.getTerm(0), atom.getTerm(2));
 		}
 		return result;
@@ -468,12 +461,14 @@ public class MetaMappingExpander {
 	/**
 	 * this method expands the input mappings, which may include meta mappings, to the concrete mappings
 	 * 
-	 * @param mappings
-	 * 		a list of mappings, which may include meta mappings
+	 * @param obdaModel
+	 * 		the container for the list of mappings, which may include meta mappings
+	 * @param sourceURI
 	 * @return
 	 * 		expanded normal mappings
+	 * @throws Exception 
 	 */
-	public void expand(OBDAModel obdaModel, URI sourceURI) {
+	public void expand(OBDAModel obdaModel, URI sourceURI) throws Exception {
 		List<OBDAMappingAxiom> expandedMappings = expand(obdaModel.getMappings(sourceURI));
 		
 		obdaModel.removeAllMappings();

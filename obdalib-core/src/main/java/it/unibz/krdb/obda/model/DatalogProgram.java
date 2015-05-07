@@ -34,8 +34,6 @@ public interface DatalogProgram extends OBDAQuery {
 	public void removeRule(CQIE rule);
 
 	public void removeRules(Collection<CQIE> rule);
-	
-	public void removeAllRules();
 
 	public boolean isUCQ();
 

@@ -12,7 +12,8 @@ import java.net.URL;
 import junit.framework.TestCase;
 
 import org.junit.Test;
-import org.openrdf.model.Graph;
+import org.openrdf.model.Model;
+import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
@@ -36,12 +37,12 @@ import sesameWrapper.SesameVirtualRepo;
 
 public class OptiqueIntegrationTest extends TestCase {
 
-	String owlfile = "src/test/resources/example/npd-ql.owl";
-	String mappingfile = "src/test/resources/example/npd-mapping.ttl";
+	String owlfile = "src/test/resources/example/npd-v2-ql_a.owl";
+	String mappingfile = "src/test/resources/example/npd-v2-ql_a.ttl";
 	String queryfile = "";
 
 	OWLOntology owlontology;
-	Graph mappings;
+	Model mappings;
 	RepositoryConnection con;
 	QuestPreferences pref;
 
@@ -59,7 +60,7 @@ public class OptiqueIntegrationTest extends TestCase {
 			RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
 			InputStream in = new FileInputStream(mappingfile);
 			URL documentUrl = new URL("file://" + mappingfile);
-			mappings = new org.openrdf.model.impl.GraphImpl();
+			mappings = new LinkedHashModel();
 			StatementCollector collector = new StatementCollector(mappings);
 			parser.setRDFHandler(collector);
 			parser.parse(in, documentUrl.toString());
@@ -145,10 +146,11 @@ public class OptiqueIntegrationTest extends TestCase {
 		//read next query
 		String sparqlQuery = "SELECT ?x WHERE {?x a <http://sws.ifi.uio.no/vocab/npd-v2#Field>}" ; 
 		//read expected result
-		int expectedResult = 14366 ;
+		//int expectedResult = 14366 ;
+		int expectedResult = 101;
 		
 		int obtainedResult = runQuery(sparqlQuery);
-		
+		System.out.println(obtainedResult);
 		assertEquals(expectedResult, obtainedResult);
 
 	}

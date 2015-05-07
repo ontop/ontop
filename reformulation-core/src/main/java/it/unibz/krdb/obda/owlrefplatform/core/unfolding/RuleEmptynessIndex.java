@@ -21,8 +21,6 @@ package it.unibz.krdb.obda.owlrefplatform.core.unfolding;
  */
 
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.URIConstant;
 
 /***
  * An emptyness index is an utility that helps two components comunicate about

@@ -24,35 +24,30 @@ import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.utils.EventGeneratingArrayList;
 import it.unibz.krdb.obda.utils.EventGeneratingLinkedList;
 import it.unibz.krdb.obda.utils.EventGeneratingList;
 import it.unibz.krdb.obda.utils.ListListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-public class FunctionalTermImpl extends AbstractLiteral implements Function, ListListener {
+public class FunctionalTermImpl implements Function, ListListener {
 
-	protected static final long serialVersionUID = 2832481815465364535L;
+	private static final long serialVersionUID = 2832481815465364535L;
 	
-	protected Predicate functor = null;
-	protected EventGeneratingList<Term> terms = null;
-	protected int identifier = -1;
+	private Predicate functor;
+	private EventGeneratingList<Term> terms;
+	private int identifier = -1;
 
 	// true when the list of terms has been modified
-	protected boolean rehash = true;
+	private boolean rehash = true;
 
 	// null when the list of terms has been modified
-	protected String string = null;
-
-	protected Function asAtom = null;
+	private String string = null;
 
 	/**
 	 * The default constructor.
@@ -102,8 +97,8 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 		if (obj == null || !(obj instanceof FunctionalTermImpl)) {
 			return false;
 		}
-		FunctionalTermImpl functor2 = (FunctionalTermImpl) obj;
-		return this.hashCode() == functor2.hashCode();
+		FunctionalTermImpl other = (FunctionalTermImpl) obj;
+		return this.hashCode() == other.hashCode();
 	}
 
 	@Override
@@ -123,21 +118,6 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 	}
 
 	@Override
-	public Set<Variable> getVariables() {
-		HashSet<Variable> variables = new LinkedHashSet<Variable>();
-		for (Term t : terms) {
-			for (Variable v : t.getReferencedVariables())
-				variables.add(v);
-		}
-		return variables;
-	}
-
-	@Override
-	public Predicate getPredicate() {
-		return getFunctionSymbol();
-	}
-
-	@Override
 	public Predicate getFunctionSymbol() {
 		return functor;
 	}
@@ -154,7 +134,7 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 
 	@Override
 	public FunctionalTermImpl clone() {
-		ArrayList<Term> copyTerms = new ArrayList<Term>(terms.size()+10);
+		ArrayList<Term> copyTerms = new ArrayList<Term>(terms.size());
 		
 		for (Term term: terms) {
 			copyTerms.add(term.clone());
@@ -168,8 +148,21 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 
 	@Override
 	public String toString() {
-		if (string == null)
-			string = TermUtil.toString(this);
+		if (string == null) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(functor.toString());
+			sb.append("(");
+			boolean separator = false;
+			for (Term innerTerm : terms) {
+				if (separator) {
+					sb.append(",");
+				}
+				sb.append(innerTerm.toString());
+				separator = true;
+			}
+			sb.append(")");
+			string = sb.toString();
+		}
 		return string;
 	}
 
@@ -189,55 +182,11 @@ public class FunctionalTermImpl extends AbstractLiteral implements Function, Lis
 		return false;
 	}
 
-	@Override
-	public int getFirstOcurrance(Term t, int i) {
-		int size = terms.size();
-		for (int j = 0; j < size; j++) {
-			Term t2 = terms.get(j);
-			if (t2 instanceof FunctionalTermImpl) {
-				FunctionalTermImpl f = (FunctionalTermImpl) t2;
-				int newindex = f.getFirstOcurrance(t, 0);
-				if (newindex != -1)
-					return j;
-			} else {
-				if (t2.equals(t))
-					return j;
-			}
-		}
-		return -1;
-	}
 
 	@Override
 	public void listChanged() {
 		rehash = true;
 		string = null;
-	}
-
-	@Override
-	public Set<Variable> getReferencedVariables() {
-		Set<Variable> vars = new LinkedHashSet<Variable>();
-		for (Term t : terms) {
-			for (Variable v : t.getReferencedVariables())
-				vars.add(v);
-		}
-		return vars;
-	}
-
-	@Override
-	public Map<Variable, Integer> getVariableCount() {
-		Map<Variable, Integer> currentcount = new HashMap<Variable, Integer>();
-		for (Term t : terms) {
-			Map<Variable, Integer> atomCount = t.getVariableCount();
-			for (Variable var : atomCount.keySet()) {
-				Integer count = currentcount.get(var);
-				if (count != null) {
-					currentcount.put(var, count + atomCount.get(var));
-				} else {
-					currentcount.put(var, new Integer(atomCount.get(var)));
-				}
-			}
-		}
-		return currentcount;
 	}
 
 	@Override

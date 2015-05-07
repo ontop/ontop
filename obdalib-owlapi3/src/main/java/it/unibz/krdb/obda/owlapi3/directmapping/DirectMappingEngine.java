@@ -20,7 +20,6 @@ package it.unibz.krdb.obda.owlapi3.directmapping;
  * #L%
  */
 
-import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.OBDADataFactory;
@@ -28,10 +27,14 @@ import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.OntologyFactory;
+import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.DataDefinition;
 import it.unibz.krdb.sql.JDBCConnectionManager;
@@ -40,6 +43,7 @@ import it.unibz.krdb.sql.TableDefinition;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +80,8 @@ public class DirectMappingEngine {
 	private DBMetadata metadata = null;
 	private String baseuri;
 	private int mapidx = 1;
+	
+	private static OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 	
 	public DirectMappingEngine(String baseUri, int mapnr){
 		conMan = JDBCConnectionManager.getJDBCConnectionManager();
@@ -151,27 +157,27 @@ public class DirectMappingEngine {
 	public OWLOntology getOntology(OWLOntology ontology, OWLOntologyManager manager, OBDAModel model) throws OWLOntologyCreationException, OWLOntologyStorageException, SQLException{
 		OWLDataFactory dataFactory = manager.getOWLDataFactory();
 		
-		Set<Predicate> classset = model.getDeclaredClasses();
-		Set<Predicate> objectset = model.getDeclaredObjectProperties();
-		Set<Predicate> dataset = model.getDeclaredDataProperties();
+		Set<OClass> classset = model.getDeclaredClasses();
+		Set<ObjectPropertyExpression> objectset = model.getDeclaredObjectProperties();
+		Set<DataPropertyExpression> dataset = model.getDeclaredDataProperties();
 		
 		//Add all the classes
-		for(Iterator<Predicate> it = classset.iterator(); it.hasNext();){
-			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getName().toString()));
+		for(Iterator<OClass> it = classset.iterator(); it.hasNext(); ) {
+			OWLClass newclass = dataFactory.getOWLClass(IRI.create(it.next().getPredicate().getName()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );
 		}
 		
 		//Add all the object properties
-		for(Iterator<Predicate> it = objectset.iterator(); it.hasNext();){
-			OWLObjectProperty newclass = dataFactory.getOWLObjectProperty(IRI.create(it.next().getName().toString()));
+		for(Iterator<ObjectPropertyExpression> it = objectset.iterator(); it.hasNext();){
+			OWLObjectProperty newclass = dataFactory.getOWLObjectProperty(IRI.create(it.next().getPredicate().getName().toString()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );
 		}
 		
 		//Add all the data properties
-		for(Iterator<Predicate> it = dataset.iterator(); it.hasNext();){
-			OWLDataProperty newclass = dataFactory.getOWLDataProperty(IRI.create(it.next().getName().toString()));
+		for(Iterator<DataPropertyExpression> it = dataset.iterator(); it.hasNext();){
+			OWLDataProperty newclass = dataFactory.getOWLDataProperty(IRI.create(it.next().getPredicate().getName().toString()));
 			OWLDeclarationAxiom declarationAxiom = dataFactory.getOWLDeclarationAxiom(newclass);
 			manager.addAxiom(ontology,declarationAxiom );
 		}
@@ -211,19 +217,18 @@ public class DirectMappingEngine {
 	 * since mapping id is generated randomly and same id may occur
 	 * @throws Exception 
 	 */
-	public void insertMapping(OBDADataSource source, OBDAModel model) throws SQLException, DuplicateMappingException{		
+	public void insertMapping(OBDADataSource source, OBDAModel model) throws Exception{		
 		model.addSource(source);
 		insertMapping(conMan.getMetaData(source),model,source.getSourceID());
 	}
 	
 	
-	public void insertMapping(DBMetadata metadata, OBDAModel model, URI sourceUri) throws SQLException, DuplicateMappingException{			
+	public void insertMapping(DBMetadata metadata, OBDAModel model, URI sourceUri) throws Exception{			
 		if (baseuri == null || baseuri.isEmpty())
 			this.baseuri = model.getPrefixManager().getDefaultPrefix();
-		List<TableDefinition> tables = metadata.getTableList();
+		Collection<TableDefinition> tables = metadata.getTables();
 		List<OBDAMappingAxiom> mappingAxioms = new ArrayList<OBDAMappingAxiom>();
-		for (int i = 0; i < tables.size(); i++) {
-			TableDefinition td = tables.get(i);
+		for (TableDefinition td : tables) {
 			model.addMappings(sourceUri, getMapping(td, metadata, baseuri));
 		}
 		model.addMappings(sourceUri, mappingAxioms);
@@ -233,12 +238,12 @@ public class DirectMappingEngine {
 				CQIE rule = (CQIE) q;
 				for (Function f : rule.getBody()) {
 					if (f.getArity() == 1)
-						model.declarePredicate(f.getFunctionSymbol());
+						model.declareClass(ofac.createClass(f.getFunctionSymbol().getName()));
 					else if (f.getFunctionSymbol().getType(1)
 							.equals(COL_TYPE.OBJECT))
-						model.declareObjectProperty(f.getFunctionSymbol());
+						model.declareObjectProperty(ofac.createObjectProperty(f.getFunctionSymbol().getName()));
 					else
-						model.declareDataProperty(f.getFunctionSymbol());
+						model.declareDataProperty(ofac.createDataProperty(f.getFunctionSymbol().getName()));
 				}
 			}
 		}
@@ -253,7 +258,7 @@ public class DirectMappingEngine {
 	 *  @return a List of OBDAMappingAxiom-s
 	 * @throws Exception 
 	 */
-	public List<OBDAMappingAxiom> getMapping(DataDefinition table, OBDADataSource source) throws SQLException{
+	public List<OBDAMappingAxiom> getMapping(DataDefinition table, OBDADataSource source) throws Exception{
 		return getMapping(table,conMan.getMetaData(source),baseuri);
 	}
 	
@@ -266,15 +271,14 @@ public class DirectMappingEngine {
 	 * @param baseUri : the base uri needed for direct mapping axiom
 	 * 
 	 *  @return a List of OBDAMappingAxiom-s
+	 * @throws Exception 
 	 */
-	public List<OBDAMappingAxiom> getMapping(DataDefinition table, DBMetadata metadata, String baseUri) {
+	public List<OBDAMappingAxiom> getMapping(DataDefinition table, DBMetadata metadata, String baseUri) throws Exception {
 		OBDADataFactory dfac = OBDADataFactoryImpl.getInstance();
 		DirectMappingAxiom dma=null;
-		try {
+
 			dma = new DirectMappingAxiom(baseUri, table, metadata, dfac);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
 		dma.setbaseuri(baseUri);
 		
 		List<OBDAMappingAxiom> axioms = new ArrayList<OBDAMappingAxiom>();

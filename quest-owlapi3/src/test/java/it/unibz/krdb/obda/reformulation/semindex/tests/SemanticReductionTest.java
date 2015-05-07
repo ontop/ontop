@@ -21,13 +21,10 @@ package it.unibz.krdb.obda.reformulation.semindex.tests;
  */
 
 
-import it.unibz.krdb.obda.ontology.Axiom;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.SigmaTBoxOptimizer;
-
-import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -35,44 +32,44 @@ public class SemanticReductionTest extends TestCase {
 	
 	SemanticIndexHelper	helper	= new SemanticIndexHelper();
 
+	private static int getSize(Ontology ont) {
+		return ont.getSubClassAxioms().size() + ont.getSubObjectPropertyAxioms().size() + ont.getSubDataPropertyAxioms().size();
+	}
+	
 	public void test_2_0_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_0_0");
-		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
-		Ontology sigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
-		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, sigma);
-		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
-		assertEquals(0, rv.size());
+		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
+		Ontology reduced = reduction.getReducedOntology();
+		assertEquals(0, getSize(reduced));
 	}
 
 	public void test_2_0_1() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_0_1");
-		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
-		Ontology sigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
-		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, sigma);
-		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
-		assertEquals(0, rv.size());
+		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
+		Ontology reduced = reduction.getReducedOntology();
+		assertEquals(0, getSize(reduced));
 	}
 
 	public void test_2_1_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_2_1_0");
-		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
-		Ontology sigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
-		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, sigma);
-		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
-		assertEquals(1, rv.size());
+		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
+		Ontology reduced = reduction.getReducedOntology();
+		assertEquals(1, getSize(reduced));
 	}
 
 	public void test_1_2_0() throws Exception {
 		Ontology ontology = helper.load_onto("test_1_2_0");
-		TBoxReasonerImpl reasoner = new TBoxReasonerImpl(ontology);
-		Ontology sigma = SigmaTBoxOptimizer.getSigmaOntology(reasoner);
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
-		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, sigma);
-		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
-		assertEquals(0, rv.size());
+		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner);
+		Ontology reduced = reduction.getReducedOntology();
+		assertEquals(0, getSize(reduced));
 	}
 
 	public void test_equivalence() throws Exception {
@@ -85,10 +82,10 @@ public class SemanticReductionTest extends TestCase {
 		 */
 
 		Ontology ontology = helper.load_onto("equivalence-test");
+		TBoxReasoner reasoner = new TBoxReasonerImpl(ontology);
 
-		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(ontology, OntologyFactoryImpl.getInstance().createOntology());
-		Set<Axiom> rv = reduction.getReducedOntology().getAssertions();
-		//System.out.println(rv);
-		assertEquals(45, rv.size());
+		SigmaTBoxOptimizer reduction = new SigmaTBoxOptimizer(reasoner, null);
+		Ontology reduced = reduction.getReducedOntology();
+		assertEquals(45, getSize(reduced));
 	}
 }

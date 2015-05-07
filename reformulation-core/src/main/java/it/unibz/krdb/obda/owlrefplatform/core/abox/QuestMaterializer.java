@@ -27,7 +27,11 @@ import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.ABoxAssertion;
+import it.unibz.krdb.obda.model.ResultSet;
+import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
@@ -68,13 +72,13 @@ import org.slf4j.LoggerFactory;
  */
 public class QuestMaterializer {
 
-	private OBDAModel model;
-	private Quest questInstance;
+	private final OBDAModel model;
+	private final Quest questInstance;
 	private Ontology ontology;
 	
-	private Set<Predicate> vocabulary;
+	private final Set<Predicate> vocabulary;
 
-	protected long counter = 0;
+	private long counter = 0;
 	private VirtualTripleIterator iterator;
 
 	private static final OntologyFactory ofac = OntologyFactoryImpl.getInstance();
@@ -94,8 +98,8 @@ public class QuestMaterializer {
 		
 	}
 	
-	public QuestMaterializer(OBDAModel modell, Ontology onto) throws Exception {
-		this(modell, onto, getDefaultPreferences());
+	public QuestMaterializer(OBDAModel model, Ontology onto) throws Exception {
+		this(model, onto, getDefaultPreferences());
 	}
 	
 	/***
@@ -104,32 +108,56 @@ public class QuestMaterializer {
 	 * @param model
 	 * @throws Exception
 	 */
-	public QuestMaterializer(OBDAModel modell, Ontology onto, QuestPreferences preferences) throws Exception {
-		this.model = modell;
+	public QuestMaterializer(OBDAModel model, Ontology onto, QuestPreferences preferences) throws Exception {
+		this.model = model;
 		this.ontology = onto;
 		this.vocabulary = new HashSet<Predicate>();
 		
-		if (model.getSources()!= null && model.getSources().size() > 1)
+		if (this.model.getSources()!= null && this.model.getSources().size() > 1)
 			throw new Exception("Cannot materialize with multiple data sources!");
 		
 		//add all class/data/object predicates to vocabulary
 		//add declared predicates in model
-		for (Predicate p: model.getDeclaredPredicates()) {
+		for (OClass cl : model.getDeclaredClasses()) {
+			Predicate p = cl.getPredicate();
+			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+				vocabulary.add(p);
+		}
+		for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) {
+			Predicate p = prop.getPredicate();
+			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
+				vocabulary.add(p);
+		}
+		for (DataPropertyExpression prop : model.getDeclaredDataProperties()) {
+			Predicate p = prop.getPredicate();
 			if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#"))
 				vocabulary.add(p);
 		}
 		if (onto != null) {
 			//from ontology
-			for (Predicate p : onto.getVocabulary()) {
+			for (OClass cl : onto.getVocabulary().getClasses()) {
+				Predicate p = cl.getPredicate(); 
 				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
 						&& !vocabulary.contains(p))
 					vocabulary.add(p);
 			}
-		} else
-		{
+			for (ObjectPropertyExpression role : onto.getVocabulary().getObjectProperties()) {
+				Predicate p = role.getPredicate();
+				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+						&& !vocabulary.contains(p))
+					vocabulary.add(p);
+			}
+			for (DataPropertyExpression role : onto.getVocabulary().getDataProperties()) {
+				Predicate p = role.getPredicate();
+				if (!p.toString().startsWith("http://www.w3.org/2002/07/owl#")
+						&& !vocabulary.contains(p))
+					vocabulary.add(p);
+			}
+		} 
+		else {
 			//from mapping undeclared predicates (can happen)
-			for (URI uri : model.getMappings().keySet()){
-				for (OBDAMappingAxiom axiom : model.getMappings(uri))
+			for (URI uri : this.model.getMappings().keySet()){
+				for (OBDAMappingAxiom axiom : this.model.getMappings(uri))
 				{
 					if (axiom.getTargetQuery() instanceof CQIE)
 					{
@@ -147,13 +175,23 @@ public class QuestMaterializer {
 		//start a quest instance
 		if (ontology == null) {
 			ontology = ofac.createOntology();
-			ontology.addEntities(model.getDeclaredPredicates());
+			
+			// TODO: use Vocabulary for OBDAModel as well
+			
+			for (OClass pred : model.getDeclaredClasses()) 
+				ontology.getVocabulary().createClass(pred.getPredicate().getName());				
+			
+			for (ObjectPropertyExpression prop : model.getDeclaredObjectProperties()) 
+				ontology.getVocabulary().createObjectProperty(prop.getPredicate().getName());
+
+			for (DataPropertyExpression prop : model.getDeclaredDataProperties()) 
+				ontology.getVocabulary().createDataProperty(prop.getPredicate().getName());
 		}
 		
 		
 		preferences.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 
-		questInstance = new Quest(ontology, model, preferences);
+		questInstance = new Quest(ontology, this.model, preferences);
 					
 		questInstance.setupRepository();
 	}
@@ -169,16 +207,16 @@ public class QuestMaterializer {
 	}
 
 
-	public Iterator<ABoxAssertion> getAssertionIterator() throws Exception {
+	public Iterator<Assertion> getAssertionIterator() throws Exception {
 		//return the inner class  iterator
 		iterator = new VirtualTripleIterator(questInstance, vocabulary.iterator());
 		return iterator;
 		
 	}
 
-	public List<ABoxAssertion> getAssertionList() throws Exception {
-		Iterator<ABoxAssertion> it = getAssertionIterator();
-		List<ABoxAssertion> assertions = new LinkedList<ABoxAssertion>();
+	public List<Assertion> getAssertionList() throws Exception {
+		Iterator<Assertion> it = getAssertionIterator();
+		List<Assertion> assertions = new LinkedList<Assertion>();
 		while (it.hasNext()) {
 			assertions.add(it.next());
 		}
@@ -215,7 +253,7 @@ public class QuestMaterializer {
 	 * predicate in each data source.
 	 * 
 	 */
-	private class VirtualTripleIterator implements Iterator<ABoxAssertion> {
+	private class VirtualTripleIterator implements Iterator<Assertion> {
 
 		private String query1 = "CONSTRUCT {?s <%s> ?o} WHERE {?s <%s> ?o}";
 		private String query2 = "CONSTRUCT {?s a <%s>} WHERE {?s a <%s>}";
@@ -245,10 +283,16 @@ public class QuestMaterializer {
 					if (vocabularyIterator.hasNext()) {
 						Predicate pred = vocabularyIterator.next();
 						String query = getQuery(pred);
-						results = (GraphResultSet) stm.execute(query);
-					}
-					else
+						ResultSet execute = stm.execute(query);
+
+						results = (GraphResultSet) execute;
+//						if (results!=null){
+//							hasNext = results.hasNext();
+//
+//						}					
+					}else{
 						break;
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -280,13 +324,20 @@ public class QuestMaterializer {
 						//close previous statement if open
 						if (stm!= null && results!=null)
 							{stm.close(); results.close(); }
-						
+
 						//execute next query
 						stm = questConn.createStatement();
-						results = (GraphResultSet) stm.execute(getQuery(vocabularyIterator.next()));
-						if (results!=null)
+						Predicate next = vocabularyIterator.next();
+						String query = getQuery(next);
+						ResultSet execute = stm.execute(query);
+
+						results = (GraphResultSet) execute;
+						if (results!=null){
 							hasNext = results.hasNext();
-					
+
+						}
+
+
 				}
 				read = true;
 				
@@ -297,7 +348,7 @@ public class QuestMaterializer {
 		}
 
 		@Override
-		public ABoxAssertion next() {
+		public Assertion next() {
 			try {
 				counter+=1;
 				if (read && hasNext)

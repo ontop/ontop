@@ -21,7 +21,6 @@ package it.unibz.krdb.obda.model;
  */
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * This class defines a type of {@link Term} in which it denotes a mapping
@@ -58,14 +57,6 @@ public interface Function extends Term {
 	 */
 	public Predicate getFunctionSymbol();
 
-	/***
-	 * Same as before
-	 * 
-	 * @return
-	 */
-	@Deprecated
-	public Predicate getPredicate();
-
 	/**
 	 * Get the number of terms (or arguments) in the function symbol.
 	 * 
@@ -73,13 +64,9 @@ public interface Function extends Term {
 	 */
 	public int getArity();
 
-	public int getFirstOcurrance(Term t, int i);
-
 	public Term getTerm(int index);
 
 	public void setTerm(int index, Term term);
-
-	public Set<Variable> getVariables();
 
 	public void updateTerms(List<Term> literals);
 

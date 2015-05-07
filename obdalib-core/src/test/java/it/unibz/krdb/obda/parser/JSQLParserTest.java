@@ -20,10 +20,8 @@ package it.unibz.krdb.obda.parser;
  * #L%
  */
 
-import it.unibz.krdb.sql.api.VisitedQuery;
+import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import junit.framework.TestCase;
-import net.sf.jsqlparser.JSQLParserException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,23 +93,22 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
-	// NO SUPPORT JSQL PARSER VALUE is considered as a SQL function
+	
 	public void test_1_5_extra() {
 
 		final boolean result = parseJSQL("SELECT \"URI\" as X, VALUE as Y, LANG as Z FROM QUEST_DATA_PROPERTY_LITERAL_ASSERTION WHERE ISBNODE = FALSE AND LANG IS NULL AND IDX = 1");
 		printJSQL("test_1_5_extra", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
 
-	// NO SUPPORT JSQL PARSER VALUE is considered as a SQL function
+	
 	public void test_1_5_extra_2() {
 		final boolean result = parseJSQL("SELECT id, name as alias1, value as alias2 FROM table1");
 		printJSQL("test_1_5_extra_2", result);
-		assertFalse(result);
+		assertTrue(result);
 
 	}
-
 	
 	public void test_1_5_extra_3() {
 		final boolean result = parseJSQL("select to_char(REGION_ID) as RID FROM HR.REGIONS");
@@ -127,6 +124,13 @@ public class JSQLParserTest extends TestCase {
 
 	}
 
+	// all of these are legal in SQL server; 'row' and 'rows' are not legal on
+	// Oracle, though;
+	public void test_1_5_extra_5() {
+		final boolean result = parseJSQL("SELECT cast, do, extract, first, following, last, materialized, nulls, partition, range, row, rows, siblings, value, xml FROM tableName");
+		printJSQL("test_1_5_extra_5", result);
+		assertTrue(result);
+	}
 	
 	public void test_1_6_1() {
 		final boolean result = parseJSQL("SELECT undergraduate.* FROM student as undergraduate");
@@ -660,23 +664,115 @@ public class JSQLParserTest extends TestCase {
 		final boolean result = parseJSQL("SELECT DISTINCT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
 				+ "FROM people \"QpeopleVIEW0\" "
 				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
-		printJSQL("test_12", result);
+		printJSQL("test_13", result);
 		assertTrue(result);
 
 	}
+	
+	//add support for CAST also in unquoted visited query
+	public void testUnquoted1(){
+		final boolean result = parseUnquotedJSQL("SELECT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
+				+ "FROM people \"QpeopleVIEW0\" "
+				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
+		printJSQL("test_Unquoted1", result);
+		assertTrue(result);
+	}
+
+	// Does not parse SELECT DISTINCT (on purpose)
+	public void testUnquoted2(){
+		final boolean result = parseUnquotedJSQL("SELECT DISTINCT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
+				+ "FROM people \"QpeopleVIEW0\" "
+				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
+		printJSQL("test_Unquoted1", result);
+		assertFalse(result);
+	}
+
+	public void testCast1(){
+		final boolean result = parseUnquotedJSQL("SELECT CAST(`view0`.`nick2` AS CHAR (8000) CHARACTER SET utf8) AS `v0` FROM people `view0` WHERE `view0`.`nick2` IS NOT NULL");
+		printJSQL("testCast", result);
+		assertTrue(result);
+	}
+
+	// Does not parse SELECT DISTINCT (on purpose)
+	public void testCast2(){
+		final boolean result = parseUnquotedJSQL("SELECT DISTINCT CAST(`view0`.`nick2` AS CHAR (8000) CHARACTER SET utf8) AS `v0` FROM people `view0` WHERE `view0`.`nick2` IS NOT NULL");
+		printJSQL("testCast", result);
+		assertFalse(result);
+	}
+
+	/* Regex in MySQL, Oracle and Postgres*/
+
+	public void testRegexMySQL(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE name REGEXP '^b'");
+		printJSQL("testRegexMySQL", result);
+		assertTrue(result);
+	}
+	
+	public void testRegexBinaryMySQL(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE name REGEXP BINARY '^b'");
+		printJSQL("testRegexBinaryMySQL", result);
+		assertTrue(result);
+	}
+	
+	public void testRegexPostgres(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE name ~ 'foo'");
+		printJSQL("testRegexPostgres", result);
+		assertTrue(result);
+	}
+	
+	//no support for similar to in postgres
+	public void testRegexPostgresSimilarTo(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE 'abc' SIMILAR TO 'abc'");
+		printJSQL("testRegexPostgresSimilarTo", result);
+		assertFalse(result);
+	}
+	
+	public void testRegexOracle(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE REGEXP_LIKE(testcol, '[[:alpha:]]')");
+		printJSQL("testRegexMySQL", result);
+		assertTrue(result);
+	}
+	
+	//no support for not without parenthesis
+	public void testRegexNotOracle(){
+		final boolean result = parseUnquotedJSQL("SELECT * FROM pet WHERE NOT REGEXP_LIKE(testcol, '[[:alpha:]]')");
+		printJSQL("testRegexNotMySQL", result);
+		assertFalse(result);
+	}
+
+    public void test_md5() {
+        final boolean result = parseJSQL("SELECT MD5(CONCAT(COALESCE(Address, RAND()), COALESCE(City, RAND()),\n" +
+                "COALESCE(Region, RAND()), COALESCE(PostalCode, RAND()), COALESCE(Country,\n" +
+                "RAND()) )) AS locationID FROM northwind.Suppliers");
+        printJSQL("test_13", result);
+        assertTrue(result);
+    }
+
+    public void test_concatOracle() {
+        final boolean result = parseJSQL("SELECT ('ID-' || student.id || 'type1') \"sid\" FROM student");
+        printJSQL("test_concatOracle()", result);
+        assertTrue(result);
+    }
+
+    public void test_RegexpReplace() {
+        final boolean result = parseJSQL("SELECT REGEXP_REPLACE('Hello World', ' +', ' ') as reg FROM student");
+        printJSQL("test_RegexpReplace()", result);
+        assertTrue(result);
+    }
 
 	private String queryText;
 
-	VisitedQuery queryP;
+	ParsedSQLQuery queryP;
 
 	private boolean parseJSQL(String input) {
 
 		queryText = input;
 
 		try {
-			queryP = new VisitedQuery(input,false);
+			queryP = new ParsedSQLQuery(input,false);
 		} catch (Exception e) {
 
+			e.printStackTrace();
 			return false;
 		}
 
@@ -688,23 +784,23 @@ public class JSQLParserTest extends TestCase {
 			System.out.println(title + ": " + queryP.toString());
 			
 			try {
-				System.out.println("  Tables: " + queryP.getTableSet());
+				System.out.println("  Tables: " + queryP.getTables());
 				System.out.println("  Projection: " + queryP.getProjection());
 
 				System.out.println("  Selection: "
-						+ ((queryP.getSelection() == null) ? "--" : queryP
-								.getSelection()));
+						+ ((queryP.getWhereClause() == null) ? "--" : queryP
+								.getWhereClause()));
 
 				System.out.println("  Aliases: "
 						+ (queryP.getAliasMap().isEmpty() ? "--" : queryP
 								.getAliasMap()));
 				System.out.println("  GroupBy: " + queryP.getGroupByClause());
 				System.out.println("  SubSelect: "
-						+ (queryP.getSubSelectSet().isEmpty() ? "--" : queryP
-								.getSubSelectSet()));
+						+ (queryP.getSubSelects().isEmpty() ? "--" : queryP
+								.getSubSelects()));
 				System.out.println("  Join conditions: "
-						+ (queryP.getJoinCondition().isEmpty() ? "--" : queryP
-								.getJoinCondition()));
+						+ (queryP.getJoinConditions().isEmpty() ? "--" : queryP
+								.getJoinConditions()));
 				System.out.println("  Columns: "
 						+ (queryP.getColumns().isEmpty() ? "--" : queryP
 								.getColumns()));
@@ -717,6 +813,21 @@ public class JSQLParserTest extends TestCase {
 					+ queryText);
 		}
 		System.out.println();
+	}
+
+	
+	private boolean parseUnquotedJSQL(String input) {
+
+		queryText = input;
+
+		try {
+			queryP = new ParsedSQLQuery(input,true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		return true;
 	}
 
 }

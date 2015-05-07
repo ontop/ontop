@@ -30,39 +30,21 @@ import it.unibz.krdb.obda.protege4.gui.IconLoader;
 import it.unibz.krdb.obda.protege4.gui.treemodels.FilteredModel;
 import it.unibz.krdb.obda.protege4.gui.treemodels.SynchronizedMappingListModel;
 import it.unibz.krdb.obda.protege4.gui.treemodels.TreeModelFilter;
-import it.unibz.krdb.obda.protege4.utils.DatasourceSelectorListener;
-import it.unibz.krdb.obda.protege4.utils.DialogUtils;
-import it.unibz.krdb.obda.protege4.utils.MappingFilterLexer;
-import it.unibz.krdb.obda.protege4.utils.MappingFilterParser;
-import it.unibz.krdb.obda.protege4.utils.OBDAMappingListRenderer;
+import it.unibz.krdb.obda.protege4.utils.*;
 import it.unibz.krdb.obda.utils.IDGenerator;
 import it.unibz.krdb.obda.utils.SourceQueryValidator;
+import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.CommonTokenStream;
+import org.slf4j.LoggerFactory;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import javax.swing.*;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
+import java.awt.event.*;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.JDialog;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTree;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
-
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.slf4j.LoggerFactory;
 
 public class MappingManagerPanel extends JPanel implements DatasourceSelectorListener {
 
@@ -562,15 +544,15 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			@Override
 			public void run() {
 				canceled = false;
-				final Object[] path = mappingList.getSelectedValues();
+				final List path = mappingList.getSelectedValuesList();
 				if (path == null) {
 					JOptionPane.showMessageDialog(MappingManagerPanel.this, "Select at least one mapping");
 					return;
 				}
-				outputField.addText("Validating " + path.length + " SQL queries.\n", outputField.NORMAL);
-				for (int i = 0; i < path.length; i++) {
+				outputField.addText("Validating " + path.size() + " SQL queries.\n", outputField.NORMAL);
+				for (int i = 0; i < path.size(); i++) {
 					final int index = i;
-					OBDAMappingAxiom o = (OBDAMappingAxiom) path[index];
+					OBDAMappingAxiom o = (OBDAMappingAxiom) path.get(index);
 					String id = o.getId();
 					outputField.addText("  id: '" + id + "'... ", outputField.NORMAL);
 					validator = new SourceQueryValidator(selectedSource, o.getSourceQuery());

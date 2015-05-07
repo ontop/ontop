@@ -23,30 +23,25 @@ package it.unibz.krdb.sql.api;
 import it.unibz.krdb.sql.Reference;
 
 import java.io.Serializable;
+import java.sql.Types;
 
 public class Attribute implements Serializable{
 	
 	private static final long serialVersionUID = -5780621780592347583L;
 	
 	/** Fields */
-	private String name;
-	private int type;
+	private final String name;
+	private final int type;
+	private final int canNull;
+	private final String typeName;
+	
 	private boolean bPrimaryKey;
 	private Reference foreignKey;
-	private int canNull;
-	
-	public String toString() {
-		return name + ":" + type;
-	}
-	
+
 	public Attribute(String name) {
 		this(name, 0, false, null, 0);
 	}
 
-	public Attribute(String name, int type) {
-		this(name, type, false, null, 0);
-	}
-	
 	/**
 	 * Use Attribute(String name, int type, boolean primaryKey, Reference foreignKey) instead.
 	 */
@@ -59,20 +54,17 @@ public class Attribute implements Serializable{
 		this(name, type, primaryKey, foreignKey, 0);
 	}
 
-	/**
-	 * Use Attribute(String name, int type, boolean primaryKey, Reference foreignKey, int canNull) instead.
-	 */
-	@Deprecated
-	public Attribute(String name, int type, boolean primaryKey, boolean foreignKey, int canNull) {
-		this(name, type, primaryKey, null, 0);
+	public Attribute(String name, int type, boolean primaryKey, Reference foreignKey, int canNull) {
+		this(name,type,primaryKey,foreignKey,canNull,null);		
 	}
 	
-	public Attribute(String name, int type, boolean primaryKey, Reference foreignKey, int canNull) {
+	public Attribute(String name, int type, boolean primaryKey, Reference foreignKey, int canNull, String typeName) {
 		this.name = name;
 		this.type = type;
 		this.bPrimaryKey = primaryKey;
 		this.foreignKey = foreignKey;
 		this.canNull = canNull;
+		this.typeName = typeName;
 	}
 	
 	public String getName() {
@@ -99,16 +91,22 @@ public class Attribute implements Serializable{
 		return foreignKey;
 	}
 	
-	/**
-	 * Determines whether this attribute object contains a
-	 * specified name.
+	/***
+	 * Returns the name of the SQL type associated with this attribute. Note, the name maybe not match
+	 * the integer SQL id. The integer SQL id comes from the {@link Types} class, and these are few. Often
+	 * databases match extra datatypes they may provide to the same ID, e.g., in MySQL YEAR (which doesn't
+	 * exists in standard SQL, is mapped to 91, the ID of DATE. This field helps in disambiguating this 
+	 * cases.
 	 * 
-	 * @param name
-	 * 			The name in question.
-	 * @return Returns true if the attribute has the name,
-	 * or false, otherwise.
+	 * @return
 	 */
-	public boolean hasName(String name) {
-		return (this.name.equals(name)) ? true : false;
+	public String getSQLTypeName() {
+		return typeName;
 	}
+	
+	@Override
+	public String toString() {
+		return name + ":" + type;
+	}
+		
 }

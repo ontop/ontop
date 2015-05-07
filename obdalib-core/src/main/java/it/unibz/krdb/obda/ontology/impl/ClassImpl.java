@@ -20,30 +20,45 @@ package it.unibz.krdb.obda.ontology.impl;
  * #L%
  */
 
+import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.OClass;
 
 public class ClassImpl implements OClass {
 
 	private static final long serialVersionUID = -4930755519806785384L;
 
-	private Predicate predicate;
+	private final Predicate predicate;
+	private final String string;
+	private final boolean isNothing, isThing;
 
-	private String str;
-
+	public static final String owlThingIRI = "http://www.w3.org/2002/07/owl#Thing";
+	public static final String owlNothingIRI  = "http://www.w3.org/2002/07/owl#Nothing";
+	
+    static final OClass owlThing = initialize(owlThingIRI); 
+    static final OClass owlNothing = initialize(owlNothingIRI); 
+    
+    private static OClass initialize(String uri) {
+    	final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
+		Predicate prop = ofac.getClassPredicate(uri);
+		return new ClassImpl(prop);  	
+    }
+	
+	
 	ClassImpl(Predicate p) {
 		this.predicate = p;
-		str = predicate.toString();
+		string = predicate.toString();
+		isNothing = predicate.getName().equals(owlNothingIRI);
+		isThing = predicate.getName().equals(owlThingIRI);
 	}
 
+	@Override
 	public Predicate getPredicate() {
 		return predicate;
 	}
 
-	public int hashCode() {
-		return toString().hashCode();
-	}
-
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof ClassImpl)) {
 			return false;
@@ -51,8 +66,26 @@ public class ClassImpl implements OClass {
 		ClassImpl concept2 = (ClassImpl) obj;
 		return (predicate.equals(concept2.getPredicate()));
 	}
+	
+	@Override
+	public int hashCode() {
+		return string.hashCode();
+	}
 
+	@Override
 	public String toString() {
-		return str;
+		return string;
+	}
+
+
+	@Override
+	public boolean isNothing() {
+		return isNothing;
+	}
+
+
+	@Override
+	public boolean isThing() {
+		return isThing;
 	}
 }

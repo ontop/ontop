@@ -44,6 +44,7 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
@@ -78,7 +79,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 	final String obdafile = "src/test/resources/test/metamapping.obda";
 
 	@Override
-	public void setUp() throws Exception {
+	protected void setUp() throws Exception {
 		
 		
 		/*
@@ -102,7 +103,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
-
+		in.close();
 		st.executeUpdate(bf.toString());
 		conn.commit();
 
@@ -119,13 +120,11 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 	}
 
 	@Override
-	public void tearDown() throws Exception {
-		try {
+	protected void tearDown() throws Exception {
+		
 			dropTables();
 			conn.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
+		
 	}
 
 	private void dropTables() throws SQLException, IOException {
@@ -140,7 +139,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
-
+		in.close();
 		st.executeUpdate(bf.toString());
 		st.close();
 		conn.commit();
@@ -154,7 +153,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 
 		factory.setPreferenceHolder(p);
 
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
 		// Now we are ready for querying
 		QuestOWLConnection conn = reasoner.getConnection();
@@ -190,12 +189,14 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 
 			} catch (Exception e) {
 				st.close();
+				throw e;
 			}
 			conn.close();
 			reasoner.dispose();
 		}
 	}
 
+	@Test
 	public void testViEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -206,6 +207,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 		runTests(p);
 	}
 	
+	@Test
 	public void testClassicEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();

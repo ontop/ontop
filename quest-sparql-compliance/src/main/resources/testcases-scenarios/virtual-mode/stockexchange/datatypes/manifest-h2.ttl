@@ -185,8 +185,8 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop- Team> ;
     mf:action
-            [ qt:query <integer-2.rq> ] ;
-    mf:result <integer-2.ttl> ;
+            [ qt:query <decimal-2.rq> ] ;
+    mf:result <decimal-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-h2.obda> .
     

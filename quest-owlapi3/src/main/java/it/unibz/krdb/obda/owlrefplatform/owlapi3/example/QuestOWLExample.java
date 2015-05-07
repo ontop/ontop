@@ -81,13 +81,8 @@ public class QuestOWLExample {
 		QuestOWLFactory factory = new QuestOWLFactory();
 		factory.setOBDAController(obdaModel);
 		factory.setPreferenceHolder(preference);
-		QuestOWL reasoner = (QuestOWL) factory.createReasoner(ontology, new SimpleConfiguration());
+		QuestOWL reasoner = factory.createReasoner(ontology, new SimpleConfiguration());
 
-		/*
-		 * Prepare the data connection for querying.
-		 */
-		QuestOWLConnection conn = reasoner.getConnection();
-		QuestOWLStatement st = conn.createStatement();
 
 		/*
 		 * Get the book information that is stored in the database
@@ -99,9 +94,16 @@ public class QuestOWLExample {
 				"		 ?y a :Author; :name ?author. \n" +
 				"		 ?z a :Edition; :editionNumber ?edition }";
 
-		try {
+		try (/*
+		 	 * Prepare the data connection for querying.
+		 	 */
+			 QuestOWLConnection conn = reasoner.getConnection();
+			 QuestOWLStatement st = conn.createStatement() )
+		{
+
+            long t1 = System.currentTimeMillis();
 			QuestOWLResultSet rs = st.executeTuple(sparqlQuery);
-			int columnSize = rs.getColumCount();
+			int columnSize = rs.getColumnCount();
 			while (rs.nextRow()) {
 				for (int idx = 1; idx <= columnSize; idx++) {
 					OWLObject binding = rs.getOWLObject(idx);
@@ -110,11 +112,12 @@ public class QuestOWLExample {
 				System.out.print("\n");
 			}
 			rs.close();
+            long t2 = System.currentTimeMillis();
 
 			/*
 			 * Print the query summary
 			 */
-			QuestOWLStatement qst = (QuestOWLStatement) st;
+			QuestOWLStatement qst = st;
 			String sqlQuery = qst.getUnfolding(sparqlQuery);
 
 			System.out.println();
@@ -126,18 +129,12 @@ public class QuestOWLExample {
 			System.out.println("The output SQL query:");
 			System.out.println("=====================");
 			System.out.println(sqlQuery);
+
+            System.out.println("Query Execution Time:");
+            System.out.println("=====================");
+            System.out.println((t2-t1) + "ms");
 			
 		} finally {
-			
-			/*
-			 * Close connection and resources
-			 */
-			if (st != null && !st.isClosed()) {
-				st.close();
-			}
-			if (conn != null && !conn.isClosed()) {
-				conn.close();
-			}
 			reasoner.dispose();
 		}
 	}

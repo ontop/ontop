@@ -38,7 +38,7 @@ public abstract class SesameAbstractRepo implements
 	boolean isinitialized = false;
 	
 	public SesameAbstractRepo() {
-		namespaces = new HashMap<String, String>();
+		namespaces = new HashMap<>();
 	}
 
 	public RepositoryConnection getConnection() throws RepositoryException {
@@ -46,8 +46,9 @@ public abstract class SesameAbstractRepo implements
 			this.repoConnection = new RepositoryConnection(this,
 					getQuestConnection());
 		} catch (OBDAException e) {
-			System.out.println("Error creating repo connecion!");
+			System.err.println("Error creating repo connection!");
 			e.printStackTrace();
+            throw new RepositoryException(e.getMessage());
 		}
 		return repoConnection;
 

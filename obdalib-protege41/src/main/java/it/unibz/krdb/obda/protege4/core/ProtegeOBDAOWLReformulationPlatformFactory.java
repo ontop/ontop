@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.protege4.core;
  */
 
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 
 import java.util.Properties;
 
@@ -31,7 +31,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeOWLReasonerInfo {
 
-	QuestOWLFactory factory = new QuestOWLFactory();
+	OntopOWLFactory factory = new OntopOWLFactory();
 
 	@Override
 	public BufferingMode getRecommendedBuffering() {
@@ -51,4 +51,14 @@ public class ProtegeOBDAOWLReformulationPlatformFactory extends AbstractProtegeO
 		factory.setOBDAController(model);
 	}
 
+	/**
+	 * Allows the user to supply database keys that are not in the database metadata
+	 * 
+	 * @param uc The user-supplied database constraints
+	 */
+	public void setImplicitDBConstraints(ImplicitDBConstraints uc) {
+		if(uc == null)
+			throw new NullPointerException();
+		factory.setImplicitDBConstraints(uc);
+	}
 }

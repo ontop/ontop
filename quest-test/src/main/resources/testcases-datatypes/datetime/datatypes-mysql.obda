@@ -19,7 +19,7 @@ target		:character-{id} a :Row ; :hasChar {type_char} ; :hasVarChar {type_varcha
 source		select id, type_char, type_varchar, type_text, type_enum, type_set, type_longtext, type_mediumtext, type_tinytext from Characters
 
 mappingId	Date-Time Types
-target		:datetime-{id} a :Row ; :hasDate {type_date} ; :hasDateTime {type_datetime} ; :hasTimestamp {type_timestamp} ; :hasTime {type_time} ; :hasYear {type_year} ; :hasDateTimeString {type_datetime}^^xsd:string ; :hasTimestampString {type_timestamp}^^xsd:string . 
+target		:datetime-{id} a :Row ; :hasDate {type_date}  ;  :hasDate2 {type_date}^^xsd:date ; :hasDateTime {type_datetime} ; :hasTimestamp {type_timestamp} ; :hasTime {type_time} ; :hasTime2 {type_time}^^xsd:time ; :hasYear {type_year}^^xsd:gYear ; :hasDateTimeString {type_datetime}^^xsd:string ;  :hasDateString {type_date}^^xsd:string ; :hasTimeString {type_time}^^xsd:string ; :hasTimestampString {type_timestamp}^^xsd:string ; :hasYearString {type_year}^^xsd:string .
 source		select id, type_date, type_datetime, type_timestamp, type_time, type_year from DateTimes
 
 mappingId	Boolean Types

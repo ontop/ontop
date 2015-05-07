@@ -26,24 +26,18 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
-
-import java.io.File;
-
-
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import junit.framework.TestCase;
-
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 /***
  * Tests that oracle identifiers for tables and columns are treated
@@ -118,12 +112,38 @@ public class OracleIdentifierTest extends TestCase {
 
 			} catch (Exception e) {
 				st.close();
+				assertTrue(false);
 			}
 			conn.close();
 			reasoner.dispose();
 		}
 		return retval;
 	}
+
+
+	private Boolean runASKTests(String query) throws Exception {
+		QuestOWLStatement st = conn.createStatement();
+		boolean retval;
+		try {
+			QuestOWLResultSet rs = st.executeTuple(query);
+			assertTrue(rs.nextRow());
+			OWLLiteral ind1 = rs.getOWLLiteral(1);
+			retval = ind1.parseBoolean();
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			try {
+
+			} catch (Exception e) {
+				st.close();
+				assertTrue(false);
+			}
+			conn.close();
+			reasoner.dispose();
+		}
+		return retval;
+	}
+
 
 	/**
 	 * Test use of lowercase, unquoted table, schema and column identifiers (also in target)
@@ -165,6 +185,12 @@ public class OracleIdentifierTest extends TestCase {
 		String val =  runTests(query);
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country5-Argentina>", val);
 	}
-	
+
+	public void testDual() throws Exception {
+		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> ASK WHERE {:Italy a :Country .} ";
+		Boolean val =  runASKTests(query);
+		assertTrue(val);
+	}
+
 }
 

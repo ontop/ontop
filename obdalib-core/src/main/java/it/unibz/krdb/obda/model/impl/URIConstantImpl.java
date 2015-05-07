@@ -22,23 +22,15 @@ package it.unibz.krdb.obda.model.impl;
 
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.Variable;
-
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Provides a storage to put the URI constant.
  */
-public class URIConstantImpl extends AbstractLiteral implements URIConstant {
+public class URIConstantImpl implements URIConstant {
 
 	private static final long serialVersionUID = -1263974895010238519L;
-
-
+	
 	private final int identifier;
-
 	private final String iristr;
 
 	protected URIConstantImpl(String iri) {
@@ -62,7 +54,7 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 
 	@Override
 	public String getURI() {
-		return this.iristr;
+		return iristr;
 	}
 
 	@Override
@@ -72,32 +64,16 @@ public class URIConstantImpl extends AbstractLiteral implements URIConstant {
 
 	@Override
 	public String toString() {
-		return TermUtil.toString(this);
+		return "<" + iristr + ">";
 	}
-
-	@Override
-	public Set<Variable> getReferencedVariables() {
-		return new LinkedHashSet<Variable>();
-	}
-
-	@Override
-	public Map<Variable, Integer> getVariableCount() {
-		return new HashMap<Variable, Integer>();
-	}
-
 
 	@Override
 	public COL_TYPE getType() {
 		return COL_TYPE.OBJECT;
 	}
 
-	@Override
+	@Deprecated
 	public String getValue() {
 		return iristr;
-	}
-
-	@Override
-	public String getLanguage() {
-		return null;
 	}
 }
