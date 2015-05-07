@@ -137,8 +137,13 @@ public class TableJSQL implements Serializable{
 
 	public String getTableName() {
 		return tableName;
-	}	
+	}
 
+	/**
+	 * The alias given to the table
+	 * See test  QuotedAliasTableTest
+	 * @param alias
+	 */
 	public void setAlias(Alias alias) {
 		if (alias == null) {
 			return;

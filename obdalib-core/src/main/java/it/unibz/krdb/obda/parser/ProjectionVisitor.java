@@ -241,6 +241,7 @@ public class ProjectionVisitor implements SelectVisitor, SelectItemVisitor, Expr
 	/*
 	 * The system cannot support function currently (non-Javadoc)
 	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.Function)
+	 * @link ConferenceConcatMySQLTest
 	 */
 	@Override
 	public void visit(Function function) {

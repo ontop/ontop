@@ -128,7 +128,7 @@ public class OracleSesameLIMITTest  {
 		DBMetadata dbMetadata = new DBMetadata(driver_class);
 		dbMetadata.add(defTable("hr.countries"));
 		dbMetadata.add(defTable("HR.countries"));
-		dbMetadata.add(defTable("dual"));
+		dbMetadata.add(new TableDefinition("dual"));
 		return dbMetadata;
 	}
 

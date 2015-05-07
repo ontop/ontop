@@ -27,6 +27,8 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
+import it.unibz.krdb.obda.parser.ProjectionVisitor;
+import it.unibz.krdb.obda.utils.Mapping2DatalogConverter;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -45,8 +47,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Test mysql case. CONCAT with table.columnName and string values.
- *
+ * Test
+ * CONCAT with table.columnName and string values that need to be change to literal
+ * use mysql.
+ * Refer to {@link Mapping2DatalogConverter} {@link ProjectionVisitor}
  */
 
 public class ConferenceConcatMySQLTest {
