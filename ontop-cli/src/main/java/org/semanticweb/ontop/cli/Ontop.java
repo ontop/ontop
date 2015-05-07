@@ -21,7 +21,7 @@ public class Ontop {
         CliBuilder<OntopCommand> builder = Cli.<OntopCommand>builder("ontop")
                 .withDescription("Ontop system for OBDA")
                 //.withDefaultCommand(Help.class)
-                .withCommands(OntopHelp.class, OntopMaterialize.class);
+                .withCommands(OntopHelp.class, OntopMaterialize.class, OntopQuery.class);
 
 //        builder.withGroup("query")
 //                .withDescription("Manage set of tracked repositories")
