@@ -1,32 +1,21 @@
 package org.semanticweb.ontop.cli;
 
-import io.airlift.airline.Arguments;
 import io.airlift.airline.Cli;
 import io.airlift.airline.Cli.CliBuilder;
-import io.airlift.airline.Command;
-
-import io.airlift.airline.Option;
 import io.airlift.airline.ParseArgumentsUnexpectedException;
 import io.airlift.airline.ParseCommandMissingException;
 import io.airlift.airline.ParseCommandUnrecognizedException;
 import io.airlift.airline.ParseOptionMissingException;
-import io.airlift.airline.help.Help;
-
-import java.util.List;
 
 public class Ontop {
 
     public static void main(String... args)
     {
         CliBuilder<OntopCommand> builder = Cli.<OntopCommand>builder("ontop")
-                .withDescription("Ontop system for OBDA")
+                .withDescription("Ontop system for Ontology based Data Access")
                 //.withDefaultCommand(Help.class)
                 .withCommands(OntopHelp.class, OntopMaterialize.class, OntopQuery.class);
 
-//        builder.withGroup("query")
-//                .withDescription("Manage set of tracked repositories")
-//                .withDefaultCommand(OntopQuery.class)
-//                .withCommands(OntopQuery.class, RemoteMaterialize.class);
 
         Cli<OntopCommand> ontopParser = builder.build();
 

@@ -56,7 +56,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
 @Command(name = "query",
-        description = "query the RDF graph exposed by the mapping and the OWL ontology")
+        description = "Query the RDF graph exposed by the mapping and the OWL ontology")
 public class OntopQuery extends OntopReasoningCommandBase {
 
     @Option(type = OptionType.COMMAND, name = {"-q", "--query"}, title = "queryFile",

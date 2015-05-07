@@ -3,7 +3,7 @@ package org.semanticweb.ontop.cli;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class OntopQueryCMDTest {
+public class OntopQueryTest {
 
 
     //@Ignore("too expensive to run")
@@ -32,10 +32,10 @@ public class OntopQueryCMDTest {
                 "-m", "/Users/xiao/Projects/iswc2014-benchmark/LUBM/univ-benchQL.ttl",
                 "-t", "/Users/xiao/Projects/iswc2014-benchmark/LUBM/univ-benchQL.owl",
                 "-o", "/tmp/q1.csv",
-                "-l",	"jdbc:mysql://10.7.20.39/lubm1",
-                "-u",	"fish",
-                "-p",	"fish",
-                "-c",	"com.mysql.jdbc.Driver",
+                "-l", "jdbc:mysql://10.7.20.39/lubm1",
+                "-u", "fish",
+                "-p", "fish",
+                "-c", "com.mysql.jdbc.Driver",
                 "-q", "/Users/xiao/Projects/iswc2014-benchmark/Ontop/q1.txt"
         };
         Ontop.main(argv);
