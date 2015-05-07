@@ -20,19 +20,17 @@ package it.unibz.krdb.obda.reformulation.tests;
  * #L%
  */
 
-import it.unibz.krdb.obda.ontology.Assertion;
+import it.unibz.krdb.obda.ontology.ABoxAssertion;
 import it.unibz.krdb.obda.owlapi3.OWLAPI3ABoxIterator;
-
-import java.io.File;
-import java.util.HashSet;
-import java.util.Iterator;
-
 import junit.framework.TestCase;
-
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+
+import java.io.File;
+import java.util.HashSet;
+import java.util.Iterator;
 
 public class OWLAPI2ABoxIteratorTest extends TestCase {
 
@@ -40,7 +38,7 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 		super.setUp();
 	}
 
-	public void testAssertionIterator() throws Exception {
+	public void testABoxAssertionIterator() throws Exception {
 		String owlfile = "src/test/resources/test/ontologies/translation/onto2.owl";
 
 		// Loading the OWL file
@@ -48,7 +46,7 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
 		Iterator<OWLAxiom> owliterator = ontology.getAxioms().iterator();
-		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(owliterator);
+		Iterator<ABoxAssertion> aboxit = new OWLAPI3ABoxIterator(owliterator);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -57,14 +55,14 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 		assertTrue("Count: " + count, count == 9);
 	}
 
-	public void testAssertionIterable() throws Exception {
+	public void testABoxAssertionIterable() throws Exception {
 		String owlfile = "src/test/resources/test/ontologies/translation/onto2.owl";
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(ontology.getAxioms());
+		Iterator<ABoxAssertion> aboxit = new OWLAPI3ABoxIterator(ontology.getAxioms());
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -73,9 +71,9 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 		assertTrue("Count: " + count, count == 9);
 	}
 	
-	public void testAssertionEmptyIterable() throws Exception {
+	public void testABoxAssertionEmptyIterable() throws Exception {
 
-		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(new HashSet<OWLAxiom>());
+		Iterator<ABoxAssertion> aboxit = new OWLAPI3ABoxIterator(new HashSet<OWLAxiom>());
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -88,14 +86,14 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 
 
 	
-	public void testAssertionOntology() throws Exception {
+	public void testABoxAssertionOntology() throws Exception {
 		String owlfile = "src/test/resources/test/ontologies/translation/onto2.owl";
 
 		// Loading the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
-		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(ontology);
+		Iterator<ABoxAssertion> aboxit = new OWLAPI3ABoxIterator(ontology);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -104,12 +102,12 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 		assertTrue("Count: " + count, count == 9);
 	}
 	
-	public void testAssertionEmptyOntology() throws Exception {
+	public void testABoxAssertionEmptyOntology() throws Exception {
 		
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.createOntology();
 
-		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(ontology);
+		Iterator<ABoxAssertion> aboxit = new OWLAPI3ABoxIterator(ontology);
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -118,7 +116,7 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 		assertTrue("Count: " + count, count == 0);
 	}
 	
-	public void testAssertionOntologies() throws Exception {
+	public void testABoxAssertionOntologies() throws Exception {
 		String owlfile1 = "src/test/resources/test/ontologies/translation/onto1.owl";
 		String owlfile2 = "src/test/resources/test/ontologies/translation/onto2.owl";
 		String owlfile3 = "src/test/resources/test/ontologies/translation/onto3.owl";
@@ -129,7 +127,7 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 		manager.loadOntologyFromOntologyDocument((new File(owlfile2)));
 		manager.loadOntologyFromOntologyDocument((new File(owlfile3)));
 
-		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(manager.getOntologies());
+		Iterator<ABoxAssertion> aboxit = new OWLAPI3ABoxIterator(manager.getOntologies());
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
@@ -138,9 +136,9 @@ public class OWLAPI2ABoxIteratorTest extends TestCase {
 		assertTrue("Count: " + count, count == 9);
 	}
 	
-	public void testAssertionEmptyOntologySet() throws Exception {
+	public void testABoxAssertionEmptyOntologySet() throws Exception {
 
-		Iterator<Assertion> aboxit = new OWLAPI3ABoxIterator(new HashSet<OWLOntology>());
+		Iterator<ABoxAssertion> aboxit = new OWLAPI3ABoxIterator(new HashSet<OWLOntology>());
 		int count = 0;
 		while (aboxit.hasNext()) {
 			count += 1;
