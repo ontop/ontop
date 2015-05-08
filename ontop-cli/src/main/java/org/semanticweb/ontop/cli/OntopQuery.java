@@ -64,8 +64,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
     private String queryFile;
 
 
-    public OntopQuery() {
-    }
+    public OntopQuery() { }
 
     @Override
     public void run() {

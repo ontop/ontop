@@ -35,7 +35,7 @@ public class OntopQueryTest {
                 "-l", "jdbc:mysql://10.7.20.39/lubm1",
                 "-u", "fish",
                 "-p", "fish",
-                "-c", "com.mysql.jdbc.Driver",
+                "-d", "com.mysql.jdbc.Driver",
                 "-q", "/Users/xiao/Projects/iswc2014-benchmark/Ontop/q1.txt"
         };
         Ontop.main(argv);
@@ -50,7 +50,7 @@ public class OntopQueryTest {
                 "-l",	"jdbc:mysql://10.7.20.39/lubm1",
                 "-u",	"fish",
                 "-p",	"fish",
-                "-c",	"com.mysql.jdbc.Driver",
+                "-d",	"com.mysql.jdbc.Driver",
                 "-q", "/Users/xiao/Projects/iswc2014-benchmark/Ontop/q5.txt"
         };
         Ontop.main(argv);
@@ -65,7 +65,7 @@ public class OntopQueryTest {
                 "-l",	"jdbc:mysql://10.7.20.39/lubm1",
                 "-u",	"fish",
                 "-p",	"fish",
-                "-c",	"com.mysql.jdbc.Driver",
+                "-d",	"com.mysql.jdbc.Driver",
                 "-q", "/Users/xiao/Projects/iswc2014-benchmark/Ontop/q5.txt"
         };
         Ontop.main(argv);

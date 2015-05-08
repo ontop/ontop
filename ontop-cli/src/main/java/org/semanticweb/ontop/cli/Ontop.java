@@ -14,8 +14,15 @@ public class Ontop {
         CliBuilder<OntopCommand> builder = Cli.<OntopCommand>builder("ontop")
                 .withDescription("Ontop system for Ontology based Data Access")
                 //.withDefaultCommand(Help.class)
-                .withCommands(OntopHelp.class, OntopQuery.class, OntopMaterialize.class, OntopBootstrap.class);
+                .withCommands(OntopHelp.class, OntopQuery.class, OntopMaterialize.class, OntopBootstrap.class,
+                        OntopCompile.class);
 
+
+        builder.withGroup("mapping")
+                .withDescription("Manipulate mapping files")
+                .withCommand(OntopOBDAToR2RML.class)
+                .withCommand(OntopR2RMLToOBDA.class)
+                .withCommand(OntopR2RMLPrettify.class);
 
         Cli<OntopCommand> ontopParser = builder.build();
 
@@ -38,25 +45,4 @@ public class Ontop {
         }
     }
 
-//
-//
-//    @Command(name = "query", description = "Gives some information about the query <name>")
-//    public static class OntopQuery extends OntopCommand
-//    {
-//        @Option(name = "-n", description = "Do not query query heads")
-//        public boolean noQuery;
-//
-//        @Arguments(description = "query")
-//        public String query;
-//    }
-//
-//    @Command(name = "materialize", description = "Materializes a query")
-//    public static class RemoteMaterialize extends OntopCommand
-//    {
-//        @Option(name = "-t", description = "Track only a specific branch")
-//        public String branch;
-//
-//        @Arguments(description = "Remote repository to materialize")
-//        public List<String> query;
-//    }
 }

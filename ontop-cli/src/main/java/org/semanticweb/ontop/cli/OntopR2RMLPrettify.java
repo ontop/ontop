@@ -22,6 +22,7 @@ package org.semanticweb.ontop.cli;
 
 
 import com.hp.hpl.jena.rdf.model.Model;
+import io.airlift.airline.Command;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
@@ -31,10 +32,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
-/**
- * Command line tool for making R2RML file pretty using Jena
- */
-public class OntopR2RMLPrettify {
+@Command(name = "pretty-r2rml",
+        description = "making R2RML file pretty using Jena")
+public class OntopR2RMLPrettify implements OntopCommand {
+
+
+
 
     public static void main(String[] args) throws FileNotFoundException {
 
@@ -53,6 +56,11 @@ public class OntopR2RMLPrettify {
         OutputStream out = new FileOutputStream(outputR2RMLFile);
 
         RDFDataMgr.write(out, model, RDFFormat.TURTLE_PRETTY) ;
+
+    }
+
+    @Override
+    public void run() {
 
     }
 }

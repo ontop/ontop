@@ -22,6 +22,12 @@ public class OntopTest {
         Ontop.main("help", "materialize");
     }
 
+    @Test
+    public void testOntopHelpMapping(){
+        Ontop.main("help", "mapping");
+    }
+
+
     @Ignore("too expensive")
     @Test
     public void testOntopMaterializeSeparateFiles (){
@@ -52,7 +58,7 @@ public class OntopTest {
                 "-l",	"jdbc:mysql://10.7.20.39/lubm1",
                 "-u",	"fish",
                 "-p",	"fish",
-                "-c",	"com.mysql.jdbc.Driver"
+                "-d",	"com.mysql.jdbc.Driver"
         };
         Ontop.main(argv);
     }
@@ -66,7 +72,7 @@ public class OntopTest {
                 "-l",	"jdbc:mysql://10.7.20.39/lubm1",
                 "-u",	"fish",
                 "-p",	"fish",
-                "-c",	"com.mysql.jdbc.Driver"
+                "-d",	"com.mysql.jdbc.Driver"
         };
         Ontop.main(argv);
     }
@@ -80,7 +86,7 @@ public class OntopTest {
                 "-U",	"jdbc:mysql://10.7.20.39/lubm1",
                 "-u",	"fish",
                 "-p",	"fish",
-                "-c",	"com.mysql.jdbc.Driver",
+                "-d",	"com.mysql.jdbc.Driver",
                 "--separate-files"
         };
         Ontop.main(argv);

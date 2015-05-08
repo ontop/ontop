@@ -23,7 +23,8 @@ package org.semanticweb.ontop.cli;
 import io.airlift.airline.Command;
 
 @Command(name = "compile",
-        description = "compile the ontology axioms to the mappings")
+        description = "compile the ontology axioms into  mappings",
+        hidden = true)
 public class OntopCompile implements OntopCommand {
 
     @Override
