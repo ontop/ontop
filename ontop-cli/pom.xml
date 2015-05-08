@@ -51,9 +51,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-maven-plugin</artifactId>
-            <version></version>
+            <groupId>org.eclipse.jetty.aggregate</groupId>
+            <artifactId>jetty-all</artifactId>
+            <version>9.3.0.M2</version>
         </dependency>
 
 
@@ -67,7 +67,6 @@
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
-
 
     </dependencies>
 </project>

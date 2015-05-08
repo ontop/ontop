@@ -123,31 +123,6 @@
                 </plugins>
             </build>
         </profile>
-
-        <!--profile for jcenter maven repo -->
-        <profile>
-            <repositories>
-                <repository>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                    <id>central</id>
-                    <name>bintray</name>
-                    <url>http://jcenter.bintray.com</url>
-                </repository>
-            </repositories>
-            <pluginRepositories>
-                <pluginRepository>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                    <id>central</id>
-                    <name>bintray-plugins</name>
-                    <url>http://jcenter.bintray.com</url>
-                </pluginRepository>
-            </pluginRepositories>
-            <id>bintray</id>
-        </profile>
     </profiles>
 
 	<properties>
@@ -159,7 +134,6 @@
         <sesame.version>2.7.10</sesame.version>
         <owlapi.version>3.4.10</owlapi.version>
 	</properties>
-
 
 	<build>
 		<pluginManagement>
