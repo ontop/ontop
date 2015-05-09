@@ -1,7 +1,12 @@
 package org.semanticweb.ontop.cli;
 
-/**
- * Created by xiao on 08/05/15.
- */
+
+import org.junit.Test;
+
 public class OntopServerTest {
+
+    @Test
+    public void testOntopServer(){
+        Ontop.main("server");
+    }
 }
