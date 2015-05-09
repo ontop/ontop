@@ -36,7 +36,7 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
     public boolean disableReasoning = false;
 
     @Option(type = OptionType.COMMAND, name = {"-o", "--output"},
-            title = "output", description = "output file (default) or directory (for --separate-files")
+            title = "output", description = "output file (default) or directory (for --separate-files)")
     protected String outputFile;
 
     protected static OWLOntologyFormat getOntologyFormat(String format) throws Exception {
