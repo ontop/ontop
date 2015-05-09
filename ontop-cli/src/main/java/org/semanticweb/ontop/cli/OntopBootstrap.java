@@ -12,7 +12,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import java.io.File;
 
 @Command(name = "bootstrap",
-        description = "Bootstrap ontology and mapping from the database", hidden = true)
+        description = "Bootstrap ontology and mapping from the database")
 public class OntopBootstrap extends OntopMappingOntologyRelatedCommand {
 
     @Option(type = OptionType.COMMAND, name = {"-b", "--base-uri"}, title = "baseURI",
