@@ -4,6 +4,10 @@ import org.junit.Test;
 
 public class OntopBootstrapTest {
 
+    @Test
+    public void testOntopHelp(){
+        Ontop.main("help", "bootstrap");
+    }
 
     @Test
     public void testOntopBootstrap (){
