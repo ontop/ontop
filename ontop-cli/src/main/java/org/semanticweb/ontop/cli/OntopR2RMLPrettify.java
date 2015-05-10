@@ -23,6 +23,8 @@ package org.semanticweb.ontop.cli;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import io.airlift.airline.Command;
+import io.airlift.airline.Option;
+import io.airlift.airline.OptionType;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
@@ -33,34 +35,45 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 @Command(name = "pretty-r2rml",
-        description = "making R2RML file pretty using Jena")
+        description = "prettify R2RML file using Jena")
 public class OntopR2RMLPrettify implements OntopCommand {
 
+    @Option(type = OptionType.COMMAND, name = {"-i", "--input"}, title = "input.ttl",
+            description = "Input mapping file in Ontop native format (.obda)", required = true)
+    protected String inputMappingFile;
 
-
+    @Option(type = OptionType.COMMAND, name = {"-o", "--output"}, title = "pretty.ttl",
+            description = "Input mapping file in Ontop native format (.obda)", required = true)
+    protected String outputMappingFile;
 
     public static void main(String[] args) throws FileNotFoundException {
 
-        if(args.length != 2){
-            System.err.println("Usage: org.semanticweb.ontop.cli.R2RMLPrettify r2rml.ttl prettified_r2rml.ttl");
-            System.err.println("");
-            System.exit(0);
-        }
-
-        String r2rmlFile = args[0];
-
-        String outputR2RMLFile = args[1];
-
-        Model model = RDFDataMgr.loadModel(new File(r2rmlFile).toURI().toString(), Lang.TURTLE);
-
-        OutputStream out = new FileOutputStream(outputR2RMLFile);
-
-        RDFDataMgr.write(out, model, RDFFormat.TURTLE_PRETTY) ;
+//        if(args.length != 2){
+//            System.err.println("Usage: org.semanticweb.ontop.cli.R2RMLPrettify r2rml.ttl prettified_r2rml.ttl");
+//            System.err.println("");
+//            System.exit(0);
+//        }
+//
+//        String r2rmlFile = args[0];
+//
+//        String outputR2RMLFile = args[1];
+//
+//        Model model = RDFDataMgr.loadModel(new File(r2rmlFile).toURI().toString(), Lang.TURTLE);
+//
+//        OutputStream out = new FileOutputStream(outputR2RMLFile);
+//
+//        RDFDataMgr.write(out, model, RDFFormat.TURTLE_PRETTY) ;
 
     }
 
     @Override
     public void run() {
-
+        try {
+            Model model = RDFDataMgr.loadModel(new File(inputMappingFile).toURI().toString(), Lang.TURTLE);
+            OutputStream out = new FileOutputStream(outputMappingFile);
+            RDFDataMgr.write(out, model, RDFFormat.TURTLE_PRETTY) ;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }

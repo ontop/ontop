@@ -40,12 +40,12 @@ public class OntopR2RMLToOBDA implements OntopCommand {
         R2RMLReader reader = new R2RMLReader(inputMappingFile);
 
         String jdbcurl = "jdbc:h2:tcp://localhost/DBName";
-        String username = "sa";
-        String password = "";
+        String username = "username";
+        String password = "password";
         String driverclass = "com.mysql.jdbc.Driver";
 
         OBDADataFactory f = OBDADataFactoryImpl.getInstance();
-        String sourceUrl =obdaURI.toString();
+        String sourceUrl = obdaURI.toString();
         OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcurl,
                 username, password, driverclass);
         OBDAModel model = reader.readModel(dataSource);

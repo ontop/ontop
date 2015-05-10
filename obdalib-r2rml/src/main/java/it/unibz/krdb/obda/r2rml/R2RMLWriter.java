@@ -33,6 +33,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -129,18 +130,30 @@ public class R2RMLWriter {
 	public void write(File file)
 	{
 		try {
-			R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
-			Collection<TriplesMap> coll = getTriplesMaps();
-			Model out = mm.exportMappings(coll, Model.class);			
-			FileOutputStream fos = new FileOutputStream(file);
-			Rio.write(out, fos, RDFFormat.TURTLE);
-			fos.close();
+            FileOutputStream fos = new FileOutputStream(file);
+			write(fos);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
 
+    /**
+     * the method to write the R2RML mappings
+     * from an rdf Model to a file
+     * @param os the output target
+     */
+    public void write(OutputStream os)
+    {
+        try {
+            R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
+            Collection<TriplesMap> coll = getTriplesMaps();
+            Model out = mm.exportMappings(coll, Model.class);
+            Rio.write(out, os, RDFFormat.TURTLE);
+            os.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 	
 	public static void main(String args[])

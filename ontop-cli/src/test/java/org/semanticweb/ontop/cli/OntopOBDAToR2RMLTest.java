@@ -22,7 +22,15 @@ public class OntopOBDAToR2RMLTest {
         Ontop.main(argv);
     }
 
-
+    @Test
+    public void testOntopOBDAToR2RML2 (){
+        String[] argv = {"mapping", "to-r2rml",
+                "-i", "src/test/resources/mapping-northwind.obda",
+                "-t", "src/test/resources/mapping-northwind.owl",
+                "-o", "src/test/resources/mapping-northwind.r2rml"
+        };
+        Ontop.main(argv);
+    }
 
 
 }
