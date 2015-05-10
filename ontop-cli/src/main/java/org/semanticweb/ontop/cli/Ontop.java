@@ -24,8 +24,9 @@ public class Ontop {
                         /**
                          * hidden commands
                          */
-                        OntopCompile.class,
-                        OntopServer.class);
+                        OntopCompile.class
+                        // OntopServer.class
+                );
 
 
         builder.withGroup("mapping")
