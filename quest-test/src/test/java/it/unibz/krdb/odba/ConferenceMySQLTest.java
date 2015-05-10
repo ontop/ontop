@@ -44,7 +44,9 @@ import java.util.Properties;
 import static org.junit.Assert.assertFalse;
 
 /**
- * Test mysql case. The mapping do not corresponds to the table in the database (uppercase difference) an error should be returned by the system.
+ * Test mysql jdbc driver.
+ * The mappings do not correspond to the table in the database
+ * (uppercase difference) : an error should be returned by the system.
  *
  */
 

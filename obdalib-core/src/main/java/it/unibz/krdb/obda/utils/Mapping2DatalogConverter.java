@@ -173,6 +173,8 @@ public class Mapping2DatalogConverter {
      * @param lookupTable
      * @author Dag Hovland
      *
+     * @link ConferenceConcatMySQLTest
+     *
      */
     private static void addFunctionAtoms(List<Function> bodyAtoms, ParsedSQLQuery parsedSQLQuery, LookupTable lookupTable) throws JSQLParserException {
     	ProjectionJSQL proj = parsedSQLQuery.getProjection();
