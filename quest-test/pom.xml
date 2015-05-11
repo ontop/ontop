@@ -45,8 +45,8 @@
 			<artifactId>owlapi-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
 			<type>jar</type>
 		</dependency>
 		<dependency>
@@ -100,7 +100,6 @@
             <artifactId>sesame-sparql-testsuite</artifactId>
         </dependency>
 
-					
         <dependency>
    			<groupId>com.google.guava</groupId>
    			<artifactId>guava</artifactId>

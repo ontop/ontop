@@ -58,11 +58,11 @@ public class ParserTest extends TestCase {
 
 	}
 
+	// Does not parse SELECT DISTINCT (on purpose restriction)
 	public void test_1_3_1() {
 		final boolean result = parseJSQL("SELECT DISTINCT name FROM student");
 		printJSQL("test_1_3_1", result);
-		assertTrue(result);
-
+		assertFalse(result);
 	}
 
 	public void test_1_3_2() {
@@ -72,10 +72,11 @@ public class ParserTest extends TestCase {
 
 	}
 
+	// Does not parse SELECT DISTINCT (on purpose restriction)
 	public void test_1_3_3() {
 		final boolean result = parseJSQL("select DISTINCT ON (name,age,year) name,age FROM student");
 		printJSQL("test_1_3_1", result);
-		assertTrue(result);
+		assertFalse(result);
 
 	}
 

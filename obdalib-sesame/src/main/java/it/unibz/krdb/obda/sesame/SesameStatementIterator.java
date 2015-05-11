@@ -44,6 +44,21 @@ public class SesameStatementIterator implements Iterator<Statement> {
 		return iterator.hasNext();
 	}
 
+
+    /* //another version which skips errors
+    public Statement next() {
+        try {
+            Assertion assertion = iterator.next();
+            Statement statement = new SesameStatement(assertion);
+            return statement;
+        } catch (IllegalArgumentException ex){
+            System.err.println("Skip the assertion cannot be converted into triple: ");
+            ex.printStackTrace();
+            return next();
+        }
+
+    }*/
+
 	public Statement next() {
 		Assertion assertion = iterator.next();
 		Statement individual = new SesameStatement(assertion);
