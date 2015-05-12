@@ -97,8 +97,10 @@ public class R2RMLImportAction extends ProtegeAction {
 								JOptionPane.showMessageDialog(workspace, "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
 							} else {
 								obdaModel.addMapping(sourceID, mapping);
+
 							}
 						}
+						JOptionPane.showMessageDialog(workspace, "R2rml Import completed. " );
 					} catch (DuplicateMappingException dm) {
 						JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
 						throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());

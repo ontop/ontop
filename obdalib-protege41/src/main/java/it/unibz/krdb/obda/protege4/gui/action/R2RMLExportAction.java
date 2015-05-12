@@ -80,6 +80,7 @@ public class R2RMLExportAction extends ProtegeAction {
 
                     R2RMLWriter writer = new R2RMLWriter(obdaModel, sourceID, modelManager.getActiveOntology());
                     writer.write(file);
+                    JOptionPane.showMessageDialog(workspace, "R2rml Export completed.");
                 }
             }
         } catch (Exception ex) {
