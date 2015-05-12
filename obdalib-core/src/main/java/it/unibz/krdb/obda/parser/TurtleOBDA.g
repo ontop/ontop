@@ -38,6 +38,7 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.utils.QueryUtils;
+import it.unibz.krdb.obda.model.URITemplatePredicate;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -331,17 +332,31 @@ private class ColumnString implements FormatString {
 		        } else if( ! QueryUtils.isGrounded(pred) ){
 		             atom = dfac.getTripleAtom(subject, pred,  object);
 		        } else {
-		             //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
-		             Predicate predicate;
-		             if(pred instanceof Function){
-		                  ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
-		                  predicate = dfac.getPredicate(pr.getValue(), 2);
-		             } else {
-		                  throw new IllegalArgumentException("predicate should be a URI Function");
-		             }
-		             atom = dfac.getFunction(predicate, subject, object);
-		       }
-		       return atom;
+                			             //Predicate predicate = dfac.getPredicate(pred.toString(), 2); // the data type cannot be determined here!
+                			             Predicate predicate;
+                			             if(pred instanceof Function) {
+                							 ValueConstant pr = (ValueConstant) ((Function) pred).getTerm(0);
+                							 if (object instanceof Variable) {
+                								 predicate = dfac.getPredicate(pr.getValue(), 2);
+                							 } else {
+                								 if (object instanceof Function) {
+                									 if (((Function) object).getFunctionSymbol() instanceof URITemplatePredicate) {
+
+                										 predicate = dfac.getObjectPropertyPredicate(pr.getValue());
+                									 } else {
+                										 predicate = dfac.getDataPropertyPredicate(pr.getValue());
+                									 }
+                								 }
+                									 else {
+                										 throw new IllegalArgumentException("parser cannot handle object " + object);
+                									 }
+                							 }
+                						 }else {
+                			                  throw new IllegalArgumentException("predicate should be a URI Function");
+                			             }
+                			             atom = dfac.getFunction(predicate, subject, object);
+                			       }
+                			       return atom;
 	  }
 
 

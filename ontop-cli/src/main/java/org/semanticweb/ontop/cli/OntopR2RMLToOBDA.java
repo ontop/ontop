@@ -12,7 +12,6 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 
 @Command(name = "to-obda",
@@ -37,6 +36,7 @@ public class OntopR2RMLToOBDA implements OntopCommand {
         File out = new File(outputMappingFile);
 
         URI obdaURI = new File(inputMappingFile).toURI();
+        try {
         R2RMLReader reader = new R2RMLReader(inputMappingFile);
 
         String jdbcurl = "jdbc:h2:tcp://localhost/DBName";
@@ -51,9 +51,9 @@ public class OntopR2RMLToOBDA implements OntopCommand {
         OBDAModel model = reader.readModel(dataSource);
 
         ModelIOManager modelIO = new ModelIOManager(model);
-        try {
+
             modelIO.save(out);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

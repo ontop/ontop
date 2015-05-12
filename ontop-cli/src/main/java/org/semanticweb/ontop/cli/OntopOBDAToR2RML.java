@@ -19,13 +19,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URI;
 
 @Command(name = "to-r2rml",
@@ -91,7 +85,11 @@ public class OntopOBDAToR2RML implements OntopCommand {
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        writer.write(outputStream);
+        try {
+            writer.write(outputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         String mappingStr= null;
 

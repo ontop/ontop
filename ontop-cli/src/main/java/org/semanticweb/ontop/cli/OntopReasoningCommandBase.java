@@ -15,13 +15,7 @@ import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import org.coode.owlapi.turtle.TurtleOntologyFormat;
 import org.semanticweb.owlapi.io.OWLXMLOntologyFormat;
 import org.semanticweb.owlapi.io.RDFXMLOntologyFormat;
-import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyFormat;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -112,7 +106,12 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
         OBDADataSource dataSource = f.getJDBCDataSource(sourceUrl, jdbcUrl,
                 username, password, driverClass);
 
-        R2RMLReader reader = new R2RMLReader(r2rmlFile);
+        R2RMLReader reader = null;
+        try {
+            reader = new R2RMLReader(r2rmlFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return reader.readModel(dataSource);
     }

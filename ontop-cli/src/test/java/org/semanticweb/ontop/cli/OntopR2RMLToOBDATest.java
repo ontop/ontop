@@ -22,6 +22,15 @@ public class OntopR2RMLToOBDATest {
         Ontop.main(argv);
     }
 
+    @Test
+    public void testOntopR2RMLToOBDA2 (){
+        String[] argv = {"mapping", "to-obda",
+                "-i", "src/test/resources/mapping.ttl",
+                "-o", "src/test/resources/mapping-booktutorial.obda"
+        };
+        Ontop.main(argv);
+    }
+
 
 
 }
