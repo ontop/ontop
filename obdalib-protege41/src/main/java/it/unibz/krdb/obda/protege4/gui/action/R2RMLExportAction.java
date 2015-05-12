@@ -84,7 +84,7 @@ public class R2RMLExportAction extends ProtegeAction {
                 }
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "An error occured. For more info, see the logs.");
+            JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
             log.error("Error during r2rml export. \n");
             ex.printStackTrace();
         }
