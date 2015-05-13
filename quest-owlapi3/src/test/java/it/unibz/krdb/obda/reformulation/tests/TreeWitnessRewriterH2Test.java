@@ -161,6 +161,7 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		conn.commit();
@@ -200,6 +201,7 @@ public class TreeWitnessRewriterH2Test extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
+		in.close();
 
 		st.executeUpdate(bf.toString());
 		st.close();

@@ -20,43 +20,21 @@ package it.unibz.krdb.obda.io;
  * #L%
  */
 
-import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.exception.Indicator;
-import it.unibz.krdb.obda.exception.InvalidMappingException;
-import it.unibz.krdb.obda.exception.InvalidPredicateDeclarationException;
-import it.unibz.krdb.obda.exception.UnsupportedTagException;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
+import it.unibz.krdb.obda.exception.*;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.obda.parser.TargetQueryParser;
-import it.unibz.krdb.obda.parser.TargetQueryParserException;
-import it.unibz.krdb.obda.parser.TurtleOBDASyntaxParser;
-import it.unibz.krdb.obda.parser.TurtleSyntaxParser;
-import it.unibz.krdb.obda.parser.UnparsableTargetQueryException;
+import it.unibz.krdb.obda.parser.*;
 import it.unibz.krdb.obda.renderer.SourceQueryRenderer;
 import it.unibz.krdb.obda.renderer.TargetQueryRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
+import java.io.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class manages saving and loading an OBDA file.
@@ -163,7 +141,7 @@ public class ModelIOManager {
     /**
      * The load/read operation.
      * 
-     * @param fileLocation
+     * @param file
      *          The target file object from which the model is loaded.
      * @throws IOException
      * @throws InvalidPredicateDeclarationException

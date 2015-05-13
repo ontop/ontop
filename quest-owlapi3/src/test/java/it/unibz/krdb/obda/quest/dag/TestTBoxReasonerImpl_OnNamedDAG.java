@@ -21,14 +21,14 @@ package it.unibz.krdb.obda.quest.dag;
  */
 
 
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
+import it.unibz.krdb.obda.ontology.DataRangeExpression;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.EquivalencesDAG;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Intersection;
-import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.NamedDAG;
+import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.SemanticIndexBuilder;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
 import java.util.Iterator;
@@ -52,18 +52,24 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 @Deprecated
 public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 
-	private EquivalencesDAG<PropertyExpression> propertyDAG;
-	private EquivalencesDAG<BasicClassDescription> classDAG;
+	private final EquivalencesDAG<ObjectPropertyExpression> objectPropertyDAG;
+	private final EquivalencesDAG<DataPropertyExpression> dataPropertyDAG;
+	private final EquivalencesDAG<ClassExpression> classDAG;
+	private final EquivalencesDAG<DataRangeExpression> dataRangeDAG;
 
 	/**
 	 * Constructor using a DAG or a named DAG
 	 * @param dag DAG to be used for reasoning
 	 */
 	public TestTBoxReasonerImpl_OnNamedDAG(TBoxReasoner reasoner) {
-		NamedDAG dag = new NamedDAG(reasoner);
-		
-		this.propertyDAG = new EquivalencesDAGImpl<PropertyExpression>(dag.getPropertyDag(), reasoner.getProperties());
-		this.classDAG = new EquivalencesDAGImpl<BasicClassDescription>(dag.getClassDag(), reasoner.getClasses());		
+		this.objectPropertyDAG = new EquivalencesDAGImpl<>(
+				SemanticIndexBuilder.getNamedDAG(reasoner.getObjectPropertyDAG()), reasoner.getObjectPropertyDAG());
+		this.dataPropertyDAG = new EquivalencesDAGImpl<>(
+				SemanticIndexBuilder.getNamedDAG(reasoner.getDataPropertyDAG()), reasoner.getDataPropertyDAG());
+		this.classDAG = new EquivalencesDAGImpl<>(
+				SemanticIndexBuilder.getNamedDAG(reasoner.getClassDAG()), reasoner.getClassDAG());
+		this.dataRangeDAG = new EquivalencesDAGImpl<>(
+					SemanticIndexBuilder.getNamedDAG(reasoner.getDataRangeDAG()), reasoner.getDataRangeDAG());
 	}
 
 	
@@ -73,9 +79,20 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<PropertyExpression> getProperties() {
-		return propertyDAG;
+	public EquivalencesDAG<ObjectPropertyExpression> getObjectPropertyDAG() {
+		return objectPropertyDAG;
 	}
+	
+	/**
+	 * Return the DAG of properties
+	 * 
+	 * @return DAG 
+	 */
+
+	public EquivalencesDAG<DataPropertyExpression> getDataPropertyDAG() {
+		return dataPropertyDAG;
+	}
+
 
 	/**
 	 * Return the DAG of classes
@@ -83,8 +100,12 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 	 * @return DAG 
 	 */
 
-	public EquivalencesDAG<BasicClassDescription> getClasses() {
+	public EquivalencesDAG<ClassExpression> getClassDAG() {
 		return classDAG;
+	}
+
+	public EquivalencesDAG<DataRangeExpression> getDataRangeDAG() {
+		return dataRangeDAG;
 	}
 
 	/**
@@ -214,14 +235,20 @@ public class TestTBoxReasonerImpl_OnNamedDAG implements TBoxReasoner {
 	}
 
 	@Override
-	public OClass getClassRepresentative(Predicate p) {
+	public OClass getClassRepresentative(OClass p) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
 	@Override
-	public PropertyExpression getPropertyRepresentative(Predicate p) {
+	public ObjectPropertyExpression getObjectPropertyRepresentative(ObjectPropertyExpression p) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public DataPropertyExpression getDataPropertyRepresentative(DataPropertyExpression p) {
 		// TODO Auto-generated method stub
 		return null;
 	}

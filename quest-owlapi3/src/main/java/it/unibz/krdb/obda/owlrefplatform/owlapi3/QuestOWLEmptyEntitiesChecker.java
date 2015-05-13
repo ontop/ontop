@@ -21,11 +21,11 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  */
 
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
-import it.unibz.krdb.obda.owlrefplatform.core.QuestConnection;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +57,7 @@ public class QuestOWLEmptyEntitiesChecker {
 	 * @throws Exception
 	 */
 	public QuestOWLEmptyEntitiesChecker(OWLOntology onto, QuestOWLConnection conn) throws Exception {
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 
 		this.onto = translator.translate(onto);
 		this.conn = conn;
@@ -127,7 +127,7 @@ public class QuestOWLEmptyEntitiesChecker {
 		}
 		log.debug(emptyConcepts.size() + " Empty concept/s: " + emptyConcepts);
 
-		for (PropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
+		for (ObjectPropertyExpression prop : onto.getVocabulary().getObjectProperties()) {
 			Predicate role = prop.getPredicate();
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
 				emptyRoles.add(role);
@@ -135,7 +135,7 @@ public class QuestOWLEmptyEntitiesChecker {
 		}
 		log.debug(emptyRoles.size() + " Empty role/s: " + emptyRoles);
 
-		for (PropertyExpression prop : onto.getVocabulary().getDataProperties()) {
+		for (DataPropertyExpression prop : onto.getVocabulary().getDataProperties()) {
 			Predicate role = prop.getPredicate();
 			if (!runSPARQLRolesQuery("<" + role.getName() + ">")) {
 				emptyRoles.add(role);

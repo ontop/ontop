@@ -20,57 +20,73 @@ package it.unibz.krdb.obda.ontology;
  * #L%
  */
 
-import java.util.Set;
-
-import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.ValueConstant;
 
 public interface OntologyFactory {
 
+	public Ontology createOntology();
+	
+	
 	public OClass createClass(String uri);
 
-	public Datatype createDataType(Predicate p);
+	public OClass getThing();
+
+	public OClass getNothing();
+	
+	
+	
+	public Datatype createDataType(Predicate.COL_TYPE type);
+	
+	
 	
 	public ObjectPropertyExpression createObjectProperty(String uri);
 	
+	public ObjectPropertyExpression getTopObjectProperty();
+	
+	public ObjectPropertyExpression getBottomObjectProperty();
+
+	
+	
 	public DataPropertyExpression createDataProperty(String uri);
 
+	public DataPropertyExpression getTopDataProperty();
+	
+	public DataPropertyExpression getBottomDataProperty();
 	
 	
-	public Ontology createOntology();
+	/**
+	 * creates an object property assertion 
+	 * (ensures that the property is not inverse by swapping arguments if necessary)
+	 * 
+	 * @param prop
+	 * @param o1
+	 * @param o2
+	 * @return
+	 */
+	
+	public ObjectPropertyAssertion createObjectPropertyAssertion(ObjectPropertyExpression prop, ObjectConstant o1, ObjectConstant o2);
 
+	/**
+	 * creates a data property assertion 
+	 * 
+	 * @param prop
+	 * @param o1
+	 * @param o2
+	 * @return
+	 */
+	
+	public DataPropertyAssertion createDataPropertyAssertion(DataPropertyExpression prop, ObjectConstant o1, ValueConstant o2);
 
+	/**
+	 * creates a class assertion 
+	 * 
+	 * @param concept
+	 * @param o
+	 * @return
+	 */
 	
-	public SubClassOfAxiom createSubClassAxiom(ClassExpression concept1, BasicClassDescription concept2);
-
-	public SubClassOfAxiom createSubClassAxiom(DataRangeExpression concept1, DataRangeExpression concept2);
-	
-	public SubPropertyOfAxiom createSubPropertyAxiom(ObjectPropertyExpression included, ObjectPropertyExpression including);
-
-	public SubPropertyOfAxiom createSubPropertyAxiom(DataPropertyExpression included, DataPropertyExpression including);
-
-	@Deprecated // used only in YAGOTest 
-	public SubPropertyOfAxiom createSubPropertyAxiom(PropertyExpression included, PropertyExpression including);
-	
-	@Deprecated // generic property is to be eliminated (used in SemIndex and YAGO)
-	public PropertyExpression createProperty(String uri);
-	
-	
-	public SomeValuesFrom createPropertySomeRestriction(PropertyExpression role);
-	
-	public DataPropertyRangeExpression createDataPropertyRange(DataPropertyExpression role);
-	
-	
-	public FunctionalPropertyAxiom createPropertyFunctionalAxiom(PropertyExpression role);
-	
-	public DisjointClassesAxiom createDisjointClassesAxiom(Set<ClassExpression> classes);
-	
-	public DisjointPropertiesAxiom createDisjointPropertiesAxiom(Set<PropertyExpression> props);
-	
-	public PropertyAssertion createPropertyAssertion(PropertyExpression attribute, ObjectConstant o1, Constant o2);
-	
-	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant object);
-
+	public ClassAssertion createClassAssertion(OClass concept, ObjectConstant o);
 
 }

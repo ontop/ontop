@@ -24,7 +24,7 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualIterator;
+import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualAxiomIterator;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.OWLAPI3Materializer;
 
 import java.io.BufferedWriter;
@@ -64,7 +64,8 @@ public class ABoxMaterializerExample {
 		 * Start materializing data from database to triples.
 		 */
 
-		OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel);
+		// TODO: try the streaming mode.
+		OWLAPI3Materializer materializer = new OWLAPI3Materializer(obdaModel, false);
 		
 		long numberOfTriples = materializer.getTriplesCount();
 		System.out.println("Generated triples: " + numberOfTriples);
@@ -72,7 +73,7 @@ public class ABoxMaterializerExample {
 		/*
 		 * Obtain the triples iterator
 		 */
-		QuestOWLIndividualIterator triplesIter = materializer.getIterator();
+		QuestOWLIndividualAxiomIterator triplesIter = materializer.getIterator();
 		
 		/*
 		 * Print the triples into an external file.

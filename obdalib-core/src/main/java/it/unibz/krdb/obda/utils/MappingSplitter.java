@@ -49,24 +49,7 @@ import java.util.List;
  */
 public class MappingSplitter {
 
-	/**
-	 * This class split the mappings
-	 * 
-	 *  <pre> q1, q2, ... qn <- SQL </pre>
-	 *  
-	 *   into n mappings
-	 *   
-	 *  <pre> q1 <-SQL , ..., qn <- SQL </pre>
-	 * 
-	 * 
-	 * @author xiao
-	 *
-	 */
-	public MappingSplitter() {
-
-	}
-
-	private List<OBDAMappingAxiom> splitMappings(List<OBDAMappingAxiom> mappings) {
+	private static List<OBDAMappingAxiom> splitMappings(List<OBDAMappingAxiom> mappings) {
 
 		List<OBDAMappingAxiom> newMappings = new ArrayList<OBDAMappingAxiom>();
 		
@@ -108,7 +91,7 @@ public class MappingSplitter {
 	 * @param obdaModel
 	 * @param sourceURI
 	 */
-	public void splitMappings(OBDAModel obdaModel, URI sourceURI) {
+	public static void splitMappings(OBDAModel obdaModel, URI sourceURI) {
 		List<OBDAMappingAxiom> splittedMappings = splitMappings(obdaModel.getMappings(sourceURI));
 		
 		obdaModel.removeAllMappings();

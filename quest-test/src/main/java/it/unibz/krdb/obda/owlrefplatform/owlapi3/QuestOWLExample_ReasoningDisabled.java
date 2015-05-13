@@ -176,8 +176,6 @@ public class QuestOWLExample_ReasoningDisabled {
         queries[24]="PREFIX :	<http://www.example.org/>  SELECT ?x   WHERE {?x a  :4Tab1 . } ";
 */
 
-        StringBuilder csvOut = new StringBuilder();
-
 
         int j=0;
         while (j < queries.length){

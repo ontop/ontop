@@ -16,7 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openrdf.model.Model;
 import org.openrdf.query.Query;
-import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;

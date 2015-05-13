@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.14.0</version>
+		<version>1.15.0</version>
 	</parent>
 	<artifactId>ontop-reformulation-core</artifactId>
 	<name>ontop-reformulation-core</name>
@@ -45,8 +45,8 @@
 		</dependency>
 			
 		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
 			<scope>test</scope>		
 			<type>jar</type>
 		</dependency>
@@ -60,7 +60,11 @@
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-jdbc</artifactId>
-		</dependency>     
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
 	</dependencies>
 	
 	<properties>

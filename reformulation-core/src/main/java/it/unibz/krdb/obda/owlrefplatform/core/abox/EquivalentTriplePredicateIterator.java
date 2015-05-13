@@ -21,14 +21,15 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  */
 
 import it.unibz.krdb.obda.model.ObjectConstant;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.ValueConstant;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 
@@ -67,34 +68,31 @@ public class EquivalentTriplePredicateIterator implements Iterator<Assertion> {
 	private Assertion getNormal(Assertion assertion) {
 		if (assertion instanceof ClassAssertion) {
 			ClassAssertion ca = (ClassAssertion) assertion;
-			Predicate concept = ca.getConcept().getPredicate();
-			OClass description = reasoner.getClassRepresentative(concept);
+			OClass description = reasoner.getClassRepresentative(ca.getConcept());
 			
 			if (description != null) {
 				ObjectConstant object = ca.getIndividual();
 				return ofac.createClassAssertion(description, object);
 			}			
 		} 
-		else if (assertion instanceof PropertyAssertion) {
-			PropertyAssertion opa = (PropertyAssertion) assertion;
-			Predicate role = opa.getProperty().getPredicate();
-			PropertyExpression property = reasoner.getPropertyRepresentative(role);
+		else if (assertion instanceof ObjectPropertyAssertion) {
+			ObjectPropertyAssertion opa = (ObjectPropertyAssertion) assertion;
+			ObjectPropertyExpression property = reasoner.getObjectPropertyRepresentative(opa.getProperty());
 			
 			if (property != null) {
 				ObjectConstant object1 = opa.getSubject();
-				if (opa.getValue2() instanceof ValueConstant) {
-					ValueConstant constant = (ValueConstant)opa.getValue2();
-					return ofac.createPropertyAssertion(property, object1, constant);					
-				}
-				else {
-					ObjectConstant object2 = (ObjectConstant)opa.getValue2();
-					if (property.isInverse()) {
-						PropertyExpression notinv = property.getInverse();
-						return ofac.createPropertyAssertion(notinv, object2, object1);
-					} else {
-						return ofac.createPropertyAssertion(property, object1, object2);
-					}
-				}
+				ObjectConstant object2 = opa.getObject();
+				return ofac.createObjectPropertyAssertion(property, object1, object2);
+			}
+		} 
+		else if (assertion instanceof DataPropertyAssertion) {
+			DataPropertyAssertion opa = (DataPropertyAssertion) assertion;
+			DataPropertyExpression property = reasoner.getDataPropertyRepresentative(opa.getProperty());
+			
+			if (property != null) {
+				ObjectConstant object1 = opa.getSubject();
+				ValueConstant constant = opa.getValue();
+				return ofac.createDataPropertyAssertion(property, object1, constant);					
 			}
 		} 
 		return assertion;

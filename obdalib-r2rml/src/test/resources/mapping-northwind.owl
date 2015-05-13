@@ -1,0 +1,1292 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY annotations "http://eu.optique.ontology/annotations#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND#"
+     xml:base="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:annotations="http://eu.optique.ontology/annotations#">
+    <owl:Ontology rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND">
+        <owl:versionIRI rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/1.4"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://eu.optique.ontology/annotations#data_values -->
+
+    <owl:AnnotationProperty rdf:about="&annotations;data_values"/>
+    
+
+
+    <!-- http://eu.optique.ontology/annotations#domain_class -->
+
+    <owl:AnnotationProperty rdf:about="&annotations;domain_class"/>
+    
+
+
+    <!-- http://eu.optique.ontology/annotations#geoLocation -->
+
+    <owl:AnnotationProperty rdf:about="&annotations;geoLocation"/>
+    
+
+
+    <!-- http://eu.optique.ontology/annotations#hidden -->
+
+    <owl:AnnotationProperty rdf:about="&annotations;hidden"/>
+    
+
+
+    <!-- http://eu.optique.ontology/annotations#max_value -->
+
+    <owl:AnnotationProperty rdf:about="&annotations;max_value"/>
+    
+
+
+    <!-- http://eu.optique.ontology/annotations#min_value -->
+
+    <owl:AnnotationProperty rdf:about="&annotations;min_value"/>
+    
+
+
+    <!-- http://eu.optique.ontology/annotations#range_class -->
+
+    <owl:AnnotationProperty rdf:about="&annotations;range_class"/>
+    
+
+
+    <!-- http://eu.optique.ontology/annotations#temporal -->
+
+    <owl:AnnotationProperty rdf:about="&annotations;temporal"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/COMPANY/LOCATION -->
+
+    <owl:ObjectProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/COMPANY/LOCATION">
+        <rdfs:label>COMPANY.LOCATION</rdfs:label>
+        <rdfs:comment>COMPANY.LOCATION</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY"/>
+        <annotations:range_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+        <rdfs:range rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/LOCATION -->
+
+    <owl:ObjectProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/LOCATION">
+        <rdfs:label>EMPLOYEES.LOCATION</rdfs:label>
+        <rdfs:comment>EMPLOYEES.LOCATION</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:range_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+        <rdfs:range rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/REPORTSTO -->
+
+    <owl:ObjectProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/REPORTSTO">
+        <rdfs:label rdf:datatype="&xsd;string">EMPLOYEES.REPORTSTO</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">EMPLOYEES.REPORTSTO</rdfs:comment>
+        <rdfs:range rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:range_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEETERRITORIES/EMPLOYEES_has_TERRITORIES -->
+
+    <owl:ObjectProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEETERRITORIES/EMPLOYEES_has_TERRITORIES">
+        <rdfs:label rdf:datatype="&xsd;string">EMPLOYEES_has_TERRITORIES</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">From many to many table: EMPLOYEETERRITORIES</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:range_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES"/>
+        <rdfs:range rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES"/>
+        <owl:inverseOf rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEETERRITORIES/TERRITORIES_has_EMPLOYEES"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEETERRITORIES/TERRITORIES_has_EMPLOYEES -->
+
+    <owl:ObjectProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEETERRITORIES/TERRITORIES_has_EMPLOYEES">
+        <rdfs:label rdf:datatype="&xsd;string">TERRITORIES_has_EMPLOYEES</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">From many to many table: EMPLOYEETERRITORIES</rdfs:comment>
+        <rdfs:range rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:range_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDER/SHIPLOCATION -->
+
+    <owl:ObjectProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDER/SHIPLOCATION">
+        <rdfs:label>ORDERS.SHIPLOCATION</rdfs:label>
+        <rdfs:comment>ORDERS.SHIPLOCATION</rdfs:comment>
+        <annotations:range_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+        <rdfs:range rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/ORDERID -->
+
+    <owl:ObjectProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/ORDERID">
+        <rdfs:label rdf:datatype="&xsd;string">ORDERDETAILS.ORDERID</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">ORDERDETAILS.ORDERID</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS"/>
+        <annotations:range_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <rdfs:range rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/PRODUCTID -->
+
+    <owl:ObjectProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/PRODUCTID">
+        <rdfs:label rdf:datatype="&xsd;string">ORDERDETAILS.PRODUCTID</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">ORDERDETAILS.PRODUCTID</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS"/>
+        <annotations:range_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <rdfs:range rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/CUSTOMERID -->
+
+    <owl:ObjectProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/CUSTOMERID">
+        <rdfs:label rdf:datatype="&xsd;string">ORDERS.CUSTOMERID</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">ORDERS.CUSTOMERID</rdfs:comment>
+        <rdfs:range rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CUSTOMERS"/>
+        <annotations:range_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CUSTOMERS"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/EMPLOYEEID -->
+
+    <owl:ObjectProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/EMPLOYEEID">
+        <rdfs:label rdf:datatype="&xsd;string">ORDERS.EMPLOYEEID</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">ORDERS.EMPLOYEEID</rdfs:comment>
+        <annotations:range_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:range rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/SHIPVIA -->
+
+    <owl:ObjectProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/SHIPVIA">
+        <rdfs:label rdf:datatype="&xsd;string">ORDERS.SHIPVIA</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">ORDERS.SHIPVIA</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <rdfs:range rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SHIPPERS"/>
+        <annotations:range_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SHIPPERS"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/SUPPLIERID -->
+
+    <owl:ObjectProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/SUPPLIERID">
+        <rdfs:label rdf:datatype="&xsd;string">PRODUCTS.SUPPLIERID</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">PRODUCTS.SUPPLIERID</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <rdfs:range rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS"/>
+        <annotations:range_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES/REGIONID -->
+
+    <owl:ObjectProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES/REGIONID">
+        <rdfs:label rdf:datatype="&xsd;string">TERRITORIES.REGIONID</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">TERRITORIES.REGIONID</rdfs:comment>
+        <rdfs:range rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION"/>
+        <annotations:range_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/CONTACTTITLE -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/CONTACTTITLE">
+        <rdfs:label rdf:datatype="&xsd;string">COMPANY.CONTACTTITLE</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">COMPANY.CONTACTTITLE</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/FAX -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/FAX">
+        <rdfs:label rdf:datatype="&xsd;string">COMPANY.FAX</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">COMPANY.FAX</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/NAME -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/NAME">
+        <rdfs:label rdf:datatype="&xsd;string">COMPANY.NAME</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">COMPANY.NAME</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/PHONE -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY/PHONE">
+        <rdfs:label rdf:datatype="&xsd;string">COMPANY.PHONE</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">COMPANY.PHONE</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CONTACT/CONTACTNAME -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CONTACT/CONTACTNAME">
+        <rdfs:label rdf:datatype="&xsd;string">COMPANY.CONTACTNAME</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">COMPANY.CONTACTNAME</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CUSTOMERS/CUSTOMERID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CUSTOMERS/CUSTOMERID">
+        <rdfs:label rdf:datatype="&xsd;string">CUSTOMERS.CUSTOMERID</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">CUSTOMERS.CUSTOMERID</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CUSTOMERS"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CUSTOMERS"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/BIRTHDATE -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/BIRTHDATE">
+        <rdfs:label rdf:datatype="&xsd;string">EMPLOYEES.BIRTHDATE</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">EMPLOYEES.BIRTHDATE</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+        <annotations:range_class rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/EMPLOYEEID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/EMPLOYEEID">
+        <rdfs:label rdf:datatype="&xsd;string">EMPLOYEES.EMPLOYEEID</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">EMPLOYEES.EMPLOYEEID</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:range_class rdf:resource="&xsd;integer"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/EXTENSION -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/EXTENSION">
+        <rdfs:label rdf:datatype="&xsd;string">EMPLOYEES.EXTENSION</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">EMPLOYEES.EXTENSION</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/FIRSTNAME -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/FIRSTNAME">
+        <rdfs:label rdf:datatype="&xsd;string">EMPLOYEES.FIRSTNAME</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">EMPLOYEES.FIRSTNAME</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/HIREDATE -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/HIREDATE">
+        <rdfs:label rdf:datatype="&xsd;string">EMPLOYEES.HIREDATE</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">EMPLOYEES.HIREDATE</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:range_class rdf:resource="&xsd;dateTime"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/HOMEPHONE -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/HOMEPHONE">
+        <rdfs:label rdf:datatype="&xsd;string">EMPLOYEES.HOMEPHONE</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">EMPLOYEES.HOMEPHONE</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/LASTNAME -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/LASTNAME">
+        <rdfs:label rdf:datatype="&xsd;string">EMPLOYEES.LASTNAME</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">EMPLOYEES.LASTNAME</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/NOTES -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/NOTES">
+        <rdfs:label rdf:datatype="&xsd;string">EMPLOYEES.NOTES</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">EMPLOYEES.NOTES</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/PHOTO -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/PHOTO">
+        <rdfs:label rdf:datatype="&xsd;string">EMPLOYEES.PHOTO</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">EMPLOYEES.PHOTO</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:range rdf:resource="&xsd;base64Binary"/>
+        <annotations:range_class rdf:resource="&xsd;base64Binary"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/PHOTOPATH -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/PHOTOPATH">
+        <rdfs:label rdf:datatype="&xsd;string">EMPLOYEES.PHOTOPATH</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">EMPLOYEES.PHOTOPATH</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/SALARY -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/SALARY">
+        <rdfs:label rdf:datatype="&xsd;string">EMPLOYEES.SALARY</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">EMPLOYEES.SALARY</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:range rdf:resource="&rdfs;Literal"/>
+        <annotations:range_class rdf:resource="&rdfs;Literal"/>
+        <annotations:range_class rdf:resource="&xsd;double"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/TITLE -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/TITLE">
+        <rdfs:label rdf:datatype="&xsd;string">EMPLOYEES.TITLE</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">EMPLOYEES.TITLE</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/TITLEOFCOURTESY -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/TITLEOFCOURTESY">
+        <rdfs:label rdf:datatype="&xsd;string">EMPLOYEES.TITLEOFCOURTESY</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">EMPLOYEES.TITLEOFCOURTESY</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/ADDRESS -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/ADDRESS">
+        <rdfs:label rdf:datatype="&xsd;string">LOCATION.ADDRESS</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">LOCATION.ADDRESS</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/CITY -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/CITY">
+        <rdfs:label rdf:datatype="&xsd;string">LOCATION.CITY</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">LOCATION.CITY</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/COUNTRY -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/COUNTRY">
+        <rdfs:label rdf:datatype="&xsd;string">LOCATION.COUNTRY</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">LOCATION.COUNTRY</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/POSTALCODE">
+        <rdfs:label rdf:datatype="&xsd;string">LOCATION.POSTALCODE</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">LOCATION.POSTALCODE</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/REGION -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION/REGION">
+        <rdfs:label rdf:datatype="&xsd;string">LOCATION.REGION</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">LOCATION.REGION</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/DISCOUNT -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/DISCOUNT">
+        <rdfs:label rdf:datatype="&xsd;string">ORDERDETAILS.DISCOUNT</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">ORDERDETAILS.DISCOUNT</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS"/>
+        <rdfs:range rdf:resource="&xsd;decimal"/>
+        <annotations:range_class rdf:resource="&xsd;decimal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/QUANTITY -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/QUANTITY">
+        <rdfs:label rdf:datatype="&xsd;string">ORDERDETAILS.QUANTITY</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">ORDERDETAILS.QUANTITY</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS"/>
+        <annotations:range_class rdf:resource="&xsd;integer"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/UNITPRICE -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/UNITPRICE">
+        <rdfs:label>ORDERDETAILS.UNITPRICE</rdfs:label>
+        <rdfs:comment>ORDERDETAILS.UNITPRICE</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS"/>
+        <rdfs:range rdf:resource="&xsd;decimal"/>
+        <annotations:range_class rdf:resource="&xsd;decimal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/FREIGHT -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/FREIGHT">
+        <rdfs:label rdf:datatype="&xsd;string">ORDERS.FREIGHT</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">ORDERS.FREIGHT</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <rdfs:range rdf:resource="&xsd;decimal"/>
+        <annotations:range_class rdf:resource="&xsd;decimal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/ORDERDATE -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/ORDERDATE">
+        <rdfs:label rdf:datatype="&xsd;string">ORDERS.ORDERDATE</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">ORDERS.ORDERDATE</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+        <annotations:range_class rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/ORDERID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/ORDERID">
+        <rdfs:label rdf:datatype="&xsd;string">ORDERS.ORDERID</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">ORDERS.ORDERID</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <annotations:range_class rdf:resource="&xsd;integer"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/REQUIREDDATE -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/REQUIREDDATE">
+        <rdfs:label rdf:datatype="&xsd;string">ORDERS.REQUIREDDATE</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">ORDERS.REQUIREDDATE</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <annotations:range_class rdf:resource="&xsd;dateTime"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/SHIPNAME -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/SHIPNAME">
+        <rdfs:label rdf:datatype="&xsd;string">ORDERS.SHIPNAME</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">ORDERS.SHIPNAME</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/SHIPPEDDATE -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/SHIPPEDDATE">
+        <rdfs:label rdf:datatype="&xsd;string">ORDERS.SHIPPEDDATE</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">ORDERS.SHIPPEDDATE</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+        <rdfs:range rdf:resource="&xsd;dateTime"/>
+        <annotations:range_class rdf:resource="&xsd;dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/TOTALPRICE -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/TOTALPRICE">
+        <rdfs:label>ORDERDETAILS.TOTALPRICE</rdfs:label>
+        <rdfs:comment>ORDERDETAILS.TOTALPRICE</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS"/>
+        <annotations:range_class rdf:resource="&xsd;decimal"/>
+        <rdfs:range rdf:resource="&xsd;decimal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/DISCONTINUED -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/DISCONTINUED">
+        <rdfs:label rdf:datatype="&xsd;string">PRODUCTS.DISCONTINUED</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">PRODUCTS.DISCONTINUED</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <annotations:range_class rdf:resource="&rdfs;Literal"/>
+        <rdfs:range rdf:resource="&rdfs;Literal"/>
+        <annotations:range_class rdf:resource="&xsd;boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/PRODUCTID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/PRODUCTID">
+        <rdfs:label rdf:datatype="&xsd;string">PRODUCTS.PRODUCTID</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">PRODUCTS.PRODUCTID</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <annotations:range_class rdf:resource="&xsd;integer"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/PRODUCTNAME -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/PRODUCTNAME">
+        <rdfs:label rdf:datatype="&xsd;string">PRODUCTS.PRODUCTNAME</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">PRODUCTS.PRODUCTNAME</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/QUANTITYPERUNIT -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/QUANTITYPERUNIT">
+        <rdfs:label rdf:datatype="&xsd;string">PRODUCTS.QUANTITYPERUNIT</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">PRODUCTS.QUANTITYPERUNIT</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/REORDERLEVEL -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/REORDERLEVEL">
+        <rdfs:label rdf:datatype="&xsd;string">PRODUCTS.REORDERLEVEL</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">PRODUCTS.REORDERLEVEL</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <annotations:range_class rdf:resource="&xsd;integer"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/UNITSINSTOCK -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/UNITSINSTOCK">
+        <rdfs:label rdf:datatype="&xsd;string">PRODUCTS.UNITSINSTOCK</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">PRODUCTS.UNITSINSTOCK</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <annotations:range_class rdf:resource="&xsd;integer"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/UNITSONORDER -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/UNITSONORDER">
+        <rdfs:label rdf:datatype="&xsd;string">PRODUCTS.UNITSONORDER</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">PRODUCTS.UNITSONORDER</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <annotations:range_class rdf:resource="&xsd;integer"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION/REGIONDESCRIPTION -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION/REGIONDESCRIPTION">
+        <rdfs:label rdf:datatype="&xsd;string">REGION.REGIONDESCRIPTION</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">REGION.REGIONDESCRIPTION</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION/REGIONID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION/REGIONID">
+        <rdfs:label rdf:datatype="&xsd;string">REGION.REGIONID</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">REGION.REGIONID</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION"/>
+        <annotations:range_class rdf:resource="&xsd;integer"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SHIPPERS/SHIPPERID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SHIPPERS/SHIPPERID">
+        <rdfs:label rdf:datatype="&xsd;string">SHIPPERS.SHIPPERID</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">SHIPPERS.SHIPPERID</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SHIPPERS"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SHIPPERS"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+        <annotations:range_class rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS/HOMEPAGE -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS/HOMEPAGE">
+        <rdfs:label rdf:datatype="&xsd;string">SUPPLIERS.HOMEPAGE</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">SUPPLIERS.HOMEPAGE</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS/SUPPLIERID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS/SUPPLIERID">
+        <rdfs:label rdf:datatype="&xsd;string">SUPPLIERS.SUPPLIERID</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">SUPPLIERS.SUPPLIERID</rdfs:comment>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS"/>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS"/>
+        <annotations:range_class rdf:resource="&xsd;integer"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES/TERRITORYDESCRIPTION -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES/TERRITORYDESCRIPTION">
+        <rdfs:label rdf:datatype="&xsd;string">TERRITORIES.TERRITORYDESCRIPTION</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">TERRITORIES.TERRITORYDESCRIPTION</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES/TERRITORYID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES/TERRITORYID">
+        <rdfs:label rdf:datatype="&xsd;string">TERRITORIES.TERRITORYID</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">TERRITORIES.TERRITORYID</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <annotations:range_class rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/super_dProp/decimal/UNITPRICE -->
+
+    <owl:DatatypeProperty rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/super_dProp/decimal/UNITPRICE">
+        <rdfs:label rdf:datatype="&xsd;string">PRODUCTS.UNITPRICE</rdfs:label>
+        <rdfs:comment rdf:datatype="&xsd;string">PRODUCTS.UNITPRICE</rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <annotations:domain_class rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <annotations:range_class rdf:resource="&xsd;decimal"/>
+        <rdfs:range rdf:resource="&xsd;decimal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/BEVERAGES -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/BEVERAGES">
+        <rdfs:label>Beverage</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <rdfs:comment>Soft drinks, coffees, teas, beers, and ales.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY">
+        <rdfs:label>Company</rdfs:label>
+        <rdfs:comment>Company Northwind has a relation to.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CONDIMENTS -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CONDIMENTS">
+        <rdfs:label>Condiment</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <rdfs:comment>Sweet and savory sauces, relishes, spreads, and seasonings.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CONFECTIONS -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CONFECTIONS">
+        <rdfs:label>Confection</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <rdfs:comment>Desserts, candies, and sweet breads.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CUSTOMERS -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CUSTOMERS">
+        <rdfs:label rdf:datatype="&xsd;string">Customer</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CUSTOMERS/CUSTOMERID"/>
+                <owl:someValuesFrom rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>Company which orders products from Northwind.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/DAIRY_PRODUCTS -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/DAIRY_PRODUCTS">
+        <rdfs:label>Dairy product</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <rdfs:comment>Cheeses.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES">
+        <rdfs:label rdf:datatype="&xsd;string">Employee</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/NOTES"/>
+                <owl:someValuesFrom rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/EMPLOYEEID"/>
+                <owl:someValuesFrom rdf:resource="&xsd;integer"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/LASTNAME"/>
+                <owl:someValuesFrom rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/REPORTSTO"/>
+                <owl:someValuesFrom rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES/FIRSTNAME"/>
+                <owl:someValuesFrom rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>Employee working for Northwind.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/GRAINS_AND_CEREALS -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/GRAINS_AND_CEREALS">
+        <rdfs:label>Grain/cereal</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <rdfs:comment>Breads, crackers, pasta, and cereal.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/LOCATION">
+        <rdfs:label>Location</rdfs:label>
+        <rdfs:comment>Geographical location containing information about address, city, postal code, country and region.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/MEAT_AND_POULTRY -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/MEAT_AND_POULTRY">
+        <rdfs:label>Meat/poultry</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <rdfs:comment>Prepared meats.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS">
+        <rdfs:label rdf:datatype="&xsd;string">Orderdetail</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/PRODUCTID"/>
+                <owl:someValuesFrom rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/QUANTITY"/>
+                <owl:someValuesFrom rdf:resource="&xsd;integer"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/DISCOUNT"/>
+                <owl:someValuesFrom rdf:resource="&xsd;decimal"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERDETAILS/ORDERID"/>
+                <owl:someValuesFrom rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>Part of an order which contains information about one specific product in the order.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS">
+        <rdfs:label rdf:datatype="&xsd;string">Order</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/ORDERID"/>
+                <owl:someValuesFrom rdf:resource="&xsd;integer"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/CUSTOMERID"/>
+                <owl:someValuesFrom rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/CUSTOMERS"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/EMPLOYEEID"/>
+                <owl:someValuesFrom rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/EMPLOYEES"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/ORDERS/SHIPVIA"/>
+                <owl:someValuesFrom rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SHIPPERS"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>Specification of what a customer wants to buy from Northwind.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCE -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCE">
+        <rdfs:label>Produce</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <rdfs:comment>Dried fruit and bean curd.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS">
+        <rdfs:label rdf:datatype="&xsd;string">Product</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/DISCONTINUED"/>
+                <owl:someValuesFrom rdf:resource="&rdfs;Literal"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/SUPPLIERID"/>
+                <owl:someValuesFrom rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/PRODUCTID"/>
+                <owl:someValuesFrom rdf:resource="&xsd;integer"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS/PRODUCTNAME"/>
+                <owl:someValuesFrom rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>Product that the Northwind company keeps and sells.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION">
+        <rdfs:label rdf:datatype="&xsd;string">Region</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION/REGIONDESCRIPTION"/>
+                <owl:someValuesFrom rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION/REGIONID"/>
+                <owl:someValuesFrom rdf:resource="&xsd;integer"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>Geographical area.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SEAFOOD -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SEAFOOD">
+        <rdfs:label>Seafood</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/PRODUCTS"/>
+        <rdfs:comment>Seaweed and fish.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SHIPPERS -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SHIPPERS">
+        <rdfs:label rdf:datatype="&xsd;string">Shipper</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SHIPPERS/SHIPPERID"/>
+                <owl:someValuesFrom rdf:resource="&xsd;integer"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>Company which ships orders between Northwind and the customers.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS">
+        <rdfs:label rdf:datatype="&xsd;string">Supplier</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/COMPANY"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/SUPPLIERS/SUPPLIERID"/>
+                <owl:someValuesFrom rdf:resource="&xsd;integer"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>Company which supplies Northwind with one or more products.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES -->
+
+    <owl:Class rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES">
+        <rdfs:label rdf:datatype="&xsd;string">Territory</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES/TERRITORYDESCRIPTION"/>
+                <owl:someValuesFrom rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES/TERRITORYID"/>
+                <owl:someValuesFrom rdf:resource="&xsd;string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/TERRITORIES/REGIONID"/>
+                <owl:someValuesFrom rdf:resource="http://www.optique-project.eu/resource/northwind-h2-db/NORTHWIND/REGION"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment>Geographical area.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Ontology -->
+
+    <owl:Class rdf:about="&owl;Ontology">
+        <rdfs:label>Ontology</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/dmo -->
+
+    <owl:NamedIndividual rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/dmo"/>
+    
+
+
+    <!-- http://www.optique-project.eu/resource/northwind-h2-db/dmo/annotation/ -->
+
+    <owl:NamedIndividual rdf:about="http://www.optique-project.eu/resource/northwind-h2-db/dmo/annotation/"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
+

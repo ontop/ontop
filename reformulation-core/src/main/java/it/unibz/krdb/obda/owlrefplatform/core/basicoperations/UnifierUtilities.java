@@ -32,173 +32,68 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
 
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.*;
 
-import java.util.Collection;
-import java.util.List;
-
-/***
+/**
  * A Class that provides general utilities related to unification, of terms and
  * atoms.
- * 
+ * <p/>
+ * See also SubstitutionUtilities that contains methods that were initially present
+ * in this class.
+ *
  * @author mariano
- * 
  */
 public class UnifierUtilities {
 
-	private static OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
-		
-	/***
-	 * Unifies two atoms in a conjunctive query returning a new conjunctive
-	 * query. To to this we calculate the MGU for atoms, duplicate the query q
-	 * into q', remove i and j from q', apply the mgu to q', and
-	 * 
-	 * @param q
-	 * @param i
-	 * @param j (j > i)
-	 * @return null if the two atoms are not unifiable, else a new conjunctive
-	 *         query produced by the unification of j and i
-	 * 
-	 * @throws Exception
-	 */
-	public static CQIE unify(CQIE q, int i, int j) {
+    /**
+     * Unifies two atoms in a conjunctive query returning a new conjunctive
+     * query. To to this we calculate the MGU for atoms, duplicate the query q
+     * into q', remove i and j from q', apply the mgu to q', and
+     *
+     * @param q
+     * @param i
+     * @param j (j > i)
+     * @return null if the two atoms are not unifiable, else a new conjunctive
+     * query produced by the unification of j and i
+     * @throws Exception
+     */
+    public static CQIE unify(CQIE q, int i, int j) {
 
-		Unifier mgu = Unifier.getMGU(q.getBody().get(i), q.getBody().get(j));
-		if (mgu == null)
-			return null;
+        Function atom1 = q.getBody().get(i);
+        Function atom2 = q.getBody().get(j);
+        
+        Substitution mgu = getMGU(atom1, atom2);
+        if (mgu == null)
+            return null;
 
-		CQIE unifiedQ = applyUnifier(q, mgu);
-		unifiedQ.getBody().remove(i);
-		unifiedQ.getBody().remove(j - 1);
+        CQIE unifiedQ = SubstitutionUtilities.applySubstitution(q, mgu);
+        unifiedQ.getBody().remove(i);
+        unifiedQ.getBody().remove(j - 1);
 
-		Function atom1 = q.getBody().get(i);
-		Function atom2 = q.getBody().get(j);
-		//Function newatom = unify((Function) atom1, (Function) atom2, mgu);
-		
-		// take care of anonymous variables
-		Function newatom = (Function) atom1.clone();
-		for (int ii = 0; ii < atom1.getTerms().size(); ii++) {
-			Term t1 = atom1.getTerms().get(ii);
-			if (t1 instanceof AnonymousVariable) 
-				newatom.getTerms().set(ii, atom2.getTerms().get(ii));
-		}
-		applyUnifier(newatom, mgu);
-		
-		unifiedQ.getBody().add(i, newatom);
+        Function newatom = (Function) atom1.clone();
+        SubstitutionUtilities.applySubstitution(newatom, mgu);
+        unifiedQ.getBody().add(i, newatom);
 
-		return unifiedQ;
-	}
+        return unifiedQ;
+    }
 
 
-	/***
-	 * This method will return a new query, resulting from the application of
-	 * the unifier to the original query q. To do this, we will call the clone()
-	 * method of the original query and then will call applyUnifier to each atom
-	 * of the cloned query.
-	 * 
-	 * @param q
-	 * @param unifier
-	 * @return
-	 */
-	public static CQIE applyUnifier(CQIE q, Unifier unifier, boolean clone) {
+    /**
+     * Computes the Most General Unifier (MGU) for two n-ary atoms.
+     * <p/>
+     * IMPORTANT: Function terms are supported as long as they are not nested.
+     * <p/>
+     * IMPORTANT: handling of AnonymousVariables is questionable --
+     * much is left to UnifierUtilities.apply (and only one version handles them)
+     *
+     * @param first
+     * @param second
+     * @return the substitution corresponding to this unification.
+     */
+    public static Substitution getMGU(Function first, Function second) {
+        SubstitutionImpl mgu = new SubstitutionImpl();
+        if (mgu.composeFunctions(first, second))
+            return mgu;
+        return null;
+    }
 
-		CQIE newq;
-		if (clone)
-			newq = q.clone();
-		else
-			newq = q;
-
-		Function head = newq.getHead();
-		applyUnifier(head, unifier);
-		for (Function bodyatom : newq.getBody()) 
-			applyUnifier(bodyatom, unifier);
-		
-		return newq;
-	}
-
-	public static CQIE applyUnifier(CQIE q, Unifier unifier) {
-		return applyUnifier(q, unifier, true);
-	}
-
-
-
-	/***
-	 * Applies the substitution to all the terms in the list. Note that this
-	 * will not clone the list or the terms inside the list.
-	 * 
-	 * @param atom
-	 * @param unifier
-	 */
-	
-	public static void applyUnifier(Function atom, Unifier unifier) {
-		applyUnifier(atom, unifier,0);
-	}
-	
-	public static void applyUnifier(Function atom, Unifier unifier, int fromIndex) {
-		
-		List<Term> terms = atom.getTerms();
-		
-		for (int i = fromIndex; i < terms.size(); i++) {
-			Term t = terms.get(i);
-			
-			// unifiers only apply to variables, simple or inside functional terms
-			
-			if (t instanceof VariableImpl) {
-				Term replacement = unifier.get((VariableImpl)t);
-				if (replacement != null)
-					terms.set(i, replacement);
-			} 
-			else if (t instanceof Function) {
-				Function t2 = (Function) t;
-				applyUnifier(t2, unifier);
-			}
-		}
-	}
-	
-	/**
-	 * 
-	 * @param atom
-	 * @param unifier
-	 */
-	public static void applyUnifierToGetFact(Function atom, Unifier unifier) {
-		
-		List<Term> terms = atom.getTerms();
-		for (int i = 0; i < terms.size(); i++) {
-			Term t = terms.get(i);
-			/*
-			 * unifiers only apply to variables, simple or inside functional
-			 * terms
-			 */
-			if (t instanceof VariableImpl) {
-				Term replacement = unifier.get((VariableImpl)t);
-				if (replacement != null) {
-					terms.set(i, replacement);
-				} else {
-					terms.set(i, ofac.getConstantFreshLiteral());
-				}
-			} else if (t instanceof Function) {
-				Function t2 = (Function) t;
-				applyUnifier(t2, unifier);
-			}
-		}
-	}
-
-	/**
-	 * returns a unifier that assigns NULLs to all variables in the list
-	 * 
-	 * @param vars the list of variables
-	 * @return unifier
-	 */
-	
-	public static Unifier getNullifier(Collection<Variable> vars) {
-		Unifier unifier = new Unifier();
-
-		for (Variable var : vars) {
-			unifier.put((VariableImpl)var, OBDAVocabulary.NULL);
-		}
-		return unifier;
-	}
 }

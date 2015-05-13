@@ -21,8 +21,6 @@ package it.unibz.krdb.obda.reformulation.tests;
  */
 
 import it.unibz.krdb.obda.io.QueryIOManager;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
@@ -50,13 +48,12 @@ import org.slf4j.LoggerFactory;
  */
 public class SemanticIndexLUBMHTest extends TestCase {
 
-	String owlfile = "src/test/resources/test/lubm-ex-20-uni1/University0-imports.owl";
+	private final String owlfile = "src/test/resources/test/lubm-ex-20-uni1/University0-imports.owl";
 
-	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	private OWLOntology ontology;
 	private OWLOntologyManager manager;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public SemanticIndexLUBMHTest() throws Exception {
 		manager = OWLManager.createOWLOntologyManager();
@@ -74,11 +71,11 @@ public class SemanticIndexLUBMHTest extends TestCase {
 
 		fac.setPreferenceHolder(pref);
 
-		QuestOWL quest = (QuestOWL) fac.createReasoner(ontology);
+		QuestOWL quest = fac.createReasoner(ontology);
 
-		QuestOWLConnection qconn = (QuestOWLConnection) quest.getConnection();
+		QuestOWLConnection qconn =  quest.getConnection();
 
-		QuestOWLStatement st = (QuestOWLStatement) qconn.createStatement();
+		QuestOWLStatement st = qconn.createStatement();
 		long end = System.nanoTime();
 		double init_time = (end - start) / 1000000;
 		start = System.nanoTime();
@@ -181,7 +178,9 @@ public class SemanticIndexLUBMHTest extends TestCase {
 //		log.debug("File 24. Total insertion time: {}", time1);
 //		st.insertData(new File("src/test/resources/test/lubm-ex-20-uni1/University24.ttl"), 150000, 15000, "http://swat.cse.lehigh.edu/onto/univ-bench.owl#");
 		
-		st.createIndexes();
+		//st.getSIRepository().createIndexes();
+		quest.getQuestInstance().getSemanticIndexRepository().createIndexes(qconn.getConnection());
+		
 		end = System.nanoTime();
 		double insert_time = (end - start) / 1000000;
 		
@@ -221,5 +220,7 @@ public class SemanticIndexLUBMHTest extends TestCase {
 			log.debug("Data insertion time: {} ms", insert_time);
 			log.debug("Query execution time: {} ms", time);
 		}
+		st.close();
+		quest.dispose();
 	}
 }

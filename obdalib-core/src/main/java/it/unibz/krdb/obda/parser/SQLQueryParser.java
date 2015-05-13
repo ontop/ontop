@@ -28,16 +28,14 @@ import it.unibz.krdb.sql.api.ParsedSQLQuery;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.AllColumns;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +48,7 @@ public class SQLQueryParser {
 	
 	//This field will contain all the target SQL from the 
 	//mappings that could not be parsed by the parser.
-	private ArrayList<ViewDefinition> viewDefinitions;
+//	private ArrayList<ViewDefinition> viewDefinitions;
 	
 	private static int id_counter;
 	
@@ -71,7 +69,7 @@ public class SQLQueryParser {
 	public SQLQueryParser(Connection conn) throws SQLException {
 		connection=conn;
 		database=connection.getMetaData().getDriverName();
-		this.viewDefinitions = new ArrayList<ViewDefinition>();
+//		this.viewDefinitions = new ArrayList<ViewDefinition>();
 		this.dbMetaData = null;
 		id_counter = 0;		
 	}
@@ -79,7 +77,7 @@ public class SQLQueryParser {
 	public SQLQueryParser() {
 		database=null;
 		connection=null;
-		this.viewDefinitions = new ArrayList<ViewDefinition>();
+//		this.viewDefinitions = new ArrayList<ViewDefinition>();
 		this.dbMetaData = null;
 		id_counter = 0;		
 	}
@@ -88,9 +86,9 @@ public class SQLQueryParser {
 	 *  Returns all the target SQL from the 
 	 *  mappings that could not be parsed by the parser.
 	 */
-	public ArrayList<ViewDefinition> getViewDefinitions(){
-		return this.viewDefinitions;
-	}
+//	public ArrayList<ViewDefinition> getViewDefinitions(){
+//		return this.viewDefinitions;
+//	}
 
 	/**
 	 * Called from ParsedMapping. Returns the query, even if there were 
@@ -122,7 +120,7 @@ public class SQLQueryParser {
      * @param deeply <ul>
      *               <li>
      *               <p/>
-     *               If true, (i) unquote columns, (ii) create a view if an error is generated,
+     *               If true, (i) deepParsing columns, (ii) create a view if an error is generated,
      *               and (iii) store information about the different part of the query
      *               </li>
      *               <li>
@@ -169,8 +167,8 @@ public class SQLQueryParser {
 		
 		if(dbMetaData != null)
 			dbMetaData.add(vd);
-		else
-			viewDefinitions.add(vd);
+//		else
+//			viewDefinitions.add(vd);
 		}
 		
 		ParsedSQLQuery vt = createViewParsed(viewName, query);
@@ -179,7 +177,7 @@ public class SQLQueryParser {
 	
 	
 	/*
-	 * To create a view, I start building a new select statement and add the viewName information in a table in the FROMitem expression
+	 * To create a view, I start building a new select statement and add the viewName information in a table in the FROM item expression
 	 * We create a query that looks like SELECT * FROM viewName
 	 */
 	private ParsedSQLQuery createViewParsed(String viewName, String query) {
@@ -204,7 +202,7 @@ public class SQLQueryParser {
 		
 		ParsedSQLQuery queryParsed = null;
 		try {
-			queryParsed = new ParsedSQLQuery(select,true);
+			queryParsed = new ParsedSQLQuery(select,false);
 			
 		} catch (JSQLParserException e) {
 			if(e.getCause() instanceof ParseException)
@@ -216,85 +214,116 @@ public class SQLQueryParser {
 	
 	
 	private ViewDefinition createViewDefinition(String viewName, String query) {
-		int start = 6; // the keyword 'select'
-		int end = query.toLowerCase().indexOf("from");	
-		
-		boolean uppercase=false;
-		boolean quoted;
-		if (end == -1) {
-			throw new RuntimeException("Error parsing SQL query: Couldn't find FROM clause");
-		}
-			
-		if (database.contains("Oracle") || database.contains("DB2") || database.contains("H2") || database.contains("HSQL")) {
-			// If the database engine is Oracle, H2 or DB2 unquoted columns are changed in uppercase
-			uppercase=true;
-		}
-		
-		String projection = query.substring(start, end).trim();
-		
-		//split where comma is present but not inside parenthesis
-		String[] columns = projection.split(",+(?![^\\(]*\\))");  
-		
-		ViewDefinition viewDefinition = new ViewDefinition();
-		viewDefinition.setName(viewName);
-		viewDefinition.copy(query);		
-		for (int i = 0; i < columns.length; i++) {
-			quoted = false;
-			String columnName = columns[i].trim();
-			
-			
-			/*
-			 * Take the alias name if the column name has it.
-			 */
-			String[] aliasSplitters = new String[2];
-			aliasSplitters[0] = " as ";
-			aliasSplitters[1] = " AS ";
-			
-			for(String aliasSplitter : aliasSplitters){
-				if (columnName.contains(aliasSplitter)) { // has an alias
-					columnName = columnName.split(aliasSplitter)[1].trim();
-					break;
+
+        ParsedSQLQuery queryParser = null;
+        boolean supported = true;
+        boolean uppercase = false;
+
+        //TODO: we could use the sql adapter, but it's in the package reformulation-core
+        if (database.contains("Oracle") || database.contains("DB2") || database.contains("H2") || database.contains("HSQL")) {
+            // If the database engine is Oracle, H2 or DB2 unquoted columns are changed in uppercase
+            uppercase = true;
+        }
+
+        try {
+            queryParser = new ParsedSQLQuery(query,false);
+        } 
+        catch (JSQLParserException e) {
+            supported = false;
+        }
+
+        ViewDefinition viewDefinition = new ViewDefinition(viewName, query);
+       
+        if (supported) {
+            List<String> columns = queryParser.getColumns();
+            for (String columnName : columns) {
+                if (!ParsedSQLQuery.pQuotes.matcher(columnName).matches()) { //if it is not quoted, change it in uppercase when needed
+
+                    if (uppercase)
+                        columnName = columnName.toUpperCase();
+                    else
+                      columnName = columnName.toLowerCase();
+                }
+				else { // if quoted remove the quotes
+					columnName= columnName.substring(1, columnName.length()-1);
 				}
-			}
-			////split where space is present but not inside single quotes
-			if(columnName.contains(" "))
-				columnName = columnName.split("\\s+(?![^'\"]*')")[1].trim();;
-			/*
-			 * Remove any identifier quotes
-			 * Example:
-			 * 		INPUT: "table"."column"
-			 * 		OUTPUT: table.column
-			 */
-			Pattern pattern = Pattern.compile("[\"`\\[].*[\"`\\]]");
-			Matcher matcher = pattern.matcher(columnName);
-			if (matcher.find()) {
-				columnName = columnName.replaceAll("[\\[\\]\"`]", "");
-				quoted=true;
-			}
+
+                viewDefinition.addAttribute(new Attribute(columnName));
+            }
+        }
+        else {
+            int start = 6; // the keyword 'select'
+			boolean quoted;
+
+            int end = query.toLowerCase().indexOf("from");
+
+            if (end == -1) {
+                throw new RuntimeException("Error parsing SQL query: Couldn't find FROM clause");
+            }
+
+            String projection = query.substring(start, end).trim();
+
+            //split where comma is present but not inside parenthesis
+		    String[] columns = projection.split(",+(?!.*\\))");
+//            String[] columns = projection.split(",+(?![^\\(]*\\))");
+
+
+            for (String col : columns) {
+                quoted = false;
+                String columnName = col.trim();
+			
+    			/*
+    			 * Take the alias name if the column name has it.
+    			 */
+                final String[] aliasSplitters = new String[] { " as ",  " AS " };
+
+                for (String aliasSplitter : aliasSplitters) {
+                    if (columnName.contains(aliasSplitter)) { // has an alias
+                        columnName = columnName.split(aliasSplitter)[1].trim();
+                        break;
+                    }
+                }
+                ////split where space is present but not inside single quotes
+                if (columnName.contains(" "))
+                    columnName = columnName.split("\\s+(?![^'\"]*')")[1].trim();
+                
+    			/*
+    			 * Remove any identifier quotes
+    			 * Example:
+    			 * 		INPUT: "table"."column"
+    			 * 		OUTPUT: table.column
+    			 */
+                Pattern pattern = Pattern.compile("[\"`\\[].*[\"`\\]]");
+                Matcher matcher = pattern.matcher(columnName);
+                if (matcher.find()) {
+                    columnName = columnName.replaceAll("[\\[\\]\"`]", "");
+                    quoted = true;
+                }
 			
 
-			/*
-			 * Get only the short name if the column name uses qualified name.
-			 * Example:
-			 * 		INPUT: table.column
-			 * 		OUTPUT: column
-			 */
-			if (columnName.contains(".")) {
-				columnName = columnName.substring(columnName.lastIndexOf(".")+1, columnName.length()); // get only the name
-			}
-			
+    			/*
+    			 * Get only the short name if the column name uses qualified name.
+    			 * Example:
+    			 * 		INPUT: table.column
+    			 * 		OUTPUT: column
+    			 */
+                
+                if (columnName.contains(".")) {
+                    columnName = columnName.substring(columnName.lastIndexOf(".") + 1, columnName.length()); // get only the name
+                }
 
-			if(!quoted){
-				if(uppercase)
-					columnName=columnName.toUpperCase();
-				else
-					columnName=columnName.toLowerCase();
-			}
-		
-			
-			viewDefinition.setAttribute(i+1, new Attribute(columnName)); // the attribute index always start at 1
-		}
-		return viewDefinition;
+                if (!quoted) {
+                    if (uppercase)
+                        columnName = columnName.toUpperCase();
+                    else
+                        columnName = columnName.toLowerCase();
+                }
+
+                viewDefinition.addAttribute(new Attribute(columnName)); // the attribute index always start at 1
+            }
+        }
+        
+        return viewDefinition;
 	}
 
 }

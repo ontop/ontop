@@ -27,6 +27,7 @@ import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.SQLQueryImpl;
+import it.unibz.krdb.obda.renderer.TargetQueryRenderer;
 import it.unibz.krdb.obda.utils.IDGenerator;
 import it.unibz.krdb.obda.utils.URITemplates;
 import org.openrdf.model.Resource;
@@ -137,26 +138,24 @@ public class OBDAMappingTransformer {
 			String predName = pred.getName();
 			URI predUri = null; String predURIString ="";
 			
-			if (pred.equals(OBDAVocabulary.QUEST_TRIPLE_PRED))
-			{
+			if (pred.isTriplePredicate()) {
 				//triple
 				Function predf = (Function)func.getTerm(1);
-				if (predf.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI))
-				{
+				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
 					if (predf.getTerms().size() == 1) //fixed string
 					{
 						pred = OBDADataFactoryImpl.getInstance().getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
 						predUri = vf.createURI(pred.getName());
 					}
-					else
-					{
+				    else {
 						//custom predicate
 						predURIString = URITemplates.getUriTemplateString(predf, prefixmng);
 						predUri = vf.createURI(predURIString);
 					}
 				}
 				
-			} else {
+			} 
+			else {
 				predUri = vf.createURI(predName);
 			}
 			predURIString = predUri.stringValue();
@@ -165,7 +164,7 @@ public class OBDAMappingTransformer {
 			OWLDataFactory factory =  OWLManager.getOWLDataFactory();
 			OWLObjectProperty prop = factory.getOWLObjectProperty(propname);
 		
-			if (pred.isClass() && !predURIString.equals(OBDAVocabulary.RDF_TYPE)) {
+			if (  !predURIString.equals(OBDAVocabulary.RDF_TYPE) && pred.isClass() ){
 				// The term is actually a SubjectMap (class)
 			//	statements.add(vf.createStatement(nod_subject, vf.createURI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.subjectMapClass));		
 				
@@ -179,7 +178,7 @@ public class OBDAMappingTransformer {
 				Statement triple_main_predicate = vf.createStatement(mainNode, R2RMLVocabulary.predicateObjectMap, predObjNode);
 				statements.add(triple_main_predicate);
 				
-				if (!predName.equals(OBDAVocabulary.QUEST_TRIPLE_STR)) {
+				if (!pred.isTriplePredicate()) {
 					//add predicate declaration to predObj node
 					Statement triple_predicateObject_predicate_uri = vf.createStatement(predObjNode, R2RMLVocabulary.predicate, predUri);
 					statements.add(triple_predicateObject_predicate_uri);
@@ -214,7 +213,7 @@ public class OBDAMappingTransformer {
 						String objectURI =  URITemplates.getUriTemplateString((Function)object, prefixmng);
 						//add template object
 						statements.add(vf.createStatement(objNode, R2RMLVocabulary.template, vf.createLiteral(objectURI)));
-					}else if (objectPred instanceof DataTypePredicate) {
+					}else if (objectPred instanceof DatatypePredicate) {
 						Term objectTerm = ((Function) object).getTerm(0);
 
 						if (objectTerm instanceof Variable) {
@@ -286,26 +285,22 @@ public class OBDAMappingTransformer {
 			String predName = pred.getName();
 			URI predUri = null; String predURIString ="";
 			
-			if (pred.equals(OBDAVocabulary.QUEST_TRIPLE_PRED))
-			{
+			if (pred.isTriplePredicate()) {
 				//triple
 				Function predf = (Function)func.getTerm(1);
-				if (predf.getFunctionSymbol().getName().equals(OBDAVocabulary.QUEST_URI))
-				{
-					if (predf.getTerms().size() == 1) //fixed string
-					{
+				if (predf.getFunctionSymbol() instanceof URITemplatePredicate) {
+					if (predf.getTerms().size() == 1) { //fixed string 
 						pred = OBDADataFactoryImpl.getInstance().getPredicate(((ValueConstant)(predf.getTerm(0))).getValue(), 1);
 						predUri = vf.createURI(pred.getName());
 					}
-					else
-					{
+					else {
 						//custom predicate
 						predURIString = URITemplates.getUriTemplateString(predf, prefixmng);
 						predUri = vf.createURI(predURIString);
 					}
-				}
-				
-			} else {
+				}	
+			} 
+			else {
 				predUri = vf.createURI(predName);
 			}
 			predURIString = predUri.stringValue();
@@ -315,7 +310,7 @@ public class OBDAMappingTransformer {
 			OWLObjectProperty objectProperty = factory.getOWLObjectProperty(propname);
             OWLDataProperty dataProperty = factory.getOWLDataProperty(propname);
 			
-			if (pred.isClass() && !predURIString.equals(OBDAVocabulary.RDF_TYPE)) {
+			if (!predURIString.equals(OBDAVocabulary.RDF_TYPE) && pred.isClass() ) {
 				// The term is actually a SubjectMap (class)
 				//add class declaration to subject Map node
 				sm.addClass(predUri);
@@ -325,7 +320,7 @@ public class OBDAMappingTransformer {
 				PredicateMap predM = mfact.createPredicateMap(TermMapType.CONSTANT_VALUED, predURIString);
 				ObjectMap obm = null; PredicateObjectMap pom = null;
                 Term object = null;
-				if (!predName.equals(OBDAVocabulary.QUEST_TRIPLE_STR)) {
+				if (!pred.isTriplePredicate()) {
 //					predM.setConstant(predURIString);
                     //add object declaration to predObj node
                     //term 0 is always the subject, we are interested in term 1
@@ -386,7 +381,7 @@ public class OBDAMappingTransformer {
 							
 							
 							//check if it is not a plain literal
-							if(!objectPred.equals(OBDAVocabulary.RDFS_LITERAL)){
+							if(!objectPred.getName().equals(OBDAVocabulary.RDFS_LITERAL_URI)){
 								
 								//set the datatype for the typed literal								
 								obm.setDatatype(vf.createURI(objectPred.getName()));
@@ -410,6 +405,26 @@ public class OBDAMappingTransformer {
 							//statements.add(vf.createStatement(objNode, R2RMLVocabulary.constant, vf.createLiteral(((Constant) objectTerm).getValue())));
 							//obm.setConstant(vf.createLiteral(((Constant) objectTerm).getValue()).stringValue());
 							obm = mfact.createObjectMap(TermMapType.CONSTANT_VALUED, vf.createLiteral(((Constant) objectTerm).getValue()).stringValue());
+							
+						} else if(objectTerm instanceof Function){
+							
+							StringBuilder sb = new StringBuilder();
+							Predicate functionSymbol = ((Function) objectTerm).getFunctionSymbol();
+							
+							if (functionSymbol instanceof StringOperationPredicate){ //concat
+								
+								List<Term> terms = ((Function)objectTerm).getTerms();
+								TargetQueryRenderer.getNestedConcats(sb, terms.get(0),terms.get(1));
+								obm = mfact.createObjectMap(mfact.createTemplate(sb.toString()));
+								obm.setTermType(R2RMLVocabulary.literal);
+								
+								if(objectPred.getArity()==2){
+									Term langTerm = ((Function) object).getTerm(1);
+                                    if(langTerm instanceof Constant) {
+                                        obm.setLanguageTag(((Constant) langTerm).getValue());
+                                    }
+								}
+							}
 						}
 						
 					}

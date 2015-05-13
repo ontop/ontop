@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class TableDefinition extends DataDefinition {
 
@@ -36,23 +37,22 @@ public class TableDefinition extends DataDefinition {
 	}
 	
 	public List<Attribute> getPrimaryKeys() {
-		List<Attribute> primaryKeys = new ArrayList<Attribute>();
-		for (Attribute attr : attributes.values()) {
-			if (attr.isPrimaryKey()) {
+		List<Attribute> primaryKeys = new ArrayList<>();
+		for (Attribute attr : getAttributes()) {
+			if (attr.isPrimaryKey()) 
 				primaryKeys.add(attr);
-			}
 		}
 		return primaryKeys;
 	}
 	
 	public Map<String, List<Attribute>> getForeignKeys() {
-		Map<String, List<Attribute>> foreignKeys = new HashMap<String, List<Attribute>>();
-		for (Attribute attr : attributes.values()) {
+		Map<String, List<Attribute>> foreignKeys = new HashMap<>();
+		for (Attribute attr : getAttributes()) {
 			if (attr.isForeignKey()) {
 				String fkName = attr.getReference().getReferenceName();
 				List<Attribute> fkAttributes = foreignKeys.get(fkName);
 				if (fkAttributes == null) {
-					fkAttributes = new ArrayList<Attribute>();
+					fkAttributes = new ArrayList<>();
 					foreignKeys.put(fkName, fkAttributes);
 				}
 				fkAttributes.add(attr);
@@ -64,23 +64,22 @@ public class TableDefinition extends DataDefinition {
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
-		bf.append(name);
+		bf.append(getName());
 		bf.append("[");
 		boolean comma = false;
-		for (Integer i : attributes.keySet()) {
-			if (comma) {
+		for (Attribute att : getAttributes()) {
+			if (comma) 
 				bf.append(",");
-			}
-			Attribute at = attributes.get(i);
-			bf.append(at);
-			if (at.isPrimaryKey()) {
+			
+			bf.append(att);
+			if (att.isPrimaryKey()) 
 				bf.append(":PK");
-			}
-			if (at.isForeignKey()) {
+			
+			if (att.isForeignKey()) {
 				bf.append(":FK:");
 				bf.append(String.format("%s(%s)", 
-						at.getReference().getTableReference(), 
-						at.getReference().getColumnReference()));
+						att.getReference().getTableReference(), 
+						att.getReference().getColumnReference()));
 			}
 			comma = true;
 		}

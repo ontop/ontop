@@ -21,15 +21,59 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  */
 
 
-public class NeutralSubstitution extends Substitution {
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
-	public NeutralSubstitution() {
-		super(null, null);
-	}
-	
-	@Override
+import it.unibz.krdb.obda.model.Function;
+import it.unibz.krdb.obda.model.Term;
+import it.unibz.krdb.obda.model.Variable;
+
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * TODO: explain
+ */
+public class NeutralSubstitution implements Substitution {
+
+    @Override
+    public Term get(Variable var) {
+        return null;
+    }
+
+    @Override
+    public Map<Variable, Term> getMap() {
+        return ImmutableMap.of();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return true;
+    }
+
+    @Override
+    public void put(Variable var, Term term) {
+        throw new UnsupportedOperationException("Every SingletonSubstitution is immutable.");
+    }
+
+    @Override
+    public boolean composeFunctions(Function term1, Function term2) {
+        throw new UnsupportedOperationException("Every SingletonSubstitution is immutable.");
+    }
+
+    @Override
 	public String toString() {
-		return "-/-";
+		return "{-/-}";
 	}
+
+    @Override
+    public boolean compose(Substitution s) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean composeTerms(Term term1, Term term2) {
+        throw new UnsupportedOperationException();
+    }
 
 }
