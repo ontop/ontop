@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.15.1-SNAPSHOT</version>
+		<version>1.15.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>ontop-reformulation-core</artifactId>
 	<name>ontop-reformulation-core</name>
