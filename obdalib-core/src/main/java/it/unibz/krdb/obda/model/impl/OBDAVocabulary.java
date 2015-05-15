@@ -72,25 +72,32 @@ public class OBDAVocabulary {
 	
 	
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+
+
 	/*	sparql entailment predicate URI*/
 	
 	public static final String RDFS_SUBCLASS_URI = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
-	
 	public static final String RDFS_SUBPROPERTY_URI = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
-	
 	public static final String RDFS_DOMAIN_URI = "http://www.w3.org/2000/01/rdf-schema#domain";
-	
 	public static final String RDFS_RANGE_URI = "http://www.w3.org/2000/01/rdf-schema#range";
-	
 	public static final String OWL_INVERSE_URI = "http://www.w3.org/2002/07/owl#inverseOf";
-	
 	public static final String OWL_EQUIVALENTCLASS_URI = "http://www.w3.org/2002/07/owl#equivalentClass";
-	
 	public static final String OWL_EQUIVALENTPROPERTY_URI = "http://www.w3.org/2002/07/owl#equivalentProperty";
-	
 	public static final String OWL_DISJOINTCLASS_URI = "http://www.w3.org/2002/07/owl#disjointWith";
-	
 	public static final String OWL_DISJOINTPROPERTY_URI = "http://www.w3.org/2002/07/owl#propertyDisjointWith";
+
+	/* For SPARQL entailments*/
+
+	public static final Predicate RDFS_SUBCLASS = new PredicateImpl(RDFS_SUBCLASS_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	public static final Predicate RDFS_SUBPROPERTY = new PredicateImpl(RDFS_SUBPROPERTY_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	public static final Predicate RDFS_DOMAIN = new PredicateImpl(RDFS_DOMAIN_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	public static final Predicate RDFS_RANGE = new PredicateImpl(RDFS_RANGE_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	public static final Predicate OWL_INVERSE = new PredicateImpl(OWL_INVERSE_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	public static final Predicate OWL_EQUIVALENT_CLASS = new PredicateImpl(OWL_EQUIVALENTCLASS_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	public static final Predicate OWL_EQUIVALENT_PROPERTY =  new PredicateImpl(OWL_EQUIVALENTPROPERTY_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	public static final Predicate OWL_DISJOINT_CLASS = new PredicateImpl(OWL_DISJOINTCLASS_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+	public static final Predicate OWL_DISJOINT_PROPERTY = new PredicateImpl(OWL_DISJOINTPROPERTY_URI, 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+
 
 
 	/* Common namespaces and prefixes */

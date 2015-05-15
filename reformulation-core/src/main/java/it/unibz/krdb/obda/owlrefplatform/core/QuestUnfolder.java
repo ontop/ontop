@@ -1,7 +1,6 @@
 package it.unibz.krdb.obda.owlrefplatform.core;
 
 import com.google.common.base.Joiner;
-
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
@@ -9,10 +8,12 @@ import it.unibz.krdb.obda.model.impl.TermUtils;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
+import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.*;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair;
 import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingProcessor;
+import it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing.OWLEntailmentsToFactRule;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.UnfoldingMechanism;
 import it.unibz.krdb.obda.parser.PreprocessProjection;
@@ -23,7 +24,6 @@ import it.unibz.krdb.sql.DBMetadata;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.Select;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -419,6 +419,11 @@ public class QuestUnfolder {
 	}
 
 
-
-
+	public void addEntailmentsToFactRule(Ontology inputOntology) {
+		log.info("SparqlOWLEntailment");
+		long start = System.nanoTime();
+		unfoldingProgram = OWLEntailmentsToFactRule.addFacts(unfoldingProgram, inputOntology);
+		log.info("{}ms", ((System.nanoTime() - start)/1000000));
+		log.info("Done.");
+	}
 }

@@ -22,16 +22,10 @@ package sesameWrapper;
 
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.ontology.ABoxAssertion;
+import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBConnection;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestDBStatement;
 import it.unibz.krdb.obda.sesame.SesameStatement;
-
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.openrdf.model.Statement;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
@@ -40,6 +34,11 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.impl.GraphQueryResultImpl;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.RDFHandlerException;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 
 public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery {
@@ -55,7 +54,7 @@ public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery 
 			throw new MalformedQueryException("Graph query expected!");
 	}
 
-	private Statement createStatement(ABoxAssertion assertion) {
+	private Statement createStatement(Assertion assertion) {
 
 		SesameStatement stm = new SesameStatement(assertion);
 		if (stm.getSubject()!=null && stm.getPredicate()!=null && stm.getObject()!=null)
@@ -76,8 +75,8 @@ public class SesameGraphQuery extends SesameAbstractQuery implements GraphQuery 
 			List<Statement> results = new LinkedList<Statement>();
 			if (res != null) {
 				while (res.hasNext()) {
-					List<ABoxAssertion> chunk = res.next();
-					for (ABoxAssertion as : chunk) {
+					List<Assertion> chunk = res.next();
+					for (Assertion as : chunk) {
 						Statement st = createStatement(as);
 						if (st!=null)
 							results.add(st);

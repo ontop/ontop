@@ -23,7 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
 import it.unibz.krdb.obda.model.GraphResultSet;
 import it.unibz.krdb.obda.model.OBDAException;
 import it.unibz.krdb.obda.model.TupleResultSet;
-import it.unibz.krdb.obda.ontology.ABoxAssertion;
+import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
 import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
 import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
@@ -32,19 +32,7 @@ import it.unibz.krdb.obda.owlapi3.OWLAPI3IndividualTranslator;
 import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.sesame.SesameRDFIterator;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.Reader;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.QueryParser;
@@ -55,11 +43,17 @@ import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.BasicParserSettings;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLAxiom;
-import org.semanticweb.owlapi.model.OWLException;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.Reader;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /***
  * A Statement to execute queries over a QuestOWLConnection. The logic of this
@@ -143,7 +137,7 @@ public class QuestOWLStatement implements AutoCloseable {
 
 	public int insertData(File owlFile, int commitSize, int batchsize, String baseURI) throws Exception {
 
-		Iterator<ABoxAssertion> aBoxIter = null;
+		Iterator<Assertion> aBoxIter = null;
 
 		if (owlFile.getName().toLowerCase().endsWith(".owl")) {
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -395,7 +389,7 @@ public class QuestOWLStatement implements AutoCloseable {
 		List<OWLAxiom> axiomList = new ArrayList<OWLAxiom>();
 		if (resultSet != null) {
 			while (resultSet.hasNext()) {
-				for (ABoxAssertion assertion : resultSet.next()) {
+				for (Assertion assertion : resultSet.next()) {
 					if (assertion instanceof ClassAssertion) {
 						OWLAxiom classAxiom = translator.translate((ClassAssertion)assertion);
 						axiomList.add(classAxiom);

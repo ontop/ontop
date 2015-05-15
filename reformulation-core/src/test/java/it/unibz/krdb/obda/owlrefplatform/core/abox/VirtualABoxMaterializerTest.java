@@ -20,19 +20,13 @@ package it.unibz.krdb.obda.owlrefplatform.core.abox;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDALibConstants;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
-import it.unibz.krdb.obda.ontology.ABoxAssertion;
+import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.sql.JDBCConnectionManager;
+import junit.framework.TestCase;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -41,8 +35,6 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 public class VirtualABoxMaterializerTest extends TestCase {
 
@@ -62,8 +54,8 @@ try{
 
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
-		List<ABoxAssertion> assertions = materializer.getAssertionList();
-		for (ABoxAssertion a : assertions) {
+		List<Assertion> assertions = materializer.getAssertionList();
+		for (Assertion a : assertions) {
 //			System.out.println(a.toString());
 		}
 }catch(Exception e)
@@ -144,7 +136,7 @@ try{
 
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
-		List<ABoxAssertion> assertions = materializer.getAssertionList();
+		List<Assertion> assertions = materializer.getAssertionList();
 		assertEquals(0, assertions.size());
 
 		int count = materializer.getTripleCount();
@@ -241,7 +233,7 @@ try{
 
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
-		List<ABoxAssertion> assertions = materializer.getAssertionList();
+		List<Assertion> assertions = materializer.getAssertionList();
 		
 		conn.close();
 		
@@ -348,8 +340,8 @@ try{
 
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
-		List<ABoxAssertion> assertions = materializer.getAssertionList();
-		for (ABoxAssertion a : assertions) {
+		List<Assertion> assertions = materializer.getAssertionList();
+		for (Assertion a : assertions) {
 //			System.out.println(a.toString());
 		}
 } catch(Exception e) {
@@ -416,8 +408,8 @@ try{
 
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
-		List<ABoxAssertion> assertions = materializer.getAssertionList();
-		for (ABoxAssertion a : assertions) {
+		List<Assertion> assertions = materializer.getAssertionList();
+		for (Assertion a : assertions) {
 //			System.out.println(a.toString());
 		}
 } catch(Exception e) {
@@ -520,8 +512,8 @@ try{
 		
 		QuestMaterializer materializer = new QuestMaterializer(model);
 	
-		List<ABoxAssertion> assertions = materializer.getAssertionList();
-		for (ABoxAssertion a : assertions) {
+		List<Assertion> assertions = materializer.getAssertionList();
+		for (Assertion a : assertions) {
 //			System.out.println(a.toString());
 		}
 } catch(Exception e) {
@@ -627,7 +619,7 @@ try{
 		
 		QuestMaterializer materializer = new QuestMaterializer(model);
 
-		List<ABoxAssertion> assertions = materializer.getAssertionList();
+		List<Assertion> assertions = materializer.getAssertionList();
 		int count = materializer.getTripleCount();
 		
 		assertEquals(0, count);

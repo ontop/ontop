@@ -39,7 +39,6 @@ import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
-
 import org.openrdf.model.Literal;
 
 import java.sql.Types;
@@ -146,7 +145,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			if (limit != -1 || offset != -1) {
 				modifier += sqladapter.sqlSlice(limit, offset) + "\n";
 			}
-			String sql = "SELECT *\n";
+			String sql = "SELECT DISTINCT *\n";
 			sql += "FROM (\n";
 			sql += subquery + "\n";
 			sql += ") " + outerViewName + "\n";
@@ -243,6 +242,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		Iterator<String> queryStringIterator = queriesStrings.iterator();
 		StringBuilder result = new StringBuilder();
+		result.append("SELECT DISTINCT *\n FROM\n ( ");
 		if (queryStringIterator.hasNext()) {
 			result.append(queryStringIterator.next());
 		}
@@ -259,6 +259,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			result.append("\n");
 			result.append(queryStringIterator.next());
 		}
+
+		result.append(") FinalView" );
 
 		return result.toString();
 	}
@@ -727,10 +729,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 		List<Term> headterms = query.getHead().getTerms();
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("SELECT ");
-		if (distinct) {
-			sb.append("DISTINCT ");
-		}
+		sb.append("SELECT DISTINCT ");
+//		if (distinct) {
+//			sb.append("DISTINCT ");
+//		}
 		//Only for ASK
 		if (headterms.size() == 0) {
 			sb.append("'true' as x");
@@ -780,7 +782,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		String mainTemplate = "%s AS %s";
 
-		if (ht instanceof URIConstant) {
+		if (ht instanceof BNode) {
+			mainColumn = sqladapter.getSQLLexicalFormString(((BNode) ht).getName());
+		} else if (ht instanceof URIConstant) {
 			URIConstant uc = (URIConstant) ht;
 			mainColumn = sqladapter.getSQLLexicalFormString(uc.getURI().toString());
 		} else if (ht == OBDAVocabulary.NULL) {
@@ -1035,6 +1039,9 @@ public class SQLGenerator implements SQLQueryGenerator {
         }
         else if (ht instanceof URIConstant) {
             type = COL_TYPE.OBJECT;
+		}
+		else if (ht instanceof BNode) {
+			type = COL_TYPE.BNODE;
 		}
 		else if (ht == OBDAVocabulary.NULL) {  // NULL is an instance of ValueConstant
             type = COL_TYPE.NULL;

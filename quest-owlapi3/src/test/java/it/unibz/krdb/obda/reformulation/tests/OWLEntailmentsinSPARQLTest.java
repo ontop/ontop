@@ -26,11 +26,15 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
+import junit.framework.TestCase;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -44,16 +48,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import junit.framework.TestCase;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Test the simple ontology animals for sparql owl entailments.
  * rdfs:subclass, rdfs:subProperty, owl:inverseof owl:equivalentclass owl:equivalentProperty 
@@ -61,7 +55,7 @@ import org.slf4j.LoggerFactory;
  * QuestPreferences has SPARQL_OWL_ENTAILMENT  set to true.
  *
  */
-public class OWLEntailmentsinSPARQL extends TestCase {
+public class OWLEntailmentsinSPARQLTest extends TestCase {
 
 	private OBDADataFactory fac;
 	private Connection conn;
@@ -240,7 +234,7 @@ public class OWLEntailmentsinSPARQL extends TestCase {
 
 		log.info("Find subProperty");
 		List<String> individualsProperty = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x rdfs:subPropertyOf ?y }", "rdfs:subPropertyOf");
-		assertEquals(36, individualsProperty.size());
+		assertEquals(35, individualsProperty.size());
 
 		log.info("Find subProperty");
 		List<String> property = runSingleNamedIndividualTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { :likesPet rdfs:subPropertyOf ?x }",
@@ -249,7 +243,7 @@ public class OWLEntailmentsinSPARQL extends TestCase {
 
 		log.info("Find subClass");
 		List<String> individualsClass = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x rdfs:subClassOf ?y }", "rdfs:subClassOf");
-		assertEquals(86, individualsClass.size());
+		assertEquals(85, individualsClass.size());
 
 		log.info("Find subClass");
 		List<String> classes = runSingleNamedIndividualTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x rdfs:subClassOf :Person }", "rdfs:subClassOf");
@@ -267,7 +261,7 @@ public class OWLEntailmentsinSPARQL extends TestCase {
 
 		log.info("Find equivalent classes");
 		List<String> individualsEquivClass = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x owl:equivalentClass ?y }", "owl:equivalentClass");
-		assertEquals(50, individualsEquivClass.size());
+		assertEquals(49, individualsEquivClass.size());
 
 		List<String> equivClass = runSingleNamedIndividualTests(p,
 				"PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> select * where {?x owl:equivalentClass :Person }", "owl:equivalentClass");
@@ -275,7 +269,7 @@ public class OWLEntailmentsinSPARQL extends TestCase {
 		
 		log.info("Find equivalent properties");
 		List<String> individualsEquivProperties = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x owl:equivalentProperty ?y }", "owl:equivalentProperty");
-		assertEquals(30, individualsEquivProperties.size());
+		assertEquals(29, individualsEquivProperties.size());
 
 		List<String> equivProperty = runSingleNamedIndividualTests(p,
 				"PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> select * where {?x owl:equivalentProperty :likesPet }", "owl:equivalentProperty");
@@ -292,7 +286,7 @@ public class OWLEntailmentsinSPARQL extends TestCase {
 
 		log.info("Find domain");
 		List<String> individualsDomainClass = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x rdfs:domain ?y }", "rdfs:domain");
-		assertEquals(10, individualsDomainClass.size());
+		assertEquals(9, individualsDomainClass.size());
 		
 		log.info("Find one domain");
 		List<String> domain = runSingleNamedIndividualTests(p,
@@ -337,8 +331,8 @@ public class OWLEntailmentsinSPARQL extends TestCase {
 		
 		log.info("Find disjoint properties");
 		List<String> individualsDisjProp = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x owl:propertyDisjointWith ?y }", "owl:propertyDisjointWith");
-		assertEquals(26, individualsDisjProp.size());
-		
+		assertEquals(32, individualsDisjProp.size());
+
 		log.info("Find a disjoint property");
 		List<String> disjProp = runSingleNamedIndividualTests(p,
 				"PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x owl:propertyDisjointWith :eats }", "owl:propertyDisjointWith");
@@ -356,9 +350,9 @@ public class OWLEntailmentsinSPARQL extends TestCase {
 
 		log.info("Find inverse");
 		List<String> individualsInverse = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x owl:inverseOf ?y }", "owl:inverseOf");
-		assertEquals(30, individualsInverse.size());
+		assertEquals(28, individualsInverse.size());
 		
-		log.info("Find a disjoint property");
+		log.info("Find an inverse property");
 		List<String> inverse = runSingleNamedIndividualTests(p,
 				"PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#>  SELECT * WHERE { ?x owl:inverseOf :isPetOf }", "owl:inverseOf");
 		assertEquals(3, inverse.size());

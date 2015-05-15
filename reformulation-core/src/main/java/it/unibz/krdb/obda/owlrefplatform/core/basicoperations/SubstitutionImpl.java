@@ -21,13 +21,18 @@ package it.unibz.krdb.obda.owlrefplatform.core.basicoperations;
  */
 
 import com.google.common.base.Joiner;
-
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
 import it.unibz.krdb.obda.model.Variable;
-import it.unibz.krdb.obda.model.impl.*;
+import it.unibz.krdb.obda.model.impl.BNodeConstantImpl;
+import it.unibz.krdb.obda.model.impl.FunctionalTermImpl;
+import it.unibz.krdb.obda.model.impl.URIConstantImpl;
+import it.unibz.krdb.obda.model.impl.ValueConstantImpl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -215,7 +220,7 @@ public class SubstitutionImpl implements Substitution {
             // equal, in which case there the substitution is empty
 
             if (/*(term1 instanceof VariableImpl) ||*/ (term1 instanceof FunctionalTermImpl)
-                    || (term1 instanceof ValueConstantImpl) || (term1 instanceof URIConstantImpl)) {
+                    || (term1 instanceof ValueConstantImpl) || (term1 instanceof URIConstantImpl) || (term1 instanceof BNodeConstantImpl)) {
 
                 // ROMAN: why is BNodeConstantImpl not mentioned?
 
@@ -248,7 +253,7 @@ public class SubstitutionImpl implements Substitution {
             else
                 return new SingletonSubstitution(t1, t2);
         }
-        else if ((t2 instanceof ValueConstantImpl) || (t2 instanceof URIConstantImpl)) {
+        else if ((t2 instanceof ValueConstantImpl) || (t2 instanceof URIConstantImpl) || (t2 instanceof BNodeConstantImpl)) {
             return new SingletonSubstitution(t1, t2);
         }
         else if (t2 instanceof FunctionalTermImpl) {
