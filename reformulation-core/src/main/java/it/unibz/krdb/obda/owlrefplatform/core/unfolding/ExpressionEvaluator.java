@@ -80,18 +80,18 @@ public class ExpressionEvaluator {
 	}
 
 	public boolean evaluateExpressions(CQIE q) {
-		for (int atomidx = 0; atomidx < q.getBody().size(); atomidx++) {
-			Function atom = q.getBody().get(atomidx);
+		List<Function> body = q.getBody();
+		for (int atomidx = 0; atomidx < body.size(); atomidx++) {
+			Function atom = body.get(atomidx);
 			Term newatom = eval(atom);
 			if (newatom == fac.getConstantTrue()) {
-				q.getBody().remove(atomidx);
+				body.remove(atomidx);
 				atomidx -= 1;
 				continue;
 			} else if (newatom == fac.getConstantFalse()) {
 				return true;
 			}
-			q.getBody().remove(atomidx);
-			q.getBody().add(atomidx, (Function)newatom);
+			body.set(atomidx, (Function)newatom);
 		}
 		return false;
 	}
