@@ -328,7 +328,7 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x, a);
 		Function ans3 = createRule(ANS3, x, b);
-		Function join = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans2, ans3);
+		Function join = dataFactory.getSPARQLJoin(ans2, ans3);
 		
 		/**
 		 * ans1(x,a,b) :- Join(ans2(x,a), ans3(x,b))
@@ -353,8 +353,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, b, c);
 		Function ans4 = createRule(ANS4, x, b);
 		Function ans5 = createRule(ANS5, x, c);
-		Function join1 = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans2, ans3);
-		Function join2 = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans4, ans5);
+		Function join1 = dataFactory.getSPARQLJoin(ans2, ans3);
+		Function join2 = dataFactory.getSPARQLJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- Join(ans2(x,a), ans3(x,b,c))
@@ -381,7 +381,7 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x, a, b);
 		Function ans2 = createRule(ANS2, x, a);
 		Function ans3 = createRule(ANS3, x, b);
-		Function leftJoin = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans2, ans3);
+		Function leftJoin = dataFactory.getSPARQLLeftJoin(ans2, ans3);
 		
 		/**
 		 * ans1(x,a,b) :- LeftJoin(ans2(x,a), ans3(x,b))
@@ -406,8 +406,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, b, c);
 		Function ans4 = createRule(ANS4, x, b);
 		Function ans5 = createRule(ANS5, x, c);
-		Function join1 = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans2, ans3);
-		Function join2 = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans4, ans5);
+		Function join1 = dataFactory.getSPARQLLeftJoin(ans2, ans3);
+		Function join2 = dataFactory.getSPARQLLeftJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- LeftJoin(ans2(x,a), ans3(x,b,c))
@@ -436,8 +436,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, b, c);
 		Function ans4 = createRule(ANS4, x, b);
 		Function ans5 = createRule(ANS5, x, c);
-		Function join1 = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans2, ans3);
-		Function join2 = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans4, ans5);
+		Function join1 = dataFactory.getSPARQLLeftJoin(ans2, ans3);
+		Function join2 = dataFactory.getSPARQLJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- LeftJoin(ans2(x,a), ans3(x,b,c))
@@ -464,7 +464,7 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x);
 		Function ans2 = createRule(ANS2, x);
 		Function ans3 = createRule(ANS3, x, d);
-		Function join = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans2, ans3);
+		Function join = dataFactory.getSPARQLJoin(ans2, ans3);
 		
 		/**
 		 * ans1(x) :- Join(ans2(x), ans3(x,d))
@@ -493,8 +493,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, a, b);
 		Function ans4 = createRule(ANS4, x, a);
 		Function ans5 = createRule(ANS5, x, b);
-		Function join1 = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans2, ans3);
-		Function join2 = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans4, ans5);
+		Function join1 = dataFactory.getSPARQLJoin(ans2, ans3);
+		Function join2 = dataFactory.getSPARQLJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- Join(ans2(x), ans3(x,a,b))
@@ -525,7 +525,7 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans1 = createQuery(x);
 		Function ans2 = createRule(ANS2, x);
 		Function ans3 = createRule(ANS3, x, d);
-		Function join = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans2, ans3);
+		Function join = dataFactory.getSPARQLLeftJoin(ans2, ans3);
 		
 		/**
 		 * ans1(x) :- LeftJoin(ans2(x), ans3(x,d))
@@ -554,8 +554,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, a, b);
 		Function ans4 = createRule(ANS4, x, a);
 		Function ans5 = createRule(ANS5, x, b);
-		Function join1 = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans2, ans3);
-		Function join2 = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans4, ans5);
+		Function join1 = dataFactory.getSPARQLLeftJoin(ans2, ans3);
+		Function join2 = dataFactory.getSPARQLLeftJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- LeftJoin(ans2(x), ans3(x,a,b))
@@ -588,8 +588,8 @@ public class DatalogToSparqlTranslatorTest {
 		Function ans3 = createRule(ANS3, x, a, b);
 		Function ans4 = createRule(ANS4, x, a);
 		Function ans5 = createRule(ANS5, x, b);
-		Function join1 = dataFactory.getFunction(OBDAVocabulary.SPARQL_JOIN, ans2, ans3);
-		Function join2 = dataFactory.getFunction(OBDAVocabulary.SPARQL_LEFTJOIN, ans4, ans5);
+		Function join1 = dataFactory.getSPARQLJoin(ans2, ans3);
+		Function join2 = dataFactory.getSPARQLLeftJoin(ans4, ans5);
 		
 		/**
 		 * ans1(x,a,b) :- Join(ans2(x), ans3(x,a,b))
@@ -630,14 +630,14 @@ public class DatalogToSparqlTranslatorTest {
 		CQIE rule1 = dataFactory.getCQIE(ans2, student, ans3);
 		CQIE rule2 = dataFactory.getCQIE(ans3, firstName, lastName);
 		
-		DatalogProgram datalog = createDatalogProgram(query, rule1, rule2);
-		
 		OBDAQueryModifiers modifiers = new OBDAQueryModifiers();
 		modifiers.setDistinct();
 		modifiers.setLimit(100);
 		modifiers.setOffset(20);
 		modifiers.addOrderCondition(a, OrderCondition.ORDER_DESCENDING);
-		datalog.setQueryModifiers(modifiers);
+
+		DatalogProgram datalog = createDatalogProgram(modifiers, query, rule1, rule2);
+		
 		
 		// Translate the datalog and display the returned SPARQL string
 		translateAndDisplayOutput("Query Modifiers", datalog);
@@ -655,11 +655,16 @@ public class DatalogToSparqlTranslatorTest {
 		return dataFactory.getFunction(rulePredicate, vars);
 	}
 
+	private DatalogProgram createDatalogProgram(OBDAQueryModifiers modifiers, CQIE... queryAndRules) {
+		List<CQIE> program = Arrays.asList(queryAndRules);
+		return dataFactory.getDatalogProgram(modifiers, program);
+	}
+
 	private DatalogProgram createDatalogProgram(CQIE... queryAndRules) {
 		List<CQIE> program = Arrays.asList(queryAndRules);
 		return dataFactory.getDatalogProgram(program);
 	}
-
+	
 	private void translateAndDisplayOutput(String title, DatalogProgram datalog) {
 		final String sparqlOutput = datalogTranslator.translate(datalog);
 		StringBuilder sb = new StringBuilder();
@@ -696,20 +701,20 @@ public class DatalogToSparqlTranslatorTest {
 	private static Predicate predHasAdvancedCourse;
 	
 	static {
-		predStudent = dataFactory.getPredicate("http://example.org/Student", 1, new COL_TYPE[] { COL_TYPE.OBJECT });
-		predBachelorStudent = dataFactory.getPredicate("http://example.org/BachelorStudent", 1, new COL_TYPE[] { COL_TYPE.OBJECT });
-		predMasterStudent = dataFactory.getPredicate("http://example.org/MasterStudent", 1, new COL_TYPE[] { COL_TYPE.OBJECT });
-		predDoctoralStudent = dataFactory.getPredicate("http://example.org/DoctoralStudent", 1, new COL_TYPE[] { COL_TYPE.OBJECT });
+		predStudent = dataFactory.getClassPredicate("http://example.org/Student");
+		predBachelorStudent = dataFactory.getClassPredicate("http://example.org/BachelorStudent");
+		predMasterStudent = dataFactory.getClassPredicate("http://example.org/MasterStudent");
+		predDoctoralStudent = dataFactory.getClassPredicate("http://example.org/DoctoralStudent");
 		
-		predFirstName = dataFactory.getPredicate("http://example.org/firstName", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.STRING });
-		predLastName = dataFactory.getPredicate("http://example.org/lastName", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.STRING });
-		predAge = dataFactory.getPredicate("http://example.org/age", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.INTEGER });
-		predGrade = dataFactory.getPredicate("http://example.org/grade", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.DECIMAL });
-		predEnrollmentDate = dataFactory.getPredicate("http://example.org/enrollmentDate", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.DATETIME });
+		predFirstName = dataFactory.getDataPropertyPredicate("http://example.org/firstName", COL_TYPE.STRING);
+		predLastName = dataFactory.getDataPropertyPredicate("http://example.org/lastName", COL_TYPE.STRING);
+		predAge = dataFactory.getDataPropertyPredicate("http://example.org/age", COL_TYPE.INTEGER);
+		predGrade = dataFactory.getDataPropertyPredicate("http://example.org/grade", COL_TYPE.DECIMAL);
+		predEnrollmentDate = dataFactory.getDataPropertyPredicate("http://example.org/enrollmentDate", COL_TYPE.DATETIME);
 		
-		predHasCourse = dataFactory.getPredicate("http://example.org/hasCourse", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		predHasElementaryCourse = dataFactory.getPredicate("http://example.org/hasElementaryCourse", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
-		predHasAdvancedCourse = dataFactory.getPredicate("http://example.org/hasAdvancedCourse", 2, new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT });
+		predHasCourse = dataFactory.getObjectPropertyPredicate("http://example.org/hasCourse");
+		predHasElementaryCourse = dataFactory.getObjectPropertyPredicate("http://example.org/hasElementaryCourse");
+		predHasAdvancedCourse = dataFactory.getObjectPropertyPredicate("http://example.org/hasAdvancedCourse");
 	}
 	
 	private static Variable x;

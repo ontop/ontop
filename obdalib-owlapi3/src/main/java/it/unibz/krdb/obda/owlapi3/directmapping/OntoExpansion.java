@@ -24,7 +24,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 import it.unibz.krdb.sql.DBMetadata;
-import it.unibz.krdb.sql.DataDefinition;
+import it.unibz.krdb.sql.TableDefinition;
 
 public class OntoExpansion {
 	
@@ -40,11 +40,10 @@ public class OntoExpansion {
 
 	
 	public void enrichOntology(DBMetadata md, OWLOntology rootOntology) throws OWLOntologyStorageException{
-		for(int i=0;i<md.getTableList().size();i++){
-			OntoSchema os = new OntoSchema(md.getTableList().get(i));
+		for (TableDefinition td : md.getTables()) {
+			OntoSchema os = new OntoSchema(td);
 			os.setBaseURI(this.baseURI);
 			os.enrichOntology(rootOntology);
-			
 		}
 	}
 

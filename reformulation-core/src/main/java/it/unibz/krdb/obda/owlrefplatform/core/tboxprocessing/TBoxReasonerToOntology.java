@@ -2,10 +2,11 @@ package it.unibz.krdb.obda.owlrefplatform.core.tboxprocessing;
 
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.DataRangeExpression;
+import it.unibz.krdb.obda.ontology.DataSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectSomeValuesFrom;
 import it.unibz.krdb.obda.ontology.Ontology;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.SomeValuesFrom;
 import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
@@ -35,7 +36,7 @@ public class TBoxReasonerToOntology {
 			@Override
 			public void onInclusion(ClassExpression sub, ClassExpression sup) {
 				if (sub != sup) {
-					if (!excludeExistentials || !(sup instanceof SomeValuesFrom)) {
+					if (!excludeExistentials || (!(sup instanceof ObjectSomeValuesFrom) && !(sup instanceof DataSomeValuesFrom))) {
 						sigma.addSubClassOfAxiomWithReferencedEntities(sub, sup);
 					}
 				}
@@ -43,7 +44,8 @@ public class TBoxReasonerToOntology {
 			@Override
 			public void onInclusion(DataRangeExpression sub, DataRangeExpression sup) {
 				if (sub != sup) {
-					if (!excludeExistentials || !(sup instanceof SomeValuesFrom)) {
+					// TODO: to be cleaned
+					if (!excludeExistentials || (!(sup instanceof ObjectSomeValuesFrom) && !(sup instanceof DataSomeValuesFrom))) {
 						sigma.addSubClassOfAxiomWithReferencedEntities(sub, sup);
 					}
 				}

@@ -86,7 +86,6 @@ public class CQCUtilities {
 					if (query2 == query)
 						break;
 					if (containment.isContainedIn(query, query2)) {
-//						log.debug("REMOVE (SIGMA): " + result.get(i));
 						iterator.remove();
 						break;
 					}
@@ -94,12 +93,7 @@ public class CQCUtilities {
 			}
 		}
 	}
-	
-	/**
-	 * 
-	 * @param program
-	 * @param rules
-	 */
+
 	public static void optimizeQueryWithSigmaRules(List<Function> atoms, LinearInclusionDependencies sigma) {
 				
 		// for each atom in query body
@@ -112,13 +106,13 @@ public class CQCUtilities {
 				// try to unify current query body atom with tbox rule body atom
 				// ESSENTIAL THAT THE RULES IN SIGMA ARE "FRESH" -- see LinearInclusionDependencies.addRule				
 				Function ruleBody = rule.getBody().get(0);
-				Unifier theta = Unifier.getMGU(ruleBody, atom);
+				Substitution theta = UnifierUtilities.getMGU(ruleBody, atom);
 				if (theta == null || theta.isEmpty()) {
 					continue;
 				}
 				// if unifiable, apply to head of tbox rule
 				Function copyRuleHead = (Function) rule.getHead().clone();
-				UnifierUtilities.applyUnifier(copyRuleHead, theta);
+				SubstitutionUtilities.applySubstitution(copyRuleHead, theta);
 
 				derivedAtoms.add(copyRuleHead);
 			}
@@ -149,7 +143,7 @@ public class CQCUtilities {
 			Function currentAtom = result.getBody().get(i);
 			for (int j = i + 1; j < result.getBody().size(); j++) {
 				Function nextAtom = result.getBody().get(j);
-				Unifier map = Unifier.getMGU(currentAtom, nextAtom);
+				Substitution map = UnifierUtilities.getMGU(currentAtom, nextAtom);
 				if (map != null && map.isEmpty()) {
 					result = UnifierUtilities.unify(result, i, j);
 				}

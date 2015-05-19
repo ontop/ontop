@@ -55,28 +55,29 @@ public class MappingParser {
 		this.sqlQueryParser = new SQLQueryParser(conn);
 		this.parsedMappings = this.parseMappings();
 	}
-	
 
-	/**
+
+
+    /**
 	 * Called by Quest when fetching non-full metadata
 	 * Only metadata for the tables in this list is extracted by Quest
 	 * 
-	 * @return The tables (same as getTables) but without those that are created by the sqltranslator as view definitions
+	 * @return The tables (same as getTables)
 	 * @throws JSQLParserException 
 	 */
 	public List<RelationJSQL> getRealTables() throws JSQLParserException{
 		if(this.realTables == null){
 			List<RelationJSQL> _realTables = this.getTables();
-			List<RelationJSQL> removeThese = new ArrayList<>();
-			for(ViewDefinition vd : sqlQueryParser.getViewDefinitions()){
-				for(RelationJSQL rel : _realTables){
-					if(rel.getFullName().equals(vd.getName()))
-						removeThese.add(rel);
-				}
-			}
-			for(RelationJSQL remRel : removeThese){
-				_realTables.remove(remRel);
-			}
+//			List<RelationJSQL> removeThese = new ArrayList<>();
+//			for(ViewDefinition vd : sqlQueryParser.getViewDefinitions()){
+//				for(RelationJSQL rel : _realTables){
+//					if(rel.getFullName().equals(vd.getName()))
+//						removeThese.add(rel);
+//				}
+//			}
+//			for(RelationJSQL remRel : removeThese){
+//				_realTables.remove(remRel);
+//			}
 			this.realTables = _realTables;
 		}
 		return this.realTables;
@@ -107,19 +108,7 @@ public class MappingParser {
 		return tables;
 	}
 	
-	
-	
-	
-	/**
-	 * Adds the view definitions created by the SQLQueryTranslator during parsing to the metadata
-	 * 
-	 * This must be separated out, since the parsing must be done before metadata extraction
-	 */
-	public void addViewDefs(DBMetadata metadata){
-		for (ViewDefinition vd : sqlQueryParser.getViewDefinitions()){
-			metadata.add(vd);
-		}
-	}
+
 	
 	/**
 	 * 	Parses the mappingList (Actually, only the source sql is parsed.)

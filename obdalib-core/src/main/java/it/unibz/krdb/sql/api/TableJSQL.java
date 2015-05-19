@@ -20,10 +20,10 @@ package it.unibz.krdb.sql.api;
  * #L%
  */
 
-import java.io.Serializable;
-
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Table;
+
+import java.io.Serializable;
 
 
 public class TableJSQL implements Serializable{
@@ -36,7 +36,6 @@ public class TableJSQL implements Serializable{
 	
 	private String schema;
 	private String tableName;
-	private String aliasName;
 	private Alias alias;
 	
 	
@@ -89,8 +88,10 @@ public class TableJSQL implements Serializable{
 	}
 	
 	public void setSchema(String schema) {
-		if(schema!=null && ParsedSQLQuery.pQuotes.matcher(schema).matches())
-			this.schema = schema.substring(1, schema.length()-1);
+		if(schema!=null && ParsedSQLQuery.pQuotes.matcher(schema).matches()) {
+            this.schema = schema.substring(1, schema.length() - 1);
+            quotedSchema = true;
+        }
 		else
 			this.schema = schema;
 	}
@@ -136,28 +137,23 @@ public class TableJSQL implements Serializable{
 
 	public String getTableName() {
 		return tableName;
-	}	
+	}
 
+	/**
+	 * The alias given to the table
+	 * See test  QuotedAliasTableTest
+	 * @param alias
+	 */
 	public void setAlias(Alias alias) {
 		if (alias == null) {
 			return;
 		}
+		alias.setName(unquote(alias.getName()));
 		this.alias = alias;
-		this.aliasName = alias.getName();
-	}
-
-	public void setAliasName(String alias) {
-		this.aliasName = alias;
-		if (alias != null)
-			this.alias.setName(alias);
 	}
 	
 	public Alias getAlias() {
 		return alias;
-	}
-	
-	public String getAliasName() { 
-		return this.aliasName;
 	}
 	
 	/**
@@ -197,5 +193,14 @@ public class TableJSQL implements Serializable{
 		return false;
 	}
 
+	/**
+	 * Idempotent method.
+	 */
+	public static String unquote(String name) {
+		if(ParsedSQLQuery.pQuotes.matcher(name).matches()) {
+			return name.substring(1, name.length()-1);
+		}
+		return name;
+	}
 	
 }

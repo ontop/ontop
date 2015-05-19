@@ -32,7 +32,6 @@ public class Intersection<T> {
 	 * default constructor -- the intersection equals to top
 	 * 
 	 */
-	
 	public Intersection(EquivalencesDAG<T> dag) {
 		this.dag = dag;
 		elements = null;
@@ -128,7 +127,6 @@ public class Intersection<T> {
 	/**
 	 * resets the intersection to the trivial case (top)
 	 */
-	
 	public void setToTop() {
 		elements = null;
 	}

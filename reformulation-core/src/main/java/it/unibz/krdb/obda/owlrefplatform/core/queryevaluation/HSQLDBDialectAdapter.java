@@ -24,8 +24,9 @@ import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 
 import java.sql.Types;
 import java.util.List;
+import java.util.regex.Pattern;
 
-public class HSQLDBDialectAdapter implements SQLDialectAdapter {
+public class HSQLDBDialectAdapter extends SQL99DialectAdapter {
 
 
 	@Override
@@ -52,11 +53,6 @@ public class HSQLDBDialectAdapter implements SQLDialectAdapter {
 		return null;
 	}
 
-	@Override
-	public String strreplace(String str, String oldstr, String newstr) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public String strreplace(String str, int start, int end, String with) {
@@ -137,9 +133,12 @@ public class HSQLDBDialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-																// enclosing
-																// quotes
+        Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
+        if(quotes.matcher(pattern).matches() ) {
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
+        }
 		//we use % wildcards to search for a string that contains and not only match the pattern
 		if (caseinSensitive) {
 			return " LOWER(" + columnname + ") LIKE " + "'%"
@@ -147,4 +146,70 @@ public class HSQLDBDialectAdapter implements SQLDialectAdapter {
 		}
 		return columnname + " LIKE " + "'%" + pattern + "%'";
 	}
+
+	@Override
+	public String getDummyTable() {
+		// TODO: check whether it is OK --- this was the behaviour in JDBCUtility
+		return "SELECT 1";
+	}
+	
+	@Override
+	public String getSQLLexicalFormString(String constant) {
+		return "'" + constant + "'";
+	}
+	
+	@Override 
+	public String getSQLLexicalFormBoolean(boolean value) {
+		// TODO: provide a correct implementation
+		return value ? 	"1" : "0";
+	}
+	
+	/***
+	 * Given an XSD dateTime this method will generate a SQL TIMESTAMP value.
+	 * The method will strip any fractional seconds found in the date time
+	 * (since we haven't found a nice way to support them in all databases). It
+	 * will also normalize the use of Z to the timezome +00:00 and last, if the
+	 * database is H2, it will remove all timezone information, since this is
+	 * not supported there.
+	 * 
+	 * @param rdfliteral
+	 * @return
+	 */
+	@Override
+	public String getSQLLexicalFormDatetime(String v) {
+		// TODO: check whether this inherited implementation is OK
+		
+		String datetime = v.replace('T', ' ');
+		int dotlocation = datetime.indexOf('.');
+		int zlocation = datetime.indexOf('Z');
+		int minuslocation = datetime.indexOf('-', 10); // added search from 10th pos, because we need to ignore minuses in date
+		int pluslocation = datetime.indexOf('+');
+		StringBuilder bf = new StringBuilder(datetime);
+		if (zlocation != -1) {
+			/*
+			 * replacing Z by +00:00
+			 */
+			bf.replace(zlocation, bf.length(), "+00:00");
+		}
+
+		if (dotlocation != -1) {
+			/*
+			 * Stripping the string from the presicion that is not supported by
+			 * SQL timestamps.
+			 */
+			// TODO we need to check which databases support fractional
+			// sections (e.g., oracle,db2, postgres)
+			// so that when supported, we use it.
+			int endlocation = Math.max(zlocation, Math.max(minuslocation, pluslocation));
+			if (endlocation == -1) {
+				endlocation = datetime.length();
+			}
+			bf.replace(dotlocation, endlocation, "");
+		}
+		bf.insert(0, "'");
+		bf.append("'");
+		
+		return bf.toString();
+	}
+	
 }

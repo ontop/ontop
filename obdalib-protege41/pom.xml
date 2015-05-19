@@ -3,12 +3,17 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.14.0</version>
+		<version>1.15.0</version>
 		<relativePath>..</relativePath>
 	</parent>
 
 	<artifactId>ontop-protege4</artifactId>
 	<name>ontop-protege4</name>
+
+
+    <properties>
+        <protege.version>5.0.0-beta-16</protege.version>
+    </properties>
 
 	<dependencies>
 		<dependency>
@@ -141,13 +146,13 @@
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
 			<artifactId>org.protege.editor.core.application</artifactId>
-			<version>4.3.0</version>
+			<version>${protege.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
 			<artifactId>org.protege.editor.owl</artifactId>
-			<version>4.3.0</version>
+			<version>${protege.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -258,7 +263,10 @@
 	   		<groupId>com.github.jsqlparser</groupId>
 	   		<artifactId>jsqlparser</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
 	</dependencies>
 
 

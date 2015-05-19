@@ -2,7 +2,7 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.14.0</version>
+		<version>1.15.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
@@ -10,7 +10,6 @@
 	<artifactId>ontop-obdalib-core</artifactId>
 	<packaging>jar</packaging>
 	<name>ontop-obdalib-core</name>
-
 	<dependencies>
 	 <dependency>
 			<groupId>org.openrdf.sesame</groupId>
@@ -29,6 +28,11 @@
    			 <groupId>com.github.jsqlparser</groupId>
     		<artifactId>jsqlparser</artifactId>
 		</dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
 		
 		<dependency>
 			<groupId>junit</groupId>
@@ -36,14 +40,24 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
