@@ -93,7 +93,12 @@ public class ExpressionEvaluator {
 			}
 			body.set(atomidx, (Function)newatom);
 		}
-		return false;
+		
+		// additional unsatisfiability checking
+		ExpressionUnsatisfiabilityCheck sat = new ExpressionUnsatisfiabilityCheck();
+		return sat.check(body);
+		
+		//return false;
 	}
 
 	public Term eval(Term expr) {
