@@ -237,7 +237,7 @@ public class QuestStatement implements OBDAStatement {
 					else{
 						if (isSelect) { // is tuple-based results
 
-                            if(questInstance.getDatasourceQueryGenerator().isDistinct()) {
+                            if(questInstance.getDatasourceQueryGenerator().hasDistinctResultSet()) {
 
                                 tupleResult = new QuestDistinctResultset(set, signature, QuestStatement.this );
                             }

@@ -39,7 +39,6 @@ import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
-
 import org.openrdf.model.Literal;
 
 import java.sql.Types;
@@ -91,6 +90,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 
     private boolean generatingREPLACE = true;
+	private boolean distinctResultSet = false;
 
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
@@ -112,9 +112,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @param uriid is null in case we are not in the SI mode
 	 */
 	
-    public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace, SemanticIndexURIMap uriid) {
+    public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace, boolean distinctResultSet, SemanticIndexURIMap uriid) {
         this(metadata, sqladapter);
         this.generatingREPLACE = sqlGenerateReplace;
+		this.distinctResultSet = distinctResultSet;
         if (uriid != null) {
     		this.isSI = true;
     		this.uriRefIds = uriid;
@@ -158,8 +159,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	}
 
     @Override
-    public boolean isDistinct() {
-        return isDistinct;
+    public boolean hasDistinctResultSet() {
+        return distinctResultSet;
     }
 
     private boolean hasSelectDistinctStatement(DatalogProgram query) {
@@ -233,9 +234,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			QueryAliasIndex index = new QueryAliasIndex(cq);
 
+			boolean innerdistincts = false;
+			if (isDistinct && !distinctResultSet && numberOfQueries == 1) {
+				innerdistincts = true;
+			}
+
 			String FROM = getFROM(cq, index);
 			String WHERE = getWHERE(cq, index);
-			String SELECT = getSelectClause(signature, cq, index);
+			String SELECT = getSelectClause(signature, cq, index, innerdistincts);
 
 			String querystr = SELECT + FROM + WHERE;
 			queriesStrings.add(querystr);
@@ -247,8 +253,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 			result.append(queryStringIterator.next());
 		}
 
-		String UNION = "UNION ALL";
-
+		String UNION = null;
+		if (isDistinct && !distinctResultSet) {
+			UNION = "UNION";
+		} else {
+			UNION = "UNION ALL";
+		}
 		while (queryStringIterator.hasNext()) {
 			result.append("\n");
 			result.append(UNION);
@@ -716,7 +726,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @return the sql select clause
 	 */
 	private String getSelectClause(List<String> signature, CQIE query,
-			QueryAliasIndex index) throws OBDAException {
+			QueryAliasIndex index, boolean distinct) throws OBDAException {
 		/*
 		 * If the head has size 0 this is a boolean query.
 		 */
@@ -724,7 +734,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("SELECT ");
-
+		if (distinct && !distinctResultSet) {
+			sb.append("DISTINCT ");
+		}
 		//Only for ASK
 		if (headterms.size() == 0) {
 			sb.append("'true' as x");
@@ -1175,7 +1187,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 * A work around to handle DB2 (>9.1) issue SQL0134N: Improper use of a string column, host variable, constant, or function name.
 			 * http://publib.boulder.ibm.com/infocenter/db2luw/v9r5/index.jsp?topic=%2Fcom.ibm.db2.luw.messages.sql.doc%2Fdoc%2Fmsql00134n.html
 			 */
-			if (isOrderBy) {
+			if (isDistinct || isOrderBy) {
 				return adapter.sqlCast(toReturn, Types.VARCHAR);
 			}
 		}

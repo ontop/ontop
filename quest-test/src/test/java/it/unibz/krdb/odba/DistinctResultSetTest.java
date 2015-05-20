@@ -5,6 +5,7 @@ import it.unibz.krdb.obda.io.ModelIOManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import org.junit.Before;
@@ -97,14 +98,14 @@ public class DistinctResultSetTest { //
 
     }
 
-    private int runTestsSesame(String query){
+    private int runTestsSesame(String query, String configFile){
         //create a sesame repository
         RepositoryConnection con = null;
         Repository repo = null;
         int count = 0;
         try {
 
-        repo = new SesameVirtualRepo("my_name", owlFile, obdaFile, false, "TreeWitness");
+        repo = new SesameVirtualRepo("my_name", owlFile, obdaFile, configFile);
 
 
 
@@ -164,6 +165,7 @@ public class DistinctResultSetTest { //
 
 
         QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.DISTINCT_RESULTSET, QuestConstants.TRUE);
         String query = "PREFIX : <http://meraka/moss/exampleBooks.owl#>" +
                 " select distinct * {?x a :Author}";
         int nResults = runTestsQuestOWL(p, query);
@@ -177,7 +179,7 @@ public class DistinctResultSetTest { //
         QuestPreferences p = new QuestPreferences();
         String query = "PREFIX : <http://meraka/moss/exampleBooks.owl#>" +
                 " select distinct * {?x a :Book}";
-        int nResults = runTestsSesame(query);
+        int nResults = runTestsSesame(query, "file:/Users/Sarah/develop/ontop/quest-test/src/test/resources/example/exampleDistinct.preferences") ;
         assertEquals(24, nResults);
     }
 

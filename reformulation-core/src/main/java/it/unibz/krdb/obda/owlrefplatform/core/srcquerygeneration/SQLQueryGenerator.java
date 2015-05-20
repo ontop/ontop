@@ -47,5 +47,5 @@ public interface SQLQueryGenerator extends Serializable {
 	 */
 	public String generateSourceQuery(DatalogProgram query, List<String> signature) throws OBDAException;
 
-    public boolean isDistinct() ;
+    public boolean hasDistinctResultSet() ;
 }
