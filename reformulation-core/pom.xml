@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.14.1-SNAPSHOT</version>
+		<version>1.15.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>ontop-reformulation-core</artifactId>
 	<name>ontop-reformulation-core</name>
@@ -45,13 +45,15 @@
 		</dependency>
 			
 		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+			<scope>test</scope>		
 			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 			
