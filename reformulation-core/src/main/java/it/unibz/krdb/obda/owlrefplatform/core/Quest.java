@@ -20,14 +20,9 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.OBDAModel;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.RDBMSourceParameterConstants;
 import it.unibz.krdb.obda.ontology.Ontology;
@@ -37,7 +32,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.SemanticIndexURIMap;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.CQCUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.LinearInclusionDependencies;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.VocabularyValidator;
-import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.EvaluationEngine;
@@ -53,14 +47,18 @@ import it.unibz.krdb.obda.owlrefplatform.core.translator.MappingVocabularyRepair
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.utils.MappingParser;
-import it.unibz.krdb.obda.utils.MappingSplitter;
-import it.unibz.krdb.obda.utils.MetaMappingExpander;
 import it.unibz.krdb.sql.DBMetadata;
+import it.unibz.krdb.sql.ImplicitDBConstraints;
 import it.unibz.krdb.sql.JDBCConnectionManager;
 import it.unibz.krdb.sql.TableDefinition;
-import it.unibz.krdb.sql.ImplicitDBConstraints;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.RelationJSQL;
+import net.sf.jsqlparser.JSQLParserException;
+import org.apache.tomcat.jdbc.pool.DataSource;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
+import org.openrdf.query.parser.ParsedQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -69,22 +67,51 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 
-import net.sf.jsqlparser.JSQLParserException;
+enum ConnClasses{
+	
+	MYSQL("com.mysql.jdbc.JDBC4Connection"),
+	POSTGRES("org.postgresql.jdbc4.Jdbc4Connection"),
+    DB2("com.ibm.db2.jcc.DB2Connection", "com.ibm.db2.jcc.t4.b");
 
-import org.apache.tomcat.jdbc.pool.DataSource;
-import org.apache.tomcat.jdbc.pool.PoolProperties;
-import org.openrdf.query.parser.ParsedQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+	private final List<String> connClasses;
+	
+	ConnClasses(String... connClasses){
+		this.connClasses = Lists.newArrayList(connClasses);
+	}
+	
+	public static ConnClasses fromString(String connectionClassName) {
+		
+		ConnClasses result = null;
+		
+	    if (connectionClassName != null) {
+	      for (ConnClasses b : ConnClasses.values()) {
 
+              if(b.connClasses.indexOf(connectionClassName) != -1){
+                  result = b;
+              }
+
+//	        if (connectionClassName.equals(b.connClass)) {
+//	          result = b;
+//	        }
+	      }
+	    }
+	    else
+            throw new IllegalArgumentException("No constant with text " + connectionClassName + " found");
+	    return result;
+	}
+	
+	@Override
+	public String toString(){
+		return this.connClasses.toString();
+	}
+	
+}
 
 public class Quest implements Serializable, RepositoryChangedListener {
 
@@ -178,6 +205,8 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	private boolean obtainFullMetadata = false;
 
     private boolean sqlGenerateReplace = true;
+
+	private boolean distinctResultSet = false;
 
 	private String aboxMode = QuestConstants.CLASSIC;
 
@@ -422,6 +451,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		
 		obtainFullMetadata = Boolean.valueOf((String) preferences.get(QuestPreferences.OBTAIN_FULL_METADATA));	
 		printKeys = Boolean.valueOf((String) preferences.get(QuestPreferences.PRINT_KEYS));
+		distinctResultSet = Boolean.valueOf((String) preferences.get(QuestPreferences.DISTINCT_RESULTSET));
 
         sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
                 
@@ -725,7 +755,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				
 
 
-			datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, getUriMap());
+			datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, distinctResultSet, getUriMap());
 
 
 
@@ -839,7 +869,58 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	}
 
 
+// Davide> TODO: Test
+	public void setQueryTimeout(Statement st) throws SQLException {
 
+        int timeout = 1200; //7200; // 2 hours, //1200: 20mins.
+        //int timeout = 30;
+
+		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().getName());
+
+		if(connClass == null){
+            st.setQueryTimeout(timeout);
+            return;
+        }
+
+
+		switch(connClass){
+        case DB2:
+		case MYSQL:
+            st.setQueryTimeout(timeout);
+			break;
+		case POSTGRES:
+		{
+			String query = String.format("SET statement_timeout TO %d", timeout*1000); // 1000ms = one second
+			st.execute(query);
+			break;
+		}
+		default:
+            st.setQueryTimeout(timeout);
+            break;
+		}
+	}
+	
+	public void resetTimeouts(Statement st) throws SQLException {
+		ConnClasses connClass = ConnClasses.fromString(localConnection.getClass().toString());
+
+		if(connClass == null){
+			// TODO: check
+			return;
+		}
+
+		switch(connClass){
+		case MYSQL:
+        case DB2:
+			// Do nothing
+			break;
+		case POSTGRES:
+		{
+			String query = "RESET statement_timeout;";
+			st.execute(query);
+			break;
+		}		
+		}		
+	}
 
 
 	private void setupConnectionPool() {
