@@ -28,6 +28,10 @@ import java.io.File;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.OWLOntology;
 
+/**
+ * @deprecated use {@code org.semanticweb.ontop.cli.Ontop}
+ */
+@Deprecated
 public class DirectMappingBootstrapperCMD {
 
 	/**

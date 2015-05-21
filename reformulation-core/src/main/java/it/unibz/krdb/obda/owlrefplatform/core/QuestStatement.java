@@ -26,10 +26,7 @@ import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.EmptyQueryResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestGraphResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestResultset;
+import it.unibz.krdb.obda.owlrefplatform.core.resultset.*;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.DatalogToSparqlTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
@@ -189,7 +186,7 @@ public class QuestStatement implements OBDAStatement {
 				} 
 				else if (sql.equals("")) {
 					tupleResult = new BooleanOWLOBDARefResultSet(false, QuestStatement.this);
-				} 
+				}
 				else {
 					try {
 //                        FOR debugging H2 in-memory database
@@ -212,7 +209,15 @@ public class QuestStatement implements OBDAStatement {
 						// Store the SQL result to application result set.
 						if (isSelect) { // is tuple-based results
 
-							tupleResult = new QuestResultset(set, signature, QuestStatement.this);
+                            if(questInstance.getDatasourceQueryGenerator().hasDistinctResultSet()) {
+
+                                tupleResult = new QuestDistinctResultset(set, signature, QuestStatement.this );
+                            }
+
+                            else {
+
+                                tupleResult = new QuestResultset(set, signature, QuestStatement.this);
+                            }
 
 						} else if (isBoolean) {
 							tupleResult = new BooleanOWLOBDARefResultSet(set, QuestStatement.this);
@@ -300,8 +305,8 @@ public class QuestStatement implements OBDAStatement {
 				it.unibz.krdb.obda.model.ResultSet resultSet = (it.unibz.krdb.obda.model.ResultSet) this.executeTupleQuery(sel, 1);
 				if (resultSet instanceof EmptyQueryResultSet)
 					return null;
-				else if (resultSet instanceof QuestResultset) {
-					QuestResultset res = (QuestResultset) resultSet;
+				else if (resultSet instanceof QuestResultset || resultSet instanceof QuestDistinctResultset) {
+                    TupleResultSet res = (TupleResultSet) resultSet;
 					while (res.nextRow()) {
 						Constant constant = res.getConstant(1);
 						if (constant instanceof URIConstant) {
@@ -472,6 +477,7 @@ public class QuestStatement implements OBDAStatement {
 
 		// query = DatalogNormalizer.normalizeDatalogProgram(query);
 		String sql = questInstance.getDatasourceQueryGenerator().generateSourceQuery(query, signature);
+
 
 		log.debug("Resulting SQL: \n{}", sql);
 		return sql;
@@ -838,7 +844,7 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 	public int getUCQSizeAfterRewriting() {
-		if(programAfterRewriting.getRules() != null)
+		if(programAfterRewriting != null && programAfterRewriting.getRules() != null)
 			return programAfterRewriting.getRules().size();
 		else return 0;
 	}
@@ -945,5 +951,5 @@ public class QuestStatement implements OBDAStatement {
 
 		return result;
 	}
-	
+
 }

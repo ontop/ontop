@@ -30,7 +30,6 @@ import it.unibz.krdb.obda.model.impl.SQLQueryImpl;
 import it.unibz.krdb.obda.renderer.TargetQueryRenderer;
 import it.unibz.krdb.obda.utils.IDGenerator;
 import it.unibz.krdb.obda.utils.URITemplates;
-
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
@@ -165,7 +164,7 @@ public class OBDAMappingTransformer {
 			OWLDataFactory factory =  OWLManager.getOWLDataFactory();
 			OWLObjectProperty prop = factory.getOWLObjectProperty(propname);
 		
-			if (pred.isClass() && !predURIString.equals(OBDAVocabulary.RDF_TYPE)) {
+			if (  !predURIString.equals(OBDAVocabulary.RDF_TYPE) && pred.isClass() ){
 				// The term is actually a SubjectMap (class)
 			//	statements.add(vf.createStatement(nod_subject, vf.createURI(OBDAVocabulary.RDF_TYPE),   R2RMLVocabulary.subjectMapClass));		
 				
@@ -311,7 +310,7 @@ public class OBDAMappingTransformer {
 			OWLObjectProperty objectProperty = factory.getOWLObjectProperty(propname);
             OWLDataProperty dataProperty = factory.getOWLDataProperty(propname);
 			
-			if (pred.isClass() && !predURIString.equals(OBDAVocabulary.RDF_TYPE)) {
+			if (!predURIString.equals(OBDAVocabulary.RDF_TYPE) && pred.isClass() ) {
 				// The term is actually a SubjectMap (class)
 				//add class declaration to subject Map node
 				sm.addClass(predUri);

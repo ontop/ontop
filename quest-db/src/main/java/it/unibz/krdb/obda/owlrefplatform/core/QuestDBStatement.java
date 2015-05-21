@@ -124,7 +124,7 @@ public class QuestDBStatement implements OBDAStatement {
 			OBDAModel obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();
 			ModelIOManager io = new ModelIOManager(obdaModel);
 			io.load(uri.toString());
-			materializer = new QuestMaterializer(obdaModel);
+			materializer = new QuestMaterializer(obdaModel, false);
 			assertionIter =  materializer.getAssertionIterator();
 			int result = st.insertData(assertionIter, /*useFile,*/ commit, batch);
 			return result;
