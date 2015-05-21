@@ -25,30 +25,14 @@ package it.unibz.krdb.obda.r2rml;
  * Class responsible of parsing R2RML mappings from file or from an RDF Model
  */
 
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDALibConstants;
-import it.unibz.krdb.obda.model.OBDAMappingAxiom;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
+import eu.optique.api.mapping.Join;
+import eu.optique.api.mapping.PredicateObjectMap;
+import eu.optique.api.mapping.RefObjectMap;
+import eu.optique.api.mapping.TriplesMap;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.model.impl.TermUtils;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.impl.LinkedHashModel;
@@ -57,10 +41,11 @@ import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.StatementCollector;
 
-import eu.optique.api.mapping.Join;
-import eu.optique.api.mapping.PredicateObjectMap;
-import eu.optique.api.mapping.RefObjectMap;
-import eu.optique.api.mapping.TriplesMap;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.*;
 
 public class R2RMLManager {
 	
@@ -72,7 +57,7 @@ public class R2RMLManager {
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the full path of the file
 	 */
-	public R2RMLManager(String file) {
+	public R2RMLManager(String file) throws Exception {
 		this(new File(file));
 	}
 	
@@ -80,8 +65,8 @@ public class R2RMLManager {
 	 * Constructor to start parsing R2RML mappings from file.
 	 * @param file - the File object
 	 */
-	public R2RMLManager(File file) {
-		try {
+	public R2RMLManager(File file) throws Exception {
+
 			myModel = new LinkedHashModel();			
 			RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
 			InputStream in = new FileInputStream(file);
@@ -90,9 +75,7 @@ public class R2RMLManager {
 			parser.setRDFHandler(collector);
 			parser.parse(in, documentUrl.toString());
 			r2rmlParser = new R2RMLParser();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
 	}
 	
 	/**

@@ -21,11 +21,7 @@ package it.unibz.krdb.odba;
  */
 
 import it.unibz.krdb.obda.io.ModelIOManager;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
@@ -36,7 +32,6 @@ import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -315,7 +310,7 @@ public class R2rmlCheckerTest {
 		// Now we are ready for querying
 		log.debug("Comparing roles");
 
-		int roleOBDA = runSPARQLRoleFilterQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>",reasonerOBDA.getConnection());
+		int roleOBDA = runSPARQLRoleFilterQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>", reasonerOBDA.getConnection());
 		int roleR2rml = runSPARQLRoleFilterQuery("<http://sws.ifi.uio.no/vocab/npd-v2#name>", reasonerR2rml.getConnection());
 
 		assertEquals(roleOBDA, roleR2rml);
@@ -373,7 +368,10 @@ public class R2rmlCheckerTest {
 
 		factory.setPreferenceHolder(p);
 
-		R2RMLReader reader = new R2RMLReader(r2rmlfile);
+		R2RMLReader reader = null;
+		try {
+			reader = new R2RMLReader(r2rmlfile);
+
 
 		obdaModel = reader.readModel(dataSource);
 
@@ -381,6 +379,9 @@ public class R2rmlCheckerTest {
 
 		reasonerR2rml = (QuestOWL) factory.createReasoner(ontology,
 				new SimpleConfiguration());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 

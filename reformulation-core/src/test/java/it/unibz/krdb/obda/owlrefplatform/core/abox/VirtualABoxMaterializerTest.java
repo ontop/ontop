@@ -52,7 +52,7 @@ try{
 		 * Setting the database;
 		 */
 
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -134,7 +134,7 @@ try{
 		model.addSource(source);
 		model.addMapping(source.getSourceID(), map1);
 
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		assertEquals(0, assertions.size());
@@ -231,7 +231,7 @@ try{
 		model.addMapping(source.getSourceID(), map1);
 		model.addMapping(source2.getSourceID(), map1);
 
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		
@@ -338,7 +338,7 @@ try{
 		model.addMapping(source2.getSourceID(), map1);
 		model.addMapping(source3.getSourceID(), map1);
 
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -406,7 +406,7 @@ try{
 		source3.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 		model.addSource(source3);
 
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -510,7 +510,7 @@ try{
 
 		model.addMapping(source2.getSourceID(), map1);
 		
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 	
 		List<Assertion> assertions = materializer.getAssertionList();
 		for (Assertion a : assertions) {
@@ -617,7 +617,7 @@ try{
 		model.addMapping(source.getSourceID(), map5);
 		model.addMapping(source.getSourceID(), map6);
 		
-		QuestMaterializer materializer = new QuestMaterializer(model);
+		QuestMaterializer materializer = new QuestMaterializer(model, false);
 
 		List<Assertion> assertions = materializer.getAssertionList();
 		int count = materializer.getTripleCount();

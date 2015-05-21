@@ -81,7 +81,7 @@ import org.openrdf.rio.Rio;
 import org.openrdf.rio.UnsupportedRDFormatException;
 import org.openrdf.rio.helpers.BasicParserSettings;
 
-public class RepositoryConnection implements org.openrdf.repository.RepositoryConnection {
+public class RepositoryConnection implements org.openrdf.repository.RepositoryConnection, AutoCloseable {
 
 	private SesameAbstractRepo repository;
 	private QuestDBConnection questConn;
