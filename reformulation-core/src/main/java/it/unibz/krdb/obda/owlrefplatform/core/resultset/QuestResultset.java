@@ -134,6 +134,19 @@ public class QuestResultset implements TupleResultSet {
 		return st;
 	}
 
+	public Object getRawObject(int column) throws OBDAException {
+
+		Object realValue;
+
+		try {
+			realValue = set.getObject(column);
+		} catch (SQLException e) {
+			throw new OBDAException(e);
+		}
+
+		return realValue;
+	}
+
 	/***
 	 * Returns the constant at column "column" recall that columns start at index 1.
 	 */
