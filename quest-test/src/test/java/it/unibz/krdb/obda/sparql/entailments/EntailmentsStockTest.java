@@ -6,20 +6,10 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import junit.framework.TestCase;
-
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -27,6 +17,12 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 
 /**
@@ -37,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 
-public class EntailmentsStockTest extends TestCase {
+public class EntailmentsStockTest  {
 
 	private OBDADataFactory fac;
 
@@ -50,7 +46,7 @@ public class EntailmentsStockTest extends TestCase {
 	private QuestOWL reasoner;
 	private QuestOWLConnection conn;
 
-	@Override
+
 	@Before
 	public void setUp() throws Exception {
 		try {
@@ -125,20 +121,20 @@ public class EntailmentsStockTest extends TestCase {
 		}
 		return resultCount;
 	}
-
+	@Test
 	public void testSubClass() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:subClassOf ?y }";
 		int numbersub = runTests(query, "rdfs:subClassOf");
-		assertEquals(546, numbersub);
+		assertEquals(523, numbersub);
 
 	}
-
+	@Test
 	public void testSubProperty() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:subPropertyOf ?y }";
 		int numbersub = runTests(query, "rdfs:subPropertyOf");
-		assertEquals(130, numbersub);
+		assertEquals(107, numbersub);
 	}
-
+	@Test
 	public void testOneSubClass() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?y rdfs:subClassOf :FinantialInstrument }";
 		QuestOWLStatement st = conn.createStatement();
@@ -169,7 +165,7 @@ public class EntailmentsStockTest extends TestCase {
 		}
 
 	}
-
+	@Test
 	public void testOneSubProperty() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?y rdfs:subPropertyOf <http://www.owl-ontologies.com/Ontology1207768242.owl#inverse_of_test1> }";
 		QuestOWLStatement st = conn.createStatement();
@@ -180,25 +176,26 @@ public class EntailmentsStockTest extends TestCase {
 			assertTrue(rs.nextRow());
 			OWLIndividual y = rs.getOWLIndividual("y");
 			retval = y.toString();
-			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#test1^->", retval);
-			log.info(retval);
-			
-			assertTrue(rs.nextRow());
-			y = rs.getOWLIndividual("y");
-			retval = y.toString();
 			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#test2^->", retval);
 			log.info(retval);
 			
 			assertTrue(rs.nextRow());
 			y = rs.getOWLIndividual("y");
 			retval = y.toString();
-			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#inverse_of_test1>", retval);
+			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#inverse_test2>", retval);
+
 			log.info(retval);
 			
 			assertTrue(rs.nextRow());
 			y = rs.getOWLIndividual("y");
 			retval = y.toString();
-			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#inverse_test2>", retval);
+			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#test1^->", retval);
+			log.info(retval);
+			
+			assertTrue(rs.nextRow());
+			y = rs.getOWLIndividual("y");
+			retval = y.toString();
+			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#inverse_of_test1>", retval);
 			log.info(retval);
 			
 
@@ -215,14 +212,14 @@ public class EntailmentsStockTest extends TestCase {
 		}
 
 	}
-
+	@Test
 	public void testEquivalentClass() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x owl:equivalentClass ?y }";
 		int equivalent = runTests(query, "owl:equivalentClass");
-		assertEquals(323, equivalent);
+		assertEquals(300, equivalent);
 
 	}
-
+	@Test
 	public void testOneEquivalentClass() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {:Transaction owl:equivalentClass ?y }";
 		QuestOWLStatement st = conn.createStatement();
@@ -254,7 +251,7 @@ public class EntailmentsStockTest extends TestCase {
 		}
 
 	}
-
+	@Test
 	public void testMoreEquivalentClass() throws Exception {
 
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?y owl:equivalentClass :Dealer }";
@@ -266,19 +263,20 @@ public class EntailmentsStockTest extends TestCase {
 			assertTrue(rs.nextRow());
 			OWLIndividual y = rs.getOWLIndividual("y");
 			retval = y.toString();
-			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#StockTrader>", retval);
-			log.info(retval);
-
-			assertTrue(rs.nextRow());
-			y = rs.getOWLIndividual("y");
-			retval = y.toString();
 			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#Dealer>", retval);
+
 			log.info(retval);
 
 			assertTrue(rs.nextRow());
 			y = rs.getOWLIndividual("y");
 			retval = y.toString();
 			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#Trader>", retval);
+			log.info(retval);
+
+			assertTrue(rs.nextRow());
+			y = rs.getOWLIndividual("y");
+			retval = y.toString();
+			assertEquals("<http://www.owl-ontologies.com/Ontology1207768242.owl#StockTrader>", retval);
 			log.info(retval);
 
 			assertFalse(rs.nextRow());
@@ -296,21 +294,21 @@ public class EntailmentsStockTest extends TestCase {
 		}
 
 	}
-	
+	@Test
 	public void testEquivalentProperty() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x owl:equivalentProperty ?y }";
 		int equivalent = runTests(query, "owl:equivalentProperty");
-		assertEquals(106, equivalent);
+		assertEquals(83, equivalent);
 
 	}
-
+	@Test
 	public void testRange() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:range ?y }";
 		int range = runTests(query, "rdfs:range");
-		assertEquals(69, range);
+		assertEquals(43, range);
 
 	}
-
+	@Test
 	public void testOneRange() throws Exception {
 
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:range <http://www.owl-ontologies.com/Ontology1207768242.owl#Person> }";
@@ -344,14 +342,14 @@ public class EntailmentsStockTest extends TestCase {
 		}
 
 	}
-
+	@Test
 	public void testDomain() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x rdfs:domain ?y }";
 		int domain = runTests(query, "rdfs:domain");
-		assertEquals(69, domain);
+		assertEquals(46, domain);
 
 	}
-
+	@Test
 	public void testOneDomain() throws Exception {
 
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {<http://www.owl-ontologies.com/Ontology1207768242.owl#hasAddress> rdfs:domain ?x }";
@@ -381,14 +379,14 @@ public class EntailmentsStockTest extends TestCase {
 		}
 
 	}
-
+	@Test
 	public void testInverses() throws Exception {
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x owl:inverseOf ?y }";
 		int inverse = runTests(query, "owl:inverseOf");
-		assertEquals(106, inverse);
+		assertEquals(60, inverse);
 
 	}
-
+	@Test
 	public void testOneInverse() throws Exception {
 
 		String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> select * where {?x owl:inverseOf <http://www.owl-ontologies.com/Ontology1207768242.owl#hasStock> }";

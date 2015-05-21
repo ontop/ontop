@@ -26,11 +26,15 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWL;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLConnection;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
-import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
+import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
+import junit.framework.TestCase;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -44,17 +48,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-
-import junit.framework.TestCase;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Test the simple ontology test-hierarchy-extended for sparql owl entailments.
@@ -304,14 +297,18 @@ public class GalenVirtualTest extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
 
-		log.info("Find subProperty");
-		List<String> individualsProperty = runTests(p, "PREFIX : <http://www.co-ode.org/ontologies/galen#> SELECT * WHERE { ?x rdfs:subPropertyOf ?y }", "rdfs:subPropertyOf");
-		assertEquals(48, individualsProperty.size());
 
 		log.info("Find subProperty");
 		List<String> property = runSingleNamedIndividualTests(p, "PREFIX : <http://www.co-ode.org/ontologies/galen#> SELECT * WHERE { :isSibling rdfs:subPropertyOf ?x }",
 				"rdfs:subPropertyOf");
 		assertEquals(4, property.size());
+
+
+		log.info("Find subProperty");
+		List<String> individualsProperty = runTests(p, "PREFIX : <http://www.co-ode.org/ontologies/galen#> SELECT * WHERE { ?x rdfs:subPropertyOf ?y }", "rdfs:subPropertyOf");
+		assertEquals(48, individualsProperty.size());
+
+
 
 		log.info("Find subClass");
 		List<String> individualsClass = runTests(p, "PREFIX : <http://www.co-ode.org/ontologies/galen#> SELECT * WHERE { ?x rdfs:subClassOf ?y }", "rdfs:subClassOf");
@@ -323,6 +320,27 @@ public class GalenVirtualTest extends TestCase {
 
 	}
 
-	
+	//does not return any result stackoverflow
+	public void testSubClasses() throws Exception {
+
+		QuestPreferences p = new QuestPreferences();
+		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
+
+
+		log.info("Find subClass");
+		List<String> individualsClass = runTests(p, "PREFIX : <http://www.co-ode.org/ontologies/galen#> SELECT * WHERE { ?x rdfs:subClassOf ?y }", "rdfs:subClassOf");
+		assertEquals(76, individualsClass.size());
+
+		log.info("Find subClass");
+		List<String> classes = runSingleNamedIndividualTests(p, "PREFIX : <http://www.co-ode.org/ontologies/galen#> SELECT * WHERE { ?x rdfs:subClassOf :Man }", "rdfs:subClassOf");
+		assertEquals(2, classes.size());
+
+	}
+
+
+
 
 }

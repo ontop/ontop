@@ -283,15 +283,20 @@ public class OWLEntailmentsinSPARQLTest extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
-
+//
 		log.info("Find domain");
 		List<String> individualsDomainClass = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x rdfs:domain ?y }", "rdfs:domain");
 		assertEquals(9, individualsDomainClass.size());
-		
-		log.info("Find one domain");
-		List<String> domain = runSingleNamedIndividualTests(p,
-				"PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x rdfs:domain :AnimalLover }", "rdfs:domain");
-		assertEquals(4, domain.size());
+//
+//		log.info("Find one domain");
+//		List<String> domain = runSingleNamedIndividualTests(p,
+//				"PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x rdfs:domain :AnimalLover }", "rdfs:domain");
+//		assertEquals(4, domain.size());
+//
+//		log.info("Find one domain");
+//		List<String> domain2 = runSingleNamedIndividualTests(p,
+//				"PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#hasDog> rdfs:domain ?x }", "rdfs:domain");
+////		assertEquals(4, domain.size());
 	}
 
 	public void testRanges() throws Exception {

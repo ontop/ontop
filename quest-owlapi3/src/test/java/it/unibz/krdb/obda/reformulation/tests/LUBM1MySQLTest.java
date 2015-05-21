@@ -27,7 +27,8 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -39,6 +40,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.*;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Test the simple ontology test-hierarchy-extended for sparql owl entailments.
  * rdfs:subclass, rdfs:subProperty, owl:inverseof owl:equivalentclass
@@ -46,7 +49,7 @@ import java.util.*;
  * rdfs:range QuestPreferences has SPARQL_OWL_ENTAILMENT set to true.
  * 
  */
-public class LUBM1MySQLTest extends TestCase {
+public class LUBM1MySQLTest  {
 
 	private OBDADataFactory fac;
 
@@ -59,7 +62,7 @@ public class LUBM1MySQLTest extends TestCase {
 	String obdafile =
 			"src/test/resources/test/entailments/univ1-bench.obda";
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 
 		// Loading the OWL file
@@ -162,6 +165,8 @@ public class LUBM1MySQLTest extends TestCase {
 		}
 	}
 
+
+	@Test
 	public void testLUBM() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -443,6 +448,7 @@ public class LUBM1MySQLTest extends TestCase {
 		}
 
 	}
+
 
 	public void testSubDescription() throws Exception {
 
