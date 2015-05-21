@@ -20,14 +20,14 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class that represents the preferences which can be modified by the user.
@@ -50,8 +50,6 @@ public class QuestPreferences extends Properties {
 	public static final String OBTAIN_FULL_METADATA = "OBTAIN_FULL_METADATA";
 
     public static final String SQL_GENERATE_REPLACE = "org.obda.owlreformulationplatform.sqlGenerateReplace";
-
-	public static final String DISTINCT_RESULTSET = "org.obda.owlreformulationplatform.distinctResultSet";
 
     public static final String  REWRITE 	= "rewrite";
 	

@@ -39,6 +39,7 @@ import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.ViewDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.ParsedSQLQuery;
+
 import org.openrdf.model.Literal;
 
 import java.sql.Types;
@@ -90,7 +91,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 
     private boolean generatingREPLACE = true;
-	private boolean distinctResultSet = false;
 
 	private boolean isDistinct = false;
 	private boolean isOrderBy = false;
@@ -112,10 +112,9 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * @param uriid is null in case we are not in the SI mode
 	 */
 	
-    public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace, boolean distinctResultSet, SemanticIndexURIMap uriid) {
+    public SQLGenerator(DBMetadata metadata, SQLDialectAdapter sqladapter, boolean sqlGenerateReplace, SemanticIndexURIMap uriid) {
         this(metadata, sqladapter);
         this.generatingREPLACE = sqlGenerateReplace;
-		this.distinctResultSet = distinctResultSet;
         if (uriid != null) {
     		this.isSI = true;
     		this.uriRefIds = uriid;
@@ -157,13 +156,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			return generateQuery(query, signature, "");
 		}
 	}
-
-    @Override
-    public boolean hasDistinctResultSet() {
-        return distinctResultSet;
-    }
-
-    private boolean hasSelectDistinctStatement(DatalogProgram query) {
+	
+	private boolean hasSelectDistinctStatement(DatalogProgram query) {
 		boolean toReturn = false;
 		if (query.getQueryModifiers().hasModifiers()) {
 			toReturn = query.getQueryModifiers().isDistinct();
@@ -235,7 +229,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			QueryAliasIndex index = new QueryAliasIndex(cq);
 
 			boolean innerdistincts = false;
-			if (isDistinct && !distinctResultSet && numberOfQueries == 1) {
+			if (isDistinct && numberOfQueries == 1) {
 				innerdistincts = true;
 			}
 
@@ -254,7 +248,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		}
 
 		String UNION = null;
-		if (isDistinct && !distinctResultSet) {
+		if (isDistinct) {
 			UNION = "UNION";
 		} else {
 			UNION = "UNION ALL";
@@ -734,7 +728,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("SELECT ");
-		if (distinct && !distinctResultSet) {
+		if (distinct) {
 			sb.append("DISTINCT ");
 		}
 		//Only for ASK
