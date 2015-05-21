@@ -26,16 +26,19 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDAModelImpl;
 import it.unibz.krdb.obda.protege4.core.OBDAModelManager;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
+
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.net.URI;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLWorkspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.io.File;
-import java.net.URI;
 
 public class R2RMLImportAction extends ProtegeAction {
 
@@ -84,10 +87,7 @@ public class R2RMLImportAction extends ProtegeAction {
 					e.printStackTrace();
 				}
 				if (file != null) {
-					R2RMLReader reader = null;
-					try {
-						reader = new R2RMLReader(file);
-
+					R2RMLReader reader = new R2RMLReader(file);
 
 					URI sourceID = obdaModel.getSources().get(0).getSourceID();
 
@@ -97,19 +97,11 @@ public class R2RMLImportAction extends ProtegeAction {
 								JOptionPane.showMessageDialog(workspace, "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
 							} else {
 								obdaModel.addMapping(sourceID, mapping);
-
 							}
 						}
-						JOptionPane.showMessageDialog(workspace, "R2rml Import completed. " );
 					} catch (DuplicateMappingException dm) {
 						JOptionPane.showMessageDialog(workspace, "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
 						throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
-					}
-
-					} catch (Exception e) {
-						JOptionPane.showMessageDialog(null, "An error occurred. For more info, see the logs.");
-						log.error("Error during r2rml import. \n");
-						e.printStackTrace();
 					}
 
 				}

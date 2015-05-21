@@ -29,17 +29,7 @@
 			</includes>
 		</fileSet>
 
-        <fileSet>
-            <directory>${project.basedir}/../ontop-cli/src/main/resources/
-            </directory>
-            <outputDirectory>/</outputDirectory>
-            <includes>
-                <include>*</include>
-            </includes>
-        </fileSet>
-
-    <!--
-        <fileSet>
+		<fileSet>
 			<directory>${project.basedir}/../quest-owlapi3/src/main/resources/
 			</directory>
 			<outputDirectory>/</outputDirectory>
@@ -47,7 +37,7 @@
 				<include>*</include>
 			</includes>
 		</fileSet>
-	-->
+		
 		<fileSet>
 			<directory>${project.basedir}/../obdalib-owlapi3/src/main/resources/
 			</directory>
@@ -56,7 +46,7 @@
 				<include>*</include>
 			</includes>
 		</fileSet>
-	<!--
+		
 		<fileSet>
 			<directory>${project.basedir}/../quest-sesame/src/main/resources/
 			</directory>
@@ -64,11 +54,14 @@
 			<includes>
 				<include>*</include>
 			</includes>
-    		</fileSet>
-    -->
+		</fileSet>
+
 	</fileSets>
 
 	<dependencySets>
+		<!-- <dependencySet> <outputDirectory>/lib</outputDirectory> <includes> 
+			<include>inf.unibz.it.obda:quest-owlapi3</include> </includes> <useTransitiveDependencies>false</useTransitiveDependencies> 
+			<unpack>false</unpack> </dependencySet> -->
 		<dependencySet>
 			<outputDirectory>/lib</outputDirectory>
 			<excludes>
@@ -80,13 +73,14 @@
 				<exclude>log4j*</exclude>
 				<exclude>org.slf4j:slf4j-log4j12*</exclude>
 			</excludes>
-		</dependencySet>
 
+		</dependencySet>
 		<dependencySet>
 			<outputDirectory>/jdbc</outputDirectory>
 			<includes>
 				<include>com.h2database:h2*</include>
 				<include>postgres*</include>
+				<include>mysql*</include>
 			</includes>
 		</dependencySet>
 

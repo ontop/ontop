@@ -179,8 +179,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 
     private boolean sqlGenerateReplace = true;
 
-	private boolean distinctResultSet = false;
-
 	private boolean sparqlOwlEntailment = false;
 
 	private String aboxMode = QuestConstants.CLASSIC;
@@ -428,7 +426,6 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		sparqlOwlEntailment = Boolean.valueOf((String) preferences.get(QuestPreferences.SPARQL_OWL_ENTAILMENT));
 
 		printKeys = Boolean.valueOf((String) preferences.get(QuestPreferences.PRINT_KEYS));
-		distinctResultSet = Boolean.valueOf((String) preferences.get(QuestPreferences.DISTINCT_RESULTSET));
 
         sqlGenerateReplace = Boolean.valueOf((String) preferences.get(QuestPreferences.SQL_GENERATE_REPLACE));
                 
@@ -733,7 +730,7 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				
 
 
-			datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, distinctResultSet, getUriMap());
+			datasourceQueryGenerator = new SQLGenerator(metadata, sqladapter, sqlGenerateReplace, getUriMap());
 
 
 

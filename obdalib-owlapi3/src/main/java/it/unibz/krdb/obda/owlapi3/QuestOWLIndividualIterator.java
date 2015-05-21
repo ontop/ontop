@@ -29,13 +29,13 @@ import java.util.Iterator;
 
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 
-public class QuestOWLIndividualAxiomIterator implements Iterator<OWLIndividualAxiom> {
+public class QuestOWLIndividualIterator  implements Iterator<OWLIndividualAxiom> {
 
 	private OWLAPI3IndividualTranslator translator = new OWLAPI3IndividualTranslator();
 	
 	private Iterator<Assertion> assertions = null;
 
-	public QuestOWLIndividualAxiomIterator(Iterator<Assertion> assertions) {
+	public QuestOWLIndividualIterator(Iterator<Assertion> assertions) {
 		this.assertions = assertions;
 	}
 	

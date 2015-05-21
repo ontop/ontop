@@ -20,46 +20,30 @@ package it.unibz.krdb.obda.owlrefplatform.owlapi3;
  * #L%
  */
 
-import com.google.common.collect.ImmutableSet;
 import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualAxiomIterator;
+import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.QuestMaterializer;
 
-import java.util.Collection;
 import java.util.Iterator;
 
-public class OWLAPI3Materializer implements AutoCloseable{
+public class OWLAPI3Materializer {
 
 	private final Iterator<Assertion> assertions;
 	private final QuestMaterializer materializer;
 	
-	public OWLAPI3Materializer(OBDAModel model, boolean doStreamResults) throws Exception {
-		 this(model, null, doStreamResults);
+	public OWLAPI3Materializer(OBDAModel model) throws Exception {
+		 this(model, null);
 	}
-
 	
-	public OWLAPI3Materializer(OBDAModel model, Ontology onto, boolean doStreamResults) throws Exception {
-		 materializer = new QuestMaterializer(model, onto, doStreamResults);
+	public OWLAPI3Materializer(OBDAModel model, Ontology onto) throws Exception {
+		 materializer = new QuestMaterializer(model, onto);
 		 assertions = materializer.getAssertionIterator();
 	}
-
-    /*
-     * only materialize the predicates in  `predicates`
-     */
-    public OWLAPI3Materializer(OBDAModel model, Ontology onto, Collection<Predicate> predicates, boolean doStreamResults) throws Exception {
-        materializer = new QuestMaterializer(model, onto, predicates, doStreamResults);
-        assertions = materializer.getAssertionIterator();
-    }
-
-    public OWLAPI3Materializer(OBDAModel obdaModel, Ontology onto, Predicate predicate, boolean doStreamResults)  throws Exception{
-        this(obdaModel, onto, ImmutableSet.of(predicate), doStreamResults);
-    }
-
-    public QuestOWLIndividualAxiomIterator getIterator() {
-		return new QuestOWLIndividualAxiomIterator(assertions);
+	
+	public QuestOWLIndividualIterator getIterator() {
+		return new QuestOWLIndividualIterator(assertions);
 	}
 	
 	public void disconnect() {
@@ -79,9 +63,4 @@ public class OWLAPI3Materializer implements AutoCloseable{
 	public int getVocabularySize() {
 		return materializer.getVocabSize();
 	}
-
-    @Override
-    public void close() throws Exception {
-        disconnect();
-    }
 }

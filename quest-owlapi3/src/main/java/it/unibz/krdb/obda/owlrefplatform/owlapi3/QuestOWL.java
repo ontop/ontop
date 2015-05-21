@@ -348,7 +348,7 @@ public class QuestOWL extends OWLReasonerBase implements AutoCloseable {
 					OBDAModel obdaModelForMaterialization = questInstance.getOBDAModel();
 					obdaModelForMaterialization.declareAll(translatedOntologyMerge.getVocabulary());
 					
-					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization, false);
+					QuestMaterializer materializer = new QuestMaterializer(obdaModelForMaterialization);
 					Iterator<Assertion> assertionIter = materializer.getAssertionIterator();
 					int count = st.insertData(assertionIter, 5000, 500);
 					materializer.disconnect();

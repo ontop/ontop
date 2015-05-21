@@ -119,7 +119,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 			OBDAModel model = OBDADataFactoryImpl.getInstance().getOBDAModel();
 			ModelIOManager man = new ModelIOManager(model);
 			man.load(f);
-			QuestMaterializer mat = new QuestMaterializer(model, prefs, false);
+			QuestMaterializer mat = new QuestMaterializer(model, prefs);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
 			int propAss = 0;
@@ -158,7 +158,7 @@ public class QuestOWLMaterializerTest extends TestCase {
 			System.out.println(onto.getSubObjectPropertyAxioms());
 			System.out.println(onto.getSubDataPropertyAxioms());
 			
-			QuestMaterializer mat = new QuestMaterializer(model, onto, prefs, false);
+			QuestMaterializer mat = new QuestMaterializer(model, onto, prefs);
 			Iterator<Assertion> iterator = mat.getAssertionIterator();
 			int classAss = 0;
 			int propAss = 0;

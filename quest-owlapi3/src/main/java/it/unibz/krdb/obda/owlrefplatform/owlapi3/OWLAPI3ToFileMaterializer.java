@@ -25,7 +25,7 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualAxiomIterator;
+import it.unibz.krdb.obda.owlapi3.QuestOWLIndividualIterator;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -73,10 +73,10 @@ public class OWLAPI3ToFileMaterializer {
 	}
 
 	public static int materializeN3(Writer bf, OBDAModel model) throws Exception {
-		return materializeN3(bf, (new OWLAPI3Materializer(model, false)).getIterator());
+		return materializeN3(bf, (new OWLAPI3Materializer(model)).getIterator());
 	}
 	
-	public static int materializeN3(Writer bf, QuestOWLIndividualAxiomIterator iterator) throws Exception {
+	public static int materializeN3(Writer bf, QuestOWLIndividualIterator iterator) throws Exception {
 
 		String rdftype = OBDAVocabulary.RDF_TYPE;
 		int count = 0;

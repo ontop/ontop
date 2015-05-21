@@ -44,7 +44,7 @@ import org.semanticweb.owlapi.model.OWLPropertyAssertionObject;
  * @author Mariano Rodriguez Muro <mariano.muro@gmail.com>
  * 
  */
-public class QuestOWLResultSet implements AutoCloseable {
+public class QuestOWLResultSet {
 
 	private final TupleResultSet res;
 

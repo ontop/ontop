@@ -23,13 +23,22 @@ package it.unibz.krdb.obda.r2rml;
  * @author timea bagosi
  * Class responsible to write an r2rml turtle file given an obda model
  */
-
-import eu.optique.api.mapping.R2RMLMappingManager;
-import eu.optique.api.mapping.R2RMLMappingManagerFactory;
-import eu.optique.api.mapping.TriplesMap;
 import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
@@ -38,12 +47,9 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.Rio;
 import org.semanticweb.owlapi.model.OWLOntology;
 
-import java.io.*;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import eu.optique.api.mapping.R2RMLMappingManager;
+import eu.optique.api.mapping.R2RMLMappingManagerFactory;
+import eu.optique.api.mapping.TriplesMap;
 
 
 public class R2RMLWriter {
@@ -120,39 +126,26 @@ public class R2RMLWriter {
 	 * from an rdf Model to a file
 	 * @param file the ttl file to write to
 	 */
-	public void write(File file) throws Exception {
+	public void write(File file)
+	{
 		try {
-            FileOutputStream fos = new FileOutputStream(file);
-			write(fos);
+			R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
+			Collection<TriplesMap> coll = getTriplesMaps();
+			Model out = mm.exportMappings(coll, Model.class);			
+			FileOutputStream fos = new FileOutputStream(file);
+			Rio.write(out, fos, RDFFormat.TURTLE);
+			fos.close();
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw e;
 		}
 	}
+	
 
-    /**
-     * the method to write the R2RML mappings
-     * from an rdf Model to a file
-     * @param os the output target
-     */
-    public void write(OutputStream os) throws Exception {
-        try {
-            R2RMLMappingManager mm = R2RMLMappingManagerFactory.getSesameMappingManager();
-            Collection<TriplesMap> coll = getTriplesMaps();
-            Model out = mm.exportMappings(coll, Model.class);
-            Rio.write(out, os, RDFFormat.TURTLE);
-            os.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-			throw e;
-        }
-    }
 
 	
 	public static void main(String args[])
 	{
 		String file = "/Users/mindaugas/r2rml/test2.ttl";
-		try {
 		R2RMLReader reader = new R2RMLReader(file);
 		OWLOntology ontology = null;
 
@@ -162,11 +155,7 @@ public class R2RMLWriter {
 //		Iterator<Statement> st = g.iterator();
 //		while (st.hasNext())
 //			System.out.println(st.next());
-
-			writer.write(out);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+		writer.write(out);
+		
 	}
 }

@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>ontop</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>1.15.1-SNAPSHOT</version>
+		<version>1.14.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>ontop-quest-owlapi3</artifactId>
@@ -18,11 +18,6 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		
 		<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
@@ -59,8 +54,8 @@
 		</dependency>
 		
 		<dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

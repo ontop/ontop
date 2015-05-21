@@ -427,6 +427,4 @@ public class QuestOWLStatement implements AutoCloseable {
 		return st.getUCQSizeAfterRewriting();
 	}
 
-
-
 }

@@ -3,7 +3,7 @@
   <parent>
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
-    <version>1.15.1-SNAPSHOT</version>
+    <version>1.14.1-SNAPSHOT</version>
   </parent>
   <artifactId>ontop-test</artifactId>
 
@@ -45,8 +45,8 @@
 			<artifactId>owlapi-api</artifactId>
 		</dependency>
 		<dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
 			<type>jar</type>
 		</dependency>
 		<dependency>
@@ -100,6 +100,7 @@
             <artifactId>sesame-sparql-testsuite</artifactId>
         </dependency>
 
+					
         <dependency>
    			<groupId>com.google.guava</groupId>
    			<artifactId>guava</artifactId>

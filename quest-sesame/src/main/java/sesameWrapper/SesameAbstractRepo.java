@@ -31,7 +31,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.repository.RepositoryException;
 
 public abstract class SesameAbstractRepo implements
-		org.openrdf.repository.Repository, AutoCloseable {
+		org.openrdf.repository.Repository {
 
 	private RepositoryConnection repoConnection;
 	private Map<String, String> namespaces;
@@ -100,11 +100,6 @@ public abstract class SesameAbstractRepo implements
 			repoConnection.close();
 		
 	}
-
-    @Override
-    public void close() throws Exception {
-        this.shutDown();
-    }
 	
 
 	public abstract String getType();

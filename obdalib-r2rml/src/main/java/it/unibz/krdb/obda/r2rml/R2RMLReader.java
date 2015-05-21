@@ -23,18 +23,18 @@ package it.unibz.krdb.obda.r2rml;
  * @author timea bagosi
  * Class responsible to construct an OBDA model from an R2RML mapping file or graph.
  */
-
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAMappingAxiom;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import org.openrdf.model.Model;
 
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+
+import org.openrdf.model.Model;
 
 public class R2RMLReader {
 	
@@ -50,16 +50,19 @@ public class R2RMLReader {
 		this.m = m;
 	}
 	
-	public R2RMLReader(String file) throws Exception {
+	public R2RMLReader(String file)
+	{
 		this(new File(file));
 	}
 	
-	public R2RMLReader(File file, OBDAModel model) throws Exception {
+	public R2RMLReader(File file, OBDAModel model)
+	{
 		this(file);
 		obdaModel = model;
 	}
 	
-	public R2RMLReader(File file) throws Exception {
+	public R2RMLReader(File file)
+	{
 		manager = new R2RMLManager(file);
 		m = manager.getModel();
 	}
@@ -86,7 +89,7 @@ public class R2RMLReader {
 	
 	/**
 	 * the method that gives the obda model based on the given graph
-	 * @param dataSource - the datasource of the model
+	 * @param datasource - the datasource of the model
 	 * @return the read obda model
 	 */
 	public OBDAModel readModel(OBDADataSource dataSource){
@@ -113,13 +116,8 @@ public class R2RMLReader {
 
 	public static void main(String args[])
 	{
-		String file = "/Users/mindaugas/r2rml/test26.ttl";
-		R2RMLReader reader = null;
-		try {
-			reader = new R2RMLReader(file);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		String file = "/Users/mindaugas/r2rml/test26.ttl";	
+		R2RMLReader reader = new R2RMLReader(file);
 		ArrayList<OBDAMappingAxiom> axioms = reader.readMappings();
 		for (OBDAMappingAxiom ax : axioms)
 			System.out.println(ax);

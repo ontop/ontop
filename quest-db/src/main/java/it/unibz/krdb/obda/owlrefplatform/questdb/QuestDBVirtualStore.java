@@ -40,6 +40,13 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.RDBMSSIRepositoryManager;
 import it.unibz.krdb.obda.r2rml.R2RMLReader;
 import it.unibz.krdb.sql.DBMetadata;
 import it.unibz.krdb.sql.ImplicitDBConstraints;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Properties;
+import java.util.Set;
+
 import org.openrdf.model.Model;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -48,12 +55,6 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.Properties;
-import java.util.Set;
 
 /***
  * A bean that holds all the data about a store, generates a store folder and
@@ -113,13 +114,8 @@ public class QuestDBVirtualStore extends QuestDBAbstractStore {
 			modelIO.load(new File(obdaURI));
 		} else if (obdaURI.toString().endsWith(".ttl")) {
 			//read R2RML file
-			R2RMLReader reader = null;
-			try {
-				reader = new R2RMLReader(new File(obdaURI));
-				obdaModel = reader.readModel(obdaURI);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			R2RMLReader reader = new R2RMLReader(new File(obdaURI));
+			obdaModel = reader.readModel(obdaURI);
 		}
 		return obdaModel;
 	}
