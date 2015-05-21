@@ -92,15 +92,15 @@ public class QuestResultset implements TupleResultSet {
 		isOracle = vendor.contains("Oracle");
 		version = metadata.getDriverVersion();
 		isMsSQL = vendor.contains("SQL Server");
+						
+
 
 	}
 
-    @Override
 	public int getColumnCount() throws OBDAException {
 		return signature.size();
 	}
 
-    @Override
 	public int getFetchSize() throws OBDAException {
 		try {
 			return set.getFetchSize();
@@ -109,12 +109,10 @@ public class QuestResultset implements TupleResultSet {
 		}
 	}
 
-    @Override
 	public List<String> getSignature() throws OBDAException {
 		return signature;
 	}
 
-    @Override
 	public boolean nextRow() throws OBDAException {
 		try {
 			return set.next();
@@ -123,7 +121,6 @@ public class QuestResultset implements TupleResultSet {
 		}
 	}
 
-    @Override
 	public void close() throws OBDAException {
 		try {
 			set.close();
@@ -132,25 +129,23 @@ public class QuestResultset implements TupleResultSet {
 		}
 	}
 
-
 	@Override
 	public OBDAStatement getStatement() {
 		return st;
 	}
 
+	public Object getRawObject(int column) throws OBDAException {
 
-    public Object getRawObject(int column) throws OBDAException {
+		Object realValue;
 
-        Object realValue;
+		try {
+			realValue = set.getObject(column);
+		} catch (SQLException e) {
+			throw new OBDAException(e);
+		}
 
-        try {
-            realValue = set.getObject(column);
-        } catch (SQLException e) {
-            throw new OBDAException(e);
-        }
-
-        return realValue;
-    }
+		return realValue;
+	}
 
 	/***
 	 * Returns the constant at column "column" recall that columns start at index 1.

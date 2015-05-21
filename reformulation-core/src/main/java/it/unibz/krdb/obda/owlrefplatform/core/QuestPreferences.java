@@ -50,10 +50,9 @@ public class QuestPreferences extends Properties {
 	public static final String OBTAIN_FULL_METADATA = "OBTAIN_FULL_METADATA";
 
     public static final String SQL_GENERATE_REPLACE = "org.obda.owlreformulationplatform.sqlGenerateReplace";
-
 	public static final String DISTINCT_RESULTSET = "org.obda.owlreformulationplatform.distinctResultSet";
 
-    public static final String  REWRITE 	= "rewrite";
+	public static final String  REWRITE 	= "rewrite";
 	
 	public static final String  SPARQL_OWL_ENTAILMENT = "SPARQL_OWL_ENTAILMENT";
 	
