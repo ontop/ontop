@@ -84,20 +84,17 @@ public class ExpressionEvaluator {
 			Function atom = body.get(atomidx);
 			Term newatom = eval(atom);
 			if (newatom == OBDAVocabulary.TRUE) {
-				q.getBody().remove(atomidx);
+				body.remove(atomidx);
 				atomidx -= 1;
 				continue;
 			} else if (newatom == OBDAVocabulary.FALSE) {
 				return true;
 			}
-			body.set(atomidx, (Function)newatom);
+			body.set(atomidx, (Function) newatom);
 		}
 		
-		// additional unsatisfiability checking
-		ExpressionUnsatisfiabilityCheck sat = new ExpressionUnsatisfiabilityCheck();
-		return sat.check(body);
-		
-		//return false;
+		InequalitiesSatisfiabilityCheck sat = new InequalitiesSatisfiabilityCheck(fac);
+		return sat.check(q);
 	}
 
 	public Term eval(Term expr) {
@@ -246,17 +243,17 @@ public class ExpressionEvaluator {
 		} else if (pred == OBDAVocabulary.EQ) {
 			return evalEqNeq(term, true);
 		} else if (pred == OBDAVocabulary.GT) {
-			return term;
+			return evalGtLt(term, true);
 		} else if (pred == OBDAVocabulary.GTE) {
-			return term;
+			return evalGteLte(term, true);
 		} else if (pred == OBDAVocabulary.IS_NOT_NULL) {
 			return evalIsNullNotNull(term, false);
 		} else if (pred == OBDAVocabulary.IS_NULL) {
 			return evalIsNullNotNull(term, true);
 		} else if (pred == OBDAVocabulary.LT) {
-			return term;
+			return evalGtLt(term, false);
 		} else if (pred == OBDAVocabulary.LTE) {
-			return term;
+			return evalGteLte(term, false);
 		} else if (pred == OBDAVocabulary.NEQ) {
 			return evalEqNeq(term, false);
 		} else if (pred == OBDAVocabulary.NOT) {
@@ -284,6 +281,50 @@ public class ExpressionEvaluator {
 		}
 	}
 
+	private Term evalGteLte(Function term, boolean isgte){
+		Term t1 = term.getTerm(0),
+			 t2 = term.getTerm(1);
+		/*
+		 * Remove '# =< #' or '# >= #'
+		 */
+		if (t1.equals(t2))
+			return OBDAVocabulary.TRUE;
+		
+		if (t1 instanceof Constant && t2 instanceof Constant) {
+			Term result = evalGtLt(term, isgte);
+			if (result == OBDAVocabulary.TRUE || result == OBDAVocabulary.FALSE) {
+				return result;
+			}
+		}
+		
+		return term;
+	}
+	
+	private Term evalGtLt(Function term, boolean isgt){
+		Term t1 = term.getTerm(0),
+			 t2 = term.getTerm(1);
+		
+		/*
+		 * Remove '# < #' or '# > #'
+		 */
+		if (t1.equals(t2)) {
+			return OBDAVocabulary.FALSE;
+		}
+		
+		if (t1 instanceof Constant && t2 instanceof Constant) {
+			Constant c1 = (Constant) t1,
+					 c2 = (Constant) t2;
+			if (c1.getType() != c2.getType()) {
+				return OBDAVocabulary.FALSE;
+			}
+			
+			Predicate.COL_TYPE type = c1.getType();
+			// TODO actual comparison
+		}
+		
+		return term;
+	}
+	
 	private Term evalNonBoolean(Function term) {
 		Predicate pred = term.getFunctionSymbol();
 		if (pred == OBDAVocabulary.SPARQL_STR) {
@@ -732,7 +773,11 @@ public class ExpressionEvaluator {
 		Term eval2 = teval1 instanceof Function ? teval2 : teval1;
 
 		if (eval1 instanceof Variable || eval2 instanceof Variable) {
-			// no - op
+			if (eval1 instanceof Variable &&
+				eval2 instanceof Variable &&
+				eval1.equals(eval2)){
+				return fac.getBooleanConstant(eq);
+			}
 		} 
 		else if (eval1 instanceof Constant && eval2 instanceof Constant) {
 			if (eval1.equals(eval2)) 
