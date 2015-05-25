@@ -25,14 +25,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 
-/*
- * ExpressionEvaluator evaluator = new ExpressionEvaluator();
-		evaluator.setUriTemplateMatcher(questInstance.getUriTemplateMatcher());
-		evaluator.evaluateExpressions(unfolding);
- */
-
 class InequalitiesSatisfiabilityCheck {
-	private OBDADataFactory fac;
+	private final OBDADataFactory fac;
 	
 	InequalitiesSatisfiabilityCheck(OBDADataFactory fac){
 		this.fac = fac;
@@ -48,7 +42,7 @@ class InequalitiesSatisfiabilityCheck {
 		if (type == COL_TYPE.INT || type == COL_TYPE.INTEGER || type == COL_TYPE.LONG ||
 			type == COL_TYPE.NON_POSITIVE_INTEGER || type== COL_TYPE.POSITIVE_INTEGER ||
 			type == COL_TYPE.NON_NEGATIVE_INTEGER || type== COL_TYPE.NEGATIVE_INTEGER ||
-			type == COL_TYPE.UNSIGNED_INT || type== COL_TYPE.POSITIVE_INTEGER) {
+			type == COL_TYPE.UNSIGNED_INT) {
 			return new Long(Long.parseLong(value)).doubleValue();
 		} else if (type == COL_TYPE.DOUBLE || type == COL_TYPE.FLOAT) {
 			return Double.parseDouble(value);
@@ -82,22 +76,22 @@ class InequalitiesSatisfiabilityCheck {
 	 * Return true if the query is found unsatisfiable, false otherwise.
 	 */
 	public boolean check(CQIE q) {		
-		List<Function> atoms = new ArrayList<Function>(q.getBody());
+		List<Function> atoms = new ArrayList<>(q.getBody());
 		
 		/*
 		 * The minimum ranges of the variables among the comparisons
 		 */
-		HashMap<Variable, Constant[]> mranges = new HashMap<Variable, Constant[]>();
+		HashMap<Variable, Constant[]> mranges = new HashMap<>();
 		
 		/*
 		 * The un-equality (neq) constraints
 		 */
-		HashMap<Variable, Set<Term>> neq = new HashMap<Variable, Set<Term>>();
+		HashMap<Variable, Set<Term>> neq = new HashMap<>();
 		
 		/*
 		 * The directed graph that contains the greater-than-or-equal (gte) relations
 		 */
-		DirectedGraph<Term, DefaultEdge> gteGraph = new DefaultDirectedGraph<Term, DefaultEdge>(DefaultEdge.class);
+		DirectedGraph<Term, DefaultEdge> gteGraph = new DefaultDirectedGraph<>(DefaultEdge.class);
 		
 		/*
 		 * The first step is to eliminate trivial inequalities; anyway
@@ -105,7 +99,7 @@ class InequalitiesSatisfiabilityCheck {
 		 * - elimination of "C1 op C2": evalEqNeq, evalGtLt, evalGteLte;
 		 * - elimination of "# = #", "# != #": evalEqNeq.
 		 */
-		
+
 		for (int atomidx = 0; atomidx < atoms.size(); atomidx++) {
 			Function atom = atoms.get(atomidx);
 			Predicate pred = atom.getFunctionSymbol();
@@ -119,19 +113,21 @@ class InequalitiesSatisfiabilityCheck {
 			/*
 			 * Ignore unsupported variables
 			 */
-			if (t0 instanceof Constant & !supported_constant((Constant) t0))
+			if (t0 instanceof Constant && !supported_constant((Constant) t0))
 					continue;
-			if (t1 instanceof Constant & !supported_constant((Constant) t1))
+			if (t1 instanceof Constant && !supported_constant((Constant) t1))
 					continue;
 			
 			/*
 			 * Remove LT's and LTE's by swapping the terms
 			 */
 			if (pred == OBDAVocabulary.LTE) {
-				atom = fac.getFunctionGTE(t1, t0);
+				//atom = fac.getFunctionGTE(t1, t0);
+				Term tmp = t0; t0 = t1; t1 = tmp;
 				pred = OBDAVocabulary.GTE;
 			} else if (pred == OBDAVocabulary.LT) {
-				atom = fac.getFunctionGT(t1, t0);
+				//atom = fac.getFunctionGT(t1, t0);
+				Term tmp = t0; t0 = t1; t1 = tmp;
 				pred = OBDAVocabulary.GT;
 			}
 			
@@ -160,13 +156,13 @@ class InequalitiesSatisfiabilityCheck {
 			
 			if (pred == OBDAVocabulary.NEQ) {
 				if (t0 instanceof Variable) {
-					if (!neq.containsKey((Variable) t0)) {
+					if (!neq.containsKey(t0)) {
 						neq.put((Variable) t0, new HashSet<Term>());
 					}
 					neq.get((Variable) t0).add(t1);
 				}
 				if (t1 instanceof Variable) {
-					if (!neq.containsKey((Variable) t1)) {
+					if (!neq.containsKey(t1)) {
 						neq.put((Variable) t1, new HashSet<Term>());
 					}
 					neq.get((Variable) t1).add(t0);
@@ -176,7 +172,7 @@ class InequalitiesSatisfiabilityCheck {
 					Constant[] bounds;
 					if (!mranges.containsKey((Variable) t0)) {
 						bounds = new Constant[]{null, null};
-						mranges.put((Variable)  t0, bounds);
+						mranges.put((Variable) t0, bounds);
 					} else {
 						bounds = mranges.get((Variable) t0);
 					}
@@ -189,7 +185,7 @@ class InequalitiesSatisfiabilityCheck {
 						bounds = new Constant[]{null, null};
 						mranges.put((Variable)  t1, bounds);
 					} else {
-						bounds = mranges.get((Variable) t0);
+						bounds = mranges.get((Variable) t1);
 					}
 					if (bounds[1] == null || this.constants_compare((Constant) t0, bounds[1]) == -1) {
 						bounds[1] = (Constant) t0;
@@ -201,7 +197,7 @@ class InequalitiesSatisfiabilityCheck {
 			
 		}
 		
-		List<Constant> constants = new ArrayList<Constant>();
+		List<Constant> constants = new ArrayList<>();
 		
 		/*
 		 * Add to the graph the constraints about variables
@@ -232,7 +228,7 @@ class InequalitiesSatisfiabilityCheck {
 		for (int i = 0; i < constants.size() - 1; i += 1) {
 			if (!constants.get(i).equals(constants.get(i + 1))) {
 				gteGraph.addEdge(constants.get(i), constants.get(i + 1));
-				neq.get(constants.get(i)).add(constants.get(i + 1));
+				//neq.get(constants.get(i)).add(constants.get(i + 1));
 			}
 		}
 		
@@ -244,7 +240,7 @@ class InequalitiesSatisfiabilityCheck {
 		
 		for (Set<Term> component: scc) {
 			Constant cur = null;
-			Set<Term> forbidden = new HashSet<Term>();
+			Set<Term> forbidden = new HashSet();
 			for (Term t: component) {
 				/*
 				 * Check if the component contains two constants that are different
