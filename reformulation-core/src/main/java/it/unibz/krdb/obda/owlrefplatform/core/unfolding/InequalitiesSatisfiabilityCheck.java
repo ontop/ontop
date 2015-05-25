@@ -12,13 +12,17 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import org.jgrapht.*;
+import org.jgrapht.alg.StrongConnectivityInspector;
 import org.jgrapht.graph.*;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map.Entry;
+import java.util.Set;
 
 
 /*
@@ -34,33 +38,69 @@ class InequalitiesSatisfiabilityCheck {
 		this.fac = fac;
 	}
 	
-	/*private Double value(Constant c) {
-		// FIXME see also: DatatypeFactoryImpl for XSD_*, RDFS_*
+	/*
+	 * Return the Double value of a Constant object that has "numerical value"
+	 * FIXME TODO!
+	 */
+	private Double value(Constant c) {
 		String value = c.getValue();
 		COL_TYPE type = c.getType();
-		if (type == COL_TYPE.INT) {
+		if (type == COL_TYPE.INT || type == COL_TYPE.INTEGER || type == COL_TYPE.LONG ||
+			type == COL_TYPE.NON_POSITIVE_INTEGER || type== COL_TYPE.POSITIVE_INTEGER ||
+			type == COL_TYPE.NON_NEGATIVE_INTEGER || type== COL_TYPE.NEGATIVE_INTEGER ||
+			type == COL_TYPE.UNSIGNED_INT || type== COL_TYPE.POSITIVE_INTEGER) {
 			return new Long(Long.parseLong(value)).doubleValue();
 		} else if (type == COL_TYPE.DOUBLE || type == COL_TYPE.FLOAT) {
 			return Double.parseDouble(value);
 		}
 		return null;
-	}*/
+	}
 	
-	public boolean check(CQIE q) {
-		/*
-		 * Check unsatisfiability of a query, following ? the algorithm for solving the
-		 * satisfiability problem on the real domain that can be found in
-		 * Sha Guo and Wei Sun and Mark A. Weiss, "Solving Satisfiability and Implication Problems in Database Systems".
-		 * 
-		 * This function returns true iff the query is found unsatisfiable by this method.
-		 */
+	private boolean supported_constant(Constant c) {
+		COL_TYPE type = c.getType();
+		return type == COL_TYPE.INTEGER || type == COL_TYPE.LONG || type == COL_TYPE.DOUBLE || type == COL_TYPE.FLOAT;
+	}
+
+	/*
+	 * Compare two Constant objects as in the Java convention. See Comparable.
+	 * TODO
+	 */
+	private int constants_compare(Constant o1, Constant o2) { 
+		Double val1 = value(o1);
+		Double val2 = value(o2);
+		if (val1 == null || val2 == null) {
+			return -1; // FIXME
+		}
+		return Double.compare(val1, val2);
+	}
+	
+	/*
+	 * Check unsatisfiability of a query with respect to the numerical comparisons occurring in it;
+	 * this version checks (un)satisfiability on the real domain.
+	 * The algorithm is implemented after "Sha Guo et al: Solving Satisfiability and Implication Problems in Database Systems".
+	 * 
+	 * Return true if the query is found unsatisfiable, false otherwise.
+	 */
+	public boolean check(CQIE q) {		
+		List<Function> atoms = new ArrayList<Function>(q.getBody());
 		
-		List<Function> atoms = (List<Function>) ((ArrayList<Function>) q.getBody()).clone();		
-		List<Constant> constants = new ArrayList<Constant>();
+		/*
+		 * The minimum ranges of the variables among the comparisons
+		 */
+		HashMap<Variable, Constant[]> mranges = new HashMap<Variable, Constant[]>();
+		
+		/*
+		 * The un-equality (neq) constraints
+		 */
+		HashMap<Variable, Set<Term>> neq = new HashMap<Variable, Set<Term>>();
+		
+		/*
+		 * The directed graph that contains the greater-than-or-equal (gte) relations
+		 */
 		DirectedGraph<Term, DefaultEdge> gteGraph = new DefaultDirectedGraph<Term, DefaultEdge>(DefaultEdge.class);
 		
 		/*
-		 * The first step is to eliminate trivial inequalities,
+		 * The first step is to eliminate trivial inequalities; anyway
 		 * this was already performed in ExpressionEvaluator.java:
 		 * - elimination of "C1 op C2": evalEqNeq, evalGtLt, evalGteLte;
 		 * - elimination of "# = #", "# != #": evalEqNeq.
@@ -76,10 +116,13 @@ class InequalitiesSatisfiabilityCheck {
 			Term t0 = atom.getTerm(0),
 				 t1 = atom.getTerm(1);
 			
-			if (t0 instanceof Constant)
-				constants.add((Constant) t0);
-			if (t1 instanceof Constant)
-				constants.add((Constant) t1);
+			/*
+			 * Ignore unsupported variables
+			 */
+			if (t0 instanceof Constant & !supported_constant((Constant) t0))
+					continue;
+			if (t1 instanceof Constant & !supported_constant((Constant) t1))
+					continue;
 			
 			/*
 			 * Remove LT's and LTE's by swapping the terms
@@ -112,50 +155,114 @@ class InequalitiesSatisfiabilityCheck {
 			   */
 			  else if (pred == OBDAVocabulary.EQ) {
 				pred = OBDAVocabulary.GTE;
-				atoms.add(fac.getFunctionNEQ(t1, t0));
+				atoms.add(fac.getFunctionGTE(t1, t0));
 			}
 			
 			if (pred == OBDAVocabulary.NEQ) {
-				if ((t0 instanceof Variable || t0 instanceof Constant) &&
-					(t1 instanceof Variable || t1 instanceof Constant) ) {
-						//neqGraph.addEdge(t0, t1);
-					}				
+				if (t0 instanceof Variable) {
+					if (!neq.containsKey((Variable) t0)) {
+						neq.put((Variable) t0, new HashSet<Term>());
+					}
+					neq.get((Variable) t0).add(t1);
+				}
+				if (t1 instanceof Variable) {
+					if (!neq.containsKey((Variable) t1)) {
+						neq.put((Variable) t1, new HashSet<Term>());
+					}
+					neq.get((Variable) t1).add(t0);
+				}
 			} else if (pred == OBDAVocabulary.GTE) {
-				if ((t0 instanceof Variable || t0 instanceof Constant) &&
-					(t1 instanceof Variable || t1 instanceof Constant) ) {
+				if (t0 instanceof Variable && t1 instanceof Constant) {
+					Constant[] bounds;
+					if (!mranges.containsKey((Variable) t0)) {
+						bounds = new Constant[]{null, null};
+						mranges.put((Variable)  t0, bounds);
+					} else {
+						bounds = mranges.get((Variable) t0);
+					}
+					if (bounds[0] == null || this.constants_compare((Constant) t1, bounds[0]) == 1) {
+						bounds[0] = (Constant) t1;
+					}
+				} else if (t0 instanceof Constant && t1 instanceof Variable) {
+					Constant[] bounds;
+					if (!mranges.containsKey((Variable) t1)) {
+						bounds = new Constant[]{null, null};
+						mranges.put((Variable)  t1, bounds);
+					} else {
+						bounds = mranges.get((Variable) t0);
+					}
+					if (bounds[1] == null || this.constants_compare((Constant) t0, bounds[1]) == -1) {
+						bounds[1] = (Constant) t0;
+					}
+				} else if (t0 instanceof Variable && t1 instanceof Variable) {
 					gteGraph.addEdge(t0, t1);
 				}
 			}
 			
 		}
 		
+		List<Constant> constants = new ArrayList<Constant>();
+		
 		/*
-		 * Add the number constraints
+		 * Add to the graph the constraints about variables
+		 */
+		for (Entry<Variable, Constant[]> cursor: mranges.entrySet()) {
+			Constant bounds[] = cursor.getValue();
+			if (bounds[0] != null && bounds[1] != null && this.constants_compare(bounds[0], bounds[1]) == 1) {
+				return true;
+			}
+			if (bounds[0] != null) {
+				gteGraph.addEdge(cursor.getKey(), bounds[0]);
+				constants.add(bounds[0]);
+			}
+			if (bounds[1] != null) {
+				gteGraph.addEdge(bounds[1], cursor.getKey());
+				constants.add(bounds[1]);
+			}
+		}
+		
+		/*
+		 * Add to the graph the number constraints
 		 */
 		Collections.sort(constants, new Comparator<Constant>() {
-			public int compare(Constant one, Constant two) {
-				return 1;
+			public int compare(Constant o1, Constant o2) {
+				return constants_compare(o1, o2);
 			}
 		});
 		for (int i = 0; i < constants.size() - 1; i += 1) {
 			if (!constants.get(i).equals(constants.get(i + 1))) {
 				gteGraph.addEdge(constants.get(i), constants.get(i + 1));
-				//neqGraph.addEdge(constants.get(i), constants.get(i + 1));
+				neq.get(constants.get(i)).add(constants.get(i + 1));
 			}
 		}
-
-		/*
-		 * Construct the labelled directed graph
-		 */
-		//List<List<Integer>> connections = new ArrayList<List<Integer>>();
-		/*
-		 * Detect all SCCs
-		 */
-		//List<List<Integer>> sccs = this.tarjan(connections);
 		
 		/*
-		 *  Otherwise, collapse SCCs and obtain an acyclic graph GScollapsed
+		 * Compute the strongly connected components of the gteGraph
 		 */
+		StrongConnectivityInspector<Term, DefaultEdge> insp = new StrongConnectivityInspector<Term, DefaultEdge>(gteGraph);
+		List<Set<Term>> scc = insp.stronglyConnectedSets();
+		
+		for (Set<Term> component: scc) {
+			Constant cur = null;
+			Set<Term> forbidden = new HashSet<Term>();
+			for (Term t: component) {
+				/*
+				 * Check if the component contains two constants that are different
+				 */
+				if (t instanceof Constant) {
+					if (cur == null) {
+						cur = (Constant)t;
+					} else if (!t.equals(cur)) {
+						return true;
+					}
+				}
+				if (t instanceof Variable && neq.containsKey((Variable) t))
+					forbidden.addAll(neq.get((Variable) t));
+			}
+			if (!Collections.disjoint(component, forbidden)) {
+				return true;
+			}
+		}
 		
 		return false;
 	}
