@@ -22,16 +22,18 @@ public class InequalitiesSatisfiabilityTests extends TestCase {
 	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
 	public void test1() {
-		// evaluate: x = 0, x = 1
+		// evaluate: x < 1, y > 3, x > y
 		List<Function> body = new ArrayList<>();
-		Constant t0, t1;
+		Constant t1, t3;
 		
 		Variable x = fac.getVariable("x");
-		t0 = fac.getConstantLiteral("0", COL_TYPE.INTEGER);
+		Variable y = fac.getVariable("y");
 		t1 = fac.getConstantLiteral("1", COL_TYPE.INTEGER);
+		t3 = fac.getConstantLiteral("3", COL_TYPE.INTEGER);
 		
-		body.add(fac.getFunctionEQ(x, t0));
-		body.add(fac.getFunctionEQ(x, t1));
+		body.add(fac.getFunctionLT(x, t1));
+		body.add(fac.getFunctionGT(y, t3));
+		body.add(fac.getFunctionLT(y, x));
 		
 		CQIE q = fac.getCQIE(null, body);
 		

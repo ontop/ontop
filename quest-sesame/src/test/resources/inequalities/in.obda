@@ -22,6 +22,6 @@ target		:obj-{COL1} a :Gt3 .
 source		SELECT COL1 FROM "TABLE" WHERE COL1 > 3
 
 mappingId	Gt
-target		:obj-{COL1} :role :obj-{COL2} . 
+target		:obj-{COL1} :Gt :obj-{COL2} . 
 source		SELECT COL1, COL2 FROM "TABLE" WHERE COL1 > COL2
 ]]

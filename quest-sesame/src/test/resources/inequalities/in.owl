@@ -22,7 +22,7 @@
     <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
     <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
     <Declaration>
-        <Class IRI="#Gt"/>
+        <Class IRI="#Gt3"/>
     </Declaration>
     <Declaration>
         <Class IRI="#Lt1"/>
@@ -31,6 +31,6 @@
         <Class IRI="#Gt5"/>
     </Declaration>
 	<Declaration>
-        <DataProperty IRI="#role"/>
+        <DataProperty IRI="#Gt"/>
     </Declaration>
 </Ontology>
