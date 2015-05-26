@@ -93,8 +93,7 @@ public class ExpressionEvaluator {
 			body.set(atomidx, (Function) newatom);
 		}
 		
-		InequalitiesSatisfiabilityCheck sat = new InequalitiesSatisfiabilityCheck(fac);
-		return sat.check(q);
+		return InequalitiesSatisfiabilityCheck.check(q);
 	}
 
 	public Term eval(Term expr) {

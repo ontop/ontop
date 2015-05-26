@@ -9,11 +9,16 @@ import it.unibz.krdb.obda.model.CQIE;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
+import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
-import org.jgrapht.*;
+import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.StrongConnectivityInspector;
-import org.jgrapht.graph.*;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -25,18 +30,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 
-class InequalitiesSatisfiabilityCheck {
-	private final OBDADataFactory fac;
+class InequalitiesSatisfiabilityCheck {	
+	private static final Logger log = LoggerFactory.getLogger(InequalitiesSatisfiabilityCheck.class);
 	
-	InequalitiesSatisfiabilityCheck(OBDADataFactory fac){
-		this.fac = fac;
-	}
+	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 	
-	/*NTripleAssertionIteratorTest.testIteratorTest
+	/*
 	 * Return the Double value of a Constant object that has "numerical value"
 	 * FIXME TODO!
 	 */
-	private Double value(Constant c) {
+	private static Double value(Constant c) {
 		String value = c.getValue();
 		COL_TYPE type = c.getType();
 		if (type == COL_TYPE.INT || type == COL_TYPE.INTEGER || type == COL_TYPE.LONG ||
@@ -50,7 +53,7 @@ class InequalitiesSatisfiabilityCheck {
 		return null;
 	}
 	
-	private boolean supported_constant(Constant c) {
+	private static boolean supported_constant(Constant c) {
 		COL_TYPE type = c.getType();
 		return type == COL_TYPE.INTEGER || type == COL_TYPE.LONG || type == COL_TYPE.DOUBLE || type == COL_TYPE.FLOAT;
 	}
@@ -59,7 +62,7 @@ class InequalitiesSatisfiabilityCheck {
 	 * Compare two Constant objects as in the Java convention. See Comparable.
 	 * TODO
 	 */
-	private int constants_compare(Constant o1, Constant o2) { 
+	private static int constants_compare(Constant o1, Constant o2) { 
 		Double val1 = value(o1);
 		Double val2 = value(o2);
 		if (val1 == null || val2 == null) {
@@ -75,7 +78,9 @@ class InequalitiesSatisfiabilityCheck {
 	 * 
 	 * Return true if the query is found unsatisfiable, false otherwise.
 	 */
-	public boolean check(CQIE q) {
+	public static boolean check(CQIE q) {
+		log.debug("Checking satisfiability of OBDA query\n", q);
+		
 		List<Function> atoms = new ArrayList<>(q.getBody());
 		
 		/*
@@ -84,7 +89,7 @@ class InequalitiesSatisfiabilityCheck {
 		HashMap<Variable, Constant[]> mranges = new HashMap<>();
 		
 		/*
-		 * The un-equality (neq) constraints
+		 * The unequality (neq) constraints
 		 */
 		HashMap<Variable, Set<Term>> neq = new HashMap<>();
 		
@@ -104,7 +109,7 @@ class InequalitiesSatisfiabilityCheck {
 			Function atom = atoms.get(atomidx);
 			Predicate pred = atom.getFunctionSymbol();
 			
-			if (!(pred instanceof BooleanOperationPredicate)) {
+			if (!(pred instanceof BooleanOperationPredicate) || pred.getArity() != 2) {
 				continue;
 			}
 			Term t0 = atom.getTerm(0),
@@ -176,7 +181,7 @@ class InequalitiesSatisfiabilityCheck {
 					} else {
 						bounds = mranges.get((Variable) t0);
 					}
-					if (bounds[0] == null || this.constants_compare((Constant) t1, bounds[0]) == 1) {
+					if (bounds[0] == null || constants_compare((Constant) t1, bounds[0]) == 1) {
 						bounds[0] = (Constant) t1;
 					}
 				} else if (t0 instanceof Constant && t1 instanceof Variable) {
@@ -187,7 +192,7 @@ class InequalitiesSatisfiabilityCheck {
 					} else {
 						bounds = mranges.get((Variable) t1);
 					}
-					if (bounds[1] == null || this.constants_compare((Constant) t0, bounds[1]) == -1) {
+					if (bounds[1] == null || constants_compare((Constant) t0, bounds[1]) == -1) {
 						bounds[1] = (Constant) t0;
 					}
 				} else if (t0 instanceof Variable && t1 instanceof Variable) {
@@ -206,7 +211,7 @@ class InequalitiesSatisfiabilityCheck {
 		 */
 		for (Entry<Variable, Constant[]> cursor: mranges.entrySet()) {
 			Constant bounds[] = cursor.getValue();
-			if (bounds[0] != null && bounds[1] != null && this.constants_compare(bounds[0], bounds[1]) == 1) {
+			if (bounds[0] != null && bounds[1] != null && constants_compare(bounds[0], bounds[1]) == 1) {
 				return true;
 			}
 			if (bounds[0] != null) {
