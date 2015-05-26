@@ -189,10 +189,7 @@ public class R2RMLParser {
 		for (Object o : classes) {
 			classPredicates.add(fac.getClassPredicate(o.toString()));
 		}
-		List<GraphMap> graphMaps = sMap.getGraphMaps();
-		for (GraphMap o : graphMaps) {
-			classPredicates.add(fac.getClassPredicate(o.toString()));
-		}
+
 		if (subjectAtom == null)
 			throw new Exception("Error in parsing the subjectMap in node "
 					+ tm.toString());

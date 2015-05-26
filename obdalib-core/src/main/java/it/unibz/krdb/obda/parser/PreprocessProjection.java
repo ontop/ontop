@@ -175,7 +175,9 @@ public class PreprocessProjection implements SelectVisitor, SelectItemVisitor, F
         }
 
         if(!subselect) {
-            plainSelect.setSelectItems(columnNames);
+            if(!columnNames.isEmpty()) {
+                plainSelect.setSelectItems(columnNames);
+            }
         }
         else{
 
