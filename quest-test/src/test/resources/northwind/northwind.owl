@@ -1,0 +1,663 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#"
+     xml:base="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#companyContactInfo -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#companyContactInfo">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Company"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#ContactInfo"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#companyContactPerson -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#companyContactPerson">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Company"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#ContactPerson"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#companyLocation -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#companyLocation">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Company"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Location"/>
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#locationContainsCompany"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#employeeReportsTo -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#employeeReportsTo">
+        <rdfs:range rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Employee"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Employee"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#locationContainsCompany -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#locationContainsCompany">
+        <rdfs:range rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Company"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Location"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderByEmployee -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderByEmployee">
+        <rdfs:range rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Employee"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Order"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderHasOrderDetail -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderHasOrderDetail">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Order"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#OrderDetail"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderShipToLocation -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderShipToLocation">
+        <rdfs:range rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Location"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Order"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderShippedBy -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderShippedBy">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Order"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Shipper"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderToCustomer -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderToCustomer">
+        <rdfs:range rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Customer"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Order"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderedProduct -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderedProduct">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#OrderDetail"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Product"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personContactInfo -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personContactInfo">
+        <rdfs:range rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#ContactInfo"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Person"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personLocation -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personLocation">
+        <rdfs:range rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Location"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Person"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productCategory -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productCategory">
+        <rdfs:range rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Category"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Product"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productSuppliedBy -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productSuppliedBy">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Product"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Supplier"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#categoryDescription -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#categoryDescription">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Category"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#categoryID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#categoryID">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Category"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#categoryName -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#categoryName">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Category"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#companyName -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#companyName">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Company"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#contactInfoFax -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#contactInfoFax">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#ContactInfo"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#contactInfoHomePage -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#contactInfoHomePage">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#ContactInfo"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#contactInfoHomePhone -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#contactInfoHomePhone">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#ContactInfo"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#contactInfoPhone -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#contactInfoPhone">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#ContactInfo"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#customerID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#customerID">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Customer"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#employeeHireDate -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#employeeHireDate">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Person"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#employeeID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#employeeID">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Employee"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#employeeNotes -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#employeeNotes">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Employee"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#employeeSalary -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#employeeSalary">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Employee"/>
+        <rdfs:range rdf:resource="&rdfs;Literal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#locationAddress -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#locationAddress">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Location"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#locationCity -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#locationCity">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Location"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#locationCountry -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#locationCountry">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Location"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#locationPostalCode -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#locationPostalCode">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Location"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#locationRegion -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#locationRegion">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Location"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderDetailDiscount -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderDetailDiscount">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#OrderDetail"/>
+        <rdfs:range rdf:resource="&rdfs;Literal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderDetailQuantity -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderDetailQuantity">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#OrderDetail"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderDetailUnitPrice -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderDetailUnitPrice">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#OrderDetail"/>
+        <rdfs:range rdf:resource="&xsd;decimal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderFreight -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderFreight">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Order"/>
+        <rdfs:range rdf:resource="&xsd;decimal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderID">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Order"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderOrderDate -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderOrderDate">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Order"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderRequiredDate -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderRequiredDate">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Order"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderShipName -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderShipName">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Order"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderShippedDate -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#orderShippedDate">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Order"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personBirthDate -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personBirthDate">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Person"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personFirstName -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personFirstName">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Person"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personLastName -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personLastName">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Person"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personName -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personName">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Person"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personTitleOfCourtesy -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personTitleOfCourtesy">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Person"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personWorkTitle -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#personWorkTitle">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Person"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productDiscontinued -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productDiscontinued">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Product"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productID">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Product"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productName -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productName">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Product"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productQuantityPerUnit -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productQuantityPerUnit">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Product"/>
+        <rdfs:range rdf:resource="&xsd;string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productReorderLevel -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productReorderLevel">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Product"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productUnitPrice -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productUnitPrice">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Product"/>
+        <rdfs:range rdf:resource="&xsd;decimal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productUnitsInStock -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productUnitsInStock">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Product"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productUnitsOnOrder -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#productUnitsOnOrder">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Product"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#shipperID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#shipperID">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Shipper"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#supplierID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#supplierID">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Supplier"/>
+        <rdfs:range rdf:resource="&xsd;integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Category -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Category"/>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Company -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Company"/>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#ContactInfo -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#ContactInfo"/>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#ContactPerson -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#ContactPerson">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Customer -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Customer">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Company"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Employee -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Employee">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Location -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Location"/>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Order -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Order"/>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#OrderDetail -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#OrderDetail"/>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Person -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Person"/>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Product -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Product"/>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Shipper -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Shipper">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Company"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Supplier -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Supplier">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#Company"/>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
+

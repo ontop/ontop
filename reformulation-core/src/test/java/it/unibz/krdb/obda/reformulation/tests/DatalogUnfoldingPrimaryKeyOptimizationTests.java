@@ -34,6 +34,7 @@ import it.unibz.krdb.sql.TableDefinition;
 import it.unibz.krdb.sql.api.Attribute;
 
 import java.sql.Types;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -50,23 +51,23 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
 	@Override
 	public void setUp() {
-		metadata = new DBMetadata();
+		metadata = new DBMetadata("dummy class");
 		TableDefinition table = new TableDefinition("TABLE");
-		table.setAttribute(1, new Attribute("col1", Types.INTEGER, true, false));
-		table.setAttribute(2, new Attribute("col2", Types.INTEGER, false, false));
-		table.setAttribute(3, new Attribute("col3", Types.INTEGER, false, false));
-		table.setAttribute(4, new Attribute("col4", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col1", Types.INTEGER, true, false));
+		table.addAttribute(new Attribute("col2", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col3", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col4", Types.INTEGER, false, false));
 		metadata.add(table);
 		
 		
 		table = new TableDefinition("TABLE2");
-		table.setAttribute(1, new Attribute("col1", Types.INTEGER, true, false));
-		table.setAttribute(2, new Attribute("col2", Types.INTEGER, false, false));
-		table.setAttribute(3, new Attribute("col3", Types.INTEGER, false, false));
-		table.setAttribute(4, new Attribute("col4", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col1", Types.INTEGER, true, false));
+		table.addAttribute(new Attribute("col2", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col3", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col4", Types.INTEGER, false, false));
 		metadata.add(table);
 
-        unfoldingProgram = fac.getDatalogProgram();
+		unfoldingProgram = fac.getDatalogProgram();
 
 		Function head = fac.getFunction(fac.getDataPropertyPredicate("name"), fac.getVariable("x"), fac.getVariable("y"));
 		List<Term> bodyTerms = new LinkedList<Term>();
@@ -131,7 +132,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 
 	public void testRedundancyElimination() throws Exception {
 		Multimap<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram.getRules());
-		DatalogUnfolder unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
+		DatalogUnfolder unfolder = new DatalogUnfolder(unfoldingProgram.getRules(), pkeys);
 
 		LinkedList<Term> headterms = new LinkedList<Term>();
 		headterms.add(fac.getVariable("m"));
@@ -146,7 +147,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		body.add(fac.getFunction(fac.getDataPropertyPredicate("id"), fac.getVariable("m"), fac.getVariable("p")));
 		CQIE query = fac.getCQIE(head, body);
 
-		DatalogProgram input = fac.getDatalogProgram(query);
+		DatalogProgram input = fac.getDatalogProgram(Collections.singletonList(query));
 		DatalogProgram output = unfolder.unfold(input, "q");
 		System.out.println("input " + input);
 
@@ -175,7 +176,7 @@ public class DatalogUnfoldingPrimaryKeyOptimizationTests extends TestCase {
 		body.add(fac.getFunction(fac.getDataPropertyPredicate("lastname"), fac.getVariable("s2"), fac.getVariable("o")));
 		query = fac.getCQIE(head, body);
 
-		input = fac.getDatalogProgram(query);
+		input = fac.getDatalogProgram(Collections.singletonList(query));
 		output = unfolder.unfold(input, "q");
 		System.out.println("input " + input);
 

@@ -20,17 +20,16 @@ package it.unibz.krdb.obda.model;
  * #L%
  */
 
-public interface OBDAStatement {
+public interface OBDAStatement extends AutoCloseable {
 
 	public void cancel() throws OBDAException;
 
+	@Override
 	public void close() throws OBDAException;
 
 	public ResultSet execute(String query) throws OBDAException;
 
 	public int executeUpdate(String query) throws OBDAException;
-
-	public OBDAConnection getConnection() throws OBDAException;
 
 	public int getFetchSize() throws OBDAException;
 

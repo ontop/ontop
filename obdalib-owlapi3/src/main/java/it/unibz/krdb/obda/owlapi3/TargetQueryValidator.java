@@ -28,7 +28,6 @@ import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.OntologyFactory;
 import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
 
@@ -57,7 +56,7 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 
 		// Get the predicates in the target query.
 		for (Function atom : targetQuery.getBody()) {
-			Predicate p = atom.getPredicate();
+			Predicate p = atom.getFunctionSymbol();
 
 			boolean isClass = isClass(p);
 			boolean isObjectProp = isObjectProperty(p);
@@ -70,18 +69,19 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 
 			String debugMsg = "The predicate: [" + p.getName().toString() + "]";
 			if (isPredicateValid) {
-				COL_TYPE colType[] = null;
+				Predicate predicate;
 				if (isClass) {
-					colType = new COL_TYPE[] { COL_TYPE.OBJECT };
+					predicate = dataFactory.getClassPredicate(p.getName());
 					debugMsg += " is a Class.";
 				} else if (isObjectProp) {
-					colType = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.OBJECT };
+					predicate = dataFactory.getObjectPropertyPredicate(p.getName());
 					debugMsg += " is an Object property.";
 				} else if (isDataProp) {
-					colType = new COL_TYPE[] { COL_TYPE.OBJECT, COL_TYPE.LITERAL };
+					predicate = dataFactory.getDataPropertyPredicate(p.getName(), COL_TYPE.LITERAL);
 					debugMsg += " is a Data property.";
 				}
-				Predicate predicate = dataFactory.getPredicate(p.getName(), atom.getArity(), colType);
+				else
+					predicate = dataFactory.getPredicate(p.getName(), atom.getArity());
 				atom.setPredicate(predicate); // TODO Fix the API!
 			} else {
 				invalidPredicates.add(p.getName().toString());
@@ -116,6 +116,6 @@ public class TargetQueryValidator implements TargetQueryVocabularyValidator {
 	
 	@Override
 	public boolean isTriple(Predicate predicate){
-		return predicate.equals(OBDAVocabulary.QUEST_TRIPLE_PRED);
+		return predicate.isTriplePredicate();
 	}
 }

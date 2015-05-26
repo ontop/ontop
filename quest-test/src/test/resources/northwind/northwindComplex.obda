@@ -1,0 +1,35 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#
+
+[SourceDeclaration]
+sourceUri	northwind
+connectionUrl	jdbc:mysql://10.7.20.39/northwind
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-complexFunction
+target		:{newCatID} a :Category .
+source		select CategoryID, CategoryName, Description, Picture, MD5(CONCAT(CONCAT(CategoryID,
+            CONCAT(CONCAT(COALESCE(CategoryName, RAND()), COALESCE(Description, RAND()) ),
+            COALESCE(Picture, RAND()) ) )) ) as newCatID from
+            northwind.Categories
+
+mappingId	MAPID-complexFunction2
+target		:{newCastID} a :Customer .
+source		select CustomerID, CompanyName, ContactName, ContactTitle, Address,
+            MD5(CONCAT(CONCAT(CONCAT(CONCAT(COALESCE(Address, RAND()), COALESCE(CustomerID,
+            RAND()) ), COALESCE(CompanyName, RAND()) ), COALESCE(ContactName, RAND()) ), ContactTitle )
+            ) as newCastID from northwind.Customers
+
+mappingId	MAPID-simpleFunction
+target		:{newRegID} :locationRegion {RegionDescription} .
+source		select RegionID, RegionDescription, MD5(CONCAT(COALESCE(RegionID, RAND()), COALESCE(RegionDescription,
+            RAND()))) as newRegID from northwind.Region
+
+mappingId	MAPID-Star
+target		:{OrderID} :orderDetailDiscount {newOrdID} .
+source		select *, MD5(OrderID) as newOrdID from northwind.Orders
+
+]]

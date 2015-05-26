@@ -56,7 +56,7 @@ public class BooleanOWLOBDARefResultSet implements TupleResultSet {
 		this.st = st;
 		try {
 			isTrue = set.next();
-			valueConstant = this.fac.getConstantLiteral(String.valueOf(isTrue), COL_TYPE.BOOLEAN);
+			valueConstant = fac.getBooleanConstant(isTrue);
 		} catch (SQLException e) {
 			throw new RuntimeException(e.getMessage());
 		}

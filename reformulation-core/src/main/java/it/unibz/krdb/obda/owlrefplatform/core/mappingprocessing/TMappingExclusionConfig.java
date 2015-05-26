@@ -1,8 +1,9 @@
 package it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing;
 
 
+import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.OClass;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
+import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -31,8 +32,12 @@ public class TMappingExclusionConfig {
         return classes.contains(cls.getPredicate().getName());
     }
 
-    public boolean contains(PropertyExpression propertyExpression){
+    public boolean contains(ObjectPropertyExpression propertyExpression){
         return !propertyExpression.isInverse() && properties.contains(propertyExpression.getPredicate().getName());
+    }
+
+    public boolean contains(DataPropertyExpression propertyExpression){
+        return  properties.contains(propertyExpression.getPredicate().getName());
     }
 
     private static final TMappingExclusionConfig EMPTY = new TMappingExclusionConfig(Collections.<String>emptySet(), Collections.<String>emptySet());

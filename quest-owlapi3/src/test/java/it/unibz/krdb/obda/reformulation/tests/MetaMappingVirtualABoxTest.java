@@ -44,6 +44,7 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
+import org.junit.Test;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
@@ -78,7 +79,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 	final String obdafile = "src/test/resources/test/metamapping.obda";
 
 	@Override
-	public void setUp() throws Exception {
+	protected void setUp() throws Exception {
 		
 		
 		/*
@@ -102,7 +103,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
-
+		in.close();
 		st.executeUpdate(bf.toString());
 		conn.commit();
 
@@ -119,7 +120,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 	}
 
 	@Override
-	public void tearDown() throws Exception {
+	protected void tearDown() throws Exception {
 		
 			dropTables();
 			conn.close();
@@ -138,7 +139,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 			bf.append(line);
 			line = in.readLine();
 		}
-
+		in.close();
 		st.executeUpdate(bf.toString());
 		st.close();
 		conn.commit();
@@ -195,6 +196,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testViEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();
@@ -205,6 +207,7 @@ public class MetaMappingVirtualABoxTest extends TestCase {
 		runTests(p);
 	}
 	
+	@Test
 	public void testClassicEqSig() throws Exception {
 
 		QuestPreferences p = new QuestPreferences();

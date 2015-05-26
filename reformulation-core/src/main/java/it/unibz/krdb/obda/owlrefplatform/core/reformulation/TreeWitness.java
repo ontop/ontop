@@ -27,7 +27,7 @@ import java.util.Set;
 
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Intersection;
 
 /**
@@ -56,11 +56,11 @@ public class TreeWitness {
 	private final Collection<TreeWitnessGenerator> gens; // the \exists R.B concepts that realise the tree witness 
 	                                          // in the canonical model of the TBox
 	
-	private final Intersection<BasicClassDescription> rootConcepts; // store concept for merging tree witnesses
+	private final Intersection<ClassExpression> rootConcepts; // store concept for merging tree witnesses
 	
 	private List<List<Function>> twfs;  // tw-formula: disjunction of conjunctions of atoms
 
-	public TreeWitness(Collection<TreeWitnessGenerator> gens, TermCover terms, Set<Function> rootAtoms, Intersection<BasicClassDescription> rootConcepts) {
+	public TreeWitness(Collection<TreeWitnessGenerator> gens, TermCover terms, Set<Function> rootAtoms, Intersection<ClassExpression> rootConcepts) {
 		this.gens = gens;
 		this.terms = terms;
 		this.rootAtoms = rootAtoms;
@@ -76,7 +76,7 @@ public class TreeWitness {
 		return twfs;
 	}
 	
-	public Intersection<BasicClassDescription> getRootConcepts() {
+	public Intersection<ClassExpression> getRootConcepts() {
 		return rootConcepts;
 	}
 	
@@ -129,11 +129,11 @@ public class TreeWitness {
 	 */
 	
 	
-	public Set<BasicClassDescription> getGeneratorSubConcepts() {
+	public Set<ClassExpression> getGeneratorSubConcepts() {
 		if (gens.size() == 1)
 			return gens.iterator().next().getSubConcepts();
 		
-		Set<BasicClassDescription> all = new HashSet<BasicClassDescription>();		
+		Set<ClassExpression> all = new HashSet<ClassExpression>();		
 		for (TreeWitnessGenerator twg : gens) 
 			all.addAll(twg.getSubConcepts());
 		return all;

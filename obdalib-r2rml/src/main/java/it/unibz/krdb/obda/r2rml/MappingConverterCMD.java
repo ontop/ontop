@@ -22,7 +22,6 @@ package it.unibz.krdb.obda.r2rml;
 
 import it.unibz.krdb.obda.exception.InvalidMappingException;
 import it.unibz.krdb.obda.io.ModelIOManager;
-import it.unibz.krdb.obda.io.PrefixManager;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDADataSource;
 import it.unibz.krdb.obda.model.OBDAModel;

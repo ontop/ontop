@@ -22,7 +22,7 @@ package it.unibz.krdb.obda.quest.dag;
 
 
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import java.io.File;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -37,8 +37,7 @@ public class S_InputOWL {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument((new File(file)));
 
-		OWLAPI3Translator translator = new OWLAPI3Translator();
-		Ontology o = translator.translate(ontology);
+		Ontology o = OWLAPI3TranslatorUtility.translate(ontology);
 		return o;
 	}
 

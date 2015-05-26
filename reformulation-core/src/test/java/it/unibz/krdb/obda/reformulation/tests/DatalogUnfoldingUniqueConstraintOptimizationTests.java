@@ -35,6 +35,7 @@ import it.unibz.krdb.sql.api.Attribute;
 import junit.framework.TestCase;
 
 import java.sql.Types;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -48,20 +49,20 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 
 	@Override
 	public void setUp() {
-		metadata = new DBMetadata();
+		metadata = new DBMetadata(("dummy class"));
 		TableDefinition table = new TableDefinition("TABLE");
-		table.setAttribute(1, new Attribute("col1", Types.INTEGER, true, null, 1, null, false));
-		table.setAttribute(2, new Attribute("col2", Types.INTEGER, false, null, 1, null, false));
-		table.setAttribute(3, new Attribute("col3", Types.INTEGER, false, null, 1, null, false));
-		table.setAttribute(4, new Attribute("col4", Types.INTEGER, false, null, 1, null, true));
+		table.addAttribute(new Attribute("col1", Types.INTEGER, true, null, 1, null, false));
+		table.addAttribute(new Attribute("col2", Types.INTEGER, false, null, 1, null, false));
+		table.addAttribute(new Attribute("col3", Types.INTEGER, false, null, 1, null, false));
+		table.addAttribute(new Attribute("col4", Types.INTEGER, false, null, 1, null, true));
 		metadata.add(table);
 		
 		
 		table = new TableDefinition("TABLE2");
-		table.setAttribute(1, new Attribute("col1", Types.INTEGER, true, false));
-		table.setAttribute(2, new Attribute("col2", Types.INTEGER, false, false));
-		table.setAttribute(3, new Attribute("col3", Types.INTEGER, false, false));
-		table.setAttribute(4, new Attribute("col4", Types.INTEGER, true, false));
+		table.addAttribute(new Attribute("col1", Types.INTEGER, true, false));
+		table.addAttribute(new Attribute("col2", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col3", Types.INTEGER, false, false));
+		table.addAttribute(new Attribute("col4", Types.INTEGER, true, false));
 		metadata.add(table);
 
         unfoldingProgram = fac.getDatalogProgram();
@@ -147,7 +148,7 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
 
 	public void testRedundancyElimination() throws Exception {
 		Multimap<Predicate, List<Integer>> pkeys = DBMetadata.extractPKs(metadata, unfoldingProgram.getRules());
-		DatalogUnfolder unfolder = new DatalogUnfolder(unfoldingProgram, pkeys);
+		DatalogUnfolder unfolder = new DatalogUnfolder(unfoldingProgram.getRules(), pkeys);
 
         // q(m, n, p) :-  id(m, p), id1(n, p)
 		LinkedList<Term> headterms = new LinkedList<Term>();
@@ -161,7 +162,7 @@ public class DatalogUnfoldingUniqueConstraintOptimizationTests extends TestCase 
         body.add(fac.getFunction(fac.getDataPropertyPredicate("id1"), fac.getVariable("n"), fac.getVariable("p")));
 		CQIE query = fac.getCQIE(head, body);
 
-		DatalogProgram input = fac.getDatalogProgram(query);
+		DatalogProgram input = fac.getDatalogProgram(Collections.singletonList(query));
 		DatalogProgram output = unfolder.unfold(input, "q");
 		System.out.println("input " + input);
 

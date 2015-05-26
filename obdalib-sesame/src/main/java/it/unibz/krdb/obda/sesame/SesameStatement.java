@@ -20,151 +20,73 @@ package it.unibz.krdb.obda.sesame;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.BNode;
-import it.unibz.krdb.obda.model.Constant;
+import it.unibz.krdb.obda.model.ObjectConstant;
 import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.URIConstant;
 import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
-import it.unibz.krdb.obda.ontology.PropertyAssertion;
 import it.unibz.krdb.obda.ontology.ClassAssertion;
+import it.unibz.krdb.obda.ontology.DataPropertyAssertion;
+import it.unibz.krdb.obda.ontology.ObjectPropertyAssertion;
 
-import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
 
 public class SesameStatement implements Statement {
     private static final long serialVersionUID = 3398547980791013746L;
+    
 	private Resource subject = null;
 	private URI predicate = null;
 	private Value object = null;
 	private Resource context = null;
-	private ValueFactory fact = new ValueFactoryImpl();
+
+	private SesameHelper helper = new SesameHelper();
 
 	public SesameStatement(Assertion assertion) {
 		
-		Constant subj;
-
-		if (assertion instanceof PropertyAssertion) {
+		if (assertion instanceof ObjectPropertyAssertion) {
 			//object or data property assertion
-			PropertyAssertion ba = (PropertyAssertion) assertion;
-			subj = ba.getSubject();
+			ObjectPropertyAssertion ba = (ObjectPropertyAssertion) assertion;
+			ObjectConstant subj = ba.getSubject();
 			Predicate pred = ba.getProperty().getPredicate();
-			Constant obj = ba.getValue2();
+			ObjectConstant obj = ba.getObject();
 			
 			// convert string into respective type
-			if (subj instanceof BNode)
-				subject = fact.createBNode(((BNode) subj).getName());
-			else if (subj instanceof URIConstant)
-				subject = fact.createURI(subj.getValue());
-			else if (subj instanceof ValueConstant)
-				throw new RuntimeException("Invalid ValueConstant as subject!");
+			subject = helper.getResource(subj);
+			predicate = helper.createURI(pred.getName().toString()); // URI	
+			object = helper.getResource(obj);
+		} 
+		else if (assertion instanceof DataPropertyAssertion) {
+			//object or data property assertion
+			DataPropertyAssertion ba = (DataPropertyAssertion) assertion;
+			ObjectConstant subj = ba.getSubject();
+			Predicate pred = ba.getProperty().getPredicate();
+			ValueConstant obj = ba.getValue();
 			
-			predicate = fact.createURI(pred.getName().toString()); // URI
+			// convert string into respective type
+			subject = helper.getResource(subj);	
+			predicate = helper.createURI(pred.getName().toString()); // URI
 			
-			if (obj instanceof BNode)
-				object = fact.createBNode(((BNode) obj).getName());
-			else if (obj instanceof URIConstant)
-				object = fact.createURI(obj.getValue());
-			else if (obj instanceof ValueConstant)
-				object = getLiteral((ValueConstant)obj);
-			
-			
-		} else if (assertion instanceof ClassAssertion) { 
+			if (obj instanceof ValueConstant)
+				object = helper.getLiteral((ValueConstant)obj);		
+			else 
+				throw new RuntimeException("Invalid constant as object!" + obj);
+		} 
+		else if (assertion instanceof ClassAssertion) { 
 			//class assertion
 			ClassAssertion ua = (ClassAssertion) assertion;
-			subj = ua.getIndividual();
-			String pred = OBDAVocabulary.RDF_TYPE;
+			ObjectConstant subj = ua.getIndividual();
 			Predicate obj = ua.getConcept().getPredicate();
 			
 			// convert string into respective type
-			if (subj instanceof BNode)
-				subject = fact.createBNode(((BNode) subj).getName());
-			else if (subj instanceof URIConstant)
-				subject = fact.createURI(subj.getValue());
-			else if (subj instanceof ValueConstant)
-				throw new RuntimeException("Invalid ValueConstant as subject!");
-			
-			predicate = fact.createURI(pred); // URI
-		
-			object = fact.createURI(obj.getName().toString());
-			
+			subject = helper.getResource(subj);
+			predicate = helper.createURI(OBDAVocabulary.RDF_TYPE); // URI
+			object = helper.createURI(obj.getName().toString());	
 		}
 	}
 	
-	public Literal getLiteral(ValueConstant literal)
-	{
-		URI datatype = null;
-		if (literal.getType() == COL_TYPE.BOOLEAN)
-			datatype = fact
-					.createURI(OBDAVocabulary.XSD_BOOLEAN_URI);
-		else if (literal.getType() == COL_TYPE.DATETIME)
-			datatype = fact
-					.createURI(OBDAVocabulary.XSD_DATETIME_URI);
-        else if (literal.getType() == COL_TYPE.DATE)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_DATE_URI);
-        else if (literal.getType() == COL_TYPE.TIME)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_TIME_URI);
-        else if (literal.getType() == COL_TYPE.YEAR)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_YEAR_URI);
-		else if (literal.getType() == COL_TYPE.DECIMAL)
-			datatype = fact
-					.createURI(OBDAVocabulary.XSD_DECIMAL_URI);
-		else if (literal.getType() == COL_TYPE.DOUBLE)
-			datatype = fact
-					.createURI(OBDAVocabulary.XSD_DOUBLE_URI);
-        else if (literal.getType() == COL_TYPE.FLOAT)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_FLOAT_URI);
-		else if (literal.getType() == COL_TYPE.INTEGER)
-			datatype = fact
-					.createURI(OBDAVocabulary.XSD_INTEGER_URI);
-        else if (literal.getType() == COL_TYPE.NON_NEGATIVE_INTEGER)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_NON_NEGATIVE_INTEGER_URI);
-        else if (literal.getType() == COL_TYPE.POSITIVE_INTEGER)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_NEGATIVE_INTEGER_URI);
-        else if (literal.getType() == COL_TYPE.POSITIVE_INTEGER)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_POSITIVE_INTEGER_URI);
-        else if (literal.getType() == COL_TYPE.NON_POSITIVE_INTEGER)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_NON_POSITIVE_INTEGER_URI);
-        else if (literal.getType() == COL_TYPE.UNSIGNED_INT)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_UNSIGNED_INT_URI);
-        else if (literal.getType() == COL_TYPE.INT)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_INT_URI);
-        else if (literal.getType() == COL_TYPE.LONG)
-            datatype = fact
-                    .createURI(OBDAVocabulary.XSD_LONG_URI);
-		else if (literal.getType() == COL_TYPE.LITERAL)
-			datatype = null;
-		else if (literal.getType() == COL_TYPE.LITERAL_LANG)
-			{
-				datatype = null;
-				return fact.createLiteral(literal.getValue(), literal.getLanguage());
-			}
-		else if (literal.getType() == COL_TYPE.OBJECT)
-			datatype = fact
-					.createURI(OBDAVocabulary.XSD_STRING_URI);
-		else if (literal.getType() == COL_TYPE.STRING)
-			datatype = fact
-					.createURI(OBDAVocabulary.XSD_STRING_URI);
-		Literal value = fact.createLiteral(literal.getValue(), datatype);
-		return value;
-	}
 
 	public Resource getSubject() {
 		return subject;
@@ -212,8 +134,7 @@ public class SesameStatement implements Statement {
     }
 
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		return "("+subject+", "+predicate+", "+object+")";
 	}
 }

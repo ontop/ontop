@@ -25,14 +25,14 @@ import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
-import it.unibz.krdb.obda.ontology.BasicClassDescription;
+import it.unibz.krdb.obda.ontology.ClassExpression;
 import it.unibz.krdb.obda.ontology.DataPropertyExpression;
 import it.unibz.krdb.obda.ontology.Datatype;
+import it.unibz.krdb.obda.ontology.Description;
 import it.unibz.krdb.obda.ontology.OClass;
 import it.unibz.krdb.obda.ontology.ObjectPropertyExpression;
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.PropertyExpression;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.Equivalences;
@@ -44,14 +44,8 @@ import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLFactory;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLResultSet;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.QuestOWLStatement;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -94,8 +88,8 @@ public class EmptyEntitiesTest {
 	
 	private List<String> emptyConcepts = new ArrayList<String>();
 	private List<String> emptyRoles = new ArrayList<String>();
-	private Set<BasicClassDescription> emptyBasicConcepts = new HashSet<BasicClassDescription>();
-	private Set<PropertyExpression> emptyProperties = new HashSet<PropertyExpression>();
+	private Set<ClassExpression> emptyBasicConcepts = new HashSet<ClassExpression>();
+	private Set<Description> emptyProperties = new HashSet<Description>();
 
 	private QuestOWL reasoner;
 	private Ontology onto;
@@ -150,7 +144,7 @@ public class EmptyEntitiesTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		OWLAPI3Translator translator = new OWLAPI3Translator();
+		OWLAPI3TranslatorUtility translator = new OWLAPI3TranslatorUtility();
 
 		onto = translator.translate(ontology);
 
@@ -326,11 +320,11 @@ public class EmptyEntitiesTest {
 	public void testEmptiesWithInverses() throws Exception {
 		TBoxReasoner tboxreasoner = new TBoxReasonerImpl(onto);
 		System.out.println();
-		System.out.println(tboxreasoner.getProperties());
+		System.out.println(tboxreasoner.getObjectPropertyDAG());
 
 		int c = 0; // number of empty concepts
-		for (Equivalences<BasicClassDescription> concept : tboxreasoner.getClasses()) {
-			BasicClassDescription representative = concept.getRepresentative();
+		for (Equivalences<ClassExpression> concept : tboxreasoner.getClassDAG()) {
+			ClassExpression representative = concept.getRepresentative();
 			if ((!(representative instanceof Datatype)) && !runSPARQLConceptsQuery("<" + concept.getRepresentative().toString() + ">")) {
 				emptyBasicConcepts.addAll(concept.getMembers());
 				c += concept.size();
@@ -338,14 +332,26 @@ public class EmptyEntitiesTest {
 		}
 		log.info(c + " Empty concept/s: " + emptyConcepts);
 
-		int r = 0; // number of empty roles
-		for (Equivalences<PropertyExpression> properties : tboxreasoner.getProperties()) {
-			if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
-				emptyProperties.addAll(properties.getMembers());
-				r += properties.size();
+		{
+			int r = 0; // number of empty roles
+			for (Equivalences<ObjectPropertyExpression> properties : tboxreasoner.getObjectPropertyDAG()) {
+				if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
+					emptyProperties.addAll(properties.getMembers());
+					r += properties.size();
+				}
 			}
+			log.info(r + " Empty role/s: " + emptyRoles);
 		}
-		log.info(r + " Empty role/s: " + emptyRoles);
+		{
+			int r = 0; // number of empty roles
+			for (Equivalences<DataPropertyExpression> properties : tboxreasoner.getDataPropertyDAG()) {
+				if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
+					emptyProperties.addAll(properties.getMembers());
+					r += properties.size();
+				}
+			}
+			log.info(r + " Empty role/s: " + emptyRoles);
+		}
 	}
 
 }

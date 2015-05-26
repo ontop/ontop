@@ -35,10 +35,10 @@ import java.sql.SQLException;
  * 
  */
 public class QuestConnection implements OBDAConnection {
+	
+	private Connection conn;
 
-	protected Connection conn; 
-
-	private Quest questinstance;
+	private final Quest questinstance;
 	
 	private boolean isClosed;
 
@@ -46,6 +46,11 @@ public class QuestConnection implements OBDAConnection {
 		this.questinstance = questisntance;
 		this.conn = connection;
 		isClosed = false;
+	}
+	
+	@Deprecated // used only in QuestSemanticSIRepository
+	public Connection getConnection() {
+		return conn;
 	}
 	
 	@Override

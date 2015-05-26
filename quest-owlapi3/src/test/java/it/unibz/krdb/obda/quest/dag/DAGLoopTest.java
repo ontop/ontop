@@ -22,9 +22,7 @@ package it.unibz.krdb.obda.quest.dag;
 
 
 import it.unibz.krdb.obda.ontology.Ontology;
-import it.unibz.krdb.obda.ontology.OntologyFactory;
-import it.unibz.krdb.obda.ontology.impl.OntologyFactoryImpl;
-import it.unibz.krdb.obda.owlapi3.OWLAPI3Translator;
+import it.unibz.krdb.obda.owlapi3.OWLAPI3TranslatorUtility;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasoner;
 import it.unibz.krdb.obda.owlrefplatform.core.dagjgrapht.TBoxReasonerImpl;
 
@@ -50,13 +48,10 @@ public class DAGLoopTest {
 	@Before
 	public void setUp() throws Exception {
 		
-		OWLAPI3Translator t = new OWLAPI3Translator();
 		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owlonto;
-
-			owlonto = man.loadOntologyFromOntologyDocument(new File("src/test/resources/test/dag/final_project_original.owl"));
+		OWLOntology owlonto = man.loadOntologyFromOntologyDocument(new File("src/test/resources/test/dag/final_project_original.owl"));
 		
-		onto = t.translate(owlonto);
+		onto = OWLAPI3TranslatorUtility.translate(owlonto);
 
 	}
 
@@ -67,7 +62,6 @@ public class DAGLoopTest {
 		
 		// generate DAG
 		TBoxReasoner dag = new TBoxReasonerImpl(onto);
-		OntologyFactory ofac = OntologyFactoryImpl.getInstance();
 
 		
 	}

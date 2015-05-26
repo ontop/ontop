@@ -3,7 +3,6 @@
  */
 package it.unibz.krdb.sql;
 
-
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.TableJSQL;
@@ -16,7 +15,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import net.sf.jsqlparser.schema.Table;
@@ -25,11 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- *
- * Used for reading user-provided information about keys in views and materialized views. 
- * Necessary for better performance in cases where materialized views do a lot of work
  * 
+ * 
+ * Used for reading user-provided information about keys in views and
+ * materialized views. Necessary for better performance in cases where
+ * materialized views do a lot of work
  * 
  * 
  * Associated JUnit Tests @TestImplicitDBConstraints, @TestQuestImplicitDBConstraints
@@ -56,17 +54,16 @@ public class ImplicitDBConstraints {
 	
 	/**
 	 * Reads colon separated pairs of view name and primary key
-	 * @param The name of the plain-text file with the fake keys
+	 * @param filename The name of the plain-text file with the fake keys
 	 * @throws IOException 
 	 */
 	public ImplicitDBConstraints(String filename) {
 		this(new File(filename));
 	}
-		
-		
+
 	/**
 	 * Reads colon separated pairs of view name and primary key
-	 * @param The plain-text file with functional dependencies
+	 * @param file The plain-text file with functional dependencies
 	 * @throws IOException 
 	 */
 	public ImplicitDBConstraints(File file) {
@@ -80,8 +77,7 @@ public class ImplicitDBConstraints {
 		this.parseConstraints();
 	}
 
-
-	private void parseConstraints(){
+	private final void parseConstraints() {
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new FileReader(file));
@@ -150,9 +146,10 @@ public class ImplicitDBConstraints {
 	 * @param tableGivenName Full table name exactly as provided by user (same casing, and with schema prefix)
 	 * @return True if there is a RelationJSQL with the getGivenName method equals the parameter tableGivenName
 	 */
-	public boolean tableIsInList(List<RelationJSQL> tables, String tableGivenName){
-		for(RelationJSQL table : tables){
-			if(table.getGivenName().equals(tableGivenName))
+	public static boolean tableIsInList(List<RelationJSQL> tables,
+			String tableGivenName) {
+		for (RelationJSQL table : tables) {
+			if (table.getGivenName().equals(tableGivenName))
 				return true;
 		}
 		return false;
@@ -216,7 +213,7 @@ public class ImplicitDBConstraints {
 							log.warn("Got wrong attribute " + attr.getName() + " when asking for column " + keyColumn + " from table " + tableName);
 						} else {		
 						//	td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), true, attr.getReference(), 0));
-							td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), attr.isPrimaryKey(), attr.getReference(),0, attr.getSQLTypeName(),/*isUnique*/true));
+							td.addAttribute(new Attribute(attr.getName(), attr.getType(), attr.isPrimaryKey(), attr.getReference(),0, attr.getSQLTypeName(),/*isUnique*/true));
 						}
 					}
 				}
@@ -275,7 +272,7 @@ public class ImplicitDBConstraints {
 						continue;
 					}
 					//String type = attr.getType();
-					td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), attr.isPrimaryKey() , ref, attr.canNull() ? 1 : 0,  attr.getSQLTypeName(), attr.isUnique()));
+					td.addAttribute(new Attribute(attr.getName(), attr.getType(), attr.isPrimaryKey() , ref, attr.canNull() ? 1 : 0,  attr.getSQLTypeName(), attr.isUnique()));
 				}
 			}
 			md.add(td);

@@ -30,30 +30,20 @@ public class Attribute implements Serializable{
 	private static final long serialVersionUID = -5780621780592347583L;
 	
 	/** Fields */
-	private String name;
-	private int type;
+	private final String name;
+	private final int type;
+	private final int canNull;
+	private final String typeName;
+	
 	private boolean bPrimaryKey;
 	private Reference foreignKey;
-	private int canNull;
 
-	private String typeName;
+	private boolean unique;
 
-    private boolean unique;
-
-
-
-    public String toString() {
-		return name + ":" + type;
-	}
-	
 	public Attribute(String name) {
 		this(name, 0, false, null, 0);
 	}
 
-	public Attribute(String name, int type) {
-		this(name, type, false, null, 0);
-	}
-	
 	/**
 	 * Use Attribute(String name, int type, boolean primaryKey, Reference foreignKey) instead.
 	 */
@@ -66,14 +56,6 @@ public class Attribute implements Serializable{
 		this(name, type, primaryKey, foreignKey, 0);
 	}
 
-	/**
-	 * Use Attribute(String name, int type, boolean primaryKey, Reference foreignKey, int canNull) instead.
-	 */
-	@Deprecated
-	public Attribute(String name, int type, boolean primaryKey, boolean foreignKey, int canNull) {
-		this(name, type, primaryKey, null, 0);
-	}
-	
 	public Attribute(String name, int type, boolean primaryKey, Reference foreignKey, int canNull) {
 		this(name,type,primaryKey,foreignKey,canNull,null);		
 	}
@@ -116,24 +98,11 @@ public class Attribute implements Serializable{
 		return foreignKey;
 	}
 	
-	/**
-	 * Determines whether this attribute object contains a
-	 * specified name.
-	 * 
-	 * @param name
-	 * 			The name in question.
-	 * @return Returns true if the attribute has the name,
-	 * or false, otherwise.
-	 */
-	public boolean hasName(String name) {
-		return (this.name.equals(name)) ? true : false;
-	}
-
 	/***
-	 * Returns the name of the SQL type asssociated with this attribute. Note, the name maybe not match
+	 * Returns the name of the SQL type associated with this attribute. Note, the name maybe not match
 	 * the integer SQL id. The integer SQL id comes from the {@link Types} class, and these are few. Often
 	 * databases match extra datatypes they may provide to the same ID, e.g., in MySQL YEAR (which doesn't
-	 * exists in standard SQL, is mapped to 91, the ID of DATE. This field helps in dissambiguating this 
+	 * exists in standard SQL, is mapped to 91, the ID of DATE. This field helps in disambiguating this 
 	 * cases.
 	 * 
 	 * @return
@@ -141,9 +110,10 @@ public class Attribute implements Serializable{
 	public String getSQLTypeName() {
 		return typeName;
 	}
-
-	public void setSQLTypeName(String typeName) {
-		this.typeName = typeName;
+	
+	@Override
+	public String toString() {
+		return name + ":" + type;
 	}
 
     public boolean isUnique() {

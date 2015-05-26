@@ -148,6 +148,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 				return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.NON_BUFFERING, preferences, excludeFromTMappings);
 		}
 		
+		
 	}
 
 	@Override
@@ -203,6 +204,7 @@ public class QuestOWLFactory implements OWLReasonerFactory {
 			//else
 			//	return new QuestOWL(ontology, mappingManager, new SimpleConfiguration(), BufferingMode.BUFFERING, preferences);
 		}
+		
 	}
 
 	@Override

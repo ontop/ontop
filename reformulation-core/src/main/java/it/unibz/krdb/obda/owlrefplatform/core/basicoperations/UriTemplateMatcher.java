@@ -40,34 +40,22 @@ public class UriTemplateMatcher {
 
 	private final OBDADataFactory ofac = OBDADataFactoryImpl.getInstance();
 
-	private final Map<Pattern, Function> uriTemplateMatcher = new HashMap<Pattern, Function>();
+	private final Map<Pattern, Function> uriTemplateMatcher = new HashMap<>();
 	
-	public UriTemplateMatcher() {
-		// NO-OP
-	}
-	
-	
-	public void clear() {
-		uriTemplateMatcher.clear();
-	}
-	
-	public UriTemplateMatcher(Map<Pattern, Function> existing) {
-		uriTemplateMatcher.putAll(existing);
-	}
-	
+
 	public void put(Pattern uriTemplatePattern, Function uriFunction) {
 		uriTemplateMatcher.put(uriTemplatePattern, uriFunction);
 	}
 	
 	/***
 	 * We will try to match the URI to one of our patterns, if this happens, we
-	 * have a corresponding function, and the paramters for this function. The
+	 * have a corresponding function, and the parameters for this function. The
 	 * parameters are the values for the groups of the pattern.
 	 */
 	public Function generateURIFunction(String uriString) {
 		Function functionURI = null;
 
-		List<Pattern> patternsMatched = new LinkedList<Pattern>();
+		List<Pattern> patternsMatched = new LinkedList<>();
 		for (Pattern pattern : uriTemplateMatcher.keySet()) {
 
 			Matcher matcher = pattern.matcher(uriString);
@@ -101,23 +89,22 @@ public class UriTemplateMatcher {
 						String value = matcher.group(i + 1);
 						values.add(ofac.getConstantLiteral(value));
 					}
-					functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(values.size()), values);
+					functionURI = ofac.getUriTemplate(values);
 				}
 			} else if (baseParameter instanceof Variable) {
 				/*
 				 * This is a direct mapping to a column, uri(x)
 				 * we need to match x with the subjectURI
 				 */
-				functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), 
-						ofac.getConstantLiteral(uriString));
+				functionURI = ofac.getUriTemplate(ofac.getConstantLiteral(uriString));
 			}
 			break;
 		}
 		if (functionURI == null) {
-			/* If we cannot match againts a tempalte, we try to match againts the most general tempalte (which will 
-			 * generate empty queires later in the query answering process
+			/* If we cannot match against a template, we try to match against the most general template (which will
+			 * generate empty queries later in the query answering process
 			 */
-			functionURI = ofac.getFunction(ofac.getUriTemplatePredicate(1), ofac.getConstantLiteral(uriString));
+			functionURI = ofac.getUriTemplate(ofac.getConstantLiteral(uriString));
 		}
 			
 		return functionURI;
