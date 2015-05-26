@@ -586,7 +586,7 @@ public class OWLEntailmentsToFactRule {
 			 */
 				if (!foundRange) {
 
-					Iterator<Equivalences<ClassExpression>> classesIt2 = classDAG.getDirectSuper(domainEquiv).iterator();
+					Iterator<Equivalences<ClassExpression>> classesIt2 = classDAG.getSuper(domainEquiv).iterator();
 
 					while (classesIt2.hasNext()) {
 
@@ -708,7 +708,7 @@ public class OWLEntailmentsToFactRule {
 			 */
 				if (!foundRange) {
 
-					Iterator<Equivalences<ClassExpression>> classesIt2 = classDAG.getDirectSuper(domainEquiv).iterator();
+					Iterator<Equivalences<ClassExpression>> classesIt2 = classDAG.getSuper(domainEquiv).iterator();
 
 					while (classesIt2.hasNext()) {
 
@@ -806,30 +806,30 @@ public class OWLEntailmentsToFactRule {
 			// add URI terms
 			terms.add(factory.getUriTemplate(factory.getConstantLiteral(description1.toString())));
 		}
-		else {
-			if (description1 instanceof ObjectSomeValuesFrom || description1 instanceof DataSomeValuesFrom) {
-			 // propertySomeDescription
-				// add blank node
-				terms.add(factory.getConstantBNode(description1.toString()));
-			}
+//		else {
+//			if (description1 instanceof ObjectSomeValuesFrom || description1 instanceof DataSomeValuesFrom) {
+//			 // propertySomeDescription
+//				// add blank node
+//				terms.add(factory.getConstantBNode(description1.toString()));
+//			}
 
 
-
-		}
+//
+//		}
 
 		if (description2 instanceof OClass)
 		{
 			// add URI terms
 			terms.add(factory.getUriTemplate(factory.getConstantLiteral(description2.toString())));
 		}
-		else {
-			if  (description2 instanceof ObjectSomeValuesFrom || description2 instanceof DataSomeValuesFrom) {
-				// propertySomeDescription
-				// add blank node
-				terms.add(factory.getConstantBNode(description2.toString()));
-			}
-
-		}
+//		else {
+//			if  (description2 instanceof ObjectSomeValuesFrom || description2 instanceof DataSomeValuesFrom) {
+//				// propertySomeDescription
+//				// add blank node
+//				terms.add(factory.getConstantBNode(description2.toString()));
+//			}
+//
+//		}
 
 		if (terms.size() == 2) {
 			Function head = factory.getFunction(function, terms);
