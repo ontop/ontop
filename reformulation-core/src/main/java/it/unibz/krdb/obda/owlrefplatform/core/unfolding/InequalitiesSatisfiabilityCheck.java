@@ -16,10 +16,10 @@ import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.StrongConnectivityInspector;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -110,11 +110,12 @@ class InequalitiesSatisfiabilityCheck {
 			Predicate pred = atom.getFunctionSymbol();
 			
 			if (!(pred instanceof BooleanOperationPredicate) || pred.getArity() != 2) {
+				log.debug("UNKNOWN: " + atom.toString());
 				continue;
 			}
+			log.debug("   KNOWN: " + atom.toString());
 			Term t0 = atom.getTerm(0),
 				 t1 = atom.getTerm(1);
-			
 			/*
 			 * Ignore unsupported constants
 			 */
@@ -199,6 +200,7 @@ class InequalitiesSatisfiabilityCheck {
 					gteGraph.addVertex(t0);
 					gteGraph.addVertex(t1);
 					gteGraph.addEdge(t0, t1);
+					log.debug("dedge " + t0 + "->" + t1);
 				}
 			}
 			
@@ -218,12 +220,14 @@ class InequalitiesSatisfiabilityCheck {
 				gteGraph.addVertex(bounds[0]);
 				gteGraph.addVertex(cursor.getKey());
 				gteGraph.addEdge(cursor.getKey(), bounds[0]);
+				log.debug("aedge " + cursor.getKey() + "->" + bounds[0]);
 				constants.add(bounds[0]);
 			}
 			if (bounds[1] != null) {
 				gteGraph.addVertex(bounds[1]);
 				gteGraph.addVertex(cursor.getKey());
 				gteGraph.addEdge(bounds[1], cursor.getKey());
+				log.debug("bedge " + bounds[1] + "->" + cursor.getKey());
 				constants.add(bounds[1]);
 			}
 		}
@@ -238,7 +242,8 @@ class InequalitiesSatisfiabilityCheck {
 		});
 		for (int i = 0; i < constants.size() - 1; i += 1) {
 			if (!constants.get(i).equals(constants.get(i + 1))) {
-				gteGraph.addEdge(constants.get(i), constants.get(i + 1));
+				gteGraph.addEdge(constants.get(i+1), constants.get(i));
+				log.debug("cedge " + constants.get(i+1) + "->" + constants.get(i));
 				//neq.get(constants.get(i)).add(constants.get(i + 1));
 			}
 		}
@@ -251,6 +256,7 @@ class InequalitiesSatisfiabilityCheck {
 		
 		for (Set<Term> component: scc) {
 			Constant cur = null;
+			log.debug("component: " + Arrays.toString(component.toArray()));
 			Set<Term> forbidden = new HashSet<>();
 			for (Term t: component) {
 				/*

@@ -33,4 +33,10 @@
 	<Declaration>
         <DataProperty IRI="#Gt"/>
     </Declaration>
+    <Declaration>
+        <DataProperty IRI="#Lte"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#Neq"/>
+    </Declaration>
 </Ontology>

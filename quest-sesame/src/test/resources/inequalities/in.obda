@@ -24,4 +24,12 @@ source		SELECT COL1 FROM "TABLE" WHERE COL1 > 3
 mappingId	Gt
 target		:obj-{COL1} :Gt :obj-{COL2} . 
 source		SELECT COL1, COL2 FROM "TABLE" WHERE COL1 > COL2
+
+mappingId	Lte
+target		:obj-{COL1} :Lte :obj-{COL2} . 
+source		SELECT COL1, COL2 FROM "TABLE" WHERE COL1 <= COL2
+
+mappingId	Neq
+target		:obj-{COL1} :Neq :obj-{COL2} . 
+source		SELECT COL1, COL2 FROM "TABLE" WHERE COL1 != COL2
 ]]

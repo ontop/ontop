@@ -1,5 +1,7 @@
 package it.unibz.krdb.sql;
 
+import org.junit.*;
+
 import static org.junit.Assert.*;
 import it.unibz.krdb.obda.model.OBDAModel;
 
@@ -18,12 +20,10 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
 /*
  * The code for this tests is an adaptation from the class 
@@ -42,7 +42,11 @@ public class InequalitiesSatisfiabilityTest2 {
 	private QuestOWL reasoner;
 	private Connection sqlConnection;
 	
+	private static Logger log;
+	
 	@Before public void initialize() throws Exception {
+		log = LoggerFactory.getLogger(this.getClass());
+		
 		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:countries", "sa", "");
 		
 		java.sql.Statement s = sqlConnection.createStatement();
@@ -84,7 +88,7 @@ public class InequalitiesSatisfiabilityTest2 {
 			try {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
 			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
+				log.debug("Table not found, not dropping");
 			} finally {
 				s.close();
 				sqlConnection.close();
@@ -92,24 +96,20 @@ public class InequalitiesSatisfiabilityTest2 {
 		}
 	}
 	
-	/*
-	 * Helper function
-	 */
-	private String qunfold(String query) throws Exception {
+	@Ignore private String qunfold(String query) throws Exception {
 		QuestOWLStatement st = conn.createStatement();
 		String result = st.getUnfolding("PREFIX : <http://www.semanticweb.org/ontologies/2015/5/untitled-ontology-1636#> SELECT * WHERE {" + query + "}");
-		System.out.println(query + " ==> " + result + "("+result.length()+")");
+		log.debug(query + " ==> " + result);
 		return result;
 	}
 	
 	@Test public void test() throws Exception {
-		assertFalse(qunfold("?a :Gt ?b. ?b :Gt ?c. ?c :Gt ?d. ?d :Gt ?e. ?e :Gt ?f.").length() ==0);
+		assertFalse(qunfold("?a :Gt ?b. ?b :Gt ?c. ?c :Gt ?d. ?d :Gt ?e. ?e :Gt ?f.") == "");
+		assertEquals(qunfold("?a :Lte ?b. ?b :Lte ?c. ?c :Lte ?d. ?d :Lte ?e. ?e :Lte ?a. ?a :Neq ?c."), "");
 		assertEquals(qunfold("?a :Gt ?b. ?b :Gt ?c. ?c :Gt ?d. ?d :Gt ?e. ?e :Gt ?a."), "");
-		
 		assertEquals(qunfold("?x a :Lt1. ?x a :Gt3."), "");
 		assertEquals(qunfold("?x a :Lt1. ?y a :Gt3. ?x :Gt ?y."), "");
-		
-		assertFalse(qunfold("?x a :Gt3. ?x a :Gt5.").length() ==0);
+		assertFalse(qunfold("?x a :Gt3. ?x a :Gt5.") == "");
 	}
 
 
