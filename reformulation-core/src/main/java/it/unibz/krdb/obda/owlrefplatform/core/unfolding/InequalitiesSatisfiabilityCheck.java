@@ -32,7 +32,7 @@ class InequalitiesSatisfiabilityCheck {
 		this.fac = fac;
 	}
 	
-	/*
+	/*NTripleAssertionIteratorTest.testIteratorTest
 	 * Return the Double value of a Constant object that has "numerical value"
 	 * FIXME TODO!
 	 */
@@ -75,7 +75,7 @@ class InequalitiesSatisfiabilityCheck {
 	 * 
 	 * Return true if the query is found unsatisfiable, false otherwise.
 	 */
-	public boolean check(CQIE q) {		
+	public boolean check(CQIE q) {
 		List<Function> atoms = new ArrayList<>(q.getBody());
 		
 		/*
@@ -111,7 +111,7 @@ class InequalitiesSatisfiabilityCheck {
 				 t1 = atom.getTerm(1);
 			
 			/*
-			 * Ignore unsupported variables
+			 * Ignore unsupported constants
 			 */
 			if (t0 instanceof Constant && !supported_constant((Constant) t0))
 					continue;
@@ -191,6 +191,8 @@ class InequalitiesSatisfiabilityCheck {
 						bounds[1] = (Constant) t0;
 					}
 				} else if (t0 instanceof Variable && t1 instanceof Variable) {
+					gteGraph.addVertex(t0);
+					gteGraph.addVertex(t1);
 					gteGraph.addEdge(t0, t1);
 				}
 			}
@@ -208,10 +210,14 @@ class InequalitiesSatisfiabilityCheck {
 				return true;
 			}
 			if (bounds[0] != null) {
+				gteGraph.addVertex(bounds[0]);
+				gteGraph.addVertex(cursor.getKey());
 				gteGraph.addEdge(cursor.getKey(), bounds[0]);
 				constants.add(bounds[0]);
 			}
 			if (bounds[1] != null) {
+				gteGraph.addVertex(bounds[1]);
+				gteGraph.addVertex(cursor.getKey());
 				gteGraph.addEdge(bounds[1], cursor.getKey());
 				constants.add(bounds[1]);
 			}
@@ -240,7 +246,7 @@ class InequalitiesSatisfiabilityCheck {
 		
 		for (Set<Term> component: scc) {
 			Constant cur = null;
-			Set<Term> forbidden = new HashSet();
+			Set<Term> forbidden = new HashSet<>();
 			for (Term t: component) {
 				/*
 				 * Check if the component contains two constants that are different
