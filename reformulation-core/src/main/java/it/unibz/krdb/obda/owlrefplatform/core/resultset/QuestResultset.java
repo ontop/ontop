@@ -30,10 +30,10 @@ import it.unibz.krdb.sql.DBMetadata;
 
 import java.net.URISyntaxException;
 import java.sql.*;
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.text.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
 
 public class QuestResultset implements TupleResultSet {
 
@@ -134,6 +134,19 @@ public class QuestResultset implements TupleResultSet {
 		return st;
 	}
 
+	public Object getRawObject(int column) throws OBDAException {
+
+		Object realValue;
+
+		try {
+			realValue = set.getObject(column);
+		} catch (SQLException e) {
+			throw new OBDAException(e);
+		}
+
+		return realValue;
+	}
+
 	/***
 	 * Returns the constant at column "column" recall that columns start at index 1.
 	 */
@@ -161,7 +174,7 @@ public class QuestResultset implements TupleResultSet {
 						} catch (NumberFormatException e) {
 							/*
 							 * If its not a number, then it has to be a URI, so
-							 * we leave realValue as is.
+							 * we leave realValue as it is.
 							 */
 						}
 					}
@@ -193,11 +206,7 @@ public class QuestResultset implements TupleResultSet {
 						}
 					} else if (type == COL_TYPE.BOOLEAN) {
 						boolean value = set.getBoolean(column);
-						if (value) {
-							result = fac.getConstantLiteral("true", COL_TYPE.BOOLEAN);
-						} else {
-							result = fac.getConstantLiteral("false", COL_TYPE.BOOLEAN);
-						}
+						result = fac.getBooleanConstant(value);
 					} else if (type == COL_TYPE.DOUBLE) {
 						double d = set.getDouble(column);
 						// format name into correct double representation

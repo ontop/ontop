@@ -21,7 +21,7 @@ package it.unibz.krdb.obda.reformulation.tests;
  */
 
 import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.SingletonSubstitution;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
@@ -95,7 +95,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			if (mgu == null) {
 				computedmgu = null;
 			} else {
-				for (VariableImpl var : mgu.getMap().keySet()) {
+				for (Variable var : mgu.getMap().keySet()) {
 					computedmgu.add(new SingletonSubstitution(var, mgu.get(var)));
 				}
 			}

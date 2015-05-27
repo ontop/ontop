@@ -24,21 +24,26 @@ import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 
 import java.sql.Types;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.Set;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
+
+    private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 
 	@Override
 	public String strconcat(String[] strings) {
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
+
 		if (strings.length == 1)
 			return strings[0];
 
 		StringBuilder sql = new StringBuilder();
 
-		sql.append(String.format("CONCAT(%s", strings[0]));
+		sql.append(String.format("(%s", strings[0]));
 		for (int i = 1; i < strings.length; i++) {
-			sql.append(String.format(", %s", strings[i]));
+			sql.append(String.format(" || %s", strings[i]));
 		}
 		sql.append(")");
 		return sql.toString();
@@ -46,14 +51,19 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String strreplace(String str, char oldchar, char newchar) {
-		// TODO Auto-generated method stub
-		return null;
+		return String.format("REPLACE(%s, '%s', '%s')", str, oldchar, newchar);
 	}
 
 	@Override
 	public String strreplace(String str, String oldstr, String newstr) {
-		// TODO Auto-generated method stub
-		return null;
+        if(quotes.matcher(oldstr).matches() ) {
+            oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+        }
+
+        if(quotes.matcher(newstr).matches() ) {
+            newstr = newstr.substring(1, newstr.length() - 1);
+        }
+		return String.format("REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
 	}
 
 	@Override
@@ -152,9 +162,12 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-																// enclosing
-																// quotes
+
+        if(quotes.matcher(pattern).matches() ) {
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
+        }
 		//we use % wildcards to search for a string that contains and not only match the pattern
 		if (caseinSensitive) {
 			return " LOWER(" + columnname + ") LIKE " + "'%"
@@ -264,13 +277,9 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	}
 
 	@Override
-	public String sqlNull() {
-		return "NULL";
+	public String nameTopVariable(String signatureVariableName, String proposedSuffix, Set<String> sqlVariableNames) {
+		return sqlQuote(signatureVariableName + proposedSuffix);
 	}
 
-	@Override
-	public String sqlTypeCode(int code) {
-		return String.format("%d", code);
-	}
 
 }

@@ -3,7 +3,7 @@
 	<groupId>it.unibz.inf.ontop</groupId>
 	<artifactId>ontop</artifactId>
 	<packaging>pom</packaging>
-	<version>1.14.1-SNAPSHOT</version>
+	<version>1.15.1-SNAPSHOT</version>
 	<name>ontop</name>
 	<url>http://ontop.inf.unibz.it/</url>
 
@@ -35,10 +35,6 @@
 
 	<developers>
 		<developer>
-			<id>marianormuro</id>
-			<name>Mariano Rodriguez-Muro</name>
-		</developer>
-		<developer>
 			<id>ghxiao</id>
 			<name>Guohui Xiao</name>
 		</developer>
@@ -47,21 +43,17 @@
 			<name>Martin Rezk</name>
 		</developer>
 		<developer>
-			<id>johardi</id>
-			<name>Josef Hardi</name>
-		</developer>
-		<developer>
-			<id>tibagosi</id>
-			<name>Timea Bagosi</name>
-		</developer>
-		<developer>
-			<id>mislusnys</id>
-			<name>Mindaugas Slusnys</name>
-		</developer>
-		<developer>
 			<id>skomlaebri</id>
 			<name>Sarah Komla-Ebri</name>
 		</developer>
+        <developer>
+            <id>bcogrel</id>
+            <name>Benjamin Cogrel</name>
+        </developer>
+        <developer>
+            <id>elemguzel</id>
+            <name>Elem Güzel</name>
+        </developer>
 	</developers>
 
 	<dependencies>
@@ -113,7 +105,25 @@
 				</plugins>
 			</build>
 		</profile>
-	</profiles>
+        <profile>
+            <id>doclint-java8-disable</id>
+            <activation>
+                <jdk>[1.8,</jdk>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -121,8 +131,9 @@
 		<!-- for org.codehaus.mojo:license-maven-plugin -->
 		<license.licenseName>apache_v2</license.licenseName>
 		<license.roots>src/main/java,src/test/java</license.roots>
+        <sesame.version>2.7.10</sesame.version>
+        <owlapi.version>3.4.10</owlapi.version>
 	</properties>
-
 
 	<build>
 		<pluginManagement>
@@ -327,32 +338,45 @@
     			<artifactId>guava</artifactId>
     			<version>15.0</version>
 			</dependency>
-			
+
+            <!--
+            <dependency>
+                <groupId>io.airlift</groupId>
+                <artifactId>airline</artifactId>
+                <version>0.7</version>
+            </dependency>
+            -->
+            <dependency>
+                <groupId>com.github.rvesse</groupId>
+                <artifactId>airline</artifactId>
+                <version>0.9.1</version>
+            </dependency>
+
 			<!-- OWL API -->
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-api</artifactId>
-				<version>3.4.10</version>
+				<version>${owlapi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-apibinding</artifactId>
-				<version>3.4.10</version>
+				<version>${owlapi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-impl</artifactId>
-				<version>3.4.10</version>
+				<version>${owlapi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-parsers</artifactId>
-				<version>3.4.10</version>
+				<version>${owlapi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-oboformat</artifactId>
-				<version>3.4.10</version>
+				<version>${owlapi.version}</version>
 			</dependency>
 			
 			<!-- Sesame API -->
@@ -361,131 +385,131 @@
 				<!-- this includes ALL seasame -->
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-runtime</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 
 			<!-- These will download some of the sources -->
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-repository-api</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-queryparser-sparql</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-util</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-rio-ntriples</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-rio-api</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-sparql-compliance</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 				<type>war</type>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-sparql-testsuite</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-model</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-rio-turtle</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-rio-rdfxml</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-rio-n3</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-queryresultio-api</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-queryresultio-text</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-queryresultio-sparqlxml</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-queryalgebra-model</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-repository-sparql</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-repository-manager</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-query</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-queryparser-api</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-queryalgebra-evaluation</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-rio-datatypes</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openrdf.sesame</groupId>
 				<artifactId>sesame-rio-languages</artifactId>
-				<version>2.7.10</version>
+				<version>${sesame.version}</version>
 			</dependency>
 			
 			<!-- JDBC Drivers -->
 
-			<dependency>
-				<groupId>postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>9.0-801.jdbc4</version>
-			</dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>9.4-1201-jdbc41</version>
+            </dependency>
 			<dependency>
 				<groupId>com.ibm</groupId>
 				<artifactId>db2jcc4.jar</artifactId>
@@ -494,7 +518,7 @@
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
-				<version>1.3.168</version>
+				<version>1.4.187</version>
 			</dependency>
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
@@ -509,7 +533,7 @@
 			<dependency>
 				<groupId>mysql</groupId>
 				<artifactId>mysql-connector-java</artifactId>
-				<version>5.1.22</version>
+				<version>5.1.35</version>
 			</dependency>
 			
 			<!-- Optique R2RML API -->

@@ -124,7 +124,7 @@ public class QuestDBStatement implements OBDAStatement {
 			OBDAModel obdaModel = OBDADataFactoryImpl.getInstance().getOBDAModel();
 			ModelIOManager io = new ModelIOManager(obdaModel);
 			io.load(uri.toString());
-			materializer = new QuestMaterializer(obdaModel);
+			materializer = new QuestMaterializer(obdaModel, false);
 			assertionIter =  materializer.getAssertionIterator();
 			int result = st.insertData(assertionIter, /*useFile,*/ commit, batch);
 			return result;
@@ -227,9 +227,9 @@ public class QuestDBStatement implements OBDAStatement {
 		QueryParser qp = QueryParserUtil.createParser(QueryLanguage.SPARQL);
 		ParsedQuery pq = qp.parseQuery(query, null); // base URI is null
 		
-		SparqlAlgebraToDatalogTranslator tr = st.questInstance.getSparqlAlgebraToDatalogTranslator();	
-		List<String> signatureContainer = tr.getSignature(pq);
+		//SparqlAlgebraToDatalogTranslator tr = st.questInstance.getSparqlAlgebraToDatalogTranslator();	
+		//List<String> signatureContainer = tr.getSignature(pq);
 		
-		return st.getRewriting(pq, signatureContainer);
+		return st.getRewriting(pq/*, signatureContainer*/);
 	}
 }

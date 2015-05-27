@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import it.unibz.krdb.obda.model.DatatypePredicate;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -20,23 +21,23 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 
 	
 	// special case of literals with the specified language 
-	private final DataTypePredicateImpl RDFS_LITERAL_LANG = new DataTypePredicateImpl(RDFS.LITERAL.toString(), 
+	private final DatatypePredicate RDFS_LITERAL_LANG = new DatatypePredicateImpl(RDFS.LITERAL.toString(),
 									new COL_TYPE[] { COL_TYPE.LITERAL, COL_TYPE.LITERAL });
 	
-	private final DataTypePredicateImpl RDFS_LITERAL, XSD_STRING;
-	private final DataTypePredicateImpl XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
-	private final DataTypePredicateImpl XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER;
-	private final DataTypePredicateImpl XSD_INT, XSD_UNSIGNED_INT, XSD_LONG;
-	private final DataTypePredicateImpl XSD_DECIMAL;
-	private final DataTypePredicateImpl XSD_DOUBLE, XSD_FLOAT;
-	private final DataTypePredicateImpl XSD_DATETIME, XSD_DATETIME_STAMP;
-	private final DataTypePredicateImpl XSD_BOOLEAN;
-	private final DataTypePredicateImpl XSD_DATE, XSD_TIME, XSD_YEAR;
+	private final DatatypePredicate RDFS_LITERAL, XSD_STRING;
+	private final DatatypePredicate XSD_INTEGER, XSD_NEGATIVE_INTEGER, XSD_NON_NEGATIVE_INTEGER;
+	private final DatatypePredicate XSD_POSITIVE_INTEGER, XSD_NON_POSITIVE_INTEGER;
+	private final DatatypePredicate XSD_INT, XSD_UNSIGNED_INT, XSD_LONG;
+	private final DatatypePredicate XSD_DECIMAL;
+	private final DatatypePredicate XSD_DOUBLE, XSD_FLOAT;
+	private final DatatypePredicate XSD_DATETIME, XSD_DATETIME_STAMP;
+	private final DatatypePredicate XSD_BOOLEAN;
+	private final DatatypePredicate XSD_DATE, XSD_TIME, XSD_YEAR;
 	
-	private final Map<String, COL_TYPE> mapURItoCOLTYPE = new HashMap<String, COL_TYPE>();
-	private final Map<COL_TYPE, URI> mapCOLTYPEtoURI = new HashMap<COL_TYPE, URI>();
-	private final Map<COL_TYPE, DataTypePredicateImpl> mapCOLTYPEtoPredicate = new HashMap<COL_TYPE, DataTypePredicateImpl>();
-	private final List<Predicate> predicateList = new LinkedList<Predicate>();
+	private final Map<String, COL_TYPE> mapURItoCOLTYPE = new HashMap<>();
+	private final Map<COL_TYPE, URI> mapCOLTYPEtoURI = new HashMap<>();
+	private final Map<COL_TYPE, DatatypePredicate> mapCOLTYPEtoPredicate = new HashMap<>();
+	private final List<Predicate> predicateList = new LinkedList<>();
 	
 	DatatypeFactoryImpl() {
 		RDFS_LITERAL = registerType(RDFS.LITERAL, COL_TYPE.LITERAL); // 3 "http://www.w3.org/2000/01/rdf-schema#Literal"
@@ -69,28 +70,28 @@ public class DatatypeFactoryImpl implements DatatypeFactory {
 
 	}
 	
-	private final DataTypePredicateImpl registerType(org.openrdf.model.URI uri, COL_TYPE type) {
+	private DatatypePredicate registerType(org.openrdf.model.URI uri, COL_TYPE type) {
 		String sURI = uri.toString();
 		mapURItoCOLTYPE.put(sURI, type);  
 		mapCOLTYPEtoURI.put(type, uri); 
-		DataTypePredicateImpl predicate = new DataTypePredicateImpl(sURI, type);
+		DatatypePredicate predicate = new DatatypePredicateImpl(sURI, type);
 		mapCOLTYPEtoPredicate.put(type, predicate);
 		predicateList.add(predicate);
 		return predicate;
 	}
 	
 	@Override
-	public COL_TYPE getDataType(String uri) {
+	public COL_TYPE getDatatype(String uri) {
 		return mapURItoCOLTYPE.get(uri);
 	}
 	
 	@Override
-	public COL_TYPE getDataType(URI uri) {
+	public COL_TYPE getDatatype(URI uri) {
 		return mapURItoCOLTYPE.get(uri.stringValue());
 	}
 	
 	@Override
-	public URI getDataTypeURI(COL_TYPE type) {
+	public URI getDatatypeURI(COL_TYPE type) {
 		return mapCOLTYPEtoURI.get(type);
 	}
 	

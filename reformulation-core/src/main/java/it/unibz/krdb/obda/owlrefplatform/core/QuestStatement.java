@@ -20,43 +20,19 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.BuiltinPredicate;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.GraphResultSet;
-import it.unibz.krdb.obda.model.OBDAException;
-import it.unibz.krdb.obda.model.OBDAStatement;
-import it.unibz.krdb.obda.model.Predicate;
-import it.unibz.krdb.obda.model.TupleResultSet;
-import it.unibz.krdb.obda.model.URIConstant;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 import it.unibz.krdb.obda.ontology.Assertion;
 import it.unibz.krdb.obda.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.EmptyQueryResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestGraphResultSet;
-import it.unibz.krdb.obda.owlrefplatform.core.resultset.QuestResultset;
+import it.unibz.krdb.obda.owlrefplatform.core.resultset.*;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.DatalogToSparqlTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SesameConstructTemplate;
 import it.unibz.krdb.obda.owlrefplatform.core.translator.SparqlAlgebraToDatalogTranslator;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.DatalogUnfolder;
 import it.unibz.krdb.obda.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import it.unibz.krdb.obda.renderer.DatalogProgramRenderer;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
@@ -64,6 +40,15 @@ import org.openrdf.query.parser.QueryParser;
 import org.openrdf.query.parser.QueryParserUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 
 /**
@@ -204,7 +189,12 @@ public class QuestStatement implements OBDAStatement {
 				} 
 				else {
 					try {
-
+//                        FOR debugging H2 in-memory database
+//                        try {
+//                            org.h2.tools.Server.startWebServer(conn.getConnection());
+//                        } catch (SQLException e) {
+//                            e.printStackTrace();
+//                        }
 						// Execute the SQL query string
 						executingSQL = true;
 						ResultSet set = null;
@@ -219,7 +209,15 @@ public class QuestStatement implements OBDAStatement {
 						// Store the SQL result to application result set.
 						if (isSelect) { // is tuple-based results
 
-							tupleResult = new QuestResultset(set, signature, QuestStatement.this);
+							if(questInstance.getDatasourceQueryGenerator().hasDistinctResultSet()) {
+
+								tupleResult = new QuestDistinctResultset(set, signature, QuestStatement.this );
+							}
+
+							else {
+
+								tupleResult = new QuestResultset(set, signature, QuestStatement.this);
+							}
 
 						} else if (isBoolean) {
 							tupleResult = new BooleanOWLOBDARefResultSet(set, QuestStatement.this);
@@ -260,7 +258,9 @@ public class QuestStatement implements OBDAStatement {
 	 */
 	@Override
 	public it.unibz.krdb.obda.model.ResultSet execute(String strquery) throws OBDAException {
-		if (strquery.isEmpty()) {
+
+
+        if (strquery.isEmpty()) {
 			throw new OBDAException("Cannot execute an empty query");
 		}
 		ParsedQuery pq = null;
@@ -391,11 +391,11 @@ public class QuestStatement implements OBDAStatement {
 	 * @return
 	 */
 	
-	private DatalogProgram translateAndPreProcess(ParsedQuery pq, List<String> signature) {
+	private DatalogProgram translateAndPreProcess(ParsedQuery pq) {
 		DatalogProgram program = null;
 		try {
 			SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();
-			program = translator.translate(pq, signature);
+			program = translator.translate(pq);
 
 			log.debug("Datalog program translated from the SPARQL query: \n{}", program);
 
@@ -436,6 +436,21 @@ public class QuestStatement implements OBDAStatement {
 
 		ExpressionEvaluator evaluator = questInstance.getExpressionEvaluator();
 		evaluator.evaluateExpressions(unfolding);
+		
+		/*
+			UnionOfSqlQueries ucq = new UnionOfSqlQueries(questInstance.getUnfolder().getCQContainmentCheck());
+			for (CQIE cq : unfolding.getRules())
+				ucq.add(cq);
+			
+			List<CQIE> rules = new ArrayList<>(unfolding.getRules());
+			unfolding.removeRules(rules); 
+			
+			for (CQIE cq : ucq.asCQIE()) {
+				unfolding.appendRule(cq);
+			}
+			log.debug("CQC performed ({} rules): \n{}", unfolding.getRules().size(), unfolding);
+		 
+		 */
 
 		log.debug("Boolean expression evaluated: \n{}", unfolding);
 		log.debug("Partial evaluation ended.");
@@ -557,12 +572,12 @@ public class QuestStatement implements OBDAStatement {
 		}
 		
 		// Obtain the query signature
-		SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();		
-		List<String> signatureContainer = translator.getSignature(query);
+		//SparqlAlgebraToDatalogTranslator translator = questInstance.getSparqlAlgebraToDatalogTranslator();		
+		//List<String> signatureContainer = translator.getSignature(query);
 		
 		
 		// Translate the SPARQL algebra to datalog program
-		DatalogProgram initialProgram = translateAndPreProcess(query, signatureContainer);
+		DatalogProgram initialProgram = translateAndPreProcess(query/*, signatureContainer*/);
 		
 		// Perform the query rewriting
 		DatalogProgram programAfterRewriting = questInstance.getRewriting(initialProgram);
@@ -577,10 +592,10 @@ public class QuestStatement implements OBDAStatement {
 	/**
 	 * Returns the final rewriting of the given query
 	 */
-	public String getRewriting(ParsedQuery query, List<String> signature) throws Exception {
+	public String getRewriting(ParsedQuery query) throws Exception {
 		// TODO FIX to limit to SPARQL input and output
 
-		DatalogProgram program = translateAndPreProcess(query, signature);
+		DatalogProgram program = translateAndPreProcess(query);
 
 		DatalogProgram rewriting = questInstance.getRewriting(program);
 		return DatalogProgramRenderer.encode(rewriting);
@@ -634,14 +649,12 @@ public class QuestStatement implements OBDAStatement {
 			questInstance.getSesameQueryCache().put(strquery, query);
 			questInstance.getSignatureCache().put(strquery, signatureContainer);
 
-			DatalogProgram program = translateAndPreProcess(query, signatureContainer);
+			DatalogProgram program = translateAndPreProcess(query);
 			try {
 				// log.debug("Input query:\n{}", strquery);
 
-				for (CQIE q : program.getRules()) {
-					// ROMAN: unfoldJoinTrees clones the query, so the statement below does not change anything
-					DatalogNormalizer.unfoldJoinTrees(q, false);
-				}
+				for (CQIE q : program.getRules()) 
+					DatalogNormalizer.unfoldJoinTrees(q);
 
  				log.debug("Normalized program: \n{}", program);
 

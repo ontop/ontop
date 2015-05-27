@@ -9,8 +9,7 @@ import it.unibz.krdb.obda.model.Constant;
 import it.unibz.krdb.obda.model.Function;
 import it.unibz.krdb.obda.model.Predicate;
 import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.impl.AnonymousVariable;
-import it.unibz.krdb.obda.model.impl.VariableImpl;
+import it.unibz.krdb.obda.model.Variable;
 
 public class HomomorphismUtilities {
 
@@ -24,14 +23,11 @@ public class HomomorphismUtilities {
 		for (int i = 0; i < arity; i++) {
 			Term fromTerm = from.getTerm(i);
 			Term toTerm = to.getTerm(i);
-			if (fromTerm instanceof VariableImpl) {
-				boolean result = sb.extend((VariableImpl)fromTerm, toTerm);
+			if (fromTerm instanceof Variable) {
+				boolean result = sb.extend((Variable)fromTerm, toTerm);
 				// if we cannot find a match, terminate the process and return false
 				if (!result)
 					return false;
-			}
-			else if (fromTerm instanceof AnonymousVariable) {
-				// ??
 			}
 			else if (fromTerm instanceof Constant) {
 				// constants must match 

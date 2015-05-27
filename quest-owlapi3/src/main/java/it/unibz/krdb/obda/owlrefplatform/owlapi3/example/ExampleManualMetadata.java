@@ -81,13 +81,13 @@ private TableDefinition defMeasTable(String name){
 	Attribute attribute = null;
 	attribute = new Attribute("timestamp", java.sql.Types.TIMESTAMP, false, null);
 	//It starts from 1 !!!
-	tableDefinition.setAttribute(1, attribute);
+	tableDefinition.addAttribute(attribute);
 	attribute = new Attribute("value", java.sql.Types.NUMERIC, false, null);
-	tableDefinition.setAttribute(2, attribute);
+	tableDefinition.addAttribute(attribute);
 	attribute = new Attribute("assembly", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.setAttribute(3, attribute);
+	tableDefinition.addAttribute(attribute);
 	attribute = new Attribute("sensor", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.setAttribute(4, attribute);
+	tableDefinition.addAttribute(attribute);
 	return tableDefinition;
 }
 
@@ -96,11 +96,11 @@ private TableDefinition defMessTable(String name){
 	Attribute attribute = null;
 	//It starts from 1 !!!
 	attribute = new Attribute("timestamp", java.sql.Types.TIMESTAMP, false, null);
-	tableDefinition.setAttribute(1, attribute);
+	tableDefinition.addAttribute(attribute);
 	attribute = new Attribute("eventtext", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.setAttribute(2, attribute);
+	tableDefinition.addAttribute(attribute);
 	attribute = new Attribute("assembly", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.setAttribute(3, attribute);
+	tableDefinition.addAttribute(attribute);
 	return tableDefinition;
 }
 
@@ -109,13 +109,13 @@ private TableDefinition defStaticTable(String name){
 	Attribute attribute = null;
 	//It starts from 1 !!!
 	attribute = new Attribute("domain", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.setAttribute(1, attribute);
+	tableDefinition.addAttribute(attribute);
 	attribute = new Attribute("range", java.sql.Types.VARCHAR, false, null);
-	tableDefinition.setAttribute(2, attribute);
+	tableDefinition.addAttribute(attribute);
 	return tableDefinition;
 }
 private DBMetadata getMeta(){
-	DBMetadata dbMetadata = new DBMetadata();
+	DBMetadata dbMetadata = new DBMetadata("dummy class");
 	dbMetadata.add(defMeasTable("burner"));
 	dbMetadata.add(defMessTable("events"));
 	dbMetadata.add(defStaticTable("a_static"));

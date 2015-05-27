@@ -20,23 +20,9 @@ package it.unibz.krdb.obda.model.impl;
  * #L%
  */
 
-import it.unibz.krdb.obda.model.BNode;
-import it.unibz.krdb.obda.model.CQIE;
-import it.unibz.krdb.obda.model.Constant;
-import it.unibz.krdb.obda.model.DatalogProgram;
-import it.unibz.krdb.obda.model.DatatypeFactory;
-import it.unibz.krdb.obda.model.Function;
-import it.unibz.krdb.obda.model.Term;
-import it.unibz.krdb.obda.model.OBDADataFactory;
-import it.unibz.krdb.obda.model.OBDADataSource;
-import it.unibz.krdb.obda.model.OBDAModel;
-import it.unibz.krdb.obda.model.OBDAQuery;
-import it.unibz.krdb.obda.model.OBDARDBMappingAxiom;
-import it.unibz.krdb.obda.model.Predicate;
+import com.google.common.base.Preconditions;
+import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
-import it.unibz.krdb.obda.model.URIConstant;
-import it.unibz.krdb.obda.model.ValueConstant;
-import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.utils.IDGenerator;
 import it.unibz.krdb.obda.utils.JdbcTypeMapper;
 
@@ -184,11 +170,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Variable getVariableNondistinguished() {
-		return new AnonymousVariable();
-	}
-
-	@Override
 	public Function getFunction(Predicate functor, Term... arguments) {
 		return new FunctionalTermImpl(functor, arguments);
 	}
@@ -219,18 +200,27 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public DatalogProgram getDatalogProgram(CQIE rule) {
+	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers) {
 		DatalogProgram p = new DatalogProgramImpl();
-		p.appendRule(rule);
+		p.getQueryModifiers().copy(modifiers);
 		return p;
 	}
-
+	
 	@Override
 	public DatalogProgram getDatalogProgram(Collection<CQIE> rules) {
 		DatalogProgram p = new DatalogProgramImpl();
 		p.appendRule(rules);
 		return p;
 	}
+	
+	@Override
+	public DatalogProgram getDatalogProgram(OBDAQueryModifiers modifiers, Collection<CQIE> rules) {
+		DatalogProgram p = new DatalogProgramImpl();
+		p.appendRule(rules);
+		p.getQueryModifiers().copy(modifiers);
+		return p;
+	}
+	
 
 	@Override
 	public RDBMSMappingAxiomImpl getRDBMSMappingAxiom(String id, OBDAQuery sourceQuery, OBDAQuery targetQuery) {
@@ -252,12 +242,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		String id = new String(IDGenerator.getNextUniqueID("MAPID-"));
 		return getRDBMSMappingAxiom(id, sql, targetQuery);
 	}
-
-	
-	
-	
-	
-	
 
 	
 	@Override
@@ -288,6 +272,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		Predicate pred = new BNodePredicateImpl(terms.size());
 		return getFunction(pred, terms);
 	}
+
 
 	@Override
 	public Function getFunctionEQ(Term firstTerm, Term secondTerm) {
@@ -402,6 +387,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 	
 	@Override
+	public Function getFunctionReplace(Term term1, Term term2, Term term3) {
+		return getFunction(OBDAVocabulary.REPLACE, term1, term2, term3 );
+	}
+	
+	@Override
 	public Function getFunctionMinus(Term term1) {
 		return getFunction(OBDAVocabulary.MINUS, term1);
 	}
@@ -421,6 +411,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return getFunction(OBDAVocabulary.MULTIPLY, term1, term2);
 	}
 
+    @Override
+    public Function getFunctionConcat(Term term1, Term term2) {
+        return getFunction(OBDAVocabulary.CONCAT, term1, term2);
+    }
+
 	@Override
 	public Function getFunctionCast(Term term1, Term term2) {
 		// TODO implement cast function
@@ -437,7 +432,13 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	@Override
 	public OBDADataSource getJDBCDataSource(String sourceuri, String jdbcurl, 
 			String username, String password, String driverclass) {
-		DataSourceImpl source = new DataSourceImpl(URI.create(sourceuri));
+        Preconditions.checkNotNull(sourceuri, "sourceuri is null");
+        Preconditions.checkNotNull(jdbcurl, "jdbcurl is null");
+        Preconditions.checkNotNull(password, "password is null");
+        Preconditions.checkNotNull(username, "username is null");
+        Preconditions.checkNotNull(driverclass, "driverclass is null");
+
+        DataSourceImpl source = new DataSourceImpl(URI.create(sourceuri));
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_URL, jdbcurl);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_PASSWORD, password);
 		source.setParameter(RDBMSourceParameterConstants.DATABASE_USERNAME, username);
@@ -530,8 +531,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	private Term getFreshTerm(Term term, int suff) {
 		Term newTerm;
-		if (term instanceof VariableImpl) {
-			VariableImpl variable = (VariableImpl) term;
+		if (term instanceof Variable) {
+			Variable variable = (Variable) term;
 			newTerm = getVariable(variable.getName() + "_" + suff);
 		} 
 		else if (term instanceof Function) {

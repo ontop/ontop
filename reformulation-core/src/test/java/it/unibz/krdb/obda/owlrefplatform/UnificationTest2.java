@@ -58,20 +58,20 @@ public class UnificationTest2 extends TestCase {
 		Term t2 = factory.getVariable("y");
 		Term t3 = factory.getVariable("x");
 
-		Predicate r1 = predFac.getPredicate("R", 2);
-		Predicate r2 = predFac.getPredicate("R", 2);
-		Predicate s = predFac.getPredicate("S", 2);
+		Predicate r1 = predFac.getObjectPropertyPredicate("R");
+		Predicate r2 = predFac.getObjectPropertyPredicate("R");
+		Predicate s = predFac.getObjectPropertyPredicate("S");
 		Predicate p = predFac.getPredicate("p", 2);
 
 		List<Term> terms1 = new Vector<Term>();
 		terms1.add(t1);
-		terms1.add(factory.getVariableNondistinguished());
+		terms1.add(factory.getVariable("w1"));
 		List<Term> terms2 = new Vector<Term>();
-		terms2.add(factory.getVariableNondistinguished());
+		terms2.add(factory.getVariable("w2"));
 		terms2.add(t2);
 		List<Term> terms3 = new Vector<Term>();
 		terms3.add(t3);
-		terms3.add(factory.getVariableNondistinguished());
+		terms3.add(factory.getVariable("w3"));
 		List<Term> terms4 = new Vector<Term>();
 		terms4.add(t3.clone());
 		terms4.add(t2.clone());

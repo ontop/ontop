@@ -23,28 +23,20 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.Set;
 
 public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
-	@Override
-	public String strconcat(String[] strings) {
-		if (strings.length == 0)
-			throw new IllegalArgumentException("Cannot concatenate 0 strings");
-
-		if (strings.length == 1)
-			return strings[0];
-
-		StringBuilder sql = new StringBuilder();
-
-		sql.append(String.format("(%s", strings[0]));
-		for (int i = 1; i < strings.length; i++) {
-			sql.append(String.format(" || %s", strings[i]));
-		}
-		sql.append(")");
-		return sql.toString();
-	}
+	public static final int VARIABLE_NAME_MAX_LENGTH = 30;
+	/**
+	 * If the variable needs to be shortcut, length of the number
+	 * introduced.
+	 */
+	public static final int VARIABLE_NUMBER_LENGTH = 3;
 
 	private static Map<Integer, String> SqlDatatypes;
+    private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 	static {
 		SqlDatatypes = new HashMap<Integer, String>();
 		SqlDatatypes.put(Types.DECIMAL, "NUMBER");
@@ -71,9 +63,12 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	
 	@Override
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-		pattern = pattern.substring(1, pattern.length() - 1); // remove the
-																// enclosing
-																// quotes
+
+        if(quotes.matcher(pattern).matches() ) {
+            pattern = pattern.substring(1, pattern.length() - 1); // remove the
+            // enclosing
+            // quotes
+        }
 		String flags = "";
 		if(caseinSensitive)
 			flags += "i";
@@ -87,6 +82,18 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		String sql = " REGEXP_LIKE " + "( " + columnname + " , '" + pattern + "' , '" + flags  + "' )";
 		return sql;
 	}
+
+    @Override
+    public String strreplace(String str, String oldstr, String newstr) {
+        if(quotes.matcher(oldstr).matches() ) {
+            oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
+        }
+
+        if(quotes.matcher(newstr).matches() ) {
+            newstr = newstr.substring(1, newstr.length() - 1);
+        }
+        return String.format("REGEXP_REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
+    }
 
 	@Override
 	public String getDummyTable() {
@@ -105,9 +112,6 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	 * will also normalize the use of Z to the timezome +00:00 and last, if the
 	 * database is H2, it will remove all timezone information, since this is
 	 * not supported there.
-	 * 
-	 * @param rdfliteral
-	 * @return
 	 */
 	@Override
 	public String getSQLLexicalFormDatetime(String v) {
@@ -196,5 +200,40 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 		return bf.toString();
 	}
-	
+
+	@Override
+	public String nameTopVariable(String signatureVariableName, String suffix, Set<String> sqlVariableNames) {
+		int suffixLength = suffix.length();
+		int signatureVarLength = signatureVariableName.length();
+
+		if (suffixLength >= (VARIABLE_NAME_MAX_LENGTH - VARIABLE_NUMBER_LENGTH))  {
+			throw new IllegalArgumentException("The suffix is too long (must be less than " +
+					(VARIABLE_NAME_MAX_LENGTH - VARIABLE_NUMBER_LENGTH) + ")");
+		}
+
+		/**
+		 * If the length limit is not reached, processes as usual.
+		 */
+		if (signatureVarLength + suffixLength <= VARIABLE_NAME_MAX_LENGTH) {
+			return super.nameTopVariable(signatureVariableName, suffix, sqlVariableNames);
+		}
+
+		String varPrefix = signatureVariableName.substring(0, VARIABLE_NAME_MAX_LENGTH - suffixLength
+				- VARIABLE_NUMBER_LENGTH);
+
+
+		/**
+		 * Naive implementation
+		 */
+		for (int i = 0; i < Math.pow(10, VARIABLE_NUMBER_LENGTH); i++) {
+			String mainVarName = super.nameTopVariable(varPrefix + i, suffix, sqlVariableNames);
+			if (!sqlVariableNames.contains(mainVarName)) {
+				return mainVarName;
+			}
+		}
+
+		// TODO: find a better exception
+		throw new RuntimeException("Impossible to create a new variable " + varPrefix + "???" + suffix + " : already " +
+				Math.pow(10, VARIABLE_NUMBER_LENGTH) + " of them.");
+	}
 }

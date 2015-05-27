@@ -1,0 +1,13 @@
+rewrite=true
+org.obda.owlreformulationplatform.sqlGenerateReplace=true
+org.obda.owlreformulationplatform.distinctResultSet=true
+org.obda.owlreformulationplatform.aboxmode=virtual
+max_pool_size=20
+initial_pool_size=2
+remove_abandoned=false
+abandoned_timeout=60
+keep_alive=true
+JDBC_URL=jdbc:mysql://10.7.20.39/books
+DBUSER=fish
+DBPASSWORD=fish
+JDBC_DRIVER=com.mysql.jdbc.Driver

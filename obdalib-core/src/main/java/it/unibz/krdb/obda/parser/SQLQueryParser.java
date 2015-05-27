@@ -215,14 +215,8 @@ public class SQLQueryParser {
 	
 	private ViewDefinition createViewDefinition(String viewName, String query) {
 
-
-        ViewDefinition viewDefinition = new ViewDefinition();
-        viewDefinition.setName(viewName);
-        viewDefinition.copy(query);
-
         ParsedSQLQuery queryParser = null;
-        boolean supported =true;
-
+        boolean supported = true;
         boolean uppercase = false;
 
         //TODO: we could use the sql adapter, but it's in the package reformulation-core
@@ -232,56 +226,40 @@ public class SQLQueryParser {
         }
 
         try {
-
             queryParser = new ParsedSQLQuery(query,false);
-
-        } catch (JSQLParserException e)
-        {
-            supported=false;
+        } 
+        catch (JSQLParserException e) {
+            supported = false;
         }
 
-        if(supported){
-
-
-            int i=1; // the attribute index always start at 1
-
-
-                List<String> columns = queryParser.getColumns();
-            for (String columnName : columns){
-
+        ViewDefinition viewDefinition = new ViewDefinition(viewName, query);
+       
+        if (supported) {
+            List<String> columns = queryParser.getColumns();
+            for (String columnName : columns) {
                 if (!ParsedSQLQuery.pQuotes.matcher(columnName).matches()) { //if it is not quoted, change it in uppercase when needed
-
 
                     if (uppercase)
                         columnName = columnName.toUpperCase();
                     else
                       columnName = columnName.toLowerCase();
                 }
-				else // if quoted remove the quotes
-				{
+				else { // if quoted remove the quotes
 					columnName= columnName.substring(1, columnName.length()-1);
 				}
 
-                viewDefinition.setAttribute(i , new Attribute(columnName));
-				i++;
-
+                viewDefinition.addAttribute(new Attribute(columnName));
             }
-
-
         }
-
         else {
-
             int start = 6; // the keyword 'select'
 			boolean quoted;
 
             int end = query.toLowerCase().indexOf("from");
 
-
             if (end == -1) {
                 throw new RuntimeException("Error parsing SQL query: Couldn't find FROM clause");
             }
-
 
             String projection = query.substring(start, end).trim();
 
@@ -290,17 +268,14 @@ public class SQLQueryParser {
 //            String[] columns = projection.split(",+(?![^\\(]*\\))");
 
 
-            for (int i = 0; i < columns.length; i++) {
+            for (String col : columns) {
                 quoted = false;
-                String columnName = columns[i].trim();
+                String columnName = col.trim();
 			
-			
-			/*
-			 * Take the alias name if the column name has it.
-			 */
-                String[] aliasSplitters = new String[2];
-                aliasSplitters[0] = " as ";
-                aliasSplitters[1] = " AS ";
+    			/*
+    			 * Take the alias name if the column name has it.
+    			 */
+                final String[] aliasSplitters = new String[] { " as ",  " AS " };
 
                 for (String aliasSplitter : aliasSplitters) {
                     if (columnName.contains(aliasSplitter)) { // has an alias
@@ -311,13 +286,13 @@ public class SQLQueryParser {
                 ////split where space is present but not inside single quotes
                 if (columnName.contains(" "))
                     columnName = columnName.split("\\s+(?![^'\"]*')")[1].trim();
-                ;
-			/*
-			 * Remove any identifier quotes
-			 * Example:
-			 * 		INPUT: "table"."column"
-			 * 		OUTPUT: table.column
-			 */
+                
+    			/*
+    			 * Remove any identifier quotes
+    			 * Example:
+    			 * 		INPUT: "table"."column"
+    			 * 		OUTPUT: table.column
+    			 */
                 Pattern pattern = Pattern.compile("[\"`\\[].*[\"`\\]]");
                 Matcher matcher = pattern.matcher(columnName);
                 if (matcher.find()) {
@@ -326,16 +301,16 @@ public class SQLQueryParser {
                 }
 			
 
-			/*
-			 * Get only the short name if the column name uses qualified name.
-			 * Example:
-			 * 		INPUT: table.column
-			 * 		OUTPUT: column
-			 */
+    			/*
+    			 * Get only the short name if the column name uses qualified name.
+    			 * Example:
+    			 * 		INPUT: table.column
+    			 * 		OUTPUT: column
+    			 */
+                
                 if (columnName.contains(".")) {
                     columnName = columnName.substring(columnName.lastIndexOf(".") + 1, columnName.length()); // get only the name
                 }
-
 
                 if (!quoted) {
                     if (uppercase)
@@ -344,12 +319,11 @@ public class SQLQueryParser {
                         columnName = columnName.toLowerCase();
                 }
 
-
-                viewDefinition.setAttribute(i + 1, new Attribute(columnName)); // the attribute index always start at 1
+                viewDefinition.addAttribute(new Attribute(columnName)); // the attribute index always start at 1
             }
         }
-            return viewDefinition;
-
+        
+        return viewDefinition;
 	}
 
 }
