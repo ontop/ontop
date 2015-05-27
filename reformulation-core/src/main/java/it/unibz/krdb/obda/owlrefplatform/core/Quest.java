@@ -20,6 +20,9 @@ package it.unibz.krdb.obda.owlrefplatform.core;
  * #L%
  */
 
+
+import com.google.common.collect.Lists;
+import it.unibz.krdb.obda.owlrefplatform.core.mappingprocessing.TMappingExclusionConfig;
 import it.unibz.krdb.obda.exception.DuplicateMappingException;
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
@@ -70,6 +73,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+
+import net.sf.jsqlparser.JSQLParserException;
+
+import org.apache.tomcat.jdbc.pool.DataSource;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
+import org.openrdf.query.parser.ParsedQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class Quest implements Serializable, RepositoryChangedListener {
@@ -139,6 +150,16 @@ public class Quest implements Serializable, RepositoryChangedListener {
 	 */
 	private boolean applyUserConstraints;
 
+	/** Davide> Exclude specific predicates from T-Mapping approach **/
+	private TMappingExclusionConfig excludeFromTMappings = TMappingExclusionConfig.empty();
+	
+	/** Davide> Whether to exclude the user-supplied predicates from the
+	 *          TMapping procedure (that is, the mapping assertions for 
+	 *          those predicates should not be extended according to the 
+	 *          TBox hierarchies
+	 */
+	//private boolean applyExcludeFromTMappings;
+	
 	/***
 	 * General flags and fields
 	 */
@@ -268,6 +289,14 @@ public class Quest implements Serializable, RepositoryChangedListener {
 		loadOBDAModel(mappings);
 	}
 	
+	
+
+	/** Davide> Exclude specific predicates from T-Mapping approach **/
+	public void setExcludeFromTMappings(TMappingExclusionConfig excludeFromTMappings){
+		assert(excludeFromTMappings != null);
+		this.excludeFromTMappings = excludeFromTMappings;
+	}
+
 	/**
 	 * Supply user constraints: that is primary and foreign keys not in the database
 	 * Can be useful for eliminating self-joins
@@ -737,7 +766,12 @@ public class Quest implements Serializable, RepositoryChangedListener {
 				unfolder.normalizeEqualities();
 				
 				// Apply TMappings
-				unfolder.applyTMappings(reformulationReasoner, true, metadata);
+				//unfolder.applyTMappings(reformulationReasoner, true, metadata);
+				// Davide> Option to disable T-Mappings (TODO: Test)
+				//if( tMappings ){
+				unfolder.applyTMappings(reformulationReasoner, true, metadata, excludeFromTMappings);
+				//}
+
 				
                 // Adding ontology assertions (ABox) as rules (facts, head with no body).
                 unfolder.addClassAssertionsAsFacts(inputOntology.getClassAssertions());
