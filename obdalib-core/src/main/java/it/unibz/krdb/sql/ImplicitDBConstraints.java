@@ -6,21 +6,15 @@ package it.unibz.krdb.sql;
 import it.unibz.krdb.sql.api.Attribute;
 import it.unibz.krdb.sql.api.RelationJSQL;
 import it.unibz.krdb.sql.api.TableJSQL;
+import net.sf.jsqlparser.schema.Table;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-
-import net.sf.jsqlparser.schema.Table;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -213,7 +207,7 @@ public class ImplicitDBConstraints {
 							log.warn("Got wrong attribute " + attr.getName() + " when asking for column " + keyColumn + " from table " + tableName);
 						} else {		
 						//	td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), true, attr.getReference(), 0));
-							td.addAttribute(new Attribute(attr.getName(), attr.getType(), attr.isPrimaryKey(), attr.getReference(),0, attr.getSQLTypeName(),/*isUnique*/true));
+							td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), attr.isPrimaryKey(), attr.getReference(), 0, attr.getSQLTypeName(),/*isUnique*/true));
 						}
 					}
 				}
@@ -272,7 +266,7 @@ public class ImplicitDBConstraints {
 						continue;
 					}
 					//String type = attr.getType();
-					td.addAttribute(new Attribute(attr.getName(), attr.getType(), attr.isPrimaryKey() , ref, attr.canNull() ? 1 : 0,  attr.getSQLTypeName(), attr.isUnique()));
+					td.setAttribute(key_pos, new Attribute(attr.getName(), attr.getType(), attr.isPrimaryKey(), ref, attr.canNull() ? 1 : 0, attr.getSQLTypeName(), attr.isUnique()));
 				}
 			}
 			md.add(td);
