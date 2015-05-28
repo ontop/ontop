@@ -104,12 +104,22 @@ public class InequalitiesSatisfiabilityTest2 {
 	}
 	
 	@Test public void test() throws Exception {
+		// a > b > c > d > e > f
 		assertFalse(qunfold("?a :Gt ?b. ?b :Gt ?c. ?c :Gt ?d. ?d :Gt ?e. ?e :Gt ?f.") == "");
+		// a =< b =< c =< d =< e =< a, a != c
 		assertEquals(qunfold("?a :Lte ?b. ?b :Lte ?c. ?c :Lte ?d. ?d :Lte ?e. ?e :Lte ?a. ?a :Neq ?c."), "");
+		// a < b < c < d < e < a
 		assertEquals(qunfold("?a :Gt ?b. ?b :Gt ?c. ?c :Gt ?d. ?d :Gt ?e. ?e :Gt ?a."), "");
+		// a < 1, x > 3
 		assertEquals(qunfold("?x a :Lt1. ?x a :Gt3."), "");
+		// x < 1, y > 3, x > y
 		assertEquals(qunfold("?x a :Lt1. ?y a :Gt3. ?x :Gt ?y."), "");
-		assertFalse(qunfold("?x a :Gt3. ?x a :Gt5.") == "");
+		// x > 3, x > 5, y < x, y < 1
+		assertFalse(qunfold("?x a :Gt3. ?x a :Gt5. ?y :Lt ?x. ?y a :Lt1.") == "");
+		// x = y, x = z, y != z
+		assertEquals(qunfold("?x :Eq ?y. ?x :Eq ?z. ?y :Neq ?z."), "");
+		// 3 < x =< y < z <= w < 1, 
+		assertEquals(qunfold("?x a :Gt3. ?x :Lte ?y. ?y :Lt ?z. ?z :Lte ?w. ?w a :Lt1."), "");
 	}
 
 

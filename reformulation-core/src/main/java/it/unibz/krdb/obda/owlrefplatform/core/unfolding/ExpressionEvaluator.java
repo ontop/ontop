@@ -41,7 +41,6 @@ import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
-
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.Substitution;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UnifierUtilities;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.UriTemplateMatcher;
@@ -67,6 +66,7 @@ public class ExpressionEvaluator {
 	}
 	
 	public void evaluateExpressions(DatalogProgram p) {
+		//if (1==1) return;
 		Set<CQIE> toremove = new LinkedHashSet<CQIE>();
 		for (CQIE q : p.getRules()) {
 			setRegexFlag(false); // reset the ObjectConstant flag
@@ -313,12 +313,32 @@ public class ExpressionEvaluator {
 		if (t1 instanceof Constant && t2 instanceof Constant) {
 			Constant c1 = (Constant) t1,
 					 c2 = (Constant) t2;
+			/*
+			 * Normalize Lt to Gt
+			 */
+			if (!isgt) {
+				Constant tmp = c1; c1 = c2; c2 = tmp;
+			}
+			// FIXME: bug: different kinds of integers
 			if (c1.getType() != c2.getType()) {
 				return OBDAVocabulary.FALSE;
 			}
 			
 			Predicate.COL_TYPE type = c1.getType();
 			// TODO actual comparison
+			boolean result = false;
+			switch(type) {
+			case LONG:
+				result = (Long.parseLong(c1.getValue()) > Long.parseLong(c2.getValue()));
+				break;
+			case DOUBLE:
+			case FLOAT:
+				result = (Double.parseDouble(c1.getValue()) > Double.parseDouble(c2.getValue()));
+				break;
+			default:
+				return term;
+			}
+			return fac.getBooleanConstant(result);
 		}
 		
 		return term;
