@@ -31,6 +31,28 @@ public class FourDSQLDialectAdapter extends SQL99DialectAdapter {
     }
 
     @Override
+    public String strconcat(String[] strings) {
+        if (strings.length == 0)
+            throw new IllegalArgumentException("Cannot concatenate 0 strings");
+
+        if (strings.length == 1)
+            return strings[0];
+
+        StringBuilder sql = new StringBuilder();
+        String str = "CONCAT("+strings[0]+","+strings[1]+")";
+        sql.append(concat(strings,str,2));
+        return sql.toString();
+    }
+
+    private String concat(String[] strings,String str, int i){
+        str = "CONCAT("+str+","+strings[i]+")";
+        if (i < strings.length-1) {
+            return concat(strings,str,i+1);
+        }
+        return str;
+    }
+
+    @Override
     public String sqlCast(String value, int type) {
         String strType = SqlDatatypes.get(type);
         if (strType != null) {
@@ -42,7 +64,7 @@ public class FourDSQLDialectAdapter extends SQL99DialectAdapter {
     /**
      * 4D does not accept expressions like " NULL AS myVar ".
      */
-    @Override
+    //@Override
     public String sqlNull() {
         return "0";
     }
@@ -50,7 +72,7 @@ public class FourDSQLDialectAdapter extends SQL99DialectAdapter {
     /**
      * 4D does not handle properly expressions like " 1 AS myVarType " (assigns "null" instead of 1).
      */
-    @Override
+   // @Override
     public String sqlTypeCode(int code) {
         return String.format("CAST(%d as INT)", code);
     }

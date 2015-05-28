@@ -31,6 +31,7 @@ import it.unibz.krdb.obda.owlrefplatform.core.abox.XsdDatatypeConverter;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.DatalogNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.basicoperations.EQNormalizer;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.DB2SQLDialectAdapter;
+import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.FourDSQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.queryevaluation.SQLDialectAdapter;
 import it.unibz.krdb.obda.owlrefplatform.core.srcquerygeneration.SQLQueryGenerator;
 import it.unibz.krdb.sql.DBMetadata;
@@ -881,12 +882,22 @@ public class SQLGenerator implements SQLQueryGenerator {
 			Predicate function = ov.getFunctionSymbol();
 
 			String lang = getLangType(ov, index);
-//
 
+            /*4D needs 0 instead of NULL
+            * It is bad practice. Should be refactored */
+            if(this.metadata.getDatabaseProductName().contains("4D")){
+                if(lang.equals("NULL")){
+                    return  (String.format(langStrForSELECT, ((FourDSQLDialectAdapter)sqladapter).sqlNull(), langVariableName));
+                }
+            }
+//
 			return (String.format(langStrForSELECT, lang, langVariableName));
 		}
+        if(this.metadata.getDatabaseProductName().contains("4D")){
+            return  (String.format(langStrForSELECT, ((FourDSQLDialectAdapter)sqladapter).sqlNull(), langVariableName));
+        }
 
-		return  (String.format(langStrForSELECT, "NULL", langVariableName));
+        return  (String.format(langStrForSELECT, "NULL", langVariableName));
 
 	}
 
@@ -969,6 +980,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 		 */
 		String typeVariableName = sqladapter.nameTopVariable(signature.get(hpos), typeSuffix, sqlVariableNames);
 		sqlVariableNames.add(typeVariableName);
+
+        /*It is bad practice. But 4D needs to cast Quest code*/
+        if(this.metadata.getDatabaseProductName().contains("4D")){
+            return String.format(typeStrForSELECT, ((FourDSQLDialectAdapter)sqladapter).sqlTypeCode(code), typeVariableName);
+        }
 
 		return String.format(typeStrForSELECT, code, typeVariableName);
 	}

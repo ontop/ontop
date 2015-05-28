@@ -343,7 +343,12 @@ public class JDBCConnectionManager {
 			}
 			
 			final ArrayList<String> primaryKeys = getPrimaryKey(md, null, tableSchema, tblName);
-			final Map<String, Reference> foreignKeys = getForeignKey(md, null, tableSchema, tblName);
+            final Map<String, Reference> foreignKeys;
+            if (md.getDatabaseProductName().contains("4D")){
+                foreignKeys = getForeignKeyFourD(md, null, tableSchema, tblName);
+            }else{
+                foreignKeys = getForeignKey(md, null, tableSchema, tblName);
+            }
 
 			TableDefinition td = new TableDefinition(tableGivenName);
 
@@ -683,6 +688,24 @@ public class JDBCConnectionManager {
 		} 
 		return pk;
 	}
+
+    /*It is bad practice, it should be refactored*/
+    /* Retrieves the foreign key(s) from a table for 4D database */
+    /*The difference is only FKNAME instead of FK_NAME*/
+    private static Map<String, Reference> getForeignKeyFourD(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
+        Map<String, Reference> fk = new HashMap<String, Reference>();
+        try (ResultSet rsForeignKeys = md.getImportedKeys(tblCatalog, schema, table)) {
+            ;
+            while (rsForeignKeys.next()) {
+                String fkName = rsForeignKeys.getString("FKNAME");
+                String colName = rsForeignKeys.getString("FKCOLUMN_NAME");
+                String pkTableName = rsForeignKeys.getString("PKTABLE_NAME");
+                String pkColumnName = rsForeignKeys.getString("PKCOLUMN_NAME");
+                fk.put(colName, new Reference(fkName, pkTableName, pkColumnName));
+            }
+        }
+        return fk;
+    }
 	
 	/* Retrieves the foreign key(s) from a table */
 	private static Map<String, Reference> getForeignKey(DatabaseMetaData md, String tblCatalog, String schema, String table) throws SQLException {
