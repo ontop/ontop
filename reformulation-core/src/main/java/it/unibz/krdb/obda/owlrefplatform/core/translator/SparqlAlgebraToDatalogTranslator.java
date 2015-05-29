@@ -708,9 +708,7 @@ public class SparqlAlgebraToDatalogTranslator {
         
         return topConcat;		
 	}
-	
-	//18.5.1.3 Sum: http://www.w3.org/TR/sparql11-query/#defn_aggSum
-	
+		
 	private Term getSum(List<ValueExpr> args) {
 		Iterator<ValueExpr> iterator = args.iterator();
 		ValueExpr first = iterator.next();
