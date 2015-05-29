@@ -18,7 +18,7 @@
 	<!-- Configure the logging level bellow. For more information use WARN, 
 		INFO or DEBUG instead of ERROR -->
 
-	<root level="INFO">
+	<root level="DEBUG">
 		<appender-ref ref="STDOUT" />
         <!--
 		<appender-ref ref="FILE" />

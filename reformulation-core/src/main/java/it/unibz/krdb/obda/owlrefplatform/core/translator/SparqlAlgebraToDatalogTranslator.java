@@ -709,6 +709,25 @@ public class SparqlAlgebraToDatalogTranslator {
         return topConcat;		
 	}
 	
+	private Term getSum(List<ValueExpr> args) {
+		Iterator<ValueExpr> iterator = args.iterator();
+		ValueExpr first = iterator.next();
+		Term sum = getExpression(first);
+		
+		if (!iterator.hasNext())
+            throw new UnsupportedOperationException("Wrong number of arguments (found " + args.size() + 
+            					", at least 1) of SQL function SUM");
+		
+		while (iterator.hasNext()) {
+            ValueExpr second = iterator.next();
+            Term next_argument = getExpression(second);
+            
+            sum = ofac.getFunctionAdd(sum, next_argument);                	
+        }
+		
+		return sum; 
+	}
+	
 	private Term getReplace(List<ValueExpr> expressions) {
         if (expressions.size() == 2 || expressions.size() == 3) {
 
@@ -752,11 +771,16 @@ public class SparqlAlgebraToDatalogTranslator {
             case "http://www.w3.org/2005/xpath-functions#replace":
                 return getReplace(expr.getArgs());
                 
+            case "http://www.w3.org/2005/xpath-functions#sum":
+            	return getSum(expr.getArgs());
+                
             default:
                 throw new RuntimeException("The builtin function " + expr.getURI() + " is not supported yet!");
         }
     }
 
+
+	
 
 	private Term getConstantExpression(Value v) {
 
