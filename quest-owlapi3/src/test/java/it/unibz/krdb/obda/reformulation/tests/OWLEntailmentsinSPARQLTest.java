@@ -243,7 +243,7 @@ public class OWLEntailmentsinSPARQLTest extends TestCase {
 
 		log.info("Find subClass");
 		List<String> individualsClass = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x rdfs:subClassOf ?y }", "rdfs:subClassOf");
-		assertEquals(85, individualsClass.size());
+		assertEquals(29, individualsClass.size());
 
 		log.info("Find subClass");
 		List<String> classes = runSingleNamedIndividualTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x rdfs:subClassOf :Person }", "rdfs:subClassOf");
@@ -261,7 +261,7 @@ public class OWLEntailmentsinSPARQLTest extends TestCase {
 
 		log.info("Find equivalent classes");
 		List<String> individualsEquivClass = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x owl:equivalentClass ?y }", "owl:equivalentClass");
-		assertEquals(49, individualsEquivClass.size());
+		assertEquals(14, individualsEquivClass.size());
 
 		List<String> equivClass = runSingleNamedIndividualTests(p,
 				"PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> select * where {?x owl:equivalentClass :Person }", "owl:equivalentClass");
@@ -283,20 +283,17 @@ public class OWLEntailmentsinSPARQLTest extends TestCase {
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
 		p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
 		p.setCurrentValueOf(QuestPreferences.SPARQL_OWL_ENTAILMENT, "true");
-//
+
 		log.info("Find domain");
 		List<String> individualsDomainClass = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x rdfs:domain ?y }", "rdfs:domain");
-		assertEquals(9, individualsDomainClass.size());
+		assertEquals(12, individualsDomainClass.size());
+
+		log.info("Find one domain");
+		List<String> domain = runSingleNamedIndividualTests(p,
+				"PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x rdfs:domain :AnimalLover }", "rdfs:domain");
+		assertEquals(4, domain.size());
+
 //
-//		log.info("Find one domain");
-//		List<String> domain = runSingleNamedIndividualTests(p,
-//				"PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x rdfs:domain :AnimalLover }", "rdfs:domain");
-//		assertEquals(4, domain.size());
-//
-//		log.info("Find one domain");
-//		List<String> domain2 = runSingleNamedIndividualTests(p,
-//				"PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#hasDog> rdfs:domain ?x }", "rdfs:domain");
-////		assertEquals(4, domain.size());
 	}
 
 	public void testRanges() throws Exception {
@@ -327,7 +324,7 @@ public class OWLEntailmentsinSPARQLTest extends TestCase {
 
 		log.info("Find disjoint classes");
 		List<String> individualsDisjClass = runTests(p, "PREFIX : <http://www.semanticweb.org/sarah/ontologies/2014/3/untitled-ontology-35#> SELECT * WHERE { ?x owl:disjointWith ?y }", "owl:disjointWith");
-		assertEquals(84, individualsDisjClass.size());
+		assertEquals(44, individualsDisjClass.size());
 		
 		log.info("Find a disjoint class");
 		List<String> disjClass = runSingleNamedIndividualTests(p,

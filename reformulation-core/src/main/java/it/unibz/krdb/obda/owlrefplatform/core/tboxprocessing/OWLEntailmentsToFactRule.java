@@ -151,7 +151,8 @@ public class OWLEntailmentsToFactRule {
 						 * blank node if some property of description
 						 */
 
-						addBlankNodesRule(subClassItem, classItem, subClassOf);
+//						addBlankNodesRule(subClassItem, classItem, subClassOf);
+						addClasses(subClassItem, classItem, subClassOf);
 
 					}
 
@@ -184,7 +185,8 @@ public class OWLEntailmentsToFactRule {
 			 * Add to datalog program equivalences owl:equivalentClass create a
 			 * blank node if some property of description
 			 */
-			addBlankNodesRule(description, node2, equivalentClass);
+//			addBlankNodesRule(description, node2, equivalentClass);
+			addClasses(description, node2, equivalentClass);
 
 		}
 
@@ -233,6 +235,7 @@ public class OWLEntailmentsToFactRule {
 						 * Add to datalog program rdfs:subproperty
 						 */
 						addNodesRule(subPropertyItem.toString(), propertyItem.toString(), subPropertyOf);
+//
 
 					}
 				}
@@ -396,7 +399,8 @@ public class OWLEntailmentsToFactRule {
 										 * Add owl:disjointWith facts to the
 										 * datalog program
 										 */
-											addBlankNodesRule(description1, description2, disjointClass);
+//											addBlankNodesRule(description1, description2, disjointClass);
+											addClasses(description1, description2, disjointClass);
 										}
 
 									}
@@ -734,7 +738,7 @@ public class OWLEntailmentsToFactRule {
 				DataPropertyRangeExpression range = node1.getRange();
 				Equivalences<DataRangeExpression> rangeEquiv= dataRangeDAG.getVertex(range);
 
-				System.out.println(rangeEquiv.getRepresentative());
+//				System.out.println(rangeEquiv.getRepresentative());
 
 				Iterator<DataRangeExpression> iteq2 = rangeEquiv.getMembers().iterator();
 
@@ -806,30 +810,30 @@ public class OWLEntailmentsToFactRule {
 			// add URI terms
 			terms.add(factory.getUriTemplate(factory.getConstantLiteral(description1.toString())));
 		}
-//		else {
-//			if (description1 instanceof ObjectSomeValuesFrom || description1 instanceof DataSomeValuesFrom) {
-//			 // propertySomeDescription
-//				// add blank node
-//				terms.add(factory.getConstantBNode(description1.toString()));
-//			}
+		else {
+			if (description1 instanceof ObjectSomeValuesFrom || description1 instanceof DataSomeValuesFrom) {
+			 // propertySomeDescription
+				// add blank node
+				terms.add(factory.getConstantBNode(description1.toString()));
+			}
 
 
-//
-//		}
+
+		}
 
 		if (description2 instanceof OClass)
 		{
 			// add URI terms
 			terms.add(factory.getUriTemplate(factory.getConstantLiteral(description2.toString())));
 		}
-//		else {
-//			if  (description2 instanceof ObjectSomeValuesFrom || description2 instanceof DataSomeValuesFrom) {
-//				// propertySomeDescription
-//				// add blank node
-//				terms.add(factory.getConstantBNode(description2.toString()));
-//			}
-//
-//		}
+		else {
+			if  (description2 instanceof ObjectSomeValuesFrom || description2 instanceof DataSomeValuesFrom) {
+				// propertySomeDescription
+				// add blank node
+				terms.add(factory.getConstantBNode(description2.toString()));
+			}
+
+		}
 
 		if (terms.size() == 2) {
 			Function head = factory.getFunction(function, terms);
@@ -839,6 +843,30 @@ public class OWLEntailmentsToFactRule {
 
 	}
 
+	private static void addClasses(ClassExpression description1, ClassExpression description2, Predicate function){
+		List<Term> terms = new ArrayList<Term>();
+
+		if (description1 instanceof OClass)
+		{
+			// add URI terms
+			terms.add(factory.getUriTemplate(factory.getConstantLiteral(description1.toString())));
+		}
+//
+		if (description2 instanceof OClass)
+		{
+			// add URI terms
+			terms.add(factory.getUriTemplate(factory.getConstantLiteral(description2.toString())));
+		}
+//
+
+		if (terms.size() == 2) {
+			Function head = factory.getFunction(function, terms);
+			program.add(factory.getCQIE(head));
+//			log.debug(head.toString());
+		}
+
+
+	}
 
 	/**
 	 * Create a fact given two nodes (transformed in URI) and a predicate function
