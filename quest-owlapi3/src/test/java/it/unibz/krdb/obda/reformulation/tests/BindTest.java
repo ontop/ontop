@@ -221,7 +221,7 @@ public class BindTest {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount\n"
                 + "   BIND (?p*(1-?discount) AS ?w)\n"
-                + "   FILTER(?w < 20 && strlen(\"a\") > 1) \n"
+                + "   FILTER(?w < 20 && strlen(?title) > 0) \n"
                 + "   ?x dc:title ?title .\n"
                 + "}";
 
@@ -397,7 +397,7 @@ public class BindTest {
 
 
     }
-
+*/
     @Test
     public void testBindWithConcat() throws Exception {
 
@@ -413,17 +413,18 @@ public class BindTest {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (CONCAT(?title, \" title\") AS ?w)\n"
+                + "   BIND (strlen(?title) AS ?v)\n"
+                + "   BIND (CONCAT(?title, ?v) AS ?w)\n"
              + "}";
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial title\"");
-        expectedValues.add("\"The Semantic Web title\"");
+        expectedValues.add("\"SPARQL Tutorial\"");
+        expectedValues.add("\"The Semantic Web\"");
         checkReturnedValues(p, queryBind, expectedValues);
 
 
-    } */
+    } 
    /* Test for ABS
     
     @Test

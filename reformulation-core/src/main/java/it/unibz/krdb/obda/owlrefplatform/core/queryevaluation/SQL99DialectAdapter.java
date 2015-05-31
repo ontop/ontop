@@ -56,7 +56,6 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		return Integer.toString(length);
 	}
 	
-	
 	@Override
 	public String strreplace(String str, char oldchar, char newchar) {
 		return String.format("REPLACE(%s, '%s', '%s')", str, oldchar, newchar);
