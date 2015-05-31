@@ -49,6 +49,14 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		return sql.toString();
 	}
 
+	
+	@Override
+	public String strlength(String str) {
+		int length = str.length();
+		return Integer.toString(length);
+	}
+	
+	
 	@Override
 	public String strreplace(String str, char oldchar, char newchar) {
 		return String.format("REPLACE(%s, '%s', '%s')", str, oldchar, newchar);
@@ -280,6 +288,8 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	public String nameTopVariable(String signatureVariableName, String proposedSuffix, Set<String> sqlVariableNames) {
 		return sqlQuote(signatureVariableName + proposedSuffix);
 	}
+
+
 
 
 }

@@ -167,6 +167,8 @@ public interface OBDADataFactory extends Serializable {
 	public Function getFunctionMultiply(Term term1, Term term2);
 
     public Function getFunctionConcat(Term term1, Term term2);
+    
+    public Function getFunctionLength(Term term1); // added by Nika
 	
 	/*
 	 * Casting values cast(source-value AS destination-type)

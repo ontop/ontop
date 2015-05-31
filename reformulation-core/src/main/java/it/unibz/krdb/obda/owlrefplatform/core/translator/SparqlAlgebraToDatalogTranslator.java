@@ -104,7 +104,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		
 		DatalogProgram result = ofac.getDatalogProgram();
 		Function bodyAtom = translateTupleExpr(te, result, OBDAVocabulary.QUEST_QUERY + "0");
-		createRule(result, OBDAVocabulary.QUEST_QUERY, vars, bodyAtom);
+		createRule(result, OBDAVocabulary.QUEST_QUERY, vars, bodyAtom); // appends rule to the result
 		
 		return result;
 	}
@@ -138,7 +138,8 @@ public class SparqlAlgebraToDatalogTranslator {
 			for (OrderElem c : order.getElements()) {	
 				ValueExpr expression = c.getExpr();
 				if (!(expression instanceof Var)) {
-					throw new IllegalArgumentException("Error translating ORDER BY. The current implementation can only sort by variables, this query has a more complex expression. Offending expression: '"+expression+"'");
+					throw new IllegalArgumentException("Error translating ORDER BY. "
+							+ "The current implementation can only sort by variables, this query has a more complex expression. Offending expression: '"+expression+"'");
 				}
 				Var v = (Var) expression;
 				Variable var = ofac.getVariable(v.getName());
@@ -708,25 +709,15 @@ public class SparqlAlgebraToDatalogTranslator {
         
         return topConcat;		
 	}
-		
-	private Term getSum(List<ValueExpr> args) {
-		Iterator<ValueExpr> iterator = args.iterator();
-		ValueExpr first = iterator.next();
-		Term sum = getExpression(first);
-		
-		if (!iterator.hasNext())
-            throw new UnsupportedOperationException("Wrong number of arguments (found " + args.size() + 
-            					", at least 1) of SQL function SUM");
-		
-		while (iterator.hasNext()) {
-            ValueExpr second = iterator.next();
-            Term next_argument = getExpression(second);
-            
-            sum = ofac.getFunctionAdd(sum, next_argument);                	
-        }
-		
-		return sum; 
+	
+	private Term getLength(List<ValueExpr> args) {
+		ValueExpr arg = args.get(0); 
+		Term term = getExpression(arg);
+		term = ofac.getFunctionLength(term);
+		return term;
 	}
+
+		
 	
 	private Term getReplace(List<ValueExpr> expressions) {
         if (expressions.size() == 2 || expressions.size() == 3) {
@@ -757,6 +748,8 @@ public class SparqlAlgebraToDatalogTranslator {
             throw new UnsupportedOperationException("Wrong number of arguments (found " + expressions.size() + ", only 2 or 3 supported) to sql function REPLACE");		
 	}
 	
+	
+	
     /** Return the Functions supported at the moment only
      * concat and replace
      * @param expr
@@ -771,16 +764,16 @@ public class SparqlAlgebraToDatalogTranslator {
             case "http://www.w3.org/2005/xpath-functions#replace":
                 return getReplace(expr.getArgs());
                 
-            case "http://www.w3.org/2005/xpath-functions#sum":
-            	return getSum(expr.getArgs());
+            case "http://www.w3.org/2005/xpath-functions#string-length":
+                return getLength(expr.getArgs()); // added by Nika
+                
+                
                 
             default:
                 throw new RuntimeException("The builtin function " + expr.getURI() + " is not supported yet!");
         }
     }
 
-
-	
 
 	private Term getConstantExpression(Value v) {
 

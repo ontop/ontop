@@ -64,6 +64,9 @@ public class OBDAVocabulary {
 	
 	/* String predicates */
 	
+	public static final StringOperationPredicate STRLEN = new StringOperationPredicateImpl(
+            "STRLEN", 1, new COL_TYPE[]{COL_TYPE.LITERAL}); //added by Nika
+	
 	public static final StringOperationPredicate REPLACE = new StringOperationPredicateImpl(
             "REPLACE", 3, new COL_TYPE[]{COL_TYPE.LITERAL, COL_TYPE.LITERAL, COL_TYPE.LITERAL});
 	
