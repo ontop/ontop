@@ -52,8 +52,9 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	
 	@Override
 	public String strlength(String str) {
-		int length = str.length();
-		return Integer.toString(length);
+		//int length = str.length();
+		//return String.valueOf(length);
+		return String.format("LENGTH(%s)", str);
 	}
 	
 	@Override

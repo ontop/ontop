@@ -413,14 +413,14 @@ public class BindTest {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (strlen(?title) AS ?v)\n"
-                + "   BIND (CONCAT(?title, ?v) AS ?w)\n"
+                + "   BIND (STRLEN(?title) AS ?v)\n"
+                + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
              + "}";
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial\"");
-        expectedValues.add("\"The Semantic Web\"");
+        expectedValues.add("\"SPARQL Tutorial 15\"");
+        expectedValues.add("\"The Semantic Web 16\"");
         checkReturnedValues(p, queryBind, expectedValues);
 
 
