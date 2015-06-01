@@ -22,7 +22,6 @@ package org.semanticweb.ontop.owlrefplatform.core.unfolding;
 
 import java.util.*;
 
-import com.google.common.collect.ImmutableList;
 import org.semanticweb.ontop.model.AlgebraOperatorPredicate;
 import org.semanticweb.ontop.model.BooleanOperationPredicate;
 import org.semanticweb.ontop.model.CQIE;
@@ -595,7 +594,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		// List of rules that MUST NOT be unfolded (to prevent partial unfolding)
 		List<CQIE> notToUnfoldRules = new ArrayList<>();
 		// {New rule : original rule }
-		Map<CQIE, CQIE> originalRules = initOriginalRules(workingList);
+		Map<CQIE, CQIE> originalRuleTrackingMap = initOriginalRules(workingList);
 
 		/**
 		 * For each predicate ...
@@ -632,6 +631,15 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 					if (notToUnfoldRules.contains(fatherRule))
 						continue;
 
+					/**
+					 * Needed for backtracking the unfolding (if necessary).
+					 */
+					CQIE originalFatherRule = originalRuleTrackingMap.get(fatherRule);
+					if (originalFatherRule == null) {
+						throw new RuntimeException("Bug: the mappings between new and original rules" +
+								"must be tracked.");
+					}
+
 					Predicate preFather =  fatherRule.getHead().getFunctionSymbol();
 					List<Term> ruleTerms = getBodyTerms(fatherRule);
 					Stack<Integer> termidx = new Stack<Integer>();
@@ -643,17 +651,19 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 								parentIsLeftJoin, includeMappings, ruleIndex, multiTypedFunctionSymbolIndex, true);
 					}
 					/**
-					 * TODO: explain
+					 * Prevents partial unfolding.
+					 *
+					 * This exception is thrown in two situations:
+					 *   1. if a ansXX atom is detected in the body of the father rule
+					 *       (the current implementation is not able to unfold it properly)
+					 *   2. if a data atom in the right argument of the LJ has more than 1 definition.
 					 */
 					catch(NotToUnfoldException e) {
-						CQIE originalRule = originalRules.get(fatherRule);
-						if (originalRule == null) {
-							throw new RuntimeException("Bug: the mappings between new and original rules" +
-									"must be tracked.");
-						}
-						notToUnfoldRules.add(originalRule);
-						partialEvaluation = Arrays.asList(originalRule);
-						workingList = appendMappingRulesToQuery(originalRule, workingList);
+						notToUnfoldRules.add(originalFatherRule);
+						// Hack: consider the original rule instead.
+						partialEvaluation = Arrays.asList(originalFatherRule);
+						// Makes sure the definitions of the data atoms are added to the datalog program.
+						workingList = appendMappingRulesToQuery(originalFatherRule, workingList);
 					}
 
 					if (partialEvaluation != null) {
@@ -666,9 +676,13 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						addDistinctList(result, partialEvaluation);
 						//updating indexes with intermediate results
 
-
 						keepLooping = updateIndexes(pred, preFather, result, fatherRule,
 								workingList, depGraph, multiTypedFunctionSymbolIndex);
+
+						/**
+						 * Adds the (new rule -> original rule) mappings
+						 */
+						originalRuleTrackingMap = updateOriginalRuleTrackingMap(originalRuleTrackingMap, result, originalFatherRule);
 
 						log.debug(pred + " : " + ruleIndex.get(preFather).toString());
 
@@ -722,6 +736,17 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 		}
 
 
+	}
+
+	/**
+	 * Adds the mappings (new rule -> original rule)
+	 */
+	private static Map<CQIE,CQIE> updateOriginalRuleTrackingMap(Map<CQIE, CQIE> originalRuleTrackingMap,
+																List<CQIE> newRules, CQIE originalRule) {
+		for (CQIE newRule : newRules) {
+			originalRuleTrackingMap.put(newRule, originalRule);
+		}
+		return originalRuleTrackingMap;
 	}
 
 	/**
