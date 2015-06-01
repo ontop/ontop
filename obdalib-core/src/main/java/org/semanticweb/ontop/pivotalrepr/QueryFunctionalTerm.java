@@ -1,7 +1,7 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 /**
- * Useful for built-in functions in the target query language.
+ * Useful for built-in functions in the native query language.
  *
  * Example (random() in SQL engines).
  */

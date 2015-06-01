@@ -36,6 +36,13 @@ public class IntermediateQueryImpl implements IntermediateQuery {
         queryDAG = new DirectedAcyclicGraph<>(DefaultEdge.class);
     }
 
+    /**
+     * For the IntermediateQueryBuilder ONLY!!
+     */
+    protected IntermediateQueryImpl( DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG) {
+        nodesInAntiTopologicalOrder = null;
+        this.queryDAG = queryDAG;
+    }
 
     @Override
     public ImmutableList<QueryNode> getNodesInBottomUpOrder() {

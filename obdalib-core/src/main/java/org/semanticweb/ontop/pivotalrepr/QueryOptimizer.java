@@ -7,7 +7,7 @@ import com.google.common.base.Optional;
  */
 public interface QueryOptimizer {
 
-    public Optional<LocalOptimizationProposal> makeProposal(JoinNode node);
+    public Optional<LocalOptimizationProposal> makeProposal(InnerJoinNode node);
     //TODO: complete the list
 
 }

@@ -1,10 +1,11 @@
 package org.semanticweb.ontop.pivotalrepr;
 
 /**
- * TODO: complete it.
+ * TODO: keep it?
  *
  * Immutable.
  */
+@Deprecated
 public interface QueryTerm {
 
     public String getDatatype();

@@ -8,10 +8,19 @@ import com.google.common.collect.ImmutableList;
  *
  * --> Mutations under control.
  *
+ * Golden rule: after mutation, the node must be semantically equivalent (for instance, not specialized).
+ *
  */
 public interface QueryNode {
 
+    /**
+     * TODO: keep??
+     */
     public QueryModifiers getModifiers();
+
+    /**
+     * TODO: keep??
+     */
     public boolean hasModifiers();
 
     /**
@@ -23,7 +32,14 @@ public interface QueryNode {
      */
     public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer);
 
+    /**
+     * TODO: should it be here?
+     */
     public BooleanExpression getFilterExpression();
+
+    /**
+     * TODO: should it be here?
+     */
     public boolean hasFilterExpression();
 
     public boolean isRejected();

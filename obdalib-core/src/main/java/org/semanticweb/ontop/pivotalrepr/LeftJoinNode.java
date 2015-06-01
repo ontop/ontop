@@ -1,4 +1,4 @@
 package org.semanticweb.ontop.pivotalrepr;
 
-public interface LeftJoinNode extends QueryNode {
+public interface LeftJoinNode extends AbstractJoinNode {
 }
