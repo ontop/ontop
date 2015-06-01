@@ -716,6 +716,13 @@ public class SparqlAlgebraToDatalogTranslator {
 		term = ofac.getFunctionLength(term);
 		return term;
 	}
+	
+	private Term getAbs(List<ValueExpr> args) {
+		ValueExpr arg = args.get(0); 
+		Term term = getExpression(arg);
+		term = ofac.getFunctionAbs(term);
+		return term;
+	}
 
 		
 	
@@ -766,6 +773,9 @@ public class SparqlAlgebraToDatalogTranslator {
                 
             case "http://www.w3.org/2005/xpath-functions#string-length":
                 return getLength(expr.getArgs()); // added by Nika
+                
+            case "http://www.w3.org/2005/xpath-functions#numeric-abs":
+            	return getAbs(expr.getArgs()); //Nika
                 
                 
                 

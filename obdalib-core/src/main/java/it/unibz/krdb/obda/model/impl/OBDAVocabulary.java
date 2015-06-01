@@ -64,6 +64,8 @@ public class OBDAVocabulary {
 	
 	/* String predicates */
 	
+	public static final StringOperationPredicate ABS = new StringOperationPredicateImpl("ABS",1, new COL_TYPE[]{COL_TYPE.DOUBLE});
+	
 	public static final StringOperationPredicate STRLEN = new StringOperationPredicateImpl(
             "STRLEN", 1, new COL_TYPE[]{COL_TYPE.LITERAL}); //added by Nika
 	
@@ -128,4 +130,5 @@ public class OBDAVocabulary {
 	public static final BooleanOperationPredicate SPARQL_LANGMATCHES = new BooleanOperationPredicateImpl("LangMatches", 2);
 	public static final BooleanOperationPredicate SPARQL_REGEX = new BooleanOperationPredicateImpl("regex", 3);
 	public static final BooleanOperationPredicate SPARQL_LIKE = new BooleanOperationPredicateImpl("like", 2);
+	
 }

@@ -1445,6 +1445,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 					String result = sqladapter.strlength(literal);
 					return result;
 			} //added by Nika
+			
+			 else if (functionName.equals(OBDAVocabulary.ABS.getName())) {
+					String value = getSQLString(function.getTerm(0), index, false);
+					String result = sqladapter.abs(value);
+					return result;
+			} //added by Nika
 
         }
 

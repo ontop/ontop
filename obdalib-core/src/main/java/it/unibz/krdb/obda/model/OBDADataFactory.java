@@ -169,6 +169,8 @@ public interface OBDADataFactory extends Serializable {
     public Function getFunctionConcat(Term term1, Term term2);
     
     public Function getFunctionLength(Term term1); // added by Nika
+    
+    public Function getFunctionAbs(Term term);
 	
 	/*
 	 * Casting values cast(source-value AS destination-type)
@@ -307,4 +309,6 @@ public interface OBDADataFactory extends Serializable {
 	public Function getSPARQLJoin(Term t1, Term t2);
 
 	public Function getSPARQLLeftJoin(Term t1, Term t2);
+
+	
 }

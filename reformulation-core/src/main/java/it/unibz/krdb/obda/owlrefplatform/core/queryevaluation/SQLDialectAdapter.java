@@ -28,6 +28,8 @@ import java.util.Set;
 public interface SQLDialectAdapter {
 	
 	public String strlength(String str); //added by Nika
+	
+	public String abs(String str); //Nika
 
 	public String strconcat(String[] strings);
 

@@ -421,6 +421,11 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
         return getFunction(OBDAVocabulary.STRLEN, term1);
     } //added by Nika
     
+    @Override
+    public Function getFunctionAbs(Term term1) {
+        return getFunction(OBDAVocabulary.ABS, term1);
+    } //added by Nika
+    
 	@Override
 	public Function getFunctionCast(Term term1, Term term2) {
 		// TODO implement cast function

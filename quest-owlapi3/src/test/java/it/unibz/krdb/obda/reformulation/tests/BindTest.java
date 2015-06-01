@@ -221,7 +221,7 @@ public class BindTest {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount\n"
                 + "   BIND (?p*(1-?discount) AS ?w)\n"
-                + "   FILTER(?w < 20 && strlen(?title) > 0) \n"
+                + "   FILTER(?w < ABS(-20) && strlen(?title) > 0) \n"
                 + "   ?x dc:title ?title .\n"
                 + "}";
 
@@ -413,14 +413,14 @@ public class BindTest {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (STRLEN(?title) AS ?v)\n"
+                + "   BIND (STRLEN(CONCAT(?title, \" \")) AS ?v)\n"
                 + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
              + "}";
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial 15\"");
-        expectedValues.add("\"The Semantic Web 16\"");
+        expectedValues.add("\"SPARQL Tutorial 16\"");
+        expectedValues.add("\"The Semantic Web 17\"");
         checkReturnedValues(p, queryBind, expectedValues);
 
 

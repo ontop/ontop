@@ -52,10 +52,13 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	
 	@Override
 	public String strlength(String str) {
-		//int length = str.length();
-		//return String.valueOf(length);
 		return String.format("LENGTH(%s)", str);
-	}
+	} //Nika
+	
+	@Override
+	public String abs(String number) {
+		return String.format("ABS(%s)", number);
+	} //Nika
 	
 	@Override
 	public String strreplace(String str, char oldchar, char newchar) {
