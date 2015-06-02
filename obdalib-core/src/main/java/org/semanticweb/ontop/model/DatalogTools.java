@@ -1,4 +1,4 @@
-package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
+package org.semanticweb.ontop.model;
 
 import fj.F;
 import fj.F2;
@@ -20,6 +20,19 @@ public class DatalogTools {
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
     private final static Function TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
 
+    private final static  F<Function, Boolean> isDataOrLeftJoinOrJoinAtomFct = new F<Function, Boolean>() {
+        @Override
+        public Boolean f(Function atom) {
+            return isDataOrLeftJoinOrJoinAtom(atom);
+        }
+    };
+    private final static  F<Function, Boolean> isNotDataOrCompositeAtomFct = new F<Function, Boolean>() {
+        @Override
+        public Boolean f(Function atom) {
+            return !isDataOrLeftJoinOrJoinAtom(atom);
+        }
+    };
+
     public static Boolean isDataOrLeftJoinOrJoinAtom(Function atom) {
         return atom.isDataFunction() || isLeftJoinOrJoinAtom(atom);
     }
@@ -28,6 +41,14 @@ public class DatalogTools {
         Predicate predicate = atom.getFunctionSymbol();
         return predicate.equals(OBDAVocabulary.SPARQL_LEFTJOIN) ||
                 predicate.equals(OBDAVocabulary.SPARQL_JOIN);
+    }
+
+    public static List<Function> filterDataAndCompositeAtoms(List<Function> atoms) {
+        return atoms.filter(isDataOrLeftJoinOrJoinAtomFct);
+    }
+
+    public static List<Function> filterNonDataAndCompositeAtoms(List<Function> atoms) {
+        return atoms.filter(isNotDataOrCompositeAtomFct);
     }
 
     /**

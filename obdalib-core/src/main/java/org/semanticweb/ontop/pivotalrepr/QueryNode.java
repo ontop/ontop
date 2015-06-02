@@ -14,16 +14,6 @@ import com.google.common.collect.ImmutableList;
 public interface QueryNode {
 
     /**
-     * TODO: keep??
-     */
-    public QueryModifiers getModifiers();
-
-    /**
-     * TODO: keep??
-     */
-    public boolean hasModifiers();
-
-    /**
      * "Accept" method for the "Visitor" pattern.
      *
      * To be implemented by leaf classes.
@@ -32,23 +22,5 @@ public interface QueryNode {
      */
     public Optional<LocalOptimizationProposal> acceptOptimizer(QueryOptimizer optimizer);
 
-    /**
-     * TODO: should it be here?
-     */
-    public BooleanExpression getFilterExpression();
-
-    /**
-     * TODO: should it be here?
-     */
-    public boolean hasFilterExpression();
-
     public boolean isRejected();
-
-    /**
-     * TODO: throw an exception if the node is not in the DAG anymore.
-     *
-     * Follows the evolution of the DAG ("dynamic").
-     *
-     */
-    public ImmutableList<QueryNode> getCurrentSubNodes();
 }

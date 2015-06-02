@@ -48,7 +48,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
-import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogTools.isLeftJoinOrJoinAtom;
+import static org.semanticweb.ontop.model.DatalogTools.isLeftJoinOrJoinAtom;
 
 /**
  * Generates partial evaluations of rules (the queries), with respect to a set

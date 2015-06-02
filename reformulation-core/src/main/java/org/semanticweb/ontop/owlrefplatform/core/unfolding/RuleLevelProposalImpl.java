@@ -15,9 +15,9 @@ import org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUti
 import java.util.*;
 import java.util.Set;
 
-import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogTools.constructNewFunction;
-import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogTools.isDataOrLeftJoinOrJoinAtom;
-import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogTools.isLeftJoinOrJoinAtom;
+import static org.semanticweb.ontop.model.DatalogTools.constructNewFunction;
+import static org.semanticweb.ontop.model.DatalogTools.isDataOrLeftJoinOrJoinAtom;
+import static org.semanticweb.ontop.model.DatalogTools.isLeftJoinOrJoinAtom;
 import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.SubstitutionUtilities.union;
 import static org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLiftTools.*;
 
@@ -153,7 +153,7 @@ public class RuleLevelProposalImpl implements RuleLevelProposal {
     private static Function computeExtendedCompositeAtom(Function compositeAtom,
                                                          final HashMap<Predicate, PredicateLevelProposal> childProposalIndex,
                                                          final Set<Variable> alreadyKnownRuleVariables) {
-        List<Function> subAtoms = List.iterableList((java.util.List<Function>)(java.util.List<?>)compositeAtom.getTerms());
+        List<Function> subAtoms = List.iterableList((java.util.List<Function>) (java.util.List<?>) compositeAtom.getTerms());
         List<Term> extendedSubAtoms = subAtoms.map(new F<Function, Term>() {
             @Override
             public Term f(Function subAtom) {

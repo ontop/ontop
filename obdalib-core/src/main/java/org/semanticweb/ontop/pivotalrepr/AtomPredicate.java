@@ -7,5 +7,4 @@ import org.semanticweb.ontop.model.Predicate;
  */
 public interface AtomPredicate extends Predicate {
 
-    boolean isExtensional();
 }
