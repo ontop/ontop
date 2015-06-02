@@ -21,6 +21,7 @@ package org.semanticweb.ontop.owlrefplatform.core.basicoperations;
  */
 
 import com.google.common.base.Joiner;
+import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.*;
 
@@ -30,7 +31,7 @@ import java.util.*;
 /**
  * Mutable reference implementation of a Substitution.
  */
-public class SubstitutionImpl implements Substitution {
+public class SubstitutionImpl implements AppendableSubstitution {
 
     private final Map<VariableImpl, Term> map;
 
@@ -58,7 +59,6 @@ public class SubstitutionImpl implements Substitution {
     }
 
     @Override
-    @Deprecated
     public void put(VariableImpl var, Term term) {
         map.put(var, term);
     }
@@ -104,7 +104,14 @@ public class SubstitutionImpl implements Substitution {
      * @return true if the substitution exists (false if it does not)
      */
     @Override
-    public boolean compose(Term term1, Term term2) {
+    public boolean composeTerms(Term term1, Term term2) {
+
+        /**
+         * Special case: unification of two functional terms (possibly recursive)
+         */
+        if ((term1 instanceof Function) && (term2 instanceof Function)) {
+            return composeFunctions((Function) term1, (Function) term2);
+        }
 
         Substitution s = createUnifier(term1, term2);
 
@@ -155,6 +162,42 @@ public class SubstitutionImpl implements Substitution {
         }
         map.keySet().removeAll(forRemoval);
         map.put(substitution.getVariable(), substitution.getTerm());
+        return true;
+    }
+
+    @Override
+    public boolean composeFunctions(Function first, Function second) {
+        // Basic case: if predicates are different or their arity is different,
+        // then no unifier
+        if ((first.getArity() != second.getArity()
+                || !first.getFunctionSymbol().equals(second.getFunctionSymbol()))) {
+            return false;
+        }
+
+        Function firstAtom = (Function) first.clone();
+        Function secondAtom = (Function) second.clone();
+
+        int arity = first.getArity();
+
+        // Computing the disagreement set
+        for (int termidx = 0; termidx < arity; termidx++) {
+
+            // Checking if there are already substitutions calculated for the
+            // current terms. If there are any, then we have to take the
+            // substituted terms instead of the original ones.
+
+            Term term1 = firstAtom.getTerm(termidx);
+            Term term2 = secondAtom.getTerm(termidx);
+
+            if (!composeTerms(term1, term2))
+                return false;
+
+            // Applying the newly computed substitution to the 'replacement' of
+            // the existing substitutions
+            SubstitutionUtilities.applySubstitution(firstAtom, this, termidx + 1);
+            SubstitutionUtilities.applySubstitution(secondAtom, this, termidx + 1);
+        }
+
         return true;
     }
 

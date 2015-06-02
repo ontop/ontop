@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import com.google.common.collect.ArrayListMultimap;
-import org.h2.tools.Server;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.parser.ParsedQuery;
@@ -45,6 +44,8 @@ import org.semanticweb.ontop.ontology.Assertion;
 import org.semanticweb.ontop.owlrefplatform.core.abox.EquivalentTriplePredicateIterator;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.CQCUtilities;
 import org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogNormalizer;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizer;
+import org.semanticweb.ontop.owlrefplatform.core.basicoperations.PullOutEqualityNormalizerImpl;
 import org.semanticweb.ontop.owlrefplatform.core.queryevaluation.SPARQLQueryUtility;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.BooleanOWLOBDARefResultSet;
 import org.semanticweb.ontop.owlrefplatform.core.resultset.EmptyQueryResultSet;
@@ -58,7 +59,6 @@ import org.semanticweb.ontop.owlrefplatform.core.unfolding.DatalogUnfolder;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.ExpressionEvaluator;
 import org.semanticweb.ontop.owlrefplatform.core.unfolding.TypeLift;
 import org.semanticweb.ontop.renderer.DatalogProgramRenderer;
-import org.semanticweb.ontop.utils.DatalogDependencyGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,7 +116,7 @@ public class QuestStatement implements OBDAStatement {
 
 	/**
 	 * Index function symbols (predicate) that have multiple types.
-	 * Such predicates should be managed carefully. See DatalogUnfolder.pushTypes() for more details.
+	 * Such predicates should be managed carefully. See DatalogUnfolder.liftTypes() for more details.
 	 *
 	 * Not that this index may be modified by the DatalogUnfolder.
 	 */
@@ -492,14 +492,21 @@ public class QuestStatement implements OBDAStatement {
 
 		// PUSH TYPE HERE
 		log.debug("Pushing types...");
-		unfolding = pushTypes(unfolding, unfolder, multiTypedFunctionSymbolIndex);
+		unfolding = liftTypes(unfolding, multiTypedFunctionSymbolIndex);
 
 
 		log.debug("Pulling out equalities...");
-		for (CQIE rule: unfolding.getRules()){
-			DatalogNormalizer.pullOutEqualities(rule);
-			//System.out.println(rule);
+
+		//TODO: use Guice instead
+		PullOutEqualityNormalizer normalizer = new PullOutEqualityNormalizerImpl();
+
+		List<CQIE> normalizedRules = new ArrayList<>();
+		for (CQIE rule: unfolding.getRules()) {
+			normalizedRules.add(normalizer.normalizeByPullingOutEqualities(rule));
 		}
+
+		OBDAQueryModifiers queryModifiers = unfolding.getQueryModifiers();
+		unfolding = ofac.getDatalogProgram(queryModifiers, normalizedRules);
 
 		log.debug("\n Partial evaluation ended.\n{}", unfolding);
 
@@ -507,52 +514,21 @@ public class QuestStatement implements OBDAStatement {
 	}
 
 	/**
-	 * Tests if the conditions are met to push types into the Datalog program.
-	 * If it ok, pushes them.
-	 *
-	 * @param datalogProgram
-	 * @param unfolder
-	 * @return the updated Datalog program
+	 * Lift types of the Datalog program.
+	 * Returns a new one.
 	 */
-	private DatalogProgram pushTypes(DatalogProgram datalogProgram, DatalogUnfolder unfolder,
-									 Multimap<Predicate,Integer> multiTypedFunctionSymbolMap) {
-		boolean canPush = true;
+	private DatalogProgram liftTypes(DatalogProgram datalogProgram,
+									 Multimap<Predicate, Integer> multiTypedFunctionSymbolMap) {
 
-		/**
-		 * Disables type pushing if a functionSymbol of the Datalog program is known as
-		 * being multi-typed.
-		 *
-		 * TODO: explain what we mean by multi-typed .
-		 * Happens for instance with URI templates.
-		 *
-		 * TODO: See if this protection is still needed for the new TypeLift.
-		 *
-		 * (former explanation :  "See LeftJoin3Virtual. Problems with the Join.")
-		 */
-		if (!multiTypedFunctionSymbolMap.isEmpty()) {
-			DatalogDependencyGraphGenerator dependencyGraph = new DatalogDependencyGraphGenerator(datalogProgram.getRules());
+		List<CQIE> newTypedRules = TypeLift.liftTypes(datalogProgram.getRules(), multiTypedFunctionSymbolMap);
 
-			for (Predicate functionSymbol : multiTypedFunctionSymbolMap.keys()) {
-				if (dependencyGraph.getRuleIndex().containsKey(functionSymbol)) {
-					canPush = false;
-					log.debug(String.format("The Datalog program is using at least one multi-typed function symbol" +
-							" (%s) so type pushing is disabled.", functionSymbol.getName()));
-					break;
-				}
-			}
-		}
-
-		if (canPush) {
-			List<CQIE> newTypedRules = TypeLift.liftTypes(datalogProgram.getRules(), multiTypedFunctionSymbolMap);
-
-			OBDAQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
-			//TODO: can we avoid using this intermediate variable???
-			//datalogProgram.removeAllRules();
-			datalogProgram = ofac.getDatalogProgram();
-			datalogProgram.appendRule(newTypedRules);
-			datalogProgram.setQueryModifiers(queryModifiers);
-			log.debug("Types Pushed: \n{}",datalogProgram);
-		}
+		OBDAQueryModifiers queryModifiers = datalogProgram.getQueryModifiers();
+		//TODO: can we avoid using this intermediate variable???
+		//datalogProgram.removeAllRules();
+		datalogProgram = ofac.getDatalogProgram();
+		datalogProgram.appendRule(newTypedRules);
+		datalogProgram.setQueryModifiers(queryModifiers);
+		log.debug("Types Pushed: \n{}",datalogProgram);
 
 		return datalogProgram;
 	}

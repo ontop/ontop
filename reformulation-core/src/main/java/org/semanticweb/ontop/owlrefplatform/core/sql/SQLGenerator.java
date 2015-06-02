@@ -524,7 +524,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if(dataTypePredicateUnifyTable.contains(type1, type2)){
 			return dataTypePredicateUnifyTable.get(type1, type2);
 		}else if(type2 == null){
-			throw new NullPointerException("type2 cannot be null");
+			return type1;
+			//throw new NullPointerException("type2 cannot be null");
 		} else {
 			return dtfac.getTypePredicate(COL_TYPE.STRING);
 		}
@@ -1118,8 +1119,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			if (predicate == OBDAVocabulary.SPARQL_JOIN) {
 				String indent2 = indent + INDENT;
-				String tableDefinitions = getTableDefinitions(innerTerms,
-						index, false, false, indent2);
+				String tableDefinitions = "(" + getTableDefinitions(innerTerms,
+						index, false, false, indent2) + ")";
 				return tableDefinitions;
 			} else if (predicate == OBDAVocabulary.SPARQL_LEFTJOIN) {
 
@@ -2314,7 +2315,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 		else if (constant.getType() == COL_TYPE.DATETIME) {
 			sql = sqladapter.getSQLLexicalFormDatetime(constant.getValue());
 		}
-		else if (constant.getType() == COL_TYPE.DECIMAL || constant.getType() == COL_TYPE.DOUBLE
+		else if (constant.getType() == COL_TYPE.NULL
+				|| constant.getType() == COL_TYPE.DECIMAL || constant.getType() == COL_TYPE.DOUBLE
 				|| constant.getType() == COL_TYPE.INTEGER || constant.getType() == COL_TYPE.LONG
 				|| constant.getType() == COL_TYPE.FLOAT || constant.getType() == COL_TYPE.NON_POSITIVE_INTEGER
 				|| constant.getType() == COL_TYPE.INT || constant.getType() == COL_TYPE.UNSIGNED_INT
@@ -2479,6 +2481,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 			Predicate tablePredicate = atom.getFunctionSymbol();
 			String tableName = tablePredicate.getName();
+			String safeTableName = tableName.replace('.', '_');
 			DataDefinition def = metadata.getDefinition(tableName);
 
 			if (def == null) {
@@ -2489,7 +2492,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				 */
 				// tableName = "Q"+tableName+"View";
 				//tableName = String.format(VIEW_ANS_NAME, tableName);
-				final String viewName = sqladapter.nameView(VIEW_PREFIX, tableName, VIEW_ANS_SUFFIX, viewNames.values());
+				final String viewName = sqladapter.nameView(VIEW_PREFIX, safeTableName, VIEW_ANS_SUFFIX, viewNames.values());
 				/**
 				 * TODO: understand this.
 				 */
@@ -2504,7 +2507,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				//String simpleTableViewName = String.format(VIEW_NAME,
 				// tableName, String.valueOf(dataTableCount));
 				String suffix = VIEW_SUFFIX + String.valueOf(dataTableCount);
-				final String simpleTableViewName = sqladapter.nameView(VIEW_PREFIX, tableName, suffix, viewNames.values());
+				final String simpleTableViewName = sqladapter.nameView(VIEW_PREFIX, safeTableName, suffix, viewNames.values());
 				viewNames.put(atom, simpleTableViewName);
 			}
 			dataTableCount += 1;

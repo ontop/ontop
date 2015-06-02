@@ -48,6 +48,8 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
+import static org.semanticweb.ontop.owlrefplatform.core.basicoperations.DatalogTools.isLeftJoinOrJoinAtom;
+
 /**
  * Generates partial evaluations of rules (the queries), with respect to a set
  * of (partial) facts (set of rules). The procedure uses extended resolution
@@ -1468,64 +1470,99 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 	 * example:
 	 *
 	 * <pre>
-	 * m(x,y) :- R(x,y), R(y,z), R(z,m)
+	 * m(x,y) :- R(x,y), R(y,z), R(z,m), GT(z,0)
 	 *
 	 * into
 	 *
-	 * m(x,y) :- Join(R(x,y), Join(R(y,z), R(z,m))
+	 * m(x,y) :- Join(R(x,y), Join(R(y,z), R(z,m), AND(true, true)), GT(z,0))
 	 * </pre>
 	 *
-	 * @param mapping
+	 * @param initialRule
 	 *            <bold>null</bold> if the body contains 0 or 1 data atoms,
 	 *            otherwhise returns a new query with the nested joins.
 	 * @return
 	 */
-	private CQIE foldJOIN(CQIE mapping) {
-		// Checking if the rule has more that 1 data atom, otherwise we do
-		// nothing. Now we count, and at the same time collect the atoms we
-		// will need to manipulate in 2 temporal lists.
+	private CQIE foldJOIN(CQIE initialRule) {
+		List<Function> dataAtoms = new ArrayList<>();
+		List<Function> filterConditionAtoms = new ArrayList<>();
+		//List<Function> otherAtomsList = new ArrayList<Function>();
 
-		// Data atoms in the list will be folded, boolean atoms will be
-		// added to the bod in the end
-
-		int dataAtoms = 0;
-
-		List<Function> body = mapping.getBody();
-
-		List<Function> dataAtomsList = new LinkedList<Function>();
-		List<Function> otherAtomsList = new ArrayList<Function>(body.size() * 2);
-
-		for (Function subAtom : body) {
-			if (subAtom.isDataFunction() || subAtom.isAlgebraFunction()) {
-				dataAtoms += 1;
-				dataAtomsList.add(subAtom);
-			} else {
-				otherAtomsList.add(subAtom);
+		/**
+		 * First, splits data atoms and filter conditions.
+		 */
+		for (Function atom : initialRule.getBody()) {
+			if (atom.isDataFunction() || atom.isAlgebraFunction()) {
+				dataAtoms.add(atom);
+			} else if (atom.isBooleanFunction()) {
+				filterConditionAtoms.add(atom);
+			}
+			else {
+				// TODO: See if it makes sense
+				throw new RuntimeException("Non data, algebra nor boolean atom found: " + atom.toString());
 			}
 		}
-		if (dataAtoms == 1) {
-			return null;
-		}
 
-		/*
-		 * This mapping can be transformed into a normal join with ON
-		 * conditions. Doing so.
+		/**
+		 * If not necessary, Join folding is rejected (only one data atom).
 		 */
-		Function foldedJoinAtom = null;
-
-		while (dataAtomsList.size() > 1) {
-			foldedJoinAtom = termFactory.getSPARQLJoin(dataAtomsList.remove(0), dataAtomsList.remove(0));
-			dataAtomsList.add(0, foldedJoinAtom);
+		if (dataAtoms.size() == 1) {
+			return initialRule;
 		}
 
-		List<Function> newBodyMapping = new LinkedList<Function>();
+
+		int lastIndex = dataAtoms.size() - 1;
+
+		// Initial value
+		Function foldedJoinAtom = dataAtoms.get(lastIndex);
+
+		/**
+		 * "Intermediate" data atoms (first and last excluded).
+		 *
+		 * Recursive constructor of the folded join atom.
+		 */
+		for (int i=(lastIndex - 1); i > 0; i--) {
+			//TODO: find a more elegant solution (in order to have a functional term)
+			Function defaultBooleanExpression = termFactory.getFunctionAND(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
+
+			foldedJoinAtom = termFactory.getSPARQLJoin(dataAtoms.get(i), foldedJoinAtom, defaultBooleanExpression);
+		}
+		/**
+		 * Basic "naive" approach: we introduce the filter terms as a boolean expression
+		 * only to the top JOIN.
+		 *
+		 */
+		Function booleanExpression = buildBooleanExpression(filterConditionAtoms);
+		foldedJoinAtom = termFactory.getSPARQLJoin(dataAtoms.get(0), foldedJoinAtom, booleanExpression);
+
+		List<Function> newBodyMapping = new ArrayList<>();
 		newBodyMapping.add(foldedJoinAtom);
-		newBodyMapping.addAll(otherAtomsList);
+		//newBodyMapping.addAll(otherAtomsList);
 
-		CQIE newrule = termFactory.getCQIE(mapping.getHead(), newBodyMapping);
+		CQIE newRule = termFactory.getCQIE(initialRule.getHead(), newBodyMapping);
 
-		return newrule;
+		return newRule;
 
+	}
+
+	private static Function buildBooleanExpression(List<Function> booleanAtoms) {
+		/**
+		 * By default, the boolean expression is True
+		 */
+		if (booleanAtoms.size() == 0) {
+			//TODO: find a more elegant solution
+			return termFactory.getFunctionAND(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
+		}
+
+		int lastIndex = booleanAtoms.size() - 1;
+		Function foldedBooleanExpression = booleanAtoms.get(lastIndex);
+
+		/**
+		 * Recursive
+		 */
+		for (int i=(lastIndex - 1); i >= 0 ; i--) {
+			foldedBooleanExpression = termFactory.getFunctionAND(booleanAtoms.get(i), foldedBooleanExpression);
+		}
+		return foldedBooleanExpression;
 	}
 
 	/***
@@ -1556,6 +1593,22 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 												Collection<CQIE> rulesDefiningTheAtom, boolean isLeftJoin, boolean isSecondAtomOfLeftJoin,
 												Multimap<Predicate, Integer> multiTypedFunctionSymbolIndex) {
 
+		/**
+		 * No unfolding in there is multiple rules for the right term of the LJ.
+		 *
+		 * Indeed, we had disjunction on the second atom of the leftjoin, that is,
+		 * more than two rules that unified. LeftJoin is not
+		 * distributable on the right component, hence, we cannot simply
+		 * generate 2 rules for the second atom.
+		 *
+		 * The rules must be untouched, no partial evaluation is
+		 * possible. We must return the original rule.
+		 *
+		 */
+		if (isSecondAtomOfLeftJoin && (rulesDefiningTheAtom.size() > 1)) {
+			return null;
+		}
+
 		List<CQIE> candidateMatches = new LinkedList<CQIE>(rulesDefiningTheAtom);
 //		List<CQIE> result = new ArrayList<CQIE>(candidateMatches.size() * 2);
 		List<CQIE> result = new LinkedList<CQIE>();
@@ -1584,9 +1637,7 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			// if we are in a left join, we need to make sure the fresh rule
 			// has only one data atom
 			if (isLeftJoin) {
-				CQIE foldedJoinsRule = foldJOIN(freshRule);
-				if (foldedJoinsRule != null)
-					freshRule = foldedJoinsRule;
+				freshRule = foldJOIN(freshRule);
 			}
 
 			/*
@@ -1602,7 +1653,10 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			List innerAtoms = getNestedList(termidx, partialEvalution);
 
-
+			/**
+			 * Apparently,  the stack is used to track positions inside a "complex atom"
+			 * (using a tree of algebraic functional terms)
+			 */
 			innerAtoms.remove((int) termidx.peek());
 
 			while (innerAtoms.contains(focusAtom)){
@@ -1631,26 +1685,6 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 
 			rulesGeneratedSoFar += 1;
 
-
-
-
-			//if (isSecondAtomOfLeftJoin && rulesGeneratedSoFar > 1 ) {
-			//if (isSecondAtomOfLeftJoin ) {
-			if (isLeftJoin) {
-				// guohui: I changed it to not unfold inside the leftjoin, regardless of the position 
-				
-				/*
-				 * We had disjunction on the second atom of the lejoin, that is,
-				 * more than two rules that unified. LeftJoin is not
-				 * distributable on the right component, hence, we cannot simply
-				 * generate 2 rules for the seocnd atom.
-				 * 
-				 * The rules must be untouched, no partial evaluation is
-				 * possible. We must return the original rule.
-				 */
-				return null;
-
-			}
 
 			result.add(partialEvalution);
 		}// end for candidate matches
@@ -1816,6 +1850,8 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 						break;
 					}
 				}
+				//TODO: how do we know that we can put it at the same level? What about a complex structure?
+				newbody.add(atom);
 			}
 
 		}// end for rule body
@@ -2267,6 +2303,9 @@ public class DatalogUnfolder implements UnfoldingMechanism {
 			if (atom.getFunctionSymbol().equals(bodyPred))
 			{
 				focusAtom = atom;
+			}
+			else if (isLeftJoinOrJoinAtom(atom)) {
+				focusAtom = getAtomFromBody(bodyPred, (List<Function>)(List<?>)atom.getTerms());
 			}
 		}
 		return focusAtom;
