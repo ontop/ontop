@@ -165,12 +165,26 @@ public interface OBDADataFactory extends Serializable {
 	public Function getFunctionSubstract(Term term1, Term term2);
 
 	public Function getFunctionMultiply(Term term1, Term term2);
+	
+	
+	/* Functions on strings */
 
     public Function getFunctionConcat(Term term1, Term term2);
     
-    public Function getFunctionLength(Term term1); // added by Nika
+ // added by Nika: 
     
-    public Function getFunctionAbs(Term term);
+    public Function getFunctionLength(Term term1); 
+    
+	public Function getFunctionSubstring(Term term1, Term term2, Term term3);
+
+	public Function getFunctionUpper(Term term1);
+	
+	public Function getFunctionLower(Term term1);
+	
+	public Function getFunctionStrBefore(Term term1, Term term2);
+	
+	public Function getFunctionStrAfter(Term term1, Term term2);
+
 	
 	/*
 	 * Casting values cast(source-value AS destination-type)
@@ -309,6 +323,7 @@ public interface OBDADataFactory extends Serializable {
 	public Function getSPARQLJoin(Term t1, Term t2);
 
 	public Function getSPARQLLeftJoin(Term t1, Term t2);
+
 
 	
 }

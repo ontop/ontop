@@ -1446,9 +1446,37 @@ public class SQLGenerator implements SQLQueryGenerator {
 					return result;
 			} //added by Nika
 			
-			 else if (functionName.equals(OBDAVocabulary.ABS.getName())) {
-					String value = getSQLString(function.getTerm(0), index, false);
-					String result = sqladapter.abs(value);
+			 else if (functionName.equals(OBDAVocabulary.UCASE.getName())) {
+					String literal = getSQLString(function.getTerm(0), index, false);
+					String result = sqladapter.strucase(literal);
+					return result;
+			} //added by Nika
+			
+			 else if (functionName.equals(OBDAVocabulary.LCASE.getName())) {
+					String literal = getSQLString(function.getTerm(0), index, false);
+					String result = sqladapter.strlcase(literal);
+					return result;
+			} //added by Nika
+			
+			 else if (functionName.equals(OBDAVocabulary.SUBSTR.getName())) {
+					String string = getSQLString(function.getTerm(0), index, false);
+					String start = getSQLString(function.getTerm(1), index, false);
+					String end = getSQLString(function.getTerm(2), index, false);
+					String result = sqladapter.strsubstr(string, start, end);
+					return result;
+			} //added by Nika
+			
+			 else if (functionName.equals(OBDAVocabulary.STRBEFORE.getName())) {
+					String string = getSQLString(function.getTerm(0), index, false);
+					String before = getSQLString(function.getTerm(1), index, false);
+					String result = sqladapter.strbefore(string, before);
+					return result;
+			} //added by Nika
+			
+			 else if (functionName.equals(OBDAVocabulary.STRAFTER.getName())) {
+					String string = getSQLString(function.getTerm(0), index, false);
+					String after = getSQLString(function.getTerm(1), index, false);
+					String result = sqladapter.strafter(string, after);
 					return result;
 			} //added by Nika
 

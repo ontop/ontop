@@ -717,10 +717,46 @@ public class SparqlAlgebraToDatalogTranslator {
 		return term;
 	}
 	
-	private Term getAbs(List<ValueExpr> args) {
+	private Term getSubstring(List<ValueExpr> args) {
+		ValueExpr string = args.get(0); 
+		ValueExpr start = args.get(1); 
+		ValueExpr end = args.get(2); 
+		Term str = getExpression(string);
+		Term st = getExpression(start);
+		Term en = getExpression(end);
+		Term term = ofac.getFunctionSubstring(str, st, en);
+		return term;
+	}
+	
+	private Term getLower(List<ValueExpr> args) {
 		ValueExpr arg = args.get(0); 
 		Term term = getExpression(arg);
-		term = ofac.getFunctionAbs(term);
+		term = ofac.getFunctionLower(term);
+		return term;
+	}
+
+	private Term getUpper(List<ValueExpr> args) {
+		ValueExpr arg = args.get(0); 
+		Term term = getExpression(arg);
+		term = ofac.getFunctionUpper(term);
+		return term;
+	}
+	
+	private Term getStrBefore(List<ValueExpr> args) {
+		ValueExpr string = args.get(0); 
+		ValueExpr before = args.get(1); 
+		Term str = getExpression(string);
+		Term be = getExpression(before);
+		Term term = ofac.getFunctionStrBefore(str, be);
+		return term;
+	}
+	
+	private Term getStrAfter(List<ValueExpr> args) {
+		ValueExpr string = args.get(0); 
+		ValueExpr after = args.get(1); 
+		Term str = getExpression(string);
+		Term af = getExpression(after);
+		Term term = ofac.getFunctionStrAfter(str, af);
 		return term;
 	}
 
@@ -774,15 +810,27 @@ public class SparqlAlgebraToDatalogTranslator {
             case "http://www.w3.org/2005/xpath-functions#string-length":
                 return getLength(expr.getArgs()); // added by Nika
                 
-            case "http://www.w3.org/2005/xpath-functions#numeric-abs":
-            	return getAbs(expr.getArgs()); //Nika
-                
-                
+            case "http://www.w3.org/2005/xpath-functions#substring":
+            	return getSubstring(expr.getArgs()); //Nika
+            	
+            case "http://www.w3.org/2005/xpath-functions#upper-case":
+            	return getUpper(expr.getArgs()); //Nika   
+            	
+            case "http://www.w3.org/2005/xpath-functions#lower-case":
+            	return getLower(expr.getArgs()); //Nika  
+            	
+            case "http://www.w3.org/2005/xpath-functions#substring-before":
+            	return getStrBefore(expr.getArgs()); //Nika 
+            	
+            case "http://www.w3.org/2005/xpath-functions#substring-after":
+            	return getStrAfter(expr.getArgs()); //Nika 
                 
             default:
                 throw new RuntimeException("The builtin function " + expr.getURI() + " is not supported yet!");
         }
     }
+
+
 
 
 	private Term getConstantExpression(Value v) {

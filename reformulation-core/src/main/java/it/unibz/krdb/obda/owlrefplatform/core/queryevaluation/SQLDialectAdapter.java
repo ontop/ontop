@@ -29,7 +29,15 @@ public interface SQLDialectAdapter {
 	
 	public String strlength(String str); //added by Nika
 	
-	public String abs(String str); //Nika
+	public String strucase(String str);
+	
+	public String strlcase(String str);
+	
+	public String strbefore(String str, String before);
+	
+	public String strafter(String str, String after);
+	
+	public String strsubstr(String str, String start, String end); //Nika
 
 	public String strconcat(String[] strings);
 

@@ -21,6 +21,7 @@ package it.unibz.krdb.obda.model.impl;
  */
 
 import com.google.common.base.Preconditions;
+
 import it.unibz.krdb.obda.model.*;
 import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.utils.IDGenerator;
@@ -422,8 +423,28 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
     } //added by Nika
     
     @Override
-    public Function getFunctionAbs(Term term1) {
-        return getFunction(OBDAVocabulary.ABS, term1);
+    public Function getFunctionSubstring(Term term1, Term term2, Term term3) {
+        return getFunction(OBDAVocabulary.SUBSTR, term1, term2, term3);
+    } //added by Nika
+    
+    @Override
+    public Function getFunctionUpper(Term term) {
+        return getFunction(OBDAVocabulary.UCASE, term);
+    } //added by Nika
+    
+    @Override
+    public Function getFunctionLower(Term term) {
+        return getFunction(OBDAVocabulary.LCASE, term);
+    } //added by Nika
+    
+    @Override
+    public Function getFunctionStrBefore(Term term1, Term term2){
+    	return getFunction(OBDAVocabulary.STRBEFORE, term1, term2); 
+    } //added by Nika
+    
+    @Override
+	public Function getFunctionStrAfter(Term term1, Term term2){
+    	return getFunction(OBDAVocabulary.STRAFTER, term1, term2);
     } //added by Nika
     
 	@Override

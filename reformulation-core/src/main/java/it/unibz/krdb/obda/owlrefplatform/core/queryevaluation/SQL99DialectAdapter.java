@@ -51,13 +51,33 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
 	
 	@Override
+	public String strucase(String str) {
+		return String.format("UPPER(%s)", str);
+	} //Nika
+	
+	@Override
+	public String strbefore(String str, String before) {
+		return String.format("LEFT(%s,CHARINDEX(%s,%s)-1)", str, before, str);
+	} //Nika
+	
+	@Override
+	public String strafter(String str, String after) {
+		return String.format("RIGHT(%s,LENGTH(%s) - CHARINDEX(%s,%s) )", str, str, after, str);
+	} //Nika
+	
+	@Override
+	public String strlcase(String str) {
+		return String.format("LOWER(%s)", str);
+	} //Nika
+	
+	@Override
 	public String strlength(String str) {
 		return String.format("LENGTH(%s)", str);
 	} //Nika
 	
 	@Override
-	public String abs(String number) {
-		return String.format("ABS(%s)", number);
+	public String strsubstr(String str, String start, String end) {
+		return String.format("SUBSTR(%s,%s,%s)", str, start, end);
 	} //Nika
 	
 	@Override
