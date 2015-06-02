@@ -8,16 +8,16 @@ import com.google.common.collect.ImmutableList;
 public interface IntermediateQuery {
 
 
-    public ImmutableList<QueryNode> getNodesInBottomUpOrder();
+    ImmutableList<QueryNode> getNodesInBottomUpOrder();
 
-    public ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node);
+    ImmutableList<QueryNode> getCurrentSubNodesOf(QueryNode node);
 
     /**
      * TODO: describe
      *
      * Returns the QueryNode at the same position, which might be new.
      */
-    public QueryNode applySubNodeSelectionProposal(NewSubNodeSelectionProposal proposal)
+    QueryNode applySubNodeSelectionProposal(NewSubNodeSelectionProposal proposal)
             throws InvalidLocalOptimizationProposalException;
 
     /**
@@ -25,7 +25,12 @@ public interface IntermediateQuery {
      *
      * Returns the QueryNode at the same position, which might be new.
      */
-    public QueryNode applyReplaceNodeProposal(ReplaceNodeProposal proposal)
+    QueryNode applyReplaceNodeProposal(ReplaceNodeProposal proposal)
             throws InvalidLocalOptimizationProposalException;
+
+    /**
+     * TODO: find an exception to throw
+     */
+    void mergeRule(Rule rule) throws RuleMergingException;
 
 }

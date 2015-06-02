@@ -11,12 +11,5 @@ public interface IntermediateQueryBuilder {
 
     void addChild(QueryNode parentNode, QueryNode child) throws IntermediateQueryBuilderException;
 
-    /**
-     * TODO: find a better terminology
-     *
-     * TODO: throw an exception?
-     */
-    void mergeRule(Rule rule) throws IntermediateQueryBuilderException;
-
     IntermediateQuery build() throws IntermediateQueryBuilderException;
 }

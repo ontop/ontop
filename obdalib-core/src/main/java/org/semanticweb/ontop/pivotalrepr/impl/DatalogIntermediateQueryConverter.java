@@ -27,42 +27,41 @@ public class DatalogIntermediateQueryConverter {
 
     /**
      * TODO: explain
+     *
      */
     public static IntermediateQuery convertFromDatalog(DatalogProgram queryProgram) throws InvalidDatalogProgramException {
-        try {
-            List<CQIE> rules = queryProgram.getRules();
+        List<CQIE> rules = queryProgram.getRules();
 
-            DatalogDependencyGraphGenerator dependencyGraph = new DatalogDependencyGraphGenerator(rules);
-            List<Predicate> topDownPredicates = Lists.reverse(dependencyGraph.getPredicatesInBottomUp());
+        DatalogDependencyGraphGenerator dependencyGraph = new DatalogDependencyGraphGenerator(rules);
+        List<Predicate> topDownPredicates = Lists.reverse(dependencyGraph.getPredicatesInBottomUp());
 
-            if (topDownPredicates.size() == 0) {
-                throw new InvalidDatalogProgramException("Datalog program without any rule!");
-            }
-
-            Multimap<Predicate, CQIE> ruleIndex = dependencyGraph.getRuleIndex();
-
-            //Not final mutable object
-            IntermediateQueryBuilder builder = initIntermediateQuery(
-                    extractRootHeadAtom(topDownPredicates.get(0), ruleIndex),
-                    queryProgram.getQueryModifiers());
-
-            /**
-             * Rules
-             */
-            for (int i = 0; i < topDownPredicates.size(); i++) {
-                Predicate datalogAtomPredicate = topDownPredicates.get(i);
-                Optional<Rule> optionalRule = convertDatalogDefinitions(datalogAtomPredicate, ruleIndex);
-                if (optionalRule.isPresent()) {
-                    builder.mergeRule(optionalRule.get());
-                }
-
-            }
-
-            return builder.build();
-
-        } catch (IntermediateQueryBuilderException e) {
-            throw new InvalidDatalogProgramException(e.getMessage());
+        if (topDownPredicates.size() == 0) {
+            throw new InvalidDatalogProgramException("Datalog program without any rule!");
         }
+
+        Multimap<Predicate, CQIE> ruleIndex = dependencyGraph.getRuleIndex();
+
+        IntermediateQuery intermediateQuery = initIntermediateQuery(
+                extractRootHeadAtom(topDownPredicates.get(0), ruleIndex),
+                queryProgram.getQueryModifiers());
+
+        /**
+         * Rules
+         */
+        for (Predicate datalogAtomPredicate : topDownPredicates) {
+            Optional<Rule> optionalRule = convertDatalogDefinitions(datalogAtomPredicate, ruleIndex);
+            if (optionalRule.isPresent()) {
+                try {
+                    intermediateQuery.mergeRule(optionalRule.get());
+                } catch (RuleMergingException e) {
+                    throw new InvalidDatalogProgramException(e.getMessage());
+                }
+            }
+
+        }
+
+        return intermediateQuery;
+
     }
 
     /**
@@ -81,22 +80,27 @@ public class DatalogIntermediateQueryConverter {
 
     /**
      * TODO: explain
+     * TODO: find a better name
      */
-    private static IntermediateQueryBuilder initIntermediateQuery(Function rootDatalogAtom,
-                                                                  OBDAQueryModifiers queryModifiers)
-            throws IntermediateQueryBuilderException {
+    private static IntermediateQuery initIntermediateQuery(Function rootDatalogAtom,
+                                                           OBDAQueryModifiers queryModifiers)
+            throws InvalidDatalogProgramException {
+        try {
+            IntermediateQueryBuilder builder = new IntermediateQueryBuilderImpl();
+            DataNode topDataNode = createDataNode(convertFromDatalogDataAtom(rootDatalogAtom, false));
 
-        IntermediateQueryBuilder builder = new IntermediateQueryBuilderImpl();
-        DataNode topDataNode = createDataNode(convertFromDatalogDataAtom(rootDatalogAtom));
+            if (queryModifiers.hasModifiers()) {
+                throw new RuntimeException("Modifiers not yet supported. TODO: implement it !");
+            }
+            else {
+                builder.init(topDataNode);
+            }
 
-        if (queryModifiers.hasModifiers()) {
-            throw new RuntimeException("Modifiers not yet supported. TODO: implement it !");
+            return builder.build();
         }
-        else {
-            builder.init(topDataNode);
+        catch (IntermediateQueryBuilderException e) {
+            throw new InvalidDatalogProgramException(e.getMessage());
         }
-
-        return builder;
     }
 
 
@@ -107,25 +111,35 @@ public class DatalogIntermediateQueryConverter {
                                                             Multimap<Predicate, CQIE> datalogRuleIndex) {
         Collection<CQIE> atomDefinitions = datalogRuleIndex.get(datalogAtomPredicate);
 
-        AtomPredicate atomPredicate = new AtomPredicateImpl(datalogAtomPredicate.getName(),
-                datalogAtomPredicate.getArity(), true);
-
         List<Rule> convertedRules = new ArrayList<>();
         for (CQIE datalogAtomDefinition : atomDefinitions) {
-            convertedRules.add(convertDatalogRule(atomPredicate, datalogAtomDefinition));
+            convertedRules.add(convertDatalogRule(datalogAtomDefinition));
         }
 
         return RuleUtils.mergeDefinitions(convertedRules);
     }
 
-    private static Rule convertDatalogRule(AtomPredicate atomPredicate, CQIE datalogRule) {
-        // TODO: implement it
-        return null;
+    private static Rule convertDatalogRule(CQIE datalogRule) {
+        // Not extensional because of there is a rule :)
+        boolean isExtensional = false;
+
+        DataAtom headAtom = convertFromDatalogDataAtom(datalogRule.getHead(), isExtensional);
+        IntermediateQuery body = convertDatalogBody(datalogRule.getBody());
+
+        return new RuleImpl(headAtom, body);
     }
 
-    private static DataAtom convertFromDatalogDataAtom(Function datalogAtom) {
-        // TODO: implement it
-        return null;
+    private static IntermediateQuery convertDatalogBody(List<Function> bodyDatalogAtoms) {
+        //TODO: deal with top filter conditions
+        
+
+    }
+
+    private static DataAtom convertFromDatalogDataAtom(Function datalogAtom, boolean isExtensional) {
+        Predicate datalogAtomPredicate = datalogAtom.getFunctionSymbol();
+        AtomPredicate atomPredicate = new AtomPredicateImpl(datalogAtomPredicate, isExtensional);
+
+        return new DataAtomImpl(atomPredicate, datalogAtom.getTerms());
     }
 
     /**

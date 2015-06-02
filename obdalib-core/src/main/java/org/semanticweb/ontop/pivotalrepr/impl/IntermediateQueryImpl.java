@@ -37,9 +37,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     }
 
     /**
-     * For the IntermediateQueryBuilder ONLY!!
+     * For IntermediateQueryBuilders ONLY!!
      */
-    protected IntermediateQueryImpl( DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG) {
+    protected IntermediateQueryImpl(DirectedAcyclicGraph<QueryNode, DefaultEdge> queryDAG) {
         nodesInAntiTopologicalOrder = null;
         this.queryDAG = queryDAG;
     }
@@ -125,6 +125,11 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     public QueryNode applyReplaceNodeProposal(ReplaceNodeProposal proposal)
             throws InvalidLocalOptimizationProposalException {
         return null;
+    }
+
+    @Override
+    public void mergeRule(Rule rule) {
+        // TODO: implement it
     }
 
     /**

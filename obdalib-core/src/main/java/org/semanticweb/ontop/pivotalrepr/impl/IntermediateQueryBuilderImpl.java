@@ -45,14 +45,6 @@ public class IntermediateQueryBuilderImpl implements IntermediateQueryBuilder {
     }
 
     @Override
-    public void mergeRule(Rule rule) throws IntermediateQueryBuilderException {
-        checkEditMode();
-
-        // TODO: continue
-
-    }
-
-    @Override
     public IntermediateQuery build() throws IntermediateQueryBuilderException{
         checkInitialization();
 
