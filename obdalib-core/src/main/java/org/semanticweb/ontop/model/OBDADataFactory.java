@@ -121,39 +121,42 @@ public interface OBDADataFactory extends Serializable {
 	public Function getFunction(Predicate functor, Term... terms);
 
 	public Function getFunction(Predicate functor, List<Term> terms);
+
+	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, Term... arguments);
+
 	/*
 	 * Boolean function terms
 	 */
 
-	public Function getFunctionEQ(Term firstTerm, Term secondTerm);
+	public BooleanExpression getFunctionEQ(Term firstTerm, Term secondTerm);
 
-	public Function getFunctionGTE(Term firstTerm, Term secondTerm);
+	public BooleanExpression getFunctionGTE(Term firstTerm, Term secondTerm);
 
-	public Function getFunctionGT(Term firstTerm, Term secondTerm);
+	public BooleanExpression getFunctionGT(Term firstTerm, Term secondTerm);
 
-	public Function getFunctionLTE(Term firstTerm, Term secondTerm);
+	public BooleanExpression getFunctionLTE(Term firstTerm, Term secondTerm);
 
-	public Function getFunctionLT(Term firstTerm, Term secondTerm);
+	public BooleanExpression getFunctionLT(Term firstTerm, Term secondTerm);
 
-	public Function getFunctionNEQ(Term firstTerm, Term secondTerm);
+	public BooleanExpression getFunctionNEQ(Term firstTerm, Term secondTerm);
 
-	public Function getFunctionNOT(Term term);
+	public BooleanExpression getFunctionNOT(Term term);
 
-	public Function getFunctionAND(Term term1, Term term2);
+	public BooleanExpression getFunctionAND(Term term1, Term term2);
 
-	public Function getFunctionOR(Term term1, Term term2);
+	public BooleanExpression getFunctionOR(Term term1, Term term2);
 
-	public Function getFunctionIsTrue(Term term);
+	public BooleanExpression getFunctionIsTrue(Term term);
 	
-	public Function getFunctionIsNull(Term term);
+	public BooleanExpression getFunctionIsNull(Term term);
 
-	public Function getFunctionIsNotNull(Term term);
+	public BooleanExpression getFunctionIsNotNull(Term term);
 
-	public Function getLANGMATCHESFunction(Term term1, Term term2);
+	public BooleanExpression getLANGMATCHESFunction(Term term1, Term term2);
 	
-	public Function getFunctionLike(Term term1, Term term2);
+	public BooleanExpression getFunctionLike(Term term1, Term term2);
 	
-	public Function getFunctionRegex(Term term1, Term term2, Term term3);
+	public BooleanExpression getFunctionRegex(Term term1, Term term2, Term term3);
 	
 
 	/*

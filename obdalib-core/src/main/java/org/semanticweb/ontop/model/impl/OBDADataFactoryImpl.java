@@ -24,7 +24,6 @@ package org.semanticweb.ontop.model.impl;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -180,7 +179,13 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getFunction(Predicate functor, Term... arguments) {
 		return new FunctionalTermImpl(functor, arguments);
 	}
-	
+
+	@Override
+	public BooleanExpression getBooleanExpression(BooleanOperationPredicate functor, Term... arguments) {
+		return new BooleanExpressionImpl(functor, arguments);
+	}
+
+
 	@Override
 	public Function getFunction(Predicate functor, List<Term> arguments) {
 		return new FunctionalTermImpl(functor, arguments);
@@ -291,43 +296,43 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getFunctionEQ(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.EQ, firstTerm, secondTerm);
+	public BooleanExpression getFunctionEQ(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.EQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionGTE(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.GTE, firstTerm, secondTerm);
+	public BooleanExpression getFunctionGTE(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.GTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionGT(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.GT, firstTerm, secondTerm);
+	public BooleanExpression getFunctionGT(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.GT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionLTE(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.LTE, firstTerm, secondTerm);
+	public BooleanExpression getFunctionLTE(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.LTE, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionLT(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.LT, firstTerm, secondTerm);
+	public BooleanExpression getFunctionLT(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.LT, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionNEQ(Term firstTerm, Term secondTerm) {
-		return getFunction(OBDAVocabulary.NEQ, firstTerm, secondTerm);
+	public BooleanExpression getFunctionNEQ(Term firstTerm, Term secondTerm) {
+		return getBooleanExpression(OBDAVocabulary.NEQ, firstTerm, secondTerm);
 	}
 
 	@Override
-	public Function getFunctionNOT(Term term) {
-		return getFunction(OBDAVocabulary.NOT, term);
+	public BooleanExpression getFunctionNOT(Term term) {
+		return getBooleanExpression(OBDAVocabulary.NOT, term);
 	}
 
 	@Override
-	public Function getFunctionAND(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.AND, term1, term2);
+	public BooleanExpression getFunctionAND(Term term1, Term term2) {
+		return getBooleanExpression(OBDAVocabulary.AND, term1, term2);
 	}
 
 //	@Override
@@ -351,8 +356,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 //	}
 
 	@Override
-	public Function getFunctionOR(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.OR, term1, term2);
+	public BooleanExpression getFunctionOR(Term term1, Term term2) {
+		return getBooleanExpression(OBDAVocabulary.OR, term1, term2);
 	}
 
 	
@@ -377,29 +382,29 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 //	}
 
 	@Override
-	public Function getFunctionIsNull(Term term) {
-		return getFunction(OBDAVocabulary.IS_NULL, term);
+	public BooleanExpression getFunctionIsNull(Term term) {
+		return getBooleanExpression(OBDAVocabulary.IS_NULL, term);
 	}
 
 	@Override
-	public Function getFunctionIsNotNull(Term term) {
-		return getFunction(OBDAVocabulary.IS_NOT_NULL, term);
+	public BooleanExpression getFunctionIsNotNull(Term term) {
+		return getBooleanExpression(OBDAVocabulary.IS_NOT_NULL, term);
 	}
 
 
 	@Override
-	public Function getLANGMATCHESFunction(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.SPARQL_LANGMATCHES, term1, term2);
+	public BooleanExpression getLANGMATCHESFunction(Term term1, Term term2) {
+		return getBooleanExpression(OBDAVocabulary.SPARQL_LANGMATCHES, term1, term2);
 	}
 
 	@Override
-	public Function getFunctionLike(Term term1, Term term2) {
-		return getFunction(OBDAVocabulary.SPARQL_LIKE, term1, term2);
+	public BooleanExpression getFunctionLike(Term term1, Term term2) {
+		return getBooleanExpression(OBDAVocabulary.SPARQL_LIKE, term1, term2);
 	}
 	
 	@Override
-	public Function getFunctionRegex(Term term1, Term term2, Term term3) {
-		return getFunction(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3 );
+	public BooleanExpression getFunctionRegex(Term term1, Term term2, Term term3) {
+		return getBooleanExpression(OBDAVocabulary.SPARQL_REGEX, term1, term2, term3);
 	}
 	
 	@Override
@@ -453,8 +458,8 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 
 	@Override
-	public Function getFunctionIsTrue(Term term) {
-		return getFunction(OBDAVocabulary.IS_TRUE, term);
+	public BooleanExpression getFunctionIsTrue(Term term) {
+		return getBooleanExpression(OBDAVocabulary.IS_TRUE, term);
 	}
 
 	@Override
