@@ -1,17 +1,13 @@
 package org.semanticweb.ontop.pivotalrepr;
 
+import org.semanticweb.ontop.model.BooleanExpression;
+
 /**
  * TODO: explain
  */
 public interface FilterNode extends QueryNode {
 
-    /**
-     * TODO: should it be here?
-     */
-    public BooleanExpression getFilterExpression();
+    public BooleanExpression getFilterCondition();
 
-    /**
-     * TODO: should it be here?
-     */
-    public boolean hasFilterExpression();
+    public boolean hasFilterCondition();
 }

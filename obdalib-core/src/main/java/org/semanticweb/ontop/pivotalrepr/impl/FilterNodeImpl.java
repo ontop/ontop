@@ -1,27 +1,28 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
 
-import com.google.common.base.Optional;
-import org.semanticweb.ontop.pivotalrepr.BooleanExpression;
+import org.semanticweb.ontop.model.BooleanExpression;
 import org.semanticweb.ontop.pivotalrepr.FilterNode;
-import org.semanticweb.ontop.pivotalrepr.LocalOptimizationProposal;
-import org.semanticweb.ontop.pivotalrepr.QueryOptimizer;
 
 public abstract class FilterNodeImpl extends QueryNodeImpl implements FilterNode {
 
-    /**
-     * TODO: implement
-     */
-    @Override
-    public BooleanExpression getFilterExpression() {
-        return null;
+    private BooleanExpression filterCondition;
+
+    protected FilterNodeImpl() {
+        filterCondition = null;
     }
 
-    /**
-     * TODO: implement
-     */
+    protected FilterNodeImpl(BooleanExpression filterCondition) {
+        this.filterCondition = filterCondition;
+    }
+
     @Override
-    public boolean hasFilterExpression() {
-        return false;
+    public BooleanExpression getFilterCondition() {
+        return filterCondition;
+    }
+
+    @Override
+    public boolean hasFilterCondition() {
+        return filterCondition != null;
     }
 }
