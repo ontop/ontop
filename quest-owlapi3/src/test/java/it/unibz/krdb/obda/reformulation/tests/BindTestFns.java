@@ -207,7 +207,7 @@ public class BindTestFns {
 
     } */
 
-    @Test
+   /* @Test
     public void testBind() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
@@ -236,7 +236,7 @@ public class BindTestFns {
 //        assertEquals("\"17.25\"", price.toString());
 
 
-    }
+    } */
 /*
     @Test
     public void testDoubleBind() throws Exception{
@@ -395,6 +395,8 @@ public class BindTestFns {
 
     }
 */
+    
+    /*
     @Test
     public void testBindWithSubstrAnsStrlen() throws Exception {
 
@@ -421,8 +423,37 @@ public class BindTestFns {
         checkReturnedValues(p, queryBind, expectedValues);
 
 
-    } 
+    } */
     
+    @Test
+    public void testBindWithStarts() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND ( SUBSTR(?title,10,STRLEN(?title))  AS ?v)\n"
+                + "   BIND (CONCAT(SUBSTR(?title,1,9), ?v) AS ?w)\n"
+                + "   FILTER(!STRSTARTS(?title, \"T\"))\n"
+             + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"SPARQL Tutorial\"");
+        expectedValues.add("\"The Semantic Web\"");
+        checkReturnedValues(p, queryBind, expectedValues);
+
+
+    } 
+   /* 
     @Test
     public void testBindWithUcase() throws Exception {
 

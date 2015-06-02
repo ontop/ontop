@@ -1479,6 +1479,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 					String result = sqladapter.strafter(string, after);
 					return result;
 			} //added by Nika
+			
+			 else if (functionName.equals(OBDAVocabulary.STRSTARTS.getName())) {
+					String string = getSQLString(function.getTerm(0), index, false);
+					String start = getSQLString(function.getTerm(1), index, false);
+					String result = sqladapter.sqlStrStarts(string, start);
+					return result;
+			} //added by Nika
+			
 
         }
 
@@ -1577,7 +1585,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = LIKE_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_REGEX)) {
 			operator = ""; //we do not need the operator for regex, it should not be used, because the sql adapter will take care of this
-		} 
+		} else if (functionSymbol.equals(OBDAVocabulary.STRSTARTS)) {
+			operator = "";}
 		else {
 			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);
 		}

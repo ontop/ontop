@@ -759,9 +759,17 @@ public class SparqlAlgebraToDatalogTranslator {
 		Term term = ofac.getFunctionStrAfter(str, af);
 		return term;
 	}
+	
+	private Term getStrStarts(List<ValueExpr> args) {
+		ValueExpr string = args.get(0); 
+		ValueExpr start = args.get(1); 
+		Term str = getExpression(string);
+		Term sta = getExpression(start);
+		Term term = ofac.getFunctionStrStarts(str, sta);
+		return term;
+	}
 
 		
-	
 	private Term getReplace(List<ValueExpr> expressions) {
         if (expressions.size() == 2 || expressions.size() == 3) {
 
@@ -824,6 +832,9 @@ public class SparqlAlgebraToDatalogTranslator {
             	
             case "http://www.w3.org/2005/xpath-functions#substring-after":
             	return getStrAfter(expr.getArgs()); //Nika 
+            	
+            case "http://www.w3.org/2005/xpath-functions#starts-with":
+            	return getStrStarts(expr.getArgs()); //Nika
                 
             default:
                 throw new RuntimeException("The builtin function " + expr.getURI() + " is not supported yet!");
@@ -926,6 +937,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		else if (expr instanceof IsBNode) {
 			return ofac.getFunction(OBDAVocabulary.SPARQL_IS_BLANK, term);
 		} 
+		
 		else if (expr instanceof Lang) {
 			ValueExpr arg = expr.getArg();
 			if (arg instanceof Var) 
@@ -993,6 +1005,9 @@ public class SparqlAlgebraToDatalogTranslator {
 			return ofac.getLANGMATCHESFunction(term1, toLowerCase(term2));
 		} 
 		
+		/*else if (expr instanceof StrStarts) {
+			return ofac.getStrStartsFunction(term1, term2);
+		} */
 		throw new RuntimeException("The expression " + expr + " is not supported yet!");
 	}
 

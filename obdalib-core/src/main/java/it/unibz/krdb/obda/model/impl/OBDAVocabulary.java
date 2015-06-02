@@ -90,6 +90,13 @@ public class OBDAVocabulary {
 	public static final StringOperationPredicate CONCAT = new StringOperationPredicateImpl(
             "CONCAT", 2, new COL_TYPE[]{COL_TYPE.LITERAL, COL_TYPE.LITERAL});
 	
+	public static final StringOperationPredicate STRSTARTS = new StringOperationPredicateImpl(
+			"STRSTARTS", 2, new COL_TYPE[]{COL_TYPE.LITERAL, COL_TYPE.LITERAL});
+
+	
+	
+
+	
 	
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 

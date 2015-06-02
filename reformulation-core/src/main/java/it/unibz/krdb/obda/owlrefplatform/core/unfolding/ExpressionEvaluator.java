@@ -271,8 +271,11 @@ public class ExpressionEvaluator {
 		} else if (pred == OBDAVocabulary.SPARQL_REGEX) {
 			return evalRegex(term);
 		} else if (pred == OBDAVocabulary.SPARQL_LIKE) {
-				return term;
-		} else {
+				return term;	
+		} /*else if (pred == OBDAVocabulary.STRSTARTS) {
+			return term;} */
+		
+		else {
 			throw new RuntimeException(
 					"Evaluation of expression not supported: "
 							+ term.toString());

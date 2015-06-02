@@ -221,7 +221,7 @@ public class BindTest {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount\n"
                 + "   BIND (?p*(1-?discount) AS ?w)\n"
-                + "   FILTER(?w < ABS(-20) && strlen(?title) > 0) \n"
+                + "   FILTER(?w < 20 && strlen(?title) > 0) \n"
                 + "   ?x dc:title ?title .\n"
                 + "}";
 

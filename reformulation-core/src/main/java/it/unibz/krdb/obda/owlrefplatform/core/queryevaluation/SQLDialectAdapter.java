@@ -50,6 +50,9 @@ public interface SQLDialectAdapter {
 	public String strindexOf(String str, char ch);
 
 	public String strindexOf(String str, String strsr);
+	
+	public String sqlStrStarts(String str, String start);
+
 
 	/*
 	 * Table/Column name functions
@@ -80,7 +83,6 @@ public interface SQLDialectAdapter {
 	
 	public String getDummyTable();
 	
-
 	public String getSQLLexicalFormString(String constant);
 	
 	public String getSQLLexicalFormBoolean(boolean value);

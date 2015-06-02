@@ -207,6 +207,11 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		return columnname + " LIKE " + "'%" + pattern + "%'";
 	}
 	
+	
+	public String sqlStrStarts(String string, String start){
+		return String.format("LEFT(%s,LENGTH(%s)) = %s", string, start, start);
+	}
+	
 	@Override
 	public String getDummyTable() {
 		// TODO: check whether this inherited implementation from JDBCUtilities is OK

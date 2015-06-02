@@ -184,6 +184,9 @@ public interface OBDADataFactory extends Serializable {
 	public Function getFunctionStrBefore(Term term1, Term term2);
 	
 	public Function getFunctionStrAfter(Term term1, Term term2);
+	
+	public Function getFunctionStrStarts(Term term1, Term term2);
+
 
 	
 	/*
@@ -323,6 +326,7 @@ public interface OBDADataFactory extends Serializable {
 	public Function getSPARQLJoin(Term t1, Term t2);
 
 	public Function getSPARQLLeftJoin(Term t1, Term t2);
+
 
 
 	

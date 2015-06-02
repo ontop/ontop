@@ -393,6 +393,12 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	}
 	
 	@Override
+	public Function getFunctionStrStarts(Term term1, Term term2){
+		return getFunction(OBDAVocabulary.STRSTARTS, term1, term2);
+	}
+
+	
+	@Override
 	public Function getFunctionMinus(Term term1) {
 		return getFunction(OBDAVocabulary.MINUS, term1);
 	}
