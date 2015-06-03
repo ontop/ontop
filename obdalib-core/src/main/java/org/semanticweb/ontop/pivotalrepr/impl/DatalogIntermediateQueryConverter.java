@@ -257,6 +257,6 @@ public class DatalogIntermediateQueryConverter {
             return new TableNodeImpl(dataAtom);
         }
 
-        return new TripleNodeImpl(dataAtom);
+        return new OrdinaryDataNodeImpl(dataAtom);
     }
 }
