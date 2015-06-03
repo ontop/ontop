@@ -96,6 +96,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 */
 	private static final String VIEW_NAME = "QVIEW%s";
 
+	private static final String MD5_OPERATOR = "HASHBYTES('MD5',%s)";
+
+	private static final String SHA1_OPERATOR = "HASHBYTES('SHA1',%s)";
+
+	private static final String SHA256_OPERATOR = "HASHBYTES('SHA256',%s)";
+
+	private static final String SHA512_OPERATOR = "HASHBYTES('SHA512',%s)";
+
 
 	private final DBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
@@ -1643,6 +1651,14 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = RAND_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.UUID)) {
 			operator = UUID_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.MD5)) {
+			operator = MD5_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.SHA1)) {
+			operator = SHA1_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.SHA256)) {
+			operator = SHA256_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.SHA512)) {
+			operator = SHA512_OPERATOR;
 		} else {
 			throw new RuntimeException("Unknown numerical operator: " + functionSymbol);
 		}

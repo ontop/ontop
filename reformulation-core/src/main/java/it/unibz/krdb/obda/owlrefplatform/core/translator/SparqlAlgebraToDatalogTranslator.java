@@ -832,6 +832,34 @@ public class SparqlAlgebraToDatalogTranslator {
 		return term;	
 	}
 	
+	private Term getMD5(List<ValueExpr> args) {	
+		ValueExpr argument = args.get(0);
+		Term arg = getExpression(argument);
+		Term term = ofac.getFunctionMD5(arg);
+		return term;	
+	}
+	
+	private Term getSHA1(List<ValueExpr> args) {	
+		ValueExpr argument = args.get(0);
+		Term arg = getExpression(argument);
+		Term term = ofac.getFunctionSHA1(arg);
+		return term;	
+	}
+	
+	private Term getSHA256(List<ValueExpr> args) {	
+		ValueExpr argument = args.get(0);
+		Term arg = getExpression(argument);
+		Term term = ofac.getFunctionSHA256(arg);
+		return term;	
+	}
+	
+	private Term getSHA512(List<ValueExpr> args) {	
+		ValueExpr argument = args.get(0);
+		Term arg = getExpression(argument);
+		Term term = ofac.getFunctionSHA512(arg);
+		return term;	
+	}
+	
 
 		
 	private Term getReplace(List<ValueExpr> expressions) {
@@ -921,14 +949,27 @@ public class SparqlAlgebraToDatalogTranslator {
             case "http://www.w3.org/2005/xpath-functions#numeric-round":
             	return getRound(expr.getArgs());
             	
-            case "http://www.w3.org/2005/xpath-functions#rand":
-            	return getRand(expr.getArgs());
-            	
             case "RAND":
             	return getRand(expr.getArgs());
             	
             case "UUID":
             	return getUUID(expr.getArgs());
+            
+            // Hash functions:
+            
+            case "MD5":
+            	return getMD5(expr.getArgs());
+           
+            case "SHA1":
+            	return getSHA1(expr.getArgs());
+            	
+            case "SHA256":
+            	return getSHA256(expr.getArgs());
+            	
+            case "SHA512":
+            	return getSHA512(expr.getArgs());
+            
+            
 
             	
             default:

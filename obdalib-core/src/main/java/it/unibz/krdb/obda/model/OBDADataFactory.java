@@ -153,6 +153,14 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getFunctionReplace(Term term1, Term term2, Term term3);
 	
+	public Function getFunctionSHA1(Term arg);
+
+	public Function getFunctionSHA256(Term arg);
+
+	public Function getFunctionSHA512(Term arg);
+
+	public Function getFunctionMD5(Term arg);
+	
 
 	/*
 	 * Numerical arithmethic functions
@@ -343,6 +351,8 @@ public interface OBDADataFactory extends Serializable {
 	public Function getSPARQLJoin(Term t1, Term t2);
 
 	public Function getSPARQLLeftJoin(Term t1, Term t2);
+
+	
 
 
 

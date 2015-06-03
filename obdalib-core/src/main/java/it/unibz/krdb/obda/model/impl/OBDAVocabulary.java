@@ -59,6 +59,14 @@ public class OBDAVocabulary {
 			"RAND", 0);
 	public static final Predicate UUID = new NumericalOperationPredicateImpl(
 			"UUID", 0);
+	public static final Predicate MD5 = new NumericalOperationPredicateImpl(
+			"md5", 1);
+	public static final Predicate SHA1 = new NumericalOperationPredicateImpl(
+			"sha1", 1);
+	public static final Predicate SHA512 = new NumericalOperationPredicateImpl(
+			"sha521", 1);
+	public static final Predicate SHA256 = new NumericalOperationPredicateImpl(
+			"sha256", 1);
 
 	/* Boolean predicates */
 

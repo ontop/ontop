@@ -166,6 +166,7 @@ public class BindTestWithFunctions {
 			reasoner.dispose();
 		}
 	}
+	@Ignore
 	@Test
     public void testBindWithNumeric() throws Exception {
 
@@ -190,7 +191,8 @@ public class BindTestWithFunctions {
         expectedValues.add("\"9.0\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
-		
+	
+	
 	@Test
     public void testBindWithRand() throws Exception {
 
@@ -203,9 +205,9 @@ public class BindTestWithFunctions {
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  ?title ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount\n"
-                + "   BIND (UUID() AS ?w)\n"
+                + "   ?x ns:discount ?discount.\n"
                 + "   ?x dc:title ?title .\n"
+                + "   BIND (SHA1(\"abc\") AS ?w)\n"
                 + "}";
 
 

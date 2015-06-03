@@ -352,6 +352,26 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	return getFunction(OBDAVocabulary.ROUND, term1);
 	}
 	
+	public Function getFunctionSHA1(Term term1){
+		return getFunction(OBDAVocabulary.SHA1, term1);
+
+	}
+
+	public Function getFunctionSHA256(Term term1){
+		return getFunction(OBDAVocabulary.SHA256, term1);
+
+	}
+
+	public Function getFunctionSHA512(Term term1){
+		return getFunction(OBDAVocabulary.SHA512, term1);
+
+	}
+
+	public Function getFunctionMD5(Term term1){
+		return getFunction(OBDAVocabulary.MD5, term1);
+
+	}
+	
 	public Function getFunctionRand(){
 	return getFunction(OBDAVocabulary.RAND);
 	}
