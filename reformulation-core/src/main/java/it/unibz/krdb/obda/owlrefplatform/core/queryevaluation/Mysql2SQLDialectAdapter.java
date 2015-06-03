@@ -44,7 +44,7 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 	}
 	
 	@Override
-	public String strconcat(String[] strings) {
+	public String strConcat(String[] strings) {
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
 		if (strings.length == 1)

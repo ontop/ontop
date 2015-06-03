@@ -27,19 +27,21 @@ import java.util.Set;
 
 public interface SQLDialectAdapter {
 	
-	public String strlength(String str); //added by Nika
+	public String strLength(String str); //added by Nika
 	
-	public String strucase(String str);
+	public String strUcase(String str);
 	
-	public String strlcase(String str);
+	public String strLcase(String str);
 	
-	public String strbefore(String str, String before);
-	
-	public String strafter(String str, String after);
-	
-	public String strsubstr(String str, String start, String end); //Nika
+	public String strEncodeForUri(String str);
 
-	public String strconcat(String[] strings);
+	public String strBefore(String str, String before);
+	
+	public String strAfter(String str, String after);
+	
+	public String strSubstr(String str, String start, String end); 
+
+	public String strConcat(String[] strings);
 
 	public String strreplace(String str, char oldchar, char newchar);
 
@@ -51,9 +53,6 @@ public interface SQLDialectAdapter {
 
 	public String strindexOf(String str, String strsr);
 	
-	public String sqlStrStarts(String str, String start);
-
-
 	/*
 	 * Table/Column name functions
 	 */
@@ -96,4 +95,5 @@ public interface SQLDialectAdapter {
 	 * Allows the SQL dialect adapter to put restrict on the name (e.g. name length).
 	 */
 	public String nameTopVariable(String signatureVariable, String proposedSuffix, Set<String> sqlVariableNames);
+
 }

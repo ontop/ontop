@@ -314,6 +314,26 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getFunctionAND(Term term1, Term term2) {
 		return getFunction(OBDAVocabulary.AND, term1, term2);
 	}
+	
+	@Override
+	public Function getFunctionStrStarts(Term term1, Term term2) {
+		return getFunction(OBDAVocabulary.STR_STARTS, term1, term2);
+	}
+	
+	@Override
+	public Function getFunctionStrEnds(Term term1, Term term2) {
+		return getFunction(OBDAVocabulary.STR_ENDS, term1, term2);
+	}
+	
+	@Override
+	public Function getFunctionContains(Term term1, Term term2) {
+		return getFunction(OBDAVocabulary.CONTAINS, term1, term2);
+	}
+	
+	@Override
+	public Function getFunctionEncodeForUri(Term term1) {
+		return getFunction(OBDAVocabulary.ENCODE_FOR_URI, term1);
+	}
 
 //	@Override
 //	public Function getANDFunction(List<Term> terms) {
@@ -391,12 +411,6 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getFunctionReplace(Term term1, Term term2, Term term3) {
 		return getFunction(OBDAVocabulary.REPLACE, term1, term2, term3 );
 	}
-	
-	@Override
-	public Function getFunctionStrStarts(Term term1, Term term2){
-		return getFunction(OBDAVocabulary.STRSTARTS, term1, term2);
-	}
-
 	
 	@Override
 	public Function getFunctionMinus(Term term1) {

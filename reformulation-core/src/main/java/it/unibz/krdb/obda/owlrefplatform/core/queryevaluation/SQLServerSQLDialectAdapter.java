@@ -25,7 +25,7 @@ import java.sql.Types;
 public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
-	public String strconcat(String[] strings) {
+	public String strConcat(String[] strings) {
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
 		

@@ -22,17 +22,23 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 
 import it.unibz.krdb.obda.model.OBDAQueryModifiers.OrderCondition;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.sql.Types;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.Set;
+
+import org.openrdf.model.util.URIUtil;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
 
     private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 
 	@Override
-	public String strconcat(String[] strings) {
+	public String strConcat(String[] strings) {
 		if (strings.length == 0)
 			throw new IllegalArgumentException("Cannot concatenate 0 strings");
 
@@ -49,34 +55,61 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		return sql.toString();
 	}
 
-	
 	@Override
-	public String strucase(String str) {
+	public String strUcase(String str) {
 		return String.format("UPPER(%s)", str);
 	} //Nika
 	
+	// Use URL Encoder to produce right URI format:
+	// TODO : need to apply after the result set is ready. As aggregate fn.
+	/*
+	public static String encodeURIComponent(String s) {
+	    String result;
+
+	    try {
+	        result = URLEncoder.encode(s, "UTF-8")
+	                .replaceAll("\\+", "%20")
+	                .replaceAll("\\%21", "!")
+	                .replaceAll("\\%27", "'")
+	                .replaceAll("\\%28", "(")
+	                .replaceAll("\\%29", ")")
+	                .replaceAll("\\%7E", "~");
+	    } catch (UnsupportedEncodingException e) {
+	        result = s;
+	    }
+
+	    return result;
+	}
+	
 	@Override
-	public String strbefore(String str, String before) {
+	public String strEncodeForUri(String str) {	
+		return encodeURIComponent(str);
+	} //Nika */
+	public String strEncodeForUri(String str) {	
+		return String.format("utl_url.escape(%s)", str);} //PL/SQL package
+	
+	@Override
+	public String strBefore(String str, String before) {
 		return String.format("LEFT(%s,CHARINDEX(%s,%s)-1)", str, before, str);
 	} //Nika
 	
 	@Override
-	public String strafter(String str, String after) {
+	public String strAfter(String str, String after) {
 		return String.format("RIGHT(%s,LENGTH(%s) - CHARINDEX(%s,%s) )", str, str, after, str);
 	} //Nika
 	
 	@Override
-	public String strlcase(String str) {
+	public String strLcase(String str) {
 		return String.format("LOWER(%s)", str);
 	} //Nika
 	
 	@Override
-	public String strlength(String str) {
+	public String strLength(String str) {
 		return String.format("LENGTH(%s)", str);
 	} //Nika
 	
 	@Override
-	public String strsubstr(String str, String start, String end) {
+	public String strSubstr(String str, String start, String end) {
 		return String.format("SUBSTR(%s,%s,%s)", str, start, end);
 	} //Nika
 	
@@ -207,10 +240,6 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		return columnname + " LIKE " + "'%" + pattern + "%'";
 	}
 	
-	
-	public String sqlStrStarts(String string, String start){
-		return String.format("LEFT(%s,LENGTH(%s)) = %s", string, start, start);
-	}
 	
 	@Override
 	public String getDummyTable() {

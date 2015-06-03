@@ -64,6 +64,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String NOT_OPERATOR = "NOT %s";
 	private static final String IS_NULL_OPERATOR = "%s IS NULL";
 	private static final String IS_NOT_NULL_OPERATOR = "%s IS NOT NULL";
+	
+	private static final String STR_STARTS_OPERATOR = "SUBSTRING(%1$s, 0, LENGTH(%2$s)) LIKE %2$s";
+	private static final String STR_ENDS_OPERATOR = "RIGHT(%1$s, LENGTH(%2$s)) LIKE %2$s";
+	private static final String CONTAINS_OPERATOR = "CHARINDEX(%2$s,%1$s) > 0";	
 
 	private static final String ADD_OPERATOR = "%s + %s";
 	private static final String SUBTRACT_OPERATOR = "%s - %s";
@@ -1175,7 +1179,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 	// TODO: move to SQLAdapter
 	private String getStringConcatenation(SQLDialectAdapter adapter, String[] params) {
-		String toReturn = sqladapter.strconcat(params);
+		String toReturn = sqladapter.strConcat(params);
 		if (adapter instanceof DB2SQLDialectAdapter) {
 			/*
 			 * A work around to handle DB2 (>9.1) issue SQL0134N: Improper use of a string column, host variable, constant, or function name.
@@ -1436,25 +1440,31 @@ public class SQLGenerator implements SQLQueryGenerator {
 			 else if (functionName.equals(OBDAVocabulary.CONCAT.getName())) {
 					String left = getSQLString(function.getTerm(0), index, false);
 					String right = getSQLString(function.getTerm(1), index, false);
-					String result = sqladapter.strconcat(new String[]{left, right});
+					String result = sqladapter.strConcat(new String[]{left, right});
 					return result;
 			}
 			
 			 else if (functionName.equals(OBDAVocabulary.STRLEN.getName())) {
 					String literal = getSQLString(function.getTerm(0), index, false);
-					String result = sqladapter.strlength(literal);
+					String result = sqladapter.strLength(literal);
 					return result;
 			} //added by Nika
 			
 			 else if (functionName.equals(OBDAVocabulary.UCASE.getName())) {
 					String literal = getSQLString(function.getTerm(0), index, false);
-					String result = sqladapter.strucase(literal);
+					String result = sqladapter.strUcase(literal);
+					return result;
+			} //added by Nika
+			
+			 else if (functionName.equals(OBDAVocabulary.ENCODE_FOR_URI.getName())) {
+					String literal = getSQLString(function.getTerm(0), index, false);
+					String result = sqladapter.strEncodeForUri(literal);
 					return result;
 			} //added by Nika
 			
 			 else if (functionName.equals(OBDAVocabulary.LCASE.getName())) {
 					String literal = getSQLString(function.getTerm(0), index, false);
-					String result = sqladapter.strlcase(literal);
+					String result = sqladapter.strLcase(literal);
 					return result;
 			} //added by Nika
 			
@@ -1462,32 +1472,24 @@ public class SQLGenerator implements SQLQueryGenerator {
 					String string = getSQLString(function.getTerm(0), index, false);
 					String start = getSQLString(function.getTerm(1), index, false);
 					String end = getSQLString(function.getTerm(2), index, false);
-					String result = sqladapter.strsubstr(string, start, end);
+					String result = sqladapter.strSubstr(string, start, end);
 					return result;
 			} //added by Nika
 			
 			 else if (functionName.equals(OBDAVocabulary.STRBEFORE.getName())) {
 					String string = getSQLString(function.getTerm(0), index, false);
 					String before = getSQLString(function.getTerm(1), index, false);
-					String result = sqladapter.strbefore(string, before);
+					String result = sqladapter.strBefore(string, before);
 					return result;
 			} //added by Nika
 			
 			 else if (functionName.equals(OBDAVocabulary.STRAFTER.getName())) {
 					String string = getSQLString(function.getTerm(0), index, false);
 					String after = getSQLString(function.getTerm(1), index, false);
-					String result = sqladapter.strafter(string, after);
+					String result = sqladapter.strAfter(string, after);
 					return result;
 			} //added by Nika
 			
-			 else if (functionName.equals(OBDAVocabulary.STRSTARTS.getName())) {
-					String string = getSQLString(function.getTerm(0), index, false);
-					String start = getSQLString(function.getTerm(1), index, false);
-					String result = sqladapter.sqlStrStarts(string, start);
-					return result;
-			} //added by Nika
-			
-
         }
 
 		/*
@@ -1585,8 +1587,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = LIKE_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.SPARQL_REGEX)) {
 			operator = ""; //we do not need the operator for regex, it should not be used, because the sql adapter will take care of this
-		} else if (functionSymbol.equals(OBDAVocabulary.STRSTARTS)) {
-			operator = "";}
+		} else if (functionSymbol.equals(OBDAVocabulary.STR_STARTS)) {
+			operator = STR_STARTS_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.STR_ENDS)) {
+			operator = STR_ENDS_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.CONTAINS)) {
+				operator = CONTAINS_OPERATOR;}
 		else {
 			throw new RuntimeException("Unknown boolean operator: " + functionSymbol);
 		}

@@ -742,6 +742,13 @@ public class SparqlAlgebraToDatalogTranslator {
 		return term;
 	}
 	
+	private Term getEncodeForUri(List<ValueExpr> args) {
+		ValueExpr arg = args.get(0); 
+		Term term = getExpression(arg);
+		term = ofac.getFunctionEncodeForUri(term);
+		return term;
+	}
+	
 	private Term getStrBefore(List<ValueExpr> args) {
 		ValueExpr string = args.get(0); 
 		ValueExpr before = args.get(1); 
@@ -766,6 +773,24 @@ public class SparqlAlgebraToDatalogTranslator {
 		Term str = getExpression(string);
 		Term sta = getExpression(start);
 		Term term = ofac.getFunctionStrStarts(str, sta);
+		return term;
+	}
+	
+	private Term getStrEnds(List<ValueExpr> args) {
+		ValueExpr string = args.get(0); 
+		ValueExpr start = args.get(1); 
+		Term str = getExpression(string);
+		Term sta = getExpression(start);
+		Term term = ofac.getFunctionStrEnds(str, sta);
+		return term;
+	}
+	
+	private Term getContains(List<ValueExpr> args) {
+		ValueExpr string = args.get(0); 
+		ValueExpr start = args.get(1); 
+		Term str = getExpression(string);
+		Term sta = getExpression(start);
+		Term term = ofac.getFunctionContains(str, sta);
 		return term;
 	}
 
@@ -835,7 +860,16 @@ public class SparqlAlgebraToDatalogTranslator {
             	
             case "http://www.w3.org/2005/xpath-functions#starts-with":
             	return getStrStarts(expr.getArgs()); //Nika
-                
+            	
+            case "http://www.w3.org/2005/xpath-functions#ends-with":
+            	return getStrEnds(expr.getArgs()); 
+            	
+            case "http://www.w3.org/2005/xpath-functions#contains":
+            	return getContains(expr.getArgs());
+            	
+            case "http://www.w3.org/2005/xpath-functions#encode-for-uri":
+            	return getEncodeForUri(expr.getArgs());
+            	
             default:
                 throw new RuntimeException("The builtin function " + expr.getURI() + " is not supported yet!");
         }
@@ -1005,9 +1039,6 @@ public class SparqlAlgebraToDatalogTranslator {
 			return ofac.getLANGMATCHESFunction(term1, toLowerCase(term2));
 		} 
 		
-		/*else if (expr instanceof StrStarts) {
-			return ofac.getStrStartsFunction(term1, term2);
-		} */
 		throw new RuntimeException("The expression " + expr + " is not supported yet!");
 	}
 
