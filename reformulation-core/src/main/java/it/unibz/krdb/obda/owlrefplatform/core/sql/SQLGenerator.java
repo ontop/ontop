@@ -78,7 +78,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String FLOOR_OPERATOR = "FLOOR(%s)";
 	private static final String ROUND_OPERATOR = "ROUND(%s)";
 	private static final String RAND_OPERATOR = "RAND()";
-	private static final String UUID_OPERATOR = "UUID()";
+	private static final String UUID_OPERATOR = "RANDOM_UUID()";
 
 	private static final String LIKE_OPERATOR = "%s LIKE %s";
 
@@ -97,10 +97,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String VIEW_NAME = "QVIEW%s";
 
 	private static final String MD5_OPERATOR = "HASHBYTES('MD5',%s)";
+	
+	//Works in H2
+	
+	private static final String SHA256_OPERATOR = "HASH('SHA256',STRINGTOUTF8(%s),10)";
 
 	private static final String SHA1_OPERATOR = "HASHBYTES('SHA1',%s)";
-
-	private static final String SHA256_OPERATOR = "HASHBYTES('SHA256',%s)";
 
 	private static final String SHA512_OPERATOR = "HASHBYTES('SHA512',%s)";
 

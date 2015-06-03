@@ -207,7 +207,7 @@ public class BindTestWithFunctions {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount.\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (SHA1(\"abc\") AS ?w)\n"
+                + "   BIND (UUID() AS ?w)\n"
                 + "}";
 
 
