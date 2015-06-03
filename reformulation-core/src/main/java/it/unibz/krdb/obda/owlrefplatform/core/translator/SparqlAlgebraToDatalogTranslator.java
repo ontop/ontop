@@ -742,12 +742,12 @@ public class SparqlAlgebraToDatalogTranslator {
 		return term;
 	}
 	
-	private Term getEncodeForUri(List<ValueExpr> args) {
+	/*private Term getEncodeForUri(List<ValueExpr> args) {
 		ValueExpr arg = args.get(0); 
 		Term term = getExpression(arg);
 		term = ofac.getFunctionEncodeForUri(term);
 		return term;
-	}
+	} */
 	
 	private Term getStrBefore(List<ValueExpr> args) {
 		ValueExpr string = args.get(0); 
@@ -827,6 +827,11 @@ public class SparqlAlgebraToDatalogTranslator {
 		return term;	
 	}
 	
+	private Term getUUID(List<ValueExpr> args) {	
+		Term term = ofac.getFunctionUUID();
+		return term;	
+	}
+	
 
 		
 	private Term getReplace(List<ValueExpr> expressions) {
@@ -901,8 +906,9 @@ public class SparqlAlgebraToDatalogTranslator {
             case "http://www.w3.org/2005/xpath-functions#contains":
             	return getContains(expr.getArgs());
             	
-            case "http://www.w3.org/2005/xpath-functions#encode-for-uri":
-            	return getEncodeForUri(expr.getArgs());
+            /*case "http://www.w3.org/2005/xpath-functions#encode-for-uri":
+            	return getEncodeForUri(expr.getArgs());*/
+            	
             case "http://www.w3.org/2005/xpath-functions#numeric-abs":
             	return getAbs(expr.getArgs());
             	
@@ -917,6 +923,13 @@ public class SparqlAlgebraToDatalogTranslator {
             	
             case "http://www.w3.org/2005/xpath-functions#rand":
             	return getRand(expr.getArgs());
+            	
+            case "RAND":
+            	return getRand(expr.getArgs());
+            	
+            case "UUID":
+            	return getUUID(expr.getArgs());
+
             	
             default:
                 throw new RuntimeException("The builtin function " + expr.getURI() + " is not supported yet!");

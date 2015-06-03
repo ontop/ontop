@@ -190,9 +190,7 @@ public class BindTestWithFunctions {
         expectedValues.add("\"9.0\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
-	
-	// Function RAND doesn't have a stable name - error
-	@Ignore
+		
 	@Test
     public void testBindWithRand() throws Exception {
 
@@ -206,7 +204,7 @@ public class BindTestWithFunctions {
                 + "SELECT  ?title ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount\n"
-                + "   BIND (RAND() AS ?w)\n"
+                + "   BIND (UUID() AS ?w)\n"
                 + "   ?x dc:title ?title .\n"
                 + "}";
 

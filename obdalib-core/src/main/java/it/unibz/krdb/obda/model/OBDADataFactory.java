@@ -175,14 +175,9 @@ public interface OBDADataFactory extends Serializable {
 	public Function getFunctionRound(Term term1);
 	
 	public Function getFunctionRand();
-
 	
-	
+	public Function getFunctionUUID();
 
-
-
-	
-	
 	/* Functions on strings */
 
     public Function getFunctionConcat(Term term1, Term term2);
@@ -207,7 +202,8 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getFunctionContains(Term term1, Term term2);
 	
-	public Function getFunctionEncodeForUri(Term term);
+	// public Function getFunctionEncodeForUri(Term term);
+	
 
 
 	/*

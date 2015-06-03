@@ -57,6 +57,8 @@ public class OBDAVocabulary {
 			"floor", 1);
 	public static final Predicate RAND = new NumericalOperationPredicateImpl(
 			"RAND", 0);
+	public static final Predicate UUID = new NumericalOperationPredicateImpl(
+			"UUID", 0);
 
 	/* Boolean predicates */
 

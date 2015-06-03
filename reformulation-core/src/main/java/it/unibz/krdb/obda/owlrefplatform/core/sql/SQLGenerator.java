@@ -78,7 +78,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String FLOOR_OPERATOR = "FLOOR(%s)";
 	private static final String ROUND_OPERATOR = "ROUND(%s)";
 	private static final String RAND_OPERATOR = "RAND()";
-	
+	private static final String UUID_OPERATOR = "UUID()";
+
 	private static final String LIKE_OPERATOR = "%s LIKE %s";
 
 	private static final String INDENT = "    ";
@@ -94,6 +95,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * Formatting template
 	 */
 	private static final String VIEW_NAME = "QVIEW%s";
+
 
 	private final DBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
@@ -849,18 +851,20 @@ public class SQLGenerator implements SQLQueryGenerator {
 
             else if (function.isArithmeticPredicate()){
             	String expressionFormat = getNumericalOperatorString(function);
-                Term left = ov.getTerm(0);
-                String leftOp = getSQLString(left, index, true);
+            	if (isBinary(ov)) {
+            		Term right = ov.getTerm(1);
+            		Term left = ov.getTerm(0);
+                    String leftOp = getSQLString(left, index, true);
+            		String rightOp = getSQLString(right, index, true);
+            		mainColumn = String.format("(" + expressionFormat + ")", leftOp, rightOp);
+              	}
+                
             	if (isUnary(ov)) {
+            		Term left = ov.getTerm(0);
+                    String leftOp = getSQLString(left, index, true);
                     mainColumn = String.format("(" + expressionFormat + ")", leftOp);
-            	} else {
-                // For numerical operators, e.g., MULTIPLY, SUBTRACT, ADDITION
-                Term right = ov.getTerm(1);
-                String rightOp = getSQLString(right, index, true);
-                mainColumn = String.format("(" + expressionFormat + ")", leftOp, rightOp);
-            	}
-            }
-			else {
+            	} else { mainColumn = expressionFormat; }
+            } else {
 				throw new IllegalArgumentException(
 						"Error generating SQL query. Found an invalid function during translation: "
 								+ ov.toString());
@@ -1637,6 +1641,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = ROUND_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.RAND)) {
 			operator = RAND_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.UUID)) {
+			operator = UUID_OPERATOR;
 		} else {
 			throw new RuntimeException("Unknown numerical operator: " + functionSymbol);
 		}
