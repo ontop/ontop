@@ -334,6 +334,26 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 	public Function getFunctionEncodeForUri(Term term1) {
 		return getFunction(OBDAVocabulary.ENCODE_FOR_URI, term1);
 	}
+	
+	public Function getFunctionAbs(Term term1){
+		return getFunction(OBDAVocabulary.ABS, term1);
+	}
+	
+	public Function getFunctionCeil(Term term1){
+	return getFunction(OBDAVocabulary.CEIL, term1);
+	}
+
+	public Function getFunctionFloor(Term term1){
+	return getFunction(OBDAVocabulary.FLOOR, term1);
+	}
+	
+	public Function getFunctionRound(Term term1){
+	return getFunction(OBDAVocabulary.ROUND, term1);
+	}
+	
+	public Function getFunctionRand(){
+	return getFunction(OBDAVocabulary.RAND);
+	}
 
 //	@Override
 //	public Function getANDFunction(List<Term> terms) {
@@ -606,4 +626,5 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		}
 		return newTerm;
 	}
+
 }

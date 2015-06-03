@@ -793,6 +793,40 @@ public class SparqlAlgebraToDatalogTranslator {
 		Term term = ofac.getFunctionContains(str, sta);
 		return term;
 	}
+	
+	private Term getAbs(List<ValueExpr> args) {	
+		ValueExpr argument = args.get(0);
+		Term arg = getExpression(argument);
+		Term term = ofac.getFunctionAbs(arg);
+		return term;	
+	}
+	
+	private Term getCeil(List<ValueExpr> args) {	
+		ValueExpr argument = args.get(0);
+		Term arg = getExpression(argument);
+		Term term = ofac.getFunctionCeil(arg);
+		return term;	
+	}
+	
+	private Term getFloor(List<ValueExpr> args) {	
+		ValueExpr argument = args.get(0);
+		Term arg = getExpression(argument);
+		Term term = ofac.getFunctionFloor(arg);
+		return term;	
+	}
+	
+	private Term getRound(List<ValueExpr> args) {	
+		ValueExpr argument = args.get(0);
+		Term arg = getExpression(argument);
+		Term term = ofac.getFunctionRound(arg);
+		return term;	
+	}
+	
+	private Term getRand(List<ValueExpr> args) {	
+		Term term = ofac.getFunctionRand();
+		return term;	
+	}
+	
 
 		
 	private Term getReplace(List<ValueExpr> expressions) {
@@ -869,13 +903,25 @@ public class SparqlAlgebraToDatalogTranslator {
             	
             case "http://www.w3.org/2005/xpath-functions#encode-for-uri":
             	return getEncodeForUri(expr.getArgs());
+            case "http://www.w3.org/2005/xpath-functions#numeric-abs":
+            	return getAbs(expr.getArgs());
+            	
+            case "http://www.w3.org/2005/xpath-functions#numeric-ceil":
+            	return getCeil(expr.getArgs());
+            	
+            case "http://www.w3.org/2005/xpath-functions#numeric-floor":
+            	return getFloor(expr.getArgs());
+            	
+            case "http://www.w3.org/2005/xpath-functions#numeric-round":
+            	return getRound(expr.getArgs());
+            	
+            case "http://www.w3.org/2005/xpath-functions#rand":
+            	return getRand(expr.getArgs());
             	
             default:
                 throw new RuntimeException("The builtin function " + expr.getURI() + " is not supported yet!");
         }
     }
-
-
 
 
 	private Term getConstantExpression(Value v) {

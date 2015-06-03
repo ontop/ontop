@@ -166,7 +166,58 @@ public class BindTestWithFunctions {
 			reasoner.dispose();
 		}
 	}
+	@Test
+    public void testBindWithNumeric() throws Exception {
 
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount\n"
+                + "   BIND (ROUND(ABS(?p*(1-?discount))) AS ?w)\n"
+                + "   FILTER(CEIL(?w) < 20) \n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"17.0\"");
+        expectedValues.add("\"9.0\"");
+        checkReturnedValues(p, queryBind, expectedValues);
+    }
+	
+	// Function RAND doesn't have a stable name - error
+	@Ignore
+	@Test
+    public void testBindWithRand() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount\n"
+                + "   BIND (RAND() AS ?w)\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"17.25\"");
+
+
+        checkReturnedValues(p, queryBind, expectedValues);
+    }
+	
     @Ignore
     @Test
     public void testStrStarts() throws Exception {
@@ -244,33 +295,7 @@ public class BindTestWithFunctions {
         expectedValues.add("\"The Semantic Web\"@en");
         checkReturnedValues(p, queryBind, expectedValues);
 
-    } 
-    
-    @Ignore
-    @Test
-    public void testEncodeForUri() throws Exception {
-
-        QuestPreferences p = new QuestPreferences();
-        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
-        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
-
-        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
-                + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
-                + "{  ?x ns:price ?p .\n"
-                + "   ?x ns:discount ?discount .\n"
-                + "   ?x dc:title ?title .\n"
-                + "   FILTER(STRSTARTS(?title,\"S\"))\n"
-                + "   BIND(ENCODE_FOR_URI(\"Crime and Punishment\") AS ?w)\n"
-             + "}";
-
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The%20Semantic%20Web\"@en");
-        checkReturnedValues(p, queryBind, expectedValues);
-
-    } 
-    
+    }    
     
    /* 
     @Test

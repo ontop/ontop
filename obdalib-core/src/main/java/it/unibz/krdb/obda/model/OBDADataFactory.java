@@ -166,6 +166,22 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getFunctionMultiply(Term term1, Term term2);
 	
+	public Function getFunctionAbs(Term term1);
+	
+	public Function getFunctionCeil(Term term1);
+	
+	public Function getFunctionFloor(Term term1);
+	
+	public Function getFunctionRound(Term term1);
+	
+	public Function getFunctionRand();
+
+	
+	
+
+
+
+	
 	
 	/* Functions on strings */
 

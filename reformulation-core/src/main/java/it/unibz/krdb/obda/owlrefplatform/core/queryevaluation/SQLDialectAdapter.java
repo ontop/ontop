@@ -27,13 +27,13 @@ import java.util.Set;
 
 public interface SQLDialectAdapter {
 	
-	public String strLength(String str); //added by Nika
+	public String strLength(String str); 
 	
 	public String strUcase(String str);
 	
 	public String strLcase(String str);
 	
-	public String strEncodeForUri(String str);
+	// public String strEncodeForUri(String str);
 
 	public String strBefore(String str, String before);
 	
@@ -43,15 +43,15 @@ public interface SQLDialectAdapter {
 
 	public String strConcat(String[] strings);
 
-	public String strreplace(String str, char oldchar, char newchar);
+	public String strReplace(String str, char oldchar, char newchar);
 
-	public String strreplace(String str, String oldstr, String newstr);
+	public String strReplace(String str, String oldstr, String newstr);
 
-	public String strreplace(String str, int start, int end, String with);
+	public String strReplace(String str, int start, int end, String with);
 
-	public String strindexOf(String str, char ch);
+	public String strIndexOf(String str, char ch);
 
-	public String strindexOf(String str, String strsr);
+	public String strIndexOf(String str, String strsr);
 	
 	/*
 	 * Table/Column name functions

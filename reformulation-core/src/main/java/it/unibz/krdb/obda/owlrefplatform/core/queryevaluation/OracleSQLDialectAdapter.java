@@ -84,7 +84,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
     @Override
-    public String strreplace(String str, String oldstr, String newstr) {
+    public String strReplace(String str, String oldstr, String newstr) {
         if(quotes.matcher(oldstr).matches() ) {
             oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
         }

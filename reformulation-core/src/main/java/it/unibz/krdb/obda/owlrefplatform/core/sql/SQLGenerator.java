@@ -73,6 +73,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String SUBTRACT_OPERATOR = "%s - %s";
 	private static final String MULTIPLY_OPERATOR = "%s * %s";
 	
+	private static final String ABS_OPERATOR = "ABS(%s)";
+	private static final String CEIL_OPERATOR = "CEIL(%s)";
+	private static final String FLOOR_OPERATOR = "FLOOR(%s)";
+	private static final String ROUND_OPERATOR = "ROUND(%s)";
+	private static final String RAND_OPERATOR = "RAND()";
 	
 	private static final String LIKE_OPERATOR = "%s LIKE %s";
 
@@ -293,6 +298,12 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private String getSQLCondition(Function atom, QueryAliasIndex index) {
 		Predicate functionSymbol = atom.getFunctionSymbol();
 		if (isUnary(atom)) {
+			if (atom.isArithmeticFunction()) {
+				String expressionFormat = getNumericalOperatorString(functionSymbol);
+				Term term = atom.getTerm(0);
+				String column = getSQLString(term, index, false);
+				return String.format(expressionFormat, column);
+			}
 			// For unary boolean operators, e.g., NOT, IS NULL, IS NOT NULL.
 			// added also for IS TRUE
 			String expressionFormat = getBooleanOperatorString(functionSymbol);
@@ -837,13 +848,17 @@ public class SQLGenerator implements SQLQueryGenerator {
 			} 
 
             else if (function.isArithmeticPredicate()){
-                // For numerical operators, e.g., MULTIPLY, SUBTRACT, ADDITION
-                String expressionFormat = getNumericalOperatorString(function);
+            	String expressionFormat = getNumericalOperatorString(function);
                 Term left = ov.getTerm(0);
-                Term right = ov.getTerm(1);
                 String leftOp = getSQLString(left, index, true);
+            	if (isUnary(ov)) {
+                    mainColumn = String.format("(" + expressionFormat + ")", leftOp);
+            	} else {
+                // For numerical operators, e.g., MULTIPLY, SUBTRACT, ADDITION
+                Term right = ov.getTerm(1);
                 String rightOp = getSQLString(right, index, true);
                 mainColumn = String.format("(" + expressionFormat + ")", leftOp, rightOp);
+            	}
             }
 			else {
 				throw new IllegalArgumentException(
@@ -1400,13 +1415,18 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (functionSymbol instanceof NumericalOperationPredicate) {
 			String expressionFormat = getNumericalOperatorString(functionSymbol);
 			String leftOp = getSQLString(term1, index, true);
-			Term term2 = function.getTerms().get(1);
-			String rightOp = getSQLString(term2, index, true);
-			String result = String.format(expressionFormat, leftOp, rightOp);
-			if (useBrackets) {
-				return String.format("(%s)", result);
-			} else {
-				return result;
+				if (isUnary(function)){
+					String result = String.format(expressionFormat, leftOp);
+					return result;
+				} else {
+					Term term2 = function.getTerms().get(1);
+					String rightOp = getSQLString(term2, index, true);
+					String result = String.format(expressionFormat, leftOp, rightOp); 
+						if (useBrackets) {
+							return String.format("(%s)", result);
+						} else {
+							return result;
+					}
 			}
 			
 		} else {
@@ -1434,7 +1454,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				String orig = getSQLString(function.getTerm(0), index, false);
 				String out_str = getSQLString(function.getTerm(1), index, false);
 				String in_str = getSQLString(function.getTerm(2), index, false);
-				String result = sqladapter.strreplace(orig, out_str, in_str);
+				String result = sqladapter.strReplace(orig, out_str, in_str);
 				return result;
 			} 
 			 else if (functionName.equals(OBDAVocabulary.CONCAT.getName())) {
@@ -1456,11 +1476,11 @@ public class SQLGenerator implements SQLQueryGenerator {
 					return result;
 			} //added by Nika
 			
-			 else if (functionName.equals(OBDAVocabulary.ENCODE_FOR_URI.getName())) {
+			/* else if (functionName.equals(OBDAVocabulary.ENCODE_FOR_URI.getName())) {
 					String literal = getSQLString(function.getTerm(0), index, false);
 					String result = sqladapter.strEncodeForUri(literal);
 					return result;
-			} //added by Nika
+			} */
 			
 			 else if (functionName.equals(OBDAVocabulary.LCASE.getName())) {
 					String literal = getSQLString(function.getTerm(0), index, false);
@@ -1607,6 +1627,16 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = SUBTRACT_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.MULTIPLY)) {
 			operator = MULTIPLY_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.ABS)) {
+				operator = ABS_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.CEIL)) {
+			operator = CEIL_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.FLOOR)) {
+			operator = FLOOR_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.ROUND)) {
+			operator = ROUND_OPERATOR;
+		} else if (functionSymbol.equals(OBDAVocabulary.RAND)) {
+			operator = RAND_OPERATOR;
 		} else {
 			throw new RuntimeException("Unknown numerical operator: " + functionSymbol);
 		}

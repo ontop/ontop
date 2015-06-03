@@ -65,7 +65,7 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
     @Override
-    public String strreplace(String str, String oldstr, String newstr) {
+    public String strReplace(String str, String oldstr, String newstr) {
         oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
 
         newstr = newstr.substring(1, newstr.length() - 1);
