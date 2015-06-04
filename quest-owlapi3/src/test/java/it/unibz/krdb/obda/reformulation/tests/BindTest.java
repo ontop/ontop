@@ -217,7 +217,7 @@ public class BindTest {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
+                + "SELECT ?x ?title ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount\n"
                 + "   BIND (?p*(1-?discount) AS ?w)\n"

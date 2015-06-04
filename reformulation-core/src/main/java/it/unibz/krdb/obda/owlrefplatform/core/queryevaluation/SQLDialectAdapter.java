@@ -27,6 +27,8 @@ import java.util.Set;
 
 public interface SQLDialectAdapter {
 	
+	public String uuid();
+	
 	public String strLength(String str); 
 	
 	public String strUcase(String str);

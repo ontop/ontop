@@ -37,6 +37,8 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
     private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 
+    
+    
 	@Override
 	public String strConcat(String[] strings) {
 		if (strings.length == 0)
@@ -344,6 +346,11 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	@Override
 	public String nameTopVariable(String signatureVariableName, String proposedSuffix, Set<String> sqlVariableNames) {
 		return sqlQuote(signatureVariableName + proposedSuffix);
+	}
+
+	@Override
+	public String uuid() {
+		return "UUID()";
 	}
 
 
