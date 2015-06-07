@@ -66,7 +66,6 @@ public class ExpressionEvaluator {
 	}
 	
 	public void evaluateExpressions(DatalogProgram p) {
-		//if (1==1) return;
 		Set<CQIE> toremove = new LinkedHashSet<CQIE>();
 		for (CQIE q : p.getRules()) {
 			setRegexFlag(false); // reset the ObjectConstant flag
@@ -93,7 +92,7 @@ public class ExpressionEvaluator {
 			body.set(atomidx, (Function) newatom);
 		}
 		
-		return InequalitiesSatisfiabilityCheck.check(q);
+		return InequalitiesSatisfiability.unsatisfiable(q);
 	}
 
 	public Term eval(Term expr) {
@@ -285,13 +284,13 @@ public class ExpressionEvaluator {
 			 t2 = term.getTerm(1);
 		/*
 		 * Remove '# =< #' or '# >= #'
-		 */
-		if (t1.equals(t2))
+		 */ 
+		if (evalEqNeq(term, true) == OBDAVocabulary.TRUE)
 			return OBDAVocabulary.TRUE;
 		
 		if (t1 instanceof Constant && t2 instanceof Constant) {
 			Term result = evalGtLt(term, isgte);
-			if (result == OBDAVocabulary.TRUE || result == OBDAVocabulary.FALSE) {
+			if (result instanceof ValueConstant) {
 				return result;
 			}
 		}
@@ -306,39 +305,50 @@ public class ExpressionEvaluator {
 		/*
 		 * Remove '# < #' or '# > #'
 		 */
-		if (t1.equals(t2)) {
+		if (evalEqNeq(term, true) == OBDAVocabulary.TRUE) {
 			return OBDAVocabulary.FALSE;
 		}
 		
 		if (t1 instanceof Constant && t2 instanceof Constant) {
 			Constant c1 = (Constant) t1,
 					 c2 = (Constant) t2;
-			/*
-			 * Normalize Lt to Gt
-			 */
-			if (!isgt) {
-				Constant tmp = c1; c1 = c2; c2 = tmp;
-			}
-			// FIXME: bug: different kinds of integers
-			if (c1.getType() != c2.getType()) {
-				return OBDAVocabulary.FALSE;
-			}
 			
-			Predicate.COL_TYPE type = c1.getType();
-			// TODO actual comparison
-			boolean result = false;
-			switch(type) {
-			case LONG:
-				result = (Long.parseLong(c1.getValue()) > Long.parseLong(c2.getValue()));
-				break;
-			case DOUBLE:
-			case FLOAT:
-				result = (Double.parseDouble(c1.getValue()) > Double.parseDouble(c2.getValue()));
-				break;
-			default:
+			if (c1.getType() == null || c2.getType() == null) {
 				return term;
 			}
-			return fac.getBooleanConstant(result);
+			
+			// Normalize less-than (<) to greater-than (>)
+			if (!isgt) {
+				Constant tmp = c1; c1 = c2; c2 = tmp;
+				isgt = true;
+			}
+			
+			Predicate p1 = dtfac.getTypePredicate(c1.getType()),
+			          p2 = dtfac.getTypePredicate(c2.getType());
+			
+			if (dtfac.isInteger(p1) && dtfac.isInteger(p2)) {
+				return fac.getBooleanConstant(
+						Long.parseLong(c1.getValue())
+				      > Long.parseLong(c2.getValue())
+				);
+			} else if (dtfac.isInteger(p1) && dtfac.isFloat(p2)) {
+				return fac.getBooleanConstant(
+						Long.parseLong(c1.getValue())
+				      > Double.parseDouble(c2.getValue())
+				);
+			} else if (dtfac.isFloat(p1) && dtfac.isInteger(p2)) {
+				return fac.getBooleanConstant(
+						Double.parseDouble(c1.getValue())
+				      > Long.parseLong(c2.getValue())
+				);
+			} else if (dtfac.isFloat(p1) && dtfac.isFloat(p2)) {
+				return fac.getBooleanConstant(
+						Double.parseDouble(c1.getValue())
+				      > Double.parseDouble(c2.getValue())
+				);
+			}
+			
+			// TODO extend to non-numeric comparisons? 
 		}
 		
 		return term;
@@ -554,9 +564,8 @@ public class ExpressionEvaluator {
 		return (dtfac.isInteger(pred) || dtfac.isFloat(pred));
 	}
 	
-	private boolean isNumeric(ValueConstant constant) {
-		String constantValue = constant.getValue();
-		Predicate.COL_TYPE type = dtfac.getDatatype(constantValue);
+	private boolean isNumeric(Constant constant) {
+		Predicate.COL_TYPE type = constant.getType();
 		if (type != null) {
 			Predicate p = dtfac.getTypePredicate(type);
 			return isNumeric(p);
@@ -790,7 +799,7 @@ public class ExpressionEvaluator {
 		 */
 		Term eval1 = teval1 instanceof Function ? teval1 : teval2;
 		Term eval2 = teval1 instanceof Function ? teval2 : teval1;
-
+		
 		if (eval1 instanceof Variable || eval2 instanceof Variable) {
 			if (eval1 instanceof Variable &&
 				eval2 instanceof Variable &&
@@ -799,11 +808,29 @@ public class ExpressionEvaluator {
 			}
 		} 
 		else if (eval1 instanceof Constant && eval2 instanceof Constant) {
-			if (eval1.equals(eval2)) 
-				return fac.getBooleanConstant(eq);
-			else 
-				return fac.getBooleanConstant(!eq);
+			Constant c1 = (Constant) eval1,
+					 c2 = (Constant) eval2;
 			
+			if (c1.getType() == null || c2.getType() == null) {
+				return term;
+			}
+			
+			Predicate p1 = dtfac.getTypePredicate(c1.getType()),
+			          p2 = dtfac.getTypePredicate(c2.getType());
+			
+			if (dtfac.isInteger(p1) && dtfac.isInteger(p2)) {
+				return fac.getBooleanConstant(eq == (
+						Long.parseLong(c1.getValue())
+				     == Long.parseLong(c2.getValue())
+				));
+			} else if (dtfac.isFloat(p1) && dtfac.isFloat(p2)) {
+				return fac.getBooleanConstant(eq == (
+						Double.parseDouble(c1.getValue())
+				     == Double.parseDouble(c2.getValue())
+				));
+			}
+			
+			// TODO 1 =?= 1.0
 		} 
 		else if (eval1 instanceof Function) {
 			Function f1 = (Function) eval1;
@@ -1018,7 +1045,7 @@ public class ExpressionEvaluator {
 				return eval2;
 			} else {
 				/*
-				 * Its an Or, and the first was true, so it doesn't matter whats
+				 * It's an Or, and the first was true, so it doesn't matter what's
 				 * next.
 				 */
 				return OBDAVocabulary.TRUE;
@@ -1029,16 +1056,11 @@ public class ExpressionEvaluator {
 				return fac.getBooleanConstant(!and);
 			} 
 			else if (eval2 == OBDAVocabulary.FALSE) {
-				// TODO: check whether the two FALSE were INTENDED
-				//if (and) {
-					return OBDAVocabulary.FALSE;
-				//} else {
-				//	return OBDAVocabulary.FALSE;
-				//}
+				return OBDAVocabulary.FALSE;
 			} else if (and) {
 				/*
-				 * Its an And, and the first was false, so it doesn't matter
-				 * whats next.
+				 * It's an And, and the first was false, so it doesn't matter
+				 * what's next.
 				 */
 				return OBDAVocabulary.FALSE;
 			} else {
@@ -1046,7 +1068,7 @@ public class ExpressionEvaluator {
 			}
 		}
 		/*
-		 * None of the subnodes evaluated to true or false, we have functions
+		 * None of the sub-nodes evaluated to true or false, we have functions
 		 * that need to be evaluated
 		 */
 		// TODO check if we can further optimize this

@@ -8,20 +8,37 @@ import it.unibz.krdb.obda.model.Predicate.COL_TYPE;
 import it.unibz.krdb.obda.model.Variable;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 
+import org.junit.Ignore;
 import org.junit.Test;
-
 
 import java.util.ArrayList;
 import java.util.List;
 
 //import org.junit.Test;
 
+
 import junit.framework.TestCase;
 
 public class InequalitiesSatisfiabilityTests extends TestCase {
-	OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
+	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
-	public void test1() {
+	/*@Test public void test0() {
+		// evaluate: 1 != 1
+		List<Function> body = new ArrayList<>();
+		Constant t1, t3;
+		
+		t1 = fac.getConstantLiteral("1", COL_TYPE.INT);
+		t3 = fac.getConstantLiteral("1.0", COL_TYPE.DOUBLE);
+		
+		body.add(fac.getFunctionNEQ(t3, t1));
+		
+		CQIE q = fac.getCQIE(null, body);
+		
+		ExpressionEvaluator evaluator = new ExpressionEvaluator();
+		assertTrue(evaluator.evaluateExpressions(q));
+	}*/
+	
+	@Test public void test1() {
 		// evaluate: x < 1, y > 3, x > y
 		List<Function> body = new ArrayList<>();
 		Constant t1, t3;
@@ -41,7 +58,7 @@ public class InequalitiesSatisfiabilityTests extends TestCase {
 		assertTrue(evaluator.evaluateExpressions(q));
 	}
 
-	public void test2() {
+	@Test public void test2() {
 		// evaluate: x < 0, x > 1
 		List<Function> body = new ArrayList<>();
 		Constant t0, t1;
@@ -59,7 +76,7 @@ public class InequalitiesSatisfiabilityTests extends TestCase {
 		assertTrue(evaluator.evaluateExpressions(q));
 	}
 
-	public void test3() {
+	@Test public void test3() {
 		// evaluate: x = y, x != y
 		List<Function> body = new ArrayList<>();
 		
@@ -74,8 +91,7 @@ public class InequalitiesSatisfiabilityTests extends TestCase {
 		ExpressionEvaluator evaluator = new ExpressionEvaluator();
 		assertTrue(evaluator.evaluateExpressions(q));
 	}
-	
-	public void test4() {
+	@Ignore public void test4() {
 		// evaluate: x < y, y < 10, x < 2
 		List<Function> body = new ArrayList<>();
 		
@@ -99,8 +115,7 @@ public class InequalitiesSatisfiabilityTests extends TestCase {
 	 * Test transitivity of LT
 	 * Evaluate query: x{1} < x{2}, ..., x{N-1} < x{N}, x{N} < x{1}
 	 */
-	@Test
-	public void test5() {
+	@Test public void test5() {
 		List<Function> body = new ArrayList<>();
 		CQIE q;
 		ExpressionEvaluator evaluator = new ExpressionEvaluator();
@@ -123,6 +138,7 @@ public class InequalitiesSatisfiabilityTests extends TestCase {
 		assertTrue(evaluator.evaluateExpressions(q));
 	}
 	
+	@Ignore
 	public void test6() {
 		// evaluate: x1 =< x2, ..., x(N-1) =< xN, xN =< x1, xN != x1 
 		List<Function> body = new ArrayList<>();
@@ -151,7 +167,8 @@ public class InequalitiesSatisfiabilityTests extends TestCase {
 		q = fac.getCQIE(null, body);
 		assertTrue(evaluator.evaluateExpressions(q));
 	}
-
+	
+	@Ignore
 	public void test7() {
 		// evaluate random disjoint dis-equalities
 		List<Function> body = new ArrayList<>();

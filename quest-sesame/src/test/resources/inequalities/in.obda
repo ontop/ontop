@@ -3,7 +3,7 @@
 
 [SourceDeclaration]
 sourceUri	oracleBolzano
-connectionUrl	jdbc:h2:mem:countries
+connectionUrl	jdbc:h2:mem:blah
 username	sa
 password	
 driverClass	org.h2.Driver

@@ -1,15 +1,14 @@
 package it.unibz.krdb.sql;
 
 import org.junit.*;
-
 import static org.junit.Assert.*;
-import it.unibz.krdb.obda.model.OBDAModel;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import it.unibz.krdb.obda.io.ModelIOManager;
+import it.unibz.krdb.obda.model.OBDAModel;
 import it.unibz.krdb.obda.model.OBDADataFactory;
 import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
@@ -20,6 +19,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ import java.io.File;
  * The code for this tests is an adaptation from the class 
  * it.unibz.krdb.sql.TestQuestImplicitDBConstraints
  */
-public class InequalitiesSatisfiabilityTest2 {
+public class TestQuestInequalitiesSatisfiability {
 	private final static String  in_owlfile = "src/test/resources/inequalities/in.owl" ;
 	private final static String in_obdafile = "src/test/resources/inequalities/in.obda";
 	
@@ -47,17 +47,17 @@ public class InequalitiesSatisfiabilityTest2 {
 	@Before public void initialize() throws Exception {
 		log = LoggerFactory.getLogger(this.getClass());
 		
-		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:countries", "sa", "");
+		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:blah", "sa", "");
 		
 		java.sql.Statement s = sqlConnection.createStatement();
 		s.execute("CREATE TABLE TABLE (\"COL1\" INT, \"COL2\" INT);");
 		s.close();
 
-		// Loading the OWL file
+		// Load the OWL file
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		ontology = manager.loadOntologyFromOntologyDocument(new File(in_owlfile));
 
-		// Loading the OBDA data
+		// Load the OBDA data
 		OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 		obdaModel = fac.getOBDAModel();
 
@@ -68,7 +68,7 @@ public class InequalitiesSatisfiabilityTest2 {
 		p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
 		p.setCurrentValueOf(QuestPreferences.OBTAIN_FULL_METADATA, QuestConstants.FALSE);
 
-		// Creating a new instance of the reasoner
+		// Create a new instance of the reasoner
 		factory = new QuestOWLFactory();
 		factory.setOBDAController(obdaModel);
 
@@ -104,6 +104,7 @@ public class InequalitiesSatisfiabilityTest2 {
 	}
 	
 	@Test public void test() throws Exception {
+		
 		// a > b > c > d > e > f
 		assertFalse(qunfold("?a :Gt ?b. ?b :Gt ?c. ?c :Gt ?d. ?d :Gt ?e. ?e :Gt ?f.") == "");
 		// a =< b =< c =< d =< e =< a, a != c
@@ -121,6 +122,5 @@ public class InequalitiesSatisfiabilityTest2 {
 		// 3 < x =< y < z <= w < 1, 
 		assertEquals(qunfold("?x a :Gt3. ?x :Lte ?y. ?y :Lt ?z. ?z :Lte ?w. ?w a :Lt1."), "");
 	}
-
 
 }
