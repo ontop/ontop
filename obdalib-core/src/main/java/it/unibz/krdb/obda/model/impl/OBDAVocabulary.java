@@ -59,14 +59,7 @@ public class OBDAVocabulary {
 			"RAND", 0);
 	public static final Predicate UUID = new NumericalOperationPredicateImpl(
 			"UUID", 0);
-	public static final Predicate MD5 = new NumericalOperationPredicateImpl(
-			"md5", 1);
-	public static final Predicate SHA1 = new NumericalOperationPredicateImpl(
-			"sha1", 1);
-	public static final Predicate SHA512 = new NumericalOperationPredicateImpl(
-			"sha521", 1);
-	public static final Predicate SHA256 = new NumericalOperationPredicateImpl(
-			"sha256", 1);
+
 
 	/* Boolean predicates */
 
@@ -138,6 +131,18 @@ public class OBDAVocabulary {
 
 	public static final StringOperationPredicate ENCODE_FOR_URI = new StringOperationPredicateImpl(
 			"ENCODE_FOR_URI", 1, new COL_TYPE[]{COL_TYPE.LITERAL});
+	
+	public static final StringOperationPredicate MD5 = new StringOperationPredicateImpl(
+			"MD5", 1, new COL_TYPE[]{COL_TYPE.LITERAL});
+	
+	public static final StringOperationPredicate SHA1 = new StringOperationPredicateImpl(
+			"SHA1", 1, new COL_TYPE[]{COL_TYPE.LITERAL});
+	
+	public static final StringOperationPredicate SHA512 = new StringOperationPredicateImpl(
+			"SHA521", 1, new COL_TYPE[]{COL_TYPE.LITERAL});
+	
+	public static final StringOperationPredicate SHA256 = new StringOperationPredicateImpl(
+			"SHA256", 1, new COL_TYPE[]{COL_TYPE.LITERAL});
 
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 

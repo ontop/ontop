@@ -24,6 +24,16 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 import java.util.regex.Pattern;
 
 public class H2SQLDialectAdapter extends SQL99DialectAdapter {
+	
+	@Override
+	public String uuid(){
+		return "RANDOM_UUID()";
+	}
+	
+	@Override
+	public String SHA256(String str){
+		return String.format("HASH('SHA256', STRINGTOUTF8(%s),1000)", str);
+	}
 
 	@Override
 	public String sqlSlice(long limit, long offset) {

@@ -51,6 +51,16 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	public String sqlSlice(long limit, long offset) {
 		return String.format("WHERE ROWNUM <= %s", limit);
 	}
+	
+	  @Override
+	  	public String SHA1(String str) {
+	  		return String.format("HASH(%s,'SH1')", str);
+	  	}
+	  
+	  @Override
+	  	public String MD5(String str) {
+	  		return String.format("HASH(%s,'MD5')", str);
+	  	}
 
 	@Override
 	public String sqlCast(String value, int type) {

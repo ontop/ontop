@@ -35,9 +35,59 @@ import org.openrdf.model.util.URIUtil;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
 
-    private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
-
+    private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");  
     
+    
+    @Override 
+    public String strEncodeForUri(String str){
+      /*"REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
+            "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" + str + ",' ', '%20')," +
+            "'!', '%21')," +
+            "'@', '%40')," +
+            "'#', '%23')," +
+            "'$', '%24')," +
+            "'&', '%26')," +
+            "'*', '%42'), " +
+            "'(', '%28'), " +
+            "')', '%29'), " +
+            "'[', '%5B'), " +
+            "']', '%5D'), " +
+            "',', '%2C'), " +
+            "';', '%3B'), " +
+            "':', '%3A'), " +
+            "'?', '%3F'), " +
+            "'=', '%3D'), " +
+            "'+', '%2B'), " +
+            "'''', '%22'), " +
+            "'/', '%2F')"; */
+    		
+    	throw new UnsupportedOperationException("SHA256 is not supported in this DB.");
+    }
+    
+    @Override
+  	public String SHA256(String str) {
+    	throw new UnsupportedOperationException("SHA256 is not supported in this DB.");
+  	}
+    
+    @Override
+  	public String SHA1(String str) {
+    	throw new UnsupportedOperationException("SHA1 is not supported in this DB.");
+  	}
+    
+    @Override
+  	public String SHA512(String str) {
+    	throw new UnsupportedOperationException("SHA512 is not supported in this DB.");
+  	}
+      
+      @Override
+  	public String MD5(String str) {
+      	throw new UnsupportedOperationException("MD5 is not supported in this DB.");
+  	}
+    
+    @Override
+	public String uuid() {
+		return "UUID()";
+	}
     
 	@Override
 	public String strConcat(String[] strings) {
@@ -60,35 +110,10 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 	@Override
 	public String strUcase(String str) {
 		return String.format("UPPER(%s)", str);
-	} //Nika
+	} 
 	
-	// Use URL Encoder to produce right URI format:
-	// TODO : need to apply after the result set is ready. As aggregate fn.
-	/*
-	public static String encodeURIComponent(String s) {
-	    String result;
-
-	    try {
-	        result = URLEncoder.encode(s, "UTF-8")
-	                .replaceAll("\\+", "%20")
-	                .replaceAll("\\%21", "!")
-	                .replaceAll("\\%27", "'")
-	                .replaceAll("\\%28", "(")
-	                .replaceAll("\\%29", ")")
-	                .replaceAll("\\%7E", "~");
-	    } catch (UnsupportedEncodingException e) {
-	        result = s;
-	    }
-
-	    return result;
-	}
-	
-	@Override
-	public String strEncodeForUri(String str) {	
-		return encodeURIComponent(str);
-	} //Nika */
-	public String strEncodeForUri(String str) {	
-		return String.format("utl_url.escape(%s)", str);} //PL/SQL package
+	/*public String strEncodeForUri(String str) {	
+		return String.format("utl_url.escape(%s)", str);} //PL/SQL package */
 	
 	@Override
 	public String strBefore(String str, String before) {
@@ -348,10 +373,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 		return sqlQuote(signatureVariableName + proposedSuffix);
 	}
 
-	@Override
-	public String uuid() {
-		return "UUID()";
-	}
+	
 
 
 

@@ -210,7 +210,7 @@ public interface OBDADataFactory extends Serializable {
 	
 	public Function getFunctionContains(Term term1, Term term2);
 	
-	// public Function getFunctionEncodeForUri(Term term);
+	public Function getFunctionEncodeForUri(Term term);
 	
 
 
@@ -351,11 +351,6 @@ public interface OBDADataFactory extends Serializable {
 	public Function getSPARQLJoin(Term t1, Term t2);
 
 	public Function getSPARQLLeftJoin(Term t1, Term t2);
-
-	
-
-
-
 
 	
 }

@@ -23,6 +23,7 @@ package it.unibz.krdb.obda.owlrefplatform.core.queryevaluation;
 import java.sql.Types;
 
 public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
+	
 
 	@Override
 	public String strConcat(String[] strings) {

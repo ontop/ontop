@@ -27,6 +27,11 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 
     private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
 
+    @Override
+    public String MD5(String str){
+    	return "MD5(%s)";
+    }
+    
 	@Override
 	public String sqlSlice(long limit, long offset) {
 		if (limit < 0 || limit == 0) {

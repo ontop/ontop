@@ -330,10 +330,10 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		return getFunction(OBDAVocabulary.CONTAINS, term1, term2);
 	}
 	
-	/*@Override
+	@Override
 	public Function getFunctionEncodeForUri(Term term1) {
 		return getFunction(OBDAVocabulary.ENCODE_FOR_URI, term1);
-	} */
+	}
 	
 	public Function getFunctionAbs(Term term1){
 		return getFunction(OBDAVocabulary.ABS, term1);

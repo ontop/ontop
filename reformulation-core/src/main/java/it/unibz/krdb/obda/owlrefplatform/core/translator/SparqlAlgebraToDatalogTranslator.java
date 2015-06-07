@@ -711,6 +711,10 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	private Term getLength(List<ValueExpr> args) {
+		if (args.size() != 2){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL LENGTH function");					
+		}
 		ValueExpr arg = args.get(0); 
 		Term term = getExpression(arg);
 		term = ofac.getFunctionLength(term);
@@ -718,6 +722,10 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	private Term getSubstring(List<ValueExpr> args) {
+		if (args.size() != 3 && args.size() != 2){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 2 or 3 supported) for SQL SUBSTRING function");					
+		}
 		ValueExpr string = args.get(0); 
 		ValueExpr start = args.get(1); 
 		ValueExpr end = args.get(2); 
@@ -729,6 +737,10 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	private Term getLower(List<ValueExpr> args) {
+		if (args.size() != 2){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL LOWER function");					
+		}
 		ValueExpr arg = args.get(0); 
 		Term term = getExpression(arg);
 		term = ofac.getFunctionLower(term);
@@ -736,20 +748,28 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 
 	private Term getUpper(List<ValueExpr> args) {
+		if (args.size() != 2){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL UPPER function");					
+		}
 		ValueExpr arg = args.get(0); 
 		Term term = getExpression(arg);
 		term = ofac.getFunctionUpper(term);
 		return term;
 	}
 	
-	/*private Term getEncodeForUri(List<ValueExpr> args) {
+	private Term getEncodeForUri(List<ValueExpr> args) {
 		ValueExpr arg = args.get(0); 
 		Term term = getExpression(arg);
 		term = ofac.getFunctionEncodeForUri(term);
 		return term;
-	} */
+	} 
 	
 	private Term getStrBefore(List<ValueExpr> args) {
+		if (args.size() != 2){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 2 supported) for SQL STRBEFORE function");					
+		}
 		ValueExpr string = args.get(0); 
 		ValueExpr before = args.get(1); 
 		Term str = getExpression(string);
@@ -759,6 +779,10 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	private Term getStrAfter(List<ValueExpr> args) {
+		if (args.size() != 2){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 2 supported) for SQL STRAFTER function");					
+		}
 		ValueExpr string = args.get(0); 
 		ValueExpr after = args.get(1); 
 		Term str = getExpression(string);
@@ -768,6 +792,10 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	private Term getStrStarts(List<ValueExpr> args) {
+		if (args.size() != 2){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 2 supported) for SQL STRSTARTS function");					
+		}
 		ValueExpr string = args.get(0); 
 		ValueExpr start = args.get(1); 
 		Term str = getExpression(string);
@@ -777,6 +805,10 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	private Term getStrEnds(List<ValueExpr> args) {
+		if (args.size() != 2){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 2 supported) for SQL STRENDS function");					
+		}
 		ValueExpr string = args.get(0); 
 		ValueExpr start = args.get(1); 
 		Term str = getExpression(string);
@@ -786,6 +818,10 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	private Term getContains(List<ValueExpr> args) {
+		if (args.size() != 2){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 2 supported) for SQL CONTAINS function");					
+		}
 		ValueExpr string = args.get(0); 
 		ValueExpr start = args.get(1); 
 		Term str = getExpression(string);
@@ -795,27 +831,43 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	private Term getAbs(List<ValueExpr> args) {	
+		if (args.size() != 1){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL ABS function");					
+		}
 		ValueExpr argument = args.get(0);
 		Term arg = getExpression(argument);
 		Term term = ofac.getFunctionAbs(arg);
 		return term;	
 	}
 	
-	private Term getCeil(List<ValueExpr> args) {	
+	private Term getCeil(List<ValueExpr> args) {
+		if (args.size() != 1){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL CEIL function");					
+		}
 		ValueExpr argument = args.get(0);
 		Term arg = getExpression(argument);
 		Term term = ofac.getFunctionCeil(arg);
 		return term;	
 	}
 	
-	private Term getFloor(List<ValueExpr> args) {	
+	private Term getFloor(List<ValueExpr> args) {
+		if (args.size() != 1){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL FLOOR function");					
+		}
 		ValueExpr argument = args.get(0);
 		Term arg = getExpression(argument);
 		Term term = ofac.getFunctionFloor(arg);
 		return term;	
 	}
 	
-	private Term getRound(List<ValueExpr> args) {	
+	private Term getRound(List<ValueExpr> args) {
+		if (args.size() != 1){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL ROUND function");					
+		}
 		ValueExpr argument = args.get(0);
 		Term arg = getExpression(argument);
 		Term term = ofac.getFunctionRound(arg);
@@ -833,6 +885,10 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	private Term getMD5(List<ValueExpr> args) {	
+		if (args.size() != 1){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL hash function");					
+		}
 		ValueExpr argument = args.get(0);
 		Term arg = getExpression(argument);
 		Term term = ofac.getFunctionMD5(arg);
@@ -840,6 +896,10 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	private Term getSHA1(List<ValueExpr> args) {	
+		if (args.size() != 1){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL hash function");					
+		}
 		ValueExpr argument = args.get(0);
 		Term arg = getExpression(argument);
 		Term term = ofac.getFunctionSHA1(arg);
@@ -847,20 +907,26 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	private Term getSHA256(List<ValueExpr> args) {	
+		if (args.size() != 1){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL hash function");					
+		}
 		ValueExpr argument = args.get(0);
 		Term arg = getExpression(argument);
 		Term term = ofac.getFunctionSHA256(arg);
 		return term;	
 	}
 	
-	private Term getSHA512(List<ValueExpr> args) {	
+	private Term getSHA512(List<ValueExpr> args) {
+		if (args.size() != 1){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL hash function");					
+		}
 		ValueExpr argument = args.get(0);
 		Term arg = getExpression(argument);
 		Term term = ofac.getFunctionSHA512(arg);
 		return term;	
 	}
-	
-
 		
 	private Term getReplace(List<ValueExpr> expressions) {
         if (expressions.size() == 2 || expressions.size() == 3) {
@@ -901,6 +967,7 @@ public class SparqlAlgebraToDatalogTranslator {
     private Term getFunctionCallTerm(FunctionCall expr) {
     	
         switch(expr.getURI()){
+         
             case "http://www.w3.org/2005/xpath-functions#concat":
                 return getConcat(expr.getArgs());
 
@@ -908,25 +975,25 @@ public class SparqlAlgebraToDatalogTranslator {
                 return getReplace(expr.getArgs());
                 
             case "http://www.w3.org/2005/xpath-functions#string-length":
-                return getLength(expr.getArgs()); // added by Nika
+                return getLength(expr.getArgs()); 
                 
             case "http://www.w3.org/2005/xpath-functions#substring":
-            	return getSubstring(expr.getArgs()); //Nika
+            	return getSubstring(expr.getArgs()); 
             	
             case "http://www.w3.org/2005/xpath-functions#upper-case":
-            	return getUpper(expr.getArgs()); //Nika   
+            	return getUpper(expr.getArgs());    
             	
             case "http://www.w3.org/2005/xpath-functions#lower-case":
-            	return getLower(expr.getArgs()); //Nika  
+            	return getLower(expr.getArgs());  
             	
             case "http://www.w3.org/2005/xpath-functions#substring-before":
-            	return getStrBefore(expr.getArgs()); //Nika 
+            	return getStrBefore(expr.getArgs()); 
             	
             case "http://www.w3.org/2005/xpath-functions#substring-after":
-            	return getStrAfter(expr.getArgs()); //Nika 
+            	return getStrAfter(expr.getArgs()); 
             	
             case "http://www.w3.org/2005/xpath-functions#starts-with":
-            	return getStrStarts(expr.getArgs()); //Nika
+            	return getStrStarts(expr.getArgs()); 
             	
             case "http://www.w3.org/2005/xpath-functions#ends-with":
             	return getStrEnds(expr.getArgs()); 
@@ -934,8 +1001,8 @@ public class SparqlAlgebraToDatalogTranslator {
             case "http://www.w3.org/2005/xpath-functions#contains":
             	return getContains(expr.getArgs());
             	
-            /*case "http://www.w3.org/2005/xpath-functions#encode-for-uri":
-            	return getEncodeForUri(expr.getArgs());*/
+            case "http://www.w3.org/2005/xpath-functions#encode-for-uri":
+            	return getEncodeForUri(expr.getArgs());
             	
             case "http://www.w3.org/2005/xpath-functions#numeric-abs":
             	return getAbs(expr.getArgs());
@@ -954,24 +1021,19 @@ public class SparqlAlgebraToDatalogTranslator {
             	
             case "UUID":
             	return getUUID(expr.getArgs());
-            
-            // Hash functions:
-            
+                        
             case "MD5":
-            	return getMD5(expr.getArgs());
+            	return getMD5(expr.getArgs()); 
            
             case "SHA1":
-            	return getSHA1(expr.getArgs());
+            	return getSHA1(expr.getArgs()); 
             	
             case "SHA256":
-            	return getSHA256(expr.getArgs());
+            	return getSHA256(expr.getArgs()); 
             	
             case "SHA512":
             	return getSHA512(expr.getArgs());
-            
-            
-
-            	
+               	
             default:
                 throw new RuntimeException("The builtin function " + expr.getURI() + " is not supported yet!");
         }

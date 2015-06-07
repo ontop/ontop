@@ -191,10 +191,9 @@ public class BindTestWithFunctions {
         expectedValues.add("\"9.0\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
-	
-	
+
 	@Test
-    public void testBindWithRand() throws Exception {
+    public void testBindWithHash() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -207,20 +206,19 @@ public class BindTestWithFunctions {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount.\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (UUID() AS ?w)\n"
+                + "   BIND (SHA256(?title) AS ?w)\n"
                 + "}";
 
-
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"17.25\"");
+        expectedValues.add("47cd2b73255540967d098e713910cd30d1419a55d6c51aec5925a6d0ff722025");
+        
 
 
         checkReturnedValues(p, queryBind, expectedValues);
     }
 	
-    @Ignore
     @Test
-    public void testStrStarts() throws Exception {
+    public void testStrEncode() throws Exception {
 
         QuestPreferences p = new QuestPreferences();
         p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
@@ -235,13 +233,12 @@ public class BindTestWithFunctions {
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
                 + "   BIND(?title AS ?w)\n"
-                + "   FILTER(STRSTARTS(?title,\"The\"))\n"
+                + "   FILTER(ENCODE_FOR_URI(\"The Logic Book\"))\n"
              + "}";
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"The Semantic Web\"@en");
-        expectedValues.add("\"The Logic Book\"@en");
+        expectedValues.add("The%20Logic%20Book");
         checkReturnedValues(p, queryBind, expectedValues);
 
 

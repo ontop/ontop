@@ -27,6 +27,14 @@ import java.util.Set;
 
 public interface SQLDialectAdapter {
 	
+	public String MD5(String literal);
+	
+	public String SHA256(String str);
+	
+	public String SHA512(String str);
+	
+	public String SHA1(String str);
+
 	public String uuid();
 	
 	public String strLength(String str); 
@@ -35,7 +43,7 @@ public interface SQLDialectAdapter {
 	
 	public String strLcase(String str);
 	
-	// public String strEncodeForUri(String str);
+	public String strEncodeForUri(String str);
 
 	public String strBefore(String str, String before);
 	
@@ -97,5 +105,6 @@ public interface SQLDialectAdapter {
 	 * Allows the SQL dialect adapter to put restrict on the name (e.g. name length).
 	 */
 	public String nameTopVariable(String signatureVariable, String proposedSuffix, Set<String> sqlVariableNames);
+
 
 }

@@ -78,7 +78,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	private static final String FLOOR_OPERATOR = "FLOOR(%s)";
 	private static final String ROUND_OPERATOR = "ROUND(%s)";
 	private static final String RAND_OPERATOR = "RAND()";
-	private static final String UUID_OPERATOR = "RANDOM_UUID()";
 
 	private static final String LIKE_OPERATOR = "%s LIKE %s";
 
@@ -95,17 +94,6 @@ public class SQLGenerator implements SQLQueryGenerator {
 	 * Formatting template
 	 */
 	private static final String VIEW_NAME = "QVIEW%s";
-
-	private static final String MD5_OPERATOR = "HASHBYTES('MD5',%s)";
-	
-	//Works in H2
-	
-	private static final String SHA256_OPERATOR = "HASH('SHA256',STRINGTOUTF8(%s),10)";
-
-	private static final String SHA1_OPERATOR = "HASHBYTES('SHA1',%s)";
-
-	private static final String SHA512_OPERATOR = "HASHBYTES('SHA512',%s)";
-
 
 	private final DBMetadata metadata;
 	private final SQLDialectAdapter sqladapter;
@@ -1482,25 +1470,43 @@ public class SQLGenerator implements SQLQueryGenerator {
 					String literal = getSQLString(function.getTerm(0), index, false);
 					String result = sqladapter.strLength(literal);
 					return result;
-			} //added by Nika
+			} 
+			 else if (functionName.equals(OBDAVocabulary.ENCODE_FOR_URI.getName())) {
+					String literal = getSQLString(function.getTerm(0), index, false);
+					String result = sqladapter.strEncodeForUri(literal);
+					return result;
+			} 
 			
 			 else if (functionName.equals(OBDAVocabulary.UCASE.getName())) {
 					String literal = getSQLString(function.getTerm(0), index, false);
 					String result = sqladapter.strUcase(literal);
 					return result;
-			} //added by Nika
+			} 
 			
-			/* else if (functionName.equals(OBDAVocabulary.ENCODE_FOR_URI.getName())) {
-					String literal = getSQLString(function.getTerm(0), index, false);
-					String result = sqladapter.strEncodeForUri(literal);
+			 else if (functionSymbol.equals(OBDAVocabulary.MD5)) {
+				 	String literal = getSQLString(function.getTerm(0), index, false);
+					String result = sqladapter.MD5(literal);
 					return result;
-			} */
+					
+			} else if (functionSymbol.equals(OBDAVocabulary.SHA1)) {
+					String literal = getSQLString(function.getTerm(0), index, false);
+					String result = sqladapter.SHA1(literal);
+					return result;
+			} else if (functionSymbol.equals(OBDAVocabulary.SHA256)) {
+					String literal = getSQLString(function.getTerm(0), index, false);
+					String result = sqladapter.SHA256(literal);
+					return result;
+			} else if (functionSymbol.equals(OBDAVocabulary.SHA512)) {
+					String literal = getSQLString(function.getTerm(0), index, false);
+					String result = sqladapter.SHA512(literal); //TODO FIX
+					return result;
+				} 
 			
 			 else if (functionName.equals(OBDAVocabulary.LCASE.getName())) {
 					String literal = getSQLString(function.getTerm(0), index, false);
 					String result = sqladapter.strLcase(literal);
 					return result;
-			} //added by Nika
+			} 
 			
 			 else if (functionName.equals(OBDAVocabulary.SUBSTR.getName())) {
 					String string = getSQLString(function.getTerm(0), index, false);
@@ -1508,21 +1514,21 @@ public class SQLGenerator implements SQLQueryGenerator {
 					String end = getSQLString(function.getTerm(2), index, false);
 					String result = sqladapter.strSubstr(string, start, end);
 					return result;
-			} //added by Nika
+			} 
 			
 			 else if (functionName.equals(OBDAVocabulary.STRBEFORE.getName())) {
 					String string = getSQLString(function.getTerm(0), index, false);
 					String before = getSQLString(function.getTerm(1), index, false);
 					String result = sqladapter.strBefore(string, before);
 					return result;
-			} //added by Nika
+			} 
 			
 			 else if (functionName.equals(OBDAVocabulary.STRAFTER.getName())) {
 					String string = getSQLString(function.getTerm(0), index, false);
 					String after = getSQLString(function.getTerm(1), index, false);
 					String result = sqladapter.strAfter(string, after);
 					return result;
-			} //added by Nika
+			} 
 			
         }
 
@@ -1652,15 +1658,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 		} else if (functionSymbol.equals(OBDAVocabulary.RAND)) {
 			operator = RAND_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.UUID)) {
-			operator = UUID_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.MD5)) {
-			operator = MD5_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.SHA1)) {
-			operator = SHA1_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.SHA256)) {
-			operator = SHA256_OPERATOR;
-		} else if (functionSymbol.equals(OBDAVocabulary.SHA512)) {
-			operator = SHA512_OPERATOR;
+			operator = sqladapter.uuid();
 		} else {
 			throw new RuntimeException("Unknown numerical operator: " + functionSymbol);
 		}
