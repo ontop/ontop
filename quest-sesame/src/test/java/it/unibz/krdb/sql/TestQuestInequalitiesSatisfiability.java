@@ -47,10 +47,10 @@ public class TestQuestInequalitiesSatisfiability {
 	@Before public void initialize() throws Exception {
 		log = LoggerFactory.getLogger(this.getClass());
 		
-		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:blah", "sa", "");
+		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:test", "sa", "");
 		
 		java.sql.Statement s = sqlConnection.createStatement();
-		s.execute("CREATE TABLE TABLE (\"COL1\" INT, \"COL2\" INT);");
+		s.execute("CREATE TABLE TABLE (\"COL\" FLOAT);");
 		s.close();
 
 		// Load the OWL file
@@ -79,20 +79,12 @@ public class TestQuestInequalitiesSatisfiability {
 	}
 
 
-	@After public void tearDown() throws Exception {
+	@After public void clean() throws Exception {
 		if (    conn != null) conn.close();
 		if (reasoner != null) reasoner.dispose();
 		
 		if (!sqlConnection.isClosed()) {
-			java.sql.Statement s = sqlConnection.createStatement();
-			try {
-				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				log.debug("Table not found, not dropping");
-			} finally {
-				s.close();
 				sqlConnection.close();
-			}
 		}
 	}
 	
@@ -106,7 +98,7 @@ public class TestQuestInequalitiesSatisfiability {
 	
 	@Test public void test() throws Exception {
 		// a > b > c > d > e > f
-		assertFalse(qunfold("?a :Gt ?b. ?b :Gt ?c. ?c :Gt ?d. ?d :Gt ?e. ?e :Gt ?f.") == "");
+		assertTrue(qunfold("?a :Gt ?b . ?b :Gt ?c . ?c :Gt ?d . ?d :Gt ?e . ?e :Gt ?f .") != "");
 		// a =< b =< c =< d =< e =< a, a != c
 		assertEquals(qunfold("?a :Lte ?b. ?b :Lte ?c. ?c :Lte ?d. ?d :Lte ?e. ?e :Lte ?a. ?a :Neq ?c."), "");
 		// a < b < c < d < e < a

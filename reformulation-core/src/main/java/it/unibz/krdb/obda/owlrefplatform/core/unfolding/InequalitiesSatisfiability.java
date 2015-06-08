@@ -40,14 +40,14 @@ class InequalitiesSatisfiability {
 	private static final DatatypeFactory DTFACTORY = OBDADataFactoryImpl.getInstance().getDatatypeFactory();
 	
 	/**
-	 * @return the Double value of a numeric Constant object
+	 * @return the Double value of a numeric Constant object, or NaN if not a number
 	 */
-	public static Double constantValue(Constant c) {
+	public static double constantValue(Constant c) {
 		String value = c.getValue();
 		COL_TYPE type = c.getType();
 		
 		if (type == null)
-			return null;
+			return Double.NaN;
 		
 		Predicate p = DTFACTORY.getTypePredicate(type);
 		
@@ -56,22 +56,9 @@ class InequalitiesSatisfiability {
 		} else if(DTFACTORY.isFloat(p)) { 
 			return Double.parseDouble(value);
 		} else {
-			return null;
+			return Double.NaN;
 		}
 	}
-	
-	/**
-	 * Checks if a Constant is either an Integer or a Float number
-	 *
-	private static boolean isNumeric(Constant c) {
-		Predicate.COL_TYPE type = c.getType();
-		if (type != null) {
-			Predicate p = DTFACTORY.getTypePredicate(type);
-			return DTFACTORY.isInteger(p) || DTFACTORY.isFloat(p);
-		}
-		return false;	
-	}
-	*/
 	
 	/**
 	 * @return Constant object that corresponds to some Double
@@ -81,27 +68,31 @@ class InequalitiesSatisfiability {
 	}
 	
 	/**
-	 * Checks unsatisfiability of a query with respect to the numerical comparisons occurring in it;
-	 * this version checks (un)satisfiability on the domain of real numbers.
-	 * The algorithm is implemented after "Sha Guo et al: Solving Satisfiability and Implication Problems in Database Systems".
+	 * Checks unsatisfiability of a query with respect to the numerical comparisons
+	 * occurring in it; this version checks (un)satisfiability on the domain of real numbers.
+	 * The algorithm is implemented after "Sha Guo et al: Solving Satisfiability and 
+	 * Implication Problems in Database Systems".
 	 * 
-	 * @param q the OBA query to check for satisfiability
+	 * @param query the CQ to check for satisfiability
 	 * @return true if the query is found unsatisfiable, false otherwise.
 	 */
-	public static boolean unsatisfiable(CQIE q) {
-		LOGGER.debug("Checking satisfiability of OBDA query");
-		return unsatisfiable(q.getBody());
+	public static boolean unsatisfiable(CQIE query) {
+		LOGGER.debug("Checking satisfiability of comparisons in conjunctive query");
+		return unsatisfiable(query.getBody());
 	}
 
 	/**
-	 * @param body the body of an OBDA query
-	 * @return true if the query is found unsatisfiable, false otherwise.
+	 * @param body the body of a conjunctive query
+	 * @return true if the query is found unsatisfiable, false otherwise
 	 */
 	public static boolean unsatisfiable(List<Function> body) {
 		List<Function> atoms = new ArrayList<>(body);
 		
 		/*
-		 * The minimum ranges of the variables among the comparisons
+		 * The minimum ranges of the variables among the comparisons:
+		 * they are intervals [lowerBound, upperBound] that are kept
+		 * for every variable and updated when new constraints are found
+		 * in disequalities.
 		 */
 		Map<Variable, DoubleInterval> mranges = new HashMap<Variable, DoubleInterval>() {
 			private static final long serialVersionUID = 1L;
@@ -117,9 +108,9 @@ class InequalitiesSatisfiability {
 		};
 		
 		/*
-		 * The unequality (neq) constraints
+		 * The neq-constraints (!=)
 		 */
-		Map<Variable, Set<Term>> neq = new HashMap<Variable, Set<Term>>() {
+		Map<Variable, Set<Term>> neq_constraints = new HashMap<Variable, Set<Term>>() {
 			private static final long serialVersionUID = 1L;
 			/*
 			 * Override the get method in order to use default values
@@ -140,23 +131,23 @@ class InequalitiesSatisfiability {
 		 */
 		DirectedGraph<Term, DefaultEdge> gteGraph = new DefaultDirectedGraph<>(DefaultEdge.class);
 		
-		return unsatisfiable(atoms, mranges, neq, gteGraph);
+		return unsatisfiable(atoms, mranges, neq_constraints, gteGraph);
 	}
 
 	private static boolean unsatisfiable(List<Function> atoms,
 			Map<Variable, DoubleInterval> mranges,
-			Map<Variable, Set<Term>> neq,
+			Map<Variable, Set<Term>> neq_constraints,
 			DirectedGraph<Term, DefaultEdge> gteGraph) {
 
 		/*
-		 * Eliminate trivial inequalities
+		 * 1) Eliminate trivial inequalities
 		 * This is already performed in ExpressionEvaluator.java:
 		 * - elimination of "const1 (op) const2": evalEqNeq, evalGtLt, evalGteLte;
 		 * - elimination of "# = #", "# != #" : evalEqNeq.
 		 */
 
 		/*
-		 * Scan the atoms in the body:
+		 * 2) Scan the atoms in the body:
 		 * - build the minimum range of each variable, that is the real interval
 		 *   in which that variable is constrained to be, obtained by the
 		 *   inequalities between variables and constants
@@ -170,10 +161,10 @@ class InequalitiesSatisfiability {
 			 * Fork the OR's
 			 */
 			if (atom.getFunctionSymbol() == OBDAVocabulary.OR) {
-				return forkOR(atomidx, atoms, mranges, neq, gteGraph);
+				return forkOR(atomidx, atoms, mranges, neq_constraints, gteGraph);
 			}
 			
-			if (scanAtom(atom, atoms, mranges, neq, gteGraph))
+			if (scanAtom(atom, atoms, mranges, neq_constraints, gteGraph))
 				return true;	
 		}
 		
@@ -183,13 +174,13 @@ class InequalitiesSatisfiability {
 		SortedSet<Double> constants = new TreeSet<>();
 		
 		/*
-		 * Transport the information gathered with the minimum range of variables
+		 * 3) Transport the information gathered with the minimum range of variables
 		 * inside the greater-than-or-equal graph
 		 */
 		constrainVariablesRanges(mranges, gteGraph, constants);
 		
 		/*
-		 * Encode in the graph the information about the linear ordering of
+		 * 4) Encode in the graph the information about the linear ordering of
 		 * real valued constants
 		 */
 		if (!constants.isEmpty()) {
@@ -197,17 +188,22 @@ class InequalitiesSatisfiability {
 		}
 		
 		/*
-		 * Compute and inspect the strongly connected components of the graph
+		 * 5) Compute and inspect the strongly connected components of the graph
 		 */
-		return inspectStronglyConnectedComponents(neq, gteGraph);
+		return inspectStronglyConnectedComponents(neq_constraints, gteGraph);
 	}
 
+	/**
+	 * Forks the current state of the satisfiability check
+	 * in order to handle the cases of a disjunction
+	 * @return true iff the disjunction is found to be unsatisfiable
+	 */
 	@SuppressWarnings("unchecked")
 	private static boolean forkOR(
 			int pos,
 			List<Function> atoms,
 			Map<Variable, DoubleInterval> mranges,
-			Map<Variable, Set<Term>> neq,
+			Map<Variable, Set<Term>> neq_constraints,
 			DirectedGraph<Term, DefaultEdge> gteGraph) {
 		
 		atoms = atoms.subList(pos, atoms.size());
@@ -217,7 +213,7 @@ class InequalitiesSatisfiability {
 		}
 		
 		/*
-		 * Clone the data structures
+		 * Clone the data structures atoms, mranges, neq_constraints, gteGraph
 		 */
 		List<Function> atoms_copy = new ArrayList<>(atoms);
 		atoms_copy.set(0, (Function) or.getTerm(0));
@@ -226,7 +222,7 @@ class InequalitiesSatisfiability {
 		Map<Variable, Set<Term>> neq_copy;
 		try {
 			mranges_copy = mranges.getClass().newInstance();
-			neq_copy = neq.getClass().newInstance();
+			neq_copy = neq_constraints.getClass().newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 			return false;
@@ -236,7 +232,7 @@ class InequalitiesSatisfiability {
 			mranges_copy.put(cursor.getKey(), cursor.getValue().clone());
 		}
 		
-		for (Entry<Variable, Set<Term>> cursor: neq.entrySet()) {
+		for (Entry<Variable, Set<Term>> cursor: neq_constraints.entrySet()) {
 			Set<Term> tmp = new HashSet<>(cursor.getValue());
 			neq_copy.put(cursor.getKey(), tmp);
 		}		
@@ -251,7 +247,7 @@ class InequalitiesSatisfiability {
 			return false;
 		} else {
 			atoms.set(0, (Function) or.getTerm(1));
-			return unsatisfiable(atoms, mranges, neq, gteGraph);
+			return unsatisfiable(atoms, mranges, neq_constraints, gteGraph);
 		}
 	}
 
@@ -262,7 +258,7 @@ class InequalitiesSatisfiability {
 	 */
 	private static boolean scanAtom(Function atom, List<Function> atoms,
 			Map<Variable, DoubleInterval> mranges,
-			Map<Variable, Set<Term>> neq,
+			Map<Variable, Set<Term>> neq_constraints,
 			DirectedGraph<Term, DefaultEdge> gteGraph) {
 
 		Predicate pred = atom.getFunctionSymbol();
@@ -272,7 +268,7 @@ class InequalitiesSatisfiability {
 		}
 		LOGGER.debug("binary BooleanOperationPredicate: " + atom.toString());
 		Term t0 = atom.getTerm(0),
-				t1 = atom.getTerm(1);
+		     t1 = atom.getTerm(1);
 
 		/*
 		 * Remove LT's and LTE's by swapping the terms
@@ -312,16 +308,16 @@ class InequalitiesSatisfiability {
 
 		if (pred == OBDAVocabulary.NEQ) {
 			if (t0 instanceof Variable) {
-				neq.get((Variable) t0).add(t1);
+				neq_constraints.get((Variable) t0).add(t1);
 			}
 			if (t1 instanceof Variable) {
-				neq.get((Variable) t1).add(t0);
+				neq_constraints.get((Variable) t1).add(t0);
 			}
 		} else if (pred == OBDAVocabulary.GTE) {
 			if (t0 instanceof Variable && t1 instanceof Constant) {
 				Variable var = (Variable) t0;
 				Double value = constantValue((Constant) t1);
-				if (value != null) {
+				if (value != Double.NaN) {
 					DoubleInterval interval; 
 					try {
 						interval = mranges.get(var).withLowerBound(value);
@@ -333,7 +329,7 @@ class InequalitiesSatisfiability {
 			} else if (t0 instanceof Constant && t1 instanceof Variable) {
 				Variable var = (Variable) t1;
 				Double value = constantValue((Constant) t0);
-				if (value != null) {
+				if (value != Double.NaN) {
 					DoubleInterval interval; 
 					try {
 						interval = mranges.get(var).withUpperBound(value);
@@ -391,11 +387,8 @@ class InequalitiesSatisfiability {
 	private static void constrainConstantsOrder(
 			DirectedGraph<Term, DefaultEdge> gteGraph, SortedSet<Double> constants) {
 		
-		/*
-		 * Linearly sort the constants encountered
-		 */
-		Constant last = doubleToConstant(constants.first());
-		Constant curr;
+		//The SortedSet constants is already linearly sorted!
+		Constant curr, last = doubleToConstant(constants.first());
 		for (Double d: constants) {
 			curr = doubleToConstant(d);
 			gteGraph.addEdge(curr, last);
@@ -406,8 +399,8 @@ class InequalitiesSatisfiability {
 
 	/**
 	 * Compute the strongly connected components of the gteGraph
-	 * and check them against the neq constraints
-	 * @return does the gteGraph violates the neq constraints?
+	 * and check them against the neq-constraints
+	 * @return whether the gteGraph violates the neq-constraints
 	 */
 	private static boolean inspectStronglyConnectedComponents(
 			Map<Variable, Set<Term>> neq,
@@ -444,46 +437,5 @@ class InequalitiesSatisfiability {
 		
 		return false;
 	}
-	
-	/*
-	private static Function DNF(Function or) {
-		Function f;
-		Predicate pred;
-		
-		if (or.getTerm(0) instanceof Function) {
-			f = (Function) or.getTerm(0);
-			pred = f.getFunctionSymbol();
-			if (pred == OBDAVocabulary.OR) {
-				or = FACTORY.getFunctionOR(DNF(f), or.getTerm(1));
-			} else if (pred == OBDAVocabulary.AND) {
-				distribute(f, or.getTerm(1));
-			}
-		}
-		
-		return or;
-	}
-	
-	private static Function distribute(Function and, Term t) {
-		Term sub0, sub1;
-		// first subterm
-		sub0 = and.getTerm(0);
-		if (sub0 instanceof Function) {
-			if (((Function) sub0).getFunctionSymbol() == OBDAVocabulary.AND) {
-				sub0 = distribute((Function) sub0, t);
-			} else {
-				sub0 = FACTORY.getFunctionOR(sub0, t);
-			}
-		}
-		// second subterm
-		sub1 = and.getTerm(1);
-		if (sub1 instanceof Function) {
-			if (((Function) sub1).getFunctionSymbol() == OBDAVocabulary.AND) {
-				sub1 = distribute((Function) sub1, t);
-			} else {
-				sub1 = FACTORY.getFunctionOR(sub1, t);
-			}
-		}
-		return FACTORY.getFunctionAND(sub0, sub1);
-	}
-	*/
+
 }
