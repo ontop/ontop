@@ -19,6 +19,10 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+/*
+ * These tests are probably not useful and can be removed... (acondolu) 
+ */
+
 public class InequalitiesSatisfiabilityTests extends TestCase {
 	private static final OBDADataFactory fac = OBDADataFactoryImpl.getInstance();
 
