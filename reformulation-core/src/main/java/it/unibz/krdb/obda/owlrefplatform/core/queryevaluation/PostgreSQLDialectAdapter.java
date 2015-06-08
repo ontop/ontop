@@ -29,7 +29,12 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 
     @Override
     public String MD5(String str){
-    	return "MD5(%s)";
+    	return String.format("MD5(%s)", str);
+    }
+    
+    @Override
+    public String dateTimezone(String str){
+    	return String.format("EXTRACT(TIMEZONE_ABBR, %s)", str);
     }
     
 	@Override

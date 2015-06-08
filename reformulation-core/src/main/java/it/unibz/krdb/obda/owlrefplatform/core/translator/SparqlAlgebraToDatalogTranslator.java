@@ -711,7 +711,7 @@ public class SparqlAlgebraToDatalogTranslator {
 	}
 	
 	private Term getLength(List<ValueExpr> args) {
-		if (args.size() != 2){
+		if (args.size() != 1){
             throw new UnsupportedOperationException("Wrong number of arguments (found " 
 		+ args.size() + ", only 1 supported) for SQL LENGTH function");					
 		}
@@ -874,6 +874,8 @@ public class SparqlAlgebraToDatalogTranslator {
 		return term;	
 	}
 	
+
+	
 	private Term getRand(List<ValueExpr> args) {	
 		Term term = ofac.getFunctionRand();
 		return term;	
@@ -881,6 +883,78 @@ public class SparqlAlgebraToDatalogTranslator {
 
 	private Term getUUID(List<ValueExpr> args) {	
 		Term term = ofac.getFunctionUUID();
+		return term;	
+	}
+	
+	private Term getNow() {	
+		Term term = ofac.getFunctionNow();
+		return term;	
+	}
+	
+	private Term getYear(List<ValueExpr> args) {
+		if (args.size() != 1){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL YEAR function");					
+		}
+		ValueExpr argument = args.get(0);
+		Term arg = getExpression(argument);
+		Term term = ofac.getFunctionYear(arg);
+		return term;	
+	}
+	
+	private Term getDay(List<ValueExpr> args) {
+		if (args.size() != 1){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL DAY function");					
+		}
+		ValueExpr argument = args.get(0);
+		Term arg = getExpression(argument);
+		Term term = ofac.getFunctionDay(arg);
+		return term;	
+	}
+	
+	private Term getHours(List<ValueExpr> args) {
+		if (args.size() != 1){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL HOURS function");					
+		}
+		ValueExpr argument = args.get(0);
+		Term arg = getExpression(argument);
+		Term term = ofac.getFunctionHours(arg);
+		return term;	
+	}
+	
+	
+	private Term getMinutes(List<ValueExpr> args) {
+		if (args.size() != 1){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL MINUTES function");					
+		}
+		ValueExpr argument = args.get(0);
+		Term arg = getExpression(argument);
+		Term term = ofac.getFunctionMinutes(arg);
+		return term;	
+	}
+	
+	private Term getSeconds(List<ValueExpr> args) {
+		if (args.size() != 1){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL SECONDS function");					
+		}
+		ValueExpr argument = args.get(0);
+		Term arg = getExpression(argument);
+		Term term = ofac.getFunctionSeconds(arg);
+		return term;	
+	}
+	
+	private Term getTimezone(List<ValueExpr> args) {
+		if (args.size() != 1){
+            throw new UnsupportedOperationException("Wrong number of arguments (found " 
+		+ args.size() + ", only 1 supported) for SQL TIMEZONE function");					
+		}
+		ValueExpr argument = args.get(0);
+		Term arg = getExpression(argument);
+		Term term = ofac.getFunctionTimezone(arg);
 		return term;	
 	}
 	
@@ -1033,7 +1107,28 @@ public class SparqlAlgebraToDatalogTranslator {
             	
             case "SHA512":
             	return getSHA512(expr.getArgs());
+            	
+            case "NOW":
+            	return getNow();	
+            
+            case "http://www.w3.org/2005/xpath-functions#year-from-dateTime":
+            	return getYear(expr.getArgs());
+            	
+            case "http://www.w3.org/2005/xpath-functions#day-from-dateTime":
+            	return getDay(expr.getArgs());
+            	
+            case "http://www.w3.org/2005/xpath-functions#hours-from-dateTime":
+            	return getHours(expr.getArgs());
+	
+            case "http://www.w3.org/2005/xpath-functions#minutes-from-dateTime":
+            	return getMinutes(expr.getArgs());
                	
+            case "http://www.w3.org/2005/xpath-functions#seconds-from-dateTime":
+            	return getSeconds(expr.getArgs());	
+            	
+            case "http://www.w3.org/2005/xpath-functions#timezone-from-dateTime":
+            	return getTimezone(expr.getArgs());
+            	
             default:
                 throw new RuntimeException("The builtin function " + expr.getURI() + " is not supported yet!");
         }

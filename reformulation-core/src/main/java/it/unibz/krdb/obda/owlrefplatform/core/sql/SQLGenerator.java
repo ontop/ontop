@@ -1342,10 +1342,10 @@ public class SQLGenerator implements SQLQueryGenerator {
 
 		Function function = (Function) term;
 		Predicate functionSymbol = function.getFunctionSymbol();
-		Term term1 = function.getTerms().get(0);
 		int size = function.getTerms().size();
 
 		if (functionSymbol instanceof DatatypePredicate) {
+			Term term1 = function.getTerms().get(0);
 			if (functionSymbol.getType(0) == COL_TYPE.UNSUPPORTED) {
 				throw new RuntimeException("Unsupported type in the query: " + function);
 			}
@@ -1356,6 +1356,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 				return getSQLStringForTemplateFunction(function, index);
 			}
 		} else if (functionSymbol.isBooleanPredicate() ) {
+			Term term1 = function.getTerms().get(0);
 			// atoms of the form EQ(x,y)
 			String expressionFormat = getBooleanOperatorString(functionSymbol);
 			if (isUnary(function)) {
@@ -1415,6 +1416,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 			}
 			
 		} else if (functionSymbol instanceof NumericalOperationPredicate) {
+			Term term1 = function.getTerms().get(0);
 			String expressionFormat = getNumericalOperatorString(functionSymbol);
 			String leftOp = getSQLString(term1, index, true);
 				if (isUnary(function)){
@@ -1470,8 +1472,37 @@ public class SQLGenerator implements SQLQueryGenerator {
 					String literal = getSQLString(function.getTerm(0), index, false);
 					String result = sqladapter.strLength(literal);
 					return result;
-			} 
-			 else if (functionName.equals(OBDAVocabulary.ENCODE_FOR_URI.getName())) {
+			} else if (functionName.equals(OBDAVocabulary.YEAR.getName())) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateYear(literal);
+				return result;
+				
+			} else if (functionName.equals(OBDAVocabulary.MINUTES.getName())) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateMinutes(literal);
+				return result; 
+				
+			} else if (functionName.equals(OBDAVocabulary.DAY.getName())) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateDay(literal);
+				return result;
+				
+			} else if (functionName.equals(OBDAVocabulary.SECONDS.getName())) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateSeconds(literal);
+				return result;
+				
+			} else if (functionName.equals(OBDAVocabulary.HOURS.getName())) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateHours(literal);
+				return result;
+				
+			} else if (functionName.equals(OBDAVocabulary.TIMEZONE.getName())) {
+				String literal = getSQLString(function.getTerm(0), index, false);
+				String result = sqladapter.dateTimezone(literal);
+				return result;
+				
+			} else if (functionName.equals(OBDAVocabulary.ENCODE_FOR_URI.getName())) {
 					String literal = getSQLString(function.getTerm(0), index, false);
 					String result = sqladapter.strEncodeForUri(literal);
 					return result;
@@ -1506,9 +1537,7 @@ public class SQLGenerator implements SQLQueryGenerator {
 					String literal = getSQLString(function.getTerm(0), index, false);
 					String result = sqladapter.strLcase(literal);
 					return result;
-			} 
-			
-			 else if (functionName.equals(OBDAVocabulary.SUBSTR.getName())) {
+			}  else if (functionName.equals(OBDAVocabulary.SUBSTR.getName())) {
 					String string = getSQLString(function.getTerm(0), index, false);
 					String start = getSQLString(function.getTerm(1), index, false);
 					String end = getSQLString(function.getTerm(2), index, false);
@@ -1659,6 +1688,8 @@ public class SQLGenerator implements SQLQueryGenerator {
 			operator = RAND_OPERATOR;
 		} else if (functionSymbol.equals(OBDAVocabulary.UUID)) {
 			operator = sqladapter.uuid();
+		} else if (functionSymbol.equals(OBDAVocabulary.NOW)) {
+			operator = sqladapter.dateNow();			
 		} else {
 			throw new RuntimeException("Unknown numerical operator: " + functionSymbol);
 		}

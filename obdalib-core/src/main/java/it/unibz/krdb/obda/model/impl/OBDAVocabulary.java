@@ -59,6 +59,8 @@ public class OBDAVocabulary {
 			"RAND", 0);
 	public static final Predicate UUID = new NumericalOperationPredicateImpl(
 			"UUID", 0);
+	public static final Predicate NOW = new NumericalOperationPredicateImpl(
+			"NOW",0);
 
 	/* Boolean predicates */
 
@@ -143,9 +145,23 @@ public class OBDAVocabulary {
 	public static final StringOperationPredicate SHA256 = new StringOperationPredicateImpl(
 			"SHA256", 1, new COL_TYPE[]{COL_TYPE.LITERAL});
 	
-
+	public static final StringOperationPredicate YEAR = new StringOperationPredicateImpl(
+			"YEAR", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
 	
-
+	public static final StringOperationPredicate DAY = new StringOperationPredicateImpl(
+			"DAY", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
+	
+	public static final StringOperationPredicate HOURS = new StringOperationPredicateImpl(
+			"HOURS", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
+	
+	public static final StringOperationPredicate MINUTES = new StringOperationPredicateImpl(
+			"MINUTES", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
+	
+	public static final StringOperationPredicate SECONDS = new StringOperationPredicateImpl(
+			"SECONDS", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
+	
+	public static final StringOperationPredicate TIMEZONE = new StringOperationPredicateImpl(
+			"TIMEZONE", 1, new COL_TYPE[]{COL_TYPE.DATETIME_STAMP});
 
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 

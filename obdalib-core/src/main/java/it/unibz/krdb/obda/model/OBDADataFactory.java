@@ -352,5 +352,20 @@ public interface OBDADataFactory extends Serializable {
 
 	public Function getSPARQLLeftJoin(Term t1, Term t2);
 
+	public Function getFunctionNow();
+
+	public Function getFunctionYear(Term arg);
+	
+	public Function getFunctionDay(Term arg);
+	
+	public Function getFunctionMinutes(Term arg);
+	
+	public Function getFunctionSeconds(Term arg);
+	
+	public Function getFunctionHours(Term arg);
+	
+	public Function getFunctionTimezone(Term arg);
+
+
 	
 }

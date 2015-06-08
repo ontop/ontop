@@ -64,24 +64,62 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
     }
     
+    
+    @Override
+  	public String dateNow() {
+    	return "CURRENT_TIMESTAMP()";
+    	
+  	}
+    
+    @Override
+  	public String dateYear(String str) {
+    	return String.format("EXTRACT(YEAR FROM %s)",str);
+  	}
+    
+    @Override
+  	public String dateDay(String str) {
+    	return String.format("EXTRACT(DAY FROM %s)",str);
+  	}
+    
+    @Override
+  	public String dateHours(String str) {
+    	return String.format("EXTRACT(HOUR FROM %s)",str);
+  	}
+    
+    @Override
+  	public String dateMinutes(String str) {
+    	return String.format("EXTRACT(MINUTE FROM %s)",str);
+  	}
+    
+    @Override
+  	public String dateSeconds(String str) {
+    	return String.format("EXTRACT(SECOND FROM %s)",str);
+  	}
+    
+    @Override
+  	public String dateTimezone(String str) {
+    	throw new UnsupportedOperationException("TIMEZONE is not supported in this dialect.");
+  	}
+    
+  
     @Override
   	public String SHA256(String str) {
-    	throw new UnsupportedOperationException("SHA256 is not supported in this DB.");
+    	throw new UnsupportedOperationException("SHA256 is not supported in this dialect.");
   	}
     
     @Override
   	public String SHA1(String str) {
-    	throw new UnsupportedOperationException("SHA1 is not supported in this DB.");
+    	throw new UnsupportedOperationException("SHA1 is not supported in this dialect.");
   	}
     
     @Override
   	public String SHA512(String str) {
-    	throw new UnsupportedOperationException("SHA512 is not supported in this DB.");
+    	throw new UnsupportedOperationException("SHA512 is not supported in this dialect.");
   	}
       
       @Override
   	public String MD5(String str) {
-      	throw new UnsupportedOperationException("MD5 is not supported in this DB.");
+      	throw new UnsupportedOperationException("MD5 is not supported in this dialect.");
   	}
     
     @Override

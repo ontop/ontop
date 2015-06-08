@@ -106,5 +106,20 @@ public interface SQLDialectAdapter {
 	 */
 	public String nameTopVariable(String signatureVariable, String proposedSuffix, Set<String> sqlVariableNames);
 
+	public String dateNow();
+	
+	public String dateYear(String date);
+
+	public String dateHours(String date);
+
+	public String dateMinutes(String date);
+
+	public String dateSeconds(String date);
+
+	public String dateDay(String date);
+
+	public String dateTimezone(String date);
+
+
 
 }

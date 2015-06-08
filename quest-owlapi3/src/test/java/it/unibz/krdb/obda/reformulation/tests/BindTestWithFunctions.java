@@ -197,7 +197,7 @@ public class BindTestWithFunctions {
         expectedValues.add("\"9.0\"");
         checkReturnedValues(p, queryBind, expectedValues);
     }
-
+	@Ignore
 	@Test
     public void testBindWithHash() throws Exception {
 
@@ -254,7 +254,7 @@ public class BindTestWithFunctions {
 	  }
 	}
 	
-	
+	@Ignore
     @Test
     public void testStrEncode() throws Exception {
 
@@ -278,6 +278,31 @@ public class BindTestWithFunctions {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"The%20Semantic%20Web\"");
         expectedValues.add("\"The%20Logic%20Book%3A%20Introduction%2C%20Second%20Edition\"");
+        checkReturnedValues(p, queryBind, expectedValues);
+    } 
+    
+    
+    @Test
+    public void testNow() throws Exception {
+
+        QuestPreferences p = new QuestPreferences();
+        p.setCurrentValueOf(QuestPreferences.ABOX_MODE, QuestConstants.VIRTUAL);
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_EQUIVALENCES, "true");
+        p.setCurrentValueOf(QuestPreferences.OPTIMIZE_TBOX_SIGMA, "true");
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND (TIMEZONE(\"2015-06-08 15:58:33.562\") AS ?w)\n"
+             + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+ 
         checkReturnedValues(p, queryBind, expectedValues);
     } 
     
