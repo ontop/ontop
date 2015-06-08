@@ -60,7 +60,6 @@ public class OBDAVocabulary {
 	public static final Predicate UUID = new NumericalOperationPredicateImpl(
 			"UUID", 0);
 
-
 	/* Boolean predicates */
 
 	public static final BooleanOperationPredicate AND = new BooleanOperationPredicateImpl(
@@ -143,6 +142,10 @@ public class OBDAVocabulary {
 	
 	public static final StringOperationPredicate SHA256 = new StringOperationPredicateImpl(
 			"SHA256", 1, new COL_TYPE[]{COL_TYPE.LITERAL});
+	
+
+	
+
 
 	public static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 

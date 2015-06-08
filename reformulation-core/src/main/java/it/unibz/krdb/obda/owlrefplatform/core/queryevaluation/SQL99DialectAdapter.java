@@ -37,10 +37,11 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
     private Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");  
     
+  
     
     @Override 
     public String strEncodeForUri(String str){
-      /*"REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
+      return "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
             "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" + str + ",' ', '%20')," +
             "'!', '%21')," +
             "'@', '%40')," +
@@ -59,9 +60,8 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
             "'=', '%3D'), " +
             "'+', '%2B'), " +
             "'''', '%22'), " +
-            "'/', '%2F')"; */
-    		
-    	throw new UnsupportedOperationException("SHA256 is not supported in this DB.");
+            "'/', '%2F')"; 
+
     }
     
     @Override

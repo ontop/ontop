@@ -878,7 +878,7 @@ public class SparqlAlgebraToDatalogTranslator {
 		Term term = ofac.getFunctionRand();
 		return term;	
 	}
-	
+
 	private Term getUUID(List<ValueExpr> args) {	
 		Term term = ofac.getFunctionUUID();
 		return term;	

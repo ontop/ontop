@@ -495,22 +495,22 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
     @Override
     public Function getFunctionUpper(Term term) {
         return getFunction(OBDAVocabulary.UCASE, term);
-    } //added by Nika
+    } 
     
     @Override
     public Function getFunctionLower(Term term) {
         return getFunction(OBDAVocabulary.LCASE, term);
-    } //added by Nika
+    } 
+    
     
     @Override
     public Function getFunctionStrBefore(Term term1, Term term2){
     	return getFunction(OBDAVocabulary.STRBEFORE, term1, term2); 
-    } //added by Nika
-    
+    } 
     @Override
 	public Function getFunctionStrAfter(Term term1, Term term2){
     	return getFunction(OBDAVocabulary.STRAFTER, term1, term2);
-    } //added by Nika
+    } 
     
 	@Override
 	public Function getFunctionCast(Term term1, Term term2) {
@@ -651,5 +651,7 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 		}
 		return newTerm;
 	}
+
+	
 
 }

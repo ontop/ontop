@@ -30,10 +30,34 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 		return "RANDOM_UUID()";
 	}
 	
+	public String strEncodeForUri(String str){
+	      return "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" +
+	            "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(" + str + ",' ', '%20')," +
+	            "'!', '%21')," +
+	            "'@', '%40')," +
+	            "'#', '%23')," +
+	            "'$', '%24')," +
+	            "'&', '%26')," +
+	            "'*', '%42'), " +
+	            "'(', '%28'), " +
+	            "')', '%29'), " +
+	            "'[', '%5B'), " +
+	            "']', '%5D'), " +
+	            "',', '%2C'), " +
+	            "';', '%3B'), " +
+	            "':', '%3A'), " +
+	            "'?', '%3F'), " +
+	            "'=', '%3D'), " +
+	            "'+', '%2B'), " +
+	            "'''', '%22'), " +
+	            "'/', '%2F')";
+	    }
+	
 	@Override
 	public String SHA256(String str){
-		return String.format("HASH('SHA256', STRINGTOUTF8(%s),1000)", str);
+		return String.format("HASH('SHA256', STRINGTOUTF8(%s),1)", str);
 	}
+
 
 	@Override
 	public String sqlSlice(long limit, long offset) {

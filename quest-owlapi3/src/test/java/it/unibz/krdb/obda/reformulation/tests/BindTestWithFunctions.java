@@ -27,6 +27,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.owlapi3.OntopOWLException;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestConstants;
 import it.unibz.krdb.obda.owlrefplatform.core.QuestPreferences;
+import it.unibz.krdb.obda.owlrefplatform.core.QuestStatement;
 import it.unibz.krdb.obda.owlrefplatform.owlapi3.*;
 
 import org.junit.After;
@@ -38,11 +39,14 @@ import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.security.MessageDigest;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -62,7 +66,7 @@ import static org.junit.Assert.assertTrue;
  */
 
 public class BindTestWithFunctions {
-
+	
 	private OBDADataFactory fac;
 	private Connection conn;
 
@@ -166,6 +170,8 @@ public class BindTestWithFunctions {
 			reasoner.dispose();
 		}
 	}
+	
+	
 	@Ignore
 	@Test
     public void testBindWithNumeric() throws Exception {
@@ -206,16 +212,48 @@ public class BindTestWithFunctions {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount.\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND (SHA256(?title) AS ?w)\n"
+                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   BIND (SHA256(\"The\") AS ?w)\n"
                 + "}";
 
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("47cd2b73255540967d098e713910cd30d1419a55d6c51aec5925a6d0ff722025");
-        
+        List<String> expectedValues = new ArrayList<>(); 
+        try{
+	          MessageDigest digest = MessageDigest.getInstance("SHA-256");
+	          byte[] hash = digest.digest("The".getBytes("UTF-8"));
+	          StringBuffer hexString = new StringBuffer();
 
+	          for (int i = 0; i < hash.length; i++) {
+	              String hex = Integer.toHexString(0xff & hash[i]);
+	              if(hex.length() == 1) hexString.append('0');
+	              hexString.append(hex);
+	          }
 
+	          expectedValues.add(String.format("\"%s\"",hexString.toString()));
+	  } catch(Exception ex){
+	     throw new RuntimeException(ex);
+	  }
         checkReturnedValues(p, queryBind, expectedValues);
+
     }
+	
+	public static String sha256(String base) {
+	      try{
+	          MessageDigest digest = MessageDigest.getInstance("SHA-256");
+	          byte[] hash = digest.digest(base.getBytes("UTF-8"));
+	          StringBuffer hexString = new StringBuffer();
+
+	          for (int i = 0; i < hash.length; i++) {
+	              String hex = Integer.toHexString(0xff & hash[i]);
+	              if(hex.length() == 1) hexString.append('0');
+	              hexString.append(hex);
+	          }
+
+	      return hexString.toString();
+	  } catch(Exception ex){
+	     throw new RuntimeException(ex);
+	  }
+	}
+	
 	
     @Test
     public void testStrEncode() throws Exception {
@@ -232,16 +270,15 @@ public class BindTestWithFunctions {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   BIND(?title AS ?w)\n"
-                + "   FILTER(ENCODE_FOR_URI(\"The Logic Book\"))\n"
+                + "   FILTER (STRSTARTS(?title,\"The\"))\n"
+                + "   BIND (ENCODE_FOR_URI(?title) AS ?w)\n"
              + "}";
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("The%20Logic%20Book");
+        expectedValues.add("\"The%20Semantic%20Web\"");
+        expectedValues.add("\"The%20Logic%20Book%3A%20Introduction%2C%20Second%20Edition\"");
         checkReturnedValues(p, queryBind, expectedValues);
-
-
     } 
     
     @Ignore
