@@ -10,7 +10,7 @@ import org.semanticweb.ontop.pivotalrepr.SimpleFilterNode;
 public class SimpleFilterNodeImpl extends FilterNodeImpl implements SimpleFilterNode {
 
     public SimpleFilterNodeImpl(BooleanExpression filterCondition) {
-        super(filterCondition);
+        super(Optional.of(filterCondition));
     }
 
     @Override

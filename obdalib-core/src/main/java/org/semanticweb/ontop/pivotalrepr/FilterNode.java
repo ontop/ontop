@@ -1,5 +1,6 @@
 package org.semanticweb.ontop.pivotalrepr;
 
+import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.BooleanExpression;
 
 /**
@@ -7,7 +8,5 @@ import org.semanticweb.ontop.model.BooleanExpression;
  */
 public interface FilterNode extends QueryNode {
 
-    public BooleanExpression getFilterCondition();
-
-    public boolean hasFilterCondition();
+    public Optional<BooleanExpression> getOptionalFilterCondition();
 }

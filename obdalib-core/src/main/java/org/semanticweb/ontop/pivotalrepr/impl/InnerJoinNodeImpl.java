@@ -6,15 +6,8 @@ import org.semanticweb.ontop.pivotalrepr.*;
 
 public class InnerJoinNodeImpl extends AbstractJoinNodeImpl implements InnerJoinNode {
 
-    /**
-     * Without condition
-     */
-    public InnerJoinNodeImpl() {
-        super();
-    }
-
-    protected InnerJoinNodeImpl(BooleanExpression joinCondition) {
-        super(joinCondition);
+    public InnerJoinNodeImpl(Optional<BooleanExpression> optionalFilterCondition) {
+        super(optionalFilterCondition);
     }
 
 

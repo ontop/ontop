@@ -1,28 +1,20 @@
 package org.semanticweb.ontop.pivotalrepr.impl;
 
 
+import com.google.common.base.Optional;
 import org.semanticweb.ontop.model.BooleanExpression;
 import org.semanticweb.ontop.pivotalrepr.FilterNode;
 
 public abstract class FilterNodeImpl extends QueryNodeImpl implements FilterNode {
 
-    private BooleanExpression filterCondition;
+    private Optional<BooleanExpression> optionalFilterCondition;
 
-    protected FilterNodeImpl() {
-        filterCondition = null;
-    }
-
-    protected FilterNodeImpl(BooleanExpression filterCondition) {
-        this.filterCondition = filterCondition;
+    protected FilterNodeImpl(Optional<BooleanExpression> optionalFilterCondition) {
+        this.optionalFilterCondition = optionalFilterCondition;
     }
 
     @Override
-    public BooleanExpression getFilterCondition() {
-        return filterCondition;
-    }
-
-    @Override
-    public boolean hasFilterCondition() {
-        return filterCondition != null;
+    public Optional<BooleanExpression> getOptionalFilterCondition() {
+        return optionalFilterCondition;
     }
 }

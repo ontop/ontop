@@ -3,10 +3,6 @@ package org.semanticweb.ontop.model;
 import fj.F;
 import fj.F2;
 import fj.data.List;
-import org.semanticweb.ontop.model.Function;
-import org.semanticweb.ontop.model.OBDADataFactory;
-import org.semanticweb.ontop.model.Predicate;
-import org.semanticweb.ontop.model.Term;
 import org.semanticweb.ontop.model.impl.OBDADataFactoryImpl;
 import org.semanticweb.ontop.model.impl.OBDAVocabulary;
 
@@ -18,18 +14,24 @@ import java.util.ArrayList;
 public class DatalogTools {
 
     private final static OBDADataFactory DATA_FACTORY = OBDADataFactoryImpl.getInstance();
-    private final static Function TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
+    private final static BooleanExpression TRUE_EQ = DATA_FACTORY.getFunctionEQ(OBDAVocabulary.TRUE, OBDAVocabulary.TRUE);
 
-    private final static  F<Function, Boolean> isDataOrLeftJoinOrJoinAtomFct = new F<Function, Boolean>() {
+    private final static  F<Function, Boolean> IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT = new F<Function, Boolean>() {
         @Override
         public Boolean f(Function atom) {
             return isDataOrLeftJoinOrJoinAtom(atom);
         }
     };
-    private final static  F<Function, Boolean> isNotDataOrCompositeAtomFct = new F<Function, Boolean>() {
+    private final static  F<Function, Boolean> IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT = new F<Function, Boolean>() {
         @Override
         public Boolean f(Function atom) {
             return !isDataOrLeftJoinOrJoinAtom(atom);
+        }
+    };
+    private final static  F<Function, Boolean> IS_BOOLEAN_ATOM_FCT = new F<Function, Boolean>() {
+        @Override
+        public Boolean f(Function atom) {
+            return atom.isBooleanFunction();
         }
     };
 
@@ -44,27 +46,40 @@ public class DatalogTools {
     }
 
     public static List<Function> filterDataAndCompositeAtoms(List<Function> atoms) {
-        return atoms.filter(isDataOrLeftJoinOrJoinAtomFct);
+        return atoms.filter(IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT);
     }
 
     public static List<Function> filterNonDataAndCompositeAtoms(List<Function> atoms) {
-        return atoms.filter(isNotDataOrCompositeAtomFct);
+        return atoms.filter(IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT);
+    }
+
+    public static List<Function> filterBooleanAtoms(List<Function> atoms) {
+        return atoms.filter(IS_BOOLEAN_ATOM_FCT);
     }
 
     /**
      * Folds a list of boolean atoms into one AND(AND(...)) boolean atom.
      */
-    public static Function foldBooleanConditions(List<Function> booleanAtoms) {
+    public static BooleanExpression foldBooleanConditions(List<Function> booleanAtoms) {
         if (booleanAtoms.length() == 0)
             return TRUE_EQ;
 
-        Function firstBooleanAtom = booleanAtoms.head();
-        return booleanAtoms.tail().foldLeft(new F2<Function, Function, Function>() {
+        Function firstAtom = booleanAtoms.head();
+        if (!(firstAtom instanceof BooleanExpression)) {
+            throw new IllegalArgumentException("The first atom " + firstAtom + " is not a boolean atom");
+        }
+
+        BooleanExpression firstBooleanAtom = (BooleanExpression) firstAtom;
+        return booleanAtoms.tail().foldLeft(new F2<BooleanExpression, Function, BooleanExpression>() {
             @Override
-            public Function f(Function previousAtom, Function currentAtom) {
+            public BooleanExpression f(BooleanExpression previousAtom, Function currentAtom) {
                 return DATA_FACTORY.getFunctionAND(previousAtom, currentAtom);
             }
         }, firstBooleanAtom);
+    }
+
+    public static BooleanExpression foldBooleanConditions(java.util.List<Function> booleanAtoms) {
+        return foldBooleanConditions(List.iterableList(booleanAtoms));
     }
 
     /**

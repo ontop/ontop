@@ -332,7 +332,27 @@ public class OBDADataFactoryImpl implements OBDADataFactory {
 
 	@Override
 	public BooleanExpression getFunctionAND(Term term1, Term term2) {
+		checkInnerBooleanExpressionTerm(term1);
+		checkInnerBooleanExpressionTerm(term2);
+
 		return getBooleanExpression(OBDAVocabulary.AND, term1, term2);
+	}
+
+	private static void checkInnerBooleanExpressionTerm(Term term) {
+		if (term instanceof Function) {
+			Function functionalTerm = (Function) term;
+
+			if (functionalTerm.isBooleanFunction()) {
+				return;
+			}
+		}
+		else if (term.equals(OBDAVocabulary.FALSE)
+				|| term.equals(OBDAVocabulary.TRUE)) {
+			return;
+		}
+
+		// Illegal argument given to the caller of this
+		throw new IllegalArgumentException(term + " is not a boolean expression");
 	}
 
 //	@Override
