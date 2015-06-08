@@ -48,4 +48,9 @@ public class DoubleInterval {
 			return this;
 		return new DoubleInterval(lowerBound, upperBound);
 	}
+	
+	@Override
+	public DoubleInterval clone() {
+		return new DoubleInterval(lowerBound, upperBound);
+	}
 }

@@ -10,15 +10,19 @@ driverClass	org.h2.Driver
 
 [MappingDeclaration] @collection [[
 mappingId	Lt1
-target		:obj-{COL1} a :Lt1 . 
+target		:obj-{COL1} a :Lt1 . :obj-{COL1} a :Lt1or2 .
 source		SELECT COL1 FROM "TABLE" WHERE COL1 < 1
 
+mappingId	Lt2
+target		:obj-{COL1} a :Lt2 . :obj-{COL1} a :Lt1or2 .
+source		SELECT COL1 FROM "TABLE" WHERE COL1 < 2
+
 mappingId	Gt5
-target		:obj-{COL1} a :Gt5 . 
+target		:obj-{COL1} a :Gt5 . :obj-{COL1} a :Gt3or5 .
 source		SELECT COL1 FROM "TABLE" WHERE COL1 > 5
 
 mappingId	Gt3
-target		:obj-{COL1} a :Gt3 . 
+target		:obj-{COL1} a :Gt3 . :obj-{COL1} a :Gt3or5 .
 source		SELECT COL1 FROM "TABLE" WHERE COL1 > 3
 
 mappingId	Gt

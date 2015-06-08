@@ -30,6 +30,13 @@
     <Declaration>
         <Class IRI="#Gt5"/>
     </Declaration>
+    <Declaration>
+        <Class IRI="#Gt3or5"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Lt1or2"/>
+    </Declaration>
+    
 	<Declaration>
         <DataProperty IRI="#Gt"/>
     </Declaration>

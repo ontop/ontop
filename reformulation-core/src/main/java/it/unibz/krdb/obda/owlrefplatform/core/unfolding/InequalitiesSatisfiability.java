@@ -14,6 +14,7 @@ import it.unibz.krdb.obda.model.impl.OBDADataFactoryImpl;
 import it.unibz.krdb.obda.model.impl.OBDAVocabulary;
 
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graphs;
 import org.jgrapht.alg.StrongConnectivityInspector;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -29,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 
 class InequalitiesSatisfiability {	
@@ -87,14 +90,14 @@ class InequalitiesSatisfiability {
 	 */
 	public static boolean unsatisfiable(CQIE q) {
 		LOGGER.debug("Checking satisfiability of OBDA query");
-		return check(q.getBody());
+		return unsatisfiable(q.getBody());
 	}
 
 	/**
 	 * @param body the body of an OBDA query
 	 * @return true if the query is found unsatisfiable, false otherwise.
 	 */
-	public static boolean check(List<Function> body) {
+	public static boolean unsatisfiable(List<Function> body) {
 		List<Function> atoms = new ArrayList<>(body);
 		
 		/*
@@ -137,13 +140,16 @@ class InequalitiesSatisfiability {
 		 */
 		DirectedGraph<Term, DefaultEdge> gteGraph = new DefaultDirectedGraph<>(DefaultEdge.class);
 		
+		return unsatisfiable(atoms, mranges, neq, gteGraph);
+	}
+
+	private static boolean unsatisfiable(List<Function> atoms,
+			Map<Variable, DoubleInterval> mranges,
+			Map<Variable, Set<Term>> neq,
+			DirectedGraph<Term, DefaultEdge> gteGraph) {
+
 		/*
-		 * The constants occurring in the inequalities atoms in the query
-		 */
-		List<Double> constants = new ArrayList<>();
-		
-		/*
-		 * First step: eliminate trivial inequalities
+		 * Eliminate trivial inequalities
 		 * This is already performed in ExpressionEvaluator.java:
 		 * - elimination of "const1 (op) const2": evalEqNeq, evalGtLt, evalGteLte;
 		 * - elimination of "# = #", "# != #" : evalEqNeq.
@@ -157,8 +163,24 @@ class InequalitiesSatisfiability {
 		 * - start constructing the graph with the greater-than-or-equal relations
 		 * - store the not-equal constraints  
 		 */
-		if (scanAtoms(atoms, mranges, neq, gteGraph))
-			return true;
+		
+		for (int atomidx = 0; atomidx < atoms.size(); atomidx++) {
+			Function atom = atoms.get(atomidx); 
+			/*
+			 * Fork the OR's
+			 */
+			if (atom.getFunctionSymbol() == OBDAVocabulary.OR) {
+				return forkOR(atomidx, atoms, mranges, neq, gteGraph);
+			}
+			
+			if (scanAtom(atom, atoms, mranges, neq, gteGraph))
+				return true;	
+		}
+		
+		/*
+		 * The constants occurring in the inequalities atoms in the query
+		 */
+		SortedSet<Double> constants = new TreeSet<>();
 		
 		/*
 		 * Transport the information gathered with the minimum range of variables
@@ -180,109 +202,151 @@ class InequalitiesSatisfiability {
 		return inspectStronglyConnectedComponents(neq, gteGraph);
 	}
 
-	/**
-	 * Scan the list of atoms building the minimum range of variables, 
-	 * constructing the greater-than-or-equal graph, storing the not-equals constraints 
-	 */
-	private static boolean scanAtoms(List<Function> atoms,
+	@SuppressWarnings("unchecked")
+	private static boolean forkOR(
+			int pos,
+			List<Function> atoms,
 			Map<Variable, DoubleInterval> mranges,
 			Map<Variable, Set<Term>> neq,
 			DirectedGraph<Term, DefaultEdge> gteGraph) {
 		
-		for (int atomidx = 0; atomidx < atoms.size(); atomidx++) {
-			Function atom = atoms.get(atomidx);
-			Predicate pred = atom.getFunctionSymbol();
-			
-			if (!(pred instanceof BooleanOperationPredicate) || pred.getArity() != 2) {
-				continue;
+		atoms = atoms.subList(pos, atoms.size());
+		Function or = atoms.get(0);
+		if (! (or.getTerm(0) instanceof Function && or.getTerm(1) instanceof Function) ) {
+			return false;
+		}
+		
+		/*
+		 * Clone the data structures
+		 */
+		List<Function> atoms_copy = new ArrayList<>(atoms);
+		atoms_copy.set(0, (Function) or.getTerm(0));
+		
+		Map<Variable, DoubleInterval> mranges_copy;
+		Map<Variable, Set<Term>> neq_copy;
+		try {
+			mranges_copy = mranges.getClass().newInstance();
+			neq_copy = neq.getClass().newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		for (Entry<Variable, DoubleInterval> cursor: mranges.entrySet()) {
+			mranges_copy.put(cursor.getKey(), cursor.getValue().clone());
+		}
+		
+		for (Entry<Variable, Set<Term>> cursor: neq.entrySet()) {
+			Set<Term> tmp = new HashSet<>(cursor.getValue());
+			neq_copy.put(cursor.getKey(), tmp);
+		}		
+		
+		DirectedGraph<Term, DefaultEdge> gteGraph_copy = new DefaultDirectedGraph<>(DefaultEdge.class);
+		Graphs.addGraph(gteGraph_copy, gteGraph);
+		
+		/*
+		 * Call the satisfiability check twice, once for each possibility
+		 */
+		if (!unsatisfiable(atoms_copy, mranges_copy, neq_copy, gteGraph_copy)) {
+			return false;
+		} else {
+			atoms.set(0, (Function) or.getTerm(1));
+			return unsatisfiable(atoms, mranges, neq, gteGraph);
+		}
+	}
+
+	
+	/**
+	 * Scan one atom in order to build the minimum range of variables, 
+	 * construct the greater-than-or-equal graph, store the not-equals constraints 
+	 */
+	private static boolean scanAtom(Function atom, List<Function> atoms,
+			Map<Variable, DoubleInterval> mranges,
+			Map<Variable, Set<Term>> neq,
+			DirectedGraph<Term, DefaultEdge> gteGraph) {
+
+		Predicate pred = atom.getFunctionSymbol();
+
+		if (!(pred instanceof BooleanOperationPredicate) || pred.getArity() != 2) {
+			return false;
+		}
+		LOGGER.debug("binary BooleanOperationPredicate: " + atom.toString());
+		Term t0 = atom.getTerm(0),
+				t1 = atom.getTerm(1);
+
+		/*
+		 * Remove LT's and LTE's by swapping the terms
+		 */
+		if (pred == OBDAVocabulary.LTE) {
+			//atom = fac.getFunctionGTE(t1, t0);
+			Term tmp = t0; t0 = t1; t1 = tmp;
+			pred = OBDAVocabulary.GTE;
+		} else if (pred == OBDAVocabulary.LT) {
+			//atom = fac.getFunctionGT(t1, t0);
+			Term tmp = t0; t0 = t1; t1 = tmp;
+			pred = OBDAVocabulary.GT;
+		}
+
+		/*
+		 * Flatten ANDs
+		 */
+		if (pred == OBDAVocabulary.AND) {
+			if (t0 instanceof Function)
+				atoms.add((Function) t0);
+			if (t1 instanceof Function)
+				atoms.add((Function) t1);
+			return false;
+		} /*
+		 * Replace GT with GTE and NEQ
+		 */
+		else if (pred == OBDAVocabulary.GT){
+			pred = OBDAVocabulary.GTE;
+			atoms.add(FACTORY.getFunctionNEQ(t0, t1));
+		} /*
+		 * Replace EQ by two GTE  
+		 */
+		else if (pred == OBDAVocabulary.EQ) {
+			pred = OBDAVocabulary.GTE;
+			atoms.add(FACTORY.getFunctionGTE(t1, t0));
+		}
+
+		if (pred == OBDAVocabulary.NEQ) {
+			if (t0 instanceof Variable) {
+				neq.get((Variable) t0).add(t1);
 			}
-			LOGGER.debug("binary BooleanOperationPredicate: " + atom.toString());
-			Term t0 = atom.getTerm(0),
-				 t1 = atom.getTerm(1);
-			/*
-			 * Ignore unsupported constants
-			 *
-			if (t0 instanceof Constant && !isNumeric((Constant) t0))
-					continue;
-			if (t1 instanceof Constant && !isNumeric((Constant) t1))
-					continue;
-			*/
-			
-			/*
-			 * Remove LT's and LTE's by swapping the terms
-			 */
-			if (pred == OBDAVocabulary.LTE) {
-				//atom = fac.getFunctionGTE(t1, t0);
-				Term tmp = t0; t0 = t1; t1 = tmp;
-				pred = OBDAVocabulary.GTE;
-			} else if (pred == OBDAVocabulary.LT) {
-				//atom = fac.getFunctionGT(t1, t0);
-				Term tmp = t0; t0 = t1; t1 = tmp;
-				pred = OBDAVocabulary.GT;
+			if (t1 instanceof Variable) {
+				neq.get((Variable) t1).add(t0);
 			}
-			
-			/*
-			 * Flatten ANDs
-			 */
-			if (pred == OBDAVocabulary.AND) {
-				if (t0 instanceof Function)
-					atoms.add((Function) t0);
-				if (t1 instanceof Function)
-					atoms.add((Function) t1);
-				continue;
-			} /*
-			   * Replace GT with GTE and NEQ
-			   */
-			  else if (pred == OBDAVocabulary.GT){
-				pred = OBDAVocabulary.GTE;
-				atoms.add(FACTORY.getFunctionNEQ(t0, t1));
-			} /*
-			   * Replace EQ by two GTE  
-			   */
-			  else if (pred == OBDAVocabulary.EQ) {
-				pred = OBDAVocabulary.GTE;
-				atoms.add(FACTORY.getFunctionGTE(t1, t0));
-			}
-			
-			if (pred == OBDAVocabulary.NEQ) {
-				if (t0 instanceof Variable) {
-					neq.get((Variable) t0).add(t1);
-				}
-				if (t1 instanceof Variable) {
-					neq.get((Variable) t1).add(t0);
-				}
-			} else if (pred == OBDAVocabulary.GTE) {
-				if (t0 instanceof Variable && t1 instanceof Constant) {
-					Variable var = (Variable) t0;
-					Double value = constantValue((Constant) t1);
-					if (value != null) {
-						DoubleInterval interval; 
-						try {
-							interval = mranges.get(var).withLowerBound(value);
-						} catch (IllegalArgumentException e) {
-							return true;
-						}
-						mranges.put(var, interval);
+		} else if (pred == OBDAVocabulary.GTE) {
+			if (t0 instanceof Variable && t1 instanceof Constant) {
+				Variable var = (Variable) t0;
+				Double value = constantValue((Constant) t1);
+				if (value != null) {
+					DoubleInterval interval; 
+					try {
+						interval = mranges.get(var).withLowerBound(value);
+					} catch (IllegalArgumentException e) {
+						return true;
 					}
-				} else if (t0 instanceof Constant && t1 instanceof Variable) {
-					Variable var = (Variable) t1;
-					Double value = constantValue((Constant) t0);
-					if (value != null) {
-						DoubleInterval interval; 
-						try {
-							interval = mranges.get(var).withUpperBound(value);
-						} catch (IllegalArgumentException e) {
-							return true;
-						}
-						mranges.put(var, interval);
-					}
-				} else if (t0 instanceof Variable && t1 instanceof Variable) {
-					gteGraph.addVertex(t0);
-					gteGraph.addVertex(t1);
-					gteGraph.addEdge(t0, t1);
+					mranges.put(var, interval);
 				}
+			} else if (t0 instanceof Constant && t1 instanceof Variable) {
+				Variable var = (Variable) t1;
+				Double value = constantValue((Constant) t0);
+				if (value != null) {
+					DoubleInterval interval; 
+					try {
+						interval = mranges.get(var).withUpperBound(value);
+					} catch (IllegalArgumentException e) {
+						return true;
+					}
+					mranges.put(var, interval);
+				}
+			} else if (t0 instanceof Variable && t1 instanceof Variable) {
+				gteGraph.addVertex(t0);
+				gteGraph.addVertex(t1);
+				gteGraph.addEdge(t0, t1);
 			}
-			
 		}
 		
 		return false;
@@ -294,7 +358,7 @@ class InequalitiesSatisfiability {
 	 */
 	private static void constrainVariablesRanges(
 			Map<Variable, DoubleInterval> mranges,
-			DirectedGraph<Term, DefaultEdge> gteGraph, List<Double> constants) {
+			DirectedGraph<Term, DefaultEdge> gteGraph, Set<Double> constants) {
 		
 		for (Entry<Variable, DoubleInterval> cursor: mranges.entrySet()) {
 			LOGGER.debug("mrange " + cursor.getKey());
@@ -325,25 +389,18 @@ class InequalitiesSatisfiability {
 	 * these concern the comparison chain c_0 <= c_1 <= ... <= c_n
 	 */
 	private static void constrainConstantsOrder(
-			DirectedGraph<Term, DefaultEdge> gteGraph, List<Double> constants) {
+			DirectedGraph<Term, DefaultEdge> gteGraph, SortedSet<Double> constants) {
 		
 		/*
 		 * Linearly sort the constants encountered
 		 */
-		Collections.sort(constants);
-		
-		Constant last = doubleToConstant(constants.get(0));
-		Constant tmp;
-		for (int i = 0, size = constants.size(); i < size - 1; i += 1) {
-			/*
-			 * Ignore the duplicates:
-			 */
-			if (!constants.get(i).equals(constants.get(i + 1))) {
-				tmp = doubleToConstant(constants.get(i + 1));
-				gteGraph.addEdge(tmp, last);
-				LOGGER.debug("number constraint edge: " + tmp.getValue() + "->" + last.getValue());
-				last = tmp;
-			}
+		Constant last = doubleToConstant(constants.first());
+		Constant curr;
+		for (Double d: constants) {
+			curr = doubleToConstant(d);
+			gteGraph.addEdge(curr, last);
+			LOGGER.debug("number constraint edge: " + curr.getValue() + "->" + last.getValue());
+			last = curr;
 		}
 	}
 
@@ -388,4 +445,45 @@ class InequalitiesSatisfiability {
 		return false;
 	}
 	
+	/*
+	private static Function DNF(Function or) {
+		Function f;
+		Predicate pred;
+		
+		if (or.getTerm(0) instanceof Function) {
+			f = (Function) or.getTerm(0);
+			pred = f.getFunctionSymbol();
+			if (pred == OBDAVocabulary.OR) {
+				or = FACTORY.getFunctionOR(DNF(f), or.getTerm(1));
+			} else if (pred == OBDAVocabulary.AND) {
+				distribute(f, or.getTerm(1));
+			}
+		}
+		
+		return or;
+	}
+	
+	private static Function distribute(Function and, Term t) {
+		Term sub0, sub1;
+		// first subterm
+		sub0 = and.getTerm(0);
+		if (sub0 instanceof Function) {
+			if (((Function) sub0).getFunctionSymbol() == OBDAVocabulary.AND) {
+				sub0 = distribute((Function) sub0, t);
+			} else {
+				sub0 = FACTORY.getFunctionOR(sub0, t);
+			}
+		}
+		// second subterm
+		sub1 = and.getTerm(1);
+		if (sub1 instanceof Function) {
+			if (((Function) sub1).getFunctionSymbol() == OBDAVocabulary.AND) {
+				sub1 = distribute((Function) sub1, t);
+			} else {
+				sub1 = FACTORY.getFunctionOR(sub1, t);
+			}
+		}
+		return FACTORY.getFunctionAND(sub0, sub1);
+	}
+	*/
 }
